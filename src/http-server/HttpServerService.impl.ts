@@ -1,11 +1,20 @@
 import { Http2SecureServer, Http2ServerRequest, Http2ServerResponse } from 'http2'
+import path from 'path'
+import * as swaggerUi from 'swagger-ui-dist'
 import Trouter, { Methods } from 'trouter'
 import { URL } from 'url'
 
 import { ErrorCode, EventBridge, HandledError, Logger, Service, UnhandledError } from '../core'
 import { COMMANDS } from './commands'
 import { getDefaultConfig, OPENAPI_DEFAULT_MOUNT_PATH, ServiceInfo } from './config'
-import { createInternalError500Handler, createNotFound404Handler, openApiHandler } from './handler'
+import {
+  createInternalError500Handler,
+  createNotFound404Handler,
+  createStaticFileHandler,
+  openApiDocuIndex,
+  openApiDocuJsInit,
+  openApiHandler,
+} from './handler'
 import { createHttpServer, getNewContext } from './helper'
 import { createCompressionMiddleware, createResponseToJsonMiddleware } from './onAfterMiddleware'
 import { SUBSCRIPTIONS } from './subscriptions'
@@ -42,10 +51,38 @@ export class HttpServerService extends Service {
 
     if (this.conf.openApi?.enabled) {
       const openApiPath = this.conf.openApi.path || OPENAPI_DEFAULT_MOUNT_PATH
+
       this.addRoute(
         'GET',
         openApiPath,
+        openApiDocuIndex.bind(this),
+        createResponseToJsonMiddleware(),
+        createCompressionMiddleware(),
+      )
+
+      this.addRoute(
+        'GET',
+        path.join(openApiPath, 'openapi.json'),
         openApiHandler.bind(this),
+        createResponseToJsonMiddleware(),
+        createCompressionMiddleware(),
+      )
+
+      this.addRoute(
+        'GET',
+        path.join(openApiPath, 'initializer.js'),
+        openApiDocuJsInit.bind(this),
+        createResponseToJsonMiddleware(),
+        createCompressionMiddleware(),
+      )
+
+      const assetsPath = path.join(openApiPath, '/assets')
+      const serveUIAssets = createStaticFileHandler({ path: swaggerUi.absolutePath(), removeStartingPath: assetsPath })
+
+      this.addRoute(
+        'GET',
+        assetsPath + '/*',
+        serveUIAssets.bind(this),
         createResponseToJsonMiddleware(),
         createCompressionMiddleware(),
       )

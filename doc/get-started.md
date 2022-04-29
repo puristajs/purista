@@ -10,7 +10,7 @@ cd ..myapp
 
 npm init
 
-npm install --save typescript @purista/core @purista/core @purista/core ts-node
+npm install --save typescript @purista/core ts-node
 
 npm install --save-dev  @types/node
 

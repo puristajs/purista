@@ -3,11 +3,11 @@ import { lstat } from 'fs/promises'
 import { contentType, lookup } from 'mime-types'
 import { extname, join } from 'path'
 
-import { ErrorCode, HandledError } from '../core'
-import { CompressionMethod, getCompressionMethod, getCompressionStream } from '../helper'
-import { ContentType, Context, Middleware } from '../http-server'
+import { ErrorCode, HandledError } from '../../../core'
+import { CompressionMethod, getCompressionMethod, getCompressionStream } from '../../../helper'
+import { ContentType, Context, Middleware } from '../../types'
 
-export type StaticFileMiddlewareOptions = {
+export type StaticFileHandlerOptions = {
   path: string
   removeStartingPath?: string
   gzipMimeTypes?: ContentType[]
@@ -17,7 +17,7 @@ export type StaticFileMiddlewareOptions = {
  * It returns a default configuration for the static file middleware.
  * @returns A middleware function that can be used in the http server.
  */
-export const getDefaultStaticFileMiddlewareOptions = (): StaticFileMiddlewareOptions => {
+export const getDefaultStaticFileHandlerOptions = (): StaticFileHandlerOptions => {
   return {
     path: '../public',
     gzipMimeTypes: [
@@ -33,10 +33,10 @@ export const getDefaultStaticFileMiddlewareOptions = (): StaticFileMiddlewareOpt
   }
 }
 
-export const createStaticFileMiddleware = (options = getDefaultStaticFileMiddlewareOptions()): Middleware => {
-  const config = { ...getDefaultStaticFileMiddlewareOptions(), ...options }
+export const createStaticFileHandler = (options = getDefaultStaticFileHandlerOptions()): Middleware => {
+  const config = { ...getDefaultStaticFileHandlerOptions(), ...options }
 
-  const staticFileMiddleware: Middleware = async function (request, response, context) {
+  const StaticFileHandler: Middleware = async function (request, response, context) {
     if (request.method !== 'GET') {
       return context
     }
@@ -104,5 +104,5 @@ export const createStaticFileMiddleware = (options = getDefaultStaticFileMiddlew
     })
   }
 
-  return staticFileMiddleware
+  return StaticFileHandler
 }
