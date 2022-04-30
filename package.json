@@ -26,8 +26,8 @@
     "node": ">=16"
   },
   "scripts": {
-    "dev": "vuepress dev docs",
-    "build:doc": "vuepress build docs",
+    "dev": "vuepress dev doc_src",
+    "build:doc": "vuepress build doc_src",
     "prepublish": "npm run lint && npm run test && npm run build",
     "build": "tsc",
     "test": "jest",
