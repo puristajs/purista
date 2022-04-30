@@ -15,7 +15,7 @@
 
 #### Defined in
 
-[src/http-server/types/SuccessStatusCode.ts:5](https://github.com/sebastianwessel/purista/blob/8f47053/src/http-server/types/SuccessStatusCode.ts#L5)
+[src/http-server/types/SuccessStatusCode.ts:5](https://github.com/sebastianwessel/purista/blob/6dd0105/src/http-server/types/SuccessStatusCode.ts#L5)
 
 ___
 
@@ -25,4 +25,4 @@ ___
 
 #### Defined in
 
-[src/http-server/types/SuccessStatusCode.ts:4](https://github.com/sebastianwessel/purista/blob/8f47053/src/http-server/types/SuccessStatusCode.ts#L4)
+[src/http-server/types/SuccessStatusCode.ts:4](https://github.com/sebastianwessel/purista/blob/6dd0105/src/http-server/types/SuccessStatusCode.ts#L4)
