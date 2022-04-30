@@ -2,9 +2,18 @@
   "name": "@purista/core",
   "version": "1.0.0",
   "description": "purista backend framwork",
-  "homepage": "https://github.com/sebastianwessel/purista",
+  "homepage": "https://purista.dev",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:sebastianwessel/purista.git"
+  },
   "author": "Sebastian Wessel",
   "license": "ISC",
+  "directories": {
+    "lib": "lib/index.js",
+    "man": "doc",
+    "example": "example"
+  },
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
@@ -17,6 +26,8 @@
     "node": ">=16"
   },
   "scripts": {
+    "dev": "vuepress dev docs",
+    "build:doc": "vuepress build docs",
     "prepublish": "npm run lint && npm run test && npm run build",
     "build": "tsc",
     "test": "jest",
@@ -44,7 +55,11 @@
     "prettier": "^2.5.1",
     "sinon": "^13.0.1",
     "ts-jest": "^27.1.3",
-    "typescript": "^4.3.5"
+    "typedoc": "^0.22.15",
+    "typedoc-plugin-markdown": "^3.12.1",
+    "typescript": "^4.3.5",
+    "vuepress": "^1.5.3",
+    "vuepress-plugin-typedoc": "^0.10.3"
   },
   "dependencies": {
     "@anatine/zod-openapi": "^1.3.0",
