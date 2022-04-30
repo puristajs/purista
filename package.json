@@ -7,7 +7,9 @@
   "license": "ISC",
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
-  "files": ["lib"],
+  "files": [
+    "lib"
+  ],
   "publishConfig": {
     "access": "public"
   },
@@ -17,20 +19,19 @@
   "scripts": {
     "prepublish": "npm run lint && npm run test && npm run build",
     "build": "tsc",
-    "test": "echo",
-    "publish": "npm publish .",
+    "test": "jest",
     "----------------------- LINTING -------------------------------------": "",
     "lint": "eslint --ext .ts,.js,.json --cache .",
     "lint:fix": "eslint . --ext .ts,.js,.json --fix"
   },
   "devDependencies": {
-    "@types/mime-types": "^2.1.1",
     "@types/jest": "^27.4.1",
+    "@types/mime-types": "^2.1.1",
     "@types/node": "^16.0.0",
     "@types/sinon": "^10.0.11",
+    "@types/swagger-ui-dist": "^3.30.1",
     "@typescript-eslint/eslint-plugin": "^5.14.0",
     "@typescript-eslint/parser": "^5.14.0",
-    "@types/swagger-ui-dist": "^3.30.1",
     "eslint": "^7.32.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^16.0.3",
@@ -46,14 +47,15 @@
     "typescript": "^4.3.5"
   },
   "dependencies": {
-    "nanoid": "^3.3.1",
-    "tslog": "^3.3.2",
-    "mime-types": "2.1.35",
-    "helmet": "5.0.2",
-    "trouter": "^3.2.0",
-    "wildcard-match": "^5.1.2",
     "@anatine/zod-openapi": "^1.3.0",
-    "zod": "^3.14.2",
-    "swagger-ui-dist": "^4.10.3"
+    "helmet": "5.0.2",
+    "jest-runner-eslint": "^1.0.0",
+    "mime-types": "2.1.35",
+    "nanoid": "^3.3.1",
+    "swagger-ui-dist": "^4.10.3",
+    "trouter": "^3.2.0",
+    "tslog": "^3.3.2",
+    "wildcard-match": "^5.1.2",
+    "zod": "^3.14.2"
   }
 }

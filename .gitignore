@@ -6,3 +6,5 @@ lib
 
 .eslintcache
 .dccache
+
+coverage
