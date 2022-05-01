@@ -1,4 +1,45 @@
-@purista/core / [Exports](modules.md)
+---
+home: true
+icon: house fas
+title: PURISTA
+heroImage: /logo.svg
+heroText: PURISTA
+tagline: A framework for building backend services and api in modern, modular and scalable way
+actions:
+  - text: Get started ⚡
+    link: /handbook/1_get-started
+    icon: bolt
+
+features:
+  - title: 100% Typescript
+    icon: node fa-brands
+    details: typescript based and with typescript in mind and mostly async-await (no call-back hell)
+    link: /handbook/1_get-started
+
+  - title: Modular & extendable
+    icon: boxes-stacked fas
+    details: Adding slide pages to display things you like
+    link: /handbook/0_concept
+
+  - title: Scales
+    icon: arrow-up-right-dots fas
+    details: runs and scales from small single instance up to cloud clusters.
+    link: /handbook/5_scale
+
+  - title: Compliance & Monitoring
+    icon: shield-halved fas
+    details: flexible to trace, audit and monitor and to get a clear picture of what's going on
+    link: /handbook/0_concept
+
+  - title: Easy to test
+    icon: vial-circle-check fas
+    details: easy to test with ready to go mocks & stubs which increases productivity and reduces costs
+    link: /handbook/4_testing
+
+
+copyright: false
+footer: MIT Licensed | Made from developers for developers with ❤️
+---
 
 # PURISTA
 
@@ -34,22 +75,3 @@ Simply answer is **NO**.
 
 If your project is mainly focused on something like processing streams (e.g. video/audio) this framework does not fit for you.  
 PURISTA is message based and there are also some low performance impacts based on the strict validations, the high useage of async-await and so on.
-
-- [Core concept](doc/concept.md)
-- [Setup a new project](doc/get-started.md)
-- [Create a service](doc/create-new-service.md)
-  - [Setup a new service](doc/create-new-service.md#Setup_a_new_service)
-  - [Add a command function](doc/create-new-service.md#Create_a_command_function)
-  - [Add a subscription](doc/create-new-service.md#Create_a_subscription)
-- [Error handling in service](doc/error-handling.md)
-- [Testing](doc/testing.md)
-- Webserver
-  - Setup
-  - OpenApi
-  - Add routes and handlers
-  - Serve static content
-  - Error Handling
-  - Proxy requests
-- [Scale up](doc/scale.md)
-  - [Combine different Services](doc/scale.md)
-  - [Cluster](doc/scale.md)

@@ -1,3 +1,5 @@
+[@purista/core](../README.md) / [Exports](../modules.md) / ServiceClass
+
 # Class: ServiceClass
 
 Abstract base service class which should be extended by the base service class.
@@ -59,7 +61,7 @@ The event bridge instance
 
 #### Defined in
 
-[src/core/types/ServiceClass.ts:39](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ServiceClass.ts#L39)
+[src/core/types/ServiceClass.ts:39](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ServiceClass.ts#L39)
 
 ___
 
@@ -72,7 +74,7 @@ Service name, service version and some human readable description
 
 #### Defined in
 
-[src/core/types/ServiceClass.ts:27](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ServiceClass.ts#L27)
+[src/core/types/ServiceClass.ts:27](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ServiceClass.ts#L27)
 
 ## Accessors
 
@@ -88,7 +90,7 @@ Get service info
 
 #### Defined in
 
-[src/core/types/ServiceClass.ts:32](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ServiceClass.ts#L32)
+[src/core/types/ServiceClass.ts:32](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ServiceClass.ts#L32)
 
 ## Methods
 
@@ -104,7 +106,7 @@ Shut down the service
 
 #### Defined in
 
-[src/core/types/ServiceClass.ts:71](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ServiceClass.ts#L71)
+[src/core/types/ServiceClass.ts:71](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ServiceClass.ts#L71)
 
 ___
 
@@ -130,7 +132,7 @@ Promise<CommandErrorResponse | CommandSuccessResponse>
 
 #### Defined in
 
-[src/core/types/ServiceClass.ts:48](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ServiceClass.ts#L48)
+[src/core/types/ServiceClass.ts:48](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ServiceClass.ts#L48)
 
 ___
 
@@ -152,7 +154,7 @@ Register a new command (function) for this service
 
 #### Defined in
 
-[src/core/types/ServiceClass.ts:66](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ServiceClass.ts#L66)
+[src/core/types/ServiceClass.ts:66](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ServiceClass.ts#L66)
 
 ___
 
@@ -177,4 +179,4 @@ Promise<SubscriptionId>
 
 #### Defined in
 
-[src/core/types/ServiceClass.ts:59](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ServiceClass.ts#L59)
+[src/core/types/ServiceClass.ts:59](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ServiceClass.ts#L59)

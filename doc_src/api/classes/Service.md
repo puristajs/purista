@@ -1,3 +1,5 @@
+[@purista/core](../README.md) / [Exports](../modules.md) / Service
+
 # Class: Service
 
 Base class for all services.
@@ -81,7 +83,7 @@ class MyService extends Service {
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:74](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L74)
+[src/core/Service/Service.impl.ts:74](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L74)
 
 ## Properties
 
@@ -91,7 +93,7 @@ class MyService extends Service {
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:70](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L70)
+[src/core/Service/Service.impl.ts:70](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L70)
 
 ___
 
@@ -107,7 +109,7 @@ The event bridge instance
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:62](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L62)
+[src/core/Service/Service.impl.ts:62](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L62)
 
 ___
 
@@ -124,7 +126,7 @@ Service name, service version and some human readable description
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:59](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L59)
+[src/core/Service/Service.impl.ts:59](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L59)
 
 ___
 
@@ -134,7 +136,7 @@ ___
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:60](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L60)
+[src/core/Service/Service.impl.ts:60](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L60)
 
 ___
 
@@ -144,7 +146,7 @@ ___
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:72](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L72)
+[src/core/Service/Service.impl.ts:72](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L72)
 
 ___
 
@@ -154,7 +156,7 @@ ___
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:64](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L64)
+[src/core/Service/Service.impl.ts:64](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L64)
 
 ___
 
@@ -164,7 +166,7 @@ ___
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:68](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L68)
+[src/core/Service/Service.impl.ts:68](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L68)
 
 ___
 
@@ -174,7 +176,7 @@ ___
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:66](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L66)
+[src/core/Service/Service.impl.ts:66](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L66)
 
 ## Accessors
 
@@ -194,7 +196,7 @@ ServiceClass.serviceInfo
 
 #### Defined in
 
-[src/core/types/ServiceClass.ts:32](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ServiceClass.ts#L32)
+[src/core/types/ServiceClass.ts:32](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ServiceClass.ts#L32)
 
 ## Methods
 
@@ -217,7 +219,7 @@ Connect service to event bridge to receive commands and command responses
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:101](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L101)
+[src/core/Service/Service.impl.ts:101](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L101)
 
 ___
 
@@ -244,7 +246,7 @@ the message relates to a regular subscription (passiv listener)
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:154](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L154)
+[src/core/Service/Service.impl.ts:154](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L154)
 
 ___
 
@@ -264,7 +266,7 @@ Shut down the service
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:307](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L307)
+[src/core/Service/Service.impl.ts:307](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L307)
 
 ___
 
@@ -287,7 +289,7 @@ Called when a command is received by the service
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:234](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L234)
+[src/core/Service/Service.impl.ts:234](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L234)
 
 ___
 
@@ -308,7 +310,7 @@ ___
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:260](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L260)
+[src/core/Service/Service.impl.ts:260](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L260)
 
 ___
 
@@ -342,7 +344,7 @@ Used for service(-function) to service(-function) communication
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:184](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L184)
+[src/core/Service/Service.impl.ts:184](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L184)
 
 ___
 
@@ -368,7 +370,7 @@ Register a new command (function) for this service
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:294](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L294)
+[src/core/Service/Service.impl.ts:294](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L294)
 
 ___
 
@@ -384,7 +386,7 @@ Function which runs in internval to reject all invocations which are timed out
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:280](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L280)
+[src/core/Service/Service.impl.ts:280](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L280)
 
 ___
 
@@ -408,7 +410,7 @@ Broadcast service info message
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:138](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L138)
+[src/core/Service/Service.impl.ts:138](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L138)
 
 ___
 
@@ -424,7 +426,7 @@ It connects to the event bridge and subscribes to the topics that are in the sub
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:94](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L94)
+[src/core/Service/Service.impl.ts:94](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L94)
 
 ___
 
@@ -451,4 +453,4 @@ Creates a new subscription
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:211](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/Service/Service.impl.ts#L211)
+[src/core/Service/Service.impl.ts:211](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L211)

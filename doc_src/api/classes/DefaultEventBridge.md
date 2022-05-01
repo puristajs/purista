@@ -1,3 +1,5 @@
+[@purista/core](../README.md) / [Exports](../modules.md) / DefaultEventBridge
+
 # Class: DefaultEventBridge
 
 Simple implementation of some simple in-memory event bridge.
@@ -45,7 +47,7 @@ Does not support threads and does not need any external databases.
 
 #### Defined in
 
-[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:26](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L26)
+[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:26](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L26)
 
 ## Properties
 
@@ -55,7 +57,7 @@ Does not support threads and does not need any external databases.
 
 #### Defined in
 
-[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:23](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L23)
+[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:23](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L23)
 
 ___
 
@@ -65,7 +67,7 @@ ___
 
 #### Defined in
 
-[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:22](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L22)
+[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:22](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L22)
 
 ___
 
@@ -75,7 +77,7 @@ ___
 
 #### Defined in
 
-[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:25](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L25)
+[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:25](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L25)
 
 ## Accessors
 
@@ -96,7 +98,7 @@ It is the maximum time a command should be responded.
 
 #### Defined in
 
-[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:35](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L35)
+[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:35](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L35)
 
 ## Methods
 
@@ -122,7 +124,7 @@ Emit a new message to event bridge to be delivered to receiver
 
 #### Defined in
 
-[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:44](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L44)
+[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:44](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L44)
 
 ___
 
@@ -151,7 +153,7 @@ Promise<SubscriptionId>
 
 #### Defined in
 
-[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:83](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L83)
+[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:83](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L83)
 
 ___
 
@@ -177,7 +179,7 @@ Unsubscribe a single subscription.
 
 #### Defined in
 
-[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:94](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L94)
+[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:94](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L94)
 
 ___
 
@@ -203,4 +205,4 @@ Unsubscribes all subscriptions for given Service.
 
 #### Defined in
 
-[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:103](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L103)
+[src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:103](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L103)

@@ -1,4 +1,22 @@
-## Concept
+---
+# This control sidebar index
+index: 0
+# This is the icon of the page
+icon: brain fas
+# This is the title of the article
+title: Concept
+# A page can have multiple tags
+tag:
+  - Installation
+  - Setup
+  - Guide
+# this page is sticky in article list
+sticky: true
+# this page will appear in article channel in home page
+star: true
+---
+
+# Concept
 
 The concept behind PURISTA is quite simple and a message based approach.  
 There are message senders and receivers. Messages are exchanged via an eventbridge.  
@@ -16,6 +34,36 @@ Commands and subscription can call other commands from same or other service by 
 This allows real complex setups and scenarios.
 
 Example:
+
+```mermaid
+flowchart RL
+    browser[Browser] -->|/api/v1/user/sign-up| httpService(HTTPS-Service)
+    httpService-- user payload -->eventBridge(Eventbridge)
+    eventBridge-- user payload -->signUp
+    subgraph UserService
+        signUp
+        verifyEmail(verifyEmail)
+    end
+    signUp-- user id -->eventBridge
+    eventBridge -- user id --> httpService
+    httpService -- user id --> browser
+    eventBridge -.-> verifyEmail
+    signUp --> database
+    database -- user id --> signUp
+    verifyEmail -- set token -->database
+    verifyEmail --> eventBridge
+    eventBridge --> sendMail
+    subgraph EmailService
+        sendMail
+    end
+
+    eventBridge -.-> countEmails
+    subgraph Audit
+        countEmails(countEmails)
+    end
+    countEmails --> database
+    database[(Database)]
+```
 
 - the browser calls the endpoint `/api/v1/user-sign-up`
 - the webserver will send a command request `signUp` to service `User`
@@ -49,3 +97,4 @@ For service `User2` we bump version to `2.0.0`.
 All api endpoints for `User2` are now directly available as `api/v2/` and our new Service is also reachable by all other services.  
 Now we can safely make our changes in `User2` and mark `api/v1/` as deprecated.  
 As soon as we finished our changes, tested them and so on, we can completely switch to the new version and remove the old one.
+

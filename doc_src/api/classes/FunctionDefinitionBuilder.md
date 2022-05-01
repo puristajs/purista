@@ -1,3 +1,5 @@
+[@purista/core](../README.md) / [Exports](../modules.md) / FunctionDefinitionBuilder
+
 # Class: FunctionDefinitionBuilder<ServiceClassType, PayloadType, ParamsType, ResultType\>
 
 ## Type parameters
@@ -64,7 +66,7 @@
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:30](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L30)
+[src/helper/FunctionDefinitionBuilder.impl.ts:30](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L30)
 
 ## Properties
 
@@ -74,7 +76,7 @@
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:27](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L27)
+[src/helper/FunctionDefinitionBuilder.impl.ts:27](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L27)
 
 ___
 
@@ -84,7 +86,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:16](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L16)
+[src/helper/FunctionDefinitionBuilder.impl.ts:16](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L16)
 
 ___
 
@@ -94,7 +96,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:17](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L17)
+[src/helper/FunctionDefinitionBuilder.impl.ts:17](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L17)
 
 ___
 
@@ -104,7 +106,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:18](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L18)
+[src/helper/FunctionDefinitionBuilder.impl.ts:18](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L18)
 
 ___
 
@@ -114,7 +116,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:19](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L19)
+[src/helper/FunctionDefinitionBuilder.impl.ts:19](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L19)
 
 ___
 
@@ -124,7 +126,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:21](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L21)
+[src/helper/FunctionDefinitionBuilder.impl.ts:21](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L21)
 
 ___
 
@@ -134,7 +136,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:25](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L25)
+[src/helper/FunctionDefinitionBuilder.impl.ts:25](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L25)
 
 ___
 
@@ -144,7 +146,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:23](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L23)
+[src/helper/FunctionDefinitionBuilder.impl.ts:23](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L23)
 
 ## Methods
 
@@ -164,7 +166,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:61](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L61)
+[src/helper/FunctionDefinitionBuilder.impl.ts:61](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L61)
 
 ___
 
@@ -184,7 +186,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:36](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L36)
+[src/helper/FunctionDefinitionBuilder.impl.ts:36](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L36)
 
 ___
 
@@ -204,7 +206,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:41](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L41)
+[src/helper/FunctionDefinitionBuilder.impl.ts:41](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L41)
 
 ___
 
@@ -224,7 +226,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:46](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L46)
+[src/helper/FunctionDefinitionBuilder.impl.ts:46](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L46)
 
 ___
 
@@ -244,7 +246,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:51](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L51)
+[src/helper/FunctionDefinitionBuilder.impl.ts:51](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L51)
 
 ___
 
@@ -264,7 +266,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:56](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L56)
+[src/helper/FunctionDefinitionBuilder.impl.ts:56](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L56)
 
 ___
 
@@ -286,7 +288,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:66](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L66)
+[src/helper/FunctionDefinitionBuilder.impl.ts:66](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L66)
 
 ___
 
@@ -306,7 +308,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:84](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L84)
+[src/helper/FunctionDefinitionBuilder.impl.ts:84](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L84)
 
 ___
 
@@ -320,7 +322,7 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:113](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L113)
+[src/helper/FunctionDefinitionBuilder.impl.ts:113](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L113)
 
 ___
 
@@ -340,4 +342,4 @@ ___
 
 #### Defined in
 
-[src/helper/FunctionDefinitionBuilder.impl.ts:79](https://github.com/sebastianwessel/purista/blob/1a178c8/src/helper/FunctionDefinitionBuilder.impl.ts#L79)
+[src/helper/FunctionDefinitionBuilder.impl.ts:79](https://github.com/sebastianwessel/purista/blob/59536dd/src/helper/FunctionDefinitionBuilder.impl.ts#L79)

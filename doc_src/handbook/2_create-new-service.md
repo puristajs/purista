@@ -1,3 +1,19 @@
+---
+# This control sidebar index
+index: 2
+# This is the icon of the page
+icon: wand-sparkles fas
+# This is the title of the article
+title: Create new Service
+# A page can have multiple tags
+tag:
+  - Guide
+# this page is sticky in article list
+sticky: true
+# this page will appear in article channel in home page
+star: true
+---
+
 # Create a new service
 
 A service is a logical group of functions and this where the domain driven aspect comes in.  
