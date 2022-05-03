@@ -21,7 +21,7 @@ export const getDefaultNotFound404HandlerOptions = (): NotFound404HandlerOptions
 export const createNotFound404Handler = (options = getDefaultNotFound404HandlerOptions()): Handler => {
   const _config = { ...getDefaultNotFound404HandlerOptions(), ...options }
 
-  const notFound404Handler: Handler = async (request, response, context) => {
+  const notFound404Handler: Handler = async function (request, response, context) {
     const payload: ErrorResponse =
       request.method === 'GET'
         ? {

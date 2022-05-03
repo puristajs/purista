@@ -1,4 +1,4 @@
-import { join } from 'path'
+import { posix } from 'path'
 
 import { InfoServiceFunctionAdded, isInfoServiceFunctionAdded } from '../../../core'
 import { createCompressionMiddleware, createResponseToJsonMiddleware } from '../../onAfterMiddleware'
@@ -28,7 +28,7 @@ export const serviceCommandsToRestApi: HttpServiceSubscriptionCallBack<InfoServi
   const version = message.sender.serviceVersion.split('.')[0]
   const method = data.http.method
   const apiMountPath = this.config.apiMountPath
-  const path = join(apiMountPath || '/api', `v${version}`, data.http.path)
+  const path = posix.join(apiMountPath || '/api', `v${version}`, data.http.path)
 
   data.http.path = path
 

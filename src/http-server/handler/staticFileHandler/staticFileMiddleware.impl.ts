@@ -1,7 +1,7 @@
 import { createReadStream } from 'fs'
 import { lstat } from 'fs/promises'
 import { contentType, lookup } from 'mime-types'
-import { extname, join } from 'path'
+import { extname, join, normalize } from 'path'
 
 import { ErrorCode, HandledError } from '../../../core'
 import { CompressionMethod, getCompressionMethod, getCompressionStream } from '../../../helper'
@@ -48,7 +48,7 @@ export const createStaticFileHandler = (options = getDefaultStaticFileHandlerOpt
       reqPath = reqPath.replace(config.removeStartingPath, '')
     }
 
-    let filePath = join(config.path, reqPath)
+    let filePath = join(normalize(config.path), normalize(reqPath))
 
     let compressionMethod: CompressionMethod
 

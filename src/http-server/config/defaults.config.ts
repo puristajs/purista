@@ -1,6 +1,8 @@
 import type { InfoObject } from 'openapi3-ts'
 
-export const OPENAPI_DEFAULT_MOUNT_PATH = '/api'
+import { getDefaultConfig } from './getDefaultConfig'
+
+export const OPENAPI_DEFAULT_MOUNT_PATH = getDefaultConfig().apiMountPath as string
 
 export const OPENAPI_DEFAULT_INFO: InfoObject = {
   title: 'Server api',

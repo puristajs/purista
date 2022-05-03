@@ -10,6 +10,7 @@ export const getDefaultConfig = (): HttpServerConfig => {
       key: 'certs/server.key',
       cert: 'certs/server.crt',
     },
+    apiMountPath: '/api',
     openApi: {
       path: OPENAPI_DEFAULT_MOUNT_PATH,
       info: OPENAPI_DEFAULT_INFO,
