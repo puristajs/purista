@@ -1,2 +1,5 @@
-/lib/*
+lib
 !.vuepress
+docs
+coverage
+node_modules

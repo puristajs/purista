@@ -20,7 +20,7 @@ export const getDefaultInternalError500HandlerOptions = (): InternalError500Hand
 export const createInternalError500Handler = (options = getDefaultInternalError500HandlerOptions()): Handler => {
   const _config = { ...getDefaultInternalError500HandlerOptions(), ...options }
 
-  const internalError500Handler: Handler = async (_request, response, context) => {
+  const internalError500Handler: Handler = async function (_request, response, context) {
     const errorResponse: ErrorResponse = {
       status: ErrorCode.InternalServerError,
       message: getErrorMessageForCode(ErrorCode.InternalServerError),
