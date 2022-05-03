@@ -3,3 +3,4 @@ lib
 docs
 coverage
 node_modules
+doc_src/.vuepress/enhanceApp.js
