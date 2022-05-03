@@ -1,3 +1,5 @@
+[@purista/core](../README.md) / [Exports](../modules.md) / EventBridge
+
 # Interface: EventBridge
 
 Event bridge interface
@@ -28,7 +30,7 @@ The event bridge must implement this interface.
 
 #### Defined in
 
-[src/core/types/EventBridge.ts:10](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EventBridge.ts#L10)
+[src/core/types/EventBridge.ts:10](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EventBridge.ts#L10)
 
 ## Methods
 
@@ -48,7 +50,7 @@ The event bridge must implement this interface.
 
 #### Defined in
 
-[src/core/types/EventBridge.ts:11](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EventBridge.ts#L11)
+[src/core/types/EventBridge.ts:11](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EventBridge.ts#L11)
 
 ___
 
@@ -68,7 +70,7 @@ ___
 
 #### Defined in
 
-[src/core/types/EventBridge.ts:12](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EventBridge.ts#L12)
+[src/core/types/EventBridge.ts:12](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EventBridge.ts#L12)
 
 ___
 
@@ -88,7 +90,7 @@ ___
 
 #### Defined in
 
-[src/core/types/EventBridge.ts:13](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EventBridge.ts#L13)
+[src/core/types/EventBridge.ts:13](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EventBridge.ts#L13)
 
 ___
 
@@ -108,4 +110,4 @@ ___
 
 #### Defined in
 
-[src/core/types/EventBridge.ts:15](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EventBridge.ts#L15)
+[src/core/types/EventBridge.ts:15](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EventBridge.ts#L15)

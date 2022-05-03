@@ -1,3 +1,5 @@
+[@purista/core](../README.md) / [Exports](../modules.md) / ErrorCode
+
 # Enumeration: ErrorCode
 
 ## Table of contents
@@ -23,7 +25,7 @@
 
 #### Defined in
 
-[src/core/types/ErrorCode.enum.ts:4](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ErrorCode.enum.ts#L4)
+[src/core/types/ErrorCode.enum.ts:4](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ErrorCode.enum.ts#L4)
 
 ___
 
@@ -33,7 +35,7 @@ ___
 
 #### Defined in
 
-[src/core/types/ErrorCode.enum.ts:5](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ErrorCode.enum.ts#L5)
+[src/core/types/ErrorCode.enum.ts:5](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ErrorCode.enum.ts#L5)
 
 ___
 
@@ -43,7 +45,7 @@ ___
 
 #### Defined in
 
-[src/core/types/ErrorCode.enum.ts:8](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ErrorCode.enum.ts#L8)
+[src/core/types/ErrorCode.enum.ts:8](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ErrorCode.enum.ts#L8)
 
 ___
 
@@ -53,7 +55,7 @@ ___
 
 #### Defined in
 
-[src/core/types/ErrorCode.enum.ts:11](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ErrorCode.enum.ts#L11)
+[src/core/types/ErrorCode.enum.ts:11](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ErrorCode.enum.ts#L11)
 
 ___
 
@@ -63,7 +65,7 @@ ___
 
 #### Defined in
 
-[src/core/types/ErrorCode.enum.ts:10](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ErrorCode.enum.ts#L10)
+[src/core/types/ErrorCode.enum.ts:10](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ErrorCode.enum.ts#L10)
 
 ___
 
@@ -73,7 +75,7 @@ ___
 
 #### Defined in
 
-[src/core/types/ErrorCode.enum.ts:9](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ErrorCode.enum.ts#L9)
+[src/core/types/ErrorCode.enum.ts:9](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ErrorCode.enum.ts#L9)
 
 ___
 
@@ -83,7 +85,7 @@ ___
 
 #### Defined in
 
-[src/core/types/ErrorCode.enum.ts:12](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ErrorCode.enum.ts#L12)
+[src/core/types/ErrorCode.enum.ts:12](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ErrorCode.enum.ts#L12)
 
 ___
 
@@ -93,7 +95,7 @@ ___
 
 #### Defined in
 
-[src/core/types/ErrorCode.enum.ts:7](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ErrorCode.enum.ts#L7)
+[src/core/types/ErrorCode.enum.ts:7](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ErrorCode.enum.ts#L7)
 
 ___
 
@@ -103,7 +105,7 @@ ___
 
 #### Defined in
 
-[src/core/types/ErrorCode.enum.ts:13](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ErrorCode.enum.ts#L13)
+[src/core/types/ErrorCode.enum.ts:13](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ErrorCode.enum.ts#L13)
 
 ___
 
@@ -113,4 +115,4 @@ ___
 
 #### Defined in
 
-[src/core/types/ErrorCode.enum.ts:6](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/ErrorCode.enum.ts#L6)
+[src/core/types/ErrorCode.enum.ts:6](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ErrorCode.enum.ts#L6)

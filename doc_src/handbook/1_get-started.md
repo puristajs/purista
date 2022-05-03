@@ -1,3 +1,21 @@
+---
+# This control sidebar index
+index: 1
+# This is the icon of the page
+icon: bolt fas
+# This is the title of the article
+title: Get started
+# A page can have multiple tags
+tag:
+  - Installation
+  - Setup
+  - Guide
+# this page is sticky in article list
+sticky: true
+# this page will appear in article channel in home page
+star: true
+---
+
 # Get started
 
 ## Setup a new project

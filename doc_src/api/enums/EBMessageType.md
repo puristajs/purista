@@ -1,3 +1,5 @@
+[@purista/core](../README.md) / [Exports](../modules.md) / EBMessageType
+
 # Enumeration: EBMessageType
 
 Type of event bridge message
@@ -29,7 +31,7 @@ If the sender does not receive a answer within this time frame, the command will
 
 #### Defined in
 
-[src/core/types/EBMessageType.enum.ts:11](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EBMessageType.enum.ts#L11)
+[src/core/types/EBMessageType.enum.ts:11](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EBMessageType.enum.ts#L11)
 
 ___
 
@@ -39,7 +41,7 @@ ___
 
 #### Defined in
 
-[src/core/types/EBMessageType.enum.ts:15](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EBMessageType.enum.ts#L15)
+[src/core/types/EBMessageType.enum.ts:15](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EBMessageType.enum.ts#L15)
 
 ___
 
@@ -49,7 +51,7 @@ ___
 
 #### Defined in
 
-[src/core/types/EBMessageType.enum.ts:13](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EBMessageType.enum.ts#L13)
+[src/core/types/EBMessageType.enum.ts:13](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EBMessageType.enum.ts#L13)
 
 ___
 
@@ -59,7 +61,7 @@ ___
 
 #### Defined in
 
-[src/core/types/EBMessageType.enum.ts:27](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EBMessageType.enum.ts#L27)
+[src/core/types/EBMessageType.enum.ts:27](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EBMessageType.enum.ts#L27)
 
 ___
 
@@ -69,7 +71,7 @@ ___
 
 #### Defined in
 
-[src/core/types/EBMessageType.enum.ts:26](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EBMessageType.enum.ts#L26)
+[src/core/types/EBMessageType.enum.ts:26](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EBMessageType.enum.ts#L26)
 
 ___
 
@@ -84,7 +86,7 @@ Info messages are fire & forget broadcasting messages.
 
 #### Defined in
 
-[src/core/types/EBMessageType.enum.ts:23](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EBMessageType.enum.ts#L23)
+[src/core/types/EBMessageType.enum.ts:23](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EBMessageType.enum.ts#L23)
 
 ___
 
@@ -94,7 +96,7 @@ ___
 
 #### Defined in
 
-[src/core/types/EBMessageType.enum.ts:25](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EBMessageType.enum.ts#L25)
+[src/core/types/EBMessageType.enum.ts:25](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EBMessageType.enum.ts#L25)
 
 ___
 
@@ -104,7 +106,7 @@ ___
 
 #### Defined in
 
-[src/core/types/EBMessageType.enum.ts:24](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EBMessageType.enum.ts#L24)
+[src/core/types/EBMessageType.enum.ts:24](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EBMessageType.enum.ts#L24)
 
 ___
 
@@ -114,4 +116,4 @@ ___
 
 #### Defined in
 
-[src/core/types/EBMessageType.enum.ts:28](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/types/EBMessageType.enum.ts#L28)
+[src/core/types/EBMessageType.enum.ts:28](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/EBMessageType.enum.ts#L28)

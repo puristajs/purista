@@ -1,3 +1,5 @@
+[@purista/core](../README.md) / [Exports](../modules.md) / HandledError
+
 # Class: HandledError
 
 A handled error is an error which is handled or thrown by business logic.
@@ -54,7 +56,7 @@ Error.constructor
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/HandledError.impl.ts#L10)
+[src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/HandledError.impl.ts#L10)
 
 ## Properties
 
@@ -187,7 +189,7 @@ ErrorResponse
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:28](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/HandledError.impl.ts#L28)
+[src/core/HandledError.impl.ts:28](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/HandledError.impl.ts#L28)
 
 ___
 
@@ -205,7 +207,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/HandledError.impl.ts#L42)
+[src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/HandledError.impl.ts#L42)
 
 ___
 
@@ -256,4 +258,4 @@ HandledError
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/1a178c8/src/core/HandledError.impl.ts#L19)
+[src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/HandledError.impl.ts#L19)

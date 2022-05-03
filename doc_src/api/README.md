@@ -1,3 +1,5 @@
+@purista/core / [Exports](modules.md)
+
 # PURISTA
 
 A backend framework for building message based domain services.

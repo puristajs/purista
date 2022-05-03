@@ -8,3 +8,20 @@ lib
 .dccache
 
 coverage
+
+.temp
+.cache
+node_modules/
+doc_src/.vuepress/.cache/
+doc_src/.vuepress/.temp/
+doc_src/.vuepress/dist/
+
+node_modules/
+doc_src/.vuepress/.cache/
+doc_src/.vuepress/.temp/
+doc_src/.vuepress/dist/
+
+node_modules/
+doc_src/.vuepress/.cache/
+doc_src/.vuepress/.temp/
+doc_src/.vuepress/dist/
