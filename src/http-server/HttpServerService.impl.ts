@@ -50,19 +50,13 @@ export class HttpServerService extends Service {
     this.internalServerErrorHandler = createInternalError500Handler()
 
     if (this.conf.openApi?.enabled) {
-      const openApiPath = this.conf.openApi.path || OPENAPI_DEFAULT_MOUNT_PATH
+      const openApiPath = this.config.openApi?.path || OPENAPI_DEFAULT_MOUNT_PATH
+
+      this.addRoute('GET', openApiPath, openApiDocuIndex.bind(this), createCompressionMiddleware())
 
       this.addRoute(
         'GET',
-        openApiPath,
-        openApiDocuIndex.bind(this),
-        createResponseToJsonMiddleware(),
-        createCompressionMiddleware(),
-      )
-
-      this.addRoute(
-        'GET',
-        path.join(openApiPath, 'openapi.json'),
+        path.posix.join(openApiPath, 'openapi.json'),
         openApiHandler.bind(this),
         createResponseToJsonMiddleware(),
         createCompressionMiddleware(),
@@ -70,22 +64,14 @@ export class HttpServerService extends Service {
 
       this.addRoute(
         'GET',
-        path.join(openApiPath, 'initializer.js'),
+        path.posix.join(openApiPath, 'initializer.js'),
         openApiDocuJsInit.bind(this),
-        createResponseToJsonMiddleware(),
         createCompressionMiddleware(),
       )
 
-      const assetsPath = path.join(openApiPath, '/assets')
+      const assetsPath = path.posix.join(openApiPath, '/assets')
       const serveUIAssets = createStaticFileHandler({ path: swaggerUi.absolutePath(), removeStartingPath: assetsPath })
-
-      this.addRoute(
-        'GET',
-        assetsPath + '/*',
-        serveUIAssets.bind(this),
-        createResponseToJsonMiddleware(),
-        createCompressionMiddleware(),
-      )
+      this.addRoute('GET', assetsPath + '/*', serveUIAssets.bind(this), createCompressionMiddleware())
     }
   }
 
@@ -192,9 +178,10 @@ export class HttpServerService extends Service {
    * @returns Nothing.
    */
   async routerHandler(request: Http2ServerRequest, response: Http2ServerResponse) {
-    const url = new URL(request.url, 'https://example.org/')
+    const url = new URL(request.url, 'https://example.com')
     const method = request.method as Methods
-    const route = this.router.find(method, url.pathname.toLowerCase())
+    const pathName = url.pathname.toLowerCase()
+    const route = this.router.find(method, pathName)
     let context = getNewContext(request.headers['x-request-id'], route.params)
     const handlers: Handler[] = []
 
@@ -202,13 +189,14 @@ export class HttpServerService extends Service {
       context.parameter[name] = value
     })
 
-    if (route.handlers.length) {
-      handlers.push(...route.handlers)
+    if (route?.handlers.length) {
+      handlers.push(...this.onBeforeMiddleware, ...route.handlers, ...this.onAfterMiddleware)
+    } else {
+      handlers.push(...this.notFoundHandlers)
     }
 
     try {
-      const allHandler = [...this.onBeforeMiddleware, ...handlers, ...this.onAfterMiddleware, ...this.notFoundHandlers]
-      for (const handler of allHandler) {
+      for (const handler of handlers) {
         const handlerFunction = handler.bind(this)
         context = await handlerFunction(request, response, context)
         if (context.isResponseSend) {
@@ -217,7 +205,7 @@ export class HttpServerService extends Service {
       }
 
       if (!context.isResponseSend) {
-        this.log.error('all handlers done, but no response send - now throwing to jump into error handlers')
+        this.log.error('all handlers done, but no response send - now throwing to jump into error handlers', url)
         throw new UnhandledError(ErrorCode.InternalServerError, 'No response send to client')
       }
     } catch (err) {
