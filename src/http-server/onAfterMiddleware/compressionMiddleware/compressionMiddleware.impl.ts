@@ -27,8 +27,12 @@ export const createCompressionMiddleware = (options = getDefaultCompressionMiddl
     if (request.method === 'HEAD') {
       response.end()
       context.isResponseSend = true
+    }
+
+    if (context.isResponseSend) {
       return context
     }
+
     const content = (context.payload as string | null | undefined) || ''
 
     response.statusCode = context.statusCode

@@ -35,6 +35,8 @@ export class HttpServerService extends Service {
 
   public routeDefinitions: HttpExposedServiceMeta[] = []
 
+  private compressionMiddleware = createCompressionMiddleware()
+
   /**
    * Create a new instance of the HttpServer class
    * @param {Logger} baseLogger - The logger that the server will use.
@@ -52,26 +54,20 @@ export class HttpServerService extends Service {
     if (this.conf.openApi?.enabled) {
       const openApiPath = this.config.openApi?.path || OPENAPI_DEFAULT_MOUNT_PATH
 
-      this.addRoute('GET', openApiPath, openApiDocuIndex.bind(this), createCompressionMiddleware())
+      this.addRoute('GET', openApiPath, openApiDocuIndex.bind(this))
 
       this.addRoute(
         'GET',
         path.posix.join(openApiPath, 'openapi.json'),
         openApiHandler.bind(this),
         createResponseToJsonMiddleware(),
-        createCompressionMiddleware(),
       )
 
-      this.addRoute(
-        'GET',
-        path.posix.join(openApiPath, 'initializer.js'),
-        openApiDocuJsInit.bind(this),
-        createCompressionMiddleware(),
-      )
+      this.addRoute('GET', path.posix.join(openApiPath, 'initializer.js'), openApiDocuJsInit.bind(this))
 
       const assetsPath = path.posix.join(openApiPath, '/assets')
       const serveUIAssets = createStaticFileHandler({ path: swaggerUi.absolutePath(), removeStartingPath: assetsPath })
-      this.addRoute('GET', assetsPath + '/*', serveUIAssets.bind(this), createCompressionMiddleware())
+      this.addRoute('GET', assetsPath + '/*', serveUIAssets.bind(this))
     }
   }
 
@@ -190,7 +186,12 @@ export class HttpServerService extends Service {
     })
 
     if (route?.handlers.length) {
-      handlers.push(...this.onBeforeMiddleware, ...route.handlers, ...this.onAfterMiddleware)
+      handlers.push(
+        ...this.onBeforeMiddleware,
+        ...route.handlers,
+        ...this.onAfterMiddleware,
+        this.compressionMiddleware,
+      )
     } else {
       handlers.push(...this.notFoundHandlers)
     }
