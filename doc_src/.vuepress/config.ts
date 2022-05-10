@@ -5,7 +5,7 @@ import themeConfig from './themeConfig'
 export default defineHopeConfig({
   lang: 'en-US',
   title: 'PURISTA',
-  description: 'A demo for vuepress-theme-hope',
+  description: 'A framework for building backend services and api in modern, modular and scalable way',
 
   base: '/',
 

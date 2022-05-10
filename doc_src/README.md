@@ -18,7 +18,7 @@ features:
 
   - title: Modular & extendable
     icon: boxes-stacked fas
-    details: Adding slide pages to display things you like
+    details: adding new functions and services is simple, fast and isolated
     link: /handbook/0_concept
 
   - title: Scales
