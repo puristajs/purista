@@ -16,17 +16,19 @@ export const getEventBridgeMock = (): ReturnType => {
   const unsubscribe = stub()
   const unsubscribeService = stub()
 
+  const mock: EventBridge = {
+    defaultTtl: 1000,
+    emit,
+    subscribe,
+    unsubscribe,
+    unsubscribeService,
+  }
+
   return {
     emit,
     subscribe,
     unsubscribe,
     unsubscribeService,
-    mock: {
-      defaultTtl: 1000,
-      emit,
-      subscribe,
-      unsubscribe,
-      unsubscribeService,
-    },
+    mock,
   }
 }
