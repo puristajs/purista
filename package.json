@@ -40,7 +40,7 @@
     "prepublishOnly": "npm test && npm run lint",
     "prepare": "npm run test && npm run build",
     "preversion": "npm run lint",
-    "version": "npm run lint:fix && git add -A src",
+    "version": "npm run lint && git add -A src",
     "postversion": "git push && git push --tags"
   },
   "devDependencies": {
