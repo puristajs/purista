@@ -1,8 +1,8 @@
-import { defineHopeConfig } from 'vuepress-theme-hope'
+import { defineUserConfig } from 'vuepress'
 
-import themeConfig from './themeConfig'
+import theme from './themeConfig'
 
-export default defineHopeConfig({
+export default defineUserConfig({
   lang: 'en-US',
   title: 'PURISTA',
   description: 'A framework for building backend services and api in modern, modular and scalable way',
@@ -19,5 +19,5 @@ export default defineHopeConfig({
     ],
   ],
 
-  themeConfig,
+  theme,
 })

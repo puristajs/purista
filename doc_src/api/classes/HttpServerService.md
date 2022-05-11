@@ -17,6 +17,7 @@
 ### Properties
 
 - [commands](HttpServerService.md#commands)
+- [compressionMiddleware](HttpServerService.md#compressionmiddleware)
 - [conf](HttpServerService.md#conf)
 - [eventBridge](HttpServerService.md#eventbridge)
 - [info](HttpServerService.md#info)
@@ -82,7 +83,7 @@ Create a new instance of the HttpServer class
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:44](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L44)
+[src/http-server/HttpServerService.impl.ts:46](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L46)
 
 ## Properties
 
@@ -96,7 +97,17 @@ Create a new instance of the HttpServer class
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:70](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L70)
+[src/core/Service/Service.impl.ts:70](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L70)
+
+___
+
+### compressionMiddleware
+
+• `Private` **compressionMiddleware**: [`Middleware`](../modules.md#middleware)
+
+#### Defined in
+
+[src/http-server/HttpServerService.impl.ts:38](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L38)
 
 ___
 
@@ -106,7 +117,7 @@ ___
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:31](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L31)
+[src/http-server/HttpServerService.impl.ts:31](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L31)
 
 ___
 
@@ -122,7 +133,7 @@ The event bridge instance
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:62](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L62)
+[src/core/Service/Service.impl.ts:62](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L62)
 
 ___
 
@@ -139,7 +150,7 @@ Service name, service version and some human readable description
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:59](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L59)
+[src/core/Service/Service.impl.ts:59](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L59)
 
 ___
 
@@ -149,7 +160,7 @@ ___
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:29](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L29)
+[src/http-server/HttpServerService.impl.ts:29](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L29)
 
 ___
 
@@ -163,7 +174,7 @@ ___
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:60](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L60)
+[src/core/Service/Service.impl.ts:60](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L60)
 
 ___
 
@@ -177,7 +188,7 @@ ___
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:72](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L72)
+[src/core/Service/Service.impl.ts:72](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L72)
 
 ___
 
@@ -187,7 +198,7 @@ ___
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:28](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L28)
+[src/http-server/HttpServerService.impl.ts:28](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L28)
 
 ___
 
@@ -197,7 +208,7 @@ ___
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:34](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L34)
+[src/http-server/HttpServerService.impl.ts:34](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L34)
 
 ___
 
@@ -207,7 +218,7 @@ ___
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:33](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L33)
+[src/http-server/HttpServerService.impl.ts:33](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L33)
 
 ___
 
@@ -221,7 +232,7 @@ ___
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:64](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L64)
+[src/core/Service/Service.impl.ts:64](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L64)
 
 ___
 
@@ -231,7 +242,7 @@ ___
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:36](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L36)
+[src/http-server/HttpServerService.impl.ts:36](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L36)
 
 ___
 
@@ -241,7 +252,7 @@ ___
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:27](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L27)
+[src/http-server/HttpServerService.impl.ts:27](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L27)
 
 ___
 
@@ -251,7 +262,7 @@ ___
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:25](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L25)
+[src/http-server/HttpServerService.impl.ts:25](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L25)
 
 ___
 
@@ -265,7 +276,7 @@ ___
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:68](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L68)
+[src/core/Service/Service.impl.ts:68](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L68)
 
 ___
 
@@ -279,7 +290,7 @@ ___
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:66](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L66)
+[src/core/Service/Service.impl.ts:66](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L66)
 
 ## Accessors
 
@@ -297,7 +308,7 @@ The value of the `conf` property.
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:112](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L112)
+[src/http-server/HttpServerService.impl.ts:94](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L94)
 
 ___
 
@@ -317,7 +328,7 @@ Service.serviceInfo
 
 #### Defined in
 
-[src/core/types/ServiceClass.ts:32](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/types/ServiceClass.ts#L32)
+[src/core/types/ServiceClass.ts:32](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/types/ServiceClass.ts#L32)
 
 ## Methods
 
@@ -340,7 +351,7 @@ Add a route that matches all HTTP methods
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:131](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L131)
+[src/http-server/HttpServerService.impl.ts:113](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L113)
 
 ___
 
@@ -362,7 +373,7 @@ Add a middleware to the list of middlewares that will be called after the reques
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:163](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L163)
+[src/http-server/HttpServerService.impl.ts:145](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L145)
 
 ___
 
@@ -385,7 +396,7 @@ handler
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:154](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L154)
+[src/http-server/HttpServerService.impl.ts:136](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L136)
 
 ___
 
@@ -409,7 +420,7 @@ Add a route to the router
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:143](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L143)
+[src/http-server/HttpServerService.impl.ts:125](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L125)
 
 ___
 
@@ -436,7 +447,7 @@ Connect service to event bridge to receive commands and command responses
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:101](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L101)
+[src/core/Service/Service.impl.ts:101](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L101)
 
 ___
 
@@ -467,7 +478,7 @@ the message relates to a regular subscription (passiv listener)
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:154](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L154)
+[src/core/Service/Service.impl.ts:154](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L154)
 
 ___
 
@@ -487,7 +498,7 @@ Shut down the service
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:307](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L307)
+[src/core/Service/Service.impl.ts:307](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L307)
 
 ___
 
@@ -514,7 +525,7 @@ Called when a command is received by the service
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:234](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L234)
+[src/core/Service/Service.impl.ts:234](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L234)
 
 ___
 
@@ -539,7 +550,7 @@ ___
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:260](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L260)
+[src/core/Service/Service.impl.ts:260](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L260)
 
 ___
 
@@ -573,7 +584,7 @@ Used for service(-function) to service(-function) communication
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:184](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L184)
+[src/core/Service/Service.impl.ts:184](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L184)
 
 ___
 
@@ -599,7 +610,7 @@ Register a new command (function) for this service
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:294](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L294)
+[src/core/Service/Service.impl.ts:294](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L294)
 
 ___
 
@@ -619,7 +630,7 @@ Function which runs in internval to reject all invocations which are timed out
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:280](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L280)
+[src/core/Service/Service.impl.ts:280](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L280)
 
 ___
 
@@ -646,7 +657,7 @@ Nothing.
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:194](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L194)
+[src/http-server/HttpServerService.impl.ts:176](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L176)
 
 ___
 
@@ -674,7 +685,7 @@ Broadcast service info message
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:138](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L138)
+[src/core/Service/Service.impl.ts:138](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L138)
 
 ___
 
@@ -696,7 +707,7 @@ Set the error handler
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:181](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L181)
+[src/http-server/HttpServerService.impl.ts:163](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L163)
 
 ___
 
@@ -718,7 +729,7 @@ Set the not found handlers
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:172](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L172)
+[src/http-server/HttpServerService.impl.ts:154](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L154)
 
 ___
 
@@ -739,7 +750,7 @@ It creates an HTTP server, and then attaches the router to the server
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:120](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L120)
+[src/http-server/HttpServerService.impl.ts:102](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L102)
 
 ___
 
@@ -766,7 +777,7 @@ Creates a new subscription
 
 #### Defined in
 
-[src/core/Service/Service.impl.ts:211](https://github.com/sebastianwessel/purista/blob/59536dd/src/core/Service/Service.impl.ts#L211)
+[src/core/Service/Service.impl.ts:211](https://github.com/sebastianwessel/purista/blob/40390cf/src/core/Service/Service.impl.ts#L211)
 
 ___
 
@@ -792,4 +803,4 @@ A promise that resolves to an instance of the class.
 
 #### Defined in
 
-[src/http-server/HttpServerService.impl.ts:99](https://github.com/sebastianwessel/purista/blob/59536dd/src/http-server/HttpServerService.impl.ts#L99)
+[src/http-server/HttpServerService.impl.ts:81](https://github.com/sebastianwessel/purista/blob/40390cf/src/http-server/HttpServerService.impl.ts#L81)

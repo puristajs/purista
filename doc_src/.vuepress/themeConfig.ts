@@ -1,8 +1,8 @@
-import { defineThemeConfig } from 'vuepress-theme-hope'
+import { hopeTheme } from 'vuepress-theme-hope'
 
 import navbar from './navbar'
 
-export default defineThemeConfig({
+export default hopeTheme({
   hostname: 'https://purista.dev',
 
   author: {
@@ -19,7 +19,7 @@ export default defineThemeConfig({
   docsDir: 'docs',
 
   // navbar
-  navbar: navbar,
+  navbar,
 
   // sidebar
   // sidebar: sidebar,
