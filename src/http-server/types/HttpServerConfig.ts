@@ -13,6 +13,8 @@ import { LogLevelName } from '../../core'
 export type HttpServerConfig = {
   logLevel?: LogLevelName
   port: number
+  domain: string
+  cookieSecret?: string
   options: SecureServerOptions
   apiMountPath?: string
   openApi?: {

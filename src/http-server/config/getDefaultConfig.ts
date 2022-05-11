@@ -4,6 +4,7 @@ import { OPENAPI_DEFAULT_INFO, OPENAPI_DEFAULT_MOUNT_PATH } from './defaults.con
 export const getDefaultConfig = (): HttpServerConfig => {
   const defaultConfig: HttpServerConfig = {
     port: 9090,
+    domain: 'localhost',
     logLevel: 'warn',
     options: {
       ca: 'certs/ca.crt',

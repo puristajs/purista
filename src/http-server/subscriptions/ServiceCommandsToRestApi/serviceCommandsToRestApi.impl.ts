@@ -1,13 +1,10 @@
 import { posix } from 'path'
 
 import { InfoServiceFunctionAdded, isInfoServiceFunctionAdded } from '../../../core'
-import { createResponseToJsonMiddleware } from '../../onAfterMiddleware'
 import { createExtractPayloadMiddleware, createRequestBodyToJsonMiddleware } from '../../onBeforeMiddleware'
 import { Handler, HttpServiceSubscriptionCallBack, isHttpExposedServiceMeta } from '../../types'
 
 const beforeMiddleware = [createExtractPayloadMiddleware(), createRequestBodyToJsonMiddleware()]
-
-const afterMiddleware = [createResponseToJsonMiddleware()]
 
 /* A function that is called when a message is received. */
 export const serviceCommandsToRestApi: HttpServiceSubscriptionCallBack<InfoServiceFunctionAdded> = async function (
@@ -56,7 +53,7 @@ export const serviceCommandsToRestApi: HttpServiceSubscriptionCallBack<InfoServi
     return serviceHandler
   }
 
-  this.addRoute(method, path, ...beforeMiddleware, getHandler(), ...afterMiddleware)
+  this.addRoute(method, path, ...beforeMiddleware, getHandler())
 
   this.routeDefinitions.push(message.data)
 }
