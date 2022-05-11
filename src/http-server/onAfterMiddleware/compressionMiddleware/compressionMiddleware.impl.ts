@@ -33,7 +33,11 @@ export const createCompressionMiddleware = (options = getDefaultCompressionMiddl
       return context
     }
 
-    const content = (context.payload as string | null | undefined) || ''
+    if (context.payload === undefined || context.payload === null) {
+      context.payload = ''
+    }
+
+    const content = typeof context.payload === 'string' ? context.payload : JSON.stringify(context.payload)
 
     response.statusCode = context.statusCode
 

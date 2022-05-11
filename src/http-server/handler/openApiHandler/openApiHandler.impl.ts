@@ -224,6 +224,7 @@ export const openApiHandler: Handler = async function (_request, _response, cont
     }
   })
 
+  context.headers['content-type'] = 'application/json'
   context.payload = json
 
   return context

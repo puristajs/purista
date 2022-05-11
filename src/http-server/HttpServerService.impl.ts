@@ -36,6 +36,7 @@ export class HttpServerService extends Service {
   public routeDefinitions: HttpExposedServiceMeta[] = []
 
   private compressionMiddleware = createCompressionMiddleware()
+  private jsonResponseMiddleware = createResponseToJsonMiddleware()
 
   /**
    * Create a new instance of the HttpServer class
@@ -56,12 +57,7 @@ export class HttpServerService extends Service {
 
       this.addRoute('GET', openApiPath, openApiDocuIndex.bind(this))
 
-      this.addRoute(
-        'GET',
-        path.posix.join(openApiPath, 'openapi.json'),
-        openApiHandler.bind(this),
-        createResponseToJsonMiddleware(),
-      )
+      this.addRoute('GET', path.posix.join(openApiPath, 'openapi.json'), openApiHandler.bind(this))
 
       this.addRoute('GET', path.posix.join(openApiPath, 'initializer.js'), openApiDocuJsInit.bind(this))
 
@@ -190,6 +186,7 @@ export class HttpServerService extends Service {
         ...this.onBeforeMiddleware,
         ...route.handlers,
         ...this.onAfterMiddleware,
+        this.jsonResponseMiddleware,
         this.compressionMiddleware,
       )
     } else {
