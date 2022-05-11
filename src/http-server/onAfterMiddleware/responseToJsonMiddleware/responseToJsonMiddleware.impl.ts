@@ -22,19 +22,16 @@ export const createResponseToJsonMiddleware = (options = getDefaultResponseToJso
   const responseToJsonMiddleware: Handler = async (_request, _response, context) => {
     if (!context.payload || context.payload === '') {
       if (context.statusCode === 200) {
+        // set correct http status code if we have an empty body
         context.statusCode = 204
       }
       return context
     }
 
-    if (context.headers['content-type'] && context.headers['content-type'] === 'application/json; charset=utf-8') {
-      return context
-    }
-
-    context.headers['content-type'] = 'application/json; charset=utf-8'
-
-    if (typeof context.payload !== 'string') {
-      context.payload = JSON.stringify(context.payload)
+    if (context.headers?.['content-type'].startsWith('application/json')) {
+      if (typeof context.payload !== 'string') {
+        context.payload = JSON.stringify(context.payload)
+      }
     }
 
     return context
