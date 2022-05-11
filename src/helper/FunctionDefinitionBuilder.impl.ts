@@ -2,7 +2,7 @@ import { generateSchema } from '@anatine/zod-openapi'
 import { z } from 'zod'
 
 import { CommandDefinition, CommandFunction, ErrorCode, Service } from '../core'
-import { HttpExposedServiceMeta, QueryParameter } from '../http-server'
+import { ContentType, HttpExposedServiceMeta, QueryParameter } from '../http-server'
 import { getFunctionWithValidation } from './getFunctionWithValidation'
 
 type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
@@ -25,6 +25,8 @@ export class FunctionDefinitionBuilder<
   private summary?: string
 
   private errorStatusCodes: ErrorCode[] = []
+
+  private contentEncoding = 'application/json'
 
   // eslint-disable-next-line no-useless-constructor
   constructor(
@@ -63,7 +65,7 @@ export class FunctionDefinitionBuilder<
     return this
   }
 
-  exposeAsHttpEndpoint(method: HttpMethod, path: string, contentType?: string) {
+  exposeAsHttpEndpoint(method: HttpMethod, path: string, contentType: ContentType = 'application/json') {
     this.httpMetadata = {
       expose: {
         http: {
