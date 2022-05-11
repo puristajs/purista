@@ -29,7 +29,7 @@
     "dev": "vuepress dev doc_src",
     "docs:clean-dev": "vuepress dev doc_src --clean-cache",
     "----------------------- TEST & LINTING -------------------------------------": "",
-    "lint": "eslint . --ext .ts,.js,.json  --cache . --fix",
+    "lint": "eslint . --ext .ts,.json  --cache . --fix",
     "test": "jest",
     "----------------------- BUILDING -------------------------------------------": "",
     "build:lib": "tsc",
