@@ -58,7 +58,7 @@ Error.constructor
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/774b686/src/core/HandledError.impl.ts#L10)
+[src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/HandledError.impl.ts#L10)
 
 ## Properties
 
@@ -197,7 +197,7 @@ ErrorResponse
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:27](https://github.com/sebastianwessel/purista/blob/774b686/src/core/HandledError.impl.ts#L27)
+[src/core/HandledError.impl.ts:27](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/HandledError.impl.ts#L27)
 
 ___
 
@@ -215,7 +215,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/774b686/src/core/HandledError.impl.ts#L42)
+[src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/HandledError.impl.ts#L42)
 
 ___
 
@@ -266,4 +266,4 @@ HandledError
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/774b686/src/core/HandledError.impl.ts#L19)
+[src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/HandledError.impl.ts#L19)

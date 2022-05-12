@@ -4,8 +4,7 @@ import { z } from 'zod'
 import { CommandDefinition, CommandFunction, Service, StatusCode } from '../core'
 import { ContentType, HttpExposedServiceMeta, QueryParameter } from '../http-server'
 import { getFunctionWithValidation } from './getFunctionWithValidation'
-
-type HttpMethod = 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
+import { SupportedHttpMethod } from './types'
 
 export class FunctionDefinitionBuilder<
   ServiceClassType extends Service,
@@ -65,7 +64,7 @@ export class FunctionDefinitionBuilder<
     return this
   }
 
-  exposeAsHttpEndpoint(method: HttpMethod, path: string, contentType: ContentType = 'application/json') {
+  exposeAsHttpEndpoint(method: SupportedHttpMethod, path: string, contentType: ContentType = 'application/json') {
     this.httpMetadata = {
       expose: {
         http: {

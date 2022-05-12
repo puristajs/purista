@@ -30,6 +30,7 @@ import {
 } from '../types'
 import { UnhandledError } from '../UnhandledError.impl'
 
+/** Internal type for holding pending invocations */
 type PendigInvocation = {
   ttl: number
   command: Command

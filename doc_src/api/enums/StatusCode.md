@@ -78,7 +78,7 @@
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:7](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L7)
+[src/core/types/StatusCode.enum.ts:7](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L7)
 
 ___
 
@@ -88,7 +88,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:13](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L13)
+[src/core/types/StatusCode.enum.ts:13](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L13)
 
 ___
 
@@ -98,7 +98,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:57](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L57)
+[src/core/types/StatusCode.enum.ts:57](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L57)
 
 ___
 
@@ -108,7 +108,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:26](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L26)
+[src/core/types/StatusCode.enum.ts:26](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L26)
 
 ___
 
@@ -118,7 +118,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:64](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L64)
+[src/core/types/StatusCode.enum.ts:64](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L64)
 
 ___
 
@@ -128,7 +128,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:35](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L35)
+[src/core/types/StatusCode.enum.ts:35](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L35)
 
 ___
 
@@ -138,7 +138,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:6](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L6)
+[src/core/types/StatusCode.enum.ts:6](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L6)
 
 ___
 
@@ -148,7 +148,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:43](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L43)
+[src/core/types/StatusCode.enum.ts:43](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L43)
 
 ___
 
@@ -158,7 +158,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:29](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L29)
+[src/core/types/StatusCode.enum.ts:29](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L29)
 
 ___
 
@@ -168,7 +168,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:59](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L59)
+[src/core/types/StatusCode.enum.ts:59](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L59)
 
 ___
 
@@ -178,7 +178,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:36](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L36)
+[src/core/types/StatusCode.enum.ts:36](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L36)
 
 ___
 
@@ -188,7 +188,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:60](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L60)
+[src/core/types/StatusCode.enum.ts:60](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L60)
 
 ___
 
@@ -198,7 +198,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:14](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L14)
+[src/core/types/StatusCode.enum.ts:14](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L14)
 
 ___
 
@@ -208,7 +208,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:44](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L44)
+[src/core/types/StatusCode.enum.ts:44](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L44)
 
 ___
 
@@ -218,7 +218,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:2](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L2)
+[src/core/types/StatusCode.enum.ts:2](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L2)
 
 ___
 
@@ -228,7 +228,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L4)
+[src/core/types/StatusCode.enum.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L4)
 
 ___
 
@@ -238,7 +238,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L3)
+[src/core/types/StatusCode.enum.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L3)
 
 ___
 
@@ -248,7 +248,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:62](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L62)
+[src/core/types/StatusCode.enum.ts:62](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L62)
 
 ___
 
@@ -258,7 +258,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:55](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L55)
+[src/core/types/StatusCode.enum.ts:55](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L55)
 
 ___
 
@@ -268,7 +268,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:37](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L37)
+[src/core/types/StatusCode.enum.ts:37](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L37)
 
 ___
 
@@ -278,7 +278,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:47](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L47)
+[src/core/types/StatusCode.enum.ts:47](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L47)
 
 ___
 
@@ -288,7 +288,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:52](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L52)
+[src/core/types/StatusCode.enum.ts:52](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L52)
 
 ___
 
@@ -298,7 +298,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:63](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L63)
+[src/core/types/StatusCode.enum.ts:63](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L63)
 
 ___
 
@@ -308,7 +308,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:31](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L31)
+[src/core/types/StatusCode.enum.ts:31](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L31)
 
 ___
 
@@ -318,7 +318,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:45](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L45)
+[src/core/types/StatusCode.enum.ts:45](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L45)
 
 ___
 
@@ -328,7 +328,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:12](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L12)
+[src/core/types/StatusCode.enum.ts:12](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L12)
 
 ___
 
@@ -338,7 +338,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:66](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L66)
+[src/core/types/StatusCode.enum.ts:66](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L66)
 
 ___
 
@@ -348,7 +348,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:9](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L9)
+[src/core/types/StatusCode.enum.ts:9](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L9)
 
 ___
 
@@ -358,7 +358,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:8](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L8)
+[src/core/types/StatusCode.enum.ts:8](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L8)
 
 ___
 
@@ -368,7 +368,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:32](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L32)
+[src/core/types/StatusCode.enum.ts:32](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L32)
 
 ___
 
@@ -378,7 +378,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:65](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L65)
+[src/core/types/StatusCode.enum.ts:65](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L65)
 
 ___
 
@@ -388,7 +388,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:30](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L30)
+[src/core/types/StatusCode.enum.ts:30](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L30)
 
 ___
 
@@ -398,7 +398,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:56](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L56)
+[src/core/types/StatusCode.enum.ts:56](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L56)
 
 ___
 
@@ -408,7 +408,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:5](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L5)
+[src/core/types/StatusCode.enum.ts:5](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L5)
 
 ___
 
@@ -418,7 +418,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:11](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L11)
+[src/core/types/StatusCode.enum.ts:11](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L11)
 
 ___
 
@@ -428,7 +428,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:39](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L39)
+[src/core/types/StatusCode.enum.ts:39](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L39)
 
 ___
 
@@ -438,7 +438,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:28](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L28)
+[src/core/types/StatusCode.enum.ts:28](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L28)
 
 ___
 
@@ -448,7 +448,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:38](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L38)
+[src/core/types/StatusCode.enum.ts:38](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L38)
 
 ___
 
@@ -458,7 +458,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:49](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L49)
+[src/core/types/StatusCode.enum.ts:49](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L49)
 
 ___
 
@@ -468,7 +468,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:33](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L33)
+[src/core/types/StatusCode.enum.ts:33](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L33)
 
 ___
 
@@ -478,7 +478,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:42](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L42)
+[src/core/types/StatusCode.enum.ts:42](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L42)
 
 ___
 
@@ -488,7 +488,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:17](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L17)
+[src/core/types/StatusCode.enum.ts:17](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L17)
 
 ___
 
@@ -498,7 +498,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:16](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L16)
+[src/core/types/StatusCode.enum.ts:16](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L16)
 
 ___
 
@@ -508,7 +508,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:15](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L15)
+[src/core/types/StatusCode.enum.ts:15](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L15)
 
 ___
 
@@ -518,7 +518,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:20](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L20)
+[src/core/types/StatusCode.enum.ts:20](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L20)
 
 ___
 
@@ -528,7 +528,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:25](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L25)
+[src/core/types/StatusCode.enum.ts:25](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L25)
 
 ___
 
@@ -538,7 +538,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:19](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L19)
+[src/core/types/StatusCode.enum.ts:19](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L19)
 
 ___
 
@@ -548,7 +548,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:23](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L23)
+[src/core/types/StatusCode.enum.ts:23](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L23)
 
 ___
 
@@ -558,7 +558,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:24](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L24)
+[src/core/types/StatusCode.enum.ts:24](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L24)
 
 ___
 
@@ -568,7 +568,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:21](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L21)
+[src/core/types/StatusCode.enum.ts:21](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L21)
 
 ___
 
@@ -578,7 +578,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:51](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L51)
+[src/core/types/StatusCode.enum.ts:51](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L51)
 
 ___
 
@@ -588,7 +588,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:34](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L34)
+[src/core/types/StatusCode.enum.ts:34](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L34)
 
 ___
 
@@ -598,7 +598,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:10](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L10)
+[src/core/types/StatusCode.enum.ts:10](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L10)
 
 ___
 
@@ -608,7 +608,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:53](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L53)
+[src/core/types/StatusCode.enum.ts:53](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L53)
 
 ___
 
@@ -618,7 +618,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:58](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L58)
+[src/core/types/StatusCode.enum.ts:58](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L58)
 
 ___
 
@@ -628,7 +628,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:50](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L50)
+[src/core/types/StatusCode.enum.ts:50](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L50)
 
 ___
 
@@ -638,7 +638,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:40](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L40)
+[src/core/types/StatusCode.enum.ts:40](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L40)
 
 ___
 
@@ -648,7 +648,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:27](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L27)
+[src/core/types/StatusCode.enum.ts:27](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L27)
 
 ___
 
@@ -658,7 +658,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:54](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L54)
+[src/core/types/StatusCode.enum.ts:54](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L54)
 
 ___
 
@@ -668,7 +668,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:46](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L46)
+[src/core/types/StatusCode.enum.ts:46](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L46)
 
 ___
 
@@ -678,7 +678,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:41](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L41)
+[src/core/types/StatusCode.enum.ts:41](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L41)
 
 ___
 
@@ -688,7 +688,7 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:48](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L48)
+[src/core/types/StatusCode.enum.ts:48](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L48)
 
 ___
 
@@ -698,4 +698,4 @@ ___
 
 #### Defined in
 
-[src/core/types/StatusCode.enum.ts:61](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/StatusCode.enum.ts#L61)
+[src/core/types/StatusCode.enum.ts:61](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/StatusCode.enum.ts#L61)

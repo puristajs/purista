@@ -8,7 +8,6 @@
 
 - [EBMessageType](enums/EBMessageType.md)
 - [StatusCode](enums/StatusCode.md)
-- [SuccessStatusCode](enums/SuccessStatusCode.md)
 
 ### Classes
 
@@ -75,6 +74,7 @@
 - [SubscriptionDefinition](modules.md#subscriptiondefinition)
 - [SubscriptionFunction](modules.md#subscriptionfunction)
 - [SubscriptionId](modules.md#subscriptionid)
+- [SupportedHttpMethod](modules.md#supportedhttpmethod)
 - [TraceId](modules.md#traceid)
 - [ValidationDefinition](modules.md#validationdefinition)
 
@@ -157,7 +157,7 @@ Subscribers should not respond with command responses if they are "silent" subsc
 
 #### Defined in
 
-[src/core/types/commandType/Command.ts:18](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/commandType/Command.ts#L18)
+[src/core/types/commandType/Command.ts:18](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/commandType/Command.ts#L18)
 
 ___
 
@@ -185,7 +185,7 @@ The definition for a command provided by some service.
 
 #### Defined in
 
-[src/core/types/commandType/CommandDefinition.ts:6](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/commandType/CommandDefinition.ts#L6)
+[src/core/types/commandType/CommandDefinition.ts:6](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/commandType/CommandDefinition.ts#L6)
 
 ___
 
@@ -197,7 +197,7 @@ CommandErrorResponse is a response to a specific previously received command whi
 
 #### Defined in
 
-[src/core/types/commandType/CommandErrorResponse.ts:11](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/commandType/CommandErrorResponse.ts#L11)
+[src/core/types/commandType/CommandErrorResponse.ts:11](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/commandType/CommandErrorResponse.ts#L11)
 
 ___
 
@@ -235,7 +235,7 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 #### Defined in
 
-[src/core/types/commandType/CommandFunction.ts:7](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/commandType/CommandFunction.ts#L7)
+[src/core/types/commandType/CommandFunction.ts:7](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/commandType/CommandFunction.ts#L7)
 
 ___
 
@@ -253,7 +253,7 @@ CommandResponse is a response to a specific previously received command which ca
 
 #### Defined in
 
-[src/core/types/commandType/CommandResponse.ts:9](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/commandType/CommandResponse.ts#L9)
+[src/core/types/commandType/CommandResponse.ts:9](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/commandType/CommandResponse.ts#L9)
 
 ___
 
@@ -272,7 +272,7 @@ It indicates that the command was executed successfully and contains the result 
 
 #### Defined in
 
-[src/core/types/commandType/CommandSuccessResponse.ts:11](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/commandType/CommandSuccessResponse.ts#L11)
+[src/core/types/commandType/CommandSuccessResponse.ts:11](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/commandType/CommandSuccessResponse.ts#L11)
 
 ___
 
@@ -282,7 +282,7 @@ ___
 
 #### Defined in
 
-[src/helper/types/CompressionMethod.ts:1](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/types/CompressionMethod.ts#L1)
+[src/helper/types/CompressionMethod.ts:1](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/types/CompressionMethod.ts#L1)
 
 ___
 
@@ -292,7 +292,7 @@ ___
 
 #### Defined in
 
-[src/http-server/onAfterMiddleware/compressionMiddleware/compressionMiddleware.impl.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onAfterMiddleware/compressionMiddleware/compressionMiddleware.impl.ts#L4)
+[src/http-server/onAfterMiddleware/compressionMiddleware/compressionMiddleware.impl.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onAfterMiddleware/compressionMiddleware/compressionMiddleware.impl.ts#L4)
 
 ___
 
@@ -302,7 +302,7 @@ ___
 
 #### Defined in
 
-[src/http-server/types/ContentType.ts:1](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/types/ContentType.ts#L1)
+[src/http-server/types/ContentType.ts:1](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/types/ContentType.ts#L1)
 
 ___
 
@@ -330,7 +330,7 @@ ___
 
 #### Defined in
 
-[src/http-server/types/Context.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/types/Context.ts#L3)
+[src/http-server/types/Context.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/types/Context.ts#L3)
 
 ___
 
@@ -340,7 +340,7 @@ ___
 
 #### Defined in
 
-[src/core/types/CorrelationId.ts:1](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/CorrelationId.ts#L1)
+[src/core/types/CorrelationId.ts:1](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/CorrelationId.ts#L1)
 
 ___
 
@@ -352,7 +352,7 @@ EBMessage is some message which is handled by the event bridge.
 
 #### Defined in
 
-[src/core/types/EBMessage.ts:7](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/EBMessage.ts#L7)
+[src/core/types/EBMessage.ts:7](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/EBMessage.ts#L7)
 
 ___
 
@@ -372,7 +372,7 @@ A event bus message address describes receiver/sender of a message.
 
 #### Defined in
 
-[src/core/types/EBMessageAddress.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/EBMessageAddress.ts#L4)
+[src/core/types/EBMessageAddress.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/EBMessageAddress.ts#L4)
 
 ___
 
@@ -392,7 +392,7 @@ ___
 
 #### Defined in
 
-[src/core/types/EBMessageBase.ts:6](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/EBMessageBase.ts#L6)
+[src/core/types/EBMessageBase.ts:6](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/EBMessageBase.ts#L6)
 
 ___
 
@@ -404,7 +404,7 @@ Unique id of the event bridge message
 
 #### Defined in
 
-[src/core/types/EBMessageId.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/EBMessageId.ts#L4)
+[src/core/types/EBMessageId.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/EBMessageId.ts#L4)
 
 ___
 
@@ -423,7 +423,7 @@ ___
 
 #### Defined in
 
-[src/core/types/ErrorResponse.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/ErrorResponse.ts#L4)
+[src/core/types/ErrorResponse.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/ErrorResponse.ts#L4)
 
 ___
 
@@ -439,7 +439,7 @@ ___
 
 #### Defined in
 
-[src/core/types/EventBridgeConfig.ts:1](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/EventBridgeConfig.ts#L1)
+[src/core/types/EventBridgeConfig.ts:1](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/EventBridgeConfig.ts#L1)
 
 ___
 
@@ -449,7 +449,7 @@ ___
 
 #### Defined in
 
-[src/http-server/onBeforeMiddleware/extractPayloadMiddleware/extractPayloadMiddleware.impl.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onBeforeMiddleware/extractPayloadMiddleware/extractPayloadMiddleware.impl.ts#L3)
+[src/http-server/onBeforeMiddleware/extractPayloadMiddleware/extractPayloadMiddleware.impl.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onBeforeMiddleware/extractPayloadMiddleware/extractPayloadMiddleware.impl.ts#L3)
 
 ___
 
@@ -476,7 +476,7 @@ ___
 
 #### Defined in
 
-[src/http-server/types/Handler.ts:6](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/types/Handler.ts#L6)
+[src/http-server/types/Handler.ts:6](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/types/Handler.ts#L6)
 
 ___
 
@@ -486,7 +486,7 @@ ___
 
 #### Defined in
 
-[src/http-server/onBeforeMiddleware/helmetMiddleware/helmetMiddleware.impl.ts:6](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onBeforeMiddleware/helmetMiddleware/helmetMiddleware.impl.ts#L6)
+[src/http-server/onBeforeMiddleware/helmetMiddleware/helmetMiddleware.impl.ts:6](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onBeforeMiddleware/helmetMiddleware/helmetMiddleware.impl.ts#L6)
 
 ___
 
@@ -515,7 +515,7 @@ ___
 
 #### Defined in
 
-[src/http-server/types/HttpExposedServiceMeta.ts:7](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/types/HttpExposedServiceMeta.ts#L7)
+[src/http-server/types/HttpExposedServiceMeta.ts:7](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/types/HttpExposedServiceMeta.ts#L7)
 
 ___
 
@@ -545,7 +545,7 @@ ___
 
 #### Defined in
 
-[src/http-server/types/HttpServerConfig.ts:13](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/types/HttpServerConfig.ts#L13)
+[src/http-server/types/HttpServerConfig.ts:13](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/types/HttpServerConfig.ts#L13)
 
 ___
 
@@ -561,7 +561,7 @@ ___
 
 #### Defined in
 
-[src/http-server/types/HttpServiceSubscriptionCallBack.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/types/HttpServiceSubscriptionCallBack.ts#L4)
+[src/http-server/types/HttpServiceSubscriptionCallBack.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/types/HttpServiceSubscriptionCallBack.ts#L4)
 
 ___
 
@@ -571,7 +571,7 @@ ___
 
 #### Defined in
 
-[src/core/types/infoType/InfoMessage.ts:10](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/infoType/InfoMessage.ts#L10)
+[src/core/types/infoType/InfoMessage.ts:10](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/infoType/InfoMessage.ts#L10)
 
 ___
 
@@ -581,7 +581,7 @@ ___
 
 #### Defined in
 
-[src/core/types/infoType/InfoMessage.ts:18](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/infoType/InfoMessage.ts#L18)
+[src/core/types/infoType/InfoMessage.ts:18](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/infoType/InfoMessage.ts#L18)
 
 ___
 
@@ -591,7 +591,7 @@ ___
 
 #### Defined in
 
-[src/core/types/infoType/InfoServiceBase.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/infoType/InfoServiceBase.ts#L3)
+[src/core/types/infoType/InfoServiceBase.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/infoType/InfoServiceBase.ts#L3)
 
 ___
 
@@ -601,7 +601,7 @@ ___
 
 #### Defined in
 
-[src/core/types/infoType/InfoServiceDrain.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/infoType/InfoServiceDrain.ts#L4)
+[src/core/types/infoType/InfoServiceDrain.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/infoType/InfoServiceDrain.ts#L4)
 
 ___
 
@@ -611,7 +611,7 @@ ___
 
 #### Defined in
 
-[src/core/types/infoType/InfoServiceFunctionAdded.ts:5](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/infoType/InfoServiceFunctionAdded.ts#L5)
+[src/core/types/infoType/InfoServiceFunctionAdded.ts:5](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/infoType/InfoServiceFunctionAdded.ts#L5)
 
 ___
 
@@ -621,7 +621,7 @@ ___
 
 #### Defined in
 
-[src/core/types/infoType/InfoServiceInit.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/infoType/InfoServiceInit.ts#L4)
+[src/core/types/infoType/InfoServiceInit.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/infoType/InfoServiceInit.ts#L4)
 
 ___
 
@@ -631,7 +631,7 @@ ___
 
 #### Defined in
 
-[src/core/types/infoType/InfoServiceNotReady.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/infoType/InfoServiceNotReady.ts#L4)
+[src/core/types/infoType/InfoServiceNotReady.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/infoType/InfoServiceNotReady.ts#L4)
 
 ___
 
@@ -641,7 +641,7 @@ ___
 
 #### Defined in
 
-[src/core/types/infoType/InfoServiceReady.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/infoType/InfoServiceReady.ts#L4)
+[src/core/types/infoType/InfoServiceReady.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/infoType/InfoServiceReady.ts#L4)
 
 ___
 
@@ -651,7 +651,7 @@ ___
 
 #### Defined in
 
-[src/core/types/infoType/InfoServiceShutdown.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/infoType/InfoServiceShutdown.ts#L4)
+[src/core/types/infoType/InfoServiceShutdown.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/infoType/InfoServiceShutdown.ts#L4)
 
 ___
 
@@ -661,7 +661,7 @@ ___
 
 #### Defined in
 
-[src/http-server/handler/internalError500Handler/internalError500Handler.impl.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/handler/internalError500Handler/internalError500Handler.impl.ts#L4)
+[src/http-server/handler/internalError500Handler/internalError500Handler.impl.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/handler/internalError500Handler/internalError500Handler.impl.ts#L4)
 
 ___
 
@@ -671,7 +671,7 @@ ___
 
 #### Defined in
 
-[src/core/types/LogLevelName.ts:1](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/LogLevelName.ts#L1)
+[src/core/types/LogLevelName.ts:1](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/LogLevelName.ts#L1)
 
 ___
 
@@ -681,7 +681,7 @@ ___
 
 #### Defined in
 
-[src/core/types/Logger.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/Logger.ts#L3)
+[src/core/types/Logger.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/Logger.ts#L3)
 
 ___
 
@@ -708,7 +708,7 @@ ___
 
 #### Defined in
 
-[src/http-server/types/Middleware.ts:6](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/types/Middleware.ts#L6)
+[src/http-server/types/Middleware.ts:6](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/types/Middleware.ts#L6)
 
 ___
 
@@ -718,7 +718,7 @@ ___
 
 #### Defined in
 
-[src/http-server/handler/notFound404Handler/notFound404Handler.impl.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/handler/notFound404Handler/notFound404Handler.impl.ts#L4)
+[src/http-server/handler/notFound404Handler/notFound404Handler.impl.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/handler/notFound404Handler/notFound404Handler.impl.ts#L4)
 
 ___
 
@@ -728,7 +728,7 @@ ___
 
 #### Defined in
 
-[src/core/types/PrincipalId.ts:1](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/PrincipalId.ts#L1)
+[src/core/types/PrincipalId.ts:1](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/PrincipalId.ts#L1)
 
 ___
 
@@ -745,7 +745,7 @@ ___
 
 #### Defined in
 
-[src/http-server/types/QueryParameter.ts:1](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/types/QueryParameter.ts#L1)
+[src/http-server/types/QueryParameter.ts:1](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/types/QueryParameter.ts#L1)
 
 ___
 
@@ -755,7 +755,7 @@ ___
 
 #### Defined in
 
-[src/http-server/onBeforeMiddleware/requestBodyToJson/requestBodyToJsonMiddleware.impl.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onBeforeMiddleware/requestBodyToJson/requestBodyToJsonMiddleware.impl.ts#L3)
+[src/http-server/onBeforeMiddleware/requestBodyToJson/requestBodyToJsonMiddleware.impl.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onBeforeMiddleware/requestBodyToJson/requestBodyToJsonMiddleware.impl.ts#L3)
 
 ___
 
@@ -765,7 +765,7 @@ ___
 
 #### Defined in
 
-[src/http-server/onAfterMiddleware/responseToJsonMiddleware/responseToJsonMiddleware.impl.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onAfterMiddleware/responseToJsonMiddleware/responseToJsonMiddleware.impl.ts#L3)
+[src/http-server/onAfterMiddleware/responseToJsonMiddleware/responseToJsonMiddleware.impl.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onAfterMiddleware/responseToJsonMiddleware/responseToJsonMiddleware.impl.ts#L3)
 
 ___
 
@@ -785,7 +785,7 @@ General service information
 
 #### Defined in
 
-[src/core/types/infoType/ServiceInfoType.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/infoType/ServiceInfoType.ts#L4)
+[src/core/types/infoType/ServiceInfoType.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/infoType/ServiceInfoType.ts#L4)
 
 ___
 
@@ -803,7 +803,7 @@ ___
 
 #### Defined in
 
-[src/http-server/handler/staticFileHandler/staticFileMiddleware.impl.ts:10](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/handler/staticFileHandler/staticFileMiddleware.impl.ts#L10)
+[src/http-server/handler/staticFileHandler/staticFileMiddleware.impl.ts:10](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/handler/staticFileHandler/staticFileMiddleware.impl.ts#L10)
 
 ___
 
@@ -947,13 +947,25 @@ src/core/types/Subscription/SubscriptionId.ts:4
 
 ___
 
+### SupportedHttpMethod
+
+Ƭ **SupportedHttpMethod**: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"``
+
+Supported HTTP-Methods for defining endpoints
+
+#### Defined in
+
+src/helper/types/SupportedHttpMethod.ts:2
+
+___
+
 ### TraceId
 
 Ƭ **TraceId**: `string`
 
 #### Defined in
 
-[src/core/types/TraceId.ts:1](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/TraceId.ts#L1)
+[src/core/types/TraceId.ts:1](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/TraceId.ts#L1)
 
 ___
 
@@ -971,7 +983,7 @@ ___
 
 #### Defined in
 
-[src/helper/types/ValidationDefinition.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/types/ValidationDefinition.ts#L3)
+[src/helper/types/ValidationDefinition.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/types/ValidationDefinition.ts#L3)
 
 ## Variables
 
@@ -981,7 +993,7 @@ ___
 
 #### Defined in
 
-[src/helper/types/MinContentSizeForCompression.const.ts:1](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/types/MinContentSizeForCompression.const.ts#L1)
+[src/helper/types/MinContentSizeForCompression.const.ts:1](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/types/MinContentSizeForCompression.const.ts#L1)
 
 ___
 
@@ -991,7 +1003,7 @@ ___
 
 #### Defined in
 
-[src/http-server/config/defaults.config.ts:7](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/config/defaults.config.ts#L7)
+[src/http-server/config/defaults.config.ts:7](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/config/defaults.config.ts#L7)
 
 ___
 
@@ -1001,7 +1013,7 @@ ___
 
 #### Defined in
 
-[src/http-server/config/defaults.config.ts:5](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/config/defaults.config.ts#L5)
+[src/http-server/config/defaults.config.ts:5](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/config/defaults.config.ts#L5)
 
 ___
 
@@ -1011,7 +1023,7 @@ ___
 
 #### Defined in
 
-[src/http-server/config/ServiceInfo.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/config/ServiceInfo.ts#L3)
+[src/http-server/config/ServiceInfo.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/config/ServiceInfo.ts#L3)
 
 ___
 
@@ -1021,7 +1033,7 @@ ___
 
 #### Defined in
 
-[src/core/types/infoType/InfoMessage.ts:25](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/infoType/InfoMessage.ts#L25)
+[src/core/types/infoType/InfoMessage.ts:25](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/infoType/InfoMessage.ts#L25)
 
 ## Functions
 
@@ -1048,7 +1060,7 @@ A middleware function.
 
 #### Defined in
 
-[src/http-server/onAfterMiddleware/compressionMiddleware/compressionMiddleware.impl.ts:23](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onAfterMiddleware/compressionMiddleware/compressionMiddleware.impl.ts#L23)
+[src/http-server/onAfterMiddleware/compressionMiddleware/compressionMiddleware.impl.ts:23](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onAfterMiddleware/compressionMiddleware/compressionMiddleware.impl.ts#L23)
 
 ___
 
@@ -1075,7 +1087,7 @@ CommandErrorResponse message object
 
 #### Defined in
 
-[src/core/helper/createErrorResponse.impl.ts:15](https://github.com/sebastianwessel/purista/blob/774b686/src/core/helper/createErrorResponse.impl.ts#L15)
+[src/core/helper/createErrorResponse.impl.ts:15](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/helper/createErrorResponse.impl.ts#L15)
 
 ___
 
@@ -1099,7 +1111,7 @@ A middleware function that will extract the payload from the request.
 
 #### Defined in
 
-[src/http-server/onBeforeMiddleware/extractPayloadMiddleware/extractPayloadMiddleware.impl.ts:19](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onBeforeMiddleware/extractPayloadMiddleware/extractPayloadMiddleware.impl.ts#L19)
+[src/http-server/onBeforeMiddleware/extractPayloadMiddleware/extractPayloadMiddleware.impl.ts:19](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onBeforeMiddleware/extractPayloadMiddleware/extractPayloadMiddleware.impl.ts#L19)
 
 ___
 
@@ -1124,7 +1136,7 @@ A function that can be used to perform the action `apply`
 
 #### Defined in
 
-[src/http-server/onBeforeMiddleware/helmetMiddleware/helmetMiddleware.impl.ts:23](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onBeforeMiddleware/helmetMiddleware/helmetMiddleware.impl.ts#L23)
+[src/http-server/onBeforeMiddleware/helmetMiddleware/helmetMiddleware.impl.ts:23](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onBeforeMiddleware/helmetMiddleware/helmetMiddleware.impl.ts#L23)
 
 ___
 
@@ -1148,7 +1160,7 @@ ___
 
 #### Defined in
 
-[src/core/helper/createInfoMessage.impl.ts:5](https://github.com/sebastianwessel/purista/blob/774b686/src/core/helper/createInfoMessage.impl.ts#L5)
+[src/core/helper/createInfoMessage.impl.ts:5](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/helper/createInfoMessage.impl.ts#L5)
 
 ___
 
@@ -1172,7 +1184,7 @@ A handler function that returns a context object.
 
 #### Defined in
 
-[src/http-server/handler/internalError500Handler/internalError500Handler.impl.ts:20](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/handler/internalError500Handler/internalError500Handler.impl.ts#L20)
+[src/http-server/handler/internalError500Handler/internalError500Handler.impl.ts:20](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/handler/internalError500Handler/internalError500Handler.impl.ts#L20)
 
 ___
 
@@ -1196,7 +1208,7 @@ A function that returns a function.
 
 #### Defined in
 
-[src/http-server/handler/notFound404Handler/notFound404Handler.impl.ts:21](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/handler/notFound404Handler/notFound404Handler.impl.ts#L21)
+[src/http-server/handler/notFound404Handler/notFound404Handler.impl.ts:21](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/handler/notFound404Handler/notFound404Handler.impl.ts#L21)
 
 ___
 
@@ -1220,7 +1232,7 @@ The return value of the function is the return value of the function.
 
 #### Defined in
 
-[src/http-server/onBeforeMiddleware/requestBodyToJson/requestBodyToJsonMiddleware.impl.ts:19](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onBeforeMiddleware/requestBodyToJson/requestBodyToJsonMiddleware.impl.ts#L19)
+[src/http-server/onBeforeMiddleware/requestBodyToJson/requestBodyToJsonMiddleware.impl.ts:19](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onBeforeMiddleware/requestBodyToJson/requestBodyToJsonMiddleware.impl.ts#L19)
 
 ___
 
@@ -1244,7 +1256,7 @@ A middleware function.
 
 #### Defined in
 
-[src/http-server/onAfterMiddleware/responseToJsonMiddleware/responseToJsonMiddleware.impl.ts:19](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onAfterMiddleware/responseToJsonMiddleware/responseToJsonMiddleware.impl.ts#L19)
+[src/http-server/onAfterMiddleware/responseToJsonMiddleware/responseToJsonMiddleware.impl.ts:19](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onAfterMiddleware/responseToJsonMiddleware/responseToJsonMiddleware.impl.ts#L19)
 
 ___
 
@@ -1264,7 +1276,7 @@ ___
 
 #### Defined in
 
-[src/http-server/handler/staticFileHandler/staticFileMiddleware.impl.ts:36](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/handler/staticFileHandler/staticFileMiddleware.impl.ts#L36)
+[src/http-server/handler/staticFileHandler/staticFileMiddleware.impl.ts:36](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/handler/staticFileHandler/staticFileMiddleware.impl.ts#L36)
 
 ___
 
@@ -1291,7 +1303,7 @@ ___
 
 #### Defined in
 
-[src/core/helper/createSuccessResponse.impl.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/core/helper/createSuccessResponse.impl.ts#L3)
+[src/core/helper/createSuccessResponse.impl.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/helper/createSuccessResponse.impl.ts#L3)
 
 ___
 
@@ -1311,7 +1323,7 @@ ___
 
 #### Defined in
 
-[src/core/helper/getCleanedMessage.impl.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/core/helper/getCleanedMessage.impl.ts#L3)
+[src/core/helper/getCleanedMessage.impl.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/helper/getCleanedMessage.impl.ts#L3)
 
 ___
 
@@ -1336,7 +1348,7 @@ A compression method.
 
 #### Defined in
 
-[src/helper/getCompressionMethod.impl.ts:11](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/getCompressionMethod.impl.ts#L11)
+[src/helper/getCompressionMethod.impl.ts:11](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/getCompressionMethod.impl.ts#L11)
 
 ___
 
@@ -1360,7 +1372,7 @@ A function that accepts a stream and returns a stream.
 
 #### Defined in
 
-[src/helper/getCompressionStream.impl.ts:10](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/getCompressionStream.impl.ts#L10)
+[src/helper/getCompressionStream.impl.ts:10](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/getCompressionStream.impl.ts#L10)
 
 ___
 
@@ -1378,7 +1390,7 @@ A CompressionMiddlewareOptions object.
 
 #### Defined in
 
-[src/http-server/onAfterMiddleware/compressionMiddleware/compressionMiddleware.impl.ts:10](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onAfterMiddleware/compressionMiddleware/compressionMiddleware.impl.ts#L10)
+[src/http-server/onAfterMiddleware/compressionMiddleware/compressionMiddleware.impl.ts:10](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onAfterMiddleware/compressionMiddleware/compressionMiddleware.impl.ts#L10)
 
 ___
 
@@ -1392,7 +1404,7 @@ ___
 
 #### Defined in
 
-[src/http-server/config/getDefaultConfig.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/config/getDefaultConfig.ts#L4)
+[src/http-server/config/getDefaultConfig.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/config/getDefaultConfig.ts#L4)
 
 ___
 
@@ -1410,7 +1422,7 @@ An object with the default configuration for the extract payload middleware.
 
 #### Defined in
 
-[src/http-server/onBeforeMiddleware/extractPayloadMiddleware/extractPayloadMiddleware.impl.ts:9](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onBeforeMiddleware/extractPayloadMiddleware/extractPayloadMiddleware.impl.ts#L9)
+[src/http-server/onBeforeMiddleware/extractPayloadMiddleware/extractPayloadMiddleware.impl.ts:9](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onBeforeMiddleware/extractPayloadMiddleware/extractPayloadMiddleware.impl.ts#L9)
 
 ___
 
@@ -1428,7 +1440,7 @@ A HelmetMiddlewareOptions object.
 
 #### Defined in
 
-[src/http-server/onBeforeMiddleware/helmetMiddleware/helmetMiddleware.impl.ts:12](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onBeforeMiddleware/helmetMiddleware/helmetMiddleware.impl.ts#L12)
+[src/http-server/onBeforeMiddleware/helmetMiddleware/helmetMiddleware.impl.ts:12](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onBeforeMiddleware/helmetMiddleware/helmetMiddleware.impl.ts#L12)
 
 ___
 
@@ -1446,7 +1458,7 @@ An object with the following properties:
 
 #### Defined in
 
-[src/http-server/handler/internalError500Handler/internalError500Handler.impl.ts:10](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/handler/internalError500Handler/internalError500Handler.impl.ts#L10)
+[src/http-server/handler/internalError500Handler/internalError500Handler.impl.ts:10](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/handler/internalError500Handler/internalError500Handler.impl.ts#L10)
 
 ___
 
@@ -1465,7 +1477,7 @@ A configuration object.
 
 #### Defined in
 
-[src/http-server/handler/notFound404Handler/notFound404Handler.impl.ts:11](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/handler/notFound404Handler/notFound404Handler.impl.ts#L11)
+[src/http-server/handler/notFound404Handler/notFound404Handler.impl.ts:11](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/handler/notFound404Handler/notFound404Handler.impl.ts#L11)
 
 ___
 
@@ -1483,7 +1495,7 @@ A RequestBodyToJsonMiddlewareOptions object.
 
 #### Defined in
 
-[src/http-server/onBeforeMiddleware/requestBodyToJson/requestBodyToJsonMiddleware.impl.ts:9](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onBeforeMiddleware/requestBodyToJson/requestBodyToJsonMiddleware.impl.ts#L9)
+[src/http-server/onBeforeMiddleware/requestBodyToJson/requestBodyToJsonMiddleware.impl.ts:9](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onBeforeMiddleware/requestBodyToJson/requestBodyToJsonMiddleware.impl.ts#L9)
 
 ___
 
@@ -1501,7 +1513,7 @@ A middleware function.
 
 #### Defined in
 
-[src/http-server/onAfterMiddleware/responseToJsonMiddleware/responseToJsonMiddleware.impl.ts:9](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/onAfterMiddleware/responseToJsonMiddleware/responseToJsonMiddleware.impl.ts#L9)
+[src/http-server/onAfterMiddleware/responseToJsonMiddleware/responseToJsonMiddleware.impl.ts:9](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/onAfterMiddleware/responseToJsonMiddleware/responseToJsonMiddleware.impl.ts#L9)
 
 ___
 
@@ -1519,7 +1531,7 @@ A middleware function that can be used in the http server.
 
 #### Defined in
 
-[src/http-server/handler/staticFileHandler/staticFileMiddleware.impl.ts:20](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/handler/staticFileHandler/staticFileMiddleware.impl.ts#L20)
+[src/http-server/handler/staticFileHandler/staticFileMiddleware.impl.ts:20](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/handler/staticFileHandler/staticFileMiddleware.impl.ts#L20)
 
 ___
 
@@ -1539,21 +1551,25 @@ ___
 
 #### Defined in
 
-[src/core/helper/getErrorMessageForCode.impl.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/core/helper/getErrorMessageForCode.impl.ts#L3)
+[src/core/helper/getErrorMessageForCode.impl.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/helper/getErrorMessageForCode.impl.ts#L3)
 
 ___
 
 ### getEventBridgeMock
 
-▸ **getEventBridgeMock**(): `ReturnType`
+▸ **getEventBridgeMock**(): [`EventBridge`](interfaces/EventBridge.md)
+
+Mocks the eventbridge and methods are stubs
 
 #### Returns
 
-`ReturnType`
+[`EventBridge`](interfaces/EventBridge.md)
+
+EventBridge mocked
 
 #### Defined in
 
-[src/core/testhelper/getEventBridge.mock.ts:13](https://github.com/sebastianwessel/purista/blob/774b686/src/core/testhelper/getEventBridge.mock.ts#L13)
+[src/core/testhelper/getEventBridge.mock.ts:9](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/testhelper/getEventBridge.mock.ts#L9)
 
 ___
 
@@ -1585,7 +1601,7 @@ ___
 
 #### Defined in
 
-[src/helper/getFunctionWithValidation.ts:5](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/getFunctionWithValidation.ts#L5)
+[src/helper/getFunctionWithValidation.ts:5](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/getFunctionWithValidation.ts#L5)
 
 ___
 
@@ -1599,7 +1615,7 @@ ___
 
 #### Defined in
 
-[src/core/testhelper/getLogger.mock.ts:5](https://github.com/sebastianwessel/purista/blob/774b686/src/core/testhelper/getLogger.mock.ts#L5)
+[src/core/testhelper/getLogger.mock.ts:5](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/testhelper/getLogger.mock.ts#L5)
 
 ___
 
@@ -1617,7 +1633,7 @@ EBMessageId
 
 #### Defined in
 
-[src/core/helper/getNewCorrelationId.ts:8](https://github.com/sebastianwessel/purista/blob/774b686/src/core/helper/getNewCorrelationId.ts#L8)
+[src/core/helper/getNewCorrelationId.ts:8](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/helper/getNewCorrelationId.ts#L8)
 
 ___
 
@@ -1635,7 +1651,7 @@ EBMessageId
 
 #### Defined in
 
-[src/core/helper/getNewEBMessageId.impl.ts:8](https://github.com/sebastianwessel/purista/blob/774b686/src/core/helper/getNewEBMessageId.impl.ts#L8)
+[src/core/helper/getNewEBMessageId.impl.ts:8](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/helper/getNewEBMessageId.impl.ts#L8)
 
 ___
 
@@ -1649,7 +1665,7 @@ ___
 
 #### Defined in
 
-[src/core/helper/getNewSubscriptionId.impl.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/core/helper/getNewSubscriptionId.impl.ts#L4)
+[src/core/helper/getNewSubscriptionId.impl.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/helper/getNewSubscriptionId.impl.ts#L4)
 
 ___
 
@@ -1663,7 +1679,7 @@ ___
 
 #### Defined in
 
-[src/core/helper/getNewTraceId.impl.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/core/helper/getNewTraceId.impl.ts#L3)
+[src/core/helper/getNewTraceId.impl.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/helper/getNewTraceId.impl.ts#L3)
 
 ___
 
@@ -1677,7 +1693,7 @@ ___
 
 #### Defined in
 
-[src/core/helper/getUniqueId.impl.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/core/helper/getUniqueId.impl.ts#L3)
+[src/core/helper/getUniqueId.impl.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/helper/getUniqueId.impl.ts#L3)
 
 ___
 
@@ -1699,7 +1715,7 @@ Create a new logger with the given minimum log level
 
 #### Defined in
 
-[src/core/initLogger.impl.ts:9](https://github.com/sebastianwessel/purista/blob/774b686/src/core/initLogger.impl.ts#L9)
+[src/core/initLogger.impl.ts:9](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/initLogger.impl.ts#L9)
 
 ___
 
@@ -1719,7 +1735,7 @@ message is Command<unknown, Record<string, unknown\>\>
 
 #### Defined in
 
-[src/core/types/commandType/Command.ts:29](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/commandType/Command.ts#L29)
+[src/core/types/commandType/Command.ts:29](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/commandType/Command.ts#L29)
 
 ___
 
@@ -1739,7 +1755,7 @@ message is CommandErrorResponse
 
 #### Defined in
 
-[src/core/types/commandType/CommandErrorResponse.ts:23](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/commandType/CommandErrorResponse.ts#L23)
+[src/core/types/commandType/CommandErrorResponse.ts:23](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/commandType/CommandErrorResponse.ts#L23)
 
 ___
 
@@ -1759,7 +1775,7 @@ message is CommandResponse<unknown\>
 
 #### Defined in
 
-[src/core/types/commandType/CommandResponse.ts:11](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/commandType/CommandResponse.ts#L11)
+[src/core/types/commandType/CommandResponse.ts:11](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/commandType/CommandResponse.ts#L11)
 
 ___
 
@@ -1779,7 +1795,7 @@ message is CommandSuccessResponse<unknown\>
 
 #### Defined in
 
-[src/core/types/commandType/CommandSuccessResponse.ts:20](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/commandType/CommandSuccessResponse.ts#L20)
+[src/core/types/commandType/CommandSuccessResponse.ts:20](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/commandType/CommandSuccessResponse.ts#L20)
 
 ___
 
@@ -1799,7 +1815,7 @@ data is HttpExposedServiceMeta
 
 #### Defined in
 
-[src/http-server/types/HttpExposedServiceMeta.ts:27](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/types/HttpExposedServiceMeta.ts#L27)
+[src/http-server/types/HttpExposedServiceMeta.ts:27](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/types/HttpExposedServiceMeta.ts#L27)
 
 ___
 
@@ -1819,7 +1835,7 @@ message is InfoMessage
 
 #### Defined in
 
-[src/core/types/infoType/InfoMessage.ts:34](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/infoType/InfoMessage.ts#L34)
+[src/core/types/infoType/InfoMessage.ts:34](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/infoType/InfoMessage.ts#L34)
 
 ___
 
@@ -1839,7 +1855,7 @@ message is InfoServiceFunctionAdded
 
 #### Defined in
 
-[src/core/types/infoType/InfoServiceFunctionAdded.ts:9](https://github.com/sebastianwessel/purista/blob/774b686/src/core/types/infoType/InfoServiceFunctionAdded.ts#L9)
+[src/core/types/infoType/InfoServiceFunctionAdded.ts:9](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/types/infoType/InfoServiceFunctionAdded.ts#L9)
 
 ___
 
@@ -1862,7 +1878,7 @@ ___
 
 #### Defined in
 
-[src/http-server/handler/openApiHandler/openApiDocuIndex.impl.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/handler/openApiHandler/openApiDocuIndex.impl.ts#L3)
+[src/http-server/handler/openApiHandler/openApiDocuIndex.impl.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/handler/openApiHandler/openApiDocuIndex.impl.ts#L3)
 
 ___
 
@@ -1885,7 +1901,7 @@ ___
 
 #### Defined in
 
-[src/http-server/handler/openApiHandler/openApiDocuJsInit.impl.ts:3](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/handler/openApiHandler/openApiDocuJsInit.impl.ts#L3)
+[src/http-server/handler/openApiHandler/openApiDocuJsInit.impl.ts:3](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/handler/openApiHandler/openApiDocuJsInit.impl.ts#L3)
 
 ___
 
@@ -1908,4 +1924,4 @@ ___
 
 #### Defined in
 
-[src/http-server/handler/openApiHandler/openApiHandler.impl.ts:8](https://github.com/sebastianwessel/purista/blob/774b686/src/http-server/handler/openApiHandler/openApiHandler.impl.ts#L8)
+[src/http-server/handler/openApiHandler/openApiHandler.impl.ts:8](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/http-server/handler/openApiHandler/openApiHandler.impl.ts#L8)

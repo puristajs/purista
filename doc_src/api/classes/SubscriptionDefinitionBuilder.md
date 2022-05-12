@@ -51,7 +51,7 @@
 
 #### Defined in
 
-[src/helper/SubscriptionDefinitionBuilder.impl.ts:19](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/SubscriptionDefinitionBuilder.impl.ts#L19)
+[src/helper/SubscriptionDefinitionBuilder.impl.ts:19](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/SubscriptionDefinitionBuilder.impl.ts#L19)
 
 ## Properties
 
@@ -61,7 +61,7 @@
 
 #### Defined in
 
-[src/helper/SubscriptionDefinitionBuilder.impl.ts:4](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/SubscriptionDefinitionBuilder.impl.ts#L4)
+[src/helper/SubscriptionDefinitionBuilder.impl.ts:4](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/SubscriptionDefinitionBuilder.impl.ts#L4)
 
 ___
 
@@ -79,7 +79,7 @@ ___
 
 #### Defined in
 
-[src/helper/SubscriptionDefinitionBuilder.impl.ts:12](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/SubscriptionDefinitionBuilder.impl.ts#L12)
+[src/helper/SubscriptionDefinitionBuilder.impl.ts:12](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/SubscriptionDefinitionBuilder.impl.ts#L12)
 
 ___
 
@@ -97,7 +97,7 @@ ___
 
 #### Defined in
 
-[src/helper/SubscriptionDefinitionBuilder.impl.ts:6](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/SubscriptionDefinitionBuilder.impl.ts#L6)
+[src/helper/SubscriptionDefinitionBuilder.impl.ts:6](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/SubscriptionDefinitionBuilder.impl.ts#L6)
 
 ## Methods
 
@@ -117,7 +117,7 @@ ___
 
 #### Defined in
 
-[src/helper/SubscriptionDefinitionBuilder.impl.ts:43](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/SubscriptionDefinitionBuilder.impl.ts#L43)
+[src/helper/SubscriptionDefinitionBuilder.impl.ts:43](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/SubscriptionDefinitionBuilder.impl.ts#L43)
 
 ___
 
@@ -131,7 +131,7 @@ ___
 
 #### Defined in
 
-[src/helper/SubscriptionDefinitionBuilder.impl.ts:53](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/SubscriptionDefinitionBuilder.impl.ts#L53)
+[src/helper/SubscriptionDefinitionBuilder.impl.ts:53](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/SubscriptionDefinitionBuilder.impl.ts#L53)
 
 ___
 
@@ -153,7 +153,7 @@ ___
 
 #### Defined in
 
-[src/helper/SubscriptionDefinitionBuilder.impl.ts:34](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/SubscriptionDefinitionBuilder.impl.ts#L34)
+[src/helper/SubscriptionDefinitionBuilder.impl.ts:34](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/SubscriptionDefinitionBuilder.impl.ts#L34)
 
 ___
 
@@ -175,4 +175,4 @@ ___
 
 #### Defined in
 
-[src/helper/SubscriptionDefinitionBuilder.impl.ts:25](https://github.com/sebastianwessel/purista/blob/774b686/src/helper/SubscriptionDefinitionBuilder.impl.ts#L25)
+[src/helper/SubscriptionDefinitionBuilder.impl.ts:25](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/helper/SubscriptionDefinitionBuilder.impl.ts#L25)
