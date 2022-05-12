@@ -1,6 +1,6 @@
 import { HandledError } from './HandledError.impl'
 import { getErrorMessageForCode } from './helper'
-import { CommandErrorResponse, ErrorResponse, StatusCode } from './types'
+import { CommandErrorResponse, ErrorResponse, StatusCode, TraceId } from './types'
 
 /**
  * A unhandled error will be thrown if some error response is returned during invoking a service function
@@ -10,7 +10,12 @@ import { CommandErrorResponse, ErrorResponse, StatusCode } from './types'
  * Unhandled error are automatically converted into "500 Internal Server Error" to the outside world.
  */
 export class UnhandledError extends Error {
-  constructor(public errorCode: StatusCode = StatusCode.InternalServerError, message?: string, public data?: unknown) {
+  constructor(
+    public errorCode: StatusCode = StatusCode.InternalServerError,
+    message?: string,
+    public data?: unknown,
+    public traceId?: TraceId,
+  ) {
     super(message || getErrorMessageForCode(errorCode))
   }
 
@@ -20,7 +25,7 @@ export class UnhandledError extends Error {
    * @returns UnhandledError
    */
   static fromMessage(message: CommandErrorResponse): UnhandledError {
-    return new UnhandledError(message.response.status, message.response.message, message.response.data)
+    return new UnhandledError(message.response.status, message.response.message, message.response.data, message.traceId)
   }
 
   /**
@@ -28,7 +33,7 @@ export class UnhandledError extends Error {
    * @returns HandledError
    */
   intoHandledError(): HandledError {
-    return new HandledError(this.errorCode, this.message, this.data)
+    return new HandledError(this.errorCode, this.message, this.data, this.traceId)
   }
 
   /**
@@ -40,6 +45,7 @@ export class UnhandledError extends Error {
       status: this.errorCode,
       message: this.message,
       data: this.data,
+      traceId: this.traceId,
     }
 
     return errorResponse

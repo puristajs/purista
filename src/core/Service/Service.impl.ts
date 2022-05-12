@@ -6,6 +6,7 @@ import {
   getCleanedMessage,
   getNewCorrelationId,
   getNewEBMessageId,
+  getNewTraceId,
 } from '../helper'
 import {
   Command,
@@ -184,11 +185,13 @@ export class Service extends ServiceClass {
   async invoke<T>(
     input: Omit<Command, 'id' | 'sender' | 'messageType' | 'timestamp' | 'correlationId'>,
     ttl = this.eventBridge.defaultTtl,
+    originalCommand?: Partial<Command>,
   ): Promise<T> {
     const command: Command = {
       id: getNewEBMessageId(),
       correlationId: getNewCorrelationId(),
       timestamp: Date.now(),
+      traceId: originalCommand?.traceId || getNewTraceId(),
       messageType: EBMessageType.Command,
       ...input,
       sender: {

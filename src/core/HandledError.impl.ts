@@ -1,5 +1,5 @@
 import { getErrorMessageForCode } from './helper'
-import { CommandErrorResponse, ErrorResponse, StatusCode } from './types'
+import { CommandErrorResponse, ErrorResponse, StatusCode, TraceId } from './types'
 
 /**
  * A handled error is an error which is handled or thrown by business logic.
@@ -7,7 +7,7 @@ import { CommandErrorResponse, ErrorResponse, StatusCode } from './types'
  * Scenarios are input validation failures or "404 Not Found" errors which should be returned to the caller.
  */
 export class HandledError extends Error {
-  constructor(public errorCode: StatusCode, message?: string, public data?: unknown) {
+  constructor(public errorCode: StatusCode, message?: string, public data?: unknown, public traceId?: TraceId) {
     super(message || getErrorMessageForCode(errorCode))
   }
 
@@ -17,8 +17,7 @@ export class HandledError extends Error {
    * @returns HandledError
    */
   static fromMessage(message: CommandErrorResponse): HandledError {
-    const error = new HandledError(message.response.status, message.response.message, message.response.data)
-    return error
+    return new HandledError(message.response.status, message.response.message, message.response.data, message.traceId)
   }
 
   /**
@@ -30,6 +29,7 @@ export class HandledError extends Error {
       status: this.errorCode,
       message: this.message,
       data: this.data,
+      traceId: this.traceId,
     }
 
     return errorResponse
