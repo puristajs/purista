@@ -1,6 +1,6 @@
 ---
 # This control sidebar index
-index: 1
+index: 2
 # This is the icon of the page
 icon: bolt fas
 # This is the title of the article
@@ -17,6 +17,12 @@ star: true
 ---
 
 # Get started
+
+PURISTA tries to avoid the need for implementing boilerplate code as much as possible and to automate and autogenerate types, definitions, documentation when ever possible.
+
+Schema and input-output-validation are deeply integrated and they should be used whenever possible to build robust, stable systems.
+
+PURISTA addresses developers which want to simply focus on implementation, while providing them the necessary things to use the great node/typescript tooling.
 
 ## Setup a new project
 

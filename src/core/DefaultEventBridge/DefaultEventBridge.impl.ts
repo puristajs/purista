@@ -78,7 +78,7 @@ export class DefaultEventBridge implements EventBridge {
    * Means listen for messages
    *
    * @param subscription Subscription
-   * @returns Promise<SubscriptionId>
+   * @returns Promise SubscriptionId
    */
   async subscribe(subscription: Subscription): Promise<SubscriptionId> {
     const subscriptionId = getNewSubscriptionId()

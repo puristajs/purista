@@ -37,9 +37,9 @@
     "build:doc": "vuepress build doc_src",
     "build": "npm run build:lib && npm run build:api && npm run build:doc",
     "----------------------- PUBLISHING -----------------------------------------": "",
-    "prepublishOnlyxx": "npm test && npm run lint",
-    "preparexx": "npm run test && npm run build",
-    "preversionxx": "npm run lint",
+    "prepublishOnly": "npm test && npm run lint",
+    "prepare": "npm run test && npm run build",
+    "preversion": "npm run lint",
     "version": "npm run lint && git add -A src",
     "postversion": "git push && git push --tags"
   },

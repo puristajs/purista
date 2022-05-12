@@ -10,7 +10,7 @@ import { CommandErrorResponse, ErrorCode, ErrorResponse } from './types'
  * Unhandled error are automatically converted into "500 Internal Server Error" to the outside world.
  */
 export class UnhandledError extends Error {
-  constructor(public errorCode: ErrorCode, message?: string, public data?: unknown) {
+  constructor(public errorCode: ErrorCode = ErrorCode.InternalServerError, message?: string, public data?: unknown) {
     super(message || getErrorMessageForCode(errorCode))
   }
 

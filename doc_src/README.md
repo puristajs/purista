@@ -2,19 +2,28 @@
 home: true
 icon: house fas
 title: PURISTA
-heroImage: /logo.svg
 heroText: PURISTA
-tagline: A framework for building backend services and api in modern, modular and scalable way
+tagline: THE TYPESCRIPT BACKEND FRAMEWORK
 actions:
-  - text: Get started ⚡
-    link: /handbook/1_get-started
-    icon: bolt
+  - text: Get started
+    link: /handbook/0_concept
+    icon: bolt fas
+    type: primary
+  - text: Github
+    link: https://github.com/sebastianwessel/purista
+    icon: github fa-brands
+    type: secondary
 
 features:
   - title: 100% Typescript
     icon: node fa-brands
     details: typescript based and with typescript in mind and mostly async-await (no call-back hell)
     link: /handbook/1_get-started
+
+  - title: K.I.S.S
+    icon: face-kiss-wink-heart fas
+    details: simply just implement your logic without overhead
+    link: /handbook/0_concept
 
   - title: Modular & extendable
     icon: boxes-stacked fas
@@ -69,9 +78,4 @@ PURISTA addresses developers which want to simply focus on implementation, while
 - clean error handling
 - low learning curve
 
-## Does PURISTA fit for every use case?
 
-Simply answer is **NO**.
-
-If your project is mainly focused on something like processing streams (e.g. video/audio) this framework does not fit for you.  
-PURISTA is message based and there are also some low performance impacts based on the strict validations, the high useage of async-await and so on.

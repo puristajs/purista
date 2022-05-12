@@ -1,6 +1,6 @@
 ---
 # This control sidebar index
-index: 5
+index: 6
 # This is the icon of the page
 icon: cloud fas
 # This is the title of the article

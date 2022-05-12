@@ -54,7 +54,7 @@ export abstract class ServiceClass {
    * Send subscription request to event bridge
    * Creates a new subscription
    * @param subscription
-   * @returns Promise<SubscriptionId>
+   * @returns Promise SubscriptionId
    */
   protected abstract subscribe(subscription: SubscriptionDefinition): Promise<SubscriptionId>
 

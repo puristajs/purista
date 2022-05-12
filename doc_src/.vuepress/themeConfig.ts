@@ -12,7 +12,9 @@ export default hopeTheme({
 
   iconPrefix: 'fa-',
 
-  logo: '/logo.svg',
+  // logo: '/logo.svg',
+
+  themeColor: false,
 
   repo: 'sebastianwessel/purista',
 
@@ -31,8 +33,9 @@ export default hopeTheme({
   footer: 'Made from developers for developers with ❤️',
 
   displayFooter: true,
+  darkmode: 'auto-switch',
 
-  pageInfo: ['Original', 'Date', 'Category', 'Tag', 'ReadingTime'],
+  pageInfo: [],
 
   plugins: {
     mdEnhance: {

@@ -1,6 +1,6 @@
 ---
 # This control sidebar index
-index: 2
+index: 3
 # This is the icon of the page
 icon: wand-sparkles fas
 # This is the title of the article
@@ -163,7 +163,9 @@ The types generated from schema are used and your linter/typescript will complai
 You have a `this` scope, which is you domain service class `User`.  
 As this service class is extending the base `Service` class, you will have some more usefull functions, which we will cover later on.
 
-*Be aware* that you can't use arrow function to create a new service function, because they don't allow the `this` scope!
+<Badge text="Be aware" type="warning"/>
+
+*You can't use arrow function to create a new service function, because they don't allow the `this` scope!*
 
 Because we have access to our `User` domain class instance, we can extend this class like this:
 
@@ -198,6 +200,21 @@ export const signUp: CommandFunction<UserService, InputPayloadType, InputParamet
     }
   }
 ```
+
+<Badge text="Be aware" type="warning"/>
+
+In real world, holding states in the service class is a bad approach and should be avoided.  
+Such stuff is hard to handle and to scale. Try to keep things as stateless as possible.
+
+So, you might ask why a service class at all?
+
+There are use cases, where it makes sens to have it - if not, than it's an empty class which doesn't hurt.
+
+Use cases are something like simply holding some configurations, which is needed by service functions.  
+Or you might want to have a service which holds some connection to external services, databases and so on.
+
+But please avoid to hold states in service classes, but real logic into service classes and so on.  
+It will hit you hard, when you try to scale your system, during tests and so on.
 
 ### Add the function to service
 
@@ -238,6 +255,8 @@ If you now start the application with `npm start` you should have a POST endpoin
 There you can see we expose our function versioned by the service version.  
 This means we can also have same domain service running with different version.
 
-If you have for example breaking api changes in a new version of our `User`service, than you would create a new Service (or copy the old one an make your changes) and set service version to a higher version.
+If you have for example breaking api changes in a new version of our `User` service, than you would create a new Service (or copy the old one an make your changes) and set service version to a higher version.
+
+Try to open `https://localhost:8080/api` in your browser. You should see the openApi-UI with your new endpoint.
 
 ## Add a subscription

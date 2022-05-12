@@ -1,6 +1,6 @@
 ---
 # This control sidebar index
-index: 0
+index: 1
 # This is the icon of the page
 icon: brain fas
 # This is the title of the article
@@ -18,6 +18,114 @@ star: true
 
 # Concept
 
+## Issues to solve
+
+### K.I.S.S.
+
+Keep things as simple as possible and do not overcomplacate everything.  
+Do not try to do some fancy stuff only _"Because I can"_.  
+Do not try to write typescript in style of other languages like JAVA. If you want to write Java code - it's fine - but than please use Java.
+
+### Predictable behavior
+
+### Maintainance
+
+### Security
+
+### Traceability
+
+### Scaling
+
+### Testing
+
+## Framework comparison
+
+There are quite a lot of frameworks out there, so we we would need a new one?  
+
+Basically most of them are focused on building http servers which provide content and api's.  
+PURISTA keeps focus on building and structuring the logic behind http endpoints.  
+Http endpoints are kind of "simply falling out".  
+
+In fact, the http server itself is only one single plugged in service and not the core of framework.
+
+A comparison is always a kind of personal opinion, but in general it highly depends on your usecase, which framework should be used.
+
+### Express
+
+Express is one of the big players with great ecosystem, big community and mature code base.  
+It's focused on providing content, server side rendering and similar stuff.
+
+So it is the to go solution if you've some CMS-like application.  
+
+Pro:
+
+- big ecosystem
+- big community
+- many documentation and ressources
+
+Cons:
+
+- call-back approach
+- still not http/2 based
+- project will quickly get a lot of package dependencies
+- not build in typescript
+
+### Restify/Fastify
+
+Both focused on building REST-api's and the request-handler approach is quite simple to understand.  
+It's the simple solution if you more or less simply provide REST endpoints for putting stuff into db and fetching stuff from db.
+
+Pro:
+
+- fast
+- ready-to-go modules/plugins
+
+Cons:
+
+- typescript support
+
+### NestJs/Ts.ED
+
+Yeah - glitter and cookies!
+
+A _"framework which solves all your problems"_, by putting a lot of own patterns, decorators on top of existing modules like express to build some Java-like environment with dependency injections and design patterns.  
+
+Sorry, it's like these _"You get this awesome ready to go theme for 99 bugs"_, which is based on some open source theme and only some colors and images are quickly changed.  
+
+It's for these kind of developers and consultants:
+
+_"I know Java a bit from University - Let's use node.js & typescript because it's ung vogue and cool buzz word!_  
+_We will save money and we will have more delivery!"_
+
+...while trying to use patterns and styles from other languages and get payed per code line count.
+
+There is no single reason to go for it and it does not solve any issue.
+
+Again: If you want to develop like you would do in Java, than please use Java with it's great ecosystem and community!  
+There are plenty reasons to use Java and it's patterns. Also Java has some skills which outperform javascript in many ways (stream handling, multitasking...).
+
+### Feathers
+
+Kind of unicorn which addresses specific usecase scenarios especially in webapp/mobile development.  
+It is one of the most innovativ frameworks recently build for node.js/typescript.
+
+One of the to-go-solution if you need a backend for webapps.
+
+PURISTA itself is highly inspired by feathers.
+
+Pros:
+
+- typescript based
+- solves specific scenarios
+- low learnign curve
+- live updates via websocket
+
+Cons:
+
+- flexibility on endpoints other than CRUD (v<5)
+
+## Main idea
+
 The concept behind PURISTA is quite simple and a message based approach.  
 There are message senders and receivers. Messages are exchanged via an eventbridge.  
 
@@ -33,7 +141,9 @@ Commands and subscription can call other commands from same or other service by 
 
 This allows real complex setups and scenarios.
 
-Example:
+## Example
+
+We will use a simple example for better understanding.
 
 ```mermaid
 flowchart RL
