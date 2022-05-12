@@ -28,6 +28,7 @@ Unhandled error are automatically converted into "500 Internal Server Error" to 
 - [message](UnhandledError.md#message)
 - [name](UnhandledError.md#name)
 - [stack](UnhandledError.md#stack)
+- [traceId](UnhandledError.md#traceid)
 - [prepareStackTrace](UnhandledError.md#preparestacktrace)
 - [stackTraceLimit](UnhandledError.md#stacktracelimit)
 
@@ -43,7 +44,7 @@ Unhandled error are automatically converted into "500 Internal Server Error" to 
 
 ### constructor
 
-• **new UnhandledError**(`errorCode?`, `message?`, `data?`)
+• **new UnhandledError**(`errorCode?`, `message?`, `data?`, `traceId?`)
 
 #### Parameters
 
@@ -52,6 +53,7 @@ Unhandled error are automatically converted into "500 Internal Server Error" to 
 | `errorCode` | [`StatusCode`](../enums/StatusCode.md) | `StatusCode.InternalServerError` |
 | `message?` | `string` | `undefined` |
 | `data?` | `unknown` | `undefined` |
+| `traceId?` | `string` | `undefined` |
 
 #### Overrides
 
@@ -59,7 +61,7 @@ Error.constructor
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:13](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/UnhandledError.impl.ts#L13)
+[src/core/UnhandledError.impl.ts:13](https://github.com/sebastianwessel/purista/blob/774b686/src/core/UnhandledError.impl.ts#L13)
 
 ## Properties
 
@@ -131,6 +133,12 @@ node_modules/typescript/lib/lib.es5.d.ts:1024
 
 ___
 
+### traceId
+
+• `Optional` **traceId**: `string`
+
+___
+
 ### prepareStackTrace
 
 ▪ `Static` `Optional` **prepareStackTrace**: (`err`: `Error`, `stackTraces`: `CallSite`[]) => `any`
@@ -192,7 +200,7 @@ ErrorResponse
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:38](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/UnhandledError.impl.ts#L38)
+[src/core/UnhandledError.impl.ts:43](https://github.com/sebastianwessel/purista/blob/774b686/src/core/UnhandledError.impl.ts#L43)
 
 ___
 
@@ -210,7 +218,7 @@ HandledError
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:30](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/UnhandledError.impl.ts#L30)
+[src/core/UnhandledError.impl.ts:35](https://github.com/sebastianwessel/purista/blob/774b686/src/core/UnhandledError.impl.ts#L35)
 
 ___
 
@@ -228,7 +236,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:52](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/UnhandledError.impl.ts#L52)
+[src/core/UnhandledError.impl.ts:58](https://github.com/sebastianwessel/purista/blob/774b686/src/core/UnhandledError.impl.ts#L58)
 
 ___
 
@@ -279,4 +287,4 @@ UnhandledError
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:22](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/UnhandledError.impl.ts#L22)
+[src/core/UnhandledError.impl.ts:27](https://github.com/sebastianwessel/purista/blob/774b686/src/core/UnhandledError.impl.ts#L27)

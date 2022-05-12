@@ -26,6 +26,7 @@ Scenarios are input validation failures or "404 Not Found" errors which should b
 - [message](HandledError.md#message)
 - [name](HandledError.md#name)
 - [stack](HandledError.md#stack)
+- [traceId](HandledError.md#traceid)
 - [prepareStackTrace](HandledError.md#preparestacktrace)
 - [stackTraceLimit](HandledError.md#stacktracelimit)
 
@@ -40,7 +41,7 @@ Scenarios are input validation failures or "404 Not Found" errors which should b
 
 ### constructor
 
-• **new HandledError**(`errorCode`, `message?`, `data?`)
+• **new HandledError**(`errorCode`, `message?`, `data?`, `traceId?`)
 
 #### Parameters
 
@@ -49,6 +50,7 @@ Scenarios are input validation failures or "404 Not Found" errors which should b
 | `errorCode` | [`StatusCode`](../enums/StatusCode.md) |
 | `message?` | `string` |
 | `data?` | `unknown` |
+| `traceId?` | `string` |
 
 #### Overrides
 
@@ -56,7 +58,7 @@ Error.constructor
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/HandledError.impl.ts#L10)
+[src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/774b686/src/core/HandledError.impl.ts#L10)
 
 ## Properties
 
@@ -128,6 +130,12 @@ node_modules/typescript/lib/lib.es5.d.ts:1024
 
 ___
 
+### traceId
+
+• `Optional` **traceId**: `string`
+
+___
+
 ### prepareStackTrace
 
 ▪ `Static` `Optional` **prepareStackTrace**: (`err`: `Error`, `stackTraces`: `CallSite`[]) => `any`
@@ -189,7 +197,7 @@ ErrorResponse
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:28](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/HandledError.impl.ts#L28)
+[src/core/HandledError.impl.ts:27](https://github.com/sebastianwessel/purista/blob/774b686/src/core/HandledError.impl.ts#L27)
 
 ___
 
@@ -207,7 +215,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/HandledError.impl.ts#L42)
+[src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/774b686/src/core/HandledError.impl.ts#L42)
 
 ___
 
@@ -258,4 +266,4 @@ HandledError
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/HandledError.impl.ts#L19)
+[src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/774b686/src/core/HandledError.impl.ts#L19)
