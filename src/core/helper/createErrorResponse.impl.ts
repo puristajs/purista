@@ -1,5 +1,5 @@
 import { HandledError } from '../HandledError.impl'
-import { Command, CommandErrorResponse, EBMessageType, ErrorCode } from '../types'
+import { Command, CommandErrorResponse, EBMessageType, StatusCode } from '../types'
 import { UnhandledError } from '../UnhandledError.impl'
 import { getErrorMessageForCode } from './getErrorMessageForCode.impl'
 
@@ -14,7 +14,7 @@ import { getErrorMessageForCode } from './getErrorMessageForCode.impl'
  */
 export const createErrorResponse = (
   originalEBMessage: Command,
-  statusCode = ErrorCode.InternalServerError,
+  statusCode = StatusCode.InternalServerError,
   error?: unknown | string | Error | HandledError | UnhandledError,
 ): CommandErrorResponse => {
   let message = getErrorMessageForCode(statusCode)
@@ -35,9 +35,9 @@ export const createErrorResponse = (
       data = undefined
       status = error.errorCode
     } else {
-      message = getErrorMessageForCode(ErrorCode.InternalServerError)
+      message = getErrorMessageForCode(StatusCode.InternalServerError)
       data = undefined
-      status = ErrorCode.InternalServerError
+      status = StatusCode.InternalServerError
     }
   }
 

@@ -1,5 +1,5 @@
 import { getErrorMessageForCode } from './helper'
-import { CommandErrorResponse, ErrorCode, ErrorResponse } from './types'
+import { CommandErrorResponse, ErrorResponse, StatusCode } from './types'
 
 /**
  * A handled error is an error which is handled or thrown by business logic.
@@ -7,7 +7,7 @@ import { CommandErrorResponse, ErrorCode, ErrorResponse } from './types'
  * Scenarios are input validation failures or "404 Not Found" errors which should be returned to the caller.
  */
 export class HandledError extends Error {
-  constructor(public errorCode: ErrorCode, message?: string, public data?: unknown) {
+  constructor(public errorCode: StatusCode, message?: string, public data?: unknown) {
     super(message || getErrorMessageForCode(errorCode))
   }
 

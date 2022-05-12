@@ -1,5 +1,5 @@
-import { getUniqueId } from '../../core'
-import { Context, SuccessStatusCode } from '../types'
+import { getUniqueId, StatusCode } from '../../core'
+import { Context } from '../types'
 
 /**
  * It creates a new context object with a traceId and a parameter object
@@ -16,7 +16,7 @@ export const getNewContext = (traceId: string | string[] | undefined, parameter 
     traceId: tId || getUniqueId(),
     parameter,
     payload: undefined,
-    statusCode: SuccessStatusCode.OK,
+    statusCode: StatusCode.OK,
     headers: {},
   }
 }

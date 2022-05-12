@@ -1,4 +1,4 @@
-import { ErrorCode, ErrorResponse, getErrorMessageForCode } from '../../../core'
+import { ErrorResponse, getErrorMessageForCode, StatusCode } from '../../../core'
 import { Handler } from '../../types'
 
 export type NotFound404HandlerOptions = {}
@@ -25,12 +25,12 @@ export const createNotFound404Handler = (options = getDefaultNotFound404HandlerO
     const payload: ErrorResponse =
       request.method === 'GET'
         ? {
-            status: ErrorCode.NotFound,
-            message: getErrorMessageForCode(ErrorCode.NotFound),
+            status: StatusCode.NotFound,
+            message: getErrorMessageForCode(StatusCode.NotFound),
           }
         : {
-            status: ErrorCode.MethodNotAllowed,
-            message: getErrorMessageForCode(ErrorCode.MethodNotAllowed),
+            status: StatusCode.MethodNotAllowed,
+            message: getErrorMessageForCode(StatusCode.MethodNotAllowed),
           }
 
     response.statusCode = payload.status

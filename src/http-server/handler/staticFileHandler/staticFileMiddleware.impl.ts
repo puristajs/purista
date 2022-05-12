@@ -3,7 +3,7 @@ import { lstat } from 'fs/promises'
 import { contentType, lookup } from 'mime-types'
 import { extname, join, normalize } from 'path'
 
-import { ErrorCode, HandledError } from '../../../core'
+import { HandledError, StatusCode } from '../../../core'
 import { CompressionMethod, getCompressionMethod, getCompressionStream } from '../../../helper'
 import { ContentType, Context, Middleware } from '../../types'
 
@@ -93,7 +93,7 @@ export const createStaticFileHandler = (options = getDefaultStaticFileHandlerOpt
           resolve(context)
         } else {
           this.log.error(err)
-          reject(new HandledError(ErrorCode.InternalServerError))
+          reject(new HandledError(StatusCode.InternalServerError))
         }
       })
 

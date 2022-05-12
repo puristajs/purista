@@ -1,6 +1,6 @@
 import { HandledError } from './HandledError.impl'
 import { getErrorMessageForCode } from './helper'
-import { CommandErrorResponse, ErrorCode, ErrorResponse } from './types'
+import { CommandErrorResponse, ErrorResponse, StatusCode } from './types'
 
 /**
  * A unhandled error will be thrown if some error response is returned during invoking a service function
@@ -10,7 +10,7 @@ import { CommandErrorResponse, ErrorCode, ErrorResponse } from './types'
  * Unhandled error are automatically converted into "500 Internal Server Error" to the outside world.
  */
 export class UnhandledError extends Error {
-  constructor(public errorCode: ErrorCode = ErrorCode.InternalServerError, message?: string, public data?: unknown) {
+  constructor(public errorCode: StatusCode = StatusCode.InternalServerError, message?: string, public data?: unknown) {
     super(message || getErrorMessageForCode(errorCode))
   }
 

@@ -43,15 +43,15 @@ Unhandled error are automatically converted into "500 Internal Server Error" to 
 
 ### constructor
 
-• **new UnhandledError**(`errorCode`, `message?`, `data?`)
+• **new UnhandledError**(`errorCode?`, `message?`, `data?`)
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `errorCode` | [`ErrorCode`](../enums/ErrorCode.md) |
-| `message?` | `string` |
-| `data?` | `unknown` |
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `errorCode` | [`StatusCode`](../enums/StatusCode.md) | `StatusCode.InternalServerError` |
+| `message?` | `string` | `undefined` |
+| `data?` | `unknown` | `undefined` |
 
 #### Overrides
 
@@ -59,7 +59,7 @@ Error.constructor
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:13](https://github.com/sebastianwessel/purista/blob/9753133/src/core/UnhandledError.impl.ts#L13)
+[src/core/UnhandledError.impl.ts:13](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/UnhandledError.impl.ts#L13)
 
 ## Properties
 
@@ -85,7 +85,7 @@ ___
 
 ### errorCode
 
-• **errorCode**: [`ErrorCode`](../enums/ErrorCode.md)
+• **errorCode**: [`StatusCode`](../enums/StatusCode.md) = `StatusCode.InternalServerError`
 
 ___
 
@@ -192,7 +192,7 @@ ErrorResponse
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:38](https://github.com/sebastianwessel/purista/blob/9753133/src/core/UnhandledError.impl.ts#L38)
+[src/core/UnhandledError.impl.ts:38](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/UnhandledError.impl.ts#L38)
 
 ___
 
@@ -210,7 +210,7 @@ HandledError
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:30](https://github.com/sebastianwessel/purista/blob/9753133/src/core/UnhandledError.impl.ts#L30)
+[src/core/UnhandledError.impl.ts:30](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/UnhandledError.impl.ts#L30)
 
 ___
 
@@ -228,7 +228,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:52](https://github.com/sebastianwessel/purista/blob/9753133/src/core/UnhandledError.impl.ts#L52)
+[src/core/UnhandledError.impl.ts:52](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/UnhandledError.impl.ts#L52)
 
 ___
 
@@ -279,4 +279,4 @@ UnhandledError
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:22](https://github.com/sebastianwessel/purista/blob/9753133/src/core/UnhandledError.impl.ts#L22)
+[src/core/UnhandledError.impl.ts:22](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/UnhandledError.impl.ts#L22)

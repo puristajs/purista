@@ -1,7 +1,7 @@
 import { generateSchema } from '@anatine/zod-openapi'
 import { z } from 'zod'
 
-import { CommandDefinition, CommandFunction, ErrorCode, Service } from '../core'
+import { CommandDefinition, CommandFunction, Service, StatusCode } from '../core'
 import { ContentType, HttpExposedServiceMeta, QueryParameter } from '../http-server'
 import { getFunctionWithValidation } from './getFunctionWithValidation'
 
@@ -24,7 +24,7 @@ export class FunctionDefinitionBuilder<
 
   private summary?: string
 
-  private errorStatusCodes: ErrorCode[] = []
+  private errorStatusCodes: StatusCode[] = []
 
   private contentEncoding = 'application/json'
 
@@ -60,7 +60,7 @@ export class FunctionDefinitionBuilder<
     return this
   }
 
-  addErrorStatusCodes(...codes: ErrorCode[]) {
+  addErrorStatusCodes(...codes: StatusCode[]) {
     this.errorStatusCodes.push(...codes)
     return this
   }
@@ -106,7 +106,7 @@ export class FunctionDefinitionBuilder<
       outputPayload: this.outputSchema ? generateSchema(this.outputSchema) : undefined,
       query: this.queryParameter,
       tags: this.tags,
-      additionalErrorCodes: this.errorStatusCodes,
+      additionalStatusCodes: this.errorStatusCodes,
     }
 
     return definition

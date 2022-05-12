@@ -13,7 +13,6 @@ import {
   EBMessage,
   EBMessageId,
   EBMessageType,
-  ErrorCode,
   EventBridge,
   InfoMessageType,
   isCommand,
@@ -23,6 +22,7 @@ import {
   Logger,
   ServiceClass,
   ServiceInfoType,
+  StatusCode,
   Subscription,
   SubscriptionDefinition,
   SubscriptionId,
@@ -235,7 +235,7 @@ export class Service extends ServiceClass {
     const command = this.commands.get(message.receiver.serviceTarget)
     if (!command) {
       this.log.error('received invalid command', getCleanedMessage(message))
-      const errorResponse = createErrorResponse(message, ErrorCode.NotImplemented)
+      const errorResponse = createErrorResponse(message, StatusCode.NotImplemented)
       await this.eventBridge.emit(errorResponse)
       return
     }
@@ -253,7 +253,7 @@ export class Service extends ServiceClass {
       }
 
       this.log.error('executeCommand unhandled error', { error, message: getCleanedMessage(message) })
-      await this.eventBridge.emit(createErrorResponse(message, ErrorCode.InternalServerError, error))
+      await this.eventBridge.emit(createErrorResponse(message, StatusCode.InternalServerError, error))
     }
   }
 
@@ -282,7 +282,7 @@ export class Service extends ServiceClass {
 
     this.pendingInvocations.forEach((value, key) => {
       if (now > value.ttl) {
-        const errorResponse = createErrorResponse(value.command, ErrorCode.Timeout)
+        const errorResponse = createErrorResponse(value.command, StatusCode.GatewayTimeout)
         this.log.error('rejecting timed out invocation', { command: getCleanedMessage(value.command) })
         const error = UnhandledError.fromMessage(errorResponse)
         value.reject(error)

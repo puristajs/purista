@@ -1,4 +1,4 @@
-import { ErrorCode, ErrorResponse, getErrorMessageForCode } from '../../../core'
+import { ErrorResponse, getErrorMessageForCode, StatusCode } from '../../../core'
 import { Handler } from '../../types'
 
 export type InternalError500HandlerOptions = {}
@@ -22,8 +22,8 @@ export const createInternalError500Handler = (options = getDefaultInternalError5
 
   const internalError500Handler: Handler = async function (_request, response, context) {
     const errorResponse: ErrorResponse = {
-      status: ErrorCode.InternalServerError,
-      message: getErrorMessageForCode(ErrorCode.InternalServerError),
+      status: StatusCode.InternalServerError,
+      message: getErrorMessageForCode(StatusCode.InternalServerError),
     }
     response.statusCode = errorResponse.status
     response.setHeader('content-type', 'application/json; charset=utf-8')

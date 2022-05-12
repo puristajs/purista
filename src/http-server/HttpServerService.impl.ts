@@ -4,7 +4,7 @@ import * as swaggerUi from 'swagger-ui-dist'
 import Trouter, { Methods } from 'trouter'
 import { URL } from 'url'
 
-import { ErrorCode, EventBridge, HandledError, Logger, Service, UnhandledError } from '../core'
+import { EventBridge, HandledError, Logger, Service, StatusCode, UnhandledError } from '../core'
 import { COMMANDS } from './commands'
 import { getDefaultConfig, OPENAPI_DEFAULT_MOUNT_PATH, ServiceInfo } from './config'
 import {
@@ -204,7 +204,7 @@ export class HttpServerService extends Service {
 
       if (!context.isResponseSend) {
         this.log.error('all handlers done, but no response send - now throwing to jump into error handlers', url)
-        throw new UnhandledError(ErrorCode.InternalServerError, 'No response send to client')
+        throw new UnhandledError(StatusCode.InternalServerError, 'No response send to client')
       }
     } catch (err) {
       if (context.isResponseSend) {

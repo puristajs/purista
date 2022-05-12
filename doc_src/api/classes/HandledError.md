@@ -46,7 +46,7 @@ Scenarios are input validation failures or "404 Not Found" errors which should b
 
 | Name | Type |
 | :------ | :------ |
-| `errorCode` | [`ErrorCode`](../enums/ErrorCode.md) |
+| `errorCode` | [`StatusCode`](../enums/StatusCode.md) |
 | `message?` | `string` |
 | `data?` | `unknown` |
 
@@ -56,7 +56,7 @@ Error.constructor
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/9753133/src/core/HandledError.impl.ts#L10)
+[src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/HandledError.impl.ts#L10)
 
 ## Properties
 
@@ -82,7 +82,7 @@ ___
 
 ### errorCode
 
-• **errorCode**: [`ErrorCode`](../enums/ErrorCode.md)
+• **errorCode**: [`StatusCode`](../enums/StatusCode.md)
 
 ___
 
@@ -189,7 +189,7 @@ ErrorResponse
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:28](https://github.com/sebastianwessel/purista/blob/9753133/src/core/HandledError.impl.ts#L28)
+[src/core/HandledError.impl.ts:28](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/HandledError.impl.ts#L28)
 
 ___
 
@@ -207,7 +207,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/9753133/src/core/HandledError.impl.ts#L42)
+[src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/HandledError.impl.ts#L42)
 
 ___
 
@@ -258,4 +258,4 @@ HandledError
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/9753133/src/core/HandledError.impl.ts#L19)
+[src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/5a4aa45/src/core/HandledError.impl.ts#L19)

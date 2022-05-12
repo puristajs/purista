@@ -1,7 +1,7 @@
-import { ErrorCode } from './ErrorCode.enum'
+import { StatusCode } from './StatusCode.enum'
 
 export type ErrorResponse = {
-  status: ErrorCode
+  status: StatusCode
   message: string
   data?: unknown
 }

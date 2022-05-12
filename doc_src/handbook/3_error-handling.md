@@ -48,7 +48,7 @@ An api call is invoking a service function like this:
 const result = db.findOne(id)
 
 if (!result) {
-  throw new HandledError(ErrorCode.NotFound, 'entity not found')
+  throw new HandledError(StatusCode.NotFound, 'entity not found')
 }
 
 ```
@@ -68,7 +68,7 @@ You can provide additional data to that error response:
 const result = db.findOne(id)
 
 if (!result) {
-  throw new HandledError(ErrorCode.NotFound, 'entity not found', { id })
+  throw new HandledError(StatusCode.NotFound, 'entity not found', { id })
 }
 
 ```
@@ -99,10 +99,10 @@ try{
 } catch(err) {
   if (isConstraintViolation(err)) {
     // give the client a propper answer, that he tries to insert a record, but a record with same id already exist
-    throw new HandledError(ErrorCode.Conflict, 'entity with same id already exist')
+    throw new HandledError(StatusCode.Conflict, 'entity with same id already exist')
   }
   // maybe our database is unreachable, so simply return a 500
-  throw new UnhandledError(ErrorCode.InternalServerError,'internal server error')
+  throw new UnhandledError(StatusCode.InternalServerError,'internal server error')
 }
 
 ```
@@ -131,7 +131,7 @@ try{
   if (isConstraintViolation(err)) {
     // give the client a propper answer, that he tries to insert a record,
     // but a record with same id already exist
-    throw new HandledError(ErrorCode.Conflict, 'entity with same id already exist')
+    throw new HandledError(StatusCode.Conflict, 'entity with same id already exist')
   }
   // ANY NON-CONSTRAINT-ERROR is swallowed, because it is catched, but not handled
   // if it is some other error you never get informed about it
@@ -150,12 +150,12 @@ try{
   if (isConstraintViolation(err)) {
     // give the client a propper answer, that he tries to insert a record,
     // but a record with same id already exist
-    throw new HandledError(ErrorCode.Conflict, 'entity with same id already exist')
+    throw new HandledError(StatusCode.Conflict, 'entity with same id already exist')
   }
   // log the original (unknown) error
   this.log.error('houston we got a problem here', err)
   // throw an unhandled error
-  throw new UnhandledError(ErrorCode.InternalServerError,'internal server error')
+  throw new UnhandledError(StatusCode.InternalServerError,'internal server error')
 }
 ```
 

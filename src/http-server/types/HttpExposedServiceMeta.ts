@@ -1,6 +1,6 @@
 import type { SchemaObject } from 'openapi3-ts'
 
-import { ErrorCode } from '../../core'
+import { StatusCode } from '../../core'
 import { ContentType } from './ContentType'
 import { QueryParameter } from './QueryParameter'
 
@@ -18,7 +18,7 @@ export type HttpExposedServiceMeta = {
         parameter?: SchemaObject
         query?: QueryParameter[]
         outputPayload?: SchemaObject
-        additionalErrorCodes?: ErrorCode[]
+        additionalStatusCodes?: StatusCode[]
       }
     }
   }

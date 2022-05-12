@@ -1,6 +1,6 @@
 import { z, ZodError } from 'zod'
 
-import { CommandFunction, ErrorCode, HandledError, Service } from '../core'
+import { CommandFunction, HandledError, Service, StatusCode } from '../core'
 
 export const getFunctionWithValidation = function <
   ServiceClassType extends Service,
@@ -25,9 +25,9 @@ export const getFunctionWithValidation = function <
       } catch (err) {
         this.log.warn('input validation for payload failed', err)
         if (err instanceof ZodError) {
-          throw new HandledError(ErrorCode.BadRequest, undefined, err.issues)
+          throw new HandledError(StatusCode.BadRequest, undefined, err.issues)
         }
-        throw new HandledError(ErrorCode.InternalServerError)
+        throw new HandledError(StatusCode.InternalServerError)
       }
     }
 
@@ -38,9 +38,9 @@ export const getFunctionWithValidation = function <
       } catch (err) {
         this.log.warn('input validation for params failed', err)
         if (err instanceof ZodError) {
-          throw new HandledError(ErrorCode.BadRequest, undefined, err.issues)
+          throw new HandledError(StatusCode.BadRequest, undefined, err.issues)
         }
-        throw new HandledError(ErrorCode.BadRequest)
+        throw new HandledError(StatusCode.BadRequest)
       }
     }
 
@@ -54,7 +54,7 @@ export const getFunctionWithValidation = function <
         safeOutput = outputPayloadSchema.parse(output)
       } catch (err) {
         this.log.error('output validation failed', err)
-        throw new HandledError(ErrorCode.InternalServerError)
+        throw new HandledError(StatusCode.InternalServerError)
       }
     }
 

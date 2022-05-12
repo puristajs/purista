@@ -1,5 +1,4 @@
-import { TraceId } from '../../core'
-import { StatusCode } from './StatusCode'
+import { StatusCode, TraceId } from '../../core'
 
 export type Context<PayloadType = unknown, ParameterType = Record<string, unknown>> = {
   isResponseSend: boolean

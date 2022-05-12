@@ -3,7 +3,7 @@ import { EBMessage } from '../EBMessage'
 import { EBMessageAddress } from '../EBMessageAddress'
 import { EBMessageBase } from '../EBMessageBase'
 import { EBMessageType } from '../EBMessageType.enum'
-import { ErrorCode } from '../ErrorCode.enum'
+import { StatusCode } from '../StatusCode.enum'
 
 /**
  * CommandErrorResponse is a response to a specific previously received command which indicates some failure.
@@ -14,7 +14,7 @@ export type CommandErrorResponse = {
   sender: EBMessageAddress
   receiver: EBMessageAddress
   response: {
-    status: ErrorCode
+    status: StatusCode
     message: string
     data?: unknown
   }

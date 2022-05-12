@@ -1,24 +1,24 @@
-import { ErrorCode } from '../types'
+import { StatusCode } from '../types'
 
-export const getErrorMessageForCode = (code: ErrorCode): string => {
+export const getErrorMessageForCode = (code: StatusCode): string => {
   switch (code) {
-    case ErrorCode.BadRequest:
+    case StatusCode.BadRequest:
       return 'Bad Request'
-    case ErrorCode.Unauthorized:
+    case StatusCode.Unauthorized:
       return 'Unauthorized'
-    case ErrorCode.PaymentRequired:
+    case StatusCode.PaymentRequired:
       return 'Payment Required'
-    case ErrorCode.Forbidden:
+    case StatusCode.Forbidden:
       return 'Forbidden'
-    case ErrorCode.NotFound:
+    case StatusCode.NotFound:
       return 'Not Found'
-    case ErrorCode.MethodNotAllowed:
+    case StatusCode.MethodNotAllowed:
       return 'Method Not Allowed'
-    case ErrorCode.InternalServerError:
+    case StatusCode.InternalServerError:
       return 'Internal Server Error'
-    case ErrorCode.NotImplemented:
+    case StatusCode.NotImplemented:
       return 'Not Implemented'
-    case ErrorCode.Timeout:
+    case StatusCode.GatewayTimeout:
       return 'Timeout'
     default:
       return 'Unspecified Error'

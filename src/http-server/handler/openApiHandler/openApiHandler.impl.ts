@@ -1,7 +1,7 @@
 import type { OpenAPIObject, ParameterObject, RequestBodyObject, SchemaObject } from 'openapi3-ts'
 import { isReferenceObject } from 'openapi3-ts'
 
-import { ErrorCode } from '../../../core'
+import { StatusCode } from '../../../core'
 import { OPENAPI_DEFAULT_INFO } from '../../config'
 import { Handler } from '../../types'
 
@@ -25,7 +25,7 @@ export const openApiHandler: Handler = async function (_request, _response, cont
     externalDocs,
   }
 
-  const getErrorResponseSchema = (code: ErrorCode, message: string, schema?: SchemaObject) => {
+  const getErrorResponseSchema = (code: StatusCode, message: string, schema?: SchemaObject) => {
     return {
       type: 'object',
 
@@ -166,7 +166,7 @@ export const openApiHandler: Handler = async function (_request, _response, cont
 
     const errorResponses: Record<number, unknown> = {}
 
-    const getErrorName = (code: ErrorCode) => ErrorCode[code].replace(/[A-Z]/g, (letter) => ` ${letter}`)
+    const getErrorName = (code: StatusCode) => StatusCode[code].replace(/[A-Z]/g, (letter) => ` ${letter}`)
 
     if (definition.openApi?.inputPayload) {
       errorResponses[400] = {
@@ -190,7 +190,7 @@ export const openApiHandler: Handler = async function (_request, _response, cont
       }
     }
 
-    definition.openApi?.additionalErrorCodes?.forEach((code) => {
+    definition.openApi?.additionalStatusCodes?.forEach((code) => {
       errorResponses[code] = {
         description: getErrorName(code),
         content: {
