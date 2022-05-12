@@ -7,6 +7,7 @@ export default defineUserConfig({
   title: 'PURISTA',
   description: 'A framework for building backend services and api in modern, modular and scalable way',
 
+  dest: 'docs',
   base: '/',
 
   head: [
