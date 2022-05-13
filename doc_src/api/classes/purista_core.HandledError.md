@@ -1,6 +1,8 @@
-[@purista/core](../README.md) / [Exports](../modules.md) / HandledError
+[PURISTA API](../README.md) / [@purista/core](../modules/purista_core.md) / HandledError
 
 # Class: HandledError
+
+[@purista/core](../modules/purista_core.md).HandledError
 
 A handled error is an error which is handled or thrown by business logic.
 It is wanted to expose it the outside world.
@@ -16,26 +18,26 @@ Scenarios are input validation failures or "404 Not Found" errors which should b
 
 ### Constructors
 
-- [constructor](HandledError.md#constructor)
+- [constructor](purista_core.HandledError.md#constructor)
 
 ### Properties
 
-- [cause](HandledError.md#cause)
-- [data](HandledError.md#data)
-- [errorCode](HandledError.md#errorcode)
-- [message](HandledError.md#message)
-- [name](HandledError.md#name)
-- [stack](HandledError.md#stack)
-- [traceId](HandledError.md#traceid)
-- [prepareStackTrace](HandledError.md#preparestacktrace)
-- [stackTraceLimit](HandledError.md#stacktracelimit)
+- [cause](purista_core.HandledError.md#cause)
+- [data](purista_core.HandledError.md#data)
+- [errorCode](purista_core.HandledError.md#errorcode)
+- [message](purista_core.HandledError.md#message)
+- [name](purista_core.HandledError.md#name)
+- [stack](purista_core.HandledError.md#stack)
+- [traceId](purista_core.HandledError.md#traceid)
+- [prepareStackTrace](purista_core.HandledError.md#preparestacktrace)
+- [stackTraceLimit](purista_core.HandledError.md#stacktracelimit)
 
 ### Methods
 
-- [getErrorResponse](HandledError.md#geterrorresponse)
-- [toString](HandledError.md#tostring)
-- [captureStackTrace](HandledError.md#capturestacktrace)
-- [fromMessage](HandledError.md#frommessage)
+- [getErrorResponse](purista_core.HandledError.md#geterrorresponse)
+- [toString](purista_core.HandledError.md#tostring)
+- [captureStackTrace](purista_core.HandledError.md#capturestacktrace)
+- [fromMessage](purista_core.HandledError.md#frommessage)
 
 ## Constructors
 
@@ -47,7 +49,7 @@ Scenarios are input validation failures or "404 Not Found" errors which should b
 
 | Name | Type |
 | :------ | :------ |
-| `errorCode` | [`StatusCode`](../enums/StatusCode.md) |
+| `errorCode` | [`StatusCode`](../enums/purista_core.StatusCode.md) |
 | `message?` | `string` |
 | `data?` | `unknown` |
 | `traceId?` | `string` |
@@ -58,7 +60,7 @@ Error.constructor
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/HandledError.impl.ts#L10)
+[core/src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/c66c2b4/src/core/HandledError.impl.ts#L10)
 
 ## Properties
 
@@ -72,7 +74,7 @@ Error.cause
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es2022.error.d.ts:26
+core/node_modules/typescript/lib/lib.es2022.error.d.ts:26
 
 ___
 
@@ -84,7 +86,7 @@ ___
 
 ### errorCode
 
-• **errorCode**: [`StatusCode`](../enums/StatusCode.md)
+• **errorCode**: [`StatusCode`](../enums/purista_core.StatusCode.md)
 
 ___
 
@@ -98,7 +100,7 @@ Error.message
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:1023
+core/node_modules/typescript/lib/lib.es5.d.ts:1023
 
 ___
 
@@ -112,7 +114,7 @@ Error.name
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:1022
+core/node_modules/typescript/lib/lib.es5.d.ts:1022
 
 ___
 
@@ -126,7 +128,7 @@ Error.stack
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:1024
+core/node_modules/typescript/lib/lib.es5.d.ts:1024
 
 ___
 
@@ -165,7 +167,7 @@ Error.prepareStackTrace
 
 #### Defined in
 
-node_modules/@types/node/globals.d.ts:11
+core/node_modules/@types/node/globals.d.ts:11
 
 ___
 
@@ -179,25 +181,25 @@ Error.stackTraceLimit
 
 #### Defined in
 
-node_modules/@types/node/globals.d.ts:13
+core/node_modules/@types/node/globals.d.ts:13
 
 ## Methods
 
 ### getErrorResponse
 
-▸ **getErrorResponse**(): [`ErrorResponse`](../modules.md#errorresponse)
+▸ **getErrorResponse**(): [`ErrorResponse`](../modules/purista_core.md#errorresponse)
 
 Returns error response object
 
 #### Returns
 
-[`ErrorResponse`](../modules.md#errorresponse)
+[`ErrorResponse`](../modules/purista_core.md#errorresponse)
 
 ErrorResponse
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:27](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/HandledError.impl.ts#L27)
+[core/src/core/HandledError.impl.ts:27](https://github.com/sebastianwessel/purista/blob/c66c2b4/src/core/HandledError.impl.ts#L27)
 
 ___
 
@@ -215,7 +217,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/HandledError.impl.ts#L42)
+[core/src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/c66c2b4/src/core/HandledError.impl.ts#L42)
 
 ___
 
@@ -242,13 +244,13 @@ Error.captureStackTrace
 
 #### Defined in
 
-node_modules/@types/node/globals.d.ts:4
+core/node_modules/@types/node/globals.d.ts:4
 
 ___
 
 ### fromMessage
 
-▸ `Static` **fromMessage**(`message`): [`HandledError`](HandledError.md)
+▸ `Static` **fromMessage**(`message`): [`HandledError`](purista_core.HandledError.md)
 
 Create a error object from EBMessage error message
 
@@ -256,14 +258,14 @@ Create a error object from EBMessage error message
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `message` | [`CommandErrorResponse`](../modules.md#commanderrorresponse) | CommandErrorResponse |
+| `message` | [`CommandErrorResponse`](../modules/purista_core.md#commanderrorresponse) | CommandErrorResponse |
 
 #### Returns
 
-[`HandledError`](HandledError.md)
+[`HandledError`](purista_core.HandledError.md)
 
 HandledError
 
 #### Defined in
 
-[src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/HandledError.impl.ts#L19)
+[core/src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/c66c2b4/src/core/HandledError.impl.ts#L19)

@@ -33,7 +33,7 @@
     "test": "jest",
     "----------------------- BUILDING -------------------------------------------": "",
     "build:lib": "tsc",
-    "build:api": "typedoc --plugin typedoc-plugin-markdown --out doc_src/api src/index.ts",
+    "build:api": "typedoc",
     "build:doc": "vuepress build doc_src",
     "build": "npm run build:lib && npm run build:api && npm run build:doc",
     "----------------------- PUBLISHING -----------------------------------------": "",

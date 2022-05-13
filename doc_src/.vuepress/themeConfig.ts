@@ -15,8 +15,10 @@ export default hopeTheme({
   // logo: '/logo.svg',
 
   themeColor: false,
+  headerDepth: 3,
 
   repo: 'sebastianwessel/purista',
+  repoLabel: 'PURISTA',
 
   docsDir: 'docs',
 
@@ -35,9 +37,11 @@ export default hopeTheme({
   displayFooter: true,
   darkmode: 'auto-switch',
 
-  pageInfo: [],
+  pageInfo: ['Author', 'Date'],
+  editLink: false,
 
   plugins: {
+    photoSwipe: false,
     mdEnhance: {
       enableAll: true,
       presentation: {

@@ -1,6 +1,8 @@
-[@purista/core](../README.md) / [Exports](../modules.md) / UnhandledError
+[PURISTA API](../README.md) / [@purista/core](../modules/purista_core.md) / UnhandledError
 
 # Class: UnhandledError
+
+[@purista/core](../modules/purista_core.md).UnhandledError
 
 A unhandled error will be thrown if some error response is returned during invoking a service function
 or when the invocation timed out.
@@ -18,27 +20,27 @@ Unhandled error are automatically converted into "500 Internal Server Error" to 
 
 ### Constructors
 
-- [constructor](UnhandledError.md#constructor)
+- [constructor](purista_core.UnhandledError.md#constructor)
 
 ### Properties
 
-- [cause](UnhandledError.md#cause)
-- [data](UnhandledError.md#data)
-- [errorCode](UnhandledError.md#errorcode)
-- [message](UnhandledError.md#message)
-- [name](UnhandledError.md#name)
-- [stack](UnhandledError.md#stack)
-- [traceId](UnhandledError.md#traceid)
-- [prepareStackTrace](UnhandledError.md#preparestacktrace)
-- [stackTraceLimit](UnhandledError.md#stacktracelimit)
+- [cause](purista_core.UnhandledError.md#cause)
+- [data](purista_core.UnhandledError.md#data)
+- [errorCode](purista_core.UnhandledError.md#errorcode)
+- [message](purista_core.UnhandledError.md#message)
+- [name](purista_core.UnhandledError.md#name)
+- [stack](purista_core.UnhandledError.md#stack)
+- [traceId](purista_core.UnhandledError.md#traceid)
+- [prepareStackTrace](purista_core.UnhandledError.md#preparestacktrace)
+- [stackTraceLimit](purista_core.UnhandledError.md#stacktracelimit)
 
 ### Methods
 
-- [getErrorResponse](UnhandledError.md#geterrorresponse)
-- [intoHandledError](UnhandledError.md#intohandlederror)
-- [toString](UnhandledError.md#tostring)
-- [captureStackTrace](UnhandledError.md#capturestacktrace)
-- [fromMessage](UnhandledError.md#frommessage)
+- [getErrorResponse](purista_core.UnhandledError.md#geterrorresponse)
+- [intoHandledError](purista_core.UnhandledError.md#intohandlederror)
+- [toString](purista_core.UnhandledError.md#tostring)
+- [captureStackTrace](purista_core.UnhandledError.md#capturestacktrace)
+- [fromMessage](purista_core.UnhandledError.md#frommessage)
 
 ## Constructors
 
@@ -50,7 +52,7 @@ Unhandled error are automatically converted into "500 Internal Server Error" to 
 
 | Name | Type | Default value |
 | :------ | :------ | :------ |
-| `errorCode` | [`StatusCode`](../enums/StatusCode.md) | `StatusCode.InternalServerError` |
+| `errorCode` | [`StatusCode`](../enums/purista_core.StatusCode.md) | `StatusCode.InternalServerError` |
 | `message?` | `string` | `undefined` |
 | `data?` | `unknown` | `undefined` |
 | `traceId?` | `string` | `undefined` |
@@ -61,7 +63,7 @@ Error.constructor
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:13](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/UnhandledError.impl.ts#L13)
+[core/src/core/UnhandledError.impl.ts:13](https://github.com/sebastianwessel/purista/blob/c66c2b4/src/core/UnhandledError.impl.ts#L13)
 
 ## Properties
 
@@ -75,7 +77,7 @@ Error.cause
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es2022.error.d.ts:26
+core/node_modules/typescript/lib/lib.es2022.error.d.ts:26
 
 ___
 
@@ -87,7 +89,7 @@ ___
 
 ### errorCode
 
-• **errorCode**: [`StatusCode`](../enums/StatusCode.md) = `StatusCode.InternalServerError`
+• **errorCode**: [`StatusCode`](../enums/purista_core.StatusCode.md) = `StatusCode.InternalServerError`
 
 ___
 
@@ -101,7 +103,7 @@ Error.message
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:1023
+core/node_modules/typescript/lib/lib.es5.d.ts:1023
 
 ___
 
@@ -115,7 +117,7 @@ Error.name
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:1022
+core/node_modules/typescript/lib/lib.es5.d.ts:1022
 
 ___
 
@@ -129,7 +131,7 @@ Error.stack
 
 #### Defined in
 
-node_modules/typescript/lib/lib.es5.d.ts:1024
+core/node_modules/typescript/lib/lib.es5.d.ts:1024
 
 ___
 
@@ -168,7 +170,7 @@ Error.prepareStackTrace
 
 #### Defined in
 
-node_modules/@types/node/globals.d.ts:11
+core/node_modules/@types/node/globals.d.ts:11
 
 ___
 
@@ -182,43 +184,43 @@ Error.stackTraceLimit
 
 #### Defined in
 
-node_modules/@types/node/globals.d.ts:13
+core/node_modules/@types/node/globals.d.ts:13
 
 ## Methods
 
 ### getErrorResponse
 
-▸ **getErrorResponse**(): [`ErrorResponse`](../modules.md#errorresponse)
+▸ **getErrorResponse**(): [`ErrorResponse`](../modules/purista_core.md#errorresponse)
 
 Returns error response object
 
 #### Returns
 
-[`ErrorResponse`](../modules.md#errorresponse)
+[`ErrorResponse`](../modules/purista_core.md#errorresponse)
 
 ErrorResponse
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:43](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/UnhandledError.impl.ts#L43)
+[core/src/core/UnhandledError.impl.ts:43](https://github.com/sebastianwessel/purista/blob/c66c2b4/src/core/UnhandledError.impl.ts#L43)
 
 ___
 
 ### intoHandledError
 
-▸ **intoHandledError**(): [`HandledError`](HandledError.md)
+▸ **intoHandledError**(): [`HandledError`](purista_core.HandledError.md)
 
 Create a handled error from unhandled error
 
 #### Returns
 
-[`HandledError`](HandledError.md)
+[`HandledError`](purista_core.HandledError.md)
 
 HandledError
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:35](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/UnhandledError.impl.ts#L35)
+[core/src/core/UnhandledError.impl.ts:35](https://github.com/sebastianwessel/purista/blob/c66c2b4/src/core/UnhandledError.impl.ts#L35)
 
 ___
 
@@ -236,7 +238,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:58](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/UnhandledError.impl.ts#L58)
+[core/src/core/UnhandledError.impl.ts:58](https://github.com/sebastianwessel/purista/blob/c66c2b4/src/core/UnhandledError.impl.ts#L58)
 
 ___
 
@@ -263,13 +265,13 @@ Error.captureStackTrace
 
 #### Defined in
 
-node_modules/@types/node/globals.d.ts:4
+core/node_modules/@types/node/globals.d.ts:4
 
 ___
 
 ### fromMessage
 
-▸ `Static` **fromMessage**(`message`): [`UnhandledError`](UnhandledError.md)
+▸ `Static` **fromMessage**(`message`): [`UnhandledError`](purista_core.UnhandledError.md)
 
 Create a error object from EBMessage error message
 
@@ -277,14 +279,14 @@ Create a error object from EBMessage error message
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `message` | [`CommandErrorResponse`](../modules.md#commanderrorresponse) | CommandErrorResponse |
+| `message` | [`CommandErrorResponse`](../modules/purista_core.md#commanderrorresponse) | CommandErrorResponse |
 
 #### Returns
 
-[`UnhandledError`](UnhandledError.md)
+[`UnhandledError`](purista_core.UnhandledError.md)
 
 UnhandledError
 
 #### Defined in
 
-[src/core/UnhandledError.impl.ts:27](https://github.com/sebastianwessel/purista/blob/c4dff4d/src/core/UnhandledError.impl.ts#L27)
+[core/src/core/UnhandledError.impl.ts:27](https://github.com/sebastianwessel/purista/blob/c66c2b4/src/core/UnhandledError.impl.ts#L27)
