@@ -59,7 +59,7 @@ const TTL_INTERVAL = 1000
  */
 export class Service extends ServiceClass {
   info: ServiceInfoType
-  log: Logger
+  protected serviceLogger: Logger
 
   protected eventBridge: EventBridge
 
@@ -83,8 +83,11 @@ export class Service extends ServiceClass {
     super()
     this.info = info
 
-    this.log = baseLogger.getChildLogger({ name: this.info.serviceName })
-    this.log.debug(`creating ${this.info.serviceName} ${this.info.serviceVersion}`)
+    this.serviceLogger = baseLogger.getChildLogger({
+      prefix: [this.info.serviceName, this.info.serviceVersion],
+      name: `${this.info.serviceName} V${this.info.serviceVersion}`,
+    })
+    this.serviceLogger.debug(`creating ${this.info.serviceName} ${this.info.serviceVersion}`)
 
     this.eventBridge = eventBridge
     this.ttlInterval = setInterval(this.rejectExpiredInvocations.bind(this), TTL_INTERVAL)
@@ -122,7 +125,7 @@ export class Service extends ServiceClass {
 
     // register subscriptions for this service
     for (const subscription of subscriptions) {
-      this.log.debug('start subscription', subscription.subscriptionName)
+      this.serviceLogger.debug('start subscription', subscription.subscriptionName)
       await this.subscribe(subscription)
     }
 
@@ -178,7 +181,9 @@ export class Service extends ServiceClass {
         }
         this.pendingInvocations.delete(message.correlationId)
       } else {
-        this.log.warn('invocation message id not found - maybe already timed out', getCleanedMessage(message))
+        this.serviceLogger
+          .getChildLogger({ name: `${this.info.serviceName} V${this.info.serviceVersion}`, requestId: message.traceId })
+          .warn('invocation message id not found - maybe already timed out', getCleanedMessage(message))
       }
     }
   }
@@ -238,14 +243,25 @@ export class Service extends ServiceClass {
   protected async executeCommand(_subscriptionId: SubscriptionId, message: Command) {
     const command = this.commands.get(message.receiver.serviceTarget)
     if (!command) {
-      this.log.error('received invalid command', getCleanedMessage(message))
+      this.serviceLogger
+        .getChildLogger({
+          name: `${this.info.serviceName} V${this.info.serviceVersion}`,
+          requestId: message.traceId,
+        })
+        .error('received invalid command', getCleanedMessage(message))
       const errorResponse = createErrorResponse(message, StatusCode.NotImplemented)
       await this.eventBridge.emit(errorResponse)
       return
     }
 
     try {
-      const call = command.call.bind(this)
+      const call = command.call.bind(
+        this,
+        this.serviceLogger.getChildLogger({
+          name: `${this.info.serviceName} V${this.info.serviceVersion} ${command.commandName}`,
+          requestId: message.traceId,
+        }),
+      )
       const payload = await call(message.command.payload, message.command.parameter, message)
 
       const successResponse = createSuccessResponse(message, payload)
@@ -256,7 +272,9 @@ export class Service extends ServiceClass {
         return
       }
 
-      this.log.error('executeCommand unhandled error', { error, message: getCleanedMessage(message) })
+      this.serviceLogger
+        .getChildLogger({ name: `${this.info.serviceName} V${this.info.serviceVersion}`, requestId: message.traceId })
+        .error('executeCommand unhandled error', { error, message: getCleanedMessage(message) })
       await this.eventBridge.emit(createErrorResponse(message, StatusCode.InternalServerError, error))
     }
   }
@@ -264,17 +282,27 @@ export class Service extends ServiceClass {
   protected async handleSubscriptionMessage(subscriptionId: SubscriptionId, message: EBMessage) {
     const subscription = this.subscriptions.get(subscriptionId)
     if (!subscription) {
-      this.log.error('received message for non existing subscription', {
-        subscriptionId,
-        message: getCleanedMessage(message),
-      })
+      this.serviceLogger
+        .getChildLogger({ name: `${this.info.serviceName} V${this.info.serviceVersion}`, requestId: message.traceId })
+        .error('received message for non existing subscription', {
+          subscriptionId,
+          message: getCleanedMessage(message),
+        })
       return
     }
 
     try {
-      await subscription.call.bind(this)(subscriptionId, message)
+      await subscription.call.bind(
+        this,
+        this.serviceLogger.getChildLogger({
+          name: `${this.info.serviceName} V${this.info.serviceVersion}`,
+          requestId: message.traceId,
+        }),
+      )(subscriptionId, message)
     } catch (error) {
-      this.log.error(error)
+      this.serviceLogger
+        .getChildLogger({ name: `${this.info.serviceName} V${this.info.serviceVersion}`, requestId: message.traceId })
+        .error(error)
     }
   }
 
@@ -287,7 +315,12 @@ export class Service extends ServiceClass {
     this.pendingInvocations.forEach((value, key) => {
       if (now > value.ttl) {
         const errorResponse = createErrorResponse(value.command, StatusCode.GatewayTimeout)
-        this.log.error('rejecting timed out invocation', { command: getCleanedMessage(value.command) })
+        this.serviceLogger
+          .getChildLogger({
+            name: `${this.info.serviceName} V${this.info.serviceVersion}`,
+            requestId: value.command.traceId,
+          })
+          .error('rejecting timed out invocation', { command: getCleanedMessage(value.command) })
         const error = UnhandledError.fromMessage(errorResponse)
         value.reject(error)
         this.pendingInvocations.delete(key)
@@ -296,7 +329,7 @@ export class Service extends ServiceClass {
   }
 
   protected async registerCommand(commandDefinition: CommandDefinition): Promise<void> {
-    this.log.debug(
+    this.serviceLogger.debug(
       'register command',
       `${this.serviceInfo.serviceName} ${this.serviceInfo.serviceVersion} ${commandDefinition.commandName}`,
     )
@@ -310,7 +343,7 @@ export class Service extends ServiceClass {
 
   async destroy() {
     await this.sendServiceInfo(EBMessageType.InfoServiceDrain)
-    this.log.info('destroy', this.info)
+    this.serviceLogger.info('destroy', this.info)
     if (this.ttlInterval) {
       clearInterval(this.ttlInterval)
     }

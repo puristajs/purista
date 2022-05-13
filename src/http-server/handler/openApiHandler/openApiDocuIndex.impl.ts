@@ -1,6 +1,6 @@
 import { Handler } from '../../types'
 
-export const openApiDocuIndex: Handler = async function (_request, response, context) {
+export const openApiDocuIndex: Handler = async function (_log, _request, response, context) {
   response.setHeader('content-type', 'text/html; charset=utf-8')
 
   response.statusCode = 200

@@ -21,7 +21,7 @@ export const createRequestBodyToJsonMiddleware = (
 ): Middleware => {
   const _config = { ...getDefaultRequestBodyToJsonMiddlewareOptions(), ...options }
 
-  const requestBodyToJsonMiddleware: Middleware = async function (request, response, context) {
+  const requestBodyToJsonMiddleware: Middleware = async function (log, request, _response, context) {
     const method = request.method
     // if it is some
     if (
@@ -36,7 +36,7 @@ export const createRequestBodyToJsonMiddleware = (
     try {
       context.payload = JSON.parse(context.payload as string)
     } catch (error) {
-      this.log.warn('failed to convert to json', error)
+      log.warn('failed to convert to json', error)
       // TODO: add
       throw new Error('bad request')
     }

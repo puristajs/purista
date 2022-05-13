@@ -23,7 +23,7 @@ export const getDefaultCompressionMiddlewareOptions = (): CompressionMiddlewareO
 export const createCompressionMiddleware = (options = getDefaultCompressionMiddlewareOptions()): Middleware => {
   const _config = { ...getDefaultCompressionMiddlewareOptions(), ...options }
 
-  const compressionMiddleware: Middleware = async (request, response, context) => {
+  const compressionMiddleware: Middleware = async (log, request, response, context) => {
     if (request.method === 'HEAD') {
       response.end()
       context.isResponseSend = true

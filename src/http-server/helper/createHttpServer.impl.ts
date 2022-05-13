@@ -1,6 +1,7 @@
 import { createSecureServer, Http2SecureServer } from 'http2'
 
 import { Logger } from '../../core'
+import { ServiceInfo } from '../config'
 import { HttpServerConfig } from '../types'
 
 /**
@@ -10,7 +11,10 @@ import { HttpServerConfig } from '../types'
  * @returns The server is returned.
  */
 export const createHttpServer = async (config: HttpServerConfig, baseLogger: Logger): Promise<Http2SecureServer> => {
-  const log = baseLogger.getChildLogger({ name: 'httpServer', minLevel: config.logLevel })
+  const log = baseLogger.getChildLogger({
+    name: `${ServiceInfo.serviceName} V${ServiceInfo.serviceVersion}`,
+    minLevel: config.logLevel,
+  })
   log.debug('init http server')
 
   const server = createSecureServer(config.options)

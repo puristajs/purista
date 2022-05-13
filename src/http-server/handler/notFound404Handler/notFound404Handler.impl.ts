@@ -21,20 +21,23 @@ export const getDefaultNotFound404HandlerOptions = (): NotFound404HandlerOptions
 export const createNotFound404Handler = (options = getDefaultNotFound404HandlerOptions()): Handler => {
   const _config = { ...getDefaultNotFound404HandlerOptions(), ...options }
 
-  const notFound404Handler: Handler = async function (request, response, context) {
+  const notFound404Handler: Handler = async function (_log, request, response, context) {
     const payload: ErrorResponse =
       request.method === 'GET'
         ? {
             status: StatusCode.NotFound,
             message: getErrorMessageForCode(StatusCode.NotFound),
+            traceId: context.traceId,
           }
         : {
             status: StatusCode.MethodNotAllowed,
             message: getErrorMessageForCode(StatusCode.MethodNotAllowed),
+            traceId: context.traceId,
           }
 
     response.statusCode = payload.status
     response.setHeader('content-type', 'application/json; charset=utf-8')
+    response.setHeader('x-trace-id', context.traceId as string)
     response.end(JSON.stringify(payload))
     context.payload = payload
     context.isResponseSend = true

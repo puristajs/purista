@@ -1,4 +1,5 @@
 import { Service } from '../../Service'
+import { Logger } from '../Logger'
 import { Command } from './Command'
 
 /**
@@ -11,6 +12,7 @@ export type CommandFunction<
   ResultType = unknown,
 > = (
   this: ServiceClassType,
+  log: Logger,
   payload: PayloadType,
   params: ParamsType,
   message: Command<PayloadType, ParamsType>,

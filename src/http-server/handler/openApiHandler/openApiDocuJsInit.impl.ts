@@ -1,6 +1,6 @@
 import { Handler } from '../../types'
 
-export const openApiDocuJsInit: Handler = async function (_request, response, context) {
+export const openApiDocuJsInit: Handler = async function (_log, _request, response, context) {
   response.setHeader('content-type', 'application/javascript; charset=utf-8')
 
   const path = this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath

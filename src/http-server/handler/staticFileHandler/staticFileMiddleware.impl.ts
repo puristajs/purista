@@ -36,7 +36,7 @@ export const getDefaultStaticFileHandlerOptions = (): StaticFileHandlerOptions =
 export const createStaticFileHandler = (options = getDefaultStaticFileHandlerOptions()): Middleware => {
   const config = { ...getDefaultStaticFileHandlerOptions(), ...options }
 
-  const StaticFileHandler: Middleware = async function (request, response, context) {
+  const StaticFileHandler: Middleware = async function (log, request, response, context) {
     if (request.method !== 'GET') {
       return context
     }
@@ -92,7 +92,7 @@ export const createStaticFileHandler = (options = getDefaultStaticFileHandlerOpt
         if (err.code === 'ENOENT') {
           resolve(context)
         } else {
-          this.log.error(err)
+          log.error(err)
           reject(new HandledError(StatusCode.InternalServerError))
         }
       })

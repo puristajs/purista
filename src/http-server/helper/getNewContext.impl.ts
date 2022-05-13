@@ -10,13 +10,15 @@ import { Context } from '../types'
  * @returns A context object.
  */
 export const getNewContext = (traceId: string | string[] | undefined, parameter = {}): Context => {
-  const tId = Array.isArray(traceId) ? traceId[0] : traceId
+  const tId = (Array.isArray(traceId) ? traceId[0] : traceId) || getUniqueId()
   return {
     isResponseSend: false,
-    traceId: tId || getUniqueId(),
+    traceId: tId,
     parameter,
     payload: undefined,
     statusCode: StatusCode.OK,
-    headers: {},
+    headers: {
+      'x-trace-id': tId,
+    },
   }
 }

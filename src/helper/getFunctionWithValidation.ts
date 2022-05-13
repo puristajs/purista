@@ -1,6 +1,6 @@
 import { z, ZodError } from 'zod'
 
-import { CommandFunction, HandledError, Service, StatusCode } from '../core'
+import { CommandFunction, HandledError, Service, StatusCode, UnhandledError } from '../core'
 
 export const getFunctionWithValidation = function <
   ServiceClassType extends Service,
@@ -14,6 +14,7 @@ export const getFunctionWithValidation = function <
   outputPayloadSchema: z.ZodType<ResultType> | undefined,
 ) {
   const wrapped: CommandFunction<ServiceClassType, PayloadType, ParamsType, ResultType> = async function (
+    log,
     payload,
     params,
     messsage,
@@ -23,11 +24,8 @@ export const getFunctionWithValidation = function <
       try {
         safePayload = inputPayloadSchema.parse(payload)
       } catch (err) {
-        this.log.warn('input validation for payload failed', err)
-        if (err instanceof ZodError) {
-          throw new HandledError(StatusCode.BadRequest, undefined, err.issues)
-        }
-        throw new HandledError(StatusCode.InternalServerError)
+        log.warn('input validation for payload failed', err)
+        throw new HandledError(StatusCode.BadRequest, undefined, (err as ZodError).issues)
       }
     }
 
@@ -36,15 +34,12 @@ export const getFunctionWithValidation = function <
       try {
         safeParams = inputParameterSchema.parse(params)
       } catch (err) {
-        this.log.warn('input validation for params failed', err)
-        if (err instanceof ZodError) {
-          throw new HandledError(StatusCode.BadRequest, undefined, err.issues)
-        }
-        throw new HandledError(StatusCode.BadRequest)
+        log.warn('input validation for params failed', err)
+        throw new HandledError(StatusCode.BadRequest, undefined, (err as ZodError).issues)
       }
     }
 
-    const call = fn.bind(this, safePayload, safeParams, messsage)
+    const call = fn.bind(this, log, safePayload, safeParams, messsage)
 
     const output = await call()
 
@@ -53,8 +48,8 @@ export const getFunctionWithValidation = function <
       try {
         safeOutput = outputPayloadSchema.parse(output)
       } catch (err) {
-        this.log.error('output validation failed', err)
-        throw new HandledError(StatusCode.InternalServerError)
+        log.error('output validation failed', err)
+        throw new UnhandledError(StatusCode.InternalServerError)
       }
     }
 

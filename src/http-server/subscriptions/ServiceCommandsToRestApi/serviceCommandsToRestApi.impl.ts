@@ -8,16 +8,17 @@ const beforeMiddleware = [createExtractPayloadMiddleware(), createRequestBodyToJ
 
 /* A function that is called when a message is received. */
 export const serviceCommandsToRestApi: HttpServiceSubscriptionCallBack<InfoServiceFunctionAdded> = async function (
+  log,
   _id,
   message,
 ) {
   if (!isInfoServiceFunctionAdded(message)) {
-    this.log.warn('Invalid message received', message)
+    log.warn('Invalid message received', message)
     return
   }
 
   if (!isHttpExposedServiceMeta(message.data)) {
-    this.log.debug('...skip exposing function')
+    log.debug('...skip exposing function')
     return
   }
 
@@ -32,13 +33,14 @@ export const serviceCommandsToRestApi: HttpServiceSubscriptionCallBack<InfoServi
   const contentType = data.http.contentType || 'application/json'
 
   const getHandler = (): Handler => {
-    const serviceHandler: Handler = async (_request, _response, context) => {
+    const serviceHandler: Handler = async (_log, _request, _response, context) => {
       context.payload = await this.invoke({
         receiver: {
           serviceName: message.sender.serviceName,
           serviceVersion: message.sender.serviceVersion,
           serviceTarget: message.sender.serviceTarget,
         },
+        traceId: context.traceId,
         command: {
           parameter: context.parameter,
           payload: context.payload,

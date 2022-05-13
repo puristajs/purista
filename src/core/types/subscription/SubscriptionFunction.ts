@@ -1,5 +1,6 @@
 import { Service } from '../../Service'
 import { EBMessage } from '../EBMessage'
+import { Logger } from '../Logger'
 import { SubscriptionId } from './SubscriptionId'
 
 /**
@@ -7,6 +8,7 @@ import { SubscriptionId } from './SubscriptionId'
  */
 export type SubscriptionFunction<ServiceClassType = Service> = (
   this: ServiceClassType,
+  log: Logger,
   message: EBMessage,
   subscriptionId: SubscriptionId,
 ) => Promise<void>

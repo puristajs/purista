@@ -20,13 +20,15 @@ export const getDefaultInternalError500HandlerOptions = (): InternalError500Hand
 export const createInternalError500Handler = (options = getDefaultInternalError500HandlerOptions()): Handler => {
   const _config = { ...getDefaultInternalError500HandlerOptions(), ...options }
 
-  const internalError500Handler: Handler = async function (_request, response, context) {
+  const internalError500Handler: Handler = async function (_log, _request, response, context) {
     const errorResponse: ErrorResponse = {
       status: StatusCode.InternalServerError,
       message: getErrorMessageForCode(StatusCode.InternalServerError),
+      traceId: context.traceId,
     }
     response.statusCode = errorResponse.status
     response.setHeader('content-type', 'application/json; charset=utf-8')
+    response.setHeader('x-trace-id', context.traceId as string)
     response.end(JSON.stringify(errorResponse))
     context.isResponseSend = true
     return context

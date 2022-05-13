@@ -5,7 +5,7 @@ import { StatusCode } from '../../../core'
 import { OPENAPI_DEFAULT_INFO } from '../../config'
 import { Handler } from '../../types'
 
-export const openApiHandler: Handler = async function (_request, _response, context) {
+export const openApiHandler: Handler = async function (log, _request, _response, context) {
   const paths: Record<string, Record<string, unknown>> = {}
 
   const info = this.config.openApi?.info || OPENAPI_DEFAULT_INFO
@@ -42,6 +42,11 @@ export const openApiHandler: Handler = async function (_request, _response, cont
           example: message,
         },
         data: schema,
+        traceId: {
+          type: 'string',
+          title: 'the unique traceId for this request',
+          example: '8452e568-4306-4e7b-8ce1-af233873514a',
+        },
       },
       required: ['status', 'message'],
     }
@@ -69,7 +74,7 @@ export const openApiHandler: Handler = async function (_request, _response, cont
       const schema = definition.openApi?.parameter?.properties?.[name]
 
       if (!schema) {
-        this.log.warn(
+        log.warn(
           `${definition.method} ${definition.path}: Path parameter ${name} is not in parameter schema and will not be available in service function`,
         )
       }
@@ -99,7 +104,7 @@ export const openApiHandler: Handler = async function (_request, _response, cont
         const required = queryParam.required
 
         if (!schema) {
-          this.log.warn(
+          log.warn(
             `${definition.method} ${definition.path}: Query parameter ${name} is not in parameter schema and will not be available in service function`,
           )
         }
@@ -179,7 +184,7 @@ export const openApiHandler: Handler = async function (_request, _response, cont
       }
     }
 
-    if (definition.openApi?.parameter) {
+    if (definition.openApi?.parameter && pathParams.length > 0) {
       errorResponses[404] = {
         description: getErrorName(404),
         content: {
@@ -201,12 +206,19 @@ export const openApiHandler: Handler = async function (_request, _response, cont
       }
     })
 
+    const requestIdParameter: ParameterObject = {
+      in: 'header',
+      required: false,
+      name: 'x-trace-id',
+      schema: { type: 'string' },
+    }
+
     paths[path] = {
       ...paths[path],
       [definition.method.toLowerCase()]: {
         description: definition.openApi?.description,
         summary: definition.openApi?.summary,
-        parameters: [...pathParams, ...queryParams],
+        parameters: [...pathParams, ...queryParams, requestIdParameter],
         tags: definition.openApi?.tags,
         requestBody,
         responses: {

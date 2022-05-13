@@ -97,8 +97,8 @@ export class HttpServerService extends Service {
    */
   async start() {
     await super.start()
-    this.server = await createHttpServer(this.config, this.log)
-    this.server.on('request', this.routerHandler.bind(this))
+    this.server = await createHttpServer(this.config, this.serviceLogger)
+    this.server.on('request', this.routerHandler.bind({ ...this, log: this.serviceLogger }))
   }
 
   /**
@@ -108,7 +108,7 @@ export class HttpServerService extends Service {
    */
   addAllRoute(pattern: string, ...handlers: Handler[]): HttpServerService {
     this.router.all(pattern, ...handlers)
-    this.log.debug('route add all:', pattern)
+    this.serviceLogger.debug('route add all:', pattern)
     return this
   }
 
@@ -120,7 +120,7 @@ export class HttpServerService extends Service {
    */
   addRoute(method: Methods, pattern: string, ...handlers: Handler[]): HttpServerService {
     this.router.add(method, pattern, ...handlers)
-    this.log.debug('route add:', method, pattern)
+    this.serviceLogger.debug('route add:', method, pattern)
     return this
   }
 
@@ -148,7 +148,7 @@ export class HttpServerService extends Service {
    * @param {Handler[]} handlers - An array of handlers to be called when the request is not found.
    */
   setNotFoundHandlers(handlers: Handler[]): HttpServerService {
-    this.notFoundHandlers = handlers.map((handler) => handler.bind(this))
+    this.notFoundHandlers = handlers.map((handler) => handler.bind({ ...this, log: this.serviceLogger }))
     return this
   }
 
@@ -157,7 +157,7 @@ export class HttpServerService extends Service {
    * @param {Handler} handler - A function that takes a `Request` and `Response` object and returns
    */
   setErrorHandler(handler: Handler): HttpServerService {
-    this.internalServerErrorHandler = handler.bind(this)
+    this.internalServerErrorHandler = handler.bind({ ...this, log: this.serviceLogger })
     return this
   }
 
@@ -174,7 +174,8 @@ export class HttpServerService extends Service {
     const method = request.method as Methods
     const pathName = url.pathname.toLowerCase()
     const route = this.router.find(method, pathName)
-    let context = getNewContext(request.headers['x-request-id'], route.params)
+
+    let context = getNewContext(request.headers['x-trace-id'], route.params)
     const handlers: Handler[] = []
 
     url.searchParams.forEach((value, name) => {
@@ -195,7 +196,7 @@ export class HttpServerService extends Service {
 
     try {
       for (const handler of handlers) {
-        const handlerFunction = handler.bind(this)
+        const handlerFunction = handler.bind(this, this.serviceLogger.getChildLogger({ requestId: context.traceId }))
         context = await handlerFunction(request, response, context)
         if (context.isResponseSend) {
           break
@@ -203,10 +204,18 @@ export class HttpServerService extends Service {
       }
 
       if (!context.isResponseSend) {
-        this.log.error('all handlers done, but no response send - now throwing to jump into error handlers', url)
-        throw new UnhandledError(StatusCode.InternalServerError, 'No response send to client')
+        this.serviceLogger
+          .getChildLogger({ requestId: context.traceId })
+          .error('all handlers done, but no response send - now throwing to jump into error handlers', url)
+        throw new UnhandledError(
+          StatusCode.InternalServerError,
+          'No response send to client',
+          undefined,
+          context.traceId,
+        )
       }
     } catch (err) {
+      this.serviceLogger.error(err)
       if (context.isResponseSend) {
         return
       }
@@ -214,6 +223,7 @@ export class HttpServerService extends Service {
       if (err instanceof HandledError) {
         response.statusCode = err.errorCode
         response.setHeader('content-type', 'application/json; charset=utf-8')
+        response.setHeader('x-trace-id', context.traceId as string)
         response.end(err.toString())
         return
       }
@@ -221,13 +231,15 @@ export class HttpServerService extends Service {
       if (err instanceof UnhandledError && err.errorCode >= 400 && err.errorCode < 500) {
         response.statusCode = err.errorCode
         response.setHeader('content-type', 'application/json; charset=utf-8')
+        response.setHeader('x-trace-id', context.traceId as string)
         response.end(err.toString())
         return
       }
 
-      this.log.error('route handler error', err)
+      this.serviceLogger.getChildLogger({ requestId: context.traceId }).error('route handler error', err)
 
-      this.internalServerErrorHandler(request, response, context)
+      const errorHandler = this.internalServerErrorHandler.bind(this, this.serviceLogger)
+      errorHandler(request, response, context)
     }
   }
 }

@@ -19,7 +19,7 @@ export const getDefaultResponseToJsonMiddlewareOptions = (): ResponseToJsonMiddl
 export const createResponseToJsonMiddleware = (options = getDefaultResponseToJsonMiddlewareOptions()): Middleware => {
   const _config = { ...getDefaultResponseToJsonMiddlewareOptions(), ...options }
 
-  const responseToJsonMiddleware: Handler = async (_request, _response, context) => {
+  const responseToJsonMiddleware: Handler = async (_log, _request, _response, context) => {
     if (!context.payload || context.payload === '') {
       if (context.statusCode === 200) {
         // set correct http status code if we have an empty body
