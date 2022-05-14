@@ -10,6 +10,7 @@ import { StatusCode } from '../StatusCode.enum'
  */
 export type CommandErrorResponse = {
   messageType: EBMessageType.CommandErrorResponse
+  isHandledError: boolean
   correlationId: CorrelationId
   sender: EBMessageAddress
   receiver: EBMessageAddress

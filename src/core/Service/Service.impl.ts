@@ -181,7 +181,7 @@ export class Service extends ServiceClass {
         if (isCommandSuccessResponse(message)) {
           pending.resolve(message.response)
         } else if (isCommandErrorResponse(message)) {
-          const error = UnhandledError.fromMessage(message)
+          const error = message.isHandledError ? HandledError.fromMessage(message) : UnhandledError.fromMessage(message)
           pending.reject(error)
         }
       } else {
@@ -293,6 +293,7 @@ export class Service extends ServiceClass {
     }
 
     const log = this.serviceLogger.getChildLogger({
+      prefix: [command.commandName],
       name: `${this.info.serviceName} V${this.info.serviceVersion} ${command.commandName}`,
       requestId: message.traceId,
     })

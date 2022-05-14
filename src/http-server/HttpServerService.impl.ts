@@ -215,8 +215,9 @@ export class HttpServerService extends Service {
         )
       }
     } catch (err) {
-      this.serviceLogger.error(err)
+      const log = this.serviceLogger.getChildLogger({ requestId: context.traceId })
       if (context.isResponseSend) {
+        log.error('handler throwed but response already send', err)
         return
       }
 
@@ -228,6 +229,8 @@ export class HttpServerService extends Service {
         return
       }
 
+      log.error('route handler error', err)
+
       if (err instanceof UnhandledError && err.errorCode >= 400 && err.errorCode < 500) {
         response.statusCode = err.errorCode
         response.setHeader('content-type', 'application/json; charset=utf-8')
@@ -235,8 +238,6 @@ export class HttpServerService extends Service {
         response.end(err.toString())
         return
       }
-
-      this.serviceLogger.getChildLogger({ requestId: context.traceId }).error('route handler error', err)
 
       const errorHandler = this.internalServerErrorHandler.bind(this, this.serviceLogger)
       errorHandler(request, response, context)

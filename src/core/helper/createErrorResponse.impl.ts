@@ -20,12 +20,14 @@ export const createErrorResponse = (
   let message = getErrorMessageForCode(statusCode)
   let data: unknown
   let status = statusCode
+  let isHandledError = false
 
   // if it is a handled error we expose error code, message and additional data
   if (error instanceof HandledError) {
     message = error.message
     data = error.data
     status = error.errorCode
+    isHandledError = true
   }
 
   // if it is a unhandled error we set the error to 500 Internal Server Error without additional data
@@ -43,6 +45,7 @@ export const createErrorResponse = (
 
   const errorResponse: CommandErrorResponse = {
     id: originalEBMessage.id,
+    isHandledError,
     traceId: originalEBMessage.traceId,
     correlationId: originalEBMessage.correlationId,
     timestamp: Date.now(),
