@@ -7,6 +7,7 @@ import {
   getNewCorrelationId,
   getNewEBMessageId,
   getNewTraceId,
+  getTimeoutPromise,
 } from '../helper'
 import {
   Command,
@@ -32,13 +33,10 @@ import { UnhandledError } from '../UnhandledError.impl'
 
 /** Internal type for holding pending invocations */
 type PendigInvocation = {
-  ttl: number
   command: Command
   resolve(responsePayload: unknown): void
-  reject(error: UnhandledError): void
+  reject(error: UnhandledError | HandledError): void
 }
-
-const TTL_INTERVAL = 1000
 
 /**
  * Base class for all services.
@@ -65,8 +63,6 @@ export class Service extends ServiceClass {
 
   protected pendingInvocations = new Map<EBMessageId, PendigInvocation>()
 
-  protected ttlInterval: ReturnType<typeof setInterval>
-
   protected subscriptions = new Map<SubscriptionId, SubscriptionDefinition>()
 
   protected commands = new Map<string, CommandDefinition>()
@@ -90,7 +86,6 @@ export class Service extends ServiceClass {
     this.serviceLogger.debug(`creating ${this.info.serviceName} ${this.info.serviceVersion}`)
 
     this.eventBridge = eventBridge
-    this.ttlInterval = setInterval(this.rejectExpiredInvocations.bind(this), TTL_INTERVAL)
   }
 
   /**
@@ -179,7 +174,6 @@ export class Service extends ServiceClass {
           const error = UnhandledError.fromMessage(message)
           pending.reject(error)
         }
-        this.pendingInvocations.delete(message.correlationId)
       } else {
         this.serviceLogger
           .getChildLogger({ name: `${this.info.serviceName} V${this.info.serviceVersion}`, requestId: message.traceId })
@@ -193,11 +187,14 @@ export class Service extends ServiceClass {
     ttl = this.eventBridge.defaultTtl,
     originalCommand?: Partial<Command>,
   ): Promise<T> {
+    const traceId = originalCommand?.traceId || getNewTraceId()
+    const correlationId = getNewCorrelationId()
+
     const command: Command = {
       id: getNewEBMessageId(),
-      correlationId: getNewCorrelationId(),
+      correlationId,
       timestamp: Date.now(),
-      traceId: originalCommand?.traceId || getNewTraceId(),
+      traceId,
       messageType: EBMessageType.Command,
       ...input,
       sender: {
@@ -206,15 +203,27 @@ export class Service extends ServiceClass {
         serviceTarget: '',
       },
     }
-    return new Promise((resolve, reject) => {
+
+    const removeFromPending = () => {
+      this.pendingInvocations.delete(correlationId)
+    }
+
+    const executionPromise = new Promise<T>((resolve, reject) => {
       this.pendingInvocations.set(command.correlationId, {
-        ttl: Date.now() + ttl,
         command,
-        resolve,
-        reject,
+        resolve: (successPayload: T) => {
+          removeFromPending()
+          resolve(successPayload)
+        },
+        reject: (err: unknown) => {
+          removeFromPending()
+          reject(err)
+        },
       })
-      this.eventBridge.emit(command)
     })
+
+    this.eventBridge.emit(command)
+    return Promise.race([executionPromise, getTimeoutPromise(ttl, traceId)])
   }
 
   protected async subscribe(subscription: SubscriptionDefinition): Promise<SubscriptionId> {
@@ -245,7 +254,7 @@ export class Service extends ServiceClass {
     if (!command) {
       this.serviceLogger
         .getChildLogger({
-          name: `${this.info.serviceName} V${this.info.serviceVersion}`,
+          name: `${this.info.serviceName} V${this.info.serviceVersion} unknown`,
           requestId: message.traceId,
         })
         .error('received invalid command', getCleanedMessage(message))
@@ -254,14 +263,13 @@ export class Service extends ServiceClass {
       return
     }
 
+    const log = this.serviceLogger.getChildLogger({
+      name: `${this.info.serviceName} V${this.info.serviceVersion} ${command.commandName}`,
+      requestId: message.traceId,
+    })
+
     try {
-      const call = command.call.bind(
-        this,
-        this.serviceLogger.getChildLogger({
-          name: `${this.info.serviceName} V${this.info.serviceVersion} ${command.commandName}`,
-          requestId: message.traceId,
-        }),
-      )
+      const call = command.call.bind(this, log)
       const payload = await call(message.command.payload, message.command.parameter, message)
 
       const successResponse = createSuccessResponse(message, payload)
@@ -272,9 +280,7 @@ export class Service extends ServiceClass {
         return
       }
 
-      this.serviceLogger
-        .getChildLogger({ name: `${this.info.serviceName} V${this.info.serviceVersion}`, requestId: message.traceId })
-        .error('executeCommand unhandled error', { error, message: getCleanedMessage(message) })
+      log.error('executeCommand unhandled error', { error, message: getCleanedMessage(message) })
       await this.eventBridge.emit(createErrorResponse(message, StatusCode.InternalServerError, error))
     }
   }
@@ -306,28 +312,6 @@ export class Service extends ServiceClass {
     }
   }
 
-  /**
-   * Function which runs in internval to reject all invocations which are timed out
-   */
-  protected rejectExpiredInvocations() {
-    const now = Date.now()
-
-    this.pendingInvocations.forEach((value, key) => {
-      if (now > value.ttl) {
-        const errorResponse = createErrorResponse(value.command, StatusCode.GatewayTimeout)
-        this.serviceLogger
-          .getChildLogger({
-            name: `${this.info.serviceName} V${this.info.serviceVersion}`,
-            requestId: value.command.traceId,
-          })
-          .error('rejecting timed out invocation', { command: getCleanedMessage(value.command) })
-        const error = UnhandledError.fromMessage(errorResponse)
-        value.reject(error)
-        this.pendingInvocations.delete(key)
-      }
-    })
-  }
-
   protected async registerCommand(commandDefinition: CommandDefinition): Promise<void> {
     this.serviceLogger.debug(
       'register command',
@@ -344,9 +328,10 @@ export class Service extends ServiceClass {
   async destroy() {
     await this.sendServiceInfo(EBMessageType.InfoServiceDrain)
     this.serviceLogger.info('destroy', this.info)
-    if (this.ttlInterval) {
-      clearInterval(this.ttlInterval)
-    }
+    this.pendingInvocations.forEach((pending) => {
+      pending.reject(new HandledError(StatusCode.ServiceUnavailable, undefined, undefined, pending.command.traceId))
+    })
+    this.pendingInvocations.clear()
     await this.eventBridge.unsubscribeService({
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
