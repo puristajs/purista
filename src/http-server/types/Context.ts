@@ -6,5 +6,5 @@ export type Context<PayloadType = unknown, ParameterType = Record<string, unknow
   parameter: ParameterType
   payload: PayloadType
   statusCode: StatusCode
-  headers: Record<string, string>
+  headers: Record<string, string | string[]>
 }

@@ -28,7 +28,11 @@ export const createResponseToJsonMiddleware = (options = getDefaultResponseToJso
       return context
     }
 
-    if (context.headers['content-type']?.startsWith('application/json')) {
+    const contentType = Array.isArray(context.headers['content-type'])
+      ? context.headers['content-type'][0]
+      : context.headers['content-type']
+
+    if (contentType?.startsWith('application/json')) {
       if (typeof context.payload !== 'string') {
         context.payload = JSON.stringify(context.payload)
       }
