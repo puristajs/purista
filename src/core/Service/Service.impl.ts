@@ -16,6 +16,7 @@ import {
   EBMessageId,
   EBMessageType,
   EventBridge,
+  InfoInvokeTimeOutPayload,
   InfoMessageType,
   isCommand,
   isCommandErrorResponse,
@@ -92,13 +93,22 @@ export class Service extends ServiceClass {
    * It connects to the event bridge and subscribes to the topics that are in the subscription list.
    */
   async start() {
-    this.connectToEventBridge(this.commandFunctions, this.subscriptionList)
+    try {
+      await this.initializeEventbridgeConnect(this.commandFunctions, this.subscriptionList)
+      await this.sendServiceInfo(EBMessageType.InfoServiceReady)
+    } catch (err) {
+      this.serviceLogger.error(`failed to start service`, err)
+      throw err
+    }
   }
 
   /**
    * Connect service to event bridge to receive commands and command responses
    */
-  protected async connectToEventBridge(commandFunctions: CommandDefinition[], subscriptions: SubscriptionDefinition[]) {
+  protected async initializeEventbridgeConnect(
+    commandFunctions: CommandDefinition[],
+    subscriptions: SubscriptionDefinition[],
+  ) {
     // send info message that this service is going to start up now
     await this.sendServiceInfo(EBMessageType.InfoServiceInit)
 
@@ -208,6 +218,24 @@ export class Service extends ServiceClass {
       this.pendingInvocations.delete(correlationId)
     }
 
+    const sendErrorInfoMsg = async () => {
+      try {
+        const data: InfoInvokeTimeOutPayload = {
+          traceId,
+          correlationId,
+          sender: command.sender,
+          receiver: command.receiver,
+          timestamp: command.timestamp,
+        }
+
+        await this.sendServiceInfo(EBMessageType.InfoInvokeTimeOut, undefined, data)
+      } catch (err) {
+        this.serviceLogger
+          .getChildLogger({ name: `${this.info.serviceName} V${this.info.serviceVersion}`, requestId: traceId })
+          .error(`failed to send InfoInvokeTimeOut message for ${correlationId}`, err)
+      }
+    }
+
     const executionPromise = new Promise<T>((resolve, reject) => {
       this.pendingInvocations.set(command.correlationId, {
         command,
@@ -218,6 +246,7 @@ export class Service extends ServiceClass {
         reject: (err: unknown) => {
           removeFromPending()
           reject(err)
+          sendErrorInfoMsg()
         },
       })
     })

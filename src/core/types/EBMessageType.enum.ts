@@ -26,4 +26,5 @@ export enum EBMessageType {
   InfoServiceFunctionAdded = 'infoServiceFunctionAdded', // send when a service provides a new function
   InfoServiceDrain = 'infoServiceDrain', // indicates that a service is going to shut down and does no longer accept new requests
   InfoServiceShutdown = 'infoServiceShutdown', // last event from service before service is destroyed
+  InfoInvokeTimeOut = 'infoInvokeTimeOut', // a service invoked a other function and did not get a answer within given ttl
 }
