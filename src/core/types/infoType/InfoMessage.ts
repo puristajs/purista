@@ -1,12 +1,13 @@
 import { EBMessage } from '../EBMessage'
 import { EBMessageType } from '../EBMessageType.enum'
-import { InfoInvokeTimeOut } from './InfoInvokeTimeOut'
+import { InfoInvokeTimeout } from './InfoInvokeTimeout'
 import { InfoServiceDrain } from './InfoServiceDrain'
 import { InfoServiceFunctionAdded } from './InfoServiceFunctionAdded'
 import { InfoServiceInit } from './InfoServiceInit'
 import { InfoServiceNotReady } from './InfoServiceNotReady'
 import { InfoServiceReady } from './InfoServiceReady'
 import { InfoServiceShutdown } from './InfoServiceShutdown'
+import { InfoSubscriptionError } from './InfoSubscriptionError'
 
 export type InfoMessage =
   | InfoServiceDrain
@@ -15,7 +16,8 @@ export type InfoMessage =
   | InfoServiceNotReady
   | InfoServiceReady
   | InfoServiceShutdown
-  | InfoInvokeTimeOut
+  | InfoInvokeTimeout
+  | InfoSubscriptionError
 
 export type InfoMessageType =
   | EBMessageType.InfoServiceDrain
@@ -24,7 +26,8 @@ export type InfoMessageType =
   | EBMessageType.InfoServiceNotReady
   | EBMessageType.InfoServiceReady
   | EBMessageType.InfoServiceShutdown
-  | EBMessageType.InfoInvokeTimeOut
+  | EBMessageType.InfoInvokeTimeout
+  | EBMessageType.InfoSubscriptionError
 export const infoMessageTypes = [
   EBMessageType.InfoServiceDrain,
   EBMessageType.InfoServiceFunctionAdded,
@@ -32,7 +35,8 @@ export const infoMessageTypes = [
   EBMessageType.InfoServiceNotReady,
   EBMessageType.InfoServiceReady,
   EBMessageType.InfoServiceShutdown,
-  EBMessageType.InfoInvokeTimeOut,
+  EBMessageType.InfoInvokeTimeout,
+  EBMessageType.InfoSubscriptionError,
 ]
 
 export const isInfoMessage = (message: EBMessage): message is InfoMessage => {

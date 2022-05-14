@@ -3,7 +3,7 @@ import { EBMessageType } from '../EBMessageType.enum'
 import { TraceId } from '../TraceId'
 import { InfoServiceBase } from './InfoServiceBase'
 
-export type InfoInvokeTimeOutPayload = {
+export type InfoInvokeTimeoutPayload = {
   traceId: TraceId
   correlationId: CorrelationId
   sender: {
@@ -19,7 +19,6 @@ export type InfoInvokeTimeOutPayload = {
   timestamp: number
 }
 
-export type InfoInvokeTimeOut = {
-  messageType: EBMessageType.InfoInvokeTimeOut
-  data: InfoInvokeTimeOutPayload
+export type InfoInvokeTimeout = {
+  messageType: EBMessageType.InfoInvokeTimeout
 } & InfoServiceBase

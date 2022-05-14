@@ -16,7 +16,7 @@ import {
   EBMessageId,
   EBMessageType,
   EventBridge,
-  InfoInvokeTimeOutPayload,
+  InfoInvokeTimeoutPayload,
   InfoMessageType,
   isCommand,
   isCommandErrorResponse,
@@ -220,7 +220,7 @@ export class Service extends ServiceClass {
 
     const sendErrorInfoMsg = async () => {
       try {
-        const data: InfoInvokeTimeOutPayload = {
+        const data: InfoInvokeTimeoutPayload = {
           traceId,
           correlationId,
           sender: command.sender,
@@ -228,11 +228,11 @@ export class Service extends ServiceClass {
           timestamp: command.timestamp,
         }
 
-        await this.sendServiceInfo(EBMessageType.InfoInvokeTimeOut, undefined, data)
+        await this.sendServiceInfo(EBMessageType.InfoInvokeTimeout, undefined, data)
       } catch (err) {
         this.serviceLogger
           .getChildLogger({ name: `${this.info.serviceName} V${this.info.serviceVersion}`, requestId: traceId })
-          .error(`failed to send InfoInvokeTimeOut message for ${correlationId}`, err)
+          .error(`failed to send InfoInvokeTimeout message for ${correlationId}`, err)
       }
     }
 
@@ -330,14 +330,26 @@ export class Service extends ServiceClass {
       await subscription.call.bind(
         this,
         this.serviceLogger.getChildLogger({
-          name: `${this.info.serviceName} V${this.info.serviceVersion}`,
+          prefix: [this.info.serviceName, this.info.serviceVersion, subscription.subscriptionName],
+          name: `${this.info.serviceName} V${this.info.serviceVersion} ${subscription.subscriptionName}`,
           requestId: message.traceId,
         }),
       )(subscriptionId, message)
     } catch (error) {
       this.serviceLogger
-        .getChildLogger({ name: `${this.info.serviceName} V${this.info.serviceVersion}`, requestId: message.traceId })
+        .getChildLogger({
+          name: `${this.info.serviceName} V${this.info.serviceVersion} ${subscription.subscriptionName}`,
+          requestId: message.traceId,
+        })
         .error(error)
+
+      const data = {
+        traceId: message.traceId,
+        subscription: subscription.subscriptionName,
+        error,
+      }
+
+      await this.sendServiceInfo(EBMessageType.InfoSubscriptionError, undefined, data)
     }
   }
 
