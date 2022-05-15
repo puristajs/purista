@@ -1,6 +1,6 @@
 {
   "name": "@purista/core",
-  "version": "1.1.0",
+  "version": "1.1.2",
   "description": "purista backend framwork",
   "homepage": "https://purista.dev",
   "repository": {
@@ -17,7 +17,7 @@
   "main": "lib/index.js",
   "typings": "lib/index.d.ts",
   "files": [
-    "lib/**/*"
+    "lib"
   ],
   "publishConfig": {
     "access": "public"
@@ -38,7 +38,7 @@
     "build": "npm run build:lib && npm run build:api && npm run build:doc",
     "----------------------- PUBLISHING -----------------------------------------": "",
     "prepublishOnly": "npm test && npm run lint",
-    "prepare": "npm run test && npm run build",
+    "prepareXX": "npm run test && npm run build",
     "preversion": "npm run lint",
     "version": "npm run lint && git add -A src",
     "postversion": "git push && git push --tags"
