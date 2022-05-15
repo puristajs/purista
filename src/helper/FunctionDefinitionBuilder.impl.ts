@@ -79,6 +79,7 @@ export class FunctionDefinitionBuilder<
   /** enable or disable security for this endpoint */
   enableHttpSecurity(enabled = true) {
     this.isSecure = enabled
+    return this
   }
 
   setSummary(summary: string) {
