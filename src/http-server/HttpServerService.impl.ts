@@ -88,7 +88,7 @@ export class HttpServerService extends Service {
    * @returns The value of the `conf` property.
    */
   get config() {
-    return this.conf
+    return { ...this.conf }
   }
 
   /**
@@ -130,7 +130,7 @@ export class HttpServerService extends Service {
    * @param {Middleware} middleware - Middleware
    */
   addOnBeforeMiddleware(middleware: Middleware): HttpServerService {
-    this.onBeforeMiddleware.push(middleware)
+    this.onBeforeMiddleware.push(middleware.bind(this))
     return this
   }
 
@@ -139,7 +139,7 @@ export class HttpServerService extends Service {
    * @param {Middleware} middleware - Middleware
    */
   addOnAfterMiddleware(middleware: Middleware): HttpServerService {
-    this.onAfterMiddleware.push(middleware)
+    this.onAfterMiddleware.push(middleware.bind(this))
     return this
   }
 
@@ -231,7 +231,7 @@ export class HttpServerService extends Service {
 
       log.error('route handler error', err)
 
-      if (err instanceof UnhandledError && err.errorCode >= 400 && err.errorCode < 500) {
+      if (err instanceof UnhandledError) {
         response.statusCode = err.errorCode
         response.setHeader('content-type', 'application/json; charset=utf-8')
         response.setHeader('x-trace-id', context.traceId as string)

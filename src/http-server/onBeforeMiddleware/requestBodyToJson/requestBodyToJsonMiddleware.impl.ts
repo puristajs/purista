@@ -1,3 +1,4 @@
+import { HandledError, StatusCode } from '../../../core'
 import { Middleware } from '../../types'
 
 export type RequestBodyToJsonMiddlewareOptions = {}
@@ -37,8 +38,7 @@ export const createRequestBodyToJsonMiddleware = (
       context.payload = JSON.parse(context.payload as string)
     } catch (error) {
       log.warn('failed to convert to json', error)
-      // TODO: add
-      throw new Error('bad request')
+      throw new HandledError(StatusCode.BadRequest, (error as Error).message)
     }
     return context
   }
