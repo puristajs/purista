@@ -25,6 +25,12 @@ export const openApiHandler: Handler = async function (log, _request, _response,
     externalDocs,
   }
 
+  let securitySchema: unknown[] = []
+
+  if (components?.securitySchemes) {
+    securitySchema = Object.keys(components.securitySchemes).map((name) => ({ [name]: [] }))
+  }
+
   const getErrorResponseSchema = (code: StatusCode, message: string, schema?: SchemaObject) => {
     return {
       type: 'object',
@@ -216,6 +222,7 @@ export const openApiHandler: Handler = async function (log, _request, _response,
     paths[path] = {
       ...paths[path],
       [definition.method.toLowerCase()]: {
+        security: securitySchema.length > 0 && definition.openApi?.isSecure ? securitySchema : undefined,
         description: definition.openApi?.description,
         summary: definition.openApi?.summary,
         parameters: [...pathParams, ...queryParams, requestIdParameter],

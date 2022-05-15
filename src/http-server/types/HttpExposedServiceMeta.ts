@@ -11,6 +11,7 @@ export type HttpExposedServiceMeta = {
       path: string
       contentType?: ContentType // if not set we expect 'application/json'
       openApi?: {
+        isSecure: boolean
         description: string
         summary: string
         tags?: string[]

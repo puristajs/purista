@@ -25,8 +25,7 @@ export class FunctionDefinitionBuilder<
 
   private errorStatusCodes: StatusCode[] = []
 
-  private contentEncoding = 'application/json'
-
+  private isSecure = true
   // eslint-disable-next-line no-useless-constructor
   constructor(
     private commandName: string,
@@ -77,6 +76,11 @@ export class FunctionDefinitionBuilder<
     return this
   }
 
+  /** enable or disable security for this endpoint */
+  enableHttpSecurity(enabled = true) {
+    this.isSecure = enabled
+  }
+
   setSummary(summary: string) {
     this.summary = summary
     return this
@@ -100,6 +104,7 @@ export class FunctionDefinitionBuilder<
     definition.metadata.expose.http.openApi = {
       description: this.commandDescription,
       summary: this.summary || this.commandName,
+      isSecure: this.isSecure,
       inputPayload: this.inputSchema ? generateSchema(this.inputSchema) : undefined,
       parameter: this.paramsSchema ? generateSchema(this.paramsSchema) : undefined,
       outputPayload: this.outputSchema ? generateSchema(this.outputSchema) : undefined,
