@@ -1,13 +1,20 @@
+import formidable from 'formidable'
+import { IncomingMessage } from 'http'
+
 import { Middleware } from '../../types'
 
-export type ExtractPayloadMiddlewareOptions = {}
+export type ExtractPayloadMiddlewareOptions = {
+  uploadDir?: string
+}
 
 /**
  * It returns an object with default values for the ExtractPayloadMiddlewareOptions.
  * @returns An object with the default configuration for the extract payload middleware.
  */
 export const getDefaultExtractPayloadMiddlewareOptions = (): ExtractPayloadMiddlewareOptions => {
-  const defaultConfig: ExtractPayloadMiddlewareOptions = {}
+  const defaultConfig: ExtractPayloadMiddlewareOptions = {
+    uploadDir: undefined,
+  }
   return defaultConfig
 }
 
@@ -17,13 +24,31 @@ export const getDefaultExtractPayloadMiddlewareOptions = (): ExtractPayloadMiddl
  * @returns A middleware function that will extract the payload from the request.
  */
 export const createExtractPayloadMiddleware = (options = getDefaultExtractPayloadMiddlewareOptions()): Middleware => {
-  const _config = { ...getDefaultExtractPayloadMiddlewareOptions(), ...options }
+  const config = { ...getDefaultExtractPayloadMiddlewareOptions(), ...options }
 
   const extractPayloadMiddleware: Middleware = async function (log, request, _response, context) {
     const method = request.method
     // if it is some
     if (!['POST', 'PATCH', 'PUT'].includes(method)) {
       return context
+    }
+
+    if (request.headers['content-type']?.includes('multipart/form-data')) {
+      const form = formidable({ multiples: true, uploadDir: config.uploadDir })
+      return new Promise((resolve, reject) => {
+        form.parse(request as unknown as IncomingMessage, (err, fields, files) => {
+          if (err) {
+            log.error(err)
+            reject(err)
+            return
+          }
+
+          context.parameter.files = files
+          context.payload = fields
+
+          resolve(context)
+        })
+      })
     }
 
     const prom = new Promise<string>((resolve, reject) => {

@@ -4,8 +4,6 @@ import { InfoServiceFunctionAdded, isInfoServiceFunctionAdded } from '../../../c
 import { createExtractPayloadMiddleware, createRequestBodyToJsonMiddleware } from '../../onBeforeMiddleware'
 import { Handler, HttpServiceSubscriptionCallBack, isHttpExposedServiceMeta } from '../../types'
 
-const beforeMiddleware = [createExtractPayloadMiddleware(), createRequestBodyToJsonMiddleware()]
-
 /* A function that is called when a message is received. */
 export const serviceCommandsToRestApi: HttpServiceSubscriptionCallBack<InfoServiceFunctionAdded> = async function (
   log,
@@ -21,6 +19,11 @@ export const serviceCommandsToRestApi: HttpServiceSubscriptionCallBack<InfoServi
     log.debug('...skip exposing function')
     return
   }
+
+  const beforeMiddleware = [
+    createExtractPayloadMiddleware({ uploadDir: this.config.uploadDir }),
+    createRequestBodyToJsonMiddleware(),
+  ]
 
   const data = message.data.expose
   const version = message.sender.serviceVersion.split('.')[0]

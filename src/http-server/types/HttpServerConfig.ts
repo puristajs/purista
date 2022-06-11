@@ -14,6 +14,7 @@ export type HttpServerConfig = {
   logLevel?: LogLevelName
   port: number
   domain: string
+  uploadDir?: string
   cookieSecret?: string
   options: SecureServerOptions
   apiMountPath?: string

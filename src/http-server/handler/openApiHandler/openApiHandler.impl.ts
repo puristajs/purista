@@ -201,16 +201,29 @@ export const openApiHandler: Handler = async function (log, _request, _response,
       }
     }
 
-    definition.openApi?.additionalStatusCodes?.forEach((code) => {
-      errorResponses[code] = {
-        description: getErrorName(code),
+    if (securitySchema.length > 0 && definition.openApi?.isSecure) {
+      errorResponses[401] = {
+        description: getErrorName(401),
         content: {
           'application/json': {
-            schema: getErrorResponseSchema(code, getErrorName(code)),
+            schema: getErrorResponseSchema(401, 'authentication required'),
           },
         },
       }
-    })
+    }
+
+    definition.openApi?.additionalStatusCodes
+      ?.filter((code) => !Object.keys(errorResponses).includes(code.toString()))
+      .forEach((code) => {
+        errorResponses[code] = {
+          description: getErrorName(code),
+          content: {
+            'application/json': {
+              schema: getErrorResponseSchema(code, getErrorName(code)),
+            },
+          },
+        }
+      })
 
     const requestIdParameter: ParameterObject = {
       in: 'header',
