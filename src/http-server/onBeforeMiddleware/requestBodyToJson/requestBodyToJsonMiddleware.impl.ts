@@ -27,9 +27,9 @@ export const createRequestBodyToJsonMiddleware = (
     // if it is some
     if (
       !['POST', 'PATCH', 'PUT'].includes(method) ||
-      context.payload === undefined ||
-      context.payload === null ||
-      context.payload === ''
+      typeof context.payload !== 'string' ||
+      context.payload === '' ||
+      !request.headers['content-type']?.includes('application/json')
     ) {
       return context
     }
