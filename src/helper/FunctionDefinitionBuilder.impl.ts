@@ -1,7 +1,15 @@
 import { generateSchema } from '@anatine/zod-openapi'
 import { z } from 'zod'
 
-import { CommandDefinition, CommandFunction, Service, StatusCode } from '../core'
+import {
+  AfterGuardHook,
+  BeforeGuardHook,
+  CommandDefinition,
+  CommandFunction,
+  Service,
+  StatusCode,
+  TransformHook,
+} from '../core'
 import { ContentType, HttpExposedServiceMeta, QueryParameter } from '../http-server'
 import { getFunctionWithValidation } from './getFunctionWithValidation'
 import { SupportedHttpMethod } from './types'
@@ -9,7 +17,7 @@ import { SupportedHttpMethod } from './types'
 export class FunctionDefinitionBuilder<
   ServiceClassType extends Service,
   PayloadType = unknown,
-  ParamsType = unknown,
+  ParamsType = Record<string, unknown>,
   ResultType = unknown,
 > {
   private httpMetadata?: HttpExposedServiceMeta
@@ -26,6 +34,17 @@ export class FunctionDefinitionBuilder<
   private errorStatusCodes: StatusCode[] = []
 
   private isSecure = true
+
+  private hooks: {
+    transformInput?: TransformHook<ServiceClassType, PayloadType, ParamsType>
+    beforeGuard?: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>
+    afterGuard?: AfterGuardHook<ServiceClassType, ResultType>
+  } = {
+    transformInput: undefined,
+    beforeGuard: undefined,
+    afterGuard: undefined,
+  }
+
   // eslint-disable-next-line no-useless-constructor
   constructor(
     private commandName: string,
@@ -63,6 +82,21 @@ export class FunctionDefinitionBuilder<
     return this
   }
 
+  setTransformInputHook(transformHook: TransformHook<ServiceClassType, PayloadType, ParamsType>) {
+    this.hooks.transformInput = transformHook
+    return this
+  }
+
+  setBeforeGuardHook(beforeGuard: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>) {
+    this.hooks.beforeGuard = beforeGuard
+    return this
+  }
+
+  setAfterGuardHook(afterGuard: AfterGuardHook<ServiceClassType, ResultType>) {
+    this.hooks.afterGuard = afterGuard
+    return this
+  }
+
   exposeAsHttpEndpoint(method: SupportedHttpMethod, path: string, contentType: ContentType = 'application/json') {
     this.httpMetadata = {
       expose: {
@@ -88,21 +122,26 @@ export class FunctionDefinitionBuilder<
   }
 
   private extendWithHttpMetadata(
-    definition: CommandDefinition<
-      HttpExposedServiceMeta,
-      CommandFunction<ServiceClassType, PayloadType, ParamsType, ResultType>
-    >,
-  ) {
+    definition: CommandDefinition<unknown, ServiceClassType, PayloadType, ParamsType, ResultType>,
+  ): CommandDefinition<unknown, ServiceClassType, PayloadType, ParamsType, ResultType> {
     if (!this.httpMetadata) {
       return definition
     }
 
-    definition.metadata.expose = {
-      ...(definition.metadata.expose || {}),
+    const def = definition as CommandDefinition<
+      HttpExposedServiceMeta,
+      ServiceClassType,
+      PayloadType,
+      ParamsType,
+      ResultType
+    >
+
+    def.metadata.expose = {
+      ...(def.metadata.expose || {}),
       ...this.httpMetadata.expose,
     }
 
-    definition.metadata.expose.http.openApi = {
+    def.metadata.expose.http.openApi = {
       description: this.commandDescription,
       summary: this.summary || this.commandName,
       isSecure: this.isSecure,
@@ -114,14 +153,11 @@ export class FunctionDefinitionBuilder<
       additionalStatusCodes: this.errorStatusCodes,
     }
 
-    return definition
+    return def
   }
 
-  getDefinition(): CommandDefinition<unknown, CommandFunction<ServiceClassType, PayloadType, ParamsType, ResultType>> {
-    let definition: CommandDefinition<
-      unknown,
-      CommandFunction<ServiceClassType, PayloadType, ParamsType, ResultType>
-    > = {
+  getDefinition(): CommandDefinition<unknown, ServiceClassType, PayloadType, ParamsType, ResultType> {
+    let definition: CommandDefinition<unknown, ServiceClassType, PayloadType, ParamsType, ResultType> = {
       commandName: this.commandName,
       commandDescription: this.commandDescription,
       metadata: {},
@@ -131,14 +167,10 @@ export class FunctionDefinitionBuilder<
         this.paramsSchema,
         this.outputSchema,
       ),
+      hooks: this.hooks,
     }
 
-    definition = this.extendWithHttpMetadata(
-      definition as CommandDefinition<
-        HttpExposedServiceMeta,
-        CommandFunction<ServiceClassType, PayloadType, ParamsType, ResultType>
-      >,
-    )
+    definition = this.extendWithHttpMetadata(definition)
 
     return definition
   }

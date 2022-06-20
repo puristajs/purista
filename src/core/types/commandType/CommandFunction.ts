@@ -8,7 +8,7 @@ import { Command } from './Command'
 export type CommandFunction<
   ServiceClassType = Service,
   PayloadType = unknown,
-  ParamsType = unknown,
+  ParamsType = Record<string, unknown>,
   ResultType = unknown,
 > = (
   this: ServiceClassType,
