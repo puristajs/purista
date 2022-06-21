@@ -1,9 +1,9 @@
 {
     "$schema": "https://typedoc.org/schema.json",
     "name":"PURISTA API",
-    "entryPointStrategy":"Packages",
-    "entryPoints": [".", "../testhelper"],
-    "out": "doc_src/api",
+    "entryPointStrategy":"packages",
+    "entryPoints": ["./packages/core", ".packages/testhelper"],
+    "out": "website/src/api",
     "plugin": "typedoc-plugin-markdown",
     "readme":"none",
     "hideGenerator": true,
