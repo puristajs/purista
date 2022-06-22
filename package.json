@@ -1,8 +1,13 @@
 {
   "private":true,
   "scripts": {
+    "start":"echo start goes here",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
     "build:api": "typedoc",
-    "build:doc": "npm run build:doc -w website"
+    "build:doc": "npm run build:doc -w website",
+    "test": "turbo run test --parallel",
+    "typecheck": "turbo run typecheck"
   },
   "workspaces":[
     "./packages/*",
@@ -10,7 +15,26 @@
     "./website"
   ],
   "devDependencies": {
+    "@types/node": "^17.0.31",
+    "@types/sinon": "^10.0.11",
+    "@swc/jest": "^0.2.21",
+    "@types/jest": "^27.5.0",
     "typedoc": "^0.22.17",
-    "typedoc-plugin-markdown": "^3.12.1"
+    "typedoc-plugin-markdown": "^3.12.1",
+    "@typescript-eslint/eslint-plugin": "^5.23.0",
+    "@typescript-eslint/parser": "^5.23.0",
+    "eslint": "^8.15.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-json": "^3.1.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-prettier": "^4.0.0",
+    "eslint-plugin-simple-import-sort": "^7.0.0",
+    "jest": "^28.1.0",
+    "prettier": "^2.6.2",
+    "typescript": "^4.7.4",
+    "turbo": "latest",
+    "esbuild": "0.14.47"
   }
 }
