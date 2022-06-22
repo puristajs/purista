@@ -1,6 +1,6 @@
 import { EBMessage } from './EBMessage'
 import { EBMessageAddress } from './EBMessageAddress'
-import { Subscription } from './Subscription'
+import { Subscription } from './subscription'
 
 /**
  * Event bridge interface
