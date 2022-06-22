@@ -1,8 +1,9 @@
 {
   "name": "@purista/simple-example",
-  "version": "1.0.5",
-  "description": "purista backend framwork",
+  "version": "1.2.0",
+  "description": "purista backend framework",
   "homepage": "https://purista.dev",
+  "private":true,
   "repository": {
     "type": "git",
     "url": "git@github.com:sebastianwessel/purista.git"
@@ -17,7 +18,10 @@
     "start": "ts-node src/index.ts",
     "dev": "ts-node-dev src/index.ts",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
-    "test": "jest"
+    "test": "jest --passWithNoTests",
+    "bump:major":"npm version major --no-git-tag-version",
+    "bump:minor":"npm version minor --no-git-tag-version",
+    "bump:patch:":"npm version patch --no-git-tag-version"
   },
   "devDependencies": {
     "ts-node-dev": "^2.0.0"

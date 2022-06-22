@@ -36,7 +36,10 @@
     "build_old": "tsc --project ./tsconfig.ref.json",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
     "test": "jest --passWithNoTests",
-    "build": "node ../../scripts/buildesm.js && tsc --emitDeclarationOnly --declaration --outDir lib/types --project ./tsconfig.ref.json"
+    "build": "node ../../scripts/buildesm.js && tsc --emitDeclarationOnly --declaration --outDir lib/types --project ./tsconfig.ref.json",
+    "bump:major":"npm version major --no-git-tag-version",
+    "bump:minor":"npm version minor --no-git-tag-version",
+    "bump:patch:":"npm version patch --no-git-tag-version"
   },
   "devDependencies": {
     "@purista/core": "*",
