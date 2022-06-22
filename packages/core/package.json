@@ -14,8 +14,15 @@
     "man": "docs",
     "example": "example"
   },
-  "main": "lib/index.js",
-  "typings": "lib/index.d.ts",
+  "main": "./lib/cjs/index.cjs",
+  "module": "./lib/esm/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./lib/esm/index.mjs",
+      "require": "./lib/cjs/index.cjs"
+    }
+  },
+  "typings": "lib/types/index.d.ts",
   "files": [
     "lib"
   ],
@@ -26,9 +33,10 @@
     "node": ">=16"
   },
   "scripts": {
-    "build": "tsc --project ./tsconfig.ref.json",
+    "build_old": "tsc --project ./tsconfig.ref.json",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
-    "test": "jest --passWithNoTests"
+    "test": "jest --passWithNoTests",
+    "build": "node ../../scripts/buildesm.js && tsc --emitDeclarationOnly --declaration --outDir lib/types --project ./tsconfig.ref.json"
   },
   "devDependencies": {
     "@types/formidable": "^2.0.5",

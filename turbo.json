@@ -1,11 +1,19 @@
 {
   "pipeline": {
+    "//#clean-git": {
+      "dependsOn": [],
+      "outputs": []
+    },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["lib/**"]
     },
     "test": {},
     "lint": {},
+    "document":{
+      "dependsOn": ["clean-git","^build","^lint","^test"],
+      "outputs": ["docs/**"]
+    },
     "dev": {
       "cache": false
     }
