@@ -1,7 +1,15 @@
 {
   "pipeline": {
-    "//#clean-git": {
+    "//#gitclean": {
       "dependsOn": [],
+      "outputs": []
+    },
+     "//#releaseprepare": {
+      "dependsOn": [],
+      "outputs": []
+    },
+     "//#tag": {
+      "dependsOn": ["gitclean"],
       "outputs": []
     },
     "build": {
@@ -11,8 +19,24 @@
     "test": {},
     "lint": {},
     "document":{
-      "dependsOn": ["clean-git","^build","^lint","^test"],
+      "dependsOn": ["^build","^lint","^test"],
       "outputs": ["docs/**"]
+    },
+    "publish": {
+      "dependsOn": [],
+      "outputs": []
+    },
+    "bump:major":{
+      "dependsOn": ["^build","^lint","^test"],
+      "outputs": ["package.json","package-lock.json"]
+    },
+    "bump:minor":{
+      "dependsOn": ["^build","^lint","^test"],
+      "outputs": ["package.json","package-lock.json"]
+    },
+    "bump:patch:":{
+      "dependsOn": ["^build","^lint","^test"],
+      "outputs": ["package.json","package-lock.json"]
     },
     "dev": {
       "cache": false

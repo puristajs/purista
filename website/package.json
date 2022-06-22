@@ -1,10 +1,14 @@
 {
   "name": "@purista/website",
+  "version": "1.2.0",
   "private": true,
   "scripts": {
     "dev": "vuepress dev src",
     "docs:clean-dev": "vuepress dev src --clean-cache",
-    "document": "vuepress build src"
+    "document": "../scripts/isGitClean.sh && vuepress build src && git add --all && git commit -am \"doc: update documentation\"",
+    "bump:major": "npm version major --no-git-tag-version",
+    "bump:minor": "npm version minor --no-git-tag-version",
+    "bump:patch:": "npm version patch --no-git-tag-version"
   },
   "devDependencies": {
     "@vuepress/client": "^2.0.0-beta.48",
