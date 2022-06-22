@@ -16,3 +16,5 @@ node_modules/
 .vuepress/.temp/
 .vuepress/dist/
 
+.turbo
+

@@ -1,31 +1,3 @@
 {
-  "compilerOptions": {
-    "strict": true,
-    "module": "commonjs",
-    "declaration": true,
-    "removeComments": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "es2022",
-    "sourceMap": true,
-    "incremental": true,
-    "noImplicitAny": true,
-    "esModuleInterop": true,
-    "resolveJsonModule": true,
-    "baseUrl": ".",
-    "rootDir": ".",
-    "outDir": "lib",
-    "paths": {
-      "~/*": [
-        "packages/*",
-        "examples/*"
-      ]
-    }
-  },
-  "exclude": [
-    "node_modules",
-    "dist",
-    "lib"
-  ],  
+  "extends": "./tsconfig.base.json",
 }

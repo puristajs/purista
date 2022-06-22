@@ -4,7 +4,7 @@
   "scripts": {
     "dev": "vuepress dev src",
     "docs:clean-dev": "vuepress dev src --clean-cache",
-    "build": "vuepress build src"
+    "document": "vuepress build src"
   },
   "devDependencies": {
     "@vuepress/client": "^2.0.0-beta.48",

@@ -1,9 +1,13 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./lib"
   },
   "include": [
-    "./**/*.ts"
-  ]
+    "./src/index.ts"
+  ],
+  "exclude": [
+    "./**/*.d.ts",
+    "./lib/*"
+  ],
 }

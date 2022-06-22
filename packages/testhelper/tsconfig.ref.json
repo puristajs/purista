@@ -1,14 +1,10 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "./lib",
   },
-  "include": [
-    "./**/*.ts"
-  ],
-  "references": [
-    {
-      "path": "../core"
-    }
+  "exclude": [
+    "./**/*.d.ts",
+    "./lib/*"
   ]
 }
