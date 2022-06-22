@@ -1,6 +1,5 @@
 **/lib/*
-!.vuepress
+.turbo
 docs
 coverage
 node_modules
-.vuepress/enhanceApp.js

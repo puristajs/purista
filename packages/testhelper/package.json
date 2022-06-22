@@ -1,6 +1,6 @@
 {
   "name": "@purista/testhelper",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Unit test helper for PURISTA backend framework",
   "homepage": "https://purista.dev",
   "repository": {
@@ -26,12 +26,16 @@
     "node": ">=16"
   },
   "scripts": {
-    "build": "esbuild ./src/index.ts --bundle --platform=node --outfile=lib/index.js",
+    "build": "tsc --project ./tsconfig.ref.json",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "devDependencies": {
-    "@purista/core": "file:../core"
+    "@purista/core": "*",
+    "@types/jest": "^27.x",
+    "@types/sinon": "^10.x",
+    "jest": "^28.x",
+    "sinon": "^14.x"
   },
   "peerDependencies": {
     "@purista/core": "*",

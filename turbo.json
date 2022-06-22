@@ -5,9 +5,7 @@
       "outputs": ["lib/**"]
     },
     "test": {},
-    "typecheck": {},
     "lint": {},
-    "lint:fix": {},
     "dev": {
       "cache": false
     }
