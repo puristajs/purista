@@ -1,0 +1,16 @@
+{
+  "pipeline": {
+    "build": {
+      "dependsOn": ["^build"],
+      "outputs": ["lib/**"]
+    },
+    "test": {},
+    "typecheck": {},
+    "lint": {},
+    "lint:fix": {},
+    "dev": {
+      "cache": false
+    }
+  },
+  "globalDependencies": ["tsconfig.base.json"]
+}

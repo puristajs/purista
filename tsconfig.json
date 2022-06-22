@@ -9,10 +9,23 @@
     "allowSyntheticDefaultImports": true,
     "target": "es2022",
     "sourceMap": true,
-    "outDir": "./lib",
     "incremental": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
     "resolveJsonModule": true,
-  }
+    "baseUrl": ".",
+    "rootDir": ".",
+    "outDir": "lib",
+    "paths": {
+      "~/*": [
+        "packages/*",
+        "examples/*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "dist",
+    "lib"
+  ],  
 }
