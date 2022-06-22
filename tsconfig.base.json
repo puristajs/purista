@@ -3,11 +3,12 @@
   "display": "Node 16",
   "compilerOptions": {
     "strict": true,
-    "module": "commonjs",
+    "module": "es2022",
     "declaration": true,
     "removeComments": true,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
+    "moduleResolution": "Node",
     "allowSyntheticDefaultImports": true,
     "target": "es2022",
     "sourceMap": true,
