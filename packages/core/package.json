@@ -1,6 +1,6 @@
 {
   "name": "@purista/core",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "purista backend framework",
   "homepage": "https://purista.dev",
   "repository": {
@@ -37,9 +37,9 @@
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
     "test": "jest --passWithNoTests",
     "build": "node ../../scripts/buildesm.js && tsc --emitDeclarationOnly --declaration --outDir lib/types --project ./tsconfig.ref.json",
-    "bump:major":"npm version major --no-git-tag-version",
-    "bump:minor":"npm version minor --no-git-tag-version",
-    "bump:patch:":"npm version patch --no-git-tag-version"
+    "bump:major": "npm version major --no-git-tag-version",
+    "bump:minor": "npm version minor --no-git-tag-version",
+    "bump:patch:": "npm version patch --no-git-tag-version"
   },
   "devDependencies": {
     "@types/formidable": "^2.0.5",
