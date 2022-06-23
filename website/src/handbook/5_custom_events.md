@@ -2,9 +2,9 @@
 # This control sidebar index
 index: 6
 # This is the icon of the page
-icon: cloud fas
+icon: hand-holding-magic fas
 # This is the title of the article
-title: Scaling
+title: Custom events
 # A page can have multiple tags
 tag:
   - Guide
@@ -14,11 +14,6 @@ sticky: true
 star: true
 ---
 
-# Scaling
+# Custom events
 
-The current version of PURISTA comes with a simple event bridge implementation for single instances.  
-
-We are currently pushing the implementation of AMQP event bridge, which allows the usage of message brokers.
-
-Please be patient.
-
+In progress
