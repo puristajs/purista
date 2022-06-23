@@ -2,7 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [1.3.0] - 2022-06-23
+
+### Documentation
+
+- Add change log file #11
+- Add simple example #5
+- Update documentation
+- Update documentation
 
 ### Features
 
@@ -13,6 +20,10 @@ All notable changes to this project will be documented in this file.
 
 - Migrate to mono repo #31
 - Add turbo
+- Update project configs
+- Build esm and commonjs
+- Setup publish pipeline
+- Bump versions to 1.3.0
 
 ## [1.1.5] - 2022-05-15
 
