@@ -1,3 +1,0 @@
-# Custom events
-
-In progress

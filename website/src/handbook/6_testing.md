@@ -1,6 +1,6 @@
 ---
 # This control sidebar index
-index: 5
+index: 7
 # This is the icon of the page
 icon: vial-circle-check fas
 # This is the title of the article
