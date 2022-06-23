@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.3.0] - 2022-06-23
+## [1.3.1] - 2022-06-23
 
 ### Documentation
 
@@ -10,11 +10,17 @@ All notable changes to this project will be documented in this file.
 - Add simple example #5
 - Update documentation
 - Update documentation
+- Add readme to packages
+- Fix typos
+- Add documentation for hooks
+- Update documentation
 
 ### Features
 
 - Add form multipart upload suppport to webserver
 - [FEATURE-REQUEST] Add hooks #34
+- Allow multiple hooks closes #34
+- Improve service function hooks
 
 ### Miscellaneous Tasks
 
@@ -24,6 +30,10 @@ All notable changes to this project will be documented in this file.
 - Build esm and commonjs
 - Setup publish pipeline
 - Bump versions to 1.3.0
+- Update changelog
+- Align command naming
+- Correct file name
+- Simplify typing
 
 ## [1.1.5] - 2022-05-15
 
