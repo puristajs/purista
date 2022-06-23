@@ -301,8 +301,9 @@ export class Service extends ServiceClass {
     try {
       let payloadInput = message.command.payload
       let parameterInput = message.command.parameter
-      if (command.hooks.transformInput) {
-        for (const hook of command.hooks.transformInput) {
+
+      if (command.hooks.beforeTransformInput) {
+        for (const hook of command.hooks.beforeTransformInput) {
           const transform = hook.bind(this, log)
           const transformResponse = await transform(payloadInput, parameterInput, message)
           payloadInput = transformResponse.payload
@@ -310,20 +311,20 @@ export class Service extends ServiceClass {
         }
       }
 
-      if (command.hooks.beforeGuard) {
-        for (const hook of command.hooks.beforeGuard) {
-          const beforeGuard = hook.bind(this, log)
-          await beforeGuard(payloadInput, parameterInput, message)
-        }
-      }
-
       const call = command.call.bind(this, log)
-      const payload = await call(payloadInput, parameterInput, message)
+      let payload = await call(payloadInput, parameterInput, message)
 
       if (command.hooks.afterGuard) {
         for (const hook of command.hooks.afterGuard) {
           const afterGuard = hook.bind(this, log)
-          await afterGuard(payload)
+          await afterGuard(payload, payloadInput, parameterInput, message)
+        }
+      }
+
+      if (command.hooks.afterTransformOutput) {
+        for (const hook of command.hooks.afterTransformOutput) {
+          const afterTransform = hook.bind(this, log)
+          payload = await afterTransform(payload, payloadInput, parameterInput, message)
         }
       }
 

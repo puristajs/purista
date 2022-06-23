@@ -1,12 +1,11 @@
-import type { Service } from '../../Service'
+import { Service } from '../../Service'
 import { Logger } from '../Logger'
 import { Command } from './Command'
 
 /**
- * Definition of after guard hook functions.
- * This guard is called after function successfully returns and after output validation.
+ * This transform hook is executed after function output validation and AfterGuardHooks.
  */
-export type AfterGuardHook<
+export type AfterTransformHook<
   ServiceClassType = Service,
   ResultType = unknown,
   PayloadType = unknown,
@@ -18,4 +17,4 @@ export type AfterGuardHook<
   input: PayloadType,
   params: ParamsType,
   message: Command<PayloadType, ParamsType>,
-) => Promise<void>
+) => Promise<unknown>

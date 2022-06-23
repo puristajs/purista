@@ -3,12 +3,13 @@ import { z } from 'zod'
 
 import {
   AfterGuardHook,
+  AfterTransformHook,
   BeforeGuardHook,
+  BeforeTransformHook,
   CommandDefinition,
   CommandFunction,
   Service,
   StatusCode,
-  TransformHook,
 } from '../core'
 import { ContentType, HttpExposedServiceMeta, QueryParameter } from '../http-server'
 import { getFunctionWithValidation } from './getFunctionWithValidation'
@@ -36,13 +37,15 @@ export class FunctionDefinitionBuilder<
   private isSecure = true
 
   private hooks: {
-    transformInput: TransformHook<ServiceClassType, PayloadType, ParamsType>[]
+    beforeTransform: BeforeTransformHook<ServiceClassType>[]
     beforeGuard: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>[]
-    afterGuard: AfterGuardHook<ServiceClassType, ResultType>[]
+    afterGuard: AfterGuardHook<ServiceClassType, ResultType, PayloadType, ParamsType>[]
+    afterTransform: AfterTransformHook<ServiceClassType, any, any, any>[]
   } = {
-    transformInput: [],
+    beforeTransform: [],
     beforeGuard: [],
     afterGuard: [],
+    afterTransform: [],
   }
 
   // eslint-disable-next-line no-useless-constructor
@@ -82,17 +85,22 @@ export class FunctionDefinitionBuilder<
     return this
   }
 
-  setTransformInputHook(transformHook: TransformHook<ServiceClassType, PayloadType, ParamsType>[]) {
-    this.hooks.transformInput.push(...transformHook)
+  setBeforeTransformHook(...beforetransformHooks: BeforeTransformHook<ServiceClassType>[]) {
+    this.hooks.beforeTransform.push(...beforetransformHooks)
     return this
   }
 
-  setBeforeGuardHook(beforeGuard: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>[]) {
-    this.hooks.beforeGuard.push(...beforeGuard)
+  setAfterTransformHook(...aftertransformHooks: AfterTransformHook<ServiceClassType, any, any, any>[]) {
+    this.hooks.afterTransform.push(...aftertransformHooks)
     return this
   }
 
-  setAfterGuardHook(...afterGuard: AfterGuardHook<ServiceClassType, ResultType>[]) {
+  setBeforeGuardHook(...beforeGuards: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>[]) {
+    this.hooks.beforeGuard.push(...beforeGuards)
+    return this
+  }
+
+  setAfterGuardHook(...afterGuard: AfterGuardHook<ServiceClassType, ResultType, PayloadType, ParamsType>[]) {
     this.hooks.afterGuard.push(...afterGuard)
     return this
   }
@@ -172,6 +180,7 @@ export class FunctionDefinitionBuilder<
         this.inputSchema,
         this.paramsSchema,
         this.outputSchema,
+        this.hooks.beforeGuard,
       ),
       hooks: this.hooks,
     }

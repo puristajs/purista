@@ -1,8 +1,9 @@
 import type { Service } from '../../Service'
 import { AfterGuardHook } from './AfterGuardHook'
+import { AfterTransformHook } from './AfterTransformHook'
 import { BeforeGuardHook } from './BeforeGuardHook'
+import { BeforeTransformHook } from './BeforeTransformHook'
 import { CommandFunction } from './CommandFunction'
-import { TransformHook } from './TransformHook'
 
 /**
  * The definition for a command provided by some service.
@@ -19,8 +20,9 @@ export type CommandDefinition<
   metadata: MetadataType
   call: CommandFunction<ServiceClassType, PayloadType, ParamsType, ResultType>
   hooks: {
-    transformInput?: TransformHook<ServiceClassType, PayloadType, ParamsType>[]
+    beforeTransformInput?: BeforeTransformHook<ServiceClassType>[]
     beforeGuard?: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>[]
-    afterGuard?: AfterGuardHook<ServiceClassType, ResultType>[]
+    afterGuard?: AfterGuardHook<ServiceClassType, ResultType, PayloadType, ParamsType>[]
+    afterTransformOutput?: AfterTransformHook<ServiceClassType, ResultType>[]
   }
 }
