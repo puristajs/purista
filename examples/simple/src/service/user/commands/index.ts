@@ -1,8 +1,6 @@
-import { CommandDefinition } from '@purista/core'
+import { CommandDefinitionList } from '@purista/core'
 
 import { UserService } from '../UserService'
 import signUp from './signUp'
 
-export const userServiceCommands: CommandDefinition<Record<string, unknown>, UserService, any, any, any>[] = [
-  signUp.getDefinition(),
-]
+export const userServiceCommands: CommandDefinitionList<UserService> = [signUp.getDefinition()]
