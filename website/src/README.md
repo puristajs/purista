@@ -54,7 +54,7 @@ footer: MIT Licensed | Made from developers for developers with ❤️
 
 A backend framework for building message based domain services.
 
-This framework adapts and combines a wide range of different patters from domain driven design, cqrs, microservice, eventsourcing and lambda functions.
+This framework adapts and combines a wide range of different patters from domain driven design, cqrs, microservice, event sourcing and lambda functions.
 
 It is build from ground up in typescript and highly focuses on schema, and auto generation of types, input-output-validation, openApi documentation (swagger).
 
@@ -62,7 +62,7 @@ It is build from ground up in typescript and highly focuses on schema, and auto 
 
 PURISTA tries to avoid the need for implementing boilerplate code as much as possible and to automate and autogenerate types, definitions, documentation when ever possible.
 
-Schema and input-output-validation are deeply integrated and they should be used whenever possible to build robust, stable systems.
+Schema and input-output-validation are deeply integrated, and they should be used whenever possible to build robust, stable systems.
 
 PURISTA addresses developers which want to simply focus on implementation, while providing them the necessary things to use the great node/typescript tooling.
 

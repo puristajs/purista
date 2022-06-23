@@ -16,8 +16,9 @@ star: true
 
 # Scaling
 
-The current version of PURISTA comes with a simple eventbridge implementation for single instances.  
+The current version of PURISTA comes with a simple event bridge implementation for single instances.  
 
-We are currently pushing the implementation of AMQP eventbridge which allows the usage of message brokers.
+We are currently pushing the implementation of AMQP event bridge, which allows the usage of message brokers.
 
 Please be patient.
+

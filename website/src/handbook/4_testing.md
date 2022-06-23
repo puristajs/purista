@@ -19,18 +19,18 @@ star: true
 Testing is one of the most love-hate-stories for developers.  
 It's always balancing between quick delivery, highly automated tests and catching each edge case and of course available time/money.
 
-Testing does not come for free and you need time for it and as we all know: time is money.
+Testing does not come for free, and you need time for it, and as we all know: time is money.
 
 So, how can PURISTA help here?
 
-First of all, because of it's concept and core design.  
-As there are schema validations in each service function for input and output, we avoid a lot edge cases upfront.  
+First, because of it's concept and core design.  
+As there are schema validations in each service function for input and output, we avoid a lot of edge cases upfront.  
 You do not need to test, what happens, if there is some wrong input.  
 Also, you do not need to take care to prevent data leaks if something fails.
-It's clear, it's defined and nothing a developer needs to implement and test over and over again.
+It's clear, it's defined, and nothing a developer needs to implement and test over and over again.
 So, just put a ✅ on this topic.
 
-We can be pretty sure, that there is wrong input data cascaded through the system.
+We can be pretty sure, that there is no wrong input data cascaded through the system.
 
 Plus:
 We use typescript and types generated out of schema.  
@@ -42,10 +42,10 @@ Next ✅ we have.
 Second big thing to point out here:  
 We can build real complex systems, but we write most of the time only simple, encapsulated functions, which are following the same design pattern.  
 We have always defined, validated input and always defined, validated output.
-Input and Output validation + propper error response = ✅
+Input and Output validation + proper error response = ✅
 
 We also do not need to think about edge cases like "what happens if something inside a function throws".  
-We already now it - it's catched, logged and handled with a defined error response.
+We already know it - it's caught, logged and handled with a defined error response.
 Unhandled, unexpected errors = ✅
 
 This means we can more focus on testing single functions.  
@@ -55,7 +55,7 @@ Just prove the business logic, instead of proving correct code.
 
 PURISTA comes with some simple mocks, which should developers help to write tests fast and simple.
 
-Currently there are mocks available for:
+Currently, there are mocks available for:
 
 - Eventbridge
 - Logger
@@ -177,4 +177,4 @@ As you can see, you just need to call your function with some input values and m
 
 There are no unknowns, dependency injections, side effects from other functions if you keep your functions as simple as possible, stateless and separated into many little pieces.
 
-With this approach, testing becomes real simple, powerfull and reduces the time/costs to a minimum.
+With this approach, testing becomes real simple, powerful and reduces the time/costs to a minimum.

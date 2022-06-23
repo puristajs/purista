@@ -16,17 +16,17 @@ star: true
 
 # Create a new service
 
-A service is a logical group of functions and this where the domain driven aspect comes in.  
-In our example we will use the classic example - Users.
+A service is a logical group of functions, and this where the domain driven aspect comes in.  
+In our example, we will use the classic example - Users.
 
 We want to have the domain *User* and the following functionality:
 
 - sign up a new user
 - send a welcome email to user
 
-## Setup a new service
+## Set up a new service
 
-First we need to create a new service.  
+First, we need to create a new service.  
 All we need to do is to create a new class which extends the `Service` class.
 
 Create a folder `src/service/user` and inside this folder create a file `UserService.ts` with following content:
@@ -75,8 +75,8 @@ Now we want to be able to sign up new users, so we will create a function for it
 
 Create a new subfolder `src/service/user/commands` and create files `index.ts`, `schema.ts` and `signUp.ts`
 
-First let's define the shape of our data.  
-Todo so, we will use awesome [zod library](https://github.com/colinhacks/zod) which will provide use schema validation, typescript types and with some plugin openapi (swagger) definition from one single definition.
+First, let's define the shape of our data.  
+To do so, we will use awesome [zod library](https://github.com/colinhacks/zod) which will provide use schema validation, typescript types and with some plugin OpenApi (swagger) definition from one single definition.
 
 Add the needed dependencies to our project:
 
@@ -88,7 +88,7 @@ npm install --save zod @anatine/zod-openapi
 
 Now we can start to create a schema for input payload, parameters and output payload.
 
-Add following content into `src/service/user/commands/schema.ts`:
+Add the following content into `src/service/user/commands/schema.ts`:
 
 ```typescript
 import { extendApi } from '@anatine/zod-openapi'
@@ -128,8 +128,8 @@ export type InputParameterType = z.infer<typeof inputParameterSchema>
 export type OutputPayloadType = z.infer<typeof outputPayloadSchema>
 ```
 
-As you can see we define the shape of our data.  
-We also add some additional metadata like `title` and `example`. This will be used to generate the openapi definition for our function as we want to expose this function as rest api endpoint.
+As you can see, we define the shape of our data.  
+We also add some additional metadata like `title` and `example`. This will be used to generate the OpenApi definition for our function, as we want to expose this function as a rest API endpoint.
 
 ### Implement logic
 
@@ -158,10 +158,10 @@ export const signUp: CommandFunction<UserService, InputPayloadType, InputParamet
 It's a simple function where we log the input and return a response object.  
 But you can see some basic features:
 
-Our function is a async function, which allows us to use async-await within our code.  
-The types generated from schema are used and your linter/typescript will complain on missmatches.  
-You have a `this` scope, which is you domain service class `User`.  
-As this service class is extending the base `Service` class, you will have some more usefull functions, which we will cover later on.
+Our function is an asynchronous function, which allows us to use async-await within our code.  
+The types generated from schema are used, and your linter/typescript will complain on mismatches.  
+You have a `this` scope, which is your domain service class `User`.  
+As this service class is extending the base `Service` class, you will have some more useful functions, which we will cover later on.
 
 <Badge text="Be aware" type="warning"/>
 
@@ -203,7 +203,7 @@ export const signUp: CommandFunction<UserService, InputPayloadType, InputParamet
 
 <Badge text="Be aware" type="warning"/>
 
-In real world, holding states in the service class is a bad approach and should be avoided.  
+In the real world, holding states in the service class is a bad approach and should be avoided.  
 Such stuff is hard to handle and to scale. Try to keep things as stateless as possible.
 
 So, you might ask why a service class at all?
@@ -219,7 +219,7 @@ It will hit you hard, when you try to scale your system, during tests and so on.
 ### Add the function to service
 
 Now it's time to let our `User` service know that he has some function `signUp`.  
-First of all we will create a function definition in our `src/service/user/commands/index.ts`:
+First, we will create a function definition in our `src/service/user/commands/index.ts`:
 
 ```typescript
 import { FunctionDefinitionBuilder } from '@purista/core'
@@ -255,8 +255,9 @@ If you now start the application with `npm start` you should have a POST endpoin
 There you can see we expose our function versioned by the service version.  
 This means we can also have same domain service running with different version.
 
-If you have for example breaking api changes in a new version of our `User` service, than you would create a new Service (or copy the old one an make your changes) and set service version to a higher version.
+If you have for example breaking API changes in a new version of our `User` service, then you would create a new Service (or copy the old one and make your changes) and set service version to a higher version.
 
-Try to open `https://localhost:8080/api` in your browser. You should see the openApi-UI with your new endpoint.
+Try to open `https://localhost:8080/api` in your browser. You should see the OpenApi- UI with your new endpoint.
 
 ## Add a subscription
+
