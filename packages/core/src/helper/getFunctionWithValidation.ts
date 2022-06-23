@@ -1,6 +1,6 @@
 import { z, ZodError } from 'zod'
 
-import { CommandFunction, HandledError, Service, StatusCode, UnhandledError } from '../core'
+import { BeforeGuardHook, CommandFunction, HandledError, Service, StatusCode, UnhandledError } from '../core'
 
 export const getFunctionWithValidation = function <
   ServiceClassType extends Service,
@@ -12,12 +12,13 @@ export const getFunctionWithValidation = function <
   inputPayloadSchema: z.ZodType<PayloadType> | undefined,
   inputParameterSchema: z.ZodType<ParamsType> | undefined,
   outputPayloadSchema: z.ZodType<ResultType> | undefined,
+  beforeGuards: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>[] = [],
 ) {
   const wrapped: CommandFunction<ServiceClassType, PayloadType, ParamsType, ResultType> = async function (
     log,
     payload,
     params,
-    messsage,
+    message,
   ): Promise<ResultType> {
     let safePayload: PayloadType = payload
     if (inputPayloadSchema) {
@@ -41,7 +42,12 @@ export const getFunctionWithValidation = function <
       }
     }
 
-    const call = fn.bind(this, log, safePayload, safeParams, messsage)
+    for (const hook of beforeGuards) {
+      const beforeGuard = hook.bind(this, log)
+      await beforeGuard(safePayload, safeParams, message)
+    }
+
+    const call = fn.bind(this, log, safePayload, safeParams, message)
 
     const output = await call()
 
