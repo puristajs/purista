@@ -19,8 +19,8 @@ export type CommandDefinition<
   metadata: MetadataType
   call: CommandFunction<ServiceClassType, PayloadType, ParamsType, ResultType>
   hooks: {
-    transformInput?: TransformHook<ServiceClassType, PayloadType, ParamsType>
-    beforeGuard?: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>
-    afterGuard?: AfterGuardHook<ServiceClassType, ResultType>
+    transformInput?: TransformHook<ServiceClassType, PayloadType, ParamsType>[]
+    beforeGuard?: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>[]
+    afterGuard?: AfterGuardHook<ServiceClassType, ResultType>[]
   }
 }
