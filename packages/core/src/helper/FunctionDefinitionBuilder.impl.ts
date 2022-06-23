@@ -36,13 +36,13 @@ export class FunctionDefinitionBuilder<
   private isSecure = true
 
   private hooks: {
-    transformInput?: TransformHook<ServiceClassType, PayloadType, ParamsType>
-    beforeGuard?: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>
-    afterGuard?: AfterGuardHook<ServiceClassType, ResultType>
+    transformInput: TransformHook<ServiceClassType, PayloadType, ParamsType>[]
+    beforeGuard: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>[]
+    afterGuard: AfterGuardHook<ServiceClassType, ResultType>[]
   } = {
-    transformInput: undefined,
-    beforeGuard: undefined,
-    afterGuard: undefined,
+    transformInput: [],
+    beforeGuard: [],
+    afterGuard: [],
   }
 
   // eslint-disable-next-line no-useless-constructor
@@ -82,18 +82,18 @@ export class FunctionDefinitionBuilder<
     return this
   }
 
-  setTransformInputHook(transformHook: TransformHook<ServiceClassType, PayloadType, ParamsType>) {
-    this.hooks.transformInput = transformHook
+  setTransformInputHook(transformHook: TransformHook<ServiceClassType, PayloadType, ParamsType>[]) {
+    this.hooks.transformInput.push(...transformHook)
     return this
   }
 
-  setBeforeGuardHook(beforeGuard: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>) {
-    this.hooks.beforeGuard = beforeGuard
+  setBeforeGuardHook(beforeGuard: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>[]) {
+    this.hooks.beforeGuard.push(...beforeGuard)
     return this
   }
 
-  setAfterGuardHook(afterGuard: AfterGuardHook<ServiceClassType, ResultType>) {
-    this.hooks.afterGuard = afterGuard
+  setAfterGuardHook(...afterGuard: AfterGuardHook<ServiceClassType, ResultType>[]) {
+    this.hooks.afterGuard.push(...afterGuard)
     return this
   }
 

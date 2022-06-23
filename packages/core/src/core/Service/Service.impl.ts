@@ -302,23 +302,29 @@ export class Service extends ServiceClass {
       let payloadInput = message.command.payload
       let parameterInput = message.command.parameter
       if (command.hooks.transformInput) {
-        const transform = command.hooks.transformInput.bind(this, log)
-        const transformResponse = await transform(payloadInput, parameterInput, message)
-        payloadInput = transformResponse.payload
-        parameterInput = transformResponse.params
+        for (const hook of command.hooks.transformInput) {
+          const transform = hook.bind(this, log)
+          const transformResponse = await transform(payloadInput, parameterInput, message)
+          payloadInput = transformResponse.payload
+          parameterInput = transformResponse.params
+        }
       }
 
       if (command.hooks.beforeGuard) {
-        const beforeGuard = command.hooks.beforeGuard.bind(this, log)
-        await beforeGuard(payloadInput, parameterInput, message)
+        for (const hook of command.hooks.beforeGuard) {
+          const beforeGuard = hook.bind(this, log)
+          await beforeGuard(payloadInput, parameterInput, message)
+        }
       }
 
       const call = command.call.bind(this, log)
       const payload = await call(payloadInput, parameterInput, message)
 
       if (command.hooks.afterGuard) {
-        const afterGuard = command.hooks.afterGuard.bind(this, log)
-        await afterGuard(payload)
+        for (const hook of command.hooks.afterGuard) {
+          const afterGuard = hook.bind(this, log)
+          await afterGuard(payload)
+        }
       }
 
       const successResponse = createSuccessResponse(message, payload)
