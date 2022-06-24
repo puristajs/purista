@@ -1,6 +1,7 @@
 ---
 # This control sidebar index
-index: 1
+index: true
+order: 10
 # This is the icon of the page
 icon: brain fas
 # This is the title of the article

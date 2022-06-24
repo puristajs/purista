@@ -1,6 +1,7 @@
 ---
 # This control sidebar index
-index: 4
+index: true
+order: 40
 # This is the icon of the page
 icon: bugs fas
 # This is the title of the article

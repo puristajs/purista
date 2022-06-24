@@ -1,6 +1,7 @@
 ---
 # This control sidebar index
-index: 3
+index: true
+order: 30
 # This is the icon of the page
 icon: wand-sparkles fas
 # This is the title of the article

@@ -25,17 +25,47 @@ export default hopeTheme({
   // navbar
   navbar,
 
-  // sidebar
-  // sidebar: sidebar,
   sidebar: {
     '/handbook/': 'structure',
-    '/api/': 'structure',
+    '/resources/': [
+      {
+        text: 'Resources',
+        link: '/resources/readme.md',
+        children: [
+          {
+            text: 'Books',
+            link: '/resources/books.md',
+          },
+          {
+            text: 'Articles',
+            link: '/resources/articles.md',
+          },
+        ],
+      },
+    ],
+    '/api/': [
+      {
+        text: 'Modules',
+        children: [
+          {
+            text: '@purista/core',
+            link: '/api/modules/purista_core.md',
+          },
+          {
+            text: '@purista/testhelper',
+            link: '/api/modules/purista_testhelper.md',
+          },
+        ],
+      },
+    ],
+    '/api/modules': ['purista_core', 'purista_testhelper'],
   },
 
-  footer: 'Made from developers for developers with ❤️',
+  footer:
+    'Made from developers for developers with ❤️ | <a href="/privacy.html">Privacy</a> | <a href="javascript:cc.showSettings()">Cookie preferences</a> | <a href="/imprint.html">Imprint</a>',
 
   displayFooter: true,
-  darkmode: 'auto-switch',
+  darkmode: 'switch',
 
   pageInfo: ['Author', 'Date'],
   editLink: false,

@@ -1,6 +1,7 @@
 ---
 # This control sidebar index
-index: 6
+index: true
+order: 60
 # This is the icon of the page
 icon: hand-holding-magic fas
 # This is the title of the article

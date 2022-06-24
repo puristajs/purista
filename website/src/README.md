@@ -47,7 +47,7 @@ features:
 
 
 copyright: false
-footer: MIT Licensed | Made from developers for developers with ❤️
+footer: Made from developers for developers with ❤️ | <a href="/privacy.html">Privacy</a> | <a href="/imprint.html">Imprint</a>
 ---
 
 # PURISTA
@@ -77,5 +77,3 @@ PURISTA addresses developers which want to simply focus on implementation, while
 - easy to test with ready to go mocks & stubs
 - clean error handling
 - low learning curve
-
-

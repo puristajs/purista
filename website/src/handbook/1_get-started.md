@@ -1,6 +1,7 @@
 ---
 # This control sidebar index
-index: 2
+index: true
+order: 20
 # This is the icon of the page
 icon: bolt fas
 # This is the title of the article

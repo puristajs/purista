@@ -1,6 +1,7 @@
 ---
 # This control sidebar index
-index: 5
+index: true
+order: 50
 # This is the icon of the page
 icon: anchor fas
 # This is the title of the article

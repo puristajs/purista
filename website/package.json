@@ -8,12 +8,14 @@
     "document": "../scripts/isGitClean.sh && vuepress build src && git add --all && git commit -am \"doc: update documentation\"",
     "bump:major": "npm version major --no-git-tag-version",
     "bump:minor": "npm version minor --no-git-tag-version",
-    "bump:patch": "npm version patch --no-git-tag-version"
+    "bump:patch": "npm version patch --no-git-tag-version",
+    "vuepress": "vuepress build src"
   },
   "devDependencies": {
     "@vuepress/client": "^2.0.0-beta.48",
     "@vuepress/plugin-google-analytics": "^2.0.0-beta.48",
     "@vuepress/plugin-search": "^2.0.0-beta.48",
+    "vanilla-cookieconsent": "^2.8.0",
     "vue": "^3.2.33",
     "vuepress": "^2.0.0-beta.48",
     "vuepress-theme-hope": "^2.0.0-beta.84"

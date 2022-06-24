@@ -1,5 +1,7 @@
 # PURISTA
 
+![npm (scoped)](https://img.shields.io/npm/v/@purista/core?label=latest%20version&logo=npm&style=for-the-badge)
+
 A backend framework for building message based domain services.
 
 This framework adapts and combines a wide range of different patters from domain driven design, cqrs, microservice, event sourcing and lambda functions.

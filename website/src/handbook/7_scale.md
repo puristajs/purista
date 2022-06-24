@@ -1,6 +1,7 @@
 ---
 # This control sidebar index
-index: 8
+index: true
+order: 80
 # This is the icon of the page
 icon: cloud fas
 # This is the title of the article
