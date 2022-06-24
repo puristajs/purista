@@ -1,3 +1,4 @@
+import { googleAnalyticsPlugin } from '@vuepress/plugin-google-analytics'
 import { defineUserConfig } from 'vuepress'
 
 import theme from './themeConfig'
@@ -19,6 +20,8 @@ export default defineUserConfig({
       },
     ],
   ],
+
+  plugins: [googleAnalyticsPlugin({ id: 'G-02L3K7YXXK' })],
 
   theme,
 })
