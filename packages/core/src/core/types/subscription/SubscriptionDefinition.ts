@@ -1,7 +1,7 @@
-import { EBMessage } from '../EBMessage'
-import { EBMessageType } from '../EBMessageType.enum'
-import { Logger } from '../Logger'
-import { SubscriptionId } from './SubscriptionId'
+import type { EBMessage } from '../EBMessage'
+import type { EBMessageType } from '../EBMessageType.enum'
+import type { Logger } from '../Logger'
+import type { SubscriptionId } from './SubscriptionId'
 
 export type SubscriptionDefinition<MessageType = EBMessage> = {
   subscriptionName: string

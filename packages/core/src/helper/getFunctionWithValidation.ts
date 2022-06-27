@@ -1,9 +1,9 @@
 import { z, ZodError } from 'zod'
 
-import { BeforeGuardHook, CommandFunction, HandledError, Service, StatusCode, UnhandledError } from '../core'
+import { BeforeGuardHook, CommandFunction, HandledError, ServiceClass, StatusCode, UnhandledError } from '../core'
 
 export const getFunctionWithValidation = function <
-  ServiceClassType extends Service,
+  ServiceClassType = ServiceClass,
   PayloadType = unknown,
   ParamsType = unknown,
   ResultType = unknown,

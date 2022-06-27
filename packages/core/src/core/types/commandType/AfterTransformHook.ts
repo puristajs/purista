@@ -1,12 +1,12 @@
-import { Service } from '../../Service'
-import { Logger } from '../Logger'
-import { Command } from './Command'
+import type { Logger } from '../Logger'
+import type { ServiceClass } from '../ServiceClass'
+import type { Command } from './Command'
 
 /**
  * This transform hook is executed after function output validation and AfterGuardHooks.
  */
 export type AfterTransformHook<
-  ServiceClassType = Service,
+  ServiceClassType = ServiceClass,
   ResultType = unknown,
   PayloadType = unknown,
   ParamsType = Record<string, unknown>,

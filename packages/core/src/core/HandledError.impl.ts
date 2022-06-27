@@ -1,5 +1,5 @@
 import { getErrorMessageForCode } from './helper'
-import { CommandErrorResponse, ErrorResponse, StatusCode, TraceId } from './types'
+import type { CommandErrorResponse, ErrorResponse, StatusCode, TraceId } from './types'
 
 /**
  * A handled error is an error which is handled or thrown by business logic.

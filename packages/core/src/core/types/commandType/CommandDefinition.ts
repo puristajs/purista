@@ -1,16 +1,16 @@
-import type { Service } from '../../Service'
-import { AfterGuardHook } from './AfterGuardHook'
-import { AfterTransformHook } from './AfterTransformHook'
-import { BeforeGuardHook } from './BeforeGuardHook'
-import { BeforeTransformHook } from './BeforeTransformHook'
-import { CommandFunction } from './CommandFunction'
+import type { ServiceClass } from '../ServiceClass'
+import type { AfterGuardHook } from './AfterGuardHook'
+import type { AfterTransformHook } from './AfterTransformHook'
+import type { BeforeGuardHook } from './BeforeGuardHook'
+import type { BeforeTransformHook } from './BeforeTransformHook'
+import type { CommandFunction } from './CommandFunction'
 
 /**
  * The definition for a command provided by some service.
  */
 export type CommandDefinition<
   MetadataType = Record<string, unknown>,
-  ServiceClassType = Service,
+  ServiceClassType = ServiceClass,
   PayloadType = unknown,
   ParamsType = Record<string, unknown>,
   ResultType = unknown,

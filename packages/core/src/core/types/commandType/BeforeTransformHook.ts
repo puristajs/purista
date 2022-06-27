@@ -1,11 +1,11 @@
-import type { Service } from '../../Service'
-import { Logger } from '../Logger'
-import { Command } from './Command'
+import type { Logger } from '../Logger'
+import type { ServiceClass } from '../ServiceClass'
+import type { Command } from './Command'
 
 /**
  * The transform hook is called before input validation.
  */
-export type BeforeTransformHook<ServiceClassType = Service> = (
+export type BeforeTransformHook<ServiceClassType = ServiceClass> = (
   this: ServiceClassType,
   log: Logger,
   payload: unknown,

@@ -1,7 +1,7 @@
-import { EBMessage } from '../EBMessage'
+import type { EBMessage } from '../EBMessage'
 import { EBMessageType } from '../EBMessageType.enum'
-import { CommandErrorResponse } from './CommandErrorResponse'
-import { CommandSuccessResponse } from './CommandSuccessResponse'
+import type { CommandErrorResponse } from './CommandErrorResponse'
+import type { CommandSuccessResponse } from './CommandSuccessResponse'
 
 /**
  * CommandResponse is a response to a specific previously received command which can be either a success or failure

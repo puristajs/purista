@@ -12,6 +12,7 @@ import {
 import {
   Command,
   CommandDefinition,
+  CommandDefinitionList,
   EBMessage,
   EBMessageId,
   EBMessageType,
@@ -57,7 +58,7 @@ type PendigInvocation = {
  * ```
  */
 export class Service extends ServiceClass {
-  info: ServiceInfoType
+  protected info: ServiceInfoType
   protected serviceLogger: Logger
 
   protected eventBridge: EventBridge
@@ -74,7 +75,7 @@ export class Service extends ServiceClass {
     baseLogger: Logger,
     info: ServiceInfoType,
     eventBridge: EventBridge,
-    private commandFunctions: CommandDefinition[],
+    private commandFunctions: CommandDefinitionList,
     private subscriptionList: SubscriptionDefinition[],
   ) {
     super()
@@ -103,10 +104,17 @@ export class Service extends ServiceClass {
   }
 
   /**
+   * Get service info
+   */
+  get serviceInfo(): ServiceInfoType {
+    return Object.freeze({ ...this.info })
+  }
+
+  /**
    * Connect service to event bridge to receive commands and command responses
    */
   protected async initializeEventbridgeConnect(
-    commandFunctions: CommandDefinition[],
+    commandFunctions: CommandDefinitionList,
     subscriptions: SubscriptionDefinition[],
   ) {
     // send info message that this service is going to start up now

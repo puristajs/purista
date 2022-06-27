@@ -1,7 +1,7 @@
-import { CorrelationId } from '../CorrelationId'
-import { EBMessageType } from '../EBMessageType.enum'
-import { TraceId } from '../TraceId'
-import { InfoServiceBase } from './InfoServiceBase'
+import type { CorrelationId } from '../CorrelationId'
+import type { EBMessageType } from '../EBMessageType.enum'
+import type { TraceId } from '../TraceId'
+import type { InfoServiceBase } from './InfoServiceBase'
 
 export type InfoInvokeTimeoutPayload = {
   traceId: TraceId

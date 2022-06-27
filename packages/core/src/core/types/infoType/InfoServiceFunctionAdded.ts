@@ -1,6 +1,6 @@
-import { EBMessage } from '../EBMessage'
+import type { EBMessage } from '../EBMessage'
 import { EBMessageType } from '../EBMessageType.enum'
-import { InfoServiceBase } from './InfoServiceBase'
+import type { InfoServiceBase } from './InfoServiceBase'
 
 export type InfoServiceFunctionAdded = {
   messageType: EBMessageType.InfoServiceFunctionAdded

@@ -1,13 +1,13 @@
-import { EBMessage } from '../EBMessage'
+import type { EBMessage } from '../EBMessage'
 import { EBMessageType } from '../EBMessageType.enum'
-import { InfoInvokeTimeout } from './InfoInvokeTimeout'
-import { InfoServiceDrain } from './InfoServiceDrain'
-import { InfoServiceFunctionAdded } from './InfoServiceFunctionAdded'
-import { InfoServiceInit } from './InfoServiceInit'
-import { InfoServiceNotReady } from './InfoServiceNotReady'
-import { InfoServiceReady } from './InfoServiceReady'
-import { InfoServiceShutdown } from './InfoServiceShutdown'
-import { InfoSubscriptionError } from './InfoSubscriptionError'
+import type { InfoInvokeTimeout } from './InfoInvokeTimeout'
+import type { InfoServiceDrain } from './InfoServiceDrain'
+import type { InfoServiceFunctionAdded } from './InfoServiceFunctionAdded'
+import type { InfoServiceInit } from './InfoServiceInit'
+import type { InfoServiceNotReady } from './InfoServiceNotReady'
+import type { InfoServiceReady } from './InfoServiceReady'
+import type { InfoServiceShutdown } from './InfoServiceShutdown'
+import type { InfoSubscriptionError } from './InfoSubscriptionError'
 
 export type InfoMessage =
   | InfoServiceDrain

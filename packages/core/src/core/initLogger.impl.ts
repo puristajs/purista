@@ -1,6 +1,6 @@
 import { Logger as TsLogger } from 'tslog'
 
-import { Logger, LogLevelName } from './types'
+import type { Logger, LogLevelName } from './types'
 
 /**
  * Create a new logger with the given minimum log level

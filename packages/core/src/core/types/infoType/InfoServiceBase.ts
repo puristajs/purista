@@ -1,4 +1,4 @@
-import { EBMessageBase } from '../EBMessageBase'
+import type { EBMessageBase } from '../EBMessageBase'
 
 export type InfoServiceBase = {
   sender: {

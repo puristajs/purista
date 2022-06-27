@@ -1,9 +1,9 @@
-import { CorrelationId } from '../CorrelationId'
-import { EBMessage } from '../EBMessage'
-import { EBMessageAddress } from '../EBMessageAddress'
-import { EBMessageBase } from '../EBMessageBase'
+import type { CorrelationId } from '../CorrelationId'
+import type { EBMessage } from '../EBMessage'
+import type { EBMessageAddress } from '../EBMessageAddress'
+import type { EBMessageBase } from '../EBMessageBase'
 import { EBMessageType } from '../EBMessageType.enum'
-import { StatusCode } from '../StatusCode.enum'
+import type { StatusCode } from '../StatusCode.enum'
 
 /**
  * CommandErrorResponse is a response to a specific previously received command which indicates some failure.

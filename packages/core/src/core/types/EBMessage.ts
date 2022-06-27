@@ -1,5 +1,5 @@
-import { Command, CommandResponse } from './commandType'
-import { InfoMessage } from './infoType'
+import type { Command, CommandResponse } from './commandType'
+import type { InfoMessage } from './infoType'
 
 /**
  * EBMessage is some message which is handled by the event bridge.

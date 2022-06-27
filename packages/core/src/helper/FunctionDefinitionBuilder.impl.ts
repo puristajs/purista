@@ -1,22 +1,22 @@
 import { generateSchema } from '@anatine/zod-openapi'
 import { z } from 'zod'
 
-import {
+import type {
   AfterGuardHook,
   AfterTransformHook,
   BeforeGuardHook,
   BeforeTransformHook,
   CommandDefinition,
   CommandFunction,
-  Service,
+  ServiceClass,
   StatusCode,
 } from '../core'
 import { ContentType, HttpExposedServiceMeta, QueryParameter } from '../http-server'
 import { getFunctionWithValidation } from './getFunctionWithValidation'
-import { SupportedHttpMethod } from './types'
+import type { SupportedHttpMethod } from './types'
 
 export class FunctionDefinitionBuilder<
-  ServiceClassType extends Service,
+  ServiceClassType = ServiceClass,
   PayloadType = unknown,
   ParamsType = Record<string, unknown>,
   ResultType = unknown,
