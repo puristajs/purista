@@ -1,6 +1,7 @@
 import { HandledError } from './HandledError.impl'
 import { getErrorMessageForCode } from './helper'
-import { CommandErrorResponse, ErrorResponse, StatusCode, TraceId } from './types'
+import type { CommandErrorResponse, ErrorResponse, TraceId } from './types'
+import { StatusCode } from './types'
 
 /**
  * A unhandled error will be thrown if some error response is returned during invoking a service function

@@ -1,6 +1,6 @@
 import { Command, CommandDefinition, CommandResponse } from './commandType'
 import { EventBridge } from './EventBridge'
-import { ServiceInfoType } from './infoType'
+import { InfoMessageType, ServiceInfoType } from './infoType'
 import { SubscriptionDefinition, SubscriptionId } from './subscription'
 
 /**
@@ -25,13 +25,6 @@ export abstract class ServiceClass {
    * Service name, service version and some human readable description
    */
   protected abstract readonly info: ServiceInfoType
-
-  /**
-   * Get service info
-   */
-  get serviceInfo(): ServiceInfoType {
-    return this.info
-  }
 
   /**
    * The event bridge instance
@@ -69,4 +62,20 @@ export abstract class ServiceClass {
    * Shut down the service
    */
   abstract destroy(): Promise<void>
+}
+
+export interface IServiceClass {
+  destroy(): Promise<void>
+
+  start(): Promise<void>
+
+  get serviceInfo(): ServiceInfoType
+
+  invoke<T>(
+    input: Omit<Command, 'id' | 'sender' | 'messageType' | 'timestamp' | 'correlationId'>,
+    ttl: number,
+    originalCommand?: Partial<Command>,
+  ): Promise<T>
+
+  sendServiceInfo(infoType: InfoMessageType, target?: string, data?: Record<string, unknown>): Promise<void>
 }

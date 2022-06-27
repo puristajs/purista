@@ -1,7 +1,7 @@
-import { CorrelationId } from './CorrelationId'
-import { EBMessageId } from './EBMessageId'
-import { PrincipalId } from './PrincipalId'
-import { TraceId } from './TraceId'
+import type { CorrelationId } from './CorrelationId'
+import type { EBMessageId } from './EBMessageId'
+import type { PrincipalId } from './PrincipalId'
+import type { TraceId } from './TraceId'
 
 export type EBMessageBase = {
   id: EBMessageId
@@ -9,4 +9,5 @@ export type EBMessageBase = {
   timestamp: number
   correlationId?: CorrelationId
   principalId?: PrincipalId
+  eventName?: string
 }

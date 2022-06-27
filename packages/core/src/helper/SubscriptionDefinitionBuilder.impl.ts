@@ -1,6 +1,6 @@
-import { EBMessage, EBMessageType, Service, SubscriptionCallback, SubscriptionDefinition } from '../core'
+import type { EBMessage, EBMessageType, ServiceClass, SubscriptionCallback, SubscriptionDefinition } from '../core'
 
-export class SubscriptionDefinitionBuilder<ServiceClassType extends Service, MessageTypes = EBMessage> {
+export class SubscriptionDefinitionBuilder<ServiceClassType = ServiceClass, MessageTypes = EBMessage> {
   private messageTypes: EBMessageType[] | undefined
 
   private sender?: {

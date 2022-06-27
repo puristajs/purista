@@ -1,13 +1,13 @@
-import type { Service } from '../../Service'
-import { Logger } from '../Logger'
-import { Command } from './Command'
+import type { Logger } from '../Logger'
+import type { ServiceClass } from '../ServiceClass'
+import type { Command } from './Command'
 
 /**
  * Definition of after guard hook functions.
  * This guard is called after function successfully returns and after output validation.
  */
 export type AfterGuardHook<
-  ServiceClassType = Service,
+  ServiceClassType = ServiceClass,
   ResultType = unknown,
   PayloadType = unknown,
   ParamsType = Record<string, unknown>,
