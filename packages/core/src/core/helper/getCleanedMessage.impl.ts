@@ -1,14 +1,23 @@
 import { EBMessage, isCommand, isCommandSuccessResponse } from '../types'
+import { isDevelop } from './isDevelop.impl'
 
-export const getCleanedMessage = (message: EBMessage): Record<string, unknown> => {
-  const cleanedMessage: EBMessage = {
-    ...message,
+/**
+ * Helper function for logging.
+ * Returns a message object, where fields which might contain sensitive data, are overwritten with string values.
+ * For command messages, parameter and payload are overwritten with string values.
+ *
+ * For command success responses, the response field is overwritten.
+ *
+ * Command error responses are not changed.
+ */
+export const getCleanedMessage = (message: EBMessage, stripeOutContent = !isDevelop()): Record<string, unknown> => {
+  // return full message if stripeOutContent is set to false
+  if (!stripeOutContent) {
+    return message
   }
 
-  const nodeEnv = process.env.NODE_ENV || 'develop'
-
-  if (nodeEnv.startsWith('develop')) {
-    return cleanedMessage
+  const cleanedMessage: EBMessage = {
+    ...message,
   }
 
   if (isCommand(cleanedMessage)) {
