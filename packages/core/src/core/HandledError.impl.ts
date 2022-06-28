@@ -16,7 +16,7 @@ export class HandledError extends Error {
    * @param message CommandErrorResponse
    * @returns HandledError
    */
-  static fromMessage(message: CommandErrorResponse): HandledError {
+  static fromMessage(message: Readonly<CommandErrorResponse>): HandledError {
     return new HandledError(message.response.status, message.response.message, message.response.data, message.traceId)
   }
 
@@ -25,12 +25,12 @@ export class HandledError extends Error {
    * @returns ErrorResponse
    */
   getErrorResponse() {
-    const errorResponse: ErrorResponse = {
+    const errorResponse: Readonly<ErrorResponse> = Object.freeze({
       status: this.errorCode,
       message: this.message,
       data: this.data,
       traceId: this.traceId,
-    }
+    })
 
     return errorResponse
   }

@@ -25,7 +25,7 @@ export class UnhandledError extends Error {
    * @param message CommandErrorResponse
    * @returns UnhandledError
    */
-  static fromMessage(message: CommandErrorResponse): UnhandledError {
+  static fromMessage(message: Readonly<CommandErrorResponse>): UnhandledError {
     return new UnhandledError(message.response.status, message.response.message, message.response.data, message.traceId)
   }
 
@@ -42,12 +42,12 @@ export class UnhandledError extends Error {
    * @returns ErrorResponse
    */
   getErrorResponse() {
-    const errorResponse: ErrorResponse = {
+    const errorResponse: Readonly<ErrorResponse> = Object.freeze({
       status: this.errorCode,
       message: this.message,
       data: this.data,
       traceId: this.traceId,
-    }
+    })
 
     return errorResponse
   }

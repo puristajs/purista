@@ -1,8 +1,11 @@
 import { Command, CommandSuccessResponse, EBMessageType } from '../types'
 import { getNewTraceId } from './getNewTraceId.impl'
 
-export const createSuccessResponse = <T>(originalEBMessage: Command, payload: T): CommandSuccessResponse<T> => {
-  const successResponse: CommandSuccessResponse<T> = {
+export const createSuccessResponse = <T>(
+  originalEBMessage: Readonly<Command>,
+  payload: T,
+): Readonly<CommandSuccessResponse<T>> => {
+  const successResponse: CommandSuccessResponse<T> = Object.freeze({
     id: originalEBMessage.id,
     correlationId: originalEBMessage.correlationId,
     traceId: originalEBMessage.traceId || getNewTraceId(),
@@ -15,7 +18,7 @@ export const createSuccessResponse = <T>(originalEBMessage: Command, payload: T)
       ...originalEBMessage.sender,
     },
     response: payload,
-  }
+  })
 
   return successResponse
 }

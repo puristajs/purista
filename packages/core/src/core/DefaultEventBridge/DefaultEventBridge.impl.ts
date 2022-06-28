@@ -42,12 +42,12 @@ export class DefaultEventBridge implements EventBridge {
    * @param message EBMessage
    */
   async emit(message: EBMessage) {
-    const msg: EBMessage = {
+    const msg: Readonly<EBMessage> = Object.freeze({
       ...message,
-      timestamp: Date.now(),
+      timestamp: message.timestamp || Date.now(),
       traceId: message.traceId || getNewTraceId(),
       correlationId: message.correlationId || getNewCorrelationId(),
-    }
+    })
 
     if (isInfoMessage(msg)) {
       this.log.trace(
