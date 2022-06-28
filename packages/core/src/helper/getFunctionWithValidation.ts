@@ -42,9 +42,12 @@ export const getFunctionWithValidation = function <
       }
     }
 
-    for (const hook of beforeGuards) {
-      const beforeGuard = hook.bind(this, log)
-      await beforeGuard(safePayload, safeParams, message)
+    if (beforeGuards.length) {
+      const guards = beforeGuards.map((hook) => {
+        const beforeGuard = hook.bind(this, log)
+        return beforeGuard(safePayload, safeParams, message)
+      })
+      await Promise.all(guards)
     }
 
     const call = fn.bind(this, log, safePayload, safeParams, message)

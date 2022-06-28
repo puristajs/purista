@@ -310,7 +310,7 @@ export class Service extends ServiceClass {
       let payloadInput = message.command.payload
       let parameterInput = message.command.parameter
 
-      if (command.hooks.beforeTransformInput) {
+      if (command.hooks.beforeTransformInput?.length) {
         for (const hook of command.hooks.beforeTransformInput) {
           const transform = hook.bind(this, log)
           const transformResponse = await transform(payloadInput, parameterInput, message)
@@ -322,14 +322,12 @@ export class Service extends ServiceClass {
       const call = command.call.bind(this, log)
       let payload = await call(payloadInput, parameterInput, message)
 
-      if (command.hooks.afterGuard) {
-        for (const hook of command.hooks.afterGuard) {
-          const afterGuard = hook.bind(this, log)
-          await afterGuard(payload, payloadInput, parameterInput, message)
-        }
+      if (command.hooks.afterGuard?.length) {
+        const afterGuards = command.hooks.afterGuard.map((hook) => hook.bind(this, log))
+        await Promise.all(afterGuards)
       }
 
-      if (command.hooks.afterTransformOutput) {
+      if (command.hooks.afterTransformOutput?.length) {
         for (const hook of command.hooks.afterTransformOutput) {
           const afterTransform = hook.bind(this, log)
           payload = await afterTransform(payload, payloadInput, parameterInput, message)
