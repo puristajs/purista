@@ -9,7 +9,7 @@ export const createInfoMessage = (
   serviceTarget?: string,
   data?: Record<string, unknown>,
 ): InfoMessage => {
-  const info: InfoMessage = {
+  const info: Readonly<InfoMessage> = Object.freeze({
     messageType,
     id: getNewEBMessageId(),
     traceId: getNewTraceId(),
@@ -20,7 +20,7 @@ export const createInfoMessage = (
       serviceTarget: serviceTarget || '',
     },
     data,
-  }
+  })
 
   return info
 }

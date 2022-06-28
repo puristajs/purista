@@ -13,10 +13,10 @@ import { getErrorMessageForCode } from './getErrorMessageForCode.impl'
  * @returns CommandErrorResponse message object
  */
 export const createErrorResponse = (
-  originalEBMessage: Command,
+  originalEBMessage: Readonly<Command>,
   statusCode = StatusCode.InternalServerError,
   error?: unknown | string | Error | HandledError | UnhandledError,
-): CommandErrorResponse => {
+): Readonly<CommandErrorResponse> => {
   let message = getErrorMessageForCode(statusCode)
   let data: unknown
   let status = statusCode
@@ -30,7 +30,7 @@ export const createErrorResponse = (
     isHandledError = true
   }
 
-  const errorResponse: CommandErrorResponse = {
+  const errorResponse: Readonly<CommandErrorResponse> = Object.freeze({
     id: originalEBMessage.id,
     isHandledError,
     traceId: originalEBMessage.traceId,
@@ -48,7 +48,7 @@ export const createErrorResponse = (
       message,
       data,
     },
-  }
+  })
 
   return errorResponse
 }

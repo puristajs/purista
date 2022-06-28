@@ -10,7 +10,10 @@ import { isDevelop } from './isDevelop.impl'
  *
  * Command error responses are not changed.
  */
-export const getCleanedMessage = (message: EBMessage, stripeOutContent = !isDevelop()): Record<string, unknown> => {
+export const getCleanedMessage = (
+  message: Readonly<EBMessage>,
+  stripeOutContent = !isDevelop(),
+): Record<string, unknown> => {
   // return full message if stripeOutContent is set to false
   if (!stripeOutContent) {
     return message

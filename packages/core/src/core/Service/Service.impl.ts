@@ -35,7 +35,7 @@ import { UnhandledError } from '../UnhandledError.impl'
 
 /** Internal type for holding pending invocations */
 type PendigInvocation = {
-  command: Command
+  command: Readonly<Command>
   resolve(responsePayload: unknown): void
   reject(error: UnhandledError | HandledError): void
 }
@@ -169,7 +169,7 @@ export class Service extends ServiceClass {
    * @param subscriptionId id of subscription
    * @param message event bridge message
    */
-  protected async defaultMessageHandler(subscriptionId: SubscriptionId, message: EBMessage) {
+  protected async defaultMessageHandler(subscriptionId: SubscriptionId, message: Readonly<EBMessage>) {
     if (isCommand(message)) {
       // handle incoming command
       this.executeCommand(subscriptionId, message)
@@ -203,12 +203,12 @@ export class Service extends ServiceClass {
   async invoke<T>(
     input: Omit<Command, 'id' | 'sender' | 'messageType' | 'timestamp' | 'correlationId'>,
     ttl = this.eventBridge.defaultTtl,
-    originalCommand?: Partial<Command>,
+    originalCommand?: Readonly<Partial<Command>>,
   ): Promise<T> {
     const traceId = originalCommand?.traceId || getNewTraceId()
     const correlationId = getNewCorrelationId()
 
-    const command: Command = {
+    const command: Readonly<Command> = Object.freeze({
       id: getNewEBMessageId(),
       correlationId,
       timestamp: Date.now(),
@@ -220,7 +220,7 @@ export class Service extends ServiceClass {
         serviceVersion: this.info.serviceVersion,
         serviceTarget: '',
       },
-    }
+    })
 
     const removeFromPending = () => {
       this.pendingInvocations.delete(correlationId)
@@ -286,7 +286,7 @@ export class Service extends ServiceClass {
    * @param subscriptionId
    * @param command
    */
-  protected async executeCommand(_subscriptionId: SubscriptionId, message: Command) {
+  protected async executeCommand(_subscriptionId: SubscriptionId, message: Readonly<Command>) {
     const command = this.commands.get(message.receiver.serviceTarget)
     if (!command) {
       this.serviceLogger
@@ -347,7 +347,7 @@ export class Service extends ServiceClass {
     }
   }
 
-  protected async handleSubscriptionMessage(subscriptionId: SubscriptionId, message: EBMessage) {
+  protected async handleSubscriptionMessage(subscriptionId: SubscriptionId, message: Readonly<EBMessage>) {
     const subscription = this.subscriptions.get(subscriptionId)
     if (!subscription) {
       this.serviceLogger
