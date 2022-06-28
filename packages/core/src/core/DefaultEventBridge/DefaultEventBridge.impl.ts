@@ -1,5 +1,5 @@
 import { getDefaultEventBridgeConfig } from '../config'
-import { getNewCorrelationId, getNewSubscriptionId, getNewTraceId } from '../helper'
+import { getCleanedMessage, getNewCorrelationId, getNewSubscriptionId, getNewTraceId } from '../helper'
 import {
   EBMessage,
   EBMessageAddress,
@@ -64,12 +64,9 @@ export class DefaultEventBridge implements EventBridge {
         return
       }
 
-      value.subscription.callback(subscriptionId, msg).catch((error) =>
-        this.log.error('error in callback', error, {
-          ...msg,
-          command: '***removed from log***',
-        }),
-      )
+      value.subscription
+        .callback(subscriptionId, msg)
+        .catch((error) => this.log.error('error in callback', error, getCleanedMessage(msg)))
     })
   }
 
@@ -101,13 +98,19 @@ export class DefaultEventBridge implements EventBridge {
    * @param subscriptionId
    */
   async unsubscribeService(service: EBMessageAddress): Promise<void> {
-    this.subscriptions.forEach((value, key) => {
+    const subscriptions = []
+
+    for (const [key, value] of this.subscriptions) {
       if (
         value.subscription.subscriber.serviceName === service.serviceName &&
         value.subscription.subscriber.serviceVersion === service.serviceVersion
       ) {
-        this.subscriptions.delete(key)
+        subscriptions.push(this.unsubscribe(key))
       }
-    })
+    }
+
+    if (subscriptions.length) {
+      await Promise.all(subscriptions)
+    }
   }
 }
