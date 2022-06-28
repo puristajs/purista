@@ -30,18 +30,9 @@ export const createErrorResponse = (
     isHandledError = true
   }
 
-  // if it is a unhandled error we set the error to 500 Internal Server Error without additional data
-  if (error instanceof UnhandledError) {
-    if (error.errorCode >= 400 || error.errorCode < 500) {
-      message = getErrorMessageForCode(error.errorCode)
-      data = undefined
-      status = error.errorCode
-    } else {
-      message = getErrorMessageForCode(StatusCode.InternalServerError)
-      data = undefined
-      status = StatusCode.InternalServerError
-    }
-  }
+  message = getErrorMessageForCode(StatusCode.InternalServerError)
+  data = undefined
+  status = StatusCode.InternalServerError
 
   const errorResponse: CommandErrorResponse = {
     id: originalEBMessage.id,
