@@ -1,4 +1,4 @@
-import { EventBridge, Logger, Service, ServiceInfoType } from '@purista/core'
+import { CommandDefinitionList, EventBridge, Logger, Service, ServiceInfoType } from '@purista/core'
 
 import { userServiceCommands } from './commands'
 
@@ -10,11 +10,10 @@ export const userServiceInfo: ServiceInfoType = {
 
 export class UserService extends Service {
   constructor(baseLogger: Logger, eventBridge: EventBridge) {
-    super(baseLogger, userServiceInfo, eventBridge, userServiceCommands, [])
+    super(baseLogger, userServiceInfo, eventBridge, userServiceCommands as CommandDefinitionList, [])
   }
 
   static async createInstance(baseLogger: Logger, eventBridge: EventBridge): Promise<UserService> {
-    const instance = new UserService(baseLogger, eventBridge)
-    return instance
+    return new UserService(baseLogger, eventBridge)
   }
 }
