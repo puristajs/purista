@@ -66,33 +66,12 @@ describe('createErrorResponse', () => {
     expect(result.isHandledError).toBeTruthy()
   })
 
-  it('creates a error response with UnhandledError between 400-500', () => {
+  it('creates a error response with UnhandledError', () => {
     const data = { some: 'additional data' }
 
     const messageText = 'invalid input - some fields missing'
 
     const error = new UnhandledError(StatusCode.BadRequest, messageText, data)
-
-    const result = createErrorResponse(message, statusCode, error)
-
-    const payload = { status: StatusCode.BadRequest, message: 'Bad Request', data: undefined }
-
-    expect(result.messageType).toBe(EBMessageType.CommandErrorResponse)
-    expect(result.response).toStrictEqual(payload)
-    expect(result.sender).toStrictEqual(message.receiver)
-    expect(result.receiver).toStrictEqual(message.sender)
-    expect(result.traceId).toBe(message.traceId)
-    expect(result.correlationId).toBe(message.correlationId)
-    expect(result.id).toBe(message.id)
-    expect(result.isHandledError).toBeFalsy()
-  })
-
-  it('creates a error response with UnhandledError not between 400-500', () => {
-    const data = { some: 'additional data' }
-
-    const messageText = 'invalid input - some fields missing'
-
-    const error = new UnhandledError(StatusCode.BadGateway, messageText, data)
 
     const result = createErrorResponse(message, statusCode, error)
 
