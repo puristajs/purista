@@ -30,10 +30,6 @@ export const createErrorResponse = (
     isHandledError = true
   }
 
-  message = getErrorMessageForCode(StatusCode.InternalServerError)
-  data = undefined
-  status = StatusCode.InternalServerError
-
   const errorResponse: CommandErrorResponse = {
     id: originalEBMessage.id,
     isHandledError,
