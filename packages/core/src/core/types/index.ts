@@ -1,5 +1,6 @@
 export * from './commandType'
 export * from './CorrelationId'
+export * from './CustomMessage'
 export * from './EBMessage'
 export * from './EBMessageAddress'
 export * from './EBMessageBase'

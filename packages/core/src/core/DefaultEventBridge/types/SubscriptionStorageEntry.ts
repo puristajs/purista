@@ -8,5 +8,6 @@ export type SubscriptionStorageEntry = {
   isMatchingReceiverServiceName(input: string): boolean
   isMatchingReceiverServiceVersion(input: string): boolean
   isMatchingReceiverServiceTarget(input: string): boolean
+  isMatchingEventName(input: string): boolean
   subscription: Subscription
 }

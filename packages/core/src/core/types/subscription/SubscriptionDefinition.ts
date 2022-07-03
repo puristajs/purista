@@ -18,4 +18,5 @@ export type SubscriptionDefinition<MessageType = EBMessage> = {
     serviceTarget?: string
   }
   messageTypes?: EBMessageType[]
+  eventName?: string
 }

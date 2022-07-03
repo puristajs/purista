@@ -226,7 +226,6 @@ describe('DefaultEventBridge', () => {
 
     const eventBridge = new DefaultEventBridge(logger, config)
 
-    const throwedError = new Error('Some Error')
     const callback = stub().resolves()
 
     const subscription: Subscription = {

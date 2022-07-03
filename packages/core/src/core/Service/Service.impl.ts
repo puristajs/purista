@@ -13,6 +13,7 @@ import {
   Command,
   CommandDefinition,
   CommandDefinitionList,
+  CustomMessage,
   EBMessage,
   EBMessageId,
   EBMessageType,
@@ -263,6 +264,22 @@ export class Service extends ServiceClass {
     return Promise.race([executionPromise, getTimeoutPromise(ttl, traceId)])
   }
 
+  async emitCustomEvent<T>(eventName: string, payload?: T) {
+    const message: Readonly<CustomMessage<T>> = Object.freeze({
+      messageType: EBMessageType.CustomMessage,
+      id: getNewEBMessageId(),
+      timestamp: Date.now(),
+      sender: {
+        serviceName: this.info.serviceName,
+        serviceVersion: this.info.serviceVersion,
+      },
+      eventName,
+      payload,
+    })
+
+    await this.eventBridge.emit(message)
+  }
+
   protected async subscribe(subscription: SubscriptionDefinition): Promise<SubscriptionId> {
     const ebSubscription: Subscription = {
       sender: subscription.sender,
@@ -334,7 +351,7 @@ export class Service extends ServiceClass {
         }
       }
 
-      const successResponse = createSuccessResponse(message, payload)
+      const successResponse = createSuccessResponse(message, payload, command.eventName)
       await this.eventBridge.emit(successResponse)
     } catch (error) {
       if (error instanceof HandledError) {

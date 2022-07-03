@@ -1,7 +1,7 @@
-import { EBMessage } from '../EBMessage'
-import { EBMessageAddress } from '../EBMessageAddress'
-import { EBMessageType } from '../EBMessageType.enum'
-import { SubscriptionId } from './SubscriptionId'
+import type { EBMessage } from '../EBMessage'
+import type { EBMessageAddress } from '../EBMessageAddress'
+import type { EBMessageType } from '../EBMessageType.enum'
+import type { SubscriptionId } from './SubscriptionId'
 
 /**
  * A subscription managed by the event bridge
@@ -18,6 +18,7 @@ export type Subscription = {
     serviceTarget?: string
   }
   messageTypes?: EBMessageType[]
+  eventName?: string
   callback(subscriptionId: SubscriptionId, message: EBMessage): Promise<void>
   subscriber: EBMessageAddress
 }
