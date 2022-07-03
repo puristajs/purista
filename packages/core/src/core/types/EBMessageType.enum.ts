@@ -28,4 +28,5 @@ export enum EBMessageType {
   InfoServiceShutdown = 'infoServiceShutdown', // last event from service before service is destroyed
   InfoInvokeTimeout = 'infoInvokeTimeout', // a service invoked a other function and did not get a answer within given ttl
   InfoSubscriptionError = 'infoSubscriptionError', // a subscription function is throwing
+  CustomMessage = 'customMessage', // a custom message / custom event
 }

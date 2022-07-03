@@ -12,12 +12,18 @@ export const getNewSubscriptionStorageEntry = (subscription: Subscription): Subs
     isMatchingReceiverServiceName: () => true,
     isMatchingReceiverServiceVersion: () => true,
     isMatchingReceiverServiceTarget: () => true,
+    isMatchingEventName: () => true,
     subscription,
   }
 
   if (subscription.messageTypes) {
     const messageTypes = subscription.messageTypes
     entry.isMatchingMessageType = (input: EBMessageType) => messageTypes.includes(input)
+  }
+
+  if (subscription.eventName) {
+    const matchingFn = wcmatch(subscription.eventName, '.')
+    entry.isMatchingEventName = (input: string) => matchingFn(input)
   }
 
   if (subscription.sender?.serviceName) {

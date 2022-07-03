@@ -15,12 +15,19 @@ export class SubscriptionDefinitionBuilder<ServiceClassType = ServiceClass, Mess
     serviceTarget?: string
   }
 
+  private eventName?: string
+
   // eslint-disable-next-line no-useless-constructor
   constructor(
     private subscriptionName: string,
     private subscriptionDescription: string,
     private fn: SubscriptionCallback<ServiceClassType, MessageTypes>,
   ) {}
+
+  subscribeToEvent(eventName: string) {
+    this.eventName = eventName
+    return this
+  }
 
   sendFrom(serviceName: string | undefined, serviceVersion: string | undefined, serviceTarget: string | undefined) {
     this.sender = {
@@ -58,6 +65,7 @@ export class SubscriptionDefinitionBuilder<ServiceClassType = ServiceClass, Mess
       subscriptionDescription: this.subscriptionDescription,
       call: this.fn,
       messageTypes: this.messageTypes,
+      eventName: this.eventName,
     }
 
     return subscription

@@ -1,5 +1,5 @@
 import { generateSchema } from '@anatine/zod-openapi'
-import { z } from 'zod'
+import type { z } from 'zod'
 
 import type {
   AfterGuardHook,
@@ -48,12 +48,25 @@ export class FunctionDefinitionBuilder<
     afterTransform: [],
   }
 
+  private eventName?: string
+
   // eslint-disable-next-line no-useless-constructor
   constructor(
     private commandName: string,
     private commandDescription: string,
     private fn: CommandFunction<ServiceClassType, PayloadType, ParamsType, ResultType>,
   ) {}
+
+  /*
+   * Event name of success response message.
+   * This makes it easy to subscribe to something like `UserCreated` (optional add service version).
+   * Otherwise you will need to subscribe to service name, service function, and message type to get the message.
+   * It is also essential to hav this possibility to be able to build event sourcing architectures
+   */
+  setSuccessEventName(eventName: string) {
+    this.eventName = eventName
+    return this
+  }
 
   addInputSchema(inputSchema: z.ZodType<PayloadType>) {
     this.inputSchema = inputSchema
@@ -165,6 +178,7 @@ export class FunctionDefinitionBuilder<
   }
 
   getDefinition(): CommandDefinition<Record<string, unknown>, ServiceClassType, PayloadType, ParamsType, ResultType> {
+    const eventName = this.eventName
     let definition: CommandDefinition<
       Record<string, unknown>,
       ServiceClassType,
@@ -175,6 +189,7 @@ export class FunctionDefinitionBuilder<
       commandName: this.commandName,
       commandDescription: this.commandDescription,
       metadata: {},
+      eventName,
       call: getFunctionWithValidation<ServiceClassType, PayloadType, ParamsType, ResultType>(
         this.fn,
         this.inputSchema,

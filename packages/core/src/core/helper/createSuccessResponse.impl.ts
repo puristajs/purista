@@ -4,12 +4,14 @@ import { getNewTraceId } from './getNewTraceId.impl'
 export const createSuccessResponse = <T>(
   originalEBMessage: Readonly<Command>,
   payload: T,
+  eventName?: string,
 ): Readonly<CommandSuccessResponse<T>> => {
   const successResponse: CommandSuccessResponse<T> = Object.freeze({
     id: originalEBMessage.id,
     correlationId: originalEBMessage.correlationId,
     traceId: originalEBMessage.traceId || getNewTraceId(),
     timestamp: Date.now(),
+    eventName,
     messageType: EBMessageType.CommandSuccessResponse,
     sender: {
       ...originalEBMessage.receiver,

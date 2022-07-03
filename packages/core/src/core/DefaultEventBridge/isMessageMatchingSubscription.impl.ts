@@ -1,13 +1,21 @@
-import { EBMessage, isCommand, isCommandResponse, isInfoMessage, Logger } from '../types'
+import { EBMessage, isCommand, isCommandResponse, isCustomMessage, isInfoMessage, Logger } from '../types'
 import { SubscriptionStorageEntry } from './types'
 
 export const isMessageMatchingSubscription = (
-  log: Logger,
+  _log: Logger,
   message: EBMessage,
   subscription: SubscriptionStorageEntry,
 ): boolean => {
   // if message type does not match the subscription does not match
   if (!subscription.isMatchingMessageType(message.messageType)) {
+    return false
+  }
+
+  // if we are looking for a named event it is does not match the subscription does not match
+  if (
+    subscription.subscription.eventName &&
+    (!message.eventName || !subscription.isMatchingEventName(message.eventName))
+  ) {
     return false
   }
 
@@ -47,6 +55,19 @@ export const isMessageMatchingSubscription = (
         !subscription.isMatchingReceiverServiceName(message.receiver.serviceName) ||
         !subscription.isMatchingReceiverServiceTarget(message.receiver.serviceTarget) ||
         !subscription.isMatchingReceiverServiceVersion(message.receiver.serviceVersion)
+      ) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  if (isCustomMessage(message)) {
+    if (subscription.subscription.eventName) {
+      if (
+        !subscription.isMatchingSenderServiceName(message.sender.serviceName) ||
+        !subscription.isMatchingSenderServiceVersion(message.sender.serviceVersion)
       ) {
         return false
       }
