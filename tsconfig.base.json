@@ -5,7 +5,7 @@
     "strict": true,
     "module": "es2022",
     "declaration": true,
-    "removeComments": true,
+    "removeComments": false,
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true,
     "moduleResolution": "Node",
