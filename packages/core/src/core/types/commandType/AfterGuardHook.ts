@@ -10,7 +10,7 @@ export type AfterGuardHook<
   ServiceClassType = ServiceClass,
   ResultType = unknown,
   PayloadType = unknown,
-  ParamsType = Record<string, unknown>,
+  ParamsType = unknown,
 > = (
   this: ServiceClassType,
   log: Logger,

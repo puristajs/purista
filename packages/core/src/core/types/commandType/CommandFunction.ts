@@ -7,13 +7,15 @@ import type { Command } from './Command'
  */
 export type CommandFunction<
   ServiceClassType = ServiceClass,
-  PayloadType = unknown,
-  ParamsType = Record<string, unknown>,
-  ResultType = unknown,
+  MessagePayloadType = unknown,
+  MessageParamsType = unknown,
+  FunctionPayloadType = MessagePayloadType,
+  FunctionParamsType = MessageParamsType,
+  FunctionResultType = unknown,
 > = (
   this: ServiceClassType,
   log: Logger,
-  payload: PayloadType,
-  params: ParamsType,
-  message: Command<PayloadType, ParamsType>,
-) => Promise<ResultType>
+  payload: FunctionPayloadType,
+  params: FunctionParamsType,
+  message: Command<MessagePayloadType, MessageParamsType>,
+) => Promise<FunctionResultType>

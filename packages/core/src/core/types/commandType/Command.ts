@@ -15,7 +15,7 @@ import { EBMessageType } from '../EBMessageType.enum'
  * BE AWARE:
  * Subscribers should not respond with command responses if they are "silent" subscribers/listeners.
  */
-export type Command<PayloadType = unknown, ParameterType = Record<string, unknown>> = {
+export type Command<PayloadType = unknown, ParameterType = unknown> = {
   messageType: EBMessageType.Command
   correlationId: CorrelationId
   sender: EBMessageAddress

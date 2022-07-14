@@ -1,7 +1,9 @@
-import { Command, CommandDefinition, CommandResponse } from './commandType'
-import { EventBridge } from './EventBridge'
-import { InfoMessageType, ServiceInfoType } from './infoType'
-import { SubscriptionDefinition, SubscriptionId } from './subscription'
+import type { Command, CommandDefinition, CommandResponse } from './commandType'
+import type { EventBridge } from './EventBridge'
+import { GenericEventEmitter } from './GenericEventEmitter'
+import type { InfoMessageType, ServiceInfoType } from './infoType'
+import type { ServiceEvents } from './ServiceEvents'
+import type { SubscriptionDefinition, SubscriptionId } from './subscription'
 
 /**
  * Abstract base service class which should be extended by the base service class.
@@ -19,7 +21,7 @@ import { SubscriptionDefinition, SubscriptionId } from './subscription'
  * }
  * ```
  */
-export abstract class ServiceClass {
+export abstract class ServiceClass extends GenericEventEmitter<ServiceEvents> {
   /**
    * General service info
    * Service name, service version and some human readable description

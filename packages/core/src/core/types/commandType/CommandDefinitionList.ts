@@ -8,7 +8,7 @@ import type { CommandDefinition } from './CommandDefinition'
  * export const userServiceCommands: CommandDefinitionList<UserService> = [signUp.getDefinition()]
  * ```
  */
-export type CommandDefinitionList<ServiceClassType = ServiceClass> = CommandDefinition<
+export type CommandDefinitionList<ServiceClassType extends ServiceClass> = CommandDefinition<
   Record<string, unknown>,
   ServiceClassType,
   any,

@@ -9,5 +9,5 @@ export type Middleware = (
   log: Logger,
   request: Http2ServerRequest,
   response: Http2ServerResponse,
-  context: Context,
+  context: Context<unknown, Record<string, unknown>>,
 ) => Promise<Context>

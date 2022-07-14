@@ -9,5 +9,5 @@ export type Handler = (
   log: Logger,
   request: Http2ServerRequest,
   response: Http2ServerResponse,
-  context: Context,
-) => Promise<Context>
+  context: Context<unknown, Record<string, unknown>>,
+) => Promise<Context<unknown, Record<string, unknown>>>

@@ -1,8 +1,18 @@
 import { extendApi } from '@anatine/zod-openapi'
 import { z } from 'zod'
 
+export const transformInputSchema = extendApi(z.string().min(5), {
+  example: '{"email": "test@example.com","password": "some-1234-secret-password"}',
+})
+export const transformParameterSchema = z.object({
+  search: z.string().optional(),
+  limit: z.string().optional(),
+})
+export const transformOutputSchema = extendApi(z.string(), {
+  example: '{"uuid":"58e7f0b5-1e64-4c46-a7b7-7c51e8f188ef"}',
+})
+
 // define the input parameters
-// parameters are given as object (key-value)
 export const inputParameterSchema = z.object({})
 
 // define the input payload
@@ -22,6 +32,7 @@ export const inputPayloadSchema = extendApi(
       example: 'the_super_secret_user_password',
       title: 'the user password',
     }),
+    test: z.string().default('some default value for optional field'),
   }),
 )
 
@@ -31,7 +42,3 @@ export const outputPayloadSchema = extendApi(
     uuid: extendApi(z.string().uuid(), { example: 'e118e649-09c4-4d00-917b-3a0a940e1d45', title: 'the users uuid' }),
   }),
 )
-
-export type InputPayloadType = z.infer<typeof inputPayloadSchema>
-export type InputParameterType = z.infer<typeof inputParameterSchema>
-export type OutputPayloadType = z.infer<typeof outputPayloadSchema>

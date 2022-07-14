@@ -4,23 +4,48 @@ import { BeforeGuardHook, CommandFunction, HandledError, ServiceClass, StatusCod
 
 export const getFunctionWithValidation = function <
   ServiceClassType = ServiceClass,
-  PayloadType = unknown,
-  ParamsType = unknown,
-  ResultType = unknown,
+  MessagePayloadType = unknown,
+  MessageParamsType = unknown,
+  MessageResultType = unknown,
+  FunctionPayloadType = MessagePayloadType,
+  FunctionParamsType = MessageParamsType,
+  FunctionResultType = MessageResultType,
 >(
-  fn: CommandFunction<ServiceClassType, PayloadType, ParamsType, ResultType>,
-  inputPayloadSchema: z.ZodType<PayloadType> | undefined,
-  inputParameterSchema: z.ZodType<ParamsType> | undefined,
-  outputPayloadSchema: z.ZodType<ResultType> | undefined,
-  beforeGuards: BeforeGuardHook<ServiceClassType, PayloadType, ParamsType>[] = [],
-) {
-  const wrapped: CommandFunction<ServiceClassType, PayloadType, ParamsType, ResultType> = async function (
-    log,
-    payload,
-    params,
-    message,
-  ): Promise<ResultType> {
-    let safePayload: PayloadType = payload
+  fn: CommandFunction<
+    ServiceClassType,
+    MessagePayloadType,
+    MessageParamsType,
+    FunctionPayloadType,
+    FunctionParamsType,
+    FunctionResultType
+  >,
+  inputPayloadSchema: z.ZodType<FunctionPayloadType, z.ZodTypeDef, MessagePayloadType> | undefined,
+  inputParameterSchema: z.ZodType<FunctionParamsType, z.ZodTypeDef, MessageParamsType> | undefined,
+  outputPayloadSchema: z.ZodType<MessageResultType, z.ZodTypeDef, FunctionResultType> | undefined,
+  beforeGuards: BeforeGuardHook<
+    ServiceClassType,
+    MessagePayloadType,
+    MessageParamsType,
+    FunctionPayloadType,
+    FunctionParamsType
+  >[] = [],
+): CommandFunction<
+  ServiceClassType,
+  MessagePayloadType,
+  MessageParamsType,
+  MessagePayloadType,
+  MessageParamsType,
+  MessageResultType
+> {
+  const wrapped: CommandFunction<
+    ServiceClassType,
+    MessagePayloadType,
+    MessageParamsType,
+    MessagePayloadType,
+    MessageParamsType,
+    MessageResultType
+  > = async function (log, payload, params, message): Promise<MessageResultType> {
+    let safePayload = payload as unknown as FunctionPayloadType
     if (inputPayloadSchema) {
       try {
         safePayload = inputPayloadSchema.parse(payload)
@@ -31,7 +56,7 @@ export const getFunctionWithValidation = function <
       }
     }
 
-    let safeParams: ParamsType = params
+    let safeParams = params as unknown as FunctionParamsType
     if (inputParameterSchema) {
       try {
         safeParams = inputParameterSchema.parse(params)
@@ -54,18 +79,17 @@ export const getFunctionWithValidation = function <
 
     const output = await call()
 
-    let safeOutput: ResultType = output
-    if (outputPayloadSchema) {
-      try {
-        safeOutput = outputPayloadSchema.parse(output)
-      } catch (err) {
-        const error = err as ZodError
-        log.error('output validation failed:', error.message)
-        throw new UnhandledError(StatusCode.InternalServerError)
-      }
+    if (!outputPayloadSchema) {
+      return output as unknown as MessageResultType
     }
 
-    return safeOutput
+    try {
+      return outputPayloadSchema.parse(output)
+    } catch (err) {
+      const error = err as ZodError
+      log.error('output validation failed:', error.message)
+      throw new UnhandledError(StatusCode.InternalServerError)
+    }
   }
   return wrapped
 }

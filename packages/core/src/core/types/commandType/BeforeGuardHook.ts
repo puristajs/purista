@@ -9,12 +9,14 @@ import type { Command } from './Command'
  */
 export type BeforeGuardHook<
   ServiceClassType = ServiceClass,
-  PayloadType = unknown,
-  ParamsType = Record<string, unknown>,
+  MessagePayloadType = unknown,
+  MessageParamsType = unknown,
+  FunctionPayloadType = MessagePayloadType,
+  FunctionParamsType = MessageParamsType,
 > = (
   this: ServiceClassType,
   log: Logger,
-  payload: PayloadType,
-  params: ParamsType,
-  message: Command<PayloadType, ParamsType>,
+  payload: FunctionPayloadType,
+  params: FunctionParamsType,
+  message: Command<MessagePayloadType, MessageParamsType>,
 ) => Promise<void>
