@@ -1,3 +1,5 @@
+import { ZodError } from 'zod'
+
 import { HandledError } from '../HandledError.impl'
 import {
   createErrorResponse,
@@ -76,7 +78,7 @@ export class Service extends ServiceClass {
     baseLogger: Logger,
     info: ServiceInfoType,
     eventBridge: EventBridge,
-    private commandFunctions: CommandDefinitionList,
+    private commandFunctions: CommandDefinitionList<any>,
     private subscriptionList: SubscriptionDefinition[],
   ) {
     super()
@@ -115,7 +117,7 @@ export class Service extends ServiceClass {
    * Connect service to event bridge to receive commands and command responses
    */
   protected async initializeEventbridgeConnect(
-    commandFunctions: CommandDefinitionList,
+    commandFunctions: CommandDefinitionList<any>,
     subscriptions: SubscriptionDefinition[],
   ) {
     // send info message that this service is going to start up now
@@ -305,11 +307,13 @@ export class Service extends ServiceClass {
    */
   protected async executeCommand(_subscriptionId: SubscriptionId, message: Readonly<Command>) {
     const command = this.commands.get(message.receiver.serviceTarget)
+    const traceId = message.traceId || getNewTraceId()
+
     if (!command) {
       this.serviceLogger
         .getChildLogger({
           name: `${this.info.serviceName} V${this.info.serviceVersion} unknown`,
-          requestId: message.traceId,
+          requestId: traceId,
         })
         .error('received invalid command', getCleanedMessage(message))
       const errorResponse = createErrorResponse(message, StatusCode.NotImplemented)
@@ -320,19 +324,41 @@ export class Service extends ServiceClass {
     const log = this.serviceLogger.getChildLogger({
       prefix: [command.commandName],
       name: `${this.info.serviceName} V${this.info.serviceVersion} ${command.commandName}`,
-      requestId: message.traceId,
+      requestId: traceId,
     })
 
     try {
-      let payloadInput = message.command.payload
       let parameterInput = message.command.parameter
+      let payloadInput = message.command.payload
 
-      if (command.hooks.beforeTransformInput?.length) {
-        for (const hook of command.hooks.beforeTransformInput) {
-          const transform = hook.bind(this, log)
-          const transformResponse = await transform(payloadInput, parameterInput, message)
-          payloadInput = transformResponse.payload
-          parameterInput = transformResponse.params
+      if (command.hooks.transformInput) {
+        const transform = command.hooks.transformInput.transformFunction.bind(this, log)
+        try {
+          parameterInput = command.hooks.transformInput.transformParameterSchema.parse(parameterInput)
+        } catch (err) {
+          const error = err as ZodError
+          log.warn('input validation for params failed:', error.message)
+          throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+        }
+
+        try {
+          payloadInput = command.hooks.transformInput.transformInputSchema.parse(payloadInput)
+        } catch (err) {
+          const error = err as ZodError
+          log.warn('input validation for payload failed:', error.message)
+          throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+        }
+
+        try {
+          const transformedInput = await transform(payloadInput, parameterInput, message)
+          parameterInput = transformedInput.params
+          payloadInput = transformedInput.payload
+        } catch (error) {
+          if (error instanceof HandledError) {
+            throw error
+          }
+          log.warn('transformInput:', error)
+          throw new HandledError(StatusCode.BadRequest, 'Unable to transform input')
         }
       }
 
@@ -344,11 +370,11 @@ export class Service extends ServiceClass {
         await Promise.all(afterGuards)
       }
 
-      if (command.hooks.afterTransformOutput?.length) {
-        for (const hook of command.hooks.afterTransformOutput) {
-          const afterTransform = hook.bind(this, log)
-          payload = await afterTransform(payload, payloadInput, parameterInput, message)
-        }
+      if (command.hooks.transformOutput) {
+        const afterTransform = command.hooks.transformOutput.transformFunction.bind(this, log)
+        payload = await afterTransform(payload, parameterInput, message)
+
+        payload = command.hooks.transformOutput.transformOutputSchema.parse(payload)
       }
 
       const successResponse = createSuccessResponse(message, payload, command.eventName)
@@ -359,16 +385,19 @@ export class Service extends ServiceClass {
         return
       }
 
+      this.emit('unhandled-function-error', { functionName: command.commandName, error, traceId })
+
       log.error('executeCommand unhandled error', { error, message: getCleanedMessage(message) })
       await this.eventBridge.emit(createErrorResponse(message, StatusCode.InternalServerError, error))
     }
   }
 
   protected async handleSubscriptionMessage(subscriptionId: SubscriptionId, message: Readonly<EBMessage>) {
+    const traceId = message.traceId || getNewTraceId()
     const subscription = this.subscriptions.get(subscriptionId)
     if (!subscription) {
       this.serviceLogger
-        .getChildLogger({ name: `${this.info.serviceName} V${this.info.serviceVersion}`, requestId: message.traceId })
+        .getChildLogger({ name: `${this.info.serviceName} V${this.info.serviceVersion}`, requestId: traceId })
         .error('received message for non existing subscription', {
           subscriptionId,
           message: getCleanedMessage(message),
@@ -394,10 +423,16 @@ export class Service extends ServiceClass {
         .error(error)
 
       const data = {
-        traceId: message.traceId,
+        traceId,
         subscription: subscription.subscriptionName,
         error,
       }
+
+      this.emit('unhandled-subscription-error', {
+        subscriptionId: subscription.subscriptionName,
+        traceId,
+        error,
+      })
 
       await this.sendServiceInfo(EBMessageType.InfoSubscriptionError, undefined, data)
     }

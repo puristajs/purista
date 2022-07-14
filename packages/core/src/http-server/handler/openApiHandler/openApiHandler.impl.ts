@@ -158,20 +158,47 @@ export const openApiHandler: Handler = async function (log, _request, _response,
         properties: {
           validation: {
             type: 'string',
+            example: 'invalid_string',
           },
           code: {
             type: 'string',
+            example: 'invalid_string',
           },
           message: {
             type: 'string',
+            example: 'String must contain at least 3 character(s)',
           },
-          path: {
+          expected: {
+            type: 'string',
+            example: 'string',
+          },
+          received: {
+            type: 'string',
+            example: 'object',
+          },
+          keys: {
             type: 'array',
             items: {
               type: 'string',
             },
           },
+          minimum: {
+            type: 'number',
+            example: 3,
+          },
+          maximum: {
+            type: 'number',
+            example: 32,
+          },
+          path: {
+            type: 'array',
+            items: {
+              type: 'string',
+              example: 'username',
+            },
+          },
         },
+        required: ['message', 'code'],
       },
     }
 

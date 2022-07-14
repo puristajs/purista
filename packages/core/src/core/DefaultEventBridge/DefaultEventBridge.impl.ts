@@ -5,6 +5,7 @@ import {
   EBMessageAddress,
   EventBridge,
   EventBridgeConfig,
+  isCustomMessage,
   isInfoMessage,
   Logger,
   Subscription,
@@ -49,10 +50,8 @@ export class DefaultEventBridge implements EventBridge {
       correlationId: message.correlationId || getNewCorrelationId(),
     })
 
-    if (isInfoMessage(msg)) {
-      this.log.trace(
-        `${msg.messageType} from ${msg.sender.serviceName} ${msg.sender.serviceVersion} ${msg.sender.serviceTarget}`,
-      )
+    if (isInfoMessage(msg) || isCustomMessage(msg)) {
+      this.log.trace(`${msg.messageType} from ${JSON.stringify(msg.sender)}`)
     } else {
       this.log.trace(
         `${msg.messageType} ${msg.receiver.serviceTarget} to ${msg.receiver.serviceName} ${msg.receiver.serviceVersion} from ${msg.sender.serviceName} ${msg.sender.serviceVersion} ${msg.sender.serviceTarget}`,

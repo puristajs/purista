@@ -1,5 +1,5 @@
 import { Logger } from '@purista/core'
-import { stub } from 'sinon'
+import { SinonStub, stub } from 'sinon'
 
 /**
  * Mocks the logger and methods are stubs
@@ -22,4 +22,12 @@ export const getLoggerMock = (): Logger => {
   } as unknown as Logger
 
   return logger
+}
+
+export type LoggerStubs = {
+  info: SinonStub
+  error: SinonStub
+  warn: SinonStub
+  debug: SinonStub
+  trace: SinonStub
 }

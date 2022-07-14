@@ -32,108 +32,124 @@ For better differentiation, hooks without return values called guard hooks.
 **Example-flow:**
 
 ```mermaid
-flowchart TD
-    input(((Invoke))) ==> |input payload| transformHook ==> |payload transform 2| beforeGuardHook ==> |payload transform 2|function[Function with business logic] ==>afterGuardHook==>|response payload|afterTransformHook ==>|transformed response payload|input
-    subgraph transformHook[transform hooks]
-    transformhook1[TransformHook like decrypt] --> |payload transform 1| transformhook2[TransformHook like JSON.parse]
+flowchart TB
+    command(((Command))) ==> |message unknown payload & unknown params| inputTransformHook[InputTransformHook]
+    inputTransformHook ==> |decoded/transformed typed payload & params|inputValidation
+
+    subgraph inputValidation[validate input]
+        validateInputPayload[validate payload]
+        validateParamsPayload[validate parameter]
     end
+
+
+    inputValidation ==> |typed & validated payload & params| beforeGuardHook
+
     subgraph beforeGuardHook[before guard hooks]
-        beforehook1[BeforeGuardHook check permissions]-.-beforehook2[BeforeGuardHook check rate limits]
-        
+        beforehook1[BeforeGuardHook check permissions]
+        beforehook2[BeforeGuardHook check rate limits]
     end
     
+    beforeGuardHook==>|typed payload & params|function
+
+    function[execute the function]==>|typed output payload| outputValidation[output validation]
+    
+    outputValidation ==> |typed and validated output payload| afterGuardHook
+
     subgraph afterGuardHook[after guard hooks]
-    afterguardhook1[AfterGuardHook meassure timings]-.-afterguardhook2[AfterGuardHook additional log]
+        afterhook1[afterGuardHook check permissions]
+        afterhook2[afterGuardHook check rate limits]
     end
 
-    subgraph afterTransformHook[after transform hooks]
-    aftertransformhook1[AfterGuardHook JSON.stringify]-.-
-    aftertransformhook2[AfterGuardHook encrypt]
-    end
+    afterGuardHook ==> outputTransformHook
    
-    beforeGuardHook -.-> |Handled Error|input
-    afterGuardHook -.-> |Handled Error|input
+    outputTransformHook==>|encode/transform output payload| successResponse(((SuccessResponse)))
+
+ 
 ```
 
-### BeforeTransformHook
+### TransformInputHook
 
 This transform hook is called before input validation.  
-It allows implementing migrations or decoding of input message payload without touching the main business logic.
+It allows implementing migrations, decoding or transformation of input message payload and message parameters without touching the main business logic.
 
 A use case could be, that the message payload is encrypted and needs to be decrypted.  
 Typically, anything like input schema migrations is also a good example for using transform hooks.
 
+The input types of a input transform hook (payload & params) will be automatically set the types for original message payload and parameter.  
+If you've set a input validation schema (you should do it always), the result type for the transform input hook is automatically set.
+
 ```typescript
-import { BeforeTransformHook, FunctionDefinitionBuilder } from '@purista/core'
+import { FunctionDefinitionBuilder } from '@purista/core'
 import { createDecipheriv } from 'crypto'
+import { z } from 'zod'
 
 import { UserService } from '../../UserService'
 import { inputParameterSchema, inputPayloadSchema, outputPayloadSchema } from './schema'
 import { signUp } from './signUp'
 
-const beforeTransformHook1: BeforeTransformHook<UserService> = async function(_logger, input, params) {
-  return {
-    params,
-    payload: JSON.parse(input as string),
-  }
-}
 
-const beforeTransformHook2: BeforeTransformHook<UserService> = async function(_logger, input, params) {
-  const i = input as { iv: string; content: string }
-  const p = params as { algorithm: string; secretKey: string }
-  const decipher = createDecipheriv(p.algorithm, p.secretKey, Buffer.from(i.iv, 'hex'))
+const payloadSchema = z.object({
+  iv: z.string(),
+  content: z.string()
+})
 
-  const decrpyted = Buffer.concat([decipher.update(Buffer.from(i.content, 'hex')), decipher.final()])
+const parameterSchema = z.object({
+  algorithm: z.string(),
+  secretKey: string.string()
+})
 
-  return {
-    params,
-    payload: decrpyted.toString(),
-  }
-}
-
-export default new FunctionDefinitionBuilder('signUp', 'Sign up a new unknown user', signUp)
+export default new FunctionDefinitionBuilder<UserService>('signUp', 'Sign up a new unknown user', 'NewUserCreated')
   .addInputSchema(inputPayloadSchema)
   .addParameterSchema(inputParameterSchema)
   .addOutputSchema(outputPayloadSchema)
   .exposeAsHttpEndpoint('POST', '/sign-up')
-  .setBeforeTransformHook(beforeTransformHook1, beforeTransformHook2)
+  .transformInput(payloadSchema, parameterSchema, async function(_logger, payload, params, _originalMessage) {
+    
+    // _originalMessage.command.payload type will become automatically { iv: string; content: string }
+    // _originalMessage.command.params type will become automatically { algorithm: string; secretKey: string }
+    // the result type of this function is automatically set, because we set input and parameter schema before
 
+    const decipher = createDecipheriv(params.algorithm, params.secretKey, Buffer.from(payload.iv, 'hex'))
+    const decrpyted = Buffer.concat([decipher.update(Buffer.from(payload.content, 'hex')), decipher.final()])
+
+    return {
+      params,
+      payload: JSON.parse(decrpyted.toString()),
+    }
+  })
+  .setFunction(signUp)
 
 ```
 
 ### BeforeGuardHook
 
-The before guard hook is extremely useful for any use case where you need to validate authorization, rate limits and similar things.
+The before guard hook is extremely useful for any use case where you need to validate authorization/authentication, rate limits and similar things.
 
 This guard should throw a HandledError, if for example the user is not allowed to execute this function.
 
 ```typescript
-import { BeforeGuardHook, FunctionDefinitionBuilder } from '@purista/core'
+import { FunctionDefinitionBuilder, HandledError, StatusCode } from '@purista/core'
 
 import { UserService } from '../../UserService'
 import {
   inputParameterSchema,
-  InputParameterType,
   inputPayloadSchema,
-  InputPayloadType,
   outputPayloadSchema,
 } from './schema'
 import { signUp } from './signUp'
 
-const beforeGuardHook1: BeforeGuardHook<UserService, InputPayloadType, InputParameterType> = async function(logger, input) {
-  logger.debug('beforeGuardHook1', input.email)
-}
-
-const beforeGuardHook2: BeforeGuardHook<UserService, InputPayloadType, InputParameterType> = async function(logger, input) {
-  logger.debug('beforeGuardHook2', input.password)
-}
-
-export default new FunctionDefinitionBuilder('signUp', 'Sign up a new unknown user', signUp)
+export default new FunctionDefinitionBuilder<UserService>('signUp', 'Sign up a new unknown user', 'NewUserCreated')
   .addInputSchema(inputPayloadSchema)
   .addParameterSchema(inputParameterSchema)
   .addOutputSchema(outputPayloadSchema)
   .exposeAsHttpEndpoint('POST', '/sign-up')
-  .setBeforeGuardHook(beforeGuardHook1, beforeGuardHook2)
+  .setBeforeGuardHook(async function(logger, payload, params, _originalMessage) {
+    if(params.email === 'blocked@example.com') {
+      logger.error('user not allowed')
+      throw new HandledError(StatusCode.Forbidden)
+    }
+  })
+  .setFunction(signUp)
 ```
 
 ### AfterGuardHook
@@ -157,77 +173,67 @@ Also keep in mind that, in case a hook fails, and it is throwing, the business i
 In the financial example, prefer a subscription or simply emit some custom event in the after guard hook instead of doing some time-consuming stuff.
 
 ```typescript
-import { AfterGuardHook, FunctionDefinitionBuilder } from '@purista/core'
+import { FunctionDefinitionBuilder } from '@purista/core'
 
 import { UserService } from '../../UserService'
 import { inputParameterSchema, inputPayloadSchema, outputPayloadSchema, OutputPayloadType } from './schema'
 import { signUp } from './signUp'
 
-const afterGuardHook1: AfterGuardHook<UserService, OutputPayloadType> = async function(logger, result) {
-  logger.debug('afterGuardHook1', result.uuid)
-}
 
-const afterGuardHook2: AfterGuardHook<UserService, OutputPayloadType> = async function(logger, result) {
-  logger.debug('afterGuardHook2', result.uuid)
-}
-
-export default new FunctionDefinitionBuilder('signUp', 'Sign up a new unknown user', signUp)
+export default new FunctionDefinitionBuilder<UserService>('signUp', 'Sign up a new unknown user', 'NewUserCreated')
   .addInputSchema(inputPayloadSchema)
   .addParameterSchema(inputParameterSchema)
   .addOutputSchema(outputPayloadSchema)
   .exposeAsHttpEndpoint('POST', '/sign-up')
-  .setAfterGuardHook(afterGuardHook1, afterGuardHook2)
+  .setAfterGuardHook(async function(logger, result, _originalMessage) {
+    // the type of result is automatically set, because we added a output schema before
+
+    logger.debug('afterGuardHook1', result.uuid)
+  })
+  .setFunction(signUp)
 
 ```
 
-### AfterTransformHook
+### TransformOutputHook
 
-This transform hook is called after output validation.
-It allows implementing migration or decoding or response payload without touching the main business logic.
+This transform hook is called after output validation and after AfterGuardHook as very last step.
+It allows implementing migration or encoding of response payload without touching the main business logic.
 
-Like the BeforeTransformHook, a good example could be the encryption of the response payload.
+Like the InputTransformHook, a good example could be the encryption of the response payload.
 
 ```typescript
-import { AfterTransformHook, FunctionDefinitionBuilder } from '@purista/core'
+import { FunctionDefinitionBuilder } from '@purista/core'
 import { createCipheriv, randomBytes } from 'crypto'
+import { z } from 'zod'
 
 import { UserService } from '../../UserService'
-import { inputParameterSchema, inputPayloadSchema, outputPayloadSchema, OutputPayloadType } from './schema'
+import { inputParameterSchema, inputPayloadSchema, outputPayloadSchema } from './schema'
 import { signUp } from './signUp'
 
-const afterTransformHook1: AfterTransformHook<UserService, OutputPayloadType> = async function (
-  _logger,
-  functionResult,
-  _inputPayload,
-  _params,
-  _message,
-) {
-  return JSON.stringify(functionResult) as unknown
-}
+const outputSchema = z.object({
+  iv: z.string(),
+  content: z.string()
+})
 
-const afterTransformHook2: AfterTransformHook<
-  UserService,
-  string,
-  unknown,
-  { algorithm: string; secretKey: string }
-> = async (_logger, functionResult, _inputPayload, params, _message) => {
-  const iv = randomBytes(16)
-
-  const cipher = createCipheriv(params.algorithm, params.secretKey, iv)
-
-  const encrypted = Buffer.concat([cipher.update(functionResult as string), cipher.final()])
-
-  return {
-    iv,
-    content: encrypted,
-  }
-}
-
-export default new FunctionDefinitionBuilder('signUp', 'Sign up a new unknown user', signUp)
+export default new FunctionDefinitionBuilder<UserService>('signUp', 'Sign up a new unknown user', 'NewUserCreated')
   .addInputSchema(inputPayloadSchema)
   .addParameterSchema(inputParameterSchema)
   .addOutputSchema(outputPayloadSchema)
   .exposeAsHttpEndpoint('POST', '/sign-up')
-  .setAfterTransformHook(afterTransformHook1, afterTransformHook2)
+  .transformOutput(outputSchema, async (_logger, outputPayload, _inputPayload, inputParams, _originalMessage) => {
 
+    const response = JSON.stringify(outputPayload)
+
+    const iv = randomBytes(16)
+
+    const cipher = createCipheriv(inputParams.algorithm, inputParams.secretKey, iv)
+
+    const encrypted = Buffer.concat([cipher.update(response), cipher.final()])
+
+    return {
+      iv,
+      content: encrypted.toString(),
+    }
+  })
+  .setFunction(signUp)
 ```

@@ -41,7 +41,11 @@ export const userServiceInfo: ServiceInfoType = {
   serviceDescription: 'service which handles all user related information',
 }
 
-export class UserService extends Service {}
+export class UserService extends Service {
+  public config = {
+    some: 'Service config'
+  }
+}
 ```
 
 Add a file `index.ts` in `src/service/user` and export our user service class.
@@ -124,85 +128,63 @@ export const outputPayloadSchema = z.object({
   uuid: extendApi(z.string().uuid(), { example: 'e118e649-09c4-4d00-917b-3a0a940e1d45', title: 'the users uuid' }),
 })
 
-export type InputPayloadType = z.infer<typeof inputPayloadSchema>
-export type InputParameterType = z.infer<typeof inputParameterSchema>
-export type OutputPayloadType = z.infer<typeof outputPayloadSchema>
 ```
 
 As you can see, we define the shape of our data.  
 We also add some additional metadata like `title` and `example`. This will be used to generate the OpenApi definition for our function, as we want to expose this function as a rest API endpoint.
 
-### Implement logic
+### Add the function to service
 
-Now we're ready to implement the function in `signUp.ts`.  
-Add following content:
+Now it's time to let our `User` service know that he has some function `signUp` and we need to implement the logic for it.  
+First, we will create a function definition in our `src/service/user/commands/index.ts`:
+
+<Badge text="Be aware" type="warning"/>
+
+Keep the order, schema, hook and function implementation as very last, to have correct types!
 
 ```typescript
-import { randomUUID } from 'crypto'
-import { CommandFunction } from '@purista/core'
+import { FunctionDefinitionBuilder } from '@purista/core'
 
-import { InputParameterType, InputPayloadType, OutputPayloadType } from './schema'
+import { UserService } from '../../UserService'
 
-export const signUp: CommandFunction<UserService, InputPayloadType, InputParameterType, OutputPayloadType> = 
-  async function (payload, _parameter, _message) {
+import { inputParameterSchema, inputPayloadSchema, outputPayloadSchema } from './schema'
 
-    this.log('sign up new user', payload)
+export default new FunctionDefinitionBuilder<UserService>('signUp', 'Sign up a new unknown user', 'NewUserCreated')
+  .addInputSchema(inputPayloadSchema)
+  .addParameterSchema(inputParameterSchema)
+  .addOutputSchema(outputPayloadSchema)
+  .exposeAsHttpEndpoint('POST', '/sign-up')
+  .setFunction(async function (logger, payload, _parameter, _originalMessage) {
+
+    logger.debug('sign up new user', payload)
 
     const uuid = randomUUID()
+
+    logger.debug(this.config) // log the service config from UserService instance
 
     return {
       uuid
     }
-  }
+  })
 ```
 
-It's a simple function where we log the input and return a response object.  
-But you can see some basic features:
+This code should be self explaining.  
+We say:
+
+*There is a new function `signUp` in `UserService`, which will create a event `NewUserCreated`, with input schema, parameter schema, output schema, and we expose it as POST endpoint on `/sign-up` path.*
+
+It's a simple function, where we log the input, the config and return a response object.  
+
+**But you can see some basic features:**
 
 Our function is an asynchronous function, which allows us to use async-await within our code.  
 The types generated from schema are used, and your linter/typescript will complain on mismatches.  
-You have a `this` scope, which is your domain service class `User`.  
+You have a `this` scope, which is the instance of your domain service class `UserService`.  
 As this service class is extending the base `Service` class, you will have some more useful functions, which we will cover later on.
 
 <Badge text="Be aware" type="warning"/>
 
 *You can't use arrow function to create a new service function, because they don't allow the `this` scope!*
-
-Because we have access to our `User` domain class instance, we can extend this class like this:
-
-```typescript
-export class UserService extends Service {
-  private users:{ uuid:string, email: string, password:string } = []
-}
-```
-
-and change our `signUp.ts` to:
-
-```typescript
-import { randomUUID } from 'crypto'
-import { CommandFunction } from '@purista/core'
-
-import { InputParameterType, InputPayloadType, OutputPayloadType } from './schema'
-
-export const signUp: CommandFunction<UserService, InputPayloadType, InputParameterType, OutputPayloadType> = 
-  async function (payload, _parameter, _message) {
-
-    this.log('sign up new user', payload)
-
-    const uuid = randomUUID()
-
-    this.users.push({
-      uuid,
-      ...payload
-    })
-
-    return {
-      uuid
-    }
-  }
-```
-
-<Badge text="Be aware" type="warning"/>
 
 In the real world, holding states in the service class is a bad approach and should be avoided.  
 Such stuff is hard to handle and to scale. Try to keep things as stateless as possible.
@@ -211,36 +193,9 @@ So, you might ask why a service class at all?
 
 There are use cases, where it makes sens to have it - if not, than it's an empty class which doesn't hurt.
 
-Use cases are something like simply holding some configurations, which is needed by service functions.  
-Or you might want to have a service which holds some connection to external services, databases and so on.
+Use cases are something like simply holding some initial configurations, which is needed by service functions.  
 
-But please avoid to hold states in service classes, but real logic into service classes and so on.  
-It will hit you hard, when you try to scale your system, during tests and so on.
-
-### Add the function to service
-
-Now it's time to let our `User` service know that he has some function `signUp`.  
-First, we will create a function definition in our `src/service/user/commands/index.ts`:
-
-```typescript
-import { FunctionDefinitionBuilder } from '@purista/core'
-
-import { inputParameterSchema, inputPayloadSchema, outputPayloadSchema } from './schema'
-import { signUp } from './signUp'
-
-export default new FunctionDefinitionBuilder('signUp', 'Sign up a new unknown user', signUp)
-  .addInputSchema(inputPayloadSchema)
-  .addParameterSchema(inputParameterSchema)
-  .addOutputSchema(outputPayloadSchema)
-  .exposeAsHttpEndpoint('POST', '/sign-up')
-```
-
-This code should be self explaining.  
-We say:
-
-*There is a new function `signUp` with input schema, parameter schema, output schema which should be exposed as POST endpoint on `/sign-up` path.*
-
-Now we should add the definition to our `User` service in our `src/index.ts`.
+Now we should add the function definition to our `User` service in our `src/index.ts`.
 
 ```typescript
   // add imports
@@ -253,8 +208,8 @@ Now we should add the definition to our `User` service in our `src/index.ts`.
 
 If you now start the application with `npm start` you should have a POST endpoint `https://localhost:8080/api/v1/sign-up` which should trigger our function.
 
-There you can see we expose our function versioned by the service version.  
-This means we can also have same domain service running with different version.
+There you can see, that we expose our function versioned by the service version.  
+This means we can also have same domain service running with different versions.
 
 If you have for example breaking API changes in a new version of our `User` service, then you would create a new Service (or copy the old one and make your changes) and set service version to a higher version.
 
