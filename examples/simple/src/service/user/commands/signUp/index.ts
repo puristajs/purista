@@ -33,19 +33,15 @@ export default new FunctionDefinitionBuilder<UserService>(
   .setSuccessEventName(EventName.NewUserSignedUp)
   // optional: transform (decode) the input payload and parameter
   // for example if you have end-to-end decryption or the payload is a string wich needs to be decoded first
-  .transformInput(
-    transformInputSchema,
-    transformParameterSchema,
-    async function (_log, payload, params, _originalMessage) {
-      // if something throws here, it will be automatically converted into a handled error
-      // a bad request 400 error response is send without any further information
-      // you can throw your own handled error if you need to send a other or more detailed error
-      return {
-        payload: JSON.parse(payload),
-        params,
-      }
-    },
-  )
+  .transformInput(transformInputSchema, transformParameterSchema, async function (_context, payload, params) {
+    // if something throws here, it will be automatically converted into a handled error
+    // a bad request 400 error response is send without any further information
+    // you can throw your own handled error if you need to send a other or more detailed error
+    return {
+      payload: JSON.parse(payload),
+      params,
+    }
+  })
   // recommended: set the input payload validation and because of that the input payload type(s)
   // even if you do not use payload within your function define the schema and set it to z.unknown()
   .addInputSchema(inputPayloadSchema)
@@ -57,18 +53,18 @@ export default new FunctionDefinitionBuilder<UserService>(
   .addOutputSchema(outputPayloadSchema)
   // optional: transform (encode) the success output payload
   // for example if you like to encrypt the response or encode is needed
-  .transformOutput(transformOutputSchema, async function (_log, payload, _params, _originalMessage) {
+  .transformOutput(transformOutputSchema, async function (_context, payload, _params) {
     return JSON.stringify(payload)
   })
   // optional: before guard is executed after input transform and schema validation and before function
   // put your business validation of request here
-  .setBeforeGuardHook(async function (_log, payload, _params, _originalMessage) {
+  .setBeforeGuardHook(async function (_context, payload, _params) {
     if (payload.email === 'blacklisted@example.com') {
       throw new HandledError(StatusCode.Unauthorized)
     }
   })
   // optional: after guard is executed after function, after output validation and before output transform
-  .setAfterGuardHook(async function (_log, _payload, _params, _originalMessage) {
+  .setAfterGuardHook(async function (_context, _payload, _params) {
     // if it throws other than a handled error the response will be a error response with internal server error 500
     // throw a handled error here to use your own status code and maybe respond with more details
   })
@@ -102,11 +98,11 @@ export default new FunctionDefinitionBuilder<UserService>(
   // if you throw other codes somewhere in you logic, add them here, to get them documented in openApi
   .addErrorStatusCodes(StatusCode.PaymentRequired, StatusCode.Conflict)
   // mandatory: the function implementation
-  .setFunction(async function (log, payload, _param, message) {
-    log.debug(payload.test)
-    log.debug(message.command.payload)
+  .setFunction(async function ({ logger, message }, payload, _param) {
+    logger.debug(payload.test)
+    logger.debug(message.payload.payload)
 
-    log.debug('sign up new user', payload)
+    logger.debug('sign up new user', payload)
 
     const uuid = randomUUID()
 

@@ -8,8 +8,8 @@ export const createInfoMessage = (
   serviceVersion: string,
   serviceTarget?: string,
   data?: Record<string, unknown>,
-): InfoMessage => {
-  const info: Readonly<InfoMessage> = Object.freeze({
+): Omit<InfoMessage, 'instanceId'> => {
+  const info: Readonly<Omit<InfoMessage, 'instanceId'>> = Object.freeze({
     messageType,
     id: getNewEBMessageId(),
     traceId: getNewTraceId(),

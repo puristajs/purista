@@ -103,7 +103,7 @@ export default new FunctionDefinitionBuilder<UserService>('signUp', 'Sign up a n
   .addParameterSchema(inputParameterSchema)
   .addOutputSchema(outputPayloadSchema)
   .exposeAsHttpEndpoint('POST', '/sign-up')
-  .transformInput(payloadSchema, parameterSchema, async function(_logger, payload, params, _originalMessage) {
+  .transformInput(payloadSchema, parameterSchema, async function(_context, payload, params) {
     
     // _originalMessage.command.payload type will become automatically { iv: string; content: string }
     // _originalMessage.command.params type will become automatically { algorithm: string; secretKey: string }
@@ -143,7 +143,7 @@ export default new FunctionDefinitionBuilder<UserService>('signUp', 'Sign up a n
   .addParameterSchema(inputParameterSchema)
   .addOutputSchema(outputPayloadSchema)
   .exposeAsHttpEndpoint('POST', '/sign-up')
-  .setBeforeGuardHook(async function(logger, payload, params, _originalMessage) {
+  .setBeforeGuardHook(async function({ logger }, payload, params) {
     if(params.email === 'blocked@example.com') {
       logger.error('user not allowed')
       throw new HandledError(StatusCode.Forbidden)
@@ -185,7 +185,7 @@ export default new FunctionDefinitionBuilder<UserService>('signUp', 'Sign up a n
   .addParameterSchema(inputParameterSchema)
   .addOutputSchema(outputPayloadSchema)
   .exposeAsHttpEndpoint('POST', '/sign-up')
-  .setAfterGuardHook(async function(logger, result, _originalMessage) {
+  .setAfterGuardHook(async function({ logger }, result) {
     // the type of result is automatically set, because we added a output schema before
 
     logger.debug('afterGuardHook1', result.uuid)
@@ -220,7 +220,7 @@ export default new FunctionDefinitionBuilder<UserService>('signUp', 'Sign up a n
   .addParameterSchema(inputParameterSchema)
   .addOutputSchema(outputPayloadSchema)
   .exposeAsHttpEndpoint('POST', '/sign-up')
-  .transformOutput(outputSchema, async (_logger, outputPayload, _inputPayload, inputParams, _originalMessage) => {
+  .transformOutput(outputSchema, async (_context, outputPayload, _inputPayload, inputParams) => {
 
     const response = JSON.stringify(outputPayload)
 

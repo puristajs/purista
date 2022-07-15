@@ -46,6 +46,7 @@ describe('HandledError', () => {
 
     const commandErrorResponse: CommandErrorResponse = {
       messageType: EBMessageType.CommandErrorResponse,
+      instanceId: 'myInstance',
       isHandledError: true,
       id: 'messageTestId',
       traceId,
@@ -54,7 +55,7 @@ describe('HandledError', () => {
       principalId: 'messagePrincipalId',
       sender,
       receiver,
-      response: {
+      payload: {
         status: statusCode,
         message,
         data,

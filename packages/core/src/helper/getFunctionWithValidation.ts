@@ -44,14 +44,14 @@ export const getFunctionWithValidation = function <
     MessagePayloadType,
     MessageParamsType,
     MessageResultType
-  > = async function (log, payload, params, message): Promise<MessageResultType> {
+  > = async function ({ logger, message, emit }, payload, params): Promise<MessageResultType> {
     let safePayload = payload as unknown as FunctionPayloadType
     if (inputPayloadSchema) {
       try {
         safePayload = inputPayloadSchema.parse(payload)
       } catch (err) {
         const error = err as ZodError
-        log.warn('input validation for payload failed:', error.message)
+        logger.warn('input validation for payload failed:', error.message)
         throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
       }
     }
@@ -62,20 +62,20 @@ export const getFunctionWithValidation = function <
         safeParams = inputParameterSchema.parse(params)
       } catch (err) {
         const error = err as ZodError
-        log.warn('input validation for params failed:', error.message)
+        logger.warn('input validation for params failed:', error.message)
         throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
       }
     }
 
     if (beforeGuards.length) {
       const guards = beforeGuards.map((hook) => {
-        const beforeGuard = hook.bind(this, log)
-        return beforeGuard(safePayload, safeParams, message)
+        const beforeGuard = hook.bind(this, { logger, message })
+        return beforeGuard(safePayload, safeParams)
       })
       await Promise.all(guards)
     }
 
-    const call = fn.bind(this, log, safePayload, safeParams, message)
+    const call = fn.bind(this, { logger, message, emit }, safePayload, safeParams)
 
     const output = await call()
 
@@ -87,7 +87,7 @@ export const getFunctionWithValidation = function <
       return outputPayloadSchema.parse(output)
     } catch (err) {
       const error = err as ZodError
-      log.error('output validation failed:', error.message)
+      logger.error('output validation failed:', error.message)
       throw new UnhandledError(StatusCode.InternalServerError)
     }
   }

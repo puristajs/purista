@@ -15,8 +15,7 @@ export type BeforeGuardHook<
   FunctionParamsType = MessageParamsType,
 > = (
   this: ServiceClassType,
-  log: Logger,
+  context: { logger: Logger; message: Command<MessagePayloadType, MessageParamsType> },
   payload: FunctionPayloadType,
   params: FunctionParamsType,
-  message: Command<MessagePayloadType, MessageParamsType>,
 ) => Promise<void>

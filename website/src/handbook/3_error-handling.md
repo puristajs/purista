@@ -154,7 +154,7 @@ try{
     throw new HandledError(StatusCode.Conflict, 'entity with same id already exist')
   }
   // log the original (unknown) error
-  this.log.error('houston we got a problem here', err)
+  logger.error('Houston we got a problem here', err)
   // throw an unhandled error
   throw new UnhandledError(StatusCode.InternalServerError,'internal server error')
 }

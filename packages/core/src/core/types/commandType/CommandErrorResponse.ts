@@ -14,7 +14,7 @@ export type CommandErrorResponse = {
   correlationId: CorrelationId
   sender: EBMessageAddress
   receiver: EBMessageAddress
-  response: {
+  payload: {
     status: StatusCode
     message: string
     data?: unknown

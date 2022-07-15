@@ -17,11 +17,12 @@ describe('prevent sensitive data to be logged in production', () => {
       },
       messageType: EBMessageType.Command,
       id: 'messageTestId',
+      instanceId: 'myInstance',
       traceId: 'messageTraceId',
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
-      command: {
+      payload: {
         payload: { content: 'content' },
         parameter: { param: 1 },
       },
@@ -47,11 +48,12 @@ describe('prevent sensitive data to be logged in production', () => {
       },
       messageType: EBMessageType.Command,
       id: 'messageTestId',
+      instanceId: 'myInstance',
       traceId: 'messageTraceId',
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
-      command: {
+      payload: {
         payload: { content: 'content' },
         parameter: { param: 1 },
       },
@@ -60,8 +62,8 @@ describe('prevent sensitive data to be logged in production', () => {
     const result = getCleanedMessage(message, true) as Command
 
     expect(result).not.toStrictEqual(message)
-    expect(result.command.payload).toBe('***removed from log***')
-    expect(result.command.parameter.all).toBe('***removed from log***')
+    expect(result.payload.payload).toBe('***removed from log***')
+    expect(result.payload.parameter.all).toBe('***removed from log***')
   })
 
   it('removes response from command success message', () => {
@@ -79,16 +81,17 @@ describe('prevent sensitive data to be logged in production', () => {
       },
       messageType: EBMessageType.CommandSuccessResponse,
       id: 'messageTestId',
+      instanceId: 'myInstance',
       traceId: 'messageTraceId',
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
-      response: { content: 'content' },
+      payload: { content: 'content' },
     }
 
     const result = getCleanedMessage(message, true) as CommandSuccessResponse
 
     expect(result).not.toStrictEqual(message)
-    expect(result.response).toBe('***removed from log***')
+    expect(result.payload).toBe('***removed from log***')
   })
 })

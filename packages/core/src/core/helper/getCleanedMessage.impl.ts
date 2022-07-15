@@ -24,8 +24,8 @@ export const getCleanedMessage = (
   }
 
   if (isCommand(cleanedMessage)) {
-    cleanedMessage.command = {
-      ...cleanedMessage.command,
+    cleanedMessage.payload = {
+      ...cleanedMessage.payload,
       parameter: {
         all: '***removed from log***',
       },
@@ -34,7 +34,7 @@ export const getCleanedMessage = (
   }
 
   if (isCommandSuccessResponse(cleanedMessage)) {
-    cleanedMessage.response = '***removed from log***'
+    cleanedMessage.payload = '***removed from log***'
   }
 
   return cleanedMessage

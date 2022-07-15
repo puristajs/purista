@@ -5,8 +5,8 @@ export const createSuccessResponse = <T>(
   originalEBMessage: Readonly<Command>,
   payload: T,
   eventName?: string,
-): Readonly<CommandSuccessResponse<T>> => {
-  const successResponse: CommandSuccessResponse<T> = Object.freeze({
+): Readonly<Omit<CommandSuccessResponse<T>, 'instanceId'>> => {
+  const successResponse: Omit<CommandSuccessResponse<T>, 'instanceId'> = Object.freeze({
     id: originalEBMessage.id,
     correlationId: originalEBMessage.correlationId,
     traceId: originalEBMessage.traceId || getNewTraceId(),
@@ -19,7 +19,7 @@ export const createSuccessResponse = <T>(
     receiver: {
       ...originalEBMessage.sender,
     },
-    response: payload,
+    payload,
   })
 
   return successResponse

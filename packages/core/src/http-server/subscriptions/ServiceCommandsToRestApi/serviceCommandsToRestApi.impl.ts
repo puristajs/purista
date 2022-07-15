@@ -44,7 +44,7 @@ export const serviceCommandsToRestApi: HttpServiceSubscriptionCallBack<InfoServi
           serviceTarget: message.sender.serviceTarget,
         },
         traceId: context.traceId,
-        command: {
+        payload: {
           parameter: context.parameter,
           payload: context.payload,
         },

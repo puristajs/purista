@@ -154,7 +154,7 @@ export default new FunctionDefinitionBuilder<UserService>('signUp', 'Sign up a n
   .addParameterSchema(inputParameterSchema)
   .addOutputSchema(outputPayloadSchema)
   .exposeAsHttpEndpoint('POST', '/sign-up')
-  .setFunction(async function (logger, payload, _parameter, _originalMessage) {
+  .setFunction(async function ({ logger }, payload, _parameter) {
 
     logger.debug('sign up new user', payload)
 
