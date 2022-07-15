@@ -1,8 +1,10 @@
-import { EventBridgeConfig } from '../types'
+import { getNewInstanceId } from '../helper'
+import { EventBridgeEnsuredDefaults } from '../types'
 
-export const getDefaultEventBridgeConfig = (): EventBridgeConfig => {
-  const defaultConfig: EventBridgeConfig = {
-    defaultTtl: 2000,
+export const getDefaultEventBridgeConfig = (): EventBridgeEnsuredDefaults => {
+  const defaultConfig: EventBridgeEnsuredDefaults = {
+    defaultTtl: 30000,
+    instanceId: getNewInstanceId(),
   }
 
   return defaultConfig

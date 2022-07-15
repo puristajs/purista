@@ -7,6 +7,7 @@ describe('createErrorResponse', () => {
   const message: Command = {
     messageType: EBMessageType.Command,
     id: 'messageTestId',
+    instanceId: 'myInstance',
     traceId: 'testTraceId',
     timestamp: Date.now(),
     correlationId: 'messageCorrelationId',
@@ -22,7 +23,7 @@ describe('createErrorResponse', () => {
       serviceVersion: '2.2.2',
       serviceTarget: 'receiverServiceTarget',
     },
-    command: {
+    payload: {
       payload: { input: 'input payload' },
       parameter: { input: 'parameter' },
     },
@@ -36,7 +37,7 @@ describe('createErrorResponse', () => {
     const payload = { status: statusCode, message: 'Internal Server Error', data: undefined }
 
     expect(result.messageType).toBe(EBMessageType.CommandErrorResponse)
-    expect(result.response).toStrictEqual(payload)
+    expect(result.payload).toStrictEqual(payload)
     expect(result.sender).toStrictEqual(message.receiver)
     expect(result.receiver).toStrictEqual(message.sender)
     expect(result.traceId).toBe(message.traceId)
@@ -57,7 +58,7 @@ describe('createErrorResponse', () => {
     const payload = { status: StatusCode.BadRequest, message: messageText, data }
 
     expect(result.messageType).toBe(EBMessageType.CommandErrorResponse)
-    expect(result.response).toStrictEqual(payload)
+    expect(result.payload).toStrictEqual(payload)
     expect(result.sender).toStrictEqual(message.receiver)
     expect(result.receiver).toStrictEqual(message.sender)
     expect(result.traceId).toBe(message.traceId)
@@ -78,7 +79,7 @@ describe('createErrorResponse', () => {
     const payload = { status: statusCode, message: 'Internal Server Error', data: undefined }
 
     expect(result.messageType).toBe(EBMessageType.CommandErrorResponse)
-    expect(result.response).toStrictEqual(payload)
+    expect(result.payload).toStrictEqual(payload)
     expect(result.sender).toStrictEqual(message.receiver)
     expect(result.receiver).toStrictEqual(message.sender)
     expect(result.traceId).toBe(message.traceId)

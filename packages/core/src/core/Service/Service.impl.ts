@@ -8,6 +8,7 @@ import {
   getCleanedMessage,
   getNewCorrelationId,
   getNewEBMessageId,
+  getNewInstanceId,
   getNewTraceId,
   getTimeoutPromise,
 } from '../helper'
@@ -15,8 +16,10 @@ import {
   Command,
   CommandDefinition,
   CommandDefinitionList,
+  CommandFunctionContext,
   CustomMessage,
   EBMessage,
+  EBMessageAddress,
   EBMessageId,
   EBMessageType,
   EventBridge,
@@ -73,6 +76,8 @@ export class Service extends ServiceClass {
   protected commands = new Map<string, CommandDefinition>()
 
   protected mainSubscriptionId: SubscriptionId | undefined
+
+  instanceId = getNewInstanceId()
 
   constructor(
     baseLogger: Logger,
@@ -190,7 +195,7 @@ export class Service extends ServiceClass {
       const pending = this.pendingInvocations.get(message.correlationId)
       if (pending) {
         if (isCommandSuccessResponse(message)) {
-          pending.resolve(message.response)
+          pending.resolve(message.payload)
         } else if (isCommandErrorResponse(message)) {
           const error = message.isHandledError ? HandledError.fromMessage(message) : UnhandledError.fromMessage(message)
           pending.reject(error)
@@ -204,7 +209,7 @@ export class Service extends ServiceClass {
   }
 
   async invoke<T>(
-    input: Omit<Command, 'id' | 'sender' | 'messageType' | 'timestamp' | 'correlationId'>,
+    input: Omit<Command, 'id' | 'sender' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
     ttl = this.eventBridge.defaultTtl,
     originalCommand?: Readonly<Partial<Command>>,
   ): Promise<T> {
@@ -213,6 +218,7 @@ export class Service extends ServiceClass {
 
     const command: Readonly<Command> = Object.freeze({
       id: getNewEBMessageId(),
+      instanceId: this.instanceId,
       correlationId,
       timestamp: Date.now(),
       traceId,
@@ -266,22 +272,6 @@ export class Service extends ServiceClass {
     return Promise.race([executionPromise, getTimeoutPromise(ttl, traceId)])
   }
 
-  async emitCustomEvent<T>(eventName: string, payload?: T) {
-    const message: Readonly<CustomMessage<T>> = Object.freeze({
-      messageType: EBMessageType.CustomMessage,
-      id: getNewEBMessageId(),
-      timestamp: Date.now(),
-      sender: {
-        serviceName: this.info.serviceName,
-        serviceVersion: this.info.serviceVersion,
-      },
-      eventName,
-      payload,
-    })
-
-    await this.eventBridge.emit(message)
-  }
-
   protected async subscribe(subscription: SubscriptionDefinition): Promise<SubscriptionId> {
     const ebSubscription: Subscription = {
       sender: subscription.sender,
@@ -321,23 +311,23 @@ export class Service extends ServiceClass {
       return
     }
 
-    const log = this.serviceLogger.getChildLogger({
+    const logger = this.serviceLogger.getChildLogger({
       prefix: [command.commandName],
       name: `${this.info.serviceName} V${this.info.serviceVersion} ${command.commandName}`,
       requestId: traceId,
     })
 
     try {
-      let parameterInput = message.command.parameter
-      let payloadInput = message.command.payload
+      let parameterInput = message.payload.parameter
+      let payloadInput = message.payload.payload
 
       if (command.hooks.transformInput) {
-        const transform = command.hooks.transformInput.transformFunction.bind(this, log)
+        const transform = command.hooks.transformInput.transformFunction.bind(this, { logger, message })
         try {
           parameterInput = command.hooks.transformInput.transformParameterSchema.parse(parameterInput)
         } catch (err) {
           const error = err as ZodError
-          log.warn('input validation for params failed:', error.message)
+          logger.warn('input validation for params failed:', error.message)
           throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
         }
 
@@ -345,34 +335,61 @@ export class Service extends ServiceClass {
           payloadInput = command.hooks.transformInput.transformInputSchema.parse(payloadInput)
         } catch (err) {
           const error = err as ZodError
-          log.warn('input validation for payload failed:', error.message)
+          logger.warn('input validation for payload failed:', error.message)
           throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
         }
 
         try {
-          const transformedInput = await transform(payloadInput, parameterInput, message)
+          const transformedInput = await transform(payloadInput, parameterInput)
           parameterInput = transformedInput.params
           payloadInput = transformedInput.payload
         } catch (error) {
           if (error instanceof HandledError) {
             throw error
           }
-          log.warn('transformInput:', error)
+          logger.warn('transformInput:', error)
           throw new HandledError(StatusCode.BadRequest, 'Unable to transform input')
         }
       }
 
-      const call = command.call.bind(this, log)
-      let payload = await call(payloadInput, parameterInput, message)
+      const emitCustomEvent = async <Payload>(sender: EBMessageAddress, eventName: string, eventPayload?: Payload) => {
+        const msg: Readonly<CustomMessage<Payload>> = Object.freeze({
+          messageType: EBMessageType.CustomMessage,
+          id: getNewEBMessageId(),
+          instanceId: this.instanceId,
+          timestamp: Date.now(),
+          traceId,
+          sender,
+          eventName,
+          payload: eventPayload,
+        })
+
+        await this.eventBridge.emit(msg)
+      }
+
+      const emit = emitCustomEvent.bind(this, {
+        serviceName: this.info.serviceName,
+        serviceVersion: this.info.serviceVersion,
+        serviceTarget: command.commandName,
+      })
+
+      const context: CommandFunctionContext = {
+        logger,
+        message,
+        emit,
+      }
+
+      const call = command.call.bind(this, context)
+      let payload = await call(payloadInput, parameterInput)
 
       if (command.hooks.afterGuard?.length) {
-        const afterGuards = command.hooks.afterGuard.map((hook) => hook.bind(this, log))
+        const afterGuards = command.hooks.afterGuard.map((hook) => hook.bind(this, { logger, message }))
         await Promise.all(afterGuards)
       }
 
       if (command.hooks.transformOutput) {
-        const afterTransform = command.hooks.transformOutput.transformFunction.bind(this, log)
-        payload = await afterTransform(payload, parameterInput, message)
+        const afterTransform = command.hooks.transformOutput.transformFunction.bind(this, { logger, message })
+        payload = await afterTransform(payload, parameterInput)
 
         payload = command.hooks.transformOutput.transformOutputSchema.parse(payload)
       }
@@ -387,7 +404,7 @@ export class Service extends ServiceClass {
 
       this.emit('unhandled-function-error', { functionName: command.commandName, error, traceId })
 
-      log.error('executeCommand unhandled error', { error, message: getCleanedMessage(message) })
+      logger.error('executeCommand unhandled error', { error, message: getCleanedMessage(message) })
       await this.eventBridge.emit(createErrorResponse(message, StatusCode.InternalServerError, error))
     }
   }

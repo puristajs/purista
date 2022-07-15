@@ -20,7 +20,7 @@ export type Command<PayloadType = unknown, ParameterType = unknown> = {
   correlationId: CorrelationId
   sender: EBMessageAddress
   receiver: EBMessageAddress
-  command: {
+  payload: {
     parameter: ParameterType
     payload: PayloadType
   }

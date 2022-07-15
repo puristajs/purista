@@ -102,6 +102,7 @@ describe('DefaultEventBridge', () => {
 
     const message: Command = {
       id: 'messageTestId',
+      instanceId: 'myInstance',
       messageType: EBMessageType.Command,
       traceId: 'messageTraceId',
       timestamp: Date.now(),
@@ -110,7 +111,7 @@ describe('DefaultEventBridge', () => {
       eventName,
       sender,
       receiver,
-      command: {
+      payload: {
         parameter: { parameter: 1 },
         payload: { payload: 'content' },
       },
@@ -179,6 +180,7 @@ describe('DefaultEventBridge', () => {
 
     const message: Command = {
       id: 'messageTestId',
+      instanceId: 'myInstance',
       messageType: EBMessageType.Command,
       traceId: 'messageTraceId',
       timestamp: Date.now(),
@@ -187,7 +189,7 @@ describe('DefaultEventBridge', () => {
       eventName,
       sender,
       receiver,
-      command: {
+      payload: {
         parameter: { parameter: 1 },
         payload: { payload: 'content' },
       },
@@ -238,6 +240,7 @@ describe('DefaultEventBridge', () => {
 
     const message: InfoMessage = {
       id: 'messageTestId',
+      instanceId: 'myInstance',
       messageType: EBMessageType.InfoServiceFunctionAdded,
       traceId: 'messageTraceId',
       timestamp: Date.now(),

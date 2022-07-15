@@ -13,9 +13,8 @@ export type AfterGuardHook<
   ParamsType = unknown,
 > = (
   this: ServiceClassType,
-  log: Logger,
+  context: { logger: Logger; message: Command<PayloadType, ParamsType> },
   result: ResultType,
   input: PayloadType,
   params: ParamsType,
-  message: Command<PayloadType, ParamsType>,
 ) => Promise<void>

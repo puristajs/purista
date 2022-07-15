@@ -13,8 +13,7 @@ export type TransformOutputHook<
   ResponseOutput = unknown,
 > = (
   this: ServiceClassType,
-  log: Logger,
+  context: { logger: Logger; message: Command<MessagePayloadType, MessageParamsType> },
   payload: MessageResultType,
   params: MessageParamsType,
-  message: Command<MessagePayloadType, MessageParamsType>,
 ) => Promise<ResponseOutput>

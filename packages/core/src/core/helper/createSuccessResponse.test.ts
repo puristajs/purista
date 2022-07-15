@@ -8,6 +8,7 @@ describe('createSuccessResponse', () => {
     const message: Command = {
       messageType: EBMessageType.Command,
       id: 'messageTestId',
+      instanceId: 'myInstance',
       traceId: 'testTraceId',
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
@@ -23,7 +24,7 @@ describe('createSuccessResponse', () => {
         serviceVersion: '2.2.2',
         serviceTarget: 'receiverServiceTarget',
       },
-      command: {
+      payload: {
         payload: { input: 'input payload' },
         parameter: { input: 'parameter' },
       },
@@ -32,7 +33,7 @@ describe('createSuccessResponse', () => {
     const result = createSuccessResponse(message, payload)
 
     expect(result.messageType).toBe(EBMessageType.CommandSuccessResponse)
-    expect(result.response).toBe(payload)
+    expect(result.payload).toBe(payload)
     expect(result.sender).toStrictEqual(message.receiver)
     expect(result.receiver).toStrictEqual(message.sender)
     expect(result.traceId).toBe(message.traceId)
@@ -46,6 +47,7 @@ describe('createSuccessResponse', () => {
     const message: Command = {
       messageType: EBMessageType.Command,
       id: 'messageTestId',
+      instanceId: 'myInstance',
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
@@ -60,7 +62,7 @@ describe('createSuccessResponse', () => {
         serviceVersion: '2.2.2',
         serviceTarget: 'receiverServiceTarget',
       },
-      command: {
+      payload: {
         payload: { input: 'input payload' },
         parameter: { input: 'parameter' },
       },
@@ -69,7 +71,7 @@ describe('createSuccessResponse', () => {
     const result = createSuccessResponse(message, payload)
 
     expect(result.messageType).toBe(EBMessageType.CommandSuccessResponse)
-    expect(result.response).toBe(payload)
+    expect(result.payload).toBe(payload)
     expect(result.sender).toStrictEqual(message.receiver)
     expect(result.receiver).toStrictEqual(message.sender)
     expect(result.traceId).toBeDefined()

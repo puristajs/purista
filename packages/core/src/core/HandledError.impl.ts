@@ -17,7 +17,7 @@ export class HandledError extends Error {
    * @returns HandledError
    */
   static fromMessage(message: Readonly<CommandErrorResponse>): HandledError {
-    return new HandledError(message.response.status, message.response.message, message.response.data, message.traceId)
+    return new HandledError(message.payload.status, message.payload.message, message.payload.data, message.traceId)
   }
 
   /**

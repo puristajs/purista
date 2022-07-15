@@ -8,7 +8,7 @@ import type { Subscription } from './subscription'
  */
 export interface EventBridge {
   readonly defaultTtl: number
-  emit(message: EBMessage): Promise<void>
+  emit(message: Omit<EBMessage, 'instanceId'>): Promise<void>
   subscribe(subscription: Subscription): Promise<string>
   unsubscribe(subscriptionId: string): Promise<void>
 

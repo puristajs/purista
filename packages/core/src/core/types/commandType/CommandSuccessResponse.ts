@@ -14,7 +14,7 @@ export type CommandSuccessResponse<PayloadType = unknown> = {
   sender: EBMessageAddress
   receiver: EBMessageAddress
   isMultipart?: boolean // multi-message handling
-  response: PayloadType // result payload
+  payload: PayloadType // result payload
 } & EBMessageBase
 
 export const isCommandSuccessResponse = (message: EBMessage): message is CommandSuccessResponse => {

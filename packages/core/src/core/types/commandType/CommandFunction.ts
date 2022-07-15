@@ -1,6 +1,5 @@
-import type { Logger } from '../Logger'
 import type { ServiceClass } from '../ServiceClass'
-import type { Command } from './Command'
+import { CommandFunctionContext } from './CommandFunctionContext'
 
 /**
  * CommandFunction is a function which will be triggered when a matching event bridge message is received by the service
@@ -14,8 +13,7 @@ export type CommandFunction<
   FunctionResultType = unknown,
 > = (
   this: ServiceClassType,
-  log: Logger,
+  context: CommandFunctionContext<MessagePayloadType, MessageParamsType>,
   payload: FunctionPayloadType,
   params: FunctionParamsType,
-  message: Command<MessagePayloadType, MessageParamsType>,
 ) => Promise<FunctionResultType>

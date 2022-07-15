@@ -5,6 +5,7 @@ import {
   EBMessageAddress,
   EventBridge,
   EventBridgeConfig,
+  EventBridgeEnsuredDefaults,
   isCustomMessage,
   isInfoMessage,
   Logger,
@@ -21,11 +22,14 @@ import { SubscriptionStorageEntry } from './types'
  */
 export class DefaultEventBridge implements EventBridge {
   private log: Logger
-  private config: EventBridgeConfig
+  private config: EventBridgeEnsuredDefaults
 
   protected subscriptions = new Map<string, SubscriptionStorageEntry>()
   constructor(baseLogger: Logger, conf: EventBridgeConfig = getDefaultEventBridgeConfig()) {
-    this.config = conf
+    this.config = {
+      ...getDefaultEventBridgeConfig(),
+      ...conf,
+    }
     this.log = baseLogger.getChildLogger({ name: 'eventBridge' })
   }
 
@@ -35,6 +39,14 @@ export class DefaultEventBridge implements EventBridge {
    */
   get defaultTtl() {
     return this.config.defaultTtl
+  }
+
+  /**
+   * Get instance id.
+   * The id of current eventbus instance.
+   */
+  get instanceId() {
+    return this.config.instanceId
   }
 
   /**
@@ -48,6 +60,7 @@ export class DefaultEventBridge implements EventBridge {
       timestamp: message.timestamp || Date.now(),
       traceId: message.traceId || getNewTraceId(),
       correlationId: message.correlationId || getNewCorrelationId(),
+      instanceId: message.instanceId || this.config.instanceId,
     })
 
     if (isInfoMessage(msg) || isCustomMessage(msg)) {
