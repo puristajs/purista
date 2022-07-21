@@ -1,4 +1,3 @@
-import { SubscriptionId } from './subscription'
 import { TraceId } from './TraceId'
 
 /**
@@ -33,7 +32,7 @@ export type ServiceEvents = {
   'service-not-available': undefined
 
   /** emitted when a subscription throws an error other than a HandledError */
-  'unhandled-subscription-error': { subscriptionId: SubscriptionId; error: unknown; traceId: TraceId }
+  'unhandled-subscription-error': { subscriptionName: string; error: unknown; traceId: TraceId }
 
   /** emitted when a function throws an error other than a HandledError */
   'unhandled-function-error': { functionName: string; error: unknown; traceId: TraceId }

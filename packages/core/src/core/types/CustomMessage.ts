@@ -7,6 +7,7 @@ export type CustomMessage<Payload = unknown> = {
   messageType: EBMessageType.CustomMessage
   eventName: string
   sender: EBMessageAddress
+  receiver?: EBMessageAddress
   payload?: Payload
 } & EBMessageBase
 

@@ -1,5 +1,4 @@
-import { Command } from '@purista/core'
-import { getLoggerMock, LoggerStubs } from '@purista/testhelper'
+import { getFunctionContext } from '@purista/testhelper'
 
 import functionDefinition from './index'
 
@@ -9,8 +8,6 @@ if (!fn) {
 }
 
 test('returns a new user id', async () => {
-  const logger = getLoggerMock()
-
   const payload = {
     email: 'mail@example.com',
     password: 'the_password',
@@ -20,17 +17,12 @@ test('returns a new user id', async () => {
   const params = {}
 
   const initialPayload = JSON.stringify(payload)
-  const message = {
-    command: {
-      payload: initialPayload,
-    },
-  } as Command<string, string>
 
-  const result = await fn(logger, payload, params, message)
+  const context = getFunctionContext(initialPayload, params)
+
+  const result = await fn(context.mock, payload, params)
 
   expect(result.uuid).toBeDefined()
 
-  const loggerStubs = logger as unknown as LoggerStubs
-
-  expect(loggerStubs.debug.calledWith(initialPayload)).toBeTruthy()
+  expect(context.stubs.logger.debug.calledWith(initialPayload)).toBeTruthy()
 })

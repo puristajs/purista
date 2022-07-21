@@ -7,7 +7,7 @@ export const createInfoMessage = (
   serviceName: string,
   serviceVersion: string,
   serviceTarget?: string,
-  data?: Record<string, unknown>,
+  payload?: Record<string, unknown>,
 ): Omit<InfoMessage, 'instanceId'> => {
   const info: Readonly<Omit<InfoMessage, 'instanceId'>> = Object.freeze({
     messageType,
@@ -19,7 +19,7 @@ export const createInfoMessage = (
       serviceVersion,
       serviceTarget: serviceTarget || '',
     },
-    data,
+    payload,
   })
 
   return info

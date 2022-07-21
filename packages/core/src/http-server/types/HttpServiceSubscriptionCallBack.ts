@@ -1,7 +1,8 @@
-import { EBMessage, SubscriptionCallback } from '../../core'
+import { EBMessage, SubscriptionFunction } from '../../core'
 import { HttpServerService } from '../HttpServerService.impl'
 
-export type HttpServiceSubscriptionCallBack<MessageType = EBMessage> = SubscriptionCallback<
+export type HttpServiceSubscriptionCallBack<MessageType = EBMessage, Payload = unknown> = SubscriptionFunction<
   HttpServerService,
-  MessageType
+  MessageType,
+  Payload
 >

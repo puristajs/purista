@@ -8,19 +8,19 @@ import { isMessageMatchingSubscription } from '../isMessageMatchingSubscription.
 describe('subscription matching for sender', () => {
   const sender = {
     serviceName: 'SenderService',
-    serviceVersion: '1.1.1',
+    serviceVersion: '1',
     serviceTarget: 'senderServiceTarget',
   }
 
   const receiver = {
     serviceName: 'ReceiverService',
-    serviceVersion: '2.2.2',
+    serviceVersion: '2',
     serviceTarget: 'receiverServiceTarget',
   }
 
   const subscriber = {
     serviceName: 'SubscriberService',
-    serviceVersion: '3.3.3',
+    serviceVersion: '3',
     serviceTarget: 'subscriberServiceTarget',
   }
 
@@ -30,9 +30,10 @@ describe('subscription matching for sender', () => {
 
   const getTestMessage = (): EBMessage => {
     return {
+      instanceId: 'instanceId',
       sender,
       receiver,
-      response: {},
+      payload: {},
       messageType: EBMessageType.CommandSuccessResponse,
       id: 'messageTestId',
       traceId: 'messageTraceId',
@@ -48,11 +49,10 @@ describe('subscription matching for sender', () => {
       receiver: {
         serviceName: receiver.serviceName,
       },
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -64,11 +64,10 @@ describe('subscription matching for sender', () => {
       receiver: {
         serviceName: 'differentService',
       },
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -80,27 +79,10 @@ describe('subscription matching for sender', () => {
       receiver: {
         serviceVersion: receiver.serviceVersion,
       },
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
-
-    const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
-
-    expect(result).toBeTruthy()
-  })
-
-  it('matches on receiver service version pattern *.?', () => {
-    const subscription: Subscription = {
-      receiver: {
-        serviceVersion: '2.*.?',
-      },
-      callback,
-      subscriber,
-    }
-
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -110,13 +92,12 @@ describe('subscription matching for sender', () => {
   it('fails on different receiver service version', () => {
     const subscription: Subscription = {
       receiver: {
-        serviceVersion: '9.9.9',
+        serviceVersion: '9',
       },
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -128,27 +109,10 @@ describe('subscription matching for sender', () => {
       receiver: {
         serviceTarget: receiver.serviceTarget,
       },
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
-
-    const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
-
-    expect(result).toBeTruthy()
-  })
-
-  it('matches on receiver service target wildcard *', () => {
-    const subscription: Subscription = {
-      receiver: {
-        serviceTarget: 'receiver*',
-      },
-      callback,
-      subscriber,
-    }
-
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -160,11 +124,10 @@ describe('subscription matching for sender', () => {
       receiver: {
         serviceTarget: 'differentTarget',
       },
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 

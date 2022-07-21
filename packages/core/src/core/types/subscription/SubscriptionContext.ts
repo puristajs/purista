@@ -1,11 +1,11 @@
+import { EBMessage } from '../EBMessage'
 import { EBMessageAddress } from '../EBMessageAddress'
 import type { Logger } from '../Logger'
-import type { ServiceClass } from '../ServiceClass'
-import type { Command } from './Command'
+import { ServiceClass } from '../ServiceClass'
 
-export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsType = unknown> = {
+export type SubscriptionContext<MessageType = EBMessage> = {
   logger: Logger
-  message: Command<MessagePayloadType, MessageParamsType>
+  message: MessageType
   emit: <Service extends ServiceClass, Payload = unknown>(
     this: Service,
     eventName: string,

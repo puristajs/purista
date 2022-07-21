@@ -44,7 +44,8 @@ export const getFunctionWithValidation = function <
     MessagePayloadType,
     MessageParamsType,
     MessageResultType
-  > = async function ({ logger, message, emit }, payload, params): Promise<MessageResultType> {
+  > = async function (context, payload, params): Promise<MessageResultType> {
+    const { logger, message } = context
     let safePayload = payload as unknown as FunctionPayloadType
     if (inputPayloadSchema) {
       try {
@@ -75,7 +76,7 @@ export const getFunctionWithValidation = function <
       await Promise.all(guards)
     }
 
-    const call = fn.bind(this, { logger, message, emit }, safePayload, safeParams)
+    const call = fn.bind(this, context, safePayload, safeParams)
 
     const output = await call()
 

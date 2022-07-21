@@ -1,7 +1,11 @@
-import type { EBMessage, EBMessageType, ServiceClass, SubscriptionCallback, SubscriptionDefinition } from '../core'
+import type { EBMessage, EBMessageType, ServiceClass, SubscriptionDefinition, SubscriptionFunction } from '../core'
 
-export class SubscriptionDefinitionBuilder<ServiceClassType = ServiceClass, MessageTypes = EBMessage> {
-  private messageTypes: EBMessageType[] | undefined
+export class SubscriptionDefinitionBuilder<
+  ServiceClassType = ServiceClass,
+  MessageType = EBMessage,
+  Payload = unknown,
+> {
+  private messageType: EBMessageType | undefined
 
   private sender?: {
     serviceName?: string
@@ -21,7 +25,7 @@ export class SubscriptionDefinitionBuilder<ServiceClassType = ServiceClass, Mess
   constructor(
     private subscriptionName: string,
     private subscriptionDescription: string,
-    private fn: SubscriptionCallback<ServiceClassType, MessageTypes>,
+    private fn: SubscriptionFunction<ServiceClassType, MessageType, Payload>,
   ) {}
 
   subscribeToEvent(eventName: string) {
@@ -47,24 +51,20 @@ export class SubscriptionDefinitionBuilder<ServiceClassType = ServiceClass, Mess
     return this
   }
 
-  addMessageTypes(...messageTypes: EBMessageType[]) {
-    if (!this.messageTypes) {
-      this.messageTypes = []
-    }
-
-    this.messageTypes.push(...messageTypes)
+  addMessageTypes(messageType: EBMessageType) {
+    this.messageType = messageType
 
     return this
   }
 
-  getDefinition(): SubscriptionDefinition<MessageTypes> {
-    const subscription: SubscriptionDefinition<MessageTypes> = {
+  getDefinition(): SubscriptionDefinition<ServiceClassType, MessageType, Payload> {
+    const subscription: SubscriptionDefinition<ServiceClassType, MessageType, Payload> = {
       sender: this.sender,
       receiver: this.receiver,
       subscriptionName: this.subscriptionName,
       subscriptionDescription: this.subscriptionDescription,
       call: this.fn,
-      messageTypes: this.messageTypes,
+      messageType: this.messageType,
       eventName: this.eventName,
     }
 

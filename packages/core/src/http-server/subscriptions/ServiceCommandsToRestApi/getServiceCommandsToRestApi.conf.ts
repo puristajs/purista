@@ -1,4 +1,5 @@
 import { EBMessageType, InfoServiceFunctionAdded, SubscriptionDefinition } from '../../../core'
+import { HttpServerService } from '../../HttpServerService.impl'
 import { serviceCommandsToRestApi } from './serviceCommandsToRestApi.impl'
 
 /**
@@ -6,13 +7,13 @@ import { serviceCommandsToRestApi } from './serviceCommandsToRestApi.impl'
  * `serviceCommandsToRestApi` function
  * @returns A subscription definition.
  */
-export const getServiceCommandsToRestApi = (): SubscriptionDefinition<InfoServiceFunctionAdded> => {
-  const subscription: SubscriptionDefinition<InfoServiceFunctionAdded> = {
+export const getServiceCommandsToRestApi = (): SubscriptionDefinition<HttpServerService, InfoServiceFunctionAdded> => {
+  const subscription: SubscriptionDefinition<HttpServerService, InfoServiceFunctionAdded> = {
     subscriptionName: 'AddServiceCommandSubscription',
     subscriptionDescription:
       'subscription which listens for infos about commands from services which should be exposed as rest api endpoints',
     call: serviceCommandsToRestApi,
-    messageTypes: [EBMessageType.InfoServiceFunctionAdded],
+    messageType: EBMessageType.InfoServiceFunctionAdded,
   }
 
   return subscription

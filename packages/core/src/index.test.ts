@@ -10,7 +10,6 @@ it('exports core functions', () => {
   expect(index.getErrorMessageForCode).toBeDefined()
   expect(index.getNewCorrelationId).toBeDefined()
   expect(index.getNewEBMessageId).toBeDefined()
-  expect(index.getNewSubscriptionId).toBeDefined()
   expect(index.getNewTraceId).toBeDefined()
   expect(index.getTimeoutPromise).toBeDefined()
   expect(index.getUniqueId).toBeDefined()

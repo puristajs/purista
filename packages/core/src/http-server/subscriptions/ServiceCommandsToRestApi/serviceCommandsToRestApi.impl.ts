@@ -5,18 +5,18 @@ import { createExtractPayloadMiddleware, createRequestBodyToJsonMiddleware } fro
 import { Handler, HttpServiceSubscriptionCallBack, isHttpExposedServiceMeta } from '../../types'
 
 /* A function that is called when a message is received. */
-export const serviceCommandsToRestApi: HttpServiceSubscriptionCallBack<InfoServiceFunctionAdded> = async function (
-  log,
-  _id,
+export const serviceCommandsToRestApi: HttpServiceSubscriptionCallBack<InfoServiceFunctionAdded> = async function ({
+  logger,
   message,
-) {
+  invoke,
+}) {
   if (!isInfoServiceFunctionAdded(message)) {
-    log.warn('Invalid message received', message)
+    logger.warn('Invalid message received', message)
     return
   }
 
-  if (!isHttpExposedServiceMeta(message.data)) {
-    log.debug('...skip exposing function')
+  if (!isHttpExposedServiceMeta(message.payload)) {
+    logger.debug('...skip exposing function')
     return
   }
 
@@ -25,7 +25,7 @@ export const serviceCommandsToRestApi: HttpServiceSubscriptionCallBack<InfoServi
     createRequestBodyToJsonMiddleware(),
   ]
 
-  const data = message.data.expose
+  const data = message.payload.expose
   const version = message.sender.serviceVersion.split('.')[0]
   const method = data.http.method
   const apiMountPath = this.config.apiMountPath
@@ -60,5 +60,5 @@ export const serviceCommandsToRestApi: HttpServiceSubscriptionCallBack<InfoServi
 
   this.addRoute(method, path, ...beforeMiddleware, getHandler())
 
-  this.routeDefinitions.push(message.data)
+  this.routeDefinitions.push(message.payload)
 }

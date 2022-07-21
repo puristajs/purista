@@ -6,22 +6,23 @@ export const isMessageMatchingSubscription = (
   message: EBMessage,
   subscription: SubscriptionStorageEntry,
 ): boolean => {
-  // if message type does not match the subscription does not match
+  // if message type does not match, the subscription does not match
   if (!subscription.isMatchingMessageType(message.messageType)) {
     return false
   }
 
-  // if we are looking for a named event it is does not match the subscription does not match
-  if (
-    subscription.subscription.eventName &&
-    (!message.eventName || !subscription.isMatchingEventName(message.eventName))
-  ) {
+  // if we are looking for a named event, if is does not match, the subscription does not match
+  if (!subscription.isMatchingEventName(message.eventName)) {
     return false
   }
 
   if (isInfoMessage(message)) {
     // info messages do not have receivers
-    if (subscription.subscription.receiver) {
+    if (
+      !subscription.isMatchingReceiverServiceName() ||
+      !subscription.isMatchingReceiverServiceVersion() ||
+      !subscription.isMatchingReceiverServiceTarget()
+    ) {
       return false
     }
 
@@ -38,39 +39,22 @@ export const isMessageMatchingSubscription = (
     return true
   }
 
-  if (isCommandResponse(message) || isCommand(message)) {
+  if (isCommandResponse(message) || isCommand(message) || isCustomMessage(message)) {
     // if subscription is looking for specific sender we check for match
-    if (subscription.subscription.sender) {
-      if (
-        !subscription.isMatchingSenderServiceName(message.sender.serviceName) ||
-        !subscription.isMatchingSenderServiceTarget(message.sender.serviceTarget) ||
-        !subscription.isMatchingSenderServiceVersion(message.sender.serviceVersion)
-      ) {
-        return false
-      }
+    if (
+      !subscription.isMatchingSenderServiceName(message.sender.serviceName) ||
+      !subscription.isMatchingSenderServiceTarget(message.sender.serviceTarget) ||
+      !subscription.isMatchingSenderServiceVersion(message.sender.serviceVersion)
+    ) {
+      return false
     }
 
-    if (subscription.subscription.receiver) {
-      if (
-        !subscription.isMatchingReceiverServiceName(message.receiver.serviceName) ||
-        !subscription.isMatchingReceiverServiceTarget(message.receiver.serviceTarget) ||
-        !subscription.isMatchingReceiverServiceVersion(message.receiver.serviceVersion)
-      ) {
-        return false
-      }
-    }
-
-    return true
-  }
-
-  if (isCustomMessage(message)) {
-    if (subscription.subscription.eventName) {
-      if (
-        !subscription.isMatchingSenderServiceName(message.sender.serviceName) ||
-        !subscription.isMatchingSenderServiceVersion(message.sender.serviceVersion)
-      ) {
-        return false
-      }
+    if (
+      !subscription.isMatchingReceiverServiceName(message.receiver?.serviceName) ||
+      !subscription.isMatchingReceiverServiceTarget(message.receiver?.serviceTarget) ||
+      !subscription.isMatchingReceiverServiceVersion(message.receiver?.serviceVersion)
+    ) {
+      return false
     }
 
     return true
