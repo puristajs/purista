@@ -31,17 +31,7 @@ export default new FunctionDefinitionBuilder<UserService>(
 )
   // optional if you want to use event name (recommended) and you did not set the event name in constructor of FunctionDefinitionBuilder
   .setSuccessEventName(EventName.NewUserSignedUp)
-  // optional: transform (decode) the input payload and parameter
-  // for example if you have end-to-end decryption or the payload is a string wich needs to be decoded first
-  .transformInput(transformInputSchema, transformParameterSchema, async function (_context, payload, params) {
-    // if something throws here, it will be automatically converted into a handled error
-    // a bad request 400 error response is send without any further information
-    // you can throw your own handled error if you need to send a other or more detailed error
-    return {
-      payload: JSON.parse(payload),
-      params,
-    }
-  })
+
   // recommended: set the input payload validation and because of that the input payload type(s)
   // even if you do not use payload within your function define the schema and set it to z.unknown()
   .addInputSchema(inputPayloadSchema)
@@ -51,11 +41,6 @@ export default new FunctionDefinitionBuilder<UserService>(
   // recommended: set the output payload validation and because of that the output payload type(s)
   // even if you do not return a payload within your function define the schema and set it to z.void()
   .addOutputSchema(outputPayloadSchema)
-  // optional: transform (encode) the success output payload
-  // for example if you like to encrypt the response or encode is needed
-  .transformOutput(transformOutputSchema, async function (_context, payload, _params) {
-    return JSON.stringify(payload)
-  })
   // optional: before guard is executed after input transform and schema validation and before function
   // put your business validation of request here
   .setBeforeGuardHook(async function (_context, payload, _params) {
@@ -98,6 +83,22 @@ export default new FunctionDefinitionBuilder<UserService>(
   // if you throw other codes somewhere in you logic, add them here, to get them documented in openApi
   .addErrorStatusCodes(StatusCode.PaymentRequired, StatusCode.Conflict)
   // mandatory: the function implementation
+  // optional: transform (decode) the input payload and parameter
+  // for example if you have end-to-end decryption or the payload is a string wich needs to be decoded first
+  .transformInput(transformInputSchema, transformParameterSchema, async function (_context, payload, params) {
+    // if something throws here, it will be automatically converted into a handled error
+    // a bad request 400 error response is send without any further information
+    // you can throw your own handled error if you need to send a other or more detailed error
+    return {
+      payload: JSON.parse(payload),
+      params,
+    }
+  })
+  // optional: transform (encode) the success output payload
+  // for example if you like to encrypt the response or encode is needed
+  .transformOutput(transformOutputSchema, async function (_context, payload, _params) {
+    return JSON.stringify(payload)
+  })
   .setFunction(async function ({ logger, message }, payload, _param) {
     logger.debug(payload.test)
     logger.debug(message.payload.payload)

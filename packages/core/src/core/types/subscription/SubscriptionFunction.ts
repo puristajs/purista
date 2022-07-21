@@ -1,14 +1,12 @@
 import type { EBMessage } from '../EBMessage'
-import type { Logger } from '../Logger'
 import type { ServiceClass } from '../ServiceClass'
-import type { SubscriptionId } from './SubscriptionId'
+import type { SubscriptionContext } from './SubscriptionContext'
 
 /**
  * CommandFunction is a function which will be triggered when a matching event bridge message is received by the service
  */
-export type SubscriptionFunction<ServiceClassType = ServiceClass> = (
+export type SubscriptionFunction<ServiceClassType = ServiceClass, MessageType = EBMessage, Payload = unknown> = (
   this: ServiceClassType,
-  log: Logger,
-  message: EBMessage,
-  subscriptionId: SubscriptionId,
+  context: SubscriptionContext<MessageType>,
+  payload: Payload,
 ) => Promise<void>

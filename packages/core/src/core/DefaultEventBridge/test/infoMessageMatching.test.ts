@@ -8,19 +8,19 @@ import { isMessageMatchingSubscription } from '../isMessageMatchingSubscription.
 describe('subscription matching for info message', () => {
   const sender = {
     serviceName: 'SenderService',
-    serviceVersion: '1.1.1',
+    serviceVersion: '1',
     serviceTarget: 'senderServiceTarget',
   }
 
   const receiver = {
     serviceName: 'ReceiverService',
-    serviceVersion: '2.2.2',
+    serviceVersion: '2',
     serviceTarget: 'receiverServiceTarget',
   }
 
   const subscriber = {
     serviceName: 'SubscriberService',
-    serviceVersion: '3.3.3',
+    serviceVersion: '3',
     serviceTarget: 'subscriberServiceTarget',
   }
 
@@ -31,6 +31,7 @@ describe('subscription matching for info message', () => {
   const getTestMessage = (): InfoMessage => {
     return {
       sender,
+      instanceId: 'instanceId',
       messageType: EBMessageType.InfoServiceInit,
       id: 'messageTestId',
       traceId: 'messageTraceId',
@@ -38,7 +39,7 @@ describe('subscription matching for info message', () => {
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
       eventName,
-      data: {},
+      payload: {},
     }
   }
 
@@ -47,11 +48,10 @@ describe('subscription matching for info message', () => {
       sender: {
         serviceName: sender.serviceName,
       },
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -63,11 +63,10 @@ describe('subscription matching for info message', () => {
       sender: {
         serviceName: 'differentService',
       },
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -79,11 +78,10 @@ describe('subscription matching for info message', () => {
       sender: {
         serviceVersion: sender.serviceVersion,
       },
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -93,13 +91,12 @@ describe('subscription matching for info message', () => {
   it('fails on different sender service version', () => {
     const subscription: Subscription = {
       sender: {
-        serviceVersion: '9.9.9',
+        serviceVersion: '9',
       },
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -111,11 +108,10 @@ describe('subscription matching for info message', () => {
       sender: {
         serviceTarget: sender.serviceTarget,
       },
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -127,11 +123,10 @@ describe('subscription matching for info message', () => {
       sender: {
         serviceTarget: 'differentTarget',
       },
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -140,12 +135,11 @@ describe('subscription matching for info message', () => {
 
   it('matches on message type', () => {
     const subscription: Subscription = {
-      messageTypes: [EBMessageType.InfoServiceInit],
-      callback,
+      messageType: EBMessageType.InfoServiceInit,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -154,12 +148,11 @@ describe('subscription matching for info message', () => {
 
   it('fails on different message type', () => {
     const subscription: Subscription = {
-      messageTypes: [EBMessageType.InfoServiceDrain],
-      callback,
+      messageType: EBMessageType.InfoServiceDrain,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -171,12 +164,11 @@ describe('subscription matching for info message', () => {
       sender: {
         serviceName: sender.serviceName,
       },
-      callback,
       subscriber,
       receiver,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 

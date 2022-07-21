@@ -4,7 +4,7 @@ import * as swaggerUi from 'swagger-ui-dist'
 import Trouter, { Methods } from 'trouter'
 import { URL } from 'url'
 
-import { EventBridge, HandledError, Logger, Service, StatusCode, UnhandledError } from '../core'
+import { Command, EventBridge, HandledError, Logger, Service, StatusCode, UnhandledError } from '../core'
 import { COMMANDS } from './commands'
 import { getDefaultConfig, OPENAPI_DEFAULT_MOUNT_PATH, ServiceInfo } from './config'
 import {
@@ -159,6 +159,23 @@ export class HttpServerService extends Service {
   setErrorHandler(handler: Handler): HttpServerService {
     this.internalServerErrorHandler = handler.bind({ ...this, log: this.serviceLogger })
     return this
+  }
+
+  async invoke(
+    input: Omit<
+      Command<unknown, unknown>,
+      'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId' | 'sender'
+    >,
+  ) {
+    const msg = {
+      ...input,
+      sender: {
+        serviceName: this.serviceInfo.serviceName,
+        serviceVersion: this.serviceInfo.serviceVersion,
+        serviceTarget: '',
+      },
+    }
+    return this.eventBridge.invoke(msg)
   }
 
   /**

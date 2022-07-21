@@ -8,19 +8,19 @@ import { isMessageMatchingSubscription } from '../isMessageMatchingSubscription.
 describe('subscription matching for message type', () => {
   const sender = {
     serviceName: 'SenderService',
-    serviceVersion: '1.1.1',
+    serviceVersion: '1',
     serviceTarget: 'senderServiceTarget',
   }
 
   const receiver = {
     serviceName: 'ReceiverService',
-    serviceVersion: '2.2.2',
+    serviceVersion: '2',
     serviceTarget: 'receiverServiceTarget',
   }
 
   const subscriber = {
     serviceName: 'SubscriberService',
-    serviceVersion: '3.3.3',
+    serviceVersion: '3',
     serviceTarget: 'subscriberServiceTarget',
   }
 
@@ -30,9 +30,10 @@ describe('subscription matching for message type', () => {
 
   const getTestMessage = (): EBMessage => {
     return {
+      instanceId: 'instanceId',
       sender,
       receiver,
-      response: {},
+      payload: {},
       messageType: EBMessageType.CommandSuccessResponse,
       id: 'messageTestId',
       traceId: 'messageTraceId',
@@ -45,12 +46,12 @@ describe('subscription matching for message type', () => {
 
   it('matches on message type', () => {
     const subscription: Subscription = {
-      messageTypes: [EBMessageType.InfoServiceInit, EBMessageType.Command],
-      callback,
+      messageType: EBMessageType.Command,
       subscriber,
     }
 
     const message: Command = {
+      instanceId: 'instanceId',
       id: 'messageTestId',
       traceId: 'messageTraceId',
       timestamp: Date.now(),
@@ -59,11 +60,11 @@ describe('subscription matching for message type', () => {
       eventName,
       sender,
       receiver,
-      command: { parameter: {}, payload: {} },
+      payload: { parameter: {}, payload: {} },
       messageType: EBMessageType.Command,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), message, storageEntry)
 
@@ -72,12 +73,11 @@ describe('subscription matching for message type', () => {
 
   it('fails on different message type', () => {
     const subscription: Subscription = {
-      messageTypes: [EBMessageType.InfoServiceDrain, EBMessageType.CommandErrorResponse],
-      callback,
+      messageType: EBMessageType.InfoServiceDrain,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -87,14 +87,13 @@ describe('subscription matching for message type', () => {
   it('fails on unknown message type', () => {
     const subscription: Subscription = {
       sender,
-      callback,
       subscriber,
     }
 
     const message = getTestMessage()
     message.messageType = 'unknown' as EBMessageType
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), message, storageEntry)
 

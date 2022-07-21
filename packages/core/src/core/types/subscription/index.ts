@@ -1,5 +1,5 @@
 export * from './Subscription'
-export * from './SubscriptionCallback'
+export * from './SubscriptionContext'
 export * from './SubscriptionDefinition'
+export * from './SubscriptionDefinitionList'
 export * from './SubscriptionFunction'
-export * from './SubscriptionId'

@@ -1,12 +1,12 @@
 import type { EBMessage } from '../EBMessage'
 import type { EBMessageType } from '../EBMessageType.enum'
-import type { Logger } from '../Logger'
-import type { SubscriptionId } from './SubscriptionId'
+import { ServiceClass } from '../ServiceClass'
+import { SubscriptionFunction } from './SubscriptionFunction'
 
-export type SubscriptionDefinition<MessageType = EBMessage> = {
+export type SubscriptionDefinition<ServiceClassType = ServiceClass, MessageType = EBMessage, Payload = unknown> = {
   subscriptionName: string
   subscriptionDescription: string
-  call(log: Logger, id: SubscriptionId, message: MessageType): Promise<void>
+  call: SubscriptionFunction<ServiceClassType, MessageType, Payload>
   sender?: {
     serviceName?: string
     serviceVersion?: string
@@ -17,6 +17,6 @@ export type SubscriptionDefinition<MessageType = EBMessage> = {
     serviceVersion?: string
     serviceTarget?: string
   }
-  messageTypes?: EBMessageType[]
+  messageType?: EBMessageType
   eventName?: string
 }

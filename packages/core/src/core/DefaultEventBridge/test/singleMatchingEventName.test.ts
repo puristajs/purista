@@ -8,19 +8,19 @@ import { isMessageMatchingSubscription } from '../isMessageMatchingSubscription.
 describe('subscription matching for even name', () => {
   const sender = {
     serviceName: 'SenderService',
-    serviceVersion: '1.1.1',
+    serviceVersion: '1',
     serviceTarget: 'senderServiceTarget',
   }
 
   const receiver = {
     serviceName: 'ReceiverService',
-    serviceVersion: '2.2.2',
+    serviceVersion: '2',
     serviceTarget: 'receiverServiceTarget',
   }
 
   const subscriber = {
     serviceName: 'SubscriberService',
-    serviceVersion: '3.3.3',
+    serviceVersion: '3',
     serviceTarget: 'subscriberServiceTarget',
   }
 
@@ -30,9 +30,10 @@ describe('subscription matching for even name', () => {
 
   const getTestMessage = (): EBMessage => {
     return {
+      instanceId: 'instanceId',
       sender,
       receiver,
-      response: {},
+      payload: {},
       messageType: EBMessageType.CommandSuccessResponse,
       id: 'messageTestId',
       traceId: 'messageTraceId',
@@ -46,25 +47,10 @@ describe('subscription matching for even name', () => {
   it('matches on event name', () => {
     const subscription: Subscription = {
       eventName,
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
-
-    const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
-
-    expect(result).toBeTruthy()
-  })
-
-  it('matches on event name wildcard *', () => {
-    const subscription: Subscription = {
-      eventName: 'test*',
-      callback,
-      subscriber,
-    }
-
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
@@ -74,11 +60,10 @@ describe('subscription matching for even name', () => {
   it('fails on different event name', () => {
     const subscription: Subscription = {
       eventName: 'otherEventName',
-      callback,
       subscriber,
     }
 
-    const storageEntry = getNewSubscriptionStorageEntry(subscription)
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
     const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
 
