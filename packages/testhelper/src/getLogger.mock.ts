@@ -5,23 +5,32 @@ import { SinonStub, stub } from 'sinon'
  * Mocks the logger and methods are stubs
  * @returns logger mocked
  */
-export const getLoggerMock = (): Logger => {
+export const getLoggerMock = (): { mock: Logger; stubs: Record<string, SinonStub> } => {
   const info = stub()
   const error = stub()
   const warn = stub()
   const debug = stub()
   const trace = stub()
 
-  const logger: Logger = {
+  const mock: Logger = {
     info,
     error,
     warn,
     debug,
     trace,
-    getChildLogger: () => logger,
+    getChildLogger: () => mock,
   } as unknown as Logger
 
-  return logger
+  return {
+    stubs: {
+      info,
+      error,
+      warn,
+      debug,
+      trace,
+    },
+    mock,
+  }
 }
 
 export type LoggerStubs = {
