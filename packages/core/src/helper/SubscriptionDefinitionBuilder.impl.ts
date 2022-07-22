@@ -51,7 +51,7 @@ export class SubscriptionDefinitionBuilder<
     return this
   }
 
-  addMessageTypes(messageType: EBMessageType) {
+  addMessageType(messageType: EBMessageType) {
     this.messageType = messageType
 
     return this

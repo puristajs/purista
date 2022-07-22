@@ -1,4 +1,5 @@
-import { DefaultEventBridge, HttpServerService, initLogger } from '@purista/core'
+import { DefaultEventBridge, initLogger } from '@purista/core'
+import { HttpServerService } from '@purista/httpserver'
 
 import config from './config'
 import { UserService } from './service/user'
@@ -11,7 +12,7 @@ const main = async () => {
   const eventBridge = new DefaultEventBridge(baseLogger)
 
   // create and init a webserver
-  const httpServerService = await HttpServerService.createInstance(baseLogger, eventBridge, config)
+  const httpServerService = new HttpServerService(baseLogger, eventBridge, config)
 
   // start the webserver
   await httpServerService.start()
