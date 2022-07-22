@@ -4,7 +4,7 @@ import { stub } from 'sinon'
 import { getLoggerMock } from './getLogger.mock'
 import { createTestCommandMsg } from './messages'
 
-export const getFunctionContext = <MessagePayloadType = unknown, MessageParamsType = unknown>(
+export const getFunctionContextMock = <MessagePayloadType = unknown, MessageParamsType = unknown>(
   payload: MessagePayloadType,
   parameter: MessageParamsType,
 ) => {
