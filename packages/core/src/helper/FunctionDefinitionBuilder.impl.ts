@@ -17,7 +17,7 @@ import type { SupportedHttpMethod } from './types'
 
 /**
  * Function definition builder is a helper to create and define a function for a service.
- * It helps to set all need information like schemas and hooks.
+ * It helps to set all needed information like schemas and hooks.
  * With these information, the types are automatically set and extended.
  *
  * A working schema definition needs at least a function name, a short description and the function implementation.
