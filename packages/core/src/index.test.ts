@@ -30,8 +30,6 @@ it('exports core functions', () => {
 
   // helper
   expect(index.FunctionDefinitionBuilder).toBeDefined()
-  expect(index.getCompressionMethod).toBeDefined()
-  expect(index.getCompressionStream).toBeDefined()
   expect(index.getFunctionWithValidation).toBeDefined()
   expect(index.SubscriptionDefinitionBuilder).toBeDefined()
 })

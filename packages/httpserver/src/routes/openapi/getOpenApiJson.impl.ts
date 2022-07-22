@@ -1,11 +1,19 @@
-import { HttpServerService, StatusCode } from '@purista/core'
+import { StatusCode } from '@purista/core'
 import { HTTPMethods, RouteHandlerMethod } from 'fastify'
 import type { OpenAPIObject, ParameterObject, RequestBodyObject, SchemaObject } from 'openapi3-ts'
 import { isReferenceObject } from 'openapi3-ts'
 import { posix } from 'path'
 
 import { OPENAPI_DEFAULT_INFO } from '../../config'
+import { HttpServerService } from '../../HttpServerService.impl'
 
+/**
+ * It creates a route handler that returns the OpenAPI JSON for all routes that are exposed via the
+ * `expose.http` property
+ * @param {HttpServerService}  - `this.config.openApi?.path`: The path where the OpenAPI JSON will be
+ * available. Defaults to `/api`
+ * @returns A route definition for the openApi.json file
+ */
 export const getOpenApiJson = function (this: HttpServerService) {
   const paths: Record<string, Record<string, unknown>> = {}
 
