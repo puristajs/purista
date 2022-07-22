@@ -1,13 +1,11 @@
-import { HttpServerConfig } from '@purista/core'
+import { HttpServerConfig } from '@purista/httpserver'
 
 const config: HttpServerConfig = {
-  port: 9090,
-  logLevel: 'debug',
-  domain: 'localhost',
-  cookieSecret: 'oCrUlLnZqhj99evenJ3x',
-  options: {
-    allowHTTP1: true,
-    ca: `-----BEGIN CERTIFICATE-----
+  fastify: {
+    http2: true,
+    https: {
+      allowHTTP1: true,
+      ca: `-----BEGIN CERTIFICATE-----
 MIIFtTCCA52gAwIBAgIUd2acASMu92IhZ8ITQiQpG86v/2EwDQYJKoZIhvcNAQEN
 BQAwajEXMBUGA1UEAwwOQW4gTVFUVCBicm9rZXIxFjAUBgNVBAoMDU93blRyYWNr
 cy5vcmcxFDASBgNVBAsMC2dlbmVyYXRlLUNBMSEwHwYJKoZIhvcNAQkBFhJub2Jv
@@ -40,7 +38,7 @@ JHaECvH1BRbZw7dndGmrGpIVxCpopwCoo/0WUptRfMiN6vRCOh/P2Tt+B73z4dgC
 B5lnlON0/QyDyqmBM5CCUBnme+iXieSp9wSPPfCezwTCmsEgC+Wrcs84kdeYKFgZ
 xb3XdLyq9pQhJt9775OdAjM6+/ONiL2Mzg==
 -----END CERTIFICATE-----`,
-    key: `-----BEGIN PRIVATE KEY-----
+      key: `-----BEGIN PRIVATE KEY-----
 MIIJQQIBADANBgkqhkiG9w0BAQEFAASCCSswggknAgEAAoICAQDO3WGyYtLrY3f/
 lE/mW21xJbwagBEqFdKgThNPZb4lx88mTmpcjmwjAIPaJY1mcRN7ApMgmCXDABWI
 DMXcsnYLjOPKe4NPq1XFWO8i7vhTX59fLfyHmZNkz7xlNACnFI7Ou7gMay1k8eAz
@@ -93,7 +91,7 @@ KawjvIN+bsg8BEEEBHDtOHr0RDCD1m5b63J1HuNfROa+y5S68xvP4TC0R5v5FXML
 8L1kU70jQVKV2A1RTsizk7rjwcxX
 -----END PRIVATE KEY-----
 `,
-    cert: `-----BEGIN CERTIFICATE-----
+      cert: `-----BEGIN CERTIFICATE-----
 MIIIaDCCBlCgAwIBAgIUUj8EID+/vOmvmK+kOjiSD9Xm5bowDQYJKoZIhvcNAQEN
 BQAwajEXMBUGA1UEAwwOQW4gTVFUVCBicm9rZXIxFjAUBgNVBAoMDU93blRyYWNr
 cy5vcmcxFDASBgNVBAsMC2dlbmVyYXRlLUNBMSEwHwYJKoZIhvcNAQkBFhJub2Jv
@@ -141,7 +139,13 @@ zGSyG1RCDU1h82F44oSYWs1ZksS8hjBaibTW08e215K48sHpa3NjNwFdKrXht6Xw
 xnBbc+oCZrvxHJFf5PKPqtfAcIjS+wMplc/6EzrlkrPrrGydnYAP3/lJQ5k=
 -----END CERTIFICATE-----
 `,
+    },
   },
+  port: 9090,
+  logLevel: 'debug',
+  domain: 'localhost',
+  host: '0.0.0.0',
+  cookieSecret: 'oCrUlLnZqhj99evenJ3x',
   apiMountPath: '/api',
   openApi: {
     enabled: true,

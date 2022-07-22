@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./lib",
+  },
+  "exclude": [
+    "./**/*.d.ts",
+    "./lib/*"
+  ]
+}
