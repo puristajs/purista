@@ -1,5 +1,6 @@
-import { Logger } from '@purista/core'
 import { SinonStub, stub } from 'sinon'
+
+import { Logger } from '../core'
 
 /**
  * Mocks the logger and methods are stubs

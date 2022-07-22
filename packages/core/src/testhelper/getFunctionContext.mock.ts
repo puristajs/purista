@@ -1,6 +1,6 @@
-import { Command, CommandFunctionContext } from '@purista/core'
 import { stub } from 'sinon'
 
+import { Command, CommandFunctionContext } from '../core'
 import { getLoggerMock } from './getLogger.mock'
 import { createTestCommandMsg } from './messages'
 

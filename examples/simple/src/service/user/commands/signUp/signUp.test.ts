@@ -1,4 +1,4 @@
-import { getFunctionContextMock } from '@purista/testhelper'
+import { getFunctionContextMock } from '@purista/core'
 
 import functionDefinition from './index'
 
