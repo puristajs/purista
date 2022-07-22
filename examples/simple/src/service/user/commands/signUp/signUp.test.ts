@@ -1,4 +1,4 @@
-import { getFunctionContext } from '@purista/testhelper'
+import { getFunctionContextMock } from '@purista/testhelper'
 
 import functionDefinition from './index'
 
@@ -18,7 +18,7 @@ test('returns a new user id', async () => {
 
   const initialPayload = JSON.stringify(payload)
 
-  const context = getFunctionContext(initialPayload, params)
+  const context = getFunctionContextMock(initialPayload, params)
 
   const result = await fn(context.mock, payload, params)
 
