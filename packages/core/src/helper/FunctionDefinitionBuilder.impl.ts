@@ -11,7 +11,7 @@ import type {
   TransformInputHook,
   TransformOutputHook,
 } from '../core'
-import { ContentType, HttpExposedServiceMeta, QueryParameter } from '../http-server'
+import { ContentType, HttpExposedServiceMeta, QueryParameter } from '../httpserver'
 import { getFunctionWithValidation } from './getFunctionWithValidation'
 import type { SupportedHttpMethod } from './types'
 

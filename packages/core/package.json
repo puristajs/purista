@@ -43,8 +43,8 @@
   },
   "devDependencies": {
     "@types/jest": "^28.1.3",
-    "ts-jest": "^28.0.5",
-    "@purista/testhelper": "*"
+    "ts-jest": "^28.0.7",
+    "sinon": "^14.x"
   },
   "dependencies": {
     "@anatine/zod-openapi": "^1.3.0",
@@ -52,5 +52,25 @@
     "openapi3-ts": "^2.0.2",
     "tslog": "^3.3.3",
     "zod": "^3.17.3"
+  },
+  "peerDependencies": {
+    "@types/jest": "^27.x",
+    "@types/sinon": "^10.x",
+    "jest": "^28.x",
+    "sinon": "^14.x"
+  },
+  "peerDependenciesMeta": {
+    "@types/sinon": {
+      "optional": true
+    },
+    "@types/jest": {
+      "optional": true
+    },
+    "jest": {
+      "optional": true
+    },
+    "sinon": {
+      "optional": true
+    }
   }
 }

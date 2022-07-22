@@ -1,4 +1,4 @@
-import { Command, EBMessageType, getNewCorrelationId, getNewEBMessageId, getNewTraceId } from '@purista/core'
+import { Command, EBMessageType, getNewCorrelationId, getNewEBMessageId, getNewTraceId } from '../../core'
 
 export const createTestCommandMsg = <Payload = unknown, Parameter = unknown>(
   input?: Partial<Command<Payload, Parameter>>,

@@ -1,5 +1,4 @@
-import { getEventBridgeMock, getLoggerMock } from '@purista/testhelper'
-
+import { getEventBridgeMock, getLoggerMock } from '../../testhelper'
 import { ServiceInfoType } from '../types'
 import { Service } from './Service.impl'
 

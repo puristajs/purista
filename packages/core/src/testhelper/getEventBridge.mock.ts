@@ -1,5 +1,6 @@
-import { EventBridge } from '@purista/core'
 import { SinonStub, stub } from 'sinon'
+
+import { EventBridge } from '../core'
 
 /**
  * Mocks the eventbridge and methods are stubs

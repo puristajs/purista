@@ -1,6 +1,6 @@
-import { getLoggerMock } from '@purista/testhelper'
 import { assert, match, spy, stub } from 'sinon'
 
+import { getLoggerMock } from '../../testhelper'
 import { getDefaultEventBridgeConfig } from '../config'
 import { Command, EBMessageType, InfoMessage, Logger, Subscription } from '../types'
 import { DefaultEventBridge } from './DefaultEventBridge.impl'
