@@ -25,14 +25,12 @@ export class SubscriptionDefinitionBuilder<
     serviceTarget?: string
   }
 
+  private fn?: SubscriptionFunction<ServiceClassType, MessageType, Payload>
+
   private eventName?: string
 
   // eslint-disable-next-line no-useless-constructor
-  constructor(
-    private subscriptionName: string,
-    private subscriptionDescription: string,
-    private fn: SubscriptionFunction<ServiceClassType, MessageType, Payload>,
-  ) {}
+  constructor(private subscriptionName: string, private subscriptionDescription: string) {}
 
   /**
    * Add a filter to only subscribe to messages with matching event name
@@ -113,10 +111,43 @@ export class SubscriptionDefinitionBuilder<
   }
 
   /**
+   * Required: Set the function implementation.
+   * The types should be automatically set as soon as schemas previously defined.
+   * As the function will be a a function of a service class you need to implement as function declaration.
+   * Anonymous functions do not have access to the `this` scope.
+   *
+   * @example
+   * ```ts
+   * async function (context, payload, parameter) {
+   *
+   *    return `the result output payload`
+   * }
+   * ```
+   * @param fn the function implementation
+   * @returns SubscriptionDefinitionBuilder
+   */
+  setFunction(fn: SubscriptionFunction<ServiceClassType, MessageType, Payload>) {
+    this.fn = fn
+    return this
+  }
+
+  /**
+   * Get the function implementation
+   * @returns the function
+   */
+  getFunction(): SubscriptionFunction<ServiceClassType, MessageType, Payload> | undefined {
+    return this.fn
+  }
+
+  /**
    * Returns the final subscription definition which will be passed into the service class.
    * @returns SubscriptionDefinition
    */
   getDefinition(): SubscriptionDefinition<ServiceClassType, MessageType, Payload> {
+    if (!this.fn) {
+      throw new Error(`SubscriptionDefinitionBuilder: missing function implementation for ${this.subscriptionName}`)
+    }
+
     const subscription: SubscriptionDefinition<ServiceClassType, MessageType, Payload> = {
       sender: this.sender,
       receiver: this.receiver,

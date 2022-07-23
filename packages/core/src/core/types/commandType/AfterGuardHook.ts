@@ -1,6 +1,5 @@
-import type { Logger } from '../Logger'
 import type { ServiceClass } from '../ServiceClass'
-import type { Command } from './Command'
+import type { CommandFunctionContext } from './CommandFunctionContext'
 
 /**
  * Definition of after guard hook functions.
@@ -13,7 +12,7 @@ export type AfterGuardHook<
   ParamsType = unknown,
 > = (
   this: ServiceClassType,
-  context: { logger: Logger; message: Command<PayloadType, ParamsType> },
+  context: CommandFunctionContext<PayloadType, ParamsType>,
   result: ResultType,
   input: PayloadType,
   params: ParamsType,

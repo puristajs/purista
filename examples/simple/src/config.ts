@@ -144,7 +144,7 @@ xnBbc+oCZrvxHJFf5PKPqtfAcIjS+wMplc/6EzrlkrPrrGydnYAP3/lJQ5k=
   port: 9090,
   logLevel: 'debug',
   domain: 'localhost',
-  host: '0.0.0.0',
+  host: '',
   cookieSecret: 'oCrUlLnZqhj99evenJ3x',
   apiMountPath: '/api',
   openApi: {

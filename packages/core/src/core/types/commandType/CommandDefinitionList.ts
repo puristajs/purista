@@ -9,8 +9,8 @@ import type { CommandDefinition } from './CommandDefinition'
  * ```
  */
 export type CommandDefinitionList<ServiceClassType extends ServiceClass> = CommandDefinition<
-  Record<string, unknown>,
   ServiceClassType,
+  Record<string, unknown>,
   any,
   any,
   any

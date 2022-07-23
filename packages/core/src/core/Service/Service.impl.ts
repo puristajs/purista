@@ -27,6 +27,7 @@ import {
   SubscriptionContext,
   SubscriptionDefinition,
   SubscriptionDefinitionList,
+  TraceId,
 } from '../types'
 import { ServiceInfoValidator } from './ServiceInfoValidator'
 
@@ -137,6 +138,59 @@ export class Service extends ServiceClass {
     return this.eventBridge.emit(info)
   }
 
+  protected getInvokeFunction(serviceTarget: string, traceId: TraceId, principalId?: string) {
+    const sender: EBMessageAddress = {
+      serviceName: this.info.serviceName,
+      serviceVersion: this.info.serviceVersion,
+      serviceTarget,
+    }
+
+    const invokeCommand = async (
+      receiver: EBMessageAddress,
+      eventPayload: unknown,
+      parameter: unknown,
+    ): Promise<any> => {
+      const msg: Readonly<Omit<Command, 'correlationId' | 'id' | 'timestamp' | 'instanceId'>> = Object.freeze({
+        messageType: EBMessageType.Command,
+        traceId,
+        sender,
+        receiver,
+        payload: {
+          payload: eventPayload,
+          parameter,
+        },
+        principalId,
+      })
+
+      return this.eventBridge.invoke(msg)
+    }
+
+    return invokeCommand.bind(this)
+  }
+
+  protected getEmitFunction(serviceTarget: string, traceId: TraceId, principalId?: string) {
+    const sender: EBMessageAddress = {
+      serviceName: this.info.serviceName,
+      serviceVersion: this.info.serviceVersion,
+      serviceTarget,
+    }
+
+    const emitCustomEvent = async <Payload>(eventName: string, eventPayload?: Payload) => {
+      const msg: Readonly<Omit<CustomMessage<Payload>, 'id' | 'instanceId' | 'timestamp'>> = Object.freeze({
+        messageType: EBMessageType.CustomMessage,
+        traceId,
+        sender,
+        eventName,
+        payload: eventPayload,
+        principalId,
+      })
+
+      await this.eventBridge.emit(msg)
+    }
+
+    return emitCustomEvent.bind(this)
+  }
+
   /**
    * Called when a command is received by the service
    *
@@ -200,61 +254,18 @@ export class Service extends ServiceClass {
         }
       }
 
-      const sender: EBMessageAddress = {
-        serviceName: this.info.serviceName,
-        serviceVersion: this.info.serviceVersion,
-        serviceTarget: command.commandName,
-      }
-
-      const emitCustomEvent = async <Payload>(eventName: string, eventPayload?: Payload) => {
-        const msg: Readonly<Omit<CustomMessage<Payload>, 'id' | 'instanceId' | 'timestamp'>> = Object.freeze({
-          messageType: EBMessageType.CustomMessage,
-          traceId,
-          sender,
-          eventName,
-          payload: eventPayload,
-          principalId: message.principalId,
-        })
-
-        await this.eventBridge.emit(msg)
-      }
-
-      const emit = emitCustomEvent.bind(this)
-
-      const invokeCommand = async <Input, Params, Output>(
-        receiver: EBMessageAddress,
-        eventPayload: Input,
-        parameter: Params,
-      ): Promise<Output> => {
-        const msg: Readonly<Omit<Command, 'correlationId' | 'id' | 'timestamp' | 'instanceId'>> = Object.freeze({
-          messageType: EBMessageType.Command,
-          traceId,
-          sender,
-          receiver,
-          payload: {
-            payload: eventPayload,
-            parameter,
-          },
-          principalId: message.principalId,
-        })
-
-        return this.eventBridge.invoke(msg)
-      }
-
-      const invoke = invokeCommand.bind(this, sender)
-
       const context: CommandFunctionContext = {
         logger,
         message,
-        emit,
-        invoke,
+        emit: this.getEmitFunction(command.commandName, traceId, message.principalId),
+        invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId),
       }
 
       const call = command.call.bind(this, context)
       let payload = await call(payloadInput, parameterInput)
 
       if (command.hooks.afterGuard?.length) {
-        const afterGuards = command.hooks.afterGuard.map((hook) => hook.bind(this, { logger, message }))
+        const afterGuards = command.hooks.afterGuard.map((hook) => hook.bind(this, context))
         await Promise.all(afterGuards)
       }
 
@@ -321,54 +332,11 @@ export class Service extends ServiceClass {
       requestId: traceId,
     })
 
-    const sender: EBMessageAddress = {
-      serviceName: this.info.serviceName,
-      serviceVersion: this.info.serviceVersion,
-      serviceTarget: subscriptionName,
-    }
-
-    const emitCustomEvent = async <Payload>(eventName: string, eventPayload?: Payload) => {
-      const msg: Readonly<Omit<CustomMessage<Payload>, 'id' | 'instanceId' | 'timestamp'>> = Object.freeze({
-        messageType: EBMessageType.CustomMessage,
-        traceId,
-        sender,
-        eventName,
-        payload: eventPayload,
-        principalId: message.principalId,
-      })
-
-      await this.eventBridge.emit(msg)
-    }
-
-    const emit = emitCustomEvent.bind(this)
-
-    const invokeCommand = async <Input, Params, Output>(
-      receiver: EBMessageAddress,
-      eventPayload: Input,
-      parameter: Params,
-    ): Promise<Output> => {
-      const msg: Readonly<Omit<Command, 'correlationId' | 'id' | 'timestamp' | 'instanceId'>> = Object.freeze({
-        messageType: EBMessageType.Command,
-        traceId,
-        sender,
-        receiver,
-        payload: {
-          payload: eventPayload,
-          parameter,
-        },
-        principalId: message.principalId,
-      })
-
-      return this.eventBridge.invoke(msg)
-    }
-
-    const invoke = invokeCommand.bind(this, sender)
-
     const context: SubscriptionContext = {
       logger,
       message,
-      emit,
-      invoke,
+      emit: this.getEmitFunction(subscriptionName, traceId, message.principalId),
+      invoke: this.getInvokeFunction(subscriptionName, traceId, message.principalId),
     }
 
     const call = subscription.call.bind(this, context)

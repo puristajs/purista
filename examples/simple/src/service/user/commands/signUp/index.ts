@@ -99,9 +99,23 @@ export default new FunctionDefinitionBuilder<UserService>(
   .transformOutput(transformOutputSchema, async function (_context, payload, _params) {
     return JSON.stringify(payload)
   })
-  .setFunction(async function ({ logger, message }, payload, _param) {
+  .setFunction(async function ({ logger, message, invoke }, payload, _param) {
     logger.debug(payload.test)
     logger.debug(message.payload.payload)
+
+    const invokeResponse = await invoke<string>(
+      {
+        serviceName: this.serviceInfo.serviceName,
+        serviceVersion: this.serviceInfo.serviceVersion,
+        serviceTarget: UserFunction.TestFunction,
+      },
+      {
+        sample: 'payload from signUp function',
+      },
+      {},
+    )
+
+    logger.debug('response from other service function invocation', invokeResponse)
 
     logger.debug('sign up new user', payload)
 
