@@ -5,8 +5,9 @@ import { UserService } from '../../UserService'
 
 export default new SubscriptionDefinitionBuilder<UserService>(
   'sendWelcomeEmail',
-  'send a email to new costumers',
-  async function ({ logger }, _payload) {
+  'send a welcome email to new costumers',
+)
+  .subscribeToEvent(EventName.NewUserSignedUp)
+  .setFunction(async function ({ logger }, _payload) {
     logger.info('Hello from sendWelcomeEmail')
-  },
-).subscribeToEvent(EventName.NewUserSignedUp)
+  })

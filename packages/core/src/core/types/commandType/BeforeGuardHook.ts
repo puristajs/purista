@@ -1,6 +1,5 @@
-import type { Logger } from '../Logger'
 import type { ServiceClass } from '../ServiceClass'
-import type { Command } from './Command'
+import type { CommandFunctionContext } from './CommandFunctionContext'
 
 /**
  * Guard is called after command function input validation and before executing the command function.
@@ -15,7 +14,7 @@ export type BeforeGuardHook<
   FunctionParamsType = MessageParamsType,
 > = (
   this: ServiceClassType,
-  context: { logger: Logger; message: Command<MessagePayloadType, MessageParamsType> },
+  context: CommandFunctionContext<MessagePayloadType, MessageParamsType>,
   payload: FunctionPayloadType,
   params: FunctionParamsType,
 ) => Promise<void>

@@ -3,7 +3,7 @@ import { z, ZodError } from 'zod'
 import { BeforeGuardHook, CommandFunction, HandledError, ServiceClass, StatusCode, UnhandledError } from '../core'
 
 export const getFunctionWithValidation = function <
-  ServiceClassType = ServiceClass,
+  ServiceClassType extends ServiceClass,
   MessagePayloadType = unknown,
   MessageParamsType = unknown,
   MessageResultType = unknown,
@@ -45,7 +45,7 @@ export const getFunctionWithValidation = function <
     MessageParamsType,
     MessageResultType
   > = async function (context, payload, params): Promise<MessageResultType> {
-    const { logger, message } = context
+    const { logger } = context
     let safePayload = payload as unknown as FunctionPayloadType
     if (inputPayloadSchema) {
       try {
@@ -70,7 +70,7 @@ export const getFunctionWithValidation = function <
 
     if (beforeGuards.length) {
       const guards = beforeGuards.map((hook) => {
-        const beforeGuard = hook.bind(this, { logger, message })
+        const beforeGuard = hook.bind(this, context)
         return beforeGuard(safePayload, safeParams)
       })
       await Promise.all(guards)

@@ -10,9 +10,11 @@ export const getDefaultConfig = (): HttpServerConfig => {
     },
     port: 9090,
     domain: 'localhost',
+    host: '',
     logLevel: 'warn',
     apiMountPath: '/api',
     openApi: {
+      enabled: true,
       path: OPENAPI_DEFAULT_MOUNT_PATH,
       info: OPENAPI_DEFAULT_INFO,
     },

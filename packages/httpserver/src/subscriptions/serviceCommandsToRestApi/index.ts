@@ -17,7 +17,8 @@ import { HttpServerService } from '../../HttpServerService.impl'
 export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceFunctionAdded, HttpExposedServiceMeta>(
   'serviceCommandsToRestApi',
   'listen for InfoServiceFunctionAdded messages and adds endpoints for service functions if needed',
-  async function ({ logger, message }, payload) {
+)
+  .setFunction(async function ({ logger, message }, payload) {
     if (!isHttpExposedServiceMeta(payload)) {
       logger.debug('...skip exposing function')
       return
@@ -78,5 +79,5 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
     })
 
     logger.debug('add ', method, url)
-  },
-).addMessageType(EBMessageType.InfoServiceFunctionAdded)
+  })
+  .addMessageType(EBMessageType.InfoServiceFunctionAdded)

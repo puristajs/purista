@@ -23,7 +23,7 @@ import type { SupportedHttpMethod } from './types'
  * A working schema definition needs at least a function name, a short description and the function implementation.
  */
 export class FunctionDefinitionBuilder<
-  ServiceClassType = ServiceClass,
+  ServiceClassType extends ServiceClass,
   MessagePayloadType = unknown,
   MessageParamsType = unknown,
   MessageResultType = unknown,
@@ -385,8 +385,8 @@ export class FunctionDefinitionBuilder<
 
   private extendWithHttpMetadata(
     definition: CommandDefinition<
-      Record<string, unknown>,
       ServiceClassType,
+      Record<string, unknown>,
       MessagePayloadType,
       MessageParamsType,
       MessageResultType,
@@ -399,8 +399,8 @@ export class FunctionDefinitionBuilder<
     }
 
     const def = definition as CommandDefinition<
-      HttpExposedServiceMeta,
       ServiceClassType,
+      HttpExposedServiceMeta,
       MessagePayloadType,
       MessageParamsType,
       MessageResultType,
@@ -437,8 +437,8 @@ export class FunctionDefinitionBuilder<
    * @returns CommandDefinition
    */
   getDefinition(): CommandDefinition<
-    Record<string, unknown>,
     ServiceClassType,
+    Record<string, unknown>,
     MessagePayloadType,
     MessageParamsType,
     MessageResultType,
@@ -451,8 +451,8 @@ export class FunctionDefinitionBuilder<
 
     const eventName = this.eventName
     let definition: CommandDefinition<
-      Record<string, unknown>,
       ServiceClassType,
+      Record<string, unknown>,
       MessagePayloadType,
       MessageParamsType,
       MessageResultType,
@@ -488,7 +488,7 @@ export class FunctionDefinitionBuilder<
    *
    * @example
    * ```ts
-   * async function (log, payload, parameter, originalMessage) {
+   * async function (context, payload, parameter) {
    *
    *    return `the result output payload`
    * }
@@ -496,9 +496,9 @@ export class FunctionDefinitionBuilder<
    * @param fn the function implementation
    * @returns FunctionDefinitionBuilder
    */
-  public setFunction<T>(
+  public setFunction(
     fn: CommandFunction<
-      T,
+      ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
       FunctionPayloadType,
@@ -506,7 +506,7 @@ export class FunctionDefinitionBuilder<
       FunctionResultType
     >,
   ): FunctionDefinitionBuilder<
-    T,
+    ServiceClassType,
     MessagePayloadType,
     MessageParamsType,
     MessageResultType,
@@ -524,7 +524,7 @@ export class FunctionDefinitionBuilder<
     >
 
     return this as unknown as FunctionDefinitionBuilder<
-      T,
+      ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
       MessageResultType,

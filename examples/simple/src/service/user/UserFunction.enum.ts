@@ -5,4 +5,5 @@
  **/
 export enum UserFunction {
   SignUpNewUser = 'signUpNewUser',
+  TestFunction = 'testFunction',
 }

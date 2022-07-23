@@ -11,8 +11,8 @@ import type { TransformOutputHook } from './TransformOutputHook'
  * The definition for a command provided by some service.
  */
 export type CommandDefinition<
+  ServiceClassType extends ServiceClass = ServiceClass,
   MetadataType = Record<string, unknown>,
-  ServiceClassType = ServiceClass,
   MessagePayloadType = unknown,
   MessageParamsType = unknown,
   MessageResultType = unknown,
