@@ -46,7 +46,7 @@ Example:
 An API call is invoking a service function like this:
 
 ```typescript
-const result = db.findOne(id)
+const result = dbRepository.findOne(id)
 
 if (!result) {
   throw new HandledError(StatusCode.NotFound, 'entity not found')
@@ -86,17 +86,17 @@ which results in:
 }
 ```
 
-This is used, out of the box, for automatically generated errors thrown by failing input validations.
+This is used, out of the box, for automatically generated errors, thrown by failing input validations.
 
 ### UnhandledErrors
 
-Unhandled Errors are more generic errors, where it is not clear what exactly happened or how we should handle it.
+Unhandled Errors are more generic errors, where it is not clear, what exactly happened, or how we should handle it.
 
 Let's take an example of a POST endpoint for creating a new Entity.
 
 ```typescript
 try{
-  const result = db.create(payload)
+  const result = dbRepository.create(payload)
 } catch(err) {
   if (isConstraintViolation(err)) {
     // give the client a propper answer, that he tries to insert a record, but a record with same id already exist
@@ -108,22 +108,26 @@ try{
 
 ```
 
-As you can see, the error is handled in the sense of _"Ok there is something wrong, and I log this error and prevent the system to crash"_, but from client side it is more like "Ups, something wrong - this should not happen"
+As you can see, the error is handled in the sense of _"Ok there is something wrong, and I log this error, and I prevent the system to crash"_, but from client side it is more like "Ups, something wrong - this should not happen - try again later"
 
 ### Error (js/ts)
 
 It is totally fine, if you reduce your error handling in service functions and subscriptions to HandledErrors only.  
 It is JavaScript/typescript - so just let it throw!  
 
-Each service function and each subscription itself is wrapped by a try-catch, which will convert any error into a UnhandledError with error code 500. So no worries, that your whole system can break.
+Each service function and each subscription itself, is wrapped by a try-catch, which will convert any error into a UnhandledError with error code 500. The error will be logged. And a error message is send. So no worries, that your whole system can break.
+
+You can create subscriptions to track errors, you have the logs, the user gets a propper response, no information will be leaked.
 
 Because of this, the example from `HandledError` is totally fine, and we do not need to write more code here.  
 We know that any database issue is handled and returned as **500 INTERNAL SERVER ERROR**.
 
 <Badge text="Avoid swallowing errors" type="danger"/>
 
-Do not catch and handle only *some* errors.  
-**BAD PRACTICE**
+
+**👎 BAD PRACTICE**
+
+Do not catch and handle only *some* errors.
 
 ```typescript
 try{
@@ -142,7 +146,9 @@ try{
 
 <Badge text="Log and throw" type="tip"/>
 
-**GOOD PRACTICE**
+**👍 GOOD PRACTICE**
+
+Handle the things you can, and throw the rest.
 
 ```typescript
 try{

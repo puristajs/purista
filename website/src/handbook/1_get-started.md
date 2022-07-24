@@ -35,9 +35,9 @@ cd ..myapp
 
 npm init
 
-npm install --save typescript @purista/core ts-node
+npm install --save typescript @purista/core @purista/httpserver ts-node
 
-npm install --save-dev  @types/node
+npm install --save-dev @types/node
 
 mkdir src
 ```
@@ -54,7 +54,7 @@ Create the main execution file `src/index.ts` with following content:
 
 ```typescript
 import { DefaultEventBridge, initLogger } from '@purista/core'
-import { HttpServerService } from '@purista/core'
+import { HttpServerService } from '@purista/httpserver'
 
 const main = async () => {
   // initialize the logging
@@ -64,10 +64,7 @@ const main = async () => {
   const eventBridge = new DefaultEventBridge(baseLogger)
 
   // create and init a webserver
-  const httpServerService = await HttpServerService.createInstance(
-    baseLogger,
-    eventBridge
-  )
+  const httpServerService = new HttpServerService(baseLogger, eventBridge)
 
   // start the webserver
   await httpServerService.start()
@@ -77,3 +74,13 @@ main()
 
 ```
 
+Now you can start your new program with `npm start`.  
+It will start a http webserver on your local machine.  
+
+Open your browser and visit [http://localhost:9090](http://localhost:9090) and you should see
+
+```json
+{"status":404,"message":"Not Found"}
+```
+
+The only, per default existing, endpoint is the OpenApi UI (swagger UI) [http://localhost:9090/api/](http://localhost:9090/api/).

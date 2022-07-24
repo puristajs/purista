@@ -117,6 +117,9 @@ There is a huge ecosystem around these frameworks.
 They are pretty cool and helpful creating webservers, but they don't help you to build the logic behind some endpoints.  
 PURISTA does not try to replace them. PURISTA will bring the missing part for building the logic behind the endpoints and you should be able to combine them.
 
+In fact, it works pretty well, to combine these frameworks with PURISTA.  
+The provided package `@purista/httpserver` is using fastify under the hood.
+
 ### The unicorns
 
 The next kind of frameworks are the unicorns - the specialists.  
@@ -221,7 +224,7 @@ There are lot's of "If you want or if you need, you can...".
 There are some "It is recommended, to ...".
 But there are only a few "You must...".
 
-Also there is a wild mix of adaptions from known things like microservices, domain driven development, functional programming, event patterns, messaging systems. So anybody with some fundamental experiences, will get the "ah I know this is like..." effect.  
+Also there is a wild mix of adaptions from known things like microservices, domain driven development, functional programming, event patterns, messaging systems. So, anybody with some fundamental experiences, will get the "ah, I know this, it's like..." effect.  
 No rocket science at all - but hopefully it rocks your next project 🚀.
 
 ### Predictable behavior
