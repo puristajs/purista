@@ -135,7 +135,10 @@ export class SubscriptionDefinitionBuilder<
    * Get the function implementation
    * @returns the function
    */
-  getFunction(): SubscriptionFunction<ServiceClassType, MessageType, Payload> | undefined {
+  getFunction(): SubscriptionFunction<ServiceClassType, MessageType, Payload> {
+    if (!this.fn) {
+      throw new Error(`No function implementation for ${this.subscriptionName}`)
+    }
     return this.fn
   }
 

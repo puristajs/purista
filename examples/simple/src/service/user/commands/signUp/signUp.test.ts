@@ -1,11 +1,12 @@
-import { getFunctionContextMock } from '@purista/core'
+import { getEventBridgeMock, getFunctionContextMock, getLoggerMock } from '@purista/core'
 
+import { UserService } from '../../UserService'
 import functionDefinition from './index'
 
-const fn = functionDefinition.getFunction()
-if (!fn) {
-  throw new Error('function not defined')
-}
+const f = functionDefinition.getFunction()
+
+const service = new UserService(getLoggerMock().mock, getEventBridgeMock().mock)
+const fn = f.bind(service)
 
 test('returns a new user id', async () => {
   const payload = {
@@ -19,6 +20,8 @@ test('returns a new user id', async () => {
   const initialPayload = JSON.stringify(payload)
 
   const context = getFunctionContextMock(initialPayload, params)
+
+  context.stubs.invoke.resolves('mocked response data')
 
   const result = await fn(context.mock, payload, params)
 
