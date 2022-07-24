@@ -538,16 +538,17 @@ export class FunctionDefinitionBuilder<
    * Get the function implementation
    * @returns the function
    */
-  getFunction():
-    | CommandFunction<
-        ServiceClassType,
-        MessagePayloadType,
-        MessageParamsType,
-        FunctionPayloadType,
-        FunctionParamsType,
-        FunctionResultType
-      >
-    | undefined {
+  getFunction(): CommandFunction<
+    ServiceClassType,
+    MessagePayloadType,
+    MessageParamsType,
+    FunctionPayloadType,
+    FunctionParamsType,
+    FunctionResultType
+  > {
+    if (!this.fn) {
+      throw new Error(`No function implementation for ${this.commandName}`)
+    }
     return this.fn
   }
 }

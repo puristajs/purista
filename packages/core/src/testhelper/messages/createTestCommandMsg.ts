@@ -1,9 +1,26 @@
 import { Command, EBMessageType, getNewCorrelationId, getNewEBMessageId, getNewTraceId } from '../../core'
 
+/**
+ * A helper to create a command message.
+ * All message fields are prefilled with dummy defaults.
+ * They can be overwritten by optional parameter.
+ *
+ * ```typescript
+ * createTestCommandMsg({
+ *   payload: {
+ *      payload: 'some input payload',
+ *      parameter: 'some parameter input'
+ *    }
+ * })
+ * ```
+ *
+ * @param input partial Command
+ * @returns Command
+ */
 export const createTestCommandMsg = <Payload = unknown, Parameter = unknown>(
   input?: Partial<Command<Payload, Parameter>>,
 ): Command<Payload, Parameter> => {
-  const command = {
+  const defaultMsg = {
     id: getNewEBMessageId(),
     instanceId: 'SenderInstanceId',
     timestamp: Date.now(),
@@ -27,7 +44,7 @@ export const createTestCommandMsg = <Payload = unknown, Parameter = unknown>(
   }
 
   return {
-    ...command,
+    ...defaultMsg,
     ...input,
   } as Command<Payload, Parameter>
 }
