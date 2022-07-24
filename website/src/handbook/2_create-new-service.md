@@ -17,7 +17,7 @@ star: true
 
 # Create a new service
 
-A service is a logical group of functions, and this where the domain driven aspect comes in.  
+A service is a logical group of functions and subscriptions. This where the domain driven aspect comes in.  
 In our example, we will use the classic example - Users.
 
 We want to have the domain *User* and the following functionality:
@@ -37,7 +37,7 @@ import { Service, ServiceInfoType } from '@purista/core'
 
 export const userServiceInfo: ServiceInfoType = {
   serviceName: 'User',
-  serviceVersion: '1.0.0',
+  serviceVersion: '1',
   serviceDescription: 'service which handles all user related information',
 }
 
@@ -78,10 +78,10 @@ It has no functionality yet, so let's add some logic.
 
 Now we want to be able to sign up new users, so we will create a function for it.
 
-Create a new subfolder `src/service/user/commands` and create files `index.ts`, `schema.ts` and `signUp.ts`
+Create a new subfolder `src/service/user/commands/signUp` and create files `index.ts` & `schema.ts`.
 
 First, let's define the shape of our data.  
-To do so, we will use awesome [zod library](https://github.com/colinhacks/zod) which will provide use schema validation, typescript types and with some plugin OpenApi (swagger) definition from one single definition.
+To do so, we will use [zod library](https://github.com/colinhacks/zod). This will provide use schema validation, typescript types and with awesome plugin [zod-openapi](https://www.npmjs.com/package/@anatine/zod-openapi) OpenApi (swagger) definition from one single definition.
 
 Add the needed dependencies to our project:
 
@@ -93,7 +93,7 @@ npm install --save zod @anatine/zod-openapi
 
 Now we can start to create a schema for input payload, parameters and output payload.
 
-Add the following content into `src/service/user/commands/schema.ts`:
+Add the following content into `src/service/user/commands/signUp/schema.ts`:
 
 ```typescript
 import { extendApi } from '@anatine/zod-openapi'
@@ -136,7 +136,7 @@ We also add some additional metadata like `title` and `example`. This will be us
 ### Add the function to service
 
 Now it's time to let our `User` service know that he has some function `signUp` and we need to implement the logic for it.  
-First, we will create a function definition in our `src/service/user/commands/index.ts`:
+First, we will create a function definition in our `src/service/user/commands/signUp/index.ts`:
 
 <Badge text="Be aware" type="warning"/>
 
@@ -180,9 +180,11 @@ It's a simple function, where we log the input, the config and return a response
 Our function is an asynchronous function, which allows us to use async-await within our code.  
 The types generated from schema are used, and your linter/typescript will complain on mismatches.  
 You have a `this` scope, which is the instance of your domain service class `UserService`.  
-As this service class is extending the base `Service` class, you will have some more useful functions, which we will cover later on.
+The first parameter of our function provides the function context.  
 
-<Badge text="Be aware" type="warning"/>
+The function context contains usefull things like logger, the full original command message and functions to invoke other service functions or emit custom events.
+
+<Badge text="⚠️ Be aware" type="warning"/>
 
 *You can't use arrow function to create a new service function, because they don't allow the `this` scope!*
 
@@ -199,7 +201,7 @@ Now we should add the function definition to our `User` service in our `src/inde
 
 ```typescript
   // add imports
-  import { signUp } from './service/user'
+  import signUp from './service/user/commands/signUp'
 
 
   // add to function array
@@ -209,13 +211,102 @@ Now we should add the function definition to our `User` service in our `src/inde
 If you now start the application with `npm start` you should have a POST endpoint `https://localhost:8080/api/v1/sign-up` which should trigger our function.
 
 There you can see, that we expose our function versioned by the service version.  
-This means we can also have same domain service running with different versions.
+This means, we can also have a domain service, running with different versions.
 
-If you have for example breaking API changes in a new version of our `User` service, then you would create a new Service (or copy the old one and make your changes) and set service version to a higher version.
+If you have, for example breaking API changes in a new version of our `User` service, then you would create a new Service (or copy the old one and make your changes) and set service version to a higher version.
 
 Try to open `https://localhost:8080/api` in your browser. You should see the OpenApi- UI with your new endpoint.
 
 ## Add a subscription
 
-TODO
+Now, our service should not only be able to create new users. New users should get a welcome or confirmation email.
 
+You could pack the send email logic into our existing function, but this might not the best way.  
+Why?  
+Because you start mixing up different things, increase  the complexity of one simple, single function and it increases the test complexity, while decreasing the stability and maintenance.
+
+It's better to have a subscription, which listens for all new created users and send them an email.  
+This allows you:
+
+- to implement retry mechanism on sending an email more easily
+- lowers the amount of mocking & stubbing within single unit tests
+- reduces the request response time for the user, as there is no need to wait for the email to be send
+- keeps your "creation" code clean and easy by separating the "email send" code
+- decouple things and remove/avoid dependencies
+- separate user creation and sending an email in deployment later on (allows different scaling if needed)
+
+Back to our example.  
+
+Create a new subfolder `src/service/user/subscriptions/sendWelcomeEmail` and create files `index.ts`.
+
+Define a subscription like this:
+
+```typescript
+import { SubscriptionDefinitionBuilder } from '@purista/core'
+
+import { UserService } from '../../UserService'
+
+export default new SubscriptionDefinitionBuilder<UserService>(
+  'sendWelcomeEmail',
+  'send a welcome email to new costumers',
+)
+  .subscribeToEvent('NewUserCreated')
+  .setFunction(async function ({ logger }, _payload, _params) {
+    logger.info('Hello from subscription sendWelcomeEmail')
+  })
+```
+
+It is quite simple and similar to function definitions.
+
+Here we create a new subscription `sendWelcomeEmail` with some description as second parameter.  
+We want to subscribe to all messages with event name `NewUserCreated`.
+
+There is only one thing left.  
+Add the subscription to our service.
+
+```typescript
+  import signUp from './service/user/commands/signUp'
+  // add imports
+  import sendWelcomeEmail from './subscriptions/sendWelcomeEmail'
+
+
+  // add to function array
+  const userService = new UserService(baseLogger, userServiceInfo, eventBridge, [ signUp.getDefinition() ], [ sendWelcomeEmail.getDefinition() ])
+```
+
+If you restart your program, you will see a console log, each time the `/sign-up` endpoint is called successfully.
+
+## Call service function from other service
+
+Until now, we have a simple request-respone-pattern and a subscription which listens for the response.  
+The request is triggered by some url request.
+
+But in real world you might need to call a other service function within a service function.
+
+With PURISTA it is quite easy. The function context provides a asynchronous function `invoke`.
+
+Example:
+
+```typescript
+setFunction(async function ({ invoke }) {
+  
+  // invokeResponse type can be set - here it is set to type string
+  const invokeResponse = await invoke<string>(
+    // the address of service to call
+    {
+      serviceName: this.serviceInfo.serviceName,
+      serviceVersion: this.serviceInfo.serviceVersion,
+      serviceTarget: UserFunction.TestFunction,
+    },
+    // the input payload
+    {
+      sample: 'payload from signUp function',
+    },
+    // the input parameter
+    {},
+  )
+}
+```
+
+If the invoked service fails for some reason, the `invoke` will throw `HandledError` or `UnhandledError`.  
+There is also no input validation on the callers side. To ensure correct types and input, you should share the types between the two service functions or you should add explicit input validation.

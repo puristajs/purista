@@ -58,6 +58,8 @@ PURISTA comes with some simple mocks, which should developers help to write test
 
 Currently, there are mocks available for:
 
+- FunctionContext
+- SubscriptionContext
 - Eventbridge
 - Logger
 
@@ -66,116 +68,163 @@ Currently, there are mocks available for:
 Service function to test:
 
 ```typescript
-import type { MyService } from '../../MyService'
-import { InputParameterType, InputPayloadType, OutputPayloadType } from './schema'
+export default new FunctionDefinitionBuilder ....
+  ....
+  .setFunction( async function ({ invoke }, payload, parameter) {
 
- import { 
-   InputPayloadType as InvokeRequestPayloadType, 
-   InputParameterType as InvokeRequestParameterType,
-   OutputPayloadType as InvokeResultPayloadType  
-  } from '../../../OtherService/commands/otherServiceFunction/schema'
+      // your logic does some stuff with payload and extract parameters
 
-
-export const myFunction: CommandFunction<MyService, InputPayloadType, InputParameterType, OutputPayloadType> =
-  async function (payload, parameter) {
-
-    // your logic does some stuff with payload and extract parameters
-
-    const invokePayload: InvokeRequestPayloadType = {
-      complex: {
-        payload: 'value',
+      const invokePayload = {
+        complex: {
+          payload: 'value',
+        }
       }
+
+      const invokeParameter = {
+        paramOne: 'value param 1',
+        paramTwo: 'value param 2',
+        key: 'value'
+      }
+
+      // invoke some other service function
+      const invokeResult = await invoke<InvokeResultPayloadType>({
+        receiver: {
+          serviceName: 'OtherService',
+          serviceVersion: '1',
+          serviceTarget: 'otherServiceFunction',
+        },
+        command: {
+          payload: invokePayload,
+          parameter: invokeParameter,
+        },
+      })
+
+      // do stuff with in invokeResult
+      // ... 
+      // return the result of our function
+      return result
     }
-
-    const invokeParameter: InvokeRequestParameterType = {
-      paramOne: 'value param 1',
-      paramTwo: 'value param 2',
-      key: 'value'
-    }
-
-    // invoke some other service function
-    const invokeResult = this.invoke<InvokeResultPayloadType>({
-      receiver: {
-        serviceName: 'OtherService',
-        serviceTarget: 'otherServiceFunction',
-        serviceVersion: '1.0.0',
-      },
-      command: {
-        payload: invokePayload,
-        parameter: invokeParameter,
-      },
-    })
-
-    // do stuff with in invokeResult
-
-    // return the result of our function
-    return returnPayload
-  }
+  )
 ```
 
 Can be tested this way:
 
 ```typescript
-import { Command, ErrorCode, getEventBridgeMock, getLoggerMock, UnhandledError } from '@purista/core'
+import { getEventBridgeMock, getFunctionContextMock, getLoggerMock, HandledError } from '@purista/core'
 
-import { InputParameterType, InputPayloadType } from './schema'
-import { MyService } from '../../MyService'
-import { myFunction } from './myFunction
-import Sinon from 'sinon'
+import { UserService } from '../../UserService'
+import functionDefinition from './index'
 
+const f = functionDefinition.getFunction()
 
-let service: MyService
-let message: Command<InputPayloadType, InputParameterType>
-beforeEach(()=>{
-  service = new MyService(getLoggerMock(), getEventBridgeMock().mock)
-  message = {} as Command<InputPayloadType, InputParameterType>
-})
+const service = new UserService(getLoggerMock().mock, getEventBridgeMock().mock)
+const fn = f.bind(service)
 
-test('works', async () => {
-  const payload: InputPayloadType = {
-    // add your test input payload data
-  } 
-
-  const parameter: InputParameterType = {
-    // add your test input parameter data
+test('returns a new user id', async () => {
+  // the function input payload
+  // this is the result of all hooks & transformations
+  const payload = {
+    email: 'mail@example.com',
+    password: 'the_password',
+    test: '',
   }
 
-  const invokeStub = Sinon.stub(service,'invoke').resolves({
-    // add the test data response you expect from OtherService otherServiceFunction
-  })
+  // the function input parameter
+  // this is the result of all hooks & transformations
+  const parameter = {}
 
-  const fnToTest = myFunction.bind(service)
+  // the original input before any hook, validation/transformation is done
+  const messagePayload = {...payload}
+  const messageParameter = {...parameter}
 
-  const result = await fnToTest(payload, parameter, message)
+  const context = getFunctionContextMock(messagePayload, messageParameter)
 
-  invokeStub.reset()
-  expect(result).toEqual(newChild)
-  
-})
-
-test('should return a unhandled error if invoked function throws', async () => {
-  const payload: InputPayloadType = {
-    // add your test input payload data
-  } 
-
-  const parameter: InputParameterType = {
-    // add your test input parameter data
-  }
-
-  const invokeStub = Sinon.stub(service,'invoke').rejects(new Error('Some error))
-
-  const fnToTest = myFunction.bind(service)
-
-  await expect( fnToTest(payload, parameter, message) ).rejects.toEqual(
-    new UnhandledError(ErrorCode.InternalServerError, getErrorMessageForCode(ErrorCode.InternalServerError)),
+  context.stubs.invoke.resolves( 
+    // pass your invoke result data here
+    'return some mocked data here'
   )
 
-  invokeStub.reset()
+  const result = await fn(context.mock, payload, parameter)
+
+  expect(result).toBeDefined()
+
+  expect(context.stubs.logger.debug.calledWith(initialPayload)).toBeTruthy()
+})
+
+
+// if you handle invocation errors within your function, you might want to test this unhappy path.
+// here is an example on how to let a invocation fail in tests
+test('throws because invocation failed', async (t) => {
+  const payload = {
+    email: 'mail@example.com',
+    password: 'the_password',
+    test: '',
+  }
+
+  const parameter = {}
+
+  const messagePayload = {...payload}
+  const messageParameter = {...parameter}
+
+  const context = getFunctionContextMock(messagePayload, messageParameter)
+
+  context.stubs.invoke.rejects(new HandledError(500, 'something went wrong'))
+
+  try {
+    await fn(context.mock, payload, parameter)
+    t.fail('Did not throw')
+  } catch (error) {
+    expect(err).toBeDefined()
+  }
 })
 ```
 
 As you can see, you just need to call your function with some input values and maybe mock invocations of other functions.
 
-There are no unknowns, dependency injections, side effects from other functions if you keep your functions as simple as possible, stateless and separated into many little pieces.
+There are no unknowns, dependency injections you need to take care of, side effects from other functions if you keep your functions as simple as possible, stateless and separated into many little pieces.
+
+The correct types for your function in-/output are already set.
 
 With this approach, testing becomes real simple, powerful and reduces the time/costs to a minimum.
+
+The same way you can test subscription functions:
+
+```typescript
+import { createTestCommandMsg, getEventBridgeMock, getLoggerMock, getSubscriptionContextMock } from '@purista/core'
+
+import { UserService } from '../../UserService'
+import functionDefinition from './index'
+
+const f = functionDefinition.getFunction()
+
+const service = new UserService(getLoggerMock().mock, getEventBridgeMock().mock)
+const fn = f.bind(service)
+
+test('returns a new user id', async () => {
+  const payload = {
+    email: 'mail@example.com',
+    password: 'the_password',
+    test: '',
+  }
+
+  const parameter = {}
+
+  const messagePayload = { payload: { payload, parameter } }
+
+  const context = getSubscriptionContextMock(createTestCommandMsg(messagePayload))
+
+  // as we have a subscription here.
+  // the function has only payload as second parameter.
+  // if your subscription is listening on command
+  await fn(context.mock, messagePayload })
+
+  expect(context.stubs.logger.info.called).toBeTruthy()
+})
+```
+
+There are some test helper functions to create propper messages:
+
+- createTestCommandMsg
+- createTestCommandResponseMsg
+- createTestCommandErrorResponseMsg
+- createTestCommandMsg
