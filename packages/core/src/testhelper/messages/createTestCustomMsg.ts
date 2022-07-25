@@ -6,7 +6,7 @@ import { CustomMessage, EBMessageType, getNewCorrelationId, getNewEBMessageId, g
  * They can be overwritten by optional parameter.
  *
  * ```typescript
- * createTestCustomMsg('theEvenName', 'the custom event payload ,{
+ * createTestCustomMsg('theEvenName', 'the custom event payload' ,{
  *   principalId: 'abc-1234'
  * })
  * ```

@@ -1,90 +1,76 @@
-[PURISTA API - v1.3.1](../README.md) / [@purista/core](../modules/purista_core.md) / Service
+[PURISTA API - v1.3.1](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / HttpServerService
 
-# Class: Service
+# Class: HttpServerService
 
-[@purista/core](../modules/purista_core.md).Service
-
-Base class for all services.
-This class provides base functions to work with the event bridge, logging and so on
-
-Every service should extend this class and should not directly access the eventbridge or other service
-
-```typescript
-class MyService extends Service {
-
-  constructor(baseLogger: Logger, info: ServiceInfoType, eventBridge: EventBridge) {
-    super( baseLogger, info, eventBridge )
-    // ... initial service logic
-  }
-  // ... service methods, functions and logic
-}
-```
+[@purista/httpserver](../modules/purista_httpserver.md).HttpServerService
 
 ## Hierarchy
 
-- [`ServiceClass`](purista_core.ServiceClass.md)
+- [`Service`](purista_core.Service.md)
 
-  ↳ **`Service`**
-
-  ↳↳ [`HttpServerService`](purista_httpserver.HttpServerService.md)
+  ↳ **`HttpServerService`**
 
 ## Table of contents
 
 ### Constructors
 
-- [constructor](purista_core.Service.md#constructor)
+- [constructor](purista_httpserver.HttpServerService.md#constructor)
 
 ### Properties
 
-- [commands](purista_core.Service.md#commands)
-- [eventBridge](purista_core.Service.md#eventbridge)
-- [info](purista_core.Service.md#info)
-- [serviceLogger](purista_core.Service.md#servicelogger)
-- [subscriptions](purista_core.Service.md#subscriptions)
+- [commands](purista_httpserver.HttpServerService.md#commands)
+- [config](purista_httpserver.HttpServerService.md#config)
+- [eventBridge](purista_httpserver.HttpServerService.md#eventbridge)
+- [info](purista_httpserver.HttpServerService.md#info)
+- [routeDefinitions](purista_httpserver.HttpServerService.md#routedefinitions)
+- [server](purista_httpserver.HttpServerService.md#server)
+- [serviceLogger](purista_httpserver.HttpServerService.md#servicelogger)
+- [subscriptions](purista_httpserver.HttpServerService.md#subscriptions)
 
 ### Accessors
 
-- [serviceInfo](purista_core.Service.md#serviceinfo)
+- [serviceInfo](purista_httpserver.HttpServerService.md#serviceinfo)
 
 ### Methods
 
-- [destroy](purista_core.Service.md#destroy)
-- [emit](purista_core.Service.md#emit)
-- [executeCommand](purista_core.Service.md#executecommand)
-- [executeSubscription](purista_core.Service.md#executesubscription)
-- [getEmitFunction](purista_core.Service.md#getemitfunction)
-- [getInvokeFunction](purista_core.Service.md#getinvokefunction)
-- [initializeEventbridgeConnect](purista_core.Service.md#initializeeventbridgeconnect)
-- [off](purista_core.Service.md#off)
-- [on](purista_core.Service.md#on)
-- [registerCommand](purista_core.Service.md#registercommand)
-- [registerSubscription](purista_core.Service.md#registersubscription)
-- [sendServiceInfo](purista_core.Service.md#sendserviceinfo)
-- [start](purista_core.Service.md#start)
+- [destroy](purista_httpserver.HttpServerService.md#destroy)
+- [emit](purista_httpserver.HttpServerService.md#emit)
+- [executeCommand](purista_httpserver.HttpServerService.md#executecommand)
+- [executeSubscription](purista_httpserver.HttpServerService.md#executesubscription)
+- [getEmitFunction](purista_httpserver.HttpServerService.md#getemitfunction)
+- [getInvokeFunction](purista_httpserver.HttpServerService.md#getinvokefunction)
+- [initializeEventbridgeConnect](purista_httpserver.HttpServerService.md#initializeeventbridgeconnect)
+- [invoke](purista_httpserver.HttpServerService.md#invoke)
+- [off](purista_httpserver.HttpServerService.md#off)
+- [on](purista_httpserver.HttpServerService.md#on)
+- [registerCommand](purista_httpserver.HttpServerService.md#registercommand)
+- [registerSubscription](purista_httpserver.HttpServerService.md#registersubscription)
+- [sendServiceInfo](purista_httpserver.HttpServerService.md#sendserviceinfo)
+- [start](purista_httpserver.HttpServerService.md#start)
 
 ## Constructors
 
 ### constructor
 
-• **new Service**(`baseLogger`, `info`, `eventBridge`, `commandFunctions`, `subscriptionList`)
+• **new HttpServerService**(`baseLogger`, `eventBridge`, `config?`)
+
+Create a new instance of the HttpServer class
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `baseLogger` | [`Logger`](../modules/purista_core.md#logger) |
-| `info` | [`ServiceInfoType`](../modules/purista_core.md#serviceinfotype) |
-| `eventBridge` | [`EventBridge`](../interfaces/purista_core.EventBridge.md) |
-| `commandFunctions` | [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)<`any`\> |
-| `subscriptionList` | [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)<`any`\> |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `baseLogger` | [`Logger`](../modules/purista_core.md#logger) | The logger that the server will use. |
+| `eventBridge` | [`EventBridge`](../interfaces/purista_core.EventBridge.md) | EventBridge |
+| `config` | [`HttpServerConfig`](../modules/purista_httpserver.md#httpserverconfig) | - |
 
 #### Overrides
 
-[ServiceClass](purista_core.ServiceClass.md).[constructor](purista_core.ServiceClass.md#constructor)
+[Service](purista_core.Service.md).[constructor](purista_core.Service.md#constructor)
 
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:58](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L58)
+[httpserver/src/HttpServerService.impl.ts:40](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/httpserver/src/HttpServerService.impl.ts#L40)
 
 ## Properties
 
@@ -92,9 +78,23 @@ class MyService extends Service {
 
 • `Protected` **commands**: `Map`<`string`, [`CommandDefinition`](../modules/purista_core.md#commanddefinition)<[`ServiceClass`](purista_core.ServiceClass.md), `Record`<`string`, `unknown`\>, `unknown`, `unknown`, `unknown`, `unknown`, `unknown`\>\>
 
+#### Inherited from
+
+[Service](purista_core.Service.md).[commands](purista_core.Service.md#commands)
+
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:56](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L56)
+core/lib/types/core/Service/Service.impl.d.ts:26
+
+___
+
+### config
+
+• **config**: [`HttpServerConfig`](../modules/purista_httpserver.md#httpserverconfig)
+
+#### Defined in
+
+[httpserver/src/HttpServerService.impl.ts:30](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/httpserver/src/HttpServerService.impl.ts#L30)
 
 ___
 
@@ -104,13 +104,13 @@ ___
 
 The event bridge instance
 
-#### Overrides
+#### Inherited from
 
-[ServiceClass](purista_core.ServiceClass.md).[eventBridge](purista_core.ServiceClass.md#eventbridge)
+[Service](purista_core.Service.md).[eventBridge](purista_core.Service.md#eventbridge)
 
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:54](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L54)
+core/lib/types/core/Service/Service.impl.d.ts:24
 
 ___
 
@@ -121,13 +121,33 @@ ___
 General service info
 Service name, service version and some human readable description
 
-#### Overrides
+#### Inherited from
 
-[ServiceClass](purista_core.ServiceClass.md).[info](purista_core.ServiceClass.md#info)
+[Service](purista_core.Service.md).[info](purista_core.Service.md#info)
 
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:52](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L52)
+core/lib/types/core/Service/Service.impl.d.ts:22
+
+___
+
+### routeDefinitions
+
+• **routeDefinitions**: [`HttpExposedServiceMeta`](../modules/purista_core.md#httpexposedservicemeta)[] = `[]`
+
+#### Defined in
+
+[httpserver/src/HttpServerService.impl.ts:32](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/httpserver/src/HttpServerService.impl.ts#L32)
+
+___
+
+### server
+
+• `Optional` **server**: `FastifyInstance`<`Server`, `IncomingMessage`, `ServerResponse`, `FastifyLoggerInstance`, `FastifyTypeProviderDefault`\>
+
+#### Defined in
+
+[httpserver/src/HttpServerService.impl.ts:28](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/httpserver/src/HttpServerService.impl.ts#L28)
 
 ___
 
@@ -135,9 +155,13 @@ ___
 
 • `Protected` **serviceLogger**: [`Logger`](../modules/purista_core.md#logger)
 
+#### Inherited from
+
+[Service](purista_core.Service.md).[serviceLogger](purista_core.Service.md#servicelogger)
+
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:53](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L53)
+core/lib/types/core/Service/Service.impl.d.ts:23
 
 ___
 
@@ -145,9 +169,13 @@ ___
 
 • `Protected` **subscriptions**: `Map`<`string`, [`SubscriptionDefinition`](../modules/purista_core.md#subscriptiondefinition)<[`ServiceClass`](purista_core.ServiceClass.md), [`EBMessage`](../modules/purista_core.md#ebmessage), `unknown`\>\>
 
+#### Inherited from
+
+[Service](purista_core.Service.md).[subscriptions](purista_core.Service.md#subscriptions)
+
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:55](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L55)
+core/lib/types/core/Service/Service.impl.d.ts:25
 
 ## Accessors
 
@@ -161,9 +189,13 @@ Get service info
 
 [`ServiceInfoType`](../modules/purista_core.md#serviceinfotype)
 
+#### Inherited from
+
+Service.serviceInfo
+
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:104](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L104)
+core/lib/types/core/Service/Service.impl.d.ts:35
 
 ## Methods
 
@@ -177,13 +209,13 @@ Shut down the service
 
 `Promise`<`void`\>
 
-#### Overrides
+#### Inherited from
 
-[ServiceClass](purista_core.ServiceClass.md).[destroy](purista_core.ServiceClass.md#destroy)
+[Service](purista_core.Service.md).[destroy](purista_core.Service.md#destroy)
 
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:371](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L371)
+core/lib/types/core/Service/Service.impl.d.ts:58
 
 ___
 
@@ -210,11 +242,11 @@ ___
 
 #### Inherited from
 
-[ServiceClass](purista_core.ServiceClass.md).[emit](purista_core.ServiceClass.md#emit)
+[Service](purista_core.Service.md).[emit](purista_core.Service.md#emit)
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+core/lib/types/core/types/GenericEventEmitter.d.ts:13
 
 ___
 
@@ -234,9 +266,13 @@ Called when a command is received by the service
 
 `Promise`<`void`\>
 
+#### Inherited from
+
+[Service](purista_core.Service.md).[executeCommand](purista_core.Service.md#executecommand)
+
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:200](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L200)
+core/lib/types/core/Service/Service.impl.d.ts:54
 
 ___
 
@@ -255,9 +291,13 @@ ___
 
 `Promise`<`void`\>
 
+#### Inherited from
+
+[Service](purista_core.Service.md).[executeSubscription](purista_core.Service.md#executesubscription)
+
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:315](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L315)
+core/lib/types/core/Service/Service.impl.d.ts:56
 
 ___
 
@@ -296,9 +336,13 @@ ___
 
 `Promise`<`void`\>
 
+#### Inherited from
+
+[Service](purista_core.Service.md).[getEmitFunction](purista_core.Service.md#getemitfunction)
+
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:171](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L171)
+core/lib/types/core/Service/Service.impl.d.ts:47
 
 ___
 
@@ -332,9 +376,13 @@ ___
 
 `Promise`<`any`\>
 
+#### Inherited from
+
+[Service](purista_core.Service.md).[getInvokeFunction](purista_core.Service.md#getinvokefunction)
+
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:141](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L141)
+core/lib/types/core/Service/Service.impl.d.ts:46
 
 ___
 
@@ -355,9 +403,45 @@ Connect service to event bridge to receive commands and command responses
 
 `Promise`<`void`\>
 
+#### Inherited from
+
+[Service](purista_core.Service.md).[initializeEventbridgeConnect](purista_core.Service.md#initializeeventbridgeconnect)
+
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:111](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L111)
+core/lib/types/core/Service/Service.impl.d.ts:39
+
+___
+
+### invoke
+
+▸ **invoke**<`T`\>(`input`, `endpoint`): `Promise`<`T`\>
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `T` |
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `input` | `Object` |
+| `input.payload` | `Object` |
+| `input.payload.parameter` | `unknown` |
+| `input.payload.payload` | `unknown` |
+| `input.receiver` | [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) |
+| `input.traceId` | `string` |
+| `endpoint` | `string` |
+
+#### Returns
+
+`Promise`<`T`\>
+
+#### Defined in
+
+[httpserver/src/HttpServerService.impl.ts:95](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/httpserver/src/HttpServerService.impl.ts#L95)
 
 ___
 
@@ -376,7 +460,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | [`EventReceiver`](../modules/purista_core.internal.md#eventreceiver)<[`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`]\> |
+| `fn` | `EventReceiver`<[`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`]\> |
 
 #### Returns
 
@@ -384,11 +468,11 @@ ___
 
 #### Inherited from
 
-[ServiceClass](purista_core.ServiceClass.md).[off](purista_core.ServiceClass.md#off)
+[Service](purista_core.Service.md).[off](purista_core.Service.md#off)
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+core/lib/types/core/types/GenericEventEmitter.d.ts:12
 
 ___
 
@@ -407,7 +491,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | [`EventReceiver`](../modules/purista_core.internal.md#eventreceiver)<[`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`]\> |
+| `fn` | `EventReceiver`<[`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`]\> |
 
 #### Returns
 
@@ -415,11 +499,11 @@ ___
 
 #### Inherited from
 
-[ServiceClass](purista_core.ServiceClass.md).[on](purista_core.ServiceClass.md#on)
+[Service](purista_core.Service.md).[on](purista_core.Service.md#on)
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+core/lib/types/core/types/GenericEventEmitter.d.ts:11
 
 ___
 
@@ -439,13 +523,13 @@ Register a new command (function) for this service
 
 `Promise`<`void`\>
 
-#### Overrides
+#### Inherited from
 
-[ServiceClass](purista_core.ServiceClass.md).[registerCommand](purista_core.ServiceClass.md#registercommand)
+[Service](purista_core.Service.md).[registerCommand](purista_core.Service.md#registercommand)
 
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:294](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L294)
+core/lib/types/core/Service/Service.impl.d.ts:55
 
 ___
 
@@ -463,9 +547,13 @@ ___
 
 `Promise`<`void`\>
 
+#### Inherited from
+
+[Service](purista_core.Service.md).[registerSubscription](purista_core.Service.md#registersubscription)
+
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:346](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L346)
+core/lib/types/core/Service/Service.impl.d.ts:57
 
 ___
 
@@ -487,9 +575,13 @@ Broadcast service info message
 
 `Promise`<`Readonly`<[`EBMessage`](../modules/purista_core.md#ebmessage)\>\>
 
+#### Inherited from
+
+[Service](purista_core.Service.md).[sendServiceInfo](purista_core.Service.md#sendserviceinfo)
+
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:135](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L135)
+core/lib/types/core/Service/Service.impl.d.ts:45
 
 ___
 
@@ -505,8 +597,8 @@ It connects to the event bridge and subscribes to the topics that are in the sub
 
 #### Overrides
 
-[ServiceClass](purista_core.ServiceClass.md).[start](purista_core.ServiceClass.md#start)
+[Service](purista_core.Service.md).[start](purista_core.Service.md#start)
 
 #### Defined in
 
-[core/src/core/Service/Service.impl.ts:91](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/Service.impl.ts#L91)
+[httpserver/src/HttpServerService.impl.ts:66](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/httpserver/src/HttpServerService.impl.ts#L66)

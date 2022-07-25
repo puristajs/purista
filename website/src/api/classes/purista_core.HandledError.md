@@ -1,4 +1,4 @@
-[PURISTA API](../README.md) / [@purista/core](../modules/purista_core.md) / HandledError
+[PURISTA API - v1.3.1](../README.md) / [@purista/core](../modules/purista_core.md) / HandledError
 
 # Class: HandledError
 
@@ -53,7 +53,7 @@ Error.constructor
 
 #### Defined in
 
-[core/src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/17388e9/packages/core/src/core/HandledError.impl.ts#L10)
+[core/src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/HandledError.impl.ts#L10)
 
 ## Properties
 
@@ -77,19 +77,19 @@ ___
 
 ### getErrorResponse
 
-▸ **getErrorResponse**(): [`ErrorResponse`](../modules/purista_core.md#errorresponse)
+▸ **getErrorResponse**(): `Readonly`<[`ErrorResponse`](../modules/purista_core.md#errorresponse)\>
 
 Returns error response object
 
 #### Returns
 
-[`ErrorResponse`](../modules/purista_core.md#errorresponse)
+`Readonly`<[`ErrorResponse`](../modules/purista_core.md#errorresponse)\>
 
 ErrorResponse
 
 #### Defined in
 
-[core/src/core/HandledError.impl.ts:27](https://github.com/sebastianwessel/purista/blob/17388e9/packages/core/src/core/HandledError.impl.ts#L27)
+[core/src/core/HandledError.impl.ts:27](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/HandledError.impl.ts#L27)
 
 ___
 
@@ -107,7 +107,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[core/src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/17388e9/packages/core/src/core/HandledError.impl.ts#L42)
+[core/src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/HandledError.impl.ts#L42)
 
 ___
 
@@ -121,7 +121,7 @@ Create a error object from EBMessage error message
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `message` | [`CommandErrorResponse`](../modules/purista_core.md#commanderrorresponse) | CommandErrorResponse |
+| `message` | `Readonly`<[`CommandErrorResponse`](../modules/purista_core.md#commanderrorresponse)\> | CommandErrorResponse |
 
 #### Returns
 
@@ -131,4 +131,4 @@ HandledError
 
 #### Defined in
 
-[core/src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/17388e9/packages/core/src/core/HandledError.impl.ts#L19)
+[core/src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/HandledError.impl.ts#L19)

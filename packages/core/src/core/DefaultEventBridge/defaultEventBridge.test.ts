@@ -110,7 +110,7 @@ describe.skip('DefaultEventBridge', () => {
 
     expect(logger.stubs.trace.called).toBeTruthy()
 
-    const unsubscribe = spy(eventBridge, 'unsubscribe')
+    const unsubscribe = spy(eventBridge, 'unregisterSubscription')
 
     await eventBridge.unregisterSubscription(subscriber)
 

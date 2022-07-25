@@ -59,7 +59,7 @@ describe('prevent sensitive data to be logged in production', () => {
       },
     }
 
-    const result = getCleanedMessage(message, true) as Command
+    const result = getCleanedMessage(message, true) as Command<string, { all: string }>
 
     expect(result).not.toStrictEqual(message)
     expect(result.payload.payload).toBe('***removed from log***')
