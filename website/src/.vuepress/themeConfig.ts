@@ -52,13 +52,13 @@ export default hopeTheme({
             link: '/api/modules/purista_core.md',
           },
           {
-            text: '@purista/testhelper',
-            link: '/api/modules/purista_testhelper.md',
+            text: '@purista/httpserver',
+            link: '/api/modules/purista_httpserver.md',
           },
         ],
       },
     ],
-    '/api/modules': ['purista_core', 'purista_testhelper'],
+    '/api/modules': ['purista_core', 'purista_httpserver'],
   },
 
   footer:

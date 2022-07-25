@@ -24,6 +24,10 @@ import { OPEN_API_ROUTE_FUNCTIONS } from './routes'
 import { SUBSCRIPTIONS } from './subscriptions'
 import { HttpServerConfig } from './types'
 
+/**
+ * A simple http server based on fastify.
+ *
+ */
 export class HttpServerService extends Service {
   server?: FastifyInstance
 

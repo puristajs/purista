@@ -16,7 +16,7 @@ import {
  *
  * ```typescript
  * createTestCommandErrorResponseMsg(
- *    new HandledError(400,'invalid input)
+ *    new HandledError(400,'invalid input')
  * {
  *   principalId: 'abc-123-4567'
  * })

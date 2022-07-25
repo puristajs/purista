@@ -1,4 +1,4 @@
-[PURISTA API](../README.md) / [@purista/core](../modules/purista_core.md) / EventBridge
+[PURISTA API - v1.3.1](../README.md) / [@purista/core](../modules/purista_core.md) / EventBridge
 
 # Interface: EventBridge
 
@@ -20,9 +20,11 @@ The event bridge must implement this interface.
 ### Methods
 
 - [emit](purista_core.EventBridge.md#emit)
-- [subscribe](purista_core.EventBridge.md#subscribe)
-- [unsubscribe](purista_core.EventBridge.md#unsubscribe)
-- [unsubscribeService](purista_core.EventBridge.md#unsubscribeservice)
+- [invoke](purista_core.EventBridge.md#invoke)
+- [registerServiceFunction](purista_core.EventBridge.md#registerservicefunction)
+- [registerSubscription](purista_core.EventBridge.md#registersubscription)
+- [unregisterServiceFunction](purista_core.EventBridge.md#unregisterservicefunction)
+- [unregisterSubscription](purista_core.EventBridge.md#unregistersubscription)
 
 ## Properties
 
@@ -32,39 +34,67 @@ The event bridge must implement this interface.
 
 #### Defined in
 
-[core/src/core/types/EventBridge.ts:10](https://github.com/sebastianwessel/purista/blob/17388e9/packages/core/src/core/types/EventBridge.ts#L10)
+[core/src/core/types/EventBridge.ts:11](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/EventBridge.ts#L11)
 
 ## Methods
 
 ### emit
 
-▸ **emit**(`message`): `Promise`<`void`\>
+▸ **emit**(`message`): `Promise`<`Readonly`<[`EBMessage`](../modules/purista_core.md#ebmessage)\>\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `message` | [`EBMessage`](../modules/purista_core.md#ebmessage) |
+| `message` | `Omit`<[`EBMessage`](../modules/purista_core.md#ebmessage), ``"id"`` \| ``"timestamp"`` \| ``"instanceId"`` \| ``"correlationId"``\> |
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`<`Readonly`<[`EBMessage`](../modules/purista_core.md#ebmessage)\>\>
 
 #### Defined in
 
-[core/src/core/types/EventBridge.ts:11](https://github.com/sebastianwessel/purista/blob/17388e9/packages/core/src/core/types/EventBridge.ts#L11)
+[core/src/core/types/EventBridge.ts:12](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/EventBridge.ts#L12)
 
 ___
 
-### subscribe
+### invoke
 
-▸ **subscribe**(`subscription`): `Promise`<`string`\>
+▸ **invoke**<`T`\>(`input`, `ttl?`): `Promise`<`T`\>
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `T` |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `subscription` | [`Subscription`](../modules/purista_core.md#subscription) |
+| `input` | `Omit`<[`Command`](../modules/purista_core.md#command)<`unknown`, `unknown`\>, ``"id"`` \| ``"messageType"`` \| ``"timestamp"`` \| ``"instanceId"`` \| ``"correlationId"``\> |
+| `ttl?` | `number` |
+
+#### Returns
+
+`Promise`<`T`\>
+
+#### Defined in
+
+[core/src/core/types/EventBridge.ts:14](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/EventBridge.ts#L14)
+
+___
+
+### registerServiceFunction
+
+▸ **registerServiceFunction**(`address`, `cb`): `Promise`<`string`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `address` | [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) |
+| `cb` | (`message`: [`Command`](../modules/purista_core.md#command)<`unknown`, `unknown`\>) => `void` |
 
 #### Returns
 
@@ -72,19 +102,40 @@ ___
 
 #### Defined in
 
-[core/src/core/types/EventBridge.ts:12](https://github.com/sebastianwessel/purista/blob/17388e9/packages/core/src/core/types/EventBridge.ts#L12)
+[core/src/core/types/EventBridge.ts:19](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/EventBridge.ts#L19)
 
 ___
 
-### unsubscribe
+### registerSubscription
 
-▸ **unsubscribe**(`subscriptionId`): `Promise`<`void`\>
+▸ **registerSubscription**(`subscription`, `cb`): `Promise`<`string`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `subscriptionId` | `string` |
+| `subscription` | [`Subscription`](../modules/purista_core.md#subscription) |
+| `cb` | (`message`: [`EBMessage`](../modules/purista_core.md#ebmessage)) => `Promise`<`void`\> |
+
+#### Returns
+
+`Promise`<`string`\>
+
+#### Defined in
+
+[core/src/core/types/EventBridge.ts:22](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/EventBridge.ts#L22)
+
+___
+
+### unregisterServiceFunction
+
+▸ **unregisterServiceFunction**(`address`): `Promise`<`void`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `address` | [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) |
 
 #### Returns
 
@@ -92,19 +143,19 @@ ___
 
 #### Defined in
 
-[core/src/core/types/EventBridge.ts:13](https://github.com/sebastianwessel/purista/blob/17388e9/packages/core/src/core/types/EventBridge.ts#L13)
+[core/src/core/types/EventBridge.ts:20](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/EventBridge.ts#L20)
 
 ___
 
-### unsubscribeService
+### unregisterSubscription
 
-▸ **unsubscribeService**(`service`): `Promise`<`void`\>
+▸ **unregisterSubscription**(`address`): `Promise`<`void`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `service` | [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) |
+| `address` | [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) |
 
 #### Returns
 
@@ -112,4 +163,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/EventBridge.ts:15](https://github.com/sebastianwessel/purista/blob/17388e9/packages/core/src/core/types/EventBridge.ts#L15)
+[core/src/core/types/EventBridge.ts:23](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/EventBridge.ts#L23)
