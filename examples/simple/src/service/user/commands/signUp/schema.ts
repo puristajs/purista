@@ -13,7 +13,10 @@ export const transformOutputSchema = extendApi(z.string(), {
 })
 
 // define the input parameters
-export const inputParameterSchema = z.object({})
+export const inputParameterSchema = z.object({
+  search: z.string().optional(),
+  limit: z.string().optional(),
+})
 
 // define the input payload
 export const inputPayloadSchema = extendApi(

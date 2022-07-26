@@ -1,4 +1,4 @@
-import { EBMessage, EBMessageType } from '../../types'
+import { EBMessage, EBMessageType, InstanceId, PrincipalId } from '../../types'
 
 export type SubscriptionStorageEntry = {
   isMatchingMessageType(input: EBMessageType): boolean
@@ -9,5 +9,7 @@ export type SubscriptionStorageEntry = {
   isMatchingReceiverServiceVersion(input?: string): boolean
   isMatchingReceiverServiceTarget(input?: string): boolean
   isMatchingEventName(input?: string): boolean
+  isMatchingPrincipalId(input?: PrincipalId): boolean
+  isMatchingInstanceId(input?: InstanceId): boolean
   cb: (message: EBMessage) => Promise<void>
 }

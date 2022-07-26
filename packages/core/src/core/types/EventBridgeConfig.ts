@@ -1,11 +1,11 @@
 import { InstanceId } from './InstanceId'
 
 export type EventBridgeConfig = {
-  defaultTtl?: number
+  defaultCommandTimeout?: number
   instanceId?: InstanceId
 }
 
 export type EventBridgeEnsuredDefaults = {
-  defaultTtl: number
+  defaultCommandTimeout: number
   instanceId: InstanceId
 }

@@ -8,7 +8,7 @@ import {
   SubscriptionDefinitionBuilder,
   UnhandledError,
 } from '@purista/core'
-import type { RouteHandlerMethod } from 'fastify'
+import type { FastifyReply, FastifyRequest } from 'fastify'
 import posix from 'node:path/posix'
 
 import { extractHeaderValue } from '../../helper'
@@ -36,12 +36,17 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
 
     const contentType = data.http.contentType || 'application/json; charset=utf-8'
 
-    const getHandler = (): RouteHandlerMethod => {
-      const handler: RouteHandlerMethod = async (request, reply) => {
+    const getHandler = () => {
+      return async (request: FastifyRequest, reply: FastifyReply, params: Record<string, unknown>) => {
         try {
+          const fastifyParams = request.params as Record<string, unknown>
+
+          delete fastifyParams['*']
+
           const parameter = {
             ...(request.query as Record<string, unknown>),
-            ...(request.params as Record<string, unknown>),
+            ...fastifyParams,
+            ...params,
           }
           const traceId = extractHeaderValue(
             request.headers,
@@ -58,25 +63,19 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
           )
           reply.header('content-type', contentType)
 
-          return response
+          reply.send(response)
         } catch (err) {
           reply.header('content-type', 'application/json; charset=utf-8')
 
           if (err instanceof HandledError || err instanceof UnhandledError) {
-            return err.getErrorResponse()
+            reply.send(err.getErrorResponse())
           }
-          return new UnhandledError().getErrorResponse()
+          reply.send(new UnhandledError().getErrorResponse())
         }
       }
-
-      return handler
     }
 
-    this.server?.route({
-      method,
-      url,
-      handler: getHandler(),
-    })
+    this.routes.add(method, url, getHandler())
 
     logger.debug('add ', method, url)
   })

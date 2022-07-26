@@ -60,8 +60,10 @@ const main = async () => {
   // initialize the logging
   const baseLogger = initLogger('debug')
 
-  // create and init our eventbridge
+  // create eventbridge
   const eventBridge = new DefaultEventBridge(baseLogger)
+  // start eventbridge (e.g. connect to broker)
+  await eventBridge.start()
 
   // create and init a webserver
   const httpServerService = new HttpServerService(baseLogger, eventBridge)

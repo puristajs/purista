@@ -55,7 +55,7 @@ describe.skip('DefaultEventBridge', () => {
 
     const eventBridge = new DefaultEventBridge(logger, config)
 
-    expect(eventBridge.defaultTtl).toBe(config.defaultTtl)
+    expect(eventBridge.defaultCommandTimeout).toBe(config.defaultCommandTimeout)
   })
 
   it('routes messages to subscriptions', async () => {
@@ -64,6 +64,7 @@ describe.skip('DefaultEventBridge', () => {
     const logger = getLoggerMock()
 
     const eventBridge = new DefaultEventBridge(logger.mock, config)
+    await eventBridge.start()
 
     const callback = stub().resolves()
 
@@ -149,6 +150,7 @@ describe.skip('DefaultEventBridge', () => {
     } as Logger
 
     const eventBridge = new DefaultEventBridge(logger, config)
+    await eventBridge.start()
 
     const throwedError = new Error('Some Error')
     const callback = stub().rejects(throwedError)
@@ -209,6 +211,7 @@ describe.skip('DefaultEventBridge', () => {
     } as Logger
 
     const eventBridge = new DefaultEventBridge(logger, config)
+    await eventBridge.start()
 
     const callback = stub().resolves()
 

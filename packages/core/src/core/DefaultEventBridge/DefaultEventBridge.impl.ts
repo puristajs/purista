@@ -13,6 +13,8 @@ import {
 } from '../helper'
 import {
   Command,
+  CommandErrorResponse,
+  CommandSuccessResponse,
   EBMessage,
   EBMessageAddress,
   EBMessageId,
@@ -33,12 +35,7 @@ import {
 import { UnhandledError } from '../UnhandledError.impl'
 import { getNewSubscriptionStorageEntry } from './getNewSubscriptionStorageEntry.impl'
 import { isMessageMatchingSubscription } from './isMessageMatchingSubscription.impl'
-import { SubscriptionStorageEntry } from './types'
-
-type PendigInvocation = {
-  resolve(responsePayload: unknown): void
-  reject(error: UnhandledError | HandledError): void
-}
+import { PendigInvocation, SubscriptionStorageEntry } from './types'
 
 /**
  * Simple implementation of some simple in-memory event bridge.
@@ -55,7 +52,11 @@ export class DefaultEventBridge implements EventBridge {
     },
   })
 
-  protected serviceFunctions = new Map<string, (message: Command) => void>()
+  protected serviceFunctions = new Map<
+    string,
+    (message: Command) => Promise<CommandSuccessResponse | CommandErrorResponse>
+  >()
+
   protected pendingInvocations = new Map<EBMessageId, PendigInvocation>()
 
   protected subscriptions = new Map<string, SubscriptionStorageEntry>()
@@ -65,7 +66,9 @@ export class DefaultEventBridge implements EventBridge {
       ...conf,
     }
     this.log = baseLogger.getChildLogger({ name: 'eventBridge' })
+  }
 
+  async start() {
     const write = (message: EBMessage, _encoding: string, next: (error?: Error) => void) => {
       try {
         if (isCommand(message)) {
@@ -74,7 +77,10 @@ export class DefaultEventBridge implements EventBridge {
             this.log.error('received invalid command', getCleanedMessage(message))
             return next(new Error('received invalid command'))
           }
-          mapEntry(message)
+
+          mapEntry(message).then((result) => {
+            this.emit(result)
+          })
           return next()
         }
 
@@ -121,11 +127,11 @@ export class DefaultEventBridge implements EventBridge {
   }
 
   /**
-   * Get default time out.
+   * Get default command time out.
    * It is the maximum time a command should be responded.
    */
-  get defaultTtl() {
-    return this.config.defaultTtl
+  get defaultCommandTimeout() {
+    return this.config.defaultCommandTimeout
   }
 
   /**
@@ -142,7 +148,10 @@ export class DefaultEventBridge implements EventBridge {
    * @param cb the function to call if a matching command message arrives
    * @returns the id of command function queue
    */
-  async registerServiceFunction(address: EBMessageAddress, cb: (message: Command) => void): Promise<string> {
+  async registerServiceFunction(
+    address: EBMessageAddress,
+    cb: (message: Command) => Promise<CommandSuccessResponse<unknown> | CommandErrorResponse>,
+  ): Promise<string> {
     const queueName = getCommandQueueName(address)
     this.serviceFunctions.set(queueName, cb)
     return queueName
@@ -176,11 +185,11 @@ export class DefaultEventBridge implements EventBridge {
     return new Promise((resolve, reject) => {
       try {
         const msg = Object.freeze({
-          ...message,
           id: getNewEBMessageId(),
           timestamp: Date.now(),
           traceId: message.traceId || getNewTraceId(),
           instanceId: this.config.instanceId,
+          ...message,
         })
 
         this.readStream.push(msg)
@@ -193,18 +202,18 @@ export class DefaultEventBridge implements EventBridge {
 
   async invoke<T>(
     input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
-    ttl = this.config.defaultTtl,
+    commandTimeout = this.config.defaultCommandTimeout,
   ): Promise<T> {
     const correlationId = getNewCorrelationId()
 
     const command = Object.freeze({
-      ...input,
       id: getNewEBMessageId(),
       instanceId: this.instanceId,
       correlationId: getNewCorrelationId(),
       timestamp: Date.now(),
       messageType: EBMessageType.Command,
       traceId: input.traceId || getNewTraceId(),
+      ...input,
     })
 
     const removeFromPending = () => {
@@ -256,6 +265,6 @@ export class DefaultEventBridge implements EventBridge {
     })
 
     this.emit(command)
-    return Promise.race([executionPromise, getTimeoutPromise(ttl, command.traceId)])
+    return Promise.race([executionPromise, getTimeoutPromise(commandTimeout, command.traceId)])
   }
 }

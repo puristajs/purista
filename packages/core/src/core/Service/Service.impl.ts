@@ -208,9 +208,7 @@ export class Service extends ServiceClass {
           requestId: traceId,
         })
         .error('received invalid command', getCleanedMessage(message))
-      const errorResponse = createErrorResponse(message, StatusCode.NotImplemented)
-      await this.eventBridge.emit(errorResponse)
-      return
+      return createErrorResponse(message, StatusCode.NotImplemented)
     }
 
     const logger = this.serviceLogger.getChildLogger({
@@ -276,18 +274,16 @@ export class Service extends ServiceClass {
         payload = command.hooks.transformOutput.transformOutputSchema.parse(payload)
       }
 
-      const successResponse = createSuccessResponse(message, payload, command.eventName)
-      await this.eventBridge.emit(successResponse)
+      return createSuccessResponse(message, payload, command.eventName)
     } catch (error) {
       if (error instanceof HandledError) {
-        await this.eventBridge.emit(createErrorResponse(message, error.errorCode, error))
-        return
+        return createErrorResponse(message, error.errorCode, error)
       }
 
       this.emit('unhandled-function-error', { functionName: command.commandName, error, traceId })
 
       logger.error('executeCommand unhandled error', { error, message: getCleanedMessage(message) })
-      await this.eventBridge.emit(createErrorResponse(message, StatusCode.InternalServerError, error))
+      return createErrorResponse(message, StatusCode.InternalServerError, error)
     }
   }
 
@@ -340,7 +336,12 @@ export class Service extends ServiceClass {
     }
 
     const call = subscription.call.bind(this, context)
-    await call(message.payload)
+    try {
+      await call(message.payload)
+    } catch (error) {
+      this.serviceLogger.error(error)
+      this.emit('unhandled-subscription-error', { subscriptionName, error, traceId })
+    }
   }
 
   protected async registerSubscription(subscriptionDefinition: SubscriptionDefinition): Promise<void> {
@@ -361,8 +362,10 @@ export class Service extends ServiceClass {
         serviceVersion: this.info.serviceVersion,
         serviceTarget: subscriptionDefinition.subscriptionName,
       },
+      settings: subscriptionDefinition.settings,
     }
 
+    // TODO check this binding for function:
     await this.eventBridge.registerSubscription(subscription, (message: EBMessage) =>
       this.executeSubscription(message, subscriptionDefinition.subscriptionName),
     )
@@ -379,6 +382,16 @@ export class Service extends ServiceClass {
           serviceName: this.info.serviceName,
           serviceVersion: this.info.serviceVersion,
           serviceTarget: functionDefinition.commandName,
+        }),
+      )
+    })
+
+    this.subscriptions.forEach((subscriptionDefinition) => {
+      functionUnregisterProms.push(
+        this.eventBridge.unregisterSubscription({
+          serviceName: this.info.serviceName,
+          serviceVersion: this.info.serviceVersion,
+          serviceTarget: subscriptionDefinition.subscriptionName,
         }),
       )
     })

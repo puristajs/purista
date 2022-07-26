@@ -13,15 +13,17 @@ export const getEventBridgeMock = (): { mock: EventBridge; stubs: Record<string,
   const unregisterServiceFunction = stub()
   const unregisterSubscription = stub()
   const invoke = stub()
+  const start = stub()
 
   const mock: EventBridge = {
-    defaultTtl: 30000,
+    defaultCommandTimeout: 30000,
     emit,
     registerServiceFunction,
     registerSubscription,
     unregisterServiceFunction,
     unregisterSubscription,
     invoke,
+    start,
   }
 
   return {
@@ -32,6 +34,7 @@ export const getEventBridgeMock = (): { mock: EventBridge; stubs: Record<string,
       unregisterServiceFunction,
       unregisterSubscription,
       invoke,
+      start,
     },
     mock,
   }

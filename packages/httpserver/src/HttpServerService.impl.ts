@@ -16,6 +16,7 @@ import fastify, { FastifyInstance } from 'fastify'
 import { posix } from 'path'
 import qs from 'qs'
 import * as swaggerUi from 'swagger-ui-dist'
+import Trouter, { Methods } from 'trouter'
 import merge from 'ts-deepmerge'
 
 import { COMMANDS } from './commands'
@@ -34,6 +35,8 @@ export class HttpServerService extends Service {
   config: HttpServerConfig
 
   routeDefinitions: HttpExposedServiceMeta[] = []
+
+  routes = new Trouter()
 
   /**
    * Create a new instance of the HttpServer class
@@ -68,6 +71,21 @@ export class HttpServerService extends Service {
   }
 
   async start(): Promise<void> {
+    const apiBasePath = posix.join(this.config.apiMountPath || 'api', '/v*')
+    this.server?.all(apiBasePath, async (request, reply) => {
+      const match = (request.params as Record<string, string>)['*']
+      const path = posix.join(this.config.apiMountPath || 'api', `v${match}`)
+
+      const route = this.routes.find(request.method as Methods, path)
+      if (!route.handlers.length) {
+        this.serviceLogger.debug('Route not found', request.method, request.url)
+        reply.code(StatusCode.NotFound)
+        return new HandledError(StatusCode.NotFound).getErrorResponse()
+      }
+
+      await route.handlers[0](request, reply, route.params)
+    })
+
     if (this.config.openApi?.enabled) {
       const apiUrl = this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath
       if (!apiUrl) {

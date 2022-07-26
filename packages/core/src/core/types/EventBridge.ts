@@ -1,4 +1,4 @@
-import { Command } from './commandType'
+import { Command, CommandErrorResponse, CommandSuccessResponse } from './commandType'
 import type { EBMessage } from './EBMessage'
 import type { EBMessageAddress } from './EBMessageAddress'
 import type { Subscription } from './subscription'
@@ -8,7 +8,9 @@ import type { Subscription } from './subscription'
  * The event bridge must implement this interface.
  */
 export interface EventBridge {
-  readonly defaultTtl: number
+  readonly defaultCommandTimeout: number
+
+  start(): Promise<void>
   emit(message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>): Promise<Readonly<EBMessage>>
 
   invoke<T>(
@@ -16,7 +18,14 @@ export interface EventBridge {
     ttl?: number,
   ): Promise<T>
 
-  registerServiceFunction(address: EBMessageAddress, cb: (message: Command) => void): Promise<string>
+  registerServiceFunction(
+    address: EBMessageAddress,
+    cb: (
+      message: Command,
+    ) => Promise<
+      Readonly<Omit<CommandSuccessResponse, 'instanceId'>> | Readonly<Omit<CommandErrorResponse, 'instanceId'>>
+    >,
+  ): Promise<string>
   unregisterServiceFunction(address: EBMessageAddress): Promise<void>
 
   registerSubscription(subscription: Subscription, cb: (message: EBMessage) => Promise<void>): Promise<string>
