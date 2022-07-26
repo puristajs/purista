@@ -1,7 +1,7 @@
 {
-  "name": "@purista/httpserver",
+  "name": "@purista/amqpbridge",
   "version": "1.3.1",
-  "description": "Simple http server service based on fastify for PURISTA backend framework",
+  "description": "rabbitMQ eventbridge for PURISTA backend framework",
   "homepage": "https://purista.dev",
   "repository": {
     "type": "git",
@@ -45,23 +45,14 @@
     "@purista/core": "*",
     "@types/jest": "^27.x",
     "@types/node": "^16.11.7",
-    "@types/qs": "^6.9.7",
     "@types/sinon": "^10.x",
-    "@types/swagger-ui-dist": "^3.30.1",
+    "@types/amqplib": "^0.8.2",
     "jest": "^28.x",
     "sinon": "^14.x"
   },
   "dependencies": {
-    "@fastify/compress": "^6.1.0",
-    "@fastify/helmet": "^9.1.0",
-    "@fastify/static": "^6.4.0",
     "@purista/core": "*",
-    "fastify": "^4.2.1",
-    "openapi3-ts": "^2.0.2",
-    "qs": "^6.11.0",
-    "swagger-ui-dist": "^4.13.0",
-    "trouter": "^3.2.0",
-    "ts-deepmerge": "^2.0.4"
+    "amqplib":"^0.10.0"
   },
   "peerDependenciesMeta": {}
 }

@@ -3,7 +3,7 @@ import { EventBridgeEnsuredDefaults } from '../types'
 
 export const getDefaultEventBridgeConfig = (): EventBridgeEnsuredDefaults => {
   const defaultConfig: EventBridgeEnsuredDefaults = {
-    defaultTtl: 30000,
+    defaultCommandTimeout: 30000,
     instanceId: getNewInstanceId(),
   }
 

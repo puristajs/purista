@@ -55,10 +55,14 @@ export default hopeTheme({
             text: '@purista/httpserver',
             link: '/api/modules/purista_httpserver.md',
           },
+          {
+            text: '@purista/amqpbridge',
+            link: '/api/modules/purista_amqpbridge.md',
+          },
         ],
       },
     ],
-    '/api/modules': ['purista_core', 'purista_httpserver'],
+    '/api/modules': ['purista_core', 'purista_httpserver', 'purista_amqpbridge.md'],
   },
 
   footer:

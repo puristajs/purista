@@ -1,4 +1,12 @@
-import type { EBMessage, EBMessageType, ServiceClass, SubscriptionDefinition, SubscriptionFunction } from '../core'
+import type {
+  EBMessage,
+  EBMessageType,
+  InstanceId,
+  PrincipalId,
+  ServiceClass,
+  SubscriptionDefinition,
+  SubscriptionFunction,
+} from '../core'
 
 /**
  * Subscription definition builder is a helper to create and define a subscriptions for a service.
@@ -29,6 +37,12 @@ export class SubscriptionDefinitionBuilder<
 
   private eventName?: string
 
+  private principalId?: PrincipalId
+
+  private instanceId?: InstanceId
+
+  private settings = { durable: true }
+
   // eslint-disable-next-line no-useless-constructor
   constructor(private subscriptionName: string, private subscriptionDescription: string) {}
 
@@ -39,6 +53,31 @@ export class SubscriptionDefinitionBuilder<
    */
   subscribeToEvent(eventName: string) {
     this.eventName = eventName
+    return this
+  }
+
+  /**
+   * Filter messages only from instance id
+   * @param instanceId
+   * @returns
+   */
+  onlyInstanceId(instanceId: InstanceId) {
+    this.instanceId = instanceId
+    return this
+  }
+
+  /**
+   * Filter messages only for principalId
+   * @param principalId
+   * @returns
+   */
+  onlyPrincipalId(principalId: PrincipalId) {
+    this.principalId = principalId
+    return this
+  }
+
+  setDurable(durable: boolean) {
+    this.settings.durable = durable
     return this
   }
 
@@ -159,6 +198,9 @@ export class SubscriptionDefinitionBuilder<
       call: this.fn,
       messageType: this.messageType,
       eventName: this.eventName,
+      principalId: this.principalId,
+      instanceId: this.instanceId,
+      settings: this.settings,
     }
 
     return subscription

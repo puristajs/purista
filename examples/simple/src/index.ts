@@ -1,3 +1,4 @@
+import { RabbitMQEventBridge } from '@purista/amqpbridge'
 import { DefaultEventBridge, initLogger } from '@purista/core'
 import { HttpServerService } from '@purista/httpserver'
 
@@ -9,7 +10,8 @@ const main = async () => {
   const baseLogger = initLogger('debug')
 
   // create and init our eventbridge
-  const eventBridge = new DefaultEventBridge(baseLogger)
+  const eventBridge = new RabbitMQEventBridge(baseLogger)
+  await eventBridge.start()
 
   // create and init a webserver
   const httpServerService = new HttpServerService(baseLogger, eventBridge, config)

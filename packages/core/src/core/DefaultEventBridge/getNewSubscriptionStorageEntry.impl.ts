@@ -13,8 +13,18 @@ export const getNewSubscriptionStorageEntry = (
     isMatchingReceiverServiceName: () => true,
     isMatchingReceiverServiceVersion: () => true,
     isMatchingReceiverServiceTarget: () => true,
+    isMatchingPrincipalId: () => true,
+    isMatchingInstanceId: () => true,
     isMatchingEventName: () => true,
     cb,
+  }
+
+  if (subscription.principalId) {
+    entry.isMatchingPrincipalId = (input: EBMessageType) => input === subscription.principalId
+  }
+
+  if (subscription.instanceId) {
+    entry.isMatchingInstanceId = (input: EBMessageType) => input === subscription.instanceId
   }
 
   if (subscription.messageType) {

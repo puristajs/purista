@@ -99,9 +99,10 @@ export default new FunctionDefinitionBuilder<UserService>(
   .transformOutput(transformOutputSchema, async function (_context, payload, _params) {
     return JSON.stringify(payload)
   })
-  .setFunction(async function ({ logger, message, invoke }, payload, _param) {
+  .setFunction(async function ({ logger, message, invoke }, payload, parameter) {
     logger.debug(payload.test)
     logger.debug(message.payload.payload)
+    logger.debug('function input parameter', parameter)
 
     const invokeResponse = await invoke<string>(
       {
