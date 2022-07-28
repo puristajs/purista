@@ -27,7 +27,7 @@ export const userSignUpBuilder = UserServiceBuilder.getFunctionBuilder(
   .addInputSchema(inputPayloadSchema)
   .addParameterSchema(inputParameterSchema)
   .addOutputSchema(outputPayloadSchema)
-  .exposeAsHttpEndpoint('POST', '/sign-up', 'text/plain')
+  .exposeAsHttpEndpoint('POST', '/sign-up')
   .disableHttpSecurity(true)
   // optional: add tags for openApi (swagger)
   .addTags('User')
