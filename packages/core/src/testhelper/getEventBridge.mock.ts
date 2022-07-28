@@ -7,6 +7,7 @@ import { EventBridge } from '../core'
  * @returns EventBridge mocked
  */
 export const getEventBridgeMock = (): { mock: EventBridge; stubs: Record<string, SinonStub> } => {
+  const emitMessage = stub()
   const emit = stub()
   const registerServiceFunction = stub()
   const registerSubscription = stub()
@@ -15,8 +16,9 @@ export const getEventBridgeMock = (): { mock: EventBridge; stubs: Record<string,
   const invoke = stub()
   const start = stub()
 
-  const mock: EventBridge = {
+  const mock = {
     defaultCommandTimeout: 30000,
+    emitMessage,
     emit,
     registerServiceFunction,
     registerSubscription,
@@ -24,10 +26,11 @@ export const getEventBridgeMock = (): { mock: EventBridge; stubs: Record<string,
     unregisterSubscription,
     invoke,
     start,
-  }
+  } as unknown as EventBridge
 
   return {
     stubs: {
+      emitMessage,
       emit,
       registerServiceFunction,
       registerSubscription,
