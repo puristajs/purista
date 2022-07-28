@@ -19,6 +19,7 @@ import {
   EBMessageType,
   EventBridge,
   InfoMessageType,
+  IServiceClass,
   Logger,
   ServiceClass,
   ServiceInfoType,
@@ -48,7 +49,7 @@ import { ServiceInfoValidator } from './ServiceInfoValidator'
  * }
  * ```
  */
-export class Service extends ServiceClass {
+export class Service<ConfigType = unknown | undefined> extends ServiceClass<ConfigType> implements IServiceClass {
   protected info: ServiceInfoType
   protected serviceLogger: Logger
   protected eventBridge: EventBridge
@@ -61,6 +62,7 @@ export class Service extends ServiceClass {
     eventBridge: EventBridge,
     private commandFunctions: CommandDefinitionList<any>,
     private subscriptionList: SubscriptionDefinitionList<any>,
+    public config: ConfigType,
   ) {
     super()
     this.info = new Proxy(
@@ -77,8 +79,8 @@ export class Service extends ServiceClass {
     this.info.serviceVersion = info.serviceVersion
 
     this.serviceLogger = baseLogger.getChildLogger({
-      prefix: [this.info.serviceName, this.info.serviceVersion],
-      name: `${this.info.serviceName} V${this.info.serviceVersion}`,
+      serviceName: this.info.serviceName,
+      serviceVersion: this.info.serviceVersion,
     })
     this.serviceLogger.debug(`creating ${this.info.serviceName} ${this.info.serviceVersion}`)
 
@@ -204,17 +206,19 @@ export class Service extends ServiceClass {
     if (!command) {
       this.serviceLogger
         .getChildLogger({
-          name: `${this.info.serviceName} V${this.info.serviceVersion} unknown`,
-          requestId: traceId,
+          serviceName: this.info.serviceName,
+          serviceVersion: this.info.serviceVersion,
+          traceId,
         })
         .error('received invalid command', getCleanedMessage(message))
       return createErrorResponse(message, StatusCode.NotImplemented)
     }
 
     const logger = this.serviceLogger.getChildLogger({
-      prefix: [command.commandName],
-      name: `${this.info.serviceName} V${this.info.serviceVersion} ${command.commandName}`,
-      requestId: traceId,
+      serviceName: this.info.serviceName,
+      serviceVersion: this.info.serviceVersion,
+      serviceTarget: command.commandName,
+      traceId,
     })
 
     try {
@@ -315,17 +319,20 @@ export class Service extends ServiceClass {
     if (!subscription) {
       this.serviceLogger
         .getChildLogger({
-          name: `${this.info.serviceName} V${this.info.serviceVersion} ${subscriptionName}`,
-          requestId: traceId,
+          serviceName: this.info.serviceName,
+          serviceVersion: this.info.serviceVersion,
+          serviceTarget: subscriptionName,
+          traceId,
         })
         .error('received message for invalid subscription', getCleanedMessage(message))
       return
     }
 
     const logger = this.serviceLogger.getChildLogger({
-      prefix: [subscription?.subscriptionName],
-      name: `${this.info.serviceName} V${this.info.serviceVersion} ${subscription?.subscriptionName}`,
-      requestId: traceId,
+      serviceName: this.info.serviceName,
+      serviceVersion: this.info.serviceVersion,
+      serviceTarget: subscription?.subscriptionName,
+      traceId,
     })
 
     const context: SubscriptionContext = {

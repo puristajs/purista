@@ -1,1 +1,1 @@
-export type LogLevelName = 'info' | 'error' | 'warn' | 'debug' | 'trace'
+export type LogLevelName = 'info' | 'error' | 'warn' | 'debug' | 'trace' | 'fatal'
