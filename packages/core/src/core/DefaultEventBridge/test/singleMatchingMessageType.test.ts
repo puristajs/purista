@@ -1,6 +1,6 @@
 import { stub } from 'sinon'
 
-import { initLogger } from '../../initLogger.impl'
+import { getLoggerMock } from '../../../testhelper'
 import { Command, EBMessage, EBMessageType, Subscription } from '../../types'
 import { getNewSubscriptionStorageEntry } from '../getNewSubscriptionStorageEntry.impl'
 import { isMessageMatchingSubscription } from '../isMessageMatchingSubscription.impl'
@@ -48,6 +48,9 @@ describe('subscription matching for message type', () => {
     const subscription: Subscription = {
       messageType: EBMessageType.Command,
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     const message: Command = {
@@ -66,7 +69,7 @@ describe('subscription matching for message type', () => {
 
     const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
-    const result = isMessageMatchingSubscription(initLogger('info'), message, storageEntry)
+    const result = isMessageMatchingSubscription(getLoggerMock().mock, message, storageEntry)
 
     expect(result).toBeTruthy()
   })
@@ -75,11 +78,14 @@ describe('subscription matching for message type', () => {
     const subscription: Subscription = {
       messageType: EBMessageType.InfoServiceDrain,
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
-    const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
+    const result = isMessageMatchingSubscription(getLoggerMock().mock, getTestMessage(), storageEntry)
 
     expect(result).toBeFalsy()
   })
@@ -88,6 +94,9 @@ describe('subscription matching for message type', () => {
     const subscription: Subscription = {
       sender,
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     const message = getTestMessage()
@@ -95,7 +104,7 @@ describe('subscription matching for message type', () => {
 
     const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
-    const result = isMessageMatchingSubscription(initLogger('info'), message, storageEntry)
+    const result = isMessageMatchingSubscription(getLoggerMock().mock, message, storageEntry)
 
     expect(result).toBeFalsy()
   })

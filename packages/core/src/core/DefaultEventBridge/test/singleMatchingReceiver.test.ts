@@ -1,6 +1,6 @@
 import { stub } from 'sinon'
 
-import { initLogger } from '../../initLogger.impl'
+import { getLoggerMock } from '../../../testhelper'
 import { EBMessage, EBMessageType, Subscription } from '../../types'
 import { getNewSubscriptionStorageEntry } from '../getNewSubscriptionStorageEntry.impl'
 import { isMessageMatchingSubscription } from '../isMessageMatchingSubscription.impl'
@@ -50,11 +50,14 @@ describe('subscription matching for sender', () => {
         serviceName: receiver.serviceName,
       },
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
-    const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
+    const result = isMessageMatchingSubscription(getLoggerMock().mock, getTestMessage(), storageEntry)
 
     expect(result).toBeTruthy()
   })
@@ -65,11 +68,14 @@ describe('subscription matching for sender', () => {
         serviceName: 'differentService',
       },
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
-    const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
+    const result = isMessageMatchingSubscription(getLoggerMock().mock, getTestMessage(), storageEntry)
 
     expect(result).toBeFalsy()
   })
@@ -80,11 +86,14 @@ describe('subscription matching for sender', () => {
         serviceVersion: receiver.serviceVersion,
       },
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
-    const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
+    const result = isMessageMatchingSubscription(getLoggerMock().mock, getTestMessage(), storageEntry)
 
     expect(result).toBeTruthy()
   })
@@ -95,11 +104,14 @@ describe('subscription matching for sender', () => {
         serviceVersion: '9',
       },
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
-    const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
+    const result = isMessageMatchingSubscription(getLoggerMock().mock, getTestMessage(), storageEntry)
 
     expect(result).toBeFalsy()
   })
@@ -110,11 +122,14 @@ describe('subscription matching for sender', () => {
         serviceTarget: receiver.serviceTarget,
       },
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
-    const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
+    const result = isMessageMatchingSubscription(getLoggerMock().mock, getTestMessage(), storageEntry)
 
     expect(result).toBeTruthy()
   })
@@ -125,11 +140,14 @@ describe('subscription matching for sender', () => {
         serviceTarget: 'differentTarget',
       },
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
-    const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
+    const result = isMessageMatchingSubscription(getLoggerMock().mock, getTestMessage(), storageEntry)
 
     expect(result).toBeFalsy()
   })

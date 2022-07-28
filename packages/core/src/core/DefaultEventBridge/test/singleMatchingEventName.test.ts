@@ -1,6 +1,6 @@
 import { stub } from 'sinon'
 
-import { initLogger } from '../../initLogger.impl'
+import { getLoggerMock } from '../../../testhelper'
 import { EBMessage, EBMessageType, Subscription } from '../../types'
 import { getNewSubscriptionStorageEntry } from '../getNewSubscriptionStorageEntry.impl'
 import { isMessageMatchingSubscription } from '../isMessageMatchingSubscription.impl'
@@ -48,11 +48,14 @@ describe('subscription matching for even name', () => {
     const subscription: Subscription = {
       eventName,
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
-    const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
+    const result = isMessageMatchingSubscription(getLoggerMock().mock, getTestMessage(), storageEntry)
 
     expect(result).toBeTruthy()
   })
@@ -61,11 +64,14 @@ describe('subscription matching for even name', () => {
     const subscription: Subscription = {
       eventName: 'otherEventName',
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
 
-    const result = isMessageMatchingSubscription(initLogger('info'), getTestMessage(), storageEntry)
+    const result = isMessageMatchingSubscription(getLoggerMock().mock, getTestMessage(), storageEntry)
 
     expect(result).toBeFalsy()
   })
