@@ -2,7 +2,7 @@ import { assert, match, spy, stub } from 'sinon'
 
 import { getLoggerMock } from '../../testhelper'
 import { getDefaultEventBridgeConfig } from '../config'
-import { Command, EBMessageType, InfoMessage, Logger, Subscription } from '../types'
+import { Command, EBMessageType, InfoMessage, Subscription } from '../types'
 import { DefaultEventBridge } from './DefaultEventBridge.impl'
 
 describe.skip('DefaultEventBridge', () => {
@@ -35,25 +35,9 @@ describe.skip('DefaultEventBridge', () => {
   it('creates a DefaultEventBridge', () => {
     const config = getDefaultEventBridgeConfig()
 
-    const trace = stub()
-    const error = stub()
-    const warn = stub()
-    const info = stub()
-    const debug = stub()
+    const logger = getLoggerMock()
 
-    const logger = {
-      getChildLogger: () => {
-        return {
-          info,
-          debug,
-          trace,
-          error,
-          warn,
-        } as unknown as Logger
-      },
-    } as Logger
-
-    const eventBridge = new DefaultEventBridge(logger, config)
+    const eventBridge = new DefaultEventBridge(logger.mock, config)
 
     expect(eventBridge.defaultCommandTimeout).toBe(config.defaultCommandTimeout)
   })
@@ -71,6 +55,9 @@ describe.skip('DefaultEventBridge', () => {
     const subscription: Subscription = {
       sender,
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     const otherCall = stub().resolves()
@@ -79,6 +66,9 @@ describe.skip('DefaultEventBridge', () => {
         serviceName: 'SomeService',
       },
       subscriber: otherSubscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     eventBridge.registerSubscription(subscription, callback)
@@ -131,25 +121,9 @@ describe.skip('DefaultEventBridge', () => {
   it('does not throw and logs error', async () => {
     const config = getDefaultEventBridgeConfig()
 
-    const trace = stub()
-    const error = stub()
-    const warn = stub()
-    const info = stub()
-    const debug = stub()
+    const logger = getLoggerMock()
 
-    const logger = {
-      getChildLogger: () => {
-        return {
-          info,
-          debug,
-          trace,
-          error,
-          warn,
-        } as unknown as Logger
-      },
-    } as Logger
-
-    const eventBridge = new DefaultEventBridge(logger, config)
+    const eventBridge = new DefaultEventBridge(logger.mock, config)
     await eventBridge.start()
 
     const throwedError = new Error('Some Error')
@@ -158,6 +132,9 @@ describe.skip('DefaultEventBridge', () => {
     const subscription: Subscription = {
       sender,
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     eventBridge.registerSubscription(subscription, callback)
@@ -185,32 +162,16 @@ describe.skip('DefaultEventBridge', () => {
     expect(callback.callCount).toBe(1)
     assert.calledWith(callback, match.string, message)
 
-    expect(error.called).toBeTruthy()
-    assert.calledWith(error, match.string, throwedError, match.object)
+    expect(logger.stubs.error.called).toBeTruthy()
+    assert.calledWith(logger.stubs.error, match.string, throwedError, match.object)
   })
 
   it('traces info messages', async () => {
     const config = getDefaultEventBridgeConfig()
 
-    const trace = stub()
-    const error = stub()
-    const warn = stub()
-    const info = stub()
-    const debug = stub()
+    const logger = getLoggerMock()
 
-    const logger = {
-      getChildLogger: () => {
-        return {
-          info,
-          debug,
-          trace,
-          error,
-          warn,
-        } as unknown as Logger
-      },
-    } as Logger
-
-    const eventBridge = new DefaultEventBridge(logger, config)
+    const eventBridge = new DefaultEventBridge(logger.mock, config)
     await eventBridge.start()
 
     const callback = stub().resolves()
@@ -218,6 +179,9 @@ describe.skip('DefaultEventBridge', () => {
     const subscription: Subscription = {
       sender,
       subscriber,
+      settings: {
+        durable: false,
+      },
     }
 
     eventBridge.registerSubscription(subscription, callback)
@@ -243,6 +207,6 @@ describe.skip('DefaultEventBridge', () => {
     expect(callback.callCount).toBe(1)
     assert.calledWith(callback, match.string, message)
 
-    expect(trace.called).toBeTruthy()
+    expect(logger.stubs.trace.called).toBeTruthy()
   })
 })
