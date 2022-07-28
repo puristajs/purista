@@ -15,6 +15,8 @@ export interface EventBridge {
 
   invoke<T>(
     input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
+    contentType?: string,
+    contentEncoding?: string,
     ttl?: number,
   ): Promise<T>
 

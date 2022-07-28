@@ -13,7 +13,7 @@ describe('Service', () => {
     const logger = getLoggerMock().mock
     const eventbridge = getEventBridgeMock().mock
 
-    const service = new Service(logger, serviceInfo, eventbridge, [], [])
+    const service = new Service(logger, serviceInfo, eventbridge, [], [], undefined)
 
     await expect(service.start()).resolves.toBeUndefined()
 

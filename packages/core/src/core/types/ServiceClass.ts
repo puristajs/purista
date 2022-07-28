@@ -1,4 +1,5 @@
 import type { CommandDefinition } from './commandType'
+import { EBMessage } from './EBMessage'
 import type { EventBridge } from './EventBridge'
 import { GenericEventEmitter } from './GenericEventEmitter'
 import type { InfoMessageType, ServiceInfoType } from './infoType'
@@ -20,12 +21,14 @@ import type { ServiceEvents } from './ServiceEvents'
  * }
  * ```
  */
-export abstract class ServiceClass extends GenericEventEmitter<ServiceEvents> {
+export abstract class ServiceClass<ConfigType = unknown | undefined> extends GenericEventEmitter<ServiceEvents> {
   /**
    * General service info
    * Service name, service version and some human readable description
    */
   protected abstract readonly info: ServiceInfoType
+
+  public abstract config: ConfigType
 
   /**
    * The event bridge instance
@@ -53,5 +56,9 @@ export interface IServiceClass {
   start(): Promise<void>
 
   get serviceInfo(): ServiceInfoType
-  sendServiceInfo(infoType: InfoMessageType, target?: string, data?: Record<string, unknown>): Promise<void>
+  sendServiceInfo(
+    infoType: InfoMessageType,
+    target?: string,
+    data?: Record<string, unknown>,
+  ): Promise<Readonly<EBMessage>>
 }
