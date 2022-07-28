@@ -156,7 +156,7 @@ ___
 • `get` **instanceId**(): `string`
 
 Get instance id.
-The id of current event bus instance.
+The id of current event bridge instance.
 
 #### Returns
 

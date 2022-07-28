@@ -13,7 +13,6 @@ export type CommandSuccessResponse<PayloadType = unknown> = {
   correlationId: CorrelationId
   sender: EBMessageAddress
   receiver: EBMessageAddress
-  isMultipart?: boolean // multi-message handling
   payload: PayloadType // result payload
 } & EBMessageBase
 
