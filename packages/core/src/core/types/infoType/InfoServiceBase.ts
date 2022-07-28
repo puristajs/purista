@@ -6,5 +6,5 @@ export type InfoServiceBase = {
     serviceVersion: string
     serviceTarget: string
   }
-  payload?: Record<string, unknown>
+  payload?: unknown
 } & EBMessageBase

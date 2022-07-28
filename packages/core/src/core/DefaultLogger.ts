@@ -34,11 +34,9 @@ export class DefaultLogger extends Logger {
   getChildLogger(options: LoggerOptions): Logger {
     const prefix = [options.serviceName, options.serviceVersion, options.serviceTarget].filter((entry) => !!entry)
 
-    this.tslog.settings.prefix.length
     const params: ISettingsParam = {
       name: options.name || prefix.join('-'),
       requestId: options.traceId,
-      // prefix,
     }
 
     const child = this.tslog.getChildLogger(params)
