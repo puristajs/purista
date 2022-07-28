@@ -151,7 +151,7 @@ You quickly end up with one dependency injection for database, one for websocket
 At the end you've build one monolithic monster, which might become totally unpredictable and maintable.  
 It is the scenario you should avoid: simple changes on one end and it possibly fails on some other end.
 
-PURISTA tries to avoid and solve this issue by using a unified event bus and to adapt some of the domain driven development patterns. This means you are able to break this dependency chain, and you are able to use ressources which are available somehow, somewhere.  
+PURISTA tries to avoid and solve this issue by using a unified event bridge and to adapt some of the domain driven development patterns. This means you are able to break this dependency chain, and you are able to use ressources which are available somehow, somewhere.  
 This also increases stability, because if one part isn't working, the rest won't crash or stop working from technical perspective.  
 PURISTA adapts the idea of microservices and serverless functions from that point of view.
 
@@ -167,9 +167,9 @@ With the approach of PURISTA, you get the a validated input, you process the dat
 If, how and when does not matter for the input processing part.  
 Each of the steps has verified in-/output and basic error handling out of the box.
 
-Depending on the event bus you choose:  
+Depending on the event bridge you choose:  
 You can build real robust and scalable system, because you can setup your system to be able to be fully asynchronous and recoverable.  
-If the persistance part isn't available right now, the information can be hold within the event bus until the persistance part is available.  
+If the persistance part isn't available right now, the information can be hold within the event bridge until the persistance part is available.  
 You can build the system to send the message via websocket, no matter if the persistance part is done. Or you can decide to trigger the websocket part as soon as the persistance part is done. And again, you can decide what should happend, when the websocket connection is currently unavailable.
 
 This is a huge benefit to control how to handle such cases, as you are now able to control if you like to loose business data.
