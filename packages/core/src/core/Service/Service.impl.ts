@@ -21,6 +21,7 @@ import {
   InfoMessageType,
   IServiceClass,
   Logger,
+  MetricEntry,
   ServiceClass,
   ServiceInfoType,
   StatusCode,
@@ -224,6 +225,22 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
       traceId,
     })
 
+    const performance: MetricEntry[] = []
+
+    const addMeasureEntry = (name: string, startTime: number) => {
+      const endTime = Date.now()
+      performance.push({
+        traceId,
+        name,
+        startTime,
+        endTime,
+        duration: endTime - startTime,
+        functionName: message.receiver.serviceTarget,
+      })
+    }
+
+    const totalStartTime = Date.now()
+
     try {
       let parameterInput = message.payload.parameter
       let payloadInput = message.payload.payload
@@ -247,7 +264,9 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
         }
 
         try {
+          const transformStartTime = Date.now()
           const transformedInput = await transform(payloadInput, parameterInput)
+          addMeasureEntry('transformInput', transformStartTime)
           parameterInput = transformedInput.params
           payloadInput = transformedInput.payload
         } catch (error) {
@@ -264,10 +283,13 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
         message,
         emit: this.getEmitFunction(command.commandName, traceId, message.principalId),
         invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId),
+        performance,
       }
 
+      const functionStart = Date.now()
       const call = command.call.bind(this, context)
       let payload = await call(payloadInput, parameterInput)
+      addMeasureEntry('functionExecution', functionStart)
 
       if (command.hooks.afterGuard?.length) {
         const afterGuards = command.hooks.afterGuard.map((hook) => hook.bind(this, context))
@@ -276,13 +298,18 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
 
       if (command.hooks.transformOutput) {
         const afterTransform = command.hooks.transformOutput.transformFunction.bind(this, { logger, message })
+        const transformStart = Date.now()
         payload = await afterTransform(payload, parameterInput)
-
+        addMeasureEntry('transformOutput', transformStart)
         payload = command.hooks.transformOutput.transformOutputSchema.parse(payload)
       }
 
+      addMeasureEntry('total', totalStartTime)
+      this.emit('metric-function-execution', performance)
       return createSuccessResponse(message, payload, command.eventName)
     } catch (error) {
+      addMeasureEntry('total', totalStartTime)
+      this.emit('metric-function-execution', performance)
       if (error instanceof HandledError) {
         this.emit('handled-function-error', { functionName: command.commandName, error, traceId })
         return createErrorResponse(message, error.errorCode, error)
@@ -291,6 +318,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
       this.emit('unhandled-function-error', { functionName: command.commandName, error, traceId })
 
       logger.error('executeCommand unhandled error', { error, message: getCleanedMessage(message) })
+
       return createErrorResponse(message, StatusCode.InternalServerError, error)
     }
   }
@@ -335,21 +363,42 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
     const logger = this.serviceLogger.getChildLogger({
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
-      serviceTarget: subscription?.subscriptionName,
+      serviceTarget: subscriptionName,
       traceId,
     })
+
+    const performance: MetricEntry[] = []
+
+    const addMeasureEntry = (name: string, startTime: number) => {
+      const endTime = Date.now()
+      performance.push({
+        traceId,
+        name,
+        startTime,
+        endTime,
+        duration: endTime - startTime,
+        functionName: subscriptionName,
+      })
+    }
+
+    const totalStartTime = Date.now()
 
     const context: SubscriptionContext = {
       logger,
       message,
       emit: this.getEmitFunction(subscriptionName, traceId, message.principalId),
       invoke: this.getInvokeFunction(subscriptionName, traceId, message.principalId),
+      performance,
     }
 
     const call = subscription.call.bind(this, context)
     try {
       await call(message.payload)
+      addMeasureEntry('total', totalStartTime)
+      this.emit('metric-subscription-execution', performance)
     } catch (error) {
+      addMeasureEntry('total', totalStartTime)
+      this.emit('metric-subscription-execution', performance)
       this.serviceLogger.error(error)
       if (error instanceof HandledError) {
         this.emit('handled-subscription-error', { subscriptionName, error, traceId })

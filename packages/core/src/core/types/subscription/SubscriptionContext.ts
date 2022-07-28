@@ -1,6 +1,7 @@
 import { EBMessage } from '../EBMessage'
 import { EBMessageAddress } from '../EBMessageAddress'
 import type { Logger } from '../Logger'
+import { MetricEntry } from '../MetricEntry'
 
 export type SubscriptionContext<MessageType = EBMessage> = {
   logger: Logger
@@ -11,4 +12,5 @@ export type SubscriptionContext<MessageType = EBMessage> = {
     payload: PayloadType,
     parameter: ParameterType,
   ) => Promise<InvokeResponseType>
+  performance: MetricEntry[]
 }
