@@ -9,6 +9,7 @@ export const getSubscriptionContextMock = <MessageType>(message: MessageType) =>
     logger: logger.stubs,
     emit: stub(),
     invoke: stub(),
+    performance: [],
   }
 
   const mock: SubscriptionContext<MessageType> = {
@@ -16,6 +17,7 @@ export const getSubscriptionContextMock = <MessageType>(message: MessageType) =>
     message,
     emit: stubs.emit,
     invoke: stubs.invoke,
+    performance: stubs.performance,
   }
 
   return {

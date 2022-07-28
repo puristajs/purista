@@ -1,5 +1,6 @@
 import { EBMessageAddress } from '../EBMessageAddress'
 import type { Logger } from '../Logger'
+import { MetricEntry } from '../MetricEntry'
 import type { Command } from './Command'
 
 export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsType = unknown> = {
@@ -11,4 +12,5 @@ export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsTy
     payload: PayloadType,
     parameter: ParameterType,
   ) => Promise<InvokeResponseType>
+  performance: MetricEntry[]
 }

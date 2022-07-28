@@ -13,6 +13,7 @@ export const getFunctionContextMock = <MessagePayloadType = unknown, MessagePara
     logger: logger.stubs,
     emit: stub(),
     invoke: stub(),
+    performance: [],
   }
 
   const message: Command<MessagePayloadType, MessageParamsType> = createTestCommandMsg({
@@ -27,6 +28,7 @@ export const getFunctionContextMock = <MessagePayloadType = unknown, MessagePara
     message,
     emit: stubs.emit,
     invoke: stubs.invoke,
+    performance: stubs.performance,
   }
 
   return {
