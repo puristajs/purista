@@ -275,7 +275,7 @@ export const getOpenApiJson = function (this: HttpServerService) {
       const requestIdParameter: ParameterObject = {
         in: 'header',
         required: false,
-        name: 'x-trace-id',
+        name: this.config.fastify.requestIdHeader || 'x-trace-id',
         schema: { type: 'string' },
       }
 

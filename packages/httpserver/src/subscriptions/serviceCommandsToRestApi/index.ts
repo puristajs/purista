@@ -5,6 +5,7 @@ import {
   HttpExposedServiceMeta,
   InfoServiceFunctionAdded,
   isHttpExposedServiceMeta,
+  PrincipalId,
   SubscriptionDefinitionBuilder,
   UnhandledError,
 } from '@purista/core'
@@ -37,7 +38,11 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
     const contentType = data.http.contentType || 'application/json; charset=utf-8'
 
     const getHandler = () => {
-      return async (request: FastifyRequest, reply: FastifyReply, params: Record<string, unknown>) => {
+      return async (
+        request: FastifyRequest & { principalId?: PrincipalId },
+        reply: FastifyReply,
+        params: Record<string, unknown>,
+      ) => {
         try {
           const fastifyParams = request.params as Record<string, unknown>
 
@@ -53,11 +58,15 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
             this.config.fastify.requestIdHeader || 'x-trace-id',
             getNewTraceId(),
           )
+
+          const principalId = request.principalId
+
           const response = await this.invoke(
             {
               traceId,
               receiver: message.sender,
               payload: { payload: request.body, parameter },
+              principalId,
             },
             `${method}:${url}`,
           )

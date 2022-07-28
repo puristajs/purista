@@ -7,6 +7,7 @@ import {
   HandledError,
   HttpExposedServiceMeta,
   Logger,
+  PrincipalId,
   Service,
   StatusCode,
   TraceId,
@@ -53,6 +54,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
     })
       .register(compress)
       .register(helmet)
+      .decorateRequest('principalId', undefined)
       .setErrorHandler((error, _request, reply) => {
         if (error instanceof HandledError) {
           reply.status(error.errorCode)
@@ -113,7 +115,12 @@ export class HttpServerService extends Service<HttpServerConfig> {
   }
 
   async invoke<T>(
-    input: { receiver: EBMessageAddress; payload: { payload: unknown; parameter: unknown }; traceId: TraceId },
+    input: {
+      receiver: EBMessageAddress
+      payload: { payload: unknown; parameter: unknown }
+      traceId: TraceId
+      principalId?: PrincipalId
+    },
     endpoint: string,
   ): Promise<T> {
     return this.eventBridge.invoke<T>({

@@ -17,6 +17,10 @@ const main = async () => {
 
   // create and init a webserver
   const httpServerService = new HttpServerService(baseLogger, eventBridge, config)
+  httpServerService.server?.addHook('preHandler', async (req) => {
+    // set the principalId which will be used within messages
+    req.principalId = 'Bob Dylan'
+  })
 
   // start the webserver
   await httpServerService.start()
