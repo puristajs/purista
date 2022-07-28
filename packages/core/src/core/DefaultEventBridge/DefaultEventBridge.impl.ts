@@ -30,6 +30,7 @@ import {
   isCommandSuccessResponse,
   isInfoMessage,
   Logger,
+  StatusCode,
   Subscription,
 } from '../types'
 import { UnhandledError } from '../UnhandledError.impl'
@@ -41,7 +42,7 @@ import { PendigInvocation, SubscriptionStorageEntry } from './types'
  * Simple implementation of some simple in-memory event bridge.
  * Does not support threads and does not need any external databases.
  */
-export class DefaultEventBridge implements EventBridge {
+export class DefaultEventBridge extends EventBridge {
   protected log: Logger
   protected config: EventBridgeEnsuredDefaults
   protected writeStream = new Stream.Writable({ objectMode: true })
@@ -61,6 +62,7 @@ export class DefaultEventBridge implements EventBridge {
 
   protected subscriptions = new Map<string, SubscriptionStorageEntry>()
   constructor(baseLogger: Logger, conf: EventBridgeConfig = getDefaultEventBridgeConfig()) {
+    super()
     this.config = {
       ...getDefaultEventBridgeConfig(),
       ...conf,
@@ -74,12 +76,18 @@ export class DefaultEventBridge implements EventBridge {
         if (isCommand(message)) {
           const mapEntry = this.serviceFunctions.get(getCommandQueueName(message.receiver))
           if (!mapEntry) {
-            this.log.error('received invalid command', getCleanedMessage(message))
-            return next(new Error('received invalid command'))
+            const error = new HandledError(
+              StatusCode.BadRequest,
+              'InvalidCommand: received invalid command',
+              getCleanedMessage(message),
+            )
+            this.log.error('received invalid command', error)
+            this.emit('eventbridge-error', error)
+            return next(error)
           }
 
           mapEntry(message).then((result) => {
-            this.emit(result)
+            this.emitMessage(result)
           })
           return next()
         }
@@ -87,8 +95,14 @@ export class DefaultEventBridge implements EventBridge {
         if (isCommandResponse(message)) {
           const mapEntry = this.pendingInvocations.get(message.correlationId)
           if (!mapEntry) {
-            this.log.error('received invalid command response', getCleanedMessage(message))
-            return next(new Error('received invalid command response'))
+            const error = new UnhandledError(
+              StatusCode.BadRequest,
+              'InvalidCommandResponse: received invalid command response',
+              getCleanedMessage(message),
+            )
+            this.log.error('received invalid command response', error)
+            this.emit('eventbridge-error', error)
+            return next(error)
           }
           if (isCommandSuccessResponse(message)) {
             mapEntry.resolve(message.payload)
@@ -106,9 +120,14 @@ export class DefaultEventBridge implements EventBridge {
           return next()
         }
 
-        this.log.error('received invalid message', message)
+        const err = new UnhandledError(StatusCode.BadRequest, 'InvalidMessage: received invalid message', message)
+        this.log.error('received invalid message', err)
+        this.emit('eventbridge-error', err)
         return next()
       } catch (error) {
+        const err = new HandledError(StatusCode.InternalServerError, 'eventbus failure', error)
+        this.emit('eventbridge-error', err)
+        this.log.error('eventbus failure', err)
         return next(error as Error)
       }
     }
@@ -120,10 +139,11 @@ export class DefaultEventBridge implements EventBridge {
     this.readStream.on('data', (message: EBMessage) => {
       this.subscriptions.forEach((subscription) => {
         if (isMessageMatchingSubscription(this.log, message, subscription)) {
-          subscription.cb(message)
+          subscription.cb(message).catch((err) => this.log.error(err))
         }
       })
     })
+    this.emit('eventbridge-connected', undefined)
   }
 
   /**
@@ -136,7 +156,7 @@ export class DefaultEventBridge implements EventBridge {
 
   /**
    * Get instance id.
-   * The id of current event bus instance.
+   * The id of current event bridge instance.
    */
   get instanceId() {
     return this.config.instanceId
@@ -179,7 +199,7 @@ export class DefaultEventBridge implements EventBridge {
    *
    * @param message EBMessage
    */
-  async emit(
+  async emitMessage(
     message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>,
   ): Promise<Readonly<EBMessage>> {
     return new Promise((resolve, reject) => {
@@ -244,11 +264,15 @@ export class DefaultEventBridge implements EventBridge {
           sender: input.sender,
         }
 
-        await this.emit(infoMessage)
+        await this.emitMessage(infoMessage)
       } catch (err) {
-        this.log
-          .getChildLogger({ traceId: command.traceId })
-          .error(`failed to send InfoInvokeTimeout message for ${correlationId}`, err)
+        const error = new UnhandledError(StatusCode.BadGateway, 'failed to send InfoInvokeTimeout message', {
+          traceId: command.traceId,
+          correlationId,
+          error: err,
+        })
+        this.log.getChildLogger({ traceId: command.traceId }).error(`failed to send InfoInvokeTimeout message`, error)
+        this.emit('eventbridge-error', error)
       }
     }
 
@@ -266,7 +290,7 @@ export class DefaultEventBridge implements EventBridge {
       })
     })
 
-    this.emit(command)
+    this.emitMessage(command)
     return Promise.race([executionPromise, getTimeoutPromise(commandTimeout, command.traceId)])
   }
 }

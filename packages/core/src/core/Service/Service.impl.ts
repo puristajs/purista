@@ -30,6 +30,7 @@ import {
   SubscriptionDefinitionList,
   TraceId,
 } from '../types'
+import { UnhandledError } from '../UnhandledError.impl'
 import { ServiceInfoValidator } from './ServiceInfoValidator'
 
 /**
@@ -91,11 +92,13 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
    * It connects to the event bridge and subscribes to the topics that are in the subscription list.
    */
   async start() {
+    this.emit('service-started', undefined)
     try {
       await this.initializeEventbridgeConnect(this.commandFunctions, this.subscriptionList)
       await this.sendServiceInfo(EBMessageType.InfoServiceReady)
     } catch (err) {
       this.serviceLogger.error(`failed to start service`, err)
+      this.emit('service-not-available', err)
       throw err
     }
   }
@@ -137,7 +140,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
   async sendServiceInfo(infoType: InfoMessageType, target?: string, payload?: Record<string, unknown>) {
     const info = createInfoMessage(infoType, this.info.serviceName, this.info.serviceVersion, target, payload)
 
-    return this.eventBridge.emit(info)
+    return this.eventBridge.emitMessage(info)
   }
 
   protected getInvokeFunction(serviceTarget: string, traceId: TraceId, principalId?: string) {
@@ -187,7 +190,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
         principalId,
       })
 
-      await this.eventBridge.emit(msg)
+      await this.eventBridge.emitMessage(msg)
     }
 
     return emitCustomEvent.bind(this)
@@ -281,6 +284,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
       return createSuccessResponse(message, payload, command.eventName)
     } catch (error) {
       if (error instanceof HandledError) {
+        this.emit('handled-function-error', { functionName: command.commandName, error, traceId })
         return createErrorResponse(message, error.errorCode, error)
       }
 
@@ -347,7 +351,16 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
       await call(message.payload)
     } catch (error) {
       this.serviceLogger.error(error)
-      this.emit('unhandled-subscription-error', { subscriptionName, error, traceId })
+      if (error instanceof HandledError) {
+        this.emit('handled-subscription-error', { subscriptionName, error, traceId })
+        // handled errors prevent that the message is re-delivered for retry
+        return
+      }
+      if (error instanceof UnhandledError) {
+        this.emit('unhandled-subscription-error', { subscriptionName, error, traceId })
+      }
+      // re-throw error here, so the underlaying event bridge driver can handle ack/re-delivery for retry
+      throw error
     }
   }
 
@@ -372,13 +385,13 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
       settings: subscriptionDefinition.settings,
     }
 
-    // TODO check this binding for function:
     await this.eventBridge.registerSubscription(subscription, (message: EBMessage) =>
       this.executeSubscription(message, subscriptionDefinition.subscriptionName),
     )
   }
 
   async destroy() {
+    this.emit('service-drain', undefined)
     await this.sendServiceInfo(EBMessageType.InfoServiceDrain)
     this.serviceLogger.info('destroy', this.info)
 
@@ -404,5 +417,6 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
     })
     await Promise.allSettled(functionUnregisterProms)
     await this.sendServiceInfo(EBMessageType.InfoServiceShutdown)
+    this.emit('service-stopped', undefined)
   }
 }

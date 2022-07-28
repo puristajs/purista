@@ -1,26 +1,30 @@
 import { Command, CommandErrorResponse, CommandSuccessResponse } from './commandType'
 import type { EBMessage } from './EBMessage'
 import type { EBMessageAddress } from './EBMessageAddress'
+import { EventBridgeEvents } from './EventBridgeEvents'
+import { GenericEventEmitter } from './GenericEventEmitter'
 import type { Subscription } from './subscription'
 
 /**
  * Event bridge interface
  * The event bridge must implement this interface.
  */
-export interface EventBridge {
-  readonly defaultCommandTimeout: number
+export abstract class EventBridge extends GenericEventEmitter<EventBridgeEvents> {
+  abstract readonly defaultCommandTimeout: number
 
-  start(): Promise<void>
-  emit(message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>): Promise<Readonly<EBMessage>>
+  abstract start(): Promise<void>
+  abstract emitMessage(
+    message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>,
+  ): Promise<Readonly<EBMessage>>
 
-  invoke<T>(
+  abstract invoke<T>(
     input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
     contentType?: string,
     contentEncoding?: string,
     ttl?: number,
   ): Promise<T>
 
-  registerServiceFunction(
+  abstract registerServiceFunction(
     address: EBMessageAddress,
     cb: (
       message: Command,
@@ -28,8 +32,9 @@ export interface EventBridge {
       Readonly<Omit<CommandSuccessResponse, 'instanceId'>> | Readonly<Omit<CommandErrorResponse, 'instanceId'>>
     >,
   ): Promise<string>
-  unregisterServiceFunction(address: EBMessageAddress): Promise<void>
 
-  registerSubscription(subscription: Subscription, cb: (message: EBMessage) => Promise<void>): Promise<string>
-  unregisterSubscription(address: EBMessageAddress): Promise<void>
+  abstract unregisterServiceFunction(address: EBMessageAddress): Promise<void>
+
+  abstract registerSubscription(subscription: Subscription, cb: (message: EBMessage) => Promise<void>): Promise<string>
+  abstract unregisterSubscription(address: EBMessageAddress): Promise<void>
 }

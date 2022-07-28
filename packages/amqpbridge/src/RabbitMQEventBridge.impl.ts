@@ -21,6 +21,7 @@ import {
   isInfoMessage,
   Logger,
   PendigInvocation,
+  StatusCode,
   Subscription,
   UnhandledError,
 } from '@purista/core'
@@ -36,7 +37,7 @@ import { Encoder, Encrypter, RabbitMQEventBridgeConfig } from './types'
 /**
  * A adapter to use rabbitMQ as event bridge.
  */
-export class RabbitMQEventBridge implements EventBridge {
+export class RabbitMQEventBridge extends EventBridge {
   protected log: Logger
   protected config: RabbitMQEventBridgeConfig
   protected connection?: Connection
@@ -70,6 +71,7 @@ export class RabbitMQEventBridge implements EventBridge {
   }
 
   constructor(baseLogger: Logger, conf: RabbitMQEventBridgeConfig = getDefaultConfig()) {
+    super()
     this.config = {
       ...getDefaultConfig(),
       ...conf,
@@ -97,7 +99,7 @@ export class RabbitMQEventBridge implements EventBridge {
 
   /**
    * Get instance id.
-   * The id of current event bus instance.
+   * The id of current event bridge instance.
    */
   get instanceId() {
     return this.config.instanceId
@@ -107,7 +109,20 @@ export class RabbitMQEventBridge implements EventBridge {
    * Connect to RabbitMQ broker, ensure exchange, call back queue
    */
   async start() {
-    this.connection = await amqplib.connect(this.config.url, this.config.socketOptions)
+    try {
+      this.connection = await amqplib.connect(this.config.url, this.config.socketOptions)
+    } catch (error) {
+      this.emit('eventbridge-connection-error', error)
+      this.log.error('unable to connect to broker', error)
+      throw error
+    }
+
+    this.connection.on('error', (e) => {
+      this.log.error('amqp lib error', e)
+      this.emit('eventbridge-error', e)
+    })
+    this.connection.on('close', (e) => this.emit('eventbridge-disconnected', e))
+    this.emit('eventbridge-connected', undefined)
     this.log.info('connected to broker')
     this.channel = await this.connection.createChannel()
     this.log.debug('ensured: default exchange')
@@ -132,17 +147,18 @@ export class RabbitMQEventBridge implements EventBridge {
             msg.properties.contentEncoding,
           )
 
-          if (!message) {
-            this.log.error('unable to decode amqp message payload', msg.properties.messageId)
-            return
-          }
-
           const log = this.log.getChildLogger({ traceId: message.traceId })
 
           if (isCommandResponse(message)) {
             const mapEntry = this.pendingInvocations.get(message.correlationId)
             if (!mapEntry) {
-              log.error('received invalid command response', getCleanedMessage(message))
+              const error = new UnhandledError(
+                StatusCode.BadRequest,
+                'InvalidCommandResponse: received invalid command response',
+                getCleanedMessage(message),
+              )
+              this.log.error('received invalid command response', error)
+              this.emit('eventbridge-error', error)
               return
             }
             if (isCommandSuccessResponse(message)) {
@@ -161,9 +177,13 @@ export class RabbitMQEventBridge implements EventBridge {
             return
           }
 
-          log.error('received invalid message', message)
+          const err = new UnhandledError(StatusCode.BadRequest, 'InvalidMessage: received invalid message', message)
+          this.log.error('received invalid message', err)
+          this.emit('eventbridge-error', err)
         } catch (error) {
-          this.log.error('failed to handle response message', error)
+          const err = new HandledError(StatusCode.InternalServerError, 'failed to handle response message', error)
+          this.emit('eventbridge-error', err)
+          this.log.error('failed to handle response message', err)
         }
       },
       { noAck: true },
@@ -173,7 +193,7 @@ export class RabbitMQEventBridge implements EventBridge {
     this.log.info('amqp event bridge ready')
   }
 
-  async emit<T extends EBMessage>(
+  async emitMessage<T extends EBMessage>(
     message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>,
     contentType = 'application/json',
     contentEncoding = 'utf-8',
@@ -262,11 +282,15 @@ export class RabbitMQEventBridge implements EventBridge {
           sender: input.sender,
         }
 
-        await this.emit(infoMessage)
+        await this.emitMessage(infoMessage)
       } catch (err) {
-        this.log
-          .getChildLogger({ traceId: command.traceId })
-          .error(`failed to send InfoInvokeTimeout message for ${correlationId}`, err)
+        const error = new UnhandledError(StatusCode.BadGateway, 'failed to send InfoInvokeTimeout message', {
+          traceId: command.traceId,
+          correlationId,
+          error: err,
+        })
+        this.log.getChildLogger({ traceId: command.traceId }).error(`failed to send InfoInvokeTimeout message`, error)
+        this.emit('eventbridge-error', error)
       }
     }
 
@@ -352,11 +376,6 @@ export class RabbitMQEventBridge implements EventBridge {
             msg.properties.contentEncoding,
           )
 
-          if (!command) {
-            this.log.error('unable to decode amqp message payload', msg.properties.messageId)
-            throw new Error('amqp message decode failed')
-          }
-
           const result = await cb(command)
 
           const responseMessage = {
@@ -392,7 +411,11 @@ export class RabbitMQEventBridge implements EventBridge {
             headers,
           })
         } catch (error) {
-          this.log.error(error)
+          const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to consume command response message', {
+            error,
+          })
+          this.emit('eventbridge-error', err)
+          this.log.error('Failed to consume command response message', err)
         }
       },
       { noAck: true },
@@ -404,13 +427,22 @@ export class RabbitMQEventBridge implements EventBridge {
   }
 
   async unregisterServiceFunction(address: EBMessageAddress): Promise<void> {
-    const queueName = getCommandQueueName(address)
-    const entry = this.serviceFunctions.get(queueName)
-    if (!entry) {
-      return
+    try {
+      const queueName = getCommandQueueName(address)
+      const entry = this.serviceFunctions.get(queueName)
+      if (!entry) {
+        return
+      }
+      await entry.channel.close()
+      this.serviceFunctions.delete(queueName)
+    } catch (error) {
+      const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to unregister service function', {
+        error,
+        address,
+      })
+      this.emit('eventbridge-error', err)
+      this.log.error('Failed to unregister service function', err)
     }
-    await entry.channel.close()
-    this.serviceFunctions.delete(queueName)
   }
 
   async registerSubscription(subscription: Subscription, cb: (message: EBMessage) => Promise<void>): Promise<string> {
@@ -449,17 +481,18 @@ export class RabbitMQEventBridge implements EventBridge {
             msg.properties.contentEncoding,
           )
 
-          if (!message) {
-            this.log.error('unable to decode amqp message payload', msg.properties.messageId)
-            throw new Error('amqp message decode failed')
-          }
-
           await cb(message)
+          channel.ack(msg)
         } catch (error) {
-          this.log.error(error)
+          const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to consume subscription message', {
+            error,
+            subscription,
+          })
+          this.emit('eventbridge-error', err)
+          this.log.error('Failed to consume subscription message', err)
         }
       },
-      { noAck: true },
+      { noAck: false },
     )
 
     this.subscriptions.set(queueName, { cb, channel })
@@ -467,13 +500,22 @@ export class RabbitMQEventBridge implements EventBridge {
   }
 
   async unregisterSubscription(address: EBMessageAddress): Promise<void> {
-    const queueName = getSubscriptionQueueName(address)
-    const entry = this.subscriptions.get(queueName)
-    if (!entry) {
-      return
+    try {
+      const queueName = getSubscriptionQueueName(address)
+      const entry = this.subscriptions.get(queueName)
+      if (!entry) {
+        return
+      }
+      await entry.channel.close()
+      this.subscriptions.delete(queueName)
+    } catch (error) {
+      const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to unregister subscription', {
+        error,
+        address,
+      })
+      this.emit('eventbridge-error', err)
+      this.log.error('Failed to unregister subscription', err)
     }
-    await entry.channel.close()
-    this.subscriptions.delete(queueName)
   }
 
   /**
@@ -486,15 +528,13 @@ export class RabbitMQEventBridge implements EventBridge {
   protected async encodeContent<T>(input: T, contentType: string, contentEncoding: string): Promise<Buffer> {
     const encoder = this.encoder[contentType]
     if (!encoder) {
-      this.log.error(`Unable to encode message with ${contentType}`)
-      return Buffer.from('')
+      throw new Error(`Encode not defined for ${contentType}`)
     }
     const encodedPayload = await encoder.encode(input)
 
     const encrypter = this.encrypter[contentEncoding]
     if (!encrypter) {
-      this.log.error(`Unable to encrypt message with ${contentEncoding}`)
-      return Buffer.from('')
+      throw new Error(`Encrypt not defined for ${contentEncoding}`)
     }
     return encrypter.encrypt(encodedPayload)
   }
@@ -506,23 +546,17 @@ export class RabbitMQEventBridge implements EventBridge {
    * @param contentEncoding
    * @returns
    */
-  protected async decodeContent<T>(
-    input: Buffer,
-    contentType: string,
-    contentEncoding: string,
-  ): Promise<T | undefined> {
+  protected async decodeContent<T>(input: Buffer, contentType: string, contentEncoding: string): Promise<T> {
     const decrypter = this.encrypter[contentEncoding]
     if (!decrypter) {
-      this.log.error(`Unable to decrypt message with ${contentEncoding}`)
-      return
+      throw new Error(`Decrypt not defined for ${contentEncoding}`)
     }
 
     const decrypted = await decrypter.decrypt(input)
 
     const decoder = this.encoder[contentType]
     if (!decoder) {
-      this.log.error(`Unable to decode message with ${contentType}`)
-      return
+      throw new Error(`Decode not defined for ${contentType}`)
     }
     return decoder.decode(decrypted)
   }
