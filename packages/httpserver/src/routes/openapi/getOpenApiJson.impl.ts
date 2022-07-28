@@ -28,7 +28,9 @@ export const getOpenApiJson = function (this: HttpServerService) {
   const tags = this.config.openApi?.tags
 
   const logger = this.serviceLogger.getChildLogger({
-    name: `${this.info.serviceName} V${this.info.serviceVersion} openApiJson`,
+    serviceName: this.info.serviceName,
+    serviceVersion: this.info.serviceVersion,
+    serviceTarget: 'openApiJson',
   })
 
   const handler: RouteHandlerMethod = (_request, reply) => {

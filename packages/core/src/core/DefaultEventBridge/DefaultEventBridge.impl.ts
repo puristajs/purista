@@ -136,7 +136,7 @@ export class DefaultEventBridge implements EventBridge {
 
   /**
    * Get instance id.
-   * The id of current eventbus instance.
+   * The id of current event bus instance.
    */
   get instanceId() {
     return this.config.instanceId
@@ -202,6 +202,8 @@ export class DefaultEventBridge implements EventBridge {
 
   async invoke<T>(
     input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
+    _contentType = 'application/json',
+    _contentEncoding = 'utf-8',
     commandTimeout = this.config.defaultCommandTimeout,
   ): Promise<T> {
     const correlationId = getNewCorrelationId()
@@ -245,7 +247,7 @@ export class DefaultEventBridge implements EventBridge {
         await this.emit(infoMessage)
       } catch (err) {
         this.log
-          .getChildLogger({ requestId: command.traceId })
+          .getChildLogger({ traceId: command.traceId })
           .error(`failed to send InfoInvokeTimeout message for ${correlationId}`, err)
       }
     }
