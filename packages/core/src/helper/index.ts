@@ -1,4 +1,5 @@
 export * from './FunctionDefinitionBuilder.impl'
 export * from './getFunctionWithValidation'
+export * from './ServiceBuilder.impl'
 export * from './SubscriptionDefinitionBuilder.impl'
 export * from './types'

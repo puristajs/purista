@@ -29,10 +29,8 @@ import { HttpServerConfig } from './types'
  * A simple http server based on fastify.
  *
  */
-export class HttpServerService extends Service {
+export class HttpServerService extends Service<HttpServerConfig> {
   server?: FastifyInstance
-
-  config: HttpServerConfig
 
   routeDefinitions: HttpExposedServiceMeta[] = []
 
@@ -45,7 +43,7 @@ export class HttpServerService extends Service {
    * @param {HttpServerConfig} conf - HttpServerConfig
    */
   constructor(baseLogger: Logger, eventBridge: EventBridge, config: HttpServerConfig = getDefaultConfig()) {
-    super(baseLogger, ServiceInfo, eventBridge, COMMANDS, SUBSCRIPTIONS)
+    super(baseLogger, ServiceInfo, eventBridge, COMMANDS, SUBSCRIPTIONS, config)
 
     this.config = merge(getDefaultConfig(), config)
 
