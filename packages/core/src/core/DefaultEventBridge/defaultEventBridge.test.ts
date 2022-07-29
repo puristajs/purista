@@ -91,7 +91,7 @@ describe.skip('DefaultEventBridge', () => {
       },
     }
 
-    await expect(eventBridge.emit(message)).resolves.toBeUndefined()
+    await expect(eventBridge.emitMessage(message)).resolves.toBeUndefined()
 
     expect(callback.called).toBeTruthy()
     expect(callback.callCount).toBe(1)
@@ -110,7 +110,7 @@ describe.skip('DefaultEventBridge', () => {
     callback.resetHistory()
     logger.stubs.trace.resetHistory()
 
-    await expect(eventBridge.emit(message)).resolves.toBeUndefined()
+    await expect(eventBridge.emitMessage(message)).resolves.toBeUndefined()
 
     expect(callback.called).toBeFalsy()
 
@@ -156,7 +156,7 @@ describe.skip('DefaultEventBridge', () => {
       },
     }
 
-    await expect(eventBridge.emit(message)).resolves.toBeUndefined()
+    await expect(eventBridge.emitMessage(message)).resolves.toBeUndefined()
 
     expect(callback.called).toBeTruthy()
     expect(callback.callCount).toBe(1)
@@ -201,7 +201,7 @@ describe.skip('DefaultEventBridge', () => {
       },
     }
 
-    await expect(eventBridge.emit(message)).resolves.toBeUndefined()
+    await expect(eventBridge.emitMessage(message)).resolves.toBeUndefined()
 
     expect(callback.called).toBeTruthy()
     expect(callback.callCount).toBe(1)
