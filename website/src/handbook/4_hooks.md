@@ -75,8 +75,8 @@ It allows implementing migrations, decoding or transformation of input message p
 A use case could be, that the message payload is encrypted and needs to be decrypted.  
 Typically, anything like input schema migrations is also a good example for using transform hooks.
 
-The input types of a input transform hook (payload & params) will be automatically set the types for original message payload and parameter.  
-If you've set a input validation schema (you should do it always), the result type for the transform input hook is automatically set.
+The input types of an input transform hook (payload & parameter) will be automatically set the types for original message payload and parameter.  
+If you've set an input validation schema (you should do it always), the result type for the transform input hook is automatically set.
 
 ```typescript
 import { FunctionDefinitionBuilder } from '@purista/core'

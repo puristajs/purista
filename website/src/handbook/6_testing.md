@@ -113,11 +113,11 @@ Can be tested this way:
 import { getEventBridgeMock, getFunctionContextMock, getLoggerMock, HandledError } from '@purista/core'
 
 import { UserService } from '../../UserService'
-import functionDefinition from './index'
+import { userSignUpBuilder } from './index'
 
-const f = functionDefinition.getFunction()
+const f = userSignUpBuilder.getFunction()
 
-const service = new UserService(getLoggerMock().mock, getEventBridgeMock().mock)
+const service = UserService.getInstance(getLoggerMock().mock, getEventBridgeMock().mock)
 const fn = f.bind(service)
 
 test('returns a new user id', async () => {
@@ -193,11 +193,11 @@ The same way you can test subscription functions:
 import { createTestCommandMsg, getEventBridgeMock, getLoggerMock, getSubscriptionContextMock } from '@purista/core'
 
 import { UserService } from '../../UserService'
-import functionDefinition from './index'
+import { userSignUpBuilder } from './index'
 
-const f = functionDefinition.getFunction()
+const f = userSignUpBuilder.getFunction()
 
-const service = new UserService(getLoggerMock().mock, getEventBridgeMock().mock)
+const service = UserService.getInstance(getLoggerMock().mock, getEventBridgeMock().mock)
 const fn = f.bind(service)
 
 test('returns a new user id', async () => {

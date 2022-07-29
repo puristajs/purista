@@ -20,7 +20,7 @@ star: true
 To be able to build real world systems, you will need to send events, which will be consumed by subscriptions or third party providers. The sender does/should not need to know, who is consuming this information.
 
 Emitting custom events is quite easy. The function context and the subscription context containing a helper function `emit`.  
-This async `emit` function has two parameters. The event name and the optional payload to be send.
+This async `emit` function has two parameters. The event name and the optional payload to be sent.
 
 Example:
 

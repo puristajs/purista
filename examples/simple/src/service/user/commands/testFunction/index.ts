@@ -1,10 +1,8 @@
-import { FunctionDefinitionBuilder } from '@purista/core'
-
 import { UserFunction } from '../../UserFunction.enum'
-import { UserService } from '../../UserService'
+import { UserServiceBuilder } from '../../UserServiceBuilder'
 import { inputParameterSchema, inputPayloadSchema, outputPayloadSchema } from './schema'
 
-export default new FunctionDefinitionBuilder<UserService>(
+export const userSignUpBuilder = UserServiceBuilder.getFunctionBuilder(
   UserFunction.TestFunction,
   'a function called from other function',
 )

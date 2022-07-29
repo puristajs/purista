@@ -20,12 +20,12 @@ star: true
 ## Logging
 
 PURISTA provides logging as integral part.  
-Per default [tslog](https://tslog.js.org) is used as logging library.  
+Per default, [tslog](https://tslog.js.org) is used as logging library.  
 
 But you can in theory use any logging library. There is only the need to build a simple wrapper.  
 This wrapper should be a class which extends `Logger` from `@purista/core`. See `DefaultLogger.ts` in core package.
 
-The logger is expect to log:
+The logger is expected to log:
 
 - service name
 - service version
@@ -74,7 +74,7 @@ Example output:
 
 To allow a more flexible way of tracking, monitoring or alerting, you might want to use some external services like [sentry](https://sentry.io/).
 
-To allow a flexible and decoupled way, a service emits following events:
+To allow a flexible and decoupled way, a service emits the following events:
 
 - `handled-subscription-error` emitted when a subscription throws a HandledError
 - `handled-function-error` emitted when a function throws a HandledError
@@ -83,6 +83,6 @@ To allow a flexible and decoupled way, a service emits following events:
 
 #### Events vs subscription
 
-There is also the option to have a subscription for error messages. This only works for functions, but not for subscriptions as they do not emit a response message. Also, the error handling should be close to the root cause, it works even when there is an issue with event bus and it might be faster when it comes to alerting.
+There is also the option to have a subscription for error messages. This only works for functions, but not for subscriptions, as they do not emit a response message. Also, the error handling should be close to the root cause, it works even when there is an issue with event bus, and it might be faster when it comes to alerting.
 
 But, subscriptions should be preferred, if you like to build some (business) analytics like "hourly average of..."

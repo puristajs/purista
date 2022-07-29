@@ -1,9 +1,7 @@
-import { SubscriptionDefinitionBuilder } from '@purista/core'
-
 import { EventName } from '../../../../types'
-import { UserService } from '../../UserService'
+import { UserServiceBuilder } from '../../UserServiceBuilder'
 
-export default new SubscriptionDefinitionBuilder<UserService>(
+export const sendWelcomeMail = UserServiceBuilder.getSubscriptionBuilder(
   'sendWelcomeEmail',
   'send a welcome email to new costumers',
 )

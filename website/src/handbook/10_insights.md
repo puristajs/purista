@@ -28,7 +28,7 @@ As an example:
 The Frontend makes a url request, which invokes a service function A. The service function A invokes a service function B.  
 Service function A is returning a result back to the frontend. There is also a subscription C which listens for success responses of service A.
 
-The traceId will be same for all the messages and responses between the frontend, different service functions and subscriptions.
+The traceId will be the same for all the messages and responses between the frontend, different service functions and subscriptions.
 
 This allows to track the whole flow.
 
@@ -40,11 +40,11 @@ It can also be used for monitoring.
 
 ### correlationId
 
-The correlation id is a unique id which is used for a request (command) message and the corresponding response. While the traceId stays same for a whole process flow, the correlationId is only valid and used for a single call.
+The correlation id is a unique id which is used for a request (command) message and the corresponding response. While the traceId stays the same for a whole process flow, the correlationId is only valid and used for a single call.
 
 ### id (message id)
 
-Each message has a unique id, which might be used by the underlaying event bridge/infrastructure or for persistance purpose.
+Each message has a unique id, which might be used by the underlaying event bridge/infrastructure or for persistence purpose.
 
 ### principalId
 
@@ -52,7 +52,7 @@ The principal id is an optional field, which can be set by business logic to the
 The principal id should be some technical user id and not something like an email, as it might be logged.
 It is recommended to use the message principal id for any authentication/authorization, because this way, there is no need to look into message payload, which might be encrypted or not present.
 
-The principal id is propaged down - like the trace id - in the whole process flow. So it will be available in subscriptions and function invocations.
+The principal id is propagated down - like the trace id - in the whole process flow. So it will be available in subscriptions and function invocations.
 
 ## Message structure
 

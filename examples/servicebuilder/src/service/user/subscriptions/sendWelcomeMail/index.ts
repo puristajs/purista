@@ -1,7 +1,7 @@
 import { EventName } from '../../../../types'
 import { UserServiceBuilder } from '../../UserServiceBuilder'
 
-export const sendWelcomeMail = UserServiceBuilder.getSubscriptionBuilder(
+export const sendWelcomeMailBuilder = UserServiceBuilder.getSubscriptionBuilder(
   'sendWelcomeEmail',
   'send a welcome email to new costumers',
 )

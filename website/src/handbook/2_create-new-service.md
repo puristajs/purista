@@ -30,10 +30,10 @@ We want to have the domain *User* and the following functionality:
 First, we need to create a new service.  
 All we need to do is to create a new class which extends the `Service` class.
 
-Create a folder `src/service/user` and inside this folder create a file `UserService.ts` with following content:
+Create a folder `src/service/user` and inside this folder create a file `UserServiceBuilder.ts` with following content:
 
 ```typescript
-import { Service, ServiceInfoType } from '@purista/core'
+import { ServiceBuilder, ServiceInfoType } from '@purista/core'
 
 export const userServiceInfo: ServiceInfoType = {
   serviceName: 'User',
@@ -41,14 +41,18 @@ export const userServiceInfo: ServiceInfoType = {
   serviceDescription: 'service which handles all user related information',
 }
 
-export class UserService extends Service {
-  public config = {
-    some: 'Service config'
-  }
-}
+export const UserServiceBuilder = new ServiceBuilder(userServiceInfo)
 ```
 
-Add a file `index.ts` in `src/service/user` and export our user service class.
+Create a file `UserService.ts` in `src/service/user` with following content:
+
+```typescript
+import { UserServiceBuilder } from './UserServiceBuilder'
+
+export const UserService = UserServiceBuilder
+```
+
+Add a file `index.ts` in `src/service/user` and export our user service.
 
 ```typescript
 export * from './UserService.ts'
@@ -64,8 +68,8 @@ Extend the file as shown below:
 
   // at the end of function main below await httpServerService.start()
 
-  // create the user service 
-  const userService = new UserService(baseLogger, userServiceInfo, eventBridge, [], [])
+  // create the user service instance
+  const userService = UserService.getInstance(baseLogger, eventBridge)
 
   // start the user service
   await userService.start()
@@ -143,13 +147,13 @@ First, we will create a function definition in our `src/service/user/commands/si
 Keep the order, schema, hook and function implementation as very last, to have correct types!
 
 ```typescript
-import { FunctionDefinitionBuilder } from '@purista/core'
+import { UserServiceBuilder } from '../../UserServiceBuilder'
 
 import { UserService } from '../../UserService'
 
 import { inputParameterSchema, inputPayloadSchema, outputPayloadSchema } from './schema'
 
-export default new FunctionDefinitionBuilder<UserService>('signUp', 'Sign up a new unknown user', 'NewUserCreated')
+export const userSignUpBuilder = UserServiceBuilder.getFunctionBuilder('signUp', 'Sign up a new unknown user', 'NewUserCreated')
   .addInputSchema(inputPayloadSchema)
   .addParameterSchema(inputParameterSchema)
   .addOutputSchema(outputPayloadSchema)
@@ -171,7 +175,7 @@ export default new FunctionDefinitionBuilder<UserService>('signUp', 'Sign up a n
 This code should be self explaining.  
 We say:
 
-*There is a new function `signUp` in `UserService`, which will create a event `NewUserCreated`, with input schema, parameter schema, output schema, and we expose it as POST endpoint on `/sign-up` path.*
+*There is a new function `signUp` in `UserService`, which will create an event `NewUserCreated`, with input schema, parameter schema, output schema, and we expose it as POST endpoint on `/sign-up` path.*
 
 It's a simple function, where we log the input, the config and return a response object.  
 
@@ -182,7 +186,7 @@ The types generated from schema are used, and your linter/typescript will compla
 You have a `this` scope, which is the instance of your domain service class `UserService`.  
 The first parameter of our function provides the function context.  
 
-The function context contains usefull things like logger, the full original command message and functions to invoke other service functions or emit custom events.
+The function context contains useful things like logger, the full original command message and functions to invoke other service functions or emit custom events.
 
 <Badge text="⚠️ Be aware" type="warning"/>
 
@@ -193,19 +197,18 @@ Such stuff is hard to handle and to scale. Try to keep things as stateless as po
 
 So, you might ask why a service class at all?
 
-There are use cases, where it makes sens to have it - if not, than it's an empty class which doesn't hurt.
+There are use cases, where it makes sense to have it - if not, than it's an empty class which doesn't hurt.
 
 Use cases are something like simply holding some initial configurations, which is needed by service functions.  
 
-Now we should add the function definition to our `User` service in our `src/index.ts`.
+Now we should add the function definition to our `User` service in our `src/service/user/UserService.ts`.
 
 ```typescript
-  // add imports
-  import signUp from './service/user/commands/signUp'
+import { userSignUpBuilder } from './commands/signUp'
+import { UserServiceBuilder } from './UserServiceBuilder'
 
+export const UserService = UserServiceBuilder.addFunctionDefinition(userSignUpBuilder.getDefinition())
 
-  // add to function array
-  const userService = new UserService(baseLogger, userServiceInfo, eventBridge, [ signUp.getDefinition() ], [])
 ```
 
 If you now start the application with `npm start` you should have a POST endpoint `https://localhost:8080/api/v1/sign-up` which should trigger our function.
@@ -213,7 +216,7 @@ If you now start the application with `npm start` you should have a POST endpoin
 There you can see, that we expose our function versioned by the service version.  
 This means, we can also have a domain service, running with different versions.
 
-If you have, for example breaking API changes in a new version of our `User` service, then you would create a new Service (or copy the old one and make your changes) and set service version to a higher version.
+If you have, for example, breaking API changes in a new version of our `User` service, then you would create a new Service (or copy the old one and make your changes) and set service version to a higher version.
 
 Try to open `https://localhost:8080/api` in your browser. You should see the OpenApi- UI with your new endpoint.
 
@@ -223,14 +226,14 @@ Now, our service should not only be able to create new users. New users should g
 
 You could pack the send email logic into our existing function, but this might not the best way.  
 Why?  
-Because you start mixing up different things, increase  the complexity of one simple, single function and it increases the test complexity, while decreasing the stability and maintenance.
+Because you start mixing up different things, increase the complexity of one simple, single function, and it increases the test complexity, while decreasing the stability and maintenance.
 
-It's better to have a subscription, which listens for all new created users and send them an email.  
+It's better to have a subscription, which listens for all new created users and email them.  
 This allows you:
 
 - to implement retry mechanism on sending an email more easily
 - lowers the amount of mocking & stubbing within single unit tests
-- reduces the request response time for the user, as there is no need to wait for the email to be send
+- reduces the request response time for the user, as there is no need to wait for the email to be sent
 - keeps your "creation" code clean and easy by separating the "email send" code
 - decouple things and remove/avoid dependencies
 - separate user creation and sending an email in deployment later on (allows different scaling if needed)
@@ -242,18 +245,18 @@ Create a new subfolder `src/service/user/subscriptions/sendWelcomeEmail` and cre
 Define a subscription like this:
 
 ```typescript
-import { SubscriptionDefinitionBuilder } from '@purista/core'
+import { EventName } from '../../../../types'
+import { UserServiceBuilder } from '../../UserServiceBuilder'
 
-import { UserService } from '../../UserService'
-
-export default new SubscriptionDefinitionBuilder<UserService>(
+export const sendWelcomeMailBuilder = UserServiceBuilder.getSubscriptionBuilder(
   'sendWelcomeEmail',
   'send a welcome email to new costumers',
 )
   .subscribeToEvent('NewUserCreated')
-  .setFunction(async function ({ logger }, _payload, _params) {
-    logger.info('Hello from subscription sendWelcomeEmail')
+  .setFunction(async function ({ logger }, _payload) {
+    logger.info('Hello from sendWelcomeEmail')
   })
+
 ```
 
 It is quite simple and similar to function definitions.
@@ -262,16 +265,16 @@ Here we create a new subscription `sendWelcomeEmail` with some description as se
 We want to subscribe to all messages with event name `NewUserCreated`.
 
 There is only one thing left.  
-Add the subscription to our service.
+Add the subscription to our service in `src/service/user/UserService.ts`.
 
 ```typescript
-  import signUp from './service/user/commands/signUp'
-  // add imports
-  import sendWelcomeEmail from './subscriptions/sendWelcomeEmail'
+import { userSignUpBuilder } from './commands/signUp'
+import { sendWelcomeMailBuilder } from './subscriptions/sendWelcomeMail'
+import { UserServiceBuilder } from './UserServiceBuilder'
 
+export const UserService = UserServiceBuilder.addFunctionDefinition(userSignUpBuilder.getDefinition())
+  .addSubscriptionDefinition(sendWelcomeMailBuilder.getDefinition())
 
-  // add to function array
-  const userService = new UserService(baseLogger, userServiceInfo, eventBridge, [ signUp.getDefinition() ], [ sendWelcomeEmail.getDefinition() ])
 ```
 
 If you restart your program, you will see a console log, each time the `/sign-up` endpoint is called successfully.
@@ -281,9 +284,9 @@ If you restart your program, you will see a console log, each time the `/sign-up
 Until now, we have a simple request-respone-pattern and a subscription which listens for the response.  
 The request is triggered by some url request.
 
-But in real world you might need to call a other service function within a service function.
+But in real world, you might need to call an other service function within a service function.
 
-With PURISTA it is quite easy. The function context provides a asynchronous function `invoke`.
+With PURISTA it is quite easy. The function context provides an asynchronous function `invoke`.
 
 Example:
 
@@ -309,4 +312,5 @@ setFunction(async function ({ invoke }) {
 ```
 
 If the invoked service fails for some reason, the `invoke` will throw `HandledError` or `UnhandledError`.  
-There is also no input validation on the callers side. To ensure correct types and input, you should share the types between the two service functions or you should add explicit input validation.
+There is also no input validation on the callers side. To ensure correct types and input, you should share the types between the two service functions, or you should add explicit input validation.  
+The response is also only validated on the invoked service.

@@ -1,11 +1,11 @@
 import { getEventBridgeMock, getFunctionContextMock, getLoggerMock } from '@purista/core'
 
 import { UserService } from '../../UserService'
-import functionDefinition from './index'
+import { userSignUpBuilder } from './index'
 
-const f = functionDefinition.getFunction()
+const f = userSignUpBuilder.getFunction()
 
-const service = new UserService(getLoggerMock().mock, getEventBridgeMock().mock)
+const service = UserService.getInstance(getLoggerMock().mock, getEventBridgeMock().mock)
 const fn = f.bind(service)
 
 test('returns a new user id', async () => {

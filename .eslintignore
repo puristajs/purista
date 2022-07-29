@@ -4,3 +4,4 @@ docs
 coverage
 node_modules
 .vuepress/enhanceApp.js
+*.d.ts
