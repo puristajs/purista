@@ -115,9 +115,9 @@ As you can see, the error is handled in the sense of _"Ok there is something wro
 It is totally fine, if you reduce your error handling in service functions and subscriptions to HandledErrors only.  
 It is JavaScript/typescript - so just let it throw!  
 
-Each service function and each subscription itself, is wrapped by a try-catch, which will convert any error into a UnhandledError with error code 500. The error will be logged. And a error message is send. So no worries, that your whole system can break.
+Each service function, and each subscription itself, is wrapped by a try-catch, which will convert any error into a UnhandledError with error code 500. The error will be logged. And an error message is send. So no worries, that your whole system can break.
 
-You can create subscriptions to track errors, you have the logs, the user gets a propper response, no information will be leaked.
+You can create subscriptions to track errors, you have the logs, the user gets a proper response, no information will be leaked.
 
 Because of this, the example from `HandledError` is totally fine, and we do not need to write more code here.  
 We know that any database issue is handled and returned as **500 INTERNAL SERVER ERROR**.

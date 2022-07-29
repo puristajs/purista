@@ -21,7 +21,7 @@ const main = async () => {
   await httpServerService.start()
 
   // create the user service
-  const userService = UserService.getInstance(baseLogger, eventBridge, {})
+  const userService = UserService.getInstance(baseLogger, eventBridge)
 
   // start the user service
   await userService.start()

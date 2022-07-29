@@ -1,9 +1,9 @@
 import { createTestCommandMsg, getEventBridgeMock, getLoggerMock, getSubscriptionContextMock } from '@purista/core'
 
 import { UserServiceBuilder } from '../../UserServiceBuilder'
-import { sendWelcomeMail } from './index'
+import { sendWelcomeMailBuilder } from './index'
 
-const f = sendWelcomeMail.getFunction()
+const f = sendWelcomeMailBuilder.getFunction()
 
 const service = UserServiceBuilder.getInstance(getLoggerMock().mock, getEventBridgeMock().mock)
 const fn = f.bind(service)

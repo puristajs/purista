@@ -1,9 +1,9 @@
-import { FunctionDefinitionBuilder, HandledError, StatusCode } from '@purista/core'
+import { HandledError, StatusCode } from '@purista/core'
 import { randomUUID } from 'node:crypto'
 
 import { EventName } from '../../../../types'
 import { UserFunction } from '../../UserFunction.enum'
-import { UserService } from '../../UserService'
+import { UserServiceBuilder } from '../../UserServiceBuilder'
 import {
   inputParameterSchema,
   inputPayloadSchema,
@@ -24,7 +24,7 @@ import {
  *
  * Add the implementation of you function as very last to ensure all information (types & co) are available.
  */
-export default new FunctionDefinitionBuilder<UserService>(
+export const userSignUpBuilder = UserServiceBuilder.getFunctionBuilder(
   UserFunction.SignUpNewUser, // set the name of function within the service
   'Sign up a new unknown user', // a short description what the function does (for example used in openApi)
   EventName.NewUserSignedUp, // the event name for the success response message

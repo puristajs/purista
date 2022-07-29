@@ -1,11 +1,11 @@
 import { createTestCommandMsg, getEventBridgeMock, getLoggerMock, getSubscriptionContextMock } from '@purista/core'
 
 import { UserService } from '../../UserService'
-import functionDefinition from './index'
+import { sendWelcomeMail } from './index'
 
-const f = functionDefinition.getFunction()
+const f = sendWelcomeMail.getFunction()
 
-const service = new UserService(getLoggerMock().mock, getEventBridgeMock().mock)
+const service = UserService.getInstance(getLoggerMock().mock, getEventBridgeMock().mock)
 const fn = f.bind(service)
 
 test('returns a new user id', async () => {
