@@ -163,7 +163,7 @@ You process the data, you persist the data and you send some message via websock
 With dependency injections, you will need to have error handling within your function for processing the data, persisting the data and sending messages over websocket. And in case the persistency is unavailable or the websocket connection get's temporary lost - you do what?  
 You can start adding more abstractions, layers and stuff to workaround, but does this really fix the underlaying problem and is it worth to have such code bloat from testing and maintaining perspective?
 
-With the approach of PURISTA, you get the a validated input, you process the data, you persist somehow, and you send a message via websocket somehow.  
+With the approach of PURISTA, you get a validated input, you process the data, you persist somehow, and you send a message via websocket somehow.  
 If, how and when does not matter for the input processing part.  
 Each of the steps has verified in-/output and basic error handling out of the box.
 
@@ -181,13 +181,81 @@ You can scale out as you need, as there are maybe multiple instances running whi
 These 4 words are describing the intention and motivation behind PURISTA.
 
 Focus on business logic, solve the clients issue, provide the features and just deliver!  
+It might need to change the mindset a bit. The question is not how to implement some feature. The question is what exactly does the user/consumer need and why.
 
 Just go through your own code and check what is your daily business?
 
 You get some kind of input, you validate it, you compute something, request some data, maybe persist some data and you return some result or you trigger some other function.  
 You will have some error handling and some logging.
 
-How much setup, configuration, abstraction, layers do you really need and much code do you produce for even simple stuff?
+How much setup, configuration, abstraction, layers do you really need and how much code do you produce for even simple stuff?
+
+### Separation of concerns
+
+Depending on your experiences, this might be hard or easy going. Separation of concerns is more a kind of mindset, than a fixed pattern or style.
+
+As an example:  
+
+You got a task "Implement user onboarding", and there something like "allow only valid emails, store the user in database and send a welcome mail".  
+From feature or business perspective, this is one single step "user onboarding".  
+Many developers will automatically get a POST http endpoint in mind - something like:
+
+```typescript
+async (request,response)=>{
+  if(!request.body.email.match(emailRegex)){
+    return response.send(400,'Invalid email')
+  }
+
+  const db = await getDbClient()
+  let user:User|undefined
+  try {
+    user = await db.insert('insert into user values (....)', request.body)
+    
+  } catch (error) {
+    console.log(error)
+    if(error instanceof ConstraintViolation) {
+      return response.send(400,'User already exists')
+    }
+    //...further error handling
+  }
+  
+  try {
+    const provider = getEmailProvider()
+    await provider.sendEmail(user.email,'Welcome')
+  }catch(err) {
+    console.log(err)
+  }
+
+  response.send(200,{ id: user.id }) 
+
+}
+
+```
+
+Many developers would now instantly start with abstractions, as they want to improve readability, testing and so on.
+
+So, you would probably see some `isUserEmailValid` abstraction function (100% for sure 😂), some wrappers around the database stuff, and some abstractions around sending the email. This might solve the developers issues, and produces a lot of nice bloat code.
+
+**BUT it does not solve the business issue**!  
+
+In fact, the issues and complexity are only hidden behind more code. At the end, you can write abstractions as much as you want, but at some point you need to do the "real" logic.  
+Don't get me wrong! Simply keep the balance. Abstractions and wrappers are ok and valid. But they are also a warning signal. Ask yourself always, why do you need it at some point. Can you avoid it with better design choices? Does it improve things from business perspective?
+
+In this example, one of the issues is: "how to retry email send, if the users is persisted".  
+Try to solve issues by design! Not by more error handling or additional code logic.  
+Also, when the user onboarding becomes more complex (like creation of ressources for new user), this function will become very quickly the little "nobody wanna touch me" monster.
+
+With separation of concerns in mind, this will turn into 3 main parts.
+
+1. Input validation is one single step and it does not matter what happens with the validated input afterwards.  
+2. Storing something in a database, and maybe handling database connection or issues, is the next part. It does not matter what happens "around" this persistance part. Simply take something and put it into database. That's it.  
+3. Sending an email is our third step. This step, only sends an email. It does not matter when, how the user is created or persisted. And you can retry the email part as you like.
+
+So, our complex "onboarding" is implemented, but the parts are simple and only a few lines of code. These are easy to understand, maintain and testable. You can also extend the onboarding flow by adding more parts (subscriptions, emitting events, invoking other functions). Or you can change your email provider or even database, without touching the other parts/tests.
+
+PURISTA helps to implement and manage these small parts. Also some parts are more or less available out of the box with low or no code implementation.
+
+Our example, the db persistance will become a simple service function with a zod input schema definition. This provides a lot of input validation and error handling out of the box. Our send email part, will become a subscription. The subscription is decoupled from the http request.
 
 ### Decuple from infrastructure and architecture
 
@@ -196,8 +264,11 @@ It's done by the concept of having services with functions and subscriptions whi
 
 How they are orchestrated, deployed and where they are running does not matter.
 
-You can decide if you want to deploy your logic as single monolith or in some microservice style or as serverless functions.  
-There is no need to decide if you like to use your own server or to some cloud provider.  
+You can decide if you want to deploy your logic as single monolith or in some microservice style or as serverless functions or if you like a mix of multiple styles.  
+There is no need to decide if you like to use your own server or some cloud provider.  
+
+It also allows to integrate other services and providers, without touching the core of your application. Simply add them to the event bus.  
+This is also a great option for larger projects, with multiple teams. Each team can work independently.
 
 ### K.I.S.S.
 
@@ -238,8 +309,8 @@ Also, any thrown error will be automatically catched, logged and transformed int
 Especially javascript/typescript is often blamed for it's error handling, but this also some opportunity.  
 It is js/typescript - let it throw! PURISTA will handle the worst case for you!  
 You don't need to implement error handling for any possible error which might occur.  
-Handle only the errors you need to handle at business level and improve your code, architecture and infrastructure over time to avoid technical errors!
-There is simply no need to have always some wrapped result, where you need to check, if it is a success or failure. And if it is a failure, what kind of failure and how to handle it and how to bubble up the error.
+Handle only the errors you need to handle at business level and improve your code, architecture and infrastructure over time to avoid technical errors!  
+There is simply no need, to have always some wrapped result, where you need to check, if it is a success or failure. And if it is a failure, what kind of failure and how to handle it and how to bubble up the error.
 
 The usage of some unified exchange bus allows to highly configure what "happens when...". It allows to build setups which are able to replay things, recover states, execute "when available" and so on.
 
@@ -283,12 +354,12 @@ You are able to follow single requests, because each one has a unique trace id a
 ### Scaling
 
 PURISTA adapts the ideas from microservices and serverless functions to separate the logic into small pieces and to use some way of unified communication.
-This means you can scale out things as you need.
+This means you can scale things as you need.
 
 The main difference is, that you do not need to decide at very first step, how you like to deploy or how you like to scale at the end.  
 You can simply start local and scale when you need. You are not nailed down to start with infrastructure or architectural questions and setups.
 
-Start small and efficient like you would do with the beginners "hello world" example and move to the solution which fits your needs.
+Start small and efficient, like you would do with the beginners "hello world" example, and move to the solution which fits your needs.
 
 You are not limited to scale "the whole blob". You are able to scale parts of your software differently.
 

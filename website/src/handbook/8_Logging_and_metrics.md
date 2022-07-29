@@ -3,7 +3,7 @@
 index: true
 order: 90
 # This is the icon of the page
-icon: cloud fas
+icon: chart-line fas
 # This is the title of the article
 title: Logging and metrics
 # A page can have multiple tags
