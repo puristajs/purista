@@ -3,7 +3,7 @@
 index: true
 order: 60
 # This is the icon of the page
-icon: hand-holding-magic fas
+icon: envelope-open-text fas
 # This is the title of the article
 title: Custom events
 # A page can have multiple tags
