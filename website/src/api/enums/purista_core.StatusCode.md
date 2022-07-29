@@ -76,628 +76,628 @@
 
 ### Accepted
 
-• **Accepted**
+• **Accepted** = ``202``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:7](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L7)
+[core/src/core/types/StatusCode.enum.ts:7](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L7)
 
 ___
 
 ### AlreadyReported
 
-• **AlreadyReported**
+• **AlreadyReported** = ``208``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:13](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L13)
+[core/src/core/types/StatusCode.enum.ts:13](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L13)
 
 ___
 
 ### BadGateway
 
-• **BadGateway**
+• **BadGateway** = ``502``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:57](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L57)
+[core/src/core/types/StatusCode.enum.ts:57](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L57)
 
 ___
 
 ### BadRequest
 
-• **BadRequest**
+• **BadRequest** = ``400``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:26](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L26)
+[core/src/core/types/StatusCode.enum.ts:26](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L26)
 
 ___
 
 ### BandwidthLimitExceeded
 
-• **BandwidthLimitExceeded**
+• **BandwidthLimitExceeded** = ``509``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:64](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L64)
+[core/src/core/types/StatusCode.enum.ts:64](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L64)
 
 ___
 
 ### Conflict
 
-• **Conflict**
+• **Conflict** = ``409``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:35](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L35)
+[core/src/core/types/StatusCode.enum.ts:35](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L35)
 
 ___
 
 ### Created
 
-• **Created**
+• **Created** = ``201``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:6](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L6)
+[core/src/core/types/StatusCode.enum.ts:6](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L6)
 
 ___
 
 ### ExpectationFailed
 
-• **ExpectationFailed**
+• **ExpectationFailed** = ``417``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:43](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L43)
+[core/src/core/types/StatusCode.enum.ts:43](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L43)
 
 ___
 
 ### Forbidden
 
-• **Forbidden**
+• **Forbidden** = ``403``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:29](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L29)
+[core/src/core/types/StatusCode.enum.ts:29](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L29)
 
 ___
 
 ### GatewayTimeout
 
-• **GatewayTimeout**
+• **GatewayTimeout** = ``504``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:59](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L59)
+[core/src/core/types/StatusCode.enum.ts:59](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L59)
 
 ___
 
 ### Gone
 
-• **Gone**
+• **Gone** = ``410``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:36](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L36)
+[core/src/core/types/StatusCode.enum.ts:36](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L36)
 
 ___
 
 ### HTTPVersionNotSupported
 
-• **HTTPVersionNotSupported**
+• **HTTPVersionNotSupported** = ``505``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:60](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L60)
+[core/src/core/types/StatusCode.enum.ts:60](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L60)
 
 ___
 
 ### IMUsed
 
-• **IMUsed**
+• **IMUsed** = ``229``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:14](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L14)
+[core/src/core/types/StatusCode.enum.ts:14](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L14)
 
 ___
 
 ### ImATeapot
 
-• **ImATeapot**
+• **ImATeapot** = ``418``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:44](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L44)
+[core/src/core/types/StatusCode.enum.ts:44](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L44)
 
 ___
 
 ### InfoContinue
 
-• **InfoContinue**
+• **InfoContinue** = ``100``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:2](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L2)
+[core/src/core/types/StatusCode.enum.ts:2](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L2)
 
 ___
 
 ### InfoProcessing
 
-• **InfoProcessing**
+• **InfoProcessing** = ``102``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L4)
+[core/src/core/types/StatusCode.enum.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L4)
 
 ___
 
 ### InfoSwitchingProtocols
 
-• **InfoSwitchingProtocols**
+• **InfoSwitchingProtocols** = ``101``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:3](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L3)
+[core/src/core/types/StatusCode.enum.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L3)
 
 ___
 
 ### InsufficientStorage
 
-• **InsufficientStorage**
+• **InsufficientStorage** = ``507``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:62](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L62)
+[core/src/core/types/StatusCode.enum.ts:62](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L62)
 
 ___
 
 ### InternalServerError
 
-• **InternalServerError**
+• **InternalServerError** = ``500``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:55](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L55)
+[core/src/core/types/StatusCode.enum.ts:55](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L55)
 
 ___
 
 ### LengthRequired
 
-• **LengthRequired**
+• **LengthRequired** = ``411``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:37](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L37)
+[core/src/core/types/StatusCode.enum.ts:37](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L37)
 
 ___
 
 ### Locked
 
-• **Locked**
+• **Locked** = ``423``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:47](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L47)
+[core/src/core/types/StatusCode.enum.ts:47](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L47)
 
 ___
 
 ### LoginTimeOut
 
-• **LoginTimeOut**
+• **LoginTimeOut** = ``440``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:52](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L52)
+[core/src/core/types/StatusCode.enum.ts:52](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L52)
 
 ___
 
 ### LoopDetected
 
-• **LoopDetected**
+• **LoopDetected** = ``508``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:63](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L63)
+[core/src/core/types/StatusCode.enum.ts:63](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L63)
 
 ___
 
 ### MethodNotAllowed
 
-• **MethodNotAllowed**
+• **MethodNotAllowed** = ``405``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:31](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L31)
+[core/src/core/types/StatusCode.enum.ts:31](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L31)
 
 ___
 
 ### MisdirectedRequest
 
-• **MisdirectedRequest**
+• **MisdirectedRequest** = ``421``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:45](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L45)
+[core/src/core/types/StatusCode.enum.ts:45](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L45)
 
 ___
 
 ### MultiStatus
 
-• **MultiStatus**
+• **MultiStatus** = ``207``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:12](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L12)
+[core/src/core/types/StatusCode.enum.ts:12](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L12)
 
 ___
 
 ### NetworkAuthRequired
 
-• **NetworkAuthRequired**
+• **NetworkAuthRequired** = ``511``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:66](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L66)
+[core/src/core/types/StatusCode.enum.ts:66](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L66)
 
 ___
 
 ### NoContent
 
-• **NoContent**
+• **NoContent** = ``204``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:9](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L9)
+[core/src/core/types/StatusCode.enum.ts:9](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L9)
 
 ___
 
 ### NonAuthoritativeInfo
 
-• **NonAuthoritativeInfo**
+• **NonAuthoritativeInfo** = ``203``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:8](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L8)
+[core/src/core/types/StatusCode.enum.ts:8](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L8)
 
 ___
 
 ### NotAcceptable
 
-• **NotAcceptable**
+• **NotAcceptable** = ``406``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:32](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L32)
+[core/src/core/types/StatusCode.enum.ts:32](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L32)
 
 ___
 
 ### NotExtended
 
-• **NotExtended**
+• **NotExtended** = ``510``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:65](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L65)
+[core/src/core/types/StatusCode.enum.ts:65](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L65)
 
 ___
 
 ### NotFound
 
-• **NotFound**
+• **NotFound** = ``404``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:30](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L30)
+[core/src/core/types/StatusCode.enum.ts:30](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L30)
 
 ___
 
 ### NotImplemented
 
-• **NotImplemented**
+• **NotImplemented** = ``501``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:56](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L56)
+[core/src/core/types/StatusCode.enum.ts:56](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L56)
 
 ___
 
 ### OK
 
-• **OK**
+• **OK** = ``200``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:5](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L5)
+[core/src/core/types/StatusCode.enum.ts:5](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L5)
 
 ___
 
 ### PartialContent
 
-• **PartialContent**
+• **PartialContent** = ``206``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:11](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L11)
+[core/src/core/types/StatusCode.enum.ts:11](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L11)
 
 ___
 
 ### PayloadTooLarge
 
-• **PayloadTooLarge**
+• **PayloadTooLarge** = ``413``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:39](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L39)
+[core/src/core/types/StatusCode.enum.ts:39](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L39)
 
 ___
 
 ### PaymentRequired
 
-• **PaymentRequired**
+• **PaymentRequired** = ``402``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:28](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L28)
+[core/src/core/types/StatusCode.enum.ts:28](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L28)
 
 ___
 
 ### PreconditionFailed
 
-• **PreconditionFailed**
+• **PreconditionFailed** = ``412``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:38](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L38)
+[core/src/core/types/StatusCode.enum.ts:38](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L38)
 
 ___
 
 ### PreconditionRequired
 
-• **PreconditionRequired**
+• **PreconditionRequired** = ``428``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:49](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L49)
+[core/src/core/types/StatusCode.enum.ts:49](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L49)
 
 ___
 
 ### ProxyAuthRequired
 
-• **ProxyAuthRequired**
+• **ProxyAuthRequired** = ``407``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:33](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L33)
+[core/src/core/types/StatusCode.enum.ts:33](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L33)
 
 ___
 
 ### RangeNotSatisfiable
 
-• **RangeNotSatisfiable**
+• **RangeNotSatisfiable** = ``416``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:42](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L42)
+[core/src/core/types/StatusCode.enum.ts:42](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L42)
 
 ___
 
 ### RedirectFound
 
-• **RedirectFound**
+• **RedirectFound** = ``302``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:17](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L17)
+[core/src/core/types/StatusCode.enum.ts:17](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L17)
 
 ___
 
 ### RedirectMovedPermanently
 
-• **RedirectMovedPermanently**
+• **RedirectMovedPermanently** = ``301``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:16](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L16)
+[core/src/core/types/StatusCode.enum.ts:16](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L16)
 
 ___
 
 ### RedirectMultipleChoices
 
-• **RedirectMultipleChoices**
+• **RedirectMultipleChoices** = ``300``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:15](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L15)
+[core/src/core/types/StatusCode.enum.ts:15](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L15)
 
 ___
 
 ### RedirectNotModified
 
-• **RedirectNotModified**
+• **RedirectNotModified** = ``304``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:20](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L20)
+[core/src/core/types/StatusCode.enum.ts:20](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L20)
 
 ___
 
 ### RedirectPermanent
 
-• **RedirectPermanent**
+• **RedirectPermanent** = ``308``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:25](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L25)
+[core/src/core/types/StatusCode.enum.ts:25](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L25)
 
 ___
 
 ### RedirectSeeOther
 
-• **RedirectSeeOther**
+• **RedirectSeeOther** = ``303``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:19](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L19)
+[core/src/core/types/StatusCode.enum.ts:19](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L19)
 
 ___
 
 ### RedirectSwitchProxy
 
-• **RedirectSwitchProxy**
+• **RedirectSwitchProxy** = ``306``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:23](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L23)
+[core/src/core/types/StatusCode.enum.ts:23](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L23)
 
 ___
 
 ### RedirectTemp
 
-• **RedirectTemp**
+• **RedirectTemp** = ``307``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:24](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L24)
+[core/src/core/types/StatusCode.enum.ts:24](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L24)
 
 ___
 
 ### RedirectUseProxy
 
-• **RedirectUseProxy**
+• **RedirectUseProxy** = ``305``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:21](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L21)
+[core/src/core/types/StatusCode.enum.ts:21](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L21)
 
 ___
 
 ### RequestHeaderFieldsTooLarge
 
-• **RequestHeaderFieldsTooLarge**
+• **RequestHeaderFieldsTooLarge** = ``431``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:51](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L51)
+[core/src/core/types/StatusCode.enum.ts:51](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L51)
 
 ___
 
 ### RequestTimeout
 
-• **RequestTimeout**
+• **RequestTimeout** = ``408``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:34](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L34)
+[core/src/core/types/StatusCode.enum.ts:34](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L34)
 
 ___
 
 ### ResetContent
 
-• **ResetContent**
+• **ResetContent** = ``205``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:10](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L10)
+[core/src/core/types/StatusCode.enum.ts:10](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L10)
 
 ___
 
 ### RetryWith
 
-• **RetryWith**
+• **RetryWith** = ``449``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:53](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L53)
+[core/src/core/types/StatusCode.enum.ts:53](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L53)
 
 ___
 
 ### ServiceUnavailable
 
-• **ServiceUnavailable**
+• **ServiceUnavailable** = ``503``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:58](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L58)
+[core/src/core/types/StatusCode.enum.ts:58](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L58)
 
 ___
 
 ### TooManyRequests
 
-• **TooManyRequests**
+• **TooManyRequests** = ``429``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:50](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L50)
+[core/src/core/types/StatusCode.enum.ts:50](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L50)
 
 ___
 
 ### URITooLong
 
-• **URITooLong**
+• **URITooLong** = ``414``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:40](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L40)
+[core/src/core/types/StatusCode.enum.ts:40](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L40)
 
 ___
 
 ### Unauthorized
 
-• **Unauthorized**
+• **Unauthorized** = ``401``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:27](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L27)
+[core/src/core/types/StatusCode.enum.ts:27](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L27)
 
 ___
 
 ### UnavailableForLegalReasons
 
-• **UnavailableForLegalReasons**
+• **UnavailableForLegalReasons** = ``451``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:54](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L54)
+[core/src/core/types/StatusCode.enum.ts:54](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L54)
 
 ___
 
 ### UnprocessableEntity
 
-• **UnprocessableEntity**
+• **UnprocessableEntity** = ``422``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:46](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L46)
+[core/src/core/types/StatusCode.enum.ts:46](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L46)
 
 ___
 
 ### UnsupportedMediaType
 
-• **UnsupportedMediaType**
+• **UnsupportedMediaType** = ``415``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:41](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L41)
+[core/src/core/types/StatusCode.enum.ts:41](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L41)
 
 ___
 
 ### UpgradeRequired
 
-• **UpgradeRequired**
+• **UpgradeRequired** = ``426``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:48](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L48)
+[core/src/core/types/StatusCode.enum.ts:48](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L48)
 
 ___
 
 ### VariantAlsoNegotiates
 
-• **VariantAlsoNegotiates**
+• **VariantAlsoNegotiates** = ``506``
 
 #### Defined in
 
-[core/src/core/types/StatusCode.enum.ts:61](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/StatusCode.enum.ts#L61)
+[core/src/core/types/StatusCode.enum.ts:61](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/StatusCode.enum.ts#L61)

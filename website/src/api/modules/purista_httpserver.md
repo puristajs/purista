@@ -4,6 +4,10 @@
 
 ## Table of contents
 
+### Namespaces
+
+- [internal](purista_httpserver.internal.md)
+
 ### Classes
 
 - [HttpServerService](../classes/purista_httpserver.HttpServerService.md)
@@ -37,7 +41,7 @@
 | `domain` | `string` |
 | `fastify` | `Partial`<`FastifyServerOptions`\> & `Partial`<`FastifyHttp2SecureOptions`<`Http2SecureServer`\>\> |
 | `host?` | `string` |
-| `logLevel?` | [`LogLevelName`](purista_core.md#loglevelname) |
+| `logLevel?` | [`LogLevelName`](purista_httpserver.internal.md#loglevelname) |
 | `openApi?` | { `components?`: `ComponentsObject` ; `enabled?`: `boolean` ; `externalDocs?`: `ExternalDocumentationObject` ; `info`: `InfoObject` ; `path?`: `string` ; `security?`: `SecurityRequirementObject`[] ; `servers?`: `ServerObject`[] ; `tags?`: `TagObject`[]  } |
 | `openApi.components?` | `ComponentsObject` |
 | `openApi.enabled?` | `boolean` |
@@ -52,7 +56,7 @@
 
 #### Defined in
 
-[httpserver/src/types/HttpServerConfig.ts:13](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/httpserver/src/types/HttpServerConfig.ts#L13)
+[httpserver/src/types/HttpServerConfig.ts:13](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/types/HttpServerConfig.ts#L13)
 
 ## Variables
 
@@ -62,7 +66,7 @@
 
 #### Defined in
 
-[httpserver/src/config/defaults.config.ts:7](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/httpserver/src/config/defaults.config.ts#L7)
+[httpserver/src/config/defaults.config.ts:7](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/config/defaults.config.ts#L7)
 
 ___
 
@@ -72,17 +76,17 @@ ___
 
 #### Defined in
 
-[httpserver/src/config/defaults.config.ts:5](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/httpserver/src/config/defaults.config.ts#L5)
+[httpserver/src/config/defaults.config.ts:5](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/config/defaults.config.ts#L5)
 
 ___
 
 ### ServiceInfo
 
-• `Const` **ServiceInfo**: [`ServiceInfoType`](purista_core.md#serviceinfotype)
+• `Const` **ServiceInfo**: [`ServiceInfoType`](purista_httpserver.internal.md#serviceinfotype)
 
 #### Defined in
 
-[httpserver/src/config/ServiceInfo.ts:3](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/httpserver/src/config/ServiceInfo.ts#L3)
+[httpserver/src/config/ServiceInfo.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/config/ServiceInfo.ts#L3)
 
 ## Functions
 
@@ -96,4 +100,4 @@ ___
 
 #### Defined in
 
-[httpserver/src/config/getDefaultConfig.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/httpserver/src/config/getDefaultConfig.ts#L4)
+[httpserver/src/config/getDefaultConfig.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/config/getDefaultConfig.ts#L4)

@@ -6,5 +6,6 @@ PURISTA API - v1.3.1
 
 ### Modules
 
+- [@purista/amqpbridge](modules/purista_amqpbridge.md)
 - [@purista/core](modules/purista_core.md)
 - [@purista/httpserver](modules/purista_httpserver.md)

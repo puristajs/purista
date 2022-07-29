@@ -1,89 +1,126 @@
-[PURISTA API - v1.3.1](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / HttpServerService
+[PURISTA API - v1.3.1](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / Service
 
-# Class: HttpServerService
+# Class: Service<ConfigType\>
 
-[@purista/httpserver](../modules/purista_httpserver.md).HttpServerService
+[@purista/httpserver](../modules/purista_httpserver.md).[internal](../modules/purista_httpserver.internal.md).Service
 
-A simple http server based on fastify.
+Base class for all services.
+This class provides base functions to work with the event bridge, logging and so on
+
+Every service should extend this class and should not directly access the eventbridge or other service
+
+```typescript
+class MyService extends Service {
+
+  constructor(baseLogger: Logger, info: ServiceInfoType, eventBridge: EventBridge) {
+    super( baseLogger, info, eventBridge )
+    // ... initial service logic
+  }
+  // ... service methods, functions and logic
+}
+```
+
+## Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ConfigType` | `unknown` \| `undefined` |
 
 ## Hierarchy
 
-- [`Service`](purista_httpserver.internal.Service.md)<[`HttpServerConfig`](../modules/purista_httpserver.md#httpserverconfig)\>
+- [`ServiceClass`](purista_httpserver.internal.ServiceClass.md)<`ConfigType`\>
 
-  ↳ **`HttpServerService`**
+  ↳ **`Service`**
+
+  ↳↳ [`HttpServerService`](purista_httpserver.HttpServerService.md)
+
+## Implements
+
+- [`IServiceClass`](../interfaces/purista_httpserver.internal.IServiceClass.md)
 
 ## Table of contents
 
 ### Constructors
 
-- [constructor](purista_httpserver.HttpServerService.md#constructor)
+- [constructor](purista_httpserver.internal.Service.md#constructor)
 
 ### Properties
 
-- [commands](purista_httpserver.HttpServerService.md#commands)
-- [config](purista_httpserver.HttpServerService.md#config)
-- [eventBridge](purista_httpserver.HttpServerService.md#eventbridge)
-- [info](purista_httpserver.HttpServerService.md#info)
-- [routeDefinitions](purista_httpserver.HttpServerService.md#routedefinitions)
-- [routes](purista_httpserver.HttpServerService.md#routes)
-- [server](purista_httpserver.HttpServerService.md#server)
-- [serviceLogger](purista_httpserver.HttpServerService.md#servicelogger)
-- [subscriptions](purista_httpserver.HttpServerService.md#subscriptions)
+- [commandFunctions](purista_httpserver.internal.Service.md#commandfunctions)
+- [commands](purista_httpserver.internal.Service.md#commands)
+- [config](purista_httpserver.internal.Service.md#config)
+- [eventBridge](purista_httpserver.internal.Service.md#eventbridge)
+- [info](purista_httpserver.internal.Service.md#info)
+- [serviceLogger](purista_httpserver.internal.Service.md#servicelogger)
+- [subscriptionList](purista_httpserver.internal.Service.md#subscriptionlist)
+- [subscriptions](purista_httpserver.internal.Service.md#subscriptions)
 
 ### Accessors
 
-- [serviceInfo](purista_httpserver.HttpServerService.md#serviceinfo)
+- [serviceInfo](purista_httpserver.internal.Service.md#serviceinfo)
 
 ### Methods
 
-- [destroy](purista_httpserver.HttpServerService.md#destroy)
-- [emit](purista_httpserver.HttpServerService.md#emit)
-- [executeCommand](purista_httpserver.HttpServerService.md#executecommand)
-- [executeSubscription](purista_httpserver.HttpServerService.md#executesubscription)
-- [getEmitFunction](purista_httpserver.HttpServerService.md#getemitfunction)
-- [getInvokeFunction](purista_httpserver.HttpServerService.md#getinvokefunction)
-- [initializeEventbridgeConnect](purista_httpserver.HttpServerService.md#initializeeventbridgeconnect)
-- [invoke](purista_httpserver.HttpServerService.md#invoke)
-- [off](purista_httpserver.HttpServerService.md#off)
-- [on](purista_httpserver.HttpServerService.md#on)
-- [registerCommand](purista_httpserver.HttpServerService.md#registercommand)
-- [registerSubscription](purista_httpserver.HttpServerService.md#registersubscription)
-- [sendServiceInfo](purista_httpserver.HttpServerService.md#sendserviceinfo)
-- [start](purista_httpserver.HttpServerService.md#start)
+- [destroy](purista_httpserver.internal.Service.md#destroy)
+- [emit](purista_httpserver.internal.Service.md#emit)
+- [executeCommand](purista_httpserver.internal.Service.md#executecommand)
+- [executeSubscription](purista_httpserver.internal.Service.md#executesubscription)
+- [getEmitFunction](purista_httpserver.internal.Service.md#getemitfunction)
+- [getInvokeFunction](purista_httpserver.internal.Service.md#getinvokefunction)
+- [initializeEventbridgeConnect](purista_httpserver.internal.Service.md#initializeeventbridgeconnect)
+- [off](purista_httpserver.internal.Service.md#off)
+- [on](purista_httpserver.internal.Service.md#on)
+- [registerCommand](purista_httpserver.internal.Service.md#registercommand)
+- [registerSubscription](purista_httpserver.internal.Service.md#registersubscription)
+- [sendServiceInfo](purista_httpserver.internal.Service.md#sendserviceinfo)
+- [start](purista_httpserver.internal.Service.md#start)
 
 ## Constructors
 
 ### constructor
 
-• **new HttpServerService**(`baseLogger`, `eventBridge`, `config?`)
+• **new Service**<`ConfigType`\>(`baseLogger`, `info`, `eventBridge`, `commandFunctions`, `subscriptionList`, `config`)
 
-Create a new instance of the HttpServer class
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ConfigType` | `unknown` |
 
 #### Parameters
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `baseLogger` | [`Logger`](purista_httpserver.internal.Logger.md) | The logger that the server will use. |
-| `eventBridge` | [`EventBridge`](purista_httpserver.internal.EventBridge.md) | EventBridge |
-| `config` | [`HttpServerConfig`](../modules/purista_httpserver.md#httpserverconfig) | - |
+| Name | Type |
+| :------ | :------ |
+| `baseLogger` | [`Logger`](purista_httpserver.internal.Logger.md) |
+| `info` | [`ServiceInfoType`](../modules/purista_httpserver.internal.md#serviceinfotype) |
+| `eventBridge` | [`EventBridge`](purista_httpserver.internal.EventBridge.md) |
+| `commandFunctions` | [`CommandDefinitionList`](../modules/purista_httpserver.internal.md#commanddefinitionlist)<`any`\> |
+| `subscriptionList` | [`SubscriptionDefinitionList`](../modules/purista_httpserver.internal.md#subscriptiondefinitionlist)<`any`\> |
+| `config` | `ConfigType` |
 
 #### Overrides
 
-[Service](purista_httpserver.internal.Service.md).[constructor](purista_httpserver.internal.Service.md#constructor)
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[constructor](purista_httpserver.internal.ServiceClass.md#constructor)
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:46](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/HttpServerService.impl.ts#L46)
+core/lib/types/core/Service/Service.impl.d.ts:28
 
 ## Properties
+
+### commandFunctions
+
+• `Private` **commandFunctions**: `any`
+
+#### Defined in
+
+core/lib/types/core/Service/Service.impl.d.ts:20
+
+___
 
 ### commands
 
 • `Protected` **commands**: `Map`<`string`, [`CommandDefinition`](../modules/purista_httpserver.internal.md#commanddefinition)<[`ServiceClass`](purista_httpserver.internal.ServiceClass.md)<`unknown`\>, `Record`<`string`, `unknown`\>, `unknown`, `unknown`, `unknown`, `unknown`, `unknown`\>\>
-
-#### Inherited from
-
-[Service](purista_httpserver.internal.Service.md).[commands](purista_httpserver.internal.Service.md#commands)
 
 #### Defined in
 
@@ -93,11 +130,11 @@ ___
 
 ### config
 
-• **config**: [`HttpServerConfig`](../modules/purista_httpserver.md#httpserverconfig)
+• **config**: `ConfigType`
 
-#### Inherited from
+#### Overrides
 
-[Service](purista_httpserver.internal.Service.md).[config](purista_httpserver.internal.Service.md#config)
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[config](purista_httpserver.internal.ServiceClass.md#config)
 
 #### Defined in
 
@@ -111,9 +148,9 @@ ___
 
 The event bridge instance
 
-#### Inherited from
+#### Overrides
 
-[Service](purista_httpserver.internal.Service.md).[eventBridge](purista_httpserver.internal.Service.md#eventbridge)
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[eventBridge](purista_httpserver.internal.ServiceClass.md#eventbridge)
 
 #### Defined in
 
@@ -128,9 +165,9 @@ ___
 General service info
 Service name, service version and some human readable description
 
-#### Inherited from
+#### Overrides
 
-[Service](purista_httpserver.internal.Service.md).[info](purista_httpserver.internal.Service.md#info)
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[info](purista_httpserver.internal.ServiceClass.md#info)
 
 #### Defined in
 
@@ -138,43 +175,9 @@ core/lib/types/core/Service/Service.impl.d.ts:23
 
 ___
 
-### routeDefinitions
-
-• **routeDefinitions**: [`HttpExposedServiceMeta`](../modules/purista_httpserver.internal.md#httpexposedservicemeta)[] = `[]`
-
-#### Defined in
-
-[httpserver/src/HttpServerService.impl.ts:36](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/HttpServerService.impl.ts#L36)
-
-___
-
-### routes
-
-• **routes**: `default`<`Function`\>
-
-#### Defined in
-
-[httpserver/src/HttpServerService.impl.ts:38](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/HttpServerService.impl.ts#L38)
-
-___
-
-### server
-
-• `Optional` **server**: `FastifyInstance`<`Server`, `IncomingMessage`, `ServerResponse`, `FastifyLoggerInstance`, `FastifyTypeProviderDefault`\>
-
-#### Defined in
-
-[httpserver/src/HttpServerService.impl.ts:34](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/HttpServerService.impl.ts#L34)
-
-___
-
 ### serviceLogger
 
 • `Protected` **serviceLogger**: [`Logger`](purista_httpserver.internal.Logger.md)
-
-#### Inherited from
-
-[Service](purista_httpserver.internal.Service.md).[serviceLogger](purista_httpserver.internal.Service.md#servicelogger)
 
 #### Defined in
 
@@ -182,13 +185,19 @@ core/lib/types/core/Service/Service.impl.d.ts:24
 
 ___
 
+### subscriptionList
+
+• `Private` **subscriptionList**: `any`
+
+#### Defined in
+
+core/lib/types/core/Service/Service.impl.d.ts:21
+
+___
+
 ### subscriptions
 
 • `Protected` **subscriptions**: `Map`<`string`, [`SubscriptionDefinition`](../modules/purista_httpserver.internal.md#subscriptiondefinition)<[`ServiceClass`](purista_httpserver.internal.ServiceClass.md)<`unknown`\>, [`EBMessage`](../modules/purista_httpserver.internal.md#ebmessage), `unknown`\>\>
-
-#### Inherited from
-
-[Service](purista_httpserver.internal.Service.md).[subscriptions](purista_httpserver.internal.Service.md#subscriptions)
 
 #### Defined in
 
@@ -206,9 +215,9 @@ Get service info
 
 [`ServiceInfoType`](../modules/purista_httpserver.internal.md#serviceinfotype)
 
-#### Inherited from
+#### Implementation of
 
-Service.serviceInfo
+IServiceClass.serviceInfo
 
 #### Defined in
 
@@ -226,9 +235,13 @@ Shut down the service
 
 `Promise`<`void`\>
 
-#### Inherited from
+#### Implementation of
 
-[Service](purista_httpserver.internal.Service.md).[destroy](purista_httpserver.internal.Service.md#destroy)
+[IServiceClass](../interfaces/purista_httpserver.internal.IServiceClass.md).[destroy](../interfaces/purista_httpserver.internal.IServiceClass.md#destroy)
+
+#### Overrides
+
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[destroy](purista_httpserver.internal.ServiceClass.md#destroy)
 
 #### Defined in
 
@@ -259,7 +272,7 @@ ___
 
 #### Inherited from
 
-[Service](purista_httpserver.internal.Service.md).[emit](purista_httpserver.internal.Service.md#emit)
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[emit](purista_httpserver.internal.ServiceClass.md#emit)
 
 #### Defined in
 
@@ -283,10 +296,6 @@ Called when a command is received by the service
 
 `Promise`<`Readonly`<`Omit`<[`CommandSuccessResponse`](../modules/purista_httpserver.internal.md#commandsuccessresponse-1)<`unknown`\>, ``"instanceId"``\>\> \| `Readonly`<`Omit`<[`CommandErrorResponse`](../modules/purista_httpserver.internal.md#commanderrorresponse-1), ``"instanceId"``\>\>\>
 
-#### Inherited from
-
-[Service](purista_httpserver.internal.Service.md).[executeCommand](purista_httpserver.internal.Service.md#executecommand)
-
 #### Defined in
 
 core/lib/types/core/Service/Service.impl.d.ts:55
@@ -307,10 +316,6 @@ ___
 #### Returns
 
 `Promise`<`void`\>
-
-#### Inherited from
-
-[Service](purista_httpserver.internal.Service.md).[executeSubscription](purista_httpserver.internal.Service.md#executesubscription)
 
 #### Defined in
 
@@ -353,10 +358,6 @@ ___
 
 `Promise`<`void`\>
 
-#### Inherited from
-
-[Service](purista_httpserver.internal.Service.md).[getEmitFunction](purista_httpserver.internal.Service.md#getemitfunction)
-
 #### Defined in
 
 core/lib/types/core/Service/Service.impl.d.ts:48
@@ -393,10 +394,6 @@ ___
 
 `Promise`<`any`\>
 
-#### Inherited from
-
-[Service](purista_httpserver.internal.Service.md).[getInvokeFunction](purista_httpserver.internal.Service.md#getinvokefunction)
-
 #### Defined in
 
 core/lib/types/core/Service/Service.impl.d.ts:47
@@ -420,46 +417,9 @@ Connect service to event bridge to receive commands and command responses
 
 `Promise`<`void`\>
 
-#### Inherited from
-
-[Service](purista_httpserver.internal.Service.md).[initializeEventbridgeConnect](purista_httpserver.internal.Service.md#initializeeventbridgeconnect)
-
 #### Defined in
 
 core/lib/types/core/Service/Service.impl.d.ts:40
-
-___
-
-### invoke
-
-▸ **invoke**<`T`\>(`input`, `endpoint`): `Promise`<`T`\>
-
-#### Type parameters
-
-| Name |
-| :------ |
-| `T` |
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `input` | `Object` |
-| `input.payload` | `Object` |
-| `input.payload.parameter` | `unknown` |
-| `input.payload.payload` | `unknown` |
-| `input.principalId?` | `string` |
-| `input.receiver` | [`EBMessageAddress`](../modules/purista_httpserver.internal.md#ebmessageaddress) |
-| `input.traceId` | `string` |
-| `endpoint` | `string` |
-
-#### Returns
-
-`Promise`<`T`\>
-
-#### Defined in
-
-[httpserver/src/HttpServerService.impl.ts:117](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/HttpServerService.impl.ts#L117)
 
 ___
 
@@ -486,7 +446,7 @@ ___
 
 #### Inherited from
 
-[Service](purista_httpserver.internal.Service.md).[off](purista_httpserver.internal.Service.md#off)
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[off](purista_httpserver.internal.ServiceClass.md#off)
 
 #### Defined in
 
@@ -517,7 +477,7 @@ ___
 
 #### Inherited from
 
-[Service](purista_httpserver.internal.Service.md).[on](purista_httpserver.internal.Service.md#on)
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[on](purista_httpserver.internal.ServiceClass.md#on)
 
 #### Defined in
 
@@ -541,9 +501,9 @@ Register a new command (function) for this service
 
 `Promise`<`void`\>
 
-#### Inherited from
+#### Overrides
 
-[Service](purista_httpserver.internal.Service.md).[registerCommand](purista_httpserver.internal.Service.md#registercommand)
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[registerCommand](purista_httpserver.internal.ServiceClass.md#registercommand)
 
 #### Defined in
 
@@ -564,10 +524,6 @@ ___
 #### Returns
 
 `Promise`<`void`\>
-
-#### Inherited from
-
-[Service](purista_httpserver.internal.Service.md).[registerSubscription](purista_httpserver.internal.Service.md#registersubscription)
 
 #### Defined in
 
@@ -593,9 +549,9 @@ Broadcast service info message
 
 `Promise`<`Readonly`<[`EBMessage`](../modules/purista_httpserver.internal.md#ebmessage)\>\>
 
-#### Inherited from
+#### Implementation of
 
-[Service](purista_httpserver.internal.Service.md).[sendServiceInfo](purista_httpserver.internal.Service.md#sendserviceinfo)
+[IServiceClass](../interfaces/purista_httpserver.internal.IServiceClass.md).[sendServiceInfo](../interfaces/purista_httpserver.internal.IServiceClass.md#sendserviceinfo)
 
 #### Defined in
 
@@ -613,10 +569,14 @@ It connects to the event bridge and subscribes to the topics that are in the sub
 
 `Promise`<`void`\>
 
+#### Implementation of
+
+[IServiceClass](../interfaces/purista_httpserver.internal.IServiceClass.md).[start](../interfaces/purista_httpserver.internal.IServiceClass.md#start)
+
 #### Overrides
 
-[Service](purista_httpserver.internal.Service.md).[start](purista_httpserver.internal.Service.md#start)
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[start](purista_httpserver.internal.ServiceClass.md#start)
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:73](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/HttpServerService.impl.ts#L73)
+core/lib/types/core/Service/Service.impl.d.ts:32

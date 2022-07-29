@@ -76,7 +76,7 @@ A working schema definition needs at least a function name, a short description 
 
 | Name | Type |
 | :------ | :------ |
-| `ServiceClassType` | extends [`ServiceClass`](purista_core.ServiceClass.md)<`ServiceClassType`\> |
+| `ServiceClassType` | extends [`ServiceClass`](purista_core.ServiceClass.md)<`unknown`, `ServiceClassType`\> |
 | `MessagePayloadType` | `unknown` |
 | `MessageParamsType` | `unknown` |
 | `MessageResultType` | `unknown` |
@@ -94,7 +94,7 @@ A working schema definition needs at least a function name, a short description 
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:83](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L83)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:83](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L83)
 
 ## Properties
 
@@ -104,7 +104,7 @@ A working schema definition needs at least a function name, a short description 
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:44](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L44)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:44](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L44)
 
 ___
 
@@ -114,7 +114,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:73](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L73)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:73](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L73)
 
 ___
 
@@ -138,7 +138,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:48](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L48)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:48](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L48)
 
 ___
 
@@ -148,7 +148,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:34](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L34)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:34](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L34)
 
 ___
 
@@ -158,7 +158,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:35](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L35)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:35](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L35)
 
 ___
 
@@ -168,7 +168,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:46](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L46)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:46](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L46)
 
 ___
 
@@ -178,7 +178,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:36](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L36)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:36](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L36)
 
 ___
 
@@ -188,7 +188,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:37](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L37)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:37](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L37)
 
 ___
 
@@ -198,7 +198,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:38](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L38)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:38](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L38)
 
 ___
 
@@ -208,7 +208,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:42](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L42)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:42](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L42)
 
 ___
 
@@ -218,7 +218,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:40](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L40)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:40](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L40)
 
 ## Methods
 
@@ -230,7 +230,8 @@ If a function can return other status codes you should add them to openApi defin
 Per default, 200, 204, 400, 401 and 500 can be autogenerated in most cases.
 Special cases or different status codes should be added with this function.
 
-**`example`**
+**`Example`**
+
 ```ts
 addErrorStatusCodes(StatusCode.PaymentRequired, StatusCode.Conflict)
 ```
@@ -249,7 +250,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:210](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L210)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:210](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L210)
 
 ___
 
@@ -282,7 +283,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:102](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L102)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:102](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L102)
 
 ___
 
@@ -315,7 +316,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:121](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L121)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:121](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L121)
 
 ___
 
@@ -348,7 +349,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:140](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L140)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:140](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L140)
 
 ___
 
@@ -360,7 +361,8 @@ Define query parameters if you expose the function as http endpoint.
 Query parameters are add to openApi definition.
 Query parameters are add to input parameters.
 
-**`example`**
+**`Example`**
+
 ```ts
 .addQueryParameters(
   {
@@ -388,7 +390,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:175](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L175)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:175](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L175)
 
 ___
 
@@ -399,7 +401,8 @@ ___
 Add tags for openApi definition for given function.
 It is recommended to use some enum for tags to avoid typo issues.
 
-**`example`**
+**`Example`**
+
 ```ts
 addTags('User','Public')
 ```
@@ -418,7 +421,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:192](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L192)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:192](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L192)
 
 ___
 
@@ -442,7 +445,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:365](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L365)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:365](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L365)
 
 ___
 
@@ -466,7 +469,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:355](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L355)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:355](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L355)
 
 ___
 
@@ -492,7 +495,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:337](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L337)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:337](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L337)
 
 ___
 
@@ -512,7 +515,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:386](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L386)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:386](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L386)
 
 ___
 
@@ -530,7 +533,7 @@ CommandDefinition
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:439](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L439)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:439](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L439)
 
 ___
 
@@ -548,7 +551,7 @@ the function
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:541](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L541)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:541](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L541)
 
 ___
 
@@ -566,7 +569,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:318](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L318)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:318](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L318)
 
 ___
 
@@ -584,7 +587,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:326](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L326)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:326](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L326)
 
 ___
 
@@ -609,7 +612,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:307](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L307)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:307](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L307)
 
 ___
 
@@ -634,7 +637,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:288](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L288)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:288](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L288)
 
 ___
 
@@ -647,7 +650,8 @@ The types should be automatically set as soon as schemas previously defined.
 As the function will be a a function of a service class you need to implement as function declaration.
 Anonymous functions do not have access to the `this` scope.
 
-**`example`**
+**`Example`**
+
 ```ts
 async function (context, payload, parameter) {
 
@@ -669,7 +673,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:499](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L499)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:499](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L499)
 
 ___
 
@@ -689,7 +693,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:91](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L91)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:91](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L91)
 
 ___
 
@@ -699,7 +703,8 @@ ___
 
 Set the function summary text used for example in openApi documentation
 
-**`example`**
+**`Example`**
+
 ```ts
 setSummary('Some function summary')
 ```
@@ -718,7 +723,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:381](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L381)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:381](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L381)
 
 ___
 
@@ -757,7 +762,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:222](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L222)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:222](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L222)
 
 ___
 
@@ -792,4 +797,4 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:257](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L257)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:257](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L257)

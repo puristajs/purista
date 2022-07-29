@@ -4,6 +4,10 @@
 
 [@purista/core](../modules/purista_core.md).IServiceClass
 
+## Implemented by
+
+- [`Service`](../classes/purista_core.Service.md)
+
 ## Table of contents
 
 ### Accessors
@@ -28,7 +32,7 @@
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:55](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/ServiceClass.ts#L55)
+[core/src/core/types/ServiceClass.ts:58](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L58)
 
 ## Methods
 
@@ -42,13 +46,13 @@
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:51](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/ServiceClass.ts#L51)
+[core/src/core/types/ServiceClass.ts:54](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L54)
 
 ___
 
 ### sendServiceInfo
 
-▸ **sendServiceInfo**(`infoType`, `target?`, `data?`): `Promise`<`void`\>
+▸ **sendServiceInfo**(`infoType`, `target?`, `data?`): `Promise`<`Readonly`<[`EBMessage`](../modules/purista_core.md#ebmessage)\>\>
 
 #### Parameters
 
@@ -60,11 +64,11 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`<`Readonly`<[`EBMessage`](../modules/purista_core.md#ebmessage)\>\>
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:56](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/ServiceClass.ts#L56)
+[core/src/core/types/ServiceClass.ts:59](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L59)
 
 ___
 
@@ -78,4 +82,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:53](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/ServiceClass.ts#L53)
+[core/src/core/types/ServiceClass.ts:56](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L56)
