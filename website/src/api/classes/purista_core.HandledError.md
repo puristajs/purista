@@ -53,7 +53,7 @@ Error.constructor
 
 #### Defined in
 
-[core/src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/HandledError.impl.ts#L10)
+[core/src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/HandledError.impl.ts#L10)
 
 ## Properties
 
@@ -61,17 +61,29 @@ Error.constructor
 
 • `Optional` **data**: `unknown`
 
+#### Defined in
+
+[core/src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/HandledError.impl.ts#L10)
+
 ___
 
 ### errorCode
 
 • **errorCode**: [`StatusCode`](../enums/purista_core.StatusCode.md)
 
+#### Defined in
+
+[core/src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/HandledError.impl.ts#L10)
+
 ___
 
 ### traceId
 
 • `Optional` **traceId**: `string`
+
+#### Defined in
+
+[core/src/core/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/HandledError.impl.ts#L10)
 
 ## Methods
 
@@ -89,7 +101,7 @@ ErrorResponse
 
 #### Defined in
 
-[core/src/core/HandledError.impl.ts:27](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/HandledError.impl.ts#L27)
+[core/src/core/HandledError.impl.ts:27](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/HandledError.impl.ts#L27)
 
 ___
 
@@ -107,7 +119,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[core/src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/HandledError.impl.ts#L42)
+[core/src/core/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/HandledError.impl.ts#L42)
 
 ___
 
@@ -131,4 +143,4 @@ HandledError
 
 #### Defined in
 
-[core/src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/HandledError.impl.ts#L19)
+[core/src/core/HandledError.impl.ts:19](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/HandledError.impl.ts#L19)

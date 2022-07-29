@@ -16,17 +16,19 @@
 ### Classes
 
 - [DefaultEventBridge](../classes/purista_core.DefaultEventBridge.md)
+- [EventBridge](../classes/purista_core.EventBridge.md)
 - [FunctionDefinitionBuilder](../classes/purista_core.FunctionDefinitionBuilder.md)
 - [GenericEventEmitter](../classes/purista_core.GenericEventEmitter.md)
 - [HandledError](../classes/purista_core.HandledError.md)
+- [Logger](../classes/purista_core.Logger.md)
 - [Service](../classes/purista_core.Service.md)
+- [ServiceBuilder](../classes/purista_core.ServiceBuilder.md)
 - [ServiceClass](../classes/purista_core.ServiceClass.md)
 - [SubscriptionDefinitionBuilder](../classes/purista_core.SubscriptionDefinitionBuilder.md)
 - [UnhandledError](../classes/purista_core.UnhandledError.md)
 
 ### Interfaces
 
-- [EventBridge](../interfaces/purista_core.EventBridge.md)
 - [IEmitter](../interfaces/purista_core.IEmitter.md)
 - [IServiceClass](../interfaces/purista_core.IServiceClass.md)
 
@@ -53,6 +55,8 @@
 - [ErrorResponse](purista_core.md#errorresponse)
 - [EventBridgeConfig](purista_core.md#eventbridgeconfig)
 - [EventBridgeEnsuredDefaults](purista_core.md#eventbridgeensureddefaults)
+- [EventBridgeEvents](purista_core.md#eventbridgeevents)
+- [EventBridgeEventsBasic](purista_core.md#eventbridgeeventsbasic)
 - [EventKey](purista_core.md#eventkey)
 - [EventMap](purista_core.md#eventmap)
 - [HttpExposedServiceMeta](purista_core.md#httpexposedservicemeta)
@@ -70,22 +74,30 @@
 - [InfoSubscriptionError](purista_core.md#infosubscriptionerror)
 - [InstanceId](purista_core.md#instanceid)
 - [LogLevelName](purista_core.md#loglevelname)
-- [Logger](purista_core.md#logger)
+- [LoggerOptions](purista_core.md#loggeroptions)
 - [LoggerStubs](purista_core.md#loggerstubs)
+- [MetricEntry](purista_core.md#metricentry)
+- [Newable](purista_core.md#newable)
+- [PendigInvocation](purista_core.md#pendiginvocation)
 - [PrincipalId](purista_core.md#principalid)
 - [QueryParameter](purista_core.md#queryparameter)
 - [ServiceEvents](purista_core.md#serviceevents)
+- [ServiceEventsInternal](purista_core.md#serviceeventsinternal)
 - [ServiceInfoType](purista_core.md#serviceinfotype)
+- [ServiceMetricEvents](purista_core.md#servicemetricevents)
 - [Subscription](purista_core.md#subscription)
 - [SubscriptionContext](purista_core.md#subscriptioncontext)
 - [SubscriptionDefinition](purista_core.md#subscriptiondefinition)
 - [SubscriptionDefinitionList](purista_core.md#subscriptiondefinitionlist)
 - [SubscriptionFunction](purista_core.md#subscriptionfunction)
+- [SubscriptionSettings](purista_core.md#subscriptionsettings)
+- [SubscriptionStorageEntry](purista_core.md#subscriptionstorageentry)
 - [SupportedHttpMethod](purista_core.md#supportedhttpmethod)
 - [TraceId](purista_core.md#traceid)
 - [TransformInputHook](purista_core.md#transforminputhook)
 - [TransformOutputHook](purista_core.md#transformoutputhook)
 - [ValidationDefinition](purista_core.md#validationdefinition)
+- [addPrefixToObject](purista_core.md#addprefixtoobject)
 
 ### Variables
 
@@ -112,6 +124,7 @@
 - [getNewCorrelationId](purista_core.md#getnewcorrelationid)
 - [getNewEBMessageId](purista_core.md#getnewebmessageid)
 - [getNewInstanceId](purista_core.md#getnewinstanceid)
+- [getNewSubscriptionStorageEntry](purista_core.md#getnewsubscriptionstorageentry)
 - [getNewTraceId](purista_core.md#getnewtraceid)
 - [getSubscriptionContextMock](purista_core.md#getsubscriptioncontextmock)
 - [getSubscriptionQueueName](purista_core.md#getsubscriptionqueuename)
@@ -166,7 +179,7 @@ This guard is called after function successfully returns and after output valida
 
 #### Defined in
 
-[core/src/core/types/commandType/AfterGuardHook.ts:8](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/AfterGuardHook.ts#L8)
+[core/src/core/types/commandType/AfterGuardHook.ts:8](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/AfterGuardHook.ts#L8)
 
 ___
 
@@ -207,7 +220,7 @@ It should throw HandledError or return void.
 
 #### Defined in
 
-[core/src/core/types/commandType/BeforeGuardHook.ts:9](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/BeforeGuardHook.ts#L9)
+[core/src/core/types/commandType/BeforeGuardHook.ts:9](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/BeforeGuardHook.ts#L9)
 
 ___
 
@@ -234,7 +247,7 @@ Subscribers should not respond with command responses if they are "silent" subsc
 
 #### Defined in
 
-[core/src/core/types/commandType/Command.ts:18](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/Command.ts#L18)
+[core/src/core/types/commandType/Command.ts:18](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/Command.ts#L18)
 
 ___
 
@@ -264,9 +277,11 @@ The definition for a command provided by some service.
 | `commandDescription` | `string` |
 | `commandName` | `string` |
 | `eventName?` | `string` |
-| `hooks` | { `afterGuard?`: [`AfterGuardHook`](purista_core.md#afterguardhook)<`ServiceClassType`, `MessageResultType`, `MessagePayloadType`, `MessageParamsType`\>[] ; `beforeGuard?`: [`BeforeGuardHook`](purista_core.md#beforeguardhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>[] ; `transformInput?`: { `transformFunction`: [`TransformInputHook`](purista_core.md#transforminputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> ; `transformInputSchema`: `z.ZodType` ; `transformParameterSchema`: `z.ZodType`  } ; `transformOutput?`: { `transformFunction`: [`TransformOutputHook`](purista_core.md#transformoutputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `FunctionParamsType`, `unknown`\> ; `transformOutputSchema`: `z.ZodType`  } ; `onError?`: () => `Promise`<`void`\> ; `onSuccess?`: () => `Promise`<`void`\>  } |
+| `hooks` | { `afterGuard?`: [`AfterGuardHook`](purista_core.md#afterguardhook)<`ServiceClassType`, `MessageResultType`, `MessagePayloadType`, `MessageParamsType`\>[] ; `beforeGuard?`: [`BeforeGuardHook`](purista_core.md#beforeguardhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>[] ; `onError?`: () => `Promise`<`void`\> ; `onSuccess?`: () => `Promise`<`void`\> ; `transformInput?`: { `transformFunction`: [`TransformInputHook`](purista_core.md#transforminputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> ; `transformInputSchema`: `z.ZodType` ; `transformParameterSchema`: `z.ZodType`  } ; `transformOutput?`: { `transformFunction`: [`TransformOutputHook`](purista_core.md#transformoutputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `FunctionParamsType`, `unknown`\> ; `transformOutputSchema`: `z.ZodType`  }  } |
 | `hooks.afterGuard?` | [`AfterGuardHook`](purista_core.md#afterguardhook)<`ServiceClassType`, `MessageResultType`, `MessagePayloadType`, `MessageParamsType`\>[] |
 | `hooks.beforeGuard?` | [`BeforeGuardHook`](purista_core.md#beforeguardhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>[] |
+| `hooks.onError?` | () => `Promise`<`void`\> |
+| `hooks.onSuccess?` | () => `Promise`<`void`\> |
 | `hooks.transformInput?` | { `transformFunction`: [`TransformInputHook`](purista_core.md#transforminputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> ; `transformInputSchema`: `z.ZodType` ; `transformParameterSchema`: `z.ZodType`  } |
 | `hooks.transformInput.transformFunction` | [`TransformInputHook`](purista_core.md#transforminputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> |
 | `hooks.transformInput.transformInputSchema` | `z.ZodType` |
@@ -274,13 +289,11 @@ The definition for a command provided by some service.
 | `hooks.transformOutput?` | { `transformFunction`: [`TransformOutputHook`](purista_core.md#transformoutputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `FunctionParamsType`, `unknown`\> ; `transformOutputSchema`: `z.ZodType`  } |
 | `hooks.transformOutput.transformFunction` | [`TransformOutputHook`](purista_core.md#transformoutputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `FunctionParamsType`, `unknown`\> |
 | `hooks.transformOutput.transformOutputSchema` | `z.ZodType` |
-| `hooks.onError?` | [object Object] |
-| `hooks.onSuccess?` | [object Object] |
 | `metadata` | `MetadataType` |
 
 #### Defined in
 
-[core/src/core/types/commandType/CommandDefinition.ts:13](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/CommandDefinition.ts#L13)
+[core/src/core/types/commandType/CommandDefinition.ts:13](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/CommandDefinition.ts#L13)
 
 ___
 
@@ -302,7 +315,7 @@ export const userServiceCommands: CommandDefinitionList<UserService> = [signUp.g
 
 #### Defined in
 
-[core/src/core/types/commandType/CommandDefinitionList.ts:11](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/CommandDefinitionList.ts#L11)
+[core/src/core/types/commandType/CommandDefinitionList.ts:11](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/CommandDefinitionList.ts#L11)
 
 ___
 
@@ -314,7 +327,7 @@ CommandErrorResponse is a response to a specific previously received command whi
 
 #### Defined in
 
-[core/src/core/types/commandType/CommandErrorResponse.ts:11](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/CommandErrorResponse.ts#L11)
+[core/src/core/types/commandType/CommandErrorResponse.ts:11](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/CommandErrorResponse.ts#L11)
 
 ___
 
@@ -354,7 +367,7 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 #### Defined in
 
-[core/src/core/types/commandType/CommandFunction.ts:7](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/CommandFunction.ts#L7)
+[core/src/core/types/commandType/CommandFunction.ts:7](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/CommandFunction.ts#L7)
 
 ___
 
@@ -373,14 +386,15 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `logger` | [`Logger`](purista_core.md#logger) |
-| `message` | [`Command`](purista_core.md#command)<`MessagePayloadType`, `MessageParamsType`\> |
 | `emit` | <Payload\>(`eventName`: `string`, `payload?`: `Payload`) => `Promise`<`void`\> |
 | `invoke` | <InvokeResponseType, PayloadType, ParameterType\>(`address`: [`EBMessageAddress`](purista_core.md#ebmessageaddress), `payload`: `PayloadType`, `parameter`: `ParameterType`) => `Promise`<`InvokeResponseType`\> |
+| `logger` | [`Logger`](../classes/purista_core.Logger.md) |
+| `message` | [`Command`](purista_core.md#command)<`MessagePayloadType`, `MessageParamsType`\> |
+| `performance` | [`MetricEntry`](purista_core.md#metricentry)[] |
 
 #### Defined in
 
-[core/src/core/types/commandType/CommandFunctionContext.ts:5](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L5)
+[core/src/core/types/commandType/CommandFunctionContext.ts:6](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L6)
 
 ___
 
@@ -398,13 +412,13 @@ CommandResponse is a response to a specific previously received command which ca
 
 #### Defined in
 
-[core/src/core/types/commandType/CommandResponse.ts:9](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/CommandResponse.ts#L9)
+[core/src/core/types/commandType/CommandResponse.ts:9](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/CommandResponse.ts#L9)
 
 ___
 
 ### CommandSuccessResponse
 
-Ƭ **CommandSuccessResponse**<`PayloadType`\>: { `correlationId`: [`CorrelationId`](purista_core.md#correlationid) ; `isMultipart?`: `boolean` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `payload`: `PayloadType` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](purista_core.md#ebmessageaddress)  } & [`EBMessageBase`](purista_core.md#ebmessagebase)
+Ƭ **CommandSuccessResponse**<`PayloadType`\>: { `correlationId`: [`CorrelationId`](purista_core.md#correlationid) ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `payload`: `PayloadType` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](purista_core.md#ebmessageaddress)  } & [`EBMessageBase`](purista_core.md#ebmessagebase)
 
 CommandSuccessResponse is a response to a specific previously received command.
 It indicates that the command was executed successfully and contains the result payload
@@ -417,7 +431,7 @@ It indicates that the command was executed successfully and contains the result 
 
 #### Defined in
 
-[core/src/core/types/commandType/CommandSuccessResponse.ts:11](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/CommandSuccessResponse.ts#L11)
+[core/src/core/types/commandType/CommandSuccessResponse.ts:11](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/CommandSuccessResponse.ts#L11)
 
 ___
 
@@ -427,7 +441,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/types/CompressionMethod.ts:1](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/types/CompressionMethod.ts#L1)
+[core/src/helper/types/CompressionMethod.ts:1](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/types/CompressionMethod.ts#L1)
 
 ___
 
@@ -437,7 +451,7 @@ ___
 
 #### Defined in
 
-[core/src/httpserver/types/ContentType.ts:1](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/httpserver/types/ContentType.ts#L1)
+[core/src/httpserver/types/ContentType.ts:1](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/httpserver/types/ContentType.ts#L1)
 
 ___
 
@@ -447,7 +461,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/CorrelationId.ts:1](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/CorrelationId.ts#L1)
+[core/src/core/types/CorrelationId.ts:1](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/CorrelationId.ts#L1)
 
 ___
 
@@ -463,7 +477,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/CustomMessage.ts:6](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/CustomMessage.ts#L6)
+[core/src/core/types/CustomMessage.ts:6](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/CustomMessage.ts#L6)
 
 ___
 
@@ -475,7 +489,7 @@ EBMessage is some message which is handled by the event bridge.
 
 #### Defined in
 
-[core/src/core/types/EBMessage.ts:8](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/EBMessage.ts#L8)
+[core/src/core/types/EBMessage.ts:8](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/EBMessage.ts#L8)
 
 ___
 
@@ -495,7 +509,7 @@ A event bridge message address describes receiver/sender of a message.
 
 #### Defined in
 
-[core/src/core/types/EBMessageAddress.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/EBMessageAddress.ts#L4)
+[core/src/core/types/EBMessageAddress.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/EBMessageAddress.ts#L4)
 
 ___
 
@@ -517,7 +531,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/EBMessageBase.ts:7](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/EBMessageBase.ts#L7)
+[core/src/core/types/EBMessageBase.ts:7](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/EBMessageBase.ts#L7)
 
 ___
 
@@ -529,7 +543,7 @@ Unique id of the event bridge message
 
 #### Defined in
 
-[core/src/core/types/EBMessageId.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/EBMessageId.ts#L4)
+[core/src/core/types/EBMessageId.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/EBMessageId.ts#L4)
 
 ___
 
@@ -548,7 +562,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/ErrorResponse.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/ErrorResponse.ts#L4)
+[core/src/core/types/ErrorResponse.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ErrorResponse.ts#L4)
 
 ___
 
@@ -560,12 +574,12 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `defaultTtl?` | `number` |
+| `defaultCommandTimeout?` | `number` |
 | `instanceId?` | [`InstanceId`](purista_core.md#instanceid) |
 
 #### Defined in
 
-[core/src/core/types/EventBridgeConfig.ts:3](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/EventBridgeConfig.ts#L3)
+[core/src/core/types/EventBridgeConfig.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/EventBridgeConfig.ts#L3)
 
 ___
 
@@ -577,12 +591,44 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `defaultTtl` | `number` |
+| `defaultCommandTimeout` | `number` |
 | `instanceId` | [`InstanceId`](purista_core.md#instanceid) |
 
 #### Defined in
 
-[core/src/core/types/EventBridgeConfig.ts:8](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/EventBridgeConfig.ts#L8)
+[core/src/core/types/EventBridgeConfig.ts:8](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/EventBridgeConfig.ts#L8)
+
+___
+
+### EventBridgeEvents
+
+Ƭ **EventBridgeEvents**: [`EventBridgeEventsBasic`](purista_core.md#eventbridgeeventsbasic) & [`addPrefixToObject`](purista_core.md#addprefixtoobject)<[`CustomEvents`](purista_core.internal.md#customevents), ``"adapter-"``\>
+
+#### Defined in
+
+[core/src/core/types/EventBridgeEvents.ts:28](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/EventBridgeEvents.ts#L28)
+
+___
+
+### EventBridgeEventsBasic
+
+Ƭ **EventBridgeEventsBasic**: `Object`
+
+Events which can be emitted by a event bridge
+
+#### Type declaration
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `eventbridge-connected` | `undefined` | emitted when then connection to event bridge is established |
+| `eventbridge-connection-error` | `undefined` \| `unknown` | emitted when the connection to event bridge can not be established or a connection has issues or gets closed unexpectedly |
+| `eventbridge-disconnected` | `undefined` | emitted when the connection to event bridge closed |
+| `eventbridge-error` | [`UnhandledError`](../classes/purista_core.UnhandledError.md) \| `unknown` | emitted on internal event bridge error |
+| `eventbridge-reconnecting` | `undefined` | emitted on retry to connect to event bridge |
+
+#### Defined in
+
+[core/src/core/types/EventBridgeEvents.ts:7](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/EventBridgeEvents.ts#L7)
 
 ___
 
@@ -598,7 +644,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:5](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/GenericEventEmitter.ts#L5)
+[core/src/core/types/GenericEventEmitter.ts:5](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L5)
 
 ___
 
@@ -608,7 +654,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:3](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/GenericEventEmitter.ts#L3)
+[core/src/core/types/GenericEventEmitter.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L3)
 
 ___
 
@@ -638,7 +684,7 @@ ___
 
 #### Defined in
 
-[core/src/httpserver/types/HttpExposedServiceMeta.ts:7](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/httpserver/types/HttpExposedServiceMeta.ts#L7)
+[core/src/httpserver/types/HttpExposedServiceMeta.ts:7](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/httpserver/types/HttpExposedServiceMeta.ts#L7)
 
 ___
 
@@ -648,7 +694,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoInvokeTimeout.ts:22](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L22)
+[core/src/core/types/infoType/InfoInvokeTimeout.ts:22](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L22)
 
 ___
 
@@ -674,7 +720,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoInvokeTimeout.ts:6](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L6)
+[core/src/core/types/infoType/InfoInvokeTimeout.ts:6](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L6)
 
 ___
 
@@ -684,7 +730,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoMessage.ts:12](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoMessage.ts#L12)
+[core/src/core/types/infoType/InfoMessage.ts:12](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoMessage.ts#L12)
 
 ___
 
@@ -694,17 +740,17 @@ ___
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoMessage.ts:22](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoMessage.ts#L22)
+[core/src/core/types/infoType/InfoMessage.ts:22](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoMessage.ts#L22)
 
 ___
 
 ### InfoServiceBase
 
-Ƭ **InfoServiceBase**: { `payload?`: `Record`<`string`, `unknown`\> ; `sender`: { `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  }  } & [`EBMessageBase`](purista_core.md#ebmessagebase)
+Ƭ **InfoServiceBase**: { `payload?`: `unknown` ; `sender`: { `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  }  } & [`EBMessageBase`](purista_core.md#ebmessagebase)
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoServiceBase.ts:3](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoServiceBase.ts#L3)
+[core/src/core/types/infoType/InfoServiceBase.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoServiceBase.ts#L3)
 
 ___
 
@@ -714,7 +760,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoServiceDrain.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoServiceDrain.ts#L4)
+[core/src/core/types/infoType/InfoServiceDrain.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoServiceDrain.ts#L4)
 
 ___
 
@@ -724,7 +770,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoServiceFunctionAdded.ts:5](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoServiceFunctionAdded.ts#L5)
+[core/src/core/types/infoType/InfoServiceFunctionAdded.ts:5](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoServiceFunctionAdded.ts#L5)
 
 ___
 
@@ -734,7 +780,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoServiceInit.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoServiceInit.ts#L4)
+[core/src/core/types/infoType/InfoServiceInit.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoServiceInit.ts#L4)
 
 ___
 
@@ -744,7 +790,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoServiceNotReady.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoServiceNotReady.ts#L4)
+[core/src/core/types/infoType/InfoServiceNotReady.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoServiceNotReady.ts#L4)
 
 ___
 
@@ -754,7 +800,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoServiceReady.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoServiceReady.ts#L4)
+[core/src/core/types/infoType/InfoServiceReady.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoServiceReady.ts#L4)
 
 ___
 
@@ -764,7 +810,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoServiceShutdown.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoServiceShutdown.ts#L4)
+[core/src/core/types/infoType/InfoServiceShutdown.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoServiceShutdown.ts#L4)
 
 ___
 
@@ -774,7 +820,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoSubscriptionError.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoSubscriptionError.ts#L4)
+[core/src/core/types/infoType/InfoSubscriptionError.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoSubscriptionError.ts#L4)
 
 ___
 
@@ -784,27 +830,39 @@ ___
 
 #### Defined in
 
-[core/src/core/types/InstanceId.ts:1](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/InstanceId.ts#L1)
+[core/src/core/types/InstanceId.ts:1](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/InstanceId.ts#L1)
 
 ___
 
 ### LogLevelName
 
-Ƭ **LogLevelName**: ``"info"`` \| ``"error"`` \| ``"warn"`` \| ``"debug"`` \| ``"trace"``
+Ƭ **LogLevelName**: ``"info"`` \| ``"error"`` \| ``"warn"`` \| ``"debug"`` \| ``"trace"`` \| ``"fatal"``
 
 #### Defined in
 
-[core/src/core/types/LogLevelName.ts:1](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/LogLevelName.ts#L1)
+[core/src/core/types/LogLevelName.ts:1](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/LogLevelName.ts#L1)
 
 ___
 
-### Logger
+### LoggerOptions
 
-Ƭ **Logger**: `Pick`<[`Logger`](purista_core.md#logger), ``"info"`` \| ``"error"`` \| ``"warn"`` \| ``"debug"`` \| ``"trace"`` \| ``"getChildLogger"``\>
+Ƭ **LoggerOptions**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `instanceId?` | [`InstanceId`](purista_core.md#instanceid) |
+| `name?` | `string` |
+| `principalId?` | [`PrincipalId`](purista_core.md#principalid) |
+| `serviceName?` | `string` |
+| `serviceTarget?` | `string` |
+| `serviceVersion?` | `string` |
+| `traceId?` | [`TraceId`](purista_core.md#traceid) |
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:3](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/Logger.ts#L3)
+[core/src/core/types/Logger.ts:5](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/Logger.ts#L5)
 
 ___
 
@@ -824,7 +882,61 @@ ___
 
 #### Defined in
 
-[core/src/testhelper/getLogger.mock.ts:37](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/testhelper/getLogger.mock.ts#L37)
+[core/src/testhelper/getLogger.mock.ts:37](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/testhelper/getLogger.mock.ts#L37)
+
+___
+
+### MetricEntry
+
+Ƭ **MetricEntry**: `Object`
+
+#### Type declaration
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `duration` | `number` | total duration in ms |
+| `endTime` | `number` | end timestamp in ms |
+| `functionName` | `string` | name of function or subscription |
+| `name` | `string` | metric name |
+| `startTime` | `number` | start timestamp in ms |
+| `traceId` | [`TraceId`](purista_core.md#traceid) | trace id |
+
+#### Defined in
+
+[core/src/core/types/MetricEntry.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/MetricEntry.ts#L3)
+
+___
+
+### Newable
+
+Ƭ **Newable**<`T`\>: `Object`
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `T` |
+
+#### Defined in
+
+[core/src/helper/ServiceBuilder.impl.ts:15](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L15)
+
+___
+
+### PendigInvocation
+
+Ƭ **PendigInvocation**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `reject` | (`error`: [`UnhandledError`](../classes/purista_core.UnhandledError.md) \| [`HandledError`](../classes/purista_core.HandledError.md)) => `void` |
+| `resolve` | (`responsePayload`: `unknown`) => `void` |
+
+#### Defined in
+
+[core/src/core/DefaultEventBridge/types/PendingInvocations.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/types/PendingInvocations.ts#L4)
 
 ___
 
@@ -834,7 +946,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/PrincipalId.ts:1](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/PrincipalId.ts#L1)
+[core/src/core/types/PrincipalId.ts:1](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/PrincipalId.ts#L1)
 
 ___
 
@@ -851,29 +963,46 @@ ___
 
 #### Defined in
 
-[core/src/httpserver/types/QueryParameter.ts:1](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/httpserver/types/QueryParameter.ts#L1)
+[core/src/httpserver/types/QueryParameter.ts:1](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/httpserver/types/QueryParameter.ts#L1)
 
 ___
 
 ### ServiceEvents
 
-Ƭ **ServiceEvents**: `Object`
+Ƭ **ServiceEvents**: [`ServiceEventsInternal`](purista_core.md#serviceeventsinternal) & [`ServiceMetricEvents`](purista_core.md#servicemetricevents) & [`addPrefixToObject`](purista_core.md#addprefixtoobject)<[`CustomEvents`](purista_core.internal.md#customevents-1), ``"custom-"``\>
 
-Events which can be emitted by a service
+#### Defined in
+
+[core/src/core/types/ServiceEvents.ts:54](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceEvents.ts#L54)
+
+___
+
+### ServiceEventsInternal
+
+Ƭ **ServiceEventsInternal**: `Object`
+
+Events which can be emitted by a service.
+Internal events are prefixed with `service-`.
+
+If you like to use your own events, the event names should be prefixed with `custom-` to have propper types.
 
 #### Type declaration
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `eventbridge-connected` | `undefined` | emitted when then connection to event bridge is established |
-| `eventbridge-connection-error` | `undefined` | emitted when the connection to event bridge can not be established or a connection has issues or gets closed unexpectedly |
-| `eventbridge-disconnected` | `undefined` | emitted when the connection to event bridge closed |
-| `eventbridge-reconnecting` | `undefined` | emitted on retry to connect to event bridge |
-| `service-available` | `undefined` | emitted when the service is fully initialized and ready |
+| `handled-function-error` | { `error`: [`HandledError`](../classes/purista_core.HandledError.md) ; `functionName`: `string` ; `traceId`: [`TraceId`](purista_core.md#traceid)  } | emitted when a function throws a HandledError |
+| `handled-function-error.error` | [`HandledError`](../classes/purista_core.HandledError.md) | - |
+| `handled-function-error.functionName` | `string` | - |
+| `handled-function-error.traceId` | [`TraceId`](purista_core.md#traceid) | - |
+| `handled-subscription-error` | { `error`: [`HandledError`](../classes/purista_core.HandledError.md) ; `subscriptionName`: `string` ; `traceId`: [`TraceId`](purista_core.md#traceid)  } | emitted when a subscription throws a HandledError |
+| `handled-subscription-error.error` | [`HandledError`](../classes/purista_core.HandledError.md) | - |
+| `handled-subscription-error.subscriptionName` | `string` | - |
+| `handled-subscription-error.traceId` | [`TraceId`](purista_core.md#traceid) | - |
+| `service-available` | `undefined` | emitted when the service is fully initialized and ready Should be emitted by custom service class. It is not emitted by default |
 | `service-drain` | `undefined` | emitted when the service is going to be stopped |
-| `service-not-available` | `undefined` | emitted when the service is not available (for example database connection could not be established) |
-| `service-start` | `undefined` | emitted when the service is started, but not fully initialized and not ready yet |
-| `service-stop` | `undefined` | emitted when the service has been stopped |
+| `service-not-available` | `undefined` \| `unknown` | emitted when the service is not available (for example database connection could not be established) |
+| `service-started` | `undefined` | emitted when the service is started, but not fully initialized and not ready yet |
+| `service-stopped` | `undefined` | emitted when the service has been stopped |
 | `unhandled-function-error` | { `error`: `unknown` ; `functionName`: `string` ; `traceId`: [`TraceId`](purista_core.md#traceid)  } | emitted when a function throws an error other than a HandledError |
 | `unhandled-function-error.error` | `unknown` | - |
 | `unhandled-function-error.functionName` | `string` | - |
@@ -885,7 +1014,7 @@ Events which can be emitted by a service
 
 #### Defined in
 
-[core/src/core/types/ServiceEvents.ts:6](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/ServiceEvents.ts#L6)
+[core/src/core/types/ServiceEvents.ts:12](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceEvents.ts#L12)
 
 ___
 
@@ -905,7 +1034,24 @@ General service information
 
 #### Defined in
 
-[core/src/core/types/infoType/ServiceInfoType.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/ServiceInfoType.ts#L4)
+[core/src/core/types/infoType/ServiceInfoType.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/ServiceInfoType.ts#L4)
+
+___
+
+### ServiceMetricEvents
+
+Ƭ **ServiceMetricEvents**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `metric-function-execution` | [`MetricEntry`](purista_core.md#metricentry)[] |
+| `metric-subscription-execution` | [`MetricEntry`](purista_core.md#metricentry)[] |
+
+#### Defined in
+
+[core/src/core/types/ServiceEvents.ts:45](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceEvents.ts#L45)
 
 ___
 
@@ -920,7 +1066,9 @@ A subscription managed by the event bridge
 | Name | Type |
 | :------ | :------ |
 | `eventName?` | `string` |
+| `instanceId?` | [`InstanceId`](purista_core.md#instanceid) |
 | `messageType?` | [`EBMessageType`](../enums/purista_core.EBMessageType.md) |
+| `principalId?` | [`PrincipalId`](purista_core.md#principalid) |
 | `receiver?` | { `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } |
 | `receiver.serviceName?` | `string` |
 | `receiver.serviceTarget?` | `string` |
@@ -929,11 +1077,12 @@ A subscription managed by the event bridge
 | `sender.serviceName?` | `string` |
 | `sender.serviceTarget?` | `string` |
 | `sender.serviceVersion?` | `string` |
+| `settings` | [`SubscriptionSettings`](purista_core.md#subscriptionsettings) |
 | `subscriber` | [`EBMessageAddress`](purista_core.md#ebmessageaddress) |
 
 #### Defined in
 
-[core/src/core/types/subscription/Subscription.ts:7](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/subscription/Subscription.ts#L7)
+[core/src/core/types/subscription/Subscription.ts:10](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/subscription/Subscription.ts#L10)
 
 ___
 
@@ -951,14 +1100,15 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `logger` | [`Logger`](purista_core.md#logger) |
-| `message` | `MessageType` |
 | `emit` | <Payload\>(`eventName`: `string`, `payload?`: `Payload`) => `Promise`<`void`\> |
 | `invoke` | <InvokeResponseType, PayloadType, ParameterType\>(`address`: [`EBMessageAddress`](purista_core.md#ebmessageaddress), `payload`: `PayloadType`, `parameter`: `ParameterType`) => `Promise`<`InvokeResponseType`\> |
+| `logger` | [`Logger`](../classes/purista_core.Logger.md) |
+| `message` | `MessageType` |
+| `performance` | [`MetricEntry`](purista_core.md#metricentry)[] |
 
 #### Defined in
 
-[core/src/core/types/subscription/SubscriptionContext.ts:5](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/subscription/SubscriptionContext.ts#L5)
+[core/src/core/types/subscription/SubscriptionContext.ts:6](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/subscription/SubscriptionContext.ts#L6)
 
 ___
 
@@ -980,7 +1130,9 @@ ___
 | :------ | :------ |
 | `call` | [`SubscriptionFunction`](purista_core.md#subscriptionfunction)<`ServiceClassType`, `MessageType`, `Payload`\> |
 | `eventName?` | `string` |
+| `instanceId?` | [`InstanceId`](purista_core.md#instanceid) |
 | `messageType?` | [`EBMessageType`](../enums/purista_core.EBMessageType.md) |
+| `principalId?` | [`PrincipalId`](purista_core.md#principalid) |
 | `receiver?` | { `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } |
 | `receiver.serviceName?` | `string` |
 | `receiver.serviceTarget?` | `string` |
@@ -989,12 +1141,13 @@ ___
 | `sender.serviceName?` | `string` |
 | `sender.serviceTarget?` | `string` |
 | `sender.serviceVersion?` | `string` |
+| `settings` | [`SubscriptionSettings`](purista_core.md#subscriptionsettings) |
 | `subscriptionDescription` | `string` |
 | `subscriptionName` | `string` |
 
 #### Defined in
 
-[core/src/core/types/subscription/SubscriptionDefinition.ts:6](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L6)
+[core/src/core/types/subscription/SubscriptionDefinition.ts:9](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L9)
 
 ___
 
@@ -1016,7 +1169,7 @@ export const userServiceCommands: SubscriptionDefinitionList<UserService> = [sig
 
 #### Defined in
 
-[core/src/core/types/subscription/SubscriptionDefinitionList.ts:11](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/subscription/SubscriptionDefinitionList.ts#L11)
+[core/src/core/types/subscription/SubscriptionDefinitionList.ts:11](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/subscription/SubscriptionDefinitionList.ts#L11)
 
 ___
 
@@ -1052,7 +1205,49 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 #### Defined in
 
-[core/src/core/types/subscription/SubscriptionFunction.ts:8](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/subscription/SubscriptionFunction.ts#L8)
+[core/src/core/types/subscription/SubscriptionFunction.ts:8](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/subscription/SubscriptionFunction.ts#L8)
+
+___
+
+### SubscriptionSettings
+
+Ƭ **SubscriptionSettings**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `durable` | `boolean` |
+
+#### Defined in
+
+[core/src/core/types/subscription/SubscriptionSettings.ts:1](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/subscription/SubscriptionSettings.ts#L1)
+
+___
+
+### SubscriptionStorageEntry
+
+Ƭ **SubscriptionStorageEntry**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `cb` | (`message`: [`EBMessage`](purista_core.md#ebmessage)) => `Promise`<`void`\> |
+| `isMatchingEventName` | (`input?`: `string`) => `boolean` |
+| `isMatchingInstanceId` | (`input?`: `string`) => `boolean` |
+| `isMatchingMessageType` | (`input`: [`EBMessageType`](../enums/purista_core.EBMessageType.md)) => `boolean` |
+| `isMatchingPrincipalId` | (`input?`: `string`) => `boolean` |
+| `isMatchingReceiverServiceName` | (`input?`: `string`) => `boolean` |
+| `isMatchingReceiverServiceTarget` | (`input?`: `string`) => `boolean` |
+| `isMatchingReceiverServiceVersion` | (`input?`: `string`) => `boolean` |
+| `isMatchingSenderServiceName` | (`input?`: `string`) => `boolean` |
+| `isMatchingSenderServiceTarget` | (`input?`: `string`) => `boolean` |
+| `isMatchingSenderServiceVersion` | (`input?`: `string`) => `boolean` |
+
+#### Defined in
+
+[core/src/core/DefaultEventBridge/types/SubscriptionStorageEntry.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L3)
 
 ___
 
@@ -1064,7 +1259,7 @@ Supported HTTP-Methods for defining endpoints
 
 #### Defined in
 
-[core/src/helper/types/SupportedHttpMethod.ts:2](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/types/SupportedHttpMethod.ts#L2)
+[core/src/helper/types/SupportedHttpMethod.ts:2](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/types/SupportedHttpMethod.ts#L2)
 
 ___
 
@@ -1074,13 +1269,13 @@ ___
 
 #### Defined in
 
-[core/src/core/types/TraceId.ts:1](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/TraceId.ts#L1)
+[core/src/core/types/TraceId.ts:1](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/TraceId.ts#L1)
 
 ___
 
 ### TransformInputHook
 
-Ƭ **TransformInputHook**<`ServiceClassType`, `PayloadOutput`, `ParamsOutput`, `PayloadInput`, `ParamsInput`\>: (`this`: `ServiceClassType`, `context`: { `logger`: [`Logger`](purista_core.md#logger) ; `message`: [`Command`](purista_core.md#command)<`PayloadInput`, `ParamsInput`\>  }, `payload`: `PayloadInput`, `params`: `ParamsInput`) => `Promise`<{ `params`: `ParamsOutput` ; `payload`: `PayloadOutput`  }\>
+Ƭ **TransformInputHook**<`ServiceClassType`, `PayloadOutput`, `ParamsOutput`, `PayloadInput`, `ParamsInput`\>: (`this`: `ServiceClassType`, `context`: { `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: [`Command`](purista_core.md#command)<`PayloadInput`, `ParamsInput`\>  }, `payload`: `PayloadInput`, `params`: `ParamsInput`) => `Promise`<{ `params`: `ParamsOutput` ; `payload`: `PayloadOutput`  }\>
 
 #### Type parameters
 
@@ -1102,7 +1297,7 @@ ___
 | :------ | :------ |
 | `this` | `ServiceClassType` |
 | `context` | `Object` |
-| `context.logger` | [`Logger`](purista_core.md#logger) |
+| `context.logger` | [`Logger`](../classes/purista_core.Logger.md) |
 | `context.message` | [`Command`](purista_core.md#command)<`PayloadInput`, `ParamsInput`\> |
 | `payload` | `PayloadInput` |
 | `params` | `ParamsInput` |
@@ -1113,13 +1308,13 @@ ___
 
 #### Defined in
 
-[core/src/core/types/commandType/TransformInputHook.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/TransformInputHook.ts#L4)
+[core/src/core/types/commandType/TransformInputHook.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/TransformInputHook.ts#L4)
 
 ___
 
 ### TransformOutputHook
 
-Ƭ **TransformOutputHook**<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `MessageParamsType`, `ResponseOutput`\>: (`this`: `ServiceClassType`, `context`: { `logger`: [`Logger`](purista_core.md#logger) ; `message`: [`Command`](purista_core.md#command)<`MessagePayloadType`, `MessageParamsType`\>  }, `payload`: `MessageResultType`, `params`: `MessageParamsType`) => `Promise`<`ResponseOutput`\>
+Ƭ **TransformOutputHook**<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `MessageParamsType`, `ResponseOutput`\>: (`this`: `ServiceClassType`, `context`: { `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: [`Command`](purista_core.md#command)<`MessagePayloadType`, `MessageParamsType`\>  }, `payload`: `MessageResultType`, `params`: `MessageParamsType`) => `Promise`<`ResponseOutput`\>
 
 #### Type parameters
 
@@ -1143,7 +1338,7 @@ This transform hook is executed after function output validation and AfterGuardH
 | :------ | :------ |
 | `this` | `ServiceClassType` |
 | `context` | `Object` |
-| `context.logger` | [`Logger`](purista_core.md#logger) |
+| `context.logger` | [`Logger`](../classes/purista_core.Logger.md) |
 | `context.message` | [`Command`](purista_core.md#command)<`MessagePayloadType`, `MessageParamsType`\> |
 | `payload` | `MessageResultType` |
 | `params` | `MessageParamsType` |
@@ -1154,7 +1349,7 @@ This transform hook is executed after function output validation and AfterGuardH
 
 #### Defined in
 
-[core/src/core/types/commandType/TransformOutputHook.ts:8](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/TransformOutputHook.ts#L8)
+[core/src/core/types/commandType/TransformOutputHook.ts:8](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/TransformOutputHook.ts#L8)
 
 ___
 
@@ -1172,7 +1367,24 @@ ___
 
 #### Defined in
 
-[core/src/helper/types/ValidationDefinition.ts:3](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/types/ValidationDefinition.ts#L3)
+[core/src/helper/types/ValidationDefinition.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/types/ValidationDefinition.ts#L3)
+
+___
+
+### addPrefixToObject
+
+Ƭ **addPrefixToObject**<`T`, `P`\>: { [K in keyof T as K extends string ? \`${P}${K}\` : never]: T[K] }
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `T` | `T` |
+| `P` | extends `string` |
+
+#### Defined in
+
+[core/src/core/types/addPrefixToObject.ts:1](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/addPrefixToObject.ts#L1)
 
 ## Variables
 
@@ -1182,7 +1394,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/types/MinContentSizeForCompression.const.ts:1](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/types/MinContentSizeForCompression.const.ts#L1)
+[core/src/helper/types/MinContentSizeForCompression.const.ts:1](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/types/MinContentSizeForCompression.const.ts#L1)
 
 ___
 
@@ -1198,7 +1410,7 @@ ___
 
 #### Defined in
 
-[core/src/core/Service/ServiceInfoValidator.ts:5](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/Service/ServiceInfoValidator.ts#L5)
+[core/src/core/Service/ServiceInfoValidator.ts:5](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/Service/ServiceInfoValidator.ts#L5)
 
 ___
 
@@ -1208,7 +1420,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoMessage.ts:31](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoMessage.ts#L31)
+[core/src/core/types/infoType/InfoMessage.ts:31](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoMessage.ts#L31)
 
 ## Functions
 
@@ -1235,7 +1447,7 @@ CommandErrorResponse message object
 
 #### Defined in
 
-[core/src/core/helper/createErrorResponse.impl.ts:15](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/createErrorResponse.impl.ts#L15)
+[core/src/core/helper/createErrorResponse.impl.ts:15](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/createErrorResponse.impl.ts#L15)
 
 ___
 
@@ -1259,7 +1471,7 @@ ___
 
 #### Defined in
 
-[core/src/core/helper/createInfoMessage.impl.ts:5](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/createInfoMessage.impl.ts#L5)
+[core/src/core/helper/createInfoMessage.impl.ts:5](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/createInfoMessage.impl.ts#L5)
 
 ___
 
@@ -1287,7 +1499,7 @@ ___
 
 #### Defined in
 
-[core/src/core/helper/createSuccessResponse.impl.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/createSuccessResponse.impl.ts#L4)
+[core/src/core/helper/createSuccessResponse.impl.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/createSuccessResponse.impl.ts#L4)
 
 ___
 
@@ -1302,7 +1514,7 @@ They can be overwritten by optional parameter.
 
 ```typescript
 createTestCommandErrorResponseMsg(
-   new HandledError(400,'invalid input)
+   new HandledError(400,'invalid input')
 {
   principalId: 'abc-123-4567'
 })
@@ -1312,7 +1524,7 @@ createTestCommandErrorResponseMsg(
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `error` | [`HandledError`](../classes/purista_core.HandledError.md) \| [`UnhandledError`](../classes/purista_core.UnhandledError.md) | - |
+| `error` | [`UnhandledError`](../classes/purista_core.UnhandledError.md) \| [`HandledError`](../classes/purista_core.HandledError.md) | - |
 | `input?` | `Partial`<[`CommandErrorResponse`](purista_core.md#commanderrorresponse)\> | partial Command |
 
 #### Returns
@@ -1323,7 +1535,7 @@ Command
 
 #### Defined in
 
-[core/src/testhelper/messages/createTestCommandErrorResponseMsg.ts:28](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/testhelper/messages/createTestCommandErrorResponseMsg.ts#L28)
+[core/src/testhelper/messages/createTestCommandErrorResponseMsg.ts:28](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/testhelper/messages/createTestCommandErrorResponseMsg.ts#L28)
 
 ___
 
@@ -1365,7 +1577,7 @@ Command
 
 #### Defined in
 
-[core/src/testhelper/messages/createTestCommandMsg.ts:20](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/testhelper/messages/createTestCommandMsg.ts#L20)
+[core/src/testhelper/messages/createTestCommandMsg.ts:20](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/testhelper/messages/createTestCommandMsg.ts#L20)
 
 ___
 
@@ -1403,7 +1615,7 @@ CommandResponse
 
 #### Defined in
 
-[core/src/testhelper/messages/createTestCommandResponseMsg.ts:17](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/testhelper/messages/createTestCommandResponseMsg.ts#L17)
+[core/src/testhelper/messages/createTestCommandResponseMsg.ts:17](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/testhelper/messages/createTestCommandResponseMsg.ts#L17)
 
 ___
 
@@ -1416,7 +1628,7 @@ All message fields are prefilled with dummy defaults.
 They can be overwritten by optional parameter.
 
 ```typescript
-createTestCustomMsg('theEvenName', 'the custom event payload ,{
+createTestCustomMsg('theEvenName', 'the custom event payload' ,{
   principalId: 'abc-1234'
 })
 ```
@@ -1443,7 +1655,7 @@ CustomMessage
 
 #### Defined in
 
-[core/src/testhelper/messages/createTestCustomMsg.ts:17](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/testhelper/messages/createTestCustomMsg.ts#L17)
+[core/src/testhelper/messages/createTestCustomMsg.ts:17](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/testhelper/messages/createTestCustomMsg.ts#L17)
 
 ___
 
@@ -1472,7 +1684,7 @@ Command error responses are not changed.
 
 #### Defined in
 
-[core/src/core/helper/getCleanedMessage.impl.ts:13](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/getCleanedMessage.impl.ts#L13)
+[core/src/core/helper/getCleanedMessage.impl.ts:13](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/getCleanedMessage.impl.ts#L13)
 
 ___
 
@@ -1492,7 +1704,7 @@ ___
 
 #### Defined in
 
-[core/src/core/helper/getCommandQueueName.impl.ts:3](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/getCommandQueueName.impl.ts#L3)
+[core/src/core/helper/getCommandQueueName.impl.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/getCommandQueueName.impl.ts#L3)
 
 ___
 
@@ -1512,7 +1724,7 @@ ___
 
 #### Defined in
 
-[core/src/core/helper/getErrorMessageForCode.impl.ts:3](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/getErrorMessageForCode.impl.ts#L3)
+[core/src/core/helper/getErrorMessageForCode.impl.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/getErrorMessageForCode.impl.ts#L3)
 
 ___
 
@@ -1530,12 +1742,12 @@ EventBridge mocked
 
 | Name | Type |
 | :------ | :------ |
-| `mock` | [`EventBridge`](../interfaces/purista_core.EventBridge.md) |
+| `mock` | [`EventBridge`](../classes/purista_core.EventBridge.md) |
 | `stubs` | `Record`<`string`, `SinonStub`<`any`[], `any`\>\> |
 
 #### Defined in
 
-[core/src/testhelper/getEventBridge.mock.ts:9](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/testhelper/getEventBridge.mock.ts#L9)
+[core/src/testhelper/getEventBridge.mock.ts:9](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/testhelper/getEventBridge.mock.ts#L9)
 
 ___
 
@@ -1564,14 +1776,15 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `mock` | [`CommandFunctionContext`](purista_core.md#commandfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\> |
-| `stubs` | { `emit`: `SinonStub`<`any`[], `any`\> ; `invoke`: `SinonStub`<`any`[], `any`\> ; `logger`: `Record`<`string`, `SinonStub`<`any`[], `any`\>\> = logger.stubs } |
+| `stubs` | { `emit`: `SinonStub`<`any`[], `any`\> ; `invoke`: `SinonStub`<`any`[], `any`\> ; `logger`: `Record`<`string`, `SinonStub`<`any`[], `any`\>\> = logger.stubs; `performance`: `never`[] = [] } |
 | `stubs.emit` | `SinonStub`<`any`[], `any`\> |
 | `stubs.invoke` | `SinonStub`<`any`[], `any`\> |
 | `stubs.logger` | `Record`<`string`, `SinonStub`<`any`[], `any`\>\> |
+| `stubs.performance` | `never`[] |
 
 #### Defined in
 
-[core/src/testhelper/getFunctionContext.mock.ts:7](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/testhelper/getFunctionContext.mock.ts#L7)
+[core/src/testhelper/getFunctionContext.mock.ts:7](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/testhelper/getFunctionContext.mock.ts#L7)
 
 ___
 
@@ -1583,7 +1796,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `ServiceClassType` | extends [`ServiceClass`](../classes/purista_core.ServiceClass.md)<`ServiceClassType`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../classes/purista_core.ServiceClass.md)<`unknown`, `ServiceClassType`\> |
 | `MessagePayloadType` | `unknown` |
 | `MessageParamsType` | `unknown` |
 | `MessageResultType` | `unknown` |
@@ -1607,7 +1820,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/getFunctionWithValidation.ts:5](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/getFunctionWithValidation.ts#L5)
+[core/src/helper/getFunctionWithValidation.ts:5](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/getFunctionWithValidation.ts#L5)
 
 ___
 
@@ -1625,12 +1838,12 @@ logger mocked
 
 | Name | Type |
 | :------ | :------ |
-| `mock` | [`Logger`](purista_core.md#logger) |
+| `mock` | [`Logger`](../classes/purista_core.Logger.md) |
 | `stubs` | `Record`<`string`, `SinonStub`<`any`[], `any`\>\> |
 
 #### Defined in
 
-[core/src/testhelper/getLogger.mock.ts:9](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/testhelper/getLogger.mock.ts#L9)
+[core/src/testhelper/getLogger.mock.ts:9](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/testhelper/getLogger.mock.ts#L9)
 
 ___
 
@@ -1648,7 +1861,7 @@ EBMessageId
 
 #### Defined in
 
-[core/src/core/helper/getNewCorrelationId.impl.ts:8](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/getNewCorrelationId.impl.ts#L8)
+[core/src/core/helper/getNewCorrelationId.impl.ts:8](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/getNewCorrelationId.impl.ts#L8)
 
 ___
 
@@ -1666,7 +1879,7 @@ EBMessageId
 
 #### Defined in
 
-[core/src/core/helper/getNewEBMessageId.impl.ts:8](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/getNewEBMessageId.impl.ts#L8)
+[core/src/core/helper/getNewEBMessageId.impl.ts:8](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/getNewEBMessageId.impl.ts#L8)
 
 ___
 
@@ -1680,7 +1893,28 @@ ___
 
 #### Defined in
 
-[core/src/core/helper/getNewInstanceId.impl.ts:3](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/getNewInstanceId.impl.ts#L3)
+[core/src/core/helper/getNewInstanceId.impl.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/getNewInstanceId.impl.ts#L3)
+
+___
+
+### getNewSubscriptionStorageEntry
+
+▸ **getNewSubscriptionStorageEntry**(`subscription`, `cb`): [`SubscriptionStorageEntry`](purista_core.md#subscriptionstorageentry)
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `subscription` | [`Subscription`](purista_core.md#subscription) |
+| `cb` | (`message`: [`EBMessage`](purista_core.md#ebmessage)) => `Promise`<`void`\> |
+
+#### Returns
+
+[`SubscriptionStorageEntry`](purista_core.md#subscriptionstorageentry)
+
+#### Defined in
+
+[core/src/core/DefaultEventBridge/getNewSubscriptionStorageEntry.impl.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/getNewSubscriptionStorageEntry.impl.ts#L4)
 
 ___
 
@@ -1694,7 +1928,7 @@ ___
 
 #### Defined in
 
-[core/src/core/helper/getNewTraceId.impl.ts:3](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/getNewTraceId.impl.ts#L3)
+[core/src/core/helper/getNewTraceId.impl.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/getNewTraceId.impl.ts#L3)
 
 ___
 
@@ -1721,14 +1955,15 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `mock` | [`SubscriptionContext`](purista_core.md#subscriptioncontext)<`MessageType`\> |
-| `stubs` | { `emit`: `SinonStub`<`any`[], `any`\> ; `invoke`: `SinonStub`<`any`[], `any`\> ; `logger`: `Record`<`string`, `SinonStub`<`any`[], `any`\>\> = logger.stubs } |
+| `stubs` | { `emit`: `SinonStub`<`any`[], `any`\> ; `invoke`: `SinonStub`<`any`[], `any`\> ; `logger`: `Record`<`string`, `SinonStub`<`any`[], `any`\>\> = logger.stubs; `performance`: `never`[] = [] } |
 | `stubs.emit` | `SinonStub`<`any`[], `any`\> |
 | `stubs.invoke` | `SinonStub`<`any`[], `any`\> |
 | `stubs.logger` | `Record`<`string`, `SinonStub`<`any`[], `any`\>\> |
+| `stubs.performance` | `never`[] |
 
 #### Defined in
 
-[core/src/testhelper/getSubscriptionContext.mock.ts:6](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/testhelper/getSubscriptionContext.mock.ts#L6)
+[core/src/testhelper/getSubscriptionContext.mock.ts:6](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/testhelper/getSubscriptionContext.mock.ts#L6)
 
 ___
 
@@ -1748,7 +1983,7 @@ ___
 
 #### Defined in
 
-[core/src/core/helper/getSubscriptionQueueName.impl.ts:3](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/getSubscriptionQueueName.impl.ts#L3)
+[core/src/core/helper/getSubscriptionQueueName.impl.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/getSubscriptionQueueName.impl.ts#L3)
 
 ___
 
@@ -1769,7 +2004,7 @@ ___
 
 #### Defined in
 
-[core/src/core/helper/getTimeoutPromise.impl.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/getTimeoutPromise.impl.ts#L4)
+[core/src/core/helper/getTimeoutPromise.impl.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/getTimeoutPromise.impl.ts#L4)
 
 ___
 
@@ -1783,13 +2018,13 @@ ___
 
 #### Defined in
 
-[core/src/core/helper/getUniqueId.impl.ts:3](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/getUniqueId.impl.ts#L3)
+[core/src/core/helper/getUniqueId.impl.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/getUniqueId.impl.ts#L3)
 
 ___
 
 ### initLogger
 
-▸ **initLogger**(`minLevel`, `opt?`): [`Logger`](purista_core.md#logger)
+▸ **initLogger**(`minLevel`, `opt?`): [`Logger`](../classes/purista_core.Logger.md)
 
 Create a new logger with the given minimum log level
 
@@ -1798,15 +2033,15 @@ Create a new logger with the given minimum log level
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `minLevel` | `undefined` \| [`LogLevelName`](purista_core.md#loglevelname) | The minimum level of log messages to display. |
-| `opt?` | `Record`<`string`, `unknown`\> | - |
+| `opt?` | `ISettingsParam` | - |
 
 #### Returns
 
-[`Logger`](purista_core.md#logger)
+[`Logger`](../classes/purista_core.Logger.md)
 
 #### Defined in
 
-[core/src/core/initLogger.impl.ts:9](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/initLogger.impl.ts#L9)
+[core/src/core/initLogger.impl.ts:10](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/initLogger.impl.ts#L10)
 
 ___
 
@@ -1826,7 +2061,7 @@ message is Command<unknown, unknown\>
 
 #### Defined in
 
-[core/src/core/types/commandType/Command.ts:29](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/Command.ts#L29)
+[core/src/core/types/commandType/Command.ts:29](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/Command.ts#L29)
 
 ___
 
@@ -1846,7 +2081,7 @@ message is CommandErrorResponse
 
 #### Defined in
 
-[core/src/core/types/commandType/CommandErrorResponse.ts:24](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/CommandErrorResponse.ts#L24)
+[core/src/core/types/commandType/CommandErrorResponse.ts:24](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/CommandErrorResponse.ts#L24)
 
 ___
 
@@ -1866,7 +2101,7 @@ message is CommandResponse<unknown\>
 
 #### Defined in
 
-[core/src/core/types/commandType/CommandResponse.ts:11](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/CommandResponse.ts#L11)
+[core/src/core/types/commandType/CommandResponse.ts:11](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/CommandResponse.ts#L11)
 
 ___
 
@@ -1886,7 +2121,7 @@ message is CommandSuccessResponse<unknown\>
 
 #### Defined in
 
-[core/src/core/types/commandType/CommandSuccessResponse.ts:20](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/commandType/CommandSuccessResponse.ts#L20)
+[core/src/core/types/commandType/CommandSuccessResponse.ts:19](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/commandType/CommandSuccessResponse.ts#L19)
 
 ___
 
@@ -1906,7 +2141,7 @@ message is CustomMessage<unknown\>
 
 #### Defined in
 
-[core/src/core/types/CustomMessage.ts:14](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/CustomMessage.ts#L14)
+[core/src/core/types/CustomMessage.ts:14](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/CustomMessage.ts#L14)
 
 ___
 
@@ -1922,7 +2157,7 @@ returns true if NODE_ENV is set to value starting with "develop"
 
 #### Defined in
 
-[core/src/core/helper/isDevelop.impl.ts:4](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/helper/isDevelop.impl.ts#L4)
+[core/src/core/helper/isDevelop.impl.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/helper/isDevelop.impl.ts#L4)
 
 ___
 
@@ -1942,7 +2177,7 @@ data is HttpExposedServiceMeta
 
 #### Defined in
 
-[core/src/httpserver/types/HttpExposedServiceMeta.ts:28](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/httpserver/types/HttpExposedServiceMeta.ts#L28)
+[core/src/httpserver/types/HttpExposedServiceMeta.ts:28](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/httpserver/types/HttpExposedServiceMeta.ts#L28)
 
 ___
 
@@ -1962,7 +2197,7 @@ message is InfoMessage
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoMessage.ts:42](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoMessage.ts#L42)
+[core/src/core/types/infoType/InfoMessage.ts:42](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoMessage.ts#L42)
 
 ___
 
@@ -1982,4 +2217,4 @@ message is InfoServiceFunctionAdded
 
 #### Defined in
 
-[core/src/core/types/infoType/InfoServiceFunctionAdded.ts:9](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/infoType/InfoServiceFunctionAdded.ts#L9)
+[core/src/core/types/infoType/InfoServiceFunctionAdded.ts:9](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/infoType/InfoServiceFunctionAdded.ts#L9)

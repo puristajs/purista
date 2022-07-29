@@ -27,17 +27,23 @@ A working schema definition needs at least a subscription name, a short descript
 
 - [eventName](purista_core.SubscriptionDefinitionBuilder.md#eventname)
 - [fn](purista_core.SubscriptionDefinitionBuilder.md#fn)
+- [instanceId](purista_core.SubscriptionDefinitionBuilder.md#instanceid)
 - [messageType](purista_core.SubscriptionDefinitionBuilder.md#messagetype)
+- [principalId](purista_core.SubscriptionDefinitionBuilder.md#principalid)
 - [receiver](purista_core.SubscriptionDefinitionBuilder.md#receiver)
 - [sender](purista_core.SubscriptionDefinitionBuilder.md#sender)
+- [settings](purista_core.SubscriptionDefinitionBuilder.md#settings)
 
 ### Methods
 
 - [addMessageType](purista_core.SubscriptionDefinitionBuilder.md#addmessagetype)
 - [getDefinition](purista_core.SubscriptionDefinitionBuilder.md#getdefinition)
 - [getFunction](purista_core.SubscriptionDefinitionBuilder.md#getfunction)
+- [onlyInstanceId](purista_core.SubscriptionDefinitionBuilder.md#onlyinstanceid)
+- [onlyPrincipalId](purista_core.SubscriptionDefinitionBuilder.md#onlyprincipalid)
 - [receivedBy](purista_core.SubscriptionDefinitionBuilder.md#receivedby)
 - [sendFrom](purista_core.SubscriptionDefinitionBuilder.md#sendfrom)
+- [setDurable](purista_core.SubscriptionDefinitionBuilder.md#setdurable)
 - [setFunction](purista_core.SubscriptionDefinitionBuilder.md#setfunction)
 - [subscribeToEvent](purista_core.SubscriptionDefinitionBuilder.md#subscribetoevent)
 
@@ -51,7 +57,7 @@ A working schema definition needs at least a subscription name, a short descript
 
 | Name | Type |
 | :------ | :------ |
-| `ServiceClassType` | [`ServiceClass`](purista_core.ServiceClass.md) |
+| `ServiceClassType` | [`ServiceClass`](purista_core.ServiceClass.md)<`unknown`\> |
 | `MessageType` | [`EBMessage`](../modules/purista_core.md#ebmessage) |
 | `Payload` | `unknown` |
 
@@ -64,7 +70,7 @@ A working schema definition needs at least a subscription name, a short descript
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:33](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L33)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:47](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L47)
 
 ## Properties
 
@@ -74,7 +80,7 @@ A working schema definition needs at least a subscription name, a short descript
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:30](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L30)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:38](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L38)
 
 ___
 
@@ -84,7 +90,17 @@ ___
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:28](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L28)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:36](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L36)
+
+___
+
+### instanceId
+
+• `Private` `Optional` **instanceId**: `string`
+
+#### Defined in
+
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:42](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L42)
 
 ___
 
@@ -94,7 +110,17 @@ ___
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:14](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L14)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:22](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L22)
+
+___
+
+### principalId
+
+• `Private` `Optional` **principalId**: `string`
+
+#### Defined in
+
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:40](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L40)
 
 ___
 
@@ -112,7 +138,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:22](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L22)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:30](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L30)
 
 ___
 
@@ -130,7 +156,23 @@ ___
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:16](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L16)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:24](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L24)
+
+___
+
+### settings
+
+• `Private` **settings**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `durable` | `boolean` |
+
+#### Defined in
+
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:44](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L44)
 
 ## Methods
 
@@ -142,7 +184,7 @@ Adds a filter to match specific message type.
 
 Common message types are `Command`, `CommandSuccessResponse` and `CommandErrorResponse`.
 
-See @enum EBMessageType for full available list.
+See  EBMessageType for full available list.
 
 #### Parameters
 
@@ -156,7 +198,7 @@ See @enum EBMessageType for full available list.
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:107](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L107)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:146](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L146)
 
 ___
 
@@ -174,7 +216,7 @@ SubscriptionDefinition
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:149](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L149)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:188](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L188)
 
 ___
 
@@ -192,7 +234,51 @@ the function
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:138](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L138)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:177](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L177)
+
+___
+
+### onlyInstanceId
+
+▸ **onlyInstanceId**(`instanceId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessageType`, `Payload`\>
+
+Filter messages only from instance id
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `instanceId` | `string` |
+
+#### Returns
+
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessageType`, `Payload`\>
+
+#### Defined in
+
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:64](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L64)
+
+___
+
+### onlyPrincipalId
+
+▸ **onlyPrincipalId**(`principalId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessageType`, `Payload`\>
+
+Filter messages only for principalId
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `principalId` | `string` |
+
+#### Returns
+
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessageType`, `Payload`\>
+
+#### Defined in
+
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:74](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L74)
 
 ___
 
@@ -225,7 +311,7 @@ receivedBy('UserService', undefined, 'testFunction')
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:88](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L88)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:127](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L127)
 
 ___
 
@@ -258,7 +344,27 @@ sendFrom('UserService', undefined, 'testFunction')
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:62](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L62)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:101](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L101)
+
+___
+
+### setDurable
+
+▸ **setDurable**(`durable`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessageType`, `Payload`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `durable` | `boolean` |
+
+#### Returns
+
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessageType`, `Payload`\>
+
+#### Defined in
+
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:79](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L79)
 
 ___
 
@@ -271,7 +377,8 @@ The types should be automatically set as soon as schemas previously defined.
 As the function will be a a function of a service class you need to implement as function declaration.
 Anonymous functions do not have access to the `this` scope.
 
-**`example`**
+**`Example`**
+
 ```ts
 async function (context, payload, parameter) {
 
@@ -293,7 +400,7 @@ SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:129](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L129)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:168](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L168)
 
 ___
 
@@ -317,4 +424,4 @@ SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:40](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L40)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:54](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L54)

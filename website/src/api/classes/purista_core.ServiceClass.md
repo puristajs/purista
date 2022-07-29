@@ -1,6 +1,6 @@
 [PURISTA API - v1.3.1](../README.md) / [@purista/core](../modules/purista_core.md) / ServiceClass
 
-# Class: ServiceClass
+# Class: ServiceClass<ConfigType\>
 
 [@purista/core](../modules/purista_core.md).ServiceClass
 
@@ -19,6 +19,12 @@ class MyBaseService extends Service {
 }
 ```
 
+## Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ConfigType` | `unknown` \| `undefined` |
+
 ## Hierarchy
 
 - [`GenericEventEmitter`](purista_core.GenericEventEmitter.md)<[`ServiceEvents`](../modules/purista_core.md#serviceevents)\>
@@ -35,6 +41,7 @@ class MyBaseService extends Service {
 
 ### Properties
 
+- [config](purista_core.ServiceClass.md#config)
 - [eventBridge](purista_core.ServiceClass.md#eventbridge)
 - [info](purista_core.ServiceClass.md#info)
 
@@ -51,7 +58,13 @@ class MyBaseService extends Service {
 
 ### constructor
 
-• **new ServiceClass**()
+• **new ServiceClass**<`ConfigType`\>()
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ConfigType` | `unknown` |
 
 #### Inherited from
 
@@ -59,15 +72,25 @@ class MyBaseService extends Service {
 
 ## Properties
 
+### config
+
+• `Abstract` **config**: `ConfigType`
+
+#### Defined in
+
+[core/src/core/types/ServiceClass.ts:31](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L31)
+
+___
+
 ### eventBridge
 
-• `Protected` `Abstract` **eventBridge**: [`EventBridge`](../interfaces/purista_core.EventBridge.md)
+• `Protected` `Abstract` **eventBridge**: [`EventBridge`](purista_core.EventBridge.md)
 
 The event bridge instance
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:33](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/ServiceClass.ts#L33)
+[core/src/core/types/ServiceClass.ts:36](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L36)
 
 ___
 
@@ -80,7 +103,7 @@ Service name, service version and some human readable description
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:28](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/ServiceClass.ts#L28)
+[core/src/core/types/ServiceClass.ts:29](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L29)
 
 ## Methods
 
@@ -96,7 +119,7 @@ Shut down the service
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:47](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/ServiceClass.ts#L47)
+[core/src/core/types/ServiceClass.ts:50](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L50)
 
 ___
 
@@ -127,7 +150,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
@@ -158,7 +181,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -189,7 +212,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L16)
 
 ___
 
@@ -203,7 +226,7 @@ Register a new command (function) for this service
 
 | Name | Type |
 | :------ | :------ |
-| `command` | [`CommandDefinition`](../modules/purista_core.md#commanddefinition)<[`ServiceClass`](purista_core.ServiceClass.md), `Record`<`string`, `unknown`\>, `unknown`, `unknown`, `unknown`, `unknown`, `unknown`\> |
+| `command` | [`CommandDefinition`](../modules/purista_core.md#commanddefinition)<[`ServiceClass`](purista_core.ServiceClass.md)<`unknown`\>, `Record`<`string`, `unknown`\>, `unknown`, `unknown`, `unknown`, `unknown`, `unknown`\> |
 
 #### Returns
 
@@ -211,7 +234,7 @@ Register a new command (function) for this service
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:42](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/ServiceClass.ts#L42)
+[core/src/core/types/ServiceClass.ts:45](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L45)
 
 ___
 
@@ -225,4 +248,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:35](https://github.com/sebastianwessel/purista/blob/78eb3f1/packages/core/src/core/types/ServiceClass.ts#L35)
+[core/src/core/types/ServiceClass.ts:38](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L38)
