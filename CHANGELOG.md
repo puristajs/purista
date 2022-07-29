@@ -2,6 +2,59 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.0] - 2022-07-29
+
+### Documentation
+
+- Add google analytics
+- Update documentation
+- Add inline documentation
+- Update handbook src
+- Update documentation
+- Update api docs
+- Add and extend examples
+- Update doc
+- Update documentation
+- Update documentation
+- Update api documentation
+- Update documentation
+
+### Features
+
+- Add function context mocks and refactor mocks
+- Refactor http server to use fastify and move to own package
+- Update testhelper and example
+- Create logger abstraction to allow different loggers
+- Add service builder
+- Add events to service and event bridge
+- Add metric events
+- Add principalId handling to httpserver service
+
+### Miscellaneous Tasks
+
+- Add unit tests for core
+- Improve types
+- Update project config
+- Improve file naming
+- Make getErrorMessageForCode generic
+- Improve code
+- Update config
+- Improve types, add instanceId
+- Remove obsolete http-server code from core package
+- Cleanup package json and minor fixes
+- Move testhelper back to core to prevent cycling dependencies
+- Improve types and subscription builder
+- Use test helper in tests
+- Update packages
+- Minor cleanup
+- Minor code cleanup
+- Update packages
+- Update test
+
+### Refactor
+
+- Default eventbridge and add function context
+
 ## [1.3.1] - 2022-06-23
 
 ### Documentation
@@ -34,6 +87,7 @@ All notable changes to this project will be documented in this file.
 - Align command naming
 - Correct file name
 - Simplify typing
+- Bump versions to 1.3.1
 
 ## [1.1.5] - 2022-05-15
 
