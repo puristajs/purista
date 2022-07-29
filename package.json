@@ -1,5 +1,5 @@
 {
-  "version": "1.3.1",
+  "version": "1.4.0",
   "private": true,
   "scripts": {
     "start": "npm run dev -w examples/simple",
@@ -16,7 +16,7 @@
     "commit:major": "npm version major --no-git-tag-version && scripts/commitVersion.sh",
     "commit:minor": "npm version minor --no-git-tag-version && scripts/commitVersion.sh",
     "commit:patch": "npm version patch --no-git-tag-version && scripts/commitVersion.sh",
-    "vuepress":"npm run vuepress -w website"
+    "vuepress": "npm run vuepress -w website"
   },
   "workspaces": [
     "./packages/*",
