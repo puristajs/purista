@@ -2,7 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.4.0] - 2022-07-29
+## [1.4.1] - 2022-07-30
+
+### Bug Fixes
+
+- Make testhelper package private
+- Subscription builder typings
 
 ### Documentation
 
@@ -18,6 +23,8 @@ All notable changes to this project will be documented in this file.
 - Update documentation
 - Update api documentation
 - Update documentation
+- Fix typos
+- Update documentation
 
 ### Features
 
@@ -32,6 +39,7 @@ All notable changes to this project will be documented in this file.
 
 ### Miscellaneous Tasks
 
+- Add task template
 - Add unit tests for core
 - Improve types
 - Update project config
@@ -50,6 +58,7 @@ All notable changes to this project will be documented in this file.
 - Minor code cleanup
 - Update packages
 - Update test
+- Bump versions to 1.4.0
 
 ### Refactor
 
