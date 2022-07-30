@@ -86,35 +86,34 @@ Each step has its own error handling and responses are divided into success and 
 Each step is decoupled from the others.
 
 In our example:
-If creating the new user is failing, none of the other steps is started and the browser receives a proper error response.
+If the creation of the new user is failing, none of the other steps is started and the browser receives a proper error response.
 If sending of verification email is failing, it does not affect the user creation, and it is traced by the `Audit` service.
 
 If you might want to extend this, to send two-factor-pin via SMS, you simply need to add a new service `SMS` with a command `sendSms`.
-Add a subscription `send2FA` in service `User`, which is listening to successful user creations, like the `verifyEmail` subscription does.  
+Add a subscription `send2FA` in service `User`, which is listening to successful user creations, like the `verifyEmail` subscription.  
 Invoke `sendSms` in service `SMS` from subscription `send2FA` in service `User`.
 
 We might need a new version of user sign up, because now, the input payload has a required field `phoneNumber` for our 2FA.
 But we do not want to break any existing and working thing.
 
 We simply copy the whole service `User` to a new service `User2`.  
-For service `User2` we bump version to `2.0.0`.
+For service `User2` we bump version to `2`.
 
 All API endpoints for `User2` are now directly available as `api/v2/` and our new Service is also reachable by all other services.  
 Now we can safely make our changes in `User2` and mark `api/v1/` as deprecated.  
-As soon as we finished our changes, tested them and so on, we can completely switch to the new version and remove the old one.
+As soon as we finished our changes, we can completely switch to the new version and remove the old one.
 
 ## Seriously, a new framework
 
 You might ask yourself why the hell there is a need for some other framework.  
 Because there are more or less three kinds of frameworks out there.
 
-
 ### The old stars
 
 The most mature ones, are focused on creating some kind of web server.  
-No matter if it is express.js, hapi, restify/fastify and all the other cool ones.  
+No matter if it is [express.js](https://expressjs.com), [hapi](https://hapi.dev), [restify](http://restify.com/[fastify](https://www.fastify.io) and all the other cool ones.  
 There is a huge ecosystem around these frameworks.  
-They are pretty cool and helpful creating web servers, but they don't help you to build the logic behind some endpoints.  
+They are pretty cool and helpful creating web servers, but they don't help you to build the logic behind endpoints.  
 PURISTA does not try to replace them. PURISTA will bring the missing part for building the logic behind the endpoints, and you should be able to combine them.
 
 In fact, it works pretty well, to combine these frameworks with PURISTA.  
@@ -124,7 +123,7 @@ The provided package `@purista/httpserver` is using fastify under the hood.
 
 The next kind of frameworks are the unicorns - the specialists.  
 They are focused on solving specific issues and requirements, and do not try to "fit for all use cases".  
-Let's give a big 👏 to Feathers and Moleculer as cool examples for this category.  
+Let's give a big 👏 to [Feathers](https://feathersjs.com) and [Moleculer](https://moleculer.services) as cool examples for this category.  
 Pretty sure there are some other awesome unicorns out there. Just let us know!  
 
 Highly recommended trying them out, play around, do some cool stuff, and maybe they perfectly fit for your next project.
@@ -143,7 +142,7 @@ PURISTA tries to have no framework specific stuff as much as possible.
 It does not try to treat developers to use certain patterns, conventions or styles.  
 It tries to separate, decouple things and to avoid having dependencies within your logic.
 
-For example, with dependency injections, you have the need, that your dependency is instantiated within your current progress.  
+For example, with dependency injections, you have the need, that your dependency is instantiated within your current process.  
 This is a first warning sign for questions like "How to scale things up?" and "How to handle multiple instances" and "How to maintain".
 
 You quickly end up with one dependency injection for database, one for websockets, one for logging, one for...  
@@ -151,7 +150,7 @@ You quickly end up with one dependency injection for database, one for websocket
 At the end, you've built one monolithic monster, which might become totally unpredictable and maintainable.  
 It is the scenario you should avoid: simple changes on one end, and it possibly fails on some other end.
 
-PURISTA tries to avoid and solve this issue by using a unified event bridge and to adapt some domain driven development patterns. This means you are able to break this dependency chain, and you are able to use resources which are available somehow, somewhere.  
+PURISTA tries to avoid and solve this issue by using a unified event bridge and to adapt some domain driven development patterns. This means you are able to break this dependency chain, and you are able to use resources which are available somehow, somewhere (blackbox).  
 This also increases stability, because if one part isn't working, the rest won't crash or stop working from a technical perspective.  
 PURISTA adapts the idea of microservices and serverless functions from that point of view.
 
@@ -164,7 +163,6 @@ With dependency injections, you will need to have error handling within your fun
 You can start adding more abstractions, layers and stuff to workaround, but does this really fix the underlaying problem and is it worth to have such code bloat from testing and maintaining perspective?
 
 With the approach of PURISTA, you get a validated input, you process the data, you persist somehow, and you send a message via websocket somehow.  
-If, how and when does not matter for the input processing part.  
 Each of the steps has verified in-/output and basic error handling out of the box.
 
 Depending on the event bridge you choose:  
@@ -172,7 +170,7 @@ You can build a real robust and scalable system, because you can set up your sys
 If the persistence part isn't available right now, the information can be hold within the event bridge until the persistence part is available.  
 You can build the system to send the message via websocket, no matter if the persistence part is done. Or you can decide to trigger the websocket part as soon as the persistence part is done. And again, you can decide what should happen, when the websocket connection is currently unavailable.
 
-This is a huge benefit to control how to handle such cases, as you are now able to control if you like to lose business data.
+This is a huge benefit to control how to handle such cases, as you are now able to control if you like to lose business data or not.
 
 You can scale out as you need, as there are maybe multiple instances running which are able to persist data or to send websocket messages.
 
@@ -264,7 +262,7 @@ It's done by the concept of having services with functions and subscriptions whi
 
 How they are orchestrated, deployed and where they are running does not matter.
 
-You can decide if you want to deploy your logic as a single monolith or in some microservice style or as serverless functions, or if you like a mix of multiple styles.  
+You can decide, if you want to deploy your logic as a single monolith or in some microservice style or as serverless functions, or if you like a mix of multiple styles.  
 There is no need to decide if you like to use your own server or some cloud provider.  
 
 It also allows integrating other services and providers, without touching the core of your application. Simply add them to the event bus.  
