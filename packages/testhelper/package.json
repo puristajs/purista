@@ -8,5 +8,6 @@
     "url": "git@github.com:sebastianwessel/purista.git"
   },
   "author": "Sebastian Wessel",
-  "license": "ISC"
+  "license": "ISC",
+  "private":true
 }
