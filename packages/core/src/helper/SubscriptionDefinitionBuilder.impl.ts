@@ -15,8 +15,8 @@ import type {
  * A working schema definition needs at least a subscription name, a short description and the subscription implementation.
  */
 export class SubscriptionDefinitionBuilder<
-  ServiceClassType = ServiceClass,
-  MessageType = EBMessage,
+  ServiceClassType extends ServiceClass = ServiceClass,
+  MsgType extends EBMessage = EBMessage,
   Payload = unknown,
 > {
   private messageType: EBMessageType | undefined
@@ -33,7 +33,7 @@ export class SubscriptionDefinitionBuilder<
     serviceTarget?: string
   }
 
-  private fn?: SubscriptionFunction<ServiceClassType, MessageType, Payload>
+  private fn?: SubscriptionFunction<ServiceClassType, any, any>
 
   private eventName?: string
 
@@ -165,16 +165,18 @@ export class SubscriptionDefinitionBuilder<
    * @param fn the function implementation
    * @returns SubscriptionDefinitionBuilder
    */
-  setFunction(fn: SubscriptionFunction<ServiceClassType, MessageType, Payload>) {
+  setFunction<PayloadType = unknown, MType extends EBMessage = MsgType>(
+    fn: SubscriptionFunction<ServiceClassType, MType, PayloadType>,
+  ) {
     this.fn = fn
-    return this
+    return this as unknown as SubscriptionDefinitionBuilder<ServiceClassType, MType, PayloadType>
   }
 
   /**
    * Get the function implementation
    * @returns the function
    */
-  getFunction(): SubscriptionFunction<ServiceClassType, MessageType, Payload> {
+  getFunction(): SubscriptionFunction<ServiceClassType, MsgType, Payload> {
     if (!this.fn) {
       throw new Error(`No function implementation for ${this.subscriptionName}`)
     }
@@ -185,12 +187,12 @@ export class SubscriptionDefinitionBuilder<
    * Returns the final subscription definition which will be passed into the service class.
    * @returns SubscriptionDefinition
    */
-  getDefinition(): SubscriptionDefinition<ServiceClassType, MessageType, Payload> {
+  getDefinition(): SubscriptionDefinition<ServiceClassType, MsgType, Payload> {
     if (!this.fn) {
       throw new Error(`SubscriptionDefinitionBuilder: missing function implementation for ${this.subscriptionName}`)
     }
 
-    const subscription: SubscriptionDefinition<ServiceClassType, MessageType, Payload> = {
+    const subscription: SubscriptionDefinition<ServiceClassType, MsgType, Payload> = {
       sender: this.sender,
       receiver: this.receiver,
       subscriptionName: this.subscriptionName,
