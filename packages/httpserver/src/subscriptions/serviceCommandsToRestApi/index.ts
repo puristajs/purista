@@ -5,12 +5,12 @@ import {
   HttpExposedServiceMeta,
   InfoServiceFunctionAdded,
   isHttpExposedServiceMeta,
-  PrincipalId,
   SubscriptionDefinitionBuilder,
   UnhandledError,
 } from '@purista/core'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import posix from 'node:path/posix'
+import { Methods } from 'trouter'
 
 import { extractHeaderValue } from '../../helper'
 import { HttpServerService } from '../../HttpServerService.impl'
@@ -38,11 +38,7 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
     const contentType = data.http.contentType || 'application/json; charset=utf-8'
 
     const getHandler = () => {
-      return async (
-        request: FastifyRequest & { principalId?: PrincipalId },
-        reply: FastifyReply,
-        params: Record<string, unknown>,
-      ) => {
+      return async (request: FastifyRequest, reply: FastifyReply, params: Record<string, unknown>) => {
         try {
           const fastifyParams = request.params as Record<string, unknown>
 
@@ -70,6 +66,18 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
             },
             `${method}:${url}`,
           )
+
+          const beforeResponse = this.beforeResponse.find(request.method as Methods, request.url)
+          for (const hook of beforeResponse.handlers) {
+            await hook(response, request, reply, beforeResponse.params)
+            if (reply.sent) {
+              return
+            }
+          }
+
+          if (reply.sent) {
+            return
+          }
           reply.header('content-type', contentType)
 
           reply.send(response)

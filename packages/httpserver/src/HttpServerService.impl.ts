@@ -13,7 +13,7 @@ import {
   TraceId,
   UnhandledError,
 } from '@purista/core'
-import fastify, { FastifyInstance } from 'fastify'
+import fastify, { FastifyInstance, HTTPMethods } from 'fastify'
 import { posix } from 'path'
 import qs from 'qs'
 import * as swaggerUi from 'swagger-ui-dist'
@@ -24,7 +24,7 @@ import { COMMANDS } from './commands'
 import { getDefaultConfig, ServiceInfo } from './config'
 import { OPEN_API_ROUTE_FUNCTIONS } from './routes'
 import { SUBSCRIPTIONS } from './subscriptions'
-import { HttpServerConfig } from './types'
+import { BeforeResponseHook, HttpServerConfig } from './types'
 
 /**
  * A simple http server based on fastify.
@@ -36,6 +36,8 @@ export class HttpServerService extends Service<HttpServerConfig> {
   routeDefinitions: HttpExposedServiceMeta[] = []
 
   routes = new Trouter()
+
+  beforeResponse = new Trouter<BeforeResponseHook>()
 
   /**
    * Create a new instance of the HttpServer class
@@ -68,6 +70,10 @@ export class HttpServerService extends Service<HttpServerConfig> {
         reply.status(StatusCode.NotFound)
         reply.send(new HandledError(StatusCode.NotFound))
       })
+  }
+
+  addBeforeResponse(method: HTTPMethods, pattern: string, handler: BeforeResponseHook) {
+    this.beforeResponse.add(method, pattern, handler)
   }
 
   async start(): Promise<void> {
