@@ -6,5 +6,12 @@
   "exclude": [
     "./**/*.d.ts",
     "./lib/*"
-  ]
+  ],
+  "ts-node": {
+    "files": true
+  },
+  "files": [
+    "src/index.ts",
+    "fastify.d.ts"
+  ],
 }
