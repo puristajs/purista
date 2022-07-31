@@ -1,4 +1,10 @@
-import { CommandResponse, EBMessageType, getNewCorrelationId, getNewEBMessageId, getNewTraceId } from '../../core'
+import {
+  CommandSuccessResponse,
+  EBMessageType,
+  getNewCorrelationId,
+  getNewEBMessageId,
+  getNewTraceId,
+} from '../../core'
 
 /**
  * A helper to create a command response message.
@@ -15,8 +21,8 @@ import { CommandResponse, EBMessageType, getNewCorrelationId, getNewEBMessageId,
  * @returns CommandResponse
  */
 export const createTestCommandResponseMsg = <Payload = unknown>(
-  input?: Partial<CommandResponse<Payload>>,
-): CommandResponse<Payload> => {
+  input?: Partial<CommandSuccessResponse<Payload>>,
+): CommandSuccessResponse<Payload> => {
   const defaultMsg = {
     id: getNewEBMessageId(),
     instanceId: 'SenderInstanceId',
@@ -40,5 +46,5 @@ export const createTestCommandResponseMsg = <Payload = unknown>(
   return {
     ...defaultMsg,
     ...input,
-  } as CommandResponse<Payload>
+  } as CommandSuccessResponse<Payload>
 }
