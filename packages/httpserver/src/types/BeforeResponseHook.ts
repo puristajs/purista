@@ -5,4 +5,4 @@ export type BeforeResponseHook = <T = unknown>(
   request: FastifyRequest,
   reply: FastifyReply,
   params: Record<string, unknown>,
-) => Promise<Boolean>
+) => void

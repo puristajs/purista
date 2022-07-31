@@ -68,16 +68,10 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
           )
 
           const beforeResponse = this.beforeResponse.find(request.method as Methods, request.url)
-          for (const hook of beforeResponse.handlers) {
-            await hook(response, request, reply, beforeResponse.params)
-            if (reply.sent) {
-              return
-            }
-          }
+          beforeResponse.handlers.forEach((hook) => {
+            hook(response, request, reply, beforeResponse.params)
+          })
 
-          if (reply.sent) {
-            return
-          }
           reply.header('content-type', contentType)
 
           reply.send(response)

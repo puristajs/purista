@@ -14,5 +14,9 @@
   },
   "compilerOptions": {
     // typescript options here
-  }
+  },
+  "files": [
+    "src/index.ts",
+    "fastify.d.ts"
+  ],
 }
