@@ -2,12 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.4.1] - 2022-07-30
+## [1.4.2] - 2022-07-31
 
 ### Bug Fixes
 
 - Make testhelper package private
 - Subscription builder typings
+- CreateTestCommandResponseMsg helper return type
 
 ### Documentation
 
@@ -25,6 +26,7 @@ All notable changes to this project will be documented in this file.
 - Update documentation
 - Fix typos
 - Update documentation
+- Update documentation
 
 ### Features
 
@@ -36,6 +38,7 @@ All notable changes to this project will be documented in this file.
 - Add events to service and event bridge
 - Add metric events
 - Add principalId handling to httpserver service
+- Add before response hook in http server solves #50
 
 ### Miscellaneous Tasks
 
@@ -59,6 +62,9 @@ All notable changes to this project will be documented in this file.
 - Update packages
 - Update test
 - Bump versions to 1.4.0
+- Bump versions to 1.4.1
+- Update packages and config
+- Cleanup simple example
 
 ### Refactor
 
