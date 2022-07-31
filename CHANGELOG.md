@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.3] - 2022-07-31
+
+### Documentation
+
+- Update documentation
+
+### Miscellaneous Tasks
+
+- Add eslintignore
+
 ## [1.4.2] - 2022-07-31
 
 ### Bug Fixes
@@ -65,6 +75,7 @@ All notable changes to this project will be documented in this file.
 - Bump versions to 1.4.1
 - Update packages and config
 - Cleanup simple example
+- Bump versions to 1.4.2
 
 ### Refactor
 
