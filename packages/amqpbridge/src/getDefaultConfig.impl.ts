@@ -1,8 +1,8 @@
 import { getNewInstanceId } from '@purista/core'
 
-import { RabbitMQEventBridgeConfig } from './types'
+import { AmqpBridgeConfig } from './types'
 
-export const getDefaultConfig = (): RabbitMQEventBridgeConfig => {
+export const getDefaultConfig = (): AmqpBridgeConfig => {
   return {
     defaultCommandTimeout: 30000,
     exchangeName: 'purista',
