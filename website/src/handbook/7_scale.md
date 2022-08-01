@@ -17,4 +17,6 @@ star: true
 
 # Scaling
 
+WIP!
 
+The current option to scale your application, is the usage of `AmqpBridge` and to run multiple instances of your application.
