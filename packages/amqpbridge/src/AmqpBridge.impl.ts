@@ -32,14 +32,14 @@ import { getCommandQueueName } from './getCommandQueueName.impl'
 import { getDefaultConfig } from './getDefaultConfig.impl'
 import { getSubscriptionQueueName } from './getSubscriptionQueueName.impl'
 import { jsonEncoder, plainEncrypter } from './payloadHandling'
-import { Encoder, Encrypter, RabbitMQEventBridgeConfig } from './types'
+import { AmqpBridgeConfig, Encoder, Encrypter } from './types'
 
 /**
  * A adapter to use rabbitMQ as event bridge.
  */
-export class RabbitMQEventBridge extends EventBridge {
+export class AmqpBridge extends EventBridge {
   protected log: Logger
-  protected config: RabbitMQEventBridgeConfig
+  protected config: AmqpBridgeConfig
   protected connection?: Connection
   protected channel?: Channel
 
@@ -70,7 +70,7 @@ export class RabbitMQEventBridge extends EventBridge {
     ...plainEncrypter,
   }
 
-  constructor(baseLogger: Logger, conf: RabbitMQEventBridgeConfig = getDefaultConfig()) {
+  constructor(baseLogger: Logger, conf: AmqpBridgeConfig = getDefaultConfig()) {
     super()
     this.config = {
       ...getDefaultConfig(),

@@ -4,9 +4,9 @@ import { Encoder } from './Encoder'
 import { Encrypter } from './Encrypter'
 
 /**
- * RabbitMQ bridge config
+ * AmqpBridge bridge config
  */
-export type RabbitMQEventBridgeConfig = {
+export type AmqpBridgeConfig = {
   instanceId: string
   defaultCommandTimeout: number
   exchangeName: string
