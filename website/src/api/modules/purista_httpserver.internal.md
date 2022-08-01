@@ -1,4 +1,4 @@
-[PURISTA API - v1.3.1](../README.md) / [@purista/httpserver](purista_httpserver.md) / internal
+[PURISTA API - v1.4.3](../README.md) / [@purista/httpserver](purista_httpserver.md) / internal
 
 # Namespace: internal
 

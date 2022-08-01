@@ -1,4 +1,4 @@
-[PURISTA API - v1.3.1](../README.md) / @purista/httpserver
+[PURISTA API - v1.4.3](../README.md) / @purista/httpserver
 
 # Module: @purista/httpserver
 
@@ -14,6 +14,7 @@
 
 ### Type Aliases
 
+- [BeforeResponseHook](purista_httpserver.md#beforeresponsehook)
 - [HttpServerConfig](purista_httpserver.md#httpserverconfig)
 
 ### Variables
@@ -27,6 +28,39 @@
 - [getDefaultConfig](purista_httpserver.md#getdefaultconfig)
 
 ## Type Aliases
+
+### BeforeResponseHook
+
+Ƭ **BeforeResponseHook**: <T\>(`payload`: `T`, `request`: `FastifyRequest`, `reply`: `FastifyReply`, `params`: `Record`<`string`, `unknown`\>) => `void`
+
+#### Type declaration
+
+▸ <`T`\>(`payload`, `request`, `reply`, `params`): `void`
+
+##### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `T` | `unknown` |
+
+##### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `payload` | `T` |
+| `request` | `FastifyRequest` |
+| `reply` | `FastifyReply` |
+| `params` | `Record`<`string`, `unknown`\> |
+
+##### Returns
+
+`void`
+
+#### Defined in
+
+[httpserver/src/types/BeforeResponseHook.ts:3](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/types/BeforeResponseHook.ts#L3)
+
+___
 
 ### HttpServerConfig
 
@@ -56,7 +90,7 @@
 
 #### Defined in
 
-[httpserver/src/types/HttpServerConfig.ts:13](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/types/HttpServerConfig.ts#L13)
+[httpserver/src/types/HttpServerConfig.ts:13](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/types/HttpServerConfig.ts#L13)
 
 ## Variables
 
@@ -66,7 +100,7 @@
 
 #### Defined in
 
-[httpserver/src/config/defaults.config.ts:7](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/config/defaults.config.ts#L7)
+[httpserver/src/config/defaults.config.ts:7](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/config/defaults.config.ts#L7)
 
 ___
 
@@ -76,7 +110,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/config/defaults.config.ts:5](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/config/defaults.config.ts#L5)
+[httpserver/src/config/defaults.config.ts:5](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/config/defaults.config.ts#L5)
 
 ___
 
@@ -86,7 +120,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/config/ServiceInfo.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/config/ServiceInfo.ts#L3)
+[httpserver/src/config/ServiceInfo.ts:3](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/config/ServiceInfo.ts#L3)
 
 ## Functions
 
@@ -100,4 +134,4 @@ ___
 
 #### Defined in
 
-[httpserver/src/config/getDefaultConfig.ts:4](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/config/getDefaultConfig.ts#L4)
+[httpserver/src/config/getDefaultConfig.ts:4](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/config/getDefaultConfig.ts#L4)

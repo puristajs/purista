@@ -1,8 +1,8 @@
-[PURISTA API - v1.3.1](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / RabbitMQEventBridge
+[PURISTA API - v1.4.3](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / AmqpBridge
 
-# Class: RabbitMQEventBridge
+# Class: AmqpBridge
 
-[@purista/amqpbridge](../modules/purista_amqpbridge.md).RabbitMQEventBridge
+[@purista/amqpbridge](../modules/purista_amqpbridge.md).AmqpBridge
 
 A adapter to use rabbitMQ as event bridge.
 
@@ -10,59 +10,59 @@ A adapter to use rabbitMQ as event bridge.
 
 - [`EventBridge`](purista_amqpbridge.internal.EventBridge.md)
 
-  ↳ **`RabbitMQEventBridge`**
+  ↳ **`AmqpBridge`**
 
 ## Table of contents
 
 ### Constructors
 
-- [constructor](purista_amqpbridge.RabbitMQEventBridge.md#constructor)
+- [constructor](purista_amqpbridge.AmqpBridge.md#constructor)
 
 ### Properties
 
-- [channel](purista_amqpbridge.RabbitMQEventBridge.md#channel)
-- [config](purista_amqpbridge.RabbitMQEventBridge.md#config)
-- [connection](purista_amqpbridge.RabbitMQEventBridge.md#connection)
-- [encoder](purista_amqpbridge.RabbitMQEventBridge.md#encoder)
-- [encrypter](purista_amqpbridge.RabbitMQEventBridge.md#encrypter)
-- [log](purista_amqpbridge.RabbitMQEventBridge.md#log)
-- [pendingInvocations](purista_amqpbridge.RabbitMQEventBridge.md#pendinginvocations)
-- [replyQueueName](purista_amqpbridge.RabbitMQEventBridge.md#replyqueuename)
-- [serviceFunctions](purista_amqpbridge.RabbitMQEventBridge.md#servicefunctions)
-- [subscriptions](purista_amqpbridge.RabbitMQEventBridge.md#subscriptions)
+- [channel](purista_amqpbridge.AmqpBridge.md#channel)
+- [config](purista_amqpbridge.AmqpBridge.md#config)
+- [connection](purista_amqpbridge.AmqpBridge.md#connection)
+- [encoder](purista_amqpbridge.AmqpBridge.md#encoder)
+- [encrypter](purista_amqpbridge.AmqpBridge.md#encrypter)
+- [log](purista_amqpbridge.AmqpBridge.md#log)
+- [pendingInvocations](purista_amqpbridge.AmqpBridge.md#pendinginvocations)
+- [replyQueueName](purista_amqpbridge.AmqpBridge.md#replyqueuename)
+- [serviceFunctions](purista_amqpbridge.AmqpBridge.md#servicefunctions)
+- [subscriptions](purista_amqpbridge.AmqpBridge.md#subscriptions)
 
 ### Accessors
 
-- [defaultCommandTimeout](purista_amqpbridge.RabbitMQEventBridge.md#defaultcommandtimeout)
-- [instanceId](purista_amqpbridge.RabbitMQEventBridge.md#instanceid)
+- [defaultCommandTimeout](purista_amqpbridge.AmqpBridge.md#defaultcommandtimeout)
+- [instanceId](purista_amqpbridge.AmqpBridge.md#instanceid)
 
 ### Methods
 
-- [decodeContent](purista_amqpbridge.RabbitMQEventBridge.md#decodecontent)
-- [emit](purista_amqpbridge.RabbitMQEventBridge.md#emit)
-- [emitMessage](purista_amqpbridge.RabbitMQEventBridge.md#emitmessage)
-- [encodeContent](purista_amqpbridge.RabbitMQEventBridge.md#encodecontent)
-- [invoke](purista_amqpbridge.RabbitMQEventBridge.md#invoke)
-- [off](purista_amqpbridge.RabbitMQEventBridge.md#off)
-- [on](purista_amqpbridge.RabbitMQEventBridge.md#on)
-- [registerServiceFunction](purista_amqpbridge.RabbitMQEventBridge.md#registerservicefunction)
-- [registerSubscription](purista_amqpbridge.RabbitMQEventBridge.md#registersubscription)
-- [start](purista_amqpbridge.RabbitMQEventBridge.md#start)
-- [unregisterServiceFunction](purista_amqpbridge.RabbitMQEventBridge.md#unregisterservicefunction)
-- [unregisterSubscription](purista_amqpbridge.RabbitMQEventBridge.md#unregistersubscription)
+- [decodeContent](purista_amqpbridge.AmqpBridge.md#decodecontent)
+- [emit](purista_amqpbridge.AmqpBridge.md#emit)
+- [emitMessage](purista_amqpbridge.AmqpBridge.md#emitmessage)
+- [encodeContent](purista_amqpbridge.AmqpBridge.md#encodecontent)
+- [invoke](purista_amqpbridge.AmqpBridge.md#invoke)
+- [off](purista_amqpbridge.AmqpBridge.md#off)
+- [on](purista_amqpbridge.AmqpBridge.md#on)
+- [registerServiceFunction](purista_amqpbridge.AmqpBridge.md#registerservicefunction)
+- [registerSubscription](purista_amqpbridge.AmqpBridge.md#registersubscription)
+- [start](purista_amqpbridge.AmqpBridge.md#start)
+- [unregisterServiceFunction](purista_amqpbridge.AmqpBridge.md#unregisterservicefunction)
+- [unregisterSubscription](purista_amqpbridge.AmqpBridge.md#unregistersubscription)
 
 ## Constructors
 
 ### constructor
 
-• **new RabbitMQEventBridge**(`baseLogger`, `conf?`)
+• **new AmqpBridge**(`baseLogger`, `conf?`)
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `baseLogger` | [`Logger`](purista_amqpbridge.internal.Logger.md) |
-| `conf` | [`RabbitMQEventBridgeConfig`](../modules/purista_amqpbridge.md#rabbitmqeventbridgeconfig) |
+| `conf` | [`AmqpBridgeConfig`](../modules/purista_amqpbridge.md#amqpbridgeconfig) |
 
 #### Overrides
 
@@ -70,7 +70,7 @@ A adapter to use rabbitMQ as event bridge.
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:73](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L73)
+[amqpbridge/src/AmqpBridge.impl.ts:73](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L73)
 
 ## Properties
 
@@ -80,17 +80,17 @@ A adapter to use rabbitMQ as event bridge.
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:44](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L44)
+[amqpbridge/src/AmqpBridge.impl.ts:44](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L44)
 
 ___
 
 ### config
 
-• `Protected` **config**: [`RabbitMQEventBridgeConfig`](../modules/purista_amqpbridge.md#rabbitmqeventbridgeconfig)
+• `Protected` **config**: [`AmqpBridgeConfig`](../modules/purista_amqpbridge.md#amqpbridgeconfig)
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:42](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L42)
+[amqpbridge/src/AmqpBridge.impl.ts:42](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L42)
 
 ___
 
@@ -100,7 +100,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:43](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L43)
+[amqpbridge/src/AmqpBridge.impl.ts:43](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L43)
 
 ___
 
@@ -110,7 +110,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:65](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L65)
+[amqpbridge/src/AmqpBridge.impl.ts:65](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L65)
 
 ___
 
@@ -120,7 +120,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:69](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L69)
+[amqpbridge/src/AmqpBridge.impl.ts:69](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L69)
 
 ___
 
@@ -130,7 +130,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:41](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L41)
+[amqpbridge/src/AmqpBridge.impl.ts:41](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L41)
 
 ___
 
@@ -140,7 +140,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:55](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L55)
+[amqpbridge/src/AmqpBridge.impl.ts:55](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L55)
 
 ___
 
@@ -150,7 +150,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:46](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L46)
+[amqpbridge/src/AmqpBridge.impl.ts:46](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L46)
 
 ___
 
@@ -160,7 +160,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:47](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L47)
+[amqpbridge/src/AmqpBridge.impl.ts:47](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L47)
 
 ___
 
@@ -170,7 +170,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:57](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L57)
+[amqpbridge/src/AmqpBridge.impl.ts:57](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L57)
 
 ## Accessors
 
@@ -191,7 +191,7 @@ EventBridge.defaultCommandTimeout
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:96](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L96)
+[amqpbridge/src/AmqpBridge.impl.ts:96](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L96)
 
 ___
 
@@ -208,7 +208,7 @@ The id of current event bridge instance.
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:104](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L104)
+[amqpbridge/src/AmqpBridge.impl.ts:104](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L104)
 
 ## Methods
 
@@ -238,7 +238,7 @@ Decode buffer into given type
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:549](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L549)
+[amqpbridge/src/AmqpBridge.impl.ts:549](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L549)
 
 ___
 
@@ -301,7 +301,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:196](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L196)
+[amqpbridge/src/AmqpBridge.impl.ts:196](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L196)
 
 ___
 
@@ -331,7 +331,7 @@ Encode given payload to buffer
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:528](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L528)
+[amqpbridge/src/AmqpBridge.impl.ts:528](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L528)
 
 ___
 
@@ -364,7 +364,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:237](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L237)
+[amqpbridge/src/AmqpBridge.impl.ts:237](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L237)
 
 ___
 
@@ -455,7 +455,7 @@ the id of command function queue
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:346](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L346)
+[amqpbridge/src/AmqpBridge.impl.ts:346](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L346)
 
 ___
 
@@ -480,7 +480,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:448](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L448)
+[amqpbridge/src/AmqpBridge.impl.ts:448](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L448)
 
 ___
 
@@ -500,7 +500,7 @@ Connect to RabbitMQ broker, ensure exchange, call back queue
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:111](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L111)
+[amqpbridge/src/AmqpBridge.impl.ts:111](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L111)
 
 ___
 
@@ -524,7 +524,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:429](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L429)
+[amqpbridge/src/AmqpBridge.impl.ts:429](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L429)
 
 ___
 
@@ -548,4 +548,4 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/RabbitMQEventBridge.impl.ts:502](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/RabbitMQEventBridge.impl.ts#L502)
+[amqpbridge/src/AmqpBridge.impl.ts:502](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/AmqpBridge.impl.ts#L502)

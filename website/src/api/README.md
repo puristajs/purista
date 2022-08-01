@@ -1,6 +1,6 @@
-PURISTA API - v1.3.1
+PURISTA API - v1.4.3
 
-# PURISTA API - v1.3.1
+# PURISTA API - v1.4.3
 
 ## Table of contents
 

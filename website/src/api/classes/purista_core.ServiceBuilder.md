@@ -1,4 +1,4 @@
-[PURISTA API - v1.3.1](../README.md) / [@purista/core](../modules/purista_core.md) / ServiceBuilder
+[PURISTA API - v1.4.3](../README.md) / [@purista/core](../modules/purista_core.md) / ServiceBuilder
 
 # Class: ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType\>
 
@@ -61,7 +61,7 @@
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:33](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L33)
+[core/src/helper/ServiceBuilder.impl.ts:33](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L33)
 
 ## Properties
 
@@ -71,7 +71,7 @@
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:30](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L30)
+[core/src/helper/ServiceBuilder.impl.ts:30](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L30)
 
 ___
 
@@ -81,7 +81,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:22](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L22)
+[core/src/helper/ServiceBuilder.impl.ts:22](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L22)
 
 ___
 
@@ -91,7 +91,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:25](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L25)
+[core/src/helper/ServiceBuilder.impl.ts:25](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L25)
 
 ___
 
@@ -101,7 +101,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:26](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L26)
+[core/src/helper/ServiceBuilder.impl.ts:26](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L26)
 
 ___
 
@@ -111,7 +111,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:33](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L33)
+[core/src/helper/ServiceBuilder.impl.ts:33](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L33)
 
 ___
 
@@ -121,7 +121,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:28](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L28)
+[core/src/helper/ServiceBuilder.impl.ts:28](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L28)
 
 ___
 
@@ -131,7 +131,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:23](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L23)
+[core/src/helper/ServiceBuilder.impl.ts:23](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L23)
 
 ## Methods
 
@@ -151,7 +151,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:49](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L49)
+[core/src/helper/ServiceBuilder.impl.ts:49](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L49)
 
 ___
 
@@ -171,7 +171,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:54](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L54)
+[core/src/helper/ServiceBuilder.impl.ts:54](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L54)
 
 ___
 
@@ -193,7 +193,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:91](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L91)
+[core/src/helper/ServiceBuilder.impl.ts:91](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L91)
 
 ___
 
@@ -215,7 +215,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:64](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L64)
+[core/src/helper/ServiceBuilder.impl.ts:64](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L64)
 
 ___
 
@@ -236,7 +236,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:99](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L99)
+[core/src/helper/ServiceBuilder.impl.ts:99](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L99)
 
 ___
 
@@ -264,7 +264,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:35](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L35)
+[core/src/helper/ServiceBuilder.impl.ts:35](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L35)
 
 ___
 
@@ -290,7 +290,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:59](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L59)
+[core/src/helper/ServiceBuilder.impl.ts:59](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L59)
 
 ___
 
@@ -310,4 +310,4 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:40](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/helper/ServiceBuilder.impl.ts#L40)
+[core/src/helper/ServiceBuilder.impl.ts:40](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/helper/ServiceBuilder.impl.ts#L40)

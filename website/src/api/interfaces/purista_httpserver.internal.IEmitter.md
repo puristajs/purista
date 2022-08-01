@@ -1,4 +1,4 @@
-[PURISTA API - v1.3.1](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / IEmitter
+[PURISTA API - v1.4.3](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / IEmitter
 
 # Interface: IEmitter<T\>
 

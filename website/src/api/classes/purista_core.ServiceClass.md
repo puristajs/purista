@@ -1,4 +1,4 @@
-[PURISTA API - v1.3.1](../README.md) / [@purista/core](../modules/purista_core.md) / ServiceClass
+[PURISTA API - v1.4.3](../README.md) / [@purista/core](../modules/purista_core.md) / ServiceClass
 
 # Class: ServiceClass<ConfigType\>
 
@@ -78,7 +78,7 @@ class MyBaseService extends Service {
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:31](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L31)
+[core/src/core/types/ServiceClass.ts:31](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/ServiceClass.ts#L31)
 
 ___
 
@@ -90,7 +90,7 @@ The event bridge instance
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:36](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L36)
+[core/src/core/types/ServiceClass.ts:36](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/ServiceClass.ts#L36)
 
 ___
 
@@ -103,7 +103,7 @@ Service name, service version and some human readable description
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:29](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L29)
+[core/src/core/types/ServiceClass.ts:29](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/ServiceClass.ts#L29)
 
 ## Methods
 
@@ -119,7 +119,7 @@ Shut down the service
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:50](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L50)
+[core/src/core/types/ServiceClass.ts:50](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/ServiceClass.ts#L50)
 
 ___
 
@@ -150,7 +150,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
@@ -181,7 +181,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -212,7 +212,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L16)
 
 ___
 
@@ -234,7 +234,7 @@ Register a new command (function) for this service
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:45](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L45)
+[core/src/core/types/ServiceClass.ts:45](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/ServiceClass.ts#L45)
 
 ___
 
@@ -248,4 +248,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:38](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceClass.ts#L38)
+[core/src/core/types/ServiceClass.ts:38](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/ServiceClass.ts#L38)

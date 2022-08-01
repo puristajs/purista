@@ -1,8 +1,7 @@
-import { CommandFunction } from '@purista/core'
+import { CommandFunction, Service } from '@purista/core'
 import { randomUUID } from 'crypto'
 import { z } from 'zod'
 
-import { UserService } from '../../UserService'
 import { inputParameterSchema, inputPayloadSchema, outputPayloadSchema } from './schema'
 
 /**
@@ -30,7 +29,7 @@ export type FunctionResultType = z.input<typeof outputPayloadSchema>
  * Be aware that original message payload property (payload and params) might not have the real type here, if you use the transform input hook!
  */
 export type FunctionImplementationType = CommandFunction<
-  UserService,
+  Service,
   MessagePayloadType,
   MessageParameterType,
   FunctionPayloadType,

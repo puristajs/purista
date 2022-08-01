@@ -1,4 +1,4 @@
-[PURISTA API - v1.3.1](../README.md) / [@purista/amqpbridge](purista_amqpbridge.md) / internal
+[PURISTA API - v1.4.3](../README.md) / [@purista/amqpbridge](purista_amqpbridge.md) / internal
 
 # Namespace: internal
 
@@ -300,7 +300,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/types/EncoderFunctions.ts#L1)
+[amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/types/EncoderFunctions.ts#L1)
 
 ___
 

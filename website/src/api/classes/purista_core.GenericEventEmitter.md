@@ -1,4 +1,4 @@
-[PURISTA API - v1.3.1](../README.md) / [@purista/core](../modules/purista_core.md) / GenericEventEmitter
+[PURISTA API - v1.4.3](../README.md) / [@purista/core](../modules/purista_core.md) / GenericEventEmitter
 
 # Class: GenericEventEmitter<T\>
 
@@ -58,7 +58,7 @@
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:15](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L15)
+[core/src/core/types/GenericEventEmitter.ts:15](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L15)
 
 ## Methods
 
@@ -89,7 +89,7 @@
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
@@ -120,7 +120,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -151,4 +151,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L16)

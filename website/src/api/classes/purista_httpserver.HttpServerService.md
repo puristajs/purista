@@ -1,4 +1,4 @@
-[PURISTA API - v1.3.1](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / HttpServerService
+[PURISTA API - v1.4.3](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / HttpServerService
 
 # Class: HttpServerService
 
@@ -20,6 +20,7 @@ A simple http server based on fastify.
 
 ### Properties
 
+- [beforeResponse](purista_httpserver.HttpServerService.md#beforeresponse)
 - [commands](purista_httpserver.HttpServerService.md#commands)
 - [config](purista_httpserver.HttpServerService.md#config)
 - [eventBridge](purista_httpserver.HttpServerService.md#eventbridge)
@@ -36,6 +37,7 @@ A simple http server based on fastify.
 
 ### Methods
 
+- [addBeforeResponse](purista_httpserver.HttpServerService.md#addbeforeresponse)
 - [destroy](purista_httpserver.HttpServerService.md#destroy)
 - [emit](purista_httpserver.HttpServerService.md#emit)
 - [executeCommand](purista_httpserver.HttpServerService.md#executecommand)
@@ -73,9 +75,19 @@ Create a new instance of the HttpServer class
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:46](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/HttpServerService.impl.ts#L46)
+[httpserver/src/HttpServerService.impl.ts:48](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L48)
 
 ## Properties
+
+### beforeResponse
+
+• **beforeResponse**: `default`<[`BeforeResponseHook`](../modules/purista_httpserver.md#beforeresponsehook)\>
+
+#### Defined in
+
+[httpserver/src/HttpServerService.impl.ts:40](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L40)
+
+___
 
 ### commands
 
@@ -144,7 +156,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:36](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/HttpServerService.impl.ts#L36)
+[httpserver/src/HttpServerService.impl.ts:36](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L36)
 
 ___
 
@@ -154,7 +166,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:38](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/HttpServerService.impl.ts#L38)
+[httpserver/src/HttpServerService.impl.ts:38](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L38)
 
 ___
 
@@ -164,7 +176,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:34](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/HttpServerService.impl.ts#L34)
+[httpserver/src/HttpServerService.impl.ts:34](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L34)
 
 ___
 
@@ -215,6 +227,28 @@ Service.serviceInfo
 core/lib/types/core/Service/Service.impl.d.ts:36
 
 ## Methods
+
+### addBeforeResponse
+
+▸ **addBeforeResponse**(`method`, `pattern`, `handler`): `void`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `method` | `HTTPMethods` |
+| `pattern` | `string` |
+| `handler` | [`BeforeResponseHook`](../modules/purista_httpserver.md#beforeresponsehook) |
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+[httpserver/src/HttpServerService.impl.ts:75](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L75)
+
+___
 
 ### destroy
 
@@ -459,7 +493,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:117](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/HttpServerService.impl.ts#L117)
+[httpserver/src/HttpServerService.impl.ts:123](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L123)
 
 ___
 
@@ -619,4 +653,4 @@ It connects to the event bridge and subscribes to the topics that are in the sub
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:73](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/httpserver/src/HttpServerService.impl.ts#L73)
+[httpserver/src/HttpServerService.impl.ts:79](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L79)

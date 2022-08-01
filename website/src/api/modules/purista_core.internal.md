@@ -1,4 +1,4 @@
-[PURISTA API - v1.3.1](../README.md) / [@purista/core](purista_core.md) / internal
+[PURISTA API - v1.4.3](../README.md) / [@purista/core](purista_core.md) / internal
 
 # Namespace: internal
 
@@ -24,7 +24,7 @@
 
 #### Defined in
 
-[core/src/core/types/EventBridgeEvents.ts:24](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/EventBridgeEvents.ts#L24)
+[core/src/core/types/EventBridgeEvents.ts:24](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/EventBridgeEvents.ts#L24)
 
 ___
 
@@ -38,7 +38,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/ServiceEvents.ts:50](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/ServiceEvents.ts#L50)
+[core/src/core/types/ServiceEvents.ts:50](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/ServiceEvents.ts#L50)
 
 ___
 
@@ -68,4 +68,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:6](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L6)
+[core/src/core/types/GenericEventEmitter.ts:6](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L6)

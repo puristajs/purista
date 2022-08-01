@@ -1,4 +1,4 @@
-[PURISTA API - v1.3.1](../README.md) / [@purista/core](../modules/purista_core.md) / DefaultEventBridge
+[PURISTA API - v1.4.3](../README.md) / [@purista/core](../modules/purista_core.md) / DefaultEventBridge
 
 # Class: DefaultEventBridge
 
@@ -66,7 +66,7 @@ Does not support threads and does not need any external databases.
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:64](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L64)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:64](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L64)
 
 ## Properties
 
@@ -76,7 +76,7 @@ Does not support threads and does not need any external databases.
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:47](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L47)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:47](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L47)
 
 ___
 
@@ -86,7 +86,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:46](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L46)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:46](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L46)
 
 ___
 
@@ -96,7 +96,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:61](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L61)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:61](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L61)
 
 ___
 
@@ -106,7 +106,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:49](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L49)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:49](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L49)
 
 ___
 
@@ -116,7 +116,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:56](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L56)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:56](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L56)
 
 ___
 
@@ -126,7 +126,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:63](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L63)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:63](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L63)
 
 ___
 
@@ -136,7 +136,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:48](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L48)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:48](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L48)
 
 ## Accessors
 
@@ -157,7 +157,7 @@ EventBridge.defaultCommandTimeout
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:153](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L153)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:153](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L153)
 
 ___
 
@@ -174,7 +174,7 @@ The id of current event bridge instance.
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:161](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L161)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:161](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L161)
 
 ## Methods
 
@@ -205,7 +205,7 @@ The id of current event bridge instance.
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
@@ -231,7 +231,7 @@ Emit a new message to event bridge to be delivered to receiver
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:202](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L202)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:202](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L202)
 
 ___
 
@@ -264,7 +264,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:223](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L223)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:223](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L223)
 
 ___
 
@@ -295,7 +295,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -326,7 +326,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L16)
 
 ___
 
@@ -355,7 +355,7 @@ the id of command function queue
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:171](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L171)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:171](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L171)
 
 ___
 
@@ -380,7 +380,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:185](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L185)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:185](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L185)
 
 ___
 
@@ -398,7 +398,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:73](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L73)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:73](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L73)
 
 ___
 
@@ -422,7 +422,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:180](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L180)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:180](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L180)
 
 ___
 
@@ -446,4 +446,4 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:192](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L192)
+[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:192](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L192)

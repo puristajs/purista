@@ -1,4 +1,4 @@
-[PURISTA API - v1.3.1](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / EventBridge
+[PURISTA API - v1.4.3](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / EventBridge
 
 # Class: EventBridge
 
@@ -13,7 +13,7 @@ The event bridge must implement this interface.
 
   ↳ **`EventBridge`**
 
-  ↳↳ [`RabbitMQEventBridge`](purista_amqpbridge.RabbitMQEventBridge.md)
+  ↳↳ [`AmqpBridge`](purista_amqpbridge.AmqpBridge.md)
 
 ## Table of contents
 

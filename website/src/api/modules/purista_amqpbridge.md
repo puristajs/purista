@@ -1,4 +1,4 @@
-[PURISTA API - v1.3.1](../README.md) / @purista/amqpbridge
+[PURISTA API - v1.4.3](../README.md) / @purista/amqpbridge
 
 # Module: @purista/amqpbridge
 
@@ -10,14 +10,14 @@
 
 ### Classes
 
-- [RabbitMQEventBridge](../classes/purista_amqpbridge.RabbitMQEventBridge.md)
+- [AmqpBridge](../classes/purista_amqpbridge.AmqpBridge.md)
 
 ### Type Aliases
 
+- [AmqpBridgeConfig](purista_amqpbridge.md#amqpbridgeconfig)
 - [Encoder](purista_amqpbridge.md#encoder)
 - [EncryptFunctions](purista_amqpbridge.md#encryptfunctions)
 - [Encrypter](purista_amqpbridge.md#encrypter)
-- [RabbitMQEventBridgeConfig](purista_amqpbridge.md#rabbitmqeventbridgeconfig)
 
 ### Functions
 
@@ -25,48 +25,11 @@
 
 ## Type Aliases
 
-### Encoder
+### AmqpBridgeConfig
 
-Ƭ **Encoder**: `Record`<`string`, [`EncoderFunctions`](purista_amqpbridge.internal.md#encoderfunctions)\>
+Ƭ **AmqpBridgeConfig**: `Object`
 
-#### Defined in
-
-[amqpbridge/src/types/Encoder.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/types/Encoder.ts#L3)
-
-___
-
-### EncryptFunctions
-
-Ƭ **EncryptFunctions**: `Object`
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `decrypt` | (`input`: `Buffer`) => `Promise`<`Buffer`\> |
-| `encrypt` | (`input`: `Buffer`) => `Promise`<`Buffer`\> |
-
-#### Defined in
-
-[amqpbridge/src/types/EncryptFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/types/EncryptFunctions.ts#L1)
-
-___
-
-### Encrypter
-
-Ƭ **Encrypter**: `Record`<`string`, [`EncryptFunctions`](purista_amqpbridge.md#encryptfunctions)\>
-
-#### Defined in
-
-[amqpbridge/src/types/Encrypter.ts:3](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/types/Encrypter.ts#L3)
-
-___
-
-### RabbitMQEventBridgeConfig
-
-Ƭ **RabbitMQEventBridgeConfig**: `Object`
-
-RabbitMQ bridge config
+AmqpBridge bridge config
 
 #### Type declaration
 
@@ -84,18 +47,55 @@ RabbitMQ bridge config
 
 #### Defined in
 
-[amqpbridge/src/types/RabbitMQEventBridgeConfig.ts:9](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/types/RabbitMQEventBridgeConfig.ts#L9)
+[amqpbridge/src/types/AmqpBridgeConfig.ts:9](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L9)
+
+___
+
+### Encoder
+
+Ƭ **Encoder**: `Record`<`string`, [`EncoderFunctions`](purista_amqpbridge.internal.md#encoderfunctions)\>
+
+#### Defined in
+
+[amqpbridge/src/types/Encoder.ts:3](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/types/Encoder.ts#L3)
+
+___
+
+### EncryptFunctions
+
+Ƭ **EncryptFunctions**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `decrypt` | (`input`: `Buffer`) => `Promise`<`Buffer`\> |
+| `encrypt` | (`input`: `Buffer`) => `Promise`<`Buffer`\> |
+
+#### Defined in
+
+[amqpbridge/src/types/EncryptFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/types/EncryptFunctions.ts#L1)
+
+___
+
+### Encrypter
+
+Ƭ **Encrypter**: `Record`<`string`, [`EncryptFunctions`](purista_amqpbridge.md#encryptfunctions)\>
+
+#### Defined in
+
+[amqpbridge/src/types/Encrypter.ts:3](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/types/Encrypter.ts#L3)
 
 ## Functions
 
 ### getDefaultConfig
 
-▸ **getDefaultConfig**(): [`RabbitMQEventBridgeConfig`](purista_amqpbridge.md#rabbitmqeventbridgeconfig)
+▸ **getDefaultConfig**(): [`AmqpBridgeConfig`](purista_amqpbridge.md#amqpbridgeconfig)
 
 #### Returns
 
-[`RabbitMQEventBridgeConfig`](purista_amqpbridge.md#rabbitmqeventbridgeconfig)
+[`AmqpBridgeConfig`](purista_amqpbridge.md#amqpbridgeconfig)
 
 #### Defined in
 
-[amqpbridge/src/getDefaultConfig.impl.ts:5](https://github.com/sebastianwessel/purista/blob/81fe9e5/packages/amqpbridge/src/getDefaultConfig.impl.ts#L5)
+[amqpbridge/src/getDefaultConfig.impl.ts:5](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/getDefaultConfig.impl.ts#L5)
