@@ -6,8 +6,19 @@ order: 90
 icon: chart-line fas
 # This is the title of the article
 title: Logging and metrics
+description: Logging and metrics in PURISTA typescript nodejs backend framework applications and how to use them.
 # A page can have multiple tags
 tag:
+  - typescript
+  - nodejs
+  - javascript
+  - backend
+  - framework
+  - cloud
+  - microservice
+  - lambda
+  - Installation
+  - Setup
   - Guide
 # this page is sticky in article list
 sticky: true

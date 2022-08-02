@@ -7,7 +7,19 @@ icon: wand-sparkles fas
 # This is the title of the article
 title: Create new Service
 # A page can have multiple tags
+# description
+description: Create your first typescript service in PURISTA with a function and a subscription implementation in simple typescript/javascript.
 tag:
+  - typescript
+  - nodejs
+  - javascript
+  - backend
+  - framework
+  - cloud
+  - microservice
+  - lambda
+  - Installation
+  - Setup
   - Guide
 # this page is sticky in article list
 sticky: true

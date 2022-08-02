@@ -5,9 +5,20 @@ order: 130
 # This is the icon of the page
 icon: wrench fas
 # This is the title of the article
-title: Builder
+title: builder
+description: Learn how to use builders in nodejs backend framework PURISTA within your typescript application
 # A page can have multiple tags
 tag:
+  - typescript
+  - nodejs
+  - javascript
+  - backend
+  - framework
+  - cloud
+  - microservice
+  - lambda
+  - Installation
+  - Setup
   - Guide
 # this page is sticky in article list
 sticky: true

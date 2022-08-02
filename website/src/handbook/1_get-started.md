@@ -6,8 +6,18 @@ order: 20
 icon: bolt fas
 # This is the title of the article
 title: Get started
+# description
+description: Setup your typescript project to build your first nodejs application based on the PURISTA backend framework.
 # A page can have multiple tags
 tag:
+  - typescript
+  - nodejs
+  - javascript
+  - backend
+  - framework
+  - cloud
+  - microservice
+  - lambda
   - Installation
   - Setup
   - Guide

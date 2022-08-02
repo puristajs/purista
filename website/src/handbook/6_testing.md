@@ -6,8 +6,19 @@ order: 70
 icon: vial-circle-check fas
 # This is the title of the article
 title: Testing
+describing: How to test single functions and subscription of PURISTA application services
 # A page can have multiple tags
 tag:
+  - typescript
+  - nodejs
+  - javascript
+  - backend
+  - framework
+  - cloud
+  - microservice
+  - lambda
+  - Installation
+  - Setup
   - Guide
 # this page is sticky in article list
 sticky: true

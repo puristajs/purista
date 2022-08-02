@@ -6,8 +6,19 @@ order: 40
 icon: bugs fas
 # This is the title of the article
 title: Error handling
+description: A deeper look into javascript/typescript error handling within PURISTA nodejs backend application framework
 # A page can have multiple tags
 tag:
+  - typescript
+  - nodejs
+  - javascript
+  - backend
+  - framework
+  - cloud
+  - microservice
+  - lambda
+  - Installation
+  - Setup
   - Guide
 # this page is sticky in article list
 sticky: true

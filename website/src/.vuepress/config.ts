@@ -5,7 +5,8 @@ import theme from './themeConfig'
 export default defineUserConfig({
   lang: 'en-US',
   title: 'PURISTA',
-  description: 'A framework for building backend services and api in modern, modular and scalable way',
+  description:
+    'The typescript/javascript framework for building nodejs backend services and api in modern, modular and scalable way',
 
   dest: '../docs',
   base: '/',

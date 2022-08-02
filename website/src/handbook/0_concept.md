@@ -6,8 +6,18 @@ order: 10
 icon: brain fas
 # This is the title of the article
 title: Concept
+# description
+description: A general description of the concept of the typescript based nodejs backend PURISTA.
 # A page can have multiple tags
 tag:
+  - typescript
+  - nodejs
+  - javascript
+  - backend
+  - framework
+  - cloud
+  - microservice
+  - lambda
   - Installation
   - Setup
   - Guide

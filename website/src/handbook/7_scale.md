@@ -6,8 +6,19 @@ order: 80
 icon: cloud fas
 # This is the title of the article
 title: Scaling
+description: Learn how to scale nodejs typescript applications built with PURISTA framework.
 # A page can have multiple tags
 tag:
+  - typescript
+  - nodejs
+  - javascript
+  - backend
+  - framework
+  - cloud
+  - microservice
+  - lambda
+  - Installation
+  - Setup
   - Guide
 # this page is sticky in article list
 sticky: true

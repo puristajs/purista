@@ -1,8 +1,18 @@
 ---
 home: true
 icon: house fas
-title: PURISTA
+title: PURISTA - The typescript/javascript nodejs backend framework
+description: PURISTA is a nodejs framework built in typescript to be used for javascript and typescript backend applications
 heroText: PURISTA
+tag:
+  - typescript
+  - nodejs
+  - javascript
+  - backend
+  - framework
+  - cloud
+  - microservice
+  - lambda
 tagline: THE TYPESCRIPT BACKEND FRAMEWORK
 actions:
   - text: Get started
@@ -50,9 +60,11 @@ copyright: false
 footer: Made from developers for developers with ❤️ | <a href="/privacy.html">Privacy</a> | <a href="/imprint.html">Imprint</a>
 ---
 
-# PURISTA
+# PURISTA typescript framework
 
-A backend framework for building message based domain services.
+PURISTA is a typescript backend based framework, for building message based domain services. Build awesome javascript/typescript applications with low overhead.
+
+Build robust and complex applications with low overhead on a solid base.
 
 This framework adapts and combines a wide range of different patters from domain driven design, cqrs, microservice, event sourcing and lambda functions.
 
@@ -77,3 +89,7 @@ PURISTA addresses developers which want to simply focus on implementation, while
 - easy to test with ready to go mocks & stubs
 - clean error handling
 - low learning curve
+
+## Typescript framework
+
+PURISTA itself is build from ground up in typescript and focuses on typescript code bases. This allows the usage of propper types across the whole code base.
