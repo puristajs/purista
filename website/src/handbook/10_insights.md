@@ -5,7 +5,8 @@ order: 120
 # This is the icon of the page
 icon: user-secret fas
 # This is the title of the article
-title: Insights
+title: Information about internals of PURISTA message based typescript framework
+shortTitle: Insights
 description: A deeper look into internals of PURISTA typescript application backend framework.
 # A page can have multiple tags
 tag:
@@ -25,8 +26,6 @@ sticky: true
 # this page will appear in article channel in home page
 star: true
 ---
-
-# Insights
 
 ## ID's
 

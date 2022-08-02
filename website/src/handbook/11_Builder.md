@@ -5,7 +5,8 @@ order: 130
 # This is the icon of the page
 icon: wrench fas
 # This is the title of the article
-title: builder
+title: Helper for PURISTA typescript based node js application development
+shortTitle: builder
 description: Learn how to use builders in nodejs backend framework PURISTA within your typescript application
 # A page can have multiple tags
 tag:
@@ -25,8 +26,6 @@ sticky: true
 # this page will appear in article channel in home page
 star: true
 ---
-
-# Builder
 
 PURISTA has the concept of builders to define services, functions and subscriptions. But why is this needed?
 

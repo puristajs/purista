@@ -73,8 +73,14 @@ export default hopeTheme({
 
   pageInfo: ['Author', 'Date'],
   editLink: false,
-
   plugins: {
+    git: {
+      createdTime: true,
+      updatedTime: true,
+    },
+    seo: {
+      fallBackImage: '/purista_slogan.png',
+    },
     photoSwipe: false,
     mdEnhance: {
       enableAll: true,

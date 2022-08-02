@@ -5,7 +5,8 @@ order: 30
 # This is the icon of the page
 icon: wand-sparkles fas
 # This is the title of the article
-title: Create new Service
+title: Create a new PURISTA typescript service with nodejs
+shortTitle: Create new Service
 # A page can have multiple tags
 # description
 description: Create your first typescript service in PURISTA with a function and a subscription implementation in simple typescript/javascript.
@@ -26,8 +27,6 @@ sticky: true
 # this page will appear in article channel in home page
 star: true
 ---
-
-# Create a new service
 
 A service is a logical group of functions and subscriptions. This where the domain driven aspect comes in.  
 In our example, we will use the classic example - Users.

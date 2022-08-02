@@ -2,7 +2,7 @@
 home: true
 icon: house fas
 title: PURISTA - The typescript/javascript nodejs backend framework
-description: PURISTA is a nodejs framework built in typescript to be used for javascript and typescript backend applications
+description: PURISTA is a typescript based nodejs framework built in typescript to be used for javascript and typescript backend application development.
 heroText: PURISTA
 tag:
   - typescript

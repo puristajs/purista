@@ -5,7 +5,8 @@ order: 40
 # This is the icon of the page
 icon: bugs fas
 # This is the title of the article
-title: Error handling
+title: Handled and unhandled errors in typescript backend framework PURISTA
+shortTitle: Error handling
 description: A deeper look into javascript/typescript error handling within PURISTA nodejs backend application framework
 # A page can have multiple tags
 tag:
@@ -25,8 +26,6 @@ sticky: true
 # this page will appear in article channel in home page
 star: true
 ---
-
-# Error handling
 
 Error handling is one of the essentials of software development.  
 But it's not easy - especially when your complexity is growing.

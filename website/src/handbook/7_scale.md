@@ -5,7 +5,8 @@ order: 80
 # This is the icon of the page
 icon: cloud fas
 # This is the title of the article
-title: Scaling
+title: Scale as microservice or serverless functions your typescript nodejs application
+shortTitle: Scaling
 description: Learn how to scale nodejs typescript applications built with PURISTA framework.
 # A page can have multiple tags
 tag:
@@ -25,8 +26,6 @@ sticky: true
 # this page will appear in article channel in home page
 star: true
 ---
-
-# Scaling
 
 WIP!
 

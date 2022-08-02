@@ -5,7 +5,8 @@ order: 60
 # This is the icon of the page
 icon: envelope-open-text fas
 # This is the title of the article
-title: Custom events
+title: Custom message events in typescript based PURISTA nodejs applications
+shortTitle: Custom events
 description: How to define and use custom events within PURISTA typescript nodejs backend framework
 # A page can have multiple tags
 tag:
@@ -25,8 +26,6 @@ sticky: true
 # this page will appear in article channel in home page
 star: true
 ---
-
-# Custom events
 
 To be able to build real world systems, you will need to send events, which will be consumed by subscriptions or third party providers. The sender does/should not need to know, who is consuming this information.
 

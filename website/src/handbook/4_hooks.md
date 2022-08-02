@@ -5,7 +5,8 @@ order: 50
 # This is the icon of the page
 icon: anchor fas
 # This is the title of the article
-title: Hooks
+shortTitle: Hooks
+title: Hooks and events in PURISTA nodejs backend framework
 description: Hooks and events in PURISTA typescript applications and services
 # A page can have multiple tags
 tag:
@@ -25,8 +26,6 @@ sticky: true
 # this page will appear in article channel in home page
 star: true
 ---
-
-# Hooks
 
 Hooks are a powerful way to separate technical needs from business logic.  
 There are two different types of hooks:

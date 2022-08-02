@@ -5,7 +5,8 @@ order: 20
 # This is the icon of the page
 icon: bolt fas
 # This is the title of the article
-title: Get started
+title: PURISTA framework - build your first typescript application and run on nodejs
+shortTitle: Get started
 # description
 description: Setup your typescript project to build your first nodejs application based on the PURISTA backend framework.
 # A page can have multiple tags
@@ -26,8 +27,6 @@ sticky: true
 # this page will appear in article channel in home page
 star: true
 ---
-
-# Get started
 
 PURISTA tries to avoid the need for implementing boilerplate code as much as possible and to automate and autogenerate types, definitions, documentation when ever possible.
 

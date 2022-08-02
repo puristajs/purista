@@ -5,7 +5,8 @@ order: 10
 # This is the icon of the page
 icon: brain fas
 # This is the title of the article
-title: Concept
+title: Concept of the nodejs PURISTA typescript based framework
+shortTitle: Concept
 # description
 description: A general description of the concept of the typescript based nodejs backend PURISTA.
 # A page can have multiple tags
@@ -26,8 +27,6 @@ sticky: true
 # this page will appear in article channel in home page
 star: true
 ---
-
-# Concept
 
 ## Main idea
 
