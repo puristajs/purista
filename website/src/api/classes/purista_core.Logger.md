@@ -44,7 +44,7 @@
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:20](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/Logger.ts#L20)
+[core/src/core/types/Logger.ts:20](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L20)
 
 ___
 
@@ -64,7 +64,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:18](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/Logger.ts#L18)
+[core/src/core/types/Logger.ts:18](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L18)
 
 ___
 
@@ -84,7 +84,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:17](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/Logger.ts#L17)
+[core/src/core/types/Logger.ts:17](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L17)
 
 ___
 
@@ -104,7 +104,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:22](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/Logger.ts#L22)
+[core/src/core/types/Logger.ts:22](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L22)
 
 ___
 
@@ -124,7 +124,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:16](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/Logger.ts#L16)
+[core/src/core/types/Logger.ts:16](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L16)
 
 ___
 
@@ -144,7 +144,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:21](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/Logger.ts#L21)
+[core/src/core/types/Logger.ts:21](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L21)
 
 ___
 
@@ -164,4 +164,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:19](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/Logger.ts#L19)
+[core/src/core/types/Logger.ts:19](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L19)

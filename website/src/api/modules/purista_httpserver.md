@@ -58,7 +58,7 @@
 
 #### Defined in
 
-[httpserver/src/types/BeforeResponseHook.ts:3](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/types/BeforeResponseHook.ts#L3)
+[httpserver/src/types/BeforeResponseHook.ts:3](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/types/BeforeResponseHook.ts#L3)
 
 ___
 
@@ -90,7 +90,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/types/HttpServerConfig.ts:13](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/types/HttpServerConfig.ts#L13)
+[httpserver/src/types/HttpServerConfig.ts:13](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/types/HttpServerConfig.ts#L13)
 
 ## Variables
 
@@ -100,7 +100,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/config/defaults.config.ts:7](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/config/defaults.config.ts#L7)
+[httpserver/src/config/defaults.config.ts:7](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/config/defaults.config.ts#L7)
 
 ___
 
@@ -110,7 +110,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/config/defaults.config.ts:5](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/config/defaults.config.ts#L5)
+[httpserver/src/config/defaults.config.ts:5](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/config/defaults.config.ts#L5)
 
 ___
 
@@ -120,7 +120,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/config/ServiceInfo.ts:3](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/config/ServiceInfo.ts#L3)
+[httpserver/src/config/ServiceInfo.ts:3](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/config/ServiceInfo.ts#L3)
 
 ## Functions
 
@@ -134,4 +134,4 @@ ___
 
 #### Defined in
 
-[httpserver/src/config/getDefaultConfig.ts:4](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/config/getDefaultConfig.ts#L4)
+[httpserver/src/config/getDefaultConfig.ts:4](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/config/getDefaultConfig.ts#L4)

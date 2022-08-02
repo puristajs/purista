@@ -56,7 +56,7 @@ The event bridge must implement this interface.
 
 #### Defined in
 
-[core/src/core/types/EventBridge.ts:13](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/EventBridge.ts#L13)
+[core/src/core/types/EventBridge.ts:13](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/EventBridge.ts#L13)
 
 ## Methods
 
@@ -87,7 +87,7 @@ The event bridge must implement this interface.
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
@@ -107,7 +107,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/EventBridge.ts:16](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/EventBridge.ts#L16)
+[core/src/core/types/EventBridge.ts:16](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/EventBridge.ts#L16)
 
 ___
 
@@ -136,7 +136,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/EventBridge.ts:20](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/EventBridge.ts#L20)
+[core/src/core/types/EventBridge.ts:20](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/EventBridge.ts#L20)
 
 ___
 
@@ -167,7 +167,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -198,7 +198,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/GenericEventEmitter.ts#L16)
 
 ___
 
@@ -219,7 +219,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/EventBridge.ts:27](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/EventBridge.ts#L27)
+[core/src/core/types/EventBridge.ts:27](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/EventBridge.ts#L27)
 
 ___
 
@@ -240,7 +240,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/EventBridge.ts:38](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/EventBridge.ts#L38)
+[core/src/core/types/EventBridge.ts:38](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/EventBridge.ts#L38)
 
 ___
 
@@ -254,7 +254,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/EventBridge.ts:15](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/EventBridge.ts#L15)
+[core/src/core/types/EventBridge.ts:15](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/EventBridge.ts#L15)
 
 ___
 
@@ -274,7 +274,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/EventBridge.ts:36](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/EventBridge.ts#L36)
+[core/src/core/types/EventBridge.ts:36](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/EventBridge.ts#L36)
 
 ___
 
@@ -294,4 +294,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/EventBridge.ts:39](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/EventBridge.ts#L39)
+[core/src/core/types/EventBridge.ts:39](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/EventBridge.ts#L39)

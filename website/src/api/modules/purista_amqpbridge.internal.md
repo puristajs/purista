@@ -300,7 +300,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/amqpbridge/src/types/EncoderFunctions.ts#L1)
+[amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/amqpbridge/src/types/EncoderFunctions.ts#L1)
 
 ___
 

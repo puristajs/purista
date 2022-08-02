@@ -75,7 +75,7 @@ Create a new instance of the HttpServer class
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:48](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L48)
+[httpserver/src/HttpServerService.impl.ts:48](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/HttpServerService.impl.ts#L48)
 
 ## Properties
 
@@ -85,7 +85,7 @@ Create a new instance of the HttpServer class
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:40](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L40)
+[httpserver/src/HttpServerService.impl.ts:40](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/HttpServerService.impl.ts#L40)
 
 ___
 
@@ -156,7 +156,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:36](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L36)
+[httpserver/src/HttpServerService.impl.ts:36](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/HttpServerService.impl.ts#L36)
 
 ___
 
@@ -166,7 +166,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:38](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L38)
+[httpserver/src/HttpServerService.impl.ts:38](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/HttpServerService.impl.ts#L38)
 
 ___
 
@@ -176,7 +176,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:34](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L34)
+[httpserver/src/HttpServerService.impl.ts:34](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/HttpServerService.impl.ts#L34)
 
 ___
 
@@ -246,7 +246,7 @@ core/lib/types/core/Service/Service.impl.d.ts:36
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:75](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L75)
+[httpserver/src/HttpServerService.impl.ts:75](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/HttpServerService.impl.ts#L75)
 
 ___
 
@@ -493,7 +493,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:123](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L123)
+[httpserver/src/HttpServerService.impl.ts:123](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/HttpServerService.impl.ts#L123)
 
 ___
 
@@ -653,4 +653,4 @@ It connects to the event bridge and subscribes to the topics that are in the sub
 
 #### Defined in
 
-[httpserver/src/HttpServerService.impl.ts:79](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/httpserver/src/HttpServerService.impl.ts#L79)
+[httpserver/src/HttpServerService.impl.ts:79](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/HttpServerService.impl.ts#L79)

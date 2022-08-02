@@ -32,7 +32,7 @@
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:58](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/ServiceClass.ts#L58)
+[core/src/core/types/ServiceClass.ts:58](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/ServiceClass.ts#L58)
 
 ## Methods
 
@@ -46,7 +46,7 @@
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:54](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/ServiceClass.ts#L54)
+[core/src/core/types/ServiceClass.ts:54](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/ServiceClass.ts#L54)
 
 ___
 
@@ -68,7 +68,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:59](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/ServiceClass.ts#L59)
+[core/src/core/types/ServiceClass.ts:59](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/ServiceClass.ts#L59)
 
 ___
 
@@ -82,4 +82,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:56](https://github.com/sebastianwessel/purista/blob/c89c5bf/packages/core/src/core/types/ServiceClass.ts#L56)
+[core/src/core/types/ServiceClass.ts:56](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/ServiceClass.ts#L56)
