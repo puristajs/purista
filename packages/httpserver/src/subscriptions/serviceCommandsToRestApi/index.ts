@@ -78,10 +78,14 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
         } catch (err) {
           reply.header('content-type', 'application/json; charset=utf-8')
 
-          if (err instanceof HandledError || err instanceof UnhandledError) {
+          if (err instanceof HandledError) {
+            reply.statusCode = err.errorCode
             reply.send(err.getErrorResponse())
+            return
           }
-          reply.send(new UnhandledError().getErrorResponse())
+          const unhandledError = new UnhandledError()
+          reply.statusCode = unhandledError.errorCode
+          reply.send(unhandledError.getErrorResponse())
         }
       }
     }
