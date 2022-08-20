@@ -76,7 +76,7 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
           })
 
           reply.header('content-type', contentType)
-          if (response === '') {
+          if (response === undefined || response === '') {
             reply.statusCode = StatusCode.NoContent
           }
           reply.send(response)
@@ -88,6 +88,8 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
             reply.send(err.getErrorResponse())
             return
           }
+
+          logger.error(err)
           const unhandledError = new UnhandledError()
           reply.statusCode = unhandledError.errorCode
           reply.send(unhandledError.getErrorResponse())
