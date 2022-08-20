@@ -5,6 +5,7 @@ import {
   HttpExposedServiceMeta,
   InfoServiceFunctionAdded,
   isHttpExposedServiceMeta,
+  StatusCode,
   SubscriptionDefinitionBuilder,
   UnhandledError,
 } from '@purista/core'
@@ -55,6 +56,8 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
             getNewTraceId(),
           )
 
+          reply.header(this.config.fastify.requestIdHeader || 'x-trace-id', traceId)
+
           const principalId = request.principalId
 
           const response = await this.invoke(
@@ -73,7 +76,9 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
           })
 
           reply.header('content-type', contentType)
-
+          if (response === '') {
+            reply.statusCode = StatusCode.NoContent
+          }
           reply.send(response)
         } catch (err) {
           reply.header('content-type', 'application/json; charset=utf-8')
