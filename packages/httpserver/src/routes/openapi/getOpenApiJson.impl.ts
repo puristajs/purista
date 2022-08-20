@@ -93,7 +93,7 @@ export const getOpenApiJson = function (this: HttpServerService) {
         routeParams = m.map((name) => name)
       }
 
-      const pathParams: Record<string, unknown>[] = routeParams.map((pathParamName): ParameterObject => {
+      const pathParams: ParameterObject[] = routeParams.map((pathParamName): ParameterObject => {
         const name = pathParamName.replace('?', '').replace(':', '')
         const required = !pathParamName.endsWith('?')
 

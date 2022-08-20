@@ -1,4 +1,5 @@
 import { generateSchema } from '@anatine/zod-openapi'
+import { SchemaObject } from 'openapi3-ts'
 import type { z } from 'zod'
 
 import type {
@@ -421,9 +422,9 @@ export class FunctionDefinitionBuilder<
       description: this.commandDescription,
       summary: this.summary || this.commandName,
       isSecure: this.isSecure,
-      inputPayload: inputPayloadSchema ? generateSchema(inputPayloadSchema) : undefined,
-      parameter: inputParameterSchema ? generateSchema(inputParameterSchema) : undefined,
-      outputPayload: outputPayloadSchema ? generateSchema(outputPayloadSchema) : undefined,
+      inputPayload: inputPayloadSchema ? (generateSchema(inputPayloadSchema) as SchemaObject) : undefined,
+      parameter: inputParameterSchema ? (generateSchema(inputParameterSchema) as SchemaObject) : undefined,
+      outputPayload: outputPayloadSchema ? (generateSchema(outputPayloadSchema) as SchemaObject) : undefined,
       query: this.queryParameter,
       tags: this.tags,
       additionalStatusCodes: this.errorStatusCodes,
