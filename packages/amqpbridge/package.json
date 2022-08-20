@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "@purista/core": "*",
-    "amqplib": "^0.10.0"
+    "amqplib": "^0.10.2"
   },
   "peerDependenciesMeta": {}
 }
