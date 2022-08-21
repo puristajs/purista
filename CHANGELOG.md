@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.5] - 2022-08-21
+
+### Features
+
+- [FEATURE-REQUEST] Add response content type option to http server#49
+
+### Miscellaneous Tasks
+
+- Correct tag
+
 ## [1.4.4] - 2022-08-21
 
 ### Bug Fixes
@@ -27,6 +37,7 @@ All notable changes to this project will be documented in this file.
 - Cleanup example
 - Return trace id in response header
 - Update dependencies
+- Bump versions to 1.4.4
 
 ## [1.4.3] - 2022-07-31
 
