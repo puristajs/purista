@@ -2,6 +2,32 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.4] - 2022-08-21
+
+### Bug Fixes
+
+- Httpserver error response
+- Improve types
+- Use status 204 on empty response and log errors
+
+### Documentation
+
+- Add documentation
+- Update api documentation
+- Update documentation
+- Update doc
+- Update api doc
+- Update documentation
+- Update doc
+- Update documentation
+- Update documentation
+
+### Miscellaneous Tasks
+
+- Cleanup example
+- Return trace id in response header
+- Update dependencies
+
 ## [1.4.3] - 2022-07-31
 
 ### Documentation
@@ -11,6 +37,7 @@ All notable changes to this project will be documented in this file.
 ### Miscellaneous Tasks
 
 - Add eslintignore
+- Bump versions to 1.4.3
 
 ## [1.4.2] - 2022-07-31
 
