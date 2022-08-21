@@ -55,7 +55,6 @@ export class HttpServerService extends Service<HttpServerConfig> {
       ...this.config.fastify,
     })
       .register(compress)
-      .register(helmet)
       .decorateRequest('principalId', undefined)
       .setErrorHandler((error, _request, reply) => {
         if (error instanceof HandledError) {
@@ -70,6 +69,14 @@ export class HttpServerService extends Service<HttpServerConfig> {
         reply.status(StatusCode.NotFound)
         reply.send(new HandledError(StatusCode.NotFound))
       })
+
+    if (this.config.enableHelmet) {
+      this.server.register(helmet)
+    }
+
+    this.server.addHook('onError', (_req, _res, error) => {
+      this.serviceLogger.error('General error handler', error)
+    })
   }
 
   addBeforeResponse(method: HTTPMethods, pattern: string, handler: BeforeResponseHook) {

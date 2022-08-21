@@ -332,16 +332,23 @@ export class FunctionDefinitionBuilder<
    * Mark the function to be exposed as http endpoint.
    * @param method Http method POST, PUT, PATCH, GET, DELETE
    * @param path The url path
-   * @param contentType response content type defaults to application/json
+   * @param contentType input content type defaults to application/json
+   * @param contentTypeResponse response content type defaults to application/json
    * @returns FunctionDefinitionBuilder
    */
-  exposeAsHttpEndpoint(method: SupportedHttpMethod, path: string, contentType: ContentType = 'application/json') {
+  exposeAsHttpEndpoint(
+    method: SupportedHttpMethod,
+    path: string,
+    contentType: ContentType = 'application/json',
+    contentTypeResponse: ContentType = 'application/json',
+  ) {
     this.httpMetadata = {
       expose: {
         http: {
           method,
           path,
           contentType,
+          contentTypeResponse,
         },
       },
     }

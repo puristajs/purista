@@ -10,6 +10,7 @@ export const getDefaultConfig = (): HttpServerConfig => {
     },
     port: 9090,
     domain: 'localhost',
+    enableHelmet: true,
     host: '',
     logLevel: 'warn',
     apiMountPath: '/api',

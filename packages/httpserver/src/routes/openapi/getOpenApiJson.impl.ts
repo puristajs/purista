@@ -292,7 +292,7 @@ export const getOpenApiJson = function (this: HttpServerService) {
             [definition.openApi?.outputPayload ? 200 : 204]: {
               description: definition.openApi?.description,
               content: {
-                [definition.contentType || 'application/json']: {
+                [definition.contentTypeResponse || 'application/json']: {
                   schema: definition.openApi?.outputPayload,
                 },
               },

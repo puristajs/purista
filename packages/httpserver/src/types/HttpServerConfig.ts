@@ -19,6 +19,7 @@ export type HttpServerConfig = {
   uploadDir?: string
   cookieSecret?: string
   apiMountPath?: string
+  enableHelmet?: boolean
   openApi?: {
     enabled?: boolean
     path?: string

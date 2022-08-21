@@ -36,7 +36,7 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
 
     data.http.path = url
 
-    const contentType = data.http.contentType || 'application/json; charset=utf-8'
+    const contentType = data.http.contentTypeResponse || 'application/json; charset=utf-8'
 
     const getHandler = () => {
       return async (request: FastifyRequest, reply: FastifyReply, params: Record<string, unknown>) => {
