@@ -61,7 +61,7 @@
     "qs": "^6.11.0",
     "swagger-ui-dist": "^4.14.0",
     "trouter": "^3.2.0",
-    "ts-deepmerge": "^3.0.0"
+    "ts-deepmerge": "^2.0.2"
   },
   "peerDependenciesMeta": {}
 }
