@@ -1,4 +1,4 @@
-import { ISettingsParam, Logger as TsLogger } from 'tslog'
+import pino, { LoggerOptions } from 'pino'
 
 import { DefaultLogger } from './DefaultLogger'
 import type { Logger, LogLevelName } from './types'
@@ -7,16 +7,12 @@ import type { Logger, LogLevelName } from './types'
  * Create a new logger with the given minimum log level
  * @param {LogLevelName | undefined} minLevel - The minimum level of log messages to display.
  */
-export const initLogger = (minLevel: LogLevelName | undefined, opt?: ISettingsParam): Logger => {
+export const initLogger = (level: LogLevelName | undefined, opt?: LoggerOptions): Logger => {
   return new DefaultLogger(
-    new TsLogger({
+    pino({
       name: 'PURISTA',
-      minLevel,
-      displayFilePath: 'hidden',
-      displayLoggerName: true,
-      displayRequestId: true,
-      displayFunctionName: false,
       ...opt,
+      level,
     }),
   )
 }

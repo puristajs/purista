@@ -13,11 +13,11 @@ export type LoggerOptions = {
 }
 
 export abstract class Logger {
-  abstract info(...args: any): void
-  abstract fatal(...args: any): void
-  abstract error(...args: any): void
-  abstract warn(...args: any): void
-  abstract debug(...args: any): void
-  abstract trace(...args: any): void
+  abstract info(message?: string, ...args: any[]): void
+  abstract fatal(message?: string, ...args: any[]): void
+  abstract error(message?: string, ...args: any[]): void
+  abstract warn(message?: string, ...args: any[]): void
+  abstract debug(message?: string, ...args: any[]): void
+  abstract trace(message?: string, ...args: any[]): void
   abstract getChildLogger(options: LoggerOptions): Logger
 }

@@ -16,7 +16,7 @@
   },
   "scripts": {
     "start": "ts-node src/index.ts",
-    "dev": "ts-node-dev src/index.ts",
+    "dev": "ts-node-dev src/index.ts | pino-pretty",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
     "test": "jest --passWithNoTests",
     "bump:major": "npm version major --no-git-tag-version",
@@ -26,16 +26,17 @@
   "devDependencies": {
     "jest": "^28.1.2",
     "sinon": "^14.x",
-    "ts-node-dev": "^2.0.0",
-    "ts-jest": "^28.0.7"
+    "ts-jest": "^28.0.7",
+    "ts-node-dev": "^2.0.0"
   },
   "dependencies": {
     "@anatine/zod-openapi": "^1.9.8",
+    "@purista/amqpbridge": "*",
     "@purista/core": "*",
     "@purista/httpserver": "*",
-    "@purista/amqpbridge": "*",
+    "pino-pretty": "^9.0.1",
     "ts-node": "^10.8.1",
-    "typescript": "^4.7.4",
+    "typescript": "^4.8.3",
     "zod": "3.18.0"
   }
 }

@@ -48,7 +48,7 @@ export const userSignUpBuilder = UserServiceBuilder.getFunctionBuilder(
 
   .setFunction(async function ({ logger, message, invoke }, payload, parameter) {
     logger.debug(payload.test)
-    logger.debug(message.payload.payload)
+    logger.debug('p', message.payload.payload)
     logger.debug('function input parameter', parameter)
 
     const invokeResponse = await invoke<string>(

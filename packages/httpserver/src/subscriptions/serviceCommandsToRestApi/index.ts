@@ -89,7 +89,7 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
             return
           }
 
-          logger.error(err)
+          logger.error('', err)
           const unhandledError = new UnhandledError()
           reply.statusCode = unhandledError.errorCode
           reply.send(unhandledError.getErrorResponse())

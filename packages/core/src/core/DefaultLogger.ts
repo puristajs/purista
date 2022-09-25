@@ -1,45 +1,45 @@
-import { ISettingsParam, Logger as TsLogger } from 'tslog'
+import { Logger as PinoLogger } from 'pino'
 
 import { Logger, LoggerOptions } from './types'
 
 export class DefaultLogger extends Logger {
-  constructor(private tslog: TsLogger) {
+  constructor(private log: PinoLogger) {
     super()
   }
 
-  fatal(...args: any[]) {
-    this.tslog.fatal(...args)
+  fatal(message?: string, ...args: any[]) {
+    this.log.fatal(message, ...args)
   }
 
-  error(...args: any[]) {
-    this.tslog.error(...args)
+  error(message?: string, ...args: any[]) {
+    this.log.error(message, ...args)
   }
 
-  warn(...args: any[]) {
-    this.tslog.warn(...args)
+  warn(message?: string, ...args: any[]) {
+    this.log.warn(message, ...args)
   }
 
-  info(...args: any[]) {
-    this.tslog.info(...args)
+  info(message?: string, ...args: any[]) {
+    this.log.info(message, ...args)
   }
 
-  debug(...args: any[]) {
-    this.tslog.debug(...args)
+  debug(message?: string, ...args: any[]) {
+    this.log.debug(message, ...args)
   }
 
-  trace(...args: any[]) {
-    this.tslog.trace(...args)
+  trace(message?: string, ...args: any[]) {
+    this.log.trace(message, ...args)
   }
 
   getChildLogger(options: LoggerOptions): Logger {
     const prefix = [options.serviceName, options.serviceVersion, options.serviceTarget].filter((entry) => !!entry)
 
-    const params: ISettingsParam = {
+    const params: LoggerOptions = {
+      ...options,
       name: options.name || prefix.join('-'),
-      requestId: options.traceId,
     }
 
-    const child = this.tslog.getChildLogger(params)
+    const child = this.log.child(params)
     return new DefaultLogger(child)
   }
 }

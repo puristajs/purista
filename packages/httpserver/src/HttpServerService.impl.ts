@@ -1,4 +1,5 @@
 import compress from '@fastify/compress'
+import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import fastifyStatic from '@fastify/static'
 import {
@@ -54,7 +55,16 @@ export class HttpServerService extends Service<HttpServerConfig> {
       querystringParser: (str) => qs.parse(str),
       ...this.config.fastify,
     })
-      .register(compress)
+
+    if (this.config.enableCors) {
+      this.server.register(cors, this.config.corsOptions)
+    }
+
+    if (this.config.enableCompress) {
+      this.server.register(compress, this.config.compressOptions)
+    }
+
+    this.server
       .decorateRequest('principalId', undefined)
       .setErrorHandler((error, _request, reply) => {
         if (error instanceof HandledError) {
@@ -71,7 +81,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
       })
 
     if (this.config.enableHelmet) {
-      this.server.register(helmet)
+      this.server.register(helmet, this.config.helmetOptions)
     }
 
     this.server.addHook('onError', (_req, _res, error) => {

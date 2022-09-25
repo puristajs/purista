@@ -399,7 +399,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
     } catch (error) {
       addMeasureEntry('total', totalStartTime)
       this.emit('metric-subscription-execution', performance)
-      this.serviceLogger.error(error)
+      this.serviceLogger.error('Error in subscription execution', error)
       if (error instanceof HandledError) {
         this.emit('handled-subscription-error', { subscriptionName, error, traceId })
         // handled errors prevent that the message is re-delivered for retry

@@ -1,3 +1,6 @@
+import { FastifyCompressOptions } from '@fastify/compress'
+import { FastifyCorsOptions } from '@fastify/cors'
+import { FastifyHelmetOptions } from '@fastify/helmet'
 import { LogLevelName } from '@purista/core'
 import { FastifyHttp2SecureOptions, FastifyServerOptions } from 'fastify'
 import { Http2SecureServer } from 'http2'
@@ -20,6 +23,11 @@ export type HttpServerConfig = {
   cookieSecret?: string
   apiMountPath?: string
   enableHelmet?: boolean
+  helmetOptions?: FastifyHelmetOptions
+  enableCompress?: boolean
+  compressOptions?: FastifyCompressOptions
+  enableCors?: boolean
+  corsOptions?: FastifyCorsOptions
   openApi?: {
     enabled?: boolean
     path?: string

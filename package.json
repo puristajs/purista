@@ -33,8 +33,8 @@
     "@types/sinon": "^10.0.11",
     "@typescript-eslint/eslint-plugin": "^5.29.0",
     "@typescript-eslint/parser": "^5.29.0",
-    "esbuild": "^0.14.54",
-    "esbuild-node-externals": "^1.4.1",
+    "esbuild": "^0.15.9",
+    "esbuild-node-externals": "^1.5.0",
     "eslint": "^8.18.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-standard": "^17.0.0",
@@ -47,10 +47,10 @@
     "prettier": "^2.7.1",
     "sinon": "^14.0.0",
     "turbo": "latest",
-    "typedoc": "^0.23.9",
+    "typedoc": "^0.23.15",
     "typedoc-monorepo-link-types": "^0.0.4",
-    "typedoc-plugin-markdown": "^3.13.4",
-    "typescript": "^4.7.4"
+    "typedoc-plugin-markdown": "^3.13.6",
+    "typescript": "^4.8.3"
   },
   "dependencies": {
     "@purista/simple-example": "^1.4.1"

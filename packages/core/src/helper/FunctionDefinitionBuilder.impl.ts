@@ -100,7 +100,7 @@ export class FunctionDefinitionBuilder<
    * @param inputSchema The schema validation for input payload
    * @returns FunctionDefinitionBuilder
    */
-  addInputSchema<I = unknown, D = unknown, O = unknown>(inputSchema: z.ZodType<O, D, I>) {
+  addInputSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(inputSchema: z.ZodType<O, D, I>) {
     this.inputSchema = inputSchema
     return this as unknown as FunctionDefinitionBuilder<
       ServiceClassType,
@@ -119,7 +119,7 @@ export class FunctionDefinitionBuilder<
    * @param outputSchema The schema validation for output payload
    * @returns FunctionDefinitionBuilder
    */
-  addOutputSchema<I, D, O>(outputSchema: z.ZodType<O, D, I>) {
+  addOutputSchema<I, D extends z.ZodTypeDef, O>(outputSchema: z.ZodType<O, D, I>) {
     this.outputSchema = outputSchema
     return this as unknown as FunctionDefinitionBuilder<
       ServiceClassType,
@@ -138,7 +138,7 @@ export class FunctionDefinitionBuilder<
    * @param paramsSchema The schema validation for output parameter
    * @returns FunctionDefinitionBuilder
    */
-  addParameterSchema<I, D, O>(paramsSchema: z.ZodType<O, D, I>) {
+  addParameterSchema<I, D extends z.ZodTypeDef, O>(paramsSchema: z.ZodType<O, D, I>) {
     this.paramsSchema = paramsSchema
     return this as unknown as FunctionDefinitionBuilder<
       ServiceClassType,
@@ -225,8 +225,8 @@ export class FunctionDefinitionBuilder<
     ParamsIn = MessageParamsType,
     PayloadOut = MessagePayloadType,
     ParamsOut = MessageParamsType,
-    PayloadD = unknown,
-    ParamsD = unknown,
+    PayloadD extends z.ZodTypeDef = z.ZodTypeDef,
+    ParamsD extends z.ZodTypeDef = z.ZodTypeDef,
   >(
     transformInputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
     transformParameterSchema: z.ZodType<ParamsOut, ParamsD, ParamsIn>,
@@ -255,7 +255,7 @@ export class FunctionDefinitionBuilder<
    * @param transformOutput Transform output function
    * @returns FunctionDefinitionBuilder
    */
-  transformOutput<PayloadOut, PayloadD, PayloadIn>(
+  transformOutput<PayloadOut, PayloadD extends z.ZodTypeDef, PayloadIn>(
     transformOutputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
     transformFunction: TransformOutputHook<
       ServiceClassType,
@@ -421,9 +421,9 @@ export class FunctionDefinitionBuilder<
       ...this.httpMetadata.expose,
     }
 
-    const inputPayloadSchema = this.hooks.transformInput?.transformInputSchema || this.inputSchema
-    const inputParameterSchema = this.hooks.transformInput?.transformParameterSchema || this.paramsSchema
-    const outputPayloadSchema = this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
+    const inputPayloadSchema: any = this.hooks.transformInput?.transformInputSchema || this.inputSchema
+    const inputParameterSchema: any = this.hooks.transformInput?.transformParameterSchema || this.paramsSchema
+    const outputPayloadSchema: any = this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
 
     def.metadata.expose.http.openApi = {
       description: this.commandDescription,

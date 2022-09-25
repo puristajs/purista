@@ -32,7 +32,7 @@ export class ServiceBuilder<
   // eslint-disable-next-line no-useless-constructor
   constructor(public info: ServiceInfoType) {}
 
-  setConfigSchema<I = unknown, D = unknown, O = unknown>(schema: z.ZodType<O, D, I>) {
+  setConfigSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(schema: z.ZodType<O, D, I>) {
     this.configSchema = schema
     return this as unknown as ServiceBuilder<O, I, Service<O>>
   }
