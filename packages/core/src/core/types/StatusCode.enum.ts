@@ -52,6 +52,8 @@ export enum StatusCode {
   LoginTimeOut = 440,
   RetryWith = 449,
   UnavailableForLegalReasons = 451,
+  InvalidToken = 498,
+  TokenRequired = 499,
   InternalServerError = 500,
   NotImplemented = 501,
   BadGateway = 502,
