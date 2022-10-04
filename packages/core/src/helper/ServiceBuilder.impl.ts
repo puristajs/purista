@@ -47,11 +47,37 @@ export class ServiceBuilder<
   }
 
   addFunctionDefinition(...functions: CommandDefinitionList<ServiceClassType>) {
+    const existing = functions.filter((fn) =>
+      this.commandFunctions.some((definition) => definition.commandName === fn.commandName),
+    )
+
+    if (existing.length) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `duplicate function definitions ${this.info.serviceName} version ${this.info.serviceVersion}`,
+        existing,
+      )
+      throw new Error('duplicate function definitions')
+    }
+
     this.commandFunctions.push(...functions)
     return this as ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType>
   }
 
   addSubscriptionDefinition(...subscription: SubscriptionDefinitionList<ServiceClassType>) {
+    const existing = subscription.filter((fn) =>
+      this.subscriptionList.some((definition) => definition.subscriptionName === fn.subscriptionName),
+    )
+
+    if (existing.length) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `duplicate subscription definitions ${this.info.serviceName} version ${this.info.serviceVersion}`,
+        existing,
+      )
+      throw new Error('duplicate function definitions')
+    }
+
     this.subscriptionList.push(...subscription)
     return this as ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType>
   }
@@ -71,7 +97,7 @@ export class ServiceBuilder<
       try {
         conf = this.configSchema.parse(config)
       } catch (error) {
-        logger.error('Invalid configuration for', this.info, error)
+        logger.error({ error, ...this.info }, 'Invalid configuration for')
         throw new Error('Fatal - unable to create service instance')
       }
     }
