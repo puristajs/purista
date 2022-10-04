@@ -71,7 +71,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
           reply.status(error.errorCode)
           return reply.send(error.getErrorResponse())
         }
-        this.serviceLogger.error('General error handler', error)
+        this.serviceLogger.error({ error }, 'General error handler')
         reply.status(StatusCode.InternalServerError)
         reply.send(new UnhandledError().getErrorResponse())
       })
@@ -84,8 +84,19 @@ export class HttpServerService extends Service<HttpServerConfig> {
       this.server.register(helmet, this.config.helmetOptions)
     }
 
-    this.server.addHook('onError', (_req, _res, error) => {
-      this.serviceLogger.error('General error handler', error)
+    this.server.addHook('onError', async (_req, reply, error) => {
+      this.serviceLogger.debug({ error }, 'General error handler')
+      // Ensure to be async function or use callback function
+      if (!reply.sent) {
+        if (error instanceof HandledError) {
+          reply.code(error.errorCode)
+          reply.send(error.getErrorResponse())
+          return
+        }
+        this.serviceLogger.error({ error }, 'onError hook: General error handler')
+        reply.status(StatusCode.InternalServerError)
+        reply.send(new UnhandledError().getErrorResponse())
+      }
     })
   }
 
@@ -101,7 +112,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
 
       const route = this.routes.find(request.method as Methods, path)
       if (!route.handlers.length) {
-        this.serviceLogger.debug('Route not found', request.method, request.url)
+        this.serviceLogger.debug({ method: request.method, url: request.url }, 'Route not found')
         reply.code(StatusCode.NotFound)
         return new HandledError(StatusCode.NotFound).getErrorResponse()
       }
@@ -134,7 +145,10 @@ export class HttpServerService extends Service<HttpServerConfig> {
       port: this.config.port,
       host: this.config.host,
     })
-    this.serviceLogger.info(`http server listen on ${this.config.domain} ${this.config.port}`)
+    this.serviceLogger.info(
+      { domain: this.config.domain, port: this.config.port },
+      `http server listen on ${this.config.domain} ${this.config.port}`,
+    )
   }
 
   async invoke<T>(
