@@ -12,12 +12,23 @@ export type LoggerOptions = {
   principalId?: PrincipalId
 }
 
+export type LogFnParamType = [unknown, string?, ...any] | [string, ...any]
+
 export abstract class Logger {
-  abstract info(message?: string, ...args: any[]): void
-  abstract fatal(message?: string, ...args: any[]): void
-  abstract error(message?: string, ...args: any[]): void
-  abstract warn(message?: string, ...args: any[]): void
-  abstract debug(message?: string, ...args: any[]): void
-  abstract trace(message?: string, ...args: any[]): void
+  abstract info(...args: LogFnParamType): void
+  abstract fatal(...args: LogFnParamType): void
+  abstract error(...args: LogFnParamType): void
+  abstract warn(...args: LogFnParamType): void
+  abstract debug(...args: LogFnParamType): void
+  abstract trace(...args: LogFnParamType): void
   abstract getChildLogger(options: LoggerOptions): Logger
+}
+
+export interface ILogger {
+  info(...args: LogFnParamType): void
+  fatal(...args: LogFnParamType): void
+  error(...args: LogFnParamType): void
+  warn(...args: LogFnParamType): void
+  debug(...args: LogFnParamType): void
+  trace(...args: LogFnParamType): void
 }

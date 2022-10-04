@@ -84,7 +84,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
     })
-    this.serviceLogger.debug(`creating ${this.info.serviceName} ${this.info.serviceVersion}`)
+    this.serviceLogger.debug({ ...this.info }, `creating ${this.info.serviceName} ${this.info.serviceVersion}`)
 
     this.eventBridge = eventBridge
   }
@@ -97,10 +97,10 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
     try {
       await this.initializeEventbridgeConnect(this.commandFunctions, this.subscriptionList)
       await this.sendServiceInfo(EBMessageType.InfoServiceReady)
-    } catch (err) {
-      this.serviceLogger.error(`failed to start service`, err)
-      this.emit('service-not-available', err)
-      throw err
+    } catch (error) {
+      this.serviceLogger.error({ error }, `failed to start service`)
+      this.emit('service-not-available', error)
+      throw error
     }
   }
 
@@ -123,7 +123,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
 
     // register subscriptions for this service
     for (const subscription of subscriptions) {
-      this.serviceLogger.debug('start subscription', subscription.subscriptionName)
+      this.serviceLogger.debug({ name: subscription.subscriptionName }, 'start subscription')
       await this.registerSubscription(subscription)
     }
 
@@ -214,7 +214,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
           serviceVersion: this.info.serviceVersion,
           traceId,
         })
-        .error('received invalid command', getCleanedMessage(message))
+        .error({ message: getCleanedMessage(message) }, 'received invalid command')
       return createErrorResponse(message, StatusCode.NotImplemented)
     }
 
@@ -317,17 +317,14 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
 
       this.emit('unhandled-function-error', { functionName: command.commandName, error, traceId })
 
-      logger.error('executeCommand unhandled error', { error, message: getCleanedMessage(message) })
+      logger.error({ error, message: getCleanedMessage(message) }, 'executeCommand unhandled error')
 
       return createErrorResponse(message, StatusCode.InternalServerError, error)
     }
   }
 
   protected async registerCommand(commandDefinition: CommandDefinition): Promise<void> {
-    this.serviceLogger.debug(
-      'register command',
-      `${this.serviceInfo.serviceName} ${this.serviceInfo.serviceVersion} ${commandDefinition.commandName}`,
-    )
+    this.serviceLogger.debug({ ...this.serviceInfo }, 'register command')
     this.commands.set(commandDefinition.commandName, commandDefinition)
     await this.eventBridge.registerServiceFunction(
       {
@@ -356,7 +353,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
           serviceTarget: subscriptionName,
           traceId,
         })
-        .error('received message for invalid subscription', getCleanedMessage(message))
+        .error({ message: getCleanedMessage(message) }, 'received message for invalid subscription')
       return
     }
 
@@ -399,7 +396,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
     } catch (error) {
       addMeasureEntry('total', totalStartTime)
       this.emit('metric-subscription-execution', performance)
-      this.serviceLogger.error('Error in subscription execution', error)
+      this.serviceLogger.error({ error }, 'Error in subscription execution')
       if (error instanceof HandledError) {
         this.emit('handled-subscription-error', { subscriptionName, error, traceId })
         // handled errors prevent that the message is re-delivered for retry
@@ -414,10 +411,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
   }
 
   protected async registerSubscription(subscriptionDefinition: SubscriptionDefinition): Promise<void> {
-    this.serviceLogger.debug(
-      'register subscription',
-      `${this.serviceInfo.serviceName} ${this.serviceInfo.serviceVersion} ${subscriptionDefinition.subscriptionName}`,
-    )
+    this.serviceLogger.debug({ ...this.serviceInfo }, 'register subscription')
 
     this.subscriptions.set(subscriptionDefinition.subscriptionName, subscriptionDefinition)
 
@@ -442,7 +436,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
   async destroy() {
     this.emit('service-drain', undefined)
     await this.sendServiceInfo(EBMessageType.InfoServiceDrain)
-    this.serviceLogger.info('destroy', this.info)
+    this.serviceLogger.info({ ...this.info }, 'destroy')
 
     const functionUnregisterProms: Promise<any>[] = []
     this.commandFunctions.forEach((functionDefinition) => {

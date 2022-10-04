@@ -39,7 +39,7 @@ export type FunctionImplementationType = CommandFunction<
 >
 
 export const signUp: FunctionImplementationType = async function ({ logger }, payload, _parameter) {
-  logger.debug('sign up new user', payload)
+  logger.debug({ payload }, 'sign up new user')
 
   const uuid = randomUUID()
 

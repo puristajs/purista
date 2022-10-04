@@ -102,7 +102,7 @@ export const userSignUpBuilder = UserServiceBuilder.getFunctionBuilder(
   .setFunction(async function ({ logger, message, invoke }, payload, parameter) {
     logger.debug(payload.test)
     logger.debug(message.payload.payload)
-    logger.debug('function input parameter', parameter)
+    logger.debug({ parameter }, 'function input parameter')
 
     const invokeResponse = await invoke<string>(
       {
@@ -116,9 +116,9 @@ export const userSignUpBuilder = UserServiceBuilder.getFunctionBuilder(
       {},
     )
 
-    logger.debug('response from other service function invocation', invokeResponse)
+    logger.debug({ invokeResponse }, 'response from other service function invocation')
 
-    logger.debug('sign up new user', payload)
+    logger.debug({ payload }, 'sign up new user')
 
     const uuid = randomUUID()
 

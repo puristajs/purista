@@ -80,16 +80,16 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
             reply.statusCode = StatusCode.NoContent
           }
           reply.send(response)
-        } catch (err) {
+        } catch (error) {
           reply.header('content-type', 'application/json; charset=utf-8')
 
-          if (err instanceof HandledError) {
+          if (error instanceof HandledError) {
             reply.statusCode = err.errorCode
-            reply.send(err.getErrorResponse())
+            reply.send(error.getErrorResponse())
             return
           }
 
-          logger.error('', err)
+          logger.error({ error }, 'handler error')
           const unhandledError = new UnhandledError()
           reply.statusCode = unhandledError.errorCode
           reply.send(unhandledError.getErrorResponse())
@@ -99,6 +99,6 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
 
     this.routes.add(method, url, getHandler())
 
-    logger.debug('add ', method, url)
+    logger.debug({ method, url }, 'add handler')
   })
   .addMessageType(EBMessageType.InfoServiceFunctionAdded)

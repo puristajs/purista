@@ -10,7 +10,7 @@ export const testFunctionBuilder = UserServiceBuilder.getFunctionBuilder(
   .addParameterSchema(inputParameterSchema)
   .addOutputSchema(outputPayloadSchema)
   .setFunction(async function ({ logger }, payload, parameter) {
-    logger.debug('called with payload', payload, parameter)
+    logger.debug({ payload, parameter }, 'called with payload')
 
     return 'response payload for invocation'
   })

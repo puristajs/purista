@@ -113,13 +113,13 @@ export class AmqpBridge extends EventBridge {
       this.connection = await amqplib.connect(this.config.url, this.config.socketOptions)
     } catch (error) {
       this.emit('eventbridge-connection-error', error)
-      this.log.error('unable to connect to broker', error)
+      this.log.error({ error }, 'unable to connect to broker')
       throw error
     }
 
-    this.connection.on('error', (e) => {
-      this.log.error('amqp lib error', e)
-      this.emit('eventbridge-error', e)
+    this.connection.on('error', (error) => {
+      this.log.error({ error }, 'amqp lib error')
+      this.emit('eventbridge-error', error)
     })
     this.connection.on('close', (e) => this.emit('eventbridge-disconnected', e))
     this.emit('eventbridge-connected', undefined)
@@ -157,7 +157,7 @@ export class AmqpBridge extends EventBridge {
                 'InvalidCommandResponse: received invalid command response',
                 getCleanedMessage(message),
               )
-              this.log.error('received invalid command response', error)
+              this.log.error({ error }, 'received invalid command response')
               this.emit('eventbridge-error', error)
               return
             }
@@ -177,13 +177,13 @@ export class AmqpBridge extends EventBridge {
             return
           }
 
-          const err = new UnhandledError(StatusCode.BadRequest, 'InvalidMessage: received invalid message', message)
-          this.log.error('received invalid message', err)
-          this.emit('eventbridge-error', err)
-        } catch (error) {
-          const err = new HandledError(StatusCode.InternalServerError, 'failed to handle response message', error)
-          this.emit('eventbridge-error', err)
-          this.log.error('failed to handle response message', err)
+          const error = new UnhandledError(StatusCode.BadRequest, 'InvalidMessage: received invalid message', message)
+          this.log.error({ error }, 'received invalid message')
+          this.emit('eventbridge-error', error)
+        } catch (err) {
+          const error = new HandledError(StatusCode.InternalServerError, 'failed to handle response message', err)
+          this.emit('eventbridge-error', error)
+          this.log.error({ error }, 'failed to handle response message')
         }
       },
       { noAck: true },
@@ -289,7 +289,9 @@ export class AmqpBridge extends EventBridge {
           correlationId,
           error: err,
         })
-        this.log.getChildLogger({ traceId: command.traceId }).error(`failed to send InfoInvokeTimeout message`, error)
+        this.log
+          .getChildLogger({ traceId: command.traceId })
+          .error({ error }, `failed to send InfoInvokeTimeout message`)
         this.emit('eventbridge-error', error)
       }
     }
@@ -410,12 +412,16 @@ export class AmqpBridge extends EventBridge {
             type: responseMessage.messageType,
             headers,
           })
-        } catch (error) {
-          const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to consume command response message', {
-            error,
-          })
-          this.emit('eventbridge-error', err)
-          this.log.error('Failed to consume command response message', err)
+        } catch (err) {
+          const error = new UnhandledError(
+            StatusCode.InternalServerError,
+            'Failed to consume command response message',
+            {
+              error: err,
+            },
+          )
+          this.emit('eventbridge-error', error)
+          this.log.error({ error }, 'Failed to consume command response message')
         }
       },
       { noAck: true },
@@ -435,13 +441,13 @@ export class AmqpBridge extends EventBridge {
       }
       await entry.channel.close()
       this.serviceFunctions.delete(queueName)
-    } catch (error) {
-      const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to unregister service function', {
-        error,
+    } catch (err) {
+      const error = new UnhandledError(StatusCode.InternalServerError, 'Failed to unregister service function', {
+        error: err,
         address,
       })
-      this.emit('eventbridge-error', err)
-      this.log.error('Failed to unregister service function', err)
+      this.emit('eventbridge-error', error)
+      this.log.error({ error }, 'Failed to unregister service function')
     }
   }
 
@@ -483,13 +489,13 @@ export class AmqpBridge extends EventBridge {
 
           await cb(message)
           channel.ack(msg)
-        } catch (error) {
-          const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to consume subscription message', {
-            error,
+        } catch (err) {
+          const error = new UnhandledError(StatusCode.InternalServerError, 'Failed to consume subscription message', {
+            error: err,
             subscription,
           })
-          this.emit('eventbridge-error', err)
-          this.log.error('Failed to consume subscription message', err)
+          this.emit('eventbridge-error', error)
+          this.log.error({ error }, 'Failed to consume subscription message')
         }
       },
       { noAck: false },
@@ -508,13 +514,13 @@ export class AmqpBridge extends EventBridge {
       }
       await entry.channel.close()
       this.subscriptions.delete(queueName)
-    } catch (error) {
-      const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to unregister subscription', {
-        error,
+    } catch (err) {
+      const error = new UnhandledError(StatusCode.InternalServerError, 'Failed to unregister subscription', {
+        error: err,
         address,
       })
-      this.emit('eventbridge-error', err)
-      this.log.error('Failed to unregister subscription', err)
+      this.emit('eventbridge-error', error)
+      this.log.error({ error }, 'Failed to unregister subscription')
     }
   }
 

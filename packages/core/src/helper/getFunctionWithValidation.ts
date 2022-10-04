@@ -88,7 +88,7 @@ export const getFunctionWithValidation = function <
       return outputPayloadSchema.parse(output)
     } catch (err) {
       const error = err as ZodError
-      logger.error('output validation failed:', error.message)
+      logger.error({ error }, 'output validation failed')
       throw new UnhandledError(StatusCode.InternalServerError)
     }
   }

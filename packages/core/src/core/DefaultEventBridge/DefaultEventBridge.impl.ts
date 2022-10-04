@@ -81,7 +81,7 @@ export class DefaultEventBridge extends EventBridge {
               'InvalidCommand: received invalid command',
               getCleanedMessage(message),
             )
-            this.log.error('received invalid command', error)
+            this.log.error({ error }, 'received invalid command')
             this.emit('eventbridge-error', error)
             return next(error)
           }
@@ -100,7 +100,7 @@ export class DefaultEventBridge extends EventBridge {
               'InvalidCommandResponse: received invalid command response',
               getCleanedMessage(message),
             )
-            this.log.error('received invalid command response', error)
+            this.log.error({ error }, 'received invalid command response')
             this.emit('eventbridge-error', error)
             return next(error)
           }
@@ -120,14 +120,14 @@ export class DefaultEventBridge extends EventBridge {
           return next()
         }
 
-        const err = new UnhandledError(StatusCode.BadRequest, 'InvalidMessage: received invalid message', message)
-        this.log.error('received invalid message', err)
-        this.emit('eventbridge-error', err)
+        const error = new UnhandledError(StatusCode.BadRequest, 'InvalidMessage: received invalid message', message)
+        this.log.error({ error }, 'received invalid message')
+        this.emit('eventbridge-error', error)
         return next()
-      } catch (error) {
-        const err = new HandledError(StatusCode.InternalServerError, 'eventbus failure', error)
-        this.emit('eventbridge-error', err)
-        this.log.error('eventbus failure', err)
+      } catch (err) {
+        const error = new HandledError(StatusCode.InternalServerError, 'eventbus failure', err)
+        this.emit('eventbridge-error', error)
+        this.log.error({ error }, 'eventbus failure')
         return next(error as Error)
       }
     }
@@ -139,7 +139,7 @@ export class DefaultEventBridge extends EventBridge {
     this.readStream.on('data', (message: EBMessage) => {
       this.subscriptions.forEach((subscription) => {
         if (isMessageMatchingSubscription(this.log, message, subscription)) {
-          subscription.cb(message).catch((err) => this.log.error(err))
+          subscription.cb(message).catch((error) => this.log.error({ error }))
         }
       })
     })
@@ -271,7 +271,9 @@ export class DefaultEventBridge extends EventBridge {
           correlationId,
           error: err,
         })
-        this.log.getChildLogger({ traceId: command.traceId }).error(`failed to send InfoInvokeTimeout message`, error)
+        this.log
+          .getChildLogger({ traceId: command.traceId })
+          .error({ error }, `failed to send InfoInvokeTimeout message`)
         this.emit('eventbridge-error', error)
       }
     }

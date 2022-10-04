@@ -1,34 +1,58 @@
 import { Logger as PinoLogger } from 'pino'
 
-import { Logger, LoggerOptions } from './types'
+import { ILogger, LogFnParamType, Logger, LoggerOptions } from './types'
 
-export class DefaultLogger extends Logger {
+export class DefaultLogger extends Logger implements ILogger {
   constructor(private log: PinoLogger) {
     super()
   }
 
-  fatal(message?: string, ...args: any[]) {
-    this.log.fatal(message, ...args)
+  fatal(...args: LogFnParamType) {
+    if (args.length === 1) {
+      this.log.fatal(args[0])
+      return
+    }
+    this.log.fatal(args[0], ...args.slice(1))
   }
 
-  error(message?: string, ...args: any[]) {
-    this.log.error(message, ...args)
+  error(...args: LogFnParamType) {
+    if (args.length === 1) {
+      this.log.error(args[0])
+      return
+    }
+    this.log.error(args[0], ...args.slice(1))
   }
 
-  warn(message?: string, ...args: any[]) {
-    this.log.warn(message, ...args)
+  warn(...args: LogFnParamType) {
+    if (args.length === 1) {
+      this.log.warn(args[0])
+      return
+    }
+    this.log.warn(args[0], ...args.slice(1))
   }
 
-  info(message?: string, ...args: any[]) {
-    this.log.info(message, ...args)
+  info(...args: LogFnParamType) {
+    if (args.length === 1) {
+      this.log.info(args[0])
+      return
+    }
+    this.log.info(args[0], ...args.slice(1))
   }
 
-  debug(message?: string, ...args: any[]) {
-    this.log.debug(message, ...args)
+  debug(...args: LogFnParamType) {
+    if (args.length === 1) {
+      this.log.debug(args[0])
+      return
+    }
+    this.log.debug(args[0], ...args.slice(1))
   }
 
-  trace(message?: string, ...args: any[]) {
-    this.log.trace(message, ...args)
+  trace(...args: LogFnParamType) {
+    if (args.length === 1) {
+      this.log.trace(args[0])
+      return
+    }
+    this.log.trace(args[0], ...args.slice(1))
   }
 
   getChildLogger(options: LoggerOptions): Logger {
