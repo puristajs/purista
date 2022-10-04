@@ -84,13 +84,13 @@ export const getOpenApiJson = function (this: HttpServerService) {
       const definition = entry.expose.http
 
       let m
-      let routeParams: string[] = []
+      const routeParams: string[] = []
       while ((m = findPathParamsRegex.exec(definition.path)) !== null) {
         if (m.index === findPathParamsRegex.lastIndex) {
           findPathParamsRegex.lastIndex++
         }
 
-        routeParams = m.map((name) => name)
+        routeParams.push(...m.map((name) => name))
       }
 
       const pathParams: ParameterObject[] = routeParams.map((pathParamName): ParameterObject => {
