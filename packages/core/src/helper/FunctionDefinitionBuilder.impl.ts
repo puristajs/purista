@@ -357,7 +357,7 @@ export class FunctionDefinitionBuilder<
 
   /**
    * enable or disable security for this endpoint
-   * @param enabled Defaults to true if not set
+   * @param enabled Defaults to true if not set means "enable security"
    * @returns FunctionDefinitionBuilder
    */
   enableHttpSecurity(enabled = true) {
@@ -367,11 +367,11 @@ export class FunctionDefinitionBuilder<
 
   /**
    * enable or disable security for this endpoint
-   * @param enabled Defaults to false if not set
+   * @param enabled Defaults to tre if not set meaning "disable security"
    * @returns FunctionDefinitionBuilder
    */
-  disableHttpSecurity(enabled = false) {
-    this.isSecure = enabled
+  disableHttpSecurity(disabled = true) {
+    this.isSecure = !disabled
     return this
   }
 
