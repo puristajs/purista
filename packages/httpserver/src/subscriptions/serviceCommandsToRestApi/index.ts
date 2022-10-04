@@ -84,7 +84,7 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceF
           reply.header('content-type', 'application/json; charset=utf-8')
 
           if (error instanceof HandledError) {
-            reply.statusCode = err.errorCode
+            reply.statusCode = error.errorCode
             reply.send(error.getErrorResponse())
             return
           }
