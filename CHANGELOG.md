@@ -2,6 +2,33 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.8] - 2022-10-09
+
+### Bug Fixes
+
+- [BUG] HttpServer onError hook does not return #55
+- [BUG] OpenApi does not reflect multiple path parameter resolves #57
+- Correct documentation generation
+
+### Documentation
+
+- Update documentation
+- Update documentation
+
+### Features
+
+- Add token status codes
+
+### Miscellaneous Tasks
+
+- Bump versions to 1.4.7
+- Bump version
+- Bump dependencies
+
+### Resolves
+
+- [TASK] Add duplication check on service builder #54
+
 ## [1.4.6] - 2022-09-25
 
 ### Bug Fixes
@@ -11,6 +38,10 @@ All notable changes to this project will be documented in this file.
 ### Documentation
 
 - Update documentation
+
+### Miscellaneous Tasks
+
+- Bump versions to 1.4.6
 
 ## [1.4.5] - 2022-08-21
 
