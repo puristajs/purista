@@ -43,12 +43,12 @@
   },
   "devDependencies": {
     "@purista/core": "*",
-    "@types/jest": "^27.x",
-    "@types/node": "^16.11.7",
-    "@types/sinon": "^10.x",
+    "@types/jest": "^29.1.2",
+    "@types/node": "^16.11.64",
+    "@types/sinon": "^10.0.13",
     "@types/amqplib": "^0.8.2",
-    "jest": "^28.x",
-    "sinon": "^14.x"
+    "jest": "^29.1.2",
+    "sinon": "^14.0.1"
   },
   "dependencies": {
     "@purista/core": "*",
