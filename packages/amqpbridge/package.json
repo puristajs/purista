@@ -1,6 +1,6 @@
 {
   "name": "@purista/amqpbridge",
-  "version": "1.4.8",
+  "version": "1.4.9",
   "description": "rabbitMQ eventbridge for PURISTA backend framework",
   "homepage": "https://purista.dev",
   "repository": {

@@ -2,6 +2,17 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.4.9] - 2023-02-06
+
+### Bug Fixes
+
+- Lint
+
+### Miscellaneous Tasks
+
+- Bump dependency packages
+- Update doc theme config
+
 ## [1.4.8] - 2022-10-09
 
 ### Bug Fixes
@@ -24,6 +35,7 @@ All notable changes to this project will be documented in this file.
 - Bump versions to 1.4.7
 - Bump version
 - Bump dependencies
+- Bump versions to 1.4.8
 
 ### Resolves
 
