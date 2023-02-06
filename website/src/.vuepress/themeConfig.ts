@@ -83,7 +83,6 @@ export default hopeTheme({
     },
     photoSwipe: false,
     mdEnhance: {
-      enableAll: true,
       presentation: {
         plugins: ['highlight', 'math', 'search', 'notes', 'zoom'],
       },
