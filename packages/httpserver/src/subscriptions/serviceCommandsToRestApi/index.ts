@@ -1,3 +1,5 @@
+import posix from 'node:path/posix'
+
 import {
   EBMessageType,
   getNewTraceId,
@@ -10,7 +12,6 @@ import {
   UnhandledError,
 } from '@purista/core'
 import type { FastifyReply, FastifyRequest } from 'fastify'
-import posix from 'node:path/posix'
 import { Methods } from 'trouter'
 
 import { extractHeaderValue } from '../../helper'
