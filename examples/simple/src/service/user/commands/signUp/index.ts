@@ -1,5 +1,6 @@
-import { HandledError, StatusCode } from '@purista/core'
 import { randomUUID } from 'node:crypto'
+
+import { HandledError, StatusCode } from '@purista/core'
 
 import { EventName } from '../../../../types'
 import { UserFunction } from '../../UserFunction.enum'
