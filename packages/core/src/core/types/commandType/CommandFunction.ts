@@ -15,5 +15,5 @@ export type CommandFunction<
   this: ServiceClassType,
   context: CommandFunctionContext<MessagePayloadType, MessageParamsType>,
   payload: FunctionPayloadType,
-  params: FunctionParamsType,
+  parameter: FunctionParamsType,
 ) => Promise<FunctionResultType>
