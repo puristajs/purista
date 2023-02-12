@@ -66,11 +66,11 @@ The broker must be able to deliver the same message to n different consumers, ba
 ## DefaultEventBridge
 
 The core package comes with `DefaultEventBridge` which will work on local without any further installation. This should work out of the box for single instances.  
-You can also use it for simple horizontal scaling. The messages and states are not shared or load balanced between instances.
+You can also use it for simple horizontal scaling, but the messages and states are not shared or load balanced between instances.
 
 This means a subscription is always running on the same instance. Also, any function invocation is done within the same instance.
 
-Because of this, the `DefaultEventBridge` will only work in scenarios, where you deploy your services as monolith.
+Because of this, the `DefaultEventBridge` will only work in scenarios, where you deploy your services as monolith and you don't have the requirement to share messages and states across instances.
 
 ## AMQP event bridge
 
@@ -94,6 +94,10 @@ The easiest way to start - simply start a RabbitMQ docker container:
 docker run --rm -it --hostname my-rabbit -p 15672:15672 -p 5672:5672 rabbitmq:3-management
 ```
 
+## KubeMQ
+
+see: [Github feature request](https://github.com/sebastianwessel/purista/issues/64)
+
 ## AWS
 
 ### AWS EventBridge
@@ -114,9 +118,14 @@ docker run --rm -it --hostname my-rabbit -p 15672:15672 -p 5672:5672 rabbitmq:3-
 
 ## Apache Kafka
 
+[Apache Kafka](https://kafka.apache.org) is a very popular message broker.  
+But, as Kafka is a pull based broker it currently does not fit the basic requirements.  
+
+There are currently no plans to use Kafka as event bridge backbone for PURISTA.
+
 ## MQTT Brokers
 
-MQTT is one of the most mature and widely used messaging protocols. As mentioned in the beginning of this page, there are several things a broker should provide.
+MQTT with the popular [mosquitto broker](https://mosquitto.org) is one of the most mature and widely used messaging protocols. As mentioned in the beginning of this page, there are several things a broker should provide.
 
 The MQTT protocol version 5 has some interesting additions, like shared subscriptions, session ttl, message ttl and response fields. This reduces the gap between available broker features and our needs.
 

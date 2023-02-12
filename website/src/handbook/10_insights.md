@@ -86,4 +86,5 @@ As PURISTA is a message based framework, the structure of messages might be inte
 |receiver.serviceVersion|yes|the service version|
 |receiver.serviceTarget|yes|the service function or subscription name|
 |payload|depends on message type|the message payload (business data)|
+|otp|no|OpenTelemetry context propagation as json stringified string|
 
