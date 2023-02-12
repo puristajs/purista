@@ -1,4 +1,4 @@
-import { SinonStub, stub } from 'sinon'
+import { SinonSandbox, SinonStub, stub } from 'sinon'
 
 import { Logger } from '../core'
 
@@ -6,12 +6,12 @@ import { Logger } from '../core'
  * Mocks the logger and methods are stubs
  * @returns logger mocked
  */
-export const getLoggerMock = (): { mock: Logger; stubs: Record<string, SinonStub> } => {
-  const info = stub()
-  const error = stub()
-  const warn = stub()
-  const debug = stub()
-  const trace = stub()
+export const getLoggerMock = (sandbox?: SinonSandbox): { mock: Logger; stubs: Record<string, SinonStub> } => {
+  const info = sandbox?.stub() || stub()
+  const error = sandbox?.stub() || stub()
+  const warn = sandbox?.stub() || stub()
+  const debug = sandbox?.stub() || stub()
+  const trace = sandbox?.stub() || stub()
 
   const mock: Logger = {
     info,
