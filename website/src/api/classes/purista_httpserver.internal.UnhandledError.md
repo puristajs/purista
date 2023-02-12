@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / UnhandledError
+[PURISTA API - v1.4.9](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / UnhandledError
 
 # Class: UnhandledError
 
@@ -56,7 +56,7 @@ Error.constructor
 
 #### Defined in
 
-core/lib/types/core/UnhandledError.impl.d.ts:15
+core/lib/core/Error/UnhandledError.impl.d.ts:15
 
 ## Properties
 
@@ -66,7 +66,7 @@ core/lib/types/core/UnhandledError.impl.d.ts:15
 
 #### Defined in
 
-core/lib/types/core/UnhandledError.impl.d.ts:13
+core/lib/core/Error/UnhandledError.impl.d.ts:13
 
 ___
 
@@ -76,7 +76,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/UnhandledError.impl.d.ts:12
+core/lib/core/Error/UnhandledError.impl.d.ts:12
 
 ___
 
@@ -86,7 +86,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/UnhandledError.impl.d.ts:14
+core/lib/core/Error/UnhandledError.impl.d.ts:14
 
 ## Methods
 
@@ -104,7 +104,7 @@ ErrorResponse
 
 #### Defined in
 
-core/lib/types/core/UnhandledError.impl.d.ts:31
+core/lib/core/Error/UnhandledError.impl.d.ts:31
 
 ___
 
@@ -122,7 +122,7 @@ HandledError
 
 #### Defined in
 
-core/lib/types/core/UnhandledError.impl.d.ts:26
+core/lib/core/Error/UnhandledError.impl.d.ts:26
 
 ___
 
@@ -140,7 +140,7 @@ ErrorResponse as string
 
 #### Defined in
 
-core/lib/types/core/UnhandledError.impl.d.ts:36
+core/lib/core/Error/UnhandledError.impl.d.ts:36
 
 ___
 
@@ -164,4 +164,4 @@ UnhandledError
 
 #### Defined in
 
-core/lib/types/core/UnhandledError.impl.d.ts:21
+core/lib/core/Error/UnhandledError.impl.d.ts:21

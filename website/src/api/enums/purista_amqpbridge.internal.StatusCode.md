@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / StatusCode
+[PURISTA API - v1.4.9](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / StatusCode
 
 # Enumeration: StatusCode
 
@@ -27,6 +27,7 @@
 - [InfoSwitchingProtocols](purista_amqpbridge.internal.StatusCode.md#infoswitchingprotocols)
 - [InsufficientStorage](purista_amqpbridge.internal.StatusCode.md#insufficientstorage)
 - [InternalServerError](purista_amqpbridge.internal.StatusCode.md#internalservererror)
+- [InvalidToken](purista_amqpbridge.internal.StatusCode.md#invalidtoken)
 - [LengthRequired](purista_amqpbridge.internal.StatusCode.md#lengthrequired)
 - [Locked](purista_amqpbridge.internal.StatusCode.md#locked)
 - [LoginTimeOut](purista_amqpbridge.internal.StatusCode.md#logintimeout)
@@ -63,6 +64,7 @@
 - [ResetContent](purista_amqpbridge.internal.StatusCode.md#resetcontent)
 - [RetryWith](purista_amqpbridge.internal.StatusCode.md#retrywith)
 - [ServiceUnavailable](purista_amqpbridge.internal.StatusCode.md#serviceunavailable)
+- [TokenRequired](purista_amqpbridge.internal.StatusCode.md#tokenrequired)
 - [TooManyRequests](purista_amqpbridge.internal.StatusCode.md#toomanyrequests)
 - [URITooLong](purista_amqpbridge.internal.StatusCode.md#uritoolong)
 - [Unauthorized](purista_amqpbridge.internal.StatusCode.md#unauthorized)
@@ -80,7 +82,7 @@
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:7
+core/lib/core/types/StatusCode.enum.d.ts:7
 
 ___
 
@@ -90,7 +92,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:13
+core/lib/core/types/StatusCode.enum.d.ts:13
 
 ___
 
@@ -100,7 +102,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:55
+core/lib/core/types/StatusCode.enum.d.ts:57
 
 ___
 
@@ -110,7 +112,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:24
+core/lib/core/types/StatusCode.enum.d.ts:24
 
 ___
 
@@ -120,7 +122,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:62
+core/lib/core/types/StatusCode.enum.d.ts:64
 
 ___
 
@@ -130,7 +132,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:33
+core/lib/core/types/StatusCode.enum.d.ts:33
 
 ___
 
@@ -140,7 +142,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:6
+core/lib/core/types/StatusCode.enum.d.ts:6
 
 ___
 
@@ -150,7 +152,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:41
+core/lib/core/types/StatusCode.enum.d.ts:41
 
 ___
 
@@ -160,7 +162,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:27
+core/lib/core/types/StatusCode.enum.d.ts:27
 
 ___
 
@@ -170,7 +172,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:57
+core/lib/core/types/StatusCode.enum.d.ts:59
 
 ___
 
@@ -180,7 +182,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:34
+core/lib/core/types/StatusCode.enum.d.ts:34
 
 ___
 
@@ -190,7 +192,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:58
+core/lib/core/types/StatusCode.enum.d.ts:60
 
 ___
 
@@ -200,7 +202,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:14
+core/lib/core/types/StatusCode.enum.d.ts:14
 
 ___
 
@@ -210,7 +212,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:42
+core/lib/core/types/StatusCode.enum.d.ts:42
 
 ___
 
@@ -220,7 +222,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:2
+core/lib/core/types/StatusCode.enum.d.ts:2
 
 ___
 
@@ -230,7 +232,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:4
+core/lib/core/types/StatusCode.enum.d.ts:4
 
 ___
 
@@ -240,7 +242,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:3
+core/lib/core/types/StatusCode.enum.d.ts:3
 
 ___
 
@@ -250,7 +252,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:60
+core/lib/core/types/StatusCode.enum.d.ts:62
 
 ___
 
@@ -260,7 +262,17 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:53
+core/lib/core/types/StatusCode.enum.d.ts:55
+
+___
+
+### InvalidToken
+
+• **InvalidToken** = ``498``
+
+#### Defined in
+
+core/lib/core/types/StatusCode.enum.d.ts:53
 
 ___
 
@@ -270,7 +282,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:35
+core/lib/core/types/StatusCode.enum.d.ts:35
 
 ___
 
@@ -280,7 +292,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:45
+core/lib/core/types/StatusCode.enum.d.ts:45
 
 ___
 
@@ -290,7 +302,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:50
+core/lib/core/types/StatusCode.enum.d.ts:50
 
 ___
 
@@ -300,7 +312,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:61
+core/lib/core/types/StatusCode.enum.d.ts:63
 
 ___
 
@@ -310,7 +322,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:29
+core/lib/core/types/StatusCode.enum.d.ts:29
 
 ___
 
@@ -320,7 +332,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:43
+core/lib/core/types/StatusCode.enum.d.ts:43
 
 ___
 
@@ -330,7 +342,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:12
+core/lib/core/types/StatusCode.enum.d.ts:12
 
 ___
 
@@ -340,7 +352,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:64
+core/lib/core/types/StatusCode.enum.d.ts:66
 
 ___
 
@@ -350,7 +362,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:9
+core/lib/core/types/StatusCode.enum.d.ts:9
 
 ___
 
@@ -360,7 +372,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:8
+core/lib/core/types/StatusCode.enum.d.ts:8
 
 ___
 
@@ -370,7 +382,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:30
+core/lib/core/types/StatusCode.enum.d.ts:30
 
 ___
 
@@ -380,7 +392,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:63
+core/lib/core/types/StatusCode.enum.d.ts:65
 
 ___
 
@@ -390,7 +402,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:28
+core/lib/core/types/StatusCode.enum.d.ts:28
 
 ___
 
@@ -400,7 +412,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:54
+core/lib/core/types/StatusCode.enum.d.ts:56
 
 ___
 
@@ -410,7 +422,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:5
+core/lib/core/types/StatusCode.enum.d.ts:5
 
 ___
 
@@ -420,7 +432,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:11
+core/lib/core/types/StatusCode.enum.d.ts:11
 
 ___
 
@@ -430,7 +442,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:37
+core/lib/core/types/StatusCode.enum.d.ts:37
 
 ___
 
@@ -440,7 +452,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:26
+core/lib/core/types/StatusCode.enum.d.ts:26
 
 ___
 
@@ -450,7 +462,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:36
+core/lib/core/types/StatusCode.enum.d.ts:36
 
 ___
 
@@ -460,7 +472,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:47
+core/lib/core/types/StatusCode.enum.d.ts:47
 
 ___
 
@@ -470,7 +482,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:31
+core/lib/core/types/StatusCode.enum.d.ts:31
 
 ___
 
@@ -480,7 +492,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:40
+core/lib/core/types/StatusCode.enum.d.ts:40
 
 ___
 
@@ -490,7 +502,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:17
+core/lib/core/types/StatusCode.enum.d.ts:17
 
 ___
 
@@ -500,7 +512,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:16
+core/lib/core/types/StatusCode.enum.d.ts:16
 
 ___
 
@@ -510,7 +522,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:15
+core/lib/core/types/StatusCode.enum.d.ts:15
 
 ___
 
@@ -520,7 +532,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:19
+core/lib/core/types/StatusCode.enum.d.ts:19
 
 ___
 
@@ -530,7 +542,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:23
+core/lib/core/types/StatusCode.enum.d.ts:23
 
 ___
 
@@ -540,7 +552,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:18
+core/lib/core/types/StatusCode.enum.d.ts:18
 
 ___
 
@@ -550,7 +562,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:21
+core/lib/core/types/StatusCode.enum.d.ts:21
 
 ___
 
@@ -560,7 +572,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:22
+core/lib/core/types/StatusCode.enum.d.ts:22
 
 ___
 
@@ -570,7 +582,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:20
+core/lib/core/types/StatusCode.enum.d.ts:20
 
 ___
 
@@ -580,7 +592,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:49
+core/lib/core/types/StatusCode.enum.d.ts:49
 
 ___
 
@@ -590,7 +602,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:32
+core/lib/core/types/StatusCode.enum.d.ts:32
 
 ___
 
@@ -600,7 +612,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:10
+core/lib/core/types/StatusCode.enum.d.ts:10
 
 ___
 
@@ -610,7 +622,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:51
+core/lib/core/types/StatusCode.enum.d.ts:51
 
 ___
 
@@ -620,7 +632,17 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:56
+core/lib/core/types/StatusCode.enum.d.ts:58
+
+___
+
+### TokenRequired
+
+• **TokenRequired** = ``499``
+
+#### Defined in
+
+core/lib/core/types/StatusCode.enum.d.ts:54
 
 ___
 
@@ -630,7 +652,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:48
+core/lib/core/types/StatusCode.enum.d.ts:48
 
 ___
 
@@ -640,7 +662,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:38
+core/lib/core/types/StatusCode.enum.d.ts:38
 
 ___
 
@@ -650,7 +672,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:25
+core/lib/core/types/StatusCode.enum.d.ts:25
 
 ___
 
@@ -660,7 +682,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:52
+core/lib/core/types/StatusCode.enum.d.ts:52
 
 ___
 
@@ -670,7 +692,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:44
+core/lib/core/types/StatusCode.enum.d.ts:44
 
 ___
 
@@ -680,7 +702,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:39
+core/lib/core/types/StatusCode.enum.d.ts:39
 
 ___
 
@@ -690,7 +712,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:46
+core/lib/core/types/StatusCode.enum.d.ts:46
 
 ___
 
@@ -700,4 +722,4 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/StatusCode.enum.d.ts:59
+core/lib/core/types/StatusCode.enum.d.ts:61

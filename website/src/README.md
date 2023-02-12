@@ -17,7 +17,7 @@ tagline: THE TYPESCRIPT BACKEND FRAMEWORK
 actions:
   - text: Get started
     link: /handbook/0_concept
-    icon: bolt fas
+    icon: bolt
     type: primary
   - text: Github
     link: https://github.com/sebastianwessel/purista
@@ -43,17 +43,17 @@ features:
   - title: Scales
     icon: arrow-up-right-dots fas
     details: runs and scales from small single instance up to cloud clusters.
-    link: /handbook/5_scale
+    link: /handbook/7_scale
 
   - title: Compliance & Monitoring
     icon: shield-halved fas
     details: flexible to trace, audit and monitor and to get a clear picture of what's going on
-    link: /handbook/0_concept
+    link: /handbook/8_Logging_and_metrics
 
   - title: Easy to test
     icon: vial-circle-check fas
     details: easy to test with ready to go mocks & stubs which increases productivity and reduces costs
-    link: /handbook/4_testing
+    link: /handbook/6_testing
 
 
 copyright: false

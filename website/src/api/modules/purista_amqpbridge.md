@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / @purista/amqpbridge
+[PURISTA API - v1.4.9](../README.md) / @purista/amqpbridge
 
 # Module: @purista/amqpbridge
 
@@ -47,7 +47,7 @@ AmqpBridge bridge config
 
 #### Defined in
 
-[amqpbridge/src/types/AmqpBridgeConfig.ts:9](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L9)
+[amqpbridge/src/types/AmqpBridgeConfig.ts:9](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L9)
 
 ___
 
@@ -57,7 +57,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/types/Encoder.ts:3](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/amqpbridge/src/types/Encoder.ts#L3)
+[amqpbridge/src/types/Encoder.ts:3](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/types/Encoder.ts#L3)
 
 ___
 
@@ -74,7 +74,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/types/EncryptFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/amqpbridge/src/types/EncryptFunctions.ts#L1)
+[amqpbridge/src/types/EncryptFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/types/EncryptFunctions.ts#L1)
 
 ___
 
@@ -84,7 +84,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/types/Encrypter.ts:3](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/amqpbridge/src/types/Encrypter.ts#L3)
+[amqpbridge/src/types/Encrypter.ts:3](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/types/Encrypter.ts#L3)
 
 ## Functions
 
@@ -98,4 +98,4 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/getDefaultConfig.impl.ts:5](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/amqpbridge/src/getDefaultConfig.impl.ts#L5)
+[amqpbridge/src/getDefaultConfig.impl.ts:5](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/getDefaultConfig.impl.ts#L5)

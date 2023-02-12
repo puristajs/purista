@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / Service
+[PURISTA API - v1.4.9](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / Service
 
 # Class: Service<ConfigType\>
 
@@ -12,8 +12,8 @@ Every service should extend this class and should not directly access the eventb
 ```typescript
 class MyService extends Service {
 
-  constructor(baseLogger: Logger, info: ServiceInfoType, eventBridge: EventBridge) {
-    super( baseLogger, info, eventBridge )
+  constructor(baseLogger: Logger, info: ServiceInfoType, eventBridge: EventBridge, config?: MyServiceConfig, spanProcessor?: SpanProcessor,) {
+    super( baseLogger, info, eventBridge, config, spanProcessor )
     // ... initial service logic
   }
   // ... service methods, functions and logic
@@ -52,8 +52,10 @@ class MyService extends Service {
 - [eventBridge](purista_httpserver.internal.Service.md#eventbridge)
 - [info](purista_httpserver.internal.Service.md#info)
 - [serviceLogger](purista_httpserver.internal.Service.md#servicelogger)
+- [spanProcessor](purista_httpserver.internal.Service.md#spanprocessor)
 - [subscriptionList](purista_httpserver.internal.Service.md#subscriptionlist)
 - [subscriptions](purista_httpserver.internal.Service.md#subscriptions)
+- [traceProvider](purista_httpserver.internal.Service.md#traceprovider)
 
 ### Accessors
 
@@ -67,6 +69,7 @@ class MyService extends Service {
 - [executeSubscription](purista_httpserver.internal.Service.md#executesubscription)
 - [getEmitFunction](purista_httpserver.internal.Service.md#getemitfunction)
 - [getInvokeFunction](purista_httpserver.internal.Service.md#getinvokefunction)
+- [getTracer](purista_httpserver.internal.Service.md#gettracer)
 - [initializeEventbridgeConnect](purista_httpserver.internal.Service.md#initializeeventbridgeconnect)
 - [off](purista_httpserver.internal.Service.md#off)
 - [on](purista_httpserver.internal.Service.md#on)
@@ -74,12 +77,14 @@ class MyService extends Service {
 - [registerSubscription](purista_httpserver.internal.Service.md#registersubscription)
 - [sendServiceInfo](purista_httpserver.internal.Service.md#sendserviceinfo)
 - [start](purista_httpserver.internal.Service.md#start)
+- [startActiveSpan](purista_httpserver.internal.Service.md#startactivespan)
+- [wrapInSpan](purista_httpserver.internal.Service.md#wrapinspan)
 
 ## Constructors
 
 ### constructor
 
-• **new Service**<`ConfigType`\>(`baseLogger`, `info`, `eventBridge`, `commandFunctions`, `subscriptionList`, `config`)
+• **new Service**<`ConfigType`\>(`baseLogger`, `info`, `eventBridge`, `commandFunctions`, `subscriptionList`, `config`, `spanProcessor?`)
 
 #### Type parameters
 
@@ -97,6 +102,7 @@ class MyService extends Service {
 | `commandFunctions` | [`CommandDefinitionList`](../modules/purista_httpserver.internal.md#commanddefinitionlist)<`any`\> |
 | `subscriptionList` | [`SubscriptionDefinitionList`](../modules/purista_httpserver.internal.md#subscriptiondefinitionlist)<`any`\> |
 | `config` | `ConfigType` |
+| `spanProcessor?` | `SpanProcessor` |
 
 #### Overrides
 
@@ -104,7 +110,7 @@ class MyService extends Service {
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:28
+core/lib/core/Service/Service.impl.d.ts:26
 
 ## Properties
 
@@ -114,7 +120,7 @@ core/lib/types/core/Service/Service.impl.d.ts:28
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:20
+core/lib/core/Service/Service.impl.d.ts:21
 
 ___
 
@@ -124,7 +130,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:27
+core/lib/core/Service/Service.impl.d.ts:25
 
 ___
 
@@ -138,50 +144,63 @@ ___
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:22
+core/lib/core/Service/Service.impl.d.ts:23
 
 ___
 
 ### eventBridge
 
-• `Protected` **eventBridge**: [`EventBridge`](purista_httpserver.internal.EventBridge.md)
+• **eventBridge**: [`EventBridge`](purista_httpserver.internal.EventBridge.md)
 
-The event bridge instance
-
-#### Overrides
+#### Inherited from
 
 [ServiceClass](purista_httpserver.internal.ServiceClass.md).[eventBridge](purista_httpserver.internal.ServiceClass.md#eventbridge)
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:25
+core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:14
 
 ___
 
 ### info
 
-• `Protected` **info**: [`ServiceInfoType`](../modules/purista_httpserver.internal.md#serviceinfotype)
+• `Readonly` **info**: [`ServiceInfoType`](../modules/purista_httpserver.internal.md#serviceinfotype)
 
-General service info
-Service name, service version and some human readable description
-
-#### Overrides
+#### Inherited from
 
 [ServiceClass](purista_httpserver.internal.ServiceClass.md).[info](purista_httpserver.internal.ServiceClass.md#info)
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:23
+core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:13
 
 ___
 
 ### serviceLogger
 
-• `Protected` **serviceLogger**: [`Logger`](purista_httpserver.internal.Logger.md)
+• **serviceLogger**: [`Logger`](purista_httpserver.internal.Logger.md)
+
+#### Inherited from
+
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[serviceLogger](purista_httpserver.internal.ServiceClass.md#servicelogger)
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:24
+core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:15
+
+___
+
+### spanProcessor
+
+• **spanProcessor**: `undefined` \| `SpanProcessor`
+
+#### Inherited from
+
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[spanProcessor](purista_httpserver.internal.ServiceClass.md#spanprocessor)
+
+#### Defined in
+
+core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:16
 
 ___
 
@@ -191,7 +210,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:21
+core/lib/core/Service/Service.impl.d.ts:22
 
 ___
 
@@ -201,7 +220,21 @@ ___
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:26
+core/lib/core/Service/Service.impl.d.ts:24
+
+___
+
+### traceProvider
+
+• **traceProvider**: `NodeTracerProvider`
+
+#### Inherited from
+
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[traceProvider](purista_httpserver.internal.ServiceClass.md#traceprovider)
+
+#### Defined in
+
+core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:17
 
 ## Accessors
 
@@ -219,17 +252,19 @@ Get service info
 
 IServiceClass.serviceInfo
 
+#### Inherited from
+
+ServiceClass.serviceInfo
+
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:36
+core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:22
 
 ## Methods
 
 ### destroy
 
 ▸ **destroy**(): `Promise`<`void`\>
-
-Shut down the service
 
 #### Returns
 
@@ -245,13 +280,13 @@ Shut down the service
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:59
+core/lib/core/Service/Service.impl.d.ts:65
 
 ___
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `params`): `void`
+▸ **emit**<`K`\>(`eventName`, `parameter`): `void`
 
 #### Type parameters
 
@@ -264,7 +299,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `params` | [`ServiceEvents`](../modules/purista_httpserver.internal.md#serviceevents)[`K`] |
+| `parameter` | [`ServiceEvents`](../modules/purista_httpserver.internal.md#serviceevents)[`K`] |
 
 #### Returns
 
@@ -276,13 +311,13 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:13
+core/lib/core/types/GenericEventEmitter.d.ts:13
 
 ___
 
 ### executeCommand
 
-▸ `Protected` **executeCommand**(`message`): `Promise`<`Readonly`<`Omit`<[`CommandSuccessResponse`](../modules/purista_httpserver.internal.md#commandsuccessresponse-1)<`unknown`\>, ``"instanceId"``\>\> \| `Readonly`<`Omit`<[`CommandErrorResponse`](../modules/purista_httpserver.internal.md#commanderrorresponse-1), ``"instanceId"``\>\>\>
+▸ `Protected` **executeCommand**(`message`): `Promise`<`Readonly`<`Omit`<[`CommandErrorResponse`](../modules/purista_httpserver.internal.md#commanderrorresponse-1), ``"instanceId"``\>\> \| { `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../modules/purista_httpserver.internal.md#commandsuccessresponse) ; `otp`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_httpserver.internal.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_httpserver.internal.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 Called when a command is received by the service
 
@@ -294,11 +329,11 @@ Called when a command is received by the service
 
 #### Returns
 
-`Promise`<`Readonly`<`Omit`<[`CommandSuccessResponse`](../modules/purista_httpserver.internal.md#commandsuccessresponse-1)<`unknown`\>, ``"instanceId"``\>\> \| `Readonly`<`Omit`<[`CommandErrorResponse`](../modules/purista_httpserver.internal.md#commanderrorresponse-1), ``"instanceId"``\>\>\>
+`Promise`<`Readonly`<`Omit`<[`CommandErrorResponse`](../modules/purista_httpserver.internal.md#commanderrorresponse-1), ``"instanceId"``\>\> \| { `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../modules/purista_httpserver.internal.md#commandsuccessresponse) ; `otp`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_httpserver.internal.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_httpserver.internal.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:55
+core/lib/core/Service/Service.impl.d.ts:49
 
 ___
 
@@ -319,7 +354,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:57
+core/lib/core/Service/Service.impl.d.ts:63
 
 ___
 
@@ -360,7 +395,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:48
+core/lib/core/Service/Service.impl.d.ts:42
 
 ___
 
@@ -396,7 +431,29 @@ ___
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:47
+core/lib/core/Service/Service.impl.d.ts:41
+
+___
+
+### getTracer
+
+▸ **getTracer**(): `Tracer`
+
+Returns open telemetry tracer of this service
+
+#### Returns
+
+`Tracer`
+
+Tracer
+
+#### Inherited from
+
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[getTracer](purista_httpserver.internal.ServiceClass.md#gettracer)
+
+#### Defined in
+
+core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:28
 
 ___
 
@@ -419,7 +476,7 @@ Connect service to event bridge to receive commands and command responses
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:40
+core/lib/core/Service/Service.impl.d.ts:34
 
 ___
 
@@ -450,7 +507,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:12
+core/lib/core/types/GenericEventEmitter.d.ts:12
 
 ___
 
@@ -481,7 +538,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:11
+core/lib/core/types/GenericEventEmitter.d.ts:11
 
 ___
 
@@ -507,7 +564,7 @@ Register a new command (function) for this service
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:56
+core/lib/core/Service/Service.impl.d.ts:62
 
 ___
 
@@ -527,7 +584,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:58
+core/lib/core/Service/Service.impl.d.ts:64
 
 ___
 
@@ -555,7 +612,7 @@ Broadcast service info message
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:46
+core/lib/core/Service/Service.impl.d.ts:40
 
 ___
 
@@ -579,4 +636,84 @@ It connects to the event bridge and subscribes to the topics that are in the sub
 
 #### Defined in
 
-core/lib/types/core/Service/Service.impl.d.ts:32
+core/lib/core/Service/Service.impl.d.ts:30
+
+___
+
+### startActiveSpan
+
+▸ **startActiveSpan**<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`<`F`\>
+
+Start a child span for opentelemetry tracking
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `F` |
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `name` | `string` | name of span |
+| `opts` | `SpanOptions` | span options |
+| `context` | `undefined` \| `Context` | optional context |
+| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function to be executed within the span |
+
+#### Returns
+
+`Promise`<`F`\>
+
+return value of fn
+
+#### Inherited from
+
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[startActiveSpan](purista_httpserver.internal.ServiceClass.md#startactivespan)
+
+#### Defined in
+
+core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:37
+
+___
+
+### wrapInSpan
+
+▸ **wrapInSpan**<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`<`F`\>
+
+Start span for opentelemetry tracking on same level.
+The created span will not become the "active" span within opentelemetry!
+
+This means during logging and similar the spanId of parent span is logged.
+
+Use wrapInSpan for marking points in flow of one bigger function,
+but not to trace the program flow itself
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `F` |
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `name` | `string` | name of span |
+| `opts` | `SpanOptions` | span options |
+| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function te be executed in the span |
+| `context?` | `Context` | span context |
+
+#### Returns
+
+`Promise`<`F`\>
+
+return value of fn
+
+#### Inherited from
+
+[ServiceClass](purista_httpserver.internal.ServiceClass.md).[wrapInSpan](purista_httpserver.internal.ServiceClass.md#wrapinspan)
+
+#### Defined in
+
+core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:53

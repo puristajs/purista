@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / @purista/httpserver
+[PURISTA API - v1.4.9](../README.md) / @purista/httpserver
 
 # Module: @purista/httpserver
 
@@ -31,11 +31,11 @@
 
 ### BeforeResponseHook
 
-Ƭ **BeforeResponseHook**: <T\>(`payload`: `T`, `request`: `FastifyRequest`, `reply`: `FastifyReply`, `params`: `Record`<`string`, `unknown`\>) => `void`
+Ƭ **BeforeResponseHook**: <T\>(`payload`: `T`, `request`: `FastifyRequest`, `reply`: `FastifyReply`, `parameter`: `Record`<`string`, `unknown`\>) => `void`
 
 #### Type declaration
 
-▸ <`T`\>(`payload`, `request`, `reply`, `params`): `void`
+▸ <`T`\>(`payload`, `request`, `reply`, `parameter`): `void`
 
 ##### Type parameters
 
@@ -50,7 +50,7 @@
 | `payload` | `T` |
 | `request` | `FastifyRequest` |
 | `reply` | `FastifyReply` |
-| `params` | `Record`<`string`, `unknown`\> |
+| `parameter` | `Record`<`string`, `unknown`\> |
 
 ##### Returns
 
@@ -58,7 +58,7 @@
 
 #### Defined in
 
-[httpserver/src/types/BeforeResponseHook.ts:3](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/types/BeforeResponseHook.ts#L3)
+[httpserver/src/types/BeforeResponseHook.ts:3](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/httpserver/src/types/BeforeResponseHook.ts#L3)
 
 ___
 
@@ -71,9 +71,15 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `apiMountPath?` | `string` |
+| `compressOptions?` | `FastifyCompressOptions` |
 | `cookieSecret?` | `string` |
+| `corsOptions?` | `FastifyCorsOptions` |
 | `domain` | `string` |
+| `enableCompress?` | `boolean` |
+| `enableCors?` | `boolean` |
+| `enableHelmet?` | `boolean` |
 | `fastify` | `Partial`<`FastifyServerOptions`\> & `Partial`<`FastifyHttp2SecureOptions`<`Http2SecureServer`\>\> |
+| `helmetOptions?` | `FastifyHelmetOptions` |
 | `host?` | `string` |
 | `logLevel?` | [`LogLevelName`](purista_httpserver.internal.md#loglevelname) |
 | `openApi?` | { `components?`: `ComponentsObject` ; `enabled?`: `boolean` ; `externalDocs?`: `ExternalDocumentationObject` ; `info`: `InfoObject` ; `path?`: `string` ; `security?`: `SecurityRequirementObject`[] ; `servers?`: `ServerObject`[] ; `tags?`: `TagObject`[]  } |
@@ -90,7 +96,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/types/HttpServerConfig.ts:13](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/types/HttpServerConfig.ts#L13)
+[httpserver/src/types/HttpServerConfig.ts:16](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/httpserver/src/types/HttpServerConfig.ts#L16)
 
 ## Variables
 
@@ -100,7 +106,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/config/defaults.config.ts:7](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/config/defaults.config.ts#L7)
+[httpserver/src/config/defaults.config.ts:7](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/httpserver/src/config/defaults.config.ts#L7)
 
 ___
 
@@ -110,7 +116,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/config/defaults.config.ts:5](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/config/defaults.config.ts#L5)
+[httpserver/src/config/defaults.config.ts:5](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/httpserver/src/config/defaults.config.ts#L5)
 
 ___
 
@@ -120,7 +126,7 @@ ___
 
 #### Defined in
 
-[httpserver/src/config/ServiceInfo.ts:3](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/config/ServiceInfo.ts#L3)
+[httpserver/src/config/ServiceInfo.ts:3](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/httpserver/src/config/ServiceInfo.ts#L3)
 
 ## Functions
 
@@ -134,4 +140,4 @@ ___
 
 #### Defined in
 
-[httpserver/src/config/getDefaultConfig.ts:4](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/httpserver/src/config/getDefaultConfig.ts#L4)
+[httpserver/src/config/getDefaultConfig.ts:4](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/httpserver/src/config/getDefaultConfig.ts#L4)

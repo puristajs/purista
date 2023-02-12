@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/core](../modules/purista_core.md) / IServiceClass
+[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / IServiceClass
 
 # Interface: IServiceClass
 
@@ -32,7 +32,7 @@
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:58](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/ServiceClass.ts#L58)
+[core/src/core/types/ServiceClass.ts:40](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/ServiceClass.ts#L40)
 
 ## Methods
 
@@ -46,7 +46,7 @@
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:54](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/ServiceClass.ts#L54)
+[core/src/core/types/ServiceClass.ts:36](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/ServiceClass.ts#L36)
 
 ___
 
@@ -68,7 +68,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:59](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/ServiceClass.ts#L59)
+[core/src/core/types/ServiceClass.ts:41](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/ServiceClass.ts#L41)
 
 ___
 
@@ -82,4 +82,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/ServiceClass.ts:56](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/ServiceClass.ts#L56)
+[core/src/core/types/ServiceClass.ts:38](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/ServiceClass.ts#L38)

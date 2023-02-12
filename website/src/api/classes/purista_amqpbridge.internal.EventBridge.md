@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / EventBridge
+[PURISTA API - v1.4.9](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / EventBridge
 
 # Class: EventBridge
 
@@ -56,13 +56,13 @@ The event bridge must implement this interface.
 
 #### Defined in
 
-core/lib/types/core/types/EventBridge.d.ts:12
+core/lib/core/types/EventBridge.d.ts:12
 
 ## Methods
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `params`): `void`
+▸ **emit**<`K`\>(`eventName`, `parameter`): `void`
 
 #### Type parameters
 
@@ -75,7 +75,7 @@ core/lib/types/core/types/EventBridge.d.ts:12
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `params` | [`EventBridgeEvents`](../modules/purista_amqpbridge.internal.md#eventbridgeevents)[`K`] |
+| `parameter` | [`EventBridgeEvents`](../modules/purista_amqpbridge.internal.md#eventbridgeevents)[`K`] |
 
 #### Returns
 
@@ -87,7 +87,7 @@ core/lib/types/core/types/EventBridge.d.ts:12
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:13
+core/lib/core/types/GenericEventEmitter.d.ts:13
 
 ___
 
@@ -107,7 +107,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EventBridge.d.ts:14
+core/lib/core/types/EventBridge.d.ts:14
 
 ___
 
@@ -136,7 +136,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EventBridge.d.ts:15
+core/lib/core/types/EventBridge.d.ts:15
 
 ___
 
@@ -167,7 +167,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:12
+core/lib/core/types/GenericEventEmitter.d.ts:12
 
 ___
 
@@ -198,7 +198,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:11
+core/lib/core/types/GenericEventEmitter.d.ts:11
 
 ___
 
@@ -219,7 +219,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EventBridge.d.ts:16
+core/lib/core/types/EventBridge.d.ts:16
 
 ___
 
@@ -240,7 +240,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EventBridge.d.ts:18
+core/lib/core/types/EventBridge.d.ts:18
 
 ___
 
@@ -254,7 +254,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EventBridge.d.ts:13
+core/lib/core/types/EventBridge.d.ts:13
 
 ___
 
@@ -274,7 +274,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EventBridge.d.ts:17
+core/lib/core/types/EventBridge.d.ts:17
 
 ___
 
@@ -294,4 +294,4 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EventBridge.d.ts:19
+core/lib/core/types/EventBridge.d.ts:19

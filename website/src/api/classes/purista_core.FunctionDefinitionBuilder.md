@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/core](../modules/purista_core.md) / FunctionDefinitionBuilder
+[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / FunctionDefinitionBuilder
 
 # Class: FunctionDefinitionBuilder<ServiceClassType, MessagePayloadType, MessageParamsType, MessageResultType, FunctionPayloadType, FunctionParamsType, FunctionResultType\>
 
@@ -30,14 +30,17 @@ A working schema definition needs at least a function name, a short description 
 
 ### Properties
 
+- [commandDescription](purista_core.FunctionDefinitionBuilder.md#commanddescription)
+- [commandName](purista_core.FunctionDefinitionBuilder.md#commandname)
 - [errorStatusCodes](purista_core.FunctionDefinitionBuilder.md#errorstatuscodes)
+- [eventName](purista_core.FunctionDefinitionBuilder.md#eventname)
 - [fn](purista_core.FunctionDefinitionBuilder.md#fn)
 - [hooks](purista_core.FunctionDefinitionBuilder.md#hooks)
 - [httpMetadata](purista_core.FunctionDefinitionBuilder.md#httpmetadata)
 - [inputSchema](purista_core.FunctionDefinitionBuilder.md#inputschema)
 - [isSecure](purista_core.FunctionDefinitionBuilder.md#issecure)
 - [outputSchema](purista_core.FunctionDefinitionBuilder.md#outputschema)
-- [paramsSchema](purista_core.FunctionDefinitionBuilder.md#paramsschema)
+- [parameterSchema](purista_core.FunctionDefinitionBuilder.md#parameterschema)
 - [queryParameter](purista_core.FunctionDefinitionBuilder.md#queryparameter)
 - [summary](purista_core.FunctionDefinitionBuilder.md#summary)
 - [tags](purista_core.FunctionDefinitionBuilder.md#tags)
@@ -94,9 +97,29 @@ A working schema definition needs at least a function name, a short description 
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:83](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L83)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:84](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L84)
 
 ## Properties
+
+### commandDescription
+
+• `Private` **commandDescription**: `string`
+
+#### Defined in
+
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:84](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L84)
+
+___
+
+### commandName
+
+• `Private` **commandName**: `string`
+
+#### Defined in
+
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:84](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L84)
+
+___
 
 ### errorStatusCodes
 
@@ -104,7 +127,17 @@ A working schema definition needs at least a function name, a short description 
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:44](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L44)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:45](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L45)
+
+___
+
+### eventName
+
+• `Private` `Optional` **eventName**: `string`
+
+#### Defined in
+
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:84](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L84)
 
 ___
 
@@ -114,7 +147,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:73](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L73)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:74](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L74)
 
 ___
 
@@ -138,7 +171,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:48](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L48)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:49](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L49)
 
 ___
 
@@ -148,7 +181,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:34](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L34)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:35](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L35)
 
 ___
 
@@ -158,7 +191,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:35](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L35)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:36](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L36)
 
 ___
 
@@ -168,7 +201,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:46](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L46)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:47](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L47)
 
 ___
 
@@ -178,17 +211,17 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:36](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L36)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:37](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L37)
 
 ___
 
-### paramsSchema
+### parameterSchema
 
-• `Private` `Optional` **paramsSchema**: `ZodType`<`any`, `ZodTypeDef`, `any`\>
+• `Private` `Optional` **parameterSchema**: `ZodType`<`any`, `ZodTypeDef`, `any`\>
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:37](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L37)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:38](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L38)
 
 ___
 
@@ -198,7 +231,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:38](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L38)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:39](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L39)
 
 ___
 
@@ -208,7 +241,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:42](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L42)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:43](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L43)
 
 ___
 
@@ -218,13 +251,13 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:40](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L40)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:41](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L41)
 
 ## Methods
 
 ### addErrorStatusCodes
 
-▸ **addErrorStatusCodes**(...`codes`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **addErrorStatusCodes**(`...codes`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 If a function can return other status codes you should add them to openApi definition.
 Per default, 200, 204, 400, 401 and 500 can be autogenerated in most cases.
@@ -250,7 +283,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:210](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L210)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:211](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L211)
 
 ___
 
@@ -266,7 +299,7 @@ Types for payload of message and function payload input are generated from given
 | Name | Type |
 | :------ | :------ |
 | `I` | `unknown` |
-| `D` | `unknown` |
+| `D` | extends `ZodTypeDef` = `ZodTypeDef` |
 | `O` | `unknown` |
 
 #### Parameters
@@ -283,7 +316,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:102](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L102)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:103](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L103)
 
 ___
 
@@ -296,11 +329,11 @@ Types for payload of message and function payload output are generated from give
 
 #### Type parameters
 
-| Name |
-| :------ |
-| `I` |
-| `D` |
-| `O` |
+| Name | Type |
+| :------ | :------ |
+| `I` | `I` |
+| `D` | extends `ZodTypeDef` |
+| `O` | `O` |
 
 #### Parameters
 
@@ -316,30 +349,30 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:121](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L121)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:122](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L122)
 
 ___
 
 ### addParameterSchema
 
-▸ **addParameterSchema**<`I`, `D`, `O`\>(`paramsSchema`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `I`, `MessageResultType`, `FunctionPayloadType`, `O`, `FunctionResultType`\>
+▸ **addParameterSchema**<`I`, `D`, `O`\>(`parameterSchema`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `I`, `MessageResultType`, `FunctionPayloadType`, `O`, `FunctionResultType`\>
 
 Add a schema for output parameter validation.
 Types for parameter of message and function parameter output are generated from given schema.
 
 #### Type parameters
 
-| Name |
-| :------ |
-| `I` |
-| `D` |
-| `O` |
+| Name | Type |
+| :------ | :------ |
+| `I` | `I` |
+| `D` | extends `ZodTypeDef` |
+| `O` | `O` |
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `paramsSchema` | `ZodType`<`O`, `D`, `I`\> | The schema validation for output parameter |
+| `parameterSchema` | `ZodType`<`O`, `D`, `I`\> | The schema validation for output parameter |
 
 #### Returns
 
@@ -349,13 +382,13 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:140](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L140)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:141](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L141)
 
 ___
 
 ### addQueryParameters
 
-▸ **addQueryParameters**(...`queryParams`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **addQueryParameters**(`...queryParams`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Define query parameters if you expose the function as http endpoint.
 Query parameters are add to openApi definition.
@@ -390,13 +423,13 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:175](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L175)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:176](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L176)
 
 ___
 
 ### addTags
 
-▸ **addTags**(...`tags`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **addTags**(`...tags`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Add tags for openApi definition for given function.
 It is recommended to use some enum for tags to avoid typo issues.
@@ -421,21 +454,21 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:192](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L192)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:193](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L193)
 
 ___
 
 ### disableHttpSecurity
 
-▸ **disableHttpSecurity**(`enabled?`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **disableHttpSecurity**(`disabled?`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 enable or disable security for this endpoint
 
 #### Parameters
 
-| Name | Type | Default value | Description |
-| :------ | :------ | :------ | :------ |
-| `enabled` | `boolean` | `false` | Defaults to false if not set |
+| Name | Type | Default value |
+| :------ | :------ | :------ |
+| `disabled` | `boolean` | `true` |
 
 #### Returns
 
@@ -445,7 +478,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:365](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L365)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:373](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L373)
 
 ___
 
@@ -459,7 +492,7 @@ enable or disable security for this endpoint
 
 | Name | Type | Default value | Description |
 | :------ | :------ | :------ | :------ |
-| `enabled` | `boolean` | `true` | Defaults to true if not set |
+| `enabled` | `boolean` | `true` | Defaults to true if not set means "enable security" |
 
 #### Returns
 
@@ -469,13 +502,13 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:355](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L355)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:363](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L363)
 
 ___
 
 ### exposeAsHttpEndpoint
 
-▸ **exposeAsHttpEndpoint**(`method`, `path`, `contentType?`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **exposeAsHttpEndpoint**(`method`, `path`, `contentType?`, `contentTypeResponse?`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Mark the function to be exposed as http endpoint.
 
@@ -485,7 +518,8 @@ Mark the function to be exposed as http endpoint.
 | :------ | :------ | :------ | :------ |
 | `method` | [`SupportedHttpMethod`](../modules/purista_core.md#supportedhttpmethod) | `undefined` | Http method POST, PUT, PATCH, GET, DELETE |
 | `path` | `string` | `undefined` | The url path |
-| `contentType` | `string` | `'application/json'` | response content type defaults to application/json |
+| `contentType` | `string` | `'application/json'` | input content type defaults to application/json |
+| `contentTypeResponse` | `string` | `'application/json'` | response content type defaults to application/json |
 
 #### Returns
 
@@ -495,7 +529,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:337](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L337)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:339](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L339)
 
 ___
 
@@ -515,7 +549,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:386](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L386)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:394](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L394)
 
 ___
 
@@ -533,7 +567,7 @@ CommandDefinition
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:439](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L439)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:447](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L447)
 
 ___
 
@@ -551,7 +585,7 @@ the function
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:541](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L541)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:549](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L549)
 
 ___
 
@@ -569,7 +603,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:318](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L318)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:319](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L319)
 
 ___
 
@@ -587,13 +621,13 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:326](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L326)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:327](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L327)
 
 ___
 
 ### setAfterGuardHook
 
-▸ **setAfterGuardHook**(...`afterGuard`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setAfterGuardHook**(`...afterGuard`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Set one or more after guard hook(s).
 If there are multiple after guard hooks, they are executed in parallel
@@ -612,13 +646,13 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:307](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L307)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:308](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L308)
 
 ___
 
 ### setBeforeGuardHook
 
-▸ **setBeforeGuardHook**(...`beforeGuards`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setBeforeGuardHook**(`...beforeGuards`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Set one or more before guard hook(s).
 If there are multiple before guard hooks, they are executed in parallel
@@ -637,7 +671,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:288](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L288)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:289](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L289)
 
 ___
 
@@ -673,7 +707,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:499](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L499)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:507](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L507)
 
 ___
 
@@ -693,7 +727,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:91](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L91)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:92](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L92)
 
 ___
 
@@ -723,7 +757,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:381](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L381)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:389](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L389)
 
 ___
 
@@ -743,8 +777,8 @@ This will change the type of input message payload and input message parameter.
 | `ParamsIn` | `MessageParamsType` |
 | `PayloadOut` | `MessagePayloadType` |
 | `ParamsOut` | `MessageParamsType` |
-| `PayloadD` | `unknown` |
-| `ParamsD` | `unknown` |
+| `PayloadD` | extends `ZodTypeDef` = `ZodTypeDef` |
+| `ParamsD` | extends `ZodTypeDef` = `ZodTypeDef` |
 
 #### Parameters
 
@@ -762,7 +796,7 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:222](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L222)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:223](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L223)
 
 ___
 
@@ -776,11 +810,11 @@ This will change the type of output message payload.
 
 #### Type parameters
 
-| Name |
-| :------ |
-| `PayloadOut` |
-| `PayloadD` |
-| `PayloadIn` |
+| Name | Type |
+| :------ | :------ |
+| `PayloadOut` | `PayloadOut` |
+| `PayloadD` | extends `ZodTypeDef` |
+| `PayloadIn` | `PayloadIn` |
 
 #### Parameters
 
@@ -797,4 +831,4 @@ FunctionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/FunctionDefinitionBuilder.impl.ts:257](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L257)
+[core/src/helper/FunctionDefinitionBuilder.impl.ts:258](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/FunctionDefinitionBuilder.impl.ts#L258)
