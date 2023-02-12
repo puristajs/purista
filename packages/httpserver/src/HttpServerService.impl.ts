@@ -96,7 +96,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
           addHeaders(span, reply)
           const err = new HandledError(StatusCode.NotFound)
 
-          this.serviceLogger.error({ err, ...span.spanContext() }, 'Not found handler')
+          this.logger.error({ err, ...span.spanContext() }, 'Not found handler')
 
           if (reply.sent) {
             reply.status(StatusCode.NotFound)
@@ -124,7 +124,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
             span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, err.errorCode)
             return reply.send(err.getErrorResponse())
           }
-          this.serviceLogger.error({ err, ...span.spanContext() }, 'General error handler')
+          this.logger.error({ err, ...span.spanContext() }, 'General error handler')
 
           span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.InternalServerError)
           if (!reply.sent) {
@@ -153,7 +153,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
           message: err.message,
         })
 
-        this.serviceLogger.error({ err, ...span.spanContext() }, 'onError hook: General error handler')
+        this.logger.error({ err, ...span.spanContext() }, 'onError hook: General error handler')
       })
 
       if (!reply.sent) {
@@ -184,7 +184,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
 
         const route = this.routes.find(request.method as Methods, path)
         if (!route.handlers.length) {
-          this.serviceLogger.debug({ method: request.method, url: request.url }, 'Route not found')
+          this.logger.debug({ method: request.method, url: request.url }, 'Route not found')
           const err = new HandledError(StatusCode.NotFound)
           span.recordException(err)
           span.setStatus({
@@ -216,7 +216,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
       OPEN_API_ROUTE_FUNCTIONS.forEach((route) => {
         const def = route.bind(this)()
         this.server?.route(def)
-        this.serviceLogger.debug(`add route ${def.method} ${def.url}`)
+        this.logger.debug(`add route ${def.method} ${def.url}`)
       })
     }
 
@@ -225,7 +225,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
       port: this.config.port,
       host: this.config.host,
     })
-    this.serviceLogger.info(
+    this.logger.info(
       { domain: this.config.domain, port: this.config.port },
       `http server listen on ${this.config.domain} ${this.config.port}`,
     )

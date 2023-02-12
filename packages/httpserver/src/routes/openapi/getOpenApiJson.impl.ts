@@ -27,7 +27,7 @@ export const getOpenApiJson = function (this: HttpServerService) {
   const externalDocs = this.config.openApi?.externalDocs
   const tags = this.config.openApi?.tags
 
-  const logger = this.serviceLogger.getChildLogger({
+  const logger = this.logger.getChildLogger({
     serviceName: this.info.serviceName,
     serviceVersion: this.info.serviceVersion,
     serviceTarget: 'openApiJson',
