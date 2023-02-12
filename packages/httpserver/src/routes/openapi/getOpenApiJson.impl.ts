@@ -68,10 +68,11 @@ export const getOpenApiJson = function (this: HttpServerService) {
             example: message,
           },
           data: schema,
-          traceId: {
+          traceparent: {
             type: 'string',
-            title: 'the unique traceId for this request',
-            example: '8452e568-4306-4e7b-8ce1-af233873514a',
+            title: 'w3c compliant unique traceparent for this request',
+            example: 'd5dbb17eec16e3c9fce9cf8adc766999',
+            externalDocs: 'https://www.w3.org/TR/trace-context/#traceparent-header-field-values',
           },
         },
         required: ['status', 'message'],
@@ -275,8 +276,10 @@ export const getOpenApiJson = function (this: HttpServerService) {
       const requestIdParameter: ParameterObject = {
         in: 'header',
         required: false,
-        name: this.config.fastify.requestIdHeader || 'x-trace-id',
+        name: 'traceparent',
         schema: { type: 'string' },
+        example: '00-d5dbb17eec16e3c9fce9cf8adc766999-b78f55dcdd1fe3ba-01',
+        description: 'see: https://www.w3.org/TR/trace-context/#traceparent-header-field-values',
       }
 
       paths[path] = {
