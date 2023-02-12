@@ -15,5 +15,5 @@ export type AfterGuardHook<
   context: CommandFunctionContext<PayloadType, ParamsType>,
   result: ResultType,
   input: PayloadType,
-  params: ParamsType,
+  parameter: ParamsType,
 ) => Promise<void>

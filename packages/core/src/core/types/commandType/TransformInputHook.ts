@@ -11,8 +11,8 @@ export type TransformInputHook<
   this: ServiceClassType,
   context: { logger: Logger; message: Command<PayloadInput, ParamsInput> },
   payload: PayloadInput,
-  params: ParamsInput,
+  parameter: ParamsInput,
 ) => Promise<{
   payload: PayloadOutput
-  params: ParamsOutput
+  parameter: ParamsOutput
 }>
