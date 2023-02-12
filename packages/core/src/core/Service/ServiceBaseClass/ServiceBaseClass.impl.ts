@@ -20,7 +20,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
 
   eventBridge: EventBridge
 
-  serviceLogger: Logger
+  logger: Logger
 
   spanProcessor: SpanProcessor | undefined
 
@@ -41,12 +41,12 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
     this.info.serviceName = info.serviceName
     this.info.serviceVersion = info.serviceVersion
 
-    this.serviceLogger = baseLogger.getChildLogger({
+    this.logger = baseLogger.getChildLogger({
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
       puristaVersion,
     })
-    this.serviceLogger.debug({ ...this.info }, `creating ${this.info.serviceName} ${this.info.serviceVersion}`)
+    this.logger.debug({ ...this.info }, `creating ${this.info.serviceName} ${this.info.serviceVersion}`)
 
     const resource = Resource.default().merge(
       new Resource({
