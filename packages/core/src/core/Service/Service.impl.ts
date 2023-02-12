@@ -24,7 +24,6 @@ import {
   EBMessageType,
   EventBridge,
   InfoMessageType,
-  IServiceClass,
   Logger,
   ServiceClass,
   ServiceInfoType,
@@ -36,6 +35,7 @@ import {
   TraceId,
 } from '../types'
 import { commandTransformInput } from './commandTransformInput.impl'
+import { ServiceBaseClass } from './ServiceBaseClass'
 
 /**
  * Base class for all services.
@@ -54,7 +54,7 @@ import { commandTransformInput } from './commandTransformInput.impl'
  * }
  * ```
  */
-export class Service<ConfigType = unknown | undefined> extends ServiceClass<ConfigType> implements IServiceClass {
+export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass implements ServiceClass<ConfigType> {
   protected subscriptions = new Map<string, SubscriptionDefinition>()
   protected commands = new Map<string, CommandDefinition>()
 
@@ -80,12 +80,12 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
       try {
         await this.initializeEventbridgeConnect(this.commandFunctions, this.subscriptionList)
         await this.sendServiceInfo(EBMessageType.InfoServiceReady)
-        this.serviceLogger.info(
+        this.logger.info(
           { ...span.spanContext(), puristaVersion },
           `service ${this.serviceInfo.serviceName} ${this.serviceInfo.serviceVersion} started`,
         )
       } catch (err) {
-        this.serviceLogger.error({ err, ...span.spanContext(), puristaVersion }, `failed to start service`)
+        this.logger.error({ err, ...span.spanContext(), puristaVersion }, `failed to start service`)
         this.emit('service-not-available', err)
         throw err
       }
@@ -105,7 +105,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
 
       // register subscriptions for this service
       for (const subscription of subscriptions) {
-        this.serviceLogger.debug({ name: subscription.subscriptionName, ...span.spanContext() }, 'start subscription')
+        this.logger.debug({ name: subscription.subscriptionName, ...span.spanContext() }, 'start subscription')
         await this.registerSubscription(subscription)
       }
 
@@ -198,12 +198,12 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
   protected async executeCommand(message: Readonly<Command>) {
     const command = this.commands.get(message.receiver.serviceTarget)
 
-    const context = await deserializeOtp(this.serviceLogger, message.otp)
+    const context = await deserializeOtp(this.logger, message.otp)
 
     return this.startActiveSpan(command?.commandName || 'purista.executeCommand', {}, context, async (span) => {
       const traceId = message.traceId || span.spanContext().traceId
 
-      const logger = this.serviceLogger.getChildLogger({
+      const logger = this.logger.getChildLogger({
         serviceTarget: command?.commandName,
         ...span.spanContext(),
         principalId: message.principalId,
@@ -277,7 +277,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
           })
         }
 
-        return await this.startActiveSpan('sendSuccessResponse', {}, undefined, async (subSpan) => {
+        return await this.startActiveSpan(command.commandName + '.success', {}, undefined, async (subSpan) => {
           if (command.eventName) {
             subSpan.addEvent(command.eventName)
           }
@@ -310,16 +310,16 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
           message: 'executeCommand unhandled error',
         })
 
-        return await this.startActiveSpan('sendErrorResponse', {}, undefined, async () =>
+        return await this.startActiveSpan(command.commandName + '.error', {}, undefined, async () =>
           createErrorResponse(message, StatusCode.InternalServerError, error),
         )
       }
     })
   }
 
-  protected async registerCommand(commandDefinition: CommandDefinition): Promise<void> {
+  async registerCommand(commandDefinition: CommandDefinition): Promise<void> {
     return this.startActiveSpan('purista.registerCommand', {}, undefined, async (span) => {
-      this.serviceLogger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register command')
+      this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register command')
 
       span.setAttributes({
         serviceName: this.serviceInfo.serviceName,
@@ -350,7 +350,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
   protected async executeSubscription(message: EBMessage, subscriptionName: string): Promise<void> {
     const subscription = this.subscriptions.get(subscriptionName)
 
-    const otpContext = await deserializeOtp(this.serviceLogger, message.otp)
+    const otpContext = await deserializeOtp(this.logger, message.otp)
     const spanContext = otpContext ? trace.getSpanContext(otpContext) : undefined
 
     this.startActiveSpan(
@@ -360,7 +360,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
       async (span) => {
         const traceId = message.traceId || span.spanContext().traceId || getNewTraceId()
 
-        const logger = this.serviceLogger.getChildLogger({
+        const logger = this.logger.getChildLogger({
           serviceTarget: subscriptionName,
           ...span.spanContext(),
           principalId: message.principalId,
@@ -418,7 +418,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
 
   protected async registerSubscription(subscriptionDefinition: SubscriptionDefinition): Promise<void> {
     return this.startActiveSpan('purista.registerSubscription', {}, undefined, async (span) => {
-      this.serviceLogger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register subscription')
+      this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register subscription')
 
       span.setAttributes({
         serviceName: this.info.serviceName,
@@ -453,7 +453,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
     this.startActiveSpan('purista.destroy', {}, undefined, async (span) => {
       this.emit('service-drain', undefined)
       await this.sendServiceInfo(EBMessageType.InfoServiceDrain)
-      this.serviceLogger.info({ ...this.info, ...span.spanContext() }, 'destroy')
+      this.logger.info({ ...this.info, ...span.spanContext() }, 'destroy')
 
       const functionUnregisterProms: Promise<any>[] = []
       this.commandFunctions.forEach((functionDefinition) => {
