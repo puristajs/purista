@@ -11,6 +11,7 @@ import {
   EventBridge,
   HandledError,
   HttpExposedServiceMeta,
+  initLogger,
   Logger,
   PrincipalId,
   Service,
@@ -53,12 +54,15 @@ export class HttpServerService extends Service<HttpServerConfig> {
    * @param {HttpServerConfig} conf - HttpServerConfig
    */
   constructor(
-    baseLogger: Logger,
     eventBridge: EventBridge,
     config: HttpServerConfig = getDefaultConfig(),
-    spanProcessor?: SpanProcessor,
+    options?: {
+      logger?: Logger
+      spanProcessor?: SpanProcessor
+    },
   ) {
-    super(baseLogger, ServiceInfo, eventBridge, COMMANDS, SUBSCRIPTIONS, config, spanProcessor)
+    const logger = options?.logger || initLogger()
+    super(logger, ServiceInfo, eventBridge, COMMANDS, SUBSCRIPTIONS, config, options?.spanProcessor)
 
     this.config = merge(getDefaultConfig(), config)
 
