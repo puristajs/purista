@@ -1,3 +1,4 @@
-import { nanoid } from 'nanoid'
+import { RandomIdGenerator } from '@opentelemetry/sdk-trace-node'
 
-export const getUniqueId = () => nanoid()
+const randomIdGenerator = new RandomIdGenerator()
+export const getUniqueId = () => randomIdGenerator.generateTraceId()
