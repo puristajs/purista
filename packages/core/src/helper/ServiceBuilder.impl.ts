@@ -4,6 +4,7 @@ import { z } from 'zod'
 import {
   CommandDefinitionList,
   EventBridge,
+  initLogger,
   Logger,
   Service,
   ServiceClass,
@@ -88,29 +89,34 @@ export class ServiceBuilder<
     return this as unknown as ServiceBuilder<ConfigType, ConfigInputType, T>
   }
 
-  getInstance(logger: Logger, eventBridge: EventBridge, config?: ConfigInputType, spanProcessor?: SpanProcessor) {
+  getInstance(
+    eventBridge: EventBridge,
+    options: { serviceConfig?: ConfigInputType; logger?: Logger; spanProcessor?: SpanProcessor } = {},
+  ) {
     let conf = {
       ...this.defaultConfig,
-      ...config,
+      ...options?.serviceConfig,
     }
+
+    const logInstance = options?.logger || initLogger()
 
     if (this.configSchema) {
       try {
-        conf = this.configSchema.parse(config)
+        conf = this.configSchema.parse(options?.serviceConfig)
       } catch (err) {
-        logger.error({ err, ...this.info }, 'Invalid configuration for')
+        logInstance.error({ err, ...this.info }, 'Invalid configuration for')
         throw new Error('Fatal - unable to create service instance')
       }
     }
 
     this.instance = new this.SClass(
-      logger,
+      logInstance,
       this.info,
       eventBridge,
       this.commandFunctions,
       this.subscriptionList,
       conf as ConfigType,
-      spanProcessor,
+      options?.spanProcessor,
     )
 
     return this.instance as ServiceClassType
