@@ -1,0 +1,97 @@
+version: '3'
+
+services:
+  clickhouse:
+    image: clickhouse/clickhouse-server:22.7
+    restart: on-failure
+    environment:
+      CLICKHOUSE_DB: uptrace
+    healthcheck:
+      test: ['CMD', 'wget', '--spider', '-q', 'localhost:8123/ping']
+      interval: 1s
+      timeout: 1s
+      retries: 30
+    volumes:
+      - ch_data_2:/var/lib/clickhouse
+    ports:
+      - '8123:8123'
+      - '9000:9000'
+
+  uptrace:
+    image: 'uptrace/uptrace:1.3.1'
+    #image: 'uptrace/uptrace-dev:latest'
+    restart: on-failure
+    volumes:
+      - uptrace_data:/var/lib/uptrace
+      - ./uptrace.yml:/etc/uptrace/uptrace.yml
+    #environment:
+    #  - DEBUG=2
+    ports:
+      - '14317:14317'
+      - '14318:14318'
+    depends_on:
+      clickhouse:
+        condition: service_healthy
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.70.0
+    restart: on-failure
+    user: '0:0' # required for logs
+    volumes:
+      - ./otel-collector.yaml:/etc/otelcol-contrib/config.yaml
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/log:/var/log:ro
+    ports:
+      - '4317:4317'
+      - '4318:4318'
+
+  alertmanager:
+    image: prom/alertmanager:v0.24.0
+    restart: on-failure
+    volumes:
+      - ../../config/alertmanager.yml:/etc/alertmanager/config.yml
+      - alertmanager_data:/alertmanager
+    ports:
+      - 9093:9093
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+
+  mailhog:
+    image: mailhog/mailhog:v1.0.1
+    restart: on-failure
+    ports:
+      - '8025:8025'
+
+  vector:
+    image: timberio/vector:0.24.X-alpine
+    volumes:
+      - ./vector.toml:/etc/vector/vector.toml:ro
+
+  # jaeger-agent:
+  #   image: jaegertracing/jaeger-agent:latest
+  #   command: ['--reporter.grpc.host-port=localhost:14250']
+  #   network_mode: host
+
+  # jaeger-hot-rod:
+  #   image: jaegertracing/example-hotrod:latest
+  #   command: ['all']
+  #   network_mode: host
+  #   environment:
+  #     - JAEGER_AGENT_HOST=localhost
+  #     - JAEGER_AGENT_PORT=6831
+  #   depends_on:
+  #     - jaeger-agent
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+     - 15672:15672
+     - 5672:5672
+
+volumes:
+  uptrace_data:
+    driver: local
+  ch_data_2:
+    driver: local
+  alertmanager_data:
+    driver: local
