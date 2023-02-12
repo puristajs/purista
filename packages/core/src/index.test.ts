@@ -24,7 +24,6 @@ it('exports core functions', () => {
   expect(index.HandledError).toBeDefined()
   expect(index.EBMessageType).toBeDefined()
   expect(index.Service).toBeDefined()
-  expect(index.ServiceClass).toBeDefined()
   expect(index.StatusCode).toBeDefined()
   expect(index.UnhandledError).toBeDefined()
 
