@@ -1,6 +1,5 @@
-import { HandledError } from '../HandledError.impl'
+import { HandledError } from '../Error/HandledError.impl'
 import { addPrefixToObject } from './addPrefixToObject'
-import { MetricEntry } from './MetricEntry'
 import { TraceId } from './TraceId'
 
 /**
@@ -42,13 +41,8 @@ export type ServiceEventsInternal = {
   'unhandled-function-error': { functionName: string; error: unknown; traceId: TraceId }
 }
 
-export type ServiceMetricEvents = {
-  'metric-function-execution': MetricEntry[]
-  'metric-subscription-execution': MetricEntry[]
-}
-
 type CustomEvents = {
   [key: string]: unknown
 }
 
-export type ServiceEvents = ServiceEventsInternal & ServiceMetricEvents & addPrefixToObject<CustomEvents, 'custom-'>
+export type ServiceEvents = ServiceEventsInternal & addPrefixToObject<CustomEvents, 'custom-'>
