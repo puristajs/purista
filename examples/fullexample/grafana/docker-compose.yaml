@@ -1,0 +1,76 @@
+version: "3"
+services:
+
+  # Generate fake traces...
+  k6-tracing:
+    image: ghcr.io/grafana/xk6-client-tracing:v0.0.2
+    environment:
+      - ENDPOINT=otel-collector:4317
+    restart: always
+    depends_on:
+      - otel-collector
+
+  # And put them in an OTEL collector pipeline...
+  otel-collector:
+    image: otel/opentelemetry-collector:0.61.0
+    command: [ "--config=/etc/otel-collector.yaml" ]
+    volumes:
+      - ./dockerConfig/otel-collector.yaml:/etc/otel-collector.yaml
+
+  # To eventually offload to Tempo...
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./dockerConfig/tempo.yaml:/etc/tempo.yaml
+      - ./temp/tempo-data:/tmp/tempo
+    ports:
+      - "14268:14268"  # jaeger ingest
+      - "3200"   # tempo
+      - "4317"  # otlp grpc
+      - "4318"  # otlp http
+      - "9411"   # zipkin
+      - "16686"
+
+  prometheus:
+    image: prom/prometheus:latest
+    command:
+      - --config.file=/etc/prometheus.yaml
+      - --web.enable-remote-write-receiver
+      - --enable-feature=exemplar-storage
+    volumes:
+      - ./dockerConfig/prometheus.yaml:/etc/prometheus.yaml
+    ports:
+      - "9090:9090"
+
+  grafana:
+    image: grafana/grafana:9.3.2
+    volumes:
+      - ./dockerConfig/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor
+    ports:
+      - "3000:3000"
+  loki:
+    image: grafana/loki:2.7.1
+    command: "-config.file=/etc/loki/loki.yaml"
+    ports:
+      - 3100:3100
+      - 7946
+      - 9095
+    volumes:
+      - ./dockerConfig:/etc/loki
+    healthcheck:
+      test: [ "CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+     - 15672:15672
+     - 5672:5672
+
