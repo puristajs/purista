@@ -5,7 +5,9 @@ import { Resource } from '@opentelemetry/resources'
 import { NodeTracerProvider, SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
+import { puristaVersion } from '../../version'
 import { getDefaultEventBridgeConfig } from '../config'
+import { initLogger } from '../DefaultLogger'
 import { HandledError } from '../Error/HandledError.impl'
 import { UnhandledError } from '../Error/UnhandledError.impl'
 import {
@@ -45,9 +47,6 @@ import {
 import { getNewSubscriptionStorageEntry } from './getNewSubscriptionStorageEntry.impl'
 import { isMessageMatchingSubscription } from './isMessageMatchingSubscription.impl'
 import { PendigInvocation, SubscriptionStorageEntry } from './types'
-
-const version = '1'
-
 /**
  * Simple implementation of some simple in-memory event bridge.
  * Does not support threads and does not need any external databases.
@@ -75,9 +74,8 @@ export class DefaultEventBridge extends EventBridge {
   public traceProvider: NodeTracerProvider
 
   constructor(
-    baseLogger: Logger,
     conf: EventBridgeConfig = getDefaultEventBridgeConfig(),
-    spanProcessor?: SpanProcessor,
+    options?: { logger?: Logger; spanProcessor?: SpanProcessor },
   ) {
     super()
     this.config = {
@@ -87,7 +85,7 @@ export class DefaultEventBridge extends EventBridge {
     const resource = Resource.default().merge(
       new Resource({
         [SemanticResourceAttributes.SERVICE_NAME]: 'DefaultEventBridge',
-        [SemanticResourceAttributes.SERVICE_VERSION]: version,
+        [SemanticResourceAttributes.SERVICE_VERSION]: puristaVersion,
       }),
     )
 
@@ -95,13 +93,14 @@ export class DefaultEventBridge extends EventBridge {
       resource,
     })
 
-    if (spanProcessor) {
-      this.traceProvider.addSpanProcessor(spanProcessor)
+    if (options?.spanProcessor) {
+      this.traceProvider.addSpanProcessor(options?.spanProcessor)
     }
 
     this.traceProvider.register()
 
-    this.logger = baseLogger.getChildLogger({ name: 'eventBridge' })
+    const logger = options?.logger || initLogger()
+    this.logger = logger.getChildLogger({ name: 'eventBridge' })
   }
 
   /**
@@ -110,7 +109,7 @@ export class DefaultEventBridge extends EventBridge {
    * @returns Tracer
    */
   getTracer() {
-    return this.traceProvider.getTracer('DefaultEventBridge', version)
+    return this.traceProvider.getTracer('DefaultEventBridge', puristaVersion)
   }
 
   async startActiveSpan<F>(
@@ -122,6 +121,7 @@ export class DefaultEventBridge extends EventBridge {
     const tracer = this.getTracer()
 
     const callback = async (span: Span) => {
+      span.setAttribute('purista.version', puristaVersion)
       try {
         return await fn(span)
       } catch (error) {
@@ -150,6 +150,7 @@ export class DefaultEventBridge extends EventBridge {
   async wrapInSpan<F>(name: string, opts: SpanOptions, fn: (span: Span) => Promise<F>, context?: Context): Promise<F> {
     const tracer = this.getTracer()
     const span = tracer.startSpan(name, opts, context)
+    span.setAttribute('purista.version', puristaVersion)
     try {
       return await fn(span)
     } catch (error) {
@@ -259,6 +260,8 @@ export class DefaultEventBridge extends EventBridge {
     this.readStream.pipe(this.writeStream)
 
     this.emit('eventbridge-connected', undefined)
+
+    this.logger.info({ puristaVersion }, 'DefaultEventBridge started')
   }
 
   /**
