@@ -1,5 +1,5 @@
-# @purista/httpserver
+# @purista/amqpbridge
 
-Package with http server based on [fastify](https://www.fastify.io).
+Package for using a AMQP broker like rabbitMQ as event bridge
 
 **Visit [purista.dev](https://purista.dev)**
