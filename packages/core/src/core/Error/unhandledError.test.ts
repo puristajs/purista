@@ -1,5 +1,5 @@
+import { CommandErrorResponse, EBMessageType, StatusCode } from '../types'
 import { HandledError } from './HandledError.impl'
-import { CommandErrorResponse, EBMessageType, StatusCode } from './types'
 import { UnhandledError } from './UnhandledError.impl'
 
 describe('UnhandledError', () => {

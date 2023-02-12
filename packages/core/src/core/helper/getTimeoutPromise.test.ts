@@ -1,7 +1,7 @@
 import assert from 'assert'
 
+import { UnhandledError } from '../Error/UnhandledError.impl'
 import { StatusCode } from '../types'
-import { UnhandledError } from '../UnhandledError.impl'
 import { getTimeoutPromise } from './getTimeoutPromise.impl'
 
 it('returns a Promise which throws time out error', async () => {

@@ -1,6 +1,6 @@
 import { Logger as PinoLogger } from 'pino'
 
-import { ILogger, LogFnParamType, Logger, LoggerOptions } from './types'
+import { ILogger, LogFnParamType, Logger, LoggerOptions } from '../types'
 
 export class DefaultLogger extends Logger implements ILogger {
   constructor(private log: PinoLogger) {
@@ -58,12 +58,12 @@ export class DefaultLogger extends Logger implements ILogger {
   getChildLogger(options: LoggerOptions): Logger {
     const prefix = [options.serviceName, options.serviceVersion, options.serviceTarget].filter((entry) => !!entry)
 
-    const params: LoggerOptions = {
+    const parameter: LoggerOptions = {
       ...options,
       name: options.name || prefix.join('-'),
     }
 
-    const child = this.log.child(params)
+    const child = this.log.child(parameter)
     return new DefaultLogger(child)
   }
 }

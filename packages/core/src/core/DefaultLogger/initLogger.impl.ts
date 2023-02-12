@@ -1,7 +1,7 @@
 import pino, { LoggerOptions } from 'pino'
 
-import { DefaultLogger } from './DefaultLogger'
-import type { Logger, LogLevelName } from './types'
+import type { Logger, LogLevelName } from '../types'
+import { DefaultLogger } from './DefaultLogger.impl'
 
 /**
  * Create a new logger with the given minimum log level
