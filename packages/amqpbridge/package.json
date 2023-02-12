@@ -54,6 +54,10 @@
   },
   "dependencies": {
     "@purista/core": "*",
+    "@opentelemetry/api": "^1.4.0",
+    "@opentelemetry/resources": "^1.9.1",
+    "@opentelemetry/sdk-trace-node": "^1.9.1",
+    "@opentelemetry/semantic-conventions": "^1.9.1",
     "amqplib": "^0.10.3"
   },
   "peerDependenciesMeta": {}
