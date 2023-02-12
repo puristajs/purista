@@ -36,6 +36,10 @@ PURISTA is build with error handling in mind and helps developers to build under
 
 Error handling is done in different layers of your application, and errors are also unified for better error handling.
 
+PURISTA has deeply integrated support for [OpenTelemetry](https://opentelemetry.io/).  
+This provides an industrial standard way to keep track of errors and issues.  
+See [Logging and metrics](8_Logging_and_metrics.md) section.
+
 ## Error types
 
 There are two error types provided by PURISTA - `HandledError` and `UnhandledError`.  
