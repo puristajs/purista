@@ -1,30 +1,28 @@
 import { Command, CommandErrorResponse, CommandSuccessResponse } from './commandType'
 import type { EBMessage } from './EBMessage'
 import type { EBMessageAddress } from './EBMessageAddress'
-import { EventBridgeEvents } from './EventBridgeEvents'
-import { GenericEventEmitter } from './GenericEventEmitter'
 import type { Subscription } from './subscription'
 
 /**
  * Event bridge interface
  * The event bridge must implement this interface.
  */
-export abstract class EventBridge extends GenericEventEmitter<EventBridgeEvents> {
-  abstract readonly defaultCommandTimeout: number
+export interface EventBridge {
+  readonly defaultCommandTimeout: number
 
-  abstract start(): Promise<void>
-  abstract emitMessage(
+  start(): Promise<void>
+  emitMessage(
     message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>,
   ): Promise<Readonly<EBMessage>>
 
-  abstract invoke<T>(
+  invoke<T>(
     input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
     contentType?: string,
     contentEncoding?: string,
     ttl?: number,
   ): Promise<T>
 
-  abstract registerServiceFunction(
+  registerServiceFunction(
     address: EBMessageAddress,
     cb: (
       message: Command,
@@ -33,8 +31,8 @@ export abstract class EventBridge extends GenericEventEmitter<EventBridgeEvents>
     >,
   ): Promise<string>
 
-  abstract unregisterServiceFunction(address: EBMessageAddress): Promise<void>
+  unregisterServiceFunction(address: EBMessageAddress): Promise<void>
 
-  abstract registerSubscription(subscription: Subscription, cb: (message: EBMessage) => Promise<void>): Promise<string>
-  abstract unregisterSubscription(address: EBMessageAddress): Promise<void>
+  registerSubscription(subscription: Subscription, cb: (message: EBMessage) => Promise<void>): Promise<string>
+  unregisterSubscription(address: EBMessageAddress): Promise<void>
 }
