@@ -1,80 +1,56 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / ServiceClass
+[PURISTA API - v1.4.9](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / ServiceBaseClass
 
-# Class: ServiceClass<ConfigType\>
+# Class: ServiceBaseClass
 
-[@purista/httpserver](../modules/purista_httpserver.md).[internal](../modules/purista_httpserver.internal.md).ServiceClass
+[@purista/httpserver](../modules/purista_httpserver.md).[internal](../modules/purista_httpserver.internal.md).ServiceBaseClass
 
-Abstract base service class which should be extended by the base service class.
-The base class should provide basic functions to use the event bridge.
+Class which contains basic functions that are not directly related to
 
-Every service should extends the base class and only implement logic used in this service.
-
-```typescript
-class MyBaseService extends Service {
-
-  constructor() {
-    super()
-  }
-  ...
-}
-```
-
-## Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `ConfigType` | `unknown` \| `undefined` |
+- handling of messages
+- handling of commands
+- handling of subscriptions
 
 ## Hierarchy
 
-- [`ServiceBaseClass`](purista_httpserver.internal.ServiceBaseClass.md)
+- [`GenericEventEmitter`](purista_httpserver.internal.GenericEventEmitter.md)<[`ServiceEvents`](../modules/purista_httpserver.internal.md#serviceevents)\>
 
-  ↳ **`ServiceClass`**
+  ↳ **`ServiceBaseClass`**
 
-  ↳↳ [`Service`](purista_httpserver.internal.Service.md)
+  ↳↳ [`ServiceClass`](purista_httpserver.internal.ServiceClass.md)
 
 ## Table of contents
 
 ### Constructors
 
-- [constructor](purista_httpserver.internal.ServiceClass.md#constructor)
+- [constructor](purista_httpserver.internal.ServiceBaseClass.md#constructor)
 
 ### Properties
 
-- [config](purista_httpserver.internal.ServiceClass.md#config)
-- [eventBridge](purista_httpserver.internal.ServiceClass.md#eventbridge)
-- [info](purista_httpserver.internal.ServiceClass.md#info)
-- [serviceLogger](purista_httpserver.internal.ServiceClass.md#servicelogger)
-- [spanProcessor](purista_httpserver.internal.ServiceClass.md#spanprocessor)
-- [traceProvider](purista_httpserver.internal.ServiceClass.md#traceprovider)
+- [eventBridge](purista_httpserver.internal.ServiceBaseClass.md#eventbridge)
+- [info](purista_httpserver.internal.ServiceBaseClass.md#info)
+- [serviceLogger](purista_httpserver.internal.ServiceBaseClass.md#servicelogger)
+- [spanProcessor](purista_httpserver.internal.ServiceBaseClass.md#spanprocessor)
+- [traceProvider](purista_httpserver.internal.ServiceBaseClass.md#traceprovider)
 
 ### Accessors
 
-- [serviceInfo](purista_httpserver.internal.ServiceClass.md#serviceinfo)
+- [serviceInfo](purista_httpserver.internal.ServiceBaseClass.md#serviceinfo)
 
 ### Methods
 
-- [destroy](purista_httpserver.internal.ServiceClass.md#destroy)
-- [emit](purista_httpserver.internal.ServiceClass.md#emit)
-- [getTracer](purista_httpserver.internal.ServiceClass.md#gettracer)
-- [off](purista_httpserver.internal.ServiceClass.md#off)
-- [on](purista_httpserver.internal.ServiceClass.md#on)
-- [registerCommand](purista_httpserver.internal.ServiceClass.md#registercommand)
-- [start](purista_httpserver.internal.ServiceClass.md#start)
-- [startActiveSpan](purista_httpserver.internal.ServiceClass.md#startactivespan)
-- [wrapInSpan](purista_httpserver.internal.ServiceClass.md#wrapinspan)
+- [destroy](purista_httpserver.internal.ServiceBaseClass.md#destroy)
+- [emit](purista_httpserver.internal.ServiceBaseClass.md#emit)
+- [getTracer](purista_httpserver.internal.ServiceBaseClass.md#gettracer)
+- [off](purista_httpserver.internal.ServiceBaseClass.md#off)
+- [on](purista_httpserver.internal.ServiceBaseClass.md#on)
+- [startActiveSpan](purista_httpserver.internal.ServiceBaseClass.md#startactivespan)
+- [wrapInSpan](purista_httpserver.internal.ServiceBaseClass.md#wrapinspan)
 
 ## Constructors
 
 ### constructor
 
-• **new ServiceClass**<`ConfigType`\>(`baseLogger`, `info`, `eventBridge`, `spanProcessor?`)
-
-#### Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `ConfigType` | `unknown` |
+• **new ServiceBaseClass**(`baseLogger`, `info`, `eventBridge`, `spanProcessor?`)
 
 #### Parameters
 
@@ -85,9 +61,9 @@ class MyBaseService extends Service {
 | `eventBridge` | [`EventBridge`](purista_httpserver.internal.EventBridge.md) |
 | `spanProcessor?` | `SpanProcessor` |
 
-#### Inherited from
+#### Overrides
 
-[ServiceBaseClass](purista_httpserver.internal.ServiceBaseClass.md).[constructor](purista_httpserver.internal.ServiceBaseClass.md#constructor)
+[GenericEventEmitter](purista_httpserver.internal.GenericEventEmitter.md).[constructor](purista_httpserver.internal.GenericEventEmitter.md#constructor)
 
 #### Defined in
 
@@ -95,23 +71,9 @@ core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:18
 
 ## Properties
 
-### config
-
-• `Abstract` **config**: `ConfigType`
-
-#### Defined in
-
-core/lib/core/types/ServiceClass.d.ts:22
-
-___
-
 ### eventBridge
 
 • **eventBridge**: [`EventBridge`](purista_httpserver.internal.EventBridge.md)
-
-#### Inherited from
-
-[ServiceBaseClass](purista_httpserver.internal.ServiceBaseClass.md).[eventBridge](purista_httpserver.internal.ServiceBaseClass.md#eventbridge)
 
 #### Defined in
 
@@ -123,10 +85,6 @@ ___
 
 • `Readonly` **info**: [`ServiceInfoType`](../modules/purista_httpserver.internal.md#serviceinfotype)
 
-#### Inherited from
-
-[ServiceBaseClass](purista_httpserver.internal.ServiceBaseClass.md).[info](purista_httpserver.internal.ServiceBaseClass.md#info)
-
 #### Defined in
 
 core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:13
@@ -136,10 +94,6 @@ ___
 ### serviceLogger
 
 • **serviceLogger**: [`Logger`](purista_httpserver.internal.Logger.md)
-
-#### Inherited from
-
-[ServiceBaseClass](purista_httpserver.internal.ServiceBaseClass.md).[serviceLogger](purista_httpserver.internal.ServiceBaseClass.md#servicelogger)
 
 #### Defined in
 
@@ -151,10 +105,6 @@ ___
 
 • **spanProcessor**: `undefined` \| `SpanProcessor`
 
-#### Inherited from
-
-[ServiceBaseClass](purista_httpserver.internal.ServiceBaseClass.md).[spanProcessor](purista_httpserver.internal.ServiceBaseClass.md#spanprocessor)
-
 #### Defined in
 
 core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:16
@@ -164,10 +114,6 @@ ___
 ### traceProvider
 
 • **traceProvider**: `NodeTracerProvider`
-
-#### Inherited from
-
-[ServiceBaseClass](purista_httpserver.internal.ServiceBaseClass.md).[traceProvider](purista_httpserver.internal.ServiceBaseClass.md#traceprovider)
 
 #### Defined in
 
@@ -185,10 +131,6 @@ Get service info
 
 [`ServiceInfoType`](../modules/purista_httpserver.internal.md#serviceinfotype)
 
-#### Inherited from
-
-ServiceBaseClass.serviceInfo
-
 #### Defined in
 
 core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:22
@@ -202,10 +144,6 @@ core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:22
 #### Returns
 
 `Promise`<`void`\>
-
-#### Inherited from
-
-[ServiceBaseClass](purista_httpserver.internal.ServiceBaseClass.md).[destroy](purista_httpserver.internal.ServiceBaseClass.md#destroy)
 
 #### Defined in
 
@@ -236,7 +174,7 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_httpserver.internal.ServiceBaseClass.md).[emit](purista_httpserver.internal.ServiceBaseClass.md#emit)
+[GenericEventEmitter](purista_httpserver.internal.GenericEventEmitter.md).[emit](purista_httpserver.internal.GenericEventEmitter.md#emit)
 
 #### Defined in
 
@@ -255,10 +193,6 @@ Returns open telemetry tracer of this service
 `Tracer`
 
 Tracer
-
-#### Inherited from
-
-[ServiceBaseClass](purista_httpserver.internal.ServiceBaseClass.md).[getTracer](purista_httpserver.internal.ServiceBaseClass.md#gettracer)
 
 #### Defined in
 
@@ -289,7 +223,7 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_httpserver.internal.ServiceBaseClass.md).[off](purista_httpserver.internal.ServiceBaseClass.md#off)
+[GenericEventEmitter](purista_httpserver.internal.GenericEventEmitter.md).[off](purista_httpserver.internal.GenericEventEmitter.md#off)
 
 #### Defined in
 
@@ -320,47 +254,11 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_httpserver.internal.ServiceBaseClass.md).[on](purista_httpserver.internal.ServiceBaseClass.md#on)
+[GenericEventEmitter](purista_httpserver.internal.GenericEventEmitter.md).[on](purista_httpserver.internal.GenericEventEmitter.md#on)
 
 #### Defined in
 
 core/lib/core/types/GenericEventEmitter.d.ts:11
-
-___
-
-### registerCommand
-
-▸ `Protected` `Abstract` **registerCommand**(`command`): `void`
-
-Register a new command (function) for this service
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `command` | [`CommandDefinition`](../modules/purista_httpserver.internal.md#commanddefinition)<[`ServiceClass`](purista_httpserver.internal.ServiceClass.md)<`unknown`\>, `Record`<`string`, `unknown`\>, `unknown`, `unknown`, `unknown`, `unknown`, `unknown`\> |
-
-#### Returns
-
-`void`
-
-#### Defined in
-
-core/lib/core/types/ServiceClass.d.ts:29
-
-___
-
-### start
-
-▸ `Abstract` **start**(): `Promise`<`void`\>
-
-#### Returns
-
-`Promise`<`void`\>
-
-#### Defined in
-
-core/lib/core/types/ServiceClass.d.ts:23
 
 ___
 
@@ -390,10 +288,6 @@ Start a child span for opentelemetry tracking
 `Promise`<`F`\>
 
 return value of fn
-
-#### Inherited from
-
-[ServiceBaseClass](purista_httpserver.internal.ServiceBaseClass.md).[startActiveSpan](purista_httpserver.internal.ServiceBaseClass.md#startactivespan)
 
 #### Defined in
 
@@ -433,10 +327,6 @@ but not to trace the program flow itself
 `Promise`<`F`\>
 
 return value of fn
-
-#### Inherited from
-
-[ServiceBaseClass](purista_httpserver.internal.ServiceBaseClass.md).[wrapInSpan](purista_httpserver.internal.ServiceBaseClass.md#wrapinspan)
 
 #### Defined in
 

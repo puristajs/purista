@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/core](../modules/purista_core.md) / GenericEventEmitter
+[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / GenericEventEmitter
 
 # Class: GenericEventEmitter<T\>
 
@@ -16,7 +16,7 @@
 
   ↳ [`EventBridge`](purista_core.EventBridge.md)
 
-  ↳ [`ServiceClass`](purista_core.ServiceClass.md)
+  ↳ [`ServiceBaseClass`](purista_core.internal.ServiceBaseClass.md)
 
 ## Implements
 
@@ -58,13 +58,13 @@
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:15](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/GenericEventEmitter.ts#L15)
+[core/src/core/types/GenericEventEmitter.ts:15](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L15)
 
 ## Methods
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `params`): `void`
+▸ **emit**<`K`\>(`eventName`, `parameter`): `void`
 
 #### Type parameters
 
@@ -77,7 +77,7 @@
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `params` | `T`[`K`] |
+| `parameter` | `T`[`K`] |
 
 #### Returns
 
@@ -89,7 +89,7 @@
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
@@ -120,7 +120,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -151,4 +151,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L16)

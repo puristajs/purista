@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/amqpbridge](purista_amqpbridge.md) / internal
+[PURISTA API - v1.4.9](../README.md) / [@purista/amqpbridge](purista_amqpbridge.md) / internal
 
 # Namespace: internal
 
@@ -60,6 +60,7 @@
 - [InfoServiceShutdown](purista_amqpbridge.internal.md#infoserviceshutdown)
 - [InfoSubscriptionError](purista_amqpbridge.internal.md#infosubscriptionerror)
 - [InstanceId](purista_amqpbridge.internal.md#instanceid)
+- [LogFnParamType](purista_amqpbridge.internal.md#logfnparamtype)
 - [LoggerOptions](purista_amqpbridge.internal.md#loggeroptions)
 - [PendigInvocation](purista_amqpbridge.internal.md#pendiginvocation)
 - [PrincipalId](purista_amqpbridge.internal.md#principalid)
@@ -81,7 +82,7 @@ If the sender does not receive a answer within this time frame, the command will
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:11
+core/lib/core/types/EBMessageType.enum.d.ts:11
 
 ___
 
@@ -91,7 +92,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:13
+core/lib/core/types/EBMessageType.enum.d.ts:13
 
 ___
 
@@ -101,7 +102,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:12
+core/lib/core/types/EBMessageType.enum.d.ts:12
 
 ## Type Aliases
 
@@ -128,7 +129,7 @@ Subscribers should not respond with command responses if they are "silent" subsc
 
 #### Defined in
 
-core/lib/types/core/types/commandType/Command.d.ts:17
+core/lib/core/types/commandType/Command.d.ts:17
 
 ___
 
@@ -140,7 +141,7 @@ CommandErrorResponse is a response to a specific previously received command whi
 
 #### Defined in
 
-core/lib/types/core/types/commandType/CommandErrorResponse.d.ts:10
+core/lib/core/types/commandType/CommandErrorResponse.d.ts:10
 
 ___
 
@@ -158,7 +159,7 @@ CommandResponse is a response to a specific previously received command which ca
 
 #### Defined in
 
-core/lib/types/core/types/commandType/CommandResponse.d.ts:7
+core/lib/core/types/commandType/CommandResponse.d.ts:7
 
 ___
 
@@ -177,7 +178,7 @@ It indicates that the command was executed successfully and contains the result 
 
 #### Defined in
 
-core/lib/types/core/types/commandType/CommandSuccessResponse.d.ts:10
+core/lib/core/types/commandType/CommandSuccessResponse.d.ts:10
 
 ___
 
@@ -187,7 +188,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/CorrelationId.d.ts:1
+core/lib/core/types/CorrelationId.d.ts:1
 
 ___
 
@@ -201,7 +202,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EventBridgeEvents.d.ts:18
+core/lib/core/types/EventBridgeEvents.d.ts:18
 
 ___
 
@@ -217,7 +218,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/CustomMessage.d.ts:5
+core/lib/core/types/CustomMessage.d.ts:5
 
 ___
 
@@ -229,7 +230,7 @@ EBMessage is some message which is handled by the event bridge.
 
 #### Defined in
 
-core/lib/types/core/types/EBMessage.d.ts:7
+core/lib/core/types/EBMessage.d.ts:7
 
 ___
 
@@ -249,7 +250,7 @@ A event bridge message address describes receiver/sender of a message.
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageAddress.d.ts:4
+core/lib/core/types/EBMessageAddress.d.ts:4
 
 ___
 
@@ -265,13 +266,14 @@ ___
 | `eventName?` | `string` |
 | `id` | [`EBMessageId`](purista_amqpbridge.internal.md#ebmessageid) |
 | `instanceId` | [`InstanceId`](purista_amqpbridge.internal.md#instanceid) |
+| `otp?` | `string` |
 | `principalId?` | [`PrincipalId`](purista_amqpbridge.internal.md#principalid) |
 | `timestamp` | `number` |
 | `traceId?` | [`TraceId`](purista_amqpbridge.internal.md#traceid) |
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageBase.d.ts:6
+core/lib/core/types/EBMessageBase.d.ts:6
 
 ___
 
@@ -283,7 +285,7 @@ Unique id of the event bridge message
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageId.d.ts:4
+core/lib/core/types/EBMessageId.d.ts:4
 
 ___
 
@@ -300,7 +302,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/amqpbridge/src/types/EncoderFunctions.ts#L1)
+[amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/types/EncoderFunctions.ts#L1)
 
 ___
 
@@ -319,7 +321,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/ErrorResponse.d.ts:3
+core/lib/core/types/ErrorResponse.d.ts:3
 
 ___
 
@@ -329,7 +331,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EventBridgeEvents.d.ts:21
+core/lib/core/types/EventBridgeEvents.d.ts:21
 
 ___
 
@@ -351,7 +353,7 @@ Events which can be emitted by a event bridge
 
 #### Defined in
 
-core/lib/types/core/types/EventBridgeEvents.d.ts:6
+core/lib/core/types/EventBridgeEvents.d.ts:6
 
 ___
 
@@ -367,7 +369,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:2
+core/lib/core/types/GenericEventEmitter.d.ts:2
 
 ___
 
@@ -377,13 +379,13 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:1
+core/lib/core/types/GenericEventEmitter.d.ts:1
 
 ___
 
 ### EventReceiver
 
-Ƭ **EventReceiver**<`T`\>: (`params`: `T`) => `void`
+Ƭ **EventReceiver**<`T`\>: (`parameter`: `T`) => `void`
 
 #### Type parameters
 
@@ -393,13 +395,13 @@ ___
 
 #### Type declaration
 
-▸ (`params`): `void`
+▸ (`parameter`): `void`
 
 ##### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `params` | `T` |
+| `parameter` | `T` |
 
 ##### Returns
 
@@ -407,7 +409,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:3
+core/lib/core/types/GenericEventEmitter.d.ts:3
 
 ___
 
@@ -417,7 +419,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoInvokeTimeout.d.ts:20
+core/lib/core/types/infoType/InfoInvokeTimeout.d.ts:20
 
 ___
 
@@ -427,7 +429,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoMessage.d.ts:11
+core/lib/core/types/infoType/InfoMessage.d.ts:11
 
 ___
 
@@ -437,7 +439,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceBase.d.ts:2
+core/lib/core/types/infoType/InfoServiceBase.d.ts:2
 
 ___
 
@@ -447,7 +449,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceDrain.d.ts:3
+core/lib/core/types/infoType/InfoServiceDrain.d.ts:3
 
 ___
 
@@ -457,7 +459,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceFunctionAdded.d.ts:4
+core/lib/core/types/infoType/InfoServiceFunctionAdded.d.ts:4
 
 ___
 
@@ -467,7 +469,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceInit.d.ts:3
+core/lib/core/types/infoType/InfoServiceInit.d.ts:3
 
 ___
 
@@ -477,7 +479,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceNotReady.d.ts:3
+core/lib/core/types/infoType/InfoServiceNotReady.d.ts:3
 
 ___
 
@@ -487,7 +489,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceReady.d.ts:3
+core/lib/core/types/infoType/InfoServiceReady.d.ts:3
 
 ___
 
@@ -497,7 +499,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceShutdown.d.ts:3
+core/lib/core/types/infoType/InfoServiceShutdown.d.ts:3
 
 ___
 
@@ -507,7 +509,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoSubscriptionError.d.ts:3
+core/lib/core/types/infoType/InfoSubscriptionError.d.ts:3
 
 ___
 
@@ -517,7 +519,17 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/InstanceId.d.ts:1
+core/lib/core/types/InstanceId.d.ts:1
+
+___
+
+### LogFnParamType
+
+Ƭ **LogFnParamType**: [`unknown`, string?, ...any] \| [`string`, ...any]
+
+#### Defined in
+
+core/lib/core/types/Logger.d.ts:13
 
 ___
 
@@ -539,7 +551,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/Logger.d.ts:4
+core/lib/core/types/Logger.d.ts:4
 
 ___
 
@@ -556,7 +568,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/DefaultEventBridge/types/PendingInvocations.d.ts:3
+core/lib/core/DefaultEventBridge/types/PendingInvocations.d.ts:3
 
 ___
 
@@ -566,7 +578,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/PrincipalId.d.ts:1
+core/lib/core/types/PrincipalId.d.ts:1
 
 ___
 
@@ -597,7 +609,7 @@ A subscription managed by the event bridge
 
 #### Defined in
 
-core/lib/types/core/types/subscription/Subscription.d.ts:9
+core/lib/core/types/subscription/Subscription.d.ts:9
 
 ___
 
@@ -613,7 +625,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/subscription/SubscriptionSettings.d.ts:1
+core/lib/core/types/subscription/SubscriptionSettings.d.ts:1
 
 ___
 
@@ -623,7 +635,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/TraceId.d.ts:1
+core/lib/core/types/TraceId.d.ts:1
 
 ___
 
@@ -640,4 +652,4 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/addPrefixToObject.d.ts:1
+core/lib/core/types/addPrefixToObject.d.ts:1

@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / HandledError
+[PURISTA API - v1.4.9](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / HandledError
 
 # Class: HandledError
 
@@ -53,7 +53,7 @@ Error.constructor
 
 #### Defined in
 
-core/lib/types/core/HandledError.impl.d.ts:11
+core/lib/core/Error/HandledError.impl.d.ts:11
 
 ## Properties
 
@@ -63,7 +63,7 @@ core/lib/types/core/HandledError.impl.d.ts:11
 
 #### Defined in
 
-core/lib/types/core/HandledError.impl.d.ts:9
+core/lib/core/Error/HandledError.impl.d.ts:9
 
 ___
 
@@ -73,7 +73,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/HandledError.impl.d.ts:8
+core/lib/core/Error/HandledError.impl.d.ts:8
 
 ___
 
@@ -83,7 +83,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/HandledError.impl.d.ts:10
+core/lib/core/Error/HandledError.impl.d.ts:10
 
 ## Methods
 
@@ -101,7 +101,7 @@ ErrorResponse
 
 #### Defined in
 
-core/lib/types/core/HandledError.impl.d.ts:22
+core/lib/core/Error/HandledError.impl.d.ts:22
 
 ___
 
@@ -119,7 +119,7 @@ ErrorResponse as string
 
 #### Defined in
 
-core/lib/types/core/HandledError.impl.d.ts:27
+core/lib/core/Error/HandledError.impl.d.ts:27
 
 ___
 
@@ -143,4 +143,4 @@ HandledError
 
 #### Defined in
 
-core/lib/types/core/HandledError.impl.d.ts:17
+core/lib/core/Error/HandledError.impl.d.ts:17

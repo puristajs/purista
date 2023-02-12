@@ -1,10 +1,14 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/core](purista_core.md) / internal
+[PURISTA API - v1.4.9](../README.md) / [@purista/core](purista_core.md) / internal
 
 # Namespace: internal
 
 [@purista/core](purista_core.md).internal
 
 ## Table of contents
+
+### Classes
+
+- [ServiceBaseClass](../classes/purista_core.internal.ServiceBaseClass.md)
 
 ### Type Aliases
 
@@ -24,7 +28,7 @@
 
 #### Defined in
 
-[core/src/core/types/EventBridgeEvents.ts:24](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/EventBridgeEvents.ts#L24)
+[core/src/core/types/EventBridgeEvents.ts:24](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/EventBridgeEvents.ts#L24)
 
 ___
 
@@ -38,13 +42,13 @@ ___
 
 #### Defined in
 
-[core/src/core/types/ServiceEvents.ts:50](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/ServiceEvents.ts#L50)
+[core/src/core/types/ServiceEvents.ts:44](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/ServiceEvents.ts#L44)
 
 ___
 
 ### EventReceiver
 
-Ƭ **EventReceiver**<`T`\>: (`params`: `T`) => `void`
+Ƭ **EventReceiver**<`T`\>: (`parameter`: `T`) => `void`
 
 #### Type parameters
 
@@ -54,13 +58,13 @@ ___
 
 #### Type declaration
 
-▸ (`params`): `void`
+▸ (`parameter`): `void`
 
 ##### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `params` | `T` |
+| `parameter` | `T` |
 
 ##### Returns
 
@@ -68,4 +72,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:6](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/GenericEventEmitter.ts#L6)
+[core/src/core/types/GenericEventEmitter.ts:6](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L6)

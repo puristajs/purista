@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / Logger
+[PURISTA API - v1.4.9](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / Logger
 
 # Class: Logger
 
@@ -30,13 +30,13 @@
 
 ### debug
 
-▸ `Abstract` **debug**(...`args`): `void`
+▸ `Abstract` **debug**(`...args`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...args` | `any` |
+| `...args` | [`LogFnParamType`](../modules/purista_httpserver.internal.md#logfnparamtype) |
 
 #### Returns
 
@@ -44,19 +44,19 @@
 
 #### Defined in
 
-core/lib/types/core/types/Logger.d.ts:18
+core/lib/core/types/Logger.d.ts:19
 
 ___
 
 ### error
 
-▸ `Abstract` **error**(...`args`): `void`
+▸ `Abstract` **error**(`...args`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...args` | `any` |
+| `...args` | [`LogFnParamType`](../modules/purista_httpserver.internal.md#logfnparamtype) |
 
 #### Returns
 
@@ -64,19 +64,19 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/Logger.d.ts:16
+core/lib/core/types/Logger.d.ts:17
 
 ___
 
 ### fatal
 
-▸ `Abstract` **fatal**(...`args`): `void`
+▸ `Abstract` **fatal**(`...args`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...args` | `any` |
+| `...args` | [`LogFnParamType`](../modules/purista_httpserver.internal.md#logfnparamtype) |
 
 #### Returns
 
@@ -84,7 +84,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/Logger.d.ts:15
+core/lib/core/types/Logger.d.ts:16
 
 ___
 
@@ -104,19 +104,19 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/Logger.d.ts:20
+core/lib/core/types/Logger.d.ts:21
 
 ___
 
 ### info
 
-▸ `Abstract` **info**(...`args`): `void`
+▸ `Abstract` **info**(`...args`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...args` | `any` |
+| `...args` | [`LogFnParamType`](../modules/purista_httpserver.internal.md#logfnparamtype) |
 
 #### Returns
 
@@ -124,19 +124,19 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/Logger.d.ts:14
+core/lib/core/types/Logger.d.ts:15
 
 ___
 
 ### trace
 
-▸ `Abstract` **trace**(...`args`): `void`
+▸ `Abstract` **trace**(`...args`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...args` | `any` |
+| `...args` | [`LogFnParamType`](../modules/purista_httpserver.internal.md#logfnparamtype) |
 
 #### Returns
 
@@ -144,19 +144,19 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/Logger.d.ts:19
+core/lib/core/types/Logger.d.ts:20
 
 ___
 
 ### warn
 
-▸ `Abstract` **warn**(...`args`): `void`
+▸ `Abstract` **warn**(`...args`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...args` | `any` |
+| `...args` | [`LogFnParamType`](../modules/purista_httpserver.internal.md#logfnparamtype) |
 
 #### Returns
 
@@ -164,4 +164,4 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/Logger.d.ts:17
+core/lib/core/types/Logger.d.ts:18
