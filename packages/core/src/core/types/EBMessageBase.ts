@@ -12,4 +12,5 @@ export type EBMessageBase = {
   correlationId?: CorrelationId
   principalId?: PrincipalId
   eventName?: string
+  otp?: string
 }

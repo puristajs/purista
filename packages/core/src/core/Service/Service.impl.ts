@@ -1,12 +1,16 @@
-import { ZodError } from 'zod'
+import { SpanStatusCode, trace } from '@opentelemetry/api'
+import { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 
-import { HandledError } from '../HandledError.impl'
+import { HandledError } from '../Error/HandledError.impl'
+import { UnhandledError } from '../Error/UnhandledError.impl'
 import {
   createErrorResponse,
   createInfoMessage,
   createSuccessResponse,
+  deserializeOtp,
   getCleanedMessage,
   getNewTraceId,
+  serializeOtp,
 } from '../helper'
 import {
   Command,
@@ -21,7 +25,6 @@ import {
   InfoMessageType,
   IServiceClass,
   Logger,
-  MetricEntry,
   ServiceClass,
   ServiceInfoType,
   StatusCode,
@@ -31,8 +34,7 @@ import {
   SubscriptionDefinitionList,
   TraceId,
 } from '../types'
-import { UnhandledError } from '../UnhandledError.impl'
-import { ServiceInfoValidator } from './ServiceInfoValidator'
+import { commandTransformInput } from './commandTransformInput.impl'
 
 /**
  * Base class for all services.
@@ -43,8 +45,8 @@ import { ServiceInfoValidator } from './ServiceInfoValidator'
  * ```typescript
  * class MyService extends Service {
  *
- *   constructor(baseLogger: Logger, info: ServiceInfoType, eventBridge: EventBridge) {
- *     super( baseLogger, info, eventBridge )
+ *   constructor(baseLogger: Logger, info: ServiceInfoType, eventBridge: EventBridge, config?: MyServiceConfig, spanProcessor?: SpanProcessor,) {
+ *     super( baseLogger, info, eventBridge, config, spanProcessor )
  *     // ... initial service logic
  *   }
  *   // ... service methods, functions and logic
@@ -52,9 +54,6 @@ import { ServiceInfoValidator } from './ServiceInfoValidator'
  * ```
  */
 export class Service<ConfigType = unknown | undefined> extends ServiceClass<ConfigType> implements IServiceClass {
-  protected info: ServiceInfoType
-  protected serviceLogger: Logger
-  protected eventBridge: EventBridge
   protected subscriptions = new Map<string, SubscriptionDefinition>()
   protected commands = new Map<string, CommandDefinition>()
 
@@ -65,50 +64,27 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
     private commandFunctions: CommandDefinitionList<any>,
     private subscriptionList: SubscriptionDefinitionList<any>,
     public config: ConfigType,
+
+    spanProcessor?: SpanProcessor,
   ) {
-    super()
-    this.info = new Proxy(
-      {
-        serviceName: '',
-        serviceDescription: '',
-        serviceVersion: '1',
-      },
-      ServiceInfoValidator,
-    )
-
-    this.info.serviceDescription = info.serviceDescription
-    this.info.serviceName = info.serviceName
-    this.info.serviceVersion = info.serviceVersion
-
-    this.serviceLogger = baseLogger.getChildLogger({
-      serviceName: this.info.serviceName,
-      serviceVersion: this.info.serviceVersion,
-    })
-    this.serviceLogger.debug({ ...this.info }, `creating ${this.info.serviceName} ${this.info.serviceVersion}`)
-
-    this.eventBridge = eventBridge
+    super(baseLogger, info, eventBridge, spanProcessor)
   }
 
   /**
    * It connects to the event bridge and subscribes to the topics that are in the subscription list.
    */
   async start() {
-    this.emit('service-started', undefined)
-    try {
-      await this.initializeEventbridgeConnect(this.commandFunctions, this.subscriptionList)
-      await this.sendServiceInfo(EBMessageType.InfoServiceReady)
-    } catch (error) {
-      this.serviceLogger.error({ error }, `failed to start service`)
-      this.emit('service-not-available', error)
-      throw error
-    }
-  }
-
-  /**
-   * Get service info
-   */
-  get serviceInfo(): ServiceInfoType {
-    return Object.freeze({ ...this.info })
+    return this.startActiveSpan('purista.start', {}, undefined, async (span) => {
+      this.emit('service-started', undefined)
+      try {
+        await this.initializeEventbridgeConnect(this.commandFunctions, this.subscriptionList)
+        await this.sendServiceInfo(EBMessageType.InfoServiceReady)
+      } catch (err) {
+        this.serviceLogger.error({ err, ...span.spanContext() }, `failed to start service`)
+        this.emit('service-not-available', err)
+        throw err
+      }
+    })
   }
 
   /**
@@ -118,19 +94,22 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
     commandFunctions: CommandDefinitionList<any>,
     subscriptions: SubscriptionDefinition[],
   ) {
-    // send info message that this service is going to start up now
-    await this.sendServiceInfo(EBMessageType.InfoServiceInit)
+    return this.startActiveSpan('purista.initializeEventbridgeConnect', {}, undefined, async (span) => {
+      // send info message that this service is going to start up now
+      await this.sendServiceInfo(EBMessageType.InfoServiceInit)
 
-    // register subscriptions for this service
-    for (const subscription of subscriptions) {
-      this.serviceLogger.debug({ name: subscription.subscriptionName }, 'start subscription')
-      await this.registerSubscription(subscription)
-    }
+      // register subscriptions for this service
+      for (const subscription of subscriptions) {
+        this.serviceLogger.debug({ name: subscription.subscriptionName, ...span.spanContext() }, 'start subscription')
+        await this.registerSubscription(subscription)
+      }
 
-    // register commands for this service
-    for (const command of commandFunctions) {
-      await this.registerCommand(command)
-    }
+      // register commands for this service
+      for (const command of commandFunctions) {
+        await this.registerCommand(command)
+      }
+      span.end()
+    })
   }
 
   /**
@@ -139,9 +118,14 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
    * @param target function name is need in messages like InfoServiceFunctionAdded
    */
   async sendServiceInfo(infoType: InfoMessageType, target?: string, payload?: Record<string, unknown>) {
-    const info = createInfoMessage(infoType, this.info.serviceName, this.info.serviceVersion, target, payload)
+    return this.startActiveSpan('purista.sendServiceInfo', {}, undefined, async (span) => {
+      const info = createInfoMessage(infoType, this.info.serviceName, this.info.serviceVersion, target, payload)
 
-    return this.eventBridge.emitMessage(info)
+      const result = await this.eventBridge.emitMessage(info)
+
+      span.end()
+      return result
+    })
   }
 
   protected getInvokeFunction(serviceTarget: string, traceId: TraceId, principalId?: string) {
@@ -182,16 +166,19 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
     }
 
     const emitCustomEvent = async <Payload>(eventName: string, eventPayload?: Payload) => {
-      const msg: Readonly<Omit<CustomMessage<Payload>, 'id' | 'instanceId' | 'timestamp'>> = Object.freeze({
-        messageType: EBMessageType.CustomMessage,
-        traceId,
-        sender,
-        eventName,
-        payload: eventPayload,
-        principalId,
-      })
+      await this.startActiveSpan('purista.emitEvent', {}, undefined, async (span) => {
+        span.addEvent(eventName)
+        const msg: Readonly<Omit<CustomMessage<Payload>, 'id' | 'instanceId' | 'timestamp'>> = Object.freeze({
+          messageType: EBMessageType.CustomMessage,
+          traceId,
+          sender,
+          eventName,
+          payload: eventPayload,
+          principalId,
+        })
 
-      await this.eventBridge.emitMessage(msg)
+        return this.eventBridge.emitMessage(msg)
+      })
     }
 
     return emitCustomEvent.bind(this)
@@ -205,261 +192,358 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
    */
   protected async executeCommand(message: Readonly<Command>) {
     const command = this.commands.get(message.receiver.serviceTarget)
-    const traceId = message.traceId || getNewTraceId()
 
-    if (!command) {
-      this.serviceLogger
-        .getChildLogger({
-          serviceName: this.info.serviceName,
-          serviceVersion: this.info.serviceVersion,
-          traceId,
-        })
-        .error({ message: getCleanedMessage(message) }, 'received invalid command')
-      return createErrorResponse(message, StatusCode.NotImplemented)
-    }
+    const context = await deserializeOtp(this.serviceLogger, message.otp)
 
-    const logger = this.serviceLogger.getChildLogger({
-      serviceName: this.info.serviceName,
-      serviceVersion: this.info.serviceVersion,
-      serviceTarget: command.commandName,
-      traceId,
-    })
+    return this.startActiveSpan(command?.commandName || 'purista.executeCommand', {}, context, async (span) => {
+      const traceId = message.traceId || span.spanContext().traceId
 
-    const performance: MetricEntry[] = []
-
-    const addMeasureEntry = (name: string, startTime: number) => {
-      const endTime = Date.now()
-      performance.push({
-        traceId,
-        name,
-        startTime,
-        endTime,
-        duration: endTime - startTime,
-        functionName: message.receiver.serviceTarget,
+      const logger = this.serviceLogger.getChildLogger({
+        serviceTarget: command?.commandName,
+        ...span.spanContext(),
+        principalId: message.principalId,
       })
-    }
 
-    const totalStartTime = Date.now()
+      if (message.principalId) {
+        span.setAttribute('purista.principalId', message.principalId)
+      }
 
-    try {
-      let parameterInput = message.payload.parameter
-      let payloadInput = message.payload.payload
+      if (!command) {
+        logger.error({ message: getCleanedMessage(message) }, 'received invalid command')
 
-      if (command.hooks.transformInput) {
-        const transform = command.hooks.transformInput.transformFunction.bind(this, { logger, message })
-        try {
-          parameterInput = command.hooks.transformInput.transformParameterSchema.parse(parameterInput)
-        } catch (err) {
-          const error = err as ZodError
-          logger.warn('input validation for params failed:', error.message)
-          throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: 'received invalid command',
+        })
+        return await this.startActiveSpan('sendErrorResponse', {}, undefined, async () =>
+          createErrorResponse(message, StatusCode.NotImplemented, undefined),
+        )
+      }
+
+      try {
+        const { payload, parameter } = await commandTransformInput(this, logger, command, message)
+        /*
+        if (command.hooks.transformInput) {
+          const transformInput = command.hooks.transformInput
+          await this.startActiveSpan(command.commandName + '.inputTransformation', {}, undefined, async (_) => {
+            const transform = transformInput.transformFunction.bind(this, { logger, message })
+            parameterInput = await this.wrapInSpan(command.commandName + '.validateParameter', {}, async (subSpan) => {
+              try {
+                return transformInput.transformParameterSchema.parse(parameterInput)
+              } catch (err) {
+                const error = err as ZodError
+                subSpan.recordException(error)
+                logger.warn(
+                  { ...subSpan.spanContext() },
+                  'transform input validation for params failed:',
+                  error.message,
+                )
+
+                subSpan.setStatus({
+                  code: SpanStatusCode.ERROR,
+                  message: 'transform input validation for parameters failed',
+                })
+                throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+              }
+            })
+
+            payloadInput = await this.wrapInSpan(command.commandName + '.validatePayload', {}, async (subSpan) => {
+              try {
+                return transformInput.transformInputSchema.parse(payloadInput)
+              } catch (err) {
+                const error = err as ZodError
+                subSpan.recordException(error)
+                logger.warn(
+                  { ...subSpan.spanContext() },
+                  'transform input validation for payload failed:',
+                  error.message,
+                )
+                subSpan.setStatus({
+                  code: SpanStatusCode.ERROR,
+                  message: 'transform input validation for payload failed',
+                })
+                throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+              }
+            })
+
+            await this.wrapInSpan(command.commandName + '.transformFunction', {}, async (subSpan) => {
+              try {
+                const transformedInput = await transform(payloadInput, parameterInput)
+                parameterInput = transformedInput.params
+                payloadInput = transformedInput.payload
+              } catch (error) {
+                const err = error as Error
+                subSpan.recordException(err)
+                subSpan.setStatus({
+                  code: SpanStatusCode.ERROR,
+                  message: err.message || 'Unable to transform input',
+                })
+
+                if (error instanceof HandledError) {
+                  throw error
+                }
+                logger.error({ err, ...subSpan.spanContext() }, 'Unable to transform input:')
+
+                throw new UnhandledError(StatusCode.InternalServerError, 'Unable to transform input')
+              }
+            })
+          })
+        }
+*/
+        let result: unknown = await this.startActiveSpan(
+          command.commandName + '.functionExecution',
+          {},
+          undefined,
+          async (_subSpan) => {
+            const context: CommandFunctionContext = {
+              logger,
+              message,
+              emit: this.getEmitFunction(command.commandName, traceId, message.principalId),
+              invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId),
+              wrapInSpan: this.wrapInSpan.bind(this),
+              startActiveSpan: this.startActiveSpan.bind(this),
+            }
+            const call = command.call.bind(this, context)
+            return await call(payload, parameter)
+          },
+        )
+
+        if (command.hooks.afterGuard?.length) {
+          const guards = command.hooks.afterGuard
+
+          await this.startActiveSpan(command.commandName + '.afterGuardHooks', {}, undefined, async () => {
+            const afterGuards = guards.map((hook, index) =>
+              this.wrapInSpan(command.commandName + '.afterGuardHook.' + index, {}, async (_subSpan) => {
+                const context: CommandFunctionContext = {
+                  logger,
+                  message,
+                  emit: this.getEmitFunction(command.commandName, traceId, message.principalId),
+                  invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId),
+                  wrapInSpan: this.wrapInSpan.bind(this),
+                  startActiveSpan: this.startActiveSpan.bind(this),
+                }
+
+                return hook.bind(this, context)
+              }),
+            )
+            await Promise.all(afterGuards)
+          })
         }
 
-        try {
-          payloadInput = command.hooks.transformInput.transformInputSchema.parse(payloadInput)
-        } catch (err) {
-          const error = err as ZodError
-          logger.warn('input validation for payload failed:', error.message)
-          throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+        if (command.hooks.transformOutput) {
+          const transformOutput = command.hooks.transformOutput
+          await this.startActiveSpan(command.commandName + '.outputTransformation', {}, undefined, async () => {
+            const afterTransform = transformOutput.transformFunction.bind(this, { logger, message })
+            const resultTransfomed = await afterTransform(result, parameter)
+            result = transformOutput.transformOutputSchema.parse(resultTransfomed)
+          })
         }
 
-        try {
-          const transformStartTime = Date.now()
-          const transformedInput = await transform(payloadInput, parameterInput)
-          addMeasureEntry('transformInput', transformStartTime)
-          parameterInput = transformedInput.params
-          payloadInput = transformedInput.payload
-        } catch (error) {
-          if (error instanceof HandledError) {
-            throw error
+        return await this.startActiveSpan('sendSuccessResponse', {}, undefined, async (subSpan) => {
+          if (command.eventName) {
+            subSpan.addEvent(command.eventName)
           }
-          logger.warn('transformInput:', error)
-          throw new HandledError(StatusCode.BadRequest, 'Unable to transform input')
+          return { ...createSuccessResponse(message, result, command.eventName), otp: serializeOtp() }
+        })
+      } catch (error) {
+        span.recordException(error as Error)
+
+        if (error instanceof HandledError) {
+          this.emit('handled-function-error', { functionName: command.commandName, error, traceId })
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error.message,
+          })
+
+          return await this.startActiveSpan('sendErrorResponse', {}, undefined, async () =>
+            createErrorResponse(message, (error as HandledError).errorCode, error),
+          )
         }
+
+        this.emit('unhandled-function-error', { functionName: command.commandName, error, traceId })
+
+        logger.error(
+          { err: error, message: getCleanedMessage(message), ...span.spanContext() },
+          'executeCommand unhandled error',
+        )
+
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: 'executeCommand unhandled error',
+        })
+
+        return await this.startActiveSpan('sendErrorResponse', {}, undefined, async () =>
+          createErrorResponse(message, StatusCode.InternalServerError, error),
+        )
       }
-
-      const context: CommandFunctionContext = {
-        logger,
-        message,
-        emit: this.getEmitFunction(command.commandName, traceId, message.principalId),
-        invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId),
-        performance,
-      }
-
-      const functionStart = Date.now()
-      const call = command.call.bind(this, context)
-      let payload = await call(payloadInput, parameterInput)
-      addMeasureEntry('functionExecution', functionStart)
-
-      if (command.hooks.afterGuard?.length) {
-        const afterGuards = command.hooks.afterGuard.map((hook) => hook.bind(this, context))
-        await Promise.all(afterGuards)
-      }
-
-      if (command.hooks.transformOutput) {
-        const afterTransform = command.hooks.transformOutput.transformFunction.bind(this, { logger, message })
-        const transformStart = Date.now()
-        payload = await afterTransform(payload, parameterInput)
-        addMeasureEntry('transformOutput', transformStart)
-        payload = command.hooks.transformOutput.transformOutputSchema.parse(payload)
-      }
-
-      addMeasureEntry('total', totalStartTime)
-      this.emit('metric-function-execution', performance)
-      return createSuccessResponse(message, payload, command.eventName)
-    } catch (error) {
-      addMeasureEntry('total', totalStartTime)
-      this.emit('metric-function-execution', performance)
-      if (error instanceof HandledError) {
-        this.emit('handled-function-error', { functionName: command.commandName, error, traceId })
-        return createErrorResponse(message, error.errorCode, error)
-      }
-
-      this.emit('unhandled-function-error', { functionName: command.commandName, error, traceId })
-
-      logger.error({ error, message: getCleanedMessage(message) }, 'executeCommand unhandled error')
-
-      return createErrorResponse(message, StatusCode.InternalServerError, error)
-    }
+    })
   }
 
   protected async registerCommand(commandDefinition: CommandDefinition): Promise<void> {
-    this.serviceLogger.debug({ ...this.serviceInfo }, 'register command')
-    this.commands.set(commandDefinition.commandName, commandDefinition)
-    await this.eventBridge.registerServiceFunction(
-      {
+    return this.startActiveSpan('purista.registerCommand', {}, undefined, async (span) => {
+      this.serviceLogger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register command')
+
+      span.setAttributes({
         serviceName: this.serviceInfo.serviceName,
         serviceVersion: this.serviceInfo.serviceVersion,
-        serviceTarget: commandDefinition.commandName,
-      },
-      this.executeCommand.bind(this),
-    )
-    await this.sendServiceInfo(
-      EBMessageType.InfoServiceFunctionAdded,
-      commandDefinition.commandName,
-      commandDefinition.metadata,
-    )
+        commandName: commandDefinition.commandName,
+      })
+
+      this.commands.set(commandDefinition.commandName, commandDefinition)
+
+      await this.eventBridge.registerServiceFunction(
+        {
+          serviceName: this.serviceInfo.serviceName,
+          serviceVersion: this.serviceInfo.serviceVersion,
+          serviceTarget: commandDefinition.commandName,
+        },
+        this.executeCommand.bind(this),
+      )
+      await this.sendServiceInfo(
+        EBMessageType.InfoServiceFunctionAdded,
+        commandDefinition.commandName,
+        commandDefinition.metadata,
+      )
+
+      span.end()
+    })
   }
 
   protected async executeSubscription(message: EBMessage, subscriptionName: string): Promise<void> {
     const subscription = this.subscriptions.get(subscriptionName)
-    const traceId = message.traceId || getNewTraceId()
 
-    if (!subscription) {
-      this.serviceLogger
-        .getChildLogger({
-          serviceName: this.info.serviceName,
-          serviceVersion: this.info.serviceVersion,
+    const otpContext = await deserializeOtp(this.serviceLogger, message.otp)
+    const spanContext = otpContext ? trace.getSpanContext(otpContext) : undefined
+
+    this.startActiveSpan(
+      subscriptionName || 'purista.executeSubscription',
+      { links: spanContext ? [{ context: spanContext }] : [] },
+      undefined,
+      async (span) => {
+        const traceId = message.traceId || span.spanContext().traceId || getNewTraceId()
+
+        const logger = this.serviceLogger.getChildLogger({
           serviceTarget: subscriptionName,
-          traceId,
+          ...span.spanContext(),
+          principalId: message.principalId,
         })
-        .error({ message: getCleanedMessage(message) }, 'received message for invalid subscription')
-      return
-    }
 
-    const logger = this.serviceLogger.getChildLogger({
-      serviceName: this.info.serviceName,
-      serviceVersion: this.info.serviceVersion,
-      serviceTarget: subscriptionName,
-      traceId,
-    })
+        if (message.principalId) {
+          span.setAttribute('purista.principalId', message.principalId)
+        }
 
-    const performance: MetricEntry[] = []
+        if (!subscription) {
+          logger.error({ message: getCleanedMessage(message) }, 'received message for invalid subscription')
 
-    const addMeasureEntry = (name: string, startTime: number) => {
-      const endTime = Date.now()
-      performance.push({
-        traceId,
-        name,
-        startTime,
-        endTime,
-        duration: endTime - startTime,
-        functionName: subscriptionName,
-      })
-    }
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: 'received message for invalid subscription',
+          })
+          return
+        }
 
-    const totalStartTime = Date.now()
+        const context: SubscriptionContext = {
+          logger,
+          message,
+          emit: this.getEmitFunction(subscriptionName, traceId, message.principalId),
+          invoke: this.getInvokeFunction(subscriptionName, traceId, message.principalId),
+          wrapInSpan: this.wrapInSpan.bind(this),
+          startActiveSpan: this.startActiveSpan.bind(this),
+        }
 
-    const context: SubscriptionContext = {
-      logger,
-      message,
-      emit: this.getEmitFunction(subscriptionName, traceId, message.principalId),
-      invoke: this.getInvokeFunction(subscriptionName, traceId, message.principalId),
-      performance,
-    }
+        const call = subscription.call.bind(this, context)
+        try {
+          await call(message.payload)
+        } catch (err) {
+          logger.error({ err }, 'Error in subscription execution')
+          if (err instanceof HandledError) {
+            this.emit('handled-subscription-error', { subscriptionName, error: err, traceId })
+            // handled errors prevent that the message is re-delivered for retry
+            return
+          }
+          if (err instanceof UnhandledError) {
+            this.emit('unhandled-subscription-error', { subscriptionName, error: err, traceId })
+          }
+          span.recordException(err as Error)
 
-    const call = subscription.call.bind(this, context)
-    try {
-      await call(message.payload)
-      addMeasureEntry('total', totalStartTime)
-      this.emit('metric-subscription-execution', performance)
-    } catch (error) {
-      addMeasureEntry('total', totalStartTime)
-      this.emit('metric-subscription-execution', performance)
-      this.serviceLogger.error({ error }, 'Error in subscription execution')
-      if (error instanceof HandledError) {
-        this.emit('handled-subscription-error', { subscriptionName, error, traceId })
-        // handled errors prevent that the message is re-delivered for retry
-        return
-      }
-      if (error instanceof UnhandledError) {
-        this.emit('unhandled-subscription-error', { subscriptionName, error, traceId })
-      }
-      // re-throw error here, so the underlaying event bridge driver can handle ack/re-delivery for retry
-      throw error
-    }
-  }
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: (err as Error).message,
+          })
 
-  protected async registerSubscription(subscriptionDefinition: SubscriptionDefinition): Promise<void> {
-    this.serviceLogger.debug({ ...this.serviceInfo }, 'register subscription')
-
-    this.subscriptions.set(subscriptionDefinition.subscriptionName, subscriptionDefinition)
-
-    const subscription: Subscription = {
-      sender: subscriptionDefinition.sender,
-      receiver: subscriptionDefinition.receiver,
-      messageType: subscriptionDefinition.messageType,
-      eventName: subscriptionDefinition.eventName,
-      subscriber: {
-        serviceName: this.info.serviceName,
-        serviceVersion: this.info.serviceVersion,
-        serviceTarget: subscriptionDefinition.subscriptionName,
+          // re-throw error here, so the underlaying event bridge driver can handle ack/re-delivery for retry
+          throw err
+        }
       },
-      settings: subscriptionDefinition.settings,
-    }
-
-    await this.eventBridge.registerSubscription(subscription, (message: EBMessage) =>
-      this.executeSubscription(message, subscriptionDefinition.subscriptionName),
     )
   }
 
-  async destroy() {
-    this.emit('service-drain', undefined)
-    await this.sendServiceInfo(EBMessageType.InfoServiceDrain)
-    this.serviceLogger.info({ ...this.info }, 'destroy')
+  protected async registerSubscription(subscriptionDefinition: SubscriptionDefinition): Promise<void> {
+    return this.startActiveSpan('purista.registerSubscription', {}, undefined, async (span) => {
+      this.serviceLogger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register subscription')
 
-    const functionUnregisterProms: Promise<any>[] = []
-    this.commandFunctions.forEach((functionDefinition) => {
-      functionUnregisterProms.push(
-        this.eventBridge.unregisterServiceFunction({
-          serviceName: this.info.serviceName,
-          serviceVersion: this.info.serviceVersion,
-          serviceTarget: functionDefinition.commandName,
-        }),
-      )
-    })
+      span.setAttributes({
+        serviceName: this.info.serviceName,
+        serviceVersion: this.info.serviceVersion,
+        subscriptionName: subscriptionDefinition.subscriptionName,
+      })
 
-    this.subscriptions.forEach((subscriptionDefinition) => {
-      functionUnregisterProms.push(
-        this.eventBridge.unregisterSubscription({
+      this.subscriptions.set(subscriptionDefinition.subscriptionName, subscriptionDefinition)
+
+      const subscription: Subscription = {
+        sender: subscriptionDefinition.sender,
+        receiver: subscriptionDefinition.receiver,
+        messageType: subscriptionDefinition.messageType,
+        eventName: subscriptionDefinition.eventName,
+        subscriber: {
           serviceName: this.info.serviceName,
           serviceVersion: this.info.serviceVersion,
           serviceTarget: subscriptionDefinition.subscriptionName,
-        }),
+        },
+        settings: subscriptionDefinition.settings,
+      }
+
+      await this.eventBridge.registerSubscription(subscription, (message: EBMessage) =>
+        this.executeSubscription(message, subscriptionDefinition.subscriptionName),
       )
+
+      span.end()
     })
-    await Promise.allSettled(functionUnregisterProms)
-    await this.sendServiceInfo(EBMessageType.InfoServiceShutdown)
-    this.emit('service-stopped', undefined)
+  }
+
+  async destroy() {
+    this.startActiveSpan('purista.destroy', {}, undefined, async (span) => {
+      this.emit('service-drain', undefined)
+      await this.sendServiceInfo(EBMessageType.InfoServiceDrain)
+      this.serviceLogger.info({ ...this.info, ...span.spanContext() }, 'destroy')
+
+      const functionUnregisterProms: Promise<any>[] = []
+      this.commandFunctions.forEach((functionDefinition) => {
+        functionUnregisterProms.push(
+          this.eventBridge.unregisterServiceFunction({
+            serviceName: this.info.serviceName,
+            serviceVersion: this.info.serviceVersion,
+            serviceTarget: functionDefinition.commandName,
+          }),
+        )
+      })
+
+      this.subscriptions.forEach((subscriptionDefinition) => {
+        functionUnregisterProms.push(
+          this.eventBridge.unregisterSubscription({
+            serviceName: this.info.serviceName,
+            serviceVersion: this.info.serviceVersion,
+            serviceTarget: subscriptionDefinition.subscriptionName,
+          }),
+        )
+      })
+      await Promise.allSettled(functionUnregisterProms)
+      await this.sendServiceInfo(EBMessageType.InfoServiceShutdown)
+      this.emit('service-stopped', undefined)
+
+      span.end()
+    })
+
+    await super.destroy()
   }
 }

@@ -1,15 +1,22 @@
 import { Stream } from 'node:stream'
 
+import { Context, Span, SpanKind, SpanOptions, SpanStatusCode } from '@opentelemetry/api'
+import { Resource } from '@opentelemetry/resources'
+import { NodeTracerProvider, SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
+
 import { getDefaultEventBridgeConfig } from '../config'
-import { HandledError } from '../HandledError.impl'
+import { HandledError } from '../Error/HandledError.impl'
+import { UnhandledError } from '../Error/UnhandledError.impl'
 import {
+  deserializeOtp,
   getCleanedMessage,
   getCommandQueueName,
   getNewCorrelationId,
   getNewEBMessageId,
-  getNewTraceId,
   getSubscriptionQueueName,
   getTimeoutPromise,
+  serializeOtp,
 } from '../helper'
 import {
   Command,
@@ -30,20 +37,23 @@ import {
   isCommandSuccessResponse,
   isInfoMessage,
   Logger,
+  PuristaSpanName,
+  PuristaSpanTag,
   StatusCode,
   Subscription,
 } from '../types'
-import { UnhandledError } from '../UnhandledError.impl'
 import { getNewSubscriptionStorageEntry } from './getNewSubscriptionStorageEntry.impl'
 import { isMessageMatchingSubscription } from './isMessageMatchingSubscription.impl'
 import { PendigInvocation, SubscriptionStorageEntry } from './types'
+
+const version = '1'
 
 /**
  * Simple implementation of some simple in-memory event bridge.
  * Does not support threads and does not need any external databases.
  */
 export class DefaultEventBridge extends EventBridge {
-  protected log: Logger
+  protected logger: Logger
   protected config: EventBridgeEnsuredDefaults
   protected writeStream = new Stream.Writable({ objectMode: true })
   protected readStream = new Stream.Readable({
@@ -61,88 +71,193 @@ export class DefaultEventBridge extends EventBridge {
   protected pendingInvocations = new Map<EBMessageId, PendigInvocation>()
 
   protected subscriptions = new Map<string, SubscriptionStorageEntry>()
-  constructor(baseLogger: Logger, conf: EventBridgeConfig = getDefaultEventBridgeConfig()) {
+
+  public traceProvider: NodeTracerProvider
+
+  constructor(
+    baseLogger: Logger,
+    conf: EventBridgeConfig = getDefaultEventBridgeConfig(),
+    spanProcessor?: SpanProcessor,
+  ) {
     super()
     this.config = {
       ...getDefaultEventBridgeConfig(),
       ...conf,
     }
-    this.log = baseLogger.getChildLogger({ name: 'eventBridge' })
+    const resource = Resource.default().merge(
+      new Resource({
+        [SemanticResourceAttributes.SERVICE_NAME]: 'DefaultEventBridge',
+        [SemanticResourceAttributes.SERVICE_VERSION]: version,
+      }),
+    )
+
+    this.traceProvider = new NodeTracerProvider({
+      resource,
+    })
+
+    if (spanProcessor) {
+      this.traceProvider.addSpanProcessor(spanProcessor)
+    }
+
+    this.traceProvider.register()
+
+    this.logger = baseLogger.getChildLogger({ name: 'eventBridge' })
+  }
+
+  /**
+   * Returns open telemetry tracer of this service
+   *
+   * @returns Tracer
+   */
+  getTracer() {
+    return this.traceProvider.getTracer('DefaultEventBridge', version)
+  }
+
+  async startActiveSpan<F>(
+    name: string,
+    opts: SpanOptions,
+    context: Context | undefined = undefined,
+    fn: (span: Span) => Promise<F>,
+  ): Promise<F> {
+    const tracer = this.getTracer()
+
+    const callback = async (span: Span) => {
+      try {
+        return await fn(span)
+      } catch (error) {
+        let message = 'error'
+        if (error instanceof Error) {
+          message = error.message
+        }
+
+        span.recordException(error as Error)
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message,
+        })
+
+        throw error
+      } finally {
+        span.end()
+      }
+    }
+
+    return context
+      ? tracer.startActiveSpan(name, opts, context, callback)
+      : tracer.startActiveSpan(name, opts, callback)
+  }
+
+  async wrapInSpan<F>(name: string, opts: SpanOptions, fn: (span: Span) => Promise<F>, context?: Context): Promise<F> {
+    const tracer = this.getTracer()
+    const span = tracer.startSpan(name, opts, context)
+    try {
+      return await fn(span)
+    } catch (error) {
+      let message = 'error'
+      if (error instanceof Error) {
+        message = error.message
+      }
+      span.recordException(error as Error)
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message,
+      })
+
+      throw error
+    } finally {
+      span.end()
+    }
   }
 
   async start() {
-    const write = (message: EBMessage, _encoding: string, next: (error?: Error) => void) => {
-      try {
-        if (isCommand(message)) {
-          const mapEntry = this.serviceFunctions.get(getCommandQueueName(message.receiver))
-          if (!mapEntry) {
-            const error = new HandledError(
-              StatusCode.BadRequest,
-              'InvalidCommand: received invalid command',
-              getCleanedMessage(message),
-            )
-            this.log.error({ error }, 'received invalid command')
-            this.emit('eventbridge-error', error)
-            return next(error)
+    const write = async (message: EBMessage, _encoding: string, next: (error?: Error) => void) => {
+      const context = await deserializeOtp(this.logger, message.otp)
+
+      return this.startActiveSpan(
+        PuristaSpanName.EventBridgeHandleIncomingMessage,
+        { kind: SpanKind.CONSUMER },
+        context,
+        async (span) => {
+          try {
+            this.subscriptions.forEach((subscription) => {
+              if (isMessageMatchingSubscription(this.logger, message, subscription)) {
+                subscription.cb(message).catch((err) => this.logger.error({ err }))
+              }
+            })
+
+            if (isCommand(message)) {
+              const mapEntry = this.serviceFunctions.get(getCommandQueueName(message.receiver))
+              if (!mapEntry) {
+                const err = new HandledError(
+                  StatusCode.BadRequest,
+                  'InvalidCommand: received invalid command',
+                  getCleanedMessage(message),
+                )
+                this.logger.error({ err, ...span.spanContext() }, 'received invalid command')
+                this.emit('eventbridge-error', err)
+                return next(err)
+              }
+
+              mapEntry(message).then((result) => {
+                this.emitMessage(result)
+              })
+              return next()
+            }
+
+            if (isCommandResponse(message)) {
+              const mapEntry = this.pendingInvocations.get(message.correlationId)
+              if (!mapEntry) {
+                const err = new UnhandledError(
+                  StatusCode.BadRequest,
+                  'InvalidCommandResponse: received invalid command response',
+                  getCleanedMessage(message),
+                )
+                this.logger.error({ err, ...span.spanContext() }, 'received invalid command response')
+                this.emit('eventbridge-error', err)
+                return next(err)
+              }
+              if (isCommandSuccessResponse(message)) {
+                mapEntry.resolve(message.payload)
+              } else if (isCommandErrorResponse(message)) {
+                const error = message.isHandledError
+                  ? HandledError.fromMessage(message)
+                  : UnhandledError.fromMessage(message)
+                mapEntry.reject(error)
+              }
+              return next()
+            }
+
+            if (isInfoMessage(message)) {
+              this.logger.trace('info message', message)
+              return next()
+            }
+
+            const err = new UnhandledError(StatusCode.BadRequest, 'InvalidMessage: received invalid message', message)
+            this.logger.error({ err, ...span.spanContext() }, 'received invalid message')
+            this.emit('eventbridge-error', err)
+            return next()
+          } catch (error) {
+            const err = new HandledError(StatusCode.InternalServerError, 'eventbus failure', error)
+            this.emit('eventbridge-error', err)
+            this.logger.error({ err, ...span.spanContext() }, 'eventbus failure')
+
+            span.recordException(err as Error)
+
+            span.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: (err as Error).message,
+            })
+
+            return next(error as Error)
           }
-
-          mapEntry(message).then((result) => {
-            this.emitMessage(result)
-          })
-          return next()
-        }
-
-        if (isCommandResponse(message)) {
-          const mapEntry = this.pendingInvocations.get(message.correlationId)
-          if (!mapEntry) {
-            const error = new UnhandledError(
-              StatusCode.BadRequest,
-              'InvalidCommandResponse: received invalid command response',
-              getCleanedMessage(message),
-            )
-            this.log.error({ error }, 'received invalid command response')
-            this.emit('eventbridge-error', error)
-            return next(error)
-          }
-          if (isCommandSuccessResponse(message)) {
-            mapEntry.resolve(message.payload)
-          } else if (isCommandErrorResponse(message)) {
-            const error = message.isHandledError
-              ? HandledError.fromMessage(message)
-              : UnhandledError.fromMessage(message)
-            mapEntry.reject(error)
-          }
-          return next()
-        }
-
-        if (isInfoMessage(message)) {
-          this.log.trace('info message', message)
-          return next()
-        }
-
-        const error = new UnhandledError(StatusCode.BadRequest, 'InvalidMessage: received invalid message', message)
-        this.log.error({ error }, 'received invalid message')
-        this.emit('eventbridge-error', error)
-        return next()
-      } catch (err) {
-        const error = new HandledError(StatusCode.InternalServerError, 'eventbus failure', err)
-        this.emit('eventbridge-error', error)
-        this.log.error({ error }, 'eventbus failure')
-        return next(error as Error)
-      }
+        },
+      )
     }
 
     this.writeStream._write = write.bind(this)
 
     this.readStream.pipe(this.writeStream)
 
-    this.readStream.on('data', (message: EBMessage) => {
-      this.subscriptions.forEach((subscription) => {
-        if (isMessageMatchingSubscription(this.log, message, subscription)) {
-          subscription.cb(message).catch((error) => this.log.error({ error }))
-        }
-      })
-    })
     this.emit('eventbridge-connected', undefined)
   }
 
@@ -202,20 +317,42 @@ export class DefaultEventBridge extends EventBridge {
   async emitMessage(
     message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>,
   ): Promise<Readonly<EBMessage>> {
-    return new Promise((resolve, reject) => {
+    const context = await deserializeOtp(this.logger, message.otp)
+
+    const name = isCommandResponse(message as EBMessage)
+      ? PuristaSpanName.EventBridgeCommandResponse
+      : PuristaSpanName.EventBridgeEmitMessage
+
+    return this.startActiveSpan(name, { kind: SpanKind.PRODUCER }, context, async (span) => {
       try {
         const msg = Object.freeze({
           id: getNewEBMessageId(),
           timestamp: Date.now(),
-          traceId: message.traceId || getNewTraceId(),
+          traceId: message.traceId || span.spanContext().traceId,
           instanceId: this.config.instanceId,
+          otp: serializeOtp(),
           ...message,
         })
 
+        span.setAttribute(PuristaSpanTag.SenderServiceName, msg.sender.serviceName)
+        span.setAttribute(PuristaSpanTag.SenderServiceVersion, msg.sender.serviceVersion)
+        span.setAttribute(PuristaSpanTag.SenderServiceTarget, msg.sender.serviceTarget)
+        /*
+          span.setAttribute(PuristaSpanTag.ReceiverServiceName, msg.receiver.serviceName)
+          span.setAttribute(PuristaSpanTag.ReceiverServiceVersion, msg.receiver.serviceVersion)
+          span.setAttribute(PuristaSpanTag.ReceiverServiceTarget, msg.receiver.serviceTarget)
+          */
+
         this.readStream.push(msg)
-        resolve(msg as Readonly<EBMessage>)
+        return msg as Readonly<EBMessage>
       } catch (err) {
-        reject(err)
+        span.recordException(err as Error)
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: (err as Error).message,
+        })
+        this.logger.error({ err, ...span.spanContext() }, 'emitMessage failed')
+        throw err
       }
     })
   }
@@ -226,73 +363,76 @@ export class DefaultEventBridge extends EventBridge {
     _contentEncoding = 'utf-8',
     commandTimeout = this.config.defaultCommandTimeout,
   ): Promise<T> {
-    const correlationId = getNewCorrelationId()
+    const context = await deserializeOtp(this.logger, input.otp)
 
-    const command = Object.freeze({
-      id: getNewEBMessageId(),
-      instanceId: this.instanceId,
-      correlationId: getNewCorrelationId(),
-      timestamp: Date.now(),
-      messageType: EBMessageType.Command,
-      traceId: input.traceId || getNewTraceId(),
-      ...input,
-    })
+    return this.startActiveSpan(PuristaSpanName.EventBridgeInvokeCommand, {}, context, async (span) => {
+      const correlationId = getNewCorrelationId()
 
-    const removeFromPending = () => {
-      this.pendingInvocations.delete(correlationId)
-    }
-
-    const sendErrorInfoMsg = async () => {
-      try {
-        const payload: InfoInvokeTimeoutPayload = {
-          traceId: command.traceId,
-          correlationId,
-          sender: command.sender,
-          receiver: command.receiver,
-          timestamp: command.timestamp,
-        }
-
-        const infoMessage: InfoMessage = {
-          id: getNewEBMessageId(),
-          instanceId: command.instanceId,
-          principalId: command.principalId,
-          traceId: command.traceId,
-          correlationId: command.correlationId,
-          timestamp: Date.now(),
-          messageType: EBMessageType.InfoInvokeTimeout,
-          payload,
-          sender: input.sender,
-        }
-
-        await this.emitMessage(infoMessage)
-      } catch (err) {
-        const error = new UnhandledError(StatusCode.BadGateway, 'failed to send InfoInvokeTimeout message', {
-          traceId: command.traceId,
-          correlationId,
-          error: err,
-        })
-        this.log
-          .getChildLogger({ traceId: command.traceId })
-          .error({ error }, `failed to send InfoInvokeTimeout message`)
-        this.emit('eventbridge-error', error)
-      }
-    }
-
-    const executionPromise = new Promise<T>((resolve, reject) => {
-      this.pendingInvocations.set(command.correlationId, {
-        resolve: (successPayload: T) => {
-          removeFromPending()
-          resolve(successPayload)
-        },
-        reject: (err: unknown) => {
-          removeFromPending()
-          reject(err)
-          sendErrorInfoMsg()
-        },
+      const command = Object.freeze({
+        id: getNewEBMessageId(),
+        instanceId: this.instanceId,
+        correlationId: getNewCorrelationId(),
+        timestamp: Date.now(),
+        messageType: EBMessageType.Command,
+        traceId: input.traceId || span.spanContext().traceId,
+        ...input,
       })
-    })
 
-    this.emitMessage(command)
-    return Promise.race([executionPromise, getTimeoutPromise(commandTimeout, command.traceId)])
+      const removeFromPending = () => {
+        this.pendingInvocations.delete(correlationId)
+      }
+
+      const sendErrorInfoMsg = async () => {
+        try {
+          const payload: InfoInvokeTimeoutPayload = {
+            traceId: command.traceId,
+            correlationId,
+            sender: command.sender,
+            receiver: command.receiver,
+            timestamp: command.timestamp,
+          }
+
+          const infoMessage: InfoMessage = {
+            id: getNewEBMessageId(),
+            instanceId: command.instanceId,
+            principalId: command.principalId,
+            traceId: command.traceId,
+            correlationId: command.correlationId,
+            timestamp: Date.now(),
+            messageType: EBMessageType.InfoInvokeTimeout,
+            payload,
+            sender: input.sender,
+            otp: serializeOtp(),
+          }
+
+          await this.emitMessage(infoMessage)
+        } catch (error) {
+          const err = new UnhandledError(StatusCode.BadGateway, 'failed to send InfoInvokeTimeout message', {
+            traceId: command.traceId,
+            correlationId,
+            error,
+          })
+          this.logger.error({ err, ...span.spanContext() }, `failed to send InfoInvokeTimeout message`)
+          this.emit('eventbridge-error', err)
+        }
+      }
+
+      const executionPromise = new Promise<T>((resolve, reject) => {
+        this.pendingInvocations.set(command.correlationId, {
+          resolve: (successPayload: T) => {
+            removeFromPending()
+            resolve(successPayload)
+          },
+          reject: (err: unknown) => {
+            removeFromPending()
+            reject(err)
+            sendErrorInfoMsg()
+          },
+        })
+      })
+
+      this.emitMessage(command)
+      return Promise.race([executionPromise, getTimeoutPromise(commandTimeout, command.traceId)])
+    })
   }
 }

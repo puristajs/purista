@@ -10,6 +10,8 @@ export const getSubscriptionContextMock = <MessageType>(message: MessageType) =>
     emit: stub(),
     invoke: stub(),
     performance: [],
+    wrapInSpan: stub(),
+    startActiveSpan: stub(),
   }
 
   const mock: SubscriptionContext<MessageType> = {
@@ -17,7 +19,8 @@ export const getSubscriptionContextMock = <MessageType>(message: MessageType) =>
     message,
     emit: stubs.emit,
     invoke: stubs.invoke,
-    performance: stubs.performance,
+    wrapInSpan: stubs.wrapInSpan,
+    startActiveSpan: stubs.startActiveSpan,
   }
 
   return {

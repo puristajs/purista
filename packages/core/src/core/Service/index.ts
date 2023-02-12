@@ -1,2 +1,2 @@
 export * from './Service.impl'
-export * from './ServiceInfoValidator'
+export * from './ServiceInfoValidator.impl'

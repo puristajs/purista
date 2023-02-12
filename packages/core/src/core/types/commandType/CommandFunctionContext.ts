@@ -1,6 +1,7 @@
+import { Context, Span, SpanOptions } from '@opentelemetry/api'
+
 import { EBMessageAddress } from '../EBMessageAddress'
 import type { Logger } from '../Logger'
-import { MetricEntry } from '../MetricEntry'
 import type { Command } from './Command'
 
 export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsType = unknown> = {
@@ -12,5 +13,11 @@ export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsTy
     payload: PayloadType,
     parameter: ParameterType,
   ) => Promise<InvokeResponseType>
-  performance: MetricEntry[]
+  wrapInSpan: <F>(name: string, opts: SpanOptions, fn: (span: Span) => Promise<F>, context?: Context) => Promise<F>
+  startActiveSpan: <F>(
+    name: string,
+    opts: SpanOptions,
+    context: Context | undefined,
+    fn: (span: Span) => Promise<F>,
+  ) => Promise<F>
 }

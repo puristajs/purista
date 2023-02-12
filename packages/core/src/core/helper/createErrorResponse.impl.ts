@@ -1,7 +1,8 @@
-import { HandledError } from '../HandledError.impl'
+import { HandledError, UnhandledError } from '../Error'
 import { Command, CommandErrorResponse, EBMessageType, StatusCode } from '../types'
-import { UnhandledError } from '../UnhandledError.impl'
 import { getErrorMessageForCode } from './getErrorMessageForCode.impl'
+import { getNewTraceId } from './getNewTraceId.impl'
+import { serializeOtp } from './serializeOtp'
 
 /**
  * Creates a error response object based on original command
@@ -33,7 +34,7 @@ export const createErrorResponse = (
   const errorResponse: Readonly<Omit<CommandErrorResponse, 'instanceId'>> = Object.freeze({
     id: originalEBMessage.id,
     isHandledError,
-    traceId: originalEBMessage.traceId,
+    traceId: originalEBMessage.traceId || getNewTraceId(),
     correlationId: originalEBMessage.correlationId,
     timestamp: Date.now(),
     messageType: EBMessageType.CommandErrorResponse,
@@ -48,6 +49,7 @@ export const createErrorResponse = (
       message,
       data,
     },
+    otp: serializeOtp(),
   })
 
   return errorResponse
