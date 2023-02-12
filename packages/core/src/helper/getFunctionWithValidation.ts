@@ -1,3 +1,4 @@
+import { SpanStatusCode } from '@opentelemetry/api'
 import { z, ZodError } from 'zod'
 
 import { BeforeGuardHook, CommandFunction, HandledError, ServiceClass, StatusCode, UnhandledError } from '../core'
@@ -44,53 +45,78 @@ export const getFunctionWithValidation = function <
     MessagePayloadType,
     MessageParamsType,
     MessageResultType
-  > = async function (context, payload, params): Promise<MessageResultType> {
-    const { logger } = context
+  > = async function (context, payload, parameter): Promise<MessageResultType> {
+    const { logger, startActiveSpan, wrapInSpan } = context
     let safePayload = payload as unknown as FunctionPayloadType
     if (inputPayloadSchema) {
-      try {
-        safePayload = inputPayloadSchema.parse(payload)
-      } catch (err) {
-        const error = err as ZodError
-        logger.warn('input validation for payload failed:', error.message)
-        throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
-      }
+      safePayload = await startActiveSpan('validatePayload', {}, undefined, async (span) => {
+        try {
+          return inputPayloadSchema.parse(payload)
+        } catch (err) {
+          const error = err as ZodError
+          span.recordException(error)
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error.message,
+          })
+          logger.warn({ ...span.spanContext() }, 'input validation for payload failed:', error.message)
+          throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+        }
+      })
     }
 
-    let safeParams = params as unknown as FunctionParamsType
+    let safeParams = parameter as unknown as FunctionParamsType
     if (inputParameterSchema) {
-      try {
-        safeParams = inputParameterSchema.parse(params)
-      } catch (err) {
-        const error = err as ZodError
-        logger.warn('input validation for params failed:', error.message)
-        throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
-      }
+      safeParams = await startActiveSpan('validateParameter', {}, undefined, async (span) => {
+        try {
+          return inputParameterSchema.parse(parameter)
+        } catch (err) {
+          const error = err as ZodError
+          span.recordException(error)
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: error.message,
+          })
+          logger.warn({ ...span.spanContext() }, 'input validation for parameter failed:', error.message)
+          throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+        }
+      })
     }
 
     if (beforeGuards.length) {
-      const guards = beforeGuards.map((hook) => {
-        const beforeGuard = hook.bind(this, context)
-        return beforeGuard(safePayload, safeParams)
+      await startActiveSpan('beforeGuardHooks', {}, undefined, async () => {
+        const guards = beforeGuards.map((hook, index) =>
+          wrapInSpan('beforeGuardHook.' + index, {}, async (_subSpan) => {
+            return hook.bind(this, context)
+          }),
+        )
+        await Promise.all(guards)
       })
-      await Promise.all(guards)
     }
 
-    const call = fn.bind(this, context, safePayload, safeParams)
-
-    const output = await call()
+    const output = await startActiveSpan('functionExecution', {}, undefined, async () => {
+      const call = fn.bind(this, context, safePayload, safeParams)
+      return call()
+    })
 
     if (!outputPayloadSchema) {
       return output as unknown as MessageResultType
     }
 
-    try {
-      return outputPayloadSchema.parse(output)
-    } catch (err) {
-      const error = err as ZodError
-      logger.error({ error }, 'output validation failed')
-      throw new UnhandledError(StatusCode.InternalServerError)
-    }
+    return await startActiveSpan('outputValidation', {}, undefined, async (span) => {
+      try {
+        return outputPayloadSchema.parse(output)
+      } catch (error) {
+        const err = error as ZodError
+        span.recordException(err)
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: err.message,
+        })
+        logger.error({ err, ...span.spanContext() }, 'output validation failed')
+        throw new UnhandledError(StatusCode.InternalServerError)
+      }
+    })
   }
   return wrapped
 }
