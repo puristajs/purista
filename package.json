@@ -53,6 +53,7 @@
     "typescript": "^4.9.5"
   },
   "dependencies": {
-    "@purista/simple-example": "^1.4.1"
+    "@purista/simple-example": "^1.4.1",
+    "pino-pretty": "^9.1.1"
   }
 }

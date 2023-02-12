@@ -39,7 +39,7 @@ module.exports = {
         '!**/node_modules/**',
         '!**/dist/**',
       ],
-      transformIgnorePatterns: ['/node_modules/(?!(nanoid)/)', '/bar/'],
+      transformIgnorePatterns: ['/bar/'],
     },
   ],
   testTimeout: 60000,
