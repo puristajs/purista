@@ -35,7 +35,7 @@ export class FunctionDefinitionBuilder<
   private httpMetadata?: HttpExposedServiceMeta
   private inputSchema?: z.ZodType
   private outputSchema?: z.ZodType
-  private paramsSchema?: z.ZodType
+  private parameterSchema?: z.ZodType
   private queryParameter: QueryParameter[] = []
 
   private tags: string[] = []
@@ -135,11 +135,11 @@ export class FunctionDefinitionBuilder<
   /**
    * Add a schema for output parameter validation.
    * Types for parameter of message and function parameter output are generated from given schema.
-   * @param paramsSchema The schema validation for output parameter
+   * @param parameterSchema The schema validation for output parameter
    * @returns FunctionDefinitionBuilder
    */
-  addParameterSchema<I, D extends z.ZodTypeDef, O>(paramsSchema: z.ZodType<O, D, I>) {
-    this.paramsSchema = paramsSchema
+  addParameterSchema<I, D extends z.ZodTypeDef, O>(parameterSchema: z.ZodType<O, D, I>) {
+    this.parameterSchema = parameterSchema
     return this as unknown as FunctionDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
@@ -422,7 +422,7 @@ export class FunctionDefinitionBuilder<
     }
 
     const inputPayloadSchema: any = this.hooks.transformInput?.transformInputSchema || this.inputSchema
-    const inputParameterSchema: any = this.hooks.transformInput?.transformParameterSchema || this.paramsSchema
+    const inputParameterSchema: any = this.hooks.transformInput?.transformParameterSchema || this.parameterSchema
     const outputPayloadSchema: any = this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
 
     def.metadata.expose.http.openApi = {
@@ -479,7 +479,7 @@ export class FunctionDefinitionBuilder<
         FunctionPayloadType,
         FunctionParamsType,
         FunctionResultType
-      >(this.fn, this.inputSchema, this.paramsSchema, this.outputSchema, this.hooks.beforeGuard),
+      >(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard),
       hooks: this.hooks,
     }
 

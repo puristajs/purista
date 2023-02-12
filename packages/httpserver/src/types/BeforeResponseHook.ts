@@ -4,5 +4,5 @@ export type BeforeResponseHook = <T = unknown>(
   payload: T,
   request: FastifyRequest,
   reply: FastifyReply,
-  params: Record<string, unknown>,
+  parameter: Record<string, unknown>,
 ) => void
