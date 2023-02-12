@@ -32,8 +32,6 @@ export type CommandDefinition<
   >
   eventName?: string
   hooks: {
-    onSuccess?: () => Promise<void>
-    onError?: () => Promise<void>
     transformInput?: {
       transformInputSchema: z.ZodType
       transformParameterSchema: z.ZodType
