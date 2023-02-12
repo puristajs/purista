@@ -1,5 +1,5 @@
-import { HandledError } from '../../HandledError.impl'
-import { UnhandledError } from '../../UnhandledError.impl'
+import { HandledError } from '../../Error/HandledError.impl'
+import { UnhandledError } from '../../Error/UnhandledError.impl'
 
 export type PendigInvocation = {
   resolve(responsePayload: unknown): void

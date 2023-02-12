@@ -1,5 +1,5 @@
+import { UnhandledError } from '../Error/UnhandledError.impl'
 import { StatusCode, TraceId } from '../types'
-import { UnhandledError } from '../UnhandledError.impl'
 
 export const getTimeoutPromise = (ttl: number, traceId: TraceId): Promise<never> =>
   // eslint-disable-next-line promise/param-names
