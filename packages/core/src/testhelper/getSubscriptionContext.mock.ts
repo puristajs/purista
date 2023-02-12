@@ -1,17 +1,17 @@
-import { stub } from 'sinon'
+import { SinonSandbox, stub } from 'sinon'
 
 import { SubscriptionContext } from '../core'
 import { getLoggerMock } from './getLogger.mock'
 
-export const getSubscriptionContextMock = <MessageType>(message: MessageType) => {
-  const logger = getLoggerMock()
+export const getSubscriptionContextMock = <MessageType>(message: MessageType, sandbox?: SinonSandbox) => {
+  const logger = getLoggerMock(sandbox)
   const stubs = {
     logger: logger.stubs,
-    emit: stub(),
-    invoke: stub(),
+    emit: sandbox?.stub() || stub(),
+    invoke: sandbox?.stub() || stub(),
     performance: [],
-    wrapInSpan: stub(),
-    startActiveSpan: stub(),
+    wrapInSpan: sandbox?.stub() || stub(),
+    startActiveSpan: sandbox?.stub() || stub(),
   }
 
   const mock: SubscriptionContext<MessageType> = {

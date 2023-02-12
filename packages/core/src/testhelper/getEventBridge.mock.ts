@@ -1,4 +1,4 @@
-import { SinonStub, stub } from 'sinon'
+import { SinonSandbox, SinonStub, stub } from 'sinon'
 
 import { EventBridge } from '../core'
 
@@ -6,15 +6,15 @@ import { EventBridge } from '../core'
  * Mocks the eventbridge and methods are stubs
  * @returns EventBridge mocked
  */
-export const getEventBridgeMock = (): { mock: EventBridge; stubs: Record<string, SinonStub> } => {
-  const emitMessage = stub()
-  const emit = stub()
-  const registerServiceFunction = stub()
-  const registerSubscription = stub()
-  const unregisterServiceFunction = stub()
-  const unregisterSubscription = stub()
-  const invoke = stub()
-  const start = stub()
+export const getEventBridgeMock = (sandbox?: SinonSandbox): { mock: EventBridge; stubs: Record<string, SinonStub> } => {
+  const emitMessage = sandbox?.stub() || stub()
+  const emit = sandbox?.stub() || stub()
+  const registerServiceFunction = sandbox?.stub() || stub()
+  const registerSubscription = sandbox?.stub() || stub()
+  const unregisterServiceFunction = sandbox?.stub() || stub()
+  const unregisterSubscription = sandbox?.stub() || stub()
+  const invoke = sandbox?.stub() || stub()
+  const start = sandbox?.stub() || stub()
 
   const mock = {
     defaultCommandTimeout: 30000,
