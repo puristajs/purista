@@ -1,8 +1,14 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/core](../modules/purista_core.md) / Logger
+[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / Logger
 
 # Class: Logger
 
 [@purista/core](../modules/purista_core.md).Logger
+
+## Hierarchy
+
+- **`Logger`**
+
+  ↳ [`DefaultLogger`](purista_core.DefaultLogger.md)
 
 ## Table of contents
 
@@ -30,13 +36,13 @@
 
 ### debug
 
-▸ `Abstract` **debug**(...`args`): `void`
+▸ `Abstract` **debug**(`...args`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...args` | `any` |
+| `...args` | [`LogFnParamType`](../modules/purista_core.md#logfnparamtype) |
 
 #### Returns
 
@@ -44,19 +50,19 @@
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:20](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L20)
+[core/src/core/types/Logger.ts:22](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/Logger.ts#L22)
 
 ___
 
 ### error
 
-▸ `Abstract` **error**(...`args`): `void`
+▸ `Abstract` **error**(`...args`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...args` | `any` |
+| `...args` | [`LogFnParamType`](../modules/purista_core.md#logfnparamtype) |
 
 #### Returns
 
@@ -64,19 +70,19 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:18](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L18)
+[core/src/core/types/Logger.ts:20](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/Logger.ts#L20)
 
 ___
 
 ### fatal
 
-▸ `Abstract` **fatal**(...`args`): `void`
+▸ `Abstract` **fatal**(`...args`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...args` | `any` |
+| `...args` | [`LogFnParamType`](../modules/purista_core.md#logfnparamtype) |
 
 #### Returns
 
@@ -84,7 +90,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:17](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L17)
+[core/src/core/types/Logger.ts:19](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/Logger.ts#L19)
 
 ___
 
@@ -104,19 +110,19 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:22](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L22)
+[core/src/core/types/Logger.ts:24](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/Logger.ts#L24)
 
 ___
 
 ### info
 
-▸ `Abstract` **info**(...`args`): `void`
+▸ `Abstract` **info**(`...args`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...args` | `any` |
+| `...args` | [`LogFnParamType`](../modules/purista_core.md#logfnparamtype) |
 
 #### Returns
 
@@ -124,19 +130,19 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:16](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L16)
+[core/src/core/types/Logger.ts:18](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/Logger.ts#L18)
 
 ___
 
 ### trace
 
-▸ `Abstract` **trace**(...`args`): `void`
+▸ `Abstract` **trace**(`...args`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...args` | `any` |
+| `...args` | [`LogFnParamType`](../modules/purista_core.md#logfnparamtype) |
 
 #### Returns
 
@@ -144,19 +150,19 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:21](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L21)
+[core/src/core/types/Logger.ts:23](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/Logger.ts#L23)
 
 ___
 
 ### warn
 
-▸ `Abstract` **warn**(...`args`): `void`
+▸ `Abstract` **warn**(`...args`): `void`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...args` | `any` |
+| `...args` | [`LogFnParamType`](../modules/purista_core.md#logfnparamtype) |
 
 #### Returns
 
@@ -164,4 +170,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:19](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/core/types/Logger.ts#L19)
+[core/src/core/types/Logger.ts:21](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/Logger.ts#L21)

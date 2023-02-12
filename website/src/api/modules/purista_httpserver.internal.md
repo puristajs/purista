@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/httpserver](purista_httpserver.md) / internal
+[PURISTA API - v1.4.9](../README.md) / [@purista/httpserver](purista_httpserver.md) / internal
 
 # Namespace: internal
 
@@ -32,6 +32,7 @@
 - [HandledError](../classes/purista_httpserver.internal.HandledError.md)
 - [Logger](../classes/purista_httpserver.internal.Logger.md)
 - [Service](../classes/purista_httpserver.internal.Service.md)
+- [ServiceBaseClass](../classes/purista_httpserver.internal.ServiceBaseClass.md)
 - [ServiceClass](../classes/purista_httpserver.internal.ServiceClass.md)
 - [UnhandledError](../classes/purista_httpserver.internal.UnhandledError.md)
 
@@ -80,15 +81,14 @@
 - [InfoServiceShutdown](purista_httpserver.internal.md#infoserviceshutdown-1)
 - [InfoSubscriptionError](purista_httpserver.internal.md#infosubscriptionerror-1)
 - [InstanceId](purista_httpserver.internal.md#instanceid)
+- [LogFnParamType](purista_httpserver.internal.md#logfnparamtype)
 - [LogLevelName](purista_httpserver.internal.md#loglevelname)
 - [LoggerOptions](purista_httpserver.internal.md#loggeroptions)
-- [MetricEntry](purista_httpserver.internal.md#metricentry)
 - [PrincipalId](purista_httpserver.internal.md#principalid)
 - [QueryParameter](purista_httpserver.internal.md#queryparameter)
 - [ServiceEvents](purista_httpserver.internal.md#serviceevents)
 - [ServiceEventsInternal](purista_httpserver.internal.md#serviceeventsinternal)
 - [ServiceInfoType](purista_httpserver.internal.md#serviceinfotype)
-- [ServiceMetricEvents](purista_httpserver.internal.md#servicemetricevents)
 - [Subscription](purista_httpserver.internal.md#subscription)
 - [SubscriptionContext](purista_httpserver.internal.md#subscriptioncontext)
 - [SubscriptionDefinition](purista_httpserver.internal.md#subscriptiondefinition)
@@ -113,7 +113,7 @@ If the sender does not receive a answer within this time frame, the command will
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:11
+core/lib/core/types/EBMessageType.enum.d.ts:11
 
 ___
 
@@ -123,7 +123,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:13
+core/lib/core/types/EBMessageType.enum.d.ts:13
 
 ___
 
@@ -133,7 +133,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:12
+core/lib/core/types/EBMessageType.enum.d.ts:12
 
 ___
 
@@ -143,7 +143,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:26
+core/lib/core/types/EBMessageType.enum.d.ts:26
 
 ___
 
@@ -153,7 +153,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:24
+core/lib/core/types/EBMessageType.enum.d.ts:24
 
 ___
 
@@ -163,7 +163,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:23
+core/lib/core/types/EBMessageType.enum.d.ts:23
 
 ___
 
@@ -178,7 +178,7 @@ Info messages are fire & forget broadcasting messages.
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:20
+core/lib/core/types/EBMessageType.enum.d.ts:20
 
 ___
 
@@ -188,7 +188,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:22
+core/lib/core/types/EBMessageType.enum.d.ts:22
 
 ___
 
@@ -198,7 +198,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:21
+core/lib/core/types/EBMessageType.enum.d.ts:21
 
 ___
 
@@ -208,7 +208,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:25
+core/lib/core/types/EBMessageType.enum.d.ts:25
 
 ___
 
@@ -218,13 +218,13 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:27
+core/lib/core/types/EBMessageType.enum.d.ts:27
 
 ## Type Aliases
 
 ### AfterGuardHook
 
-Ƭ **AfterGuardHook**<`ServiceClassType`, `ResultType`, `PayloadType`, `ParamsType`\>: (`this`: `ServiceClassType`, `context`: [`CommandFunctionContext`](purista_httpserver.internal.md#commandfunctioncontext)<`PayloadType`, `ParamsType`\>, `result`: `ResultType`, `input`: `PayloadType`, `params`: `ParamsType`) => `Promise`<`void`\>
+Ƭ **AfterGuardHook**<`ServiceClassType`, `ResultType`, `PayloadType`, `ParamsType`\>: (`this`: `ServiceClassType`, `context`: [`CommandFunctionContext`](purista_httpserver.internal.md#commandfunctioncontext)<`PayloadType`, `ParamsType`\>, `result`: `ResultType`, `input`: `PayloadType`, `parameter`: `ParamsType`) => `Promise`<`void`\>
 
 #### Type parameters
 
@@ -237,7 +237,7 @@ core/lib/types/core/types/EBMessageType.enum.d.ts:27
 
 #### Type declaration
 
-▸ (`this`, `context`, `result`, `input`, `params`): `Promise`<`void`\>
+▸ (`this`, `context`, `result`, `input`, `parameter`): `Promise`<`void`\>
 
 Definition of after guard hook functions.
 This guard is called after function successfully returns and after output validation.
@@ -250,7 +250,7 @@ This guard is called after function successfully returns and after output valida
 | `context` | [`CommandFunctionContext`](purista_httpserver.internal.md#commandfunctioncontext)<`PayloadType`, `ParamsType`\> |
 | `result` | `ResultType` |
 | `input` | `PayloadType` |
-| `params` | `ParamsType` |
+| `parameter` | `ParamsType` |
 
 ##### Returns
 
@@ -258,13 +258,13 @@ This guard is called after function successfully returns and after output valida
 
 #### Defined in
 
-core/lib/types/core/types/commandType/AfterGuardHook.d.ts:7
+core/lib/core/types/commandType/AfterGuardHook.d.ts:7
 
 ___
 
 ### BeforeGuardHook
 
-Ƭ **BeforeGuardHook**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>: (`this`: `ServiceClassType`, `context`: [`CommandFunctionContext`](purista_httpserver.internal.md#commandfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\>, `payload`: `FunctionPayloadType`, `params`: `FunctionParamsType`) => `Promise`<`void`\>
+Ƭ **BeforeGuardHook**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>: (`this`: `ServiceClassType`, `context`: [`CommandFunctionContext`](purista_httpserver.internal.md#commandfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\>, `payload`: `FunctionPayloadType`, `parameter`: `FunctionParamsType`) => `Promise`<`void`\>
 
 #### Type parameters
 
@@ -278,7 +278,7 @@ ___
 
 #### Type declaration
 
-▸ (`this`, `context`, `payload`, `params`): `Promise`<`void`\>
+▸ (`this`, `context`, `payload`, `parameter`): `Promise`<`void`\>
 
 Guard is called after command function input validation and before executing the command function.
 The guard is usefull to separate for example auth checks from business logic.
@@ -291,7 +291,7 @@ It should throw HandledError or return void.
 | `this` | `ServiceClassType` |
 | `context` | [`CommandFunctionContext`](purista_httpserver.internal.md#commandfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\> |
 | `payload` | `FunctionPayloadType` |
-| `params` | `FunctionParamsType` |
+| `parameter` | `FunctionParamsType` |
 
 ##### Returns
 
@@ -299,7 +299,7 @@ It should throw HandledError or return void.
 
 #### Defined in
 
-core/lib/types/core/types/commandType/BeforeGuardHook.d.ts:8
+core/lib/core/types/commandType/BeforeGuardHook.d.ts:8
 
 ___
 
@@ -326,7 +326,7 @@ Subscribers should not respond with command responses if they are "silent" subsc
 
 #### Defined in
 
-core/lib/types/core/types/commandType/Command.d.ts:17
+core/lib/core/types/commandType/Command.d.ts:17
 
 ___
 
@@ -372,7 +372,7 @@ The definition for a command provided by some service.
 
 #### Defined in
 
-core/lib/types/core/types/commandType/CommandDefinition.d.ts:11
+core/lib/core/types/commandType/CommandDefinition.d.ts:11
 
 ___
 
@@ -394,7 +394,7 @@ export const userServiceCommands: CommandDefinitionList<UserService> = [signUp.g
 
 #### Defined in
 
-core/lib/types/core/types/commandType/CommandDefinitionList.d.ts:10
+core/lib/core/types/commandType/CommandDefinitionList.d.ts:10
 
 ___
 
@@ -406,13 +406,13 @@ CommandErrorResponse is a response to a specific previously received command whi
 
 #### Defined in
 
-core/lib/types/core/types/commandType/CommandErrorResponse.d.ts:10
+core/lib/core/types/commandType/CommandErrorResponse.d.ts:10
 
 ___
 
 ### CommandFunction
 
-Ƭ **CommandFunction**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: (`this`: `ServiceClassType`, `context`: [`CommandFunctionContext`](purista_httpserver.internal.md#commandfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\>, `payload`: `FunctionPayloadType`, `params`: `FunctionParamsType`) => `Promise`<`FunctionResultType`\>
+Ƭ **CommandFunction**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: (`this`: `ServiceClassType`, `context`: [`CommandFunctionContext`](purista_httpserver.internal.md#commandfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\>, `payload`: `FunctionPayloadType`, `parameter`: `FunctionParamsType`) => `Promise`<`FunctionResultType`\>
 
 #### Type parameters
 
@@ -427,7 +427,7 @@ ___
 
 #### Type declaration
 
-▸ (`this`, `context`, `payload`, `params`): `Promise`<`FunctionResultType`\>
+▸ (`this`, `context`, `payload`, `parameter`): `Promise`<`FunctionResultType`\>
 
 CommandFunction is a function which will be triggered when a matching event bridge message is received by the service
 
@@ -438,7 +438,7 @@ CommandFunction is a function which will be triggered when a matching event brid
 | `this` | `ServiceClassType` |
 | `context` | [`CommandFunctionContext`](purista_httpserver.internal.md#commandfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\> |
 | `payload` | `FunctionPayloadType` |
-| `params` | `FunctionParamsType` |
+| `parameter` | `FunctionParamsType` |
 
 ##### Returns
 
@@ -446,7 +446,7 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 #### Defined in
 
-core/lib/types/core/types/commandType/CommandFunction.d.ts:6
+core/lib/core/types/commandType/CommandFunction.d.ts:6
 
 ___
 
@@ -469,11 +469,12 @@ ___
 | `invoke` | <InvokeResponseType, PayloadType, ParameterType\>(`address`: [`EBMessageAddress`](purista_httpserver.internal.md#ebmessageaddress), `payload`: `PayloadType`, `parameter`: `ParameterType`) => `Promise`<`InvokeResponseType`\> |
 | `logger` | [`Logger`](../classes/purista_httpserver.internal.Logger.md) |
 | `message` | [`Command`](purista_httpserver.internal.md#command-1)<`MessagePayloadType`, `MessageParamsType`\> |
-| `performance` | [`MetricEntry`](purista_httpserver.internal.md#metricentry)[] |
+| `startActiveSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `Context` \| `undefined`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> |
+| `wrapInSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\> |
 
 #### Defined in
 
-core/lib/types/core/types/commandType/CommandFunctionContext.d.ts:5
+core/lib/core/types/commandType/CommandFunctionContext.d.ts:5
 
 ___
 
@@ -491,13 +492,13 @@ CommandResponse is a response to a specific previously received command which ca
 
 #### Defined in
 
-core/lib/types/core/types/commandType/CommandResponse.d.ts:7
+core/lib/core/types/commandType/CommandResponse.d.ts:7
 
 ___
 
 ### CommandSuccessResponse
 
-Ƭ **CommandSuccessResponse**<`PayloadType`\>: { `correlationId`: [`CorrelationId`](purista_httpserver.internal.md#correlationid) ; `messageType`: [`CommandSuccessResponse`](../enums/purista_httpserver.internal.EBMessageType.md#commandsuccessresponse) ; `payload`: `PayloadType` ; `receiver`: [`EBMessageAddress`](purista_httpserver.internal.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](purista_httpserver.internal.md#ebmessageaddress)  } & [`EBMessageBase`](purista_httpserver.internal.md#ebmessagebase)
+Ƭ **CommandSuccessResponse**<`PayloadType`\>: { `correlationId`: [`CorrelationId`](purista_httpserver.internal.md#correlationid) ; `messageType`: [`CommandSuccessResponse`](purista_httpserver.internal.md#commandsuccessresponse) ; `payload`: `PayloadType` ; `receiver`: [`EBMessageAddress`](purista_httpserver.internal.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](purista_httpserver.internal.md#ebmessageaddress)  } & [`EBMessageBase`](purista_httpserver.internal.md#ebmessagebase)
 
 CommandSuccessResponse is a response to a specific previously received command.
 It indicates that the command was executed successfully and contains the result payload
@@ -510,7 +511,7 @@ It indicates that the command was executed successfully and contains the result 
 
 #### Defined in
 
-core/lib/types/core/types/commandType/CommandSuccessResponse.d.ts:10
+core/lib/core/types/commandType/CommandSuccessResponse.d.ts:10
 
 ___
 
@@ -520,7 +521,7 @@ ___
 
 #### Defined in
 
-core/lib/types/httpserver/types/ContentType.d.ts:1
+core/lib/httpserver/types/ContentType.d.ts:1
 
 ___
 
@@ -530,7 +531,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/CorrelationId.d.ts:1
+core/lib/core/types/CorrelationId.d.ts:1
 
 ___
 
@@ -544,7 +545,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/ServiceEvents.d.ts:55
+core/lib/core/types/ServiceEvents.d.ts:50
 
 ___
 
@@ -558,7 +559,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EventBridgeEvents.d.ts:18
+core/lib/core/types/EventBridgeEvents.d.ts:18
 
 ___
 
@@ -574,7 +575,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/CustomMessage.d.ts:5
+core/lib/core/types/CustomMessage.d.ts:5
 
 ___
 
@@ -586,7 +587,7 @@ EBMessage is some message which is handled by the event bridge.
 
 #### Defined in
 
-core/lib/types/core/types/EBMessage.d.ts:7
+core/lib/core/types/EBMessage.d.ts:7
 
 ___
 
@@ -606,7 +607,7 @@ A event bridge message address describes receiver/sender of a message.
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageAddress.d.ts:4
+core/lib/core/types/EBMessageAddress.d.ts:4
 
 ___
 
@@ -622,13 +623,14 @@ ___
 | `eventName?` | `string` |
 | `id` | [`EBMessageId`](purista_httpserver.internal.md#ebmessageid) |
 | `instanceId` | [`InstanceId`](purista_httpserver.internal.md#instanceid) |
+| `otp?` | `string` |
 | `principalId?` | [`PrincipalId`](purista_httpserver.internal.md#principalid) |
 | `timestamp` | `number` |
 | `traceId?` | [`TraceId`](purista_httpserver.internal.md#traceid) |
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageBase.d.ts:6
+core/lib/core/types/EBMessageBase.d.ts:6
 
 ___
 
@@ -640,7 +642,7 @@ Unique id of the event bridge message
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageId.d.ts:4
+core/lib/core/types/EBMessageId.d.ts:4
 
 ___
 
@@ -659,7 +661,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/ErrorResponse.d.ts:3
+core/lib/core/types/ErrorResponse.d.ts:3
 
 ___
 
@@ -669,7 +671,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EventBridgeEvents.d.ts:21
+core/lib/core/types/EventBridgeEvents.d.ts:21
 
 ___
 
@@ -691,7 +693,7 @@ Events which can be emitted by a event bridge
 
 #### Defined in
 
-core/lib/types/core/types/EventBridgeEvents.d.ts:6
+core/lib/core/types/EventBridgeEvents.d.ts:6
 
 ___
 
@@ -707,7 +709,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:2
+core/lib/core/types/GenericEventEmitter.d.ts:2
 
 ___
 
@@ -717,13 +719,13 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:1
+core/lib/core/types/GenericEventEmitter.d.ts:1
 
 ___
 
 ### EventReceiver
 
-Ƭ **EventReceiver**<`T`\>: (`params`: `T`) => `void`
+Ƭ **EventReceiver**<`T`\>: (`parameter`: `T`) => `void`
 
 #### Type parameters
 
@@ -733,13 +735,13 @@ ___
 
 #### Type declaration
 
-▸ (`params`): `void`
+▸ (`parameter`): `void`
 
 ##### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `params` | `T` |
+| `parameter` | `T` |
 
 ##### Returns
 
@@ -747,7 +749,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:3
+core/lib/core/types/GenericEventEmitter.d.ts:3
 
 ___
 
@@ -759,9 +761,10 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `expose` | { `http`: { `contentType?`: [`ContentType`](purista_httpserver.internal.md#contenttype) ; `method`: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` ; `openApi?`: { `additionalStatusCodes?`: [`StatusCode`](../enums/purista_httpserver.internal.StatusCode.md)[] ; `description`: `string` ; `inputPayload?`: `SchemaObject` ; `isSecure`: `boolean` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject` ; `query?`: [`QueryParameter`](purista_httpserver.internal.md#queryparameter)[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  } |
-| `expose.http` | { `contentType?`: [`ContentType`](purista_httpserver.internal.md#contenttype) ; `method`: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` ; `openApi?`: { `additionalStatusCodes?`: [`StatusCode`](../enums/purista_httpserver.internal.StatusCode.md)[] ; `description`: `string` ; `inputPayload?`: `SchemaObject` ; `isSecure`: `boolean` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject` ; `query?`: [`QueryParameter`](purista_httpserver.internal.md#queryparameter)[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  } |
+| `expose` | { `http`: { `contentType?`: [`ContentType`](purista_httpserver.internal.md#contenttype) ; `contentTypeResponse?`: [`ContentType`](purista_httpserver.internal.md#contenttype) ; `method`: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` ; `openApi?`: { `additionalStatusCodes?`: [`StatusCode`](../enums/purista_httpserver.internal.StatusCode.md)[] ; `description`: `string` ; `inputPayload?`: `SchemaObject` ; `isSecure`: `boolean` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject` ; `query?`: [`QueryParameter`](purista_httpserver.internal.md#queryparameter)[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  } |
+| `expose.http` | { `contentType?`: [`ContentType`](purista_httpserver.internal.md#contenttype) ; `contentTypeResponse?`: [`ContentType`](purista_httpserver.internal.md#contenttype) ; `method`: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` ; `openApi?`: { `additionalStatusCodes?`: [`StatusCode`](../enums/purista_httpserver.internal.StatusCode.md)[] ; `description`: `string` ; `inputPayload?`: `SchemaObject` ; `isSecure`: `boolean` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject` ; `query?`: [`QueryParameter`](purista_httpserver.internal.md#queryparameter)[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  } |
 | `expose.http.contentType?` | [`ContentType`](purista_httpserver.internal.md#contenttype) |
+| `expose.http.contentTypeResponse?` | [`ContentType`](purista_httpserver.internal.md#contenttype) |
 | `expose.http.method` | ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` |
 | `expose.http.openApi?` | { `additionalStatusCodes?`: [`StatusCode`](../enums/purista_httpserver.internal.StatusCode.md)[] ; `description`: `string` ; `inputPayload?`: `SchemaObject` ; `isSecure`: `boolean` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject` ; `query?`: [`QueryParameter`](purista_httpserver.internal.md#queryparameter)[] ; `summary`: `string` ; `tags?`: `string`[]  } |
 | `expose.http.openApi.additionalStatusCodes?` | [`StatusCode`](../enums/purista_httpserver.internal.StatusCode.md)[] |
@@ -777,7 +780,7 @@ ___
 
 #### Defined in
 
-core/lib/types/httpserver/types/HttpExposedServiceMeta.d.ts:5
+core/lib/httpserver/types/HttpExposedServiceMeta.d.ts:5
 
 ___
 
@@ -787,7 +790,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoInvokeTimeout.d.ts:20
+core/lib/core/types/infoType/InfoInvokeTimeout.d.ts:20
 
 ___
 
@@ -797,7 +800,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoMessage.d.ts:11
+core/lib/core/types/infoType/InfoMessage.d.ts:11
 
 ___
 
@@ -807,7 +810,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoMessage.d.ts:12
+core/lib/core/types/infoType/InfoMessage.d.ts:12
 
 ___
 
@@ -817,7 +820,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceBase.d.ts:2
+core/lib/core/types/infoType/InfoServiceBase.d.ts:2
 
 ___
 
@@ -827,7 +830,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceDrain.d.ts:3
+core/lib/core/types/infoType/InfoServiceDrain.d.ts:3
 
 ___
 
@@ -837,7 +840,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceFunctionAdded.d.ts:4
+core/lib/core/types/infoType/InfoServiceFunctionAdded.d.ts:4
 
 ___
 
@@ -847,7 +850,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceInit.d.ts:3
+core/lib/core/types/infoType/InfoServiceInit.d.ts:3
 
 ___
 
@@ -857,7 +860,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceNotReady.d.ts:3
+core/lib/core/types/infoType/InfoServiceNotReady.d.ts:3
 
 ___
 
@@ -867,7 +870,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceReady.d.ts:3
+core/lib/core/types/infoType/InfoServiceReady.d.ts:3
 
 ___
 
@@ -877,7 +880,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoServiceShutdown.d.ts:3
+core/lib/core/types/infoType/InfoServiceShutdown.d.ts:3
 
 ___
 
@@ -887,7 +890,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/infoType/InfoSubscriptionError.d.ts:3
+core/lib/core/types/infoType/InfoSubscriptionError.d.ts:3
 
 ___
 
@@ -897,7 +900,17 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/InstanceId.d.ts:1
+core/lib/core/types/InstanceId.d.ts:1
+
+___
+
+### LogFnParamType
+
+Ƭ **LogFnParamType**: [`unknown`, string?, ...any] \| [`string`, ...any]
+
+#### Defined in
+
+core/lib/core/types/Logger.d.ts:13
 
 ___
 
@@ -907,7 +920,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/LogLevelName.d.ts:1
+core/lib/core/types/LogLevelName.d.ts:1
 
 ___
 
@@ -929,28 +942,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/Logger.d.ts:4
-
-___
-
-### MetricEntry
-
-Ƭ **MetricEntry**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `duration` | `number` | total duration in ms |
-| `endTime` | `number` | end timestamp in ms |
-| `functionName` | `string` | name of function or subscription |
-| `name` | `string` | metric name |
-| `startTime` | `number` | start timestamp in ms |
-| `traceId` | [`TraceId`](purista_httpserver.internal.md#traceid) | trace id |
-
-#### Defined in
-
-core/lib/types/core/types/MetricEntry.d.ts:2
+core/lib/core/types/Logger.d.ts:4
 
 ___
 
@@ -960,7 +952,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/PrincipalId.d.ts:1
+core/lib/core/types/PrincipalId.d.ts:1
 
 ___
 
@@ -977,17 +969,17 @@ ___
 
 #### Defined in
 
-core/lib/types/httpserver/types/QueryParameter.d.ts:1
+core/lib/httpserver/types/QueryParameter.d.ts:1
 
 ___
 
 ### ServiceEvents
 
-Ƭ **ServiceEvents**: [`ServiceEventsInternal`](purista_httpserver.internal.md#serviceeventsinternal) & [`ServiceMetricEvents`](purista_httpserver.internal.md#servicemetricevents) & [`addPrefixToObject`](purista_httpserver.internal.md#addprefixtoobject)<[`CustomEvents`](purista_httpserver.internal.md#customevents), ``"custom-"``\>
+Ƭ **ServiceEvents**: [`ServiceEventsInternal`](purista_httpserver.internal.md#serviceeventsinternal) & [`addPrefixToObject`](purista_httpserver.internal.md#addprefixtoobject)<[`CustomEvents`](purista_httpserver.internal.md#customevents), ``"custom-"``\>
 
 #### Defined in
 
-core/lib/types/core/types/ServiceEvents.d.ts:58
+core/lib/core/types/ServiceEvents.d.ts:53
 
 ___
 
@@ -1028,7 +1020,7 @@ If you like to use your own events, the event names should be prefixed with `cus
 
 #### Defined in
 
-core/lib/types/core/types/ServiceEvents.d.ts:11
+core/lib/core/types/ServiceEvents.d.ts:10
 
 ___
 
@@ -1048,24 +1040,7 @@ General service information
 
 #### Defined in
 
-core/lib/types/core/types/infoType/ServiceInfoType.d.ts:4
-
-___
-
-### ServiceMetricEvents
-
-Ƭ **ServiceMetricEvents**: `Object`
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `metric-function-execution` | [`MetricEntry`](purista_httpserver.internal.md#metricentry)[] |
-| `metric-subscription-execution` | [`MetricEntry`](purista_httpserver.internal.md#metricentry)[] |
-
-#### Defined in
-
-core/lib/types/core/types/ServiceEvents.d.ts:51
+core/lib/core/types/infoType/ServiceInfoType.d.ts:4
 
 ___
 
@@ -1096,7 +1071,7 @@ A subscription managed by the event bridge
 
 #### Defined in
 
-core/lib/types/core/types/subscription/Subscription.d.ts:9
+core/lib/core/types/subscription/Subscription.d.ts:9
 
 ___
 
@@ -1118,11 +1093,12 @@ ___
 | `invoke` | <InvokeResponseType, PayloadType, ParameterType\>(`address`: [`EBMessageAddress`](purista_httpserver.internal.md#ebmessageaddress), `payload`: `PayloadType`, `parameter`: `ParameterType`) => `Promise`<`InvokeResponseType`\> |
 | `logger` | [`Logger`](../classes/purista_httpserver.internal.Logger.md) |
 | `message` | `MessageType` |
-| `performance` | [`MetricEntry`](purista_httpserver.internal.md#metricentry)[] |
+| `startActiveSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `Context` \| `undefined`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> |
+| `wrapInSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\> |
 
 #### Defined in
 
-core/lib/types/core/types/subscription/SubscriptionContext.d.ts:5
+core/lib/core/types/subscription/SubscriptionContext.d.ts:5
 
 ___
 
@@ -1161,7 +1137,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/subscription/SubscriptionDefinition.d.ts:8
+core/lib/core/types/subscription/SubscriptionDefinition.d.ts:8
 
 ___
 
@@ -1183,7 +1159,7 @@ export const userServiceCommands: SubscriptionDefinitionList<UserService> = [sig
 
 #### Defined in
 
-core/lib/types/core/types/subscription/SubscriptionDefinitionList.d.ts:10
+core/lib/core/types/subscription/SubscriptionDefinitionList.d.ts:10
 
 ___
 
@@ -1219,7 +1195,7 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 #### Defined in
 
-core/lib/types/core/types/subscription/SubscriptionFunction.d.ts:7
+core/lib/core/types/subscription/SubscriptionFunction.d.ts:7
 
 ___
 
@@ -1235,7 +1211,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/subscription/SubscriptionSettings.d.ts:1
+core/lib/core/types/subscription/SubscriptionSettings.d.ts:1
 
 ___
 
@@ -1245,13 +1221,13 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/TraceId.d.ts:1
+core/lib/core/types/TraceId.d.ts:1
 
 ___
 
 ### TransformInputHook
 
-Ƭ **TransformInputHook**<`ServiceClassType`, `PayloadOutput`, `ParamsOutput`, `PayloadInput`, `ParamsInput`\>: (`this`: `ServiceClassType`, `context`: { `logger`: [`Logger`](../classes/purista_httpserver.internal.Logger.md) ; `message`: [`Command`](purista_httpserver.internal.md#command-1)<`PayloadInput`, `ParamsInput`\>  }, `payload`: `PayloadInput`, `params`: `ParamsInput`) => `Promise`<{ `params`: `ParamsOutput` ; `payload`: `PayloadOutput`  }\>
+Ƭ **TransformInputHook**<`ServiceClassType`, `PayloadOutput`, `ParamsOutput`, `PayloadInput`, `ParamsInput`\>: (`this`: `ServiceClassType`, `context`: { `logger`: [`Logger`](../classes/purista_httpserver.internal.Logger.md) ; `message`: [`Command`](purista_httpserver.internal.md#command-1)<`PayloadInput`, `ParamsInput`\>  }, `payload`: `PayloadInput`, `parameter`: `ParamsInput`) => `Promise`<{ `parameter`: `ParamsOutput` ; `payload`: `PayloadOutput`  }\>
 
 #### Type parameters
 
@@ -1265,7 +1241,7 @@ ___
 
 #### Type declaration
 
-▸ (`this`, `context`, `payload`, `params`): `Promise`<{ `params`: `ParamsOutput` ; `payload`: `PayloadOutput`  }\>
+▸ (`this`, `context`, `payload`, `parameter`): `Promise`<{ `parameter`: `ParamsOutput` ; `payload`: `PayloadOutput`  }\>
 
 ##### Parameters
 
@@ -1276,21 +1252,21 @@ ___
 | `context.logger` | [`Logger`](../classes/purista_httpserver.internal.Logger.md) |
 | `context.message` | [`Command`](purista_httpserver.internal.md#command-1)<`PayloadInput`, `ParamsInput`\> |
 | `payload` | `PayloadInput` |
-| `params` | `ParamsInput` |
+| `parameter` | `ParamsInput` |
 
 ##### Returns
 
-`Promise`<{ `params`: `ParamsOutput` ; `payload`: `PayloadOutput`  }\>
+`Promise`<{ `parameter`: `ParamsOutput` ; `payload`: `PayloadOutput`  }\>
 
 #### Defined in
 
-core/lib/types/core/types/commandType/TransformInputHook.d.ts:3
+core/lib/core/types/commandType/TransformInputHook.d.ts:3
 
 ___
 
 ### TransformOutputHook
 
-Ƭ **TransformOutputHook**<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `MessageParamsType`, `ResponseOutput`\>: (`this`: `ServiceClassType`, `context`: { `logger`: [`Logger`](../classes/purista_httpserver.internal.Logger.md) ; `message`: [`Command`](purista_httpserver.internal.md#command-1)<`MessagePayloadType`, `MessageParamsType`\>  }, `payload`: `MessageResultType`, `params`: `MessageParamsType`) => `Promise`<`ResponseOutput`\>
+Ƭ **TransformOutputHook**<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `MessageParamsType`, `ResponseOutput`\>: (`this`: `ServiceClassType`, `context`: { `logger`: [`Logger`](../classes/purista_httpserver.internal.Logger.md) ; `message`: [`Command`](purista_httpserver.internal.md#command-1)<`MessagePayloadType`, `MessageParamsType`\>  }, `payload`: `MessageResultType`, `parameter`: `MessageParamsType`) => `Promise`<`ResponseOutput`\>
 
 #### Type parameters
 
@@ -1304,7 +1280,7 @@ ___
 
 #### Type declaration
 
-▸ (`this`, `context`, `payload`, `params`): `Promise`<`ResponseOutput`\>
+▸ (`this`, `context`, `payload`, `parameter`): `Promise`<`ResponseOutput`\>
 
 This transform hook is executed after function output validation and AfterGuardHooks.
 
@@ -1317,7 +1293,7 @@ This transform hook is executed after function output validation and AfterGuardH
 | `context.logger` | [`Logger`](../classes/purista_httpserver.internal.Logger.md) |
 | `context.message` | [`Command`](purista_httpserver.internal.md#command-1)<`MessagePayloadType`, `MessageParamsType`\> |
 | `payload` | `MessageResultType` |
-| `params` | `MessageParamsType` |
+| `parameter` | `MessageParamsType` |
 
 ##### Returns
 
@@ -1325,7 +1301,7 @@ This transform hook is executed after function output validation and AfterGuardH
 
 #### Defined in
 
-core/lib/types/core/types/commandType/TransformOutputHook.d.ts:6
+core/lib/core/types/commandType/TransformOutputHook.d.ts:6
 
 ___
 
@@ -1342,4 +1318,4 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/addPrefixToObject.d.ts:1
+core/lib/core/types/addPrefixToObject.d.ts:1

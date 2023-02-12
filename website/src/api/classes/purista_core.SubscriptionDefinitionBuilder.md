@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/core](../modules/purista_core.md) / SubscriptionDefinitionBuilder
+[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / SubscriptionDefinitionBuilder
 
 # Class: SubscriptionDefinitionBuilder<ServiceClassType, MsgType, Payload\>
 
@@ -33,6 +33,8 @@ A working schema definition needs at least a subscription name, a short descript
 - [receiver](purista_core.SubscriptionDefinitionBuilder.md#receiver)
 - [sender](purista_core.SubscriptionDefinitionBuilder.md#sender)
 - [settings](purista_core.SubscriptionDefinitionBuilder.md#settings)
+- [subscriptionDescription](purista_core.SubscriptionDefinitionBuilder.md#subscriptiondescription)
+- [subscriptionName](purista_core.SubscriptionDefinitionBuilder.md#subscriptionname)
 
 ### Methods
 
@@ -70,7 +72,7 @@ A working schema definition needs at least a subscription name, a short descript
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:47](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L47)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:47](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L47)
 
 ## Properties
 
@@ -80,7 +82,7 @@ A working schema definition needs at least a subscription name, a short descript
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:38](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L38)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:38](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L38)
 
 ___
 
@@ -90,7 +92,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:36](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L36)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:36](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L36)
 
 ___
 
@@ -100,7 +102,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:42](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L42)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:42](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L42)
 
 ___
 
@@ -110,7 +112,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:22](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L22)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:22](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L22)
 
 ___
 
@@ -120,7 +122,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:40](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L40)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:40](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L40)
 
 ___
 
@@ -138,7 +140,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:30](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L30)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:30](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L30)
 
 ___
 
@@ -156,7 +158,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:24](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L24)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:24](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L24)
 
 ___
 
@@ -172,7 +174,27 @@ ___
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:44](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L44)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:44](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L44)
+
+___
+
+### subscriptionDescription
+
+• `Private` **subscriptionDescription**: `string`
+
+#### Defined in
+
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:47](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L47)
+
+___
+
+### subscriptionName
+
+• `Private` **subscriptionName**: `string`
+
+#### Defined in
+
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:47](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L47)
 
 ## Methods
 
@@ -198,7 +220,7 @@ See  EBMessageType for full available list.
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:146](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L146)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:149](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L149)
 
 ___
 
@@ -216,7 +238,7 @@ SubscriptionDefinition
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:190](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L190)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:193](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L193)
 
 ___
 
@@ -234,7 +256,7 @@ the function
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:179](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L179)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:182](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L182)
 
 ___
 
@@ -256,7 +278,7 @@ Filter messages only from instance id
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:64](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L64)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:67](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L67)
 
 ___
 
@@ -278,7 +300,7 @@ Filter messages only for principalId
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:74](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L74)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:77](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L77)
 
 ___
 
@@ -311,7 +333,7 @@ receivedBy('UserService', undefined, 'testFunction')
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:127](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L127)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:130](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L130)
 
 ___
 
@@ -344,7 +366,7 @@ sendFrom('UserService', undefined, 'testFunction')
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:101](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L101)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:104](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L104)
 
 ___
 
@@ -364,7 +386,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:79](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L79)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:82](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L82)
 
 ___
 
@@ -407,13 +429,13 @@ SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:168](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L168)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:171](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L171)
 
 ___
 
 ### subscribeToEvent
 
-▸ **subscribeToEvent**(`eventName`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MsgType`, `Payload`\>
+▸ **subscribeToEvent**(`eventName`, `serviceVersion?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MsgType`, `Payload`\>
 
 Add a filter to only subscribe to messages with matching event name
 
@@ -422,6 +444,7 @@ Add a filter to only subscribe to messages with matching event name
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `eventName` | `string` | Event name |
+| `serviceVersion?` | `string` | the version of the service that produces the event |
 
 #### Returns
 
@@ -431,4 +454,4 @@ SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:54](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L54)
+[core/src/helper/SubscriptionDefinitionBuilder.impl.ts:55](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/SubscriptionDefinitionBuilder.impl.ts#L55)

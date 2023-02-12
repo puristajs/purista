@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / GenericEventEmitter
+[PURISTA API - v1.4.9](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / GenericEventEmitter
 
 # Class: GenericEventEmitter<T\>
 
@@ -56,13 +56,13 @@
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:10
+core/lib/core/types/GenericEventEmitter.d.ts:10
 
 ## Methods
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `params`): `void`
+▸ **emit**<`K`\>(`eventName`, `parameter`): `void`
 
 #### Type parameters
 
@@ -75,7 +75,7 @@ core/lib/types/core/types/GenericEventEmitter.d.ts:10
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `params` | `T`[`K`] |
+| `parameter` | `T`[`K`] |
 
 #### Returns
 
@@ -87,7 +87,7 @@ core/lib/types/core/types/GenericEventEmitter.d.ts:10
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:13
+core/lib/core/types/GenericEventEmitter.d.ts:13
 
 ___
 
@@ -118,7 +118,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:12
+core/lib/core/types/GenericEventEmitter.d.ts:12
 
 ___
 
@@ -149,4 +149,4 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/GenericEventEmitter.d.ts:11
+core/lib/core/types/GenericEventEmitter.d.ts:11

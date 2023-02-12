@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / EBMessageType
+[PURISTA API - v1.4.9](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / EBMessageType
 
 # Enumeration: EBMessageType
 
@@ -36,7 +36,7 @@ If the sender does not receive a answer within this time frame, the command will
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:11
+core/lib/core/types/EBMessageType.enum.d.ts:11
 
 ___
 
@@ -46,7 +46,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:13
+core/lib/core/types/EBMessageType.enum.d.ts:13
 
 ___
 
@@ -56,7 +56,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:12
+core/lib/core/types/EBMessageType.enum.d.ts:12
 
 ___
 
@@ -66,7 +66,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:28
+core/lib/core/types/EBMessageType.enum.d.ts:28
 
 ___
 
@@ -76,7 +76,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:26
+core/lib/core/types/EBMessageType.enum.d.ts:26
 
 ___
 
@@ -86,7 +86,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:24
+core/lib/core/types/EBMessageType.enum.d.ts:24
 
 ___
 
@@ -96,7 +96,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:23
+core/lib/core/types/EBMessageType.enum.d.ts:23
 
 ___
 
@@ -111,7 +111,7 @@ Info messages are fire & forget broadcasting messages.
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:20
+core/lib/core/types/EBMessageType.enum.d.ts:20
 
 ___
 
@@ -121,7 +121,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:22
+core/lib/core/types/EBMessageType.enum.d.ts:22
 
 ___
 
@@ -131,7 +131,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:21
+core/lib/core/types/EBMessageType.enum.d.ts:21
 
 ___
 
@@ -141,7 +141,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:25
+core/lib/core/types/EBMessageType.enum.d.ts:25
 
 ___
 
@@ -151,4 +151,4 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/EBMessageType.enum.d.ts:27
+core/lib/core/types/EBMessageType.enum.d.ts:27

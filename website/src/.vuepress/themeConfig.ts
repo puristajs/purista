@@ -10,9 +10,9 @@ export default hopeTheme({
     url: 'https://sebastianwessel.com',
   },
 
-  iconPrefix: 'fa-',
+  iconAssets: 'fontawesome',
 
-  // logo: '/logo.svg',
+  //logo: '/logo.svg',
 
   themeColor: false,
   headerDepth: 3,

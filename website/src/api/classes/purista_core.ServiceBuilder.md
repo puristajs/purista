@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/core](../modules/purista_core.md) / ServiceBuilder
+[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / ServiceBuilder
 
 # Class: ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType\>
 
@@ -61,7 +61,7 @@
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:33](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L33)
+[core/src/helper/ServiceBuilder.impl.ts:34](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L34)
 
 ## Properties
 
@@ -71,7 +71,7 @@
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:30](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L30)
+[core/src/helper/ServiceBuilder.impl.ts:31](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L31)
 
 ___
 
@@ -81,7 +81,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:22](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L22)
+[core/src/helper/ServiceBuilder.impl.ts:23](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L23)
 
 ___
 
@@ -91,7 +91,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:25](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L25)
+[core/src/helper/ServiceBuilder.impl.ts:26](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L26)
 
 ___
 
@@ -101,7 +101,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:26](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L26)
+[core/src/helper/ServiceBuilder.impl.ts:27](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L27)
 
 ___
 
@@ -111,7 +111,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:33](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L33)
+[core/src/helper/ServiceBuilder.impl.ts:34](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L34)
 
 ___
 
@@ -121,7 +121,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:28](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L28)
+[core/src/helper/ServiceBuilder.impl.ts:29](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L29)
 
 ___
 
@@ -131,13 +131,13 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:23](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L23)
+[core/src/helper/ServiceBuilder.impl.ts:24](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L24)
 
 ## Methods
 
 ### addFunctionDefinition
 
-▸ **addFunctionDefinition**(...`functions`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+▸ **addFunctionDefinition**(`...functions`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
 #### Parameters
 
@@ -151,13 +151,13 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:49](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L49)
+[core/src/helper/ServiceBuilder.impl.ts:50](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L50)
 
 ___
 
 ### addSubscriptionDefinition
 
-▸ **addSubscriptionDefinition**(...`subscription`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+▸ **addSubscriptionDefinition**(`...subscription`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
 #### Parameters
 
@@ -171,7 +171,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:54](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L54)
+[core/src/helper/ServiceBuilder.impl.ts:68](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L68)
 
 ___
 
@@ -193,13 +193,13 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:91](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L91)
+[core/src/helper/ServiceBuilder.impl.ts:119](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L119)
 
 ___
 
 ### getInstance
 
-▸ **getInstance**(`logger`, `eventBridge`, `config?`): `ServiceClassType`
+▸ **getInstance**(`logger`, `eventBridge`, `config?`, `spanProcessor?`): `ServiceClassType`
 
 #### Parameters
 
@@ -208,6 +208,7 @@ ___
 | `logger` | [`Logger`](purista_core.Logger.md) |
 | `eventBridge` | [`EventBridge`](purista_core.EventBridge.md) |
 | `config?` | `ConfigInputType` |
+| `spanProcessor?` | `SpanProcessor` |
 
 #### Returns
 
@@ -215,7 +216,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:64](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L64)
+[core/src/helper/ServiceBuilder.impl.ts:91](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L91)
 
 ___
 
@@ -236,7 +237,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:99](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L99)
+[core/src/helper/ServiceBuilder.impl.ts:127](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L127)
 
 ___
 
@@ -249,7 +250,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `I` | `unknown` |
-| `D` | `unknown` |
+| `D` | extends `ZodTypeDef` = `ZodTypeDef` |
 | `O` | `unknown` |
 
 #### Parameters
@@ -264,7 +265,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:35](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L35)
+[core/src/helper/ServiceBuilder.impl.ts:36](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L36)
 
 ___
 
@@ -290,7 +291,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:59](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L59)
+[core/src/helper/ServiceBuilder.impl.ts:86](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L86)
 
 ___
 
@@ -310,4 +311,4 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:40](https://github.com/sebastianwessel/purista/blob/dc1cd23/packages/core/src/helper/ServiceBuilder.impl.ts#L40)
+[core/src/helper/ServiceBuilder.impl.ts:41](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L41)

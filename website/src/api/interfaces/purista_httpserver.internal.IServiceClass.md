@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.3](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / IServiceClass
+[PURISTA API - v1.4.9](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / IServiceClass
 
 # Interface: IServiceClass
 
@@ -32,7 +32,7 @@
 
 #### Defined in
 
-core/lib/types/core/types/ServiceClass.d.ts:49
+core/lib/core/types/ServiceClass.d.ts:34
 
 ## Methods
 
@@ -46,7 +46,7 @@ core/lib/types/core/types/ServiceClass.d.ts:49
 
 #### Defined in
 
-core/lib/types/core/types/ServiceClass.d.ts:47
+core/lib/core/types/ServiceClass.d.ts:32
 
 ___
 
@@ -68,7 +68,7 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/ServiceClass.d.ts:50
+core/lib/core/types/ServiceClass.d.ts:35
 
 ___
 
@@ -82,4 +82,4 @@ ___
 
 #### Defined in
 
-core/lib/types/core/types/ServiceClass.d.ts:48
+core/lib/core/types/ServiceClass.d.ts:33
