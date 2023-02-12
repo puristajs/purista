@@ -2,6 +2,10 @@ import compress from '@fastify/compress'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import fastifyStatic from '@fastify/static'
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
+import * as api from '@opentelemetry/api'
+import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import {
   EBMessageAddress,
   EventBridge,
@@ -23,6 +27,8 @@ import merge from 'ts-deepmerge'
 
 import { COMMANDS } from './commands'
 import { getDefaultConfig, ServiceInfo } from './config'
+import { addHeaders } from './helper'
+import { addSpanTags } from './helper/addSpanTags'
 import { OPEN_API_ROUTE_FUNCTIONS } from './routes'
 import { SUBSCRIPTIONS } from './subscriptions'
 import { BeforeResponseHook, HttpServerConfig } from './types'
@@ -46,8 +52,13 @@ export class HttpServerService extends Service<HttpServerConfig> {
    * @param {EventBridge} eventBridge - EventBridge
    * @param {HttpServerConfig} conf - HttpServerConfig
    */
-  constructor(baseLogger: Logger, eventBridge: EventBridge, config: HttpServerConfig = getDefaultConfig()) {
-    super(baseLogger, ServiceInfo, eventBridge, COMMANDS, SUBSCRIPTIONS, config)
+  constructor(
+    baseLogger: Logger,
+    eventBridge: EventBridge,
+    config: HttpServerConfig = getDefaultConfig(),
+    spanProcessor?: SpanProcessor,
+  ) {
+    super(baseLogger, ServiceInfo, eventBridge, COMMANDS, SUBSCRIPTIONS, config, spanProcessor)
 
     this.config = merge(getDefaultConfig(), config)
 
@@ -66,34 +77,82 @@ export class HttpServerService extends Service<HttpServerConfig> {
 
     this.server
       .decorateRequest('principalId', undefined)
-      .setErrorHandler((error, _request, reply) => {
-        if (error instanceof HandledError) {
-          reply.status(error.errorCode)
-          return reply.send(error.getErrorResponse())
-        }
-        this.serviceLogger.error({ error }, 'General error handler')
-        reply.status(StatusCode.InternalServerError)
-        reply.send(new UnhandledError().getErrorResponse())
+      .setNotFoundHandler(async (request, reply) => {
+        const parentContext = propagation.extract(context.active(), request.headers)
+        await new Promise((resolve) => api.context.with(parentContext, async () => resolve(undefined)))
+
+        await this.startActiveSpan('notFoundHandler', { kind: SpanKind.SERVER }, api.context.active(), async (span) => {
+          addSpanTags(span, request)
+          span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.NotFound)
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: 'notFoundHandler',
+          })
+
+          addHeaders(span, reply)
+          const err = new HandledError(StatusCode.NotFound)
+
+          this.serviceLogger.error({ err, ...span.spanContext() }, 'Not found handler')
+
+          if (reply.sent) {
+            reply.status(StatusCode.NotFound)
+            reply.send(err.getErrorResponse())
+          }
+        })
       })
-      .setNotFoundHandler((_request, reply) => {
-        reply.status(StatusCode.NotFound)
-        reply.send(new HandledError(StatusCode.NotFound))
+      .setErrorHandler(async (err, request, reply) => {
+        const con = propagation.extract(context.active(), request.headers)
+        await this.startActiveSpan('errorHandler', { kind: SpanKind.SERVER }, con, async (span) => {
+          addSpanTags(span, request)
+          span.recordException(err)
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: err.message,
+          })
+
+          addHeaders(span, reply)
+
+          propagation.inject(context.active(), reply.headers)
+
+          if (err instanceof HandledError) {
+            reply.status(err.errorCode)
+
+            span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, err.errorCode)
+            return reply.send(err.getErrorResponse())
+          }
+          this.serviceLogger.error({ err, ...span.spanContext() }, 'General error handler')
+
+          span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.InternalServerError)
+          if (!reply.sent) {
+            reply.status(StatusCode.InternalServerError)
+            reply.send(new UnhandledError().getErrorResponse())
+          }
+        })
       })
 
     if (this.config.enableHelmet) {
       this.server.register(helmet, this.config.helmetOptions)
     }
 
-    this.server.addHook('onError', async (_req, reply, error) => {
-      this.serviceLogger.debug({ error }, 'General error handler')
-      // Ensure to be async function or use callback function
+    this.server.addHook('onError', async (request, reply, err) => {
+      const parentContext = propagation.extract(context.active(), request.headers)
+      await new Promise((resolve) => api.context.with(parentContext, async () => resolve(undefined)))
+
+      await this.startActiveSpan('errorHook', { kind: SpanKind.SERVER }, api.context.active(), async (span) => {
+        span.setAttribute(SemanticAttributes.HTTP_URL, request.url)
+        span.setAttribute(SemanticAttributes.HTTP_METHOD, request.method)
+        span.setAttribute(SemanticAttributes.HTTP_HOST, request.hostname)
+
+        span.recordException(err)
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: err.message,
+        })
+
+        this.serviceLogger.error({ err, ...span.spanContext() }, 'onError hook: General error handler')
+      })
+
       if (!reply.sent) {
-        if (error instanceof HandledError) {
-          reply.code(error.errorCode)
-          reply.send(error.getErrorResponse())
-          return
-        }
-        this.serviceLogger.error({ error }, 'onError hook: General error handler')
         reply.status(StatusCode.InternalServerError)
         reply.send(new UnhandledError().getErrorResponse())
       }
@@ -106,18 +165,35 @@ export class HttpServerService extends Service<HttpServerConfig> {
 
   async start(): Promise<void> {
     const apiBasePath = posix.join(this.config.apiMountPath || 'api', '/v*')
+
     this.server?.all(apiBasePath, async (request, reply) => {
-      const match = (request.params as Record<string, string>)['*']
-      const path = posix.join(this.config.apiMountPath || 'api', `v${match}`)
+      const parentContext = propagation.extract(context.active(), request.headers)
+      await new Promise((resolve) => api.context.with(parentContext, async () => resolve(undefined)))
 
-      const route = this.routes.find(request.method as Methods, path)
-      if (!route.handlers.length) {
-        this.serviceLogger.debug({ method: request.method, url: request.url }, 'Route not found')
-        reply.code(StatusCode.NotFound)
-        return new HandledError(StatusCode.NotFound).getErrorResponse()
-      }
+      await this.startActiveSpan(request.url, { kind: SpanKind.SERVER }, api.context.active(), async (span) => {
+        addSpanTags(span, request)
 
-      await route.handlers[0](request, reply, route.params)
+        addHeaders(span, reply)
+
+        const match = (request.params as Record<string, string>)['*']
+        const path = posix.join(this.config.apiMountPath || 'api', `v${match}`)
+
+        const route = this.routes.find(request.method as Methods, path)
+        if (!route.handlers.length) {
+          this.serviceLogger.debug({ method: request.method, url: request.url }, 'Route not found')
+          const err = new HandledError(StatusCode.NotFound)
+          span.recordException(err)
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: err.message,
+          })
+          span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.NotFound)
+          reply.code(StatusCode.NotFound)
+          return err.getErrorResponse()
+        }
+
+        await route.handlers[0](request, reply, route.params)
+      })
     })
 
     if (this.config.openApi?.enabled) {

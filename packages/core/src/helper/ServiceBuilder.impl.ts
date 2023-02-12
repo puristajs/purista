@@ -1,3 +1,4 @@
+import { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { z } from 'zod'
 
 import {
@@ -87,7 +88,7 @@ export class ServiceBuilder<
     return this as unknown as ServiceBuilder<ConfigType, ConfigInputType, T>
   }
 
-  getInstance(logger: Logger, eventBridge: EventBridge, config?: ConfigInputType) {
+  getInstance(logger: Logger, eventBridge: EventBridge, config?: ConfigInputType, spanProcessor?: SpanProcessor) {
     let conf = {
       ...this.defaultConfig,
       ...config,
@@ -96,8 +97,8 @@ export class ServiceBuilder<
     if (this.configSchema) {
       try {
         conf = this.configSchema.parse(config)
-      } catch (error) {
-        logger.error({ error, ...this.info }, 'Invalid configuration for')
+      } catch (err) {
+        logger.error({ err, ...this.info }, 'Invalid configuration for')
         throw new Error('Fatal - unable to create service instance')
       }
     }
@@ -109,6 +110,7 @@ export class ServiceBuilder<
       this.commandFunctions,
       this.subscriptionList,
       conf as ConfigType,
+      spanProcessor,
     )
 
     return this.instance as ServiceClassType
