@@ -80,7 +80,7 @@ Extend the file as shown below:
   // at the end of function main below await httpServerService.start()
 
   // create the user service instance
-  const userService = UserService.getInstance(baseLogger, eventBridge)
+  const userService = UserService.getInstance(eventBridge)
 
   // start the user service
   await userService.start()

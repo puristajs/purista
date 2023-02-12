@@ -127,7 +127,7 @@ import { userSignUpBuilder } from './index'
 
 const f = userSignUpBuilder.getFunction()
 
-const service = UserService.getInstance(getLoggerMock().mock, getEventBridgeMock().mock)
+const service = UserService.getInstance(getEventBridgeMock().mock, { logger: getLoggerMock().mock })
 const fn = f.bind(service)
 
 test('returns a new user id', async () => {
@@ -207,7 +207,7 @@ import { userSignUpBuilder } from './index'
 
 const f = userSignUpBuilder.getFunction()
 
-const service = UserService.getInstance(getLoggerMock().mock, getEventBridgeMock().mock)
+const service = UserService.getInstance(getEventBridgeMock().mock, { logger: getLoggerMock().mock })
 const fn = f.bind(service)
 
 test('returns a new user id', async () => {

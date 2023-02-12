@@ -62,20 +62,18 @@ Add to your `package.json`:
 Create the main execution file `src/index.ts` with following content:
 
 ```typescript
-import { DefaultEventBridge, initLogger } from '@purista/core'
+import { DefaultEventBridge} from '@purista/core'
 import { HttpServerService } from '@purista/httpserver'
 
 const main = async () => {
-  // initialize the logging
-  const baseLogger = initLogger('debug')
 
   // create eventbridge
-  const eventBridge = new DefaultEventBridge(baseLogger)
+  const eventBridge = new DefaultEventBridge()
   // start eventbridge (e.g. connect to broker)
   await eventBridge.start()
 
   // create and init a webserver
-  const httpServerService = new HttpServerService(baseLogger, eventBridge)
+  const httpServerService = new HttpServerService(eventBridge)
 
   // start the webserver
   await httpServerService.start()
