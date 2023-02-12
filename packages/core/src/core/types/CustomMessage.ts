@@ -1,4 +1,3 @@
-import { EBMessage } from './EBMessage'
 import { EBMessageAddress } from './EBMessageAddress'
 import { EBMessageBase } from './EBMessageBase'
 import { EBMessageType } from './EBMessageType.enum'
@@ -10,7 +9,3 @@ export type CustomMessage<Payload = unknown> = {
   receiver?: EBMessageAddress
   payload?: Payload
 } & EBMessageBase
-
-export const isCustomMessage = (message: EBMessage): message is CustomMessage => {
-  return message.messageType === EBMessageType.CustomMessage
-}
