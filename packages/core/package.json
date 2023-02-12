@@ -45,7 +45,8 @@
     "@types/jest": "^29.4.0",
     "@types/node": "^18.11.19",
     "sinon": "^15.0.1",
-    "ts-jest": "^29.0.5"
+    "@swc/core": "^1.3.35",
+    "@swc/jest": "^0.2.24"
   },
   "dependencies": {
     "@anatine/zod-openapi": "^1.12.0",
