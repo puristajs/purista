@@ -1,6 +1,7 @@
-/** @type {import('ts-jest').JestConfigWithTsJest} */
 module.exports = {
-  preset: 'ts-jest',
+  transform: {
+    '^.+\\.(t|j)sx?$': '@swc/jest',
+  },
   testEnvironment: 'node',
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/database/', '/test/', '/lib/'],
   coverageReporters: ['json', 'lcov', 'text', 'clover', 'html'],
