@@ -7,10 +7,12 @@ import type {
   BeforeGuardHook,
   CommandDefinition,
   CommandFunction,
+  HandledError,
   ServiceClass,
   StatusCode,
   TransformInputHook,
   TransformOutputHook,
+  UnhandledError,
 } from '../core'
 import { ContentType, HttpExposedServiceMeta, QueryParameter } from '../httpserver'
 import { getFunctionWithValidation } from './getFunctionWithValidation'
@@ -64,6 +66,8 @@ export class FunctionDefinitionBuilder<
       transformOutputSchema: z.ZodType
       transformFunction: TransformOutputHook<ServiceClassType, any, any, FunctionParamsType, any>
     }
+    onSuccess?: () => Promise<void>
+    onError?: (err: HandledError | UnhandledError) => Promise<void>
   } = {
     transformInput: undefined,
     beforeGuard: [],
@@ -309,22 +313,6 @@ export class FunctionDefinitionBuilder<
     ...afterGuard: AfterGuardHook<ServiceClassType, MessageResultType, MessagePayloadType, MessageParamsType>[]
   ) {
     this.hooks.afterGuard.push(...afterGuard)
-    return this
-  }
-
-  /**
-   * Called
-   * @returns FunctionDefinitionBuilder
-   */
-  onFailure() {
-    return this
-  }
-
-  /**
-   * Called
-   * @returns FunctionDefinitionBuilder
-   */
-  onSuccess() {
     return this
   }
 
