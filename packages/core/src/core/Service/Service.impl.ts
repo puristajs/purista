@@ -1,6 +1,7 @@
 import { SpanStatusCode, trace } from '@opentelemetry/api'
 import { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 
+import { puristaVersion } from '../../version'
 import { HandledError } from '../Error/HandledError.impl'
 import { UnhandledError } from '../Error/UnhandledError.impl'
 import {
@@ -79,8 +80,12 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
       try {
         await this.initializeEventbridgeConnect(this.commandFunctions, this.subscriptionList)
         await this.sendServiceInfo(EBMessageType.InfoServiceReady)
+        this.serviceLogger.info(
+          { ...span.spanContext(), puristaVersion },
+          `service ${this.serviceInfo.serviceName} ${this.serviceInfo.serviceVersion} started`,
+        )
       } catch (err) {
-        this.serviceLogger.error({ err, ...span.spanContext() }, `failed to start service`)
+        this.serviceLogger.error({ err, ...span.spanContext(), puristaVersion }, `failed to start service`)
         this.emit('service-not-available', err)
         throw err
       }

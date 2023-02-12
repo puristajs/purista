@@ -3,6 +3,7 @@ import { PrincipalId } from './PrincipalId'
 import { TraceId } from './TraceId'
 
 export type LoggerOptions = {
+  puristaVersion?: string
   name?: string
   serviceVersion?: string
   serviceName?: string

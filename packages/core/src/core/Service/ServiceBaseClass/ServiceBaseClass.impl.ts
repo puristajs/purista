@@ -3,6 +3,7 @@ import { Resource } from '@opentelemetry/resources'
 import { NodeTracerProvider, SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
+import { puristaVersion } from '../../../version'
 import { EventBridge, GenericEventEmitter, Logger, ServiceEvents, ServiceInfoType } from '../../types'
 import { ServiceInfoValidator } from '../ServiceInfoValidator.impl'
 
@@ -43,6 +44,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
     this.serviceLogger = baseLogger.getChildLogger({
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
+      puristaVersion,
     })
     this.serviceLogger.debug({ ...this.info }, `creating ${this.info.serviceName} ${this.info.serviceVersion}`)
 
@@ -52,7 +54,6 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
         [SemanticResourceAttributes.SERVICE_VERSION]: this.info.serviceVersion,
       }),
     )
-
     this.traceProvider = new NodeTracerProvider({
       resource,
     })
@@ -99,6 +100,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
     const tracer = this.getTracer()
 
     const callback = async (span: Span) => {
+      span.setAttribute('purista.version', puristaVersion)
       try {
         return await fn(span)
       } catch (error) {
@@ -142,6 +144,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
   async wrapInSpan<F>(name: string, opts: SpanOptions, fn: (span: Span) => Promise<F>, context?: Context): Promise<F> {
     const tracer = this.getTracer()
     const span = tracer.startSpan(name, opts, context)
+    span.setAttribute('purista.version', puristaVersion)
     try {
       return await fn(span)
     } catch (error) {
