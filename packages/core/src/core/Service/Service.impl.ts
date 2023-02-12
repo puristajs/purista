@@ -222,74 +222,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceClass<Conf
 
       try {
         const { payload, parameter } = await commandTransformInput(this, logger, command, message)
-        /*
-        if (command.hooks.transformInput) {
-          const transformInput = command.hooks.transformInput
-          await this.startActiveSpan(command.commandName + '.inputTransformation', {}, undefined, async (_) => {
-            const transform = transformInput.transformFunction.bind(this, { logger, message })
-            parameterInput = await this.wrapInSpan(command.commandName + '.validateParameter', {}, async (subSpan) => {
-              try {
-                return transformInput.transformParameterSchema.parse(parameterInput)
-              } catch (err) {
-                const error = err as ZodError
-                subSpan.recordException(error)
-                logger.warn(
-                  { ...subSpan.spanContext() },
-                  'transform input validation for params failed:',
-                  error.message,
-                )
 
-                subSpan.setStatus({
-                  code: SpanStatusCode.ERROR,
-                  message: 'transform input validation for parameters failed',
-                })
-                throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
-              }
-            })
-
-            payloadInput = await this.wrapInSpan(command.commandName + '.validatePayload', {}, async (subSpan) => {
-              try {
-                return transformInput.transformInputSchema.parse(payloadInput)
-              } catch (err) {
-                const error = err as ZodError
-                subSpan.recordException(error)
-                logger.warn(
-                  { ...subSpan.spanContext() },
-                  'transform input validation for payload failed:',
-                  error.message,
-                )
-                subSpan.setStatus({
-                  code: SpanStatusCode.ERROR,
-                  message: 'transform input validation for payload failed',
-                })
-                throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
-              }
-            })
-
-            await this.wrapInSpan(command.commandName + '.transformFunction', {}, async (subSpan) => {
-              try {
-                const transformedInput = await transform(payloadInput, parameterInput)
-                parameterInput = transformedInput.params
-                payloadInput = transformedInput.payload
-              } catch (error) {
-                const err = error as Error
-                subSpan.recordException(err)
-                subSpan.setStatus({
-                  code: SpanStatusCode.ERROR,
-                  message: err.message || 'Unable to transform input',
-                })
-
-                if (error instanceof HandledError) {
-                  throw error
-                }
-                logger.error({ err, ...subSpan.spanContext() }, 'Unable to transform input:')
-
-                throw new UnhandledError(StatusCode.InternalServerError, 'Unable to transform input')
-              }
-            })
-          })
-        }
-*/
         let result: unknown = await this.startActiveSpan(
           command.commandName + '.functionExecution',
           {},
