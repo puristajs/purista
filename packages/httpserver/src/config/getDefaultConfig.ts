@@ -4,8 +4,6 @@ import { OPENAPI_DEFAULT_INFO, OPENAPI_DEFAULT_MOUNT_PATH } from './defaults.con
 export const getDefaultConfig = (): HttpServerConfig => {
   const defaultConfig: HttpServerConfig = {
     fastify: {
-      requestIdHeader: 'x-trace-id',
-      requestIdLogLabel: 'traceId',
       ignoreTrailingSlash: true,
     },
     port: 9090,
