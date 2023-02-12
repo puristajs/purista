@@ -1,13 +1,10 @@
 import { Stream } from 'node:stream'
 
-import { Context, Span, SpanKind, SpanOptions, SpanStatusCode } from '@opentelemetry/api'
-import { Resource } from '@opentelemetry/resources'
-import { NodeTracerProvider, SpanProcessor } from '@opentelemetry/sdk-trace-node'
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
+import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
+import { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 
 import { puristaVersion } from '../../version'
 import { getDefaultEventBridgeConfig } from '../config'
-import { initLogger } from '../DefaultLogger'
 import { HandledError } from '../Error/HandledError.impl'
 import { UnhandledError } from '../Error/UnhandledError.impl'
 import {
@@ -44,6 +41,7 @@ import {
   StatusCode,
   Subscription,
 } from '../types'
+import { EventBridgeBaseClass } from './EventBridgeBaseClass.impl'
 import { getNewSubscriptionStorageEntry } from './getNewSubscriptionStorageEntry.impl'
 import { isMessageMatchingSubscription } from './isMessageMatchingSubscription.impl'
 import { PendigInvocation, SubscriptionStorageEntry } from './types'
@@ -51,8 +49,7 @@ import { PendigInvocation, SubscriptionStorageEntry } from './types'
  * Simple implementation of some simple in-memory event bridge.
  * Does not support threads and does not need any external databases.
  */
-export class DefaultEventBridge extends EventBridge {
-  protected logger: Logger
+export class DefaultEventBridge extends EventBridgeBaseClass implements EventBridge {
   protected config: EventBridgeEnsuredDefaults
   protected writeStream = new Stream.Writable({ objectMode: true })
   protected readStream = new Stream.Readable({
@@ -71,102 +68,14 @@ export class DefaultEventBridge extends EventBridge {
 
   protected subscriptions = new Map<string, SubscriptionStorageEntry>()
 
-  public traceProvider: NodeTracerProvider
-
   constructor(
     conf: EventBridgeConfig = getDefaultEventBridgeConfig(),
     options?: { logger?: Logger; spanProcessor?: SpanProcessor },
   ) {
-    super()
+    super('DefaultEventBridge', options)
     this.config = {
       ...getDefaultEventBridgeConfig(),
       ...conf,
-    }
-    const resource = Resource.default().merge(
-      new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: 'DefaultEventBridge',
-        [SemanticResourceAttributes.SERVICE_VERSION]: puristaVersion,
-      }),
-    )
-
-    this.traceProvider = new NodeTracerProvider({
-      resource,
-    })
-
-    if (options?.spanProcessor) {
-      this.traceProvider.addSpanProcessor(options?.spanProcessor)
-    }
-
-    this.traceProvider.register()
-
-    const logger = options?.logger || initLogger()
-    this.logger = logger.getChildLogger({ name: 'eventBridge' })
-  }
-
-  /**
-   * Returns open telemetry tracer of this service
-   *
-   * @returns Tracer
-   */
-  getTracer() {
-    return this.traceProvider.getTracer('DefaultEventBridge', puristaVersion)
-  }
-
-  async startActiveSpan<F>(
-    name: string,
-    opts: SpanOptions,
-    context: Context | undefined = undefined,
-    fn: (span: Span) => Promise<F>,
-  ): Promise<F> {
-    const tracer = this.getTracer()
-
-    const callback = async (span: Span) => {
-      span.setAttribute('purista.version', puristaVersion)
-      try {
-        return await fn(span)
-      } catch (error) {
-        let message = 'error'
-        if (error instanceof Error) {
-          message = error.message
-        }
-
-        span.recordException(error as Error)
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message,
-        })
-
-        throw error
-      } finally {
-        span.end()
-      }
-    }
-
-    return context
-      ? tracer.startActiveSpan(name, opts, context, callback)
-      : tracer.startActiveSpan(name, opts, callback)
-  }
-
-  async wrapInSpan<F>(name: string, opts: SpanOptions, fn: (span: Span) => Promise<F>, context?: Context): Promise<F> {
-    const tracer = this.getTracer()
-    const span = tracer.startSpan(name, opts, context)
-    span.setAttribute('purista.version', puristaVersion)
-    try {
-      return await fn(span)
-    } catch (error) {
-      let message = 'error'
-      if (error instanceof Error) {
-        message = error.message
-      }
-      span.recordException(error as Error)
-      span.setStatus({
-        code: SpanStatusCode.ERROR,
-        message,
-      })
-
-      throw error
-    } finally {
-      span.end()
     }
   }
 
@@ -194,6 +103,11 @@ export class DefaultEventBridge extends EventBridge {
                   'InvalidCommand: received invalid command',
                   getCleanedMessage(message),
                 )
+                span.setStatus({
+                  code: SpanStatusCode.ERROR,
+                  message: err.message,
+                })
+                span.recordException(err)
                 this.logger.error({ err, ...span.spanContext() }, 'received invalid command')
                 this.emit('eventbridge-error', err)
                 return next(err)
@@ -213,6 +127,11 @@ export class DefaultEventBridge extends EventBridge {
                   'InvalidCommandResponse: received invalid command response',
                   getCleanedMessage(message),
                 )
+                span.setStatus({
+                  code: SpanStatusCode.ERROR,
+                  message: err.message,
+                })
+                span.recordException(err)
                 this.logger.error({ err, ...span.spanContext() }, 'received invalid command response')
                 this.emit('eventbridge-error', err)
                 return next(err)
@@ -340,11 +259,6 @@ export class DefaultEventBridge extends EventBridge {
         span.setAttribute(PuristaSpanTag.SenderServiceName, msg.sender.serviceName)
         span.setAttribute(PuristaSpanTag.SenderServiceVersion, msg.sender.serviceVersion)
         span.setAttribute(PuristaSpanTag.SenderServiceTarget, msg.sender.serviceTarget)
-        /*
-          span.setAttribute(PuristaSpanTag.ReceiverServiceName, msg.receiver.serviceName)
-          span.setAttribute(PuristaSpanTag.ReceiverServiceVersion, msg.receiver.serviceVersion)
-          span.setAttribute(PuristaSpanTag.ReceiverServiceTarget, msg.receiver.serviceTarget)
-          */
 
         this.readStream.push(msg)
         return msg as Readonly<EBMessage>
@@ -405,7 +319,7 @@ export class DefaultEventBridge extends EventBridge {
             messageType: EBMessageType.InfoInvokeTimeout,
             payload,
             sender: input.sender,
-            otp: serializeOtp(),
+            otp: command.otp || serializeOtp(),
           }
 
           await this.emitMessage(infoMessage)
