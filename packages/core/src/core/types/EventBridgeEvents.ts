@@ -1,4 +1,4 @@
-import { UnhandledError } from '../UnhandledError.impl'
+import { UnhandledError } from '../Error/UnhandledError.impl'
 import { addPrefixToObject } from './addPrefixToObject'
 
 /**
