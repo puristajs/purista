@@ -49,10 +49,13 @@ export class SubscriptionDefinitionBuilder<
   /**
    * Add a filter to only subscribe to messages with matching event name
    * @param eventName Event name
+   * @param serviceVersion the version of the service that produces the event
    * @returns SubscriptionDefinitionBuilder
    */
-  subscribeToEvent(eventName: string) {
+  subscribeToEvent(eventName: string, serviceVersion?: string) {
     this.eventName = eventName
+    this.sender = this.sender || {}
+    this.sender.serviceVersion = serviceVersion
     return this
   }
 
