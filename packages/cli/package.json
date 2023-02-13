@@ -1,0 +1,47 @@
+{
+  "name": "@purista/cli",
+  "version": "1.0.0",
+  "description": "cli helper for PURISTA backend framework",
+  "homepage": "https://purista.dev",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:sebastianwessel/purista.git"
+  },
+  "author": "Sebastian Wessel",
+  "license": "ISC",
+  "preferGlobal": "true",
+  "main": "lib/index.js",
+  "type": "module",
+  "bin": {
+    "purista": "./lib/index.js"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "start": "./lib/index.js",
+    "build": "tsc --project ./tsconfig.json && chmod 755 lib/index.js",
+    "lint": "eslint . --ext .ts,.json  --cache . --fix",
+    "test": "jest --passWithNoTests",
+    "bump:major": "npm version major --no-git-tag-version",
+    "bump:minor": "npm version minor --no-git-tag-version",
+    "bump:patch": "npm version patch --no-git-tag-version"
+  },
+  "devDependencies": {
+    "@types/minimist": "^1.2.2",
+    "@types/node": "^18.11.19"
+  },
+  "dependencies": {
+    "minimist": "^1.2.8",
+    "plop": "^3.1.2",
+    "zod": "^3.20.2"
+  },
+  "peerDependenciesMeta": {},
+  "files": [
+    "blueprint/**/*",
+    "lib/**/*"
+  ]
+}

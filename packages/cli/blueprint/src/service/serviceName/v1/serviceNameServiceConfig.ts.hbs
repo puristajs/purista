@@ -1,0 +1,7 @@
+import { z } from 'zod'
+
+export const {{camelCase serviceName}}ServiceV{{version}}ConfigSchema = z.object({})
+
+export type {{properCase serviceName}}ServiceV{{version}}Config = z.input<typeof {{camelCase serviceName}}ServiceV{{version}}ConfigSchema>
+
+export const {{camelCase serviceName}}ServiceV{{version}}DefaultConfig: {{properCase serviceName}}ServiceV{{version}}Config = {}

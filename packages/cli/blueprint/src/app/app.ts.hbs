@@ -1,0 +1,57 @@
+{{#if installStaticPlugin}}
+import { resolve } from 'node:path'
+{{/if}}
+
+{{#if installStaticPlugin}}
+import fastifyStatic from '@fastify/static'
+{{/if}}
+{{#if (eq eventBridge "AmqpEventBridge")}}
+import { AmqpBridge } from '@purista/amqpbridge'
+{{/if}}
+{{#if (eq eventBridge "DefaultEventBridge")}}
+import { DefaultEventBridge } from '@purista/core'
+{{/if}}
+{{#if installHttpService}}
+import { HttpServerService } from '@purista/httpserver'
+{{/if}}
+
+{{#if (eq eventBridge "AmqpEventBridge")}}
+import amqpBridgeConfig from '../../config/amqpBridgeConfig'
+{{/if}}
+{{#if installHttpService}}
+import httpServerConfig from '../../config/httpServerConfig'
+{{/if}}
+
+export const main = async () => {
+  // initiate the event bridge as first step
+  {{#if (eq eventBridge "AmqpEventBridge")}}
+  const eventBridge = new AmqpBridge(amqpBridgeConfig)
+  await eventBridge.start()
+  {{/if}}
+  {{#if (eq eventBridge "DefaultEventBridge")}}
+  const eventBridge = new DefaultEventBridge()
+  await eventBridge.start()
+  {{/if}}
+
+  {{#if installHttpService}}
+  // initiate the webserver service as second step
+  const httpServerService = new HttpServerService(eventBridge, httpServerConfig)
+  {{/if}}
+
+  {{#if installStaticPlugin}}
+  // static file handler
+  const defaultPublicPath = resolve(__dirname, '..', '..', 'public')
+  
+  httpServerService.server?.register(fastifyStatic, {
+    root: defaultPublicPath,
+    decorateReply: false,
+  })
+  {{/if}}
+
+  {{#if installHttpService}}
+  // start the webserver
+  await httpServerService.start()
+  {{/if}}
+
+  // add initiation and start of services here
+}
