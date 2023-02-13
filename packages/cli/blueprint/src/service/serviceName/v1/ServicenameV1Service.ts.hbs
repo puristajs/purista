@@ -1,0 +1,5 @@
+import { {{properCase serviceName}}ServiceBuilder } from './{{properCase serviceName}}ServiceBuilder'
+import { {{camelCase serviceName}}ServiceV{{version}}ConfigSchema, {{camelCase serviceName}}ServiceV{{version}}DefaultConfig } from './{{camelCase serviceName}}ServiceConfig'
+
+export const {{properCase serviceName}}V{{version}}Service = {{properCase serviceName}}ServiceBuilder.setConfigSchema({{camelCase serviceName}}ServiceV{{version}}ConfigSchema)
+  .setDefaultConfig({{camelCase serviceName}}ServiceV{{version}}DefaultConfig)

@@ -1,0 +1,21 @@
+{
+  "name": "myProject",
+  "version": "1.0.0",
+  "description": "PURISTA blueprint project",
+  "engines": {
+  "node": ">=16"
+  },
+  "main": "src/index.ts",
+  "scripts": {
+    "start": "ts-node src/index.ts | pino-pretty",
+    {{#if (includes lintTestModules "installTest")}}
+    "test": "jest --passWithNoTests",
+    "test:cov": "jest --coverage --passWithNoTests",
+    {{/if}}
+    {{#if (includes lintTestModules "installLint")}}
+    "lint": "eslint --ext .ts,.js,.json --cache .",
+    "lint:fix": "eslint . --ext .ts,.js,.json --fix",
+    {{/if}}
+    "purista": "purista add"
+  }
+}

@@ -1,0 +1,32 @@
+import { getCommandContextMock, getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { createSandbox } from 'sinon'
+
+import { {{properCase service.name}}V{{service.version}}Service } from '../../{{properCase service.name}}V{{service.version}}Service'
+import { {{properCase commandName}}FunctionBuilder } from './{{properCase commandName}}FunctionBuilder'
+
+describe('service {{properCase service.name}} version {{service.version}} - command {{camelCase commandName}}', () => {
+  let sandbox = createSandbox()
+  beforeEach(() => {
+    sandbox = createSandbox()
+  })
+
+  afterEach(() => {
+    sandbox.restore()
+  })
+
+  test('does not throw', async () => {
+    const service = {{properCase service.name}}V{{service.version}}Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
+
+    const {{camelCase commandName}} = {{properCase commandName}}FunctionBuilder.getFunction().bind(service)
+
+    const payload = undefined
+
+    const parameter = {}
+
+    const context = getCommandContextMock(payload, parameter, sandbox)
+
+    const result = await {{camelCase commandName}}(context.mock, payload, parameter)
+
+    expect(result).toBeUndefined()
+  })
+})
