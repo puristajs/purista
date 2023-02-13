@@ -1,0 +1,11 @@
+import { extendApi } from '@anatine/zod-openapi'
+import { z } from 'zod'
+
+// define the input parameters
+export const {{camelCase service.name}}V{{service.version}}{{properCase commandName}}InputParameterSchema = extendApi(z.object({}), { title: '{{commandName}} input parameter schema' })
+
+// define the input payload
+export const {{camelCase service.name}}V{{service.version}}{{properCase commandName}}InputPayloadSchema = extendApi(z.any(), { title: '{{commandName}} input payload schema' })
+
+// define the output payload
+export const {{camelCase service.name}}V{{service.version}}{{properCase commandName}}OutputPayloadSchema = extendApi(z.any(), { title: '{{commandName}} output payload schema' })

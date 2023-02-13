@@ -1,0 +1,16 @@
+{
+  "compilerOptions": {
+    // Required
+    "module": "ESNext",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    // Not required
+    "strict": true,
+    "baseUrl": "./",
+    "paths": {
+      "plop": ["../../src/plop.d.ts"]
+    },
+    "outDir": "./lib"
+  },
+  "include": ["./src","./blueprint"]
+}
