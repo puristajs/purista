@@ -1,15 +1,8 @@
 ---
-# This control sidebar index
-index: true
-order: 10
-# This is the icon of the page
-icon: brain fas
-# This is the title of the article
+order: 1
 title: Concept of the nodejs PURISTA typescript based framework
 shortTitle: Concept
-# description
 description: A general description of the concept of the typescript based nodejs backend PURISTA.
-# A page can have multiple tags
 tag:
   - typescript
   - nodejs
@@ -22,10 +15,6 @@ tag:
   - Installation
   - Setup
   - Guide
-# this page is sticky in article list
-sticky: true
-# this page will appear in article channel in home page
-star: true
 ---
 
 ## Main idea
@@ -375,4 +364,4 @@ As an example, you might have some function which takes longer for processing da
 ### Testing
 
 The core concept of PURISTA is helping you, when it comes to testing.  
-Check out the handbook chapter [Testing](6_testing.md)
+Check out the handbook chapter [Testing](../5._testing/0_testing.md)

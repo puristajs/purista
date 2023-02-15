@@ -1,14 +1,7 @@
 ---
-# This control sidebar index
-index: true
-order: 30
-# This is the icon of the page
-icon: wand-sparkles fas
-# This is the title of the article
+order: 10
 title: Create a new PURISTA typescript service with nodejs
 shortTitle: Create new Service
-# A page can have multiple tags
-# description
 description: Create your first typescript service in PURISTA with a function and a subscription implementation in simple typescript/javascript.
 tag:
   - typescript
@@ -22,10 +15,6 @@ tag:
   - Installation
   - Setup
   - Guide
-# this page is sticky in article list
-sticky: true
-# this page will appear in article channel in home page
-star: true
 ---
 
 A service is a logical group of functions and subscriptions. This where the domain driven aspect comes in.  
