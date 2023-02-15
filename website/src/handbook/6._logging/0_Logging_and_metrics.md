@@ -1,14 +1,8 @@
 ---
-# This control sidebar index
-index: true
-order: 90
-# This is the icon of the page
-icon: chart-line fas
-# This is the title of the article
+order: 0
 title: Logging, tracing and metrics with PURISTA typescript based framework
 shortTitle: Logging and metrics
 description: Logging and metrics in PURISTA typescript nodejs backend framework applications and how to use them.
-# A page can have multiple tags
 tag:
   - typescript
   - nodejs
@@ -21,10 +15,6 @@ tag:
   - Installation
   - Setup
   - Guide
-# this page is sticky in article list
-sticky: true
-# this page will appear in article channel in home page
-star: true
 ---
 
 ## Logging
@@ -71,15 +61,6 @@ Internally, PURISTA tries to cover these use cases with different log levels:
 
 In production, log level `warn` is recommended.
 
-## Opentelemetry
-
-PURISTA has build in support for [OpenTelemetry](https://opentelemetry.io/).
-
-This means, there is a industrial standard way of tracking and metrics out of the box.
-
-### Tracing
-
-### Metrics
 
 ## Error tracking within the program
 

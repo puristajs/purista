@@ -1,14 +1,8 @@
 ---
-# This control sidebar index
-index: true
-order: 120
-# This is the icon of the page
-icon: user-secret fas
-# This is the title of the article
+order: 100
 title: Information about internals of PURISTA message based typescript framework
 shortTitle: Insights
 description: A deeper look into internals of PURISTA typescript application backend framework.
-# A page can have multiple tags
 tag:
   - typescript
   - nodejs
@@ -21,10 +15,6 @@ tag:
   - Installation
   - Setup
   - Guide
-# this page is sticky in article list
-sticky: true
-# this page will appear in article channel in home page
-star: true
 ---
 
 ## ID's

@@ -1,14 +1,8 @@
 ---
-# This control sidebar index
-index: true
-order: 100
-# This is the icon of the page
-icon: bridge fas
-# This is the title of the article
+order: 10
 title: Event bridge or event bus systems available for typescript backend framework PURISTA
 shortTitle: Event bridge
 description: A brief overview about event bridge opportunities to be used with PURISTA typescript framework
-# A page can have multiple tags
 tag:
   - typescript
   - nodejs
@@ -21,10 +15,6 @@ tag:
   - Installation
   - Setup
   - Guide
-# this page is sticky in article list
-sticky: true
-# this page will appear in article channel in home page
-star: true
 ---
 
 ## General
