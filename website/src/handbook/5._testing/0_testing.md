@@ -1,14 +1,8 @@
 ---
-# This control sidebar index
-index: true
-order: 70
-# This is the icon of the page
-icon: vial-circle-check fas
-# This is the title of the article
+order: 0
 title: Test, unit test, mock and stub in PURISTA typescript backend framework
 shortTitle: Testing
 describing: How to test single functions and subscription of PURISTA application services
-# A page can have multiple tags
 tag:
   - typescript
   - nodejs
@@ -21,10 +15,6 @@ tag:
   - Installation
   - Setup
   - Guide
-# this page is sticky in article list
-sticky: true
-# this page will appear in article channel in home page
-star: true
 ---
 
 Testing is one of the most love-hate-stories for developers.  

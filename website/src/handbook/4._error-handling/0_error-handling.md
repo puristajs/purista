@@ -1,14 +1,8 @@
 ---
-# This control sidebar index
-index: true
-order: 40
-# This is the icon of the page
-icon: bugs fas
-# This is the title of the article
+order: 0
 title: Handled and unhandled errors in typescript backend framework PURISTA
 shortTitle: Error handling
 description: A deeper look into javascript/typescript error handling within PURISTA nodejs backend application framework
-# A page can have multiple tags
 tag:
   - typescript
   - nodejs
@@ -21,10 +15,6 @@ tag:
   - Installation
   - Setup
   - Guide
-# this page is sticky in article list
-sticky: true
-# this page will appear in article channel in home page
-star: true
 ---
 
 Error handling is one of the essentials of software development.  

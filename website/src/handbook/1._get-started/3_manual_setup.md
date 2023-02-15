@@ -1,31 +1,8 @@
 ---
-# This control sidebar index
-index: true
-order: 20
-# This is the icon of the page
-icon: bolt fas
-# This is the title of the article
-title: PURISTA framework - build your first typescript application and run on nodejs
-shortTitle: Get started
-# description
-description: Setup your typescript project to build your first nodejs application based on the PURISTA backend framework.
-# A page can have multiple tags
-tag:
-  - typescript
-  - nodejs
-  - javascript
-  - backend
-  - framework
-  - cloud
-  - microservice
-  - lambda
-  - Installation
-  - Setup
-  - Guide
-# this page is sticky in article list
-sticky: true
-# this page will appear in article channel in home page
-star: true
+order: 30
+title: Manually setup a project
+shortTitle: Manual setup
+description: Manually setup a project with PURISTA framework
 ---
 
 PURISTA tries to avoid the need for implementing boilerplate code as much as possible and to automate and autogenerate types, definitions, documentation when ever possible.
@@ -93,3 +70,4 @@ Open your browser and visit [http://localhost:9090](http://localhost:9090) and y
 ```
 
 The only, per default existing, endpoint is the OpenApi UI (swagger UI) [http://localhost:9090/api/](http://localhost:9090/api/).
+
