@@ -12,7 +12,7 @@ export default hopeTheme({
 
   iconAssets: 'fontawesome',
 
-  //logo: '/logo.svg',
+  // logo: '/logo.svg',
 
   themeColor: false,
   headerDepth: 3,
@@ -81,7 +81,11 @@ export default hopeTheme({
     seo: {
       fallBackImage: '/purista_slogan.png',
     },
-    photoSwipe: false,
+    blog: {
+      filter: ({ filePathRelative }) => (filePathRelative ? filePathRelative.startsWith('posts/') : false),
+      excerptFilter: ({ filePathRelative }) => (filePathRelative ? filePathRelative.startsWith('posts/') : false),
+    },
+    photoSwipe: true,
     mdEnhance: {
       presentation: {
         plugins: ['highlight', 'math', 'search', 'notes', 'zoom'],
