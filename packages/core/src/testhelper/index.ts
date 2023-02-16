@@ -1,3 +1,4 @@
+export * from './getCommandContext.mock'
 export * from './getEventBridge.mock'
 export * from './getFunctionContext.mock'
 export * from './getLogger.mock'

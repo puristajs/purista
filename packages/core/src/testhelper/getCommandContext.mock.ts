@@ -4,11 +4,7 @@ import { Command, CommandFunctionContext } from '../core'
 import { getLoggerMock } from './getLogger.mock'
 import { createTestCommandMsg } from './messages'
 
-/**
- *
- * @deprecated use getCommandContext instead of getFunctionContextMock as it will be removed soon.
- */
-export const getFunctionContextMock = <MessagePayloadType = unknown, MessageParamsType = unknown>(
+export const getCommandContextMock = <MessagePayloadType = unknown, MessageParamsType = unknown>(
   payload: MessagePayloadType,
   parameter: MessageParamsType,
   sandbox?: SinonSandbox,
