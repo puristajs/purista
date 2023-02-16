@@ -153,6 +153,16 @@ export class SubscriptionDefinitionBuilder<
   }
 
   /**
+   *
+   * @deprecated use setSubscriptionFunction instead. It will be removed soon.
+   */
+  setFunction<PayloadType = unknown, MType extends EBMessage = MsgType>(
+    fn: SubscriptionFunction<ServiceClassType, MType, PayloadType>,
+  ) {
+    return this.setSubscriptionFunction(fn)
+  }
+
+  /**
    * Required: Set the function implementation.
    * The types should be automatically set as soon as schemas previously defined.
    * As the function will be a a function of a service class you need to implement as function declaration.
@@ -168,7 +178,7 @@ export class SubscriptionDefinitionBuilder<
    * @param fn the function implementation
    * @returns SubscriptionDefinitionBuilder
    */
-  setFunction<PayloadType = unknown, MType extends EBMessage = MsgType>(
+  setSubscriptionFunction<PayloadType = unknown, MType extends EBMessage = MsgType>(
     fn: SubscriptionFunction<ServiceClassType, MType, PayloadType>,
   ) {
     this.fn = fn
@@ -176,10 +186,18 @@ export class SubscriptionDefinitionBuilder<
   }
 
   /**
+   *
+   * @deprecated use getSubscriptionFunction instead. It will be removed soon.
+   */
+  getFunction(): SubscriptionFunction<ServiceClassType, MsgType, Payload> {
+    return this.getSubscriptionFunction()
+  }
+
+  /**
    * Get the function implementation
    * @returns the function
    */
-  getFunction(): SubscriptionFunction<ServiceClassType, MsgType, Payload> {
+  getSubscriptionFunction(): SubscriptionFunction<ServiceClassType, MsgType, Payload> {
     if (!this.fn) {
       throw new Error(`No function implementation for ${this.subscriptionName}`)
     }
