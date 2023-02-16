@@ -14,7 +14,6 @@ export const {{properCase commandName}}CommandBuilder = {{camelCase service.name
   .addInputSchema({{camelCase service.name}}V{{service.version}}{{properCase commandName}}InputPayloadSchema)
   .addParameterSchema({{camelCase service.name}}V{{service.version}}{{properCase commandName}}InputParameterSchema)
   .addOutputSchema({{camelCase service.name}}V{{service.version}}{{properCase commandName}}OutputPayloadSchema)
-
-  .setFunction(async function (_context, _payload, _parameter) {
+  .setCommandFunction(async function (_context, _payload, _parameter) {
     // add your business logic here
   })
