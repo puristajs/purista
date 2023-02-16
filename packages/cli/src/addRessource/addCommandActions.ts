@@ -37,7 +37,7 @@ export const addCommandActions: Actions = [
   {
     type: 'add',
     skipIfExists: true,
-    path: 'src/service/{{service.path}}/command/{{camelCase commandName}}/{{camelCase commandName}}CommandBuilder.ts',
+    path: 'src/service/{{service.path}}/command/{{camelCase commandName}}/{{properCase commandName}}CommandBuilder.ts',
     templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/command/commandName/commandNameBuilder.ts.hbs',
   },
   {

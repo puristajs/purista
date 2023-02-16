@@ -11,7 +11,7 @@ import {
   ServiceInfoType,
   SubscriptionDefinitionList,
 } from '../core'
-import { FunctionDefinitionBuilder } from './FunctionDefinitionBuilder.impl'
+import { CommandDefinitionBuilder } from './CommandDefinitionBuilder.impl'
 import { SubscriptionDefinitionBuilder } from './SubscriptionDefinitionBuilder.impl'
 
 export type Newable<T> = { new (...args: any[]): T }
@@ -48,8 +48,16 @@ export class ServiceBuilder<
     return this
   }
 
+  /**
+   *
+   * @deprecated use addCommandDefinition instead of addFunctionDefinition as it will be removed soon.
+   */
   addFunctionDefinition(...functions: CommandDefinitionList<ServiceClassType>) {
-    const existing = functions.filter((fn) =>
+    return this.addCommandDefinition(...functions)
+  }
+
+  addCommandDefinition(...commands: CommandDefinitionList<ServiceClassType>) {
+    const existing = commands.filter((fn) =>
       this.commandFunctions.some((definition) => definition.commandName === fn.commandName),
     )
 
@@ -62,7 +70,7 @@ export class ServiceBuilder<
       throw new Error('duplicate function definitions')
     }
 
-    this.commandFunctions.push(...functions)
+    this.commandFunctions.push(...commands)
     return this as ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType>
   }
 
@@ -100,12 +108,12 @@ export class ServiceBuilder<
 
     const logInstance = options?.logger || initLogger()
 
-    if (this.configSchema) {
+    if (this.configSchema && options?.serviceConfig) {
       try {
         conf = this.configSchema.parse(options?.serviceConfig)
       } catch (err) {
         logInstance.error({ err, ...this.info }, 'Invalid configuration for')
-        throw new Error('Fatal - unable to create service instance')
+        throw new Error('Fatal - unable to create service instance because provided configuration is invalid')
       }
     }
 
@@ -122,12 +130,24 @@ export class ServiceBuilder<
     return this.instance as ServiceClassType
   }
 
+  /**
+   *
+   * @deprecated user getCommandBuilder instead. It will be removed soon.
+   */
   getFunctionBuilder(
     commandName: string,
     description: string,
     eventName?: string,
-  ): FunctionDefinitionBuilder<ServiceClassType> {
-    return new FunctionDefinitionBuilder<ServiceClassType>(commandName, description, eventName)
+  ): CommandDefinitionBuilder<ServiceClassType> {
+    return new CommandDefinitionBuilder<ServiceClassType>(commandName, description, eventName)
+  }
+
+  getCommandBuilder(
+    commandName: string,
+    description: string,
+    eventName?: string,
+  ): CommandDefinitionBuilder<ServiceClassType> {
+    return new CommandDefinitionBuilder<ServiceClassType>(commandName, description, eventName)
   }
 
   getSubscriptionBuilder(

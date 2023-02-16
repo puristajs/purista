@@ -19,15 +19,14 @@ import { getFunctionWithValidation } from './getFunctionWithValidation'
 import type { SupportedHttpMethod } from './types'
 
 /**
- * Function definition builder is a helper to create and define a function for a service.
+ * Function definition builder is a helper to create and define a command for a service.
  * It helps to set all needed information like schemas and hooks.
  * With these information, the types are automatically set and extended.
  *
- * A working schema definition needs at least a function name, a short description and the function implementation.
+ * A working schema definition needs at least a command name, a short description and the function implementation.
  *
- * @deprecated FunctionDefinitionBuilder has been deprecated in favor of CommandDefinitionBuilder  and it will be removed soon
  */
-export class FunctionDefinitionBuilder<
+export class CommandDefinitionBuilder<
   ServiceClassType extends ServiceClass,
   MessagePayloadType = unknown,
   MessageParamsType = unknown,
@@ -104,11 +103,11 @@ export class FunctionDefinitionBuilder<
    * Add a schema for input payload validation.
    * Types for payload of message and function payload input are generated from given schema.
    * @param inputSchema The schema validation for input payload
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   addInputSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(inputSchema: z.ZodType<O, D, I>) {
     this.inputSchema = inputSchema
-    return this as unknown as FunctionDefinitionBuilder<
+    return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
       I,
       MessageParamsType,
@@ -123,11 +122,11 @@ export class FunctionDefinitionBuilder<
    * Add a schema for output payload validation.
    * Types for payload of message and function payload output are generated from given schema.
    * @param outputSchema The schema validation for output payload
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   addOutputSchema<I, D extends z.ZodTypeDef, O>(outputSchema: z.ZodType<O, D, I>) {
     this.outputSchema = outputSchema
-    return this as unknown as FunctionDefinitionBuilder<
+    return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
@@ -142,11 +141,11 @@ export class FunctionDefinitionBuilder<
    * Add a schema for output parameter validation.
    * Types for parameter of message and function parameter output are generated from given schema.
    * @param parameterSchema The schema validation for output parameter
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   addParameterSchema<I, D extends z.ZodTypeDef, O>(parameterSchema: z.ZodType<O, D, I>) {
     this.parameterSchema = parameterSchema
-    return this as unknown as FunctionDefinitionBuilder<
+    return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
       I,
@@ -177,7 +176,7 @@ export class FunctionDefinitionBuilder<
    * ```
    *
    * @param queryParams Add one or more query parameter definitions
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   addQueryParameters(...queryParams: QueryParameter[]) {
     this.queryParameter.push(...queryParams)
@@ -194,7 +193,7 @@ export class FunctionDefinitionBuilder<
    * ```
    *
    * @param tags List of tag strings
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   addTags(...tags: string[]) {
     this.tags.push(...tags)
@@ -212,7 +211,7 @@ export class FunctionDefinitionBuilder<
    * ```
    *
    * @param codes List of status codes
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   addErrorStatusCodes(...codes: StatusCode[]) {
     this.errorStatusCodes.push(...codes)
@@ -224,7 +223,7 @@ export class FunctionDefinitionBuilder<
    * Will be executed as first step before input validation, before guard and the function itself.
    * This will change the type of input message payload and input message parameter.
    * @param transformInput Transform input function
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   transformInput<
     PayloadIn = MessagePayloadType,
@@ -243,7 +242,7 @@ export class FunctionDefinitionBuilder<
       transformInputSchema,
       transformParameterSchema,
     }
-    return this as unknown as FunctionDefinitionBuilder<
+    return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
       PayloadIn,
       ParamsIn,
@@ -259,7 +258,7 @@ export class FunctionDefinitionBuilder<
    * Will be executed at very last step after function execution, output validation and after guard hooks.
    * This will change the type of output message payload.
    * @param transformOutput Transform output function
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   transformOutput<PayloadOut, PayloadD extends z.ZodTypeDef, PayloadIn>(
     transformOutputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
@@ -275,7 +274,7 @@ export class FunctionDefinitionBuilder<
       transformFunction,
       transformOutputSchema,
     }
-    return this as unknown as FunctionDefinitionBuilder<
+    return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
@@ -290,7 +289,7 @@ export class FunctionDefinitionBuilder<
    * Set one or more before guard hook(s).
    * If there are multiple before guard hooks, they are executed in parallel
    * @param beforeGuards Before guard function
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   setBeforeGuardHook(
     ...beforeGuards: BeforeGuardHook<
@@ -309,7 +308,7 @@ export class FunctionDefinitionBuilder<
    * Set one or more after guard hook(s).
    * If there are multiple after guard hooks, they are executed in parallel
    * @param afterGuard After guard function
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   setAfterGuardHook(
     ...afterGuard: AfterGuardHook<ServiceClassType, MessageResultType, MessagePayloadType, MessageParamsType>[]
@@ -324,7 +323,7 @@ export class FunctionDefinitionBuilder<
    * @param path The url path
    * @param contentType input content type defaults to application/json
    * @param contentTypeResponse response content type defaults to application/json
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   exposeAsHttpEndpoint(
     method: SupportedHttpMethod,
@@ -348,7 +347,7 @@ export class FunctionDefinitionBuilder<
   /**
    * enable or disable security for this endpoint
    * @param enabled Defaults to true if not set means "enable security"
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   enableHttpSecurity(enabled = true) {
     this.isSecure = enabled
@@ -358,7 +357,7 @@ export class FunctionDefinitionBuilder<
   /**
    * enable or disable security for this endpoint
    * @param enabled Defaults to tre if not set meaning "disable security"
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   disableHttpSecurity(disabled = true) {
     this.isSecure = !disabled
@@ -374,7 +373,7 @@ export class FunctionDefinitionBuilder<
    * ```
    *
    * @param summary Summary text
-   * @returns FunctionDefinitionBuilder
+   * @returns CommandDefinitionBuilder
    */
   setSummary(summary: string) {
     this.summary = summary
@@ -444,7 +443,7 @@ export class FunctionDefinitionBuilder<
     FunctionParamsType
   > {
     if (!this.fn) {
-      throw new Error('FunctionDefinitionBuilder: missing function implementation')
+      throw new Error('CommandDefinitionBuilder: missing function implementation')
     }
 
     const eventName = this.eventName
@@ -479,6 +478,31 @@ export class FunctionDefinitionBuilder<
   }
 
   /**
+   *
+   * @deprecated use setCommandFunction instead. It will be removed soon.
+   */
+  public setFunction(
+    fn: CommandFunction<
+      ServiceClassType,
+      MessagePayloadType,
+      MessageParamsType,
+      FunctionPayloadType,
+      FunctionParamsType,
+      FunctionResultType
+    >,
+  ): CommandDefinitionBuilder<
+    ServiceClassType,
+    MessagePayloadType,
+    MessageParamsType,
+    MessageResultType,
+    FunctionPayloadType,
+    FunctionParamsType,
+    FunctionResultType
+  > {
+    return this.setCommandFunction(fn)
+  }
+
+  /**
    * Required: Set the function implementation.
    * The types should be automatically set as soon as schemas previously defined.
    * As the function will be a a function of a service class you need to implement as function declaration.
@@ -492,11 +516,9 @@ export class FunctionDefinitionBuilder<
    * }
    * ```
    * @param fn the function implementation
-   * @returns FunctionDefinitionBuilder
-   *
-   * @deprecated use setCommandFunction of CommandDefinitionBuilder instead. It will be removed soon.
+   * @returns CommandDefinitionBuilder
    */
-  public setFunction(
+  public setCommandFunction(
     fn: CommandFunction<
       ServiceClassType,
       MessagePayloadType,
@@ -505,7 +527,7 @@ export class FunctionDefinitionBuilder<
       FunctionParamsType,
       FunctionResultType
     >,
-  ): FunctionDefinitionBuilder<
+  ): CommandDefinitionBuilder<
     ServiceClassType,
     MessagePayloadType,
     MessageParamsType,
@@ -523,7 +545,7 @@ export class FunctionDefinitionBuilder<
       FunctionResultType
     >
 
-    return this as unknown as FunctionDefinitionBuilder<
+    return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
@@ -535,12 +557,25 @@ export class FunctionDefinitionBuilder<
   }
 
   /**
-   * Get the function implementation
-   * @returns the function
    *
-   * @deprecated use getCommandFunction of CommandDefinitionBuilder instead. It will be removed soon.
+   * @deprecated use getCommandFunction instead. It will be removed soon.
    */
   getFunction(): CommandFunction<
+    ServiceClassType,
+    MessagePayloadType,
+    MessageParamsType,
+    FunctionPayloadType,
+    FunctionParamsType,
+    FunctionResultType
+  > {
+    return this.getCommandFunction()
+  }
+
+  /**
+   * Get the function implementation
+   * @returns the function
+   */
+  getCommandFunction(): CommandFunction<
     ServiceClassType,
     MessagePayloadType,
     MessageParamsType,
