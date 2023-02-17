@@ -1,5 +1,0 @@
-import { z } from 'zod'
-
-import { {{camelCase service.name}}V{{service.version}}{{properCase subscriptionName}}OutputPayloadSchema } from './schema'
-
-export type {{properCase service.name}}V{{service.version}}{{properCase subscriptionName}}OutputPayload = z.output<typeof {{camelCase service.name}}V{{service.version}}{{properCase subscriptionName}}OutputPayloadSchema>

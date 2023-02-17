@@ -1,0 +1,22 @@
+import { {{camelCase service.name}}ServiceBuilder } from '../../{{camelCase service.name}}ServiceBuilder'
+import { 
+  {{camelCase service.name}}V{{service.version}}{{properCase name}}InputParameterSchema,
+  {{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema,
+  {{camelCase service.name}}V{{service.version}}{{properCase name}}OutputPayloadSchema
+} from './schema'
+
+export const {{camelCase name}}CommandBuilder = {{camelCase service.name}}ServiceBuilder.getCommandBuilder(
+  '{{camelCase name}}',
+  '{{description}}',
+){{#if (isSet commandEventName)}}
+  .setSuccessEventName('{{trim commandEventName}}')
+{{/if}}
+  .addInputSchema({{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema)
+  .addParameterSchema({{camelCase service.name}}V{{service.version}}{{properCase name}}InputParameterSchema)
+  .addOutputSchema({{camelCase service.name}}V{{service.version}}{{properCase name}}OutputPayloadSchema)
+  .setCommandFunction(async function (_context, _payload, _parameter) {
+    // add your business logic here
+  })
+
+
+{{camelCase service.name}}ServiceBuilder.addCommandDefinition({{camelCase name}}CommandBuilder.getDefinition())

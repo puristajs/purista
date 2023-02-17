@@ -25,7 +25,7 @@ export const testDependencies: string[] = [
 ]
 
 export const lintDependencies: string[] = [
-  'eslint@^8.33.0',
+  'eslint@^8.34.0',
   'eslint-config-prettier@^8.6.0',
   'eslint-config-standard@^17.0.0',
   'eslint-plugin-import@^2.27.5',

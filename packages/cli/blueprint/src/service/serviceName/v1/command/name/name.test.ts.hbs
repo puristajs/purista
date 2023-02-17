@@ -2,9 +2,9 @@ import { getCommandContextMock, getEventBridgeMock, getLoggerMock } from '@puris
 import { createSandbox } from 'sinon'
 
 import { {{camelCase service.name}}V{{service.version}}Service } from '../../{{camelCase service.name}}V{{service.version}}Service'
-import { {{properCase commandName}}CommandBuilder } from './{{properCase commandName}}CommandBuilder'
+import { {{camelCase name}}CommandBuilder } from './{{camelCase name}}CommandBuilder'
 
-describe('service {{properCase service.name}} version {{service.version}} - command {{camelCase commandName}}', () => {
+describe('service {{properCase service.name}} version {{service.version}} - command {{camelCase name}}', () => {
   let sandbox = createSandbox()
   beforeEach(() => {
     sandbox = createSandbox()
@@ -17,7 +17,7 @@ describe('service {{properCase service.name}} version {{service.version}} - comm
   test('does not throw', async () => {
     const service = {{camelCase service.name}}V{{service.version}}Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
 
-    const {{camelCase commandName}} = {{properCase commandName}}CommandBuilder.getCommandFunction().bind(service)
+    const {{camelCase name}} = {{camelCase name}}CommandBuilder.getCommandFunction().bind(service)
 
     const payload = undefined
 
@@ -25,7 +25,7 @@ describe('service {{properCase service.name}} version {{service.version}} - comm
 
     const context = getCommandContextMock(payload, parameter, sandbox)
 
-    const result = await {{camelCase commandName}}(context.mock, payload, parameter)
+    const result = await {{camelCase name}}(context.mock, payload, parameter)
 
     expect(result).toBeUndefined()
   })
