@@ -1,12 +1,12 @@
 import { ServiceBuilder, ServiceInfoType } from '@purista/core'
 
-import { general{{properCase serviceName}}ServiceInfo } from '../general{{properCase serviceName}}ServiceInfo'
+import { general{{properCase name}}ServiceInfo } from '../general{{properCase name}}ServiceInfo'
 
-export const {{camelCase serviceName}}ServiceInfo: ServiceInfoType = {
+export const {{camelCase name}}ServiceInfo: ServiceInfoType = {
   serviceVersion: '1',
-  ...general{{properCase serviceName}}ServiceInfo,
+  ...general{{properCase name}}ServiceInfo,
 }
 
 // create a service builder instance only.
 
-export const {{camelCase serviceName}}ServiceBuilder = new ServiceBuilder({{camelCase serviceName}}ServiceInfo)
+export const {{camelCase name}}ServiceBuilder = new ServiceBuilder({{camelCase name}}ServiceInfo)

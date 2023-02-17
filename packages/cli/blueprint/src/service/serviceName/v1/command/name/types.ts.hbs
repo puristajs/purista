@@ -1,0 +1,13 @@
+import { z } from 'zod'
+
+import {
+  {{camelCase service.name}}V{{service.version}}{{properCase name}}InputParameterSchema,
+  {{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema,
+  {{camelCase service.name}}V{{service.version}}{{properCase name}}OutputPayloadSchema,
+} from './schema'
+
+export type {{properCase service.name}}V{{service.version}}{{properCase name}}InputParameter = z.input<typeof {{camelCase service.name}}V{{service.version}}{{properCase name}}InputParameterSchema>
+
+export type {{properCase service.name}}V{{service.version}}{{properCase name}}InputPayload = z.input<typeof {{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema>
+
+export type {{properCase service.name}}V{{service.version}}{{properCase name}}OutputPayload = z.output<typeof {{camelCase service.name}}V{{service.version}}{{properCase name}}OutputPayloadSchema>

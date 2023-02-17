@@ -1,7 +1,7 @@
-import { {{camelCase serviceName}}ServiceBuilder } from './{{camelCase serviceName}}ServiceBuilder'
-import { {{camelCase serviceName}}ServiceV{{version}}ConfigSchema, {{camelCase serviceName}}ServiceV{{version}}DefaultConfig } from './{{camelCase serviceName}}ServiceConfig'
+import { {{camelCase name}}ServiceBuilder } from './{{camelCase name}}ServiceBuilder'
+import { {{camelCase name}}ServiceV{{version}}ConfigSchema } from './{{camelCase name}}ServiceConfig'
 
 // bring service config definition, command definitions and subscription definitions together in the service
 
-export const {{camelCase serviceName}}V{{version}}Service = {{camelCase serviceName}}ServiceBuilder.setConfigSchema({{camelCase serviceName}}ServiceV{{version}}ConfigSchema)
-  .setDefaultConfig({{camelCase serviceName}}ServiceV{{version}}DefaultConfig)
+export const {{camelCase name}}V{{version}}Service = {{camelCase name}}ServiceBuilder.setConfigSchema({{camelCase name}}ServiceV{{version}}ConfigSchema)
+  .setDefaultConfig({})

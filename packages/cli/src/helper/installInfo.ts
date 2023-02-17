@@ -8,6 +8,7 @@ type ServiceEntry = {
   name: string
   version: number
   path: string
+  serviceInfoFile: string
   builderFile: string
 }
 type InstallInfo = {
@@ -23,6 +24,7 @@ export const installInfo: InstallInfo = {
 }
 
 const matchVersionRegex = /^\D*(\d+)$/i
+const builderFileRegex = /^\D*(\d+)$/i
 
 const getServiceVersions = (startFolder: string, serviceName: string) => {
   const files = fs.readdirSync(startFolder)
@@ -31,6 +33,7 @@ const getServiceVersions = (startFolder: string, serviceName: string) => {
     name: serviceName,
     version: 0,
     path: '',
+    serviceInfoFile: '',
     builderFile: '',
   }
 
@@ -44,6 +47,7 @@ const getServiceVersions = (startFolder: string, serviceName: string) => {
       }
     } else {
       service.builderFile = path.basename(file)
+
       console.log('file:', path.basename(file))
     }
   })
