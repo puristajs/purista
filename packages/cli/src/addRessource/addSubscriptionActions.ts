@@ -25,7 +25,21 @@ export const addSubscriptionActions: Actions = [
   {
     type: 'add',
     skipIfExists: true,
-    path: 'src/service/{{service.path}}/subscription/{{camelCase subscriptionName}}/{{properCase subscriptionName}}SubscriptionBuilder.ts',
+    path: 'src/service/{{service.path}}/subscription/{{camelCase subscriptionName}}/schema.ts',
+    templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/subscription/schema.ts.hbs',
+    skip: () => !installInfo.jestIsPresent || !installInfo.sinonIsPresent,
+  },
+  {
+    type: 'add',
+    skipIfExists: true,
+    path: 'src/service/{{service.path}}/subscription/{{camelCase subscriptionName}}/types.ts',
+    templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/subscription/types.ts.hbs',
+    skip: () => !installInfo.jestIsPresent || !installInfo.sinonIsPresent,
+  },
+  {
+    type: 'add',
+    skipIfExists: true,
+    path: 'src/service/{{service.path}}/subscription/{{camelCase subscriptionName}}/{{camelCase subscriptionName}}SubscriptionBuilder.ts',
     templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/subscription/subscriptionNameBuilder.ts.hbs',
   },
   {
