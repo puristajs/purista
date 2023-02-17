@@ -1,7 +1,11 @@
-import { {{properCase service.name}}ServiceBuilder } from '../../{{properCase service.name}}ServiceBuilder'
-import { {{camelCase service.name}}V{{service.version}}{{properCase commandName}}InputParameterSchema, {{camelCase service.name}}V{{service.version}}{{properCase commandName}}InputPayloadSchema, {{camelCase service.name}}V{{service.version}}{{properCase commandName}}OutputPayloadSchema } from './schema'
+import { {{camelCase service.name}}ServiceBuilder } from '../../{{camelCase service.name}}ServiceBuilder'
+import { 
+  {{camelCase service.name}}V{{service.version}}{{properCase commandName}}InputParameterSchema,
+  {{camelCase service.name}}V{{service.version}}{{properCase commandName}}InputPayloadSchema,
+  {{camelCase service.name}}V{{service.version}}{{properCase commandName}}OutputPayloadSchema
+} from './schema'
 
-export const {{properCase commandName}}FunctionBuilder = {{properCase service.name}}ServiceBuilder.getFunctionBuilder(
+export const {{properCase commandName}}CommandBuilder = {{camelCase service.name}}ServiceBuilder.getCommandBuilder(
   '{{camelCase commandName}}',
   '{{commandDescription}}',
 ){{#if (isSet commandEventName)}}
