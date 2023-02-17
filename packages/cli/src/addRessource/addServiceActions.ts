@@ -13,14 +13,14 @@ export const addServiceActions: Actions = [
   {
     type: 'add',
     skipIfExists: true,
-    path: 'src/service/{{properCase serviceName}}/v{{version}}/{{properCase serviceName}}V{{version}}Service.ts',
-    templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/ServicenameV1Service.ts.hbs',
+    path: 'src/service/{{properCase serviceName}}/v{{version}}/{{camelCase serviceName}}V{{version}}Service.ts',
+    templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/servicenameV1Service.ts.hbs',
   },
   {
     type: 'add',
     skipIfExists: true,
-    path: 'src/service/{{properCase serviceName}}/v{{version}}/{{properCase serviceName}}ServiceBuilder.ts',
-    templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/ServicenameBuilder.ts.hbs',
+    path: 'src/service/{{properCase serviceName}}/v{{version}}/{{camelCase serviceName}}ServiceBuilder.ts',
+    templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/servicenameBuilder.ts.hbs',
   },
   {
     type: 'add',
