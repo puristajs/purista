@@ -1,0 +1,49 @@
+import {
+  getCommandSuccessMessageMock,
+  getEventBridgeMock,
+  getLoggerMock,
+  getSubscriptionContextMock
+} from '@purista/core'
+import { createSandbox } from 'sinon'
+
+import { {{camelCase service.name}}V{{service.version}}Service } from '../../{{camelCase service.name}}V{{service.version}}Service'
+import { {{camelCase name}}SubscriptionBuilder } from './{{camelCase name}}SubscriptionBuilder'
+import { {{properCase name}}V{{service.version}}{{properCase service.name}}InputPayload } from './types'
+
+describe('service {{properCase service.name}} version {{service.version}} - subscription {{camelCase name}}', () => {
+  let sandbox = createSandbox()
+  beforeEach(() => {
+    sandbox = createSandbox()
+  })
+
+  afterEach(() => {
+    sandbox.restore()
+  })
+
+  test('does not throw', async () => {
+    // create a service instance to be bind to the subscription function
+    const service = {{camelCase service.name}}V{{service.version}}Service.getInstance(getEventBridgeMock(sandbox).mock, {
+      logger: getLoggerMock(sandbox).mock
+    })
+
+    // get the subscription function and bind to service instance to work properly
+    const {{camelCase name}} = {{camelCase name}}SubscriptionBuilder.getSubscriptionFunction().bind(service)
+
+    // define the test input payload
+    const payload: {{properCase name}}V{{service.version}}{{properCase service.name}}InputPayload = undefined
+
+    // define the test input parameter
+    const parameter = undefined
+
+    // create a mock message with the expected input for the subscription function
+    const message = getCommandSuccessMessageMock(payload)
+
+    // create a subscription context for the subscription function
+    const context = getSubscriptionContextMock(message, sandbox)
+
+    // execute the subscription function
+    const result = await {{camelCase name}}(context.mock, payload, parameter)
+
+    expect(result).toBeUndefined()
+  })
+})
