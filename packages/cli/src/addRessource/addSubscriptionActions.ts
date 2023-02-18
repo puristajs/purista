@@ -1,8 +1,12 @@
 /* eslint-disable no-console */
+import camelCase from 'camelcase'
 import { Actions } from 'node-plop'
 
 import { TEMPLATE_BASE } from '../config.js'
 import { collectInstallInfo, installInfo } from '../helper/installInfo.js'
+import { addEventEnumToSubscriptionBuilder } from '../manipulation/addEventEnumToSubscriptionBuilder.js'
+import { ensureServiceEvent } from '../manipulation/ensureServiceEvent.js'
+import { lintFiles } from '../manipulation/lintFiles.js'
 
 export const addSubscriptionActions: Actions = [
   async () => {
@@ -46,6 +50,40 @@ export const addSubscriptionActions: Actions = [
     type: 'append',
     path: 'src/service/{{service.path}}/index.ts',
     templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/partial_addTypeExportSubscription.ts.hbs',
+  },
+  async (answers) => {
+    console.log('try to update existing files - pls be patient!')
+    try {
+      const eventEnumName = await ensureServiceEvent(answers.subscriptionEventName || answers.subscriptionEventList)
+      if (eventEnumName) {
+        await addEventEnumToSubscriptionBuilder(
+          `src/service/${answers.service.path}/subscription/${camelCase(answers.name)}/${camelCase(
+            answers.name,
+          )}SubscriptionBuilder.ts`,
+          eventEnumName,
+        )
+      }
+
+      const files: string[] = [
+        `src/service/${answers.service.path}/subscription/${camelCase(answers.name)}/index.ts`,
+        `src/service/${answers.service.path}/subscription/${camelCase(answers.name)}/schema.ts`,
+        `src/service/${answers.service.path}/subscription/${camelCase(answers.name)}/types.ts`,
+        `src/service/${answers.service.path}/subscription/${camelCase(answers.name)}/${camelCase(
+          answers.name,
+        )}.test.ts`,
+        `src/service/${answers.service.path}/subscription/${camelCase(answers.name)}/${camelCase(
+          answers.name,
+        )}SubscriptionBuilder.ts`,
+        `src/service/${answers.service.path}/index.ts`,
+        `src/service/ServiceEvent.enum.ts`,
+      ]
+
+      await lintFiles(files)
+    } catch (error) {
+      console.log(error)
+      return 'Please check manually!'
+    }
+    return 'files updated'
   },
   (answers) => {
     console.log('')

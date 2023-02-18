@@ -3,6 +3,7 @@ import { Answers } from 'inquirer'
 import { Prompts } from 'node-plop'
 import path from 'path'
 
+import { getEventNames } from '../helper/getEventNames.js'
 import { collectServices, installInfo } from '../helper/installInfo.js'
 
 export const addRessourcePrompts: Prompts = [
@@ -28,7 +29,7 @@ export const addRessourcePrompts: Prompts = [
   {
     type: 'input',
     message(answers) {
-      switch (answers.message) {
+      switch (answers.ressource) {
         case 'service':
           return 'What is the name (or domain) of your new service (something like: user or account)'
         case 'command':
@@ -61,6 +62,15 @@ export const addRessourcePrompts: Prompts = [
       throw new Error('Invalid input: purista add [service|command|subscription]')
     },
     name: 'description',
+  },
+  {
+    type: 'list',
+    message: 'Select a event to subscribe',
+    name: 'subscriptionEventList',
+    when: (answers: Record<string, unknown>) => answers.ressource === 'subscription' && getEventNames().length > 0,
+    choices: (_answers) => {
+      return [...getEventNames(), { name: 'Add a new event', value: '' }]
+    },
   },
   {
     type: 'input',
