@@ -21,7 +21,7 @@
     "commit:minor": "npm version minor --no-git-tag-version && scripts/commitVersion.sh",
     "commit:patch": "npm version patch --no-git-tag-version && scripts/commitVersion.sh",
     "vuepress": "npm run vuepress -w website",
-    "check:cycling":"npx madge --circular --extensions ts ./packages"
+    "check:cycling":"npx madge --circular --exclude '\\.d\\.ts$' --extensions ts ./packages"
   },
   "workspaces": [
     "./packages/*",
