@@ -3,7 +3,7 @@ import { ZodError } from 'zod'
 
 import { HandledError, UnhandledError } from '../Error'
 import { Command, CommandDefinition, Logger, StatusCode } from '../types'
-import { Service } from './Service.impl'
+import type { Service } from './Service.impl'
 
 export const commandTransformInput = async (
   serviceInstance: Service,
