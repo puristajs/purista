@@ -21,6 +21,7 @@ import {
   Command,
   CommandErrorResponse,
   CommandSuccessResponse,
+  CustomMessage,
   EBMessage,
   EBMessageAddress,
   EBMessageId,
@@ -91,7 +92,14 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
           try {
             this.subscriptions.forEach((subscription) => {
               if (isMessageMatchingSubscription(this.logger, message, subscription)) {
-                subscription.cb(message).catch((err) => this.logger.error({ err }))
+                subscription
+                  .cb(message)
+                  .then((result) => {
+                    if (subscription.emitEventName && result) {
+                      this.emitMessage(result)
+                    }
+                  })
+                  .catch((err) => this.logger.error({ err }))
               }
             })
 
@@ -219,7 +227,10 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
     this.serviceFunctions.delete(queueName)
   }
 
-  async registerSubscription(subscription: Subscription, cb: (message: EBMessage) => Promise<void>): Promise<string> {
+  async registerSubscription(
+    subscription: Subscription,
+    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+  ): Promise<string> {
     const queueName = getSubscriptionQueueName(subscription.subscriber)
     const entry = getNewSubscriptionStorageEntry(subscription, cb)
     this.subscriptions.set(queueName, entry)
@@ -248,12 +259,12 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
     return this.startActiveSpan(name, { kind: SpanKind.PRODUCER }, context, async (span) => {
       try {
         const msg = Object.freeze({
+          ...message,
           id: getNewEBMessageId(),
           timestamp: Date.now(),
           traceId: message.traceId || span.spanContext().traceId,
           instanceId: this.config.instanceId,
           otp: serializeOtp(),
-          ...message,
         })
 
         span.setAttribute(PuristaSpanTag.SenderServiceName, msg.sender.serviceName)

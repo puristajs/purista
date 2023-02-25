@@ -1,9 +1,16 @@
 import { SpanStatusCode } from '@opentelemetry/api'
 import { z, ZodError } from 'zod'
 
-import { BeforeGuardHook, CommandFunction, HandledError, ServiceClass, StatusCode, UnhandledError } from '../core'
+import {
+  HandledError,
+  ServiceClass,
+  StatusCode,
+  SubscriptionBeforeGuardHook,
+  SubscriptionFunction,
+  UnhandledError,
+} from '../core'
 
-export const getFunctionWithValidation = function <
+export const getSubscriptionFunctionWithValidation = function <
   ServiceClassType extends ServiceClass,
   MessagePayloadType = unknown,
   MessageParamsType = unknown,
@@ -12,7 +19,7 @@ export const getFunctionWithValidation = function <
   FunctionParamsType = MessageParamsType,
   FunctionResultType = MessageResultType,
 >(
-  fn: CommandFunction<
+  fn: SubscriptionFunction<
     ServiceClassType,
     MessagePayloadType,
     MessageParamsType,
@@ -23,14 +30,14 @@ export const getFunctionWithValidation = function <
   inputPayloadSchema: z.ZodType<FunctionPayloadType, z.ZodTypeDef, MessagePayloadType> | undefined,
   inputParameterSchema: z.ZodType<FunctionParamsType, z.ZodTypeDef, MessageParamsType> | undefined,
   outputPayloadSchema: z.ZodType<MessageResultType, z.ZodTypeDef, FunctionResultType> | undefined,
-  beforeGuards: BeforeGuardHook<
+  beforeGuards: SubscriptionBeforeGuardHook<
     ServiceClassType,
     MessagePayloadType,
     MessageParamsType,
     FunctionPayloadType,
     FunctionParamsType
   >[] = [],
-): CommandFunction<
+): SubscriptionFunction<
   ServiceClassType,
   MessagePayloadType,
   MessageParamsType,
@@ -38,7 +45,7 @@ export const getFunctionWithValidation = function <
   MessageParamsType,
   MessageResultType
 > {
-  const wrapped: CommandFunction<
+  const wrapped: SubscriptionFunction<
     ServiceClassType,
     MessagePayloadType,
     MessageParamsType,

@@ -11,5 +11,7 @@ import type { SubscriptionDefinition } from './SubscriptionDefinition'
 export type SubscriptionDefinitionList<ServiceClassType extends ServiceClass> = SubscriptionDefinition<
   ServiceClassType,
   any,
+  any,
+  any,
   any
 >[]

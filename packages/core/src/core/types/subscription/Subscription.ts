@@ -1,5 +1,5 @@
-import type { EBMessageAddress } from '../EBMessageAddress'
-import type { EBMessageType } from '../EBMessageType.enum'
+import { EBMessageAddress } from '../EBMessageAddress'
+import { EBMessageType } from '../EBMessageType.enum'
 import { InstanceId } from '../InstanceId'
 import { PrincipalId } from '../PrincipalId'
 import { SubscriptionSettings } from './SubscriptionSettings'
@@ -7,7 +7,7 @@ import { SubscriptionSettings } from './SubscriptionSettings'
 /**
  * A subscription managed by the event bridge
  */
-export type Subscription = {
+export type Subscription<PayloadType = unknown, ParameterType = unknown> = {
   sender?: {
     serviceName?: string
     serviceVersion?: string
@@ -19,9 +19,14 @@ export type Subscription = {
     serviceTarget?: string
   }
   messageType?: EBMessageType
-  eventName?: string
+  eventName?: string // event to listen for
+  emitEventName?: string // event to emit if output payload is set
   principalId?: PrincipalId
   instanceId?: InstanceId
+  payload?: {
+    parameter?: ParameterType
+    payload?: PayloadType
+  }
   subscriber: EBMessageAddress
   settings: SubscriptionSettings
 }
