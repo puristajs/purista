@@ -5,7 +5,7 @@ import type { Command } from './Command'
  * This transform hook is executed after function output validation and AfterGuardHooks.
  */
 
-export type TransformOutputHook<
+export type CommandTransformOutputHook<
   ServiceClassType,
   MessagePayloadType,
   MessageResultType,

@@ -4,6 +4,7 @@ import { Command, CommandFunctionContext } from '../core'
 import { getLoggerMock } from './getLogger.mock'
 import { createTestCommandMsg } from './messages'
 
+/* A function that returns a command function context mock object. */
 export const getCommandContextMock = <MessagePayloadType = unknown, MessageParamsType = unknown>(
   payload: MessagePayloadType,
   parameter: MessageParamsType,

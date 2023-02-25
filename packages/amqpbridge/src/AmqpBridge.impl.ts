@@ -4,6 +4,7 @@ import {
   Command,
   CommandErrorResponse,
   CommandSuccessResponse,
+  CustomMessage,
   deserializeOtp,
   EBMessage,
   EBMessageAddress,
@@ -63,7 +64,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
   protected subscriptions = new Map<
     string,
     {
-      cb: (message: Command) => Promise<void>
+      cb: (message: CustomMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>
       channel: Channel
     }
   >()
@@ -254,12 +255,12 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       }
 
       const msg = Object.freeze({
+        ...message,
         id: getNewEBMessageId(),
         timestamp: Date.now(),
         traceId: message.traceId || span.spanContext().traceId,
         instanceId: this.config.instanceId,
         otp: serializeOtp(),
-        ...message,
       })
 
       span.setAttribute(PuristaSpanTag.SenderServiceName, msg.sender.serviceName)
@@ -572,7 +573,10 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     }
   }
 
-  async registerSubscription(subscription: Subscription, cb: (message: EBMessage) => Promise<void>): Promise<string> {
+  async registerSubscription(
+    subscription: Subscription,
+    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+  ): Promise<string> {
     if (!this.connection) {
       throw new Error('No connection - not connected')
     }
@@ -626,7 +630,10 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
 
               message.otp = serializeOtp()
 
-              await cb(message)
+              const result = await cb(message)
+              if (subscription.emitEventName && result) {
+                this.emitMessage(result)
+              }
               channel.ack(msg)
             } catch (error) {
               const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to consume subscription message', {
