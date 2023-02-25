@@ -3,19 +3,17 @@ import { SchemaObject } from 'openapi3-ts'
 import type { z } from 'zod'
 
 import type {
-  AfterGuardHook,
-  BeforeGuardHook,
+  CommandAfterGuardHook,
+  CommandBeforeGuardHook,
   CommandDefinition,
   CommandFunction,
-  HandledError,
+  CommandTransformInputHook,
+  CommandTransformOutputHook,
   ServiceClass,
   StatusCode,
-  TransformInputHook,
-  TransformOutputHook,
-  UnhandledError,
 } from '../core'
 import { ContentType, HttpExposedServiceMeta, QueryParameter } from '../httpserver'
-import { getFunctionWithValidation } from './getFunctionWithValidation'
+import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation'
 import type { SupportedHttpMethod } from './types'
 
 /**
@@ -29,8 +27,8 @@ import type { SupportedHttpMethod } from './types'
 export class CommandDefinitionBuilder<
   ServiceClassType extends ServiceClass,
   MessagePayloadType = unknown,
-  MessageParamsType = unknown,
-  MessageResultType = unknown,
+  MessageParamsType = undefined,
+  MessageResultType = void,
   FunctionPayloadType = MessagePayloadType,
   FunctionParamsType = MessageParamsType,
   FunctionResultType = MessageResultType,
@@ -53,22 +51,20 @@ export class CommandDefinitionBuilder<
     transformInput?: {
       transformInputSchema: z.ZodType
       transformParameterSchema: z.ZodType
-      transformFunction: TransformInputHook<ServiceClassType, any, any, any, any>
+      transformFunction: CommandTransformInputHook<ServiceClassType, any, any, any, any>
     }
-    beforeGuard: BeforeGuardHook<
+    beforeGuard: CommandBeforeGuardHook<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
       FunctionPayloadType,
       FunctionParamsType
     >[]
-    afterGuard: AfterGuardHook<ServiceClassType, MessageResultType, MessagePayloadType, MessageParamsType>[]
+    afterGuard: CommandAfterGuardHook<ServiceClassType, MessageResultType, MessagePayloadType, MessageParamsType>[]
     transformOutput?: {
       transformOutputSchema: z.ZodType
-      transformFunction: TransformOutputHook<ServiceClassType, any, any, FunctionParamsType, any>
+      transformFunction: CommandTransformOutputHook<ServiceClassType, any, any, FunctionParamsType, any>
     }
-    onSuccess?: () => Promise<void>
-    onError?: (err: HandledError | UnhandledError) => Promise<void>
   } = {
     transformInput: undefined,
     beforeGuard: [],
@@ -105,7 +101,7 @@ export class CommandDefinitionBuilder<
    * @param inputSchema The schema validation for input payload
    * @returns CommandDefinitionBuilder
    */
-  addInputSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(inputSchema: z.ZodType<O, D, I>) {
+  addPayloadSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(inputSchema: z.ZodType<O, D, I>) {
     this.inputSchema = inputSchema
     return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
@@ -225,7 +221,7 @@ export class CommandDefinitionBuilder<
    * @param transformInput Transform input function
    * @returns CommandDefinitionBuilder
    */
-  transformInput<
+  setTransformInput<
     PayloadIn = MessagePayloadType,
     ParamsIn = MessageParamsType,
     PayloadOut = MessagePayloadType,
@@ -235,7 +231,7 @@ export class CommandDefinitionBuilder<
   >(
     transformInputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
     transformParameterSchema: z.ZodType<ParamsOut, ParamsD, ParamsIn>,
-    transformFunction: TransformInputHook<ServiceClassType, PayloadOut, ParamsOut, PayloadIn, ParamsIn>,
+    transformFunction: CommandTransformInputHook<ServiceClassType, PayloadOut, ParamsOut, PayloadIn, ParamsIn>,
   ) {
     this.hooks.transformInput = {
       transformFunction,
@@ -260,9 +256,9 @@ export class CommandDefinitionBuilder<
    * @param transformOutput Transform output function
    * @returns CommandDefinitionBuilder
    */
-  transformOutput<PayloadOut, PayloadD extends z.ZodTypeDef, PayloadIn>(
+  setTransformOutput<PayloadOut, PayloadD extends z.ZodTypeDef, PayloadIn>(
     transformOutputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
-    transformFunction: TransformOutputHook<
+    transformFunction: CommandTransformOutputHook<
       ServiceClassType,
       PayloadOut,
       MessagePayloadType,
@@ -292,7 +288,7 @@ export class CommandDefinitionBuilder<
    * @returns CommandDefinitionBuilder
    */
   setBeforeGuardHook(
-    ...beforeGuards: BeforeGuardHook<
+    ...beforeGuards: CommandBeforeGuardHook<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
@@ -311,7 +307,7 @@ export class CommandDefinitionBuilder<
    * @returns CommandDefinitionBuilder
    */
   setAfterGuardHook(
-    ...afterGuard: AfterGuardHook<ServiceClassType, MessageResultType, MessagePayloadType, MessageParamsType>[]
+    ...afterGuard: CommandAfterGuardHook<ServiceClassType, MessageResultType, MessagePayloadType, MessageParamsType>[]
   ) {
     this.hooks.afterGuard.push(...afterGuard)
     return this
@@ -460,7 +456,7 @@ export class CommandDefinitionBuilder<
       commandDescription: this.commandDescription,
       metadata: {},
       eventName,
-      call: getFunctionWithValidation<
+      call: getCommandFunctionWithValidation<
         ServiceClassType,
         MessagePayloadType,
         MessageParamsType,

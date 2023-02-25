@@ -1,7 +1,7 @@
+import { EBMessage } from '../EBMessage'
 import { Logger } from '../Logger'
-import { Command } from './Command'
 
-export type TransformInputHook<
+export type SubscriptionTransformInputHook<
   ServiceClassType,
   PayloadOutput = unknown,
   ParamsOutput = unknown,
@@ -9,7 +9,7 @@ export type TransformInputHook<
   ParamsInput = unknown,
 > = (
   this: ServiceClassType,
-  context: { logger: Logger; message: Command<PayloadInput, ParamsInput> },
+  context: { logger: Logger; message: EBMessage },
   payload: PayloadInput,
   parameter: ParamsInput,
 ) => Promise<{

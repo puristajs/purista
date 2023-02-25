@@ -7,8 +7,8 @@ import type { TraceId } from './TraceId'
 export type EBMessageBase = {
   id: EBMessageId
   instanceId: InstanceId
-  traceId?: TraceId
   timestamp: number
+  traceId?: TraceId
   correlationId?: CorrelationId
   principalId?: PrincipalId
   eventName?: string

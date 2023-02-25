@@ -6,7 +6,6 @@ import {
   EBMessageType,
   HandledError,
   HttpExposedServiceMeta,
-  InfoServiceFunctionAdded,
   isHttpExposedServiceMeta,
   StatusCode,
   SubscriptionDefinitionBuilder,
@@ -18,11 +17,11 @@ import { Methods } from 'trouter'
 import { addHeaders } from '../../helper/addHeaders.impl'
 import { HttpServerService } from '../../HttpServerService.impl'
 
-export default new SubscriptionDefinitionBuilder<HttpServerService, InfoServiceFunctionAdded, HttpExposedServiceMeta>(
+export default new SubscriptionDefinitionBuilder<HttpServerService, HttpExposedServiceMeta>(
   'serviceCommandsToRestApi',
   'listen for InfoServiceFunctionAdded messages and adds endpoints for service functions if needed',
 )
-  .setFunction(async function ({ logger, message }, payload) {
+  .setSubscriptionFunction(async function ({ logger, message }, payload) {
     if (!isHttpExposedServiceMeta(payload)) {
       logger.debug('...skip exposing function')
       return

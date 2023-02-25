@@ -1,9 +1,9 @@
-import { EBMessage, EBMessageType, Subscription } from '../types'
+import { CustomMessage, EBMessage, EBMessageType, Subscription } from '../types'
 import { SubscriptionStorageEntry } from './types'
 
 export const getNewSubscriptionStorageEntry = (
   subscription: Subscription,
-  cb: (message: EBMessage) => Promise<void>,
+  cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
 ): SubscriptionStorageEntry => {
   const entry: SubscriptionStorageEntry = {
     isMatchingMessageType: () => true,
@@ -16,6 +16,7 @@ export const getNewSubscriptionStorageEntry = (
     isMatchingPrincipalId: () => true,
     isMatchingInstanceId: () => true,
     isMatchingEventName: () => true,
+    emitEventName: subscription.emitEventName,
     cb,
   }
 

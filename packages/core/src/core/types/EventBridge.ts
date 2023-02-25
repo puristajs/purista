@@ -1,4 +1,5 @@
 import { Command, CommandErrorResponse, CommandSuccessResponse } from './commandType'
+import { CustomMessage } from './CustomMessage'
 import type { EBMessage } from './EBMessage'
 import type { EBMessageAddress } from './EBMessageAddress'
 import type { Subscription } from './subscription'
@@ -33,6 +34,9 @@ export interface EventBridge {
 
   unregisterServiceFunction(address: EBMessageAddress): Promise<void>
 
-  registerSubscription(subscription: Subscription, cb: (message: EBMessage) => Promise<void>): Promise<string>
+  registerSubscription(
+    subscription: Subscription,
+    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+  ): Promise<string>
   unregisterSubscription(address: EBMessageAddress): Promise<void>
 }

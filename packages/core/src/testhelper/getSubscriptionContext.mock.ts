@@ -1,9 +1,10 @@
 import { SinonSandbox, stub } from 'sinon'
 
-import { SubscriptionContext } from '../core'
+import { EBMessage, SubscriptionFunctionContext } from '../core'
 import { getLoggerMock } from './getLogger.mock'
 
-export const getSubscriptionContextMock = <MessageType>(message: MessageType, sandbox?: SinonSandbox) => {
+/* A function that returns a subscription function context mock object. */
+export const getSubscriptionContextMock = (message: EBMessage, sandbox?: SinonSandbox) => {
   const logger = getLoggerMock(sandbox)
   const stubs = {
     logger: logger.stubs,
@@ -14,7 +15,7 @@ export const getSubscriptionContextMock = <MessageType>(message: MessageType, sa
     startActiveSpan: sandbox?.stub() || stub(),
   }
 
-  const mock: SubscriptionContext<MessageType> = {
+  const mock: SubscriptionFunctionContext = {
     logger: logger.mock,
     message,
     emit: stubs.emit,

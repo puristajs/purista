@@ -3,19 +3,17 @@ import { SchemaObject } from 'openapi3-ts'
 import type { z } from 'zod'
 
 import type {
-  AfterGuardHook,
-  BeforeGuardHook,
+  CommandAfterGuardHook,
+  CommandBeforeGuardHook,
   CommandDefinition,
   CommandFunction,
-  HandledError,
+  CommandTransformInputHook,
+  CommandTransformOutputHook,
   ServiceClass,
   StatusCode,
-  TransformInputHook,
-  TransformOutputHook,
-  UnhandledError,
 } from '../core'
 import { ContentType, HttpExposedServiceMeta, QueryParameter } from '../httpserver'
-import { getFunctionWithValidation } from './getFunctionWithValidation'
+import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation'
 import type { SupportedHttpMethod } from './types'
 
 /**
@@ -54,22 +52,20 @@ export class FunctionDefinitionBuilder<
     transformInput?: {
       transformInputSchema: z.ZodType
       transformParameterSchema: z.ZodType
-      transformFunction: TransformInputHook<ServiceClassType, any, any, any, any>
+      transformFunction: CommandTransformInputHook<ServiceClassType, any, any, any, any>
     }
-    beforeGuard: BeforeGuardHook<
+    beforeGuard: CommandBeforeGuardHook<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
       FunctionPayloadType,
       FunctionParamsType
     >[]
-    afterGuard: AfterGuardHook<ServiceClassType, MessageResultType, MessagePayloadType, MessageParamsType>[]
+    afterGuard: CommandAfterGuardHook<ServiceClassType, MessageResultType, MessagePayloadType, MessageParamsType>[]
     transformOutput?: {
       transformOutputSchema: z.ZodType
-      transformFunction: TransformOutputHook<ServiceClassType, any, any, FunctionParamsType, any>
+      transformFunction: CommandTransformOutputHook<ServiceClassType, any, any, FunctionParamsType, any>
     }
-    onSuccess?: () => Promise<void>
-    onError?: (err: HandledError | UnhandledError) => Promise<void>
   } = {
     transformInput: undefined,
     beforeGuard: [],
@@ -105,6 +101,8 @@ export class FunctionDefinitionBuilder<
    * Types for payload of message and function payload input are generated from given schema.
    * @param inputSchema The schema validation for input payload
    * @returns FunctionDefinitionBuilder
+   *
+   * @deprecated use addPayloadSchema of CommandDefinitionBuilder
    */
   addInputSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(inputSchema: z.ZodType<O, D, I>) {
     this.inputSchema = inputSchema
@@ -225,6 +223,8 @@ export class FunctionDefinitionBuilder<
    * This will change the type of input message payload and input message parameter.
    * @param transformInput Transform input function
    * @returns FunctionDefinitionBuilder
+   *
+   * @deprecated use setTransformInput of CommandDefinitionBuilder
    */
   transformInput<
     PayloadIn = MessagePayloadType,
@@ -236,7 +236,7 @@ export class FunctionDefinitionBuilder<
   >(
     transformInputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
     transformParameterSchema: z.ZodType<ParamsOut, ParamsD, ParamsIn>,
-    transformFunction: TransformInputHook<ServiceClassType, PayloadOut, ParamsOut, PayloadIn, ParamsIn>,
+    transformFunction: CommandTransformInputHook<ServiceClassType, PayloadOut, ParamsOut, PayloadIn, ParamsIn>,
   ) {
     this.hooks.transformInput = {
       transformFunction,
@@ -263,7 +263,7 @@ export class FunctionDefinitionBuilder<
    */
   transformOutput<PayloadOut, PayloadD extends z.ZodTypeDef, PayloadIn>(
     transformOutputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
-    transformFunction: TransformOutputHook<
+    transformFunction: CommandTransformOutputHook<
       ServiceClassType,
       PayloadOut,
       MessagePayloadType,
@@ -293,7 +293,7 @@ export class FunctionDefinitionBuilder<
    * @returns FunctionDefinitionBuilder
    */
   setBeforeGuardHook(
-    ...beforeGuards: BeforeGuardHook<
+    ...beforeGuards: CommandBeforeGuardHook<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
@@ -312,7 +312,7 @@ export class FunctionDefinitionBuilder<
    * @returns FunctionDefinitionBuilder
    */
   setAfterGuardHook(
-    ...afterGuard: AfterGuardHook<ServiceClassType, MessageResultType, MessagePayloadType, MessageParamsType>[]
+    ...afterGuard: CommandAfterGuardHook<ServiceClassType, MessageResultType, MessagePayloadType, MessageParamsType>[]
   ) {
     this.hooks.afterGuard.push(...afterGuard)
     return this
@@ -461,7 +461,7 @@ export class FunctionDefinitionBuilder<
       commandDescription: this.commandDescription,
       metadata: {},
       eventName,
-      call: getFunctionWithValidation<
+      call: getCommandFunctionWithValidation<
         ServiceClassType,
         MessagePayloadType,
         MessageParamsType,

@@ -18,18 +18,9 @@ export const createErrorResponse = (
   statusCode = StatusCode.InternalServerError,
   error?: unknown | string | Error | HandledError | UnhandledError,
 ): Readonly<Omit<CommandErrorResponse, 'instanceId'>> => {
-  let message = getErrorMessageForCode(statusCode)
-  let data: unknown
-  let status = statusCode
-  let isHandledError = false
-
-  // if it is a handled error we expose error code, message and additional data
-  if (error instanceof HandledError) {
-    message = error.message
-    data = error.data
-    status = error.errorCode
-    isHandledError = true
-  }
+  const message = getErrorMessageForCode(statusCode)
+  const status = statusCode
+  const isHandledError = error instanceof HandledError
 
   const errorResponse: Readonly<Omit<CommandErrorResponse, 'instanceId'>> = Object.freeze({
     id: originalEBMessage.id,
@@ -44,11 +35,13 @@ export const createErrorResponse = (
     receiver: {
       ...originalEBMessage.sender,
     },
-    payload: {
-      status,
-      message,
-      data,
-    },
+    payload:
+      error instanceof HandledError
+        ? error.getErrorResponse()
+        : {
+            status,
+            message,
+          },
     otp: serializeOtp(),
   })
 

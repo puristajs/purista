@@ -1,11 +1,11 @@
 import type { z } from 'zod'
 
 import type { ServiceClass } from '../ServiceClass'
-import type { AfterGuardHook } from './AfterGuardHook'
-import type { BeforeGuardHook } from './BeforeGuardHook'
+import type { CommandAfterGuardHook } from './CommandAfterGuardHook'
+import type { CommandBeforeGuardHook } from './CommandBeforeGuardHook'
 import type { CommandFunction } from './CommandFunction'
-import type { TransformInputHook } from './TransformInputHook'
-import type { TransformOutputHook } from './TransformOutputHook'
+import type { CommandTransformInputHook } from './CommandTransformInputHook'
+import type { CommandTransformOutputHook } from './CommandTransformOutputHook'
 
 /**
  * The definition for a command provided by some service.
@@ -35,19 +35,19 @@ export type CommandDefinition<
     transformInput?: {
       transformInputSchema: z.ZodType
       transformParameterSchema: z.ZodType
-      transformFunction: TransformInputHook<ServiceClassType, MessagePayloadType, MessageParamsType>
+      transformFunction: CommandTransformInputHook<ServiceClassType, MessagePayloadType, MessageParamsType>
     }
-    beforeGuard?: BeforeGuardHook<
+    beforeGuard?: CommandBeforeGuardHook<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
       FunctionPayloadType,
       FunctionParamsType
     >[]
-    afterGuard?: AfterGuardHook<ServiceClassType, MessageResultType, MessagePayloadType, MessageParamsType>[]
+    afterGuard?: CommandAfterGuardHook<ServiceClassType, MessageResultType, MessagePayloadType, MessageParamsType>[]
     transformOutput?: {
       transformOutputSchema: z.ZodType
-      transformFunction: TransformOutputHook<
+      transformFunction: CommandTransformOutputHook<
         ServiceClassType,
         MessagePayloadType,
         MessageResultType,

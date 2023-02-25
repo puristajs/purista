@@ -29,13 +29,14 @@ import {
   ServiceInfoType,
   StatusCode,
   Subscription,
-  SubscriptionContext,
   SubscriptionDefinition,
   SubscriptionDefinitionList,
+  SubscriptionFunctionContext,
   TraceId,
 } from '../types'
 import { commandTransformInput } from './commandTransformInput.impl'
 import { ServiceBaseClass } from './ServiceBaseClass'
+import { subscriptionTransformInput } from './subscriptionTransformInput.impl'
 
 /**
  * Base class for all services.
@@ -347,13 +348,16 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     })
   }
 
-  protected async executeSubscription(message: EBMessage, subscriptionName: string): Promise<void> {
+  protected async executeSubscription(
+    message: EBMessage,
+    subscriptionName: string,
+  ): Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined> {
     const subscription = this.subscriptions.get(subscriptionName)
 
     const otpContext = await deserializeOtp(this.logger, message.otp)
     const spanContext = otpContext ? trace.getSpanContext(otpContext) : undefined
 
-    this.startActiveSpan(
+    return this.startActiveSpan(
       subscriptionName || 'purista.executeSubscription',
       { links: spanContext ? [{ context: spanContext }] : [] },
       undefined,
@@ -380,18 +384,86 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           return
         }
 
-        const context: SubscriptionContext = {
-          logger,
-          message,
-          emit: this.getEmitFunction(subscriptionName, traceId, message.principalId),
-          invoke: this.getInvokeFunction(subscriptionName, traceId, message.principalId),
-          wrapInSpan: this.wrapInSpan.bind(this),
-          startActiveSpan: this.startActiveSpan.bind(this),
-        }
-
-        const call = subscription.call.bind(this, context)
         try {
-          await call(message.payload)
+          const { payload, parameter } = await subscriptionTransformInput(this, logger, subscription, message)
+
+          let result: unknown = await this.startActiveSpan(
+            subscription.subscriptionName + '.functionExecution',
+            {},
+            undefined,
+            async (_subSpan) => {
+              const context: SubscriptionFunctionContext = {
+                logger,
+                message,
+                emit: this.getEmitFunction(subscriptionName, traceId, message.principalId),
+                invoke: this.getInvokeFunction(subscriptionName, traceId, message.principalId),
+                wrapInSpan: this.wrapInSpan.bind(this),
+                startActiveSpan: this.startActiveSpan.bind(this),
+              }
+              const call = subscription.call.bind(this, context)
+              return await call(payload, parameter)
+            },
+          )
+
+          if (subscription.hooks.afterGuard?.length) {
+            const guards = subscription.hooks.afterGuard
+
+            await this.startActiveSpan(subscription.subscriptionName + '.afterGuardHooks', {}, undefined, async () => {
+              const afterGuards = guards.map((hook, index) =>
+                this.wrapInSpan(subscription.subscriptionName + '.afterGuardHook.' + index, {}, async (_subSpan) => {
+                  const context: SubscriptionFunctionContext = {
+                    logger,
+                    message,
+                    emit: this.getEmitFunction(subscription.subscriptionName, traceId, message.principalId),
+                    invoke: this.getInvokeFunction(subscription.subscriptionName, traceId, message.principalId),
+                    wrapInSpan: this.wrapInSpan.bind(this),
+                    startActiveSpan: this.startActiveSpan.bind(this),
+                  }
+
+                  return hook.bind(this, context)
+                }),
+              )
+              await Promise.all(afterGuards)
+            })
+          }
+
+          if (subscription.hooks.transformOutput) {
+            const transformOutput = subscription.hooks.transformOutput
+            await this.startActiveSpan(
+              subscription.subscriptionName + '.outputTransformation',
+              {},
+              undefined,
+              async () => {
+                const afterTransform = transformOutput.transformFunction.bind(this, { logger, message })
+                const resultTransfomed = await afterTransform(result, parameter)
+                result = transformOutput.transformOutputSchema.parse(resultTransfomed)
+              },
+            )
+          }
+
+          if (subscription.emitEventName) {
+            return await this.startActiveSpan(
+              subscription.subscriptionName + '.success',
+              {},
+              undefined,
+              async (subSpan) => {
+                subSpan.addEvent(subscription.emitEventName as string)
+                const resultMsg: Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> = {
+                  messageType: EBMessageType.CustomMessage,
+                  sender: {
+                    serviceName: this.serviceInfo.serviceName,
+                    serviceVersion: this.serviceInfo.serviceVersion,
+                    serviceTarget: subscription.subscriptionName,
+                  },
+                  payload: result,
+                  eventName: subscription.emitEventName as string,
+                  otp: serializeOtp(),
+                }
+                return resultMsg
+              },
+            )
+          }
+          return undefined
         } catch (err) {
           logger.error({ err }, 'Error in subscription execution')
           if (err instanceof HandledError) {
@@ -433,12 +505,15 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
         receiver: subscriptionDefinition.receiver,
         messageType: subscriptionDefinition.messageType,
         eventName: subscriptionDefinition.eventName,
+        emitEventName: subscriptionDefinition.emitEventName,
         subscriber: {
           serviceName: this.info.serviceName,
           serviceVersion: this.info.serviceVersion,
           serviceTarget: subscriptionDefinition.subscriptionName,
         },
         settings: subscriptionDefinition.settings,
+        principalId: subscriptionDefinition.principalId,
+        instanceId: subscriptionDefinition.instanceId,
       }
 
       await this.eventBridge.registerSubscription(subscription, (message: EBMessage) =>

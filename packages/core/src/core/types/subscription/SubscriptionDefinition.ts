@@ -1,15 +1,40 @@
-import type { EBMessage } from '../EBMessage'
-import type { EBMessageType } from '../EBMessageType.enum'
+import type { z } from 'zod'
+
+import { EBMessageType } from '../EBMessageType.enum'
 import { InstanceId } from '../InstanceId'
 import { PrincipalId } from '../PrincipalId'
-import { ServiceClass } from '../ServiceClass'
-import { SubscriptionFunction } from './SubscriptionFunction'
+import type { ServiceClass } from '../ServiceClass'
+import type { SubscriptionAfterGuardHook } from './SubscriptionAfterGuardHook'
+import type { SubscriptionBeforeGuardHook } from './SubscriptionBeforeGuardHook'
+import type { SubscriptionFunction } from './SubscriptionFunction'
 import { SubscriptionSettings } from './SubscriptionSettings'
+import { SubscriptionTransformInputHook } from './SubscriptionTransformInputHook'
+import { SubscriptionTransformOutputHook } from './SubscriptionTransformOutputHook'
 
-export type SubscriptionDefinition<ServiceClassType = ServiceClass, MessageType = EBMessage, Payload = unknown> = {
+/**
+ * The definition for a subscription provided by some service.
+ */
+export type SubscriptionDefinition<
+  ServiceClassType extends ServiceClass = ServiceClass,
+  MetadataType = Record<string, unknown>,
+  MessagePayloadType = unknown,
+  MessageParamsType = unknown,
+  MessageResultType = unknown,
+  FunctionPayloadType = MessagePayloadType,
+  FunctionParamsType = MessageParamsType,
+  FunctionResultType = MessageResultType,
+> = {
   subscriptionName: string
   subscriptionDescription: string
-  call: SubscriptionFunction<ServiceClassType, MessageType, Payload>
+  metadata: MetadataType
+  call: SubscriptionFunction<
+    ServiceClassType,
+    MessagePayloadType,
+    MessageParamsType,
+    MessagePayloadType,
+    MessageParamsType,
+    MessageResultType
+  >
   sender?: {
     serviceName?: string
     serviceVersion?: string
@@ -21,8 +46,22 @@ export type SubscriptionDefinition<ServiceClassType = ServiceClass, MessageType 
     serviceTarget?: string
   }
   messageType?: EBMessageType
-  eventName?: string
+  eventName?: string // event to listen for
+  emitEventName?: string // event to emit if output payload ist set
   instanceId?: InstanceId
   principalId?: PrincipalId
   settings: SubscriptionSettings
+  hooks: {
+    transformInput?: {
+      transformInputSchema: z.ZodType
+      transformParameterSchema: z.ZodType
+      transformFunction: SubscriptionTransformInputHook<ServiceClassType, MessagePayloadType, MessageParamsType>
+    }
+    beforeGuard?: SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType>[]
+    afterGuard?: SubscriptionAfterGuardHook<ServiceClassType, FunctionResultType, FunctionParamsType>[]
+    transformOutput?: {
+      transformOutputSchema: z.ZodType
+      transformFunction: SubscriptionTransformOutputHook<ServiceClassType, FunctionResultType, FunctionParamsType, any>
+    }
+  }
 }
