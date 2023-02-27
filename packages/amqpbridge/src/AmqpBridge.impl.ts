@@ -50,6 +50,8 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
   protected connection?: Connection
   protected channel?: Channel
 
+  protected isHealthy = false
+
   protected replyQueueName?: string
   protected serviceFunctions = new Map<
     string,
@@ -99,6 +101,13 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
   }
 
   /**
+   * Indicates if the eventbridge is connected to message broker
+   */
+  async isReady() {
+    return this.isHealthy
+  }
+
+  /**
    * Get default time out.
    * It is the maximum time a command should be responded.
    */
@@ -122,18 +131,37 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       this.connection = await amqplib.connect(this.config.url, this.config.socketOptions)
     } catch (err) {
       this.emit('eventbridge-connection-error', err)
-      this.logger.error({ err }, 'unable to connect to broker')
+      this.logger.fatal({ err }, 'unable to connect to broker')
       throw err
     }
 
     this.connection.on('error', (err) => {
+      this.isHealthy = false
       this.logger.error({ err }, 'amqp lib error')
       this.emit('eventbridge-error', err)
     })
-    this.connection.on('close', (e) => this.emit('eventbridge-disconnected', e))
+    this.connection.on('close', () => {
+      this.isHealthy = false
+      this.emit('eventbridge-disconnected')
+      this.logger.info('amqp connection disconnected')
+    })
+
     this.emit('eventbridge-connected', undefined)
     this.logger.info('connected to broker')
     this.channel = await this.connection.createChannel()
+
+    this.channel.on('close', () => {
+      this.isHealthy = false
+      this.logger.info('channel closed')
+      this.emit('eventbridge-disconnected')
+    })
+
+    this.channel.on('error', (err) => {
+      this.isHealthy = false
+      this.logger.error({ err }, 'amqp channel error')
+      this.emit('eventbridge-error', err)
+    })
+
     this.logger.debug('ensured: default exchange')
     await this.channel.assertExchange(this.config.exchangeName, 'headers', this.config.exchangeOptions)
     const responseQueue = await this.channel.assertQueue('', { exclusive: true, autoDelete: true, durable: false })
@@ -223,6 +251,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       },
       { noAck: true },
     )
+    this.isHealthy = true
     this.logger.debug('ensured: response queue')
 
     this.logger.info('amqp event bridge ready')
@@ -443,6 +472,19 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     const queueName = getCommandQueueName(address, this.config.namePrefix)
 
     const channel = await this.connection.createChannel()
+
+    channel.on('close', () => {
+      this.isHealthy = false
+      this.logger.info({ queueName }, 'channel for command closed')
+      this.emit('eventbridge-disconnected')
+    })
+
+    channel.on('error', (err) => {
+      this.isHealthy = false
+      this.logger.error({ err, queueName }, 'command channel error')
+      this.emit('eventbridge-error', err)
+    })
+
     const queue = await channel.assertQueue(queueName, { durable: false, autoDelete: true })
     await channel.bindQueue(queue.queue, this.config.exchangeName, '', {
       'x-match': 'all',
@@ -584,6 +626,19 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     const queueName = getSubscriptionQueueName(subscription.subscriber, this.config.namePrefix)
 
     const channel = await this.connection.createChannel()
+
+    channel.on('close', () => {
+      this.isHealthy = false
+      this.logger.info({ queueName }, 'channel for subscription closed')
+      this.emit('eventbridge-disconnected')
+    })
+
+    channel.on('error', (err) => {
+      this.isHealthy = false
+      this.logger.error({ err, queueName }, 'subscription channel error')
+      this.emit('eventbridge-error', err)
+    })
+
     const queue = await channel.assertQueue(queueName, { durable: subscription.settings.durable })
     await channel.bindQueue(queue.queue, this.config.exchangeName, '', {
       'x-match': 'all',
