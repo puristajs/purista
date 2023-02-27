@@ -8,7 +8,7 @@ type EventReceiver<T> = (parameter: T) => void
 export interface IEmitter<T extends EventMap> {
   on<K extends EventKey<T>>(eventName: K, fn: EventReceiver<T[K]>): void
   off<K extends EventKey<T>>(eventName: K, fn: EventReceiver<T[K]>): void
-  emit<K extends EventKey<T>>(eventName: K, parameter: T[K]): void
+  emit<K extends EventKey<T>>(eventName: K, parameter?: T[K]): void
 }
 
 export class GenericEventEmitter<T extends EventMap> implements IEmitter<T> {
@@ -21,7 +21,7 @@ export class GenericEventEmitter<T extends EventMap> implements IEmitter<T> {
     this.emitter.off(eventName, fn)
   }
 
-  emit<K extends EventKey<T>>(eventName: K, parameter: T[K]) {
+  emit<K extends EventKey<T>>(eventName: K, parameter?: T[K]) {
     this.emitter.emit(eventName, parameter)
   }
 }

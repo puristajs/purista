@@ -6,16 +6,16 @@ import { addPrefixToObject } from './addPrefixToObject'
  */
 export type EventBridgeEventsBasic = {
   /** emitted when then connection to event bridge is established */
-  'eventbridge-connected': undefined
+  'eventbridge-connected': never
 
   /** emitted when the connection to event bridge can not be established or a connection has issues or gets closed unexpectedly */
-  'eventbridge-connection-error': undefined | unknown
+  'eventbridge-connection-error': undefined | unknown | Error
 
   /** emitted when the connection to event bridge closed */
-  'eventbridge-disconnected': undefined
+  'eventbridge-disconnected': never
 
   /** emitted on retry to connect to event bridge */
-  'eventbridge-reconnecting': undefined
+  'eventbridge-reconnecting': never
 
   /** emitted on internal event bridge error */
   'eventbridge-error': UnhandledError | unknown
