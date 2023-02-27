@@ -161,6 +161,21 @@ export class HttpServerService extends Service<HttpServerConfig> {
         reply.send(new UnhandledError().getErrorResponse())
       }
     })
+
+    if (this.config.enableHealthz) {
+      this.server.get('/healthz', async (_request, reply) => {
+        const isEventBridgeReady = await this.eventBridge.isReady()
+
+        reply.header('content-type', 'application/json; charset=utf-8')
+        if (isEventBridgeReady) {
+          reply.status(StatusCode.OK)
+          reply.send(new HandledError(StatusCode.OK).getErrorResponse())
+          return
+        }
+        reply.status(StatusCode.InternalServerError)
+        reply.send(new HandledError(StatusCode.InternalServerError).getErrorResponse())
+      })
+    }
   }
 
   addBeforeResponse(method: HTTPMethods, pattern: string, handler: BeforeResponseHook) {

@@ -10,6 +10,7 @@ export const getDefaultConfig = (): HttpServerConfig => {
     domain: 'localhost',
     enableHelmet: true,
     enableCompress: true,
+    enableHealthz: true,
     enableCors: false,
     host: '',
     logLevel: 'warn',

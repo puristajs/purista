@@ -26,6 +26,7 @@ export const getOpenApiJson = function (this: HttpServerService) {
   const security = this.config.openApi?.security
   const externalDocs = this.config.openApi?.externalDocs
   const tags = this.config.openApi?.tags
+  const isHealthzEnabled = this.config.enableHealthz
 
   const logger = this.logger.getChildLogger({
     serviceName: this.info.serviceName,
@@ -50,6 +51,15 @@ export const getOpenApiJson = function (this: HttpServerService) {
     if (components?.securitySchemes) {
       securitySchema = Object.keys(components.securitySchemes).map((name) => ({ [name]: [] }))
     }
+
+    const getErrorName = (code: StatusCode) =>
+      StatusCode[code]
+        .replace(/[A-Z]/g, (letter) => ` ${letter}`)
+        .replace(/^./, (str) => {
+          return str.toUpperCase()
+        })
+        .trim()
+        .replace(/^O K$/g, 'OK')
 
     const getErrorResponseSchema = (code: StatusCode, message: string, schema?: SchemaObject) => {
       return {
@@ -225,8 +235,6 @@ export const getOpenApiJson = function (this: HttpServerService) {
 
       const errorResponses: Record<number, unknown> = {}
 
-      const getErrorName = (code: StatusCode) => StatusCode[code].replace(/[A-Z]/g, (letter) => ` ${letter}`)
-
       if (definition.openApi?.inputPayload) {
         errorResponses[400] = {
           description: getErrorName(400),
@@ -305,6 +313,32 @@ export const getOpenApiJson = function (this: HttpServerService) {
         },
       }
     })
+
+    if (isHealthzEnabled) {
+      json.paths['/healthz'] = {
+        get: {
+          description: 'indicates if the http server service is healthy',
+          responses: {
+            200: {
+              description: 'http server service is up and running and successfully connected to event bridge',
+              content: {
+                'application/json': {
+                  schema: getErrorResponseSchema(200, getErrorName(200)),
+                },
+              },
+            },
+            500: {
+              description: 'http server service is not up and running or not successfully connected to event bridge',
+              content: {
+                'application/json': {
+                  schema: getErrorResponseSchema(500, getErrorName(500)),
+                },
+              },
+            },
+          },
+        },
+      }
+    }
 
     reply.header('content-type', 'application/json; charset=utf-8')
     return json
