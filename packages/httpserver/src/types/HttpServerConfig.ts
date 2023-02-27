@@ -23,6 +23,7 @@ export type HttpServerConfig = {
   cookieSecret?: string
   apiMountPath?: string
   enableHelmet?: boolean
+  enableHealthz?: boolean
   helmetOptions?: FastifyHelmetOptions
   enableCompress?: boolean
   compressOptions?: FastifyCompressOptions
