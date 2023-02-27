@@ -39,4 +39,6 @@ export interface EventBridge {
     cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
   ): Promise<string>
   unregisterSubscription(address: EBMessageAddress): Promise<void>
+
+  isReady(): Promise<boolean>
 }

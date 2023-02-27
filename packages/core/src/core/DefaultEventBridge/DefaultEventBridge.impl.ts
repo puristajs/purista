@@ -69,6 +69,8 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
 
   protected subscriptions = new Map<string, SubscriptionStorageEntry>()
 
+  protected hasStarted = false
+
   constructor(
     conf: EventBridgeConfig = getDefaultEventBridgeConfig(),
     options?: { logger?: Logger; spanProcessor?: SpanProcessor },
@@ -78,6 +80,10 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
       ...getDefaultEventBridgeConfig(),
       ...conf,
     }
+  }
+
+  async isReady() {
+    return this.hasStarted
   }
 
   async start() {
@@ -189,6 +195,8 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
     this.emit('eventbridge-connected', undefined)
 
     this.logger.info({ puristaVersion }, 'DefaultEventBridge started')
+
+    this.hasStarted = true
   }
 
   /**
