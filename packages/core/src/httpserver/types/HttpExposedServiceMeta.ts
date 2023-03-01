@@ -21,17 +21,8 @@ export type HttpExposedServiceMeta = {
         query?: QueryParameter[]
         outputPayload?: SchemaObject
         additionalStatusCodes?: StatusCode[]
+        operationId?: string
       }
     }
   }
-}
-
-export const isHttpExposedServiceMeta = (data?: unknown): data is HttpExposedServiceMeta => {
-  if (!data || typeof data !== 'object') {
-    return false
-  }
-  if (!Object.prototype.hasOwnProperty.call(data, 'expose')) {
-    return false
-  }
-  return true
 }

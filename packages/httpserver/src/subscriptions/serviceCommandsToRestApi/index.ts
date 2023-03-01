@@ -3,6 +3,7 @@ import posix from 'node:path/posix'
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import {
+  convertToSnakeCase,
   EBMessageType,
   HandledError,
   HttpExposedServiceMeta,
@@ -31,11 +32,16 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, HttpExposedS
 
     const data = payload.expose
     const version = message.sender.serviceVersion
+    const serviceName = message.sender.serviceName
     const method = data.http.method
     const apiMountPath = this.config.apiMountPath
     const url = posix.join(apiMountPath || '/api', `v${version}`, data.http.path)
 
     data.http.path = url
+
+    if (data.http.openApi) {
+      data.http.openApi.operationId = convertToSnakeCase(`${serviceName}_v${version}_${data.http.openApi.operationId}`)
+    }
 
     const contentType = data.http.contentTypeResponse || 'application/json; charset=utf-8'
 
