@@ -5,9 +5,9 @@ import {
   getNewEBMessageId,
   getNewInstanceId,
   getNewTraceId,
-} from '../core'
+} from '../../core'
 
-/* A function that returns a custom message mock object. */
+/* A function that returns a mocked custom message. */
 export const getCustomMessageMessageMock = <PayloadType>(
   eventName: string,
   payload: PayloadType,

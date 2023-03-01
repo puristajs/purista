@@ -1,8 +1,8 @@
 import { SinonSandbox, stub } from 'sinon'
 
-import { Command, CommandFunctionContext } from '../core'
+import { CommandFunctionContext } from '../core'
 import { getLoggerMock } from './getLogger.mock'
-import { createTestCommandMsg } from './messages'
+import { getCommandMessageMock } from './messages'
 
 /* A function that returns a command function context mock object. */
 export const getCommandContextMock = <MessagePayloadType = unknown, MessageParamsType = unknown>(
@@ -20,7 +20,7 @@ export const getCommandContextMock = <MessagePayloadType = unknown, MessageParam
     startActiveSpan: sandbox?.stub() || stub(),
   }
 
-  const message: Command<MessagePayloadType, MessageParamsType> = createTestCommandMsg({
+  const message = getCommandMessageMock({
     payload: {
       payload,
       parameter,

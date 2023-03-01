@@ -175,11 +175,11 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
             this.emit('eventbridge-error', err)
             this.logger.error({ err, ...span.spanContext() }, 'eventbus failure')
 
-            span.recordException(err as Error)
+            span.recordException(err)
 
             span.setStatus({
               code: SpanStatusCode.ERROR,
-              message: (err as Error).message,
+              message: err.message,
             })
 
             return next(error as Error)

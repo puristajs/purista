@@ -28,16 +28,20 @@ export const commandTransformInput = async (
         async (subSpan) => {
           try {
             return transformInput.transformParameterSchema.parse(message.payload.parameter)
-          } catch (err) {
-            const error = err as ZodError
-            subSpan.recordException(error)
-            logger.warn({ ...subSpan.spanContext() }, 'transform input validation for parameter failed:', error.message)
+          } catch (error) {
+            const err = error as ZodError
+            subSpan.recordException(err)
+            logger.warn(
+              { ...subSpan.spanContext(), err },
+              'transform input validation for parameter failed:',
+              err.message,
+            )
 
             subSpan.setStatus({
               code: SpanStatusCode.ERROR,
               message: 'transform input validation for parameters failed',
             })
-            throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+            throw new HandledError(StatusCode.BadRequest, undefined, err.issues)
           }
         },
       )
@@ -48,15 +52,19 @@ export const commandTransformInput = async (
         async (subSpan) => {
           try {
             return transformInput.transformInputSchema.parse(message.payload.payload)
-          } catch (err) {
-            const error = err as ZodError
-            subSpan.recordException(error)
-            logger.warn({ ...subSpan.spanContext() }, 'transform input validation for payload failed:', error.message)
+          } catch (error) {
+            const err = error as ZodError
+            subSpan.recordException(err)
+            logger.warn(
+              { ...subSpan.spanContext(), err },
+              'transform input validation for payload failed:',
+              err.message,
+            )
             subSpan.setStatus({
               code: SpanStatusCode.ERROR,
               message: 'transform input validation for payload failed',
             })
-            throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+            throw new HandledError(StatusCode.BadRequest, undefined, err.issues)
           }
         },
       )
