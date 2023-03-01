@@ -42,7 +42,6 @@
     "bump:patch": "npm version patch --no-git-tag-version"
   },
   "devDependencies": {
-    "@purista/core": "*",
     "@types/jest": "^29.4.0",
     "@types/node": "^18.11.19",
     "@types/qs": "^6.9.7",
