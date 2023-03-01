@@ -12,7 +12,7 @@ import type {
   SubscriptionTransformInputHook,
   SubscriptionTransformOutputHook,
 } from '../core'
-import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation'
+import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl'
 
 /**
  * Subscription definition builder is a helper to create and define a subscriptions for a service.
