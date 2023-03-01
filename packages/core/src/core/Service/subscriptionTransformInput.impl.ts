@@ -14,7 +14,7 @@ export const subscriptionTransformInput = async (
   let msgPayload: { payload: unknown; parameter: unknown } | undefined
 
   if (message.messageType === EBMessageType.Command) {
-    msgPayload = message.payload as { payload: unknown; parameter: unknown }
+    msgPayload = message.payload
   } else {
     msgPayload = { payload: message.payload, parameter: undefined }
   }
@@ -36,16 +36,20 @@ export const subscriptionTransformInput = async (
         async (subSpan) => {
           try {
             return transformInput.transformParameterSchema.parse(msgPayload?.parameter)
-          } catch (err) {
-            const error = err as ZodError
-            subSpan.recordException(error)
-            logger.warn({ ...subSpan.spanContext() }, 'transform input validation for parameter failed:', error.message)
+          } catch (error) {
+            const err = error as ZodError
+            subSpan.recordException(err)
+            logger.warn(
+              { ...subSpan.spanContext(), err },
+              'transform input validation for parameter failed:',
+              err.message,
+            )
 
             subSpan.setStatus({
               code: SpanStatusCode.ERROR,
               message: 'transform input validation for parameters failed',
             })
-            throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+            throw new HandledError(StatusCode.BadRequest, undefined, err.issues)
           }
         },
       )
@@ -56,15 +60,19 @@ export const subscriptionTransformInput = async (
         async (subSpan) => {
           try {
             return transformInput.transformInputSchema.parse(msgPayload?.payload)
-          } catch (err) {
-            const error = err as ZodError
-            subSpan.recordException(error)
-            logger.warn({ ...subSpan.spanContext() }, 'transform input validation for payload failed:', error.message)
+          } catch (error) {
+            const err = error as ZodError
+            subSpan.recordException(err)
+            logger.warn(
+              { ...subSpan.spanContext(), err },
+              'transform input validation for payload failed:',
+              err.message,
+            )
             subSpan.setStatus({
               code: SpanStatusCode.ERROR,
               message: 'transform input validation for payload failed',
             })
-            throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+            throw new HandledError(StatusCode.BadRequest, undefined, err.issues)
           }
         },
       )

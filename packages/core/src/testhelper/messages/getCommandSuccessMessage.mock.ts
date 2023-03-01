@@ -1,15 +1,16 @@
-import { Command, CommandSuccessResponse, createSuccessResponse, getNewInstanceId } from '../core'
+import { Command, CommandSuccessResponse, createSuccessResponse, getNewInstanceId } from '../../core'
 import { getCommandMessageMock } from './getCommandMessage.mock'
 
-/* A function that returns a command success response message mock object. */
+/* A function that returns a mocked command success response message. */
 export const getCommandSuccessMessageMock = <PayloadType>(
   payload: PayloadType,
   input?: Partial<CommandSuccessResponse<PayloadType>>,
+  commandMessage?: Command,
 ): Readonly<CommandSuccessResponse<PayloadType>> => {
-  const commandMessage: Readonly<Command<unknown, unknown>> = getCommandMessageMock()
+  const cmdMessage: Readonly<Command<unknown, unknown>> = commandMessage || getCommandMessageMock()
 
   const successResponse: Readonly<CommandSuccessResponse<PayloadType>> = Object.freeze({
-    ...createSuccessResponse(commandMessage, payload),
+    ...createSuccessResponse(cmdMessage, payload),
     instanceId: getNewInstanceId(),
     ...input,
   })

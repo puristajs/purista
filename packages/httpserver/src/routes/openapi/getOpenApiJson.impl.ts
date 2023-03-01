@@ -1,5 +1,5 @@
 import { StatusCode } from '@purista/core'
-import { HTTPMethods, RouteHandlerMethod } from 'fastify'
+import { RouteHandlerMethod, RouteOptions } from 'fastify'
 import type { OpenAPIObject, ParameterObject, RequestBodyObject, SchemaObject } from 'openapi3-ts'
 import { isReferenceObject } from 'openapi3-ts'
 import { posix } from 'path'
@@ -14,7 +14,7 @@ import { HttpServerService } from '../../HttpServerService.impl'
  * available. Defaults to `/api`
  * @returns A route definition for the openApi.json file
  */
-export const getOpenApiJson = function (this: HttpServerService) {
+export const getOpenApiJson = function (this: HttpServerService): RouteOptions {
   const paths: Record<string, Record<string, unknown>> = {}
 
   const p = (this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath) as string
@@ -298,6 +298,7 @@ export const getOpenApiJson = function (this: HttpServerService) {
           summary: definition.openApi?.summary,
           parameters: [...pathParams, ...queryParams, requestIdParameter],
           tags: definition.openApi?.tags,
+          operationId: definition.openApi?.operationId,
           requestBody,
           responses: {
             [definition.openApi?.outputPayload ? 200 : 204]: {
@@ -345,7 +346,7 @@ export const getOpenApiJson = function (this: HttpServerService) {
   }
 
   return {
-    method: 'GET' as HTTPMethods,
+    method: 'GET',
     url,
     handler,
   }
