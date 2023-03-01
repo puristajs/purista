@@ -13,7 +13,7 @@ import type {
   StatusCode,
 } from '../core'
 import { ContentType, HttpExposedServiceMeta, QueryParameter } from '../httpserver'
-import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation'
+import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl'
 import type { SupportedHttpMethod } from './types'
 
 /**
