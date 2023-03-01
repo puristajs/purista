@@ -29,6 +29,8 @@ it('exports core functions', () => {
 
   // helper
   expect(index.FunctionDefinitionBuilder).toBeDefined()
-  expect(index.getFunctionWithValidation).toBeDefined()
+  expect(index.CommandDefinitionBuilder).toBeDefined()
+  expect(index.getCommandFunctionWithValidation).toBeDefined()
+  expect(index.getSubscriptionFunctionWithValidation).toBeDefined()
   expect(index.SubscriptionDefinitionBuilder).toBeDefined()
 })
