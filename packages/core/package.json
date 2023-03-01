@@ -54,9 +54,9 @@
     "@opentelemetry/resources": "^1.9.1",
     "@opentelemetry/sdk-trace-node": "^1.9.1",
     "@opentelemetry/semantic-conventions": "^1.9.1",
-    "openapi3-ts": "3.1.2",
+    "openapi3-ts": "3.2.0",
     "pino": "^8.9.0",
-    "zod": "^3.20.2"
+    "zod": "^3.20.6"
   },
   "peerDependencies": {
     "@types/jest": "^29.4.0",
