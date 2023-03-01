@@ -12,6 +12,7 @@ export const getLoggerMock = (sandbox?: SinonSandbox): { mock: Logger; stubs: Re
   const warn = sandbox?.stub() || stub()
   const debug = sandbox?.stub() || stub()
   const trace = sandbox?.stub() || stub()
+  const fatal = sandbox?.stub() || stub()
 
   const mock: Logger = {
     info,
@@ -19,8 +20,9 @@ export const getLoggerMock = (sandbox?: SinonSandbox): { mock: Logger; stubs: Re
     warn,
     debug,
     trace,
+    fatal,
     getChildLogger: () => mock,
-  } as unknown as Logger
+  }
 
   return {
     stubs: {

@@ -5,11 +5,18 @@ import {
   getNewEBMessageId,
   getNewInstanceId,
   getNewTraceId,
-} from '../core'
+} from '../../core'
 
-/* A function that returns a command message mock object. */
-export const getCommandMessageMock = (input?: Partial<Command>): Readonly<Command<unknown, unknown>> => {
-  const commandMessage: Readonly<Command<unknown, unknown>> = Object.freeze({
+/* A function that returns a mocked command message. */
+export const getCommandMessageMock = <Payload = unknown, Parameter = unknown>(
+  input?: Partial<Command<Payload, Parameter>> & {
+    payload?: {
+      payload?: Payload
+      parameter?: Parameter
+    }
+  },
+): Readonly<Command<Payload, Parameter>> => {
+  const commandMessage: Readonly<Command<Payload, Parameter>> = Object.freeze({
     id: getNewEBMessageId(),
     timestamp: Date.now(),
     messageType: EBMessageType.Command,
@@ -28,8 +35,8 @@ export const getCommandMessageMock = (input?: Partial<Command>): Readonly<Comman
       serviceTarget: 'mockedReceiverFunction',
     },
     payload: {
-      payload: {},
-      parameter: {},
+      payload: input?.payload?.payload as Payload,
+      parameter: input?.payload?.parameter as Parameter,
     },
     ...input,
   })
