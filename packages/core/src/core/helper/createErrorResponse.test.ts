@@ -33,7 +33,7 @@ describe('createErrorResponse', () => {
   it('creates a error response', () => {
     const result = createErrorResponse(message, statusCode)
 
-    const payload = { status: statusCode, message: 'Internal Server Error', data: undefined }
+    const payload = { status: statusCode, message: 'Internal Server Error', traceId: message.traceId }
 
     expect(result.messageType).toBe(EBMessageType.CommandErrorResponse)
     expect(result.payload).toStrictEqual(payload)
@@ -54,7 +54,7 @@ describe('createErrorResponse', () => {
 
     const result = createErrorResponse(message, statusCode, error)
 
-    const payload = { status: StatusCode.BadRequest, message: messageText, data }
+    const payload = { status: StatusCode.BadRequest, message: messageText, traceId: message.traceId, data }
 
     expect(result.messageType).toBe(EBMessageType.CommandErrorResponse)
     expect(result.payload).toStrictEqual(payload)
@@ -75,7 +75,7 @@ describe('createErrorResponse', () => {
 
     const result = createErrorResponse(message, statusCode, error)
 
-    const payload = { status: statusCode, message: 'Internal Server Error', data: undefined }
+    const payload = { status: statusCode, message: 'Internal Server Error', traceId: message.traceId }
 
     expect(result.messageType).toBe(EBMessageType.CommandErrorResponse)
     expect(result.payload).toStrictEqual(payload)

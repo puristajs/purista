@@ -25,12 +25,12 @@ export class HandledError extends Error {
    * Returns error response object
    * @returns ErrorResponse
    */
-  getErrorResponse() {
+  getErrorResponse(traceId?: TraceId) {
     const errorResponse: Readonly<ErrorResponse> = Object.freeze({
       status: this.errorCode,
       message: this.message,
       data: this.data,
-      traceId: this.traceId,
+      traceId: this.traceId || traceId,
     })
 
     return errorResponse
