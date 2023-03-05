@@ -12,6 +12,6 @@ export type SubscriptionAfterGuardHook<
 > = (
   this: ServiceClassType,
   context: SubscriptionFunctionContext,
-  payload: FunctionPayloadOutputType,
-  parameter: FunctionParameterType,
+  payload: Readonly<FunctionPayloadOutputType>,
+  parameter: Readonly<FunctionParameterType>,
 ) => Promise<void>

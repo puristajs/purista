@@ -273,8 +273,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           const transformOutput = command.hooks.transformOutput
           await this.startActiveSpan(command.commandName + '.outputTransformation', {}, undefined, async () => {
             const afterTransform = transformOutput.transformFunction.bind(this, { logger, message })
-            const resultTransfomed = await afterTransform(result, parameter)
-            result = transformOutput.transformOutputSchema.parse(resultTransfomed)
+            const resultTransformed = await afterTransform(result as Readonly<unknown>, parameter)
+            result = transformOutput.transformOutputSchema.parse(resultTransformed)
           })
         }
 
@@ -349,7 +349,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
   }
 
   protected async executeSubscription(
-    message: EBMessage,
+    message: Readonly<EBMessage>,
     subscriptionName: string,
   ): Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined> {
     const subscription = this.subscriptions.get(subscriptionName)
@@ -400,8 +400,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
                 wrapInSpan: this.wrapInSpan.bind(this),
                 startActiveSpan: this.startActiveSpan.bind(this),
               }
-              const call = subscription.call.bind(this, context)
-              return await call(payload, parameter)
+              const call2 = subscription.call.bind(this, context)
+              return await call2(payload, parameter)
             },
           )
 
@@ -435,8 +435,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
               undefined,
               async () => {
                 const afterTransform = transformOutput.transformFunction.bind(this, { logger, message })
-                const resultTransfomed = await afterTransform(result, parameter)
-                result = transformOutput.transformOutputSchema.parse(resultTransfomed)
+                const resultTransformed = await afterTransform(result as Readonly<unknown>, parameter)
+                result = transformOutput.transformOutputSchema.parse(resultTransformed)
               },
             )
           }

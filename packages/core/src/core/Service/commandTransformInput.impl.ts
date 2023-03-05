@@ -5,14 +5,14 @@ import { HandledError, UnhandledError } from '../Error'
 import { Command, CommandDefinition, Logger, StatusCode } from '../types'
 import type { Service } from './Service.impl'
 
-export const commandTransformInput = async (
+export const commandTransformInput = async <PayloadType = unknown, ParameterType = unknown>(
   serviceInstance: Service,
   logger: Logger,
   command: CommandDefinition,
-  message: Readonly<Command<unknown, unknown>>,
-) => {
+  message: Readonly<Command<PayloadType, ParameterType>>,
+): Promise<{ payload: Readonly<unknown>; parameter: Readonly<unknown> }> => {
   if (!command.hooks.transformInput) {
-    return message.payload
+    return message.payload as { payload: Readonly<unknown>; parameter: Readonly<unknown> }
   }
 
   const transformInput = command.hooks.transformInput

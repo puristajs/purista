@@ -14,6 +14,6 @@ export type CommandFunction<
 > = (
   this: ServiceClassType,
   context: CommandFunctionContext<MessagePayloadType, MessageParamsType>,
-  payload: FunctionPayloadType,
-  parameter: FunctionParamsType,
+  payload: Readonly<FunctionPayloadType>,
+  parameter: Readonly<FunctionParamsType>,
 ) => Promise<FunctionResultType>

@@ -12,7 +12,7 @@ export type SubscriptionTransformOutputHook<
   ResponseOutput = unknown,
 > = (
   this: ServiceClassType,
-  context: { logger: Logger; message: EBMessage },
-  payload: MessageResultType,
-  parameter: MessageParamsType,
+  context: { logger: Logger; message: Readonly<EBMessage> },
+  payload: Readonly<MessageResultType>,
+  parameter: Readonly<MessageParamsType>,
 ) => Promise<ResponseOutput>
