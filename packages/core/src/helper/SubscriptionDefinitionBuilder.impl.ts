@@ -96,7 +96,7 @@ export class SubscriptionDefinitionBuilder<
 
   /**
    * Add a filter to only subscribe to messages with matching event name
-   * @param eventName Event name
+   * @param eventName The name of event to subscribe
    * @param serviceVersion the version of the service that produces the event
    * @returns SubscriptionDefinitionBuilder
    */
@@ -109,7 +109,7 @@ export class SubscriptionDefinitionBuilder<
 
   /**
    * Filter messages only from instance id
-   * @param instanceId
+   * @param instanceId the instance id to subscribe
    * @returns
    */
   onlyInstanceId(instanceId: InstanceId) {
@@ -119,7 +119,7 @@ export class SubscriptionDefinitionBuilder<
 
   /**
    * Filter messages only for principalId
-   * @param principalId
+   * @param principalId the principal id to subscribe
    * @returns
    */
   onlyPrincipalId(principalId: PrincipalId) {
@@ -147,15 +147,15 @@ export class SubscriptionDefinitionBuilder<
    * This will include messages from all versions of this function.
    *
    * ```typescript
-   * sendFrom('UserService', undefined, 'testFunction')
+   * sentFrom('UserService', undefined, 'testFunction')
    * ```
    *
-   * @param serviceName
-   * @param serviceVersion
-   * @param serviceTarget
+   * @param serviceName the name of the service that produces the message
+   * @param serviceVersion the version of the service that produces the message
+   * @param serviceTarget the command or subscription name of the service that produces the message
    * @returns
    */
-  sendFrom(serviceName: string | undefined, serviceVersion: string | undefined, serviceTarget: string | undefined) {
+  sentFrom(serviceName: string | undefined, serviceVersion: string | undefined, serviceTarget: string | undefined) {
     this.sender = {
       serviceName,
       serviceVersion,
@@ -176,9 +176,9 @@ export class SubscriptionDefinitionBuilder<
    * receivedBy('UserService', undefined, 'testFunction')
    * ```
    *
-   * @param serviceName
-   * @param serviceVersion
-   * @param serviceTarget
+   * @param serviceName the name of the service that consumes the message
+   * @param serviceVersion the version of the service that consumes the message
+   * @param serviceTarget the command or subscription name of the service that consumes the message
    * @returns
    */
   receivedBy(serviceName: string | undefined, serviceVersion: string | undefined, serviceTarget: string | undefined) {
@@ -197,7 +197,7 @@ export class SubscriptionDefinitionBuilder<
    *
    * See @enum EBMessageType for full available list.
    *
-   * @param messageType
+   * @param messageType the type of message
    * @returns
    */
   addMessageType(messageType: EBMessageType) {
@@ -209,7 +209,7 @@ export class SubscriptionDefinitionBuilder<
   /**
    * Add a schema for input payload validation.
    * Types for payload of message and function payload input are generated from given schema.
-   * @param inputSchema The schema validation for input payload
+   * @param inputSchema the validation schema for input payload
    * @returns SubscriptionDefinitionBuilder
    */
   addPayloadSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(inputSchema: z.ZodType<O, D, I>) {
@@ -229,7 +229,7 @@ export class SubscriptionDefinitionBuilder<
    * Add a schema for output payload validation.
    * Types for payload of message and function payload output are generated from given schema.
    * @param eventName the event name to be used when the subscription result is emitted as custom event
-   * @param outputSchema The schema validation for output payload
+   * @param outputSchema the validation schema for the output payload
    * @returns SubscriptionDefinitionBuilder
    */
   addOutputSchema<I, D extends z.ZodTypeDef, O>(eventName: string, outputSchema: z.ZodType<O, D, I>) {
@@ -249,7 +249,7 @@ export class SubscriptionDefinitionBuilder<
   /**
    * Add a schema for output parameter validation.
    * Types for parameter of message and function parameter output are generated from given schema.
-   * @param parameterSchema The schema validation for output parameter
+   * @param parameterSchema the validation schema for output parameter
    * @returns SubscriptionDefinitionBuilder
    */
   addParameterSchema<I, D extends z.ZodTypeDef, O>(parameterSchema: z.ZodType<O, D, I>) {
@@ -269,7 +269,7 @@ export class SubscriptionDefinitionBuilder<
    * Set a transform input hook which will encode or transform the input payload and parameters.
    * Will be executed as first step before input validation, before guard and the function itself.
    * This will change the type of input message payload and input message parameter.
-   * @param transformInput Transform input function
+   * @param transformInput the transform input function
    * @returns SubscriptionDefinitionBuilder
    */
   setTransformInput<
@@ -282,7 +282,13 @@ export class SubscriptionDefinitionBuilder<
   >(
     transformInputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
     transformParameterSchema: z.ZodType<ParamsOut, ParamsD, ParamsIn>,
-    transformFunction: SubscriptionTransformInputHook<ServiceClassType, PayloadOut, ParamsOut, PayloadIn, ParamsIn>,
+    transformFunction: SubscriptionTransformInputHook<
+      ServiceClassType,
+      FunctionPayloadType,
+      FunctionParamsType,
+      PayloadIn,
+      ParamsIn
+    >,
   ) {
     this.hooks.transformInput = {
       transformFunction,
@@ -304,7 +310,7 @@ export class SubscriptionDefinitionBuilder<
    * Set a transform output hook which will encode or transform the response payload.
    * Will be executed at very last step after function execution, output validation and after guard hooks.
    * This will change the type of output message payload.
-   * @param transformOutput Transform output function
+   * @param transformOutput the transform output function
    * @returns SubscriptionDefinitionBuilder
    */
   setTransformOutput<PayloadOut, PayloadD extends z.ZodTypeDef, PayloadIn>(
@@ -459,7 +465,7 @@ export class SubscriptionDefinitionBuilder<
 
   /**
    * Get the function implementation
-   * @returns the function
+   * @returns the subscription function
    */
   getSubscriptionFunction(): SubscriptionFunction<
     ServiceClassType,
@@ -506,6 +512,8 @@ export class SubscriptionDefinitionBuilder<
       subscriptionName: this.subscriptionName,
       subscriptionDescription: this.subscriptionDescription,
       metadata: {},
+      receiver: this.receiver,
+      sender: this.sender,
       messageType: this.messageType,
       settings: this.settings,
       eventName: this.eventName,
