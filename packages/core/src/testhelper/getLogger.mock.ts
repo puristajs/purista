@@ -6,7 +6,7 @@ import { Logger } from '../core'
  * Mocks the logger and methods are stubs
  * @returns logger mocked
  */
-export const getLoggerMock = (sandbox?: SinonSandbox): { mock: Logger; stubs: Record<string, SinonStub> } => {
+export const getLoggerMock = (sandbox?: SinonSandbox) => {
   const info = sandbox?.stub() || stub()
   const error = sandbox?.stub() || stub()
   const warn = sandbox?.stub() || stub()
@@ -31,6 +31,7 @@ export const getLoggerMock = (sandbox?: SinonSandbox): { mock: Logger; stubs: Re
       warn,
       debug,
       trace,
+      fatal,
     },
     mock,
   }
