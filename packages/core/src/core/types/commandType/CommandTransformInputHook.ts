@@ -9,10 +9,10 @@ export type CommandTransformInputHook<
   ParamsInput = unknown,
 > = (
   this: ServiceClassType,
-  context: { logger: Logger; message: Command<PayloadInput, ParamsInput> },
-  payload: PayloadInput,
-  parameter: ParamsInput,
+  context: { logger: Logger; message: Readonly<Command<PayloadInput, ParamsInput>> },
+  payload: Readonly<PayloadInput>,
+  parameter: Readonly<ParamsInput>,
 ) => Promise<{
-  payload: PayloadOutput
-  parameter: ParamsOutput
+  payload: Readonly<PayloadOutput>
+  parameter: Readonly<ParamsOutput>
 }>

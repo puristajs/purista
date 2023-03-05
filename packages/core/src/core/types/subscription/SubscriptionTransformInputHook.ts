@@ -9,10 +9,10 @@ export type SubscriptionTransformInputHook<
   ParamsInput = unknown,
 > = (
   this: ServiceClassType,
-  context: { logger: Logger; message: EBMessage },
-  payload: PayloadInput,
-  parameter: ParamsInput,
+  context: { logger: Logger; message: Readonly<EBMessage> },
+  payload: Readonly<PayloadInput>,
+  parameter: Readonly<ParamsInput>,
 ) => Promise<{
-  payload: PayloadOutput
-  parameter: ParamsOutput
+  payload: Readonly<PayloadOutput>
+  parameter: Readonly<ParamsOutput>
 }>

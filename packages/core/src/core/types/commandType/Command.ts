@@ -1,5 +1,4 @@
 import type { CorrelationId } from '../CorrelationId'
-import type { EBMessage } from '../EBMessage'
 import type { EBMessageAddress } from '../EBMessageAddress'
 import type { EBMessageBase } from '../EBMessageBase'
 import { EBMessageType } from '../EBMessageType.enum'
@@ -25,7 +24,3 @@ export type Command<PayloadType = unknown, ParameterType = unknown> = {
     payload: PayloadType
   }
 } & EBMessageBase
-
-export const isCommand = (message: EBMessage): message is Command => {
-  return message.messageType === EBMessageType.Command
-}

@@ -248,7 +248,13 @@ export class CommandDefinitionBuilder<
   >(
     transformInputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
     transformParameterSchema: z.ZodType<ParamsOut, ParamsD, ParamsIn>,
-    transformFunction: CommandTransformInputHook<ServiceClassType, PayloadOut, ParamsOut, PayloadIn, ParamsIn>,
+    transformFunction: CommandTransformInputHook<
+      ServiceClassType,
+      FunctionPayloadType,
+      FunctionParamsType,
+      PayloadIn,
+      ParamsIn
+    >,
   ) {
     this.hooks.transformInput = {
       transformFunction,
@@ -277,8 +283,8 @@ export class CommandDefinitionBuilder<
     transformOutputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
     transformFunction: CommandTransformOutputHook<
       ServiceClassType,
-      PayloadOut,
       MessagePayloadType,
+      FunctionResultType,
       FunctionParamsType,
       PayloadIn
     >,

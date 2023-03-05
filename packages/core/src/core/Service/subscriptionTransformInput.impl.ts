@@ -2,7 +2,7 @@ import { SpanStatusCode } from '@opentelemetry/api'
 import { ZodError } from 'zod'
 
 import { HandledError, UnhandledError } from '../Error'
-import { EBMessage, EBMessageType, Logger, StatusCode, SubscriptionDefinition } from '../types'
+import { EBMessage, isCommand, Logger, StatusCode, SubscriptionDefinition } from '../types'
 import type { Service } from './Service.impl'
 
 export const subscriptionTransformInput = async (
@@ -11,16 +11,16 @@ export const subscriptionTransformInput = async (
   subscription: SubscriptionDefinition,
   message: Readonly<EBMessage>,
 ) => {
-  let msgPayload: { payload: unknown; parameter: unknown } | undefined
+  let msgPayload: { payload: unknown; parameter: unknown }
 
-  if (message.messageType === EBMessageType.Command) {
+  if (isCommand(message)) {
     msgPayload = message.payload
   } else {
     msgPayload = { payload: message.payload, parameter: undefined }
   }
 
   if (!subscription.hooks.transformInput) {
-    return msgPayload
+    return msgPayload as Readonly<{ payload: Readonly<unknown>; parameter: Readonly<unknown> }>
   }
 
   const transformInput = subscription.hooks.transformInput

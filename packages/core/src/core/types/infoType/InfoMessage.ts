@@ -1,4 +1,3 @@
-import type { EBMessage } from '../EBMessage'
 import { EBMessageType } from '../EBMessageType.enum'
 import type { InfoInvokeTimeout } from './InfoInvokeTimeout'
 import type { InfoServiceDrain } from './InfoServiceDrain'
@@ -38,7 +37,3 @@ export const infoMessageTypes = [
   EBMessageType.InfoInvokeTimeout,
   EBMessageType.InfoSubscriptionError,
 ]
-
-export const isInfoMessage = (message: EBMessage): message is InfoMessage => {
-  return infoMessageTypes.includes(message.messageType)
-}
