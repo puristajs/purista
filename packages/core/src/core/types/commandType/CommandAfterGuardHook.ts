@@ -13,7 +13,7 @@ export type CommandAfterGuardHook<
 > = (
   this: ServiceClassType,
   context: CommandFunctionContext<PayloadType, ParamsType>,
-  result: ResultType,
-  input: PayloadType,
-  parameter: ParamsType,
+  result: Readonly<ResultType>,
+  input: Readonly<PayloadType>,
+  parameter: Readonly<ParamsType>,
 ) => Promise<void>

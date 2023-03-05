@@ -1,0 +1,16 @@
+import { getCustomMessageMessageMock } from '../../../testhelper'
+import { createInfoMessage } from '../../helper'
+import { EBMessage, EBMessageType } from '../../types'
+import { isInfoMessage } from './isInfoMessage.impl'
+
+describe('isInfoMessage', () => {
+  it('returns true if it is a info message', () => {
+    const message = createInfoMessage(EBMessageType.InfoServiceFunctionAdded, 'serviceName', '1')
+    expect(isInfoMessage(message as EBMessage)).toBeTruthy()
+  })
+
+  it('returns false if it is not a info message', () => {
+    const message = getCustomMessageMessageMock('123', {})
+    expect(isInfoMessage(message as EBMessage)).toBeFalsy()
+  })
+})

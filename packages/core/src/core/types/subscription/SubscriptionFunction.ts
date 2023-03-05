@@ -13,6 +13,6 @@ export type SubscriptionFunction<
 > = (
   this: ServiceClassType,
   context: SubscriptionFunctionContext,
-  payload: FunctionPayloadType,
-  parameter: FunctionParamsType,
+  payload: Readonly<FunctionPayloadType>,
+  parameter: Readonly<FunctionParamsType>,
 ) => Promise<FunctionResultType>

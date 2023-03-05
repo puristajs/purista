@@ -1,5 +1,4 @@
 import type { CorrelationId } from '../CorrelationId'
-import type { EBMessage } from '../EBMessage'
 import type { EBMessageAddress } from '../EBMessageAddress'
 import type { EBMessageBase } from '../EBMessageBase'
 import { EBMessageType } from '../EBMessageType.enum'
@@ -20,11 +19,3 @@ export type CommandErrorResponse = {
     data?: unknown
   }
 } & EBMessageBase
-
-export const isCommandErrorResponse = (message: EBMessage | unknown): message is CommandErrorResponse => {
-  if (typeof message !== 'object' || message === null) {
-    return false
-  }
-  const m = message as CommandErrorResponse
-  return m.messageType === EBMessageType.CommandErrorResponse
-}

@@ -8,6 +8,7 @@ import { getDefaultEventBridgeConfig } from '../config'
 import { HandledError } from '../Error/HandledError.impl'
 import { UnhandledError } from '../Error/UnhandledError.impl'
 import {
+  createErrorResponse,
   deserializeOtp,
   getCleanedMessage,
   getCommandQueueName,
@@ -87,7 +88,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
   }
 
   async start() {
-    const write = async (message: EBMessage, _encoding: string, next: (error?: Error) => void) => {
+    const write = async (message: Readonly<EBMessage>, _encoding: string, next: (error?: Error) => void) => {
       const context = await deserializeOtp(this.logger, message.otp)
 
       return this.startActiveSpan(
@@ -96,8 +97,10 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
         context,
         async (span) => {
           try {
+            let isAtLeastDeliveredOnce = false
             this.subscriptions.forEach((subscription) => {
               if (isMessageMatchingSubscription(this.logger, message, subscription)) {
+                isAtLeastDeliveredOnce = true
                 subscription
                   .cb(message)
                   .then((result) => {
@@ -112,8 +115,8 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
             if (isCommand(message)) {
               const mapEntry = this.serviceFunctions.get(getCommandQueueName(message.receiver))
               if (!mapEntry) {
-                const err = new HandledError(
-                  StatusCode.BadRequest,
+                const err = new UnhandledError(
+                  StatusCode.BadGateway,
                   'InvalidCommand: received invalid command',
                   getCleanedMessage(message),
                 )
@@ -122,12 +125,16 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
                   message: err.message,
                 })
                 span.recordException(err)
-                this.logger.error({ err, ...span.spanContext() }, 'received invalid command')
+                this.logger.error({ err, ...span.spanContext() }, err.message)
                 this.emit('eventbridge-error', err)
-                return next(err)
+
+                const errorResponse = createErrorResponse(message, StatusCode.BadGateway, err)
+                this.emitMessage(errorResponse)
+                return next()
               }
 
-              mapEntry(message).then((result) => {
+              isAtLeastDeliveredOnce = true
+              mapEntry(message as Readonly<Command>).then((result) => {
                 this.emitMessage(result)
               })
               return next()
@@ -137,7 +144,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
               const mapEntry = this.pendingInvocations.get(message.correlationId)
               if (!mapEntry) {
                 const err = new UnhandledError(
-                  StatusCode.BadRequest,
+                  StatusCode.BadGateway,
                   'InvalidCommandResponse: received invalid command response',
                   getCleanedMessage(message),
                 )
@@ -146,10 +153,12 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
                   message: err.message,
                 })
                 span.recordException(err)
-                this.logger.error({ err, ...span.spanContext() }, 'received invalid command response')
+                this.logger.error({ err, ...span.spanContext() }, err.message)
                 this.emit('eventbridge-error', err)
-                return next(err)
+                return next()
               }
+
+              isAtLeastDeliveredOnce = true
               if (isCommandSuccessResponse(message)) {
                 mapEntry.resolve(message.payload)
               } else if (isCommandErrorResponse(message)) {
@@ -166,14 +175,21 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
               return next()
             }
 
-            const err = new UnhandledError(StatusCode.BadRequest, 'InvalidMessage: received invalid message', message)
-            this.logger.error({ err, ...span.spanContext() }, 'received invalid message')
-            this.emit('eventbridge-error', err)
+            if (!isAtLeastDeliveredOnce) {
+              const err = new UnhandledError(
+                StatusCode.BadGateway,
+                'InvalidMessage: received a message which is not consumed by any service command or subscription',
+                message,
+              )
+              this.logger.warn({ err, ...span.spanContext() }, err.message)
+              this.emit('eventbridge-error', err)
+            }
+
             return next()
           } catch (error) {
-            const err = new HandledError(StatusCode.InternalServerError, 'eventbus failure', error)
+            const err = new UnhandledError(StatusCode.InternalServerError, 'eventbus failure', error)
             this.emit('eventbridge-error', err)
-            this.logger.error({ err, ...span.spanContext() }, 'eventbus failure')
+            this.logger.error({ err, ...span.spanContext() }, err.message)
 
             span.recordException(err)
 
