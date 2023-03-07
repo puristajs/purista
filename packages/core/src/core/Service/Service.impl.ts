@@ -77,7 +77,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
    */
   async start() {
     return this.startActiveSpan('purista.start', {}, undefined, async (span) => {
-      this.emit('service-started', undefined)
+      this.emit('service-started')
       try {
         await this.initializeEventbridgeConnect(this.commandFunctions, this.subscriptionList)
         await this.sendServiceInfo(EBMessageType.InfoServiceReady)
@@ -222,7 +222,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           message: 'received invalid command',
         })
         return await this.startActiveSpan('sendErrorResponse', {}, undefined, async () =>
-          createErrorResponse(message, StatusCode.NotImplemented, undefined),
+          createErrorResponse(message, StatusCode.NotImplemented),
         )
       }
 
@@ -272,7 +272,12 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
         if (command.hooks.transformOutput) {
           const transformOutput = command.hooks.transformOutput
           await this.startActiveSpan(command.commandName + '.outputTransformation', {}, undefined, async () => {
-            const afterTransform = transformOutput.transformFunction.bind(this, { logger, message })
+            const afterTransform = transformOutput.transformFunction.bind(this, {
+              logger,
+              message,
+              startActiveSpan: this.startActiveSpan.bind(this),
+              wrapInSpan: this.wrapInSpan.bind(this),
+            })
             const resultTransformed = await afterTransform(result as Readonly<unknown>, parameter)
             result = transformOutput.transformOutputSchema.parse(resultTransformed)
           })
@@ -330,7 +335,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
 
       this.commands.set(commandDefinition.commandName, commandDefinition)
 
-      await this.eventBridge.registerServiceFunction(
+      await this.eventBridge.registerCommand(
         {
           serviceName: this.serviceInfo.serviceName,
           serviceVersion: this.serviceInfo.serviceVersion,
@@ -434,7 +439,12 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
               {},
               undefined,
               async () => {
-                const afterTransform = transformOutput.transformFunction.bind(this, { logger, message })
+                const afterTransform = transformOutput.transformFunction.bind(this, {
+                  logger,
+                  message,
+                  wrapInSpan: this.wrapInSpan.bind(this),
+                  startActiveSpan: this.startActiveSpan.bind(this),
+                })
                 const resultTransformed = await afterTransform(result as Readonly<unknown>, parameter)
                 result = transformOutput.transformOutputSchema.parse(resultTransformed)
               },
@@ -488,7 +498,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     )
   }
 
-  protected async registerSubscription(subscriptionDefinition: SubscriptionDefinition): Promise<void> {
+  async registerSubscription(subscriptionDefinition: SubscriptionDefinition): Promise<void> {
     return this.startActiveSpan('purista.registerSubscription', {}, undefined, async (span) => {
       this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register subscription')
 
@@ -533,7 +543,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       const functionUnregisterProms: Promise<any>[] = []
       this.commandFunctions.forEach((functionDefinition) => {
         functionUnregisterProms.push(
-          this.eventBridge.unregisterServiceFunction({
+          this.eventBridge.unregisterCommand({
             serviceName: this.info.serviceName,
             serviceVersion: this.info.serviceVersion,
             serviceTarget: functionDefinition.commandName,

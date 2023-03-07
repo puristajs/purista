@@ -1,3 +1,7 @@
+/**
+ * Message and error status codes.
+ * The codes are based on HTTP status codes
+ */
 export enum StatusCode {
   InfoContinue = 100,
   InfoSwitchingProtocols = 101,

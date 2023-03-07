@@ -14,8 +14,8 @@ import {
   getCommandQueueName,
   getNewCorrelationId,
   getNewEBMessageId,
+  getNewTraceId,
   getSubscriptionQueueName,
-  getTimeoutPromise,
   serializeOtp,
 } from '../helper'
 import {
@@ -71,6 +71,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
   protected subscriptions = new Map<string, SubscriptionStorageEntry>()
 
   protected hasStarted = false
+  protected healthy = false
 
   constructor(
     conf: EventBridgeConfig = getDefaultEventBridgeConfig(),
@@ -84,6 +85,10 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
   }
 
   async isReady() {
+    return this.hasStarted
+  }
+
+  async isHealthy() {
     return this.hasStarted
   }
 
@@ -175,7 +180,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
               return next()
             }
 
-            if (!isAtLeastDeliveredOnce) {
+            if (!isAtLeastDeliveredOnce && this.config.logWarnOnMessagesWithoutReceiver) {
               const err = new UnhandledError(
                 StatusCode.BadGateway,
                 'InvalidMessage: received a message which is not consumed by any service command or subscription',
@@ -198,6 +203,8 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
               message: err.message,
             })
 
+            this.healthy = false
+
             return next(error as Error)
           }
         },
@@ -208,11 +215,12 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
 
     this.readStream.pipe(this.writeStream)
 
-    this.emit('eventbridge-connected', undefined)
+    this.emit('eventbridge-connected')
 
     this.logger.info({ puristaVersion }, 'DefaultEventBridge started')
 
     this.hasStarted = true
+    this.healthy = true
   }
 
   /**
@@ -232,12 +240,12 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
   }
 
   /**
-   * Register a service function and ensure that there is a queue for all incoming command requests.
+   * Register a service command and ensure that there is a queue for all incoming command requests.
    * @param address The service function address
    * @param cb the function to call if a matching command message arrives
    * @returns the id of command function queue
    */
-  async registerServiceFunction(
+  async registerCommand(
     address: EBMessageAddress,
     cb: (message: Command) => Promise<CommandSuccessResponse<unknown> | CommandErrorResponse>,
   ): Promise<string> {
@@ -246,7 +254,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
     return queueName
   }
 
-  async unregisterServiceFunction(address: EBMessageAddress): Promise<void> {
+  async unregisterCommand(address: EBMessageAddress): Promise<void> {
     const queueName = getCommandQueueName(address)
     this.serviceFunctions.delete(queueName)
   }
@@ -320,13 +328,13 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
     return this.startActiveSpan(PuristaSpanName.EventBridgeInvokeCommand, {}, context, async (span) => {
       const correlationId = getNewCorrelationId()
 
-      const command = Object.freeze({
+      const command: Command = Object.freeze({
         id: getNewEBMessageId(),
         instanceId: this.instanceId,
         correlationId: getNewCorrelationId(),
         timestamp: Date.now(),
         messageType: EBMessageType.Command,
-        traceId: input.traceId || span.spanContext().traceId,
+        traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
         ...input,
       })
 
@@ -337,7 +345,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
       const sendErrorInfoMsg = async () => {
         try {
           const payload: InfoInvokeTimeoutPayload = {
-            traceId: command.traceId,
+            traceId: command.traceId as string,
             correlationId,
             sender: command.sender,
             receiver: command.receiver,
@@ -370,21 +378,41 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
       }
 
       const executionPromise = new Promise<T>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          const err = new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out', undefined, command.traceId)
+          this.logger.warn({ err })
+          rejectFn(err)
+        }, commandTimeout)
+
+        const resolveFn = (successPayload: T) => {
+          clearTimeout(timeout)
+          removeFromPending()
+          resolve(successPayload)
+        }
+
+        const rejectFn = (err: unknown) => {
+          clearTimeout(timeout)
+          removeFromPending()
+          reject(err)
+          sendErrorInfoMsg()
+        }
+
         this.pendingInvocations.set(command.correlationId, {
-          resolve: (successPayload: T) => {
-            removeFromPending()
-            resolve(successPayload)
-          },
-          reject: (err: unknown) => {
-            removeFromPending()
-            reject(err)
-            sendErrorInfoMsg()
-          },
+          resolve: resolveFn,
+          reject: rejectFn,
         })
       })
 
       this.emitMessage(command)
-      return Promise.race([executionPromise, getTimeoutPromise(commandTimeout, command.traceId)])
+      return executionPromise
     })
+  }
+
+  async destroy(): Promise<void> {
+    this.pendingInvocations.forEach((value) => value.reject(new UnhandledError(StatusCode.ServiceUnavailable)))
+    this.pendingInvocations.clear()
+    this.removeAllListeners()
+    this.writeStream.end().removeAllListeners()
+    this.readStream.destroy()
   }
 }

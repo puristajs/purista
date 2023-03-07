@@ -1,5 +1,4 @@
-import { EBMessage } from '../EBMessage'
-import type { Logger } from '../Logger'
+import { SubscriptionTransformFunctionContext } from './SubscriptionTransformFunctionContext'
 
 /**
  * This transform hook is executed after function output validation and AfterGuardHooks.
@@ -12,7 +11,7 @@ export type SubscriptionTransformOutputHook<
   ResponseOutput = unknown,
 > = (
   this: ServiceClassType,
-  context: { logger: Logger; message: Readonly<EBMessage> },
+  context: SubscriptionTransformFunctionContext,
   payload: Readonly<MessageResultType>,
   parameter: Readonly<MessageParamsType>,
 ) => Promise<ResponseOutput>

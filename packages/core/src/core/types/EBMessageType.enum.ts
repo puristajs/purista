@@ -10,9 +10,11 @@ export enum EBMessageType {
    */
   Command = 'command', // a message which expects an answer message from receiver
 
-  CommandSuccessResponse = 'commandSuccessResponse', // a success response from receiver of a command message
+  /** a success response from receiver of a command message */
+  CommandSuccessResponse = 'commandSuccessResponse',
 
-  CommandErrorResponse = 'commandErrorResponse', // a error response from receiver of a command message
+  /** a error response from receiver of a command message */
+  CommandErrorResponse = 'commandErrorResponse',
 
   /**
    * Info message type:
@@ -20,13 +22,22 @@ export enum EBMessageType {
    * The sender does not expect any answer to this message and does not process any reply to this message.
    * Info messages are fire & forget broadcasting messages.
    */
-  InfoServiceInit = 'infoServiceInit', // indicates that a service is booting
-  InfoServiceReady = 'infoServiceReady', // indicates that a service is ready
-  InfoServiceNotReady = 'infoServiceNotReady', // indicates that a service is not able to process requests (e.g. db not available)
-  InfoServiceFunctionAdded = 'infoServiceFunctionAdded', // send when a service provides a new function
-  InfoServiceDrain = 'infoServiceDrain', // indicates that a service is going to shut down and does no longer accept new requests
-  InfoServiceShutdown = 'infoServiceShutdown', // last event from service before service is destroyed
-  InfoInvokeTimeout = 'infoInvokeTimeout', // a service invoked a other function and did not get a answer within given ttl
-  InfoSubscriptionError = 'infoSubscriptionError', // a subscription function is throwing
-  CustomMessage = 'customMessage', // a custom message / custom event
+  /** indicates that a service is booting */
+  InfoServiceInit = 'infoServiceInit',
+  /** indicates that a service is ready */
+  InfoServiceReady = 'infoServiceReady',
+  /** indicates that a service is not able to process requests (e.g. db not available) */
+  InfoServiceNotReady = 'infoServiceNotReady',
+  /** send when a service provides a new function */
+  InfoServiceFunctionAdded = 'infoServiceFunctionAdded',
+  /** indicates that a service is going to shut down and does no longer accept new requests */
+  InfoServiceDrain = 'infoServiceDrain',
+  /** last event from service before service is destroyed */
+  InfoServiceShutdown = 'infoServiceShutdown',
+  /** a service invoked a other function and did not get a answer within given ttl */
+  InfoInvokeTimeout = 'infoInvokeTimeout',
+  /** a subscription function is throwing */
+  InfoSubscriptionError = 'infoSubscriptionError',
+  /** a custom message / custom event */
+  CustomMessage = 'customMessage',
 }

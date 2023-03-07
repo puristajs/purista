@@ -1,5 +1,5 @@
 import { getErrorMessageForCode } from '../helper'
-import type { CommandErrorResponse, ErrorResponse, TraceId } from '../types'
+import type { CommandErrorResponse, ErrorResponsePayload, TraceId } from '../types'
 import { StatusCode } from '../types'
 import { HandledError } from './HandledError.impl'
 
@@ -39,10 +39,10 @@ export class UnhandledError extends Error {
 
   /**
    * Returns error response object
-   * @returns ErrorResponse
+   * @returns ErrorResponsePayload
    */
   getErrorResponse() {
-    const errorResponse: Readonly<ErrorResponse> = Object.freeze({
+    const errorResponse: Readonly<ErrorResponsePayload> = Object.freeze({
       status: this.errorCode,
       message: this.message,
       data: this.data,

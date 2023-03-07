@@ -8,6 +8,7 @@ import type {
   CommandFunction,
   CommandTransformInputHook,
   CommandTransformOutputHook,
+  Complete,
   ServiceClass,
   StatusCode,
 } from '../core'
@@ -273,6 +274,24 @@ export class CommandDefinitionBuilder<
   }
 
   /**
+   * Return the transform input function
+   * @returns the input transform function if defined
+   */
+  getTransformInputFunction() {
+    if (!this.hooks.transformInput) {
+      return undefined
+    }
+
+    return this.hooks.transformInput.transformFunction as CommandTransformInputHook<
+      ServiceClassType,
+      FunctionPayloadType,
+      FunctionParamsType,
+      MessagePayloadType,
+      MessageParamsType
+    >
+  }
+
+  /**
    * Set a transform output hook which will encode or transform the response payload.
    * Will be executed at very last step after function execution, output validation and after guard hooks.
    * This will change the type of output message payload.
@@ -301,6 +320,24 @@ export class CommandDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType
+    >
+  }
+
+  /**
+   * Return the transform output function
+   * @returns the transform output function if defined
+   */
+  getTransformOutputFunction() {
+    if (!this.hooks.transformOutput) {
+      return undefined
+    }
+
+    return this.hooks.transformOutput.transformFunction as CommandTransformOutputHook<
+      ServiceClassType,
+      MessagePayloadType,
+      FunctionResultType,
+      FunctionParamsType,
+      MessageResultType
     >
   }
 
@@ -423,28 +460,32 @@ export class CommandDefinitionBuilder<
   }
 
   private extendWithHttpMetadata(
-    definition: CommandDefinition<
-      ServiceClassType,
-      Record<string, unknown>,
-      MessagePayloadType,
-      MessageParamsType,
-      MessageResultType,
-      FunctionPayloadType,
-      FunctionParamsType
+    definition: Complete<
+      CommandDefinition<
+        ServiceClassType,
+        Record<string, unknown>,
+        MessagePayloadType,
+        MessageParamsType,
+        MessageResultType,
+        FunctionPayloadType,
+        FunctionParamsType
+      >
     >,
   ) {
     if (!this.httpMetadata) {
       return definition
     }
 
-    const def = definition as CommandDefinition<
-      ServiceClassType,
-      HttpExposedServiceMeta,
-      MessagePayloadType,
-      MessageParamsType,
-      MessageResultType,
-      FunctionPayloadType,
-      FunctionParamsType
+    const def = definition as Complete<
+      CommandDefinition<
+        ServiceClassType,
+        HttpExposedServiceMeta,
+        MessagePayloadType,
+        MessageParamsType,
+        MessageResultType,
+        FunctionPayloadType,
+        FunctionParamsType
+      >
     >
 
     def.metadata.expose = {
@@ -490,14 +531,16 @@ export class CommandDefinitionBuilder<
     }
 
     const eventName = this.eventName
-    let definition: CommandDefinition<
-      ServiceClassType,
-      Record<string, unknown>,
-      MessagePayloadType,
-      MessageParamsType,
-      MessageResultType,
-      FunctionPayloadType,
-      FunctionParamsType
+    let definition: Complete<
+      CommandDefinition<
+        ServiceClassType,
+        Record<string, unknown>,
+        MessagePayloadType,
+        MessageParamsType,
+        MessageResultType,
+        FunctionPayloadType,
+        FunctionParamsType
+      >
     > = {
       commandName: this.commandName,
       commandDescription: this.commandDescription,

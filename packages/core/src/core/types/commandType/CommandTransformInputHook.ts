@@ -1,5 +1,4 @@
-import { Logger } from '../Logger'
-import { Command } from './Command'
+import { CommandTransformFunctionContext } from './CommandTransformFunctionContext'
 
 export type CommandTransformInputHook<
   ServiceClassType,
@@ -9,7 +8,7 @@ export type CommandTransformInputHook<
   ParamsInput = unknown,
 > = (
   this: ServiceClassType,
-  context: { logger: Logger; message: Readonly<Command<PayloadInput, ParamsInput>> },
+  context: CommandTransformFunctionContext<PayloadInput, ParamsInput>,
   payload: Readonly<PayloadInput>,
   parameter: Readonly<ParamsInput>,
 ) => Promise<{

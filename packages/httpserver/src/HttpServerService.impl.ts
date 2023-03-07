@@ -164,7 +164,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
 
     if (this.config.enableHealthz) {
       this.server.get('/healthz', async (_request, reply) => {
-        const isEventBridgeReady = await this.eventBridge.isReady()
+        const isEventBridgeReady = await this.eventBridge.isHealthy()
 
         reply.header('content-type', 'application/json; charset=utf-8')
         if (isEventBridgeReady) {
