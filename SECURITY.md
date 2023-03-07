@@ -13,4 +13,4 @@ Security updates will be only available in the recent major version.
 
 ## Reporting a Vulnerability
 
-If you find a vulnerability, please open an security issue in the github repository.
+If you find a vulnerability, please open an issue `Report a security vulnerability` in the github repository.
