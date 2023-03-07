@@ -7,7 +7,7 @@ export default hopeTheme({
 
   author: {
     name: 'Sebastian Wessel',
-    url: 'https://sebastianwessel.com',
+    url: 'https://sebastianwessel.de',
   },
 
   iconAssets: 'fontawesome',
@@ -87,6 +87,11 @@ export default hopeTheme({
     },
     photoSwipe: true,
     mdEnhance: {
+      mermaid: true,
+      flowchart: true,
+      linkCheck: true,
+      codetabs: true,
+      tabs: true,
       presentation: {
         plugins: ['highlight', 'math', 'search', 'notes', 'zoom'],
       },
