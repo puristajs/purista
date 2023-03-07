@@ -1,5 +1,4 @@
-import { EBMessage } from '../EBMessage'
-import { Logger } from '../Logger'
+import { SubscriptionTransformFunctionContext } from './SubscriptionTransformFunctionContext'
 
 export type SubscriptionTransformInputHook<
   ServiceClassType,
@@ -9,7 +8,7 @@ export type SubscriptionTransformInputHook<
   ParamsInput = unknown,
 > = (
   this: ServiceClassType,
-  context: { logger: Logger; message: Readonly<EBMessage> },
+  context: SubscriptionTransformFunctionContext,
   payload: Readonly<PayloadInput>,
   parameter: Readonly<ParamsInput>,
 ) => Promise<{

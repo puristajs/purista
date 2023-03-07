@@ -2,7 +2,7 @@ import { HandledError, UnhandledError } from '../Error'
 import { Command, CommandErrorResponse, EBMessageType, StatusCode, TraceId } from '../types'
 import { getErrorMessageForCode } from './getErrorMessageForCode.impl'
 import { getNewTraceId } from './getNewTraceId.impl'
-import { serializeOtp } from './serializeOtp'
+import { serializeOtp } from './serializeOtp.impl'
 
 /**
  * Creates a error response object based on original command

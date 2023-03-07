@@ -1,3 +1,6 @@
+/**
+ * Opentelemetry span names used by PURISTA framework
+ */
 export enum PuristaSpanName {
   EventBridgeEmitMessage = 'purista.emitMessageToBridge',
   EventBridgeInvokeCommand = 'purista.commandSent',

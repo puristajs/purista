@@ -8,35 +8,42 @@ import { EventBridge } from '../core'
  */
 export const getEventBridgeMock = (sandbox?: SinonSandbox): { mock: EventBridge; stubs: Record<string, SinonStub> } => {
   const emitMessage = sandbox?.stub() || stub()
-  const registerServiceFunction = sandbox?.stub() || stub()
+  const registerCommand = sandbox?.stub() || stub()
   const registerSubscription = sandbox?.stub() || stub()
-  const unregisterServiceFunction = sandbox?.stub() || stub()
+  const unregisterCommand = sandbox?.stub() || stub()
   const unregisterSubscription = sandbox?.stub() || stub()
   const invoke = sandbox?.stub() || stub()
   const start = sandbox?.stub() || stub()
-  const isReady = sandbox?.stub() || stub()
+  const isReady = sandbox?.stub().resolves(true) || stub().resolves(true)
+  const isHealthy = sandbox?.stub().resolves(true) || stub().resolves(true)
+  const destroy = sandbox?.stub().resolves() || stub().resolves()
 
   const mock: EventBridge = {
     defaultCommandTimeout: 30000,
     emitMessage,
-    registerServiceFunction,
+    registerCommand,
     registerSubscription,
-    unregisterServiceFunction,
+    unregisterCommand,
     unregisterSubscription,
     invoke,
     start,
     isReady,
+    isHealthy,
+    destroy,
   }
 
   return {
     stubs: {
       emitMessage,
-      registerServiceFunction,
+      registerCommand,
       registerSubscription,
-      unregisterServiceFunction,
+      unregisterCommand,
       unregisterSubscription,
       invoke,
       start,
+      isReady,
+      isHealthy,
+      destroy,
     },
     mock,
   }

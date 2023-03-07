@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 import type {
+  Complete,
   EBMessageType,
   InstanceId,
   PrincipalId,
@@ -307,6 +308,24 @@ export class SubscriptionDefinitionBuilder<
   }
 
   /**
+   * Return the transform input function
+   * @returns the input transform function if defined
+   */
+  getTransformInputFunction() {
+    if (!this.hooks.transformInput) {
+      return undefined
+    }
+
+    return this.hooks.transformInput.transformFunction as SubscriptionTransformInputHook<
+      ServiceClassType,
+      FunctionPayloadType,
+      FunctionParamsType,
+      MessagePayloadType,
+      MessageParamsType
+    >
+  }
+
+  /**
    * Set a transform output hook which will encode or transform the response payload.
    * Will be executed at very last step after function execution, output validation and after guard hooks.
    * This will change the type of output message payload.
@@ -332,6 +351,23 @@ export class SubscriptionDefinitionBuilder<
       MessageParamsType,
       PayloadOut,
       FunctionPayloadType,
+      FunctionParamsType,
+      FunctionResultType
+    >
+  }
+
+  /**
+   * Return the transform output function
+   * @returns the transform output function if defined
+   */
+  getTransformOutputFunction() {
+    if (!this.hooks.transformOutput) {
+      return undefined
+    }
+
+    return this.hooks.transformOutput.transformFunction as SubscriptionTransformOutputHook<
+      ServiceClassType,
+      FunctionResultType,
       FunctionParamsType,
       FunctionResultType
     >
@@ -499,15 +535,17 @@ export class SubscriptionDefinitionBuilder<
       throw new Error(`SubscriptionDefinitionBuilder: missing function implementation for ${this.subscriptionName}`)
     }
 
-    const subscription: SubscriptionDefinition<
-      ServiceClassType,
-      Record<string, unknown>,
-      MessagePayloadType,
-      MessageParamsType,
-      MessageResultType,
-      FunctionPayloadType,
-      FunctionParamsType,
-      FunctionResultType
+    const subscription: Complete<
+      SubscriptionDefinition<
+        ServiceClassType,
+        Record<string, unknown>,
+        MessagePayloadType,
+        MessageParamsType,
+        MessageResultType,
+        FunctionPayloadType,
+        FunctionParamsType,
+        FunctionResultType
+      >
     > = {
       subscriptionName: this.subscriptionName,
       subscriptionDescription: this.subscriptionDescription,

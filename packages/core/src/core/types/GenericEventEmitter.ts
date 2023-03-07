@@ -24,4 +24,8 @@ export class GenericEventEmitter<T extends EventMap> implements IEmitter<T> {
   emit<K extends EventKey<T>>(eventName: K, parameter?: T[K]) {
     this.emitter.emit(eventName, parameter)
   }
+
+  removeAllListeners() {
+    this.emitter.removeAllListeners()
+  }
 }
