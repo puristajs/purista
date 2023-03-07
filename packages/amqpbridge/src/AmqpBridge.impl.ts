@@ -15,7 +15,7 @@ import {
   getCleanedMessage,
   getNewCorrelationId,
   getNewEBMessageId,
-  getTimeoutPromise,
+  getNewTraceId,
   HandledError,
   InfoInvokeTimeoutPayload,
   InfoMessage,
@@ -50,7 +50,8 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
   protected connection?: Connection
   protected channel?: Channel
 
-  protected isHealthy = false
+  protected healthy = false
+  protected ready = false
 
   protected replyQueueName?: string
   protected serviceFunctions = new Map<
@@ -100,11 +101,12 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     }
   }
 
-  /**
-   * Indicates if the eventbridge is connected to message broker
-   */
   async isReady() {
-    return this.isHealthy
+    return this.ready
+  }
+
+  async isHealthy() {
+    return this.healthy
   }
 
   /**
@@ -136,28 +138,30 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     }
 
     this.connection.on('error', (err) => {
-      this.isHealthy = false
+      this.healthy = false
       this.logger.error({ err }, 'amqp lib error')
       this.emit('eventbridge-error', err)
     })
     this.connection.on('close', () => {
-      this.isHealthy = false
+      this.healthy = false
+      this.ready = false
       this.emit('eventbridge-disconnected')
       this.logger.info('amqp connection disconnected')
     })
 
-    this.emit('eventbridge-connected', undefined)
+    this.emit('eventbridge-connected')
     this.logger.info('connected to broker')
     this.channel = await this.connection.createChannel()
 
     this.channel.on('close', () => {
-      this.isHealthy = false
+      this.healthy = false
+      this.ready = false
       this.logger.info('channel closed')
       this.emit('eventbridge-disconnected')
     })
 
     this.channel.on('error', (err) => {
-      this.isHealthy = false
+      this.healthy = false
       this.logger.error({ err }, 'amqp channel error')
       this.emit('eventbridge-error', err)
     })
@@ -251,7 +255,8 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       },
       { noAck: true },
     )
-    this.isHealthy = true
+    this.healthy = true
+    this.ready = true
     this.logger.debug('ensured: response queue')
 
     this.logger.info('amqp event bridge ready')
@@ -329,8 +334,8 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
 
   async invoke<T>(
     input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
-    contentType = 'application/json',
-    contentEncoding = 'utf-8',
+    _contentType = 'application/json',
+    _contentEncoding = 'utf-8',
     commandTimeout: number = this.config.defaultCommandTimeout,
   ): Promise<T> {
     const context = await deserializeOtp(this.logger, input.otp)
@@ -348,13 +353,13 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
 
       const correlationId = getNewCorrelationId()
 
-      const command = Object.freeze({
+      const command: Command = Object.freeze({
         id: getNewEBMessageId(),
         instanceId: this.instanceId,
         correlationId: getNewCorrelationId(),
         timestamp: Date.now(),
         messageType: EBMessageType.Command,
-        traceId: input.traceId || span.spanContext().traceId,
+        traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
         otp: serializeOtp(),
         ...input,
       })
@@ -366,7 +371,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       const sendErrorInfoMsg = async () => {
         try {
           const payload: InfoInvokeTimeoutPayload = {
-            traceId: command.traceId,
+            traceId: command.traceId as string,
             correlationId,
             sender: command.sender,
             receiver: command.receiver,
@@ -404,16 +409,28 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       }
 
       const executionPromise = new Promise<T>((resolve, reject) => {
+        const timeout = setTimeout(() => {
+          const err = new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out', undefined, command.traceId)
+          this.logger.warn({ err })
+          rejectFn(err)
+        }, commandTimeout)
+
+        const resolveFn = (successPayload: T) => {
+          clearTimeout(timeout)
+          removeFromPending()
+          resolve(successPayload)
+        }
+
+        const rejectFn = (err: unknown) => {
+          clearTimeout(timeout)
+          removeFromPending()
+          reject(err)
+          sendErrorInfoMsg()
+        }
+
         this.pendingInvocations.set(command.correlationId, {
-          resolve: (successPayload: T) => {
-            removeFromPending()
-            resolve(successPayload)
-          },
-          reject: (err: unknown) => {
-            removeFromPending()
-            reject(err)
-            sendErrorInfoMsg()
-          },
+          resolve: resolveFn,
+          reject: rejectFn,
         })
       })
 
@@ -438,20 +455,20 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       }
       serializeOtpForAmqpHeader(headers)
 
-      const content = await this.encodeContent(command, contentType, contentEncoding)
+      const content = await this.encodeContent(command, 'application/json', 'utf-8')
 
       this.channel.publish(this.config.exchangeName, '', content, {
         messageId: command.id,
         timestamp: command.timestamp,
         correlationId: command.correlationId,
-        contentType,
-        contentEncoding,
+        contentType: 'application/json',
+        contentEncoding: 'utf-8',
         type: command.messageType,
         headers,
         replyTo: this.replyQueueName,
       })
 
-      return Promise.race([executionPromise, getTimeoutPromise(commandTimeout, command.traceId)])
+      return executionPromise
     })
   }
 
@@ -461,7 +478,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
    * @param cb the function to call if a matching command message arrives
    * @returns the id of command function queue
    */
-  async registerServiceFunction(
+  async registerCommand(
     address: EBMessageAddress,
     cb: (message: Command) => Promise<CommandSuccessResponse | CommandErrorResponse>,
   ): Promise<string> {
@@ -474,13 +491,13 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     const channel = await this.connection.createChannel()
 
     channel.on('close', () => {
-      this.isHealthy = false
+      this.healthy = false
       this.logger.info({ queueName }, 'channel for command closed')
       this.emit('eventbridge-disconnected')
     })
 
     channel.on('error', (err) => {
-      this.isHealthy = false
+      this.healthy = false
       this.logger.error({ err, queueName }, 'command channel error')
       this.emit('eventbridge-error', err)
     })
@@ -596,7 +613,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     return queueName
   }
 
-  async unregisterServiceFunction(address: EBMessageAddress): Promise<void> {
+  async unregisterCommand(address: EBMessageAddress): Promise<void> {
     try {
       const queueName = getCommandQueueName(address)
       const entry = this.serviceFunctions.get(queueName)
@@ -628,13 +645,13 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     const channel = await this.connection.createChannel()
 
     channel.on('close', () => {
-      this.isHealthy = false
+      this.healthy = false
       this.logger.info({ queueName }, 'channel for subscription closed')
       this.emit('eventbridge-disconnected')
     })
 
     channel.on('error', (err) => {
-      this.isHealthy = false
+      this.healthy = false
       this.logger.error({ err, queueName }, 'subscription channel error')
       this.emit('eventbridge-error', err)
     })
@@ -755,9 +772,9 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
 
   /**
    * Decode buffer into given type
-   * @param input
-   * @param contentType
-   * @param contentEncoding
+   * @param input the input buffer
+   * @param contentType the content type of buffer content
+   * @param contentEncoding the encoding type of buffer content
    * @returns
    */
   protected async decodeContent<T>(input: Buffer, contentType: string, contentEncoding: string): Promise<T> {
@@ -774,4 +791,6 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     }
     return decoder.decode(decrypted)
   }
+
+  async destroy() {}
 }

@@ -1,5 +1,5 @@
 import { getErrorMessageForCode } from '../helper'
-import type { CommandErrorResponse, ErrorResponse, StatusCode, TraceId } from '../types'
+import type { CommandErrorResponse, ErrorResponsePayload, StatusCode, TraceId } from '../types'
 
 /**
  * A handled error is an error which is handled or thrown by business logic.
@@ -23,10 +23,10 @@ export class HandledError extends Error {
 
   /**
    * Returns error response object
-   * @returns ErrorResponse
+   * @returns ErrorResponsePayload
    */
   getErrorResponse(traceId?: TraceId) {
-    const errorResponse: Readonly<ErrorResponse> = Object.freeze({
+    const errorResponse: Readonly<ErrorResponsePayload> = Object.freeze({
       status: this.errorCode,
       message: this.message,
       data: this.data,

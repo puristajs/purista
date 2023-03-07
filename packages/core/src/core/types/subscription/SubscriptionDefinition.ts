@@ -24,9 +24,13 @@ export type SubscriptionDefinition<
   FunctionParamsType = MessageParamsType,
   FunctionResultType = MessageResultType,
 > = {
+  /** the name of the subscription */
   subscriptionName: string
+  /** the description of the subscription */
   subscriptionDescription: string
+  /** the metadata of the subscription */
   metadata: MetadataType
+  /** the subscription function */
   call: SubscriptionFunction<
     ServiceClassType,
     MessagePayloadType,
@@ -35,22 +39,31 @@ export type SubscriptionDefinition<
     MessageParamsType,
     MessageResultType
   >
+  /** filter for messages produced by given sender */
   sender?: {
     serviceName?: string
     serviceVersion?: string
     serviceTarget?: string
   }
+  /** filter for messages consumed by given receiver */
   receiver?: {
     serviceName?: string
     serviceVersion?: string
     serviceTarget?: string
   }
+  /** filter for message type */
   messageType?: EBMessageType
-  eventName?: string // event to listen for
-  emitEventName?: string // event to emit if output payload ist set
+  /** filter forevent name */
+  eventName?: string
+  /** event name to be used for custom message if the subscription functions returns value  */
+  emitEventName?: string
+  /** filter for instance id */
   instanceId?: InstanceId
+  /** filter for principal id */
   principalId?: PrincipalId
+  /** subscription settings */
   settings: SubscriptionSettings
+  /** hooks of subscription */
   hooks: {
     transformInput?: {
       transformInputSchema: z.ZodType

@@ -1,3 +1,6 @@
+/**
+ * Opentelemetry tags set by PURISTA framework
+ */
 export enum PuristaSpanTag {
   SenderServiceName = 'purista.sender.name',
   SenderServiceVersion = 'purista.sender.version',

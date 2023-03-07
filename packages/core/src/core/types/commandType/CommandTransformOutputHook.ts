@@ -1,9 +1,8 @@
-import type { Logger } from '../Logger'
-import type { Command } from './Command'
-
 /**
  * This transform hook is executed after function output validation and AfterGuardHooks.
  */
+
+import { CommandTransformFunctionContext } from './CommandTransformFunctionContext'
 
 export type CommandTransformOutputHook<
   ServiceClassType,
@@ -13,7 +12,7 @@ export type CommandTransformOutputHook<
   ResponseOutput = unknown,
 > = (
   this: ServiceClassType,
-  context: { logger: Logger; message: Readonly<Command<MessagePayloadType, MessageParamsType>> },
+  context: CommandTransformFunctionContext<MessagePayloadType, MessageParamsType>,
   payload: Readonly<MessageResultType>,
   parameter: Readonly<MessageParamsType>,
 ) => Promise<ResponseOutput>

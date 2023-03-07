@@ -1,6 +1,6 @@
 import { ServiceInfoType } from '../types'
 
-const serviceNameRegex = /^[a-zA-Z0-9-_]*$/
+const serviceNameRegex = /^[a-zA-Z0-9-_]+$/
 const serviceVersionRegex = /^\d+$/
 export const ServiceInfoValidator = {
   set(obj: ServiceInfoType, prop: keyof ServiceInfoType, value: string) {

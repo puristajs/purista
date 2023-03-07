@@ -21,7 +21,12 @@ export const commandTransformInput = async <PayloadType = unknown, ParameterType
     {},
     undefined,
     async (_) => {
-      const transform = transformInput.transformFunction.bind(serviceInstance, { logger, message })
+      const transform = transformInput.transformFunction.bind(serviceInstance, {
+        logger,
+        message,
+        startActiveSpan: serviceInstance.startActiveSpan.bind(serviceInstance),
+        wrapInSpan: serviceInstance.wrapInSpan.bind(serviceInstance),
+      })
       const parameterInput = await serviceInstance.wrapInSpan(
         command.commandName + '.validateParameter',
         {},
