@@ -4,6 +4,9 @@ about: Create a report to help us improve
 title: "fix:"
 labels: bug
 assignees: sebastianwessel
+Prio: high
+Status: Todo
+Iteration: @current
 
 ---
 
