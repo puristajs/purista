@@ -24,6 +24,8 @@ export const getCommandMessageMock = <Payload = unknown, Parameter = unknown>(
     traceId: getNewTraceId(),
     instanceId: getNewInstanceId(),
     principalId: 'mocked-principal-id',
+    contentType: 'application/json',
+    contentEncoding: 'utf-8',
     sender: {
       serviceName: 'mocked_sender',
       serviceVersion: '1',

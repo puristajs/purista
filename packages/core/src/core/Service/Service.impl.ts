@@ -125,7 +125,11 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
    */
   async sendServiceInfo(infoType: InfoMessageType, target?: string, payload?: Record<string, unknown>) {
     return this.startActiveSpan('purista.sendServiceInfo', {}, undefined, async (span) => {
-      const info = createInfoMessage(infoType, this.info.serviceName, this.info.serviceVersion, target, payload)
+      const info = createInfoMessage(
+        infoType,
+        { serviceName: this.info.serviceName, serviceVersion: this.info.serviceVersion, serviceTarget: target || '' },
+        { payload },
+      )
 
       const result = await this.eventBridge.emitMessage(info)
 
@@ -145,12 +149,16 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       receiver: EBMessageAddress,
       eventPayload: unknown,
       parameter: unknown,
+      contentType = 'application/json',
+      contentEncoding = 'utf-8',
     ): Promise<any> => {
       const msg: Readonly<Omit<Command, 'correlationId' | 'id' | 'timestamp' | 'instanceId'>> = Object.freeze({
         messageType: EBMessageType.Command,
         traceId,
         sender,
         receiver,
+        contentType,
+        contentEncoding,
         payload: {
           payload: eventPayload,
           parameter,
@@ -171,12 +179,19 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       serviceTarget,
     }
 
-    const emitCustomEvent = async <Payload>(eventName: string, eventPayload?: Payload) => {
+    const emitCustomEvent = async <Payload>(
+      eventName: string,
+      eventPayload?: Payload,
+      contentType = 'application/json',
+      contentEncoding = 'utf-8',
+    ) => {
       await this.startActiveSpan('purista.emitEvent', {}, undefined, async (span) => {
         span.addEvent(eventName)
         const msg: Readonly<Omit<CustomMessage<Payload>, 'id' | 'instanceId' | 'timestamp'>> = Object.freeze({
           messageType: EBMessageType.CustomMessage,
           traceId,
+          contentType,
+          contentEncoding,
           sender,
           eventName,
           payload: eventPayload,
@@ -468,6 +483,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
                 subSpan.addEvent(subscription.emitEventName as string)
                 const resultMsg: Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> = {
                   messageType: EBMessageType.CustomMessage,
+                  contentType: subscription.contentType || 'application/json',
+                  contentEncoding: subscription.contentEncoding || 'utf-8',
                   sender: {
                     serviceName: this.serviceInfo.serviceName,
                     serviceVersion: this.serviceInfo.serviceVersion,

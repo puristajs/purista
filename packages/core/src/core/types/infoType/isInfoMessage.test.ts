@@ -5,7 +5,11 @@ import { isInfoMessage } from './isInfoMessage.impl'
 
 describe('isInfoMessage', () => {
   it('returns true if it is a info message', () => {
-    const message = createInfoMessage(EBMessageType.InfoServiceFunctionAdded, 'serviceName', '1')
+    const message = createInfoMessage(EBMessageType.InfoServiceFunctionAdded, {
+      serviceName: 'serviceName',
+      serviceVersion: '1',
+      serviceTarget: '',
+    })
     expect(isInfoMessage(message as EBMessage)).toBeTruthy()
   })
 

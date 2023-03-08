@@ -7,16 +7,14 @@ import * as api from '@opentelemetry/api'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import {
-  EBMessageAddress,
+  Command,
   EventBridge,
   HandledError,
   HttpExposedServiceMeta,
   initLogger,
   Logger,
-  PrincipalId,
   Service,
   StatusCode,
-  TraceId,
   UnhandledError,
 } from '@purista/core'
 import fastify, { FastifyInstance, HTTPMethods } from 'fastify'
@@ -94,7 +92,10 @@ export class HttpServerService extends Service<HttpServerConfig> {
           })
 
           addHeaders(span, reply)
-          const err = new HandledError(StatusCode.NotFound)
+          const err = new HandledError(StatusCode.NotFound, 'Route not found', {
+            method: request.method,
+            route: request.url,
+          })
 
           this.logger.error({ err, ...span.spanContext() }, 'Not found handler')
 
@@ -247,12 +248,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
   }
 
   async invoke<T>(
-    input: {
-      receiver: EBMessageAddress
-      payload: { payload: unknown; parameter: unknown }
-      traceId: TraceId
-      principalId?: PrincipalId
-    },
+    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId' | 'sender'>,
     endpoint: string,
   ): Promise<T> {
     return this.eventBridge.invoke<T>({

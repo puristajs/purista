@@ -43,7 +43,8 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, HttpExposedS
       data.http.openApi.operationId = convertToSnakeCase(`${serviceName}_v${version}_${data.http.openApi.operationId}`)
     }
 
-    const contentType = data.http.contentTypeResponse || 'application/json; charset=utf-8'
+    const contentType = data.contentTypeResponse || 'application/json'
+    const contentEncoding = data.contentEncodingResponse || 'utf-8'
 
     const getHandler = () => {
       return async (request: FastifyRequest, reply: FastifyReply, parameter: Record<string, unknown>) => {
@@ -67,6 +68,8 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, HttpExposedS
                 receiver: message.sender,
                 payload: { payload: request.body, parameter: parameterExtended },
                 principalId,
+                contentType,
+                contentEncoding,
               },
               `${method}:${url}`,
             )
@@ -79,7 +82,7 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, HttpExposedS
               })
             }
 
-            reply.header('content-type', contentType)
+            reply.header('content-type', `${contentType}; charset=${contentEncoding}`)
             if (response === undefined || response === '') {
               span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.NoContent)
               reply.statusCode = StatusCode.NoContent

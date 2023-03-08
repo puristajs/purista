@@ -148,15 +148,9 @@ describe('DefaultEventBridge', () => {
 
     eventBridge.registerSubscription(subscription, callback)
 
-    const message = createInfoMessage(
-      EBMessageType.InfoServiceFunctionAdded,
-      sender.serviceName,
-      sender.serviceVersion,
-      sender.serviceTarget,
-      {
-        some: 'data',
-      },
-    )
+    const message = createInfoMessage(EBMessageType.InfoServiceFunctionAdded, sender, {
+      payload: { some: 'data' },
+    })
 
     const emittedMessage = await eventBridge.emitMessage(message)
     await new Promise((resolve) => process.nextTick(resolve))

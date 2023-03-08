@@ -1,18 +1,20 @@
 import { generateSchema } from '@anatine/zod-openapi'
-import type { z } from 'zod'
+import type { z, ZodType } from 'zod'
 
 import type {
   CommandAfterGuardHook,
   CommandBeforeGuardHook,
   CommandDefinition,
+  CommandDefinitionMetadataBase,
   CommandFunction,
   CommandTransformInputHook,
   CommandTransformOutputHook,
   Complete,
+  ContentType,
   ServiceClass,
   StatusCode,
 } from '../core'
-import { ContentType, HttpExposedServiceMeta, QueryParameter } from '../httpserver'
+import { HttpExposedServiceMeta, QueryParameter } from '../httpserver'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl'
 import type { SupportedHttpMethod } from './types'
 
@@ -35,7 +37,11 @@ export class CommandDefinitionBuilder<
 > {
   private httpMetadata?: HttpExposedServiceMeta<FunctionParamsType>
   private inputSchema?: z.ZodType
+  private inputContentType: ContentType | undefined
+  private inputContentEncoding: string | undefined
   private outputSchema?: z.ZodType
+  private outputContentType: ContentType | undefined
+  private outputContentEncoding: string | undefined
   private parameterSchema?: z.ZodType
   private queryParameter: QueryParameter<FunctionParamsType>[] = []
 
@@ -116,7 +122,13 @@ export class CommandDefinitionBuilder<
    * @param inputSchema The schema validation for input payload
    * @returns CommandDefinitionBuilder
    */
-  addPayloadSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(inputSchema: z.ZodType<O, D, I>) {
+  addPayloadSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(
+    inputSchema: z.ZodType<O, D, I>,
+    inputContentType?: ContentType,
+    inputContentEncoding?: string,
+  ) {
+    this.inputContentType = inputContentType || this.inputContentType
+    this.inputContentEncoding = inputContentEncoding || this.inputContentEncoding
     this.inputSchema = inputSchema
     return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
@@ -135,7 +147,13 @@ export class CommandDefinitionBuilder<
    * @param outputSchema The schema validation for output payload
    * @returns CommandDefinitionBuilder
    */
-  addOutputSchema<I, D extends z.ZodTypeDef, O>(outputSchema: z.ZodType<O, D, I>) {
+  addOutputSchema<I, D extends z.ZodTypeDef, O>(
+    outputSchema: z.ZodType<O, D, I>,
+    outputContentType?: ContentType,
+    outputContentEncoding?: string,
+  ) {
+    this.outputContentType = outputContentType || this.outputContentType
+    this.outputContentEncoding = outputContentEncoding || this.outputContentEncoding
     this.outputSchema = outputSchema
     return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
@@ -399,16 +417,20 @@ export class CommandDefinitionBuilder<
   exposeAsHttpEndpoint(
     method: SupportedHttpMethod,
     path: string,
-    contentType: ContentType = 'application/json',
-    contentTypeResponse: ContentType = 'application/json',
+    contentTypeRequest?: ContentType,
+    contentEncodingRequest?: string,
+    contentTypeResponse?: ContentType,
+    contentEncodingResponse?: string,
   ) {
     this.httpMetadata = {
       expose: {
+        contentTypeRequest: contentTypeRequest || this.inputContentType || 'application/json',
+        contentEncodingRequest: contentEncodingRequest || this.inputContentEncoding || 'utf-8',
+        contentTypeResponse: contentTypeResponse || this.outputContentType || 'application/json',
+        contentEncodingResponse: contentEncodingResponse || this.outputContentEncoding || 'utf-8',
         http: {
           method,
           path,
-          contentType,
-          contentTypeResponse,
         },
       },
     }
@@ -465,7 +487,7 @@ export class CommandDefinitionBuilder<
     definition: Complete<
       CommandDefinition<
         ServiceClassType,
-        Record<string, unknown>,
+        CommandDefinitionMetadataBase,
         MessagePayloadType,
         MessageParamsType,
         MessageResultType,
@@ -479,7 +501,7 @@ export class CommandDefinitionBuilder<
       return definition
     }
 
-    const def = definition as Complete<
+    const def: Complete<
       CommandDefinition<
         ServiceClassType,
         HttpExposedServiceMeta<FunctionParamsType>,
@@ -490,16 +512,20 @@ export class CommandDefinitionBuilder<
         FunctionParamsType,
         FunctionResultType
       >
-    >
-
-    def.metadata.expose = {
-      ...(def.metadata.expose || {}),
-      ...this.httpMetadata.expose,
+    > = {
+      ...definition,
+      metadata: {
+        expose: {
+          ...this.httpMetadata.expose,
+        },
+      },
     }
 
-    const inputPayloadSchema: any = this.hooks.transformInput?.transformInputSchema || this.inputSchema
-    const inputParameterSchema: any = this.hooks.transformInput?.transformParameterSchema || this.parameterSchema
-    const outputPayloadSchema: any = this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
+    const inputPayloadSchema: ZodType | undefined = this.hooks.transformInput?.transformInputSchema || this.inputSchema
+    const inputParameterSchema: ZodType | undefined =
+      this.hooks.transformInput?.transformParameterSchema || this.parameterSchema
+    const outputPayloadSchema: ZodType | undefined =
+      this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
 
     def.metadata.expose.http.openApi = {
       description: this.commandDescription,
@@ -523,7 +549,7 @@ export class CommandDefinitionBuilder<
    */
   getDefinition(): CommandDefinition<
     ServiceClassType,
-    Record<string, unknown>,
+    CommandDefinitionMetadataBase,
     MessagePayloadType,
     MessageParamsType,
     MessageResultType,
@@ -536,10 +562,10 @@ export class CommandDefinitionBuilder<
     }
 
     const eventName = this.eventName
-    let definition: Complete<
+    const definition: Complete<
       CommandDefinition<
         ServiceClassType,
-        Record<string, unknown>,
+        CommandDefinitionMetadataBase,
         MessagePayloadType,
         MessageParamsType,
         MessageResultType,
@@ -550,7 +576,14 @@ export class CommandDefinitionBuilder<
     > = {
       commandName: this.commandName,
       commandDescription: this.commandDescription,
-      metadata: {},
+      metadata: {
+        expose: {
+          contentTypeRequest: this.inputContentType || 'application/json',
+          contentEncodingRequest: this.inputContentEncoding || 'utf-8',
+          contentTypeResponse: this.outputContentType || 'application/json',
+          contentEncodingResponse: this.outputContentEncoding || 'utf-8',
+        },
+      },
       eventName,
       call: getCommandFunctionWithValidation<
         ServiceClassType,
@@ -564,9 +597,7 @@ export class CommandDefinitionBuilder<
       hooks: this.hooks,
     }
 
-    definition = this.extendWithHttpMetadata(definition)
-
-    return definition
+    return this.extendWithHttpMetadata(definition)
   }
 
   /**

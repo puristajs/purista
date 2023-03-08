@@ -3,6 +3,7 @@ import type { z } from 'zod'
 import type { ServiceClass } from '../ServiceClass'
 import type { CommandAfterGuardHook } from './CommandAfterGuardHook'
 import type { CommandBeforeGuardHook } from './CommandBeforeGuardHook'
+import { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase'
 import type { CommandFunction } from './CommandFunction'
 import type { CommandTransformInputHook } from './CommandTransformInputHook'
 import type { CommandTransformOutputHook } from './CommandTransformOutputHook'
@@ -12,7 +13,7 @@ import type { CommandTransformOutputHook } from './CommandTransformOutputHook'
  */
 export type CommandDefinition<
   ServiceClassType extends ServiceClass = ServiceClass,
-  MetadataType = Record<string, unknown>,
+  MetadataType = CommandDefinitionMetadataBase,
   MessagePayloadType = unknown,
   MessageParamsType = unknown,
   MessageResultType = unknown,

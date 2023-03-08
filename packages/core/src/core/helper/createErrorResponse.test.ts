@@ -9,6 +9,8 @@ describe('createErrorResponse', () => {
     instanceId: 'myInstance',
     traceId: 'testTraceId',
     timestamp: Date.now(),
+    contentType: 'application/json',
+    contentEncoding: 'utf-8',
     correlationId: 'messageCorrelationId',
     principalId: 'messagePrincipalId',
     sender: {

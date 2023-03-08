@@ -1,16 +1,13 @@
 import type { SchemaObject } from 'openapi3-ts'
 
-import { StatusCode } from '../../core'
-import { ContentType } from './ContentType'
+import { CommandDefinitionMetadataBase, StatusCode } from '../../core'
 import { QueryParameter } from './QueryParameter'
 
-export type HttpExposedServiceMeta<ParameterType = {}> = {
+export type HttpExposedServiceMeta<ParameterType = {}> = CommandDefinitionMetadataBase & {
   expose: {
     http: {
       method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
       path: string
-      contentType?: ContentType // if not set we expect 'application/json'
-      contentTypeResponse?: ContentType // if not set we expect 'application/json'
       openApi?: {
         isSecure: boolean
         description: string

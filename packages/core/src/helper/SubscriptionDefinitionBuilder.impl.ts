@@ -2,6 +2,7 @@ import { z } from 'zod'
 
 import type {
   Complete,
+  ContentType,
   EBMessageType,
   InstanceId,
   PrincipalId,
@@ -80,8 +81,9 @@ export class SubscriptionDefinitionBuilder<
   >
 
   private eventName?: string
-
   private emitEventName?: string
+  private contentType: ContentType = 'application/json'
+  private contentEncoding = 'utf-8'
 
   private principalId?: PrincipalId
 
@@ -230,8 +232,15 @@ export class SubscriptionDefinitionBuilder<
    * @param outputSchema the validation schema for the output payload
    * @returns SubscriptionDefinitionBuilder
    */
-  addOutputSchema<I, D extends z.ZodTypeDef, O>(eventName: string, outputSchema: z.ZodType<O, D, I>) {
+  addOutputSchema<I, D extends z.ZodTypeDef, O>(
+    eventName: string,
+    outputSchema: z.ZodType<O, D, I>,
+    contentType = 'application/json',
+    contentEncoding = 'utf-8',
+  ) {
     this.emitEventName = eventName
+    this.contentEncoding = contentEncoding
+    this.contentType = contentType
     this.outputSchema = outputSchema
     return this as unknown as SubscriptionDefinitionBuilder<
       ServiceClassType,
@@ -553,6 +562,8 @@ export class SubscriptionDefinitionBuilder<
       settings: this.settings,
       eventName: this.eventName,
       emitEventName: this.emitEventName,
+      contentEncoding: this.contentEncoding,
+      contentType: this.contentType,
       principalId: this.principalId,
       instanceId: this.instanceId,
       call: getSubscriptionFunctionWithValidation<

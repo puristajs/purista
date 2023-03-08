@@ -11,13 +11,7 @@ describe('createInfoMessage', () => {
       serviceTarget: 'senderServiceTarget',
     }
 
-    const result = createInfoMessage(
-      EBMessageType.InfoServiceInit,
-      sender.serviceName,
-      sender.serviceVersion,
-      sender.serviceTarget,
-      payload,
-    )
+    const result = createInfoMessage(EBMessageType.InfoServiceInit, sender, { payload })
 
     expect(result.messageType).toBe(EBMessageType.InfoServiceInit)
     expect(result.sender).toStrictEqual(sender)
