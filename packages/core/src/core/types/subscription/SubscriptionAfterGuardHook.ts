@@ -7,11 +7,13 @@ import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext'
  */
 export type SubscriptionAfterGuardHook<
   ServiceClassType = ServiceClass,
+  FunctionResultType = unknown,
   FunctionPayloadOutputType = unknown,
   FunctionParameterType = unknown,
 > = (
   this: ServiceClassType,
   context: SubscriptionFunctionContext,
+  result: Readonly<FunctionResultType>,
   payload: Readonly<FunctionPayloadOutputType>,
   parameter: Readonly<FunctionParameterType>,
 ) => Promise<void>

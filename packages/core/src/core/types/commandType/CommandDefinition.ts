@@ -18,6 +18,7 @@ export type CommandDefinition<
   MessageResultType = unknown,
   FunctionPayloadType = MessagePayloadType,
   FunctionParamsType = MessageParamsType,
+  FunctionResultType = unknown,
 > = {
   commandName: string
   commandDescription: string
@@ -37,14 +38,27 @@ export type CommandDefinition<
       transformParameterSchema: z.ZodType
       transformFunction: CommandTransformInputHook<ServiceClassType, MessagePayloadType, MessageParamsType>
     }
-    beforeGuard?: CommandBeforeGuardHook<
-      ServiceClassType,
-      MessagePayloadType,
-      MessageParamsType,
-      FunctionPayloadType,
-      FunctionParamsType
-    >[]
-    afterGuard?: CommandAfterGuardHook<ServiceClassType, MessageResultType, MessagePayloadType, MessageParamsType>[]
+    beforeGuard?: Record<
+      string,
+      CommandBeforeGuardHook<
+        ServiceClassType,
+        MessagePayloadType,
+        MessageParamsType,
+        FunctionPayloadType,
+        FunctionParamsType
+      >
+    >
+    afterGuard?: Record<
+      string,
+      CommandAfterGuardHook<
+        ServiceClassType,
+        MessagePayloadType,
+        MessageParamsType,
+        FunctionResultType,
+        FunctionPayloadType,
+        FunctionParamsType
+      >
+    >
     transformOutput?: {
       transformOutputSchema: z.ZodType
       transformFunction: CommandTransformOutputHook<

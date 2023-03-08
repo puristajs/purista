@@ -8,10 +8,8 @@ import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext'
  */
 export type SubscriptionBeforeGuardHook<
   ServiceClassType = ServiceClass,
-  MessagePayloadType = unknown,
-  MessageParamsType = unknown,
-  FunctionPayloadType = MessagePayloadType,
-  FunctionParamsType = MessageParamsType,
+  FunctionPayloadType = unknown,
+  FunctionParamsType = unknown,
 > = (
   this: ServiceClassType,
   context: SubscriptionFunctionContext,

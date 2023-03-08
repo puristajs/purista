@@ -13,5 +13,8 @@ export type CommandDefinitionList<ServiceClassType extends ServiceClass> = Comma
   Record<string, unknown>,
   any,
   any,
+  any,
+  any,
+  any,
   any
 >[]
