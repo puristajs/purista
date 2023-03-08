@@ -30,13 +30,10 @@ export const getSubscriptionFunctionWithValidation = function <
   inputPayloadSchema: z.ZodType<FunctionPayloadType, z.ZodTypeDef, MessagePayloadType> | undefined,
   inputParameterSchema: z.ZodType<FunctionParamsType, z.ZodTypeDef, MessageParamsType> | undefined,
   outputPayloadSchema: z.ZodType<MessageResultType, z.ZodTypeDef, FunctionResultType> | undefined,
-  beforeGuards: SubscriptionBeforeGuardHook<
-    ServiceClassType,
-    MessagePayloadType,
-    MessageParamsType,
-    FunctionPayloadType,
-    FunctionParamsType
-  >[] = [],
+  beforeGuards: Record<
+    string,
+    SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType>
+  > = {},
 ): SubscriptionFunction<
   ServiceClassType,
   MessagePayloadType,
@@ -90,13 +87,17 @@ export const getSubscriptionFunctionWithValidation = function <
       })
     }
 
-    if (beforeGuards.length) {
+    if (Object.keys(beforeGuards).length) {
       await startActiveSpan('beforeGuardHooks', {}, undefined, async () => {
-        const guards = beforeGuards.map((hook, index) =>
-          wrapInSpan('beforeGuardHook.' + index, {}, async (_subSpan) => {
-            return hook.bind(this, context)
-          }),
-        )
+        const guards: Promise<void>[] = []
+
+        for (const [name, hook] of Object.entries(beforeGuards)) {
+          const guardPromise = wrapInSpan('beforeGuardHook.' + name, {}, async (_subSpan) => {
+            return hook.bind(this, context, safePayload, safeParams)()
+          })
+          guards.push(guardPromise)
+        }
+
         await Promise.all(guards)
       })
     }

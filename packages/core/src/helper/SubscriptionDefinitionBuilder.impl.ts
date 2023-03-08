@@ -42,22 +42,19 @@ export class SubscriptionDefinitionBuilder<
       transformParameterSchema: z.ZodType
       transformFunction: SubscriptionTransformInputHook<ServiceClassType, any, any, any, any>
     }
-    beforeGuard: SubscriptionBeforeGuardHook<
-      ServiceClassType,
-      MessagePayloadType,
-      MessageParamsType,
-      FunctionPayloadType,
-      FunctionParamsType
-    >[]
-    afterGuard: SubscriptionAfterGuardHook<ServiceClassType, FunctionResultType, FunctionParamsType>[]
+    beforeGuard: Record<string, SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType>>
+    afterGuard: Record<
+      string,
+      SubscriptionAfterGuardHook<ServiceClassType, FunctionResultType, FunctionPayloadType, FunctionParamsType>
+    >
     transformOutput?: {
       transformOutputSchema: z.ZodType
       transformFunction: SubscriptionTransformOutputHook<ServiceClassType, FunctionResultType, FunctionParamsType, any>
     }
   } = {
     transformInput: undefined,
-    beforeGuard: [],
-    afterGuard: [],
+    beforeGuard: {},
+    afterGuard: {},
     transformOutput: undefined,
   }
 
@@ -379,16 +376,13 @@ export class SubscriptionDefinitionBuilder<
    * @param beforeGuards Before guard function
    * @returns SubscriptionDefinitionBuilder
    */
-  setBeforeGuardHook(
-    ...beforeGuards: SubscriptionBeforeGuardHook<
-      ServiceClassType,
-      MessagePayloadType,
-      MessageParamsType,
-      FunctionPayloadType,
-      FunctionParamsType
-    >[]
+  setBeforeGuardHooks(
+    beforeGuards: Record<
+      string,
+      SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType>
+    >,
   ) {
-    this.hooks.beforeGuard.push(...beforeGuards)
+    this.hooks.beforeGuard = { ...this.hooks.beforeGuard, ...beforeGuards }
     return this
   }
 
@@ -398,10 +392,13 @@ export class SubscriptionDefinitionBuilder<
    * @param afterGuard After guard function
    * @returns SubscriptionDefinitionBuilder
    */
-  setAfterGuardHook(
-    ...afterGuard: SubscriptionAfterGuardHook<ServiceClassType, FunctionResultType, FunctionParamsType>[]
+  setAfterGuardHooks(
+    afterGuards: Record<
+      string,
+      SubscriptionAfterGuardHook<ServiceClassType, FunctionResultType, FunctionPayloadType, FunctionParamsType>
+    >,
   ) {
-    this.hooks.afterGuard.push(...afterGuard)
+    this.hooks.afterGuard = { ...this.hooks.afterGuard, ...afterGuards }
     return this
   }
 

@@ -247,25 +247,29 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           },
         )
 
-        if (command.hooks.afterGuard?.length) {
+        if (Object.keys(command.hooks.afterGuard || {}).length) {
           const guards = command.hooks.afterGuard
 
           await this.startActiveSpan(command.commandName + '.afterGuardHooks', {}, undefined, async () => {
-            const afterGuards = guards.map((hook, index) =>
-              this.wrapInSpan(command.commandName + '.afterGuardHook.' + index, {}, async (_subSpan) => {
-                const context: CommandFunctionContext = {
-                  logger,
-                  message,
-                  emit: this.getEmitFunction(command.commandName, traceId, message.principalId),
-                  invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId),
-                  wrapInSpan: this.wrapInSpan.bind(this),
-                  startActiveSpan: this.startActiveSpan.bind(this),
-                }
+            const guardsPromises: Promise<void>[] = []
 
-                return hook.bind(this, context)
-              }),
-            )
-            await Promise.all(afterGuards)
+            for (const [name, hook] of Object.entries(guards || {})) {
+              const context: CommandFunctionContext = {
+                logger,
+                message,
+                emit: this.getEmitFunction(command.commandName, traceId, message.principalId),
+                invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId),
+                wrapInSpan: this.wrapInSpan.bind(this),
+                startActiveSpan: this.startActiveSpan.bind(this),
+              }
+
+              const guardPromise = this.wrapInSpan('afterGuardHook.' + name, {}, async (_subSpan) => {
+                return hook.bind(this)(context, result as Readonly<unknown>, payload, parameter)
+              })
+              guardsPromises.push(guardPromise)
+            }
+
+            await Promise.all(guardsPromises)
           })
         }
 
@@ -410,25 +414,29 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
             },
           )
 
-          if (subscription.hooks.afterGuard?.length) {
+          if (Object.keys(subscription.hooks.afterGuard || {}).length) {
             const guards = subscription.hooks.afterGuard
 
             await this.startActiveSpan(subscription.subscriptionName + '.afterGuardHooks', {}, undefined, async () => {
-              const afterGuards = guards.map((hook, index) =>
-                this.wrapInSpan(subscription.subscriptionName + '.afterGuardHook.' + index, {}, async (_subSpan) => {
-                  const context: SubscriptionFunctionContext = {
-                    logger,
-                    message,
-                    emit: this.getEmitFunction(subscription.subscriptionName, traceId, message.principalId),
-                    invoke: this.getInvokeFunction(subscription.subscriptionName, traceId, message.principalId),
-                    wrapInSpan: this.wrapInSpan.bind(this),
-                    startActiveSpan: this.startActiveSpan.bind(this),
-                  }
+              const guardsPromises: Promise<void>[] = []
 
-                  return hook.bind(this, context)
-                }),
-              )
-              await Promise.all(afterGuards)
+              for (const [name, hook] of Object.entries(guards || {})) {
+                const context: SubscriptionFunctionContext = {
+                  logger,
+                  message,
+                  emit: this.getEmitFunction(subscription.subscriptionName, traceId, message.principalId),
+                  invoke: this.getInvokeFunction(subscription.subscriptionName, traceId, message.principalId),
+                  wrapInSpan: this.wrapInSpan.bind(this),
+                  startActiveSpan: this.startActiveSpan.bind(this),
+                }
+
+                const guardPromise = this.wrapInSpan('afterGuardHook.' + name, {}, async (_subSpan) => {
+                  return hook.bind(this)(context, result as Readonly<unknown>, payload, parameter)
+                })
+                guardsPromises.push(guardPromise)
+              }
+
+              await Promise.all(guardsPromises)
             })
           }
 

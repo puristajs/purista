@@ -70,8 +70,11 @@ export type SubscriptionDefinition<
       transformParameterSchema: z.ZodType
       transformFunction: SubscriptionTransformInputHook<ServiceClassType, MessagePayloadType, MessageParamsType>
     }
-    beforeGuard?: SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType>[]
-    afterGuard?: SubscriptionAfterGuardHook<ServiceClassType, FunctionResultType, FunctionParamsType>[]
+    beforeGuard?: Record<string, SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType>>
+    afterGuard?: Record<
+      string,
+      SubscriptionAfterGuardHook<ServiceClassType, FunctionResultType, FunctionPayloadType, FunctionParamsType>
+    >
     transformOutput?: {
       transformOutputSchema: z.ZodType
       transformFunction: SubscriptionTransformOutputHook<ServiceClassType, FunctionResultType, FunctionParamsType, any>

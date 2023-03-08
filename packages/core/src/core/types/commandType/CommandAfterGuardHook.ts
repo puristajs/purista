@@ -7,13 +7,15 @@ import type { CommandFunctionContext } from './CommandFunctionContext'
  */
 export type CommandAfterGuardHook<
   ServiceClassType = ServiceClass,
-  ResultType = unknown,
-  PayloadType = unknown,
-  ParamsType = unknown,
+  MessagePayloadType = unknown,
+  MessageParamsType = unknown,
+  FunctionResultType = unknown,
+  FunctionPayloadType = unknown,
+  FunctionParamsType = unknown,
 > = (
   this: ServiceClassType,
-  context: CommandFunctionContext<PayloadType, ParamsType>,
-  result: Readonly<ResultType>,
-  input: Readonly<PayloadType>,
-  parameter: Readonly<ParamsType>,
+  context: CommandFunctionContext<MessagePayloadType, MessageParamsType>,
+  result: Readonly<FunctionResultType>,
+  input: Readonly<FunctionPayloadType>,
+  parameter: Readonly<FunctionParamsType>,
 ) => Promise<void>
