@@ -33,11 +33,11 @@ export class CommandDefinitionBuilder<
   FunctionParamsType = MessageParamsType,
   FunctionResultType = MessageResultType,
 > {
-  private httpMetadata?: HttpExposedServiceMeta
+  private httpMetadata?: HttpExposedServiceMeta<FunctionParamsType>
   private inputSchema?: z.ZodType
   private outputSchema?: z.ZodType
   private parameterSchema?: z.ZodType
-  private queryParameter: QueryParameter[] = []
+  private queryParameter: QueryParameter<FunctionParamsType>[] = []
 
   private tags: string[] = []
 
@@ -176,7 +176,7 @@ export class CommandDefinitionBuilder<
    * @param queryParams Add one or more query parameter definitions
    * @returns CommandDefinitionBuilder
    */
-  addQueryParameters(...queryParams: QueryParameter[]) {
+  addQueryParameters(...queryParams: QueryParameter<FunctionParamsType>[]) {
     this.queryParameter.push(...queryParams)
     return this
   }
@@ -479,7 +479,7 @@ export class CommandDefinitionBuilder<
     const def = definition as Complete<
       CommandDefinition<
         ServiceClassType,
-        HttpExposedServiceMeta,
+        HttpExposedServiceMeta<FunctionParamsType>,
         MessagePayloadType,
         MessageParamsType,
         MessageResultType,
