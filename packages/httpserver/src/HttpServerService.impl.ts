@@ -41,7 +41,7 @@ import { BeforeResponseHook, HttpServerConfig } from './types'
 export class HttpServerService extends Service<HttpServerConfig> {
   server?: FastifyInstance
 
-  routeDefinitions: HttpExposedServiceMeta[] = []
+  routeDefinitions: HttpExposedServiceMeta<Record<string, unknown>>[] = []
 
   routes = new Trouter()
 
