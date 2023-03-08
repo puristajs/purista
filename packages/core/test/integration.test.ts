@@ -16,6 +16,12 @@ import {
 describe('integration test', () => {
   const sandbox = createSandbox()
 
+  const beforeCommandGuardHookStub = sandbox.stub()
+  const afterCommandGuardHookStub = sandbox.stub()
+
+  const beforeSubscriptionGuardHookStub = sandbox.stub()
+  const afterSubscriptionGuardHookStub = sandbox.stub()
+
   const serviceOneInfo: ServiceInfoType = {
     serviceName: 'ServiceOne',
     serviceVersion: '1',
@@ -87,9 +93,6 @@ describe('integration test', () => {
   })
 
   describe('creates a command for service one', () => {
-    const beforeGuardHookStub = sandbox.stub()
-    const afterGuardHookStub = sandbox.stub()
-
     const commandOneDefinitionBuilder = serviceOneBuilder
       .getCommandBuilder('commandOne', 'command one at service one')
       .setSuccessEventName('commandOneEmitted')
@@ -123,11 +126,15 @@ describe('integration test', () => {
 
         return JSON.stringify(payload)
       })
-      .setBeforeGuardHook(async (_context, payload, parameter) => {
-        beforeGuardHookStub(payload, parameter)
+      .setBeforeGuardHooks({
+        first: async (_context, payload, parameter) => {
+          beforeCommandGuardHookStub(payload, parameter)
+        },
       })
-      .setAfterGuardHook(async (_context, result) => {
-        afterGuardHookStub(result)
+      .setAfterGuardHooks({
+        some: async (_context, result, payload, parameter) => {
+          afterCommandGuardHookStub(result, result, payload, parameter)
+        },
       })
       .exposeAsHttpEndpoint('POST', 'command-one')
       .setOpenApiSummary('more description')
@@ -136,7 +143,7 @@ describe('integration test', () => {
       .addOpenApiTags('public')
       .disableHttpSecurity()
       .enableHttpSecurity()
-      .addQueryParameters({ required: false, name: 'search' })
+      .addQueryParameters({ required: false, name: 'param' })
       .setCommandFunction(async (context, payload, parameter) => {
         const address = {
           serviceName: serviceTwoInfo.serviceName,
@@ -265,9 +272,6 @@ describe('integration test', () => {
   })
 
   describe('creates a subscription for service one', () => {
-    const beforeGuardHookStub = sandbox.stub()
-    const afterGuardHookStub = sandbox.stub()
-
     const subscriptionOneBuilder = serviceOneBuilder
       .getSubscriptionBuilder('subscriptionOne', 'a subscription in service one')
       .receivedBy(serviceOneInfo.serviceName, serviceOneInfo.serviceVersion, 'commandOne')
@@ -275,11 +279,15 @@ describe('integration test', () => {
       .addPayloadSchema(commandOnePayloadSchema)
       .addParameterSchema(commandParameterSchema)
       .addOutputSchema('subscriptionOneConsumed', subscriptionOneSchema)
-      .setBeforeGuardHook(async (_context, payload, parameter) => {
-        beforeGuardHookStub(payload, parameter)
+      .setBeforeGuardHooks({
+        one: async (_context, payload, parameter) => {
+          beforeSubscriptionGuardHookStub(payload, parameter)
+        },
       })
-      .setAfterGuardHook(async (_context, result) => {
-        afterGuardHookStub(result)
+      .setAfterGuardHooks({
+        two: async (_context, result, payload, parameter) => {
+          afterSubscriptionGuardHookStub(result, result, payload, parameter)
+        },
       })
       .setTransformInput(z.string(), commandParameterSchema, async (context, payload, parameter) => {
         const response = JSON.parse(payload) as CommandOnePayload
@@ -480,5 +488,11 @@ describe('integration test', () => {
     expect(logger.stubs.fatal.called).toBeFalsy()
     expect(logger.stubs.error.called).toBeFalsy()
     expect(logger.stubs.warn.called).toBeFalsy()
+
+    expect(beforeCommandGuardHookStub.called).toBeTruthy()
+    expect(afterCommandGuardHookStub.called).toBeTruthy()
+
+    expect(beforeSubscriptionGuardHookStub).toBeTruthy()
+    expect(afterSubscriptionGuardHookStub.called).toBeTruthy()
   })
 })
