@@ -1,4 +1,4 @@
-export type QueryParameter = {
+export type QueryParameter<ParameterType = {}> = {
   required: boolean
-  name: string
+  name: keyof ParameterType
 }

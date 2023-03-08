@@ -18,7 +18,7 @@ import { Methods } from 'trouter'
 import { addHeaders } from '../../helper/addHeaders.impl'
 import { HttpServerService } from '../../HttpServerService.impl'
 
-export default new SubscriptionDefinitionBuilder<HttpServerService, HttpExposedServiceMeta>(
+export default new SubscriptionDefinitionBuilder<HttpServerService, HttpExposedServiceMeta<Record<string, unknown>>>(
   'serviceCommandsToRestApi',
   'listen for InfoServiceFunctionAdded messages and adds endpoints for service functions if needed',
 )

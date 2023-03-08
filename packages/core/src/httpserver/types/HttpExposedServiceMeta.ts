@@ -4,7 +4,7 @@ import { StatusCode } from '../../core'
 import { ContentType } from './ContentType'
 import { QueryParameter } from './QueryParameter'
 
-export type HttpExposedServiceMeta = {
+export type HttpExposedServiceMeta<ParameterType = {}> = {
   expose: {
     http: {
       method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
@@ -18,7 +18,7 @@ export type HttpExposedServiceMeta = {
         tags?: string[]
         inputPayload?: SchemaObject
         parameter?: SchemaObject
-        query?: QueryParameter[]
+        query?: QueryParameter<ParameterType>[]
         outputPayload?: SchemaObject
         additionalStatusCodes?: StatusCode[]
         operationId?: string
