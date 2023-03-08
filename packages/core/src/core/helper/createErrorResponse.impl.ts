@@ -33,6 +33,8 @@ export const createErrorResponse = (
     id: originalEBMessage.id,
     isHandledError,
     traceId,
+    contentType: 'application/json',
+    contentEncoding: 'utf-8',
     correlationId: originalEBMessage.correlationId,
     timestamp: Date.now(),
     messageType: EBMessageType.CommandErrorResponse,

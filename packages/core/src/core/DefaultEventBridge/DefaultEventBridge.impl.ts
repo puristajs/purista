@@ -9,6 +9,7 @@ import { HandledError } from '../Error/HandledError.impl'
 import { UnhandledError } from '../Error/UnhandledError.impl'
 import {
   createErrorResponse,
+  createInfoMessage,
   deserializeOtp,
   getCleanedMessage,
   getCommandQueueName,
@@ -319,8 +320,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
 
   async invoke<T>(
     input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
-    _contentType = 'application/json',
-    _contentEncoding = 'utf-8',
     commandTimeout = this.config.defaultCommandTimeout,
   ): Promise<T> {
     const context = await deserializeOtp(this.logger, input.otp)
@@ -352,18 +351,18 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
             timestamp: command.timestamp,
           }
 
-          const infoMessage: InfoMessage = {
-            id: getNewEBMessageId(),
-            instanceId: command.instanceId,
-            principalId: command.principalId,
-            traceId: command.traceId,
-            correlationId: command.correlationId,
-            timestamp: Date.now(),
-            messageType: EBMessageType.InfoInvokeTimeout,
-            payload,
-            sender: input.sender,
-            otp: command.otp || serializeOtp(),
-          }
+          const infoMessage: Omit<InfoMessage, 'instanceId'> = createInfoMessage(
+            EBMessageType.InfoInvokeTimeout,
+            input.sender,
+            {
+              instanceId: command.instanceId,
+              principalId: command.principalId,
+              traceId: command.traceId,
+              correlationId: command.correlationId,
+              payload,
+              otp: command.otp || serializeOtp(),
+            },
+          )
 
           await this.emitMessage(infoMessage)
         } catch (error) {

@@ -1,5 +1,6 @@
 import type { ServiceClass } from '../ServiceClass'
 import type { CommandDefinition } from './CommandDefinition'
+import { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase'
 
 /**
  * Helper type for creating list of service commands to be passed as input to service class
@@ -10,7 +11,7 @@ import type { CommandDefinition } from './CommandDefinition'
  */
 export type CommandDefinitionList<ServiceClassType extends ServiceClass> = CommandDefinition<
   ServiceClassType,
-  Record<string, unknown>,
+  CommandDefinitionMetadataBase,
   any,
   any,
   any,

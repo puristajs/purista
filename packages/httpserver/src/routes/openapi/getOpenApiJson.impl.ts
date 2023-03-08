@@ -92,7 +92,8 @@ export const getOpenApiJson = function (this: HttpServerService): RouteOptions {
     const findPathParamsRegex = /:[^:/]+/gm
 
     this.routeDefinitions.forEach((entry) => {
-      const definition = entry.expose.http
+      const expose = entry.expose
+      const definition = expose.http
 
       let m
       const routeParams: string[] = []
@@ -175,7 +176,7 @@ export const getOpenApiJson = function (this: HttpServerService): RouteOptions {
       if (['POST', 'PATCH', 'PUT'].includes(definition.method)) {
         requestBody = {
           content: {
-            [definition.contentType || 'application/json']: {
+            [expose.contentTypeRequest || 'application/json']: {
               schema: definition.openApi?.inputPayload,
             },
           },
@@ -304,7 +305,7 @@ export const getOpenApiJson = function (this: HttpServerService): RouteOptions {
             [definition.openApi?.outputPayload ? 200 : 204]: {
               description: definition.openApi?.description,
               content: {
-                [definition.contentTypeResponse || 'application/json']: {
+                [expose.contentTypeResponse || 'application/json']: {
                   schema: definition.openApi?.outputPayload,
                 },
               },

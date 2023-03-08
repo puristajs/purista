@@ -9,6 +9,8 @@ import type { StatusCode } from '../StatusCode.enum'
  */
 export type CommandErrorResponse = {
   messageType: EBMessageType.CommandErrorResponse
+  contentType: 'application/json'
+  contentEncoding: 'utf-8'
   isHandledError: boolean
   correlationId: CorrelationId
   sender: EBMessageAddress

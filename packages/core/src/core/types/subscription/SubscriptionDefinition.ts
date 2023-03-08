@@ -1,5 +1,6 @@
 import type { z } from 'zod'
 
+import { ContentType } from '../ContentType'
 import { EBMessageType } from '../EBMessageType.enum'
 import { InstanceId } from '../InstanceId'
 import { PrincipalId } from '../PrincipalId'
@@ -57,6 +58,10 @@ export type SubscriptionDefinition<
   eventName?: string
   /** event name to be used for custom message if the subscription functions returns value  */
   emitEventName?: string
+  /** the content type if a response is sent as custom event */
+  contentType?: ContentType
+  /** the content encoding if a response is sent as custom event */
+  contentEncoding?: string
   /** filter for instance id */
   instanceId?: InstanceId
   /** filter for principal id */

@@ -16,6 +16,8 @@ export const getCustomMessageMessageMock = <PayloadType>(
   const customMessage: Readonly<CustomMessage<PayloadType>> = Object.freeze({
     id: getNewEBMessageId(),
     timestamp: Date.now(),
+    contentType: 'application/json',
+    contentEncoding: 'utf-8',
     messageType: EBMessageType.CustomMessage,
     correlationId: getNewCorrelationId(),
     traceId: getNewTraceId(),
