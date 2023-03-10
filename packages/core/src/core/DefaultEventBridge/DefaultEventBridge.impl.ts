@@ -9,7 +9,6 @@ import { HandledError } from '../Error/HandledError.impl'
 import { UnhandledError } from '../Error/UnhandledError.impl'
 import {
   createErrorResponse,
-  createInfoMessage,
   deserializeOtp,
   getCleanedMessage,
   getCommandQueueName,
@@ -31,8 +30,6 @@ import {
   EventBridge,
   EventBridgeConfig,
   EventBridgeEnsuredDefaults,
-  InfoInvokeTimeoutPayload,
-  InfoMessage,
   isCommand,
   isCommandErrorResponse,
   isCommandResponse,
@@ -341,41 +338,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
         this.pendingInvocations.delete(correlationId)
       }
 
-      const sendErrorInfoMsg = async () => {
-        try {
-          const payload: InfoInvokeTimeoutPayload = {
-            traceId: command.traceId as string,
-            correlationId,
-            sender: command.sender,
-            receiver: command.receiver,
-            timestamp: command.timestamp,
-          }
-
-          const infoMessage: Omit<InfoMessage, 'instanceId'> = createInfoMessage(
-            EBMessageType.InfoInvokeTimeout,
-            input.sender,
-            {
-              instanceId: command.instanceId,
-              principalId: command.principalId,
-              traceId: command.traceId,
-              correlationId: command.correlationId,
-              payload,
-              otp: command.otp || serializeOtp(),
-            },
-          )
-
-          await this.emitMessage(infoMessage)
-        } catch (error) {
-          const err = new UnhandledError(StatusCode.BadGateway, 'failed to send InfoInvokeTimeout message', {
-            traceId: command.traceId,
-            correlationId,
-            error,
-          })
-          this.logger.error({ err, ...span.spanContext() }, `failed to send InfoInvokeTimeout message`)
-          this.emit('eventbridge-error', err)
-        }
-      }
-
       const executionPromise = new Promise<T>((resolve, reject) => {
         const timeout = setTimeout(() => {
           const err = new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out', undefined, command.traceId)
@@ -393,7 +355,6 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
           clearTimeout(timeout)
           removeFromPending()
           reject(err)
-          sendErrorInfoMsg()
         }
 
         this.pendingInvocations.set(command.correlationId, {
