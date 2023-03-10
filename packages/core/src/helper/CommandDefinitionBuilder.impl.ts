@@ -172,6 +172,10 @@ export class CommandDefinitionBuilder<
     >
   }
 
+  /**
+   * Mark this endpoint/command as deprecated
+   * @returns CommandDefinitionBuilder
+   */
   markAsDeprecated() {
     this.deprecated = true
     return this
