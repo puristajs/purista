@@ -21,6 +21,7 @@ export class DefaultStateStore extends StateStoreBaseClass<DefaultStateStoreConf
     this.healthy = true
     this.started = true
     this.logger.info(`Statestore ${this.name} started`)
+    this.logger.warn(`DefaultStateStore stores values in memory and also only per instance!`)
   }
 
   async destroy() {
