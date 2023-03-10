@@ -3,6 +3,7 @@ import { SpanStatusCode, trace } from '@opentelemetry/api'
 import { puristaVersion } from '../../version'
 import { DefaultConfigStore } from '../DefaultConfigStore'
 import { DefaultSecretStore } from '../DefaultSecretStore'
+import { DefaultStateStore } from '../DefaultStateStore'
 import { HandledError } from '../Error/HandledError.impl'
 import { UnhandledError } from '../Error/UnhandledError.impl'
 import {
@@ -77,6 +78,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       spanProcessor: config.spanProcessor,
       secretStore: config.secretStore || new DefaultSecretStore(),
       configStore: config.configStore || new DefaultConfigStore(),
+      stateStore: config.stateStore || new DefaultStateStore(),
     })
 
     this.config = config.config
@@ -236,6 +238,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       setSecret: this.secretStore.setSecret,
       getConfig: this.configStore.getConfig,
       setConfig: this.configStore.setConfig,
+      getState: this.stateStore.getState,
+      setState: this.stateStore.setState,
     }
   }
 

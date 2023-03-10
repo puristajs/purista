@@ -31,6 +31,7 @@ it('exports core functions', () => {
   // stores
   expect(index.DefaultConfigStore).toBeDefined()
   expect(index.DefaultSecretStore).toBeDefined()
+  expect(index.DefaultStateStore).toBeDefined()
 
   // helper
   expect(index.ServiceBuilder).toBeDefined()

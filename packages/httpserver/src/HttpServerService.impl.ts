@@ -16,6 +16,7 @@ import {
   Logger,
   SecretStore,
   Service,
+  StateStore,
   StatusCode,
   UnhandledError,
 } from '@purista/core'
@@ -61,6 +62,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
       spanProcessor?: SpanProcessor
       secretStore?: SecretStore
       configStore?: ConfigStore
+      stateStore?: StateStore
     } = {},
   ) {
     const logger = options.logger || initLogger()
@@ -73,6 +75,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
       config,
       spanProcessor: options.spanProcessor,
       secretStore: options.secretStore,
+      stateStore: options.stateStore,
     })
 
     this.config = merge(getDefaultConfig(), config)

@@ -12,10 +12,12 @@ import {
   ServiceClass,
   ServiceConstructorInput,
   ServiceInfoType,
+  StateStore,
   SubscriptionDefinitionList,
 } from '../core'
 import { initDefaultConfigStore } from '../core/DefaultConfigStore'
 import { initDefaultSecretStore } from '../core/DefaultSecretStore'
+import { initDefaultStateStore } from '../core/DefaultStateStore'
 import { CommandDefinitionBuilder } from './CommandDefinitionBuilder.impl'
 import { SubscriptionDefinitionBuilder } from './SubscriptionDefinitionBuilder.impl'
 
@@ -154,6 +156,7 @@ export class ServiceBuilder<
       spanProcessor?: SpanProcessor
       secretStore?: SecretStore
       configStore?: ConfigStore
+      stateStore?: StateStore
     } = {},
   ) {
     let config = {
@@ -184,6 +187,12 @@ export class ServiceBuilder<
         logger,
       })
 
+    const stateStore: StateStore =
+      options.stateStore ||
+      initDefaultStateStore({
+        logger,
+      })
+
     const C = this.getCustomClass()
     this.instance = new C({
       logger,
@@ -195,6 +204,7 @@ export class ServiceBuilder<
       spanProcessor: options.spanProcessor,
       secretStore,
       configStore,
+      stateStore,
     })
 
     return this.instance as ServiceClassType

@@ -14,6 +14,8 @@ export const getSubscriptionTransformContext = (message: EBMessage, sandbox?: Si
     setSecret: sandbox?.stub() || stub(),
     getConfig: sandbox?.stub() || stub(),
     setConfig: sandbox?.stub() || stub(),
+    getState: sandbox?.stub() || stub(),
+    setState: sandbox?.stub() || stub(),
   }
 
   const mock: SubscriptionTransformFunctionContext = {
@@ -25,6 +27,8 @@ export const getSubscriptionTransformContext = (message: EBMessage, sandbox?: Si
     setSecret: stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
     getConfig: stubs.getConfig.rejects(new Error('getConfig is not stubbed')),
     setConfig: stubs.setConfig.rejects(new Error('setConfig is not stubbed')),
+    getState: stubs.getState.rejects(new Error('getState is not stubbed')),
+    setState: stubs.setState.rejects(new Error('setState is not stubbed')),
   }
 
   return {

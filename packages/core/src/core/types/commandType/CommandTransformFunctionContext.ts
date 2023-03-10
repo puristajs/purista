@@ -3,6 +3,7 @@ import { Context, Span, SpanOptions } from '@opentelemetry/api'
 import { ConfigGetterFunction, ConfigSetterFunction } from '../configStore'
 import { Logger } from '../Logger'
 import { SecretGetterFunction, SecretSetterFunction } from '../secretStore'
+import { StateGetterFunction, StateSetterFunction } from '../stateStore'
 import { Command } from './Command'
 
 export type CommandTransformFunctionContext<PayloadType, ParameterType> = {
@@ -19,4 +20,6 @@ export type CommandTransformFunctionContext<PayloadType, ParameterType> = {
   setSecret: SecretSetterFunction
   getConfig: ConfigGetterFunction
   setConfig: ConfigSetterFunction
+  getState: StateGetterFunction
+  setState: StateSetterFunction
 }
