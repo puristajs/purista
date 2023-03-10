@@ -1,5 +1,6 @@
 import pino, { LoggerOptions } from 'pino'
 
+import { puristaVersion } from '../../version'
 import type { Logger, LogLevelName } from '../types'
 import { DefaultLogger } from './DefaultLogger.impl'
 import { getDefaultLogLevel } from './getDefaultLogLevel'
@@ -13,6 +14,9 @@ export const initLogger = (level: LogLevelName = getDefaultLogLevel(), opt?: Log
   return new DefaultLogger(
     pino({
       name: 'PURISTA',
+      mixin(_context, _level) {
+        return { puristaVersion }
+      },
       ...opt,
       level,
     }),
