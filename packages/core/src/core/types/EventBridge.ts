@@ -1,4 +1,4 @@
-import { Command, CommandErrorResponse, CommandSuccessResponse } from './commandType'
+import { Command, CommandDefinitionMetadataBase, CommandErrorResponse, CommandSuccessResponse } from './commandType'
 import { CustomMessage } from './CustomMessage'
 import type { EBMessage } from './EBMessage'
 import type { EBMessageAddress } from './EBMessageAddress'
@@ -51,6 +51,7 @@ export interface EventBridge {
     ) => Promise<
       Readonly<Omit<CommandSuccessResponse, 'instanceId'>> | Readonly<Omit<CommandErrorResponse, 'instanceId'>>
     >,
+    metadata: CommandDefinitionMetadataBase,
   ): Promise<string>
 
   /**
