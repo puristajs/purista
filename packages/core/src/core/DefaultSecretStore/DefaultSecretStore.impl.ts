@@ -29,7 +29,7 @@ export class DefaultSecretStore extends SecretStoreBaseClass<DefaultSecretStoreC
     this.logger.info(`Secretstore ${this.name} destroyed`)
   }
 
-  async getSecret<T>(_secretName: string): Promise<T> {
+  async getSecret<T = unknown>(_secretName: string): Promise<T> {
     const err = new UnhandledError(StatusCode.NotImplemented, 'getSecret is not implemented in DefaultSecretStore')
     this.logger.error({ err }, 'Default secret store is only placeholder dummy')
     throw err
