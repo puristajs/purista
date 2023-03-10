@@ -11,5 +11,6 @@ export type CommandDefinitionMetadataBase = {
     inputPayload?: SchemaObject
     outputPayload?: SchemaObject
     parameter?: SchemaObject
+    deprecated?: boolean
   }
 }

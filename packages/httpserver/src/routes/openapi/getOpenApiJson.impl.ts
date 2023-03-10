@@ -294,6 +294,7 @@ export const getOpenApiJson = function (this: HttpServerService): RouteOptions {
       paths[path] = {
         ...paths[path],
         [definition.method.toLowerCase()]: {
+          deprecated: expose.deprecated,
           security: securitySchema.length > 0 && definition.openApi?.isSecure ? securitySchema : undefined,
           description: definition.openApi?.description,
           summary: definition.openApi?.summary,

@@ -47,6 +47,8 @@ export class CommandDefinitionBuilder<
 
   private tags: string[] = []
 
+  private deprecated = false
+
   private summary?: string
 
   private errorStatusCodes: StatusCode[] = []
@@ -168,6 +170,11 @@ export class CommandDefinitionBuilder<
       FunctionParamsType,
       I
     >
+  }
+
+  markAsDeprecated() {
+    this.deprecated = true
+    return this
   }
 
   /**
@@ -537,7 +544,9 @@ export class CommandDefinitionBuilder<
     > = {
       ...definition,
       metadata: {
+        ...definition.metadata,
         expose: {
+          ...definition.metadata?.expose,
           ...this.httpMetadata.expose,
         },
       },
@@ -605,6 +614,7 @@ export class CommandDefinitionBuilder<
           inputPayload: inputPayloadSchema ? generateSchema(inputPayloadSchema) : undefined,
           parameter: inputParameterSchema ? generateSchema(inputParameterSchema) : undefined,
           outputPayload: outputPayloadSchema ? generateSchema(outputPayloadSchema) : undefined,
+          deprecated: this.deprecated,
         },
       },
       eventName,
