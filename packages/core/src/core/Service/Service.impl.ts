@@ -396,10 +396,6 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           serviceTarget: commandDefinition.commandName,
         },
         this.executeCommand.bind(this),
-      )
-      await this.sendServiceInfo(
-        EBMessageType.InfoServiceFunctionAdded,
-        commandDefinition.commandName,
         commandDefinition.metadata,
       )
 

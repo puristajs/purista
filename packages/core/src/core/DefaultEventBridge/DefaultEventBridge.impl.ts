@@ -9,6 +9,7 @@ import { HandledError } from '../Error/HandledError.impl'
 import { UnhandledError } from '../Error/UnhandledError.impl'
 import {
   createErrorResponse,
+  createInfoMessage,
   deserializeOtp,
   getCleanedMessage,
   getCommandQueueName,
@@ -20,6 +21,7 @@ import {
 } from '../helper'
 import {
   Command,
+  CommandDefinitionMetadataBase,
   CommandErrorResponse,
   CommandSuccessResponse,
   CustomMessage,
@@ -246,9 +248,14 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
   async registerCommand(
     address: EBMessageAddress,
     cb: (message: Command) => Promise<CommandSuccessResponse<unknown> | CommandErrorResponse>,
+    metadata: CommandDefinitionMetadataBase,
   ): Promise<string> {
     const queueName = getCommandQueueName(address)
     this.serviceFunctions.set(queueName, cb)
+
+    const info = createInfoMessage(EBMessageType.InfoServiceFunctionAdded, address, { payload: metadata })
+    await this.emitMessage(info)
+
     return queueName
   }
 
