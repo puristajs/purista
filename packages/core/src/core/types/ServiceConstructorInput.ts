@@ -6,6 +6,7 @@ import { EventBridge } from './EventBridge'
 import { ServiceInfoType } from './infoType'
 import { Logger } from './Logger'
 import { SecretStore } from './secretStore'
+import { StateStore } from './stateStore'
 import { SubscriptionDefinitionList } from './subscription'
 
 export type ServiceConstructorInput<ConfigType> = {
@@ -25,6 +26,8 @@ export type ServiceConstructorInput<ConfigType> = {
   secretStore?: SecretStore
   /** the config store instance */
   configStore?: ConfigStore
+  /** the state store instance */
+  stateStore?: StateStore
   /** the opentelemetry span processor instance */
   spanProcessor?: SpanProcessor
 }

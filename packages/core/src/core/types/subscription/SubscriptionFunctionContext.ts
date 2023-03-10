@@ -5,6 +5,7 @@ import { EBMessage } from '../EBMessage'
 import { EBMessageAddress } from '../EBMessageAddress'
 import type { Logger } from '../Logger'
 import { SecretGetterFunction, SecretSetterFunction } from '../secretStore'
+import { StateGetterFunction, StateSetterFunction } from '../stateStore'
 
 /**
  * The subscription function context which will be passed into subscription function.
@@ -35,4 +36,6 @@ export type SubscriptionFunctionContext = {
   setSecret: SecretSetterFunction
   getConfig: ConfigGetterFunction
   setConfig: ConfigSetterFunction
+  getState: StateGetterFunction
+  setState: StateSetterFunction
 }

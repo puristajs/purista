@@ -4,6 +4,7 @@ import { ConfigGetterFunction, ConfigSetterFunction } from '../configStore'
 import { EBMessageAddress } from '../EBMessageAddress'
 import type { Logger } from '../Logger'
 import { SecretGetterFunction, SecretSetterFunction } from '../secretStore'
+import { StateGetterFunction, StateSetterFunction } from '../stateStore'
 import type { Command } from './Command'
 
 export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsType = unknown> = {
@@ -26,4 +27,6 @@ export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsTy
   setSecret: SecretSetterFunction
   getConfig: ConfigGetterFunction
   setConfig: ConfigSetterFunction
+  getState: StateGetterFunction
+  setState: StateSetterFunction
 }

@@ -4,6 +4,7 @@ import { ConfigGetterFunction, ConfigSetterFunction } from '../configStore'
 import { EBMessage } from '../EBMessage'
 import { Logger } from '../Logger'
 import { SecretGetterFunction, SecretSetterFunction } from '../secretStore'
+import { StateGetterFunction, StateSetterFunction } from '../stateStore'
 
 export type SubscriptionTransformFunctionContext = {
   logger: Logger
@@ -19,4 +20,6 @@ export type SubscriptionTransformFunctionContext = {
   setSecret: SecretSetterFunction
   getConfig: ConfigGetterFunction
   setConfig: ConfigSetterFunction
+  getState: StateGetterFunction
+  setState: StateSetterFunction
 }
