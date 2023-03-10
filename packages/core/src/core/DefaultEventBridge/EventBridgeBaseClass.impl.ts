@@ -5,7 +5,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
 import { puristaVersion } from '../../version'
 import { initLogger } from '../DefaultLogger'
-import { EventBridgeEvents, GenericEventEmitter, Logger } from '../types'
+import { EventBridgeEvents, GenericEventEmitter, Logger, PuristaSpanTag } from '../types'
 
 export class EventBridgeBaseClass extends GenericEventEmitter<EventBridgeEvents> {
   logger: Logger
@@ -60,7 +60,7 @@ export class EventBridgeBaseClass extends GenericEventEmitter<EventBridgeEvents>
     const tracer = this.getTracer()
 
     const callback = async (span: Span) => {
-      span.setAttribute('purista.version', puristaVersion)
+      span.setAttribute(PuristaSpanTag.PuristaVersion, puristaVersion)
       try {
         return await fn(span)
       } catch (error) {
@@ -104,7 +104,7 @@ export class EventBridgeBaseClass extends GenericEventEmitter<EventBridgeEvents>
   async wrapInSpan<F>(name: string, opts: SpanOptions, fn: (span: Span) => Promise<F>, context?: Context): Promise<F> {
     const tracer = this.getTracer()
     const span = tracer.startSpan(name, opts, context)
-    span.setAttribute('purista.version', puristaVersion)
+    span.setAttribute(PuristaSpanTag.PuristaVersion, puristaVersion)
     try {
       return await fn(span)
     } catch (error) {

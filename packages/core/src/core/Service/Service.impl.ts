@@ -1,5 +1,4 @@
 import { SpanStatusCode, trace } from '@opentelemetry/api'
-import { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 
 import { puristaVersion } from '../../version'
 import { DefaultSecretStore } from '../DefaultSecretStore'
@@ -23,13 +22,10 @@ import {
   EBMessage,
   EBMessageAddress,
   EBMessageType,
-  EventBridge,
   InfoMessageType,
-  Logger,
   PuristaSpanTag,
-  SecretStore,
   ServiceClass,
-  ServiceInfoType,
+  ServiceConstructorInput,
   StatusCode,
   Subscription,
   SubscriptionDefinition,
@@ -68,28 +64,22 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
   protected subscriptions = new Map<string, SubscriptionDefinition>()
   protected commands = new Map<string, CommandDefinition>()
 
-  constructor(
-    baseLogger: Logger,
-    info: ServiceInfoType,
-    eventBridge: EventBridge,
-    private commandFunctions: CommandDefinitionList<any>,
-    private subscriptionList: SubscriptionDefinitionList<any>,
-    public config: ConfigType,
+  private commandDefinitionList: CommandDefinitionList<any>
+  private subscriptionDefinitionList: SubscriptionDefinitionList<any>
+  public config: ConfigType
 
-    options: {
-      spanProcessor?: SpanProcessor
-      secretStore?: SecretStore
-    },
-  ) {
+  constructor(config: ServiceConstructorInput<ConfigType>) {
     super({
-      baseLogger,
-      info,
-      eventBridge,
-      options: {
-        ...options,
-        secretStore: options.secretStore || new DefaultSecretStore(),
-      },
+      logger: config.logger,
+      info: config.info,
+      eventBridge: config.eventBridge,
+      spanProcessor: config.spanProcessor,
+      secretStore: config.secretStore || new DefaultSecretStore(),
     })
+
+    this.config = config.config
+    this.commandDefinitionList = config.commandDefinitionList
+    this.subscriptionDefinitionList = config.subscriptionDefinitionList
   }
 
   /**
@@ -103,7 +93,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           await this.secretStore.start()
         }
 
-        await this.initializeEventbridgeConnect(this.commandFunctions, this.subscriptionList)
+        await this.initializeEventbridgeConnect(this.commandDefinitionList, this.subscriptionDefinitionList)
         await this.sendServiceInfo(EBMessageType.InfoServiceReady)
         this.logger.info(
           { ...span.spanContext(), puristaVersion },
@@ -121,7 +111,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
    * Connect service to event bridge to receive commands and command responses
    */
   protected async initializeEventbridgeConnect(
-    commandFunctions: CommandDefinitionList<any>,
+    commandDefinitionList: CommandDefinitionList<any>,
     subscriptions: SubscriptionDefinition[],
   ) {
     return this.startActiveSpan('purista.initializeEventbridgeConnect', {}, undefined, async (span) => {
@@ -143,7 +133,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       }
 
       // register commands for this service
-      for (const command of commandFunctions) {
+      for (const command of commandDefinitionList) {
         await this.registerCommand(command)
       }
     })
@@ -609,7 +599,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       this.logger.info({ ...this.info, ...span.spanContext() }, 'destroy')
 
       const functionUnregisterProms: Promise<any>[] = []
-      this.commandFunctions.forEach((functionDefinition) => {
+      this.commandDefinitionList.forEach((functionDefinition) => {
         functionUnregisterProms.push(
           this.eventBridge.unregisterCommand({
             serviceName: this.info.serviceName,

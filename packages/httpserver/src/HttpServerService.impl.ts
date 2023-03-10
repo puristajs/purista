@@ -25,12 +25,12 @@ import * as swaggerUi from 'swagger-ui-dist'
 import Trouter, { Methods } from 'trouter'
 import merge from 'ts-deepmerge'
 
-import { COMMANDS } from './commands'
-import { getDefaultConfig, ServiceInfo } from './config'
+import { COMMANDS as commandDefinitionList } from './commands'
+import { getDefaultConfig, ServiceInfo as info } from './config'
 import { addHeaders } from './helper'
 import { addSpanTags } from './helper/addSpanTags'
 import { OPEN_API_ROUTE_FUNCTIONS } from './routes'
-import { SUBSCRIPTIONS } from './subscriptions'
+import { SUBSCRIPTIONS as subscriptionDefinitionList } from './subscriptions'
 import { BeforeResponseHook, HttpServerConfig } from './types'
 
 /**
@@ -62,7 +62,13 @@ export class HttpServerService extends Service<HttpServerConfig> {
     } = {},
   ) {
     const logger = options.logger || initLogger()
-    super(logger, ServiceInfo, eventBridge, COMMANDS, SUBSCRIPTIONS, config, {
+    super({
+      logger,
+      info,
+      eventBridge,
+      commandDefinitionList,
+      subscriptionDefinitionList,
+      config,
       spanProcessor: options.spanProcessor,
       secretStore: options.secretStore,
     })

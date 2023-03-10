@@ -9,6 +9,7 @@ import {
   SecretStore,
   Service,
   ServiceClass,
+  ServiceConstructorInput,
   ServiceInfoType,
   SubscriptionDefinitionList,
 } from '../core'
@@ -16,7 +17,7 @@ import { initDefaultSecretStore } from '../core/DefaultSecretStore'
 import { CommandDefinitionBuilder } from './CommandDefinitionBuilder.impl'
 import { SubscriptionDefinitionBuilder } from './SubscriptionDefinitionBuilder.impl'
 
-export type Newable<T> = { new (...args: any[]): T }
+export type Newable<T, ConfigType> = { new (config: ServiceConstructorInput<ConfigType>): T }
 
 /**
  * This class is used to build a service.
@@ -29,14 +30,14 @@ export class ServiceBuilder<
   ConfigInputType = Record<string, unknown>,
   ServiceClassType extends ServiceClass = Service<ConfigType>,
 > {
-  private commandFunctions: CommandDefinitionList<ServiceClassType> = []
-  private subscriptionList: SubscriptionDefinitionList<ServiceClassType> = []
+  private commandDefinitionList: CommandDefinitionList<ServiceClassType> = []
+  private subscriptionDefinitionList: SubscriptionDefinitionList<ServiceClassType> = []
 
   private configSchema?: z.ZodType
   private defaultConfig?: ConfigType
 
   instance?: ServiceClassType
-  SClass: any = Service
+  SClass: Newable<any, ConfigType> = Service
 
   // eslint-disable-next-line no-useless-constructor
   constructor(public info: ServiceInfoType) {}
@@ -82,7 +83,7 @@ export class ServiceBuilder<
    */
   addCommandDefinition(...commands: CommandDefinitionList<ServiceClassType>) {
     const existing = commands.filter((fn) =>
-      this.commandFunctions.some((definition) => definition.commandName === fn.commandName),
+      this.commandDefinitionList.some((definition) => definition.commandName === fn.commandName),
     )
 
     if (existing.length) {
@@ -94,7 +95,7 @@ export class ServiceBuilder<
       throw new Error('duplicate function definitions')
     }
 
-    this.commandFunctions.push(...commands)
+    this.commandDefinitionList.push(...commands)
     return this as ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType>
   }
 
@@ -105,7 +106,7 @@ export class ServiceBuilder<
    */
   addSubscriptionDefinition(...subscription: SubscriptionDefinitionList<ServiceClassType>) {
     const existing = subscription.filter((fn) =>
-      this.subscriptionList.some((definition) => definition.subscriptionName === fn.subscriptionName),
+      this.subscriptionDefinitionList.some((definition) => definition.subscriptionName === fn.subscriptionName),
     )
 
     if (existing.length) {
@@ -117,7 +118,7 @@ export class ServiceBuilder<
       throw new Error('duplicate function definitions')
     }
 
-    this.subscriptionList.push(...subscription)
+    this.subscriptionDefinitionList.push(...subscription)
     return this as ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType>
   }
 
@@ -126,9 +127,13 @@ export class ServiceBuilder<
    * @param c - Newable<T>
    * @returns The builder itself, but with the type of the service class changed.
    */
-  setCustomClass<T extends ServiceClass<ConfigType>>(c: Newable<T>) {
-    this.SClass = c
+  setCustomClass<T extends ServiceClass<ConfigType>>(c: Newable<T, ConfigType>) {
+    this.SClass = c as Newable<T, ConfigType>
     return this as unknown as ServiceBuilder<ConfigType, ConfigInputType, T>
+  }
+
+  getCustomClass() {
+    return this.SClass
   }
 
   /**
@@ -148,7 +153,7 @@ export class ServiceBuilder<
       secretStore?: SecretStore
     } = {},
   ) {
-    let conf = {
+    let config = {
       ...this.defaultConfig,
       ...options?.serviceConfig,
     } as ConfigType
@@ -157,7 +162,7 @@ export class ServiceBuilder<
 
     if (this.configSchema && options.serviceConfig) {
       try {
-        conf = this.configSchema.parse(options.serviceConfig)
+        config = this.configSchema.parse(options.serviceConfig)
       } catch (err) {
         logger.error({ err, ...this.info }, 'Invalid configuration for')
         throw new Error('Fatal - unable to create service instance because provided configuration is invalid')
@@ -171,18 +176,17 @@ export class ServiceBuilder<
         spanProcessor: options.spanProcessor,
       })
 
-    this.instance = new this.SClass(
+    const C = this.getCustomClass()
+    this.instance = new C({
       logger,
-      this.info,
       eventBridge,
-      this.commandFunctions,
-      this.subscriptionList,
-      conf,
-      {
-        spanProcessor: options.spanProcessor,
-        secretStore,
-      },
-    )
+      info: this.info,
+      commandDefinitionList: this.commandDefinitionList,
+      subscriptionDefinitionList: this.subscriptionDefinitionList,
+      config,
+      spanProcessor: options.spanProcessor,
+      secretStore,
+    })
 
     return this.instance as ServiceClassType
   }
