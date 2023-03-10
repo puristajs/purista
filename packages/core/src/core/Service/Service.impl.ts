@@ -1,6 +1,7 @@
 import { SpanStatusCode, trace } from '@opentelemetry/api'
 
 import { puristaVersion } from '../../version'
+import { DefaultConfigStore } from '../DefaultConfigStore'
 import { DefaultSecretStore } from '../DefaultSecretStore'
 import { HandledError } from '../Error/HandledError.impl'
 import { UnhandledError } from '../Error/UnhandledError.impl'
@@ -75,6 +76,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       eventBridge: config.eventBridge,
       spanProcessor: config.spanProcessor,
       secretStore: config.secretStore || new DefaultSecretStore(),
+      configStore: config.configStore || new DefaultConfigStore(),
     })
 
     this.config = config.config
@@ -226,6 +228,17 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     return emitCustomEvent.bind(this)
   }
 
+  protected getContextFunctions() {
+    return {
+      wrapInSpan: this.wrapInSpan.bind(this),
+      startActiveSpan: this.startActiveSpan.bind(this),
+      getSecret: this.secretStore.getSecret,
+      setSecret: this.secretStore.setSecret,
+      getConfig: this.configStore.getConfig,
+      setConfig: this.configStore.setConfig,
+    }
+  }
+
   /**
    * Called when a command is received by the service
    *
@@ -275,10 +288,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
               message,
               emit: this.getEmitFunction(command.commandName, traceId, message.principalId),
               invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId),
-              wrapInSpan: this.wrapInSpan.bind(this),
-              startActiveSpan: this.startActiveSpan.bind(this),
-              getSecret: this.secretStore.getSecret,
-              setSecret: this.secretStore.setSecret,
+              ...this.getContextFunctions(),
             }
             const call = command.call.bind(this, context)
             return await call(payload, parameter)
@@ -297,10 +307,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
                 message,
                 emit: this.getEmitFunction(command.commandName, traceId, message.principalId),
                 invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId),
-                wrapInSpan: this.wrapInSpan.bind(this),
-                startActiveSpan: this.startActiveSpan.bind(this),
-                getSecret: this.secretStore.getSecret,
-                setSecret: this.secretStore.setSecret,
+                ...this.getContextFunctions(),
               }
 
               const guardPromise = this.wrapInSpan('afterGuardHook.' + name, {}, async (_subSpan) => {
@@ -319,10 +326,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
             const afterTransform = transformOutput.transformFunction.bind(this, {
               logger,
               message,
-              startActiveSpan: this.startActiveSpan.bind(this),
-              wrapInSpan: this.wrapInSpan.bind(this),
-              getSecret: this.secretStore.getSecret,
-              setSecret: this.secretStore.setSecret,
+              ...this.getContextFunctions(),
             })
             const resultTransformed = await afterTransform(result as Readonly<unknown>, parameter)
             result = transformOutput.transformOutputSchema.parse(resultTransformed)
@@ -448,10 +452,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
                 message,
                 emit: this.getEmitFunction(subscriptionName, traceId, message.principalId),
                 invoke: this.getInvokeFunction(subscriptionName, traceId, message.principalId),
-                wrapInSpan: this.wrapInSpan.bind(this),
-                startActiveSpan: this.startActiveSpan.bind(this),
-                getSecret: this.secretStore.getSecret,
-                setSecret: this.secretStore.setSecret,
+                ...this.getContextFunctions(),
               }
               const call2 = subscription.call.bind(this, context)
               return await call2(payload, parameter)
@@ -470,10 +471,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
                   message,
                   emit: this.getEmitFunction(subscription.subscriptionName, traceId, message.principalId),
                   invoke: this.getInvokeFunction(subscription.subscriptionName, traceId, message.principalId),
-                  wrapInSpan: this.wrapInSpan.bind(this),
-                  startActiveSpan: this.startActiveSpan.bind(this),
-                  getSecret: this.secretStore.getSecret,
-                  setSecret: this.secretStore.setSecret,
+                  ...this.getContextFunctions(),
                 }
 
                 const guardPromise = this.wrapInSpan('afterGuardHook.' + name, {}, async (_subSpan) => {
@@ -496,10 +494,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
                 const afterTransform = transformOutput.transformFunction.bind(this, {
                   logger,
                   message,
-                  wrapInSpan: this.wrapInSpan.bind(this),
-                  startActiveSpan: this.startActiveSpan.bind(this),
-                  getSecret: this.secretStore.getSecret,
-                  setSecret: this.secretStore.setSecret,
+                  ...this.getContextFunctions(),
                 })
                 const resultTransformed = await afterTransform(result as Readonly<unknown>, parameter)
                 result = transformOutput.transformOutputSchema.parse(resultTransformed)

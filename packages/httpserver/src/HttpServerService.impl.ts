@@ -8,6 +8,7 @@ import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import {
   Command,
+  ConfigStore,
   EventBridge,
   HandledError,
   HttpExposedServiceMeta,
@@ -59,6 +60,7 @@ export class HttpServerService extends Service<HttpServerConfig> {
       logger?: Logger
       spanProcessor?: SpanProcessor
       secretStore?: SecretStore
+      configStore?: ConfigStore
     } = {},
   ) {
     const logger = options.logger || initLogger()

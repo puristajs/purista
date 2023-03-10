@@ -3,6 +3,7 @@ import { z } from 'zod'
 
 import {
   CommandDefinitionList,
+  ConfigStore,
   EventBridge,
   initLogger,
   Logger,
@@ -13,6 +14,7 @@ import {
   ServiceInfoType,
   SubscriptionDefinitionList,
 } from '../core'
+import { initDefaultConfigStore } from '../core/DefaultConfigStore'
 import { initDefaultSecretStore } from '../core/DefaultSecretStore'
 import { CommandDefinitionBuilder } from './CommandDefinitionBuilder.impl'
 import { SubscriptionDefinitionBuilder } from './SubscriptionDefinitionBuilder.impl'
@@ -151,6 +153,7 @@ export class ServiceBuilder<
       logger?: Logger
       spanProcessor?: SpanProcessor
       secretStore?: SecretStore
+      configStore?: ConfigStore
     } = {},
   ) {
     let config = {
@@ -175,6 +178,12 @@ export class ServiceBuilder<
         logger,
       })
 
+    const configStore: ConfigStore =
+      options.configStore ||
+      initDefaultConfigStore({
+        logger,
+      })
+
     const C = this.getCustomClass()
     this.instance = new C({
       logger,
@@ -185,6 +194,7 @@ export class ServiceBuilder<
       config,
       spanProcessor: options.spanProcessor,
       secretStore,
+      configStore,
     })
 
     return this.instance as ServiceClassType

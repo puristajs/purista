@@ -1,6 +1,7 @@
 import { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 
 import { CommandDefinitionList } from './commandType'
+import { ConfigStore } from './configStore'
 import { EventBridge } from './EventBridge'
 import { ServiceInfoType } from './infoType'
 import { Logger } from './Logger'
@@ -22,6 +23,8 @@ export type ServiceConstructorInput<ConfigType> = {
   config: ConfigType
   /** the secret store instance */
   secretStore?: SecretStore
+  /** the config store instance */
+  configStore?: ConfigStore
   /** the opentelemetry span processor instance */
   spanProcessor?: SpanProcessor
 }

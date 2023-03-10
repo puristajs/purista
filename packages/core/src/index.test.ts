@@ -1,6 +1,7 @@
 import * as index from './index'
 
 it('exports core functions', () => {
+  expect(index.puristaVersion).toBeDefined()
   // core
   expect(index.DefaultEventBridge).toBeDefined()
   expect(index.DefaultLogger).toBeDefined()
@@ -26,6 +27,10 @@ it('exports core functions', () => {
   expect(index.Service).toBeDefined()
   expect(index.StatusCode).toBeDefined()
   expect(index.UnhandledError).toBeDefined()
+
+  // stores
+  expect(index.DefaultConfigStore).toBeDefined()
+  expect(index.DefaultSecretStore).toBeDefined()
 
   // helper
   expect(index.ServiceBuilder).toBeDefined()
