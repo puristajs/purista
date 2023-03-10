@@ -120,6 +120,8 @@ export class CommandDefinitionBuilder<
    * Add a schema for input payload validation.
    * Types for payload of message and function payload input are generated from given schema.
    * @param inputSchema The schema validation for input payload
+   * @param inputContentType optional the content type of payload
+   * @param inputContentEncoding optional the content encoding
    * @returns CommandDefinitionBuilder
    */
   addPayloadSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(
@@ -145,6 +147,8 @@ export class CommandDefinitionBuilder<
    * Add a schema for output payload validation.
    * Types for payload of message and function payload output are generated from given schema.
    * @param outputSchema The schema validation for output payload
+   * @param outputContentType optional the content type of payload
+   * @param outputContentEncoding optional the content encoding
    * @returns CommandDefinitionBuilder
    */
   addOutputSchema<I, D extends z.ZodTypeDef, O>(
@@ -251,7 +255,11 @@ export class CommandDefinitionBuilder<
    * Set a transform input hook which will encode or transform the input payload and parameters.
    * Will be executed as first step before input validation, before guard and the function itself.
    * This will change the type of input message payload and input message parameter.
-   * @param transformInput Transform input function
+   * @param transformInputSchema Input payload validation schema
+   * @param transformParameterSchema Input parameter validation schema
+   * @param transformFunction Transform input function
+   * @param inputContentType optional the content type of payload
+   * @param inputContentEncoding optional the content encoding
    * @returns CommandDefinitionBuilder
    */
   setTransformInput<
@@ -271,7 +279,12 @@ export class CommandDefinitionBuilder<
       PayloadIn,
       ParamsIn
     >,
+    inputContentType?: ContentType,
+    inputContentEncoding?: string,
   ) {
+    this.inputContentType = inputContentType || this.inputContentType
+    this.inputContentEncoding = inputContentEncoding || this.inputContentEncoding
+
     this.hooks.transformInput = {
       transformFunction,
       transformInputSchema,
@@ -310,7 +323,10 @@ export class CommandDefinitionBuilder<
    * Set a transform output hook which will encode or transform the response payload.
    * Will be executed at very last step after function execution, output validation and after guard hooks.
    * This will change the type of output message payload.
-   * @param transformOutput Transform output function
+   * @param transformOutputSchema The output validation schema
+   * @param transformFunction Transform output function
+   * @param outputContentType optional the content type of payload
+   * @param outputContentEncoding optional the content encoding
    * @returns CommandDefinitionBuilder
    */
   setTransformOutput<PayloadOut, PayloadD extends z.ZodTypeDef, PayloadIn>(
@@ -322,7 +338,11 @@ export class CommandDefinitionBuilder<
       FunctionParamsType,
       PayloadIn
     >,
+    outputContentType?: ContentType,
+    outputContentEncoding?: string,
   ) {
+    this.outputContentEncoding = outputContentEncoding || this.outputContentEncoding
+    this.outputContentType = outputContentType || this.outputContentType
     this.hooks.transformOutput = {
       transformFunction,
       transformOutputSchema,
@@ -359,7 +379,7 @@ export class CommandDefinitionBuilder<
   /**
    * Set one or more before guard hook(s).
    * If there are multiple before guard hooks, they are executed in parallel
-   * @param beforeGuards Before guard function
+   * @param beforeGuards Object of key = name of guard, value = function
    * @returns CommandDefinitionBuilder
    */
   setBeforeGuardHooks(
@@ -381,7 +401,7 @@ export class CommandDefinitionBuilder<
   /**
    * Set one or more after guard hook(s).
    * If there are multiple after guard hooks, they are executed in parallel
-   * @param afterGuard After guard function
+   * @param afterGuard  Object of key = name of guard, value = function
    * @returns CommandDefinitionBuilder
    */
   setAfterGuardHooks(
@@ -410,8 +430,10 @@ export class CommandDefinitionBuilder<
    *
    * @param method Http method POST, PUT, PATCH, GET, DELETE
    * @param path The url path
-   * @param contentType input content type defaults to application/json
-   * @param contentTypeResponse response content type defaults to application/json
+   * @param contentTypeRequest input content type defaults to application/json
+   * @param contentEncodingRequest input content encoding defaults to utf-8
+   * @param contentTypeResponse input content type defaults to application/json
+   * @param contentEncodingResponse input content encoding defaults to utf-8
    * @returns CommandDefinitionBuilder
    */
   exposeAsHttpEndpoint(
@@ -521,19 +543,10 @@ export class CommandDefinitionBuilder<
       },
     }
 
-    const inputPayloadSchema: ZodType | undefined = this.hooks.transformInput?.transformInputSchema || this.inputSchema
-    const inputParameterSchema: ZodType | undefined =
-      this.hooks.transformInput?.transformParameterSchema || this.parameterSchema
-    const outputPayloadSchema: ZodType | undefined =
-      this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
-
     def.metadata.expose.http.openApi = {
       description: this.commandDescription,
       summary: this.summary || this.commandName,
       isSecure: this.isSecure,
-      inputPayload: inputPayloadSchema ? generateSchema(inputPayloadSchema) : undefined,
-      parameter: inputParameterSchema ? generateSchema(inputParameterSchema) : undefined,
-      outputPayload: outputPayloadSchema ? generateSchema(outputPayloadSchema) : undefined,
       query: this.queryParameter,
       tags: this.tags,
       additionalStatusCodes: this.errorStatusCodes,
@@ -562,6 +575,13 @@ export class CommandDefinitionBuilder<
     }
 
     const eventName = this.eventName
+
+    const inputPayloadSchema: ZodType | undefined = this.hooks.transformInput?.transformInputSchema || this.inputSchema
+    const inputParameterSchema: ZodType | undefined =
+      this.hooks.transformInput?.transformParameterSchema || this.parameterSchema
+    const outputPayloadSchema: ZodType | undefined =
+      this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
+
     const definition: Complete<
       CommandDefinition<
         ServiceClassType,
@@ -582,6 +602,9 @@ export class CommandDefinitionBuilder<
           contentEncodingRequest: this.inputContentEncoding || 'utf-8',
           contentTypeResponse: this.outputContentType || 'application/json',
           contentEncodingResponse: this.outputContentEncoding || 'utf-8',
+          inputPayload: inputPayloadSchema ? generateSchema(inputPayloadSchema) : undefined,
+          parameter: inputParameterSchema ? generateSchema(inputParameterSchema) : undefined,
+          outputPayload: outputPayloadSchema ? generateSchema(outputPayloadSchema) : undefined,
         },
       },
       eventName,
