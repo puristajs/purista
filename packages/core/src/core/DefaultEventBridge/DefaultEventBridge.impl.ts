@@ -413,5 +413,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
     this.removeAllListeners()
     this.writeStream.end().removeAllListeners()
     this.readStream.destroy()
+    this.hasStarted = false
+    this.healthy = false
   }
 }

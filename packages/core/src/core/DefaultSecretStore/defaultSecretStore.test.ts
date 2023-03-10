@@ -15,6 +15,7 @@ describe('DefaultSecretStore', () => {
     const store = new DefaultSecretStore({ logger: logger.mock })
 
     await expect(store.start()).resolves.toBeUndefined()
+    await expect(store.isReady()).resolves.toBeTruthy()
 
     await expect(store.getSecret('example')).rejects.toThrow('getSecret is not implemented in DefaultSecretStore')
 
