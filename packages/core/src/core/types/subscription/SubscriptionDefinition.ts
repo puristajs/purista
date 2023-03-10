@@ -1,12 +1,12 @@
 import type { z } from 'zod'
 
-import { ContentType } from '../ContentType'
 import { EBMessageType } from '../EBMessageType.enum'
 import { InstanceId } from '../InstanceId'
 import { PrincipalId } from '../PrincipalId'
 import type { ServiceClass } from '../ServiceClass'
 import type { SubscriptionAfterGuardHook } from './SubscriptionAfterGuardHook'
 import type { SubscriptionBeforeGuardHook } from './SubscriptionBeforeGuardHook'
+import { SubscriptionDefinitionMetadataBase } from './SubscriptionDefinitionMetadataBase'
 import type { SubscriptionFunction } from './SubscriptionFunction'
 import { SubscriptionSettings } from './SubscriptionSettings'
 import { SubscriptionTransformInputHook } from './SubscriptionTransformInputHook'
@@ -17,7 +17,7 @@ import { SubscriptionTransformOutputHook } from './SubscriptionTransformOutputHo
  */
 export type SubscriptionDefinition<
   ServiceClassType extends ServiceClass = ServiceClass,
-  MetadataType = Record<string, unknown>,
+  MetadataType = SubscriptionDefinitionMetadataBase,
   MessagePayloadType = unknown,
   MessageParamsType = unknown,
   MessageResultType = unknown,
@@ -58,10 +58,6 @@ export type SubscriptionDefinition<
   eventName?: string
   /** event name to be used for custom message if the subscription functions returns value  */
   emitEventName?: string
-  /** the content type if a response is sent as custom event */
-  contentType?: ContentType
-  /** the content encoding if a response is sent as custom event */
-  contentEncoding?: string
   /** filter for instance id */
   instanceId?: InstanceId
   /** filter for principal id */
