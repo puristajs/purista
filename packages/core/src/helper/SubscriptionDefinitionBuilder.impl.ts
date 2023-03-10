@@ -1,4 +1,5 @@
-import { z } from 'zod'
+import { generateSchema } from '@anatine/zod-openapi'
+import { z, ZodType } from 'zod'
 
 import type {
   Complete,
@@ -10,6 +11,7 @@ import type {
   SubscriptionAfterGuardHook,
   SubscriptionBeforeGuardHook,
   SubscriptionDefinition,
+  SubscriptionDefinitionMetadataBase,
   SubscriptionFunction,
   SubscriptionTransformInputHook,
   SubscriptionTransformOutputHook,
@@ -34,7 +36,11 @@ export class SubscriptionDefinitionBuilder<
   private messageType: EBMessageType | undefined
 
   private inputSchema?: z.ZodType
+  private inputContentType: ContentType | undefined
+  private inputContentEncoding: string | undefined
   private outputSchema: z.ZodType = z.void()
+  private outputContentType: ContentType | undefined
+  private outputContentEncoding: string | undefined
   private parameterSchema?: z.ZodType
 
   private hooks: {
@@ -82,8 +88,6 @@ export class SubscriptionDefinitionBuilder<
 
   private eventName?: string
   private emitEventName?: string
-  private contentType: ContentType = 'application/json'
-  private contentEncoding = 'utf-8'
 
   private principalId?: PrincipalId
 
@@ -210,9 +214,18 @@ export class SubscriptionDefinitionBuilder<
    * Add a schema for input payload validation.
    * Types for payload of message and function payload input are generated from given schema.
    * @param inputSchema the validation schema for input payload
+   * @param inputContentType optional the content type of payload
+   * @param inputContentEncoding optional the content encoding
    * @returns SubscriptionDefinitionBuilder
    */
-  addPayloadSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(inputSchema: z.ZodType<O, D, I>) {
+  addPayloadSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(
+    inputSchema: z.ZodType<O, D, I>,
+    inputContentType = 'application/json',
+    inputContentEncoding = 'utf-8',
+  ) {
+    this.inputContentType = inputContentType || this.inputContentType
+    this.inputContentEncoding = inputContentEncoding || this.inputContentEncoding
+
     this.inputSchema = inputSchema
     return this as unknown as SubscriptionDefinitionBuilder<
       ServiceClassType,
@@ -230,17 +243,19 @@ export class SubscriptionDefinitionBuilder<
    * Types for payload of message and function payload output are generated from given schema.
    * @param eventName the event name to be used when the subscription result is emitted as custom event
    * @param outputSchema the validation schema for the output payload
+   * @param outputContentType optional the content type of payload
+   * @param outputContentEncoding optional the content encoding
    * @returns SubscriptionDefinitionBuilder
    */
   addOutputSchema<I, D extends z.ZodTypeDef, O>(
     eventName: string,
     outputSchema: z.ZodType<O, D, I>,
-    contentType = 'application/json',
-    contentEncoding = 'utf-8',
+    outputContentType = 'application/json',
+    outputContentEncoding = 'utf-8',
   ) {
     this.emitEventName = eventName
-    this.contentEncoding = contentEncoding
-    this.contentType = contentType
+    this.outputContentEncoding = outputContentEncoding
+    this.outputContentType = outputContentType
     this.outputSchema = outputSchema
     return this as unknown as SubscriptionDefinitionBuilder<
       ServiceClassType,
@@ -276,7 +291,11 @@ export class SubscriptionDefinitionBuilder<
    * Set a transform input hook which will encode or transform the input payload and parameters.
    * Will be executed as first step before input validation, before guard and the function itself.
    * This will change the type of input message payload and input message parameter.
-   * @param transformInput the transform input function
+   * @param transformInputSchema Input payload validation schema
+   * @param transformParameterSchema Input parameter validation schema
+   * @param transformFunction the transform input function
+   * @param inputContentType optional the content type of payload
+   * @param inputContentEncoding optional the content encoding
    * @returns SubscriptionDefinitionBuilder
    */
   setTransformInput<
@@ -296,7 +315,12 @@ export class SubscriptionDefinitionBuilder<
       PayloadIn,
       ParamsIn
     >,
+    inputContentType?: ContentType,
+    inputContentEncoding?: string,
   ) {
+    this.inputContentType = inputContentType || this.inputContentType
+    this.inputContentEncoding = inputContentEncoding || this.inputContentEncoding
+
     this.hooks.transformInput = {
       transformFunction,
       transformInputSchema,
@@ -335,7 +359,10 @@ export class SubscriptionDefinitionBuilder<
    * Set a transform output hook which will encode or transform the response payload.
    * Will be executed at very last step after function execution, output validation and after guard hooks.
    * This will change the type of output message payload.
-   * @param transformOutput the transform output function
+   * @param transformOutputSchema The output validation schema
+   * @param transformFunction the transform output function
+   * @param outputContentType optional the content type of payload
+   * @param outputContentEncoding optional the content encoding
    * @returns SubscriptionDefinitionBuilder
    */
   setTransformOutput<PayloadOut, PayloadD extends z.ZodTypeDef, PayloadIn>(
@@ -346,7 +373,12 @@ export class SubscriptionDefinitionBuilder<
       FunctionParamsType,
       PayloadIn
     >,
+    outputContentType?: ContentType,
+    outputContentEncoding?: string,
   ) {
+    this.outputContentEncoding = outputContentEncoding || this.outputContentEncoding
+    this.outputContentType = outputContentType || this.outputContentType
+
     this.hooks.transformOutput = {
       transformFunction,
       transformOutputSchema,
@@ -382,7 +414,7 @@ export class SubscriptionDefinitionBuilder<
   /**
    * Set one or more before guard hook(s).
    * If there are multiple before guard hooks, they are executed in parallel
-   * @param beforeGuards Before guard function
+   * @param beforeGuards Object of key = name of guard, value = function
    * @returns SubscriptionDefinitionBuilder
    */
   setBeforeGuardHooks(
@@ -398,7 +430,7 @@ export class SubscriptionDefinitionBuilder<
   /**
    * Set one or more after guard hook(s).
    * If there are multiple after guard hooks, they are executed in parallel
-   * @param afterGuard After guard function
+   * @param afterGuard Object of key = name of guard, value = function
    * @returns SubscriptionDefinitionBuilder
    */
   setAfterGuardHooks(
@@ -529,7 +561,7 @@ export class SubscriptionDefinitionBuilder<
    */
   getDefinition(): SubscriptionDefinition<
     ServiceClassType,
-    Record<string, unknown>,
+    SubscriptionDefinitionMetadataBase,
     MessagePayloadType,
     MessageParamsType,
     MessageResultType,
@@ -541,10 +573,16 @@ export class SubscriptionDefinitionBuilder<
       throw new Error(`SubscriptionDefinitionBuilder: missing function implementation for ${this.subscriptionName}`)
     }
 
+    const inputPayloadSchema: ZodType | undefined = this.hooks.transformInput?.transformInputSchema || this.inputSchema
+    const inputParameterSchema: ZodType | undefined =
+      this.hooks.transformInput?.transformParameterSchema || this.parameterSchema
+    const outputPayloadSchema: ZodType | undefined =
+      this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
+
     const subscription: Complete<
       SubscriptionDefinition<
         ServiceClassType,
-        Record<string, unknown>,
+        SubscriptionDefinitionMetadataBase,
         MessagePayloadType,
         MessageParamsType,
         MessageResultType,
@@ -555,15 +593,23 @@ export class SubscriptionDefinitionBuilder<
     > = {
       subscriptionName: this.subscriptionName,
       subscriptionDescription: this.subscriptionDescription,
-      metadata: {},
+      metadata: {
+        expose: {
+          contentTypeRequest: this.inputContentType,
+          contentEncodingRequest: this.inputContentEncoding,
+          contentTypeResponse: this.outputContentType,
+          contentEncodingResponse: this.outputContentEncoding,
+          inputPayload: inputPayloadSchema ? generateSchema(inputPayloadSchema) : undefined,
+          parameter: inputParameterSchema ? generateSchema(inputParameterSchema) : undefined,
+          outputPayload: outputPayloadSchema ? generateSchema(outputPayloadSchema) : undefined,
+        },
+      },
       receiver: this.receiver,
       sender: this.sender,
       messageType: this.messageType,
       settings: this.settings,
       eventName: this.eventName,
       emitEventName: this.emitEventName,
-      contentEncoding: this.contentEncoding,
-      contentType: this.contentType,
       principalId: this.principalId,
       instanceId: this.instanceId,
       call: getSubscriptionFunctionWithValidation<

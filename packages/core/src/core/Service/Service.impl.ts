@@ -483,8 +483,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
                 subSpan.addEvent(subscription.emitEventName as string)
                 const resultMsg: Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> = {
                   messageType: EBMessageType.CustomMessage,
-                  contentType: subscription.contentType || 'application/json',
-                  contentEncoding: subscription.contentEncoding || 'utf-8',
+                  contentType: subscription.metadata.expose.contentTypeResponse || 'application/json',
+                  contentEncoding: subscription.metadata.expose.contentEncodingResponse || 'utf-8',
                   sender: {
                     serviceName: this.serviceInfo.serviceName,
                     serviceVersion: this.serviceInfo.serviceVersion,

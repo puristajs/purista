@@ -2,7 +2,7 @@ import type { SchemaObject } from 'openapi3-ts'
 
 import { ContentType } from '../ContentType'
 
-export type CommandDefinitionMetadataBase = {
+export type SubscriptionDefinitionMetadataBase = {
   expose: {
     contentTypeRequest?: ContentType
     contentEncodingRequest?: string

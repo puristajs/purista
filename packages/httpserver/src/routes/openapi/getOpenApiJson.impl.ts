@@ -109,7 +109,7 @@ export const getOpenApiJson = function (this: HttpServerService): RouteOptions {
         const name = pathParamName.replace('?', '').replace(':', '')
         const required = !pathParamName.endsWith('?')
 
-        const schema = definition.openApi?.parameter?.properties?.[name]
+        const schema = expose.parameter?.properties?.[name]
 
         if (!schema) {
           logger.warn(
@@ -138,7 +138,7 @@ export const getOpenApiJson = function (this: HttpServerService): RouteOptions {
       const queryParams =
         definition.openApi?.query?.map((queryParam): ParameterObject => {
           const name = queryParam.name
-          const schema = definition.openApi?.parameter?.properties?.[name]
+          const schema = expose.parameter?.properties?.[name]
           const required = queryParam.required
 
           if (!schema) {
@@ -177,7 +177,7 @@ export const getOpenApiJson = function (this: HttpServerService): RouteOptions {
         requestBody = {
           content: {
             [expose.contentTypeRequest || 'application/json']: {
-              schema: definition.openApi?.inputPayload,
+              schema: expose.inputPayload,
             },
           },
         }
@@ -236,7 +236,7 @@ export const getOpenApiJson = function (this: HttpServerService): RouteOptions {
 
       const errorResponses: Record<number, unknown> = {}
 
-      if (definition.openApi?.inputPayload) {
+      if (expose.inputPayload) {
         errorResponses[400] = {
           description: getErrorName(400),
           content: {
@@ -247,7 +247,7 @@ export const getOpenApiJson = function (this: HttpServerService): RouteOptions {
         }
       }
 
-      if (definition.openApi?.parameter && pathParams.length > 0) {
+      if (expose.parameter && pathParams.length > 0) {
         errorResponses[404] = {
           description: getErrorName(404),
           content: {
@@ -302,11 +302,11 @@ export const getOpenApiJson = function (this: HttpServerService): RouteOptions {
           operationId: definition.openApi?.operationId,
           requestBody,
           responses: {
-            [definition.openApi?.outputPayload ? 200 : 204]: {
+            [expose.outputPayload ? 200 : 204]: {
               description: definition.openApi?.description,
               content: {
                 [expose.contentTypeResponse || 'application/json']: {
-                  schema: definition.openApi?.outputPayload,
+                  schema: expose.outputPayload,
                 },
               },
             },
