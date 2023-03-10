@@ -1,5 +1,6 @@
 import type { z } from 'zod'
 
+import { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig'
 import { EBMessageType } from '../EBMessageType.enum'
 import { InstanceId } from '../InstanceId'
 import { PrincipalId } from '../PrincipalId'
@@ -8,7 +9,6 @@ import type { SubscriptionAfterGuardHook } from './SubscriptionAfterGuardHook'
 import type { SubscriptionBeforeGuardHook } from './SubscriptionBeforeGuardHook'
 import { SubscriptionDefinitionMetadataBase } from './SubscriptionDefinitionMetadataBase'
 import type { SubscriptionFunction } from './SubscriptionFunction'
-import { SubscriptionSettings } from './SubscriptionSettings'
 import { SubscriptionTransformInputHook } from './SubscriptionTransformInputHook'
 import { SubscriptionTransformOutputHook } from './SubscriptionTransformOutputHook'
 
@@ -31,6 +31,8 @@ export type SubscriptionDefinition<
   subscriptionDescription: string
   /** the metadata of the subscription */
   metadata: MetadataType
+  /** config information for event bridge */
+  eventBridgeConfig: DefinitionEventBridgeConfig
   /** the subscription function */
   call: SubscriptionFunction<
     ServiceClassType,
@@ -62,8 +64,6 @@ export type SubscriptionDefinition<
   instanceId?: InstanceId
   /** filter for principal id */
   principalId?: PrincipalId
-  /** subscription settings */
-  settings: SubscriptionSettings
   /** hooks of subscription */
   hooks: {
     transformInput?: {

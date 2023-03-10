@@ -93,7 +93,8 @@ export class SubscriptionDefinitionBuilder<
 
   private instanceId?: InstanceId
 
-  private settings = { durable: true }
+  private durable = true
+  private autoacknowledge = false
 
   // eslint-disable-next-line no-useless-constructor
   constructor(private subscriptionName: string, private subscriptionDescription: string) {}
@@ -132,13 +133,30 @@ export class SubscriptionDefinitionBuilder<
   }
 
   /**
+   * Instruct the event bridge message broker to autoacknowledge messages as soon as they arrive.
+   * This means, a message will not be resent, if the subscription execution fails unexpected.
+   *
+   * If set to false, the message will be resent from message broker to eventbridge, if:
+   * - the underlaying message broker supports it
+   * - if the subscription execution fails unexpected
+   * - if sending of optional subscription response failed
+   *
+   * @param acknowledge Enable (true) and disable (false)
+   * @returns CommandDefinition
+   */
+  autoacknowledgeCommands(acknowledge: boolean) {
+    this.autoacknowledge = acknowledge
+    return this
+  }
+
+  /**
    * False: defines the subscription as a live-subscription, which is only able to process messages while the subscription itself is running.
    *
    * True: Advises the event bridge (like rabbitMQ) to store all messages if the subscription is not running.
    * As soon as the subscription is back again, all missed messages will be sent first, before it starts working like a live-subscription.
    */
   setDurable(durable: boolean) {
-    this.settings.durable = durable
+    this.durable = durable
     return this
   }
 
@@ -593,6 +611,10 @@ export class SubscriptionDefinitionBuilder<
     > = {
       subscriptionName: this.subscriptionName,
       subscriptionDescription: this.subscriptionDescription,
+      eventBridgeConfig: {
+        durable: this.durable,
+        autoacknowledge: this.autoacknowledge,
+      },
       metadata: {
         expose: {
           contentTypeRequest: this.inputContentType,
@@ -607,7 +629,6 @@ export class SubscriptionDefinitionBuilder<
       receiver: this.receiver,
       sender: this.sender,
       messageType: this.messageType,
-      settings: this.settings,
       eventName: this.eventName,
       emitEventName: this.emitEventName,
       principalId: this.principalId,

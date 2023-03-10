@@ -1,8 +1,8 @@
+import { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig'
 import { EBMessageAddress } from '../EBMessageAddress'
 import { EBMessageType } from '../EBMessageType.enum'
 import { InstanceId } from '../InstanceId'
 import { PrincipalId } from '../PrincipalId'
-import { SubscriptionSettings } from './SubscriptionSettings'
 
 /**
  * A subscription managed by the event bridge
@@ -37,5 +37,6 @@ export type Subscription<PayloadType = unknown, ParameterType = unknown> = {
   }
   /** the address of the subscription (service name, version and subscription name) */
   subscriber: EBMessageAddress
-  settings: SubscriptionSettings
+  /** config information for event bridge */
+  eventBridgeConfig: DefinitionEventBridgeConfig
 }
