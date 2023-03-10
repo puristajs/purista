@@ -1,1 +1,1 @@
-export type SecretGetterFunction = <T>(secretName: string) => Promise<T>
+export type SecretGetterFunction = <T>(secretName: string) => Promise<T | undefined>
