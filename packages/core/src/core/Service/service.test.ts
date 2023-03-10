@@ -11,9 +11,16 @@ describe('Service', () => {
 
   it('creates a new instance', async () => {
     const logger = getLoggerMock().mock
-    const eventbridge = getEventBridgeMock().mock
+    const eventBridge = getEventBridgeMock().mock
 
-    const service = new Service(logger, serviceInfo, eventbridge, [], [], undefined)
+    const service = new Service({
+      logger,
+      eventBridge,
+      info: serviceInfo,
+      commandDefinitionList: [],
+      subscriptionDefinitionList: [],
+      config: {},
+    })
 
     await expect(service.start()).resolves.toBeUndefined()
 

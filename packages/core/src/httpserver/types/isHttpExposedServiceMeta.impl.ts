@@ -9,7 +9,7 @@ export const isHttpExposedServiceMeta = (input?: any): input is HttpExposedServi
   if (!input || typeof input !== 'object') {
     return false
   }
-  if (!input.expose.http) {
+  if (!input.expose?.http) {
     return false
   }
   return true

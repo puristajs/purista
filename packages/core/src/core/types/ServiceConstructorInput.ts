@@ -12,7 +12,7 @@ export type ServiceConstructorInput<ConfigType> = {
   logger: Logger
   /** the service info with name, version and description of service */
   info: ServiceInfoType
-  /** the eventbridge instance */
+  /** the eventBridge instance */
   eventBridge: EventBridge
   /** the list of command definitions for this service */
   commandDefinitionList: CommandDefinitionList<any>

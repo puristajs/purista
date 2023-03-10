@@ -3,7 +3,7 @@ import { SinonSandbox, SinonStub, stub } from 'sinon'
 import { EventBridge } from '../core'
 
 /**
- * Mocks the eventbridge and stubs the methods
+ * Mocks the eventBridge and stubs the methods
  * @returns EventBridge mocked
  */
 export const getEventBridgeMock = (sandbox?: SinonSandbox): { mock: EventBridge; stubs: Record<string, SinonStub> } => {
