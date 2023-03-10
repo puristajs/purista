@@ -38,6 +38,8 @@ export const subscriptionTransformInput = async (
         setSecret: serviceInstance.secretStore.setSecret,
         getConfig: serviceInstance.configStore.getConfig,
         setConfig: serviceInstance.configStore.setConfig,
+        getState: serviceInstance.stateStore.getState,
+        setState: serviceInstance.stateStore.setState,
       })
       const parameterInput = await serviceInstance.wrapInSpan(
         subscription.subscriptionName + '.validateParameter',

@@ -13,6 +13,7 @@ import {
   SecretStore,
   ServiceEvents,
   ServiceInfoType,
+  StateStore,
 } from '../../types'
 import { ServiceInfoValidator } from '../ServiceInfoValidator.impl'
 
@@ -37,6 +38,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
 
   secretStore: SecretStore
   configStore: ConfigStore
+  stateStore: StateStore
 
   constructor(options: {
     logger: Logger
@@ -45,6 +47,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
     spanProcessor?: SpanProcessor
     secretStore: SecretStore
     configStore: ConfigStore
+    stateStore: StateStore
   }) {
     super()
     this.info = new Proxy(
@@ -87,6 +90,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
 
     this.secretStore = options.secretStore
     this.configStore = options.configStore
+    this.stateStore = options.stateStore
   }
 
   /**

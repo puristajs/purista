@@ -30,6 +30,8 @@ export const commandTransformInput = async <PayloadType = unknown, ParameterType
         setSecret: serviceInstance.secretStore.setSecret,
         getConfig: serviceInstance.configStore.getConfig,
         setConfig: serviceInstance.configStore.setConfig,
+        getState: serviceInstance.stateStore.getState,
+        setState: serviceInstance.stateStore.setState,
       })
       const parameterInput = await serviceInstance.wrapInSpan(
         command.commandName + '.validateParameter',
