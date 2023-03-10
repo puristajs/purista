@@ -4,7 +4,6 @@ import {
   Command,
   CommandErrorResponse,
   CommandSuccessResponse,
-  createInfoMessage,
   CustomMessage,
   deserializeOtp,
   EBMessage,
@@ -18,8 +17,6 @@ import {
   getNewEBMessageId,
   getNewTraceId,
   HandledError,
-  InfoInvokeTimeoutPayload,
-  InfoMessage,
   isCommandErrorResponse,
   isCommandResponse,
   isCommandSuccessResponse,
@@ -367,46 +364,6 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
         this.pendingInvocations.delete(correlationId)
       }
 
-      const sendErrorInfoMsg = async () => {
-        try {
-          const payload: InfoInvokeTimeoutPayload = {
-            traceId: command.traceId as string,
-            correlationId,
-            sender: command.sender,
-            receiver: command.receiver,
-            timestamp: command.timestamp,
-          }
-
-          const infoMessage: Omit<InfoMessage, 'instanceId'> = createInfoMessage(
-            EBMessageType.InfoInvokeTimeout,
-            input.sender,
-            {
-              instanceId: command.instanceId,
-              principalId: command.principalId,
-              traceId: command.traceId,
-              correlationId: command.correlationId,
-              payload,
-              otp: command.otp || serializeOtp(),
-            },
-          )
-
-          await this.emitMessage(infoMessage)
-        } catch (error) {
-          const err = new UnhandledError(StatusCode.BadGateway, 'failed to send InfoInvokeTimeout message', {
-            traceId: command.traceId,
-            correlationId,
-            error,
-          })
-          span.setStatus({
-            code: SpanStatusCode.ERROR,
-            message: err.message,
-          })
-          span.recordException(err)
-          this.logger.getChildLogger({ traceId: command.traceId }).error({ err }, err.message)
-          this.emit('eventbridge-error', err)
-        }
-      }
-
       const executionPromise = new Promise<T>((resolve, reject) => {
         const timeout = setTimeout(() => {
           const err = new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out', undefined, command.traceId)
@@ -424,7 +381,6 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
           clearTimeout(timeout)
           removeFromPending()
           reject(err)
-          sendErrorInfoMsg()
         }
 
         this.pendingInvocations.set(command.correlationId, {
