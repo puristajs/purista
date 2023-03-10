@@ -1,5 +1,7 @@
+export * from './DefaultConfigStore'
 export * from './DefaultEventBridge'
 export * from './DefaultLogger'
+export * from './DefaultSecretStore'
 export * from './Error/HandledError.impl'
 export * from './Error/UnhandledError.impl'
 export * from './helper'

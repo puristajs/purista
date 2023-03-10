@@ -1,5 +1,6 @@
 import { Context, Span, SpanOptions } from '@opentelemetry/api'
 
+import { ConfigGetterFunction, ConfigSetterFunction } from '../configStore'
 import { EBMessage } from '../EBMessage'
 import { Logger } from '../Logger'
 import { SecretGetterFunction, SecretSetterFunction } from '../secretStore'
@@ -16,4 +17,6 @@ export type SubscriptionTransformFunctionContext = {
   ) => Promise<F>
   getSecret: SecretGetterFunction
   setSecret: SecretSetterFunction
+  getConfig: ConfigGetterFunction
+  setConfig: ConfigSetterFunction
 }

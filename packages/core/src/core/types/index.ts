@@ -1,6 +1,7 @@
 export * from './addPrefixToObject'
 export * from './commandType'
 export * from './Complete'
+export * from './configStore'
 export * from './ContentType'
 export * from './CorrelationId'
 export * from './CustomMessage'
