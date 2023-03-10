@@ -5,6 +5,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
 import { puristaVersion } from '../../../version'
 import {
+  ConfigStore,
   EventBridge,
   GenericEventEmitter,
   Logger,
@@ -35,6 +36,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
   traceProvider: NodeTracerProvider
 
   secretStore: SecretStore
+  configStore: ConfigStore
 
   constructor(options: {
     logger: Logger
@@ -42,6 +44,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
     eventBridge: EventBridge
     spanProcessor?: SpanProcessor
     secretStore: SecretStore
+    configStore: ConfigStore
   }) {
     super()
     this.info = new Proxy(
@@ -83,6 +86,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
     this.eventBridge = options.eventBridge
 
     this.secretStore = options.secretStore
+    this.configStore = options.configStore
   }
 
   /**

@@ -26,7 +26,7 @@ export interface SecretStore {
   getSecret: SecretGetterFunction
 
   /**
-   * get a secret
+   * set a secret
    * @param string name of secret
    * @param value value of secret
    * @throws UnhandledError

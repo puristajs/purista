@@ -1,5 +1,6 @@
 import { Context, Span, SpanOptions } from '@opentelemetry/api'
 
+import { ConfigGetterFunction, ConfigSetterFunction } from '../configStore'
 import { Logger } from '../Logger'
 import { SecretGetterFunction, SecretSetterFunction } from '../secretStore'
 import { Command } from './Command'
@@ -16,4 +17,6 @@ export type CommandTransformFunctionContext<PayloadType, ParameterType> = {
   ) => Promise<F>
   getSecret: SecretGetterFunction
   setSecret: SecretSetterFunction
+  getConfig: ConfigGetterFunction
+  setConfig: ConfigSetterFunction
 }
