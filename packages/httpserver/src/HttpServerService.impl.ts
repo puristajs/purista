@@ -13,6 +13,7 @@ import {
   HttpExposedServiceMeta,
   initLogger,
   Logger,
+  SecretStore,
   Service,
   StatusCode,
   UnhandledError,
@@ -54,13 +55,17 @@ export class HttpServerService extends Service<HttpServerConfig> {
   constructor(
     eventBridge: EventBridge,
     config: HttpServerConfig = getDefaultConfig(),
-    options?: {
+    options: {
       logger?: Logger
       spanProcessor?: SpanProcessor
-    },
+      secretStore?: SecretStore
+    } = {},
   ) {
-    const logger = options?.logger || initLogger()
-    super(logger, ServiceInfo, eventBridge, COMMANDS, SUBSCRIPTIONS, config, options?.spanProcessor)
+    const logger = options.logger || initLogger()
+    super(logger, ServiceInfo, eventBridge, COMMANDS, SUBSCRIPTIONS, config, {
+      spanProcessor: options.spanProcessor,
+      secretStore: options.secretStore,
+    })
 
     this.config = merge(getDefaultConfig(), config)
 
