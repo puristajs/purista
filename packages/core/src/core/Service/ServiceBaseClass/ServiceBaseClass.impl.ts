@@ -4,7 +4,15 @@ import { NodeTracerProvider, SpanProcessor } from '@opentelemetry/sdk-trace-node
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
 import { puristaVersion } from '../../../version'
-import { EventBridge, GenericEventEmitter, Logger, ServiceEvents, ServiceInfoType } from '../../types'
+import {
+  EventBridge,
+  GenericEventEmitter,
+  Logger,
+  PuristaSpanTag,
+  SecretStore,
+  ServiceEvents,
+  ServiceInfoType,
+} from '../../types'
 import { ServiceInfoValidator } from '../ServiceInfoValidator.impl'
 
 /**
@@ -26,7 +34,17 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
 
   traceProvider: NodeTracerProvider
 
-  constructor(baseLogger: Logger, info: ServiceInfoType, eventBridge: EventBridge, spanProcessor?: SpanProcessor) {
+  secretStore: SecretStore
+
+  constructor(options: {
+    baseLogger: Logger
+    info: ServiceInfoType
+    eventBridge: EventBridge
+    options: {
+      spanProcessor?: SpanProcessor
+      secretStore: SecretStore
+    }
+  }) {
     super()
     this.info = new Proxy(
       {
@@ -37,11 +55,11 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
       ServiceInfoValidator,
     )
 
-    this.info.serviceDescription = info.serviceDescription
-    this.info.serviceName = info.serviceName
-    this.info.serviceVersion = info.serviceVersion
+    this.info.serviceDescription = options.info.serviceDescription
+    this.info.serviceName = options.info.serviceName
+    this.info.serviceVersion = options.info.serviceVersion
 
-    this.logger = baseLogger.getChildLogger({
+    this.logger = options.baseLogger.getChildLogger({
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
       puristaVersion,
@@ -58,13 +76,15 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
       resource,
     })
 
-    if (spanProcessor) {
-      this.traceProvider.addSpanProcessor(spanProcessor)
+    if (options.options.spanProcessor) {
+      this.traceProvider.addSpanProcessor(options.options.spanProcessor)
     }
 
     this.traceProvider.register()
 
-    this.eventBridge = eventBridge
+    this.eventBridge = options.eventBridge
+
+    this.secretStore = options.options.secretStore
   }
 
   /**
@@ -100,7 +120,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
     const tracer = this.getTracer()
 
     const callback = async (span: Span) => {
-      span.setAttribute('purista.version', puristaVersion)
+      span.setAttribute(PuristaSpanTag.PuristaVersion, puristaVersion)
       try {
         return await fn(span)
       } catch (error) {
@@ -144,7 +164,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
   async wrapInSpan<F>(name: string, opts: SpanOptions, fn: (span: Span) => Promise<F>, context?: Context): Promise<F> {
     const tracer = this.getTracer()
     const span = tracer.startSpan(name, opts, context)
-    span.setAttribute('purista.version', puristaVersion)
+    span.setAttribute(PuristaSpanTag.PuristaVersion, puristaVersion)
     try {
       return await fn(span)
     } catch (error) {

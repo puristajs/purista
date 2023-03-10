@@ -6,11 +6,13 @@ import {
   EventBridge,
   initLogger,
   Logger,
+  SecretStore,
   Service,
   ServiceClass,
   ServiceInfoType,
   SubscriptionDefinitionList,
 } from '../core'
+import { initDefaultSecretStore } from '../core/DefaultSecretStore'
 import { CommandDefinitionBuilder } from './CommandDefinitionBuilder.impl'
 import { SubscriptionDefinitionBuilder } from './SubscriptionDefinitionBuilder.impl'
 
@@ -34,7 +36,6 @@ export class ServiceBuilder<
   private defaultConfig?: ConfigType
 
   instance?: ServiceClassType
-
   SClass: any = Service
 
   // eslint-disable-next-line no-useless-constructor
@@ -140,32 +141,47 @@ export class ServiceBuilder<
    */
   getInstance(
     eventBridge: EventBridge,
-    options: { serviceConfig?: ConfigInputType; logger?: Logger; spanProcessor?: SpanProcessor } = {},
+    options: {
+      serviceConfig?: ConfigInputType
+      logger?: Logger
+      spanProcessor?: SpanProcessor
+      secretStore?: SecretStore
+    } = {},
   ) {
     let conf = {
       ...this.defaultConfig,
       ...options?.serviceConfig,
-    }
+    } as ConfigType
 
-    const logInstance = options?.logger || initLogger()
+    const logger = options.logger || initLogger()
 
-    if (this.configSchema && options?.serviceConfig) {
+    if (this.configSchema && options.serviceConfig) {
       try {
-        conf = this.configSchema.parse(options?.serviceConfig)
+        conf = this.configSchema.parse(options.serviceConfig)
       } catch (err) {
-        logInstance.error({ err, ...this.info }, 'Invalid configuration for')
+        logger.error({ err, ...this.info }, 'Invalid configuration for')
         throw new Error('Fatal - unable to create service instance because provided configuration is invalid')
       }
     }
 
+    const secretStore: SecretStore =
+      options.secretStore ||
+      initDefaultSecretStore({
+        logger,
+        spanProcessor: options.spanProcessor,
+      })
+
     this.instance = new this.SClass(
-      logInstance,
+      logger,
       this.info,
       eventBridge,
       this.commandFunctions,
       this.subscriptionList,
-      conf as ConfigType,
-      options?.spanProcessor,
+      conf,
+      {
+        spanProcessor: options.spanProcessor,
+        secretStore,
+      },
     )
 
     return this.instance as ServiceClassType

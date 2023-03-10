@@ -2,6 +2,7 @@ import { Context, Span, SpanOptions } from '@opentelemetry/api'
 
 import { EBMessageAddress } from '../EBMessageAddress'
 import type { Logger } from '../Logger'
+import { SecretGetterFunction, SecretSetterFunction } from '../secretStore'
 import type { Command } from './Command'
 
 export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsType = unknown> = {
@@ -20,4 +21,6 @@ export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsTy
     context: Context | undefined,
     fn: (span: Span) => Promise<F>,
   ) => Promise<F>
+  getSecret: SecretGetterFunction
+  setSecret: SecretSetterFunction
 }

@@ -3,6 +3,7 @@ import { Context, Span, SpanOptions } from '@opentelemetry/api'
 import { EBMessage } from '../EBMessage'
 import { EBMessageAddress } from '../EBMessageAddress'
 import type { Logger } from '../Logger'
+import { SecretGetterFunction, SecretSetterFunction } from '../secretStore'
 
 /**
  * The subscription function context which will be passed into subscription function.
@@ -29,4 +30,6 @@ export type SubscriptionFunctionContext = {
     context: Context | undefined,
     fn: (span: Span) => Promise<F>,
   ) => Promise<F>
+  getSecret: SecretGetterFunction
+  setSecret: SecretSetterFunction
 }

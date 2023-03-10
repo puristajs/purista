@@ -26,6 +26,8 @@ export const commandTransformInput = async <PayloadType = unknown, ParameterType
         message,
         startActiveSpan: serviceInstance.startActiveSpan.bind(serviceInstance),
         wrapInSpan: serviceInstance.wrapInSpan.bind(serviceInstance),
+        getSecret: serviceInstance.secretStore.getSecret,
+        setSecret: serviceInstance.secretStore.setSecret,
       })
       const parameterInput = await serviceInstance.wrapInSpan(
         command.commandName + '.validateParameter',
