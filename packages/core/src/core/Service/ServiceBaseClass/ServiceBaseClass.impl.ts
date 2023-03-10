@@ -37,13 +37,11 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
   secretStore: SecretStore
 
   constructor(options: {
-    baseLogger: Logger
+    logger: Logger
     info: ServiceInfoType
     eventBridge: EventBridge
-    options: {
-      spanProcessor?: SpanProcessor
-      secretStore: SecretStore
-    }
+    spanProcessor?: SpanProcessor
+    secretStore: SecretStore
   }) {
     super()
     this.info = new Proxy(
@@ -59,7 +57,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
     this.info.serviceName = options.info.serviceName
     this.info.serviceVersion = options.info.serviceVersion
 
-    this.logger = options.baseLogger.getChildLogger({
+    this.logger = options.logger.getChildLogger({
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
       puristaVersion,
@@ -76,15 +74,15 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
       resource,
     })
 
-    if (options.options.spanProcessor) {
-      this.traceProvider.addSpanProcessor(options.options.spanProcessor)
+    if (options.spanProcessor) {
+      this.traceProvider.addSpanProcessor(options.spanProcessor)
     }
 
     this.traceProvider.register()
 
     this.eventBridge = options.eventBridge
 
-    this.secretStore = options.options.secretStore
+    this.secretStore = options.secretStore
   }
 
   /**
