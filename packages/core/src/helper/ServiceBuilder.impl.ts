@@ -173,7 +173,6 @@ export class ServiceBuilder<
       options.secretStore ||
       initDefaultSecretStore({
         logger,
-        spanProcessor: options.spanProcessor,
       })
 
     const C = this.getCustomClass()
