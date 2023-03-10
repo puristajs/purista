@@ -397,6 +397,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
         },
         this.executeCommand.bind(this),
         commandDefinition.metadata,
+        commandDefinition.eventBridgeConfig,
       )
 
       span.end()
@@ -574,7 +575,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           serviceVersion: this.info.serviceVersion,
           serviceTarget: subscriptionDefinition.subscriptionName,
         },
-        settings: subscriptionDefinition.settings,
+        eventBridgeConfig: subscriptionDefinition.eventBridgeConfig,
         principalId: subscriptionDefinition.principalId,
         instanceId: subscriptionDefinition.instanceId,
       }

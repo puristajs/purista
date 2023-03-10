@@ -1,5 +1,6 @@
 import { Command, CommandDefinitionMetadataBase, CommandErrorResponse, CommandSuccessResponse } from './commandType'
 import { CustomMessage } from './CustomMessage'
+import { DefinitionEventBridgeConfig } from './DefinitionEventBridgeConfig'
 import type { EBMessage } from './EBMessage'
 import type { EBMessageAddress } from './EBMessageAddress'
 import type { Subscription } from './subscription'
@@ -52,6 +53,7 @@ export interface EventBridge {
       Readonly<Omit<CommandSuccessResponse, 'instanceId'>> | Readonly<Omit<CommandErrorResponse, 'instanceId'>>
     >,
     metadata: CommandDefinitionMetadataBase,
+    eventBridgeConfig: DefinitionEventBridgeConfig,
   ): Promise<string>
 
   /**

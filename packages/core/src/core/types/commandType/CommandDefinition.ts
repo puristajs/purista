@@ -1,5 +1,6 @@
 import type { z } from 'zod'
 
+import { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig'
 import type { ServiceClass } from '../ServiceClass'
 import type { CommandAfterGuardHook } from './CommandAfterGuardHook'
 import type { CommandBeforeGuardHook } from './CommandBeforeGuardHook'
@@ -21,9 +22,15 @@ export type CommandDefinition<
   FunctionParamsType = MessageParamsType,
   FunctionResultType = unknown,
 > = {
+  /** the name of the command */
   commandName: string
+  /** the description of the command */
   commandDescription: string
+  /** the metadata of the command */
   metadata: MetadataType
+  /** config information for event bridge */
+  eventBridgeConfig: DefinitionEventBridgeConfig
+  /** the command function */
   call: CommandFunction<
     ServiceClassType,
     MessagePayloadType,
@@ -32,7 +39,9 @@ export type CommandDefinition<
     MessageParamsType,
     MessageResultType
   >
+  /** the eventName for the command response */
   eventName?: string
+  /** hooks of command */
   hooks: {
     transformInput?: {
       transformInputSchema: z.ZodType

@@ -57,6 +57,9 @@ export class CommandDefinitionBuilder<
 
   private operationId?: string
 
+  private durable = false
+  private autoacknowledge = true
+
   private hooks: {
     transformInput?: {
       transformInputSchema: z.ZodType
@@ -570,6 +573,34 @@ export class CommandDefinitionBuilder<
   }
 
   /**
+   * Instruct the event bridge message broker to autoacknowledge commands as soon as they arrive.
+   * This means, a message will not be resent, if the command execution fails unexpected.
+   *
+   * If set to false, the command message will be resent from message broker to eventbridge, if:
+   * - the underlaying message broker supports it
+   * - if the command execution fails unexpected
+   * - if sending of command response failed
+   *
+   * @param acknowledge Enable (true) and disable (false)
+   * @returns CommandDefinition
+   */
+  autoacknowledgeCommands(acknowledge: boolean) {
+    this.autoacknowledge = acknowledge
+    return this
+  }
+
+  /**
+   * Advice the underlaying message broker to store command messages if no consumer service instance is available.
+   * It defaults to false.
+   * In most cases it does not make sense as command most likely just-in-time sequential executions.
+   * In case no consumer is available, they should fail in most cases
+   */
+  setDurable(durable: boolean) {
+    this.durable = durable
+    return this
+  }
+
+  /**
    * Creates and returns the CommandDefinition used as input for the service.
    * @returns CommandDefinition
    */
@@ -609,6 +640,10 @@ export class CommandDefinitionBuilder<
     > = {
       commandName: this.commandName,
       commandDescription: this.commandDescription,
+      eventBridgeConfig: {
+        durable: this.durable,
+        autoacknowledge: this.autoacknowledge,
+      },
       metadata: {
         expose: {
           contentTypeRequest: this.inputContentType || 'application/json',
