@@ -7,6 +7,7 @@ import {
   CommandSuccessResponse,
   createInfoMessage,
   CustomMessage,
+  DefinitionEventBridgeConfig,
   deserializeOtp,
   EBMessage,
   EBMessageAddress,
@@ -439,6 +440,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     address: EBMessageAddress,
     cb: (message: Command) => Promise<CommandSuccessResponse | CommandErrorResponse>,
     metadata: CommandDefinitionMetadataBase,
+    eventBridgeConfig: DefinitionEventBridgeConfig,
   ): Promise<string> {
     if (!this.connection) {
       throw new Error('No connection - not connected')
@@ -447,6 +449,8 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     const queueName = getCommandQueueName(address, this.config.namePrefix)
 
     const channel = await this.connection.createChannel()
+
+    const noAck = !eventBridgeConfig.autoacknowledge
 
     channel.on('close', () => {
       this.healthy = false
@@ -460,7 +464,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       this.emit('eventbridge-error', err)
     })
 
-    const queue = await channel.assertQueue(queueName, { durable: false, autoDelete: true })
+    const queue = await channel.assertQueue(queueName, { durable: !!eventBridgeConfig.durable, autoDelete: true })
     await channel.bindQueue(queue.queue, this.config.exchangeName, '', {
       'x-match': 'all',
       messageType: EBMessageType.Command,
@@ -542,6 +546,10 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
                     type: responseMessage.messageType,
                     headers,
                   })
+
+                  if (noAck) {
+                    channel.ack(msg)
+                  }
                 },
               )
             } catch (error) {
@@ -559,11 +567,14 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
               span.recordException(err)
               this.emit('eventbridge-error', err)
               this.logger.error({ err }, 'Failed to consume command response message')
+              if (noAck) {
+                channel.nack(msg)
+              }
             }
           },
         )
       },
-      { noAck: true },
+      { noAck },
     )
 
     this.serviceFunctions.set(queueName, { cb, channel })
@@ -601,6 +612,8 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       throw new Error('No connection - not connected')
     }
 
+    const noAck = !subscription.eventBridgeConfig.autoacknowledge
+
     const queueName = getSubscriptionQueueName(subscription.subscriber, this.config.namePrefix)
 
     const channel = await this.connection.createChannel()
@@ -617,7 +630,9 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       this.emit('eventbridge-error', err)
     })
 
-    const queue = await channel.assertQueue(queueName, { durable: subscription.settings.durable })
+    const queue = await channel.assertQueue(queueName, {
+      durable: subscription.eventBridgeConfig.durable,
+    })
     await channel.bindQueue(queue.queue, this.config.exchangeName, '', {
       'x-match': 'all',
       messageType: subscription.messageType,
@@ -667,7 +682,9 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
               if (subscription.emitEventName && result) {
                 this.emitMessage(result)
               }
-              channel.ack(msg)
+              if (noAck) {
+                channel.ack(msg)
+              }
             } catch (error) {
               const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to consume subscription message', {
                 error,
@@ -680,11 +697,14 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
               span.recordException(err)
               this.emit('eventbridge-error', err)
               this.logger.error({ err }, 'Failed to consume subscription message')
+              if (noAck) {
+                channel.nack(msg)
+              }
             }
           },
         )
       },
-      { noAck: false },
+      { noAck },
     )
 
     this.subscriptions.set(queueName, { cb, channel })
