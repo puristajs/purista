@@ -144,6 +144,7 @@ describe('integration test', () => {
       .disableHttpSecurity()
       .enableHttpSecurity()
       .addQueryParameters({ required: false, name: 'param' })
+      .markAsDeprecated()
       .setCommandFunction(async (context, payload, parameter) => {
         const address = {
           serviceName: serviceTwoInfo.serviceName,
@@ -452,13 +453,13 @@ describe('integration test', () => {
     // jest.useFakeTimers()
 
     const logger = getLoggerMock(sandbox)
-    const eventbridge = new DefaultEventBridge(undefined, { logger: logger.mock })
-    await eventbridge.start()
+    const eventBridge = new DefaultEventBridge(undefined, { logger: logger.mock })
+    await eventBridge.start()
 
-    const serviceOne = serviceOneBuilder.getInstance(eventbridge)
+    const serviceOne = serviceOneBuilder.getInstance(eventBridge)
     await serviceOne.start()
 
-    const serviceTwo = serviceTwoBuilder.getInstance(eventbridge)
+    const serviceTwo = serviceTwoBuilder.getInstance(eventBridge)
     await serviceTwo.start()
 
     const message = getCommandMessageMock({
@@ -476,11 +477,14 @@ describe('integration test', () => {
       },
     })
 
-    const result = await eventbridge.invoke<string>(message)
+    const result = await eventBridge.invoke<string>(message)
+
+    await expect(eventBridge.isReady()).toBeTruthy()
+    await expect(eventBridge.isHealthy()).toBeTruthy()
 
     await serviceOne.destroy()
     await serviceTwo.destroy()
-    await eventbridge.destroy()
+    await eventBridge.destroy()
 
     // jest.runAllTimers()
 
