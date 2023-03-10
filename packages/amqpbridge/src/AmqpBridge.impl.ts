@@ -2,8 +2,10 @@ import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api'
 import { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import {
   Command,
+  CommandDefinitionMetadataBase,
   CommandErrorResponse,
   CommandSuccessResponse,
+  createInfoMessage,
   CustomMessage,
   deserializeOtp,
   EBMessage,
@@ -436,6 +438,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
   async registerCommand(
     address: EBMessageAddress,
     cb: (message: Command) => Promise<CommandSuccessResponse | CommandErrorResponse>,
+    metadata: CommandDefinitionMetadataBase,
   ): Promise<string> {
     if (!this.connection) {
       throw new Error('No connection - not connected')
@@ -564,6 +567,9 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     )
 
     this.serviceFunctions.set(queueName, { cb, channel })
+
+    const info = createInfoMessage(EBMessageType.InfoServiceFunctionAdded, address, { payload: metadata })
+    await this.emitMessage(info)
 
     return queueName
   }
