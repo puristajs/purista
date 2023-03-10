@@ -12,6 +12,8 @@ export const getSubscriptionContextMock = (message: EBMessage, sandbox?: SinonSa
     invoke: sandbox?.stub() || stub(),
     wrapInSpan: sandbox?.stub() || stub(),
     startActiveSpan: sandbox?.stub() || stub(),
+    getSecret: sandbox?.stub() || stub(),
+    setSecret: sandbox?.stub() || stub(),
   }
 
   const mock: SubscriptionFunctionContext = {
@@ -21,6 +23,8 @@ export const getSubscriptionContextMock = (message: EBMessage, sandbox?: SinonSa
     invoke: stubs.invoke.rejects(new Error('Invoke is not stubbed')),
     wrapInSpan: stubs.wrapInSpan.callsFake((_name, _opts, fn) => fn()),
     startActiveSpan: stubs.startActiveSpan.callsFake((_name, _opts, _context, fn) => fn()),
+    getSecret: stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
+    setSecret: stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
   }
 
   return {
