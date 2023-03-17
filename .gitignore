@@ -16,6 +16,8 @@ node_modules/
 .vuepress/.temp/
 .vuepress/dist/
 
+.$*.bkp
+
 .turbo
 
 temp
