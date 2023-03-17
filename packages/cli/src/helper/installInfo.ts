@@ -10,6 +10,7 @@ type ServiceEntry = {
   path: string
   serviceInfoFile: string
   builderFile: string
+  serviceFile: string
 }
 type InstallInfo = {
   sinonIsPresent: boolean
@@ -24,7 +25,27 @@ export const installInfo: InstallInfo = {
 }
 
 const matchVersionRegex = /^\D*(\d+)$/i
-const builderFileRegex = /^\D*(\d+)$/i
+const infoFileRegex = /general[A-Z]\D*ServiceInfo\.ts$/
+const builderFileRegex = /Builder\.ts$/i
+const serviceFileRegex = /Service\.ts$/i
+
+const getBuilderFile = (startFolder: string) => {
+  const files = fs.readdirSync(startFolder)
+  return files.find((file) => {
+    const match = file.match(builderFileRegex)
+
+    return !!match
+  })
+}
+
+const getServiceFile = (startFolder: string) => {
+  const files = fs.readdirSync(startFolder)
+  console.log(files)
+  return files.find((file) => {
+    const match = file.match(serviceFileRegex)
+    return !!match
+  })
+}
 
 const getServiceVersions = (startFolder: string, serviceName: string) => {
   const files = fs.readdirSync(startFolder)
@@ -35,24 +56,32 @@ const getServiceVersions = (startFolder: string, serviceName: string) => {
     path: '',
     serviceInfoFile: '',
     builderFile: '',
+    serviceFile: '',
   }
 
   files.forEach((file) => {
     const name = path.join(startFolder, file)
+
     if (fs.statSync(name).isDirectory()) {
       const versionInfo = file.match(matchVersionRegex)
-      if (versionInfo && versionInfo.length === 2) {
+      if (versionInfo?.length === 2) {
         service.version = parseInt(versionInfo[1])
         service.path = path.join(serviceName, path.basename(file))
+
+        service.builderFile = getBuilderFile(name) || ''
+        service.serviceFile = getServiceFile(name) || ''
       }
     } else {
-      service.builderFile = path.basename(file)
-
-      console.log('file:', path.basename(file))
+      const infoName = path.basename(file)
+      if (infoName.match(infoFileRegex)) {
+        service.serviceInfoFile = infoName
+      }
     }
   })
 
-  installInfo.services.push(service)
+  if (service.version > 0) {
+    installInfo.services.push(service)
+  }
 }
 
 export const collectServices = (startFolder: string) => {

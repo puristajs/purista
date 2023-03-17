@@ -3,6 +3,7 @@ import { createSandbox } from 'sinon'
 
 import { {{camelCase service.name}}V{{service.version}}Service } from '../../{{camelCase service.name}}V{{service.version}}Service'
 import { {{camelCase name}}CommandBuilder } from './{{camelCase name}}CommandBuilder'
+import { {{properCase service.name}}V{{service.version}}{{properCase name}}InputPayload, {{properCase service.name}}V{{service.version}}{{properCase name}}InputParameter } from './types'
 
 describe('service {{properCase service.name}} version {{service.version}} - command {{camelCase name}}', () => {
   let sandbox = createSandbox()
@@ -19,9 +20,9 @@ describe('service {{properCase service.name}} version {{service.version}} - comm
 
     const {{camelCase name}} = {{camelCase name}}CommandBuilder.getCommandFunction().bind(service)
 
-    const payload = undefined
+    const payload: {{properCase service.name}}V{{service.version}}{{properCase name}}InputPayload = undefined
 
-    const parameter = {}
+    const parameter: {{properCase service.name}}V{{service.version}}{{properCase name}}InputParameter = {}
 
     const context = getCommandContextMock(payload, parameter, sandbox)
 

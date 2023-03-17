@@ -57,13 +57,12 @@ export const initProjectActions: Actions = [
     await installDependencies('npm install -s ' + deps.join(' '))
 
     const devDeps = devDependencies
-    /*
+
     if (answers.installCliGlobal) {
       devDeps.push(...cliDependencies)
     } else {
       await installDependencies('npm install -g ' + cliDependencies.join(' '))
     }
-    */
 
     await installDependencies('npm install -d ' + devDeps.join(' '))
 
@@ -135,12 +134,6 @@ export const initProjectActions: Actions = [
     skipIfExists: true,
     path: 'src/index.ts',
     templateFile: TEMPLATE_BASE + '/src/index.ts.hbs',
-  },
-  {
-    type: 'add',
-    skipIfExists: true,
-    path: 'src/app/app.ts',
-    templateFile: TEMPLATE_BASE + '/src/app/app.ts.hbs',
   },
   {
     type: 'add',
