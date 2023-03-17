@@ -4,6 +4,7 @@ import { Actions } from 'node-plop'
 
 import { TEMPLATE_BASE } from '../config.js'
 import { collectInstallInfo, installInfo } from '../helper/installInfo.js'
+import { addDefinitionToBuilder } from '../manipulation/addDefinitionToBuilder.js'
 import { addEventEnumToCommandBuilder } from '../manipulation/addEventEnumToCommandBuilder.js'
 import { ensureServiceEvent } from '../manipulation/ensureServiceEvent.js'
 import { lintFiles } from '../manipulation/lintFiles.js'
@@ -52,7 +53,10 @@ export const addCommandActions: Actions = [
   async (answers) => {
     console.log('try to update existing files - pls be patient!')
     try {
-      const eventEnumName = await ensureServiceEvent(answers.commandEventName)
+      const enumDescription = `Emitted by ${answers.service.name} v${answers.service.version} command ${camelCase(
+        answers.name,
+      )}:\n${answers.description}`
+      const eventEnumName = await ensureServiceEvent(answers.commandEventName, enumDescription)
       if (eventEnumName) {
         await addEventEnumToCommandBuilder(
           `src/service/${answers.service.path}/command/${camelCase(answers.name)}/${camelCase(
@@ -62,6 +66,14 @@ export const addCommandActions: Actions = [
         )
       }
 
+      const serviceBuilderFile = `src/service/${answers.service.path}/${answers.service.serviceFile}`
+      await addDefinitionToBuilder(
+        'commandDefinitions',
+        serviceBuilderFile,
+        `./command/${camelCase(answers.name)}`,
+        `${camelCase(answers.name)}CommandBuilder`,
+      )
+
       const files: string[] = [
         `src/service/${answers.service.path}/command/${camelCase(answers.name)}/index.ts`,
         `src/service/${answers.service.path}/command/${camelCase(answers.name)}/schema.ts`,
@@ -70,6 +82,7 @@ export const addCommandActions: Actions = [
         `src/service/${answers.service.path}/command/${camelCase(answers.name)}/${camelCase(
           answers.name,
         )}CommandBuilder.ts`,
+        serviceBuilderFile,
         `src/service/${answers.service.path}/index.ts`,
         `src/service/ServiceEvent.enum.ts`,
       ]
