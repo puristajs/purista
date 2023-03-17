@@ -1,8 +1,8 @@
 ---
-order: 0
-title: Logging, tracing and metrics with PURISTA typescript based framework
-shortTitle: Logging and metrics
-description: Logging and metrics in PURISTA typescript nodejs backend framework applications and how to use them.
+order: 1
+title: Logging
+shortTitle: Logging
+description: Logging in PURISTA typescript nodejs backend framework applications and how to use them.
 tag:
   - typescript
   - nodejs

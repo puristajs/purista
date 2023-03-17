@@ -1,7 +1,7 @@
 ---
 order: 10
 title: Quickstart with cli
-shortTitle: CLI usage
+shortTitle: Quickstart with CLI
 description: Install and setup a PURISTA typescript framework project.
 ---
 
@@ -20,15 +20,18 @@ It might take a short time for `npx` to download the needed data to it's tempora
 The cli tool will guide you through all necessary steps.  
 If you are installing in an existing project, no files will be overwritten and it might be, that you need to do some manual steps.
 
-1. confirm that you like to install PURISTA in the current folder
+## 1. Confirm installation
 
+Confirm that you like to install PURISTA in the current folder.
 Confirm by pressing enter or `y` key.
 
 ```bash
 ? Initialize PURISTA in current folder Yes
 ```
 
-2. decide how you like to install the cli tool for further usage.
+## 2. Global vs local
+
+Decide how you like to install the cli tool for further usage.
 
 If you install PURISTA cli globally or as local project develop-dependency.  
 Global installation is recommended, as you are able to simply execute the cli tool with `purista` command.  
@@ -41,7 +44,9 @@ You can choose your preferred option by using arrow-up/down keys and confirm by 
   as local module in this project only 
 ```
 
-3. decide if you like to use linter & prettier for better code style and jest & sinon as test tools .  
+## 3. Choose dev-tools
+
+Decide if you like to use linter & prettier for better code style and jest & sinon as test tools.
 
 It is recommended to use such tools as they dramatically improve developers life and especially if you do not work on your own on a project, the code will stay consistent.  
 Because of this, code style and testing are pre-selected.  
@@ -55,9 +60,11 @@ to invert selection, and <enter> to proceed)
  ◉ testing: jest and sinon
 ```
 
-4. select the messaging system - event bridge - you like to use.
+## 4. Choose eventbridge
 
-You can navigate to the prefered one with arrow-up/down keys and confirm selection by pressing the enter key.
+Select the messaging system - event bridge - you like to use.
+
+You can navigate to the preferred one with arrow-up/down keys and confirm selection by pressing the enter key.
 
 ```bash
 ? Which messaging system should be used (Use arrow keys)
@@ -65,28 +72,34 @@ You can navigate to the prefered one with arrow-up/down keys and confirm selecti
   AMQP eventbridge (RabbitMQ)
 ```
 
-5. decide if you like to install the PURISTA http-server package or not.
+## 5. Optional http server
+
+Decide if you like to install the PURISTA http-server package or not.
 
 It is recommended to install this package, as because of this feature, you should be able to execute commands and trigger subscriptions very easily.
 
-You can confirm the installaion by pressing the enter or `y` key or decline by pressing the `n` key
+You can confirm the installation by pressing the enter or `y` key or decline by pressing the `n` key
 
 ```bash
 ? Should the @purista/httpserver package be installed, to automatically provide a REST api server? (Y/n)
 ```
 
-6. decide if you like to install the http static plugin
+## 6. Http server static plugin
+
+Decide if you like to install the http static plugin (only if http server installation is previously selected).
 
 This package can be used to serve some static files from a folder. This might be very helpfull during development and testing.  
 In production you might choose some other option like CDN.
 
-You can confirm the installaion by pressing the enter or `y` key or decline by pressing the `n` key
+You can confirm the installation by pressing the enter or `y` key or decline by pressing the `n` key
 
 ```bash
 ? Should the http service be able to provide static files - files and assets like images & css? (Y/n)
 ```
 
-7. now the installation process starts and npm will download depending modules and needed files will be created.  
+## 7. Nip on your coffee
+
+Now the installation process starts and npm will download depending modules and needed files will be created.
 
 If everything is working as expected, you will see a success message.
 
@@ -100,7 +113,7 @@ Now it is time to add your first service!
 ✔  -> 📖 Learn more about PURISTA at https://purista.dev
 ```
 
-**And yes, that's it!**
+## 8. Try out
 
 If you've installed the recommended PURISTA http-server, you can directly try out your installation.
 
@@ -112,4 +125,8 @@ And than open [http://localhost:9090/api](http://localhost:9090/api) or if you a
 
 You can now read a bit more about recommended folder structure, which is also used by the cli at [Recommended structure](2_recommended_project_structure.md).
 
-Or, you can directly jump to the [Create new Service](../2._services/1_create-new-service.md) part.
+## 9. Add Logic
+
+Now it is time for you, to add some business logic.  
+
+Start with [creating new Service](../2._services/1_create-new-service.md).

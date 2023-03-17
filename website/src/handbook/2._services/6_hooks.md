@@ -1,8 +1,8 @@
 ---
-order: 50
+order: 60
 shortTitle: Hooks
-title: Hooks and events in PURISTA nodejs backend framework
-description: Hooks and events in PURISTA typescript applications and services
+title: Hooks and transforms
+description: Hooks and transforms in PURISTA typescript applications and services
 tag:
   - typescript
   - nodejs
