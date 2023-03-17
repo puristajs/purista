@@ -1,7 +1,7 @@
 ---
 order: 10
-title: Event bridge or event bus systems available for typescript backend framework PURISTA
-shortTitle: Event bridge
+title: Overview of event bridges
+shortTitle: Overview
 description: A brief overview about event bridge opportunities to be used with PURISTA typescript framework
 tag:
   - typescript
@@ -17,11 +17,30 @@ tag:
   - Guide
 ---
 
+## Supported message broker
+
+| name                                        | scale | subscriptions*                        | durable   | status   |
+|---                                          |---    |---                                    |---        |---       |
+| [__Default__](./2_default-event-bridge.md)  | 🚫     | ✅ __complex__                        | 🚫        | available   |
+| [__AMQP__](./3_amqp-event-bridge.md)        | ✅     | ✅ __complex__                        | ✅        | available   |
+| [__Dapr__](./4_dapr.md)                     | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/85) |
+| [__MQTT__](./5_mqtt.md)                     | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/98) |
+| __AWS EventBridge__                         | ✅     | ☑️ _event only<br>(max 5 per event)_   | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/99)|
+| [__KubeMQ__ ](./6_kubemq.md)                | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/64)     |
+
+__(*)__ _- complex = based on events and/or additional properties like sender, receiver, type_  
+__(*)__ _- event only = subscriptions can subscribe to event names only_  
+
+You need a other message broker to be supported?  
+Than you can [open an issue](https://github.com/sebastianwessel/purista/issues) or implement on your own.
+
 ## General
 
 The concept of PURISTA is based on "some" message broker. The message broker is handling all the communication messages between single functions and subscriptions.
 
 There are a lot of different message system out there. So the question is, which one to choose. So, what features should an ideal message broker provide.
+
+
 
 ### Push based
 
@@ -38,7 +57,7 @@ We need in best case persistency per queue. Queues for command requests/response
 
 But on the other hand, subscriptions should be able to handle messages later and the information should not get lost.
 
-### RPC request/reply
+### Request reply pattern
 
 The broker must be able to provide some way, to build a request-replay mechanism. Otherwise, it is not possible to call a service function and receive a result.  
 In general, this pattern can be build with some kind of response queue. But, as our functions and subscriptions are maybe serverless/stateless, we will need the possibility to have response queues, which are short living and automatically created and removed.
@@ -53,70 +72,9 @@ Also, you do not want to have a 1:1 relation. You always have one message produc
 
 The broker must be able to deliver the same message to n different consumers, based on the message and the consumers.
 
-## DefaultEventBridge
-
-The core package comes with `DefaultEventBridge` which will work on local without any further installation. This should work out of the box for single instances.  
-You can also use it for simple horizontal scaling, but the messages and states are not shared or load balanced between instances.
-
-This means a subscription is always running on the same instance. Also, any function invocation is done within the same instance.
-
-Because of this, the `DefaultEventBridge` will only work in scenarios, where you deploy your services as monolith and you don't have the requirement to share messages and states across instances.
-
-## AMQP event bridge
-
-The AMQP protocol and the corresponding brokers are perfectly for PURISTA.
-
-The package `@purista/amqpbridge` provides an event bridge for the AMQP protocol. This means you can use [RabbitMQ](https://www.rabbitmq.com) as message broker. This is the recommended message broker. Also, [Apache ActiveMQ](https://activemq.apache.org/) should work.
-
-By using the AMQP event bridge, the system will scale and load balance any task across all instances.  
-It also allows you, to choose a more flexible way of deployment, as you are now able to split your monolith into small pieces.
-
-You can:
-
-- spin up multiple monolith instances
-- you can split your monolith by services and run multiple service instances (microservice style)
-- you can split even more down to single function and subscription level
-- you are able to connect other systems via the amqp broker
-
-The easiest way to start - simply start a RabbitMQ docker container:
-
-```sh
-docker run --rm -it --hostname my-rabbit -p 15672:15672 -p 5672:5672 rabbitmq:3-management
-```
-
-## KubeMQ
-
-see: [Github feature request](https://github.com/sebastianwessel/purista/issues/64)
-
-## AWS
-
-### AWS EventBridge
-
-### AWS SNS
-
-### AWS MQ
-
-## Azure
-
-### Azure Service Grid
-
-### Azure Event Hubs
-
-### Azure Service Bus
-
-## Google Cloud
-
 ## Apache Kafka
 
-[Apache Kafka](https://kafka.apache.org) is a very popular message broker.  
-But, as Kafka is a pull based broker it currently does not fit the basic requirements.  
+[Apache Kafka](https://kafka.apache.org) is a very popular message broker with a focus on stream processing.  
+But, as Kafka is a pull based broker, lacks a out-of-box request-response pattern, it currently does not fit the basic requirements.  
 
 There are currently no plans to use Kafka as event bridge backbone for PURISTA.
-
-## MQTT Brokers
-
-MQTT with the popular [mosquitto broker](https://mosquitto.org) is one of the most mature and widely used messaging protocols. As mentioned in the beginning of this page, there are several things a broker should provide.
-
-The MQTT protocol version 5 has some interesting additions, like shared subscriptions, session ttl, message ttl and response fields. This reduces the gap between available broker features and our needs.
-
-But handling subscriptions is still not possible out of the box. Delivering one message to multiple consumers, based on the message and the consumers, can't be handled by the brokers right now.

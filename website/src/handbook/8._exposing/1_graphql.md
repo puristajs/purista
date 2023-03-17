@@ -1,6 +1,6 @@
 ---
 order: 10
-title: Creating a graphql endpoint
+title: Providing a graphQL endpoint
 shortTitle: GraphQL endpoint
 description: Connect the services to clients via graphQL.
 tag:
@@ -19,3 +19,5 @@ tag:
 ---
 
 ## GraphQL
+
+see: [Github feature request](https://github.com/sebastianwessel/purista/issues/81)

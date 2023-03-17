@@ -1,6 +1,6 @@
 ---
-order: 0
-title: Handled and unhandled errors in typescript backend framework PURISTA
+order: 1
+title: Handled and unhandled errors
 shortTitle: Error handling
 description: A deeper look into javascript/typescript error handling within PURISTA nodejs backend application framework
 tag:
@@ -28,7 +28,7 @@ Error handling is done in different layers of your application, and errors are a
 
 PURISTA has deeply integrated support for [OpenTelemetry](https://opentelemetry.io/).  
 This provides an industrial standard way to keep track of errors and issues.  
-See [Logging and metrics](8_Logging_and_metrics.md) section.
+See [Logging](../6._logging/0_Logging.md) and [Tracing](../7._tracing/0_opentelemetry.md) section.
 
 ## Error types
 

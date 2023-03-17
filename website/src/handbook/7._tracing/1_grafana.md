@@ -1,8 +1,8 @@
 ---
-order: 1
-title: The HTTP server service
-shortTitle: HTTP server service
-description: Connect the services to clients via http.
+order: 10
+title: Use the Grafana suite
+shortTitle: Grafana
+description: Grafana
 tag:
   - typescript
   - nodejs
@@ -19,5 +19,6 @@ tag:
 ---
 
 
+## Grafana
 
-## Configuration
+[Grafana](https://grafana.com)

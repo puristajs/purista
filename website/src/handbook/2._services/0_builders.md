@@ -1,6 +1,6 @@
 ---
-order: 0
-title: Helper for PURISTA typescript based node js application development
+order: 1
+title: Builders in PURISTA
 shortTitle: Builders
 description: Learn how to use builders in nodejs backend framework PURISTA within your typescript application
 tag:
@@ -39,59 +39,11 @@ There is a whole bunch of type definition stuff behind the scene, to ensure corr
 
 To get an idea, take a look at this diagram. This is a kind of typescript-type dependency graph. This is the stuff you would need to manage within your code and your brain, without builders.
 
-```mermaid
-flowchart TD
-    subgraph ServiceBuilder
-        setConfigSchema --> setConfigDefault
-        setConfigDefault --> setCustomClass
-    end
+![example](/graphic/builder.svg)
 
-    subgraph FunctionBuilder
-        setSuccessEventName
-        addInputSchema --> transformInput
-        addInputSchema --> setFunction
-        addParameterSchema  --> setFunction
-        addParameterSchema  --> transformInput
-        addOutputSchema --> transformOutput
-        addOutputSchema --> setFunction
-
-        transformInput --> setBeforeGuardHook
-        transformInput --> setFunction
-        setBeforeGuardHook --> setFunction
-
-        transformOutput --> setAfterGuardHook
-        transformOutput --> setFunction
-        setFunction --> setAfterGuardHook
-
-        exposeAsHttpEndpoint --> enableHttpSecurity
-        enableHttpSecurity --> disableHttpSecurity
-        disableHttpSecurity --> addTags
-        addTags --> setSummary
-        setSummary --> addQueryParameters
-        addQueryParameters --> addErrorStatusCodes
-        addErrorStatusCodes --> openApi((OpenApi))
-        
-        addInputSchema --> openApi((OpenApi))
-        transformInput --> openApi((OpenApi))
-        transformOutput --> openApi((OpenApi))
-        addOutputSchema --> openApi((OpenApi))
-    end
-
-    subgraph SubscriptionBuilder
-        setSubFunction[setFunction]
-        subscribeToEvent
-    end
-
-    ServiceBuilder -->|getFunctionBuilder| FunctionBuilder
-    SubscriptionBuilder -->|getSubscriptionBuilder| ServiceBuilder
-
-    FunctionBuilder -->|addFunction| ServiceBuilder
-
-    SubscriptionBuilder -->|addSubscription| ServiceBuilder
-
-    ServiceBuilder -->|getInstance| serviceInstance((service instance))
-```
-
+⚠️ **Order matters**  
+You must declare the input and output schemas before adding transforms, hooks and functions!  
+As you can see in the diagram above, they impact the input/output types of transforms, hooks and functions.
 
 ## ServiceBuilder
 
@@ -191,12 +143,12 @@ export const myServiceBuilder = new ServiceBuilder(myServiceInfo).setConfigSchem
 
 As every function and subscription is running within the class context, the method `myClassMethod` will automatically be available by using `this.myClassMethod`
 
-## FunctionBuilder
+## CommandBuilder
 
-For adding a function to a service, you should use the function builder. It is recommended to use the `getFunctionBuilder` method of your service builder instance.
+For adding a function to a service, you should use the function builder. It is recommended to use the `getCommandBuilder` method of your service builder instance.
 
 ```typescript
-const myFunctionBuilder = myServiceBuilder.getFunctionBuilder('functionName','some function description','functionEventEmitted')
+const myCommandBuilder = myServiceBuilder.getCommandBuilder('functionName','some function description','functionEventEmitted')
 ```
 
 ## SubscriptionBuilder
