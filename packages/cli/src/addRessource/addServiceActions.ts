@@ -27,6 +27,12 @@ export const addServiceActions: Actions = [
   {
     type: 'add',
     skipIfExists: true,
+    path: 'src/service/{{properCase name}}/v{{version}}/{{camelCase name}}V{{version}}Service.test.ts',
+    templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/servicenameV1Service.test.ts.hbs',
+  },
+  {
+    type: 'add',
+    skipIfExists: true,
     path: 'src/service/{{properCase name}}/v{{version}}/{{camelCase name}}ServiceBuilder.ts',
     templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/servicenameBuilder.ts.hbs',
   },
@@ -52,6 +58,9 @@ export const addServiceActions: Actions = [
         `src/service/${camelCase(answers.name, { pascalCase: true })}/v${answers.version}/${camelCase(answers.name)}V${
           answers.version
         }Service.ts`,
+        `src/service/${camelCase(answers.name, { pascalCase: true })}/v${answers.version}/${camelCase(answers.name)}V${
+          answers.version
+        }Service.test.ts`,
         `src/service/${camelCase(answers.name, { pascalCase: true })}/v${answers.version}/${camelCase(
           answers.name,
         )}ServiceBuilder.ts`,

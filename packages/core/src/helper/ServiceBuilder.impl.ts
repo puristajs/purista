@@ -1,3 +1,5 @@
+import { fail } from 'node:assert'
+
 import { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { z } from 'zod'
 
@@ -251,5 +253,59 @@ export class ServiceBuilder<
     description: string,
   ): SubscriptionDefinitionBuilder<ServiceClassType> {
     return new SubscriptionDefinitionBuilder<ServiceClassType>(subscriptionName, description)
+  }
+
+  /**
+   * @returns the definition of registered commands
+   */
+  getCommandDefinitions() {
+    return this.commandDefinitionList
+  }
+
+  /**
+   * @returns the definition of registered subscriptions
+   */
+  getSubscriptionDefinitions() {
+    return this.subscriptionDefinitionList
+  }
+
+  validateCommandDefinitions() {
+    const commandDefinitions = this.getCommandDefinitions()
+
+    const existingNames = new Set()
+    const eventNames = new Set()
+
+    commandDefinitions.forEach((definition) => {
+      const name = definition.commandName.toLowerCase().trim()
+      const eventName = definition.eventName
+
+      // check for duplicate command names
+      if (existingNames.has(name)) {
+        fail(`duplicate command name ${name}`)
+      }
+      existingNames.add(name)
+
+      // check for duplicate event names
+      if (eventName) {
+        if (eventNames.has(eventName)) {
+          fail(`response event "${eventName}" in ${name} is used in other command`)
+        }
+        eventNames.add(eventName)
+      }
+    })
+  }
+
+  validateSubscriptionDefinitions() {
+    const subscriptionDefinitions = this.getSubscriptionDefinitions()
+
+    const existingNames = new Set()
+    subscriptionDefinitions.forEach((definition) => {
+      const name = definition.subscriptionName.toLowerCase().trim()
+
+      if (existingNames.has(name)) {
+        fail(`duplicate subscription name ${name}`)
+      }
+      existingNames.add(name)
+    })
   }
 }
