@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import camelCase from 'camelcase'
 import { Project } from 'ts-morph'
 
-export const ensureServiceEvent = async (eventName: string | undefined) => {
+export const ensureServiceEvent = async (eventName: string | undefined, description?: string) => {
   if (!eventName?.trim().length) {
     console.log('skip - no event name to add')
     return
@@ -45,7 +45,10 @@ export const ensureServiceEvent = async (eventName: string | undefined) => {
     return alreadyExist.getName()
   }
 
-  serviceEventEnum.addMember({ name: enumName, value: enumValue })
+  const member = serviceEventEnum.addMember({ name: enumName, value: enumValue })
+  if (description) {
+    member.addJsDoc(description)
+  }
 
   await sourceFile.save()
 

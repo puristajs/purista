@@ -8,7 +8,7 @@ import { createSandbox } from 'sinon'
 
 import { {{camelCase service.name}}V{{service.version}}Service } from '../../{{camelCase service.name}}V{{service.version}}Service'
 import { {{camelCase name}}SubscriptionBuilder } from './{{camelCase name}}SubscriptionBuilder'
-import { {{properCase name}}V{{service.version}}{{properCase service.name}}InputPayload } from './types'
+import { {{properCase service.name}}V{{service.version}}{{properCase name}}InputPayload } from './types'
 
 describe('service {{properCase service.name}} version {{service.version}} - subscription {{camelCase name}}', () => {
   let sandbox = createSandbox()
@@ -30,7 +30,7 @@ describe('service {{properCase service.name}} version {{service.version}} - subs
     const {{camelCase name}} = {{camelCase name}}SubscriptionBuilder.getSubscriptionFunction().bind(service)
 
     // define the test input payload
-    const payload: {{properCase name}}V{{service.version}}{{properCase service.name}}InputPayload = undefined
+    const payload: {{properCase service.name}}V{{service.version}}{{properCase name}}InputPayload = undefined
 
     // define the test input parameter
     const parameter = undefined

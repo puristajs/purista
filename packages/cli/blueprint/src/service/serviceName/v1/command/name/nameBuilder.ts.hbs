@@ -11,12 +11,9 @@ export const {{camelCase name}}CommandBuilder = {{camelCase service.name}}Servic
 ){{#if (isSet commandEventName)}}
   .setSuccessEventName('{{trim commandEventName}}')
 {{/if}}
-  .addInputSchema({{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema)
+  .addPayloadSchema({{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema)
   .addParameterSchema({{camelCase service.name}}V{{service.version}}{{properCase name}}InputParameterSchema)
   .addOutputSchema({{camelCase service.name}}V{{service.version}}{{properCase name}}OutputPayloadSchema)
   .setCommandFunction(async function (_context, _payload, _parameter) {
     // add your business logic here
   })
-
-
-{{camelCase service.name}}ServiceBuilder.addCommandDefinition({{camelCase name}}CommandBuilder.getDefinition())
