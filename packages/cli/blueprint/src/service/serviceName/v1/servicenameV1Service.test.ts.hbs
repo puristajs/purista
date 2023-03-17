@@ -1,0 +1,11 @@
+import { {{camelCase name}}V{{version}}Service as service } from './{{camelCase name}}V{{version}}Service'
+
+describe('service {{camelCase name}} version {{version}}', () => {
+  it('has valid commands', () => {
+    service.validateCommandDefinitions()
+  })
+
+  it('has valid subscriptions', () => {
+    service.validateSubscriptionDefinitions()
+  })
+})
