@@ -1,8 +1,8 @@
 ---
-order: 0
-title: Test, unit test, mock and stub in PURISTA typescript backend framework
+order: 1
+title: How to test
 shortTitle: Testing
-describing: How to test single functions and subscription of PURISTA application services
+describing: Test, unit test, mock and stub in PURISTA typescript backend framework
 tag:
   - typescript
   - nodejs

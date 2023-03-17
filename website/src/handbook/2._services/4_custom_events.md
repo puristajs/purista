@@ -1,6 +1,6 @@
 ---
 order: 40
-title: Custom message events in typescript based PURISTA nodejs applications
+title: Custom message events
 shortTitle: Custom events
 description: How to define and use custom events within PURISTA typescript nodejs backend framework
 tag:

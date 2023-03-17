@@ -7,6 +7,7 @@ shortTitle: PURISTA version 1.5.0
 description: Checkout all the awesome features, improvements and changes in PURISTA v1.5.0 typescript framework.
 tag:
   - purista
+  - version 1.5.0
 # this page will appear in article channel in home page
 star: true
 excerpt: <p>Checkout all the awesome features, improvements and changes in PURISTA v1.5.0 typescript framework.</p>
@@ -16,7 +17,9 @@ Version 1.5.0 of PURISTA backend typescript framework contains a lot of features
 
 <!-- more -->
 
-## @purista/cli - cli automation
+## CLI tool
+
+## Overhauled Subscription
 
 ## Opentelemetry support
 
@@ -46,8 +49,4 @@ Version 1.5.0 of PURISTA backend typescript framework contains a lot of features
 - getFunctionContextMock is now getCommandContextMock and has now optional parameter sandbox
 - getSubscriptionContextMock has now optionalparameter sandbox
 
-## Example overhauling
-
-## Migration to version 1.5.0
-
-
+## Documentation

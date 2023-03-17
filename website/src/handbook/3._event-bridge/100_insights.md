@@ -1,7 +1,7 @@
 ---
 order: 100
-title: Information about internals of PURISTA message based typescript framework
-shortTitle: Insights
+title: Structure of PURISTA messages
+shortTitle: Message insights
 description: A deeper look into internals of PURISTA typescript application backend framework.
 tag:
   - typescript

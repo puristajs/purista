@@ -1,8 +1,8 @@
 ---
-order: 1
-title: Deployment
-shortTitle: Deployment
-description: Deployment
+order: 50
+shortTitle: Execute Commands
+title: How to execute commands
+description: How to call commands in PURISTA typescript applications and services
 tag:
   - typescript
   - nodejs
@@ -16,5 +16,3 @@ tag:
   - Setup
   - Guide
 ---
-
-WIP!
