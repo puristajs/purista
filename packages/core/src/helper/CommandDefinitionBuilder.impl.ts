@@ -1,4 +1,4 @@
-import { generateSchema } from '@anatine/zod-openapi'
+import { generateSchema, OpenApiZodAny } from '@anatine/zod-openapi'
 import type { z, ZodType } from 'zod'
 
 import type {
@@ -650,9 +650,13 @@ export class CommandDefinitionBuilder<
           contentEncodingRequest: this.inputContentEncoding || 'utf-8',
           contentTypeResponse: this.outputContentType || 'application/json',
           contentEncodingResponse: this.outputContentEncoding || 'utf-8',
-          inputPayload: inputPayloadSchema ? generateSchema(inputPayloadSchema) : undefined,
-          parameter: inputParameterSchema ? generateSchema(inputParameterSchema) : undefined,
-          outputPayload: outputPayloadSchema ? generateSchema(outputPayloadSchema) : undefined,
+          inputPayload: inputPayloadSchema ? generateSchema(inputPayloadSchema as unknown as OpenApiZodAny) : undefined,
+          parameter: inputParameterSchema
+            ? generateSchema(inputParameterSchema as unknown as OpenApiZodAny)
+            : undefined,
+          outputPayload: outputPayloadSchema
+            ? generateSchema(outputPayloadSchema as unknown as OpenApiZodAny)
+            : undefined,
           deprecated: this.deprecated,
         },
       },
