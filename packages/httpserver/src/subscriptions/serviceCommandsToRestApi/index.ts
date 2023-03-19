@@ -22,6 +22,8 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, HttpExposedS
   'serviceCommandsToRestApi',
   'listen for InfoServiceFunctionAdded messages and adds endpoints for service functions if needed',
 )
+  .autoacknowledgeMessage()
+  .receiveMessageOnEveryInstance()
   .setSubscriptionFunction(async function ({ logger, message }, payload) {
     if (!isHttpExposedServiceMeta(payload)) {
       logger.debug('...skip exposing function')
