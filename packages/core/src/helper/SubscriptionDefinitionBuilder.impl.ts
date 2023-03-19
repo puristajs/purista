@@ -4,6 +4,7 @@ import { z, ZodType } from 'zod'
 import type {
   Complete,
   ContentType,
+  DefinitionEventBridgeConfig,
   EBMessageType,
   InstanceId,
   PrincipalId,
@@ -94,6 +95,8 @@ export class SubscriptionDefinitionBuilder<
   private instanceId?: InstanceId
 
   private durable = true
+
+  private shared = true
   private autoacknowledge = false
 
   // eslint-disable-next-line no-useless-constructor
@@ -142,10 +145,24 @@ export class SubscriptionDefinitionBuilder<
    * - if sending of optional subscription response failed
    *
    * @param acknowledge Enable (true) and disable (false)
-   * @returns CommandDefinition
+   * @returns SubscriptionDefinition
    */
-  autoacknowledgeCommands(acknowledge: boolean) {
+  autoacknowledgeMessage(acknowledge = true) {
     this.autoacknowledge = acknowledge
+    return this
+  }
+
+  /**
+   * Instruct the event bridge message broker to send the matching message to every running instance.
+   * The underlaying message broker must support this functionality.
+   *
+   * In serverless environments, this flag should not have any effect
+   *
+   * @param shared
+   * @returns SubscriptionDefinition
+   */
+  receiveMessageOnEveryInstance(enforce = true) {
+    this.shared = !enforce
     return this
   }
 
@@ -597,6 +614,12 @@ export class SubscriptionDefinitionBuilder<
     const outputPayloadSchema: ZodType | undefined =
       this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
 
+    const eventBridgeConfig: Complete<DefinitionEventBridgeConfig> = {
+      durable: this.durable,
+      autoacknowledge: this.autoacknowledge,
+      shared: this.shared,
+    }
+
     const subscription: Complete<
       SubscriptionDefinition<
         ServiceClassType,
@@ -611,10 +634,7 @@ export class SubscriptionDefinitionBuilder<
     > = {
       subscriptionName: this.subscriptionName,
       subscriptionDescription: this.subscriptionDescription,
-      eventBridgeConfig: {
-        durable: this.durable,
-        autoacknowledge: this.autoacknowledge,
-      },
+      eventBridgeConfig,
       metadata: {
         expose: {
           contentTypeRequest: this.inputContentType,

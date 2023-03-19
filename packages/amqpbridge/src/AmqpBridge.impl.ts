@@ -614,7 +614,15 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
 
     const noAck = !subscription.eventBridgeConfig.autoacknowledge
 
-    const queueName = getSubscriptionQueueName(subscription.subscriber, this.config.namePrefix)
+    const isShared = subscription.eventBridgeConfig.shared === undefined || subscription.eventBridgeConfig.shared
+
+    const queueName = isShared ? getSubscriptionQueueName(subscription.subscriber, this.config.namePrefix) : ''
+
+    const queOptions: amqplib.Options.AssertQueue = isShared
+      ? {
+          durable: subscription.eventBridgeConfig.durable,
+        }
+      : { exclusive: true, autoDelete: true, durable: false }
 
     const channel = await this.connection.createChannel()
 
@@ -630,9 +638,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       this.emit('eventbridge-error', err)
     })
 
-    const queue = await channel.assertQueue(queueName, {
-      durable: subscription.eventBridgeConfig.durable,
-    })
+    const queue = await channel.assertQueue(queueName, queOptions)
     await channel.bindQueue(queue.queue, this.config.exchangeName, '', {
       'x-match': 'all',
       messageType: subscription.messageType,
