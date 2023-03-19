@@ -11,6 +11,7 @@ import type {
   CommandTransformOutputHook,
   Complete,
   ContentType,
+  DefinitionEventBridgeConfig,
   ServiceClass,
   StatusCode,
 } from '../core'
@@ -584,7 +585,7 @@ export class CommandDefinitionBuilder<
    * @param acknowledge Enable (true) and disable (false)
    * @returns CommandDefinition
    */
-  autoacknowledgeCommands(acknowledge: boolean) {
+  autoacknowledgeMessages(acknowledge = true) {
     this.autoacknowledge = acknowledge
     return this
   }
@@ -626,6 +627,12 @@ export class CommandDefinitionBuilder<
     const outputPayloadSchema: ZodType | undefined =
       this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
 
+    const eventBridgeConfig: Complete<DefinitionEventBridgeConfig> = {
+      durable: this.durable,
+      autoacknowledge: this.autoacknowledge,
+      shared: true,
+    }
+
     const definition: Complete<
       CommandDefinition<
         ServiceClassType,
@@ -640,10 +647,7 @@ export class CommandDefinitionBuilder<
     > = {
       commandName: this.commandName,
       commandDescription: this.commandDescription,
-      eventBridgeConfig: {
-        durable: this.durable,
-        autoacknowledge: this.autoacknowledge,
-      },
+      eventBridgeConfig,
       metadata: {
         expose: {
           contentTypeRequest: this.inputContentType || 'application/json',
