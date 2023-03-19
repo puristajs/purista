@@ -191,6 +191,9 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
   }
 
   async destroy() {
+    await this.stateStore.destroy()
+    await this.configStore.destroy()
+    await this.secretStore.destroy()
     await this.traceProvider.shutdown()
   }
 }
