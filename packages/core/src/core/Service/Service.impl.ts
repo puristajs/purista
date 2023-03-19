@@ -20,15 +20,27 @@ import {
   CommandDefinition,
   CommandDefinitionList,
   CommandFunctionContext,
+  ConfigDeleteFunction,
+  ConfigGetterFunction,
+  ConfigSetterFunction,
+  ContextBase,
   CustomMessage,
   EBMessage,
   EBMessageAddress,
   EBMessageType,
   InfoMessageType,
+  PuristaSpanName,
   PuristaSpanTag,
+  SecretDeleteFunction,
+  SecretGetterFunction,
+  SecretSetterFunction,
   ServiceClass,
   ServiceConstructorInput,
+  StateDeleteFunction,
+  StateGetterFunction,
+  StateSetterFunction,
   StatusCode,
+  StoreType,
   Subscription,
   SubscriptionDefinition,
   SubscriptionDefinitionList,
@@ -93,10 +105,6 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     return this.startActiveSpan('purista.start', {}, undefined, async (span) => {
       this.emit('service-started')
       try {
-        if (!this.secretStore.isReady()) {
-          await this.secretStore.start()
-        }
-
         await this.initializeEventbridgeConnect(this.commandDefinitionList, this.subscriptionDefinitionList)
         await this.sendServiceInfo(EBMessageType.InfoServiceReady)
         this.logger.info(
@@ -230,16 +238,169 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     return emitCustomEvent.bind(this)
   }
 
-  protected getContextFunctions() {
+  public getContextFunctions(): ContextBase {
+    const getSecretFunction = async function (this: Service<ConfigType>, ...secretNames: string[]) {
+      return this.wrapInSpan(PuristaSpanName.SecretStoreGetValue, {}, async (span) => {
+        try {
+          span.setAttributes({
+            [PuristaSpanTag.StoreName]: this.secretStore.name,
+            [PuristaSpanTag.StoreType]: StoreType.SecretStore,
+          })
+          return this.secretStore.getSecret(...secretNames)
+        } catch (err) {
+          span.recordException(err as Error)
+          throw err
+        }
+      })
+    }
+    const getSecret: SecretGetterFunction = getSecretFunction.bind(this)
+
+    const setSecretFunction = async function (this: Service<ConfigType>, secretName: string, value: string) {
+      return this.wrapInSpan(PuristaSpanName.SecretStoreGetValue, {}, async (span) => {
+        try {
+          span.setAttributes({
+            [PuristaSpanTag.StoreName]: this.secretStore.name,
+            [PuristaSpanTag.StoreType]: StoreType.SecretStore,
+          })
+          return this.secretStore.setSecret(secretName, value)
+        } catch (err) {
+          span.recordException(err as Error)
+          throw err
+        }
+      })
+    }
+    const setSecret: SecretSetterFunction = setSecretFunction.bind(this)
+
+    const removeSecretFunction = async function (this: Service<ConfigType>, secretName: string) {
+      return this.wrapInSpan(PuristaSpanName.SecretStoreGetValue, {}, async (span) => {
+        try {
+          span.setAttributes({
+            [PuristaSpanTag.StoreName]: this.secretStore.name,
+            [PuristaSpanTag.StoreType]: StoreType.SecretStore,
+          })
+          return this.secretStore.removeSecret(secretName)
+        } catch (err) {
+          span.recordException(err as Error)
+          throw err
+        }
+      })
+    }
+    const removeSecret: SecretDeleteFunction = removeSecretFunction.bind(this)
+
+    const getConfigFunction = async function (this: Service<ConfigType>, ...configNames: string[]) {
+      return this.wrapInSpan(PuristaSpanName.ConfigStoreGetValue, {}, async (span) => {
+        try {
+          span.setAttributes({
+            [PuristaSpanTag.StoreName]: this.configStore.name,
+            [PuristaSpanTag.StoreType]: StoreType.ConfigStore,
+          })
+          return this.configStore.getConfig(...configNames)
+        } catch (err) {
+          span.recordException(err as Error)
+          throw err
+        }
+      })
+    }
+    const getConfig: ConfigGetterFunction = getConfigFunction.bind(this)
+
+    const setConfigFunction = async function (this: Service<ConfigType>, configName: string, value: unknown) {
+      return this.wrapInSpan(PuristaSpanName.ConfigStoreGetValue, {}, async (span) => {
+        try {
+          span.setAttributes({
+            [PuristaSpanTag.StoreName]: this.configStore.name,
+            [PuristaSpanTag.StoreType]: StoreType.ConfigStore,
+          })
+          return this.configStore.setConfig(configName, value)
+        } catch (err) {
+          span.recordException(err as Error)
+          throw err
+        }
+      })
+    }
+    const setConfig: ConfigSetterFunction = setConfigFunction.bind(this)
+
+    const removeConfigFunction = async function (this: Service<ConfigType>, configName: string) {
+      return this.wrapInSpan(PuristaSpanName.ConfigStoreGetValue, {}, async (span) => {
+        try {
+          span.setAttributes({
+            [PuristaSpanTag.StoreName]: this.configStore.name,
+            [PuristaSpanTag.StoreType]: StoreType.ConfigStore,
+          })
+          return this.configStore.removeConfig(configName)
+        } catch (err) {
+          span.recordException(err as Error)
+          throw err
+        }
+      })
+    }
+    const removeConfig: ConfigDeleteFunction = removeConfigFunction.bind(this)
+
+    const getStateFunction = async function (this: Service<ConfigType>, ...stateNames: string[]) {
+      return this.wrapInSpan(PuristaSpanName.StateStoreGetValue, {}, async (span) => {
+        try {
+          span.setAttributes({
+            [PuristaSpanTag.StoreName]: this.stateStore.name,
+            [PuristaSpanTag.StoreType]: StoreType.StateStore,
+          })
+          return this.stateStore.getState(...stateNames)
+        } catch (err) {
+          span.recordException(err as Error)
+          throw err
+        }
+      })
+    }
+    const getState: StateGetterFunction = getStateFunction.bind(this)
+
+    const setStateFunction = async function (this: Service<ConfigType>, stateName: string, value: unknown) {
+      return this.wrapInSpan(PuristaSpanName.StateStoreGetValue, {}, async (span) => {
+        try {
+          span.setAttributes({
+            [PuristaSpanTag.StoreName]: this.stateStore.name,
+            [PuristaSpanTag.StoreType]: StoreType.StateStore,
+          })
+          return this.stateStore.setState(stateName, value)
+        } catch (err) {
+          span.recordException(err as Error)
+          throw err
+        }
+      })
+    }
+    const setState: StateSetterFunction = setStateFunction.bind(this)
+
+    const removeStateFunction = async function (this: Service<ConfigType>, stateName: string) {
+      return this.wrapInSpan(PuristaSpanName.StateStoreGetValue, {}, async (span) => {
+        try {
+          span.setAttributes({
+            [PuristaSpanTag.StoreName]: this.stateStore.name,
+            [PuristaSpanTag.StoreType]: StoreType.StateStore,
+          })
+          return this.stateStore.removeState(stateName)
+        } catch (err) {
+          span.recordException(err as Error)
+          throw err
+        }
+      })
+    }
+    const removeState: StateDeleteFunction = removeStateFunction.bind(this)
+
     return {
       wrapInSpan: this.wrapInSpan.bind(this),
       startActiveSpan: this.startActiveSpan.bind(this),
-      getSecret: this.secretStore.getSecret,
-      setSecret: this.secretStore.setSecret,
-      getConfig: this.configStore.getConfig,
-      setConfig: this.configStore.setConfig,
-      getState: this.stateStore.getState,
-      setState: this.stateStore.setState,
+      secrets: {
+        getSecret,
+        setSecret,
+        removeSecret,
+      },
+      configs: {
+        getConfig,
+        setConfig,
+        removeConfig,
+      },
+      states: {
+        getState,
+        setState,
+        removeState,
+      },
     }
   }
 
