@@ -1,22 +1,10 @@
+import { SecretDeleteFunction } from './SecretDeleteFunction'
 import { SecretGetterFunction } from './SecretGetterFunction'
 import { SecretSetterFunction } from './SecretSetterFunction'
 
 export interface SecretStore {
-  /**
-   * indicates if the secret store has been started and is connected to persistance
-   */
-  isReady(): Promise<boolean>
-
-  /**
-   * indicates if the secret store persistance is reachable
-   */
-  isHealthy(): Promise<boolean>
-
-  /**
-   * connects the secret store to persistance
-   */
-  start(): Promise<void>
-
+  /** name of store */
+  name: string
   /**
    * get a secret
    * @param string name of secret
@@ -24,6 +12,13 @@ export interface SecretStore {
    * @throws UnhandledError
    */
   getSecret: SecretGetterFunction
+
+  /**
+   * delete a secret
+   * @param string name of secret
+   * @throws UnhandledError
+   */
+  removeSecret: SecretDeleteFunction
 
   /**
    * set a secret

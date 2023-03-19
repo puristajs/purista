@@ -56,6 +56,8 @@ describe('UnhandledError', () => {
       principalId: 'messagePrincipalId',
       sender,
       receiver,
+      contentType: 'application/json',
+      contentEncoding: 'utf-8',
       payload: {
         status: statusCode,
         message,

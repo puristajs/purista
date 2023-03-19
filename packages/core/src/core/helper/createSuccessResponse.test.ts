@@ -18,7 +18,8 @@ describe('createSuccessResponse', () => {
         serviceVersion: '1.1.1',
         serviceTarget: 'senderServiceTarget',
       },
-
+      contentType: 'application/json',
+      contentEncoding: 'utf-8',
       receiver: {
         serviceName: 'ReceiverService',
         serviceVersion: '2.2.2',
@@ -56,7 +57,8 @@ describe('createSuccessResponse', () => {
         serviceVersion: '1.1.1',
         serviceTarget: 'senderServiceTarget',
       },
-
+      contentType: 'application/json',
+      contentEncoding: 'utf-8',
       receiver: {
         serviceName: 'ReceiverService',
         serviceVersion: '2.2.2',

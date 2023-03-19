@@ -1,1 +1,1 @@
-export type SecretGetterFunction = <T>(secretName: string) => Promise<T | undefined>
+export type SecretGetterFunction = (...secretName: string[]) => Promise<Record<string, unknown>>

@@ -52,7 +52,7 @@ export class ServiceBuilder<
    * "This function sets the config schema for the service builder."
    *
    * @param schema - The schema that will be used to validate the config.
-   * @returns The ServiceBuilder<O, I, Service<O>>
+   * @returns ServiceBuilder
    */
   setConfigSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(schema: z.ZodType<O, D, I>) {
     this.configSchema = schema
@@ -62,7 +62,7 @@ export class ServiceBuilder<
   /**
    * "This function sets the default configuration for the service."
    *
-   * @param {ConfigType} config - ConfigType - The default configuration for the service.
+   * @param config - ConfigType - The default configuration for the service.
    * @returns The ServiceBuilder instance.
    */
   setDefaultConfig(config: ConfigType): ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType> {
@@ -84,7 +84,7 @@ export class ServiceBuilder<
 
   /**
    * `addCommandDefinition` adds a list of command definitions to the service builder
-   * @param commands - CommandDefinitionList<ServiceClassType>
+   * @param commands - CommandDefinitionList
    * @returns The service builder
    */
   addCommandDefinition(...commands: CommandDefinitionList<ServiceClassType>) {
@@ -107,7 +107,7 @@ export class ServiceBuilder<
 
   /**
    * It adds a subscription definition to the service builder
-   * @param subscription - SubscriptionDefinitionList<ServiceClassType>
+   * @param subscription - SubscriptionDefinitionList
    * @returns The service builder
    */
   addSubscriptionDefinition(...subscription: SubscriptionDefinitionList<ServiceClassType>) {
@@ -130,11 +130,11 @@ export class ServiceBuilder<
 
   /**
    * It sets the class type of the service.
-   * @param c - Newable<T>
+   * @param customClass - A class which extends the Service class
    * @returns The builder itself, but with the type of the service class changed.
    */
-  setCustomClass<T extends ServiceClass<ConfigType>>(c: Newable<T, ConfigType>) {
-    this.SClass = c as Newable<T, ConfigType>
+  setCustomClass<T extends ServiceClass<ConfigType>>(customClass: Newable<T, ConfigType>) {
+    this.SClass = customClass as Newable<T, ConfigType>
     return this as unknown as ServiceBuilder<ConfigType, ConfigInputType, T>
   }
 
@@ -145,9 +145,8 @@ export class ServiceBuilder<
   /**
    * It creates a new instance of the service class, passing in the logger, service info, event bridge,
    * command functions, subscription list, and configuration
-   * @param {EventBridge} eventBridge - EventBridge
-   * @param options - { serviceConfig?: ConfigInputType; logger?: Logger; spanProcessor?: SpanProcessor
-   * } = {}
+   * @param eventBridge - EventBridge
+   * @param options - additional config like logger, stores and opentelemetry span processor
    * @returns The instance of the service class
    */
   getInstance(
@@ -227,9 +226,9 @@ export class ServiceBuilder<
   /**
    * It returns a new instance of the CommandDefinitionBuilder class, which is a class that is used to
    * build a command definition
-   * @param {string} commandName - The name of the command.
-   * @param {string} description - The description of the command.
-   * @param {string} [eventName] - The name of the event that will be emitted when the command is
+   * @param commandName - The name of the command.
+   * @param description - The description of the command.
+   * @param eventName - The name of the event that will be emitted when the command is
    * executed.
    * @returns A CommandDefinitionBuilder object.
    */
@@ -244,9 +243,9 @@ export class ServiceBuilder<
   /**
    * It returns a new instance of the `SubscriptionDefinitionBuilder` class, which is a class that is
    * used to build a subscription definition
-   * @param {string} subscriptionName - The name of the subscription.
-   * @param {string} description - The description of the subscription.
-   * @returns A SubscriptionDefinitionBuilder<ServiceClassType>
+   * @param subscriptionName - The name of the subscription.
+   * @param description - The description of the subscription.
+   * @returns A SubscriptionDefinitionBuilder
    */
   getSubscriptionBuilder(
     subscriptionName: string,

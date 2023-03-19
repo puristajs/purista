@@ -53,6 +53,8 @@ describe('HandledError', () => {
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
+      contentType: 'application/json',
+      contentEncoding: 'utf-8',
       sender,
       receiver,
       payload: {
