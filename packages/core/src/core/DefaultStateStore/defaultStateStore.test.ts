@@ -14,17 +14,10 @@ describe('DefaultStateStore', () => {
     const logger = getLoggerMock(sandbox)
     const store = new DefaultStateStore({ logger: logger.mock })
 
-    await expect(store.start()).resolves.toBeUndefined()
-    await expect(store.isReady()).resolves.toBeTruthy()
+    await expect(store.getState('example')).rejects.toThrow('getState is not implemented in state store')
 
-    await expect(store.getState('example')).resolves.toBeUndefined()
+    await expect(store.removeState('example')).rejects.toThrow('removeState is not implemented in state store')
 
-    await expect(store.setState('example', 'value')).resolves.toBeUndefined()
-
-    await expect(store.getState('example')).resolves.toStrictEqual('value')
-
-    await expect(store.isHealthy()).resolves.toBeTruthy()
-
-    await expect(store.destroy()).resolves.toBeUndefined()
+    await expect(store.setState('example', 'value')).rejects.toThrow('setState is not implemented in state store')
   })
 })

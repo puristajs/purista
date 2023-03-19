@@ -1,3 +1,4 @@
+import { StatusCode } from '../types'
 import { getErrorMessageForCode } from './getErrorMessageForCode.impl'
 
 it('returns a message string for error code', () => {
@@ -5,5 +6,5 @@ it('returns a message string for error code', () => {
 
   expect(getErrorMessageForCode(400)).toBe('Bad Request')
 
-  expect(getErrorMessageForCode(900)).toBe('Unknown Error')
+  expect(getErrorMessageForCode(900 as StatusCode)).toBe('Unknown Error')
 })

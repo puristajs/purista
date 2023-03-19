@@ -1,1 +1,1 @@
-export type ConfigGetterFunction = <T>(secretName: string) => Promise<T | undefined>
+export type ConfigGetterFunction = (...configNames: string[]) => Promise<Record<string, unknown>>

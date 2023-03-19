@@ -14,17 +14,10 @@ describe('DefaultConfigStore', () => {
     const logger = getLoggerMock(sandbox)
     const store = new DefaultConfigStore({ logger: logger.mock })
 
-    await expect(store.start()).resolves.toBeUndefined()
-    await expect(store.isReady()).resolves.toBeTruthy()
+    await expect(store.getConfig('example')).rejects.toThrow('getConfig is not implemented in config store')
 
-    await expect(store.getConfig('example')).rejects.toThrow('getConfig is not implemented in DefaultConfigStore')
+    await expect(store.setConfig('example', 'value')).rejects.toThrow('setConfig is not implemented in config store')
 
-    await expect(store.setConfig('example', 'value')).rejects.toThrow(
-      'setConfig is not implemented in DefaultConfigStore',
-    )
-
-    await expect(store.isHealthy()).resolves.toBeTruthy()
-
-    await expect(store.destroy()).resolves.toBeUndefined()
+    await expect(store.removeConfig('example')).rejects.toThrow('getConfig is not implemented in config store')
   })
 })

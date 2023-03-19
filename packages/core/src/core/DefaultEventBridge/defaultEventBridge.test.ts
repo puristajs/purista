@@ -56,7 +56,7 @@ describe('DefaultEventBridge', () => {
     const subscription: Subscription = {
       sender,
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -67,7 +67,7 @@ describe('DefaultEventBridge', () => {
         serviceName: 'SomeService',
       },
       subscriber: otherSubscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -141,7 +141,7 @@ describe('DefaultEventBridge', () => {
     const subscription: Subscription = {
       sender,
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }

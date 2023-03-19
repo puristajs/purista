@@ -40,6 +40,8 @@ describe('subscription matching for info message', () => {
       principalId: 'messagePrincipalId',
       eventName,
       payload: {},
+      contentType: 'application/json',
+      contentEncoding: 'utf-8',
     }
   }
 
@@ -49,7 +51,7 @@ describe('subscription matching for info message', () => {
         serviceName: sender.serviceName,
       },
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -67,7 +69,7 @@ describe('subscription matching for info message', () => {
         serviceName: 'differentService',
       },
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -85,7 +87,7 @@ describe('subscription matching for info message', () => {
         serviceVersion: sender.serviceVersion,
       },
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -103,7 +105,7 @@ describe('subscription matching for info message', () => {
         serviceVersion: '9',
       },
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -121,7 +123,7 @@ describe('subscription matching for info message', () => {
         serviceTarget: sender.serviceTarget,
       },
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -139,7 +141,7 @@ describe('subscription matching for info message', () => {
         serviceTarget: 'differentTarget',
       },
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -155,7 +157,7 @@ describe('subscription matching for info message', () => {
     const subscription: Subscription = {
       messageType: EBMessageType.InfoServiceInit,
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -171,7 +173,7 @@ describe('subscription matching for info message', () => {
     const subscription: Subscription = {
       messageType: EBMessageType.InfoServiceDrain,
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -190,7 +192,7 @@ describe('subscription matching for info message', () => {
       },
       subscriber,
       receiver,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }

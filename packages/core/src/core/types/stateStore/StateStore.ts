@@ -1,22 +1,10 @@
+import { StateDeleteFunction } from './StateDeleteFunction'
 import { StateGetterFunction } from './StateGetterFunction'
 import { StateSetterFunction } from './StateSetterFunction'
 
 export interface StateStore {
-  /**
-   * indicates if the state store has been started and is connected to persistance
-   */
-  isReady(): Promise<boolean>
-
-  /**
-   * indicates if the state store persistance is reachable
-   */
-  isHealthy(): Promise<boolean>
-
-  /**
-   * connects the state store to persistance
-   */
-  start(): Promise<void>
-
+  /** name of store */
+  name: string
   /**
    * get a state value
    * @param string name of state
@@ -24,6 +12,13 @@ export interface StateStore {
    * @throws UnhandledError
    */
   getState: StateGetterFunction
+
+  /**
+   * delete a state value
+   * @param string name of state
+   * @throws UnhandledError
+   */
+  removeState: StateDeleteFunction
 
   /**
    * set a state value
