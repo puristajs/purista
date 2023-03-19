@@ -41,6 +41,8 @@ describe('subscription matching for principalId', () => {
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
       eventName,
+      contentType: 'application/json',
+      contentEncoding: 'utf-8',
     }
   }
 
@@ -48,7 +50,7 @@ describe('subscription matching for principalId', () => {
     const subscription: Subscription = {
       principalId: 'messagePrincipalId',
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -64,7 +66,7 @@ describe('subscription matching for principalId', () => {
     const subscription: Subscription = {
       principalId: 'otherPrincipalId',
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }

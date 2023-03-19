@@ -11,4 +11,7 @@ export enum PuristaSpanTag {
   ReceiverServiceName = 'purista.receiver.name',
   ReceiverServiceVersion = 'purista.receiver.version',
   ReceiverServiceTarget = 'purista.receiver.target',
+
+  StoreType = 'purista.store.type',
+  StoreName = 'purista.store.name',
 }

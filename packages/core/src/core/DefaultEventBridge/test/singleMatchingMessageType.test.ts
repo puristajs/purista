@@ -41,6 +41,8 @@ describe('subscription matching for message type', () => {
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
       eventName,
+      contentType: 'application/json',
+      contentEncoding: 'utf-8',
     }
   }
 
@@ -48,7 +50,7 @@ describe('subscription matching for message type', () => {
     const subscription: Subscription = {
       messageType: EBMessageType.Command,
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -65,6 +67,8 @@ describe('subscription matching for message type', () => {
       receiver,
       payload: { parameter: {}, payload: {} },
       messageType: EBMessageType.Command,
+      contentType: 'application/json',
+      contentEncoding: 'utf-8',
     }
 
     const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
@@ -78,7 +82,7 @@ describe('subscription matching for message type', () => {
     const subscription: Subscription = {
       messageType: EBMessageType.InfoServiceDrain,
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -94,7 +98,7 @@ describe('subscription matching for message type', () => {
     const subscription: Subscription = {
       sender,
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }

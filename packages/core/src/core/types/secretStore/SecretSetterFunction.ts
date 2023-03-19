@@ -1,1 +1,1 @@
-export type SecretSetterFunction = (secretName: string, secretValue: unknown) => Promise<void>
+export type SecretSetterFunction = (secretName: string, secretValue: string) => Promise<void>

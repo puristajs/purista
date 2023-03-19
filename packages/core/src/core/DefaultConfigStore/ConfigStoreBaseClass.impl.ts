@@ -1,17 +1,15 @@
 import { initLogger } from '../DefaultLogger'
-import { Logger } from '../types'
+import { UnhandledError } from '../Error'
+import { ConfigStore, Logger, StatusCode } from '../types'
 
 /**
  * Base class for config store adapters
  */
-export class ConfigStoreBaseClass<ConfigType = Record<string, unknown>> {
+export class ConfigStoreBaseClass<ConfigType = Record<string, unknown>> implements ConfigStore {
   logger: Logger
   config: ConfigType
 
   name: string
-
-  started = false
-  healthy = false
 
   constructor(name: string, config?: ConfigType, options?: { logger?: Logger }) {
     const logger = options?.logger || initLogger()
@@ -22,11 +20,23 @@ export class ConfigStoreBaseClass<ConfigType = Record<string, unknown>> {
     this.config = config || ({} as ConfigType)
   }
 
-  async isReady() {
-    return this.started
+  async getConfig(..._configNames: string[]): Promise<Record<string, unknown>> {
+    const err = new UnhandledError(StatusCode.NotImplemented, 'getConfig is not implemented in config store')
+    this.logger.error({ err }, err.message)
+    throw err
   }
 
-  async isHealthy() {
-    return this.started && this.healthy
+  async removeConfig(_configName: string): Promise<void> {
+    const err = new UnhandledError(StatusCode.NotImplemented, 'getConfig is not implemented in config store')
+    this.logger.error({ err }, err.message)
+    throw err
   }
+
+  async setConfig(_configName: string, _configValue: unknown) {
+    const err = new UnhandledError(StatusCode.NotImplemented, 'setConfig is not implemented in config store')
+    this.logger.error({ err }, err.message)
+    throw err
+  }
+
+  async destroy() {}
 }

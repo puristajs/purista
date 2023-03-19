@@ -1,22 +1,10 @@
+import { ConfigDeleteFunction } from './ConfigDeleteFunction'
 import { ConfigGetterFunction } from './ConfigGetterFunction'
 import { ConfigSetterFunction } from './ConfigSetterFunction'
 
 export interface ConfigStore {
-  /**
-   * indicates if the config store has been started and is connected to persistance
-   */
-  isReady(): Promise<boolean>
-
-  /**
-   * indicates if the config store persistance is reachable
-   */
-  isHealthy(): Promise<boolean>
-
-  /**
-   * connects the config store to persistance
-   */
-  start(): Promise<void>
-
+  /** name of store */
+  name: string
   /**
    * get a config value
    * @param string name of config
@@ -32,6 +20,13 @@ export interface ConfigStore {
    * @throws UnhandledError
    */
   setConfig: ConfigSetterFunction
+
+  /**
+   * delete a config value
+   * @param string name of config
+   * @throws UnhandledError
+   */
+  removeConfig: ConfigDeleteFunction
 
   /**
    * disconnects and shuts down the config store

@@ -41,6 +41,8 @@ describe('subscription matching for sender', () => {
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
       eventName,
+      contentType: 'application/json',
+      contentEncoding: 'utf-8',
     }
   }
 
@@ -50,7 +52,7 @@ describe('subscription matching for sender', () => {
         serviceName: receiver.serviceName,
       },
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -68,7 +70,7 @@ describe('subscription matching for sender', () => {
         serviceName: 'differentService',
       },
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -86,7 +88,7 @@ describe('subscription matching for sender', () => {
         serviceVersion: receiver.serviceVersion,
       },
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -104,7 +106,7 @@ describe('subscription matching for sender', () => {
         serviceVersion: '9',
       },
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -122,7 +124,7 @@ describe('subscription matching for sender', () => {
         serviceTarget: receiver.serviceTarget,
       },
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }
@@ -140,7 +142,7 @@ describe('subscription matching for sender', () => {
         serviceTarget: 'differentTarget',
       },
       subscriber,
-      settings: {
+      eventBridgeConfig: {
         durable: false,
       },
     }

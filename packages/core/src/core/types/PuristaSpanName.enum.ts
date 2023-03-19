@@ -12,4 +12,14 @@ export enum PuristaSpanName {
   EventBridgeCommandResponseSent = 'purista.commandResponseSent',
   EventBridgeCommandResponseReceived = 'purista.commandResponseReceived',
   EventBridgeSubscriptionEventReceived = 'purista.subscriptionEventReceived',
+
+  SecretStoreGetValue = 'purista.secretStoreGetValue',
+  SecretStoreSetValue = 'purista.secretStoreSetValue',
+  SecretStoreRemoveValue = 'purista.secretStoreRemoveValue',
+  ConfigStoreGetValue = 'purista.configStoreGetValue',
+  ConfigStoreSetValue = 'purista.configStoreSetValue',
+  ConfigStoreRemoveValue = 'purista.configStoreRemoveValue',
+  StateStoreGetValue = 'purista.stateStoreGetValue',
+  StateStoreSetValue = 'purista.stateStoreSetValue',
+  StateStoreRemoveValue = 'purista.stateStoreRemoveValue',
 }
