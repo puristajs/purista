@@ -24,14 +24,7 @@ export const commandTransformInput = async <PayloadType = unknown, ParameterType
       const transform = transformInput.transformFunction.bind(serviceInstance, {
         logger,
         message,
-        startActiveSpan: serviceInstance.startActiveSpan.bind(serviceInstance),
-        wrapInSpan: serviceInstance.wrapInSpan.bind(serviceInstance),
-        getSecret: serviceInstance.secretStore.getSecret,
-        setSecret: serviceInstance.secretStore.setSecret,
-        getConfig: serviceInstance.configStore.getConfig,
-        setConfig: serviceInstance.configStore.setConfig,
-        getState: serviceInstance.stateStore.getState,
-        setState: serviceInstance.stateStore.setState,
+        ...serviceInstance.getContextFunctions(),
       })
       const parameterInput = await serviceInstance.wrapInSpan(
         command.commandName + '.validateParameter',
