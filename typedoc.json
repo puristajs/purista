@@ -2,11 +2,11 @@
     "$schema": "https://typedoc.org/schema.json",
     "name":"PURISTA API",
     "entryPointStrategy":"Packages",
-    "entryPoints": ["./packages/core", "./packages/httpserver", "./packages/amqpbridge"],
+    "entryPoints": ["./packages/core", "./packages/httpserver", "./packages/amqpbridge","./packages/state-store-redis"],
     "out": "website/src/api",
-    "readme":"none",
+    "readme":"CHANGELOG.md",
     "hideGenerator": true,
     "includeVersion":true,
     "excludeExternals": true,
-    "exclude": ["**/**/*.(test).ts","**/*+(index|.spec|.e2e|.test).ts","lib/**"]
+    "exclude": ["**/**/*.(test).ts","**/*+(index|.spec|.e2e|.test).ts","lib/**","/examples/**/*"]
 }
