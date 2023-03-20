@@ -12,8 +12,8 @@ const start = async () => {
     serviceVersion: '1.0.0',
     deploymentEnvironment: 'production',
   })
-    // Start OpenTelemetry SDK.
-    .start()
+  // Start OpenTelemetry SDK.
+  // .start()
 
   main(getOTLPTraceExporter)
 }
