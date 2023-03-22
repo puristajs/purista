@@ -10,6 +10,7 @@ import type { Subscription } from './subscription'
  * The event bridge must implement this interface.
  */
 export interface EventBridge {
+  readonly name: string
   /**
    * The default time until when a command invocation automatically returns a time out error
    */

@@ -105,8 +105,11 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
    *
    * @returns Tracer
    */
-  getTracer() {
-    return this.traceProvider.getTracer(this.serviceInfo.serviceName, this.serviceInfo.serviceVersion)
+  getTracer(name?: string, version?: string) {
+    return this.traceProvider.getTracer(
+      name || this.serviceInfo.serviceName,
+      version || this.serviceInfo.serviceVersion,
+    )
   }
 
   /**
@@ -191,9 +194,6 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
   }
 
   async destroy() {
-    await this.stateStore.destroy()
-    await this.configStore.destroy()
-    await this.secretStore.destroy()
-    await this.traceProvider.shutdown()
+    this.logger.info({ ...this.info }, 'stopped')
   }
 }

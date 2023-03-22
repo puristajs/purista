@@ -2,7 +2,7 @@
     "$schema": "https://typedoc.org/schema.json",
     "name":"PURISTA API",
     "entryPointStrategy":"Packages",
-    "entryPoints": ["./packages/core", "./packages/httpserver", "./packages/amqpbridge","./packages/state-store-redis"],
+    "entryPoints": ["./packages/core", "./packages/httpserver", "./packages/amqpbridge","./packages/state-store-redis","./packages/k8s-sdk"],
     "out": "website/src/api",
     "readme":"CHANGELOG.md",
     "hideGenerator": true,
