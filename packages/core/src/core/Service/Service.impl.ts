@@ -78,8 +78,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
   protected subscriptions = new Map<string, SubscriptionDefinition>()
   protected commands = new Map<string, CommandDefinition>()
 
-  private commandDefinitionList: CommandDefinitionList<any>
-  private subscriptionDefinitionList: SubscriptionDefinitionList<any>
+  public commandDefinitionList: CommandDefinitionList<any>
+  public subscriptionDefinitionList: SubscriptionDefinitionList<any>
   public config: ConfigType
 
   constructor(config: ServiceConstructorInput<ConfigType>) {
@@ -96,6 +96,10 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     this.config = config.config
     this.commandDefinitionList = config.commandDefinitionList
     this.subscriptionDefinitionList = config.subscriptionDefinitionList
+  }
+
+  get name() {
+    return `${this.info.serviceName}V${this.info.serviceVersion}`
   }
 
   /**
@@ -410,7 +414,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
    * @param subscriptionId
    * @param command
    */
-  protected async executeCommand(message: Readonly<Command>) {
+  public async executeCommand(message: Readonly<Command>) {
     const command = this.commands.get(message.receiver.serviceTarget)
 
     const context = await deserializeOtp(this.logger, message.otp)
@@ -565,7 +569,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     })
   }
 
-  protected async executeSubscription(
+  public async executeSubscription(
     message: Readonly<EBMessage>,
     subscriptionName: string,
   ): Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined> {
@@ -750,38 +754,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
   }
 
   async destroy() {
-    this.startActiveSpan('purista.destroy', {}, undefined, async (span) => {
-      this.emit('service-drain', undefined)
-      await this.sendServiceInfo(EBMessageType.InfoServiceDrain)
-      this.logger.info({ ...this.info, ...span.spanContext() }, 'destroy')
-
-      const functionUnregisterProms: Promise<any>[] = []
-      this.commandDefinitionList.forEach((functionDefinition) => {
-        functionUnregisterProms.push(
-          this.eventBridge.unregisterCommand({
-            serviceName: this.info.serviceName,
-            serviceVersion: this.info.serviceVersion,
-            serviceTarget: functionDefinition.commandName,
-          }),
-        )
-      })
-
-      this.subscriptions.forEach((subscriptionDefinition) => {
-        functionUnregisterProms.push(
-          this.eventBridge.unregisterSubscription({
-            serviceName: this.info.serviceName,
-            serviceVersion: this.info.serviceVersion,
-            serviceTarget: subscriptionDefinition.subscriptionName,
-          }),
-        )
-      })
-      await Promise.allSettled(functionUnregisterProms)
-      await this.sendServiceInfo(EBMessageType.InfoServiceShutdown)
-      this.emit('service-stopped', undefined)
-
-      span.end()
-    })
-
+    this.emit('service-stopped', undefined)
+    this.removeAllListeners()
     await super.destroy()
   }
 }

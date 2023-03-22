@@ -38,5 +38,7 @@ export class SecretStoreBaseClass<ConfigType = Record<string, unknown>> {
     throw err
   }
 
-  async destroy() {}
+  async destroy() {
+    this.logger.info('stopped')
+  }
 }

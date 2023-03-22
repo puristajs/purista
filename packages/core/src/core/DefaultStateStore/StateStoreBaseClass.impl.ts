@@ -38,5 +38,7 @@ export class StateStoreBaseClass<ConfigType = Record<string, unknown>> implement
     throw err
   }
 
-  async destroy() {}
+  async destroy() {
+    this.logger.info('stopped')
+  }
 }

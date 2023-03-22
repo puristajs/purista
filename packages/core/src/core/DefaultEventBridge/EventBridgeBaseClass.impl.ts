@@ -10,8 +10,11 @@ import { EventBridgeEvents, GenericEventEmitter, Logger, PuristaSpanTag } from '
 export class EventBridgeBaseClass extends GenericEventEmitter<EventBridgeEvents> {
   logger: Logger
   traceProvider: NodeTracerProvider
+
+  name: string
   constructor(name: string, options?: { logger?: Logger; spanProcessor?: SpanProcessor }) {
     super()
+    this.name = name
 
     const logger = options?.logger || initLogger()
     this.logger = logger.getChildLogger({ name })
@@ -123,4 +126,7 @@ export class EventBridgeBaseClass extends GenericEventEmitter<EventBridgeEvents>
       span.end()
     }
   }
+
+  async destroy() {}
+  async start() {}
 }

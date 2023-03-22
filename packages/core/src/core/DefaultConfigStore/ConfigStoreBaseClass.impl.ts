@@ -38,5 +38,7 @@ export class ConfigStoreBaseClass<ConfigType = Record<string, unknown>> implemen
     throw err
   }
 
-  async destroy() {}
+  async destroy() {
+    this.logger.info('stopped')
+  }
 }

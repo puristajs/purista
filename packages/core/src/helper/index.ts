@@ -1,6 +1,7 @@
 export * from './CommandDefinitionBuilder.impl'
 export * from './getCommandFunctionWithValidation.impl'
 export * from './getSubscriptionFunctionWithValidation.impl'
+export * from './gracefulShutdown'
 export * from './ServiceBuilder.impl'
 export * from './string'
 export * from './SubscriptionDefinitionBuilder.impl'

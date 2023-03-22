@@ -22,4 +22,6 @@ export enum PuristaSpanName {
   StateStoreGetValue = 'purista.stateStoreGetValue',
   StateStoreSetValue = 'purista.stateStoreSetValue',
   StateStoreRemoveValue = 'purista.stateStoreRemoveValue',
+
+  KubernetesHttpRequest = 'purist.kubernetesHttpRequest',
 }
