@@ -19,6 +19,7 @@ export const getEventBridgeMock = (sandbox?: SinonSandbox): { mock: EventBridge;
   const destroy = sandbox?.stub().resolves() || stub().resolves()
 
   const mock: EventBridge = {
+    name: 'EventBridgeMock',
     defaultCommandTimeout: 30000,
     emitMessage,
     registerCommand,

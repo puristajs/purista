@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+    name: theServiceV1
+    labels:
+        app: theServiceV1
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: theServiceV1
+    template:
+        metadata:
+            labels:
+                app: theServiceV1
+        spec:
+            containers:
+              - name: the-service:v1
+                image: TheService:v1
+                imagePullPolicy: IfNotPresent
+                args:
+                livenessProbe:
+                  httpGet:
+                    path: /healthz
+                    port: 8080
+                  initialDelaySeconds: 10
+                  periodSeconds: 10
+                readinessProbe:
+                  httpGet:
+                    path: /healthz
+                    port: 8080
+                  initialDelaySeconds: 5
+                  periodSeconds: 10

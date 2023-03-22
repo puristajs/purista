@@ -10,6 +10,7 @@ echo $CONTENT > ./packages/core/src/version.ts
 echo $CONTENT > ./packages/cli/src/version.ts
 echo $CONTENT > ./packages/httpserver/src/version.ts
 echo $CONTENT > ./packages/redis-state-store/src/version.ts
+echo $CONTENT > ./packages/k8s-sdk/src/version.ts
 
 git add .
 git commit -am "chore: bump versions to $NODE_VERSION"
