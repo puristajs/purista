@@ -54,6 +54,8 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
   protected healthy = false
   protected ready = false
 
+  protected consumerTags: string[] = []
+
   protected replyQueueName?: string
   protected serviceFunctions = new Map<
     string,
@@ -64,6 +66,8 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
   >()
 
   protected pendingInvocations = new Map<EBMessageId, PendigInvocation>()
+
+  protected runningSubscriptionCount = 0
 
   protected subscriptions = new Map<
     string,
@@ -130,6 +134,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
    * Connect to RabbitMQ broker, ensure exchange, call back queue
    */
   async start() {
+    await super.start()
     try {
       this.connection = await amqplib.connect(this.config.url, this.config.socketOptions)
     } catch (err) {
@@ -175,7 +180,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       'x-match': 'all',
       replyTo: this.replyQueueName,
     })
-    this.channel.consume(
+    const consume = await this.channel.consume(
       this.replyQueueName,
       async (msg) => {
         if (!msg) {
@@ -256,6 +261,9 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       },
       { noAck: true },
     )
+
+    this.consumerTags.push(consume.consumerTag)
+
     this.healthy = true
     this.ready = true
     this.logger.debug('ensured: response queue')
@@ -473,7 +481,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       receiverServiceTarget: address.serviceTarget,
     })
 
-    channel.consume(
+    const consume = await channel.consume(
       queue.queue,
       async (msg) => {
         const context = await deserializeOtpFromAmqpHeader(this.logger, msg, this.encrypter, this.encoder)
@@ -577,6 +585,8 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       { noAck },
     )
 
+    this.consumerTags.push(consume.consumerTag)
+
     this.serviceFunctions.set(queueName, { cb, channel })
 
     const info = createInfoMessage(EBMessageType.InfoServiceFunctionAdded, address, { payload: metadata })
@@ -653,7 +663,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       instanceId: subscription.instanceId,
     })
 
-    channel.consume(
+    const consume = await channel.consume(
       queue.queue,
       async (msg) => {
         const context = await deserializeOtpFromAmqpHeader(this.logger, msg, this.encrypter, this.encoder)
@@ -667,6 +677,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
             if (!msg) {
               return
             }
+            this.runningSubscriptionCount++
             try {
               const message = await this.decodeContent<EBMessage>(
                 msg.content,
@@ -686,12 +697,14 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
 
               const result = await cb(message)
               if (subscription.emitEventName && result) {
-                this.emitMessage(result)
+                await this.emitMessage(result)
               }
               if (noAck) {
                 channel.ack(msg)
               }
+              this.runningSubscriptionCount--
             } catch (error) {
+              this.runningSubscriptionCount--
               const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to consume subscription message', {
                 error,
                 subscription,
@@ -712,6 +725,8 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
       },
       { noAck },
     )
+
+    this.consumerTags.push(consume.consumerTag)
 
     this.subscriptions.set(queueName, { cb, channel })
     return queueName
@@ -779,5 +794,41 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     return decoder.decode(decrypted)
   }
 
-  async destroy() {}
+  async destroy() {
+    if (this.channel) {
+      const channel = this.channel
+      // instruct message broker to no longer send messages
+      const cancelProms = this.consumerTags.map((tag) => channel.cancel(tag))
+      await Promise.all(cancelProms)
+
+      let isTimedOut = false
+      const timeout = setTimeout(() => {
+        isTimedOut = true
+      }, this.defaultCommandTimeout)
+
+      // ensure actual running commands and subscriptions are finished before closing connection
+      const waitForExecutionEnd = () => {
+        if (this.pendingInvocations.size <= 0 && this.runningSubscriptionCount <= 0) {
+          return
+        }
+        if (isTimedOut) {
+          this.logger.error('Some commands or subscriptions could not finish before connection was closed')
+          return
+        }
+        setImmediate(waitForExecutionEnd)
+      }
+
+      waitForExecutionEnd()
+      if (timeout) {
+        clearTimeout(timeout)
+      }
+
+      await this.channel.close()
+    }
+    if (this.connection) {
+      await this.connection.close()
+    }
+
+    await super.destroy()
+  }
 }
