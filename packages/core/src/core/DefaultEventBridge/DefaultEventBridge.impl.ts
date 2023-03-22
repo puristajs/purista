@@ -67,6 +67,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
   >()
 
   protected pendingInvocations = new Map<EBMessageId, PendigInvocation>()
+  protected runningSubscriptionCount = 0
 
   protected subscriptions = new Map<string, SubscriptionStorageEntry>()
 
@@ -93,6 +94,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
   }
 
   async start() {
+    await super.start()
     const write = async (message: Readonly<EBMessage>, _encoding: string, next: (error?: Error) => void) => {
       const context = await deserializeOtp(this.logger, message.otp)
 
@@ -106,6 +108,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
             this.subscriptions.forEach((subscription) => {
               if (isMessageMatchingSubscription(this.logger, message, subscription)) {
                 isAtLeastDeliveredOnce = true
+                this.runningSubscriptionCount++
                 subscription
                   .cb(message)
                   .then((result) => {
@@ -114,6 +117,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
                     }
                   })
                   .catch((err) => this.logger.error({ err }))
+                  .finally(() => this.runningSubscriptionCount--)
               }
             })
 
@@ -376,6 +380,30 @@ export class DefaultEventBridge extends EventBridgeBaseClass implements EventBri
   }
 
   async destroy(): Promise<void> {
+    await super.destroy()
+
+    let isTimedOut = false
+    const timeout = setTimeout(() => {
+      isTimedOut = true
+    }, this.config.defaultCommandTimeout)
+
+    // ensure actual running commands and subscriptions are finished before closing connection
+    const waitForExecutionEnd = () => {
+      if (this.pendingInvocations.size <= 0 && this.runningSubscriptionCount <= 0) {
+        return
+      }
+      if (isTimedOut) {
+        this.logger.error('Some commands or subscriptions could not finish before connection was closed')
+        return
+      }
+      setImmediate(waitForExecutionEnd)
+    }
+
+    waitForExecutionEnd()
+    if (timeout) {
+      clearTimeout(timeout)
+    }
+
     this.pendingInvocations.forEach((value) => value.reject(new UnhandledError(StatusCode.ServiceUnavailable)))
     this.pendingInvocations.clear()
     this.removeAllListeners()
