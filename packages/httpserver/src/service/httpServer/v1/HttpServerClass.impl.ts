@@ -4,19 +4,13 @@ import helmet from '@fastify/helmet'
 import fastifyStatic from '@fastify/static'
 import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import * as api from '@opentelemetry/api'
-import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import {
   Command,
-  ConfigStore,
-  EventBridge,
   HandledError,
   HttpExposedServiceMeta,
-  initLogger,
-  Logger,
-  SecretStore,
   Service,
-  StateStore,
+  ServiceConstructorInput,
   StatusCode,
   UnhandledError,
 } from '@purista/core'
@@ -25,21 +19,18 @@ import { posix } from 'path'
 import qs from 'qs'
 import * as swaggerUi from 'swagger-ui-dist'
 import Trouter, { Methods } from 'trouter'
-import merge from 'ts-deepmerge'
 
-import { COMMANDS as commandDefinitionList } from './commands'
-import { getDefaultConfig, ServiceInfo as info } from './config'
-import { addHeaders } from './helper'
-import { addSpanTags } from './helper/addSpanTags'
+import { HttpServerServiceV1ConfigRaw } from './httpServerServiceConfig'
 import { OPEN_API_ROUTE_FUNCTIONS } from './routes'
-import { SUBSCRIPTIONS as subscriptionDefinitionList } from './subscriptions'
-import { BeforeResponseHook, HttpServerConfig } from './types'
+import { addHeaders } from './subscription/serviceCommandsToRestApi/helper'
+import { addSpanTags } from './subscription/serviceCommandsToRestApi/helper/addSpanTags'
+import { BeforeResponseHook } from './types'
 
 /**
  * A simple http server based on fastify.
  *
  */
-export class HttpServerService extends Service<HttpServerConfig> {
+export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> extends Service<ConfigType> {
   server?: FastifyInstance
 
   routeDefinitions: HttpExposedServiceMeta<Record<string, unknown>>[] = []
@@ -48,42 +39,13 @@ export class HttpServerService extends Service<HttpServerConfig> {
 
   beforeResponse = new Trouter<BeforeResponseHook>()
 
-  /**
-   * Create a new instance of the HttpServer class
-   * @param {Logger} baseLogger - The logger that the server will use.
-   * @param {EventBridge} eventBridge - EventBridge
-   * @param {HttpServerConfig} conf - HttpServerConfig
-   */
-  constructor(
-    eventBridge: EventBridge,
-    config: HttpServerConfig = getDefaultConfig(),
-    options: {
-      logger?: Logger
-      spanProcessor?: SpanProcessor
-      secretStore?: SecretStore
-      configStore?: ConfigStore
-      stateStore?: StateStore
-    } = {},
-  ) {
-    const logger = options.logger || initLogger()
-    super({
-      logger,
-      info,
-      eventBridge,
-      commandDefinitionList,
-      subscriptionDefinitionList,
-      config,
-      spanProcessor: options.spanProcessor,
-      secretStore: options.secretStore,
-      stateStore: options.stateStore,
-    })
-
-    this.config = merge(getDefaultConfig(), config)
+  constructor(config: ServiceConstructorInput<ConfigType>) {
+    super(config)
 
     this.server = fastify({
       querystringParser: (str) => qs.parse(str),
       ...this.config.fastify,
-    })
+    }) as unknown as FastifyInstance
 
     if (this.config.enableCors) {
       this.server.register(cors, this.config.corsOptions)
@@ -275,5 +237,10 @@ export class HttpServerService extends Service<HttpServerConfig> {
       },
       ...input,
     })
+  }
+
+  async destroy() {
+    await this.server?.close()
+    await super.destroy()
   }
 }
