@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock } from '../../testhelper'
+import { getEventBridgeMock, getLoggerMock } from '../../mocks'
 import { ServiceInfoType } from '../types'
 import { Service } from './Service.impl'
 

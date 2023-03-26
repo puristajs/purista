@@ -6,6 +6,8 @@ import { PrincipalId } from '../PrincipalId'
 
 /**
  * A subscription managed by the event bridge
+ *
+ * @group Subscription
  */
 export type Subscription<PayloadType = unknown, ParameterType = unknown> = {
   /** the producer address of the message  */

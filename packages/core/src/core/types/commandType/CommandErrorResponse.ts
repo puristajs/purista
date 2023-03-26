@@ -6,6 +6,8 @@ import type { StatusCode } from '../StatusCode.enum'
 
 /**
  * CommandErrorResponse is a response to a specific previously received command which indicates some failure.
+ *
+ * @group Command
  */
 export type CommandErrorResponse = {
   messageType: EBMessageType.CommandErrorResponse

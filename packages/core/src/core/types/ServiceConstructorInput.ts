@@ -1,14 +1,17 @@
-import { SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 
-import { CommandDefinitionList } from './commandType'
-import { ConfigStore } from './configStore'
-import { EventBridge } from './EventBridge'
-import { ServiceInfoType } from './infoType'
-import { Logger } from './Logger'
-import { SecretStore } from './secretStore'
-import { StateStore } from './stateStore'
-import { SubscriptionDefinitionList } from './subscription'
+import type { ConfigStore } from '../ConfigStore'
+import type { EventBridge } from '../EventBridge'
+import type { SecretStore } from '../SecretStore'
+import type { StateStore } from '../StateStore'
+import type { CommandDefinitionList } from './commandType'
+import type { ServiceInfoType } from './infoType'
+import type { Logger } from './Logger'
+import type { SubscriptionDefinitionList } from './subscription'
 
+/**
+ * @group Service
+ */
 export type ServiceConstructorInput<ConfigType> = {
   /** the logger instance */
   logger: Logger

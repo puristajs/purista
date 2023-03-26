@@ -1,9 +1,10 @@
 import { SpanStatusCode, trace } from '@opentelemetry/api'
 
+import { DefaultConfigStore } from '../../DefaultConfigStore'
+import { DefaultSecretStore } from '../../DefaultSecretStore'
+import { DefaultStateStore } from '../../DefaultStateStore'
 import { puristaVersion } from '../../version'
-import { DefaultConfigStore } from '../DefaultConfigStore'
-import { DefaultSecretStore } from '../DefaultSecretStore'
-import { DefaultStateStore } from '../DefaultStateStore'
+import { ConfigDeleteFunction, ConfigGetterFunction, ConfigSetterFunction } from '../ConfigStore'
 import { HandledError } from '../Error/HandledError.impl'
 import { UnhandledError } from '../Error/UnhandledError.impl'
 import {
@@ -15,30 +16,25 @@ import {
   getNewTraceId,
   serializeOtp,
 } from '../helper'
+import { SecretDeleteFunction, SecretGetterFunction, SecretSetterFunction } from '../SecretStore'
+import { StateDeleteFunction, StateGetterFunction, StateSetterFunction } from '../StateStore'
 import {
   Command,
   CommandDefinition,
   CommandDefinitionList,
   CommandFunctionContext,
-  ConfigDeleteFunction,
-  ConfigGetterFunction,
-  ConfigSetterFunction,
   ContextBase,
   CustomMessage,
   EBMessage,
   EBMessageAddress,
   EBMessageType,
   InfoMessageType,
+  Logger,
   PuristaSpanName,
   PuristaSpanTag,
-  SecretDeleteFunction,
-  SecretGetterFunction,
-  SecretSetterFunction,
   ServiceClass,
   ServiceConstructorInput,
-  StateDeleteFunction,
-  StateGetterFunction,
-  StateSetterFunction,
+  ServiceEventsNames,
   StatusCode,
   StoreType,
   Subscription,
@@ -60,19 +56,19 @@ import { subscriptionTransformInput } from './subscriptionTransformInput.impl'
  * ```typescript
  * class MyService extends Service {
  *
- *   constructor(baseLogger: Logger, info: ServiceInfoType, eventBridge: EventBridge, config: MyServiceConfig, options: {
- *              spanProcessor?: SpanProcessor,
- *              secretStore?: SecretStore
- *    }) {
- *     super( baseLogger, info, eventBridge, config, options: {
- *          spanProcessor,
- *          secretStore
- *      } )
- *     // ... initial service logic
+ *   async start() {
+ *     await super.start()
+ *     // your custom implementation
  *   }
- *   // ... service methods, functions and logic
+ *
+ *   async destroy() {
+ *     // your custom implementation
+ *    await super.destroy()
+ *   }
  * }
  * ```
+ *
+ * @group Service
  */
 export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass implements ServiceClass<ConfigType> {
   protected subscriptions = new Map<string, SubscriptionDefinition>()
@@ -107,7 +103,6 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
    */
   async start() {
     return this.startActiveSpan('purista.start', {}, undefined, async (span) => {
-      this.emit('service-started')
       try {
         await this.initializeEventbridgeConnect(this.commandDefinitionList, this.subscriptionDefinitionList)
         await this.sendServiceInfo(EBMessageType.InfoServiceReady)
@@ -115,9 +110,10 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           { ...span.spanContext(), puristaVersion },
           `service ${this.serviceInfo.serviceName} ${this.serviceInfo.serviceVersion} started`,
         )
+        this.emit(ServiceEventsNames.ServiceStarted)
       } catch (err) {
         this.logger.error({ err, ...span.spanContext(), puristaVersion }, `failed to start service`)
-        this.emit('service-not-available', err)
+        this.emit(ServiceEventsNames.ServiceUnavailable, err)
         throw err
       }
     })
@@ -142,16 +138,16 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       // send info message that this service is going to start up now
       await this.sendServiceInfo(EBMessageType.InfoServiceInit)
 
-      // register subscriptions for this service
-      for (const subscription of subscriptions) {
-        this.logger.debug({ name: subscription.subscriptionName, ...span.spanContext() }, 'start subscription')
-        await this.registerSubscription(subscription)
-      }
-
       // register commands for this service
-      for (const command of commandDefinitionList) {
-        await this.registerCommand(command)
-      }
+      const commandProms = commandDefinitionList.map((command) => this.registerCommand(command))
+      await Promise.all(commandProms)
+
+      // register subscriptions for this service
+      const subscriptionProms = subscriptions.map((subscription) => {
+        this.logger.debug({ name: subscription.subscriptionName, ...span.spanContext() }, 'start subscription')
+        return this.registerSubscription(subscription)
+      })
+      await Promise.all(subscriptionProms)
     })
   }
 
@@ -242,7 +238,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     return emitCustomEvent.bind(this)
   }
 
-  public getContextFunctions(): ContextBase {
+  public getContextFunctions(logger: Logger): ContextBase {
     const getSecretFunction = async function (this: Service<ConfigType>, ...secretNames: string[]) {
       return this.wrapInSpan(PuristaSpanName.SecretStoreGetValue, {}, async (span) => {
         try {
@@ -388,6 +384,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     const removeState: StateDeleteFunction = removeStateFunction.bind(this)
 
     return {
+      logger,
       wrapInSpan: this.wrapInSpan.bind(this),
       startActiveSpan: this.startActiveSpan.bind(this),
       secrets: {
@@ -453,11 +450,10 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           undefined,
           async (_subSpan) => {
             const context: CommandFunctionContext = {
-              logger,
               message,
               emit: this.getEmitFunction(command.commandName, traceId, message.principalId),
               invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId),
-              ...this.getContextFunctions(),
+              ...this.getContextFunctions(logger),
             }
             const call = command.call.bind(this, context)
             return await call(payload, parameter)
@@ -472,11 +468,10 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
 
             for (const [name, hook] of Object.entries(guards || {})) {
               const context: CommandFunctionContext = {
-                logger,
                 message,
                 emit: this.getEmitFunction(command.commandName, traceId, message.principalId),
                 invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId),
-                ...this.getContextFunctions(),
+                ...this.getContextFunctions(logger),
               }
 
               const guardPromise = this.wrapInSpan('afterGuardHook.' + name, {}, async (_subSpan) => {
@@ -493,9 +488,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           const transformOutput = command.hooks.transformOutput
           await this.startActiveSpan(command.commandName + '.outputTransformation', {}, undefined, async () => {
             const afterTransform = transformOutput.transformFunction.bind(this, {
-              logger,
               message,
-              ...this.getContextFunctions(),
+              ...this.getContextFunctions(logger),
             })
             const resultTransformed = await afterTransform(result as Readonly<unknown>, parameter)
             result = transformOutput.transformOutputSchema.parse(resultTransformed)
@@ -505,6 +499,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
         return await this.startActiveSpan(command.commandName + '.success', {}, undefined, async (subSpan) => {
           if (command.eventName) {
             subSpan.addEvent(command.eventName)
+            this.emit(`custom-${command.eventName}`, result)
           }
           return { ...createSuccessResponse(message, result, command.eventName), otp: serializeOtp() }
         })
@@ -512,7 +507,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
         span.recordException(error as Error)
 
         if (error instanceof HandledError) {
-          this.emit('handled-function-error', { functionName: command.commandName, error, traceId })
+          this.emit(ServiceEventsNames.CommandHandledError, { commandName: command.commandName, error, traceId })
           span.setStatus({
             code: SpanStatusCode.ERROR,
             message: error.message,
@@ -523,7 +518,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           )
         }
 
-        this.emit('unhandled-function-error', { functionName: command.commandName, error, traceId })
+        this.emit(ServiceEventsNames.CommandUnhandledError, { commandName: command.commandName, error, traceId })
 
         logger.error(
           { err: error, message: getCleanedMessage(message), ...span.spanContext() },
@@ -614,11 +609,10 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
             undefined,
             async (_subSpan) => {
               const context: SubscriptionFunctionContext = {
-                logger,
                 message,
                 emit: this.getEmitFunction(subscriptionName, traceId, message.principalId),
                 invoke: this.getInvokeFunction(subscriptionName, traceId, message.principalId),
-                ...this.getContextFunctions(),
+                ...this.getContextFunctions(logger),
               }
               const call2 = subscription.call.bind(this, context)
               return await call2(payload, parameter)
@@ -633,11 +627,10 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
 
               for (const [name, hook] of Object.entries(guards || {})) {
                 const context: SubscriptionFunctionContext = {
-                  logger,
                   message,
                   emit: this.getEmitFunction(subscription.subscriptionName, traceId, message.principalId),
                   invoke: this.getInvokeFunction(subscription.subscriptionName, traceId, message.principalId),
-                  ...this.getContextFunctions(),
+                  ...this.getContextFunctions(logger),
                 }
 
                 const guardPromise = this.wrapInSpan('afterGuardHook.' + name, {}, async (_subSpan) => {
@@ -658,9 +651,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
               undefined,
               async () => {
                 const afterTransform = transformOutput.transformFunction.bind(this, {
-                  logger,
                   message,
-                  ...this.getContextFunctions(),
+                  ...this.getContextFunctions(logger),
                 })
                 const resultTransformed = await afterTransform(result as Readonly<unknown>, parameter)
                 result = transformOutput.transformOutputSchema.parse(resultTransformed)
@@ -674,6 +666,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
               {},
               undefined,
               async (subSpan) => {
+                this.emit(`custom-${subscription.emitEventName}`, result)
                 subSpan.addEvent(subscription.emitEventName as string)
                 const resultMsg: Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> = {
                   messageType: EBMessageType.CustomMessage,
@@ -696,12 +689,12 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
         } catch (err) {
           logger.error({ err }, 'Error in subscription execution')
           if (err instanceof HandledError) {
-            this.emit('handled-subscription-error', { subscriptionName, error: err, traceId })
+            this.emit(ServiceEventsNames.SubscriptionHandledError, { subscriptionName, error: err, traceId })
             // handled errors prevent that the message is re-delivered for retry
             return
           }
           if (err instanceof UnhandledError) {
-            this.emit('unhandled-subscription-error', { subscriptionName, error: err, traceId })
+            this.emit(ServiceEventsNames.SubscriptionUnhandledError, { subscriptionName, error: err, traceId })
           }
           span.recordException(err as Error)
 
@@ -754,7 +747,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
   }
 
   async destroy() {
-    this.emit('service-stopped', undefined)
+    this.emit(ServiceEventsNames.ServiceDrain, undefined)
+    this.emit(ServiceEventsNames.ServiceStopped, undefined)
     this.removeAllListeners()
     await super.destroy()
   }

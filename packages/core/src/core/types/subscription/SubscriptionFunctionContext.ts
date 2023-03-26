@@ -1,22 +1,45 @@
 import { ContextBase } from '../ContextBase'
 import { EBMessage } from '../EBMessage'
-import { EBMessageAddress } from '../EBMessageAddress'
-import type { Logger } from '../Logger'
+import { EmitCustomMessageFunction } from '../EmitCustomMessageFunction'
+import { InvokeFunction } from '../InvokeFunction'
 
 /**
- * The subscription function context which will be passed into subscription function.
+ * It provides the original command message.
+ * Also, the methods:
+ *
+ * - `emit` which allows to emit custom events to the event bridge
+ * - `invoke` which allows to call other commands
+ *
+ * @group Subscription
  */
-export type SubscriptionFunctionContext = ContextBase & {
-  /** the logger instance */
-  logger: Logger
+export type SubscriptionFunctionContextEnhancements = {
   /** the original message */
   message: Readonly<EBMessage>
   /** emit a custom message */
-  emit: <Payload = unknown>(eventName: string, payload?: Payload) => Promise<void>
-  /** call a other command and return the result */
-  invoke: <InvokeResponseType = unknown, PayloadType = unknown, ParameterType = unknown>(
-    address: EBMessageAddress,
-    payload: PayloadType,
-    parameter: ParameterType,
-  ) => Promise<InvokeResponseType>
+  emit: EmitCustomMessageFunction
+  /**
+   * Invokes a command and returns the result.
+   * It is recommended to validate the result against a schema which only contains the data you actually need.
+   *
+   * @example ```typescript
+   *
+   * const address: EBMessageAddress = {
+   *   serviceName: 'name-of-service-to-invoke',
+   *   serviceVersion: '1',
+   *   serviceTarget: 'command-name-to-invoke',
+   * }
+   *
+   * const inputPayload = { my: 'input' }
+   * const inputParameter = { search: 'for_me' }
+   *
+   * const result = await invoke<MyResultType>(address, inputPayload inputParameter )
+   */
+  invoke: InvokeFunction
 }
+
+/**
+ * The subscription function context which will be passed into subscription function.
+ *
+ * @group Subscription
+ */
+export type SubscriptionFunctionContext = ContextBase & SubscriptionFunctionContextEnhancements

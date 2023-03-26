@@ -9,6 +9,8 @@ import { isDevelop } from './isDevelop.impl'
  * For command success responses, the response field is overwritten.
  *
  * Command error responses are not changed.
+ *
+ * @group Helper
  */
 export const getCleanedMessage = (
   message: Readonly<EBMessage>,

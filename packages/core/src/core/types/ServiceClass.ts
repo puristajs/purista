@@ -4,13 +4,15 @@ import { CommandDefinition } from './commandType'
 import { SubscriptionDefinition } from './subscription'
 
 /**
- * The Service
+ * The ServiceClass interface
+ *
+ * @group Service
  */
 export interface ServiceClass<ConfigType = unknown | undefined> {
   config: ConfigType
 
   /**
-   * Stop anddestroy the current service
+   * Stop and destroy the current service
    */
   destroy(): Promise<void>
 

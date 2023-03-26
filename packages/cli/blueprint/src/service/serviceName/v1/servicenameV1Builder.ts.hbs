@@ -1,0 +1,14 @@
+import { ServiceBuilder, ServiceInfoType } from '@purista/core'
+
+import { general{{properCase name}}ServiceInfo } from '../general{{properCase name}}ServiceInfo'
+import { {{camelCase name}}ServiceV{{version}}ConfigSchema } from './{{camelCase name}}ServiceConfig'
+
+export const {{camelCase name}}ServiceInfo: ServiceInfoType = {
+  serviceVersion: '1',
+  ...general{{properCase name}}ServiceInfo,
+}
+
+// create a service builder instance and assign service config schema and default config.
+
+export const {{camelCase name}}V{{version}}ServiceBuilder = new ServiceBuilder({{camelCase name}}ServiceInfo).setConfigSchema({{camelCase name}}ServiceV{{version}}ConfigSchema)
+.setDefaultConfig({})

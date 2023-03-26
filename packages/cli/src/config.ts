@@ -25,13 +25,15 @@ export const testDependencies: string[] = [
 ]
 
 export const lintDependencies: string[] = [
+  '@typescript-eslint/eslint-plugin@^5.56.0',
+  '@typescript-eslint/parser@^5.56.0',
   'eslint@^8.36.0',
-  'eslint-config-prettier@^8.7.0',
+  'eslint-config-prettier@^8.8.0',
   'eslint-config-standard@^17.0.0',
   'eslint-plugin-import@^2.27.5',
   'eslint-plugin-json@^3.1.0',
   'eslint-plugin-node@^11.1.0',
   'eslint-plugin-prettier@^4.2.1',
   'eslint-plugin-simple-import-sort@^10.0.0',
-  'prettier@^2.8.3',
+  'prettier@^2.8.7',
 ]

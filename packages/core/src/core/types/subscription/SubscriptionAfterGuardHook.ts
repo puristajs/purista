@@ -4,6 +4,8 @@ import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext'
 /**
  * Definition of after guard hook functions.
  * This guard is called after function successfully returns and after output validation.
+ *
+ * @group Subscription
  */
 export type SubscriptionAfterGuardHook<
   ServiceClassType = ServiceClass,

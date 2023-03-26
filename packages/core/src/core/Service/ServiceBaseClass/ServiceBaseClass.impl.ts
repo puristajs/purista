@@ -4,17 +4,11 @@ import { NodeTracerProvider, SpanProcessor } from '@opentelemetry/sdk-trace-node
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
 import { puristaVersion } from '../../../version'
-import {
-  ConfigStore,
-  EventBridge,
-  GenericEventEmitter,
-  Logger,
-  PuristaSpanTag,
-  SecretStore,
-  ServiceEvents,
-  ServiceInfoType,
-  StateStore,
-} from '../../types'
+import type { ConfigStore } from '../../ConfigStore'
+import { EventBridge } from '../../EventBridge'
+import type { SecretStore } from '../../SecretStore'
+import type { StateStore } from '../../StateStore'
+import { GenericEventEmitter, Logger, PuristaSpanTag, ServiceEvents, ServiceInfoType } from '../../types'
 import { ServiceInfoValidator } from '../ServiceInfoValidator.impl'
 
 /**
@@ -24,6 +18,7 @@ import { ServiceInfoValidator } from '../ServiceInfoValidator.impl'
  * - handling of commands
  * - handling of subscriptions
  *
+ * @group Service
  */
 export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
   readonly info: ServiceInfoType

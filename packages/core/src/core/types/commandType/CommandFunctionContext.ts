@@ -1,22 +1,46 @@
 import { ContextBase } from '../ContextBase'
-import { EBMessageAddress } from '../EBMessageAddress'
-import type { Logger } from '../Logger'
+import { EmitCustomMessageFunction } from '../EmitCustomMessageFunction'
+import { InvokeFunction } from '../InvokeFunction'
 import type { Command } from './Command'
 
 /**
- * The command function context which will be passed into command function.
+ * It provides the original command message with types for payload and parameter.
+ * Also, the methods:
+ *
+ * - `emit` which allows to emit custom events to the event bridge
+ * - `invoke` which allows to call other commands
+ *
+ * @group Command
  */
-export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsType = unknown> = ContextBase & {
-  /** the logger instance */
-  logger: Logger
+export type CommandFunctionContextEnhancements<MessagePayloadType = unknown, MessageParamsType = unknown> = {
   /** the original message */
   message: Readonly<Command<MessagePayloadType, MessageParamsType>>
   /** emit a custom message */
-  emit: <Payload = unknown>(eventName: string, payload?: Payload) => Promise<void>
-  /** call a other command and return the result */
-  invoke: <InvokeResponseType = unknown, PayloadType = unknown, ParameterType = unknown>(
-    address: EBMessageAddress,
-    payload: PayloadType,
-    parameter: ParameterType,
-  ) => Promise<InvokeResponseType>
+  emit: EmitCustomMessageFunction
+  /**
+   * Invokes a command and returns the result.
+   * It is recommended to validate the result against a schema which only contains the data you actually need.
+   *
+   * @example ```typescript
+   *
+   * const address: EBMessageAddress = {
+   *   serviceName: 'name-of-service-to-invoke',
+   *   serviceVersion: '1',
+   *   serviceTarget: 'command-name-to-invoke',
+   * }
+   *
+   * const inputPayload = { my: 'input' }
+   * const inputParameter = { search: 'for_me' }
+   *
+   * const result = await invoke<MyResultType>(address, inputPayload inputParameter )
+   */
+  invoke: InvokeFunction
 }
+
+/**
+ * The command function context which will be passed into command function.
+ *
+ * @group Command
+ */
+export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsType = unknown> = ContextBase &
+  CommandFunctionContextEnhancements<MessagePayloadType, MessageParamsType>

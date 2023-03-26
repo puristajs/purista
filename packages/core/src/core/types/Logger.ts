@@ -11,6 +11,7 @@ export type LoggerOptions = {
   traceId?: TraceId
   instanceId?: InstanceId
   principalId?: PrincipalId
+  hostname?: string
 }
 
 export type LogFnParamType = [unknown, string?, ...any] | [string, ...any]

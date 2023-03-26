@@ -1,5 +1,4 @@
 import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api'
-import { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import {
   Command,
   CommandDefinitionMetadataBase,
@@ -15,6 +14,7 @@ import {
   EBMessageType,
   EventBridge,
   EventBridgeBaseClass,
+  EventBridgeConfig,
   getCleanedMessage,
   getNewCorrelationId,
   getNewEBMessageId,
@@ -24,7 +24,6 @@ import {
   isCommandResponse,
   isCommandSuccessResponse,
   isInfoMessage,
-  Logger,
   PendigInvocation,
   PuristaSpanName,
   PuristaSpanTag,
@@ -46,8 +45,7 @@ import { AmqpBridgeConfig, Encoder, Encrypter } from './types'
 /**
  * A adapter to use rabbitMQ as event bridge.
  */
-export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
-  protected config: AmqpBridgeConfig
+export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implements EventBridge {
   protected connection?: Connection
   protected channel?: Channel
 
@@ -85,24 +83,22 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
     ...plainEncrypter,
   }
 
-  constructor(
-    config: AmqpBridgeConfig = getDefaultConfig(),
-    options?: { logger?: Logger; spanProcessor?: SpanProcessor },
-  ) {
-    super('AmqpBridge', options)
-    this.config = {
-      ...getDefaultConfig(),
+  constructor(config: EventBridgeConfig<AmqpBridgeConfig>) {
+    //= getDefaultConfig()
+    const conf = {
       ...config,
+      config: { ...getDefaultConfig(), ...config },
     }
+    super('AmqpBridge', conf)
 
     this.encoder = {
       ...this.encoder,
-      ...config.encoder,
+      ...this.config.encoder,
     }
 
     this.encrypter = {
       ...this.encrypter,
-      ...config.encrypter,
+      ...this.config.encrypter,
     }
   }
 
@@ -112,22 +108,6 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
 
   async isHealthy() {
     return this.healthy
-  }
-
-  /**
-   * Get default time out.
-   * It is the maximum time a command should be responded.
-   */
-  get defaultCommandTimeout() {
-    return this.config.defaultCommandTimeout
-  }
-
-  /**
-   * Get instance id.
-   * The id of current event bridge instance.
-   */
-  get instanceId() {
-    return this.config.instanceId
   }
 
   /**
@@ -302,7 +282,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
         id: getNewEBMessageId(),
         timestamp: Date.now(),
         traceId: message.traceId || span.spanContext().traceId,
-        instanceId: this.config.instanceId,
+        instanceId: this.instanceId,
         otp: serializeOtp(),
       })
 
@@ -343,7 +323,7 @@ export class AmqpBridge extends EventBridgeBaseClass implements EventBridge {
 
   async invoke<T>(
     input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
-    commandTimeout: number = this.config.defaultCommandTimeout,
+    commandTimeout: number = this.defaultCommandTimeout,
   ): Promise<T> {
     const context = await deserializeOtp(this.logger, input.otp)
     return this.startActiveSpan(PuristaSpanName.EventBridgeInvokeCommand, {}, context, async (span) => {

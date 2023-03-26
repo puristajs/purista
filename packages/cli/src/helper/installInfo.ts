@@ -40,7 +40,6 @@ const getBuilderFile = (startFolder: string) => {
 
 const getServiceFile = (startFolder: string) => {
   const files = fs.readdirSync(startFolder)
-  console.log(files)
   return files.find((file) => {
     const match = file.match(serviceFileRegex)
     return !!match

@@ -1,5 +1,8 @@
 import { SubscriptionTransformFunctionContext } from './SubscriptionTransformFunctionContext'
 
+/**
+ * @group Subscription
+ */
 export type SubscriptionTransformInputHook<
   ServiceClassType,
   PayloadOutput = unknown,

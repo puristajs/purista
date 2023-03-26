@@ -1,13 +1,15 @@
 import { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
 
-import { {{camelCase name}}ServiceBuilder } from './{{camelCase name}}ServiceBuilder'
+import { {{camelCase name}}V{{version}}ServiceBuilder } from './{{camelCase name}}V{{version}}ServiceBuilder'
 
 // bring service config definition, command definitions and subscription definitions together in the service
+// add only definitions and no further service config here
+// other service config should be done in ./{{camelCase name}}ServiceBuilder.ts file
 
 const commandDefinitions: CommandDefinitionList<any> = []
 
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = []
 
-export const {{camelCase name}}V{{version}}Service = {{camelCase name}}ServiceBuilder
+export const {{camelCase name}}V{{version}}Service = {{camelCase name}}V{{version}}ServiceBuilder
   .addCommandDefinition(...commandDefinitions)
   .addSubscriptionDefinition(...subscriptionDefinitions)

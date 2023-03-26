@@ -12,6 +12,8 @@ import { serializeOtp } from './serializeOtp.impl'
  * @param status
  * @param error
  * @returns CommandErrorResponse message object
+ *
+ * @group Helper
  */
 export const createErrorResponse = (
   originalEBMessage: Readonly<Command>,

@@ -1,4 +1,4 @@
-import { getLoggerMock } from '../../testhelper'
+import { getLoggerMock } from '../../mocks'
 import { deserializeOtp, serializeOtp } from './serializeOtp.impl'
 
 describe('serializeOtp', () => {

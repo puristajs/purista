@@ -1,7 +1,7 @@
-import { {{camelCase service.name}}ServiceBuilder } from '../../{{camelCase service.name}}ServiceBuilder'
+import { {{camelCase service.name}}V{{service.version}}ServiceBuilder } from '../../{{camelCase service.name}}V{{service.version}}ServiceBuilder'
 import { {{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema } from './schema'
 
-export const {{camelCase name}}SubscriptionBuilder = {{camelCase service.name}}ServiceBuilder.getSubscriptionBuilder(
+export const {{camelCase name}}SubscriptionBuilder = {{camelCase service.name}}V{{service.version}}ServiceBuilder.getSubscriptionBuilder(
   '{{camelCase name}}',
   '{{description}}',
 ){{#if (isSet subscriptionEventName)}}.subscribeToEvent('{{trim subscriptionEventName}}')

@@ -1,6 +1,17 @@
 import { Command, CommandSuccessResponse, EBMessageType } from '../types'
 import { getNewTraceId } from './getNewTraceId.impl'
 
+/**
+ *
+ * @param originalEBMessage
+ * @param payload
+ * @param eventName
+ * @param contentType
+ * @param contentEncoding
+ * @returns
+ *
+ * @group Helper
+ */
 export const createSuccessResponse = <T>(
   originalEBMessage: Readonly<Command>,
   payload: T,

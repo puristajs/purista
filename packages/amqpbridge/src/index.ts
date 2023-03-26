@@ -1,3 +1,7 @@
+/**
+ *
+ * @module
+ */
 export * from './AmqpBridge.impl'
 export * from './deserializeOtpFromAmqpHeader.impl'
 export * from './getDefaultConfig.impl'

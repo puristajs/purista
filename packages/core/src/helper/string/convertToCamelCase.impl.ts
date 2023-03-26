@@ -3,6 +3,8 @@
  * @param str string
  * @returns string converted to camelCase
  * @link https://github.com/30-seconds/30-seconds-of-code
+ *
+ * @group Helper
  */
 export const convertToCamelCase = (str: string): string => {
   const s =
