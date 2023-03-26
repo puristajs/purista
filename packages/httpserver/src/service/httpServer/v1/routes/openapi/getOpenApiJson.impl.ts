@@ -4,8 +4,8 @@ import type { OpenAPIObject, ParameterObject, RequestBodyObject, SchemaObject } 
 import { isReferenceObject } from 'openapi3-ts'
 import { posix } from 'path'
 
-import { OPENAPI_DEFAULT_INFO } from '../../config'
-import { HttpServerService } from '../../HttpServerService.impl'
+import { HttpServerClass } from '../../HttpServerClass.impl'
+import { HttpServerServiceV1ConfigRaw, OPENAPI_DEFAULT_INFO } from '../../httpServerServiceConfig'
 
 /**
  * It creates a route handler that returns the OpenAPI JSON for all routes that are exposed via the
@@ -14,7 +14,7 @@ import { HttpServerService } from '../../HttpServerService.impl'
  * available. Defaults to `/api`
  * @returns A route definition for the openApi.json file
  */
-export const getOpenApiJson = function (this: HttpServerService): RouteOptions {
+export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV1ConfigRaw>): RouteOptions {
   const paths: Record<string, Record<string, unknown>> = {}
 
   const p = (this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath) as string

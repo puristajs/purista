@@ -1,4 +1,4 @@
-import posix from 'node:path/posix'
+import { posix } from 'node:path'
 
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
@@ -6,23 +6,23 @@ import {
   convertToSnakeCase,
   EBMessageType,
   HandledError,
-  HttpExposedServiceMeta,
   isHttpExposedServiceMeta,
   StatusCode,
-  SubscriptionDefinitionBuilder,
   UnhandledError,
 } from '@purista/core'
-import type { FastifyReply, FastifyRequest } from 'fastify'
+import { FastifyReply, FastifyRequest } from 'fastify'
 import { Methods } from 'trouter'
 
-import { addHeaders } from '../../helper/addHeaders.impl'
-import { HttpServerService } from '../../HttpServerService.impl'
+import { httpServerV1ServiceBuilder } from '../../httpServerV1ServiceBuilder'
+import { addHeaders } from './helper'
 
-export default new SubscriptionDefinitionBuilder<HttpServerService, HttpExposedServiceMeta<Record<string, unknown>>>(
-  'serviceCommandsToRestApi',
-  'listen for InfoServiceFunctionAdded messages and adds endpoints for service functions if needed',
-)
+export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBuilder
+  .getSubscriptionBuilder(
+    'serviceCommandsToRestApi',
+    'listens for InfoMessages and adds endpoints for commands if they are configured to be exposed as http endpoint',
+  )
   .autoacknowledgeMessage()
+  .addMessageType(EBMessageType.InfoServiceFunctionAdded)
   .receiveMessageOnEveryInstance()
   .setSubscriptionFunction(async function ({ logger, message }, payload) {
     if (!isHttpExposedServiceMeta(payload)) {
@@ -123,4 +123,3 @@ export default new SubscriptionDefinitionBuilder<HttpServerService, HttpExposedS
 
     logger.debug({ method, url }, 'add handler')
   })
-  .addMessageType(EBMessageType.InfoServiceFunctionAdded)
