@@ -12,6 +12,7 @@ esbuild
     sourcemap: true,
     target: 'node16',
     minify: true,
+    packages: 'external',
   })
   .catch(() => process.exit(1))
 
@@ -26,5 +27,6 @@ esbuild
     sourcemap: true,
     target: 'node16',
     minify: true,
+    packages: 'external',
   })
   .catch(() => process.exit(1))
