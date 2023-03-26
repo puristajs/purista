@@ -15,59 +15,59 @@ export const addServiceActions: Actions = [
   {
     type: 'add',
     skipIfExists: true,
-    path: 'src/service/{{properCase name}}/general{{properCase name}}ServiceInfo.ts',
+    path: 'src/service/{{camelCase name}}/general{{properCase name}}ServiceInfo.ts',
     templateFile: TEMPLATE_BASE + '/src/service/serviceName/generalServicenameServiceInfo.ts.hbs',
   },
   {
     type: 'add',
     skipIfExists: true,
-    path: 'src/service/{{properCase name}}/v{{version}}/{{camelCase name}}V{{version}}Service.ts',
+    path: 'src/service/{{camelCase name}}/v{{version}}/{{camelCase name}}V{{version}}Service.ts',
     templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/servicenameV1Service.ts.hbs',
   },
   {
     type: 'add',
     skipIfExists: true,
-    path: 'src/service/{{properCase name}}/v{{version}}/{{camelCase name}}V{{version}}Service.test.ts',
+    path: 'src/service/{{camelCase name}}/v{{version}}/{{camelCase name}}V{{version}}Service.test.ts',
     templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/servicenameV1Service.test.ts.hbs',
   },
   {
     type: 'add',
     skipIfExists: true,
-    path: 'src/service/{{properCase name}}/v{{version}}/{{camelCase name}}ServiceBuilder.ts',
-    templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/servicenameBuilder.ts.hbs',
+    path: 'src/service/{{camelCase name}}/v{{version}}/{{camelCase name}}V{{version}}ServiceBuilder.ts',
+    templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/servicenameV1Builder.ts.hbs',
   },
   {
     type: 'add',
     skipIfExists: true,
-    path: 'src/service/{{properCase name}}/v{{version}}/index.ts',
+    path: 'src/service/{{camelCase name}}/v{{version}}/index.ts',
     templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/index.ts.hbs',
   },
   {
     type: 'add',
     skipIfExists: true,
-    path: 'src/service/{{properCase name}}/v{{version}}/{{camelCase name}}ServiceConfig.ts',
+    path: 'src/service/{{camelCase name}}/v{{version}}/{{camelCase name}}ServiceConfig.ts',
     templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/serviceNameServiceConfig.ts.hbs',
   },
   async (answers) => {
     console.log('try to update existing files - pls be patient!')
     try {
       const files: string[] = [
-        `src/service/${camelCase(answers.name, { pascalCase: true })}/general${camelCase(answers.name, {
+        `src/service/${camelCase(answers.name, { pascalCase: false })}/general${camelCase(answers.name, {
           pascalCase: true,
         })}ServiceInfo.ts`,
-        `src/service/${camelCase(answers.name, { pascalCase: true })}/v${answers.version}/${camelCase(answers.name)}V${
+        `src/service/${camelCase(answers.name, { pascalCase: false })}/v${answers.version}/${camelCase(answers.name)}V${
           answers.version
         }Service.ts`,
-        `src/service/${camelCase(answers.name, { pascalCase: true })}/v${answers.version}/${camelCase(answers.name)}V${
+        `src/service/${camelCase(answers.name, { pascalCase: false })}/v${answers.version}/${camelCase(answers.name)}V${
           answers.version
         }Service.test.ts`,
-        `src/service/${camelCase(answers.name, { pascalCase: true })}/v${answers.version}/${camelCase(
-          answers.name,
-        )}ServiceBuilder.ts`,
-        `src/service/${camelCase(answers.name, { pascalCase: true })}/v${answers.version}/${camelCase(
+        `src/service/${camelCase(answers.name, { pascalCase: false })}/v${answers.version}/${camelCase(answers.name)}V${
+          answers.version
+        }ServiceBuilder.ts`,
+        `src/service/${camelCase(answers.name, { pascalCase: false })}/v${answers.version}/${camelCase(
           answers.name,
         )}ServiceConfig.ts`,
-        `src/service/${camelCase(answers.name, { pascalCase: true })}/v${answers.version}/index.ts`,
+        `src/service/${camelCase(answers.name, { pascalCase: false })}/v${answers.version}/index.ts`,
         `src/service/ServiceEvent.enum.ts`,
       ]
 

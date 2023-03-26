@@ -1,11 +1,17 @@
-import { createServer, ServerResponse } from 'node:http'
+import { createServer, IncomingMessage, ServerResponse } from 'node:http'
 
-import { HandledError, StatusCode } from '@purista/core'
+import { HandledError, StatusCode, UnhandledError } from '@purista/core'
 import Trouter, { Methods } from 'trouter'
 
 import { addServiceEndpoints } from './addServiceEndpoints.impl'
 import { GetHttpServerConfig } from './types'
 import { puristaVersion } from './version'
+
+export type RouterFunction = (
+  request: IncomingMessage,
+  response: ServerResponse,
+  parameter: Record<string, unknown>,
+) => Promise<void>
 
 /**
  * Create a basic http web server.
@@ -23,7 +29,7 @@ export const getHttpServer = (input: GetHttpServerConfig, name = 'K8sHttpHelperS
   const hostname = process.env.HOSTNAME
 
   const logger = input.logger.getChildLogger({ name, puristaVersion, hostname })
-  const router = new Trouter()
+  const router = new Trouter<RouterFunction>()
 
   let isShuttingDown = false
 
@@ -31,11 +37,20 @@ export const getHttpServer = (input: GetHttpServerConfig, name = 'K8sHttpHelperS
     isShuttingDown = true
   })
 
+  process.on('uncaughtException', (error, origin) => {
+    const err = UnhandledError.fromError(error)
+    logger.error({ err, origin }, `unhandled error: ${err.message}`)
+  })
+
+  process.on('unhandledRejection', (error, origin) => {
+    const err = UnhandledError.fromError(error)
+    logger.error({ err, origin }, `unhandled rejection: ${err.message}`)
+  })
+
   addServiceEndpoints(services, router, logger, apiMountPath)
 
   router.add('GET', '/healthz', async (body: unknown, response: ServerResponse) => {
     const isHealthy = await healthFn()
-
     if (isShuttingDown) {
       response.statusCode = 503
       response.setHeader('content-type', 'application/json; charset=utf-8')

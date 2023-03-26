@@ -1,4 +1,4 @@
-import { getCommandSuccessMessageMock, getCustomMessageMessageMock } from '../../testhelper'
+import { getCommandSuccessMessageMock, getCustomMessageMessageMock } from '../../mocks'
 import { isCustomMessage } from './isCustomMessage.impl'
 
 describe('isCustomMessage', () => {

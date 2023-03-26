@@ -4,6 +4,8 @@ import type { CommandFunctionContext } from './CommandFunctionContext'
 /**
  * Definition of after guard hook functions.
  * This guard is called after function successfully returns and after output validation.
+ *
+ * @group Command
  */
 export type CommandAfterGuardHook<
   ServiceClassType = ServiceClass,

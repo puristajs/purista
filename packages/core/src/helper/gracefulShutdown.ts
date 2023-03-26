@@ -30,6 +30,8 @@ import { ShutdownEntry } from './types'
  * @param logger the logger object
  * @param list a object containing name and function
  * @param timeoutMs in ms to shut @default 30000 milliseconds
+ *
+ * @group Helper
  */
 export const gracefulShutdown = (logger: Logger, list: ShutdownEntry[], timeoutMs = 30000) => {
   process.once('SIGTERM', async () => shutDown('SIGTERM'))

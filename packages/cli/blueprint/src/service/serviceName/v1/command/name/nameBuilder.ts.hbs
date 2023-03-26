@@ -1,11 +1,11 @@
-import { {{camelCase service.name}}ServiceBuilder } from '../../{{camelCase service.name}}ServiceBuilder'
+import { {{camelCase service.name}}V{{service.version}}ServiceBuilder } from '../../{{camelCase service.name}}V{{service.version}}ServiceBuilder'
 import { 
   {{camelCase service.name}}V{{service.version}}{{properCase name}}InputParameterSchema,
   {{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema,
   {{camelCase service.name}}V{{service.version}}{{properCase name}}OutputPayloadSchema
 } from './schema'
 
-export const {{camelCase name}}CommandBuilder = {{camelCase service.name}}ServiceBuilder.getCommandBuilder(
+export const {{camelCase name}}CommandBuilder = {{camelCase service.name}}V{{service.version}}ServiceBuilder.getCommandBuilder(
   '{{camelCase name}}',
   '{{description}}',
 ){{#if (isSet commandEventName)}}

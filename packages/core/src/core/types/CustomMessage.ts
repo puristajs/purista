@@ -8,9 +8,14 @@ import { EBMessageType } from './EBMessageType.enum'
  * The producer does not expect a response from a consumer.
  */
 export type CustomMessage<Payload = unknown> = {
+  /** Message type musst be EBMessageType.CustomMessage */
   messageType: EBMessageType.CustomMessage
+  /** the event name assigned to this custom message */
   eventName: string
+  /** the sender of the event */
   sender: EBMessageAddress
+  /** an optional receiver */
   receiver?: EBMessageAddress
+  /** the message payload */
   payload?: Payload
 } & EBMessageBase

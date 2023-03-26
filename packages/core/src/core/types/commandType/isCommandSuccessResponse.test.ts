@@ -1,4 +1,4 @@
-import { getCommandErrorMessageMock, getCommandSuccessMessageMock } from '../../../testhelper'
+import { getCommandErrorMessageMock, getCommandSuccessMessageMock } from '../../../mocks'
 import { isCommandSuccessResponse } from './isCommandSuccessResponse.impl'
 
 describe('isCommandSuccessResponse', () => {

@@ -1,5 +1,12 @@
 import { StatusCode } from '../types'
 
+/**
+ *
+ * @param code
+ * @returns
+ *
+ * @group Helper
+ */
 export const getErrorMessageForCode = (code: StatusCode): string => {
   const entry = StatusCode[code]
 
