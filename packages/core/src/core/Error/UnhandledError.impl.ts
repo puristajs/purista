@@ -18,6 +18,7 @@ export class UnhandledError extends Error {
     public traceId?: TraceId,
   ) {
     super(message || getErrorMessageForCode(errorCode))
+    Error.captureStackTrace(this, this.constructor)
   }
 
   /**
@@ -27,6 +28,22 @@ export class UnhandledError extends Error {
    */
   static fromMessage(message: Readonly<CommandErrorResponse>): UnhandledError {
     return new UnhandledError(message.payload.status, message.payload.message, message.payload.data, message.traceId)
+  }
+
+  /**
+   * Creates a UnhandledError from an input
+   *
+   * @param err the input
+   * @param errorCode the error code
+   * @param data optional data
+   * @param traceId optional trace id
+   * @returns UnhandledError
+   */
+  static fromError(err: any, errorCode?: StatusCode, data?: unknown, traceId?: TraceId): HandledError {
+    const error = new HandledError(errorCode || StatusCode.InternalServerError, err.message, data, traceId)
+    error.stack = err.stack
+    error.cause = err.cause
+    return error
   }
 
   /**

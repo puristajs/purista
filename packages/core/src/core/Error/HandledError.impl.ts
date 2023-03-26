@@ -1,5 +1,5 @@
 import { getErrorMessageForCode } from '../helper'
-import type { CommandErrorResponse, ErrorResponsePayload, StatusCode, TraceId } from '../types'
+import { CommandErrorResponse, ErrorResponsePayload, StatusCode, TraceId } from '../types'
 
 /**
  * A handled error is an error which is handled or thrown by business logic.
@@ -10,6 +10,7 @@ export class HandledError extends Error {
   constructor(public errorCode: StatusCode, message?: string, public data?: unknown, public traceId?: TraceId) {
     /* Calling the constructor of the parent class (Error) and passing the message. */
     super(message || getErrorMessageForCode(errorCode))
+    Error.captureStackTrace(this, this.constructor)
   }
 
   /**
@@ -19,6 +20,22 @@ export class HandledError extends Error {
    */
   static fromMessage(message: Readonly<CommandErrorResponse>): HandledError {
     return new HandledError(message.payload.status, message.payload.message, message.payload.data, message.traceId)
+  }
+
+  /**
+   * Creates a HandledError from an input
+   *
+   * @param err the input
+   * @param errorCode the error code
+   * @param data optional data
+   * @param traceId optional trace id
+   * @returns HandledError
+   */
+  static fromError(err: any, errorCode?: StatusCode, data?: unknown, traceId?: TraceId): HandledError {
+    const error = new HandledError(errorCode || StatusCode.InternalServerError, err.message, data, traceId)
+    error.stack = err.stack
+    error.cause = err.cause
+    return error
   }
 
   /**

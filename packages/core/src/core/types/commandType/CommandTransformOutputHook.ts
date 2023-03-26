@@ -1,9 +1,9 @@
-/**
- * This transform hook is executed after function output validation and AfterGuardHooks.
- */
-
 import { CommandTransformFunctionContext } from './CommandTransformFunctionContext'
 
+/**
+ * This transform hook is executed after function output validation and AfterGuardHooks.
+ * @group Command
+ */
 export type CommandTransformOutputHook<
   ServiceClassType,
   MessagePayloadType,

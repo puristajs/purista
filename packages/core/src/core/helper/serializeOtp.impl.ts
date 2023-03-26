@@ -2,6 +2,12 @@ import { context, propagation } from '@opentelemetry/api'
 
 import { Logger } from '../types'
 
+/**
+ *
+ * @returns
+ *
+ * @group Helper
+ */
 export const serializeOtp = () => {
   const serializedContext = {}
 
@@ -9,6 +15,14 @@ export const serializeOtp = () => {
   return JSON.stringify(serializedContext)
 }
 
+/**
+ *
+ * @param logger
+ * @param otp
+ * @returns
+ *
+ * @group Helper
+ */
 export const deserializeOtp = async (logger: Logger, otp?: string) => {
   try {
     let header = {}

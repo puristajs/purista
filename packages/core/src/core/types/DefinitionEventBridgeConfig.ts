@@ -1,3 +1,8 @@
+/**
+ * Settings and advices for the event bridge, which are set in the command or subscription builder.
+ * The properties are advices and hints.
+ * It depends on the used event bridge implementation and underlaying message broker, if a specific property can be respected.
+ */
 export type DefinitionEventBridgeConfig = {
   /**
    * Advise the underlaying message broker to store messages if no consumer is available.

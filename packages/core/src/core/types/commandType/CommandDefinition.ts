@@ -11,6 +11,8 @@ import type { CommandTransformOutputHook } from './CommandTransformOutputHook'
 
 /**
  * The definition for a command provided by some service.
+ *
+ * @group Command
  */
 export type CommandDefinition<
   ServiceClassType extends ServiceClass = ServiceClass,

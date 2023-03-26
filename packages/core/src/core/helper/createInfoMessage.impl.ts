@@ -2,6 +2,15 @@ import { EBMessageAddress, InfoMessage, InfoMessageType } from '../types'
 import { getNewEBMessageId } from './getNewEBMessageId.impl'
 import { getNewTraceId } from './getNewTraceId.impl'
 
+/**
+ *
+ * @param messageType
+ * @param sender
+ * @param additional
+ * @returns
+ *
+ * @group Helper
+ */
 export const createInfoMessage = (
   messageType: InfoMessageType,
   sender: EBMessageAddress,

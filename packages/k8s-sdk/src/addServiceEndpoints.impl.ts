@@ -17,6 +17,8 @@ import {
 import qs from 'qs'
 import Trouter from 'trouter'
 
+import { RouterFunction } from './getHttpServer.impl'
+
 /**
  *
  * @param services instance of the service to add
@@ -51,14 +53,14 @@ export const addServiceEndpoints = (
 
       logger.debug(`adding ${url}`)
 
-      const handler = async (
+      const handler: RouterFunction = async (
         request: IncomingMessage,
         response: ServerResponse,
         parameter: Record<string, unknown>,
       ) => {
         const parentContext = propagation.extract(context.active(), request.headers)
 
-        service
+        await service
           .getTracer('PURISTA_k8s_http_server')
           .startActiveSpan(
             PuristaSpanName.KubernetesHttpRequest,

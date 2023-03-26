@@ -1,10 +1,17 @@
 import { Context, Span, SpanOptions } from '@opentelemetry/api'
 
-import { ConfigDeleteFunction, ConfigGetterFunction, ConfigSetterFunction } from './configStore'
-import { SecretDeleteFunction, SecretGetterFunction, SecretSetterFunction } from './secretStore'
-import { StateDeleteFunction, StateGetterFunction, StateSetterFunction } from './stateStore'
+import type { ConfigDeleteFunction, ConfigGetterFunction, ConfigSetterFunction } from '../ConfigStore'
+import type { SecretDeleteFunction, SecretGetterFunction, SecretSetterFunction } from '../SecretStore'
+import type { StateDeleteFunction, StateGetterFunction, StateSetterFunction } from '../StateStore'
+import { Logger } from '../types'
 
+/**
+ * The ContextBase provides is a basic type.
+ * Each context for command function, subscription function and all Hooks and transformers will have at least the properties of this type.
+ */
 export type ContextBase = {
+  /** the logger instance */
+  logger: Logger
   /** wrap given function in an opentelemetry span */
   wrapInSpan: <F>(name: string, opts: SpanOptions, fn: (span: Span) => Promise<F>, context?: Context) => Promise<F>
   /** wrap given function in an opentelemetry active span */
@@ -14,6 +21,7 @@ export type ContextBase = {
     context: Context | undefined,
     fn: (span: Span) => Promise<F>,
   ) => Promise<F>
+  /** the secret store  */
   secrets: {
     /** get a secret from the secret store */
     getSecret: SecretGetterFunction
@@ -22,6 +30,7 @@ export type ContextBase = {
     /** delete a secret from the secret store */
     removeSecret: SecretDeleteFunction
   }
+  /** the config store */
   configs: {
     /** get a config value from the config store */
     getConfig: ConfigGetterFunction
@@ -30,6 +39,7 @@ export type ContextBase = {
     /** delete a config value from the config store */
     removeConfig: ConfigDeleteFunction
   }
+  /** the state store */
   states: {
     /** get a state value from the state store */
     getState: StateGetterFunction

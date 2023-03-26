@@ -10,8 +10,8 @@ import {
   getEventBridgeMock,
   getLoggerMock,
   getSubscriptionContextMock,
-  getSubscriptionTransformContext,
-} from '../src/testhelper'
+  getSubscriptionTransformContextMock,
+} from '../src/mocks'
 
 describe('integration test', () => {
   const sandbox = createSandbox()
@@ -375,7 +375,7 @@ describe('integration test', () => {
         },
       })
 
-      const contextMock = getSubscriptionTransformContext(message, sandbox)
+      const contextMock = getSubscriptionTransformContextMock(message, sandbox)
 
       const result = await transformInput.bind(service)(
         contextMock.mock,
@@ -411,7 +411,7 @@ describe('integration test', () => {
         },
       })
 
-      const contextMock = getSubscriptionTransformContext(message, sandbox)
+      const contextMock = getSubscriptionTransformContextMock(message, sandbox)
 
       const functionResult = {
         result: 'SUBSCRIPTION:MY INPUT',
@@ -453,7 +453,7 @@ describe('integration test', () => {
     // jest.useFakeTimers()
 
     const logger = getLoggerMock(sandbox)
-    const eventBridge = new DefaultEventBridge(undefined, { logger: logger.mock })
+    const eventBridge = new DefaultEventBridge({ logger: logger.mock })
     await eventBridge.start()
 
     const serviceOne = serviceOneBuilder.getInstance(eventBridge)

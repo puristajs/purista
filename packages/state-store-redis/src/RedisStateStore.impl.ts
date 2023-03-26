@@ -1,4 +1,4 @@
-import { Logger, StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
+import { StateStoreBaseClass, StatusCode, StoreBaseConfig, UnhandledError } from '@purista/core'
 import {
   createClient,
   RedisClientOptions,
@@ -22,7 +22,7 @@ import {
  *
  * See documentation of underlaying redis lib package for detailed configuration options.
  *
- * @@see[NODE-REDIS(https://redis.js.org)
+ * @see[NODE-REDIS](https://redis.js.org)
  *
  */
 export class RedisStateStore<
@@ -32,9 +32,9 @@ export class RedisStateStore<
 > extends StateStoreBaseClass<RedisClientOptions<M, F, S>> {
   public client: RedisClientType<M, F, S>
 
-  constructor(config?: RedisClientOptions<M, F, S>, options?: { logger?: Logger }) {
-    super('RedisStateStore', config, options)
-    this.client = createClient(this.config)
+  constructor(config?: StoreBaseConfig<RedisClientOptions<M, F, S>>) {
+    super('RedisStateStore', config)
+    this.client = createClient(this.config.config)
   }
 
   async getState(...stateNames: string[]): Promise<Record<string, unknown>> {

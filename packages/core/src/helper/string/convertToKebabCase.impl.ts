@@ -3,6 +3,8 @@
  * @param str string
  * @returns string converted to kebab-case
  * @link https://github.com/30-seconds/30-seconds-of-code
+ *
+ * @group Helper
  */
 export const convertToKebabCase = (str: string): string =>
   str

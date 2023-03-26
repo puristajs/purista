@@ -2,8 +2,9 @@ import { SubscriptionTransformFunctionContext } from './SubscriptionTransformFun
 
 /**
  * This transform hook is executed after function output validation and AfterGuardHooks.
+ *
+ * @group Subscription
  */
-
 export type SubscriptionTransformOutputHook<
   ServiceClassType,
   MessageResultType = unknown,

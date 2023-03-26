@@ -14,6 +14,8 @@ import { SubscriptionTransformOutputHook } from './SubscriptionTransformOutputHo
 
 /**
  * The definition for a subscription provided by some service.
+ *
+ * @group Subscription
  */
 export type SubscriptionDefinition<
   ServiceClassType extends ServiceClass = ServiceClass,
