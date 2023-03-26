@@ -1,8 +1,9 @@
 import { RouteHandlerMethod, RouteOptions } from 'fastify'
 
-import { HttpServerService } from '../../HttpServerService.impl'
+import { HttpServerClass } from '../../HttpServerClass.impl'
+import { HttpServerServiceV1ConfigRaw } from '../../httpServerServiceConfig'
 
-export const getOpenApiDocuIndex = function (this: HttpServerService): RouteOptions {
+export const getOpenApiDocuIndex = function (this: HttpServerClass<HttpServerServiceV1ConfigRaw>): RouteOptions {
   const path = this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath
   const url = `${path}`
 
