@@ -122,7 +122,7 @@ export class SubscriptionDefinitionBuilder<
    * @param instanceId the instance id to subscribe
    * @returns
    */
-  onlyInstanceId(instanceId: InstanceId) {
+  filterInstanceId(instanceId: InstanceId) {
     this.instanceId = instanceId
     return this
   }
@@ -132,7 +132,7 @@ export class SubscriptionDefinitionBuilder<
    * @param principalId the principal id to subscribe
    * @returns
    */
-  onlyPrincipalId(principalId: PrincipalId) {
+  filterPrincipalId(principalId: PrincipalId) {
     this.principalId = principalId
     return this
   }
@@ -196,7 +196,11 @@ export class SubscriptionDefinitionBuilder<
    * @param serviceTarget the command or subscription name of the service that produces the message
    * @returns
    */
-  sentFrom(serviceName: string | undefined, serviceVersion: string | undefined, serviceTarget: string | undefined) {
+  filterSentFrom(
+    serviceName: string | undefined,
+    serviceVersion: string | undefined,
+    serviceTarget: string | undefined,
+  ) {
     this.sender = {
       serviceName,
       serviceVersion,
@@ -222,7 +226,11 @@ export class SubscriptionDefinitionBuilder<
    * @param serviceTarget the command or subscription name of the service that consumes the message
    * @returns
    */
-  receivedBy(serviceName: string | undefined, serviceVersion: string | undefined, serviceTarget: string | undefined) {
+  filterReceivedBy(
+    serviceName: string | undefined,
+    serviceVersion: string | undefined,
+    serviceTarget: string | undefined,
+  ) {
     this.receiver = {
       serviceName,
       serviceVersion,
@@ -241,7 +249,7 @@ export class SubscriptionDefinitionBuilder<
    * @param messageType the type of message
    * @returns
    */
-  addMessageType(messageType: EBMessageType) {
+  filterForMessageType(messageType: EBMessageType) {
     this.messageType = messageType
 
     return this

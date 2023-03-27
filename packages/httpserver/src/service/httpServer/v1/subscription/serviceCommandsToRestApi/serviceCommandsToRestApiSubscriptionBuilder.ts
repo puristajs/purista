@@ -22,7 +22,7 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
     'listens for InfoMessages and adds endpoints for commands if they are configured to be exposed as http endpoint',
   )
   .autoacknowledgeMessage()
-  .addMessageType(EBMessageType.InfoServiceFunctionAdded)
+  .filterForMessageType(EBMessageType.InfoServiceFunctionAdded)
   .receiveMessageOnEveryInstance()
   .setSubscriptionFunction(async function ({ logger, message }, payload) {
     if (!isHttpExposedServiceMeta(payload)) {
