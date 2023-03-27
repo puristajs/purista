@@ -5,15 +5,13 @@ import { Encrypter } from './Encrypter'
 
 /**
  * AmqpBridge bridge config
+ *
+ * @see [amqplib documentation](https://amqp-node.github.io/amqplib/)
  */
 export type AmqpBridgeConfig = {
-  /** the instance id of the event bridge */
-  instanceId: string
-  /** the default timeout */
-  defaultCommandTimeout: number
-  /** the mqtt exchage name to be used */
+  /** the AMQP exchage name to be used */
   exchangeName: string
-  /** the queue prefix to be used */
+  /** the queue prefix to be used for all PURISTA queues except short living queues created by the broker on request */
   namePrefix?: string
   /** the AMQP exchange options */
   exchangeOptions?: Options.AssertExchange

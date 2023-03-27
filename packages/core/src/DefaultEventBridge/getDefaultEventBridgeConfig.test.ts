@@ -4,6 +4,5 @@ it('returns default config for DefaultEventBridge', () => {
   const config = getDefaultEventBridgeConfig()
 
   expect(config).toBeDefined()
-  expect(config.defaultCommandTimeout).not.toBeNaN()
-  expect(typeof config.defaultCommandTimeout).toBe('number')
+  expect(config.logWarnOnMessagesWithoutReceiver).toBeTruthy()
 })

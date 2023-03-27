@@ -7,33 +7,31 @@ import { puristaVersion } from '../../version'
 import { initLogger } from '../DefaultLogger'
 import { getNewInstanceId } from '../helper'
 import { GenericEventEmitter, InstanceId, Logger, PuristaSpanTag } from '../types'
-import { EventBridgeBaseCustomConfig, EventBridgeConfig, EventBridgeEvents } from './types'
+import { EventBridgeConfig, EventBridgeEvents } from './types'
 
 /**
  * The base class to be extended by event bridge implementations
  *
  * @group Event bridge
  */
-export class EventBridgeBaseClass<
-  ConfigType extends EventBridgeBaseCustomConfig,
-> extends GenericEventEmitter<EventBridgeEvents> {
+export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventBridgeEvents> {
   logger: Logger
   traceProvider: NodeTracerProvider
 
-  config: ConfigType
+  config: EventBridgeConfig<ConfigType>
 
   name: string
 
   instanceId: Readonly<InstanceId>
 
   defaultCommandTimeout: Readonly<number>
-  constructor(name: string, config: Omit<EventBridgeConfig<ConfigType>, 'config'> & { config: ConfigType }) {
+  constructor(name: string, config: EventBridgeConfig<ConfigType>) {
     super()
     this.name = name
-    this.config = config.config
+    this.config = config
 
-    this.instanceId = config.config?.instanceId || getNewInstanceId()
-    this.defaultCommandTimeout = config.config?.defaultCommandTimeout || 30000
+    this.instanceId = config.instanceId || getNewInstanceId()
+    this.defaultCommandTimeout = config.defaultCommandTimeout || 30000
 
     const logger = config?.logger || initLogger()
     this.logger = logger.getChildLogger({ name })
