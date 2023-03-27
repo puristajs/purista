@@ -107,6 +107,14 @@ export const addSubscriptionActions: Actions = [
         ' is created 🎉',
     )
     console.log('')
+    console.log('')
+    console.log('start adding your business logic here:')
+    console.log(
+      `./src/service/${answers.service.path}/subscription/${camelCase(answers.name)}/${camelCase(
+        answers.name,
+      )}SubscriptionBuilder.ts`,
+    )
+    console.log('')
     return '📖 Learn more about PURISTA at https://purista.dev'
   },
 ]
