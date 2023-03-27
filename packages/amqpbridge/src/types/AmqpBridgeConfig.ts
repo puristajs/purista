@@ -10,13 +10,13 @@ import { Encrypter } from './Encrypter'
  */
 export type AmqpBridgeConfig = {
   /** the AMQP exchage name to be used */
-  exchangeName: string
+  exchangeName?: string
   /** the queue prefix to be used for all PURISTA queues except short living queues created by the broker on request */
   namePrefix?: string
   /** the AMQP exchange options */
-  exchangeOptions?: Options.AssertExchange
+  exchangeOptions?: Options.AssertExchange | undefined
   /** the AMQP broker url */
-  url: string | Options.Connect
+  url?: string | Options.Connect
   /** socket options */
   socketOptions?: any
   /** the encoder(s) to be used for AMQP messages */

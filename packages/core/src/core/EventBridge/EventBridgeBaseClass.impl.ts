@@ -6,7 +6,7 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { puristaVersion } from '../../version'
 import { initLogger } from '../DefaultLogger'
 import { getNewInstanceId } from '../helper'
-import { GenericEventEmitter, InstanceId, Logger, PuristaSpanTag } from '../types'
+import { Complete, GenericEventEmitter, InstanceId, Logger, PuristaSpanTag } from '../types'
 import { EventBridgeConfig, EventBridgeEvents } from './types'
 
 /**
@@ -18,23 +18,30 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
   logger: Logger
   traceProvider: NodeTracerProvider
 
-  config: EventBridgeConfig<ConfigType>
+  config: Complete<EventBridgeConfig<Complete<ConfigType>>>
 
   name: string
 
   instanceId: Readonly<InstanceId>
 
   defaultCommandTimeout: Readonly<number>
-  constructor(name: string, config: EventBridgeConfig<ConfigType>) {
+  constructor(name: string, config: EventBridgeConfig<Complete<ConfigType>>) {
     super()
     this.name = name
-    this.config = config
+    const logger = config?.logger || initLogger()
+    this.logger = logger.getChildLogger({ name })
+
+    this.config = {
+      logger: logger.getChildLogger({ name }),
+      instanceId: config.instanceId || getNewInstanceId(),
+      defaultCommandTimeout: config.defaultCommandTimeout || 30000,
+      spanProcessor: undefined,
+      config: {} as Complete<ConfigType>,
+      ...config,
+    }
 
     this.instanceId = config.instanceId || getNewInstanceId()
     this.defaultCommandTimeout = config.defaultCommandTimeout || 30000
-
-    const logger = config?.logger || initLogger()
-    this.logger = logger.getChildLogger({ name })
 
     const resource = Resource.default().merge(
       new Resource({

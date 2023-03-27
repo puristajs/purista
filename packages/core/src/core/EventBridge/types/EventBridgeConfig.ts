@@ -12,7 +12,7 @@ export type EventBridgeConfig<CustomConfig> = {
   logger?: Logger
   spanProcessor?: SpanProcessor
   /** the instance id of the event bridge */
-  instanceId: string
+  instanceId?: string
   /** the default timeout of command invocations */
-  defaultCommandTimeout: number
+  defaultCommandTimeout?: number
 }
