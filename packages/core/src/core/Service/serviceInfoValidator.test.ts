@@ -12,7 +12,7 @@ describe('ServiceInfoValidator', () => {
     )
     expect(() => {
       info.serviceName = ''
-    }).toThrowError('serviceName must be set')
+    }).toThrow('serviceName must be set')
   })
 
   it('throws on invalid service name', () => {
@@ -26,7 +26,7 @@ describe('ServiceInfoValidator', () => {
     )
     expect(() => {
       info.serviceName = '@some$service'
-    }).toThrowError('serviceName "@some$service" is invalid. Only allowed to have a-z, A-Z, 0-9, -, _ as characters.')
+    }).toThrow('serviceName "@some$service" is invalid. Only allowed to have a-z, A-Z, 0-9, -, _ as characters.')
   })
 
   it('throws on empty service version', () => {
@@ -40,7 +40,7 @@ describe('ServiceInfoValidator', () => {
     )
     expect(() => {
       info.serviceVersion = ''
-    }).toThrowError('serviceVersion must be set')
+    }).toThrow('serviceVersion must be set')
   })
 
   it('throws on invalid service version', () => {
@@ -54,6 +54,6 @@ describe('ServiceInfoValidator', () => {
     )
     expect(() => {
       info.serviceVersion = 'x'
-    }).toThrowError('serviceVersion "x" is invalid. Only allowed number characters 0-9.')
+    }).toThrow('serviceVersion "x" is invalid. Only allowed number characters 0-9.')
   })
 })
