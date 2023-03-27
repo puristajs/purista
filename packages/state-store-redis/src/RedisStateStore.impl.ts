@@ -12,17 +12,32 @@ import {
  * A state store for using redis as storage.
  * State values are stored as stringified JSON.
  *
+ * Per default, setting/changing and removal of values are enabled.
+ *
  * @example ```typescript
  * const config = {
- *    url: 'redis://alice:foobared@awesome.redis.server:6380'
- *  }
+ *  enableGet: true, // optional, default is true
+ *  enableRemove: true, // optional, default is true
+ *  enableSet: true, // optional, default is true
+ *  url: 'redis://alice:foobared@awesome.redis.server:6379'
+ * }
  *
- * const store = new RedisStateStore(config)
+ * const store = new RedisStateStore({ config })
+ *
+ * await store.setState('stateKey',{ myState: 'value' })
+ *
+ * let value = await store.getState('stateKey')
+ * console.log(value) // outputs: { myState: 'value' }
+ *
+ * await store.removeState('stateKey')
+ *
+ * value = await store.getState('stateKey')
+ * console.log(value) // outputs: undefined
  * ```
  *
  * See documentation of underlaying redis lib package for detailed configuration options.
  *
- * @see[NODE-REDIS](https://redis.js.org)
+ * @see [NODE-REDIS](https://redis.js.org)
  *
  */
 export class RedisStateStore<
@@ -38,6 +53,14 @@ export class RedisStateStore<
   }
 
   async getState(...stateNames: string[]): Promise<Record<string, unknown>> {
+    if (!this.config.enableGet) {
+      throw new UnhandledError(StatusCode.Unauthorized, 'get state from store is disabled by config')
+    }
+
+    if (!this.client.isOpen) {
+      await this.client.connect()
+    }
+
     const result: Record<string, unknown> = {}
     for await (const name of stateNames) {
       try {
@@ -53,6 +76,14 @@ export class RedisStateStore<
   }
 
   async removeState(stateName: string) {
+    if (!this.config.enableRemove) {
+      throw new UnhandledError(StatusCode.Unauthorized, 'remove state from store is disabled by config')
+    }
+
+    if (!this.client.isOpen) {
+      await this.client.connect()
+    }
+
     try {
       await this.client.del(stateName)
     } catch (err) {
@@ -63,6 +94,13 @@ export class RedisStateStore<
   }
 
   async setState(stateName: string, stateValue: unknown) {
+    if (!this.config.enableSet) {
+      throw new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
+    }
+
+    if (!this.client.isOpen) {
+      await this.client.connect()
+    }
     try {
       await this.client.set(stateName, JSON.stringify(stateValue))
     } catch (err) {
@@ -73,6 +111,8 @@ export class RedisStateStore<
   }
 
   async destroy() {
-    await this.client.disconnect()
+    if (this.client.isOpen) {
+      await this.client.disconnect()
+    }
   }
 }

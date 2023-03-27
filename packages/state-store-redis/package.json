@@ -34,7 +34,9 @@
   },
   "scripts": {
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
+    "pretest": "(docker stop redis-state-store-test || true) && (docker rm redis-state-store-test || true) && (docker run -p 6379:6379 --name redis-state-store-test -d redis)",
     "test": "jest --passWithNoTests",
+    "posttest": "docker stop redis-state-store-test",
     "build": "node ../../scripts/buildesm.js && tsc --emitDeclarationOnly --declaration --outDir lib/types --project ./tsconfig.ref.json",
     "bump:major": "npm version major --no-git-tag-version",
     "bump:minor": "npm version minor --no-git-tag-version",
