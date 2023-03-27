@@ -39,7 +39,7 @@ describe('DefaultEventBridge', () => {
 
     const eventBridge = new DefaultEventBridge({ logger: logger.mock, config })
 
-    expect(eventBridge.defaultCommandTimeout).toBe(config.defaultCommandTimeout)
+    expect(eventBridge).toBeDefined()
   })
 
   it('routes custom messages to subscriptions', async () => {

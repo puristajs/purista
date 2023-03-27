@@ -19,11 +19,11 @@ describe('DefaultStateStore', () => {
       enableSet: false,
     })
 
-    await expect(store.getSecret('example')).rejects.toThrow('get state from store is disabled by config')
+    await expect(store.getState('example')).rejects.toThrow('get state from store is disabled by config')
 
-    await expect(store.removeSecret('example')).rejects.toThrow('remove state from store is disabled by config')
+    await expect(store.removeState('example')).rejects.toThrow('remove state from store is disabled by config')
 
-    await expect(store.setSecret('example', 'value')).rejects.toThrow('set state at store is disabled by config')
+    await expect(store.setState('example', 'value')).rejects.toThrow('set state at store is disabled by config')
 
     expect(
       logger.stubs.warn.calledWith(
@@ -44,20 +44,20 @@ describe('DefaultStateStore', () => {
       },
     })
 
-    await expect(store.getSecret('initialValue', 'unknownState')).resolves.toEqual({
+    await expect(store.getState('initialValue', 'unknownState')).resolves.toEqual({
       initialValue: 'initial',
       unknownState: undefined,
     })
 
-    await expect(store.setSecret('initialValue', 'other_value')).resolves.toBeUndefined()
+    await expect(store.setState('initialValue', 'other_value')).resolves.toBeUndefined()
 
-    await expect(store.getSecret('initialValue')).resolves.toEqual({
+    await expect(store.getState('initialValue')).resolves.toEqual({
       initialValue: 'other_value',
     })
 
-    await expect(store.removeSecret('initialValue')).resolves.toBeUndefined()
+    await expect(store.removeState('initialValue')).resolves.toBeUndefined()
 
-    await expect(store.getSecret('initialValue')).resolves.toEqual({
+    await expect(store.getState('initialValue')).resolves.toEqual({
       initialValue: undefined,
     })
   })

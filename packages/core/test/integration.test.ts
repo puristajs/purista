@@ -275,8 +275,8 @@ describe('integration test', () => {
   describe('creates a subscription for service one', () => {
     const subscriptionOneBuilder = serviceOneBuilder
       .getSubscriptionBuilder('subscriptionOne', 'a subscription in service one')
-      .receivedBy(serviceOneInfo.serviceName, serviceOneInfo.serviceVersion, 'commandOne')
-      .addMessageType(EBMessageType.Command)
+      .filterReceivedBy(serviceOneInfo.serviceName, serviceOneInfo.serviceVersion, 'commandOne')
+      .filterForMessageType(EBMessageType.Command)
       .addPayloadSchema(commandOnePayloadSchema)
       .addParameterSchema(commandParameterSchema)
       .addOutputSchema('subscriptionOneConsumed', subscriptionOneSchema)
