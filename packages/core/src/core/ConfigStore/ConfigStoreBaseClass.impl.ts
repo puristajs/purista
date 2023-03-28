@@ -1,5 +1,5 @@
 import { Logger, StatusCode, StoreBaseConfig } from '../../core'
-import { initLogger } from '../DefaultLogger'
+import { initLogger } from '../../DefaultLogger'
 import { UnhandledError } from '../Error'
 import { ConfigStore } from './types'
 
@@ -10,12 +10,11 @@ import { ConfigStore } from './types'
  */
 export class ConfigStoreBaseClass<ConfigType> implements ConfigStore {
   logger: Logger
-
   config: StoreBaseConfig<ConfigType>
 
   name: string
 
-  constructor(name: string, config: StoreBaseConfig<ConfigType>) {
+  constructor(name: string, config?: StoreBaseConfig<ConfigType>) {
     const logger = config?.logger || initLogger()
     this.logger = logger.getChildLogger({ name })
 

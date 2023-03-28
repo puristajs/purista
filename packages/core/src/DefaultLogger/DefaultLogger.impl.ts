@@ -1,6 +1,6 @@
 import { Logger as PinoLogger } from 'pino'
 
-import { ILogger, LogFnParamType, Logger, LoggerOptions } from '../types'
+import { ILogger, LogFnParamType, Logger, LoggerOptions } from '../core/types'
 
 export class DefaultLogger extends Logger implements ILogger {
   constructor(private log: PinoLogger) {

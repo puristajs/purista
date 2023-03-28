@@ -149,7 +149,7 @@ export class SubscriptionDefinitionBuilder<
    * @param acknowledge Enable (true) and disable (false)
    * @returns SubscriptionDefinition
    */
-  autoacknowledgeMessage(acknowledge = true) {
+  adviceAutoacknowledgeMessage(acknowledge = true) {
     this.autoacknowledge = acknowledge
     return this
   }
@@ -174,7 +174,7 @@ export class SubscriptionDefinitionBuilder<
    * True: Advises the event bridge (like rabbitMQ) to store all messages if the subscription is not running.
    * As soon as the subscription is back again, all missed messages will be sent first, before it starts working like a live-subscription.
    */
-  setDurable(durable: boolean) {
+  adviceDurable(durable: boolean) {
     this.durable = durable
     return this
   }
@@ -489,31 +489,6 @@ export class SubscriptionDefinitionBuilder<
   }
 
   /**
-   *
-   * @deprecated use setSubscriptionFunction instead. It will be removed soon.
-   */
-  setFunction(
-    fn: SubscriptionFunction<
-      ServiceClassType,
-      MessagePayloadType,
-      MessageParamsType,
-      FunctionPayloadType,
-      FunctionParamsType,
-      FunctionResultType
-    >,
-  ): SubscriptionDefinitionBuilder<
-    ServiceClassType,
-    MessagePayloadType,
-    MessageParamsType,
-    MessageResultType,
-    FunctionPayloadType,
-    FunctionParamsType,
-    FunctionResultType
-  > {
-    return this.setSubscriptionFunction(fn)
-  }
-
-  /**
    * Required: Set the function implementation.
    * The types should be automatically set as soon as schemas previously defined.
    * As the function will be a a function of a service class you need to implement as function declaration.
@@ -568,21 +543,6 @@ export class SubscriptionDefinitionBuilder<
   }
 
   /**
-   *
-   * @deprecated use getSubscriptionFunction instead. It will be removed soon.
-   */
-  getFunction(): SubscriptionFunction<
-    ServiceClassType,
-    MessagePayloadType,
-    MessageParamsType,
-    FunctionPayloadType,
-    FunctionParamsType,
-    FunctionResultType
-  > {
-    return this.getSubscriptionFunction()
-  }
-
-  /**
    * Get the function implementation
    * @returns the subscription function
    */
@@ -590,14 +550,25 @@ export class SubscriptionDefinitionBuilder<
     ServiceClassType,
     MessagePayloadType,
     MessageParamsType,
-    FunctionPayloadType,
-    FunctionParamsType,
-    FunctionResultType
+    MessagePayloadType,
+    MessageParamsType,
+    MessageResultType
   > {
     if (!this.fn) {
       throw new Error(`No function implementation for ${this.subscriptionName}`)
     }
-    return this.fn
+
+    const f = getSubscriptionFunctionWithValidation<
+      ServiceClassType,
+      MessagePayloadType,
+      MessageParamsType,
+      MessageResultType,
+      FunctionPayloadType,
+      FunctionParamsType,
+      FunctionResultType
+    >(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard)
+
+    return f
   }
 
   /**

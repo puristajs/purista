@@ -1,7 +1,7 @@
 import pino, { LoggerOptions } from 'pino'
 
-import { puristaVersion } from '../../version'
-import type { Logger, LogLevelName } from '../types'
+import type { Logger, LogLevelName } from '../core/types'
+import { puristaVersion } from '../version'
 import { DefaultLogger } from './DefaultLogger.impl'
 import { getDefaultLogLevel } from './getDefaultLogLevel'
 
