@@ -205,7 +205,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     return invokeCommand.bind(this)
   }
 
-  protected getEmitFunction(serviceTarget: string, traceId: TraceId, principalId?: string) {
+  protected getEmitFunction(serviceTarget: string, traceId: TraceId, principalId: string | undefined) {
     const sender: EBMessageAddress = {
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,

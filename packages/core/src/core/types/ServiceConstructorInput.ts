@@ -13,24 +13,24 @@ import type { SubscriptionDefinitionList } from './subscription'
  * @group Service
  */
 export type ServiceConstructorInput<ConfigType> = {
-  /** the logger instance */
+  /** A logger instance */
   logger: Logger
-  /** the service info with name, version and description of service */
+  /** The service info with name, version and description of service */
   info: ServiceInfoType
-  /** the eventBridge instance */
+  /** The eventBridge instance */
   eventBridge: EventBridge
-  /** the list of command definitions for this service */
+  /** The list of command definitions for this service */
   commandDefinitionList: CommandDefinitionList<any>
-  /** the list of subscription definitions for this service */
+  /** The list of subscription definitions for this service */
   subscriptionDefinitionList: SubscriptionDefinitionList<any>
-  /** the service specific config */
+  /** The service specific config */
   config: ConfigType
-  /** the secret store instance */
+  /** The secret store instance */
   secretStore?: SecretStore
-  /** the config store instance */
+  /** The config store instance */
   configStore?: ConfigStore
   /** the state store instance */
   stateStore?: StateStore
-  /** the opentelemetry span processor instance */
+  /** The opentelemetry span processor instance */
   spanProcessor?: SpanProcessor
 }

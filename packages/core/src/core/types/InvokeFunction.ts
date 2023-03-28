@@ -16,6 +16,7 @@ import { EBMessageAddress } from './EBMessageAddress'
  * const inputParameter = { search: 'for_me' }
  *
  * const result = await invoke<MyResultType>(address, inputPayload inputParameter )
+ * ```
  */
 export type InvokeFunction = <InvokeResponseType = unknown, PayloadType = unknown, ParameterType = unknown>(
   address: EBMessageAddress,

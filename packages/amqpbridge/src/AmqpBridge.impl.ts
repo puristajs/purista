@@ -327,6 +327,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
         contentEncoding,
         type: msg.messageType,
         headers,
+        persistent: true,
       })
 
       return msg as Readonly<T>
@@ -424,6 +425,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
         type: command.messageType,
         headers,
         replyTo: this.replyQueueName,
+        persistent: true,
       })
 
       return executionPromise
@@ -450,7 +452,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
     const channel = await this.connection.createChannel()
 
-    const noAck = !eventBridgeConfig.autoacknowledge
+    const noAck = eventBridgeConfig.autoacknowledge === undefined ? true : eventBridgeConfig.autoacknowledge
 
     channel.on('close', () => {
       this.healthy = false
@@ -549,10 +551,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
                       contentEncoding,
                       type: responseMessage.messageType,
                       headers,
+                      persistent: true,
                     },
                   )
 
-                  if (noAck) {
+                  if (!noAck) {
                     channel.ack(msg)
                   }
                 },
@@ -572,7 +575,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
               span.recordException(err)
               this.emit('eventbridge-error', err)
               this.logger.error({ err }, 'Failed to consume command response message')
-              if (noAck) {
+              if (!noAck) {
                 channel.nack(msg)
               }
             }
@@ -619,13 +622,13 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
       throw new Error('No connection - not connected')
     }
 
-    const noAck = !subscription.eventBridgeConfig.autoacknowledge
+    const noAck = !!subscription.eventBridgeConfig.autoacknowledge
 
     const isShared = subscription.eventBridgeConfig.shared === undefined || subscription.eventBridgeConfig.shared
 
     const queueName = isShared ? getSubscriptionQueueName(subscription.subscriber, this.config.config?.namePrefix) : ''
 
-    const queOptions: amqplib.Options.AssertQueue = isShared
+    const queueOptions: amqplib.Options.AssertQueue = isShared
       ? {
           durable: subscription.eventBridgeConfig.durable,
         }
@@ -645,7 +648,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
       this.emit('eventbridge-error', err)
     })
 
-    const queue = await channel.assertQueue(queueName, queOptions)
+    const queue = await channel.assertQueue(queueName, queueOptions)
     await channel.bindQueue(queue.queue, this.config.config?.exchangeName || getDefaultConfig().exchangeName, '', {
       'x-match': 'all',
       messageType: subscription.messageType,
@@ -696,7 +699,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
               if (subscription.emitEventName && result) {
                 await this.emitMessage(result)
               }
-              if (noAck) {
+              if (!noAck) {
                 channel.ack(msg)
               }
               this.runningSubscriptionCount--
@@ -713,7 +716,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
               span.recordException(err)
               this.emit('eventbridge-error', err)
               this.logger.error({ err }, 'Failed to consume subscription message')
-              if (noAck) {
+              if (!noAck) {
                 channel.nack(msg)
               }
             }

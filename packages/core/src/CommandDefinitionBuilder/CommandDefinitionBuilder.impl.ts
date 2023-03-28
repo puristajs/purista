@@ -586,19 +586,8 @@ export class CommandDefinitionBuilder<
    * @param acknowledge Enable (true) and disable (false)
    * @returns CommandDefinition
    */
-  autoacknowledgeMessages(acknowledge = true) {
+  adviceAutoacknowledgeMessages(acknowledge = true) {
     this.autoacknowledge = acknowledge
-    return this
-  }
-
-  /**
-   * Advice the underlaying message broker to store command messages if no consumer service instance is available.
-   * It defaults to false.
-   * In most cases it does not make sense as command most likely just-in-time sequential executions.
-   * In case no consumer is available, they should fail in most cases
-   */
-  setDurable(durable: boolean) {
-    this.durable = durable
     return this
   }
 
@@ -743,13 +732,24 @@ export class CommandDefinitionBuilder<
     ServiceClassType,
     MessagePayloadType,
     MessageParamsType,
-    FunctionPayloadType,
-    FunctionParamsType,
-    FunctionResultType
+    MessagePayloadType,
+    MessageParamsType,
+    MessageResultType
   > {
     if (!this.fn) {
       throw new Error(`No function implementation for ${this.commandName}`)
     }
-    return this.fn
+
+    const f = getCommandFunctionWithValidation<
+      ServiceClassType,
+      MessagePayloadType,
+      MessageParamsType,
+      MessageResultType,
+      FunctionPayloadType,
+      FunctionParamsType,
+      FunctionResultType
+    >(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard)
+
+    return f
   }
 }

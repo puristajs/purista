@@ -1,4 +1,4 @@
-import { initLogger } from '../DefaultLogger'
+import { initLogger } from '../../DefaultLogger'
 import { UnhandledError } from '../Error'
 import { Logger, StatusCode, StoreBaseConfig } from '../types'
 import { SecretStore } from './types'

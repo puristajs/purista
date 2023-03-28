@@ -8,11 +8,17 @@ import { Logger } from '../../types'
  *
  */
 export type EventBridgeConfig<CustomConfig> = {
+  /** Specific configuration settings for the event bridge depending on the used message broker */
   config?: CustomConfig
+  /** A logger instance */
   logger?: Logger
+  /** A OpenTelemetry span processor */
   spanProcessor?: SpanProcessor
-  /** the instance id of the event bridge */
+  /** The instance id of the event bridge.
+   * If not set, a id will generated each time a instance is created.
+   * Use this if there is a need to always have the same instance id.
+   * */
   instanceId?: string
-  /** the default timeout of command invocations */
+  /** Overwrite the hardcoded default timeout of command invocations */
   defaultCommandTimeout?: number
 }
