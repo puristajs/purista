@@ -33,6 +33,7 @@ export type CommandFunctionContextEnhancements<MessagePayloadType = unknown, Mes
    * const inputParameter = { search: 'for_me' }
    *
    * const result = await invoke<MyResultType>(address, inputPayload inputParameter )
+   * ```
    */
   invoke: InvokeFunction
 }

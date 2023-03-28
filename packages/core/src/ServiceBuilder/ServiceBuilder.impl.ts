@@ -11,6 +11,7 @@ import {
   EventBridge,
   initLogger,
   Logger,
+  LogLevelName,
   SecretStore,
   Service,
   ServiceClass,
@@ -155,6 +156,7 @@ export class ServiceBuilder<
   getInstance(
     eventBridge: EventBridge,
     options: {
+      logLevel?: LogLevelName
       serviceConfig?: ConfigInputType
       logger?: Logger
       spanProcessor?: SpanProcessor
@@ -172,11 +174,15 @@ export class ServiceBuilder<
     const hasLogLevel = opt?.logLevel
       ? ['info', 'error', 'warn', 'debug', 'trace', 'fatal'].includes(opt.logLevel)
       : false
-    const logger = options.logger || initLogger(hasLogLevel ? opt.logLevel : undefined)
+
+    const logger = options.logger || initLogger(hasLogLevel ? opt.logLevel : options.logLevel)
 
     if (this.configSchema && options.serviceConfig) {
       try {
-        config = this.configSchema.parse(options.serviceConfig)
+        config = {
+          ...this.defaultConfig,
+          ...this.configSchema.parse(options.serviceConfig),
+        }
       } catch (err) {
         logger.error({ err, ...this.info }, 'Invalid configuration for')
         throw new Error('Fatal - unable to create service instance because provided configuration is invalid')

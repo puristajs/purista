@@ -29,5 +29,6 @@
  *
  * @see [NODE-REDIS](https://redis.js.org)
  *
+ * @module
  */
 export * from './RedisStateStore.impl'
