@@ -1,6 +1,6 @@
 {
   "name": "@purista/k8s-sdk",
-  "version": "1.4.9",
+  "version": "1.5.0",
   "description": "SDK and helper to run PURISTA services in Kubernetes",
   "homepage": "https://purista.dev",
   "repository": {
@@ -58,7 +58,7 @@
   },
   "peerDependenciesMeta": {},
   "typedoc": {
-      "entryPoint": "./src/index.ts",
-      "tsconfig": "./tsconfig.ref.json"
+    "entryPoint": "./src/index.ts",
+    "tsconfig": "./tsconfig.ref.json"
   }
 }
