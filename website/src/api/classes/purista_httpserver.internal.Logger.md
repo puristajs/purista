@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / Logger
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / Logger
 
 # Class: Logger
 
@@ -44,7 +44,7 @@
 
 #### Defined in
 
-core/lib/core/types/Logger.d.ts:19
+packages/core/lib/core/types/Logger.d.ts:21
 
 ___
 
@@ -64,7 +64,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/Logger.d.ts:17
+packages/core/lib/core/types/Logger.d.ts:19
 
 ___
 
@@ -84,7 +84,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/Logger.d.ts:16
+packages/core/lib/core/types/Logger.d.ts:18
 
 ___
 
@@ -104,7 +104,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/Logger.d.ts:21
+packages/core/lib/core/types/Logger.d.ts:23
 
 ___
 
@@ -124,7 +124,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/Logger.d.ts:15
+packages/core/lib/core/types/Logger.d.ts:17
 
 ___
 
@@ -144,7 +144,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/Logger.d.ts:20
+packages/core/lib/core/types/Logger.d.ts:22
 
 ___
 
@@ -164,4 +164,4 @@ ___
 
 #### Defined in
 
-core/lib/core/types/Logger.d.ts:18
+packages/core/lib/core/types/Logger.d.ts:20

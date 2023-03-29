@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / GenericEventEmitter
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / GenericEventEmitter
 
 # Class: GenericEventEmitter<T\>
 
@@ -14,7 +14,7 @@
 
 - **`GenericEventEmitter`**
 
-  ↳ [`EventBridge`](purista_amqpbridge.internal.EventBridge.md)
+  ↳ [`EventBridgeBaseClass`](purista_amqpbridge.internal.EventBridgeBaseClass.md)
 
 ## Implements
 
@@ -35,6 +35,7 @@
 - [emit](purista_amqpbridge.internal.GenericEventEmitter.md#emit)
 - [off](purista_amqpbridge.internal.GenericEventEmitter.md#off)
 - [on](purista_amqpbridge.internal.GenericEventEmitter.md#on)
+- [removeAllListeners](purista_amqpbridge.internal.GenericEventEmitter.md#removealllisteners)
 
 ## Constructors
 
@@ -56,13 +57,13 @@
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:10
+packages/core/lib/core/types/GenericEventEmitter.d.ts:10
 
 ## Methods
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter`): `void`
+▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
@@ -75,7 +76,7 @@ core/lib/core/types/GenericEventEmitter.d.ts:10
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `parameter` | `T`[`K`] |
+| `parameter?` | `T`[`K`] |
 
 #### Returns
 
@@ -87,7 +88,7 @@ core/lib/core/types/GenericEventEmitter.d.ts:10
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:13
+packages/core/lib/core/types/GenericEventEmitter.d.ts:13
 
 ___
 
@@ -118,7 +119,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:12
+packages/core/lib/core/types/GenericEventEmitter.d.ts:12
 
 ___
 
@@ -149,4 +150,18 @@ ___
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:11
+packages/core/lib/core/types/GenericEventEmitter.d.ts:11
+
+___
+
+### removeAllListeners
+
+▸ **removeAllListeners**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+packages/core/lib/core/types/GenericEventEmitter.d.ts:14

@@ -17,7 +17,7 @@ tag:
   - Guide
 ---
 
-## Useage
+## General
 
 The core package comes with `DefaultEventBridge`, which will work on local without any further installation.  
 The `DefaultEventBridge` acts as event bridge and simple message broker.
@@ -34,15 +34,19 @@ A simplified schema of how the `DefaultEventBridge` works:
 
 ![single instance](/graphic/single_instance.svg)
 
-### Pros
+::: tip Pros
 
 - no extra message broker needed
 - full subscription support
+- ideal for local development and debug purpose
+:::
 
-### Cons
+::: danger Cons
 
-- does scale
-- no persistance
+- does not scale
+- no persistance of messages
+- no retry mechanism for messages
+:::
 
 ## Config
 

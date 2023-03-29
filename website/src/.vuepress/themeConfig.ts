@@ -2,6 +2,57 @@ import { hopeTheme } from 'vuepress-theme-hope'
 
 import navbar from './navbar'
 
+const apiSidebar = [
+  {
+    text: 'Core',
+    children: [
+      {
+        text: '@purista/core',
+        link: '/api/modules/purista_core.md',
+      },
+      {
+        text: '@purista/httpserver',
+        link: '/api/modules/purista_httpserver.md',
+      },
+    ],
+  },
+  {
+    text: 'Event bridges',
+    children: [
+      {
+        text: '@purista/amqpbridge',
+        link: '/api/modules/purista_amqpbridge.md',
+      },
+    ],
+  },
+  {
+    text: 'Config stores',
+    children: [],
+  },
+  {
+    text: 'Secret stores',
+    children: [],
+  },
+  {
+    text: 'State stores',
+    children: [
+      {
+        text: '@purista/redis-state-store',
+        link: '/api/modules/purista_redis_state_store.md',
+      },
+    ],
+  },
+  {
+    text: 'Deployment SDK',
+    children: [
+      {
+        text: '@purista/k8s-sdk',
+        link: '/api/modules/purista_k8s_sdk.md',
+      },
+    ],
+  },
+]
+
 export default hopeTheme({
   hostname: 'https://purista.dev',
 
@@ -9,7 +60,6 @@ export default hopeTheme({
     name: 'Sebastian Wessel',
     url: 'https://sebastianwessel.de',
   },
-
   iconAssets: 'fontawesome',
 
   // logo: '/logo.svg',
@@ -43,36 +93,24 @@ export default hopeTheme({
         ],
       },
     ],
-    '/api/': [
-      {
-        text: 'Modules',
-        children: [
-          {
-            text: '@purista/core',
-            link: '/api/modules/purista_core.md',
-          },
-          {
-            text: '@purista/httpserver',
-            link: '/api/modules/purista_httpserver.md',
-          },
-          {
-            text: '@purista/amqpbridge',
-            link: '/api/modules/purista_amqpbridge.md',
-          },
-        ],
-      },
-    ],
-    '/api/modules': ['purista_core', 'purista_httpserver', 'purista_amqpbridge.md'],
+    '/api/': apiSidebar,
+    '/api/modules': apiSidebar,
   },
 
   footer:
     'Made from developers for developers with ❤️ | <a href="/privacy.html">Privacy</a> | <a href="javascript:cc.showSettings()">Cookie preferences</a> | <a href="/imprint.html">Imprint</a>',
 
   displayFooter: true,
-  darkmode: 'switch',
-
+  darkmode: 'disable',
+  fullscreen: true,
+  hotReload: true,
+  navbarAutoHide: 'mobile',
   pageInfo: ['Author', 'Date'],
   editLink: false,
+  blog: {
+    sidebarDisplay: 'none',
+    articleInfo: ['Author', 'Date'],
+  },
   plugins: {
     git: {
       createdTime: true,
@@ -87,6 +125,7 @@ export default hopeTheme({
     },
     photoSwipe: true,
     mdEnhance: {
+      container: true,
       mermaid: true,
       flowchart: true,
       linkCheck: true,

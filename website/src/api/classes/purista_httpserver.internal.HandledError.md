@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / HandledError
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / HandledError
 
 # Class: HandledError
 
@@ -30,6 +30,7 @@ Scenarios are input validation failures or "404 Not Found" errors which should b
 
 - [getErrorResponse](purista_httpserver.internal.HandledError.md#geterrorresponse)
 - [toString](purista_httpserver.internal.HandledError.md#tostring)
+- [fromError](purista_httpserver.internal.HandledError.md#fromerror)
 - [fromMessage](purista_httpserver.internal.HandledError.md#frommessage)
 
 ## Constructors
@@ -53,7 +54,7 @@ Error.constructor
 
 #### Defined in
 
-core/lib/core/Error/HandledError.impl.d.ts:11
+packages/core/lib/core/Error/HandledError.impl.d.ts:11
 
 ## Properties
 
@@ -63,7 +64,7 @@ core/lib/core/Error/HandledError.impl.d.ts:11
 
 #### Defined in
 
-core/lib/core/Error/HandledError.impl.d.ts:9
+packages/core/lib/core/Error/HandledError.impl.d.ts:9
 
 ___
 
@@ -73,7 +74,7 @@ ___
 
 #### Defined in
 
-core/lib/core/Error/HandledError.impl.d.ts:8
+packages/core/lib/core/Error/HandledError.impl.d.ts:8
 
 ___
 
@@ -83,25 +84,31 @@ ___
 
 #### Defined in
 
-core/lib/core/Error/HandledError.impl.d.ts:10
+packages/core/lib/core/Error/HandledError.impl.d.ts:10
 
 ## Methods
 
 ### getErrorResponse
 
-▸ **getErrorResponse**(): `Readonly`<[`ErrorResponse`](../modules/purista_httpserver.internal.md#errorresponse)\>
+▸ **getErrorResponse**(`traceId?`): `Readonly`<[`ErrorResponsePayload`](../modules/purista_httpserver.internal.md#errorresponsepayload)\>
 
 Returns error response object
 
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `traceId?` | `string` |
+
 #### Returns
 
-`Readonly`<[`ErrorResponse`](../modules/purista_httpserver.internal.md#errorresponse)\>
+`Readonly`<[`ErrorResponsePayload`](../modules/purista_httpserver.internal.md#errorresponsepayload)\>
 
-ErrorResponse
+ErrorResponsePayload
 
 #### Defined in
 
-core/lib/core/Error/HandledError.impl.d.ts:22
+packages/core/lib/core/Error/HandledError.impl.d.ts:32
 
 ___
 
@@ -119,7 +126,34 @@ ErrorResponse as string
 
 #### Defined in
 
-core/lib/core/Error/HandledError.impl.d.ts:27
+packages/core/lib/core/Error/HandledError.impl.d.ts:37
+
+___
+
+### fromError
+
+▸ `Static` **fromError**(`err`, `errorCode?`, `data?`, `traceId?`): [`HandledError`](purista_httpserver.internal.HandledError.md)
+
+Creates a HandledError from an input
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `err` | `any` | the input |
+| `errorCode?` | [`StatusCode`](../enums/purista_httpserver.internal.StatusCode.md) | the error code |
+| `data?` | `unknown` | optional data |
+| `traceId?` | `string` | optional trace id |
+
+#### Returns
+
+[`HandledError`](purista_httpserver.internal.HandledError.md)
+
+HandledError
+
+#### Defined in
+
+packages/core/lib/core/Error/HandledError.impl.d.ts:27
 
 ___
 
@@ -143,4 +177,4 @@ HandledError
 
 #### Defined in
 
-core/lib/core/Error/HandledError.impl.d.ts:17
+packages/core/lib/core/Error/HandledError.impl.d.ts:17

@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / ILogger
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ILogger
 
 # Interface: ILogger
 
@@ -37,7 +37,7 @@
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:32](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/Logger.ts#L32)
+[packages/core/src/core/types/Logger.ts:34](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/Logger.ts#L34)
 
 ___
 
@@ -57,7 +57,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:30](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/Logger.ts#L30)
+[packages/core/src/core/types/Logger.ts:32](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/Logger.ts#L32)
 
 ___
 
@@ -77,7 +77,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:29](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/Logger.ts#L29)
+[packages/core/src/core/types/Logger.ts:31](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/Logger.ts#L31)
 
 ___
 
@@ -97,7 +97,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:28](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/Logger.ts#L28)
+[packages/core/src/core/types/Logger.ts:30](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/Logger.ts#L30)
 
 ___
 
@@ -117,7 +117,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:33](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/Logger.ts#L33)
+[packages/core/src/core/types/Logger.ts:35](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/Logger.ts#L35)
 
 ___
 
@@ -137,4 +137,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/Logger.ts:31](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/Logger.ts#L31)
+[packages/core/src/core/types/Logger.ts:33](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/Logger.ts#L33)

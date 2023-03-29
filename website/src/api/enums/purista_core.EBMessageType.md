@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / EBMessageType
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / EBMessageType
 
 # Enumeration: EBMessageType
 
@@ -36,7 +36,7 @@ If the sender does not receive a answer within this time frame, the command will
 
 #### Defined in
 
-[core/src/core/types/EBMessageType.enum.ts:11](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/EBMessageType.enum.ts#L11)
+[packages/core/src/core/types/EBMessageType.enum.ts:11](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/EBMessageType.enum.ts#L11)
 
 ___
 
@@ -44,9 +44,11 @@ ___
 
 • **CommandErrorResponse** = ``"commandErrorResponse"``
 
+a error response from receiver of a command message
+
 #### Defined in
 
-[core/src/core/types/EBMessageType.enum.ts:15](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/EBMessageType.enum.ts#L15)
+[packages/core/src/core/types/EBMessageType.enum.ts:17](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/EBMessageType.enum.ts#L17)
 
 ___
 
@@ -54,9 +56,11 @@ ___
 
 • **CommandSuccessResponse** = ``"commandSuccessResponse"``
 
+a success response from receiver of a command message
+
 #### Defined in
 
-[core/src/core/types/EBMessageType.enum.ts:13](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/EBMessageType.enum.ts#L13)
+[packages/core/src/core/types/EBMessageType.enum.ts:14](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/EBMessageType.enum.ts#L14)
 
 ___
 
@@ -64,9 +68,11 @@ ___
 
 • **CustomMessage** = ``"customMessage"``
 
+a custom message / custom event
+
 #### Defined in
 
-[core/src/core/types/EBMessageType.enum.ts:31](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/EBMessageType.enum.ts#L31)
+[packages/core/src/core/types/EBMessageType.enum.ts:42](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/EBMessageType.enum.ts#L42)
 
 ___
 
@@ -74,9 +80,11 @@ ___
 
 • **InfoInvokeTimeout** = ``"infoInvokeTimeout"``
 
+a service invoked a other function and did not get a answer within given ttl
+
 #### Defined in
 
-[core/src/core/types/EBMessageType.enum.ts:29](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/EBMessageType.enum.ts#L29)
+[packages/core/src/core/types/EBMessageType.enum.ts:38](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/EBMessageType.enum.ts#L38)
 
 ___
 
@@ -84,9 +92,11 @@ ___
 
 • **InfoServiceDrain** = ``"infoServiceDrain"``
 
+indicates that a service is going to shut down and does no longer accept new requests
+
 #### Defined in
 
-[core/src/core/types/EBMessageType.enum.ts:27](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/EBMessageType.enum.ts#L27)
+[packages/core/src/core/types/EBMessageType.enum.ts:34](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/EBMessageType.enum.ts#L34)
 
 ___
 
@@ -94,9 +104,11 @@ ___
 
 • **InfoServiceFunctionAdded** = ``"infoServiceFunctionAdded"``
 
+send when a service provides a new function
+
 #### Defined in
 
-[core/src/core/types/EBMessageType.enum.ts:26](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/EBMessageType.enum.ts#L26)
+[packages/core/src/core/types/EBMessageType.enum.ts:32](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/EBMessageType.enum.ts#L32)
 
 ___
 
@@ -104,14 +116,11 @@ ___
 
 • **InfoServiceInit** = ``"infoServiceInit"``
 
-Info message type:
-Message which is sent from a single sender to unspecified receivers.
-The sender does not expect any answer to this message and does not process any reply to this message.
-Info messages are fire & forget broadcasting messages.
+indicates that a service is booting
 
 #### Defined in
 
-[core/src/core/types/EBMessageType.enum.ts:23](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/EBMessageType.enum.ts#L23)
+[packages/core/src/core/types/EBMessageType.enum.ts:26](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/EBMessageType.enum.ts#L26)
 
 ___
 
@@ -119,9 +128,11 @@ ___
 
 • **InfoServiceNotReady** = ``"infoServiceNotReady"``
 
+indicates that a service is not able to process requests (e.g. db not available)
+
 #### Defined in
 
-[core/src/core/types/EBMessageType.enum.ts:25](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/EBMessageType.enum.ts#L25)
+[packages/core/src/core/types/EBMessageType.enum.ts:30](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/EBMessageType.enum.ts#L30)
 
 ___
 
@@ -129,9 +140,11 @@ ___
 
 • **InfoServiceReady** = ``"infoServiceReady"``
 
+indicates that a service is ready
+
 #### Defined in
 
-[core/src/core/types/EBMessageType.enum.ts:24](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/EBMessageType.enum.ts#L24)
+[packages/core/src/core/types/EBMessageType.enum.ts:28](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/EBMessageType.enum.ts#L28)
 
 ___
 
@@ -139,9 +152,11 @@ ___
 
 • **InfoServiceShutdown** = ``"infoServiceShutdown"``
 
+last event from service before service is destroyed
+
 #### Defined in
 
-[core/src/core/types/EBMessageType.enum.ts:28](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/EBMessageType.enum.ts#L28)
+[packages/core/src/core/types/EBMessageType.enum.ts:36](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/EBMessageType.enum.ts#L36)
 
 ___
 
@@ -149,6 +164,8 @@ ___
 
 • **InfoSubscriptionError** = ``"infoSubscriptionError"``
 
+a subscription function is throwing
+
 #### Defined in
 
-[core/src/core/types/EBMessageType.enum.ts:30](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/EBMessageType.enum.ts#L30)
+[packages/core/src/core/types/EBMessageType.enum.ts:40](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/EBMessageType.enum.ts#L40)

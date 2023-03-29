@@ -13,6 +13,9 @@ Highly modular and easy to extend and to be customized for your needs.
 ![PURISTA](advertise_large.svg)
 **Visit [purista.dev](https://purista.dev)**
 
+**Follow on Twitter [@purista_js](https://twitter.com/purista_js)**  
+**Join the [Discord Chat](https://discord.gg/9feaUm3H2v)**
+
 This framework adapts and combines a wide range of different patters from domain driven design, cqrs, microservice, event sourcing and lambda functions.
 
 It is built from the ground up in typescript and highly focuses on schema, and auto generation of types, input-output-validation, OpenApi documentation (swagger) and tracing via OpenTelemetry.

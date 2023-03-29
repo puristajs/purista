@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / UnhandledError
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / UnhandledError
 
 # Class: UnhandledError
 
@@ -33,6 +33,7 @@ Unhandled error are automatically converted into "500 Internal Server Error" to 
 - [getErrorResponse](purista_amqpbridge.internal.UnhandledError.md#geterrorresponse)
 - [intoHandledError](purista_amqpbridge.internal.UnhandledError.md#intohandlederror)
 - [toString](purista_amqpbridge.internal.UnhandledError.md#tostring)
+- [fromError](purista_amqpbridge.internal.UnhandledError.md#fromerror)
 - [fromMessage](purista_amqpbridge.internal.UnhandledError.md#frommessage)
 
 ## Constructors
@@ -56,7 +57,7 @@ Error.constructor
 
 #### Defined in
 
-core/lib/core/Error/UnhandledError.impl.d.ts:15
+packages/core/lib/core/Error/UnhandledError.impl.d.ts:15
 
 ## Properties
 
@@ -66,7 +67,7 @@ core/lib/core/Error/UnhandledError.impl.d.ts:15
 
 #### Defined in
 
-core/lib/core/Error/UnhandledError.impl.d.ts:13
+packages/core/lib/core/Error/UnhandledError.impl.d.ts:13
 
 ___
 
@@ -76,7 +77,7 @@ ___
 
 #### Defined in
 
-core/lib/core/Error/UnhandledError.impl.d.ts:12
+packages/core/lib/core/Error/UnhandledError.impl.d.ts:12
 
 ___
 
@@ -86,25 +87,25 @@ ___
 
 #### Defined in
 
-core/lib/core/Error/UnhandledError.impl.d.ts:14
+packages/core/lib/core/Error/UnhandledError.impl.d.ts:14
 
 ## Methods
 
 ### getErrorResponse
 
-▸ **getErrorResponse**(): `Readonly`<[`ErrorResponse`](../modules/purista_amqpbridge.internal.md#errorresponse)\>
+▸ **getErrorResponse**(): `Readonly`<[`ErrorResponsePayload`](../modules/purista_amqpbridge.internal.md#errorresponsepayload)\>
 
 Returns error response object
 
 #### Returns
 
-`Readonly`<[`ErrorResponse`](../modules/purista_amqpbridge.internal.md#errorresponse)\>
+`Readonly`<[`ErrorResponsePayload`](../modules/purista_amqpbridge.internal.md#errorresponsepayload)\>
 
-ErrorResponse
+ErrorResponsePayload
 
 #### Defined in
 
-core/lib/core/Error/UnhandledError.impl.d.ts:31
+packages/core/lib/core/Error/UnhandledError.impl.d.ts:41
 
 ___
 
@@ -122,7 +123,7 @@ HandledError
 
 #### Defined in
 
-core/lib/core/Error/UnhandledError.impl.d.ts:26
+packages/core/lib/core/Error/UnhandledError.impl.d.ts:36
 
 ___
 
@@ -140,7 +141,34 @@ ErrorResponse as string
 
 #### Defined in
 
-core/lib/core/Error/UnhandledError.impl.d.ts:36
+packages/core/lib/core/Error/UnhandledError.impl.d.ts:46
+
+___
+
+### fromError
+
+▸ `Static` **fromError**(`err`, `errorCode?`, `data?`, `traceId?`): [`HandledError`](purista_amqpbridge.internal.HandledError.md)
+
+Creates a UnhandledError from an input
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `err` | `any` | the input |
+| `errorCode?` | [`StatusCode`](../enums/purista_amqpbridge.internal.StatusCode.md) | the error code |
+| `data?` | `unknown` | optional data |
+| `traceId?` | `string` | optional trace id |
+
+#### Returns
+
+[`HandledError`](purista_amqpbridge.internal.HandledError.md)
+
+UnhandledError
+
+#### Defined in
+
+packages/core/lib/core/Error/UnhandledError.impl.d.ts:31
 
 ___
 
@@ -164,4 +192,4 @@ UnhandledError
 
 #### Defined in
 
-core/lib/core/Error/UnhandledError.impl.d.ts:21
+packages/core/lib/core/Error/UnhandledError.impl.d.ts:21

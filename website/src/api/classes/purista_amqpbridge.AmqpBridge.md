@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / AmqpBridge
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / AmqpBridge
 
 # Class: AmqpBridge
 
@@ -8,9 +8,13 @@ A adapter to use rabbitMQ as event bridge.
 
 ## Hierarchy
 
-- [`EventBridge`](purista_amqpbridge.internal.EventBridge.md)
+- [`EventBridgeBaseClass`](purista_amqpbridge.internal.EventBridgeBaseClass.md)<[`AmqpBridgeConfig`](../modules/purista_amqpbridge.md#amqpbridgeconfig)\>
 
   ↳ **`AmqpBridge`**
+
+## Implements
+
+- [`EventBridge`](../interfaces/purista_amqpbridge.internal.EventBridge.md)
 
 ## Table of contents
 
@@ -23,54 +27,63 @@ A adapter to use rabbitMQ as event bridge.
 - [channel](purista_amqpbridge.AmqpBridge.md#channel)
 - [config](purista_amqpbridge.AmqpBridge.md#config)
 - [connection](purista_amqpbridge.AmqpBridge.md#connection)
+- [consumerTags](purista_amqpbridge.AmqpBridge.md#consumertags)
+- [defaultCommandTimeout](purista_amqpbridge.AmqpBridge.md#defaultcommandtimeout)
 - [encoder](purista_amqpbridge.AmqpBridge.md#encoder)
 - [encrypter](purista_amqpbridge.AmqpBridge.md#encrypter)
-- [log](purista_amqpbridge.AmqpBridge.md#log)
+- [healthy](purista_amqpbridge.AmqpBridge.md#healthy)
+- [instanceId](purista_amqpbridge.AmqpBridge.md#instanceid)
+- [logger](purista_amqpbridge.AmqpBridge.md#logger)
+- [name](purista_amqpbridge.AmqpBridge.md#name)
 - [pendingInvocations](purista_amqpbridge.AmqpBridge.md#pendinginvocations)
+- [ready](purista_amqpbridge.AmqpBridge.md#ready)
 - [replyQueueName](purista_amqpbridge.AmqpBridge.md#replyqueuename)
+- [runningSubscriptionCount](purista_amqpbridge.AmqpBridge.md#runningsubscriptioncount)
 - [serviceFunctions](purista_amqpbridge.AmqpBridge.md#servicefunctions)
 - [subscriptions](purista_amqpbridge.AmqpBridge.md#subscriptions)
-
-### Accessors
-
-- [defaultCommandTimeout](purista_amqpbridge.AmqpBridge.md#defaultcommandtimeout)
-- [instanceId](purista_amqpbridge.AmqpBridge.md#instanceid)
+- [traceProvider](purista_amqpbridge.AmqpBridge.md#traceprovider)
 
 ### Methods
 
 - [decodeContent](purista_amqpbridge.AmqpBridge.md#decodecontent)
+- [destroy](purista_amqpbridge.AmqpBridge.md#destroy)
 - [emit](purista_amqpbridge.AmqpBridge.md#emit)
 - [emitMessage](purista_amqpbridge.AmqpBridge.md#emitmessage)
 - [encodeContent](purista_amqpbridge.AmqpBridge.md#encodecontent)
+- [getTracer](purista_amqpbridge.AmqpBridge.md#gettracer)
 - [invoke](purista_amqpbridge.AmqpBridge.md#invoke)
+- [isHealthy](purista_amqpbridge.AmqpBridge.md#ishealthy)
+- [isReady](purista_amqpbridge.AmqpBridge.md#isready)
 - [off](purista_amqpbridge.AmqpBridge.md#off)
 - [on](purista_amqpbridge.AmqpBridge.md#on)
-- [registerServiceFunction](purista_amqpbridge.AmqpBridge.md#registerservicefunction)
+- [registerCommand](purista_amqpbridge.AmqpBridge.md#registercommand)
 - [registerSubscription](purista_amqpbridge.AmqpBridge.md#registersubscription)
+- [removeAllListeners](purista_amqpbridge.AmqpBridge.md#removealllisteners)
 - [start](purista_amqpbridge.AmqpBridge.md#start)
-- [unregisterServiceFunction](purista_amqpbridge.AmqpBridge.md#unregisterservicefunction)
+- [startActiveSpan](purista_amqpbridge.AmqpBridge.md#startactivespan)
+- [unregisterCommand](purista_amqpbridge.AmqpBridge.md#unregistercommand)
 - [unregisterSubscription](purista_amqpbridge.AmqpBridge.md#unregistersubscription)
+- [wrapInSpan](purista_amqpbridge.AmqpBridge.md#wrapinspan)
 
 ## Constructors
 
 ### constructor
 
-• **new AmqpBridge**(`baseLogger`, `conf?`)
+• **new AmqpBridge**(`config`)
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `baseLogger` | [`Logger`](purista_amqpbridge.internal.Logger.md) |
-| `conf` | [`AmqpBridgeConfig`](../modules/purista_amqpbridge.md#amqpbridgeconfig) |
+| `config` | [`EventBridgeConfig`](../modules/purista_amqpbridge.internal.md#eventbridgeconfig)<[`AmqpBridgeConfig`](../modules/purista_amqpbridge.md#amqpbridgeconfig)\> |
 
 #### Overrides
 
-[EventBridge](purista_amqpbridge.internal.EventBridge.md).[constructor](purista_amqpbridge.internal.EventBridge.md#constructor)
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[constructor](purista_amqpbridge.internal.EventBridgeBaseClass.md#constructor)
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:73](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L73)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:86](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L86)
 
 ## Properties
 
@@ -80,17 +93,21 @@ A adapter to use rabbitMQ as event bridge.
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:44](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L44)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:50](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L50)
 
 ___
 
 ### config
 
-• `Protected` **config**: [`AmqpBridgeConfig`](../modules/purista_amqpbridge.md#amqpbridgeconfig)
+• **config**: [`Complete`](../modules/purista_amqpbridge.internal.md#complete)<[`EventBridgeConfig`](../modules/purista_amqpbridge.internal.md#eventbridgeconfig)<[`Complete`](../modules/purista_amqpbridge.internal.md#complete)<[`AmqpBridgeConfig`](../modules/purista_amqpbridge.md#amqpbridgeconfig)\>\>\>
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[config](purista_amqpbridge.internal.EventBridgeBaseClass.md#config)
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:42](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L42)
+packages/core/lib/core/EventBridge/EventBridgeBaseClass.impl.d.ts:13
 
 ___
 
@@ -100,7 +117,37 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:43](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L43)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:49](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L49)
+
+___
+
+### consumerTags
+
+• `Protected` **consumerTags**: `string`[] = `[]`
+
+#### Defined in
+
+[packages/amqpbridge/src/AmqpBridge.impl.ts:55](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L55)
+
+___
+
+### defaultCommandTimeout
+
+• **defaultCommandTimeout**: `number`
+
+The default time until when a command invocation automatically returns a time out error
+
+#### Implementation of
+
+[EventBridge](../interfaces/purista_amqpbridge.internal.EventBridge.md).[defaultCommandTimeout](../interfaces/purista_amqpbridge.internal.EventBridge.md#defaultcommandtimeout)
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[defaultCommandTimeout](purista_amqpbridge.internal.EventBridgeBaseClass.md#defaultcommandtimeout)
+
+#### Defined in
+
+packages/core/lib/core/EventBridge/EventBridgeBaseClass.impl.d.ts:16
 
 ___
 
@@ -110,7 +157,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:65](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L65)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:78](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L78)
 
 ___
 
@@ -120,17 +167,63 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:69](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L69)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:82](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L82)
 
 ___
 
-### log
+### healthy
 
-• `Protected` **log**: [`Logger`](purista_amqpbridge.internal.Logger.md)
+• `Protected` **healthy**: `boolean` = `false`
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:41](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L41)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:52](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L52)
+
+___
+
+### instanceId
+
+• **instanceId**: `string`
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[instanceId](purista_amqpbridge.internal.EventBridgeBaseClass.md#instanceid)
+
+#### Defined in
+
+packages/core/lib/core/EventBridge/EventBridgeBaseClass.impl.d.ts:15
+
+___
+
+### logger
+
+• **logger**: [`Logger`](purista_amqpbridge.internal.Logger.md)
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[logger](purista_amqpbridge.internal.EventBridgeBaseClass.md#logger)
+
+#### Defined in
+
+packages/core/lib/core/EventBridge/EventBridgeBaseClass.impl.d.ts:11
+
+___
+
+### name
+
+• **name**: `string`
+
+#### Implementation of
+
+[EventBridge](../interfaces/purista_amqpbridge.internal.EventBridge.md).[name](../interfaces/purista_amqpbridge.internal.EventBridge.md#name)
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[name](purista_amqpbridge.internal.EventBridgeBaseClass.md#name)
+
+#### Defined in
+
+packages/core/lib/core/EventBridge/EventBridgeBaseClass.impl.d.ts:14
 
 ___
 
@@ -140,7 +233,17 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:55](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L55)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:66](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L66)
+
+___
+
+### ready
+
+• `Protected` **ready**: `boolean` = `false`
+
+#### Defined in
+
+[packages/amqpbridge/src/AmqpBridge.impl.ts:53](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L53)
 
 ___
 
@@ -150,65 +253,51 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:46](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L46)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:57](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L57)
+
+___
+
+### runningSubscriptionCount
+
+• `Protected` **runningSubscriptionCount**: `number` = `0`
+
+#### Defined in
+
+[packages/amqpbridge/src/AmqpBridge.impl.ts:68](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L68)
 
 ___
 
 ### serviceFunctions
 
-• `Protected` **serviceFunctions**: `Map`<`string`, { `cb`: (`message`: [`Command`](../modules/purista_amqpbridge.internal.md#command-1)<`unknown`, `unknown`\>) => `Promise`<[`CommandErrorResponse`](../modules/purista_amqpbridge.internal.md#commanderrorresponse-1) \| [`CommandSuccessResponse`](../modules/purista_amqpbridge.internal.md#commandsuccessresponse-1)<`unknown`\>\> ; `channel`: `Channel`  }\>
+• `Protected` **serviceFunctions**: `Map`<`string`, { `cb`: (`message`: [`Command`](../modules/purista_amqpbridge.internal.md#command-1)) => `Promise`<[`CommandErrorResponse`](../modules/purista_amqpbridge.internal.md#commanderrorresponse-1) \| [`CommandSuccessResponse`](../modules/purista_amqpbridge.internal.md#commandsuccessresponse-1)\> ; `channel`: `Channel`  }\>
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:47](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L47)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:58](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L58)
 
 ___
 
 ### subscriptions
 
-• `Protected` **subscriptions**: `Map`<`string`, { `cb`: (`message`: [`Command`](../modules/purista_amqpbridge.internal.md#command-1)<`unknown`, `unknown`\>) => `Promise`<`void`\> ; `channel`: `Channel`  }\>
+• `Protected` **subscriptions**: `Map`<`string`, { `cb`: (`message`: [`CustomMessage`](../modules/purista_amqpbridge.internal.md#custommessage-1)) => `Promise`<`undefined` \| `Omit`<[`CustomMessage`](../modules/purista_amqpbridge.internal.md#custommessage-1), ``"id"`` \| ``"timestamp"`` \| ``"instanceId"``\>\> ; `channel`: `Channel`  }\>
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:57](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L57)
-
-## Accessors
-
-### defaultCommandTimeout
-
-• `get` **defaultCommandTimeout**(): `number`
-
-Get default time out.
-It is the maximum time a command should be responded.
-
-#### Returns
-
-`number`
-
-#### Overrides
-
-EventBridge.defaultCommandTimeout
-
-#### Defined in
-
-[amqpbridge/src/AmqpBridge.impl.ts:96](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L96)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:70](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L70)
 
 ___
 
-### instanceId
+### traceProvider
 
-• `get` **instanceId**(): `string`
+• **traceProvider**: `NodeTracerProvider`
 
-Get instance id.
-The id of current event bridge instance.
+#### Inherited from
 
-#### Returns
-
-`string`
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[traceProvider](purista_amqpbridge.internal.EventBridgeBaseClass.md#traceprovider)
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:104](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L104)
+packages/core/lib/core/EventBridge/EventBridgeBaseClass.impl.d.ts:12
 
 ## Methods
 
@@ -226,11 +315,11 @@ Decode buffer into given type
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `input` | `Buffer` |
-| `contentType` | `string` |
-| `contentEncoding` | `string` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `input` | `Buffer` | the input buffer |
+| `contentType` | `string` | the content type of buffer content |
+| `contentEncoding` | `string` | the encoding type of buffer content |
 
 #### Returns
 
@@ -238,13 +327,37 @@ Decode buffer into given type
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:549](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L549)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:782](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L782)
+
+___
+
+### destroy
+
+▸ **destroy**(): `Promise`<`void`\>
+
+Shut down event bridge as gracefully as possible
+
+#### Returns
+
+`Promise`<`void`\>
+
+#### Implementation of
+
+[EventBridge](../interfaces/purista_amqpbridge.internal.EventBridge.md).[destroy](../interfaces/purista_amqpbridge.internal.EventBridge.md#destroy)
+
+#### Overrides
+
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[destroy](purista_amqpbridge.internal.EventBridgeBaseClass.md#destroy)
+
+#### Defined in
+
+[packages/amqpbridge/src/AmqpBridge.impl.ts:797](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L797)
 
 ___
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter`): `void`
+▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
@@ -257,7 +370,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `parameter` | [`EventBridgeEvents`](../modules/purista_amqpbridge.internal.md#eventbridgeevents)[`K`] |
+| `parameter?` | [`EventBridgeEvents`](../modules/purista_amqpbridge.internal.md#eventbridgeevents)[`K`] |
 
 #### Returns
 
@@ -265,17 +378,19 @@ ___
 
 #### Inherited from
 
-[EventBridge](purista_amqpbridge.internal.EventBridge.md).[emit](purista_amqpbridge.internal.EventBridge.md#emit)
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[emit](purista_amqpbridge.internal.EventBridgeBaseClass.md#emit)
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:13
+packages/core/lib/core/types/GenericEventEmitter.d.ts:13
 
 ___
 
 ### emitMessage
 
 ▸ **emitMessage**<`T`\>(`message`, `contentType?`, `contentEncoding?`): `Promise`<`Readonly`<[`EBMessage`](../modules/purista_amqpbridge.internal.md#ebmessage)\>\>
+
+Emit a message to the eventbridge without awaiting a result
 
 #### Type parameters
 
@@ -285,23 +400,23 @@ ___
 
 #### Parameters
 
-| Name | Type | Default value |
-| :------ | :------ | :------ |
-| `message` | `Omit`<[`EBMessage`](../modules/purista_amqpbridge.internal.md#ebmessage), ``"id"`` \| ``"timestamp"`` \| ``"instanceId"`` \| ``"correlationId"``\> | `undefined` |
-| `contentType` | `string` | `'application/json'` |
-| `contentEncoding` | `string` | `'utf-8'` |
+| Name | Type | Default value | Description |
+| :------ | :------ | :------ | :------ |
+| `message` | `Omit`<[`EBMessage`](../modules/purista_amqpbridge.internal.md#ebmessage), ``"id"`` \| ``"timestamp"`` \| ``"instanceId"`` \| ``"correlationId"``\> | `undefined` | the message |
+| `contentType` | `string` | `'application/json'` | - |
+| `contentEncoding` | `string` | `'utf-8'` | - |
 
 #### Returns
 
 `Promise`<`Readonly`<[`EBMessage`](../modules/purista_amqpbridge.internal.md#ebmessage)\>\>
 
-#### Overrides
+#### Implementation of
 
-[EventBridge](purista_amqpbridge.internal.EventBridge.md).[emitMessage](purista_amqpbridge.internal.EventBridge.md#emitmessage)
+[EventBridge](../interfaces/purista_amqpbridge.internal.EventBridge.md).[emitMessage](../interfaces/purista_amqpbridge.internal.EventBridge.md#emitmessage)
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:196](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L196)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:266](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L266)
 
 ___
 
@@ -331,13 +446,37 @@ Encode given payload to buffer
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:528](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L528)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:761](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L761)
+
+___
+
+### getTracer
+
+▸ **getTracer**(): `Tracer`
+
+Returns open telemetry tracer of this service
+
+#### Returns
+
+`Tracer`
+
+Tracer
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[getTracer](purista_amqpbridge.internal.EventBridgeBaseClass.md#gettracer)
+
+#### Defined in
+
+packages/core/lib/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
 
 ___
 
 ### invoke
 
-▸ **invoke**<`T`\>(`input`, `contentType?`, `contentEncoding?`, `commandTimeout?`): `Promise`<`T`\>
+▸ **invoke**<`T`\>(`input`, `commandTimeout?`): `Promise`<`T`\>
+
+Call a command of a service and return the result of this command
 
 #### Type parameters
 
@@ -347,24 +486,62 @@ ___
 
 #### Parameters
 
-| Name | Type | Default value |
+| Name | Type | Description |
 | :------ | :------ | :------ |
-| `input` | `Omit`<[`Command`](../modules/purista_amqpbridge.internal.md#command-1)<`unknown`, `unknown`\>, ``"id"`` \| ``"messageType"`` \| ``"timestamp"`` \| ``"instanceId"`` \| ``"correlationId"``\> | `undefined` |
-| `contentType` | `string` | `'application/json'` |
-| `contentEncoding` | `string` | `'utf-8'` |
-| `commandTimeout` | `number` | `undefined` |
+| `input` | `Omit`<[`Command`](../modules/purista_amqpbridge.internal.md#command-1), ``"id"`` \| ``"messageType"`` \| ``"timestamp"`` \| ``"instanceId"`` \| ``"correlationId"``\> | a partial command message |
+| `commandTimeout` | `number` | the time to live (timeout) of the invocation |
 
 #### Returns
 
 `Promise`<`T`\>
 
-#### Overrides
+#### Implementation of
 
-[EventBridge](purista_amqpbridge.internal.EventBridge.md).[invoke](purista_amqpbridge.internal.EventBridge.md#invoke)
+[EventBridge](../interfaces/purista_amqpbridge.internal.EventBridge.md).[invoke](../interfaces/purista_amqpbridge.internal.EventBridge.md#invoke)
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:237](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L237)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:337](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L337)
+
+___
+
+### isHealthy
+
+▸ **isHealthy**(): `Promise`<`boolean`\>
+
+Indicates if the eventbridge is running and works correctly
+
+#### Returns
+
+`Promise`<`boolean`\>
+
+#### Implementation of
+
+[EventBridge](../interfaces/purista_amqpbridge.internal.EventBridge.md).[isHealthy](../interfaces/purista_amqpbridge.internal.EventBridge.md#ishealthy)
+
+#### Defined in
+
+[packages/amqpbridge/src/AmqpBridge.impl.ts:109](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L109)
+
+___
+
+### isReady
+
+▸ **isReady**(): `Promise`<`boolean`\>
+
+Indicates if the eventbridge has been started and is connected to underlaying message broker
+
+#### Returns
+
+`Promise`<`boolean`\>
+
+#### Implementation of
+
+[EventBridge](../interfaces/purista_amqpbridge.internal.EventBridge.md).[isReady](../interfaces/purista_amqpbridge.internal.EventBridge.md#isready)
+
+#### Defined in
+
+[packages/amqpbridge/src/AmqpBridge.impl.ts:105](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L105)
 
 ___
 
@@ -391,11 +568,11 @@ ___
 
 #### Inherited from
 
-[EventBridge](purista_amqpbridge.internal.EventBridge.md).[off](purista_amqpbridge.internal.EventBridge.md#off)
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[off](purista_amqpbridge.internal.EventBridgeBaseClass.md#off)
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:12
+packages/core/lib/core/types/GenericEventEmitter.d.ts:12
 
 ___
 
@@ -422,17 +599,17 @@ ___
 
 #### Inherited from
 
-[EventBridge](purista_amqpbridge.internal.EventBridge.md).[on](purista_amqpbridge.internal.EventBridge.md#on)
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[on](purista_amqpbridge.internal.EventBridgeBaseClass.md#on)
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:11
+packages/core/lib/core/types/GenericEventEmitter.d.ts:11
 
 ___
 
-### registerServiceFunction
+### registerCommand
 
-▸ **registerServiceFunction**(`address`, `cb`): `Promise`<`string`\>
+▸ **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`<`string`\>
 
 Register a service function and ensure that there is a queue for all incoming command requests.
 
@@ -441,7 +618,9 @@ Register a service function and ensure that there is a queue for all incoming co
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `address` | [`EBMessageAddress`](../modules/purista_amqpbridge.internal.md#ebmessageaddress) | The service function address |
-| `cb` | (`message`: [`Command`](../modules/purista_amqpbridge.internal.md#command-1)<`unknown`, `unknown`\>) => `Promise`<[`CommandErrorResponse`](../modules/purista_amqpbridge.internal.md#commanderrorresponse-1) \| [`CommandSuccessResponse`](../modules/purista_amqpbridge.internal.md#commandsuccessresponse-1)<`unknown`\>\> | the function to call if a matching command message arrives |
+| `cb` | (`message`: [`Command`](../modules/purista_amqpbridge.internal.md#command-1)) => `Promise`<[`CommandErrorResponse`](../modules/purista_amqpbridge.internal.md#commanderrorresponse-1) \| [`CommandSuccessResponse`](../modules/purista_amqpbridge.internal.md#commandsuccessresponse-1)\> | the function to call if a matching command message arrives |
+| `metadata` | [`CommandDefinitionMetadataBase`](../modules/purista_amqpbridge.internal.md#commanddefinitionmetadatabase) | - |
+| `eventBridgeConfig` | [`DefinitionEventBridgeConfig`](../modules/purista_amqpbridge.internal.md#definitioneventbridgeconfig) | - |
 
 #### Returns
 
@@ -449,13 +628,13 @@ Register a service function and ensure that there is a queue for all incoming co
 
 the id of command function queue
 
-#### Overrides
+#### Implementation of
 
-[EventBridge](purista_amqpbridge.internal.EventBridge.md).[registerServiceFunction](purista_amqpbridge.internal.EventBridge.md#registerservicefunction)
+[EventBridge](../interfaces/purista_amqpbridge.internal.EventBridge.md).[registerCommand](../interfaces/purista_amqpbridge.internal.EventBridge.md#registercommand)
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:346](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L346)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:441](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L441)
 
 ___
 
@@ -463,24 +642,44 @@ ___
 
 ▸ **registerSubscription**(`subscription`, `cb`): `Promise`<`string`\>
 
+Register a new subscription
+
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `subscription` | [`Subscription`](../modules/purista_amqpbridge.internal.md#subscription) |
-| `cb` | (`message`: [`EBMessage`](../modules/purista_amqpbridge.internal.md#ebmessage)) => `Promise`<`void`\> |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `subscription` | [`Subscription`](../modules/purista_amqpbridge.internal.md#subscription) | the subscription definition |
+| `cb` | (`message`: [`EBMessage`](../modules/purista_amqpbridge.internal.md#ebmessage)) => `Promise`<`undefined` \| `Omit`<[`CustomMessage`](../modules/purista_amqpbridge.internal.md#custommessage-1), ``"id"`` \| ``"timestamp"`` \| ``"instanceId"``\>\> | the function to be called if a matching message arrives |
 
 #### Returns
 
 `Promise`<`string`\>
 
-#### Overrides
+#### Implementation of
 
-[EventBridge](purista_amqpbridge.internal.EventBridge.md).[registerSubscription](purista_amqpbridge.internal.EventBridge.md#registersubscription)
+[EventBridge](../interfaces/purista_amqpbridge.internal.EventBridge.md).[registerSubscription](../interfaces/purista_amqpbridge.internal.EventBridge.md#registersubscription)
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:448](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L448)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:617](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L617)
+
+___
+
+### removeAllListeners
+
+▸ **removeAllListeners**(): `void`
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[removeAllListeners](purista_amqpbridge.internal.EventBridgeBaseClass.md#removealllisteners)
+
+#### Defined in
+
+packages/core/lib/core/types/GenericEventEmitter.d.ts:14
 
 ___
 
@@ -494,37 +693,80 @@ Connect to RabbitMQ broker, ensure exchange, call back queue
 
 `Promise`<`void`\>
 
+#### Implementation of
+
+[EventBridge](../interfaces/purista_amqpbridge.internal.EventBridge.md).[start](../interfaces/purista_amqpbridge.internal.EventBridge.md#start)
+
 #### Overrides
 
-[EventBridge](purista_amqpbridge.internal.EventBridge.md).[start](purista_amqpbridge.internal.EventBridge.md#start)
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[start](purista_amqpbridge.internal.EventBridgeBaseClass.md#start)
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:111](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L111)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:116](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L116)
 
 ___
 
-### unregisterServiceFunction
+### startActiveSpan
 
-▸ **unregisterServiceFunction**(`address`): `Promise`<`void`\>
+▸ **startActiveSpan**<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`<`F`\>
+
+Start a child span for opentelemetry tracking
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `F` |
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `address` | [`EBMessageAddress`](../modules/purista_amqpbridge.internal.md#ebmessageaddress) |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `name` | `string` | name of span |
+| `opts` | `SpanOptions` | span options |
+| `context` | `undefined` \| `Context` | optional context |
+| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function to be executed within the span |
+
+#### Returns
+
+`Promise`<`F`\>
+
+return value of fn
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[startActiveSpan](purista_amqpbridge.internal.EventBridgeBaseClass.md#startactivespan)
+
+#### Defined in
+
+packages/core/lib/core/EventBridge/EventBridgeBaseClass.impl.d.ts:32
+
+___
+
+### unregisterCommand
+
+▸ **unregisterCommand**(`address`): `Promise`<`void`\>
+
+Unregister a service command
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `address` | [`EBMessageAddress`](../modules/purista_amqpbridge.internal.md#ebmessageaddress) | The address (service name, version and command name) of the command to be de-registered |
 
 #### Returns
 
 `Promise`<`void`\>
 
-#### Overrides
+#### Implementation of
 
-[EventBridge](purista_amqpbridge.internal.EventBridge.md).[unregisterServiceFunction](purista_amqpbridge.internal.EventBridge.md#unregisterservicefunction)
+[EventBridge](../interfaces/purista_amqpbridge.internal.EventBridge.md).[unregisterCommand](../interfaces/purista_amqpbridge.internal.EventBridge.md#unregistercommand)
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:429](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L429)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:598](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L598)
 
 ___
 
@@ -542,10 +784,53 @@ ___
 
 `Promise`<`void`\>
 
-#### Overrides
+#### Implementation of
 
-[EventBridge](purista_amqpbridge.internal.EventBridge.md).[unregisterSubscription](purista_amqpbridge.internal.EventBridge.md#unregistersubscription)
+[EventBridge](../interfaces/purista_amqpbridge.internal.EventBridge.md).[unregisterSubscription](../interfaces/purista_amqpbridge.internal.EventBridge.md#unregistersubscription)
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:502](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/AmqpBridge.impl.ts#L502)
+[packages/amqpbridge/src/AmqpBridge.impl.ts:735](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/AmqpBridge.impl.ts#L735)
+
+___
+
+### wrapInSpan
+
+▸ **wrapInSpan**<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`<`F`\>
+
+Start span for opentelemetry tracking on same level.
+The created span will not become the "active" span within opentelemetry!
+
+This means during logging and similar the spanId of parent span is logged.
+
+Use wrapInSpan for marking points in flow of one bigger function,
+but not to trace the program flow itself
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `F` |
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `name` | `string` | name of span |
+| `opts` | `SpanOptions` | span options |
+| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function te be executed in the span |
+| `context?` | `Context` | span context |
+
+#### Returns
+
+`Promise`<`F`\>
+
+return value of fn
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_amqpbridge.internal.EventBridgeBaseClass.md).[wrapInSpan](purista_amqpbridge.internal.EventBridgeBaseClass.md#wrapinspan)
+
+#### Defined in
+
+packages/core/lib/core/EventBridge/EventBridgeBaseClass.impl.d.ts:48

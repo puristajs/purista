@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / ServiceBaseClass
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / ServiceBaseClass
 
 # Class: ServiceBaseClass
 
@@ -16,7 +16,7 @@ Class which contains basic functions that are not directly related to
 
   ↳ **`ServiceBaseClass`**
 
-  ↳↳ [`ServiceClass`](purista_httpserver.internal.ServiceClass.md)
+  ↳↳ [`Service`](purista_httpserver.internal.Service.md)
 
 ## Table of contents
 
@@ -26,10 +26,13 @@ Class which contains basic functions that are not directly related to
 
 ### Properties
 
+- [configStore](purista_httpserver.internal.ServiceBaseClass.md#configstore)
 - [eventBridge](purista_httpserver.internal.ServiceBaseClass.md#eventbridge)
 - [info](purista_httpserver.internal.ServiceBaseClass.md#info)
-- [serviceLogger](purista_httpserver.internal.ServiceBaseClass.md#servicelogger)
+- [logger](purista_httpserver.internal.ServiceBaseClass.md#logger)
+- [secretStore](purista_httpserver.internal.ServiceBaseClass.md#secretstore)
 - [spanProcessor](purista_httpserver.internal.ServiceBaseClass.md#spanprocessor)
+- [stateStore](purista_httpserver.internal.ServiceBaseClass.md#statestore)
 - [traceProvider](purista_httpserver.internal.ServiceBaseClass.md#traceprovider)
 
 ### Accessors
@@ -43,6 +46,7 @@ Class which contains basic functions that are not directly related to
 - [getTracer](purista_httpserver.internal.ServiceBaseClass.md#gettracer)
 - [off](purista_httpserver.internal.ServiceBaseClass.md#off)
 - [on](purista_httpserver.internal.ServiceBaseClass.md#on)
+- [removeAllListeners](purista_httpserver.internal.ServiceBaseClass.md#removealllisteners)
 - [startActiveSpan](purista_httpserver.internal.ServiceBaseClass.md#startactivespan)
 - [wrapInSpan](purista_httpserver.internal.ServiceBaseClass.md#wrapinspan)
 
@@ -50,16 +54,20 @@ Class which contains basic functions that are not directly related to
 
 ### constructor
 
-• **new ServiceBaseClass**(`baseLogger`, `info`, `eventBridge`, `spanProcessor?`)
+• **new ServiceBaseClass**(`options`)
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `baseLogger` | [`Logger`](purista_httpserver.internal.Logger.md) |
-| `info` | [`ServiceInfoType`](../modules/purista_httpserver.internal.md#serviceinfotype) |
-| `eventBridge` | [`EventBridge`](purista_httpserver.internal.EventBridge.md) |
-| `spanProcessor?` | `SpanProcessor` |
+| `options` | `Object` |
+| `options.configStore` | [`ConfigStore`](../interfaces/purista_httpserver.internal.ConfigStore.md) |
+| `options.eventBridge` | [`EventBridge`](../interfaces/purista_httpserver.internal.EventBridge.md) |
+| `options.info` | [`ServiceInfoType`](../modules/purista_httpserver.internal.md#serviceinfotype) |
+| `options.logger` | [`Logger`](purista_httpserver.internal.Logger.md) |
+| `options.secretStore` | [`SecretStore`](../interfaces/purista_httpserver.internal.SecretStore.md) |
+| `options.spanProcessor?` | `SpanProcessor` |
+| `options.stateStore` | [`StateStore`](../interfaces/purista_httpserver.internal.StateStore.md) |
 
 #### Overrides
 
@@ -67,17 +75,27 @@ Class which contains basic functions that are not directly related to
 
 #### Defined in
 
-core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:18
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:26
 
 ## Properties
 
-### eventBridge
+### configStore
 
-• **eventBridge**: [`EventBridge`](purista_httpserver.internal.EventBridge.md)
+• **configStore**: [`ConfigStore`](../interfaces/purista_httpserver.internal.ConfigStore.md)
 
 #### Defined in
 
-core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:14
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:24
+
+___
+
+### eventBridge
+
+• **eventBridge**: [`EventBridge`](../interfaces/purista_httpserver.internal.EventBridge.md)
+
+#### Defined in
+
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:19
 
 ___
 
@@ -87,17 +105,27 @@ ___
 
 #### Defined in
 
-core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:13
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:18
 
 ___
 
-### serviceLogger
+### logger
 
-• **serviceLogger**: [`Logger`](purista_httpserver.internal.Logger.md)
+• **logger**: [`Logger`](purista_httpserver.internal.Logger.md)
 
 #### Defined in
 
-core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:15
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:20
+
+___
+
+### secretStore
+
+• **secretStore**: [`SecretStore`](../interfaces/purista_httpserver.internal.SecretStore.md)
+
+#### Defined in
+
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:23
 
 ___
 
@@ -107,7 +135,17 @@ ___
 
 #### Defined in
 
-core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:16
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:21
+
+___
+
+### stateStore
+
+• **stateStore**: [`StateStore`](../interfaces/purista_httpserver.internal.StateStore.md)
+
+#### Defined in
+
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:25
 
 ___
 
@@ -117,7 +155,7 @@ ___
 
 #### Defined in
 
-core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:17
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:22
 
 ## Accessors
 
@@ -133,7 +171,7 @@ Get service info
 
 #### Defined in
 
-core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:22
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:38
 
 ## Methods
 
@@ -147,13 +185,13 @@ core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:22
 
 #### Defined in
 
-core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:54
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:70
 
 ___
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter`): `void`
+▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
@@ -166,7 +204,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `parameter` | [`ServiceEvents`](../modules/purista_httpserver.internal.md#serviceevents)[`K`] |
+| `parameter?` | [`ServiceEvents`](../modules/purista_httpserver.internal.md#serviceevents)[`K`] |
 
 #### Returns
 
@@ -178,15 +216,22 @@ ___
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:13
+packages/core/lib/core/types/GenericEventEmitter.d.ts:13
 
 ___
 
 ### getTracer
 
-▸ **getTracer**(): `Tracer`
+▸ **getTracer**(`name?`, `version?`): `Tracer`
 
 Returns open telemetry tracer of this service
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `name?` | `string` |
+| `version?` | `string` |
 
 #### Returns
 
@@ -196,7 +241,7 @@ Tracer
 
 #### Defined in
 
-core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:28
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:44
 
 ___
 
@@ -227,7 +272,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:12
+packages/core/lib/core/types/GenericEventEmitter.d.ts:12
 
 ___
 
@@ -258,7 +303,25 @@ ___
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:11
+packages/core/lib/core/types/GenericEventEmitter.d.ts:11
+
+___
+
+### removeAllListeners
+
+▸ **removeAllListeners**(): `void`
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[GenericEventEmitter](purista_httpserver.internal.GenericEventEmitter.md).[removeAllListeners](purista_httpserver.internal.GenericEventEmitter.md#removealllisteners)
+
+#### Defined in
+
+packages/core/lib/core/types/GenericEventEmitter.d.ts:14
 
 ___
 
@@ -291,7 +354,7 @@ return value of fn
 
 #### Defined in
 
-core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:37
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:53
 
 ___
 
@@ -330,4 +393,4 @@ return value of fn
 
 #### Defined in
 
-core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:53
+packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:69
