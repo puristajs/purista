@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/amqpbridge](purista_amqpbridge.md) / internal
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/amqpbridge](purista_amqpbridge.md) / internal
 
 # Namespace: internal
 
@@ -16,10 +16,16 @@
 - [Command](purista_amqpbridge.internal.md#command)
 - [CommandErrorResponse](purista_amqpbridge.internal.md#commanderrorresponse)
 - [CommandSuccessResponse](purista_amqpbridge.internal.md#commandsuccessresponse)
+- [CustomMessage](purista_amqpbridge.internal.md#custommessage)
+
+### Event bridge
+
+- [EventBridgeBaseClass](../classes/purista_amqpbridge.internal.EventBridgeBaseClass.md)
+- [EventBridge](../interfaces/purista_amqpbridge.internal.EventBridge.md)
+- [EventBridgeEventsBasic](purista_amqpbridge.internal.md#eventbridgeeventsbasic)
 
 ### Classes
 
-- [EventBridge](../classes/purista_amqpbridge.internal.EventBridge.md)
 - [GenericEventEmitter](../classes/purista_amqpbridge.internal.GenericEventEmitter.md)
 - [HandledError](../classes/purista_amqpbridge.internal.HandledError.md)
 - [Logger](../classes/purista_amqpbridge.internal.Logger.md)
@@ -32,20 +38,21 @@
 ### Type Aliases
 
 - [Command](purista_amqpbridge.internal.md#command-1)
-- [CommandErrorResponse](purista_amqpbridge.internal.md#commanderrorresponse-1)
-- [CommandResponse](purista_amqpbridge.internal.md#commandresponse)
-- [CommandSuccessResponse](purista_amqpbridge.internal.md#commandsuccessresponse-1)
+- [CommandDefinitionMetadataBase](purista_amqpbridge.internal.md#commanddefinitionmetadatabase)
+- [Complete](purista_amqpbridge.internal.md#complete)
+- [ContentType](purista_amqpbridge.internal.md#contenttype)
 - [CorrelationId](purista_amqpbridge.internal.md#correlationid)
 - [CustomEvents](purista_amqpbridge.internal.md#customevents)
-- [CustomMessage](purista_amqpbridge.internal.md#custommessage)
+- [CustomMessage](purista_amqpbridge.internal.md#custommessage-1)
+- [DefinitionEventBridgeConfig](purista_amqpbridge.internal.md#definitioneventbridgeconfig)
 - [EBMessage](purista_amqpbridge.internal.md#ebmessage)
 - [EBMessageAddress](purista_amqpbridge.internal.md#ebmessageaddress)
 - [EBMessageBase](purista_amqpbridge.internal.md#ebmessagebase)
 - [EBMessageId](purista_amqpbridge.internal.md#ebmessageid)
 - [EncoderFunctions](purista_amqpbridge.internal.md#encoderfunctions)
-- [ErrorResponse](purista_amqpbridge.internal.md#errorresponse)
+- [ErrorResponsePayload](purista_amqpbridge.internal.md#errorresponsepayload)
+- [EventBridgeConfig](purista_amqpbridge.internal.md#eventbridgeconfig)
 - [EventBridgeEvents](purista_amqpbridge.internal.md#eventbridgeevents)
-- [EventBridgeEventsBasic](purista_amqpbridge.internal.md#eventbridgeeventsbasic)
 - [EventKey](purista_amqpbridge.internal.md#eventkey)
 - [EventMap](purista_amqpbridge.internal.md#eventmap)
 - [EventReceiver](purista_amqpbridge.internal.md#eventreceiver)
@@ -64,10 +71,18 @@
 - [LoggerOptions](purista_amqpbridge.internal.md#loggeroptions)
 - [PendigInvocation](purista_amqpbridge.internal.md#pendiginvocation)
 - [PrincipalId](purista_amqpbridge.internal.md#principalid)
-- [Subscription](purista_amqpbridge.internal.md#subscription)
-- [SubscriptionSettings](purista_amqpbridge.internal.md#subscriptionsettings)
 - [TraceId](purista_amqpbridge.internal.md#traceid)
 - [addPrefixToObject](purista_amqpbridge.internal.md#addprefixtoobject)
+
+### Command
+
+- [CommandErrorResponse](purista_amqpbridge.internal.md#commanderrorresponse-1)
+- [CommandResponse](purista_amqpbridge.internal.md#commandresponse)
+- [CommandSuccessResponse](purista_amqpbridge.internal.md#commandsuccessresponse-1)
+
+### Subscription
+
+- [Subscription](purista_amqpbridge.internal.md#subscription)
 
 ## Enumeration Members
 
@@ -82,7 +97,7 @@ If the sender does not receive a answer within this time frame, the command will
 
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:11
+packages/core/lib/core/types/EBMessageType.enum.d.ts:11
 
 ___
 
@@ -90,9 +105,11 @@ ___
 
 • **CommandErrorResponse**: ``"commandErrorResponse"``
 
+a error response from receiver of a command message
+
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:13
+packages/core/lib/core/types/EBMessageType.enum.d.ts:15
 
 ___
 
@@ -100,9 +117,68 @@ ___
 
 • **CommandSuccessResponse**: ``"commandSuccessResponse"``
 
+a success response from receiver of a command message
+
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:12
+packages/core/lib/core/types/EBMessageType.enum.d.ts:13
+
+___
+
+### CustomMessage
+
+• **CustomMessage**: ``"customMessage"``
+
+a custom message / custom event
+
+#### Defined in
+
+packages/core/lib/core/types/EBMessageType.enum.d.ts:39
+
+## Event bridge
+
+• **EventBridgeBaseClass**<`ConfigType`\>: `Object`
+
+The base class to be extended by event bridge implementations
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `ConfigType` |
+
+#### Defined in
+
+packages/core/lib/core/EventBridge/EventBridgeBaseClass.impl.d.ts:10
+
+• **EventBridge**: `Object`
+
+Event bridge interface
+The event bridge must implement this interface.
+
+#### Defined in
+
+packages/core/lib/core/EventBridge/types/EventBridge.d.ts:8
+
+### EventBridgeEventsBasic
+
+Ƭ **EventBridgeEventsBasic**: `Object`
+
+Events which can be emitted by a event bridge
+
+#### Type declaration
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `eventbridge-connected` | `never` | emitted when then connection to event bridge is established |
+| `eventbridge-connection-error` | `undefined` \| `unknown` \| `Error` | emitted when the connection to event bridge can not be established or a connection has issues or gets closed unexpectedly |
+| `eventbridge-disconnected` | `never` | emitted when the connection to event bridge closed |
+| `eventbridge-error` | [`UnhandledError`](../classes/purista_amqpbridge.internal.UnhandledError.md) \| `unknown` | emitted on internal event bridge error |
+| `eventbridge-reconnecting` | `never` | emitted on retry to connect to event bridge |
+
+#### Defined in
+
+packages/core/lib/core/EventBridge/types/EventBridgeEvents.d.ts:8
 
 ## Type Aliases
 
@@ -129,56 +205,81 @@ Subscribers should not respond with command responses if they are "silent" subsc
 
 #### Defined in
 
-core/lib/core/types/commandType/Command.d.ts:17
+packages/core/lib/core/types/commandType/Command.d.ts:16
 
 ___
 
-### CommandErrorResponse
+### CommandDefinitionMetadataBase
 
-Ƭ **CommandErrorResponse**: { `correlationId`: [`CorrelationId`](purista_amqpbridge.internal.md#correlationid) ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_amqpbridge.internal.EBMessageType.md#commanderrorresponse) ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_amqpbridge.internal.StatusCode.md)  } ; `receiver`: [`EBMessageAddress`](purista_amqpbridge.internal.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](purista_amqpbridge.internal.md#ebmessageaddress)  } & [`EBMessageBase`](purista_amqpbridge.internal.md#ebmessagebase)
+Ƭ **CommandDefinitionMetadataBase**: `Object`
 
-CommandErrorResponse is a response to a specific previously received command which indicates some failure.
-
-#### Defined in
-
-core/lib/core/types/commandType/CommandErrorResponse.d.ts:10
-
-___
-
-### CommandResponse
-
-Ƭ **CommandResponse**<`T`\>: [`CommandSuccessResponse`](purista_amqpbridge.internal.md#commandsuccessresponse-1)<`T`\> \| [`CommandErrorResponse`](purista_amqpbridge.internal.md#commanderrorresponse-1)
-
-CommandResponse is a response to a specific previously received command which can be either a success or failure
-
-#### Type parameters
+#### Type declaration
 
 | Name | Type |
 | :------ | :------ |
-| `T` | `unknown` |
+| `expose` | { `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: [`ContentType`](purista_amqpbridge.internal.md#contenttype) ; `contentTypeResponse?`: [`ContentType`](purista_amqpbridge.internal.md#contenttype) ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } |
+| `expose.contentEncodingRequest?` | `string` |
+| `expose.contentEncodingResponse?` | `string` |
+| `expose.contentTypeRequest?` | [`ContentType`](purista_amqpbridge.internal.md#contenttype) |
+| `expose.contentTypeResponse?` | [`ContentType`](purista_amqpbridge.internal.md#contenttype) |
+| `expose.deprecated?` | `boolean` |
+| `expose.inputPayload?` | `SchemaObject` |
+| `expose.outputPayload?` | `SchemaObject` |
+| `expose.parameter?` | `SchemaObject` |
 
 #### Defined in
 
-core/lib/core/types/commandType/CommandResponse.d.ts:7
+packages/core/lib/core/types/commandType/CommandDefinitionMetadataBase.d.ts:3
 
 ___
 
-### CommandSuccessResponse
+### Complete
 
-Ƭ **CommandSuccessResponse**<`PayloadType`\>: { `correlationId`: [`CorrelationId`](purista_amqpbridge.internal.md#correlationid) ; `messageType`: [`CommandSuccessResponse`](../enums/purista_amqpbridge.internal.EBMessageType.md#commandsuccessresponse) ; `payload`: `PayloadType` ; `receiver`: [`EBMessageAddress`](purista_amqpbridge.internal.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](purista_amqpbridge.internal.md#ebmessageaddress)  } & [`EBMessageBase`](purista_amqpbridge.internal.md#ebmessagebase)
+Ƭ **Complete**<`T`\>: { [P in keyof Required<T\>]: Pick<T, P\> extends Required<Pick<T, P\>\> ? T[P] : T[P] \| undefined }
 
-CommandSuccessResponse is a response to a specific previously received command.
-It indicates that the command was executed successfully and contains the result payload
+A helper which forces to provide all object keys, even if they are optional.
+
+**`Example`**
+
+```typescript
+type A = {
+ one?: string,
+ two?: number,
+ three: string
+}
+
+// without:
+const x:A = { three: 'will work'}
+
+// this will fail
+const y:Complete<A> = { three: 'will complain that one and two is missing'}
+// needs to be like this:
+const z:Complete<A> = { one: undefined, two: undefined, three: 'will work'}
+```
 
 #### Type parameters
 
-| Name | Type |
-| :------ | :------ |
-| `PayloadType` | `unknown` |
+| Name |
+| :------ |
+| `T` |
 
 #### Defined in
 
-core/lib/core/types/commandType/CommandSuccessResponse.d.ts:10
+packages/core/lib/core/types/Complete.d.ts:20
+
+___
+
+### ContentType
+
+Ƭ **ContentType**: ``"application/json"`` \| ``"application/javascript"`` \| ``"text/csv"`` \| ``"text/css"`` \| ``"text/html"`` \| ``"text/javascript"`` \| ``"text/markdown"`` \| ``"text/plain"`` \| ``"text/xml"`` \| `string`
+
+List of content types for message payloads.
+If the content type is other than `application/json`, the message payload must be a string.
+It is up to the implementation to extract the content type from the original message and to convert or transform data.
+
+#### Defined in
+
+packages/core/lib/core/types/ContentType.d.ts:6
 
 ___
 
@@ -186,9 +287,11 @@ ___
 
 Ƭ **CorrelationId**: `string`
 
+the correlation id links the command invocation message with the command response message
+
 #### Defined in
 
-core/lib/core/types/CorrelationId.d.ts:1
+packages/core/lib/core/types/CorrelationId.d.ts:2
 
 ___
 
@@ -202,13 +305,17 @@ ___
 
 #### Defined in
 
-core/lib/core/types/EventBridgeEvents.d.ts:18
+packages/core/lib/core/EventBridge/types/EventBridgeEvents.d.ts:20
 
 ___
 
 ### CustomMessage
 
 Ƭ **CustomMessage**<`Payload`\>: { `eventName`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_amqpbridge.internal.EBMessageType.md#custommessage) ; `payload?`: `Payload` ; `receiver?`: [`EBMessageAddress`](purista_amqpbridge.internal.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](purista_amqpbridge.internal.md#ebmessageaddress)  } & [`EBMessageBase`](purista_amqpbridge.internal.md#ebmessagebase)
+
+A custom message is a message which can be used to pass business information.
+The producer emits the message without knowledge about any consumer.
+The producer does not expect a response from a consumer.
 
 #### Type parameters
 
@@ -218,19 +325,41 @@ ___
 
 #### Defined in
 
-core/lib/core/types/CustomMessage.d.ts:5
+packages/core/lib/core/types/CustomMessage.d.ts:9
+
+___
+
+### DefinitionEventBridgeConfig
+
+Ƭ **DefinitionEventBridgeConfig**: `Object`
+
+Settings and advices for the event bridge, which are set in the command or subscription builder.
+The properties are advices and hints.
+It depends on the used event bridge implementation and underlaying message broker, if a specific property can be respected.
+
+#### Type declaration
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `autoacknowledge?` | `boolean` | Send the acknowledge to message broker as soon as the message arrives - defaults to true for commands - defaults to false for subscriptions |
+| `durable?` | `boolean` | Advise the underlaying message broker to store messages if no consumer is available. Messages will be send as soon as the service is able to consume. |
+| `shared?` | `boolean` | If set to true, the event bridge is adviced to deliver one message to at least one consumer instance. True is the default value. If set to false, the event bridge is adviced to deliver one message to all consumer instances. Use case: Receiving Info of message, which need to be passed to all instance to keep information in sync. In serverless environments, this flag should not have any effect **`Default`** true |
+
+#### Defined in
+
+packages/core/lib/core/types/DefinitionEventBridgeConfig.d.ts:6
 
 ___
 
 ### EBMessage
 
-Ƭ **EBMessage**: [`Command`](purista_amqpbridge.internal.md#command-1) \| [`CommandResponse`](purista_amqpbridge.internal.md#commandresponse) \| [`InfoMessage`](purista_amqpbridge.internal.md#infomessage) \| [`CustomMessage`](purista_amqpbridge.internal.md#custommessage)
+Ƭ **EBMessage**: [`Command`](purista_amqpbridge.internal.md#command-1) \| [`CommandResponse`](purista_amqpbridge.internal.md#commandresponse) \| [`InfoMessage`](purista_amqpbridge.internal.md#infomessage) \| [`CustomMessage`](purista_amqpbridge.internal.md#custommessage-1)
 
 EBMessage is some message which is handled by the event bridge.
 
 #### Defined in
 
-core/lib/core/types/EBMessage.d.ts:7
+packages/core/lib/core/types/EBMessage.d.ts:7
 
 ___
 
@@ -238,19 +367,19 @@ ___
 
 Ƭ **EBMessageAddress**: `Object`
 
-A event bridge message address describes receiver/sender of a message.
+A event bridge message address describes the sender or receiver of a message.
 
 #### Type declaration
 
-| Name | Type |
-| :------ | :------ |
-| `serviceName` | `string` |
-| `serviceTarget` | `string` |
-| `serviceVersion` | `string` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `serviceName` | `string` | the name of the service |
+| `serviceTarget` | `string` | the name of the command or subscription |
+| `serviceVersion` | `string` | the version of the service |
 
 #### Defined in
 
-core/lib/core/types/EBMessageAddress.d.ts:4
+packages/core/lib/core/types/EBMessageAddress.d.ts:4
 
 ___
 
@@ -258,22 +387,26 @@ ___
 
 Ƭ **EBMessageBase**: `Object`
 
+Default fields which are part of any purista message
+
 #### Type declaration
 
-| Name | Type |
-| :------ | :------ |
-| `correlationId?` | [`CorrelationId`](purista_amqpbridge.internal.md#correlationid) |
-| `eventName?` | `string` |
-| `id` | [`EBMessageId`](purista_amqpbridge.internal.md#ebmessageid) |
-| `instanceId` | [`InstanceId`](purista_amqpbridge.internal.md#instanceid) |
-| `otp?` | `string` |
-| `principalId?` | [`PrincipalId`](purista_amqpbridge.internal.md#principalid) |
-| `timestamp` | `number` |
-| `traceId?` | [`TraceId`](purista_amqpbridge.internal.md#traceid) |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `contentEncoding` | `string` | content encoding of message payload |
+| `contentType` | [`ContentType`](purista_amqpbridge.internal.md#contenttype) | content type of message payload |
+| `correlationId?` | [`CorrelationId`](purista_amqpbridge.internal.md#correlationid) | correlation id to know which command response referrs to which command |
+| `eventName?` | `string` | event name for this message |
+| `id` | [`EBMessageId`](purista_amqpbridge.internal.md#ebmessageid) | global unique id of message |
+| `instanceId` | [`InstanceId`](purista_amqpbridge.internal.md#instanceid) | instance id of eventbridge which was creating the message |
+| `otp?` | `string` | stringified Opentelemetry parent trace id |
+| `principalId?` | [`PrincipalId`](purista_amqpbridge.internal.md#principalid) | principal id |
+| `timestamp` | `number` | timestamp of message creation time |
+| `traceId?` | [`TraceId`](purista_amqpbridge.internal.md#traceid) | trace id of message |
 
 #### Defined in
 
-core/lib/core/types/EBMessageBase.d.ts:6
+packages/core/lib/core/types/EBMessageBase.d.ts:10
 
 ___
 
@@ -285,7 +418,7 @@ Unique id of the event bridge message
 
 #### Defined in
 
-core/lib/core/types/EBMessageId.d.ts:4
+packages/core/lib/core/types/EBMessageId.d.ts:4
 
 ___
 
@@ -302,26 +435,57 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/amqpbridge/src/types/EncoderFunctions.ts#L1)
+[packages/amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/types/EncoderFunctions.ts#L1)
 
 ___
 
-### ErrorResponse
+### ErrorResponsePayload
 
-Ƭ **ErrorResponse**: `Object`
+Ƭ **ErrorResponsePayload**: `Object`
+
+Error message payload
 
 #### Type declaration
 
-| Name | Type |
-| :------ | :------ |
-| `data?` | `unknown` |
-| `message` | `string` |
-| `status` | [`StatusCode`](../enums/purista_amqpbridge.internal.StatusCode.md) |
-| `traceId?` | [`TraceId`](purista_amqpbridge.internal.md#traceid) |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `data?` | `unknown` | addition data |
+| `message` | `string` | a human readable error message |
+| `status` | [`StatusCode`](../enums/purista_amqpbridge.internal.StatusCode.md) | the error status code |
+| `traceId?` | [`TraceId`](purista_amqpbridge.internal.md#traceid) | the trace if of the request |
 
 #### Defined in
 
-core/lib/core/types/ErrorResponse.d.ts:3
+packages/core/lib/core/types/ErrorResponsePayload.d.ts:6
+
+___
+
+### EventBridgeConfig
+
+Ƭ **EventBridgeConfig**<`CustomConfig`\>: `Object`
+
+The config object for an event bridge.
+Every event bridge implementation must use this type for configuration.
+
+#### Type parameters
+
+| Name |
+| :------ |
+| `CustomConfig` |
+
+#### Type declaration
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `config?` | `CustomConfig` | - |
+| `defaultCommandTimeout?` | `number` | the default timeout of command invocations |
+| `instanceId?` | `string` | the instance id of the event bridge |
+| `logger?` | [`Logger`](../classes/purista_amqpbridge.internal.Logger.md) | - |
+| `spanProcessor?` | `SpanProcessor` | - |
+
+#### Defined in
+
+packages/core/lib/core/EventBridge/types/EventBridgeConfig.d.ts:8
 
 ___
 
@@ -331,29 +495,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/EventBridgeEvents.d.ts:21
-
-___
-
-### EventBridgeEventsBasic
-
-Ƭ **EventBridgeEventsBasic**: `Object`
-
-Events which can be emitted by a event bridge
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `eventbridge-connected` | `undefined` | emitted when then connection to event bridge is established |
-| `eventbridge-connection-error` | `undefined` \| `unknown` | emitted when the connection to event bridge can not be established or a connection has issues or gets closed unexpectedly |
-| `eventbridge-disconnected` | `undefined` | emitted when the connection to event bridge closed |
-| `eventbridge-error` | [`UnhandledError`](../classes/purista_amqpbridge.internal.UnhandledError.md) \| `unknown` | emitted on internal event bridge error |
-| `eventbridge-reconnecting` | `undefined` | emitted on retry to connect to event bridge |
-
-#### Defined in
-
-core/lib/core/types/EventBridgeEvents.d.ts:6
+packages/core/lib/core/EventBridge/types/EventBridgeEvents.d.ts:23
 
 ___
 
@@ -369,7 +511,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:2
+packages/core/lib/core/types/GenericEventEmitter.d.ts:2
 
 ___
 
@@ -379,7 +521,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:1
+packages/core/lib/core/types/GenericEventEmitter.d.ts:1
 
 ___
 
@@ -409,7 +551,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:3
+packages/core/lib/core/types/GenericEventEmitter.d.ts:3
 
 ___
 
@@ -419,7 +561,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/infoType/InfoInvokeTimeout.d.ts:20
+packages/core/lib/core/types/infoType/InfoInvokeTimeout.d.ts:20
 
 ___
 
@@ -429,17 +571,17 @@ ___
 
 #### Defined in
 
-core/lib/core/types/infoType/InfoMessage.d.ts:11
+packages/core/lib/core/types/infoType/InfoMessage.d.ts:10
 
 ___
 
 ### InfoServiceBase
 
-Ƭ **InfoServiceBase**: { `payload?`: `unknown` ; `sender`: { `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  }  } & [`EBMessageBase`](purista_amqpbridge.internal.md#ebmessagebase)
+Ƭ **InfoServiceBase**: { `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `payload?`: `unknown` ; `sender`: { `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  }  } & [`EBMessageBase`](purista_amqpbridge.internal.md#ebmessagebase)
 
 #### Defined in
 
-core/lib/core/types/infoType/InfoServiceBase.d.ts:2
+packages/core/lib/core/types/infoType/InfoServiceBase.d.ts:2
 
 ___
 
@@ -449,7 +591,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/infoType/InfoServiceDrain.d.ts:3
+packages/core/lib/core/types/infoType/InfoServiceDrain.d.ts:3
 
 ___
 
@@ -459,7 +601,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/infoType/InfoServiceFunctionAdded.d.ts:4
+packages/core/lib/core/types/infoType/InfoServiceFunctionAdded.d.ts:3
 
 ___
 
@@ -469,7 +611,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/infoType/InfoServiceInit.d.ts:3
+packages/core/lib/core/types/infoType/InfoServiceInit.d.ts:3
 
 ___
 
@@ -479,7 +621,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/infoType/InfoServiceNotReady.d.ts:3
+packages/core/lib/core/types/infoType/InfoServiceNotReady.d.ts:3
 
 ___
 
@@ -489,7 +631,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/infoType/InfoServiceReady.d.ts:3
+packages/core/lib/core/types/infoType/InfoServiceReady.d.ts:3
 
 ___
 
@@ -499,7 +641,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/infoType/InfoServiceShutdown.d.ts:3
+packages/core/lib/core/types/infoType/InfoServiceShutdown.d.ts:3
 
 ___
 
@@ -509,7 +651,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/infoType/InfoSubscriptionError.d.ts:3
+packages/core/lib/core/types/infoType/InfoSubscriptionError.d.ts:3
 
 ___
 
@@ -517,9 +659,11 @@ ___
 
 Ƭ **InstanceId**: `string`
 
+the instance id of the event bridge
+
 #### Defined in
 
-core/lib/core/types/InstanceId.d.ts:1
+packages/core/lib/core/types/InstanceId.d.ts:2
 
 ___
 
@@ -529,7 +673,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/Logger.d.ts:13
+packages/core/lib/core/types/Logger.d.ts:15
 
 ___
 
@@ -541,9 +685,11 @@ ___
 
 | Name | Type |
 | :------ | :------ |
+| `hostname?` | `string` |
 | `instanceId?` | [`InstanceId`](purista_amqpbridge.internal.md#instanceid) |
 | `name?` | `string` |
 | `principalId?` | [`PrincipalId`](purista_amqpbridge.internal.md#principalid) |
+| `puristaVersion?` | `string` |
 | `serviceName?` | `string` |
 | `serviceTarget?` | `string` |
 | `serviceVersion?` | `string` |
@@ -551,7 +697,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/Logger.d.ts:4
+packages/core/lib/core/types/Logger.d.ts:4
 
 ___
 
@@ -568,7 +714,7 @@ ___
 
 #### Defined in
 
-core/lib/core/DefaultEventBridge/types/PendingInvocations.d.ts:3
+packages/core/lib/DefaultEventBridge/types/PendingInvocations.d.ts:2
 
 ___
 
@@ -576,56 +722,11 @@ ___
 
 Ƭ **PrincipalId**: `string`
 
-#### Defined in
-
-core/lib/core/types/PrincipalId.d.ts:1
-
-___
-
-### Subscription
-
-Ƭ **Subscription**: `Object`
-
-A subscription managed by the event bridge
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `eventName?` | `string` |
-| `instanceId?` | [`InstanceId`](purista_amqpbridge.internal.md#instanceid) |
-| `messageType?` | [`EBMessageType`](../enums/purista_amqpbridge.internal.EBMessageType.md) |
-| `principalId?` | [`PrincipalId`](purista_amqpbridge.internal.md#principalid) |
-| `receiver?` | { `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } |
-| `receiver.serviceName?` | `string` |
-| `receiver.serviceTarget?` | `string` |
-| `receiver.serviceVersion?` | `string` |
-| `sender?` | { `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } |
-| `sender.serviceName?` | `string` |
-| `sender.serviceTarget?` | `string` |
-| `sender.serviceVersion?` | `string` |
-| `settings` | [`SubscriptionSettings`](purista_amqpbridge.internal.md#subscriptionsettings) |
-| `subscriber` | [`EBMessageAddress`](purista_amqpbridge.internal.md#ebmessageaddress) |
+the principal id
 
 #### Defined in
 
-core/lib/core/types/subscription/Subscription.d.ts:9
-
-___
-
-### SubscriptionSettings
-
-Ƭ **SubscriptionSettings**: `Object`
-
-#### Type declaration
-
-| Name | Type |
-| :------ | :------ |
-| `durable` | `boolean` |
-
-#### Defined in
-
-core/lib/core/types/subscription/SubscriptionSettings.d.ts:1
+packages/core/lib/core/types/PrincipalId.d.ts:2
 
 ___
 
@@ -633,15 +734,22 @@ ___
 
 Ƭ **TraceId**: `string`
 
+The trace id which will be passed through all commands, invocations and subscriptions
+
 #### Defined in
 
-core/lib/core/types/TraceId.d.ts:1
+packages/core/lib/core/types/TraceId.d.ts:4
 
 ___
 
 ### addPrefixToObject
 
 Ƭ **addPrefixToObject**<`T`, `P`\>: { [K in keyof T as K extends string ? \`${P}${K}\` : never]: T[K] }
+
+Helper for better typescript type.
+All keys of given object must start with the given prefix. Otherwise Typescript will complain.
+
+```
 
 #### Type parameters
 
@@ -652,4 +760,95 @@ ___
 
 #### Defined in
 
-core/lib/core/types/addPrefixToObject.d.ts:1
+packages/core/lib/core/types/addPrefixToObject.d.ts:7
+
+## Command
+
+### CommandErrorResponse
+
+Ƭ **CommandErrorResponse**: { `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: [`CorrelationId`](purista_amqpbridge.internal.md#correlationid) ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_amqpbridge.internal.EBMessageType.md#commanderrorresponse) ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_amqpbridge.internal.StatusCode.md)  } ; `receiver`: [`EBMessageAddress`](purista_amqpbridge.internal.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](purista_amqpbridge.internal.md#ebmessageaddress)  } & [`EBMessageBase`](purista_amqpbridge.internal.md#ebmessagebase)
+
+CommandErrorResponse is a response to a specific previously received command which indicates some failure.
+
+#### Defined in
+
+packages/core/lib/core/types/commandType/CommandErrorResponse.d.ts:11
+
+___
+
+### CommandResponse
+
+Ƭ **CommandResponse**<`T`\>: [`CommandSuccessResponse`](purista_amqpbridge.internal.md#commandsuccessresponse-1)<`T`\> \| [`CommandErrorResponse`](purista_amqpbridge.internal.md#commanderrorresponse-1)
+
+CommandResponse is a response to a specific previously received command which can be either a success or failure
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `T` | `unknown` |
+
+#### Defined in
+
+packages/core/lib/core/types/commandType/CommandResponse.d.ts:8
+
+___
+
+### CommandSuccessResponse
+
+Ƭ **CommandSuccessResponse**<`PayloadType`\>: { `correlationId`: [`CorrelationId`](purista_amqpbridge.internal.md#correlationid) ; `messageType`: [`CommandSuccessResponse`](../enums/purista_amqpbridge.internal.EBMessageType.md#commandsuccessresponse) ; `payload`: `PayloadType` ; `receiver`: [`EBMessageAddress`](purista_amqpbridge.internal.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](purista_amqpbridge.internal.md#ebmessageaddress)  } & [`EBMessageBase`](purista_amqpbridge.internal.md#ebmessagebase)
+
+CommandSuccessResponse is a response to a specific previously received command.
+It indicates that the command was executed successfully and contains the result payload
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `PayloadType` | `unknown` |
+
+#### Defined in
+
+packages/core/lib/core/types/commandType/CommandSuccessResponse.d.ts:11
+
+## Subscription
+
+### Subscription
+
+Ƭ **Subscription**<`PayloadType`, `ParameterType`\>: `Object`
+
+A subscription managed by the event bridge
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `PayloadType` | `unknown` |
+| `ParameterType` | `unknown` |
+
+#### Type declaration
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `emitEventName?` | `string` | the event name to be used for custom message if the subscriptions returns a result |
+| `eventBridgeConfig` | [`DefinitionEventBridgeConfig`](purista_amqpbridge.internal.md#definitioneventbridgeconfig) | config information for event bridge |
+| `eventName?` | `string` | the event name to subscribe for |
+| `instanceId?` | [`InstanceId`](purista_amqpbridge.internal.md#instanceid) | the principal id |
+| `messageType?` | [`EBMessageType`](../enums/purista_amqpbridge.internal.EBMessageType.md) | the message type |
+| `payload?` | { `parameter?`: `ParameterType` ; `payload?`: `PayloadType`  } | the message payload |
+| `payload.parameter?` | `ParameterType` | - |
+| `payload.payload?` | `PayloadType` | - |
+| `principalId?` | [`PrincipalId`](purista_amqpbridge.internal.md#principalid) | the principal id |
+| `receiver?` | { `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } | the consumer address of the message |
+| `receiver.serviceName?` | `string` | - |
+| `receiver.serviceTarget?` | `string` | - |
+| `receiver.serviceVersion?` | `string` | - |
+| `sender?` | { `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } | the producer address of the message |
+| `sender.serviceName?` | `string` | - |
+| `sender.serviceTarget?` | `string` | - |
+| `sender.serviceVersion?` | `string` | - |
+| `subscriber` | [`EBMessageAddress`](purista_amqpbridge.internal.md#ebmessageaddress) | the address of the subscription (service name, version and subscription name) |
+
+#### Defined in
+
+packages/core/lib/core/types/subscription/Subscription.d.ts:11

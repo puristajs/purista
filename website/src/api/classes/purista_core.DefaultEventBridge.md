@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / DefaultEventBridge
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / DefaultEventBridge
 
 # Class: DefaultEventBridge
 
@@ -9,9 +9,13 @@ Does not support threads and does not need any external databases.
 
 ## Hierarchy
 
-- [`EventBridge`](purista_core.EventBridge.md)
+- [`EventBridgeBaseClass`](purista_core.EventBridgeBaseClass.md)<[`DefaultEventBridgeConfig`](../modules/purista_core.md#defaulteventbridgeconfig)\>
 
   ↳ **`DefaultEventBridge`**
+
+## Implements
+
+- [`EventBridge`](../interfaces/purista_core.EventBridge.md)
 
 ## Table of contents
 
@@ -22,32 +26,37 @@ Does not support threads and does not need any external databases.
 ### Properties
 
 - [config](purista_core.DefaultEventBridge.md#config)
+- [defaultCommandTimeout](purista_core.DefaultEventBridge.md#defaultcommandtimeout)
+- [hasStarted](purista_core.DefaultEventBridge.md#hasstarted)
+- [healthy](purista_core.DefaultEventBridge.md#healthy)
+- [instanceId](purista_core.DefaultEventBridge.md#instanceid)
 - [logger](purista_core.DefaultEventBridge.md#logger)
+- [name](purista_core.DefaultEventBridge.md#name)
 - [pendingInvocations](purista_core.DefaultEventBridge.md#pendinginvocations)
 - [readStream](purista_core.DefaultEventBridge.md#readstream)
+- [runningSubscriptionCount](purista_core.DefaultEventBridge.md#runningsubscriptioncount)
 - [serviceFunctions](purista_core.DefaultEventBridge.md#servicefunctions)
 - [subscriptions](purista_core.DefaultEventBridge.md#subscriptions)
 - [traceProvider](purista_core.DefaultEventBridge.md#traceprovider)
 - [writeStream](purista_core.DefaultEventBridge.md#writestream)
 
-### Accessors
-
-- [defaultCommandTimeout](purista_core.DefaultEventBridge.md#defaultcommandtimeout)
-- [instanceId](purista_core.DefaultEventBridge.md#instanceid)
-
 ### Methods
 
+- [destroy](purista_core.DefaultEventBridge.md#destroy)
 - [emit](purista_core.DefaultEventBridge.md#emit)
 - [emitMessage](purista_core.DefaultEventBridge.md#emitmessage)
 - [getTracer](purista_core.DefaultEventBridge.md#gettracer)
 - [invoke](purista_core.DefaultEventBridge.md#invoke)
+- [isHealthy](purista_core.DefaultEventBridge.md#ishealthy)
+- [isReady](purista_core.DefaultEventBridge.md#isready)
 - [off](purista_core.DefaultEventBridge.md#off)
 - [on](purista_core.DefaultEventBridge.md#on)
-- [registerServiceFunction](purista_core.DefaultEventBridge.md#registerservicefunction)
+- [registerCommand](purista_core.DefaultEventBridge.md#registercommand)
 - [registerSubscription](purista_core.DefaultEventBridge.md#registersubscription)
+- [removeAllListeners](purista_core.DefaultEventBridge.md#removealllisteners)
 - [start](purista_core.DefaultEventBridge.md#start)
 - [startActiveSpan](purista_core.DefaultEventBridge.md#startactivespan)
-- [unregisterServiceFunction](purista_core.DefaultEventBridge.md#unregisterservicefunction)
+- [unregisterCommand](purista_core.DefaultEventBridge.md#unregistercommand)
 - [unregisterSubscription](purista_core.DefaultEventBridge.md#unregistersubscription)
 - [wrapInSpan](purista_core.DefaultEventBridge.md#wrapinspan)
 
@@ -55,43 +64,121 @@ Does not support threads and does not need any external databases.
 
 ### constructor
 
-• **new DefaultEventBridge**(`baseLogger`, `conf?`, `spanProcessor?`)
+• **new DefaultEventBridge**(`config`)
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `baseLogger` | [`Logger`](purista_core.Logger.md) |
-| `conf` | [`EventBridgeConfig`](../modules/purista_core.md#eventbridgeconfig) |
-| `spanProcessor?` | `SpanProcessor` |
+| `config` | [`EventBridgeConfig`](../modules/purista_core.md#eventbridgeconfig)<[`DefaultEventBridgeConfig`](../modules/purista_core.md#defaulteventbridgeconfig)\> |
 
 #### Overrides
 
-[EventBridge](purista_core.EventBridge.md).[constructor](purista_core.EventBridge.md#constructor)
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[constructor](purista_core.EventBridgeBaseClass.md#constructor)
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:77](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L77)
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:72](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L72)
 
 ## Properties
 
 ### config
 
-• `Protected` **config**: [`EventBridgeEnsuredDefaults`](../modules/purista_core.md#eventbridgeensureddefaults)
+• **config**: [`Complete`](../modules/purista_core.md#complete)<[`EventBridgeConfig`](../modules/purista_core.md#eventbridgeconfig)<[`Complete`](../modules/purista_core.md#complete)<[`DefaultEventBridgeConfig`](../modules/purista_core.md#defaulteventbridgeconfig)\>\>\>
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[config](purista_core.EventBridgeBaseClass.md#config)
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:57](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L57)
+[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:21](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L21)
+
+___
+
+### defaultCommandTimeout
+
+• **defaultCommandTimeout**: `number`
+
+The default time until when a command invocation automatically returns a time out error
+
+#### Implementation of
+
+[EventBridge](../interfaces/purista_core.EventBridge.md).[defaultCommandTimeout](../interfaces/purista_core.EventBridge.md#defaultcommandtimeout)
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[defaultCommandTimeout](purista_core.EventBridgeBaseClass.md#defaultcommandtimeout)
+
+#### Defined in
+
+[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:27](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L27)
+
+___
+
+### hasStarted
+
+• `Protected` **hasStarted**: `boolean` = `false`
+
+#### Defined in
+
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:69](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L69)
+
+___
+
+### healthy
+
+• `Protected` **healthy**: `boolean` = `false`
+
+#### Defined in
+
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:70](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L70)
+
+___
+
+### instanceId
+
+• **instanceId**: `string`
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[instanceId](purista_core.EventBridgeBaseClass.md#instanceid)
+
+#### Defined in
+
+[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:25](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L25)
 
 ___
 
 ### logger
 
-• `Protected` **logger**: [`Logger`](purista_core.Logger.md)
+• **logger**: [`Logger`](purista_core.Logger.md)
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[logger](purista_core.EventBridgeBaseClass.md#logger)
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:56](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L56)
+[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:18](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L18)
+
+___
+
+### name
+
+• **name**: `string`
+
+#### Implementation of
+
+[EventBridge](../interfaces/purista_core.EventBridge.md).[name](../interfaces/purista_core.EventBridge.md#name)
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[name](purista_core.EventBridgeBaseClass.md#name)
+
+#### Defined in
+
+[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:23](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L23)
 
 ___
 
@@ -101,7 +188,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:71](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L71)
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:64](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L64)
 
 ___
 
@@ -111,17 +198,27 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:59](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L59)
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:52](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L52)
+
+___
+
+### runningSubscriptionCount
+
+• `Protected` **runningSubscriptionCount**: `number` = `0`
+
+#### Defined in
+
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:65](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L65)
 
 ___
 
 ### serviceFunctions
 
-• `Protected` **serviceFunctions**: `Map`<`string`, (`message`: [`Command`](../modules/purista_core.md#command)<`unknown`, `unknown`\>) => `Promise`<[`CommandErrorResponse`](../modules/purista_core.md#commanderrorresponse) \| [`CommandSuccessResponse`](../modules/purista_core.md#commandsuccessresponse)<`unknown`\>\>\>
+• `Protected` **serviceFunctions**: `Map`<`string`, (`message`: [`Command`](../modules/purista_core.md#command)) => `Promise`<[`CommandErrorResponse`](../modules/purista_core.md#commanderrorresponse) \| [`CommandSuccessResponse`](../modules/purista_core.md#commandsuccessresponse)\>\>
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:66](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L66)
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:59](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L59)
 
 ___
 
@@ -131,7 +228,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:73](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L73)
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:67](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L67)
 
 ___
 
@@ -139,9 +236,13 @@ ___
 
 • **traceProvider**: `NodeTracerProvider`
 
+#### Inherited from
+
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[traceProvider](purista_core.EventBridgeBaseClass.md#traceprovider)
+
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:75](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L75)
+[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:19](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L19)
 
 ___
 
@@ -151,51 +252,37 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:58](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L58)
-
-## Accessors
-
-### defaultCommandTimeout
-
-• `get` **defaultCommandTimeout**(): `number`
-
-Get default command time out.
-It is the maximum time a command should be responded.
-
-#### Returns
-
-`number`
-
-#### Overrides
-
-EventBridge.defaultCommandTimeout
-
-#### Defined in
-
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:268](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L268)
-
-___
-
-### instanceId
-
-• `get` **instanceId**(): `string`
-
-Get instance id.
-The id of current event bridge instance.
-
-#### Returns
-
-`string`
-
-#### Defined in
-
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:276](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L276)
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:51](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L51)
 
 ## Methods
 
+### destroy
+
+▸ **destroy**(): `Promise`<`void`\>
+
+Shut down event bridge as gracefully as possible
+
+#### Returns
+
+`Promise`<`void`\>
+
+#### Implementation of
+
+[EventBridge](../interfaces/purista_core.EventBridge.md).[destroy](../interfaces/purista_core.EventBridge.md#destroy)
+
+#### Overrides
+
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[destroy](purista_core.EventBridgeBaseClass.md#destroy)
+
+#### Defined in
+
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:361](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L361)
+
+___
+
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter`): `void`
+▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
@@ -208,7 +295,7 @@ The id of current event bridge instance.
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `parameter` | [`EventBridgeEvents`](../modules/purista_core.md#eventbridgeevents)[`K`] |
+| `parameter?` | [`EventBridgeEvents`](../modules/purista_core.md#eventbridgeevents)[`K`] |
 
 #### Returns
 
@@ -216,11 +303,11 @@ The id of current event bridge instance.
 
 #### Inherited from
 
-[EventBridge](purista_core.EventBridge.md).[emit](purista_core.EventBridge.md#emit)
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[emit](purista_core.EventBridgeBaseClass.md#emit)
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[packages/core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
@@ -234,19 +321,19 @@ Emit a new message to event bridge to be delivered to receiver
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `message` | `Omit`<[`EBMessage`](../modules/purista_core.md#ebmessage), ``"id"`` \| ``"timestamp"`` \| ``"instanceId"`` \| ``"correlationId"``\> | EBMessage |
+| `message` | `Omit`<[`EBMessage`](../modules/purista_core.md#ebmessage), ``"id"`` \| ``"instanceId"`` \| ``"correlationId"`` \| ``"timestamp"``\> | EBMessage |
 
 #### Returns
 
 `Promise`<`Readonly`<[`EBMessage`](../modules/purista_core.md#ebmessage)\>\>
 
-#### Overrides
+#### Implementation of
 
-[EventBridge](purista_core.EventBridge.md).[emitMessage](purista_core.EventBridge.md#emitmessage)
+[EventBridge](../interfaces/purista_core.EventBridge.md).[emitMessage](../interfaces/purista_core.EventBridge.md#emitmessage)
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:317](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L317)
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:270](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L270)
 
 ___
 
@@ -262,15 +349,21 @@ Returns open telemetry tracer of this service
 
 Tracer
 
+#### Inherited from
+
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[getTracer](purista_core.EventBridgeBaseClass.md#gettracer)
+
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:112](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L112)
+[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:69](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L69)
 
 ___
 
 ### invoke
 
-▸ **invoke**<`T`\>(`input`, `_contentType?`, `_contentEncoding?`, `commandTimeout?`): `Promise`<`T`\>
+▸ **invoke**<`T`\>(`input`, `commandTimeout?`): `Promise`<`T`\>
+
+Call a command of a service and return the result of this command
 
 #### Type parameters
 
@@ -280,24 +373,62 @@ ___
 
 #### Parameters
 
-| Name | Type | Default value |
+| Name | Type | Description |
 | :------ | :------ | :------ |
-| `input` | `Omit`<[`Command`](../modules/purista_core.md#command)<`unknown`, `unknown`\>, ``"id"`` \| ``"messageType"`` \| ``"timestamp"`` \| ``"instanceId"`` \| ``"correlationId"``\> | `undefined` |
-| `_contentType` | `string` | `'application/json'` |
-| `_contentEncoding` | `string` | `'utf-8'` |
-| `commandTimeout` | `number` | `undefined` |
+| `input` | `Omit`<[`Command`](../modules/purista_core.md#command), ``"id"`` \| ``"messageType"`` \| ``"instanceId"`` \| ``"correlationId"`` \| ``"timestamp"``\> | a partial command message |
+| `commandTimeout` | `number` | the time to live (timeout) of the invocation |
 
 #### Returns
 
 `Promise`<`T`\>
 
-#### Overrides
+#### Implementation of
 
-[EventBridge](purista_core.EventBridge.md).[invoke](purista_core.EventBridge.md#invoke)
+[EventBridge](../interfaces/purista_core.EventBridge.md).[invoke](../interfaces/purista_core.EventBridge.md#invoke)
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:360](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L360)
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:308](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L308)
+
+___
+
+### isHealthy
+
+▸ **isHealthy**(): `Promise`<`boolean`\>
+
+Indicates if the eventbridge is running and works correctly
+
+#### Returns
+
+`Promise`<`boolean`\>
+
+#### Implementation of
+
+[EventBridge](../interfaces/purista_core.EventBridge.md).[isHealthy](../interfaces/purista_core.EventBridge.md#ishealthy)
+
+#### Defined in
+
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:87](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L87)
+
+___
+
+### isReady
+
+▸ **isReady**(): `Promise`<`boolean`\>
+
+Indicates if the eventbridge has been started and is connected to underlaying message broker
+
+#### Returns
+
+`Promise`<`boolean`\>
+
+#### Implementation of
+
+[EventBridge](../interfaces/purista_core.EventBridge.md).[isReady](../interfaces/purista_core.EventBridge.md#isready)
+
+#### Defined in
+
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:83](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L83)
 
 ___
 
@@ -324,11 +455,11 @@ ___
 
 #### Inherited from
 
-[EventBridge](purista_core.EventBridge.md).[off](purista_core.EventBridge.md#off)
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[off](purista_core.EventBridgeBaseClass.md#off)
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[packages/core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -355,26 +486,27 @@ ___
 
 #### Inherited from
 
-[EventBridge](purista_core.EventBridge.md).[on](purista_core.EventBridge.md#on)
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[on](purista_core.EventBridgeBaseClass.md#on)
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[packages/core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L16)
 
 ___
 
-### registerServiceFunction
+### registerCommand
 
-▸ **registerServiceFunction**(`address`, `cb`): `Promise`<`string`\>
+▸ **registerCommand**(`address`, `cb`, `metadata`): `Promise`<`string`\>
 
-Register a service function and ensure that there is a queue for all incoming command requests.
+Register a service command and ensure that there is a queue for all incoming command requests.
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `address` | [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) | The service function address |
-| `cb` | (`message`: [`Command`](../modules/purista_core.md#command)<`unknown`, `unknown`\>) => `Promise`<[`CommandErrorResponse`](../modules/purista_core.md#commanderrorresponse) \| [`CommandSuccessResponse`](../modules/purista_core.md#commandsuccessresponse)<`unknown`\>\> | the function to call if a matching command message arrives |
+| `cb` | (`message`: [`Command`](../modules/purista_core.md#command)) => `Promise`<[`CommandErrorResponse`](../modules/purista_core.md#commanderrorresponse) \| [`CommandSuccessResponse`](../modules/purista_core.md#commandsuccessresponse)<`unknown`\>\> | the function to call if a matching command message arrives |
+| `metadata` | [`CommandDefinitionMetadataBase`](../modules/purista_core.md#commanddefinitionmetadatabase) | - |
 
 #### Returns
 
@@ -382,13 +514,13 @@ Register a service function and ensure that there is a queue for all incoming co
 
 the id of command function queue
 
-#### Overrides
+#### Implementation of
 
-[EventBridge](purista_core.EventBridge.md).[registerServiceFunction](purista_core.EventBridge.md#registerservicefunction)
+[EventBridge](../interfaces/purista_core.EventBridge.md).[registerCommand](../interfaces/purista_core.EventBridge.md#registercommand)
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:286](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L286)
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:231](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L231)
 
 ___
 
@@ -396,24 +528,44 @@ ___
 
 ▸ **registerSubscription**(`subscription`, `cb`): `Promise`<`string`\>
 
+Register a new subscription
+
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `subscription` | [`Subscription`](../modules/purista_core.md#subscription) |
-| `cb` | (`message`: [`EBMessage`](../modules/purista_core.md#ebmessage)) => `Promise`<`void`\> |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `subscription` | [`Subscription`](../modules/purista_core.md#subscription) | the subscription definition |
+| `cb` | (`message`: [`EBMessage`](../modules/purista_core.md#ebmessage)) => `Promise`<`undefined` \| `Omit`<[`CustomMessage`](../modules/purista_core.md#custommessage), ``"id"`` \| ``"instanceId"`` \| ``"timestamp"``\>\> | the function to be called if a matching message arrives |
 
 #### Returns
 
 `Promise`<`string`\>
 
-#### Overrides
+#### Implementation of
 
-[EventBridge](purista_core.EventBridge.md).[registerSubscription](purista_core.EventBridge.md#registersubscription)
+[EventBridge](../interfaces/purista_core.EventBridge.md).[registerSubscription](../interfaces/purista_core.EventBridge.md#registersubscription)
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:300](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L300)
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:250](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L250)
+
+___
+
+### removeAllListeners
+
+▸ **removeAllListeners**(): `void`
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[removeAllListeners](purista_core.EventBridgeBaseClass.md#removealllisteners)
+
+#### Defined in
+
+[packages/core/src/core/types/GenericEventEmitter.ts:28](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L28)
 
 ___
 
@@ -421,23 +573,31 @@ ___
 
 ▸ **start**(): `Promise`<`void`\>
 
+Start the eventbridge and connect to the underlaying message broker
+
 #### Returns
 
 `Promise`<`void`\>
 
+#### Implementation of
+
+[EventBridge](../interfaces/purista_core.EventBridge.md).[start](../interfaces/purista_core.EventBridge.md#start)
+
 #### Overrides
 
-[EventBridge](purista_core.EventBridge.md).[start](purista_core.EventBridge.md#start)
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[start](purista_core.EventBridgeBaseClass.md#start)
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:172](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L172)
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:91](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L91)
 
 ___
 
 ### startActiveSpan
 
 ▸ **startActiveSpan**<`F`\>(`name`, `opts`, `context?`, `fn`): `Promise`<`F`\>
+
+Start a child span for opentelemetry tracking
 
 #### Type parameters
 
@@ -447,44 +607,52 @@ ___
 
 #### Parameters
 
-| Name | Type | Default value |
-| :------ | :------ | :------ |
-| `name` | `string` | `undefined` |
-| `opts` | `SpanOptions` | `undefined` |
-| `context` | `undefined` \| `Context` | `undefined` |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | `undefined` |
+| Name | Type | Default value | Description |
+| :------ | :------ | :------ | :------ |
+| `name` | `string` | `undefined` | name of span |
+| `opts` | `SpanOptions` | `undefined` | span options |
+| `context` | `undefined` \| `Context` | `undefined` | optional context |
+| `fn` | (`span`: `Span`) => `Promise`<`F`\> | `undefined` | function to be executed within the span |
 
 #### Returns
 
 `Promise`<`F`\>
 
+return value of fn
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[startActiveSpan](purista_core.EventBridgeBaseClass.md#startactivespan)
+
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:116](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L116)
+[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:81](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L81)
 
 ___
 
-### unregisterServiceFunction
+### unregisterCommand
 
-▸ **unregisterServiceFunction**(`address`): `Promise`<`void`\>
+▸ **unregisterCommand**(`address`): `Promise`<`void`\>
+
+Unregister a service command
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `address` | [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `address` | [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) | The address (service name, version and command name) of the command to be de-registered |
 
 #### Returns
 
 `Promise`<`void`\>
 
-#### Overrides
+#### Implementation of
 
-[EventBridge](purista_core.EventBridge.md).[unregisterServiceFunction](purista_core.EventBridge.md#unregisterservicefunction)
+[EventBridge](../interfaces/purista_core.EventBridge.md).[unregisterCommand](../interfaces/purista_core.EventBridge.md#unregistercommand)
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:295](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L295)
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:245](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L245)
 
 ___
 
@@ -502,19 +670,27 @@ ___
 
 `Promise`<`void`\>
 
-#### Overrides
+#### Implementation of
 
-[EventBridge](purista_core.EventBridge.md).[unregisterSubscription](purista_core.EventBridge.md#unregistersubscription)
+[EventBridge](../interfaces/purista_core.EventBridge.md).[unregisterSubscription](../interfaces/purista_core.EventBridge.md#unregistersubscription)
 
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:307](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L307)
+[packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:260](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L260)
 
 ___
 
 ### wrapInSpan
 
 ▸ **wrapInSpan**<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`<`F`\>
+
+Start span for opentelemetry tracking on same level.
+The created span will not become the "active" span within opentelemetry!
+
+This means during logging and similar the spanId of parent span is logged.
+
+Use wrapInSpan for marking points in flow of one bigger function,
+but not to trace the program flow itself
 
 #### Type parameters
 
@@ -524,17 +700,23 @@ ___
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `name` | `string` |
-| `opts` | `SpanOptions` |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> |
-| `context?` | `Context` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `name` | `string` | name of span |
+| `opts` | `SpanOptions` | span options |
+| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function te be executed in the span |
+| `context?` | `Context` | span context |
 
 #### Returns
 
 `Promise`<`F`\>
 
+return value of fn
+
+#### Inherited from
+
+[EventBridgeBaseClass](purista_core.EventBridgeBaseClass.md).[wrapInSpan](purista_core.EventBridgeBaseClass.md#wrapinspan)
+
 #### Defined in
 
-[core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts:150](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultEventBridge/DefaultEventBridge.impl.ts#L150)
+[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:131](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L131)

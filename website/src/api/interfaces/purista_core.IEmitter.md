@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / IEmitter
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / IEmitter
 
 # Interface: IEmitter<T\>
 
@@ -26,7 +26,7 @@
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter`): `void`
+▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
@@ -39,7 +39,7 @@
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `parameter` | `T`[`K`] |
+| `parameter?` | `T`[`K`] |
 
 #### Returns
 
@@ -47,7 +47,7 @@
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:11](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L11)
+[packages/core/src/core/types/GenericEventEmitter.ts:11](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L11)
 
 ___
 
@@ -74,7 +74,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:10](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L10)
+[packages/core/src/core/types/GenericEventEmitter.ts:10](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L10)
 
 ___
 
@@ -101,4 +101,4 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:9](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L9)
+[packages/core/src/core/types/GenericEventEmitter.ts:9](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L9)
