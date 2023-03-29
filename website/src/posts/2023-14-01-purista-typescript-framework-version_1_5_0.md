@@ -2,8 +2,8 @@
 # This control sidebar index
 index: true
 # This is the title of the article
-title: Introducing PURISTA version 1.5.0
-shortTitle: PURISTA version 1.5.0
+title: Introducing PURISTA version 1.5
+shortTitle: PURISTA version 1.5
 description: Checkout all the awesome features, improvements and changes in PURISTA v1.5.0 typescript framework.
 tag:
  - purista
@@ -13,6 +13,8 @@ category:
  - news
  - announcement
 star: true
+isOriginal: true
+image: /graphic/advertise_large.svg
 ---
 
 Version 1.5 of PURISTA is available, with a lot of features, enhancements, and a bunch of improvements and bug fixes.  
