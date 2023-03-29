@@ -54,9 +54,5 @@
     "typedoc-plugin-markdown": "^3.14.0",
     "typescript": "^5.0.2"
   },
-  "dependencies": {
-    "@purista/full-example": "^1.4.1",
-    "pino-pretty": "^10.0.0"
-  },
   "packageManager": "npm@9.6.2"
 }
