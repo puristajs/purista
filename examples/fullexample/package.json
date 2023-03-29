@@ -1,6 +1,6 @@
 {
   "name": "@purista/full-example",
-  "version": "1.4.9",
+  "version": "1.5.0",
   "description": "purista backend framework",
   "homepage": "https://purista.dev",
   "private": true,
@@ -19,23 +19,18 @@
     "grafana:start": "NODE_ENV=development ts-node src/index.ts | pino-loki -pl traceId,spanId,serviceName,serviceVersion,serviceTarget --hostname http://localhost:3100",
     "grafana:up": "docker compose -f grafana/docker-compose.yaml up --detach",
     "grafana:down": "docker compose -f grafana/docker-compose.yaml down",
-
     "jaeger:start": "NODE_ENV=development ts-node src/index.ts  | pino-pretty",
     "jaeger:up": "docker compose -f jaeger/docker-compose.yaml up --detach",
     "jaeger:down": "docker compose -f jaeger/docker-compose.yaml down",
-
     "signoz:start": "NODE_ENV=development ts-node src/index.ts  | pino-pretty",
     "signoz:up": "docker compose -f signoz/docker-compose.yaml up --detach",
     "signoz:down": "docker compose -f signoz/docker-compose.yaml down",
-    
     "uptrace:start": "NODE_ENV=development ts-node src/indexUptrace.ts | pino-pretty",
     "uptrace:up": "docker compose -f uptrace/docker-compose.yaml up --detach",
     "uptrace:down": "docker compose -f uptrace/docker-compose.yaml down",
-
     "zipkin:start": "NODE_ENV=development ts-node src/indexZipkin.ts  | pino-pretty",
     "zipkin:up": "DOCKER_TAG=develop docker compose -f zipkin/docker-compose.yaml up --detach",
     "zipkin:down": "docker compose -f zipkin/docker-compose.yaml down",
-
     "dev": "NODE_ENV=development ts-node-dev src/index.ts | pino-pretty",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
     "test": "jest --passWithNoTests",
@@ -58,7 +53,7 @@
     "@opentelemetry/exporter-zipkin": "^1.10.1",
     "@purista/amqpbridge": "*",
     "@purista/core": "*",
-    "@purista/redis-state-store":"*",
+    "@purista/redis-state-store": "*",
     "@purista/httpserver": "*",
     "@uptrace/node": "^1.10.1",
     "pino-loki": "^2.0.4",

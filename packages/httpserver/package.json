@@ -1,6 +1,6 @@
 {
   "name": "@purista/httpserver",
-  "version": "1.4.9",
+  "version": "1.5.0",
   "description": "Simple http server service based on fastify for PURISTA backend framework",
   "homepage": "https://purista.dev",
   "repository": {
@@ -69,7 +69,7 @@
   },
   "peerDependenciesMeta": {},
   "typedoc": {
-      "entryPoint": "./src/index.ts",
-      "tsconfig": "./tsconfig.ref.json"
+    "entryPoint": "./src/index.ts",
+    "tsconfig": "./tsconfig.ref.json"
   }
 }
