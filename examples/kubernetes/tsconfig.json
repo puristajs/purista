@@ -19,7 +19,6 @@
     "./src/index.ts"
   ],
   "files": [
-    "src/index.ts",
-    "fastify.d.ts"
+    "src/index.ts"
   ],
 }

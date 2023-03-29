@@ -1,0 +1,19 @@
+columns format version: 1
+17 columns:
+`timestamp` UInt64
+`observed_timestamp` UInt64
+`id` String
+`trace_id` String
+`span_id` String
+`trace_flags` UInt32
+`severity_text` LowCardinality(String)
+`severity_number` UInt8
+`body` String
+`resources_string_key` Array(String)
+`resources_string_value` Array(String)
+`attributes_string_key` Array(String)
+`attributes_string_value` Array(String)
+`attributes_int64_key` Array(String)
+`attributes_int64_value` Array(Int64)
+`attributes_float64_key` Array(String)
+`attributes_float64_value` Array(Float64)

@@ -1,0 +1,6 @@
+columns format version: 1
+4 columns:
+`metric_name` LowCardinality(String)
+`fingerprint` UInt64
+`timestamp_ms` Int64
+`value` Float64

@@ -24,11 +24,7 @@ Start the example project:
 npm run start:grafana
 ````
 
-Open in your browser [https://localhost:4443](https://localhost:4443).  
-Your browser might complain about the invalid https certificate, because we are using some local generated ssl certificate here.  
-Just ignore the warning, accept the certificate.  
-
-**YOU need to use `localhost` instead of `127.0.0.1` because of CORS restrictions!**
+Open in your browser [http://localhost:8080](http://localhost:8080).  
 
 To stop grafana you can use this command:
 
@@ -56,9 +52,7 @@ Start the example project:
 npm run start:uptrace
 ````
 
-Visit example swagger ui in browser: [https://localhost:4443/api](https://localhost:4443/api).  
-Your browser might complain about the invalid https certificate, because we are using some local generated ssl certificate here.  
-Just ignore the warning, accept the certificate.
+Visit example swagger ui in browser: [http://localhost:8080/api](http://localhost:8080/api).  
 
 To stop uptrace you can use this command:
 

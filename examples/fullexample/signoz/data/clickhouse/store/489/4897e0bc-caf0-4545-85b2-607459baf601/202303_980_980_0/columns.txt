@@ -1,0 +1,6 @@
+columns format version: 1
+4 columns:
+`event_date` Date
+`event_time` DateTime
+`metric` LowCardinality(String)
+`value` Float64

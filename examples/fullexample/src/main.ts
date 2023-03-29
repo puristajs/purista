@@ -1,27 +1,35 @@
 import { resolve } from 'node:path'
 
 import fastifyStatic from '@fastify/static'
-import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { SpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { AmqpBridge } from '@purista/amqpbridge'
-import { initLogger } from '@purista/core'
-import { HttpServerService } from '@purista/httpserver'
+import { DefaultConfigStore, DefaultSecretStore, gracefulShutdown, initLogger } from '@purista/core'
+import { httpServerV1Service } from '@purista/httpserver'
+import { RedisStateStore } from '@purista/redis-state-store'
 
 import httpServerConfig from './config/httpServerConfig'
-import { EmailService } from './service/email/v1'
-import { UserService } from './service/user/v1'
+import { emailV1Service } from './service/email/v1'
+import { userV1Service } from './service/user/v1'
 
-export const main = async (getProcessor: () => SimpleSpanProcessor) => {
+export const main = async (getProcessor: () => SpanProcessor) => {
   // initialize the logging
-  const baseLogger = initLogger()
+  const logger = initLogger()
 
-  baseLogger.info('application starts')
+  logger.info('application starts')
+
+  const spanProcessor = getProcessor()
 
   // create and init our eventbridge
-  const eventBridge = new AmqpBridge(undefined, { spanProcessor: getProcessor() })
+  const eventBridge = new AmqpBridge({
+    spanProcessor,
+  })
   await eventBridge.start()
 
   // create and init a webserver
-  const httpServerService = new HttpServerService(eventBridge, httpServerConfig, { spanProcessor: getProcessor() })
+  const httpServerService = httpServerV1Service.getInstance(eventBridge, {
+    serviceConfig: httpServerConfig,
+    spanProcessor,
+  })
 
   const defaultPublicPath = resolve(__dirname, '..', 'public')
 
@@ -34,18 +42,42 @@ export const main = async (getProcessor: () => SimpleSpanProcessor) => {
   // start the webserver
   await httpServerService.start()
 
-  // create the user service
-  const userService = UserService.getInstance(eventBridge, { spanProcessor: getProcessor() })
+  // create a state store
+  const stateStore = new RedisStateStore({ config: { url: 'redis://localhost:6379' } })
+  // create config store
+  const configStore = new DefaultConfigStore({
+    config: {
+      emailProviderUrl: 'https://example.com',
+    },
+  })
+  // create secret store
+  const secretStore = new DefaultSecretStore({
+    config: {
+      emailProviderAuthToken: 'some-secret-token',
+    },
+  })
 
-  // start the user service
+  const userService = userV1Service.getInstance(eventBridge, { spanProcessor, stateStore, configStore, secretStore })
   await userService.start()
 
-  // create the email service
-  const emailService = EmailService.getInstance(eventBridge, { spanProcessor: getProcessor() })
-
-  // start the email service
+  const emailService = emailV1Service.getInstance(eventBridge, { spanProcessor, stateStore, configStore, secretStore })
   await emailService.start()
 
-  baseLogger.info('application ready')
-  baseLogger.info(`open in browser: https://localhost:${httpServerConfig.port}`)
+  logger.info('application ready')
+  logger.info(`open in browser: http://localhost:${httpServerConfig.port}`)
+
+  gracefulShutdown(logger, [
+    // start with the event bridge to no longer accept incoming messages
+    eventBridge,
+    userService,
+    emailService,
+    httpServerService,
+    secretStore,
+    stateStore,
+    configStore,
+    {
+      name: 'OTSpanProcessor',
+      destroy: () => spanProcessor.shutdown(),
+    },
+  ])
 }
