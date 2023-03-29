@@ -17,6 +17,9 @@ spec:
             containers:
               - name: the-service:v1
                 image: TheService:v1
+                env:
+                - name: AMQP_URL
+                  value: "amqp://localhost"
                 imagePullPolicy: IfNotPresent
                 args:
                 livenessProbe:

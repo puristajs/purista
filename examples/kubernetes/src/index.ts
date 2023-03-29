@@ -1,12 +1,14 @@
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { AmqpBridge } from '@purista/amqpbridge'
 import {
   DefaultConfigStore,
-  DefaultEventBridge,
   DefaultSecretStore,
   DefaultStateStore,
+  getNewInstanceId,
   gracefulShutdown,
   initLogger,
+  UnhandledError,
 } from '@purista/core'
 import { getHttpServer } from '@purista/k8s-sdk'
 
@@ -15,6 +17,17 @@ import { theServiceV1Service } from './service/theService/v1/'
 const main = async () => {
   // create a logger
   const logger = initLogger()
+
+  // add listeners to log really unexpected errors
+  process.on('uncaughtException', (error, origin) => {
+    const err = UnhandledError.fromError(error)
+    logger.error({ err, origin }, `unhandled error: ${err.message}`)
+  })
+
+  process.on('unhandledRejection', (error, origin) => {
+    const err = UnhandledError.fromError(error)
+    logger.error({ err, origin }, `unhandled rejection: ${err.message}`)
+  })
 
   // optional: set up opentelemetry if you like to use it
   const exporter = new OTLPTraceExporter({
@@ -28,7 +41,13 @@ const main = async () => {
   const stateStore = new DefaultStateStore({ logger })
 
   // set up the eventbridge and start the event bridge
-  const eventBridge = new DefaultEventBridge({}, { spanProcessor })
+  const eventBridge = new AmqpBridge({
+    spanProcessor,
+    instanceId: process.env.HOSTNAME || getNewInstanceId(),
+    config: {
+      url: process.env.AMQP_URL,
+    },
+  })
   await eventBridge.start()
 
   // set up the service

@@ -1,0 +1,2 @@
+ttl format version: 1
+{"table":{"min":1682639885,"max":1682639999,"finished":0}}

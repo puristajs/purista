@@ -13,7 +13,7 @@
     }
   },
   "compilerOptions": {
-    // typescript options here
+    "outDir": "./build"
   },
   "files": [
     "src/index.ts",

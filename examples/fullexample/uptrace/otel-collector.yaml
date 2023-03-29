@@ -35,10 +35,10 @@ exporters:
   logging:
     logLevel: debug
   otlp/uptrace:
-    endpoint: uptrace:14317
+    endpoint: uptrace:14318
     tls:
       insecure: true
-    headers: { 'uptrace-dsn': 'http://project1_secret_token@localhost:14317/1' }
+    headers: { 'uptrace-dsn': 'http://purista_secret_token@localhost:14318/3' }
 
 service:
   # telemetry:

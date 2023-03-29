@@ -1,0 +1,7 @@
+columns format version: 1
+5 columns:
+`tenant` String
+`collector_id` String
+`exporter_id` String
+`timestamp` DateTime
+`data` String

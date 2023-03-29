@@ -1,0 +1,10 @@
+Dockerfile
+README.md
+node_modules
+npm-debug.log
+.eslintcache
+.eslintignore
+deployment.yaml
+jest.config.js
+.turbo
+build

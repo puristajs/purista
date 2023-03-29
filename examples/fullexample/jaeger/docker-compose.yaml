@@ -1,0 +1,29 @@
+version: '3'
+
+services:
+  openzipkin:
+    image: jaegertracing/all-in-one:latest
+    restart: on-failure
+    environment:
+      - COLLECTOR_ZIPKIN_HOST_PORT=:9411
+      - COLLECTOR_OTLP_ENABLED=true
+    ports:
+      - 6831:6831/udp
+      - 6832:6832/udp
+      - 5778:5778
+      - 16686:16686
+      - 4317:4317
+      - 4318:4318
+      - 14250:14250
+      - 14268:14268
+      - 14269:14269
+      - 9411:9411
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+     - 15672:15672
+     - 5672:5672
+  redis:
+    image: redis:alpine
+    ports:
+     - 6379:6379

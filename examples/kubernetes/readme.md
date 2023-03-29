@@ -2,8 +2,4 @@
 
 This is an example on how to prepare an deploy a single service in a Kubernetes cluster.  
 
-Build the docker file:
-
-```bash
-docker build . -t the-service:v1
-```
+The example is referenced in the handbook at [purista.dev](https://purista.dev).
