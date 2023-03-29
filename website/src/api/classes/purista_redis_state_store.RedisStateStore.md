@@ -98,7 +98,7 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 #### Defined in
 
-[packages/state-store-redis/src/RedisStateStore.impl.ts:50](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/state-store-redis/src/RedisStateStore.impl.ts#L50)
+[packages/state-store-redis/src/RedisStateStore.impl.ts:50](https://github.com/sebastianwessel/purista/blob/8c66693/packages/state-store-redis/src/RedisStateStore.impl.ts#L50)
 
 ## Properties
 
@@ -108,7 +108,7 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 #### Defined in
 
-[packages/state-store-redis/src/RedisStateStore.impl.ts:48](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/state-store-redis/src/RedisStateStore.impl.ts#L48)
+[packages/state-store-redis/src/RedisStateStore.impl.ts:48](https://github.com/sebastianwessel/purista/blob/8c66693/packages/state-store-redis/src/RedisStateStore.impl.ts#L48)
 
 ___
 
@@ -172,7 +172,7 @@ disconnects and shuts down the state store
 
 #### Defined in
 
-[packages/state-store-redis/src/RedisStateStore.impl.ts:113](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/state-store-redis/src/RedisStateStore.impl.ts#L113)
+[packages/state-store-redis/src/RedisStateStore.impl.ts:113](https://github.com/sebastianwessel/purista/blob/8c66693/packages/state-store-redis/src/RedisStateStore.impl.ts#L113)
 
 ___
 
@@ -196,7 +196,7 @@ ___
 
 #### Defined in
 
-[packages/state-store-redis/src/RedisStateStore.impl.ts:55](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/state-store-redis/src/RedisStateStore.impl.ts#L55)
+[packages/state-store-redis/src/RedisStateStore.impl.ts:55](https://github.com/sebastianwessel/purista/blob/8c66693/packages/state-store-redis/src/RedisStateStore.impl.ts#L55)
 
 ___
 
@@ -220,7 +220,7 @@ ___
 
 #### Defined in
 
-[packages/state-store-redis/src/RedisStateStore.impl.ts:78](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/state-store-redis/src/RedisStateStore.impl.ts#L78)
+[packages/state-store-redis/src/RedisStateStore.impl.ts:78](https://github.com/sebastianwessel/purista/blob/8c66693/packages/state-store-redis/src/RedisStateStore.impl.ts#L78)
 
 ___
 
@@ -245,4 +245,4 @@ ___
 
 #### Defined in
 
-[packages/state-store-redis/src/RedisStateStore.impl.ts:96](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/state-store-redis/src/RedisStateStore.impl.ts#L96)
+[packages/state-store-redis/src/RedisStateStore.impl.ts:96](https://github.com/sebastianwessel/purista/blob/8c66693/packages/state-store-redis/src/RedisStateStore.impl.ts#L96)

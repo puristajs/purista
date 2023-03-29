@@ -435,7 +435,7 @@ ___
 
 #### Defined in
 
-[packages/amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/types/EncoderFunctions.ts#L1)
+[packages/amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/8c66693/packages/amqpbridge/src/types/EncoderFunctions.ts#L1)
 
 ___
 
@@ -477,11 +477,11 @@ Every event bridge implementation must use this type for configuration.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `config?` | `CustomConfig` | - |
-| `defaultCommandTimeout?` | `number` | the default timeout of command invocations |
-| `instanceId?` | `string` | the instance id of the event bridge |
-| `logger?` | [`Logger`](../classes/purista_amqpbridge.internal.Logger.md) | - |
-| `spanProcessor?` | `SpanProcessor` | - |
+| `config?` | `CustomConfig` | Specific configuration settings for the event bridge depending on the used message broker |
+| `defaultCommandTimeout?` | `number` | Overwrite the hardcoded default timeout of command invocations |
+| `instanceId?` | `string` | The instance id of the event bridge. If not set, a id will generated each time a instance is created. Use this if there is a need to always have the same instance id. |
+| `logger?` | [`Logger`](../classes/purista_amqpbridge.internal.Logger.md) | A logger instance |
+| `spanProcessor?` | `SpanProcessor` | A OpenTelemetry span processor |
 
 #### Defined in
 

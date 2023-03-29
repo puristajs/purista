@@ -29,7 +29,7 @@ Opentelemetry tags set by PURISTA framework
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanTag.enum.ts:6](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/PuristaSpanTag.enum.ts#L6)
+[packages/core/src/core/types/PuristaSpanTag.enum.ts:6](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanTag.enum.ts#L6)
 
 ___
 
@@ -39,7 +39,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanTag.enum.ts:5](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/PuristaSpanTag.enum.ts#L5)
+[packages/core/src/core/types/PuristaSpanTag.enum.ts:5](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanTag.enum.ts#L5)
 
 ___
 
@@ -49,7 +49,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanTag.enum.ts:11](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/PuristaSpanTag.enum.ts#L11)
+[packages/core/src/core/types/PuristaSpanTag.enum.ts:11](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanTag.enum.ts#L11)
 
 ___
 
@@ -59,7 +59,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanTag.enum.ts:13](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/PuristaSpanTag.enum.ts#L13)
+[packages/core/src/core/types/PuristaSpanTag.enum.ts:13](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanTag.enum.ts#L13)
 
 ___
 
@@ -69,7 +69,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanTag.enum.ts:12](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/PuristaSpanTag.enum.ts#L12)
+[packages/core/src/core/types/PuristaSpanTag.enum.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanTag.enum.ts#L12)
 
 ___
 
@@ -79,7 +79,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanTag.enum.ts:7](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/PuristaSpanTag.enum.ts#L7)
+[packages/core/src/core/types/PuristaSpanTag.enum.ts:7](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanTag.enum.ts#L7)
 
 ___
 
@@ -89,7 +89,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanTag.enum.ts:9](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/PuristaSpanTag.enum.ts#L9)
+[packages/core/src/core/types/PuristaSpanTag.enum.ts:9](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanTag.enum.ts#L9)
 
 ___
 
@@ -99,7 +99,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanTag.enum.ts:8](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/PuristaSpanTag.enum.ts#L8)
+[packages/core/src/core/types/PuristaSpanTag.enum.ts:8](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanTag.enum.ts#L8)
 
 ___
 
@@ -109,7 +109,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanTag.enum.ts:16](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/PuristaSpanTag.enum.ts#L16)
+[packages/core/src/core/types/PuristaSpanTag.enum.ts:16](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanTag.enum.ts#L16)
 
 ___
 
@@ -119,4 +119,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanTag.enum.ts:15](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/PuristaSpanTag.enum.ts#L15)
+[packages/core/src/core/types/PuristaSpanTag.enum.ts:15](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanTag.enum.ts#L15)

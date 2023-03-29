@@ -20,7 +20,7 @@
 
 #### Defined in
 
-[packages/core/src/core/types/StoreType.enum.ts:3](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/StoreType.enum.ts#L3)
+[packages/core/src/core/types/StoreType.enum.ts:3](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/StoreType.enum.ts#L3)
 
 ___
 
@@ -30,7 +30,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/StoreType.enum.ts:4](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/StoreType.enum.ts#L4)
+[packages/core/src/core/types/StoreType.enum.ts:4](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/StoreType.enum.ts#L4)
 
 ___
 
@@ -40,4 +40,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/StoreType.enum.ts:2](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/StoreType.enum.ts#L2)
+[packages/core/src/core/types/StoreType.enum.ts:2](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/StoreType.enum.ts#L2)

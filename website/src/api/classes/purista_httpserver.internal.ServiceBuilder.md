@@ -242,7 +242,7 @@ A CommandDefinitionBuilder object.
 
 #### Defined in
 
-packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:93
+packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:94
 
 ___
 
@@ -258,7 +258,7 @@ the definition of registered commands
 
 #### Defined in
 
-packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:105
+packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:106
 
 ___
 
@@ -298,7 +298,7 @@ user getCommandBuilder instead. It will be removed soon.
 
 #### Defined in
 
-packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:83
+packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:84
 
 ___
 
@@ -316,6 +316,7 @@ command functions, subscription list, and configuration
 | `eventBridge` | [`EventBridge`](../interfaces/purista_httpserver.internal.EventBridge.md) | EventBridge |
 | `options?` | `Object` | additional config like logger, stores and opentelemetry span processor |
 | `options.configStore?` | [`ConfigStore`](../interfaces/purista_httpserver.internal.ConfigStore.md) | - |
+| `options.logLevel?` | [`LogLevelName`](../modules/purista_httpserver.internal.md#loglevelname) | - |
 | `options.logger?` | [`Logger`](purista_httpserver.internal.Logger.md) | - |
 | `options.secretStore?` | [`SecretStore`](../interfaces/purista_httpserver.internal.SecretStore.md) | - |
 | `options.serviceConfig?` | `ConfigInputType` | - |
@@ -356,7 +357,7 @@ A SubscriptionDefinitionBuilder
 
 #### Defined in
 
-packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:101
+packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:102
 
 ___
 
@@ -372,7 +373,7 @@ the definition of registered subscriptions
 
 #### Defined in
 
-packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:109
+packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:110
 
 ___
 
@@ -472,7 +473,7 @@ ___
 
 #### Defined in
 
-packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:110
+packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:111
 
 ___
 
@@ -486,4 +487,4 @@ ___
 
 #### Defined in
 
-packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:111
+packages/core/lib/ServiceBuilder/ServiceBuilder.impl.d.ts:112

@@ -662,13 +662,13 @@ ___
 
 ### getCommandFunction
 
-▸ **getCommandFunction**(): [`CommandFunction`](../modules/purista_httpserver.internal.md#commandfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **getCommandFunction**(): [`CommandFunction`](../modules/purista_httpserver.internal.md#commandfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`\>
 
 Get the function implementation
 
 #### Returns
 
-[`CommandFunction`](../modules/purista_httpserver.internal.md#commandfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandFunction`](../modules/purista_httpserver.internal.md#commandfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`\>
 
 the function
 

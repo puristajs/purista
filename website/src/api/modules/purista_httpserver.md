@@ -99,7 +99,7 @@ main()
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/types.ts:5](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/types.ts#L5)
+[packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/types.ts:5](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/types.ts#L5)
 
 ## Variables
 
@@ -109,7 +109,7 @@ main()
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts:11](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts#L11)
+[packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts:11](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts#L11)
 
 ___
 
@@ -119,7 +119,7 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts:13](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts#L13)
+[packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts:16](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts#L16)
 
 ___
 
@@ -129,7 +129,7 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts:18](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts#L18)
+[packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts:18](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts#L18)
 
 ___
 
@@ -139,4 +139,4 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/version.ts#L1)
+[packages/httpserver/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/version.ts#L1)

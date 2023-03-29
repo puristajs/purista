@@ -40,6 +40,7 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 - [config](purista_core.DefaultConfigStore.md#config)
 - [logger](purista_core.DefaultConfigStore.md#logger)
+- [map](purista_core.DefaultConfigStore.md#map)
 - [name](purista_core.DefaultConfigStore.md#name)
 
 ### Methods
@@ -59,7 +60,7 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 | Name | Type |
 | :------ | :------ |
-| `config?` | [`StoreBaseConfig`](../modules/purista_core.md#storebaseconfig)<`never`\> |
+| `config?` | [`StoreBaseConfig`](../modules/purista_core.md#storebaseconfig)<[`DefaultConfigStoreConfig`](../modules/purista_core.md#defaultconfigstoreconfig)\> |
 
 #### Overrides
 
@@ -67,7 +68,7 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 #### Defined in
 
-[packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:26](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L26)
+[packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:27](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L27)
 
 ## Properties
 
@@ -81,7 +82,7 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:14](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L14)
+[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L13)
 
 ___
 
@@ -95,7 +96,17 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L12)
+[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L12)
+
+___
+
+### map
+
+• `Private` **map**: `Map`<`string`, `unknown`\>
+
+#### Defined in
+
+[packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:26](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L26)
 
 ___
 
@@ -111,7 +122,7 @@ name of store
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:16](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L16)
+[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:15](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L15)
 
 ## Methods
 
@@ -131,77 +142,77 @@ disconnects and shuts down the config store
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:62](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L62)
+[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:61](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L61)
 
 ___
 
 ### getConfig
 
-▸ **getConfig**(`..._configNames`): `Promise`<`Record`<`string`, `unknown`\>\>
+▸ **getConfig**(`...configNames`): `Promise`<`Record`<`string`, `unknown`\>\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `..._configNames` | `string`[] |
+| `...configNames` | `string`[] |
 
 #### Returns
 
 `Promise`<`Record`<`string`, `unknown`\>\>
 
-#### Inherited from
+#### Overrides
 
 [ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[getConfig](purista_core.ConfigStoreBaseClass.md#getconfig)
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:32](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L32)
+[packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:39](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L39)
 
 ___
 
 ### removeConfig
 
-▸ **removeConfig**(`_configName`): `Promise`<`void`\>
+▸ **removeConfig**(`configName`): `Promise`<`void`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `_configName` | `string` |
+| `configName` | `string` |
 
 #### Returns
 
 `Promise`<`void`\>
 
-#### Inherited from
+#### Overrides
 
 [ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[removeConfig](purista_core.ConfigStoreBaseClass.md#removeconfig)
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:42](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L42)
+[packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:59](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L59)
 
 ___
 
 ### setConfig
 
-▸ **setConfig**(`_configName`, `_configValue`): `Promise`<`void`\>
+▸ **setConfig**(`configName`, `configValue`): `Promise`<`void`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `_configName` | `string` |
-| `_configValue` | `unknown` |
+| `configName` | `string` |
+| `configValue` | `unknown` |
 
 #### Returns
 
 `Promise`<`void`\>
 
-#### Inherited from
+#### Overrides
 
 [ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[setConfig](purista_core.ConfigStoreBaseClass.md#setconfig)
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:52](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L52)
+[packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:51](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L51)
