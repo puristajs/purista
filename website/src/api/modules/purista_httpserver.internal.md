@@ -133,6 +133,7 @@
 - [InstanceId](purista_httpserver.internal.md#instanceid)
 - [InvokeFunction](purista_httpserver.internal.md#invokefunction)
 - [LogFnParamType](purista_httpserver.internal.md#logfnparamtype)
+- [LogLevelName](purista_httpserver.internal.md#loglevelname)
 - [LoggerOptions](purista_httpserver.internal.md#loggeroptions)
 - [Newable](purista_httpserver.internal.md#newable)
 - [PrincipalId](purista_httpserver.internal.md#principalid)
@@ -519,7 +520,7 @@ The command function context which will be passed into command function.
 
 #### Defined in
 
-packages/core/lib/core/types/commandType/CommandFunctionContext.d.ts:43
+packages/core/lib/core/types/commandType/CommandFunctionContext.d.ts:44
 
 ___
 
@@ -545,7 +546,7 @@ Also, the methods:
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `emit` | [`EmitCustomMessageFunction`](purista_httpserver.internal.md#emitcustommessagefunction) | emit a custom message |
-| `invoke` | [`InvokeFunction`](purista_httpserver.internal.md#invokefunction) | Invokes a command and returns the result. It is recommended to validate the result against a schema which only contains the data you actually need. **`Example`** ```typescript const address: EBMessageAddress = { serviceName: 'name-of-service-to-invoke', serviceVersion: '1', serviceTarget: 'command-name-to-invoke', } const inputPayload = { my: 'input' } const inputParameter = { search: 'for_me' } const result = await invoke<MyResultType>(address, inputPayload inputParameter ) |
+| `invoke` | [`InvokeFunction`](purista_httpserver.internal.md#invokefunction) | Invokes a command and returns the result. It is recommended to validate the result against a schema which only contains the data you actually need. **`Example`** ```typescript const address: EBMessageAddress = { serviceName: 'name-of-service-to-invoke', serviceVersion: '1', serviceTarget: 'command-name-to-invoke', } const inputPayload = { my: 'input' } const inputParameter = { search: 'for_me' } const result = await invoke<MyResultType>(address, inputPayload inputParameter ) ``` |
 | `message` | `Readonly`<[`Command`](purista_httpserver.internal.md#command-1)<`MessagePayloadType`, `MessageParamsType`\>\> | the original message |
 
 #### Defined in
@@ -781,16 +782,16 @@ packages/core/lib/core/types/ServiceClass.d.ts:9
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `commandDefinitionList` | [`CommandDefinitionList`](purista_httpserver.internal.md#commanddefinitionlist)<`any`\> | the list of command definitions for this service |
-| `config` | `ConfigType` | the service specific config |
-| `configStore?` | [`ConfigStore`](../interfaces/purista_httpserver.internal.ConfigStore.md) | the config store instance |
-| `eventBridge` | [`EventBridge`](../interfaces/purista_httpserver.internal.EventBridge.md) | the eventBridge instance |
-| `info` | [`ServiceInfoType`](purista_httpserver.internal.md#serviceinfotype) | the service info with name, version and description of service |
-| `logger` | [`Logger`](../classes/purista_httpserver.internal.Logger.md) | the logger instance |
-| `secretStore?` | [`SecretStore`](../interfaces/purista_httpserver.internal.SecretStore.md) | the secret store instance |
-| `spanProcessor?` | `SpanProcessor` | the opentelemetry span processor instance |
+| `commandDefinitionList` | [`CommandDefinitionList`](purista_httpserver.internal.md#commanddefinitionlist)<`any`\> | The list of command definitions for this service |
+| `config` | `ConfigType` | The service specific config |
+| `configStore?` | [`ConfigStore`](../interfaces/purista_httpserver.internal.ConfigStore.md) | The config store instance |
+| `eventBridge` | [`EventBridge`](../interfaces/purista_httpserver.internal.EventBridge.md) | The eventBridge instance |
+| `info` | [`ServiceInfoType`](purista_httpserver.internal.md#serviceinfotype) | The service info with name, version and description of service |
+| `logger` | [`Logger`](../classes/purista_httpserver.internal.Logger.md) | A logger instance |
+| `secretStore?` | [`SecretStore`](../interfaces/purista_httpserver.internal.SecretStore.md) | The secret store instance |
+| `spanProcessor?` | `SpanProcessor` | The opentelemetry span processor instance |
 | `stateStore?` | [`StateStore`](../interfaces/purista_httpserver.internal.StateStore.md) | the state store instance |
-| `subscriptionDefinitionList` | [`SubscriptionDefinitionList`](purista_httpserver.internal.md#subscriptiondefinitionlist)<`any`\> | the list of subscription definitions for this service |
+| `subscriptionDefinitionList` | [`SubscriptionDefinitionList`](purista_httpserver.internal.md#subscriptiondefinitionlist)<`any`\> | The list of subscription definitions for this service |
 
 #### Defined in
 
@@ -1090,7 +1091,7 @@ The subscription function context which will be passed into subscription functio
 
 #### Defined in
 
-packages/core/lib/core/types/subscription/SubscriptionFunctionContext.d.ts:43
+packages/core/lib/core/types/subscription/SubscriptionFunctionContext.d.ts:44
 
 ___
 
@@ -1109,7 +1110,7 @@ Also, the methods:
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `emit` | [`EmitCustomMessageFunction`](purista_httpserver.internal.md#emitcustommessagefunction) | emit a custom message |
-| `invoke` | [`InvokeFunction`](purista_httpserver.internal.md#invokefunction) | Invokes a command and returns the result. It is recommended to validate the result against a schema which only contains the data you actually need. **`Example`** ```typescript const address: EBMessageAddress = { serviceName: 'name-of-service-to-invoke', serviceVersion: '1', serviceTarget: 'command-name-to-invoke', } const inputPayload = { my: 'input' } const inputParameter = { search: 'for_me' } const result = await invoke<MyResultType>(address, inputPayload inputParameter ) |
+| `invoke` | [`InvokeFunction`](purista_httpserver.internal.md#invokefunction) | Invokes a command and returns the result. It is recommended to validate the result against a schema which only contains the data you actually need. **`Example`** ```typescript const address: EBMessageAddress = { serviceName: 'name-of-service-to-invoke', serviceVersion: '1', serviceTarget: 'command-name-to-invoke', } const inputPayload = { my: 'input' } const inputParameter = { search: 'for_me' } const result = await invoke<MyResultType>(address, inputPayload inputParameter ) ``` |
 | `message` | `Readonly`<[`EBMessage`](purista_httpserver.internal.md#ebmessage)\> | the original message |
 
 #### Defined in
@@ -1493,7 +1494,7 @@ packages/core/lib/core/StateStore/types/StateSetterFunction.d.ts:2
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts:3](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts#L3)
+[packages/httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts:3](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts#L3)
 
 ___
 
@@ -1932,7 +1933,7 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts:90](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts#L90)
+[packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts:90](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts#L90)
 
 ___
 
@@ -2083,6 +2084,7 @@ const inputPayload = { my: 'input' }
 const inputParameter = { search: 'for_me' }
 
 const result = await invoke<MyResultType>(address, inputPayload inputParameter )
+```
 
 ##### Type parameters
 
@@ -2106,7 +2108,7 @@ const result = await invoke<MyResultType>(address, inputPayload inputParameter )
 
 #### Defined in
 
-packages/core/lib/core/types/InvokeFunction.d.ts:19
+packages/core/lib/core/types/InvokeFunction.d.ts:20
 
 ___
 
@@ -2117,6 +2119,16 @@ ___
 #### Defined in
 
 packages/core/lib/core/types/Logger.d.ts:15
+
+___
+
+### LogLevelName
+
+Ƭ **LogLevelName**: ``"info"`` \| ``"error"`` \| ``"warn"`` \| ``"debug"`` \| ``"trace"`` \| ``"fatal"``
+
+#### Defined in
+
+packages/core/lib/core/types/LogLevelName.d.ts:1
 
 ___
 
@@ -2343,7 +2355,7 @@ packages/core/lib/core/types/addPrefixToObject.d.ts:7
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts:60](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts#L60)
+[packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts:60](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts#L60)
 
 ___
 
@@ -2353,4 +2365,4 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/schema.ts:4](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/schema.ts#L4)
+[packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/schema.ts:4](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/schema.ts#L4)

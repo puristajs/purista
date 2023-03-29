@@ -59,7 +59,7 @@
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:15](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L15)
+[packages/core/src/core/types/GenericEventEmitter.ts:15](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L15)
 
 ## Methods
 
@@ -90,7 +90,7 @@
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[packages/core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
@@ -121,7 +121,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[packages/core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -152,7 +152,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[packages/core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L16)
 
 ___
 
@@ -166,4 +166,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:28](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L28)
+[packages/core/src/core/types/GenericEventEmitter.ts:28](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L28)

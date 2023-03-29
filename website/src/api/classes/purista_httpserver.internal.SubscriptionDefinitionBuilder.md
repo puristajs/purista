@@ -64,14 +64,12 @@ A working schema definition needs at least a subscription name, a short descript
 - [filterReceivedBy](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#filterreceivedby)
 - [filterSentFrom](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#filtersentfrom)
 - [getDefinition](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#getdefinition)
-- [getFunction](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#getfunction)
 - [getSubscriptionFunction](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#getsubscriptionfunction)
 - [getTransformInputFunction](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#gettransforminputfunction)
 - [getTransformOutputFunction](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#gettransformoutputfunction)
 - [receiveMessageOnEveryInstance](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#receivemessageoneveryinstance)
 - [setAfterGuardHooks](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#setafterguardhooks)
 - [setBeforeGuardHooks](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#setbeforeguardhooks)
-- [setFunction](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#setfunction)
 - [setSubscriptionFunction](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#setsubscriptionfunction)
 - [setTransformInput](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#settransforminput)
 - [setTransformOutput](purista_httpserver.internal.SubscriptionDefinitionBuilder.md#settransformoutput)
@@ -627,43 +625,25 @@ SubscriptionDefinition
 
 #### Defined in
 
-packages/core/lib/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.d.ts:239
-
-___
-
-### getFunction
-
-▸ **getFunction**(): [`SubscriptionFunction`](../modules/purista_httpserver.internal.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
-
-**`Deprecated`**
-
-use getSubscriptionFunction instead. It will be removed soon.
-
-#### Returns
-
-[`SubscriptionFunction`](../modules/purista_httpserver.internal.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
-
-#### Defined in
-
 packages/core/lib/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.d.ts:229
 
 ___
 
 ### getSubscriptionFunction
 
-▸ **getSubscriptionFunction**(): [`SubscriptionFunction`](../modules/purista_httpserver.internal.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **getSubscriptionFunction**(): [`SubscriptionFunction`](../modules/purista_httpserver.internal.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`\>
 
 Get the function implementation
 
 #### Returns
 
-[`SubscriptionFunction`](../modules/purista_httpserver.internal.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionFunction`](../modules/purista_httpserver.internal.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`\>
 
 the subscription function
 
 #### Defined in
 
-packages/core/lib/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.d.ts:234
+packages/core/lib/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.d.ts:224
 
 ___
 
@@ -780,30 +760,6 @@ packages/core/lib/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.im
 
 ___
 
-### setFunction
-
-▸ **setFunction**(`fn`): [`SubscriptionDefinitionBuilder`](purista_httpserver.internal.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
-
-**`Deprecated`**
-
-use setSubscriptionFunction instead. It will be removed soon.
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `fn` | [`SubscriptionFunction`](../modules/purista_httpserver.internal.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\> |
-
-#### Returns
-
-[`SubscriptionDefinitionBuilder`](purista_httpserver.internal.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
-
-#### Defined in
-
-packages/core/lib/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.d.ts:207
-
-___
-
 ### setSubscriptionFunction
 
 ▸ **setSubscriptionFunction**(`fn`): [`SubscriptionDefinitionBuilder`](purista_httpserver.internal.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
@@ -836,7 +792,7 @@ SubscriptionDefinitionBuilder
 
 #### Defined in
 
-packages/core/lib/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.d.ts:224
+packages/core/lib/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.d.ts:219
 
 ___
 

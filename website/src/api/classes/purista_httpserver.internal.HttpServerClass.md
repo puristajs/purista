@@ -96,7 +96,7 @@ A simple http server based on fastify.
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:42](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L42)
+[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:42](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L42)
 
 ## Properties
 
@@ -106,7 +106,7 @@ A simple http server based on fastify.
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:40](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L40)
+[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:40](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L40)
 
 ___
 
@@ -214,7 +214,7 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:36](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L36)
+[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:36](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L36)
 
 ___
 
@@ -224,7 +224,7 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:38](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L38)
+[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:38](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L38)
 
 ___
 
@@ -248,7 +248,7 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:34](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L34)
+[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:34](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L34)
 
 ___
 
@@ -378,7 +378,7 @@ packages/core/lib/core/Service/ServiceBaseClass/ServiceBaseClass.impl.d.ts:38
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:160](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L160)
+[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:160](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L160)
 
 ___
 
@@ -398,7 +398,7 @@ Stop and destroy the current service
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:242](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L242)
+[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:242](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L242)
 
 ___
 
@@ -676,7 +676,7 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:228](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L228)
+[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:228](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L228)
 
 ___
 
@@ -856,7 +856,7 @@ It connects to the event bridge and subscribes to the topics that are in the sub
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:164](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L164)
+[packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:164](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts#L164)
 
 ___
 

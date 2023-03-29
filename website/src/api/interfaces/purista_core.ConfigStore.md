@@ -41,7 +41,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/types/ConfigStore.ts:19](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L19)
+[packages/core/src/core/ConfigStore/types/ConfigStore.ts:19](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L19)
 
 ___
 
@@ -53,7 +53,7 @@ name of store
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/types/ConfigStore.ts:12](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L12)
+[packages/core/src/core/ConfigStore/types/ConfigStore.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L12)
 
 ___
 
@@ -73,7 +73,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/types/ConfigStore.ts:34](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L34)
+[packages/core/src/core/ConfigStore/types/ConfigStore.ts:34](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L34)
 
 ___
 
@@ -97,7 +97,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/types/ConfigStore.ts:27](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L27)
+[packages/core/src/core/ConfigStore/types/ConfigStore.ts:27](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L27)
 
 ## Methods
 
@@ -113,4 +113,4 @@ disconnects and shuts down the config store
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/types/ConfigStore.ts:39](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L39)
+[packages/core/src/core/ConfigStore/types/ConfigStore.ts:39](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L39)

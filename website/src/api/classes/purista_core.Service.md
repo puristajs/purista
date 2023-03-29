@@ -112,7 +112,7 @@ class MyService extends Service {
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:81](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L81)
+[packages/core/src/core/Service/Service.impl.ts:81](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L81)
 
 ## Properties
 
@@ -122,7 +122,7 @@ class MyService extends Service {
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:77](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L77)
+[packages/core/src/core/Service/Service.impl.ts:77](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L77)
 
 ___
 
@@ -132,7 +132,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:75](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L75)
+[packages/core/src/core/Service/Service.impl.ts:75](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L75)
 
 ___
 
@@ -146,7 +146,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:79](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L79)
+[packages/core/src/core/Service/Service.impl.ts:79](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L79)
 
 ___
 
@@ -160,7 +160,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:35](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L35)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:35](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L35)
 
 ___
 
@@ -174,7 +174,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:26](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L26)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:26](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L26)
 
 ___
 
@@ -188,7 +188,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:24](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L24)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:24](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L24)
 
 ___
 
@@ -202,7 +202,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:28](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L28)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:28](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L28)
 
 ___
 
@@ -216,7 +216,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:34](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L34)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:34](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L34)
 
 ___
 
@@ -230,7 +230,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:30](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L30)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:30](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L30)
 
 ___
 
@@ -244,7 +244,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:36](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L36)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:36](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L36)
 
 ___
 
@@ -254,7 +254,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:78](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L78)
+[packages/core/src/core/Service/Service.impl.ts:78](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L78)
 
 ___
 
@@ -264,7 +264,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:74](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L74)
+[packages/core/src/core/Service/Service.impl.ts:74](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L74)
 
 ___
 
@@ -278,7 +278,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:32](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L32)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:32](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L32)
 
 ## Accessors
 
@@ -292,7 +292,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:97](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L97)
+[packages/core/src/core/Service/Service.impl.ts:97](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L97)
 
 ___
 
@@ -312,7 +312,7 @@ ServiceBaseClass.serviceInfo
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:94](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L94)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:94](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L94)
 
 ## Methods
 
@@ -336,7 +336,7 @@ Stop and destroy the current service
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:749](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L749)
+[packages/core/src/core/Service/Service.impl.ts:749](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L749)
 
 ___
 
@@ -367,7 +367,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[packages/core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
@@ -389,7 +389,7 @@ Called when a command is received by the service
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:414](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L414)
+[packages/core/src/core/Service/Service.impl.ts:414](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L414)
 
 ___
 
@@ -410,7 +410,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:567](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L567)
+[packages/core/src/core/Service/Service.impl.ts:567](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L567)
 
 ___
 
@@ -430,7 +430,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:241](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L241)
+[packages/core/src/core/Service/Service.impl.ts:241](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L241)
 
 ___
 
@@ -473,7 +473,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:208](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L208)
+[packages/core/src/core/Service/Service.impl.ts:208](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L208)
 
 ___
 
@@ -511,7 +511,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:174](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L174)
+[packages/core/src/core/Service/Service.impl.ts:174](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L174)
 
 ___
 
@@ -544,7 +544,7 @@ Tracer
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:103](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L103)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:103](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L103)
 
 ___
 
@@ -567,7 +567,7 @@ Connect service to event bridge to receive commands and command responses
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:125](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L125)
+[packages/core/src/core/Service/Service.impl.ts:125](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L125)
 
 ___
 
@@ -598,7 +598,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[packages/core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -629,7 +629,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[packages/core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L16)
 
 ___
 
@@ -655,7 +655,7 @@ Registers a new command for the service
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:540](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L540)
+[packages/core/src/core/Service/Service.impl.ts:540](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L540)
 
 ___
 
@@ -681,7 +681,7 @@ Registers a new subscription for the service
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:713](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L713)
+[packages/core/src/core/Service/Service.impl.ts:713](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L713)
 
 ___
 
@@ -699,7 +699,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:28](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L28)
+[packages/core/src/core/types/GenericEventEmitter.ts:28](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L28)
 
 ___
 
@@ -723,7 +723,7 @@ Broadcast service info message
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:159](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L159)
+[packages/core/src/core/Service/Service.impl.ts:159](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L159)
 
 ___
 
@@ -743,7 +743,7 @@ It connects to the event bridge and subscribes to the topics that are in the sub
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:104](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/Service.impl.ts#L104)
+[packages/core/src/core/Service/Service.impl.ts:104](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L104)
 
 ___
 
@@ -784,7 +784,7 @@ return value of fn
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:118](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L118)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:118](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L118)
 
 ___
 
@@ -831,4 +831,4 @@ return value of fn
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:168](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L168)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:168](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L168)

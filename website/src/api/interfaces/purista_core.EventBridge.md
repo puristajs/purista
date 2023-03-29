@@ -41,7 +41,7 @@ The default time until when a command invocation automatically returns a time ou
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/types/EventBridge.ts:24](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/types/EventBridge.ts#L24)
+[packages/core/src/core/EventBridge/types/EventBridge.ts:24](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/types/EventBridge.ts#L24)
 
 ___
 
@@ -51,7 +51,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/types/EventBridge.ts:20](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/types/EventBridge.ts#L20)
+[packages/core/src/core/EventBridge/types/EventBridge.ts:20](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/types/EventBridge.ts#L20)
 
 ## Methods
 
@@ -67,7 +67,7 @@ Shut down event bridge as gracefully as possible
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/types/EventBridge.ts:102](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/types/EventBridge.ts#L102)
+[packages/core/src/core/EventBridge/types/EventBridge.ts:102](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/types/EventBridge.ts#L102)
 
 ___
 
@@ -89,7 +89,7 @@ Emit a message to the eventbridge without awaiting a result
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/types/EventBridge.ts:35](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/types/EventBridge.ts#L35)
+[packages/core/src/core/EventBridge/types/EventBridge.ts:35](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/types/EventBridge.ts#L35)
 
 ___
 
@@ -118,7 +118,7 @@ Call a command of a service and return the result of this command
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/types/EventBridge.ts:46](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/types/EventBridge.ts#L46)
+[packages/core/src/core/EventBridge/types/EventBridge.ts:46](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/types/EventBridge.ts#L46)
 
 ___
 
@@ -134,7 +134,7 @@ Indicates if the eventbridge is running and works correctly
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/types/EventBridge.ts:97](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/types/EventBridge.ts#L97)
+[packages/core/src/core/EventBridge/types/EventBridge.ts:97](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/types/EventBridge.ts#L97)
 
 ___
 
@@ -150,7 +150,7 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/types/EventBridge.ts:92](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/types/EventBridge.ts#L92)
+[packages/core/src/core/EventBridge/types/EventBridge.ts:92](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/types/EventBridge.ts#L92)
 
 ___
 
@@ -173,7 +173,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/types/EventBridge.ts:56](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/types/EventBridge.ts#L56)
+[packages/core/src/core/EventBridge/types/EventBridge.ts:56](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/types/EventBridge.ts#L56)
 
 ___
 
@@ -196,7 +196,7 @@ Register a new subscription
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/types/EventBridge.ts:78](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/types/EventBridge.ts#L78)
+[packages/core/src/core/EventBridge/types/EventBridge.ts:78](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/types/EventBridge.ts#L78)
 
 ___
 
@@ -212,7 +212,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/types/EventBridge.ts:29](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/types/EventBridge.ts#L29)
+[packages/core/src/core/EventBridge/types/EventBridge.ts:29](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/types/EventBridge.ts#L29)
 
 ___
 
@@ -234,7 +234,7 @@ Unregister a service command
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/types/EventBridge.ts:71](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/types/EventBridge.ts#L71)
+[packages/core/src/core/EventBridge/types/EventBridge.ts:71](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/types/EventBridge.ts#L71)
 
 ___
 
@@ -254,4 +254,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/types/EventBridge.ts:87](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/types/EventBridge.ts#L87)
+[packages/core/src/core/EventBridge/types/EventBridge.ts:87](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/types/EventBridge.ts#L87)

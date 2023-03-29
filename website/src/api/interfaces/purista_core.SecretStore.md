@@ -42,7 +42,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/types/SecretStore.ts:18](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/SecretStore/types/SecretStore.ts#L18)
+[packages/core/src/core/SecretStore/types/SecretStore.ts:18](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/types/SecretStore.ts#L18)
 
 ___
 
@@ -54,7 +54,7 @@ name of store
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/types/SecretStore.ts:11](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/SecretStore/types/SecretStore.ts#L11)
+[packages/core/src/core/SecretStore/types/SecretStore.ts:11](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/types/SecretStore.ts#L11)
 
 ___
 
@@ -74,7 +74,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/types/SecretStore.ts:25](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/SecretStore/types/SecretStore.ts#L25)
+[packages/core/src/core/SecretStore/types/SecretStore.ts:25](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/types/SecretStore.ts#L25)
 
 ___
 
@@ -98,7 +98,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/types/SecretStore.ts:33](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/SecretStore/types/SecretStore.ts#L33)
+[packages/core/src/core/SecretStore/types/SecretStore.ts:33](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/types/SecretStore.ts#L33)
 
 ## Methods
 
@@ -114,4 +114,4 @@ disconnects and shuts down the secret store
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/types/SecretStore.ts:38](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/SecretStore/types/SecretStore.ts#L38)
+[packages/core/src/core/SecretStore/types/SecretStore.ts:38](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/types/SecretStore.ts#L38)

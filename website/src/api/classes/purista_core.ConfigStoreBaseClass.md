@@ -45,7 +45,7 @@ Base class for config store adapters
 
 ### constructor
 
-• **new ConfigStoreBaseClass**<`ConfigType`\>(`name`, `config`)
+• **new ConfigStoreBaseClass**<`ConfigType`\>(`name`, `config?`)
 
 #### Type parameters
 
@@ -58,11 +58,11 @@ Base class for config store adapters
 | Name | Type |
 | :------ | :------ |
 | `name` | `string` |
-| `config` | [`StoreBaseConfig`](../modules/purista_core.md#storebaseconfig)<`ConfigType`\> |
+| `config?` | [`StoreBaseConfig`](../modules/purista_core.md#storebaseconfig)<`ConfigType`\> |
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:18](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L18)
+[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:17](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L17)
 
 ## Properties
 
@@ -72,7 +72,7 @@ Base class for config store adapters
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:14](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L14)
+[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L13)
 
 ___
 
@@ -82,7 +82,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L12)
+[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L12)
 
 ___
 
@@ -98,7 +98,7 @@ name of store
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:16](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L16)
+[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:15](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L15)
 
 ## Methods
 
@@ -118,7 +118,7 @@ disconnects and shuts down the config store
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:62](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L62)
+[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:61](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L61)
 
 ___
 
@@ -142,7 +142,7 @@ ConfigStore.getConfig
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:32](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L32)
+[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:31](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L31)
 
 ___
 
@@ -166,7 +166,7 @@ ConfigStore.removeConfig
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:42](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L42)
+[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:41](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L41)
 
 ___
 
@@ -191,4 +191,4 @@ ConfigStore.setConfig
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:52](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L52)
+[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:51](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L51)
