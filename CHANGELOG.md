@@ -2,16 +2,136 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.4.9] - 2023-02-06
+## [unreleased]
 
 ### Bug Fixes
 
 - Lint
+- Error logging
+- Remove cycling dependency
+- Remove cycling dependency
+- Export test
+- TraceId in payload of error responses
+- Missing receiver and sender in SubscriptionBuilder getDefinition
+- AMQP bridge ack handling #72
+- Improve gracefully shutdown of eventbridges
+- Esbuild issue
+- Redis state store and add integration test
+- Issues and improve code and add inline documentation
+
+### Depreciation
+
+- FunctionDefinitionBuilder in favor of CommandDefinitionBuilder resolve #66
+- Set/getFunction in SubscriptionDefinitionBuilder
+- GetFunctionContextMock in favor of getCommandContextMock
+
+### Documentation
+
+- Update documentation
+- Update code example
+- Update documentation according to breaking changes
+- Add blog to website
+- Refactor handbook
+- Update example
+- Update doc structure
+- Fix website setting
+- Update documentation #97
+- Revamp website #97
+- Revamp example #96
+- Update api documentation
+- Update documentation
+
+### Features
+
+- Implement OpenTelemetry into core resolve #63
+- Subscribe to event now supports optional version parameter
+- Add purista version to packages
+- Add support for sinon sandbox in test helpers
+- Simplify init logger - set default instead of required property
+- Implement OpenTelemetry into AmqpBridge resolve #63
+- Add @purista/cli package
+- Implement purista cli
+- Add EventBridge status check resolve #68
+- Add /healthz endpoint to httpServer resolve #69
+- Add string case helper functions
+- Add operationId to OpenAPI schema resolve #77
+- Provide an abstract secret store (getter) similar to event bridge #88
+- Improve secret store #88
+- Provide an abstract config store (getter) similar to event bridge  #87
+- Provide an abstract key-value state store similar to event bridge #89
+- Add OpenApi deprecated flag option #78
+- Add predefined tests for service builder usage #100
+- Add receiveMessageOnEveryInstance flag
+- Add package @purista/redis-state-store #103
+- Add k8s helper package #110
 
 ### Miscellaneous Tasks
 
 - Bump dependency packages
 - Update doc theme config
+- Bump versions to 1.4.9
+- Cleanup code structure
+- Provide full example
+- Update vuepress-theme-hope
+- Correct vuepress packages
+- Cleanup setup
+- Improve automated document generation
+- Use @swc/jest in favor of ts-jest
+- Minor code cleanup
+- Update package.lock
+- Cleanup code - remove onSuccess and onError hook in favor of event listening
+- Add cycling dependency checker
+- Add inline documentation
+- Fix file casing
+- Fix git file casing
+- Minor improvements
+- Update github issue templates
+- Evaluate bun and correct package.json duplicates resolve #74
+- Add vscode launch jest single file execution
+- Improve types and code cleanup
+- Code cleanup
+- Bump zod package versions
+- Improve code and types
+- Add fatal to logger mock and improve type
+- Improve code, types and inline documentation
+- Add unit tests #2
+- Improve addQueryParameters types solves #90
+- Update github issue templates
+- Update github issue templates
+- Update integration test #2
+- Minor fix and improvements
+- Remove spanProcessor parameter
+- Minor code improvements
+- Improve getter types in stores #87 #88
+- Improve types
+- Add warning
+- Add inline doc #78
+- Update test
+- Add inline doc
+- Update and improve cli #102
+- Update gitignore
+- Bump dependencies
+- Set types because of package update
+- Code and type improvements
+- Improve code
+- Update uptrace example config
+- Refactor HttpserverService to ServiceBuilder #111
+- Big code cleanup
+- Update packages and project config
+- Unify config handling in event bridge
+- Minor output improvement
+- Improve types
+- Update project config
+- Update package script
+- Update packages
+- Set current version
+- Package
+
+### Refactor
+
+- Improve code and types and reduce complexity in DefaultEventBridge
+- Improve code and types and reduce complexity in Service
+- Unify logger name to be always logger
 
 ## [1.4.8] - 2022-10-09
 
