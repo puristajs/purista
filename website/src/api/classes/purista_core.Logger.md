@@ -50,7 +50,7 @@
 
 #### Defined in
 
-[packages/core/src/core/types/Logger.ts:24](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/Logger.ts#L24)
+[packages/core/src/core/types/Logger.ts:24](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/Logger.ts#L24)
 
 ___
 
@@ -70,7 +70,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/Logger.ts:22](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/Logger.ts#L22)
+[packages/core/src/core/types/Logger.ts:22](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/Logger.ts#L22)
 
 ___
 
@@ -90,7 +90,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/Logger.ts:21](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/Logger.ts#L21)
+[packages/core/src/core/types/Logger.ts:21](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/Logger.ts#L21)
 
 ___
 
@@ -110,7 +110,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/Logger.ts:26](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/Logger.ts#L26)
+[packages/core/src/core/types/Logger.ts:26](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/Logger.ts#L26)
 
 ___
 
@@ -130,7 +130,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/Logger.ts:20](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/Logger.ts#L20)
+[packages/core/src/core/types/Logger.ts:20](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/Logger.ts#L20)
 
 ___
 
@@ -150,7 +150,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/Logger.ts:25](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/Logger.ts#L25)
+[packages/core/src/core/types/Logger.ts:25](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/Logger.ts#L25)
 
 ___
 
@@ -170,4 +170,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/Logger.ts:23](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/Logger.ts#L23)
+[packages/core/src/core/types/Logger.ts:23](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/Logger.ts#L23)

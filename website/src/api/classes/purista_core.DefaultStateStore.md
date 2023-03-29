@@ -51,7 +51,7 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 #### Defined in
 
-[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:13](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L13)
+[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:13](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L13)
 
 ## Properties
 
@@ -65,7 +65,7 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 #### Defined in
 
-[packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L13)
+[packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L13)
 
 ___
 
@@ -79,7 +79,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L12)
+[packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L12)
 
 ___
 
@@ -89,7 +89,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:12](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L12)
+[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L12)
 
 ___
 
@@ -105,7 +105,7 @@ name of store
 
 #### Defined in
 
-[packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:15](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L15)
+[packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:15](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L15)
 
 ## Methods
 
@@ -125,7 +125,7 @@ disconnects and shuts down the state store
 
 #### Defined in
 
-[packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:64](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L64)
+[packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:64](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L64)
 
 ___
 
@@ -149,7 +149,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:25](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L25)
+[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:25](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L25)
 
 ___
 
@@ -173,7 +173,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:45](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L45)
+[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:45](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L45)
 
 ___
 
@@ -198,4 +198,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:37](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L37)
+[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:37](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L37)

@@ -41,7 +41,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/StateStore/types/StateStore.ts:19](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/StateStore/types/StateStore.ts#L19)
+[packages/core/src/core/StateStore/types/StateStore.ts:19](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/StateStore/types/StateStore.ts#L19)
 
 ___
 
@@ -53,7 +53,7 @@ name of store
 
 #### Defined in
 
-[packages/core/src/core/StateStore/types/StateStore.ts:12](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/StateStore/types/StateStore.ts#L12)
+[packages/core/src/core/StateStore/types/StateStore.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/StateStore/types/StateStore.ts#L12)
 
 ___
 
@@ -73,7 +73,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/StateStore/types/StateStore.ts:26](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/StateStore/types/StateStore.ts#L26)
+[packages/core/src/core/StateStore/types/StateStore.ts:26](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/StateStore/types/StateStore.ts#L26)
 
 ___
 
@@ -97,7 +97,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/StateStore/types/StateStore.ts:34](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/StateStore/types/StateStore.ts#L34)
+[packages/core/src/core/StateStore/types/StateStore.ts:34](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/StateStore/types/StateStore.ts#L34)
 
 ## Methods
 
@@ -113,4 +113,4 @@ disconnects and shuts down the state store
 
 #### Defined in
 
-[packages/core/src/core/StateStore/types/StateStore.ts:39](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/StateStore/types/StateStore.ts#L39)
+[packages/core/src/core/StateStore/types/StateStore.ts:39](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/StateStore/types/StateStore.ts#L39)

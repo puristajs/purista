@@ -355,16 +355,16 @@ packages/core/lib/core/types/ServiceClass.d.ts:9
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `commandDefinitionList` | [`CommandDefinitionList`](purista_k8s_sdk.internal.md#commanddefinitionlist)<`any`\> | the list of command definitions for this service |
-| `config` | `ConfigType` | the service specific config |
-| `configStore?` | [`ConfigStore`](../interfaces/purista_k8s_sdk.internal.ConfigStore.md) | the config store instance |
-| `eventBridge` | [`EventBridge`](../interfaces/purista_k8s_sdk.internal.EventBridge.md) | the eventBridge instance |
-| `info` | [`ServiceInfoType`](purista_k8s_sdk.internal.md#serviceinfotype) | the service info with name, version and description of service |
-| `logger` | [`Logger`](../classes/purista_k8s_sdk.internal.Logger.md) | the logger instance |
-| `secretStore?` | [`SecretStore`](../interfaces/purista_k8s_sdk.internal.SecretStore.md) | the secret store instance |
-| `spanProcessor?` | `SpanProcessor` | the opentelemetry span processor instance |
+| `commandDefinitionList` | [`CommandDefinitionList`](purista_k8s_sdk.internal.md#commanddefinitionlist)<`any`\> | The list of command definitions for this service |
+| `config` | `ConfigType` | The service specific config |
+| `configStore?` | [`ConfigStore`](../interfaces/purista_k8s_sdk.internal.ConfigStore.md) | The config store instance |
+| `eventBridge` | [`EventBridge`](../interfaces/purista_k8s_sdk.internal.EventBridge.md) | The eventBridge instance |
+| `info` | [`ServiceInfoType`](purista_k8s_sdk.internal.md#serviceinfotype) | The service info with name, version and description of service |
+| `logger` | [`Logger`](../classes/purista_k8s_sdk.internal.Logger.md) | A logger instance |
+| `secretStore?` | [`SecretStore`](../interfaces/purista_k8s_sdk.internal.SecretStore.md) | The secret store instance |
+| `spanProcessor?` | `SpanProcessor` | The opentelemetry span processor instance |
 | `stateStore?` | [`StateStore`](../interfaces/purista_k8s_sdk.internal.StateStore.md) | the state store instance |
-| `subscriptionDefinitionList` | [`SubscriptionDefinitionList`](purista_k8s_sdk.internal.md#subscriptiondefinitionlist)<`any`\> | the list of subscription definitions for this service |
+| `subscriptionDefinitionList` | [`SubscriptionDefinitionList`](purista_k8s_sdk.internal.md#subscriptiondefinitionlist)<`any`\> | The list of subscription definitions for this service |
 
 #### Defined in
 
@@ -1199,6 +1199,7 @@ const inputPayload = { my: 'input' }
 const inputParameter = { search: 'for_me' }
 
 const result = await invoke<MyResultType>(address, inputPayload inputParameter )
+```
 
 ##### Type parameters
 
@@ -1222,7 +1223,7 @@ const result = await invoke<MyResultType>(address, inputPayload inputParameter )
 
 #### Defined in
 
-packages/core/lib/core/types/InvokeFunction.d.ts:19
+packages/core/lib/core/types/InvokeFunction.d.ts:20
 
 ___
 
@@ -1583,7 +1584,7 @@ The command function context which will be passed into command function.
 
 #### Defined in
 
-packages/core/lib/core/types/commandType/CommandFunctionContext.d.ts:43
+packages/core/lib/core/types/commandType/CommandFunctionContext.d.ts:44
 
 ___
 
@@ -1609,7 +1610,7 @@ Also, the methods:
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `emit` | [`EmitCustomMessageFunction`](purista_k8s_sdk.internal.md#emitcustommessagefunction) | emit a custom message |
-| `invoke` | [`InvokeFunction`](purista_k8s_sdk.internal.md#invokefunction) | Invokes a command and returns the result. It is recommended to validate the result against a schema which only contains the data you actually need. **`Example`** ```typescript const address: EBMessageAddress = { serviceName: 'name-of-service-to-invoke', serviceVersion: '1', serviceTarget: 'command-name-to-invoke', } const inputPayload = { my: 'input' } const inputParameter = { search: 'for_me' } const result = await invoke<MyResultType>(address, inputPayload inputParameter ) |
+| `invoke` | [`InvokeFunction`](purista_k8s_sdk.internal.md#invokefunction) | Invokes a command and returns the result. It is recommended to validate the result against a schema which only contains the data you actually need. **`Example`** ```typescript const address: EBMessageAddress = { serviceName: 'name-of-service-to-invoke', serviceVersion: '1', serviceTarget: 'command-name-to-invoke', } const inputPayload = { my: 'input' } const inputParameter = { search: 'for_me' } const result = await invoke<MyResultType>(address, inputPayload inputParameter ) ``` |
 | `message` | `Readonly`<[`Command`](purista_k8s_sdk.internal.md#command-1)<`MessagePayloadType`, `MessageParamsType`\>\> | the original message |
 
 #### Defined in
@@ -1981,7 +1982,7 @@ The subscription function context which will be passed into subscription functio
 
 #### Defined in
 
-packages/core/lib/core/types/subscription/SubscriptionFunctionContext.d.ts:43
+packages/core/lib/core/types/subscription/SubscriptionFunctionContext.d.ts:44
 
 ___
 
@@ -2000,7 +2001,7 @@ Also, the methods:
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `emit` | [`EmitCustomMessageFunction`](purista_k8s_sdk.internal.md#emitcustommessagefunction) | emit a custom message |
-| `invoke` | [`InvokeFunction`](purista_k8s_sdk.internal.md#invokefunction) | Invokes a command and returns the result. It is recommended to validate the result against a schema which only contains the data you actually need. **`Example`** ```typescript const address: EBMessageAddress = { serviceName: 'name-of-service-to-invoke', serviceVersion: '1', serviceTarget: 'command-name-to-invoke', } const inputPayload = { my: 'input' } const inputParameter = { search: 'for_me' } const result = await invoke<MyResultType>(address, inputPayload inputParameter ) |
+| `invoke` | [`InvokeFunction`](purista_k8s_sdk.internal.md#invokefunction) | Invokes a command and returns the result. It is recommended to validate the result against a schema which only contains the data you actually need. **`Example`** ```typescript const address: EBMessageAddress = { serviceName: 'name-of-service-to-invoke', serviceVersion: '1', serviceTarget: 'command-name-to-invoke', } const inputPayload = { my: 'input' } const inputParameter = { search: 'for_me' } const result = await invoke<MyResultType>(address, inputPayload inputParameter ) ``` |
 | `message` | `Readonly`<[`EBMessage`](purista_k8s_sdk.internal.md#ebmessage)\> | the original message |
 
 #### Defined in

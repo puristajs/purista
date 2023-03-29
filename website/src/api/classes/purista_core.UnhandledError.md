@@ -57,7 +57,7 @@ Error.constructor
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:14](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Error/UnhandledError.impl.ts#L14)
+[packages/core/src/core/Error/UnhandledError.impl.ts:14](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L14)
 
 ## Properties
 
@@ -67,7 +67,7 @@ Error.constructor
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:17](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Error/UnhandledError.impl.ts#L17)
+[packages/core/src/core/Error/UnhandledError.impl.ts:17](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L17)
 
 ___
 
@@ -77,7 +77,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:15](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Error/UnhandledError.impl.ts#L15)
+[packages/core/src/core/Error/UnhandledError.impl.ts:15](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L15)
 
 ___
 
@@ -87,7 +87,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:18](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Error/UnhandledError.impl.ts#L18)
+[packages/core/src/core/Error/UnhandledError.impl.ts:18](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L18)
 
 ## Methods
 
@@ -105,7 +105,7 @@ ErrorResponsePayload
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:61](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Error/UnhandledError.impl.ts#L61)
+[packages/core/src/core/Error/UnhandledError.impl.ts:61](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L61)
 
 ___
 
@@ -123,7 +123,7 @@ HandledError
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:53](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Error/UnhandledError.impl.ts#L53)
+[packages/core/src/core/Error/UnhandledError.impl.ts:53](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L53)
 
 ___
 
@@ -141,7 +141,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:76](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Error/UnhandledError.impl.ts#L76)
+[packages/core/src/core/Error/UnhandledError.impl.ts:76](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L76)
 
 ___
 
@@ -168,7 +168,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Error/UnhandledError.impl.ts#L42)
+[packages/core/src/core/Error/UnhandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L42)
 
 ___
 
@@ -192,4 +192,4 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:29](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Error/UnhandledError.impl.ts#L29)
+[packages/core/src/core/Error/UnhandledError.impl.ts:29](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L29)

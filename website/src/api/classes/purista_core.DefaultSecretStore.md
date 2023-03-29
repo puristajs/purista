@@ -81,7 +81,7 @@ const store = new DefaultSecretStore({
 
 #### Defined in
 
-[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:35](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L35)
+[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:35](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L35)
 
 ## Properties
 
@@ -95,7 +95,7 @@ const store = new DefaultSecretStore({
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L13)
+[packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L13)
 
 ___
 
@@ -109,7 +109,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L12)
+[packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L12)
 
 ___
 
@@ -119,7 +119,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:34](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L34)
+[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:34](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L34)
 
 ___
 
@@ -139,7 +139,7 @@ name of store
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:15](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L15)
+[packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:15](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L15)
 
 ## Methods
 
@@ -163,7 +163,7 @@ disconnects and shuts down the secret store
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:64](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L64)
+[packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:64](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L64)
 
 ___
 
@@ -191,7 +191,7 @@ SecretStore.getSecret
 
 #### Defined in
 
-[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:47](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L47)
+[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:47](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L47)
 
 ___
 
@@ -219,7 +219,7 @@ SecretStore.removeSecret
 
 #### Defined in
 
-[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:67](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L67)
+[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:67](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L67)
 
 ___
 
@@ -248,4 +248,4 @@ SecretStore.setSecret
 
 #### Defined in
 
-[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:59](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L59)
+[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:59](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L59)

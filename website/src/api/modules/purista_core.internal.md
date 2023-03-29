@@ -29,7 +29,7 @@
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceEvents.ts:87](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/ServiceEvents.ts#L87)
+[packages/core/src/core/types/ServiceEvents.ts:87](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceEvents.ts#L87)
 
 ___
 
@@ -43,7 +43,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:26](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L26)
+[packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:26](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L26)
 
 ___
 
@@ -73,7 +73,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:6](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L6)
+[packages/core/src/core/types/GenericEventEmitter.ts:6](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L6)
 
 ___
 
@@ -126,4 +126,4 @@ const result = await invoke<MyResultType>(address, inputPayload inputParameter )
 
 #### Defined in
 
-[packages/core/src/core/types/InvokeFunction.ts:21](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/InvokeFunction.ts#L21)
+[packages/core/src/core/types/InvokeFunction.ts:21](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/InvokeFunction.ts#L21)

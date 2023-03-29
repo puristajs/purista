@@ -2,6 +2,21 @@
 
 # Module: @purista/amqpbridge
 
+Package for using a AMQP broker like rabbitMQ as event bridge.
+
+Example usage:
+
+**`Example`**
+
+```typescript
+import { AmqpBridge } from '@purista/amqpbridge'
+
+// create and init our eventbridge
+  const eventBridge = new AmqpBridge(undefined)
+  await eventBridge.start()
+
+```
+
 ## Table of contents
 
 ### Namespaces
@@ -45,17 +60,17 @@ AmqpBridge bridge config
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `encoder?` | [`Encoder`](purista_amqpbridge.md#encoder) | the encoder(s) to be used for AMQP messages |
-| `encrypter?` | [`Encrypter`](purista_amqpbridge.md#encrypter) | the encrypter(s) to be used for AMQP messages |
-| `exchangeName?` | `string` | the AMQP exchage name to be used |
+| `encoder?` | [`Encoder`](purista_amqpbridge.md#encoder) | the encoder(s) to be used for AMQP messages **`Default`** jsonEncoder |
+| `encrypter?` | [`Encrypter`](purista_amqpbridge.md#encrypter) | the encrypter(s) to be used for AMQP messages **`Default`** plain |
+| `exchangeName?` | `string` | the AMQP exchage name to be used **`Default`** purista |
 | `exchangeOptions?` | `Options.AssertExchange` | the AMQP exchange options |
-| `namePrefix?` | `string` | the queue prefix to be used for all PURISTA queues except short living queues created by the broker on request |
+| `namePrefix?` | `string` | the queue prefix to be used for all PURISTA queues except short living queues created by the broker on request **`Default`** purista |
 | `socketOptions?` | `any` | socket options |
-| `url?` | `string` \| `Options.Connect` | the AMQP broker url |
+| `url?` | `string` \| `Options.Connect` | the AMQP broker url **`Default`** amqp://localhost |
 
 #### Defined in
 
-[packages/amqpbridge/src/types/AmqpBridgeConfig.ts:11](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L11)
+[packages/amqpbridge/src/types/AmqpBridgeConfig.ts:11](https://github.com/sebastianwessel/purista/blob/8c66693/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L11)
 
 ___
 
@@ -65,7 +80,7 @@ ___
 
 #### Defined in
 
-[packages/amqpbridge/src/types/Encoder.ts:3](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/types/Encoder.ts#L3)
+[packages/amqpbridge/src/types/Encoder.ts:3](https://github.com/sebastianwessel/purista/blob/8c66693/packages/amqpbridge/src/types/Encoder.ts#L3)
 
 ___
 
@@ -82,7 +97,7 @@ ___
 
 #### Defined in
 
-[packages/amqpbridge/src/types/EncryptFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/types/EncryptFunctions.ts#L1)
+[packages/amqpbridge/src/types/EncryptFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/8c66693/packages/amqpbridge/src/types/EncryptFunctions.ts#L1)
 
 ___
 
@@ -92,7 +107,7 @@ ___
 
 #### Defined in
 
-[packages/amqpbridge/src/types/Encrypter.ts:3](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/types/Encrypter.ts#L3)
+[packages/amqpbridge/src/types/Encrypter.ts:3](https://github.com/sebastianwessel/purista/blob/8c66693/packages/amqpbridge/src/types/Encrypter.ts#L3)
 
 ## Variables
 
@@ -102,7 +117,7 @@ ___
 
 #### Defined in
 
-[packages/amqpbridge/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/version.ts#L1)
+[packages/amqpbridge/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/8c66693/packages/amqpbridge/src/version.ts#L1)
 
 ## Functions
 
@@ -125,7 +140,7 @@ ___
 
 #### Defined in
 
-[packages/amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts:8](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts#L8)
+[packages/amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts:8](https://github.com/sebastianwessel/purista/blob/8c66693/packages/amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts#L8)
 
 ___
 
@@ -139,7 +154,7 @@ ___
 
 #### Defined in
 
-[packages/amqpbridge/src/getDefaultConfig.impl.ts:5](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/getDefaultConfig.impl.ts#L5)
+[packages/amqpbridge/src/getDefaultConfig.impl.ts:5](https://github.com/sebastianwessel/purista/blob/8c66693/packages/amqpbridge/src/getDefaultConfig.impl.ts#L5)
 
 ___
 
@@ -159,4 +174,4 @@ ___
 
 #### Defined in
 
-[packages/amqpbridge/src/serializeOtpForAmqpHeader.impl.ts:3](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/amqpbridge/src/serializeOtpForAmqpHeader.impl.ts#L3)
+[packages/amqpbridge/src/serializeOtpForAmqpHeader.impl.ts:3](https://github.com/sebastianwessel/purista/blob/8c66693/packages/amqpbridge/src/serializeOtpForAmqpHeader.impl.ts#L3)
