@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [1.5.0] - 2023-03-29
 
 ### Bug Fixes
 
@@ -40,6 +40,7 @@ All notable changes to this project will be documented in this file.
 - Revamp example #96
 - Update api documentation
 - Update documentation
+- Update CHANGELOG
 
 ### Features
 
