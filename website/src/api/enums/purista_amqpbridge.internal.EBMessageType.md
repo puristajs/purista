@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / EBMessageType
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/amqpbridge](../modules/purista_amqpbridge.md) / [internal](../modules/purista_amqpbridge.internal.md) / EBMessageType
 
 # Enumeration: EBMessageType
 
@@ -36,7 +36,7 @@ If the sender does not receive a answer within this time frame, the command will
 
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:11
+packages/core/lib/core/types/EBMessageType.enum.d.ts:11
 
 ___
 
@@ -44,9 +44,11 @@ ___
 
 • **CommandErrorResponse** = ``"commandErrorResponse"``
 
+a error response from receiver of a command message
+
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:13
+packages/core/lib/core/types/EBMessageType.enum.d.ts:15
 
 ___
 
@@ -54,9 +56,11 @@ ___
 
 • **CommandSuccessResponse** = ``"commandSuccessResponse"``
 
+a success response from receiver of a command message
+
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:12
+packages/core/lib/core/types/EBMessageType.enum.d.ts:13
 
 ___
 
@@ -64,9 +68,11 @@ ___
 
 • **CustomMessage** = ``"customMessage"``
 
+a custom message / custom event
+
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:28
+packages/core/lib/core/types/EBMessageType.enum.d.ts:39
 
 ___
 
@@ -74,9 +80,11 @@ ___
 
 • **InfoInvokeTimeout** = ``"infoInvokeTimeout"``
 
+a service invoked a other function and did not get a answer within given ttl
+
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:26
+packages/core/lib/core/types/EBMessageType.enum.d.ts:35
 
 ___
 
@@ -84,9 +92,11 @@ ___
 
 • **InfoServiceDrain** = ``"infoServiceDrain"``
 
+indicates that a service is going to shut down and does no longer accept new requests
+
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:24
+packages/core/lib/core/types/EBMessageType.enum.d.ts:31
 
 ___
 
@@ -94,9 +104,11 @@ ___
 
 • **InfoServiceFunctionAdded** = ``"infoServiceFunctionAdded"``
 
+send when a service provides a new function
+
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:23
+packages/core/lib/core/types/EBMessageType.enum.d.ts:29
 
 ___
 
@@ -104,14 +116,11 @@ ___
 
 • **InfoServiceInit** = ``"infoServiceInit"``
 
-Info message type:
-Message which is sent from a single sender to unspecified receivers.
-The sender does not expect any answer to this message and does not process any reply to this message.
-Info messages are fire & forget broadcasting messages.
+indicates that a service is booting
 
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:20
+packages/core/lib/core/types/EBMessageType.enum.d.ts:23
 
 ___
 
@@ -119,9 +128,11 @@ ___
 
 • **InfoServiceNotReady** = ``"infoServiceNotReady"``
 
+indicates that a service is not able to process requests (e.g. db not available)
+
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:22
+packages/core/lib/core/types/EBMessageType.enum.d.ts:27
 
 ___
 
@@ -129,9 +140,11 @@ ___
 
 • **InfoServiceReady** = ``"infoServiceReady"``
 
+indicates that a service is ready
+
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:21
+packages/core/lib/core/types/EBMessageType.enum.d.ts:25
 
 ___
 
@@ -139,9 +152,11 @@ ___
 
 • **InfoServiceShutdown** = ``"infoServiceShutdown"``
 
+last event from service before service is destroyed
+
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:25
+packages/core/lib/core/types/EBMessageType.enum.d.ts:33
 
 ___
 
@@ -149,6 +164,8 @@ ___
 
 • **InfoSubscriptionError** = ``"infoSubscriptionError"``
 
+a subscription function is throwing
+
 #### Defined in
 
-core/lib/core/types/EBMessageType.enum.d.ts:27
+packages/core/lib/core/types/EBMessageType.enum.d.ts:37

@@ -1,8 +1,11 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / StatusCode
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / StatusCode
 
 # Enumeration: StatusCode
 
 [@purista/httpserver](../modules/purista_httpserver.md).[internal](../modules/purista_httpserver.internal.md).StatusCode
+
+Message and error status codes.
+The codes are based on HTTP status codes
 
 ## Table of contents
 
@@ -82,7 +85,7 @@
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:7
+packages/core/lib/core/types/StatusCode.enum.d.ts:11
 
 ___
 
@@ -92,7 +95,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:13
+packages/core/lib/core/types/StatusCode.enum.d.ts:17
 
 ___
 
@@ -102,7 +105,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:57
+packages/core/lib/core/types/StatusCode.enum.d.ts:61
 
 ___
 
@@ -112,7 +115,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:24
+packages/core/lib/core/types/StatusCode.enum.d.ts:28
 
 ___
 
@@ -122,7 +125,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:64
+packages/core/lib/core/types/StatusCode.enum.d.ts:68
 
 ___
 
@@ -132,7 +135,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:33
+packages/core/lib/core/types/StatusCode.enum.d.ts:37
 
 ___
 
@@ -142,7 +145,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:6
+packages/core/lib/core/types/StatusCode.enum.d.ts:10
 
 ___
 
@@ -152,7 +155,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:41
+packages/core/lib/core/types/StatusCode.enum.d.ts:45
 
 ___
 
@@ -162,7 +165,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:27
+packages/core/lib/core/types/StatusCode.enum.d.ts:31
 
 ___
 
@@ -172,7 +175,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:59
+packages/core/lib/core/types/StatusCode.enum.d.ts:63
 
 ___
 
@@ -182,7 +185,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:34
+packages/core/lib/core/types/StatusCode.enum.d.ts:38
 
 ___
 
@@ -192,7 +195,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:60
+packages/core/lib/core/types/StatusCode.enum.d.ts:64
 
 ___
 
@@ -202,7 +205,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:14
+packages/core/lib/core/types/StatusCode.enum.d.ts:18
 
 ___
 
@@ -212,7 +215,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:42
+packages/core/lib/core/types/StatusCode.enum.d.ts:46
 
 ___
 
@@ -222,7 +225,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:2
+packages/core/lib/core/types/StatusCode.enum.d.ts:6
 
 ___
 
@@ -232,7 +235,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:4
+packages/core/lib/core/types/StatusCode.enum.d.ts:8
 
 ___
 
@@ -242,7 +245,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:3
+packages/core/lib/core/types/StatusCode.enum.d.ts:7
 
 ___
 
@@ -252,7 +255,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:62
+packages/core/lib/core/types/StatusCode.enum.d.ts:66
 
 ___
 
@@ -262,7 +265,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:55
+packages/core/lib/core/types/StatusCode.enum.d.ts:59
 
 ___
 
@@ -272,7 +275,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:53
+packages/core/lib/core/types/StatusCode.enum.d.ts:57
 
 ___
 
@@ -282,7 +285,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:35
+packages/core/lib/core/types/StatusCode.enum.d.ts:39
 
 ___
 
@@ -292,7 +295,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:45
+packages/core/lib/core/types/StatusCode.enum.d.ts:49
 
 ___
 
@@ -302,7 +305,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:50
+packages/core/lib/core/types/StatusCode.enum.d.ts:54
 
 ___
 
@@ -312,7 +315,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:63
+packages/core/lib/core/types/StatusCode.enum.d.ts:67
 
 ___
 
@@ -322,7 +325,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:29
+packages/core/lib/core/types/StatusCode.enum.d.ts:33
 
 ___
 
@@ -332,7 +335,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:43
+packages/core/lib/core/types/StatusCode.enum.d.ts:47
 
 ___
 
@@ -342,7 +345,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:12
+packages/core/lib/core/types/StatusCode.enum.d.ts:16
 
 ___
 
@@ -352,7 +355,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:66
+packages/core/lib/core/types/StatusCode.enum.d.ts:70
 
 ___
 
@@ -362,7 +365,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:9
+packages/core/lib/core/types/StatusCode.enum.d.ts:13
 
 ___
 
@@ -372,7 +375,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:8
+packages/core/lib/core/types/StatusCode.enum.d.ts:12
 
 ___
 
@@ -382,7 +385,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:30
+packages/core/lib/core/types/StatusCode.enum.d.ts:34
 
 ___
 
@@ -392,7 +395,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:65
+packages/core/lib/core/types/StatusCode.enum.d.ts:69
 
 ___
 
@@ -402,7 +405,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:28
+packages/core/lib/core/types/StatusCode.enum.d.ts:32
 
 ___
 
@@ -412,7 +415,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:56
+packages/core/lib/core/types/StatusCode.enum.d.ts:60
 
 ___
 
@@ -422,7 +425,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:5
+packages/core/lib/core/types/StatusCode.enum.d.ts:9
 
 ___
 
@@ -432,7 +435,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:11
+packages/core/lib/core/types/StatusCode.enum.d.ts:15
 
 ___
 
@@ -442,7 +445,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:37
+packages/core/lib/core/types/StatusCode.enum.d.ts:41
 
 ___
 
@@ -452,7 +455,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:26
+packages/core/lib/core/types/StatusCode.enum.d.ts:30
 
 ___
 
@@ -462,7 +465,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:36
+packages/core/lib/core/types/StatusCode.enum.d.ts:40
 
 ___
 
@@ -472,7 +475,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:47
+packages/core/lib/core/types/StatusCode.enum.d.ts:51
 
 ___
 
@@ -482,7 +485,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:31
+packages/core/lib/core/types/StatusCode.enum.d.ts:35
 
 ___
 
@@ -492,7 +495,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:40
+packages/core/lib/core/types/StatusCode.enum.d.ts:44
 
 ___
 
@@ -502,7 +505,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:17
+packages/core/lib/core/types/StatusCode.enum.d.ts:21
 
 ___
 
@@ -512,7 +515,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:16
+packages/core/lib/core/types/StatusCode.enum.d.ts:20
 
 ___
 
@@ -522,7 +525,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:15
+packages/core/lib/core/types/StatusCode.enum.d.ts:19
 
 ___
 
@@ -532,7 +535,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:19
+packages/core/lib/core/types/StatusCode.enum.d.ts:23
 
 ___
 
@@ -542,7 +545,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:23
+packages/core/lib/core/types/StatusCode.enum.d.ts:27
 
 ___
 
@@ -552,7 +555,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:18
+packages/core/lib/core/types/StatusCode.enum.d.ts:22
 
 ___
 
@@ -562,7 +565,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:21
+packages/core/lib/core/types/StatusCode.enum.d.ts:25
 
 ___
 
@@ -572,7 +575,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:22
+packages/core/lib/core/types/StatusCode.enum.d.ts:26
 
 ___
 
@@ -582,7 +585,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:20
+packages/core/lib/core/types/StatusCode.enum.d.ts:24
 
 ___
 
@@ -592,7 +595,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:49
+packages/core/lib/core/types/StatusCode.enum.d.ts:53
 
 ___
 
@@ -602,7 +605,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:32
+packages/core/lib/core/types/StatusCode.enum.d.ts:36
 
 ___
 
@@ -612,7 +615,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:10
+packages/core/lib/core/types/StatusCode.enum.d.ts:14
 
 ___
 
@@ -622,7 +625,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:51
+packages/core/lib/core/types/StatusCode.enum.d.ts:55
 
 ___
 
@@ -632,7 +635,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:58
+packages/core/lib/core/types/StatusCode.enum.d.ts:62
 
 ___
 
@@ -642,7 +645,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:54
+packages/core/lib/core/types/StatusCode.enum.d.ts:58
 
 ___
 
@@ -652,7 +655,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:48
+packages/core/lib/core/types/StatusCode.enum.d.ts:52
 
 ___
 
@@ -662,7 +665,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:38
+packages/core/lib/core/types/StatusCode.enum.d.ts:42
 
 ___
 
@@ -672,7 +675,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:25
+packages/core/lib/core/types/StatusCode.enum.d.ts:29
 
 ___
 
@@ -682,7 +685,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:52
+packages/core/lib/core/types/StatusCode.enum.d.ts:56
 
 ___
 
@@ -692,7 +695,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:44
+packages/core/lib/core/types/StatusCode.enum.d.ts:48
 
 ___
 
@@ -702,7 +705,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:39
+packages/core/lib/core/types/StatusCode.enum.d.ts:43
 
 ___
 
@@ -712,7 +715,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:46
+packages/core/lib/core/types/StatusCode.enum.d.ts:50
 
 ___
 
@@ -722,4 +725,4 @@ ___
 
 #### Defined in
 
-core/lib/core/types/StatusCode.enum.d.ts:61
+packages/core/lib/core/types/StatusCode.enum.d.ts:65

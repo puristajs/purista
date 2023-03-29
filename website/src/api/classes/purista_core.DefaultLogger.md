@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / DefaultLogger
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / DefaultLogger
 
 # Class: DefaultLogger
 
@@ -44,7 +44,7 @@
 
 | Name | Type |
 | :------ | :------ |
-| `log` | `Logger`<`LoggerOptions`\> |
+| `log` | `Logger` |
 
 #### Overrides
 
@@ -52,17 +52,17 @@
 
 #### Defined in
 
-[core/src/core/DefaultLogger/DefaultLogger.impl.ts:6](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L6)
+[packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts:6](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L6)
 
 ## Properties
 
 ### log
 
-• `Private` **log**: `Logger`<`LoggerOptions`\>
+• `Private` **log**: `Logger`
 
 #### Defined in
 
-[core/src/core/DefaultLogger/DefaultLogger.impl.ts:6](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L6)
+[packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts:6](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L6)
 
 ## Methods
 
@@ -90,7 +90,7 @@
 
 #### Defined in
 
-[core/src/core/DefaultLogger/DefaultLogger.impl.ts:42](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L42)
+[packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts:42](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L42)
 
 ___
 
@@ -118,7 +118,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultLogger/DefaultLogger.impl.ts:18](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L18)
+[packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts:18](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L18)
 
 ___
 
@@ -146,7 +146,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultLogger/DefaultLogger.impl.ts:10](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L10)
+[packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts:10](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L10)
 
 ___
 
@@ -170,7 +170,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultLogger/DefaultLogger.impl.ts:58](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L58)
+[packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts:58](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L58)
 
 ___
 
@@ -198,7 +198,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultLogger/DefaultLogger.impl.ts:34](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L34)
+[packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts:34](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L34)
 
 ___
 
@@ -226,7 +226,7 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultLogger/DefaultLogger.impl.ts:50](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L50)
+[packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts:50](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L50)
 
 ___
 
@@ -254,4 +254,4 @@ ___
 
 #### Defined in
 
-[core/src/core/DefaultLogger/DefaultLogger.impl.ts:26](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L26)
+[packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts:26](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/DefaultLogger/DefaultLogger.impl.ts#L26)

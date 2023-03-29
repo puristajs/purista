@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / GenericEventEmitter
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / GenericEventEmitter
 
 # Class: GenericEventEmitter<T\>
 
@@ -13,8 +13,6 @@
 ## Hierarchy
 
 - **`GenericEventEmitter`**
-
-  ↳ [`EventBridge`](purista_httpserver.internal.EventBridge.md)
 
   ↳ [`ServiceBaseClass`](purista_httpserver.internal.ServiceBaseClass.md)
 
@@ -37,6 +35,7 @@
 - [emit](purista_httpserver.internal.GenericEventEmitter.md#emit)
 - [off](purista_httpserver.internal.GenericEventEmitter.md#off)
 - [on](purista_httpserver.internal.GenericEventEmitter.md#on)
+- [removeAllListeners](purista_httpserver.internal.GenericEventEmitter.md#removealllisteners)
 
 ## Constructors
 
@@ -58,13 +57,13 @@
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:10
+packages/core/lib/core/types/GenericEventEmitter.d.ts:10
 
 ## Methods
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter`): `void`
+▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
@@ -77,7 +76,7 @@ core/lib/core/types/GenericEventEmitter.d.ts:10
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `parameter` | `T`[`K`] |
+| `parameter?` | `T`[`K`] |
 
 #### Returns
 
@@ -89,7 +88,7 @@ core/lib/core/types/GenericEventEmitter.d.ts:10
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:13
+packages/core/lib/core/types/GenericEventEmitter.d.ts:13
 
 ___
 
@@ -120,7 +119,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:12
+packages/core/lib/core/types/GenericEventEmitter.d.ts:12
 
 ___
 
@@ -151,4 +150,18 @@ ___
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:11
+packages/core/lib/core/types/GenericEventEmitter.d.ts:11
+
+___
+
+### removeAllListeners
+
+▸ **removeAllListeners**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+packages/core/lib/core/types/GenericEventEmitter.d.ts:14

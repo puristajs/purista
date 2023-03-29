@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / IEmitter
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/httpserver](../modules/purista_httpserver.md) / [internal](../modules/purista_httpserver.internal.md) / IEmitter
 
 # Interface: IEmitter<T\>
 
@@ -26,7 +26,7 @@
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter`): `void`
+▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
@@ -39,7 +39,7 @@
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `parameter` | `T`[`K`] |
+| `parameter?` | `T`[`K`] |
 
 #### Returns
 
@@ -47,7 +47,7 @@
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:7
+packages/core/lib/core/types/GenericEventEmitter.d.ts:7
 
 ___
 
@@ -74,7 +74,7 @@ ___
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:6
+packages/core/lib/core/types/GenericEventEmitter.d.ts:6
 
 ___
 
@@ -101,4 +101,4 @@ ___
 
 #### Defined in
 
-core/lib/core/types/GenericEventEmitter.d.ts:5
+packages/core/lib/core/types/GenericEventEmitter.d.ts:5

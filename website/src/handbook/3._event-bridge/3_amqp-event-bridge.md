@@ -4,20 +4,12 @@ title: AMQP event bridge
 shortTitle: AMQP
 description: AMQP event bridge
 tag:
-  - typescript
-  - nodejs
-  - javascript
-  - backend
-  - framework
-  - cloud
-  - microservice
-  - lambda
-  - Installation
-  - Setup
-  - Guide
+  - event bridge
+  - AMQP
+  - rabbitMQ
 ---
 
-## Useage
+## General
 
 The AMQP protocol and the corresponding brokers are perfectly for PURISTA.
 
@@ -33,22 +25,50 @@ You can:
 - you can split even more down to single function and subscription level
 - you are able to connect other systems via the amqp broker
 
+::: tip Pros
+
+- allows scaling
+- full subscription support
+- support of durable queues
+- retry mechanism
+- dead letter queues
+:::
+
+::: danger Cons
+
+- needs managing of an AMQP broker
+:::
+
+## Config
+
+The AMQP event bridge uses the unified configuration schema as all event bridges.  
+
+::: info API documentation
+
+- [General event bridge config](../../api/modules/purista_core.html#eventbridgeconfig)
+- [AMQP bridge config](../../api/modules/purista_amqpbridge.html#amqpbridgeconfig)
+:::
+
+## Example
+
 The easiest way to start - simply start a RabbitMQ docker container:
 
 ```sh
 docker run --rm -it --hostname my-rabbit -p 15672:15672 -p 5672:5672 rabbitmq:3-management
 ```
 
-### Pros
+Add the AMQP bridge to your code:
 
-- allows scaling
-- full subscription support
+```typescript
+import { AmqpBridge, AmqpBridgeConfig } from '@purista/amqpbridge'
 
-### Cons
+// create and init our eventbridge
 
-- needs managing of an AMQP broker
+const config:AmqpBridgeConfig = { 
+    url: 'amqp://my-amqp-host.example.com'
+  }
 
-## Config
+const eventBridge = new AmqpBridge({ config })
+await eventBridge.start()
 
-## Example
-
+```

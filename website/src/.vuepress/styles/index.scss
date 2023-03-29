@@ -2,9 +2,11 @@
 @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;900&display=swap');
 
 $--font-family-fancy: 'Raleway', sans-serif !important;
+$--font-family: 'Raleway', sans-serif !important;
+$--font-family-heading: 'Raleway', sans-serif !important;
 
-body {
-  font-family: 'Raleway', sans-serif;
+body, .blog-main {
+  font-family: 'Raleway', sans-serif !important;
   font-size: 18px;
 }
 
@@ -81,30 +83,9 @@ font-weight: 400;
 }
 
 
-@-webkit-keyframes dash {
-  to {
-    stroke-dashoffset: 1000;
-  }
-}
-
-@keyframes dash {
-  to {
-    stroke-dashoffset: 1000;
-  }
-}
-
-.animated-line {
-  -webkit-animation: dash 30s linear infinite;
-  animation: dash 30s linear infinite;
-  stroke-dasharray: 8;
-}
-
-.reverse {
-  animation-direction: reverse;
-}
-
 .theme-hope-content:not(.custom)>p,
 .theme-hope-content:not(.custom)>ul p,
 .theme-hope-content:not(.custom)>ol p {
   word-break: keep-all;
 }
+

@@ -21,12 +21,14 @@ tag:
 
 | name                                        | scale | subscriptions*                        | durable   | status   |
 |---                                          |---    |---                                    |---        |---       |
-| [__Default__](./2_default-event-bridge.md)  | 🚫     | ✅ __complex__                        | 🚫        | available   |
-| [__AMQP__](./3_amqp-event-bridge.md)        | ✅     | ✅ __complex__                        | ✅        | available   |
-| [__Dapr__](./4_dapr.md)                     | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/85) |
-| [__MQTT__](./5_mqtt.md)                     | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/98) |
-| __AWS EventBridge__                         | ✅     | ☑️ _event only<br>(max 5 per event)_   | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/99)|
-| [__KubeMQ__ ](./6_kubemq.md)                | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/64)     |
+| [__Default__](./2_default-event-bridge.md)  | 🚫     | ✅ __complex__                        | 🚫        | stable   |
+| [__MQTT__](./4_mqtt.md)                     | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/98) |
+| [__AMQP__](./3_amqp-event-bridge.md)        | ✅     | ✅ __complex__                        | ✅        | beta   |
+| [__KubeMQ__](./6_kubemq.md)                | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/64)     |
+| [__NATS__](./7_nats.md)                | ✅     | 🔎 under investigation                       | 🔎        | [requested](https://github.com/sebastianwessel/purista/issues/64)     |
+| [__Dapr__](./5_dapr.md)                     | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/85) |
+| [__Knative__](./9_knative.md)| ✅     | 🔎 under investigation   | 🔎        | [requested](https://github.com/sebastianwessel/purista/issues/113)|
+| [__AWS EventBridge__](./8_aws_eventbridge.md)| ✅     | ☑️ _event only<br>(max 5 per event)_   | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/99)|
 
 __(*)__ _- complex = based on events and/or additional properties like sender, receiver, type_  
 __(*)__ _- event only = subscriptions can subscribe to event names only_  
@@ -40,11 +42,9 @@ The concept of PURISTA is based on "some" message broker. The message broker is 
 
 There are a lot of different message system out there. So the question is, which one to choose. So, what features should an ideal message broker provide.
 
-
-
 ### Push based
 
-The broker should actively deliver messages to the client instead of client pull. The reason is, that if you deploy in serverless function style, single functions are stateless, and the single instances are only existing at the time of execution. So, there is no instance at all, which can  continuously pulling for new messages.
+The broker should actively deliver messages to the client instead of client pull. The reason is, that if you deploy in serverless function style, single functions are stateless, and the single instances are only existing at the time of execution. So, there is no real instance at all, which can  continuously pulling for new messages.
 
 ### Queues
 
@@ -70,11 +70,5 @@ But what about subscriptions? Subscriptions are kind of dynamic and unknown. You
 
 Also, you do not want to have a 1:1 relation. You always have one message producer, but you might have n message consumers.
 
-The broker must be able to deliver the same message to n different consumers, based on the message and the consumers.
+The broker should be able to deliver the same message to n different consumers, based on the message and the consumers.
 
-## Apache Kafka
-
-[Apache Kafka](https://kafka.apache.org) is a very popular message broker with a focus on stream processing.  
-But, as Kafka is a pull based broker, lacks a out-of-box request-response pattern, it currently does not fit the basic requirements.  
-
-There are currently no plans to use Kafka as event bridge backbone for PURISTA.

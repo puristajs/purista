@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / [internal](../modules/purista_core.internal.md) / ServiceBaseClass
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / [internal](../modules/purista_core.internal.md) / ServiceBaseClass
 
 # Class: ServiceBaseClass
 
@@ -16,7 +16,7 @@ Class which contains basic functions that are not directly related to
 
   ↳ **`ServiceBaseClass`**
 
-  ↳↳ [`ServiceClass`](purista_core.ServiceClass.md)
+  ↳↳ [`Service`](purista_core.Service.md)
 
 ## Table of contents
 
@@ -26,10 +26,13 @@ Class which contains basic functions that are not directly related to
 
 ### Properties
 
+- [configStore](purista_core.internal.ServiceBaseClass.md#configstore)
 - [eventBridge](purista_core.internal.ServiceBaseClass.md#eventbridge)
 - [info](purista_core.internal.ServiceBaseClass.md#info)
-- [serviceLogger](purista_core.internal.ServiceBaseClass.md#servicelogger)
+- [logger](purista_core.internal.ServiceBaseClass.md#logger)
+- [secretStore](purista_core.internal.ServiceBaseClass.md#secretstore)
 - [spanProcessor](purista_core.internal.ServiceBaseClass.md#spanprocessor)
+- [stateStore](purista_core.internal.ServiceBaseClass.md#statestore)
 - [traceProvider](purista_core.internal.ServiceBaseClass.md#traceprovider)
 
 ### Accessors
@@ -43,6 +46,7 @@ Class which contains basic functions that are not directly related to
 - [getTracer](purista_core.internal.ServiceBaseClass.md#gettracer)
 - [off](purista_core.internal.ServiceBaseClass.md#off)
 - [on](purista_core.internal.ServiceBaseClass.md#on)
+- [removeAllListeners](purista_core.internal.ServiceBaseClass.md#removealllisteners)
 - [startActiveSpan](purista_core.internal.ServiceBaseClass.md#startactivespan)
 - [wrapInSpan](purista_core.internal.ServiceBaseClass.md#wrapinspan)
 
@@ -50,16 +54,20 @@ Class which contains basic functions that are not directly related to
 
 ### constructor
 
-• **new ServiceBaseClass**(`baseLogger`, `info`, `eventBridge`, `spanProcessor?`)
+• **new ServiceBaseClass**(`options`)
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `baseLogger` | [`Logger`](purista_core.Logger.md) |
-| `info` | [`ServiceInfoType`](../modules/purista_core.md#serviceinfotype) |
-| `eventBridge` | [`EventBridge`](purista_core.EventBridge.md) |
-| `spanProcessor?` | `SpanProcessor` |
+| `options` | `Object` |
+| `options.configStore` | [`ConfigStore`](../interfaces/purista_core.ConfigStore.md) |
+| `options.eventBridge` | [`EventBridge`](../interfaces/purista_core.EventBridge.md) |
+| `options.info` | [`ServiceInfoType`](../modules/purista_core.md#serviceinfotype) |
+| `options.logger` | [`Logger`](purista_core.Logger.md) |
+| `options.secretStore` | [`SecretStore`](../interfaces/purista_core.SecretStore.md) |
+| `options.spanProcessor?` | `SpanProcessor` |
+| `options.stateStore` | [`StateStore`](../interfaces/purista_core.StateStore.md) |
 
 #### Overrides
 
@@ -67,17 +75,27 @@ Class which contains basic functions that are not directly related to
 
 #### Defined in
 
-[core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:28](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L28)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:38](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L38)
 
 ## Properties
 
-### eventBridge
+### configStore
 
-• **eventBridge**: [`EventBridge`](purista_core.EventBridge.md)
+• **configStore**: [`ConfigStore`](../interfaces/purista_core.ConfigStore.md)
 
 #### Defined in
 
-[core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:20](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L20)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:35](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L35)
+
+___
+
+### eventBridge
+
+• **eventBridge**: [`EventBridge`](../interfaces/purista_core.EventBridge.md)
+
+#### Defined in
+
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:26](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L26)
 
 ___
 
@@ -87,17 +105,27 @@ ___
 
 #### Defined in
 
-[core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:18](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L18)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:24](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L24)
 
 ___
 
-### serviceLogger
+### logger
 
-• **serviceLogger**: [`Logger`](purista_core.Logger.md)
+• **logger**: [`Logger`](purista_core.Logger.md)
 
 #### Defined in
 
-[core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:22](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L22)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:28](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L28)
+
+___
+
+### secretStore
+
+• **secretStore**: [`SecretStore`](../interfaces/purista_core.SecretStore.md)
+
+#### Defined in
+
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:34](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L34)
 
 ___
 
@@ -107,7 +135,17 @@ ___
 
 #### Defined in
 
-[core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:24](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L24)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:30](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L30)
+
+___
+
+### stateStore
+
+• **stateStore**: [`StateStore`](../interfaces/purista_core.StateStore.md)
+
+#### Defined in
+
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:36](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L36)
 
 ___
 
@@ -117,7 +155,7 @@ ___
 
 #### Defined in
 
-[core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:26](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L26)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:32](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L32)
 
 ## Accessors
 
@@ -133,7 +171,7 @@ Get service info
 
 #### Defined in
 
-[core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:72](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L72)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:94](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L94)
 
 ## Methods
 
@@ -147,13 +185,13 @@ Get service info
 
 #### Defined in
 
-[core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:164](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L164)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:191](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L191)
 
 ___
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter`): `void`
+▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
@@ -166,7 +204,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `parameter` | [`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`] |
+| `parameter?` | [`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`] |
 
 #### Returns
 
@@ -178,15 +216,22 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[packages/core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
 ### getTracer
 
-▸ **getTracer**(): `Tracer`
+▸ **getTracer**(`name?`, `version?`): `Tracer`
 
 Returns open telemetry tracer of this service
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `name?` | `string` |
+| `version?` | `string` |
 
 #### Returns
 
@@ -196,7 +241,7 @@ Tracer
 
 #### Defined in
 
-[core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:81](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L81)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:103](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L103)
 
 ___
 
@@ -227,7 +272,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[packages/core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -258,7 +303,25 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[packages/core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+
+___
+
+### removeAllListeners
+
+▸ **removeAllListeners**(): `void`
+
+#### Returns
+
+`void`
+
+#### Inherited from
+
+[GenericEventEmitter](purista_core.GenericEventEmitter.md).[removeAllListeners](purista_core.GenericEventEmitter.md#removealllisteners)
+
+#### Defined in
+
+[packages/core/src/core/types/GenericEventEmitter.ts:28](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L28)
 
 ___
 
@@ -291,7 +354,7 @@ return value of fn
 
 #### Defined in
 
-[core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:93](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L93)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:118](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L118)
 
 ___
 
@@ -330,4 +393,4 @@ return value of fn
 
 #### Defined in
 
-[core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:142](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L142)
+[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:168](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L168)

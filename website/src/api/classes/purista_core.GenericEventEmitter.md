@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / GenericEventEmitter
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / GenericEventEmitter
 
 # Class: GenericEventEmitter<T\>
 
@@ -14,7 +14,7 @@
 
 - **`GenericEventEmitter`**
 
-  ↳ [`EventBridge`](purista_core.EventBridge.md)
+  ↳ [`EventBridgeBaseClass`](purista_core.EventBridgeBaseClass.md)
 
   ↳ [`ServiceBaseClass`](purista_core.internal.ServiceBaseClass.md)
 
@@ -37,6 +37,7 @@
 - [emit](purista_core.GenericEventEmitter.md#emit)
 - [off](purista_core.GenericEventEmitter.md#off)
 - [on](purista_core.GenericEventEmitter.md#on)
+- [removeAllListeners](purista_core.GenericEventEmitter.md#removealllisteners)
 
 ## Constructors
 
@@ -58,13 +59,13 @@
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:15](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L15)
+[packages/core/src/core/types/GenericEventEmitter.ts:15](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L15)
 
 ## Methods
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter`): `void`
+▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
@@ -77,7 +78,7 @@
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `parameter` | `T`[`K`] |
+| `parameter?` | `T`[`K`] |
 
 #### Returns
 
@@ -89,7 +90,7 @@
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[packages/core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
@@ -120,7 +121,7 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[packages/core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -151,4 +152,18 @@ ___
 
 #### Defined in
 
-[core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[packages/core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+
+___
+
+### removeAllListeners
+
+▸ **removeAllListeners**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+[packages/core/src/core/types/GenericEventEmitter.ts:28](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/core/types/GenericEventEmitter.ts#L28)

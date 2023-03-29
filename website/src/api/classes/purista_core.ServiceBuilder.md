@@ -1,8 +1,13 @@
-[PURISTA API - v1.4.9](../README.md) / [@purista/core](../modules/purista_core.md) / ServiceBuilder
+[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ServiceBuilder
 
 # Class: ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType\>
 
 [@purista/core](../modules/purista_core.md).ServiceBuilder
+
+This class is used to build a service.
+The `ServiceBuilder` class is used to build a service. It has a few methods that are used to add
+command definitions and subscription definitions to the service. It also has a method that is used
+to create an instance of the service class.
 
 ## Type parameters
 
@@ -10,7 +15,7 @@
 | :------ | :------ |
 | `ConfigType` | `Record`<`string`, `unknown`\> |
 | `ConfigInputType` | `Record`<`string`, `unknown`\> |
-| `ServiceClassType` | extends [`ServiceClass`](purista_core.ServiceClass.md) = [`Service`](purista_core.Service.md)<`ConfigType`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md) = [`Service`](purista_core.Service.md)<`ConfigType`\> |
 
 ## Table of contents
 
@@ -21,23 +26,30 @@
 ### Properties
 
 - [SClass](purista_core.ServiceBuilder.md#sclass)
-- [commandFunctions](purista_core.ServiceBuilder.md#commandfunctions)
+- [commandDefinitionList](purista_core.ServiceBuilder.md#commanddefinitionlist)
 - [configSchema](purista_core.ServiceBuilder.md#configschema)
 - [defaultConfig](purista_core.ServiceBuilder.md#defaultconfig)
 - [info](purista_core.ServiceBuilder.md#info)
 - [instance](purista_core.ServiceBuilder.md#instance)
-- [subscriptionList](purista_core.ServiceBuilder.md#subscriptionlist)
+- [subscriptionDefinitionList](purista_core.ServiceBuilder.md#subscriptiondefinitionlist)
 
 ### Methods
 
+- [addCommandDefinition](purista_core.ServiceBuilder.md#addcommanddefinition)
 - [addFunctionDefinition](purista_core.ServiceBuilder.md#addfunctiondefinition)
 - [addSubscriptionDefinition](purista_core.ServiceBuilder.md#addsubscriptiondefinition)
+- [getCommandBuilder](purista_core.ServiceBuilder.md#getcommandbuilder)
+- [getCommandDefinitions](purista_core.ServiceBuilder.md#getcommanddefinitions)
+- [getCustomClass](purista_core.ServiceBuilder.md#getcustomclass)
 - [getFunctionBuilder](purista_core.ServiceBuilder.md#getfunctionbuilder)
 - [getInstance](purista_core.ServiceBuilder.md#getinstance)
 - [getSubscriptionBuilder](purista_core.ServiceBuilder.md#getsubscriptionbuilder)
+- [getSubscriptionDefinitions](purista_core.ServiceBuilder.md#getsubscriptiondefinitions)
 - [setConfigSchema](purista_core.ServiceBuilder.md#setconfigschema)
 - [setCustomClass](purista_core.ServiceBuilder.md#setcustomclass)
 - [setDefaultConfig](purista_core.ServiceBuilder.md#setdefaultconfig)
+- [validateCommandDefinitions](purista_core.ServiceBuilder.md#validatecommanddefinitions)
+- [validateSubscriptionDefinitions](purista_core.ServiceBuilder.md#validatesubscriptiondefinitions)
 
 ## Constructors
 
@@ -51,7 +63,7 @@
 | :------ | :------ |
 | `ConfigType` | `Record`<`string`, `unknown`\> |
 | `ConfigInputType` | `Record`<`string`, `unknown`\> |
-| `ServiceClassType` | extends [`ServiceClass`](purista_core.ServiceClass.md)<`unknown`, `ServiceClassType`\> = [`Service`](purista_core.Service.md)<`ConfigType`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`, `ServiceClassType`\> = [`Service`](purista_core.Service.md)<`ConfigType`\> |
 
 #### Parameters
 
@@ -61,27 +73,27 @@
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:34](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L34)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:52](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L52)
 
 ## Properties
 
 ### SClass
 
-• **SClass**: `any` = `Service`
+• **SClass**: [`Newable`](../modules/purista_core.md#newable)<`any`, `ConfigType`\> = `Service`
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:31](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L31)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:49](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L49)
 
 ___
 
-### commandFunctions
+### commandDefinitionList
 
-• `Private` **commandFunctions**: [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)<`ServiceClassType`\> = `[]`
+• `Private` **commandDefinitionList**: [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)<`ServiceClassType`\> = `[]`
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:23](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L23)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:42](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L42)
 
 ___
 
@@ -91,17 +103,17 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:26](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L26)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:45](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L45)
 
 ___
 
 ### defaultConfig
 
-• `Private` `Optional` **defaultConfig**: `ConfigType`
+• `Private` `Optional` **defaultConfig**: [`Complete`](../modules/purista_core.md#complete)<`ConfigType`\>
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:27](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L27)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:46](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L46)
 
 ___
 
@@ -111,7 +123,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:34](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L34)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:52](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L52)
 
 ___
 
@@ -121,23 +133,51 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:29](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L29)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:48](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L48)
 
 ___
 
-### subscriptionList
+### subscriptionDefinitionList
 
-• `Private` **subscriptionList**: [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)<`ServiceClassType`\> = `[]`
+• `Private` **subscriptionDefinitionList**: [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)<`ServiceClassType`\> = `[]`
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:24](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L24)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:43](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L43)
 
 ## Methods
+
+### addCommandDefinition
+
+▸ **addCommandDefinition**(`...commands`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+
+`addCommandDefinition` adds a list of command definitions to the service builder
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `...commands` | [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)<`ServiceClassType`\> | CommandDefinitionList |
+
+#### Returns
+
+[`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+
+The service builder
+
+#### Defined in
+
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:93](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L93)
+
+___
 
 ### addFunctionDefinition
 
 ▸ **addFunctionDefinition**(`...functions`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+
+**`Deprecated`**
+
+use addCommandDefinition instead of addFunctionDefinition as it will be removed soon.
 
 #### Parameters
 
@@ -151,7 +191,7 @@ ___
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:50](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L50)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:84](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L84)
 
 ___
 
@@ -159,25 +199,90 @@ ___
 
 ▸ **addSubscriptionDefinition**(`...subscription`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
+It adds a subscription definition to the service builder
+
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `...subscription` | [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)<`ServiceClassType`\> |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `...subscription` | [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)<`ServiceClassType`\> | SubscriptionDefinitionList |
 
 #### Returns
 
 [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
+The service builder
+
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:68](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L68)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:116](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L116)
+
+___
+
+### getCommandBuilder
+
+▸ **getCommandBuilder**(`commandName`, `description`, `eventName?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
+
+It returns a new instance of the CommandDefinitionBuilder class, which is a class that is used to
+build a command definition
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `commandName` | `string` | The name of the command. |
+| `description` | `string` | The description of the command. |
+| `eventName?` | `string` | The name of the event that will be emitted when the command is executed. |
+
+#### Returns
+
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
+
+A CommandDefinitionBuilder object.
+
+#### Defined in
+
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:242](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L242)
+
+___
+
+### getCommandDefinitions
+
+▸ **getCommandDefinitions**(): [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)<`ServiceClassType`\>
+
+#### Returns
+
+[`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)<`ServiceClassType`\>
+
+the definition of registered commands
+
+#### Defined in
+
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:267](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L267)
+
+___
+
+### getCustomClass
+
+▸ **getCustomClass**(): [`Newable`](../modules/purista_core.md#newable)<`any`, `ConfigType`\>
+
+#### Returns
+
+[`Newable`](../modules/purista_core.md#newable)<`any`, `ConfigType`\>
+
+#### Defined in
+
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:144](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L144)
 
 ___
 
 ### getFunctionBuilder
 
-▸ **getFunctionBuilder**(`commandName`, `description`, `eventName?`): [`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `unknown`, `unknown`, `unknown`, `unknown`, `unknown`\>
+▸ **getFunctionBuilder**(`commandName`, `description`, `eventName?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
+
+**`Deprecated`**
+
+user getCommandBuilder instead. It will be removed soon.
 
 #### Parameters
 
@@ -189,61 +294,93 @@ ___
 
 #### Returns
 
-[`FunctionDefinitionBuilder`](purista_core.FunctionDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `unknown`, `unknown`, `unknown`, `unknown`, `unknown`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:119](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L119)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:225](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L225)
 
 ___
 
 ### getInstance
 
-▸ **getInstance**(`logger`, `eventBridge`, `config?`, `spanProcessor?`): `ServiceClassType`
+▸ **getInstance**(`eventBridge`, `options?`): `ServiceClassType`
+
+It creates a new instance of the service class, passing in the logger, service info, event bridge,
+command functions, subscription list, and configuration
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `logger` | [`Logger`](purista_core.Logger.md) |
-| `eventBridge` | [`EventBridge`](purista_core.EventBridge.md) |
-| `config?` | `ConfigInputType` |
-| `spanProcessor?` | `SpanProcessor` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `eventBridge` | [`EventBridge`](../interfaces/purista_core.EventBridge.md) | EventBridge |
+| `options` | `Object` | additional config like logger, stores and opentelemetry span processor |
+| `options.configStore?` | [`ConfigStore`](../interfaces/purista_core.ConfigStore.md) | - |
+| `options.logger?` | [`Logger`](purista_core.Logger.md) | - |
+| `options.secretStore?` | [`SecretStore`](../interfaces/purista_core.SecretStore.md) | - |
+| `options.serviceConfig?` | `ConfigInputType` | - |
+| `options.spanProcessor?` | `SpanProcessor` | - |
+| `options.stateStore?` | [`StateStore`](../interfaces/purista_core.StateStore.md) | - |
 
 #### Returns
 
 `ServiceClassType`
 
+The instance of the service class
+
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:91](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L91)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:155](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L155)
 
 ___
 
 ### getSubscriptionBuilder
 
-▸ **getSubscriptionBuilder**(`subscriptionName`, `description`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, [`EBMessage`](../modules/purista_core.md#ebmessage), `unknown`\>
+▸ **getSubscriptionBuilder**(`subscriptionName`, `description`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `undefined` \| `void`\>
+
+It returns a new instance of the `SubscriptionDefinitionBuilder` class, which is a class that is
+used to build a subscription definition
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `subscriptionName` | `string` |
-| `description` | `string` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `subscriptionName` | `string` | The name of the subscription. |
+| `description` | `string` | The description of the subscription. |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, [`EBMessage`](../modules/purista_core.md#ebmessage), `unknown`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `undefined` \| `void`\>
+
+A SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:127](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L127)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:257](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L257)
+
+___
+
+### getSubscriptionDefinitions
+
+▸ **getSubscriptionDefinitions**(): [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)<`ServiceClassType`\>
+
+#### Returns
+
+[`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)<`ServiceClassType`\>
+
+the definition of registered subscriptions
+
+#### Defined in
+
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:274](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L274)
 
 ___
 
 ### setConfigSchema
 
 ▸ **setConfigSchema**<`I`, `D`, `O`\>(`schema`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`O`, `I`, [`Service`](purista_core.Service.md)<`O`\>\>
+
+"This function sets the config schema for the service builder."
 
 #### Type parameters
 
@@ -255,43 +392,49 @@ ___
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `schema` | `ZodType`<`O`, `D`, `I`\> |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `schema` | `ZodType`<`O`, `D`, `I`\> | The schema that will be used to validate the config. |
 
 #### Returns
 
 [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`O`, `I`, [`Service`](purista_core.Service.md)<`O`\>\>
 
+ServiceBuilder
+
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:36](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L36)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:60](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L60)
 
 ___
 
 ### setCustomClass
 
-▸ **setCustomClass**<`T`\>(`c`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `T`\>
+▸ **setCustomClass**<`T`\>(`customClass`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `T`\>
+
+It sets the class type of the service.
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends [`ServiceClass`](purista_core.ServiceClass.md)<`ConfigType`, `T`\> |
+| `T` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`ConfigType`, `T`\> |
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `c` | [`Newable`](../modules/purista_core.md#newable)<`T`\> |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `customClass` | [`Newable`](../modules/purista_core.md#newable)<`T`, `ConfigType`\> | A class which extends the Service class |
 
 #### Returns
 
 [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `T`\>
 
+The builder itself, but with the type of the service class changed.
+
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:86](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L86)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:139](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L139)
 
 ___
 
@@ -299,16 +442,48 @@ ___
 
 ▸ **setDefaultConfig**(`config`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
+"This function sets the default configuration for the service."
+
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `config` | `ConfigType` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `config` | [`Complete`](../modules/purista_core.md#complete)<`ConfigType`\> | ConfigType - The default configuration for the service. |
 
 #### Returns
 
 [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
+The ServiceBuilder instance.
+
 #### Defined in
 
-[core/src/helper/ServiceBuilder.impl.ts:41](https://github.com/sebastianwessel/purista/blob/e4f9042/packages/core/src/helper/ServiceBuilder.impl.ts#L41)
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:71](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L71)
+
+___
+
+### validateCommandDefinitions
+
+▸ **validateCommandDefinitions**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:278](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L278)
+
+___
+
+### validateSubscriptionDefinitions
+
+▸ **validateSubscriptionDefinitions**(): `void`
+
+#### Returns
+
+`void`
+
+#### Defined in
+
+[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:304](https://github.com/sebastianwessel/purista/blob/dde9cc6/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L304)
