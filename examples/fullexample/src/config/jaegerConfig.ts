@@ -1,4 +1,3 @@
 export const jaegerExporterOptions = {
-  tags: [],
-  endpoint: `http://localhost:14268/api/traces`,
+  url: `http://localhost:4318/v1/traces`,
 }

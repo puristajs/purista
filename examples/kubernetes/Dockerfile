@@ -7,9 +7,9 @@ WORKDIR /app
 # AVOID TO COPY EVERYTHING FOR REAL PRODUCTION!
 COPY . .
 
-RUN npm ci
+RUN npm i
 
-RUN tsc
+RUN npx tsc
 # or you can use esbuild
 # RUN npx esbuild ./src/index.ts --bundle --platform=node --outfile=build/src/index.js
 

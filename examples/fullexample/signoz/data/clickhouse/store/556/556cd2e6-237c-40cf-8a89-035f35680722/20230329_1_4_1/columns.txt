@@ -1,0 +1,5 @@
+columns format version: 1
+3 columns:
+`timestamp` DateTime64(9)
+`traceID` FixedString(32)
+`model` String

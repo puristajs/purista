@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  openzipkin:
+    image: openzipkin/zipkin-slim:latest
+    restart: on-failure
+    ports:
+      - '9411:9411'
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+     - 15672:15672
+     - 5672:5672
+  redis:
+    image: redis:alpine
+    ports:
+     - 6379:6379

@@ -30,6 +30,6 @@ describe('service TheService version 1 - command ping', () => {
 
     const result = await ping(context.mock, payload, parameter)
 
-    expect(result).toBeUndefined()
+    expect(result).toEqual({ ping: true })
   })
 })

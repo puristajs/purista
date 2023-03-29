@@ -1,0 +1,5 @@
+columns format version: 1
+3 columns:
+`timestamp` DateTime64(9)
+`service_name` LowCardinality(String)
+`count` UInt64

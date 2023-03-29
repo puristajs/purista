@@ -1,0 +1,5 @@
+columns format version: 1
+3 columns:
+`version` Int64
+`dirty` UInt8
+`sequence` UInt64

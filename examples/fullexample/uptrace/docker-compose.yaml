@@ -34,7 +34,7 @@ services:
         condition: service_healthy
 
   otel-collector:
-    image: otel/opentelemetry-collector-contrib:0.70.0
+    image: otel/opentelemetry-collector-contrib:latest
     restart: on-failure
     user: '0:0' # required for logs
     volumes:
@@ -56,37 +56,19 @@ services:
     command:
       - '--config.file=/etc/alertmanager/config.yml'
       - '--storage.path=/alertmanager'
-
-  mailhog:
-    image: mailhog/mailhog:v1.0.1
-    restart: on-failure
-    ports:
-      - '8025:8025'
-
   vector:
     image: timberio/vector:0.24.X-alpine
     volumes:
       - ./vector.toml:/etc/vector/vector.toml:ro
-
-  # jaeger-agent:
-  #   image: jaegertracing/jaeger-agent:latest
-  #   command: ['--reporter.grpc.host-port=localhost:14250']
-  #   network_mode: host
-
-  # jaeger-hot-rod:
-  #   image: jaegertracing/example-hotrod:latest
-  #   command: ['all']
-  #   network_mode: host
-  #   environment:
-  #     - JAEGER_AGENT_HOST=localhost
-  #     - JAEGER_AGENT_PORT=6831
-  #   depends_on:
-  #     - jaeger-agent
   rabbitmq:
     image: rabbitmq:3-management
     ports:
      - 15672:15672
      - 5672:5672
+  redis:
+    image: redis:alpine
+    ports:
+     - 6379:6379
 
 volumes:
   uptrace_data:

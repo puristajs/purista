@@ -1,18 +1,9 @@
 version: "3"
 services:
 
-  # Generate fake traces...
-  k6-tracing:
-    image: ghcr.io/grafana/xk6-client-tracing:v0.0.2
-    environment:
-      - ENDPOINT=otel-collector:4317
-    restart: always
-    depends_on:
-      - otel-collector
-
   # And put them in an OTEL collector pipeline...
   otel-collector:
-    image: otel/opentelemetry-collector:0.61.0
+    image: otel/opentelemetry-collector:latest
     command: [ "--config=/etc/otel-collector.yaml" ]
     volumes:
       - ./dockerConfig/otel-collector.yaml:/etc/otel-collector.yaml
@@ -27,9 +18,9 @@ services:
     ports:
       - "14268:14268"  # jaeger ingest
       - "3200"   # tempo
-      - "4317"  # otlp grpc
-      - "4318"  # otlp http
-      - "9411"   # zipkin
+      - "4317:4317"  # otlp grpc
+      - "4318:4318"  # otlp http
+      - "9411:9411"   # zipkin
       - "16686"
 
   prometheus:
@@ -44,7 +35,7 @@ services:
       - "9090:9090"
 
   grafana:
-    image: grafana/grafana:9.3.2
+    image: grafana/grafana:latest
     volumes:
       - ./dockerConfig/grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml
     environment:
@@ -55,7 +46,7 @@ services:
     ports:
       - "3000:3000"
   loki:
-    image: grafana/loki:2.7.1
+    image: grafana/loki:latest
     command: "-config.file=/etc/loki/loki.yaml"
     ports:
       - 3100:3100
@@ -73,4 +64,8 @@ services:
     ports:
      - 15672:15672
      - 5672:5672
+  redis:
+    image: redis:alpine
+    ports:
+     - 6379:6379
 
