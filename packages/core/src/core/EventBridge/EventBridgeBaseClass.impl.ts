@@ -18,7 +18,7 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
   logger: Logger
   traceProvider: NodeTracerProvider
 
-  config: Complete<EventBridgeConfig<Complete<ConfigType>>>
+  config: EventBridgeConfig<Complete<ConfigType>>
 
   name: string
 
@@ -36,7 +36,6 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
       instanceId: config.instanceId || getNewInstanceId(),
       defaultCommandTimeout: config.defaultCommandTimeout || 30000,
       spanProcessor: undefined,
-      config: {} as Complete<ConfigType>,
       ...config,
     }
 
