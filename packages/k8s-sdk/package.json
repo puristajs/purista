@@ -30,7 +30,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "scripts": {
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
@@ -42,7 +42,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
-    "@types/node": "^18.15.9",
+    "@types/node": "^18.15.11",
     "@types/sinon": "^10.x",
     "jest": "^29.5.0",
     "sinon": "^15.x",

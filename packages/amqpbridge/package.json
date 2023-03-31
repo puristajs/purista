@@ -30,7 +30,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "scripts": {
     "build_old": "tsc --project ./tsconfig.ref.json",
@@ -46,7 +46,7 @@
     "@swc/jest": "^0.2.24",
     "@types/amqplib": "^0.10.1",
     "@types/jest": "^29.5.0",
-    "@types/node": "^18.15.9",
+    "@types/node": "^18.15.11",
     "@types/sinon": "^10.0.13",
     "jest": "^29.5.0",
     "sinon": "^15.0.2"
