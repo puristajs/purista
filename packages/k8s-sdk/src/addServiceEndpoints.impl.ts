@@ -6,15 +6,18 @@ import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import {
   Command,
   EBMessageType,
+  HandledError,
   HttpExposedServiceMeta,
   isCommandErrorResponse,
   isHttpExposedServiceMeta,
   Logger,
   PuristaSpanName,
+  serializeOtp,
   type Service,
   StatusCode,
+  UnhandledError,
 } from '@purista/core'
-import qs from 'qs'
+import qs, { ParsedQs } from 'qs'
 import Trouter from 'trouter'
 
 import { RouterFunction } from './getHttpServer.impl'
@@ -67,102 +70,151 @@ export const addServiceEndpoints = (
             { kind: SpanKind.SERVER },
             parentContext,
             async (span) => {
-              const hostname = process.env.HOSTNAME || ''
+              const hostname = process.env.HOSTNAME || 'unknown'
 
               span.setAttribute(SemanticAttributes.HTTP_URL, request.url || '')
               span.setAttribute(SemanticAttributes.HTTP_METHOD, request.method || '')
-              span.setAttribute(SemanticAttributes.HTTP_HOST, hostname || 'unknown')
+              span.setAttribute(SemanticAttributes.HTTP_HOST, hostname)
 
-              const queryParams = qs.parse(request.url || '')
+              try {
+                const queryParams: ParsedQs = {}
 
-              let body
-              if (request.method === 'POST') {
-                const buffers = []
-
-                for await (const chunk of request) {
-                  buffers.push(chunk)
+                // allow only defined parameters
+                if (metadata.expose.http.openApi?.query) {
+                  const parsedQueries = qs.parse(request.url || '')
+                  metadata.expose.http.openApi.query.forEach((qp) => {
+                    queryParams[qp.name] = parsedQueries[qp.name]
+                    if (qp.required && !parsedQueries[qp.name]) {
+                      throw new HandledError(StatusCode.BadRequest, `query parameter ${qp.name} is required`)
+                    }
+                  })
                 }
 
-                body = JSON.parse(Buffer.concat(buffers).toString())
-              }
+                let body
+                if (request.method === 'POST') {
+                  const buffers = []
 
-              const command: Command = {
-                id: '',
-                messageType: EBMessageType.Command,
-                instanceId: '',
-                correlationId: '',
-                timestamp: Date.now(),
-                contentType: definition.metadata.expose.contentTypeResponse || 'application/json',
-                contentEncoding: definition.metadata.expose.contentEncodingResponse || 'utf-8',
-                otp: '',
-                receiver: {
-                  serviceName: service.info.serviceName,
-                  serviceVersion: service.info.serviceVersion,
-                  serviceTarget: definition.commandName,
-                },
-                sender: {
-                  serviceName: '',
-                  serviceVersion: '',
-                  serviceTarget: '',
-                },
-                payload: {
-                  payload: body,
-                  parameter: {
-                    ...queryParams,
-                    ...parameter,
+                  for await (const chunk of request) {
+                    buffers.push(chunk)
+                  }
+
+                  body = JSON.parse(Buffer.concat(buffers).toString())
+                }
+
+                const command: Command = {
+                  id: '',
+                  messageType: EBMessageType.Command,
+                  instanceId: '',
+                  correlationId: '',
+                  timestamp: Date.now(),
+                  contentType: definition.metadata.expose.contentTypeResponse || 'application/json',
+                  contentEncoding: definition.metadata.expose.contentEncodingResponse || 'utf-8',
+                  otp: serializeOtp(),
+                  receiver: {
+                    serviceName: service.info.serviceName,
+                    serviceVersion: service.info.serviceVersion,
+                    serviceTarget: definition.commandName,
                   },
-                },
-              }
+                  sender: {
+                    serviceName: '',
+                    serviceVersion: '',
+                    serviceTarget: '',
+                  },
+                  payload: {
+                    payload: body,
+                    parameter: {
+                      ...queryParams,
+                      ...parameter,
+                    },
+                  },
+                }
 
-              const result = await service.executeCommand(command)
+                const result = await service.executeCommand(command)
 
-              if (isCommandErrorResponse(result)) {
-                span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, result.payload.status)
+                if (isCommandErrorResponse(result)) {
+                  span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, result.payload.status)
 
-                span.setStatus({
-                  code: SpanStatusCode.ERROR,
-                  message: result.payload.message,
+                  span.setStatus({
+                    code: SpanStatusCode.ERROR,
+                    message: result.payload.message,
+                  })
+
+                  response.statusCode = result.payload.status
+                  response.setHeader('content-type', 'application/json; charset=utf-8')
+                  response.write(JSON.stringify(result.payload), (err) => {
+                    if (err) {
+                      span.setStatus({
+                        code: SpanStatusCode.ERROR,
+                        message: err.message,
+                      })
+                      span.recordException(err)
+
+                      logger.error({ err, ...span.spanContext() }, err.message)
+                    }
+                  })
+                  response.end()
+                  span.end()
+                  return
+                }
+
+                // empty response
+                if (result.payload === undefined || result.payload === '') {
+                  response.statusCode = StatusCode.NoContent
+                  span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.NoContent)
+
+                  response.end()
+                  span.end()
+                  return
+                }
+
+                span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.OK)
+
+                let payload = ''
+                if (typeof result.payload === 'string') {
+                  payload = result.payload
+                } else {
+                  payload = JSON.stringify(result.payload)
+                }
+
+                response.statusCode = StatusCode.OK
+                response.write(payload, (err) => {
+                  if (err) {
+                    span.setStatus({
+                      code: SpanStatusCode.ERROR,
+                      message: err.message,
+                    })
+                    span.recordException(err)
+                    logger.error({ err, ...span.spanContext() }, err.message)
+                  }
                 })
 
-                response.setHeader('content-type', 'application/json; charset=utf-8')
+                response.end()
+                span.end()
+              } catch (error) {
+                const err =
+                  error instanceof HandledError || error instanceof UnhandledError
+                    ? error
+                    : UnhandledError.fromError(error)
 
-                response.write(JSON.stringify(result.payload), (err) => {
+                logger.error({ err }, err.message)
+                span.setStatus({
+                  code: SpanStatusCode.ERROR,
+                  message: err.message,
+                })
+
+                span.recordException(err)
+
+                response.statusCode = err.errorCode
+                response.setHeader('content-type', 'application/json; charset=utf-8')
+                // deepcode ignore ServerLeak: <please specify a reason of ignoring this>
+                response.write(JSON.stringify(err.getErrorResponse()), (err) => {
                   if (err) {
                     logger.error({ err, ...span.spanContext() }, err.message)
                   }
                 })
                 response.end()
-                return
-              }
-
-              if (result.payload === undefined || result.payload === '') {
-                response.statusCode = StatusCode.NoContent
-                span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.NoContent)
-
-                response.end()
                 span.end()
-                return
               }
-
-              span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.OK)
-
-              let payload = ''
-              if (typeof result.payload === 'string') {
-                payload = result.payload
-              } else {
-                payload = JSON.stringify(result.payload)
-              }
-
-              response.statusCode = StatusCode.OK
-              response.write(payload, (err) => {
-                if (err) {
-                  logger.error({ err, ...span.spanContext() }, err.message)
-                }
-              })
-
-              response.end()
-
-              span.end()
             },
           )
       }
