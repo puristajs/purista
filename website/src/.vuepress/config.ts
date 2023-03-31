@@ -13,7 +13,7 @@ export default defineUserConfig({
 
   theme,
   head: [
-    ['meta', { name: 'twitter:image', content: 'https://purista.dev/preview.png' }],
+    ['meta', { name: 'twitter:image', content: 'https://purista.dev/twitter.png' }],
     ['meta', { name: 'og:image:width', content: '1200' }],
     ['meta', { name: 'og:image:height', content: '630' }],
     ['meta', { name: 'twitter:site', content: '@purista_js' }],
