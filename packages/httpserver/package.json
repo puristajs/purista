@@ -30,7 +30,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=16"
+    "node": ">=18"
   },
   "scripts": {
     "build_old": "tsc --project ./tsconfig.ref.json",
@@ -43,7 +43,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.0",
-    "@types/node": "^18.15.9",
+    "@types/node": "^18.15.11",
     "@types/qs": "^6.9.7",
     "@types/sinon": "^10.x",
     "@types/swagger-ui-dist": "^3.30.1",

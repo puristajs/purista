@@ -12,7 +12,7 @@ export const httpserverDependencies: string[] = ['@purista/httpserver@latest']
 
 export const httpStaticDependencies: string[] = ['@fastify/static@^6.9.0']
 
-export const devDependencies: string[] = ['pino-pretty@^9.1.1']
+export const devDependencies: string[] = ['pino-pretty@^9.1.1', '@types/node@^18.15.11']
 
 export const cliDependencies = ['@purista/cli@latest']
 
