@@ -7,7 +7,8 @@
       "./packages/httpserver",
       "./packages/amqpbridge",
       "./packages/state-store-redis",
-      "./packages/k8s-sdk"
+      "./packages/k8s-sdk",
+      "./packages/dapr-sdk"
     ],
     "out": "website/src/api",
     "readme":"CHANGELOG.md",
