@@ -56,8 +56,21 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
             const fastifyParams = request.params as Record<string, unknown>
             delete fastifyParams['*']
 
+            const queryParams: Record<string, unknown> = {}
+
+            // only allow defined query parameters and check if they are required
+            const queries = request.query as Record<string, unknown>
+            if (data.http.openApi?.query) {
+              data.http.openApi.query.forEach((qp) => {
+                queryParams[qp.name] = queries[qp.name]
+                if (qp.required && !queries[qp.name]) {
+                  throw new HandledError(StatusCode.BadRequest, `query parameter ${qp.name} is required`)
+                }
+              })
+            }
+
             const parameterExtended = {
-              ...(request.query as Record<string, unknown>),
+              ...queryParams,
               ...fastifyParams,
               ...parameter,
             }
