@@ -16,5 +16,15 @@ export default defineUserConfig({
     ['meta', { name: 'twitter:image', content: 'https://purista.dev/preview.png' }],
     ['meta', { name: 'og:image:width', content: '1200' }],
     ['meta', { name: 'og:image:height', content: '630' }],
+    ['meta', { name: 'twitter:site', content: '@purista_js' }],
+    ['meta', { name: 'twitter:title', content: 'PURISTA - The TypeScript Framework' }],
+    [
+      'meta',
+      {
+        name: 'twitter:description',
+        content:
+          'PURISTA is a typescript based nodejs framework to built typescript backends for iot, edge, server, cloud and serverless.',
+      },
+    ],
   ],
 })

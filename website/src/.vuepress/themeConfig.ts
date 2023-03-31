@@ -118,7 +118,7 @@ export default hopeTheme({
     },
     seo: {
       fallBackImage: 'https://purista.dev/preview.png',
-      twitterID: 'purista_js',
+      twitterID: '@purista_js',
       autoDescription: true,
     },
     blog: {

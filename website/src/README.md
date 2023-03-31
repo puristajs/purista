@@ -6,7 +6,7 @@ shortTitle: PURISTA
 description: PURISTA is a typescript based nodejs framework to built typescript backends for iot, edge, server, cloud and serverless.
 heroImage: /purista_cli_logo.png
 heroText: PURISTA
-image: /preview.png
+image: https://purista.dev/preview.png
 tag:
   - typescript
   - nodejs
