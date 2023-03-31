@@ -9,7 +9,7 @@ import { Logger } from '../../types'
  */
 export type EventBridgeConfig<CustomConfig> = {
   /** Specific configuration settings for the event bridge depending on the used message broker */
-  config?: CustomConfig
+  config: CustomConfig
   /** A logger instance */
   logger?: Logger
   /** A OpenTelemetry span processor */
