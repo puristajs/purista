@@ -1,6 +1,6 @@
 import { createServer, IncomingMessage, ServerResponse } from 'node:http'
 
-import { HandledError, StatusCode, UnhandledError } from '@purista/core'
+import { ensureHttpServerClose, HandledError, StatusCode, UnhandledError } from '@purista/core'
 import Trouter, { Methods } from 'trouter'
 
 import { addServiceEndpoints } from './addServiceEndpoints.impl'
@@ -47,9 +47,11 @@ export const getHttpServer = (input: GetHttpServerConfig, name = 'K8sHttpHelperS
     logger.error({ err, origin }, `unhandled rejection: ${err.message}`)
   })
 
-  addServiceEndpoints(services, router, logger, apiMountPath)
+  if (!input.disableEndpointExposing) {
+    addServiceEndpoints(services, router, logger, apiMountPath)
+  }
 
-  router.add('GET', '/healthz', async (body: unknown, response: ServerResponse) => {
+  router.add('GET', '/healthz', async (_request: IncomingMessage, response: ServerResponse) => {
     const isHealthy = await healthFn()
     if (isShuttingDown) {
       response.statusCode = 503
@@ -110,7 +112,7 @@ export const getHttpServer = (input: GetHttpServerConfig, name = 'K8sHttpHelperS
       logger.error({ err }, err.message)
       response.statusCode = err.errorCode
       response.setHeader('content-type', 'application/json; charset=utf-8')
-      // file deepcode ignore ServerLeak: <please specify a reason of ignoring this>
+      // deepcode ignore ServerLeak: <We have a handled error here - it on purpose to respond with error>
       response.write(JSON.stringify(err.getErrorResponse()), (err) => {
         if (err) {
           logger.error({ err }, err.message)
@@ -128,6 +130,7 @@ export const getHttpServer = (input: GetHttpServerConfig, name = 'K8sHttpHelperS
 
       response.statusCode = err.errorCode
       response.setHeader('content-type', 'application/json; charset=utf-8')
+      // deepcode ignore ServerLeak: <We have a handled error here - it on purpose to respond with error>
       response.write(JSON.stringify(err.getErrorResponse()), (err) => {
         if (err) {
           logger.error({ err }, err.message)
@@ -136,6 +139,8 @@ export const getHttpServer = (input: GetHttpServerConfig, name = 'K8sHttpHelperS
       response.end()
     }
   })
+
+  ensureHttpServerClose(server)
 
   const destroy = async () =>
     new Promise<void>((resolve, reject) => {
