@@ -356,7 +356,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
       const command: Command = Object.freeze({
         id: getNewEBMessageId(),
         instanceId: this.instanceId,
-        correlationId: getNewCorrelationId(),
+        correlationId,
         timestamp: Date.now(),
         messageType: EBMessageType.Command,
         traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
