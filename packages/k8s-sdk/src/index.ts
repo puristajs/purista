@@ -6,6 +6,7 @@
  *
  * @example ```typescript
  * // src/index.ts
+ * import { serve } from '@hono/node-server'
  * import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
  * import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
  * import {
@@ -49,7 +50,7 @@
  *   await theService.start()
  *
  *   // create http server
- *   const server = getHttpServer({
+ *   const app = getHttpServer({
  *     logger,
  *     // check event bridge health if /healthz endpoint is called
  *     healthFn: () => eventBridge.isHealthy(),
@@ -59,6 +60,13 @@
  *     // defaults to /api
  *     apiMountPath: '/api',
  *   })
+ *
+ *    // start the http server
+ *    // defaults to port 3000
+ *    // optional: you can set the port in the optional parameter of this method
+ *    const server = serve({
+ *      fetch: app.fetch,
+ *    })
  *
  *   // register shut down methods
  *   gracefulShutdown(logger, [
@@ -73,13 +81,14 @@
  *     // optional: shut down the state store
  *     stateStore,
  *     // stop the http server
- *     server,
+ *     {
+ *        name: 'httpserver',
+ *        destroy: async () => {
+ *        server.closeIdleConnections()
+ *        server.close()
+ *     },
+ *  },,
  *   ])
- *
- *   // start the http server
- *   // defaults to port 8080
- *   // optional: you can set the port in the optional parameter of this method
- *   await server.start()
  * }
  *
  * main()
@@ -87,6 +96,17 @@
  *
  * @module
  */
+declare global {
+  interface FetchEvent extends Event {
+    readonly request: Request
+    respondWith(response: Promise<Response> | Response): Promise<Response>
+  }
+  interface ExecutionContext {
+    waitUntil(promise: Promise<any>): void
+    passThroughOnException(): void
+  }
+}
+
 export * from './addServiceEndpoints.impl'
 export * from './getHttpServer.impl'
 export * from './types'

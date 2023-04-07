@@ -1,5 +1,3 @@
-import type { ServerOptions } from 'node:http'
-
 import type { Logger, Service } from '@purista/core'
 
 /**
@@ -8,8 +6,8 @@ import type { Logger, Service } from '@purista/core'
 export type GetHttpServerConfig = {
   /** a logger instance */
   logger: Logger
-  /** node http module server options */
-  httpServerOptions?: ServerOptions
+  /** hostname used in tracing and logging */
+  hostname?: string
   /** health function to be executed on health check */
   healthFn: () => Promise<boolean>
   /** service or array of services which should expose their commands as endpoints if defined */
