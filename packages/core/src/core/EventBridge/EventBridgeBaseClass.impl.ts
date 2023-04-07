@@ -28,7 +28,7 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
   constructor(name: string, config: EventBridgeConfig<Complete<ConfigType>>) {
     super()
     this.name = name
-    const logger = config?.logger || initLogger()
+    const logger = config?.logger || initLogger(config?.logLevel)
     this.logger = logger.getChildLogger({ name })
 
     this.config = {
