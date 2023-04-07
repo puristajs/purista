@@ -1,4 +1,3 @@
-import { IncomingMessage, ServerResponse } from 'node:http'
 import { posix } from 'node:path'
 
 import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
@@ -17,10 +16,7 @@ import {
   StatusCode,
   UnhandledError,
 } from '@purista/core'
-import qs, { ParsedQs } from 'qs'
-import Trouter from 'trouter'
-
-import { RouterFunction } from './getHttpServer.impl'
+import type { Context as HonoContext, Hono } from 'hono'
 
 /**
  *
@@ -32,7 +28,7 @@ import { RouterFunction } from './getHttpServer.impl'
  */
 export const addServiceEndpoints = (
   services: Service | Service[] | undefined,
-  router: Trouter,
+  app: Hono,
   logger: Logger,
   apiMountPath = '/api',
 ) => {
@@ -54,16 +50,10 @@ export const addServiceEndpoints = (
       const method = metadata.expose.http.method
       const url = posix.join(apiMountPath || '/api', `v${serviceVersion}`, data.http.path)
 
-      logger.debug(`adding ${url}`)
+      const handler = async (c: HonoContext) => {
+        const parentContext = propagation.extract(context.active(), c.req.headers)
 
-      const handler: RouterFunction = async (
-        request: IncomingMessage,
-        response: ServerResponse,
-        parameter: Record<string, unknown>,
-      ) => {
-        const parentContext = propagation.extract(context.active(), request.headers)
-
-        await service
+        return await service
           .getTracer('PURISTA_k8s_http_server')
           .startActiveSpan(
             PuristaSpanName.KubernetesHttpRequest,
@@ -72,16 +62,16 @@ export const addServiceEndpoints = (
             async (span) => {
               const hostname = process.env.HOSTNAME || 'unknown'
 
-              span.setAttribute(SemanticAttributes.HTTP_URL, request.url || '')
-              span.setAttribute(SemanticAttributes.HTTP_METHOD, request.method || '')
+              span.setAttribute(SemanticAttributes.HTTP_URL, c.req.url || '')
+              span.setAttribute(SemanticAttributes.HTTP_METHOD, c.req.method || '')
               span.setAttribute(SemanticAttributes.HTTP_HOST, hostname)
 
               try {
-                const queryParams: ParsedQs = {}
+                const queryParams: Record<string, string> = {}
 
                 // allow only defined parameters
                 if (metadata.expose.http.openApi?.query) {
-                  const parsedQueries = qs.parse(request.url || '')
+                  const parsedQueries = c.req.query()
                   metadata.expose.http.openApi.query.forEach((qp) => {
                     queryParams[qp.name] = parsedQueries[qp.name]
                     if (qp.required && !parsedQueries[qp.name]) {
@@ -91,14 +81,8 @@ export const addServiceEndpoints = (
                 }
 
                 let body
-                if (request.method === 'POST') {
-                  const buffers = []
-
-                  for await (const chunk of request) {
-                    buffers.push(chunk)
-                  }
-
-                  body = JSON.parse(Buffer.concat(buffers).toString())
+                if (c.req.method === 'POST' || c.req.method === 'PUT' || c.req.method === 'PATCH') {
+                  body = await c.req.json()
                 }
 
                 const command: Command = {
@@ -124,7 +108,7 @@ export const addServiceEndpoints = (
                     payload: body,
                     parameter: {
                       ...queryParams,
-                      ...parameter,
+                      parameter: c.req.param(),
                     },
                   },
                 }
@@ -139,57 +123,36 @@ export const addServiceEndpoints = (
                     message: result.payload.message,
                   })
 
-                  response.statusCode = result.payload.status
-                  response.setHeader('content-type', 'application/json; charset=utf-8')
-                  response.write(JSON.stringify(result.payload), (err) => {
-                    if (err) {
-                      span.setStatus({
-                        code: SpanStatusCode.ERROR,
-                        message: err.message,
-                      })
-                      span.recordException(err)
-
-                      logger.error({ err, ...span.spanContext() }, err.message)
-                    }
-                  })
-                  response.end()
+                  const response = c.json(result.payload, result.payload.status as any)
                   span.end()
-                  return
+                  return response
                 }
+
+                const header: Record<string, string> = {
+                  'content-type': `${metadata.expose.contentTypeResponse || 'application/json'}; charset=${
+                    metadata.expose.contentEncodingResponse || 'utf-8'
+                  }`,
+                }
+
+                propagation.inject(context.active(), header)
 
                 // empty response
                 if (result.payload === undefined || result.payload === '') {
-                  response.statusCode = StatusCode.NoContent
                   span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.NoContent)
-
-                  response.end()
+                  const response = c.text('', StatusCode.NoContent, header)
                   span.end()
-                  return
+                  return response
                 }
 
                 span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.OK)
 
-                let payload = ''
-                if (typeof result.payload === 'string') {
-                  payload = result.payload
-                } else {
-                  payload = JSON.stringify(result.payload)
-                }
+                const response =
+                  typeof result.payload === 'string'
+                    ? c.text(result.payload, StatusCode.OK, header)
+                    : c.json(result.payload, StatusCode.OK, header)
 
-                response.statusCode = StatusCode.OK
-                response.write(payload, (err) => {
-                  if (err) {
-                    span.setStatus({
-                      code: SpanStatusCode.ERROR,
-                      message: err.message,
-                    })
-                    span.recordException(err)
-                    logger.error({ err, ...span.spanContext() }, err.message)
-                  }
-                })
-
-                response.end()
                 span.end()
+                return response
               } catch (error) {
                 const err =
                   error instanceof HandledError || error instanceof UnhandledError
@@ -204,22 +167,42 @@ export const addServiceEndpoints = (
 
                 span.recordException(err)
 
-                response.statusCode = err.errorCode
-                response.setHeader('content-type', 'application/json; charset=utf-8')
-                // deepcode ignore ServerLeak: <please specify a reason of ignoring this>
-                response.write(JSON.stringify(err.getErrorResponse()), (err) => {
-                  if (err) {
-                    logger.error({ err, ...span.spanContext() }, err.message)
-                  }
-                })
-                response.end()
+                const header: Record<string, string> = {
+                  'content-type': `${metadata.expose.contentTypeResponse || 'application/json'}; charset=${
+                    metadata.expose.contentEncodingResponse || 'utf-8'
+                  }`,
+                }
+
+                propagation.inject(context.active(), header)
+
+                const response = c.json(err, err.errorCode as any, header)
                 span.end()
+                return response
               }
             },
           )
       }
 
-      router.add(method, url, handler)
+      logger.debug({ method, url }, `adding ${url}`)
+      switch (method) {
+        case 'GET':
+          app.get(url, handler)
+          break
+        case 'POST':
+          app.post(url, handler)
+          break
+        case 'PATCH':
+          app.patch(url, handler)
+          break
+        case 'PUT':
+          app.put(url, handler)
+          break
+        case 'DELETE':
+          app.delete(url, handler)
+          break
+        default:
+          break
+      }
     })
   })
 }

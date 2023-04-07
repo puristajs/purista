@@ -1,3 +1,4 @@
+import { serve } from '@hono/node-server'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { AmqpBridge } from '@purista/amqpbridge'
@@ -16,7 +17,7 @@ import { theServiceV1Service } from './service/theService/v1/'
 
 const main = async () => {
   // create a logger
-  const logger = initLogger()
+  const logger = initLogger('debug')
 
   // add listeners to log really unexpected errors
   process.on('uncaughtException', (error, origin) => {
@@ -60,7 +61,7 @@ const main = async () => {
   await theService.start()
 
   // create http server
-  const server = getHttpServer({
+  const app = getHttpServer({
     logger,
     // check event bridge health if /healthz endpoint is called
     healthFn: () => eventBridge.isHealthy(),
@@ -69,6 +70,13 @@ const main = async () => {
     // optional: expose service endpoints at [apiMountPath]/v[serviceVersion]/[path defined for command]
     // defaults to /api
     apiMountPath: '/api',
+  })
+
+  // start the http server
+  // defaults to port 3000
+  // optional: you can set the port in the optional parameter of this method
+  const server = serve({
+    fetch: app.fetch,
   })
 
   // register shut down methods
@@ -83,14 +91,14 @@ const main = async () => {
     configStore,
     // optional: shut down the state store
     stateStore,
-    // stop the http server
-    server,
+    {
+      name: 'httpserver',
+      destroy: async () => {
+        server.closeIdleConnections()
+        server.close()
+      },
+    },
   ])
-
-  // start the http server
-  // defaults to port 8080
-  // optional: you can set the port in the optional parameter of this method
-  await server.start()
 }
 
 main()
