@@ -25,5 +25,5 @@ COPY --chown=node:node --from=builder /app/build /app
 RUN npm install --omit=dev
 
 # exposed port must match the one used to start the http server in src/index.ts
-EXPOSE 8080
+EXPOSE 3000
 ENTRYPOINT ["node", "index.js"]
