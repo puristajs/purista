@@ -16,7 +16,6 @@ import {
 } from '@purista/core'
 import fastify, { FastifyInstance, HTTPMethods } from 'fastify'
 import { posix } from 'path'
-import qs from 'qs'
 import * as swaggerUi from 'swagger-ui-dist'
 import Trouter, { Methods } from 'trouter'
 
@@ -43,7 +42,6 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
     super(config)
 
     this.server = fastify({
-      querystringParser: (str) => qs.parse(str),
       ...this.config.fastify,
     }) as unknown as FastifyInstance
 
