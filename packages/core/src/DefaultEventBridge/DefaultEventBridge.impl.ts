@@ -18,6 +18,7 @@ import {
   EventBridge,
   EventBridgeBaseClass,
   EventBridgeConfig,
+  EventBridgeEventNames,
   getCleanedMessage,
   getCommandQueueName,
   getNewCorrelationId,
@@ -130,7 +131,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
                 })
                 span.recordException(err)
                 this.logger.error({ err, ...span.spanContext() }, err.message)
-                this.emit('eventbridge-error', err)
+                this.emit(EventBridgeEventNames.EventbridgeError, err)
 
                 const errorResponse = createErrorResponse(message, StatusCode.BadGateway, err)
                 this.emitMessage(errorResponse)
@@ -158,7 +159,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
                 })
                 span.recordException(err)
                 this.logger.error({ err, ...span.spanContext() }, err.message)
-                this.emit('eventbridge-error', err)
+                this.emit(EventBridgeEventNames.EventbridgeError, err)
                 return next()
               }
 
@@ -186,13 +187,13 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
                 message,
               )
               this.logger.warn({ err, ...span.spanContext() }, err.message)
-              this.emit('eventbridge-error', err)
+              this.emit(EventBridgeEventNames.EventbridgeError, err)
             }
 
             return next()
           } catch (error) {
             const err = new UnhandledError(StatusCode.InternalServerError, 'eventbus failure', error)
-            this.emit('eventbridge-error', err)
+            this.emit(EventBridgeEventNames.EventbridgeError, err)
             this.logger.error({ err, ...span.spanContext() }, err.message)
 
             span.recordException(err)
@@ -214,7 +215,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
     this.readStream.pipe(this.writeStream)
 
-    this.emit('eventbridge-connected')
+    this.emit(EventBridgeEventNames.EventbridgeConnected)
 
     this.logger.info({ puristaVersion }, 'DefaultEventBridge started')
 
@@ -382,6 +383,8 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
     if (timeout) {
       clearTimeout(timeout)
     }
+
+    this.emit(EventBridgeEventNames.EventbridgeDisconnected)
 
     this.pendingInvocations.forEach((value) => value.reject(new UnhandledError(StatusCode.ServiceUnavailable)))
     this.pendingInvocations.clear()
