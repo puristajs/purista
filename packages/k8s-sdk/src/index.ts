@@ -70,7 +70,7 @@
  *
  *   // register shut down methods
  *   gracefulShutdown(logger, [
- *     // start with the event bridge to no longer accept incoming messages
+ *     // begin with the event bridge to no longer accept incoming messages
  *     eventBridge,
  *     // optional: shut down the service
  *     theService,

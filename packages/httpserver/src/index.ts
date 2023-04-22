@@ -57,7 +57,7 @@ const main = async() => {
   // ...
 
   gracefulShutdown(logger, [
-    // start with the event bridge to no longer accept incoming messages
+    // begin with the event bridge to no longer accept incoming messages
     eventBridge,
     // shut down optional services
     // ...
