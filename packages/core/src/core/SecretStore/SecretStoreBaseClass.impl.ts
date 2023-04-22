@@ -15,7 +15,7 @@ export class SecretStoreBaseClass<ConfigType> implements SecretStore {
   name: string
 
   constructor(name: string, config?: StoreBaseConfig<ConfigType>) {
-    const logger = config?.logger || initLogger()
+    const logger = config?.logger || initLogger(config?.logLevel)
     this.logger = logger.getChildLogger({ name })
 
     this.name = name
