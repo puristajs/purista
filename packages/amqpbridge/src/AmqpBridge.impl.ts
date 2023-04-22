@@ -15,6 +15,7 @@ import {
   EventBridge,
   EventBridgeBaseClass,
   EventBridgeConfig,
+  EventBridgeEventNames,
   getCleanedMessage,
   getNewCorrelationId,
   getNewEBMessageId,
@@ -121,7 +122,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
         this.config.config?.socketOptions,
       )
     } catch (err) {
-      this.emit('eventbridge-connection-error', err)
+      this.emit(EventBridgeEventNames.EventbridgeConnectionError, err)
       this.logger.fatal({ err }, 'unable to connect to broker')
       throw err
     }
@@ -129,16 +130,16 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
     this.connection.on('error', (err) => {
       this.healthy = false
       this.logger.error({ err }, 'amqp lib error')
-      this.emit('eventbridge-error', err)
+      this.emit(EventBridgeEventNames.EventbridgeError, err)
     })
     this.connection.on('close', () => {
       this.healthy = false
       this.ready = false
-      this.emit('eventbridge-disconnected')
+      this.emit(EventBridgeEventNames.EventbridgeDisconnected)
       this.logger.info('amqp connection disconnected')
     })
 
-    this.emit('eventbridge-connected')
+    this.emit(EventBridgeEventNames.EventbridgeConnected)
     this.logger.info('connected to broker')
     this.channel = await this.connection.createChannel()
 
@@ -146,13 +147,13 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
       this.healthy = false
       this.ready = false
       this.logger.info('channel closed')
-      this.emit('eventbridge-disconnected')
+      this.emit(EventBridgeEventNames.EventbridgeDisconnected)
     })
 
     this.channel.on('error', (err) => {
       this.healthy = false
       this.logger.error({ err }, 'amqp channel error')
-      this.emit('eventbridge-error', err)
+      this.emit(EventBridgeEventNames.EventbridgeError, err)
     })
 
     this.logger.debug('ensured: default exchange')
@@ -211,7 +212,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
                   })
                   span.recordException(err)
                   this.logger.error({ err, ...span.spanContext() }, 'received invalid command response')
-                  this.emit('eventbridge-error', err)
+                  this.emit(EventBridgeEventNames.EventbridgeError, err)
                   return
                 }
                 if (isCommandSuccessResponse(message)) {
@@ -237,7 +238,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
               })
               span.recordException(err)
               this.logger.error({ err }, 'received invalid message')
-              this.emit('eventbridge-error', err)
+              this.emit(EventBridgeEventNames.EventbridgeError, err)
             } catch (error) {
               const err = new HandledError(StatusCode.InternalServerError, 'failed to handle response message', error)
               span.setStatus({
@@ -245,7 +246,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
                 message: err.message,
               })
               span.recordException(err)
-              this.emit('eventbridge-error', err)
+              this.emit(EventBridgeEventNames.EventbridgeError, err)
               this.logger.error({ err }, 'failed to handle response message')
             }
           },
@@ -457,13 +458,13 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
     channel.on('close', () => {
       this.healthy = false
       this.logger.info({ queueName }, 'channel for command closed')
-      this.emit('eventbridge-disconnected')
+      this.emit(EventBridgeEventNames.EventbridgeDisconnected)
     })
 
     channel.on('error', (err) => {
       this.healthy = false
       this.logger.error({ err, queueName }, 'command channel error')
-      this.emit('eventbridge-error', err)
+      this.emit(EventBridgeEventNames.EventbridgeError, err)
     })
 
     const queue = await channel.assertQueue(queueName, { durable: !!eventBridgeConfig.durable, autoDelete: true })
@@ -573,7 +574,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
                 message: err.message,
               })
               span.recordException(err)
-              this.emit('eventbridge-error', err)
+              this.emit(EventBridgeEventNames.EventbridgeError, err)
               this.logger.error({ err }, 'Failed to consume command response message')
               if (!noAck) {
                 channel.nack(msg)
@@ -609,7 +610,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
         error,
         address,
       })
-      this.emit('eventbridge-error', err)
+      this.emit(EventBridgeEventNames.EventbridgeError, err)
       this.logger.error({ err }, 'Failed to unregister service function')
     }
   }
@@ -639,13 +640,13 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
     channel.on('close', () => {
       this.healthy = false
       this.logger.info({ queueName }, 'channel for subscription closed')
-      this.emit('eventbridge-disconnected')
+      this.emit(EventBridgeEventNames.EventbridgeDisconnected)
     })
 
     channel.on('error', (err) => {
       this.healthy = false
       this.logger.error({ err, queueName }, 'subscription channel error')
-      this.emit('eventbridge-error', err)
+      this.emit(EventBridgeEventNames.EventbridgeError, err)
     })
 
     const queue = await channel.assertQueue(queueName, queueOptions)
@@ -714,7 +715,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
                 message: err.message,
               })
               span.recordException(err)
-              this.emit('eventbridge-error', err)
+              this.emit(EventBridgeEventNames.EventbridgeError, err)
               this.logger.error({ err }, 'Failed to consume subscription message')
               if (!noAck) {
                 channel.nack(msg)
@@ -746,7 +747,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
         error,
         address,
       })
-      this.emit('eventbridge-error', err)
+      this.emit(EventBridgeEventNames.EventbridgeError, err)
       this.logger.error({ err }, 'Failed to unregister subscription')
     }
   }

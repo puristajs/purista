@@ -1,6 +1,17 @@
 import { UnhandledError } from '../../Error/UnhandledError.impl'
 import { addPrefixToObject } from '../../types'
 
+export enum EventBridgeEventNames {
+  EventbridgeConnected = 'eventbridge-connected',
+  EventbridgeConnectionError = 'eventbridge-connection-error',
+
+  EventbridgeDisconnected = 'eventbridge-disconnected',
+
+  EventbridgeReconnecting = 'eventbridge-reconnecting',
+
+  EventbridgeError = 'eventbridge-error',
+}
+
 /**
  * Events which can be emitted by a event bridge
  *
@@ -8,19 +19,19 @@ import { addPrefixToObject } from '../../types'
  */
 export type EventBridgeEventsBasic = {
   /** emitted when then connection to event bridge is established @event */
-  'eventbridge-connected': never
+  [EventBridgeEventNames.EventbridgeConnected]: never
 
   /** emitted when the connection to event bridge can not be established or a connection has issues or gets closed unexpectedly @event */
-  'eventbridge-connection-error': undefined | unknown | Error
+  [EventBridgeEventNames.EventbridgeConnectionError]: undefined | unknown | Error
 
   /** emitted when the connection to event bridge closed @event */
-  'eventbridge-disconnected': never
+  [EventBridgeEventNames.EventbridgeDisconnected]: never
 
   /** emitted on retry to connect to event bridge @event */
-  'eventbridge-reconnecting': never
+  [EventBridgeEventNames.EventbridgeReconnecting]: never
 
   /** emitted on internal event bridge error @event */
-  'eventbridge-error': UnhandledError | unknown
+  [EventBridgeEventNames.EventbridgeError]: UnhandledError | unknown
 }
 
 type CustomEvents = {
