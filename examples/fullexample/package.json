@@ -12,7 +12,7 @@
   "license": "ISC",
   "main": "src/index.ts",
   "engines": {
-    "node": ">=18"
+    "node": ">=18.15"
   },
   "scripts": {
     "start": "ts-node src/index.ts | pino-pretty",

@@ -30,7 +30,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=18.15"
   },
   "scripts": {
     "build_old": "tsc --project ./tsconfig.ref.json",
