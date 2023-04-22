@@ -30,7 +30,7 @@
     "access": "public"
   },
   "engines": {
-    "node": ">=18"
+    "node": ">=18.15"
   },
   "scripts": {
     "build_old": "tsc --project ./tsconfig.ref.json",
@@ -56,7 +56,8 @@
     "@opentelemetry/semantic-conventions": "^1.10.1",
     "openapi3-ts": "3.2.0",
     "pino": "^8.11.0",
-    "zod": "^3.21.4"
+    "zod": "^3.21.4",
+    "cloudevents":"^6.0.4"
   },
   "peerDependencies": {
     "@types/jest": "^29.5.0",

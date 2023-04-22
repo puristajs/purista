@@ -67,7 +67,7 @@ export const main = async (getProcessor: () => SpanProcessor) => {
   logger.info(`open in browser: http://localhost:${httpServerConfig.port}`)
 
   gracefulShutdown(logger, [
-    // start with the event bridge to no longer accept incoming messages
+    // begin with the event bridge to no longer accept incoming messages
     eventBridge,
     userService,
     emailService,
