@@ -2,26 +2,28 @@
  * Opentelemetry span names used by PURISTA framework
  */
 export enum PuristaSpanName {
-  EventBridgeEmitMessage = 'purista.emitMessageToBridge',
-  EventBridgeInvokeCommand = 'purista.commandSent',
-  EventBridgeCommandResponse = 'purista.commandResponse',
-  EventBridgeHandleIncomingMessage = 'purista.handleIncomingMessage',
+  EventBridgeEmitMessage = 'purista.emit.MessageToBridge',
+  EventBridgeInvokeCommand = 'purista.command.invoke',
+  EventBridgeCommandResponse = 'purista.command.response',
+  EventBridgeHandleIncomingMessage = 'purista.handle.incomingMessage',
 
-  EventBridgeCommandSent = 'purista.commandSent',
-  EventBridgeCommandReceived = 'purista.commandReceived',
-  EventBridgeCommandResponseSent = 'purista.commandResponseSent',
-  EventBridgeCommandResponseReceived = 'purista.commandResponseReceived',
-  EventBridgeSubscriptionEventReceived = 'purista.subscriptionEventReceived',
+  EventBridgeCommandSent = 'purista.command.sent',
+  EventBridgeCommandReceived = 'purista.command.received',
+  EventBridgeCommandResponseSent = 'purista.command.response.sent',
+  EventBridgeCommandResponseReceived = 'purista.command.response.received',
+  EventBridgeSubscriptionEventReceived = 'purista.subscription.eventReceived',
 
-  SecretStoreGetValue = 'purista.secretStoreGetValue',
-  SecretStoreSetValue = 'purista.secretStoreSetValue',
-  SecretStoreRemoveValue = 'purista.secretStoreRemoveValue',
-  ConfigStoreGetValue = 'purista.configStoreGetValue',
-  ConfigStoreSetValue = 'purista.configStoreSetValue',
-  ConfigStoreRemoveValue = 'purista.configStoreRemoveValue',
-  StateStoreGetValue = 'purista.stateStoreGetValue',
-  StateStoreSetValue = 'purista.stateStoreSetValue',
-  StateStoreRemoveValue = 'purista.stateStoreRemoveValue',
+  SecretStoreGetValue = 'purista.secretStore.getValue',
+  SecretStoreSetValue = 'purista.secretStore.setValue',
+  SecretStoreRemoveValue = 'purista.secretStore.removeValue',
 
-  KubernetesHttpRequest = 'purista.kubernetesHttpRequest',
+  ConfigStoreGetValue = 'purista.configStore.getValue',
+  ConfigStoreSetValue = 'purista.configStore.setValue',
+  ConfigStoreRemoveValue = 'purista.configStore.removeValue',
+
+  StateStoreGetValue = 'purista.stateStore.getValue',
+  StateStoreSetValue = 'purista.stateStore.setValue',
+  StateStoreRemoveValue = 'purista.stateStore.removeValue',
+
+  KubernetesHttpRequest = 'purist.kubernetes.HttpRequest',
 }
