@@ -1,3 +1,4 @@
+export * from './command/computeData/types'
 export * from './command/getAllUsers/types'
 export * from './command/getUserById/types'
 export * from './command/ping/types'

@@ -26,8 +26,10 @@ describe('service User version 1 - command ping', () => {
 
     const context = getCommandContextMock(payload, parameter, sandbox)
 
+    context.stubs.invoke.resolves('invoke response')
+
     const result = await ping(context.mock, payload, parameter)
 
-    expect(result).toBeUndefined()
+    expect(result).toStrictEqual({ pong: 'invoke response' })
   })
 })
