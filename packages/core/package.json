@@ -36,7 +36,7 @@
     "build_old": "tsc --project ./tsconfig.ref.json",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
     "test": "jest --passWithNoTests",
-    "build": "node ../../scripts/buildesm.js && tsc --emitDeclarationOnly --declaration --project ./tsconfig.ref.json",
+    "build": "rimraf lib && node ../../scripts/buildesm.js && tsc --emitDeclarationOnly --declaration --project ./tsconfig.ref.json",
     "bump:major": "npm version major --no-git-tag-version",
     "bump:minor": "npm version minor --no-git-tag-version",
     "bump:patch": "npm version patch --no-git-tag-version"
@@ -46,7 +46,9 @@
     "@swc/jest": "^0.2.24",
     "@types/jest": "^29.5.0",
     "@types/node": "^18.15.11",
-    "sinon": "^15.0.2"
+    "hono": "^3.1.5",
+    "sinon": "^15.0.2",
+    "trouter": "^3.2.1"
   },
   "dependencies": {
     "@anatine/zod-openapi": "^1.12.0",
@@ -54,16 +56,18 @@
     "@opentelemetry/resources": "^1.10.1",
     "@opentelemetry/sdk-trace-node": "^1.10.1",
     "@opentelemetry/semantic-conventions": "^1.10.1",
+    "cloudevents": "^6.0.4",
     "openapi3-ts": "3.2.0",
     "pino": "^8.11.0",
-    "zod": "^3.21.4",
-    "cloudevents":"^6.0.4"
+    "zod": "^3.21.4"
   },
   "peerDependencies": {
     "@types/jest": "^29.5.0",
     "@types/sinon": "^10.x",
+    "hono": "^3.1.5",
     "jest": "^29.x",
-    "sinon": "^15.x"
+    "sinon": "^15.x",
+    "trouter": "^3.2.1"
   },
   "peerDependenciesMeta": {
     "@types/sinon": {
@@ -76,6 +80,12 @@
       "optional": true
     },
     "sinon": {
+      "optional": true
+    },
+    "hono": {
+      "optional": true
+    },
+    "trouter": {
       "optional": true
     }
   },
