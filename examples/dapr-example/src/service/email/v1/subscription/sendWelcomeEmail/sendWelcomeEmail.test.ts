@@ -57,7 +57,7 @@ describe('service Email version 1 - subscription sendWelcomeEmail', () => {
     const result = await sendWelcomeEmail(context.mock, payload, parameter)
 
     expect(
-      context.stubs.logger.debug.calledWith('Using email provider https://example.com with token secret_token'),
+      context.stubs.logger.info.calledWith('Using email provider https://example.com with token secret_token'),
     ).toBeTruthy()
     expect(context.stubs.logger.info.calledWith('Welcome email to user sent to ' + userMock.email)).toBeTruthy()
     expect(result).toStrictEqual({ userId: userMock.userId })

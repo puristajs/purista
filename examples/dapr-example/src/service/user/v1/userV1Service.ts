@@ -1,5 +1,6 @@
 import { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
 
+import { computeDataCommandBuilder } from './command/computeData'
 import { getAllUsersCommandBuilder } from './command/getAllUsers'
 import { getUserByIdCommandBuilder } from './command/getUserById'
 import { pingCommandBuilder } from './command/ping'
@@ -15,6 +16,7 @@ const commandDefinitions: CommandDefinitionList<any> = [
   getUserByIdCommandBuilder.getDefinition(),
   getAllUsersCommandBuilder.getDefinition(),
   pingCommandBuilder.getDefinition(),
+  computeDataCommandBuilder.getDefinition(),
 ]
 
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = []

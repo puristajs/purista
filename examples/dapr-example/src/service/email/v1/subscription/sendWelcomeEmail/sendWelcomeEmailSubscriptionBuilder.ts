@@ -9,10 +9,11 @@ export const sendWelcomeEmailSubscriptionBuilder = emailV1ServiceBuilder
   .addPayloadSchema(emailV1SendWelcomeEmailInputPayloadSchema)
   .addOutputSchema(ServiceEvent.WelcomeEmailSent, emailV1SendWelcomeEmailOutputPayloadSchema)
   .setSubscriptionFunction(async function (context, payload, _parameter) {
+    context.logger.info('sendWelcomeEmail starting')
     const config = await context.configs.getConfig('emailProviderUrl')
     const secrets = await context.secrets.getSecret('emailProviderAuthToken')
 
-    context.logger.debug(`Using email provider ${config.emailProviderUrl} with token ${secrets.emailProviderAuthToken}`)
+    context.logger.info(`Using email provider ${config.emailProviderUrl} with token ${secrets.emailProviderAuthToken}`)
 
     const user = await context.invoke<UserV1GetUserByIdOutputPayload>(
       { serviceName: 'User', serviceVersion: '1', serviceTarget: 'getUserById' },
