@@ -23,7 +23,20 @@ export * from './CommandDefinitionBuilder'
 export * from './SubscriptionDefinitionBuilder'
 export * from './DefaultConfigStore'
 export * from './DefaultEventBridge'
+export * from './HttpClient'
+export * from './HttpEventBridge'
 export * from './DefaultSecretStore'
 export * from './DefaultStateStore'
 export * from './ServiceBuilder'
 export * from './mocks'
+
+declare global {
+  interface FetchEvent extends Event {
+    readonly request: Request
+    respondWith(response: Promise<Response> | Response): Promise<Response>
+  }
+  interface ExecutionContext {
+    waitUntil(promise: Promise<any>): void
+    passThroughOnException(): void
+  }
+}

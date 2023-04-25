@@ -1,6 +1,7 @@
 export * from './ensureHttpServerClose.impl'
 export * from './getTimeoutPromise.impl'
 export * from './gracefulShutdown.impl'
+export * from './HonoTRouter'
 export * from './string'
 export * from './throwIfNotValidMessage.impl'
 export * from './types'
