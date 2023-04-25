@@ -47,13 +47,14 @@
     "git-cliff": "^1.1.2",
     "jest": "^29.5.0",
     "prettier": "^2.8.7",
+    "rimraf": "^5.0.0",
     "sinon": "^15.0.2",
+    "testcontainers": "^9.6.0",
     "turbo": "1.8.5",
     "typedoc": "^0.23.28",
     "typedoc-monorepo-link-types": "^0.0.4",
     "typedoc-plugin-markdown": "^3.14.0",
-    "typescript": "^5.0.4",
-    "rimraf": "^5.0.0"
+    "typescript": "^5.0.4"
   },
   "packageManager": "npm@9.6.2"
 }
