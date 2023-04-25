@@ -14,7 +14,8 @@ category:
  - announcement
 star: true
 isOriginal: true
-image: /graphic/advertise_large.svg
+image: https://purista.dev/graphic/advertise_large.png
+cover: https://purista.dev/graphic/advertise_large.png
 ---
 
 Version 1.5 of PURISTA is available, with a lot of features, enhancements, and a bunch of improvements and bug fixes.  

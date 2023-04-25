@@ -3,6 +3,8 @@ order: 1
 title: The HTTP server service
 shortTitle: HTTP server service
 description: Connect the services to clients via http.
+cover: https://purista.dev/graphic/expose_rest_endpoint.png
+image: https://purista.dev/graphic/expose_rest_endpoint.png
 tag:
   - http
   - rest
@@ -10,6 +12,9 @@ tag:
   - server
   - OpenApi
 ---
+
+
+![Expose command as endpoint](/graphic/expose_rest_endpoint.png)
 
 It is essential in most use cases, to expose certain functionality to clients.  
 A common way is a REST API.

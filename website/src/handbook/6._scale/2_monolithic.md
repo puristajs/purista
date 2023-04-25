@@ -3,6 +3,8 @@ order: 20
 title: Monolithic way - horizontal scale
 shortTitle: Monolithic way
 description: Monolithic
+image: https://purista.dev/graphic/monolithic.png
+cover: https://purista.dev/graphic/monolithic.png
 tag:
  - scaling
  - scale
