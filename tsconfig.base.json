@@ -22,7 +22,11 @@
       "@purista/*": [
         "./packages/*"
       ]
-    }
+    },
+    "types": [
+      "jest",
+      "node"
+    ]
   },
   "exclude": [
     "node_modules",

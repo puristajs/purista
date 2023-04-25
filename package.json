@@ -52,7 +52,8 @@
     "typedoc": "^0.23.28",
     "typedoc-monorepo-link-types": "^0.0.4",
     "typedoc-plugin-markdown": "^3.14.0",
-    "typescript": "^5.0.2"
+    "typescript": "^5.0.4",
+    "rimraf": "^5.0.0"
   },
   "packageManager": "npm@9.6.2"
 }
