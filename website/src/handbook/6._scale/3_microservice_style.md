@@ -3,6 +3,8 @@ order: 30
 title: Microservice style - scale on service level
 shortTitle: Microservice style
 description: Microservice style
+image: https://purista.dev/graphic/microservice_style.png
+cover: https://purista.dev/graphic/microservice_style.png
 tag:
   - microservice
   - Kubernetes

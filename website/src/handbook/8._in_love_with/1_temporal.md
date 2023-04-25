@@ -3,6 +3,8 @@ order: 10
 title: Temporal
 shortTitle: Temporal
 description: Temporal
+image: https://purista.dev/graphic/temporal.png
+cover: https://purista.dev/graphic/temporal.png
 tag:
   - temporal
 ---

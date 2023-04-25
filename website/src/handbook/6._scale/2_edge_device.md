@@ -3,6 +3,8 @@ order: 20
 title: Edge device - no scale
 shortTitle: Edge device
 description: Edge device
+image: https://purista.dev/graphic/edge.png
+cover: https://purista.dev/graphic/edge.png
 tag:
   - edge
   - edge device
