@@ -1,5 +1,6 @@
 import { StatusCode, UnhandledError } from '@purista/core'
 import { Hono } from 'hono'
+import { compress } from 'hono/compress'
 
 import { addServiceEndpoints } from './addServiceEndpoints.impl'
 import { GetHttpServerConfig } from './types'
@@ -23,6 +24,8 @@ export const getHttpServer = (input: GetHttpServerConfig, name = 'K8sHttpHelperS
 
   const logger = input.logger.getChildLogger({ name, puristaVersion, hostname: hostnameWithFallback })
   const app = new Hono()
+
+  app.use('*', compress())
 
   app.onError((error, c) => {
     const err = UnhandledError.fromError(error)
