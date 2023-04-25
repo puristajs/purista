@@ -8,7 +8,15 @@ export const pingCommandBuilder = userV1ServiceBuilder
   .addPayloadSchema(userV1PingInputPayloadSchema)
   .addParameterSchema(userV1PingInputParameterSchema)
   .addOutputSchema(userV1PingOutputPayloadSchema)
-  .setCommandFunction(async function (_context, _payload, _parameter) {
+  .exposeAsHttpEndpoint('POST', 'ping', 'text/plain')
+  .setCommandFunction(async function ({ invoke }, payload, _parameter) {
     // add your business logic here
-    return 'PONG!'
+    const pong = await invoke(
+      { serviceName: this.info.serviceName, serviceVersion: this.info.serviceVersion, serviceTarget: 'computeData' },
+      payload,
+      {},
+    )
+    return {
+      pong,
+    }
   })
