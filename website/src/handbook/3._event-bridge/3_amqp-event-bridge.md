@@ -37,6 +37,7 @@ You can:
 ::: danger Cons
 
 - needs managing of an AMQP broker
+- no auto-reconnect
 :::
 
 ## Config

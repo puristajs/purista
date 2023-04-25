@@ -3,6 +3,8 @@ order: 40
 title: Grafana
 shortTitle: Grafana
 description: Integrate Grafana Tempo and Grafana Loki into a PURISTA project
+image: https://purista.dev/graphic/grafana_screenshot.png
+cover: https://purista.dev/graphic/grafana_screenshot.png
 tag:
   - opentelemetry
   - grafana

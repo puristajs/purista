@@ -1,6 +1,6 @@
 ---
 order: 20
-title: Kubernetes
+title: Deploy to Kubernetes
 shortTitle: Kubernetes
 description: Kubernetes
 tag:
@@ -37,22 +37,36 @@ Therefore, we use a small HTTP server here.
 
 We also want to handle shutdown signals properly.
 
-This can be done by using [@purista/k8s-sdk](../../api/modules/purista_k8s_sdk.md).
+It can be done by using [@purista/k8s-sdk](../../api/modules/purista_k8s_sdk.md).
+
+::: info
+The [@purista/k8s-sdk](../../api/modules/purista_k8s_sdk.md) package is using [Hono](https://hono.dev) to provide a modern, flexible and lightweight http server.  
+Because of this, the webserver is able to use the benefits of different runtime environments like [Bun](https://bun.sh).  
+See [Hono](https://hono.dev)
+:::
 
 As you will see, you can optional expose commands as HTTP endpoints. This will allow __integration into existing or other microservices environments__ or __exposing commands as HTTP endpoints for clients__.
 
 Here is a full example, of how the index file might look like, if you want to deploy a service to Kubernetes.
 You can adjust this example for your actual requirements.
 
+::: code-tabs#code
+
+@tab:active Node.js
+
 ```typescript
 // src/index.ts
+// For running on Node.js a small additional package is needed:
+import { serve } from '@purista/hono-node-server'
+
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { AmqpBridge } from '@purista/amqpbridge'
 import {
   DefaultConfigStore,
-  DefaultEventBridge,
   DefaultSecretStore,
   DefaultStateStore,
+  getNewInstanceId,
   gracefulShutdown,
   initLogger,
   UnhandledError,
@@ -63,7 +77,7 @@ import { theServiceV1Service } from './service/theService/v1/'
 
 const main = async () => {
   // create a logger
-  const logger = initLogger()
+  const logger = initLogger('debug')
 
   // add listeners to log really unexpected errors
   process.on('uncaughtException', (error, origin) => {
@@ -88,7 +102,13 @@ const main = async () => {
   const stateStore = new DefaultStateStore({ logger })
 
   // set up the eventbridge and start the event bridge
-  const eventBridge = new DefaultEventBridge({ spanProcessor })
+  const eventBridge = new AmqpBridge({
+    spanProcessor,
+    instanceId: process.env.HOSTNAME || getNewInstanceId(),
+    config: {
+      url: process.env.AMQP_URL,
+    },
+  })
   await eventBridge.start()
 
   // set up the service
@@ -101,7 +121,7 @@ const main = async () => {
   await theService.start()
 
   // create http server
-  const server = getHttpServer({
+  const app = getHttpServer({
     logger,
     // check event bridge health if /healthz endpoint is called
     healthFn: () => eventBridge.isHealthy(),
@@ -110,6 +130,14 @@ const main = async () => {
     // optional: expose service endpoints at [apiMountPath]/v[serviceVersion]/[path defined for command]
     // defaults to /api
     apiMountPath: '/api',
+  })
+
+  // start the http server
+  // defaults to port 3000
+  // optional: you can set the `port` in the optional parameter of this method
+  // use the `serve` method form the `@purista/hono-node-server` package
+  const server = serve({
+    fetch: app.fetch,
   })
 
   // register shut down methods
@@ -124,16 +152,130 @@ const main = async () => {
     configStore,
     // optional: shut down the state store
     stateStore,
-    // stop the http server
-    server,
+    {
+      name: 'httpserver',
+      destroy: async () => {
+        server.closeIdleConnections()
+        server.close()
+      },
+    },
   ])
-
-  // start the http server
-  await server.start()
 }
 
 main()
 ```
+
+@tab Bun
+
+```typescript
+// src/index.ts
+import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
+import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { AmqpBridge } from '@purista/amqpbridge'
+import {
+  DefaultConfigStore,
+  DefaultSecretStore,
+  DefaultStateStore,
+  getNewInstanceId,
+  gracefulShutdown,
+  initLogger,
+  UnhandledError,
+} from '@purista/core'
+import { getHttpServer } from '@purista/k8s-sdk'
+
+import { theServiceV1Service } from './service/theService/v1/'
+
+const main = async () => {
+  // create a logger
+  const logger = initLogger('debug')
+
+  // add listeners to log really unexpected errors
+  process.on('uncaughtException', (error, origin) => {
+    const err = UnhandledError.fromError(error)
+    logger.error({ err, origin }, `unhandled error: ${err.message}`)
+  })
+
+  process.on('unhandledRejection', (error, origin) => {
+    const err = UnhandledError.fromError(error)
+    logger.error({ err, origin }, `unhandled rejection: ${err.message}`)
+  })
+
+  // optional: set up opentelemetry if you like to use it
+  const exporter = new OTLPTraceExporter({
+    url: `http://localhost:14268/api/traces`,
+  })
+  const spanProcessor = new SimpleSpanProcessor(exporter)
+
+  // optional: set up stores if they are needed for your service
+  const secretStore = new DefaultSecretStore({ logger })
+  const configStore = new DefaultConfigStore({ logger })
+  const stateStore = new DefaultStateStore({ logger })
+
+  // set up the eventbridge and start the event bridge
+  const eventBridge = new AmqpBridge({
+    spanProcessor,
+    instanceId: process.env.HOSTNAME || getNewInstanceId(),
+    config: {
+      url: process.env.AMQP_URL,
+    },
+  })
+  await eventBridge.start()
+
+  // set up the service
+  const theService = theServiceV1Service.getInstance(eventBridge, {
+    spanProcessor,
+    configStore,
+    secretStore,
+    stateStore,
+  })
+  await theService.start()
+
+  // create http server
+  const app = getHttpServer({
+    logger,
+    // check event bridge health if /healthz endpoint is called
+    healthFn: () => eventBridge.isHealthy(),
+    // optional: expose the commands if they are defined to have url endpoint
+    services: theService,
+    // optional: expose service endpoints at [apiMountPath]/v[serviceVersion]/[path defined for command]
+    // defaults to /api
+    apiMountPath: '/api',
+  })
+
+  // start the http server
+  // defaults to port 3000
+  // optional: you can set the `port` in the optional parameter of this method
+  // Use Bun native `serve` method
+  const server = Bun.serve({
+    fetch: app.fetch,
+  })
+
+  // register shut down methods
+  gracefulShutdown(logger, [
+    // start with the event bridge to no longer accept incoming messages
+    eventBridge,
+    // optional: shut down the service
+    theService,
+    // optional: shut down the secret store
+    secretStore,
+    // optional: shut down the config store
+    configStore,
+    // optional: shut down the state store
+    stateStore,
+    {
+      name: 'httpserver',
+      destroy: async () => {
+        server.closeIdleConnections()
+        server.close()
+      },
+    },
+  ])
+}
+
+main()
+```
+
+:::
 
 With this setup, you should be able to build and deploy your app as a container in Kubernetes like any other node-based service.
 

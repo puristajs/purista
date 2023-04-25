@@ -120,6 +120,28 @@ export default hopeTheme({
       fallBackImage: 'https://purista.dev/preview.png',
       twitterID: '@purista_js',
       autoDescription: true,
+      customHead(head, page, _app) {
+        head.push([
+          'meta',
+          {
+            name: 'twitter:image',
+            content: (page.frontmatter.cover as string | undefined) || 'https://purista.dev/twitter.png',
+          },
+        ])
+        head.push(['meta', { name: 'twitter:image:alt', content: page.data.title }])
+        /* head.push(['meta', { name: 'og:image:width', content: '1200' }])
+        head.push(['meta', { name: 'og:image:height', content: '630' }]) */
+        head.push(['meta', { name: 'twitter:site', content: '@purista_js' }])
+        head.push(['meta', { name: 'twitter:creator', content: '@purista_js' }])
+        head.push(['meta', { name: 'twitter:title', content: page.data.title }])
+        head.push([
+          'meta',
+          {
+            name: 'twitter:description',
+            content: page.frontmatter.description || page.data.title,
+          },
+        ])
+      },
     },
     blog: {
       filter: ({ filePathRelative }) => (filePathRelative ? filePathRelative.startsWith('posts/') : false),

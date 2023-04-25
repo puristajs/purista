@@ -3,6 +3,8 @@ order: 60
 title: SignNoz
 shortTitle: SignNoz
 description: SignNoz
+image: https://purista.dev/graphic/signoz_screenshot.png
+cover: https://purista.dev/graphic/signoz_screenshot.png
 tag:
   - opentelemetry
   - SignNoz

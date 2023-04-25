@@ -3,6 +3,8 @@ order: 40
 title: Serverless functions (FaaS) - scale on function level
 shortTitle: Serverless (FaaS)
 description: Lambda style
+image: https://purista.dev/graphic/lambda.png
+cover: https://purista.dev/graphic/lambda.png
 tag:
   - lambda
   - functions
