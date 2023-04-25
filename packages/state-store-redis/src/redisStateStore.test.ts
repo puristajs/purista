@@ -1,6 +1,18 @@
+import { GenericContainer, StartedTestContainer } from 'testcontainers'
+
 import { RedisStateStore } from './RedisStateStore.impl'
 
 describe('@purista/redis-state-store', () => {
+  let container: StartedTestContainer
+
+  beforeAll(async () => {
+    container = await new GenericContainer('redis').withExposedPorts(6379).start()
+  })
+
+  afterAll(async () => {
+    await container.stop()
+  })
+
   it('set, get and remove values', async () => {
     const config = {
       url: 'redis://localhost:6379',
