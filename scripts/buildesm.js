@@ -10,7 +10,7 @@ esbuild
     splitting: false,
     platform: 'node',
     sourcemap: true,
-    target: 'node16',
+    target: 'node18',
     minify: true,
     packages: 'external',
   })
@@ -25,7 +25,7 @@ esbuild
     splitting: false,
     platform: 'node',
     sourcemap: true,
-    target: 'node16',
+    target: 'node18',
     minify: true,
     packages: 'external',
   })
