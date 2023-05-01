@@ -456,10 +456,10 @@ describe('integration test', () => {
     const eventBridge = new DefaultEventBridge({ logger: logger.mock })
     await eventBridge.start()
 
-    const serviceOne = serviceOneBuilder.getInstance(eventBridge)
+    const serviceOne = serviceOneBuilder.getInstance(eventBridge, { logger: getLoggerMock().mock })
     await serviceOne.start()
 
-    const serviceTwo = serviceTwoBuilder.getInstance(eventBridge)
+    const serviceTwo = serviceTwoBuilder.getInstance(eventBridge, { logger: getLoggerMock().mock })
     await serviceTwo.start()
 
     const message = getCommandMessageMock({

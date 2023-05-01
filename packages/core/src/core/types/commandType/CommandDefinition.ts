@@ -37,9 +37,9 @@ export type CommandDefinition<
     ServiceClassType,
     MessagePayloadType,
     MessageParamsType,
-    MessagePayloadType,
-    MessageParamsType,
-    MessageResultType
+    FunctionPayloadType,
+    FunctionParamsType,
+    FunctionResultType
   >
   /** the eventName for the command response */
   eventName?: string

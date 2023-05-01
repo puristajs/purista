@@ -1,4 +1,5 @@
 export * from './AmqpBridgeConfig'
 export * from './Encoder'
+export * from './EncoderFunctions'
 export * from './Encrypter'
 export * from './EncryptFunctions'

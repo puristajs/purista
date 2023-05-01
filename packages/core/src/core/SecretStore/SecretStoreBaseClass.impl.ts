@@ -31,7 +31,9 @@ export class SecretStoreBaseClass<ConfigType> implements SecretStore {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getSecret(...secretNames: string[]): Promise<Record<string, string | undefined>> {
     if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get secret from store is disabled by config')
+      const err = new UnhandledError(StatusCode.Unauthorized, 'get secret from store is disabled by config')
+      this.logger.error({ err }, err.message)
+      throw err
     }
 
     const err = new UnhandledError(StatusCode.NotImplemented, 'get secret is not implemented in secret store')
@@ -42,7 +44,9 @@ export class SecretStoreBaseClass<ConfigType> implements SecretStore {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async removeSecret(secretName: string): Promise<void> {
     if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove secret from store is disabled by config')
+      const err = new UnhandledError(StatusCode.Unauthorized, 'remove secret from store is disabled by config')
+      this.logger.error({ err }, err.message)
+      throw err
     }
 
     const err = new UnhandledError(StatusCode.NotImplemented, 'remove secret is not implemented in secret store')
@@ -53,7 +57,9 @@ export class SecretStoreBaseClass<ConfigType> implements SecretStore {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async setSecret(secretName: string, secretValue: string) {
     if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set secret at store is disabled by config')
+      const err = new UnhandledError(StatusCode.Unauthorized, 'set secret at store is disabled by config')
+      this.logger.error({ err }, err.message)
+      throw err
     }
 
     const err = new UnhandledError(StatusCode.NotImplemented, 'set secret is not implemented in secret store')

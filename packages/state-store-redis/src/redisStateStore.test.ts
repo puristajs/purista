@@ -1,12 +1,17 @@
-import { GenericContainer, StartedTestContainer } from 'testcontainers'
+import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers'
 
 import { RedisStateStore } from './RedisStateStore.impl'
+
+const REDIS_PORT = 6379
 
 describe('@purista/redis-state-store', () => {
   let container: StartedTestContainer
 
   beforeAll(async () => {
-    container = await new GenericContainer('redis').withExposedPorts(6379).start()
+    container = await new GenericContainer('redis')
+      .withExposedPorts(REDIS_PORT)
+      .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
+      .start()
   })
 
   afterAll(async () => {
@@ -15,7 +20,7 @@ describe('@purista/redis-state-store', () => {
 
   it('set, get and remove values', async () => {
     const config = {
-      url: 'redis://localhost:6379',
+      url: `redis://127.0.0.1:${REDIS_PORT}`,
     }
 
     const store = new RedisStateStore({ config })

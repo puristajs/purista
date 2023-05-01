@@ -30,7 +30,9 @@ export class ConfigStoreBaseClass<ConfigType> implements ConfigStore {
 
   async getConfig(..._configNames: string[]): Promise<Record<string, unknown | undefined>> {
     if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get config from store is disabled by config')
+      const err = new UnhandledError(StatusCode.Unauthorized, 'get config from store is disabled by config')
+      this.logger.error({ err }, err.message)
+      throw err
     }
 
     const err = new UnhandledError(StatusCode.NotImplemented, 'get config is not implemented in config store')
@@ -40,7 +42,9 @@ export class ConfigStoreBaseClass<ConfigType> implements ConfigStore {
 
   async removeConfig(_configName: string): Promise<void> {
     if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove config from store is disabled by config')
+      const err = new UnhandledError(StatusCode.Unauthorized, 'remove config from store is disabled by config')
+      this.logger.error({ err }, err.message)
+      throw err
     }
 
     const err = new UnhandledError(StatusCode.NotImplemented, 'remove config is not implemented in config store')
@@ -50,7 +54,9 @@ export class ConfigStoreBaseClass<ConfigType> implements ConfigStore {
 
   async setConfig(_configName: string, _configValue: unknown) {
     if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set config at store is disabled by config')
+      const err = new UnhandledError(StatusCode.Unauthorized, 'set config at store is disabled by config')
+      this.logger.error({ err }, err.message)
+      throw err
     }
 
     const err = new UnhandledError(StatusCode.NotImplemented, 'set config is not implemented in config store')

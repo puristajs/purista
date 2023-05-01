@@ -18,11 +18,11 @@ export const deserializeOtpFromAmqpHeader = async (
     // try to use amqp header first
     const header = message.properties.headers
 
-    // if not present try to ffind in message content
     if (header['traceparent']) {
       return propagation.extract(context.active(), header)
     }
 
+    // if not present try to find in message content
     const msg = await decodeContent<EBMessage>(
       message.content,
       message.properties.contentType,
@@ -30,6 +30,7 @@ export const deserializeOtpFromAmqpHeader = async (
       encrypter,
       encoder,
     )
+
     return await deserializeOtp(logger, msg.otp)
   } catch (err) {
     logger.error({ err }, 'unable to deserialize otp entry from amqp header')

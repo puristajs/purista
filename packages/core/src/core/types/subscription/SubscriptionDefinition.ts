@@ -40,9 +40,9 @@ export type SubscriptionDefinition<
     ServiceClassType,
     MessagePayloadType,
     MessageParamsType,
-    MessagePayloadType,
-    MessageParamsType,
-    MessageResultType
+    FunctionPayloadType,
+    FunctionParamsType,
+    FunctionResultType
   >
   /** filter for messages produced by given sender */
   sender?: {
