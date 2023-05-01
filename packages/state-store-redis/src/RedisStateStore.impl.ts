@@ -50,6 +50,7 @@ export class RedisStateStore<
   constructor(config?: StoreBaseConfig<RedisClientOptions<M, F, S>>) {
     super('RedisStateStore', config)
     this.client = createClient(this.config.config)
+    this.client.on('error', (err) => this.logger.error({ err }, 'Redis Client Error'))
   }
 
   async getState(...stateNames: string[]): Promise<Record<string, unknown>> {

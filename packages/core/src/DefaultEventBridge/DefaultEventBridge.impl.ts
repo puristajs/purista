@@ -70,12 +70,12 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
   protected hasStarted = false
   protected healthy = false
 
-  constructor(config: EventBridgeConfig<DefaultEventBridgeConfig>) {
+  constructor(config?: EventBridgeConfig<DefaultEventBridgeConfig>) {
     const conf = {
       ...config,
       config: {
         logWarnOnMessagesWithoutReceiver: true,
-        ...config.config,
+        ...config?.config,
       },
     }
     super('DefaultEventBridge', conf)
@@ -316,13 +316,13 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
       const correlationId = getNewCorrelationId()
 
       const command: Command = Object.freeze({
+        ...input,
         id: getNewEBMessageId(),
         instanceId: this.instanceId,
         correlationId: getNewCorrelationId(),
         timestamp: Date.now(),
         messageType: EBMessageType.Command,
         traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
-        ...input,
       })
 
       const removeFromPending = () => {

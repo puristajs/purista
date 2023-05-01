@@ -1,4 +1,5 @@
 import {
+  Complete,
   CustomMessage,
   EBMessage,
   EventBridge,
@@ -15,8 +16,11 @@ import { DaprClient } from '../DaprClient'
 import { DaprPubSubType } from '../types'
 import { puristaVersion } from '../version'
 import { getDefaultConfig } from './getDefaultConfig.impl'
-import { configRoute } from './routes/index.impl'
+import { configRoute } from './routes'
 import { DaprEventBridgeConfig } from './types'
+
+type CompleteConfig = Required<Pick<EventBridgeConfig<Complete<DaprEventBridgeConfig>>, 'config'>> &
+  Omit<EventBridgeConfig<Complete<DaprEventBridgeConfig>>, 'config'>
 
 /**
  * The DaprEventBridge connects to the Dapr sidecar container.
@@ -30,7 +34,7 @@ import { DaprEventBridgeConfig } from './types'
 export class DaprEventBridge extends HttpEventBridge<DaprEventBridgeConfig> implements EventBridge {
   private pubSubSubscriptions: DaprPubSubType[] = []
 
-  constructor(config: EventBridgeConfig<DaprEventBridgeConfig>) {
+  constructor(config: CompleteConfig) {
     const conf = {
       ...config,
       config: { ...getDefaultConfig(), ...config?.config },
@@ -70,10 +74,12 @@ export class DaprEventBridge extends HttpEventBridge<DaprEventBridgeConfig> impl
       return c.json(this.pubSubSubscriptions)
     })
 
+    /* actors currently not supported/used
     this.app.delete('/actors/:actorTypeName/:actorId')
     this.app.put('/actors/:actorTypeName/:actorId/method/:methodName')
     this.app.put('/actors/:actorTypeName/:actorId/method/timer/:timerName')
     this.app.put('/actors/:actorTypeName/:actorId/method/remind/:reminderName')
+    */
 
     this.app.get('/dapr/config', configRoute.bind(this))
 

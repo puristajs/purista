@@ -4,7 +4,7 @@ module.exports = {
   },
   testEnvironment: 'node',
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/database/', '/test/', '/lib/'],
-  coverageReporters: ['json', 'lcov', 'text', 'clover', 'html'],
+  coverageReporters: ['json', 'lcov', 'text', 'clover', 'html', 'text-summary'],
   collectCoverage: false,
   collectCoverageFrom: [
     'src/**/*.(ts|tsx)',
@@ -14,8 +14,10 @@ module.exports = {
     '!**/*.mock.{ts}',
     '!**/node_modules/**',
     '!**/dist/**',
+    '!**/website/**',
+    '!**/test/**',
+    '!**/_testdata/**',
   ],
-  /*
   coverageThreshold: {
     global: {
       branches: 20,
@@ -24,7 +26,6 @@ module.exports = {
       statements: 50,
     },
   },
-  */
   coverageProvider: 'v8',
   projects: [
     {

@@ -109,13 +109,7 @@ export const getCommandHandlerRestApi = function (
             })
 
             span.end()
-            return new Response(JSON.stringify(result.payload), {
-              status,
-              statusText: getErrorMessageForCode(status),
-              headers: {
-                'content-type': 'application/json; charset=utf-8',
-              },
-            })
+            return c.json(result.payload, status as any)
           }
 
           if (result.eventName) {
@@ -128,7 +122,7 @@ export const getCommandHandlerRestApi = function (
             span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, status)
 
             span.end()
-            return new Response(JSON.stringify(result.payload), {
+            return new Response(undefined, {
               status,
               statusText: getErrorMessageForCode(status),
               headers: {
@@ -174,13 +168,7 @@ export const getCommandHandlerRestApi = function (
           const status = err.errorCode
           span.end()
 
-          return new Response(JSON.stringify(err.getErrorResponse()), {
-            status,
-            statusText: getErrorMessageForCode(status),
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-            },
-          })
+          return c.json(err.getErrorResponse(), status as any)
         }
       },
     )

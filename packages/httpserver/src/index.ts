@@ -72,4 +72,5 @@ main()
  * @module
  */
 export * from './service/httpServer/v1/'
+export * from './service/ServiceEvent.enum'
 export * from './version'

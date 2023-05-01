@@ -3,6 +3,7 @@ import { posix } from 'path'
 
 import { HttpServerClass } from '../../HttpServerClass.impl'
 import { HttpServerServiceV1ConfigRaw } from '../../httpServerServiceConfig'
+import { getJsInit } from './getJsInit.imp'
 
 export const getOpenApiDocuJsInit = function (this: HttpServerClass<HttpServerServiceV1ConfigRaw>): RouteOptions {
   const path = (this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath) as string
@@ -11,23 +12,7 @@ export const getOpenApiDocuJsInit = function (this: HttpServerClass<HttpServerSe
   const handler: RouteHandlerMethod = (_request, reply) => {
     reply.header('content-type', 'text/javascript; charset=utf-8')
 
-    return `
-      window.onload = function() {
-        //<editor-fold desc="Changeable Configuration Block">
-
-        // the following lines will be replaced by docker/configurator, when it runs in a docker-container
-        window.ui = SwaggerUIBundle({
-          url: "${path}/openapi.json",
-          dom_id: '#swagger-ui',
-          deepLinking: true,
-          presets: [
-            SwaggerUIBundle.presets.apis,
-          ],
-        });
-
-        //</editor-fold>
-      };
-    `
+    return getJsInit(path)
   }
 
   return {

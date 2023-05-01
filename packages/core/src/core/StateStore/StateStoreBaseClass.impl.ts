@@ -31,7 +31,9 @@ export class StateStoreBaseClass<ConfigType> implements StateStore {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getState(...stateNames: string[]): Promise<Record<string, unknown | undefined>> {
     if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get state from store is disabled by config')
+      const err = new UnhandledError(StatusCode.Unauthorized, 'get state from store is disabled by config')
+      this.logger.error({ err }, err.message)
+      throw err
     }
 
     const err = new UnhandledError(StatusCode.NotImplemented, 'getState is not implemented in state store')
@@ -42,7 +44,9 @@ export class StateStoreBaseClass<ConfigType> implements StateStore {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async removeState(stateName: string) {
     if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove state from store is disabled by config')
+      const err = new UnhandledError(StatusCode.Unauthorized, 'remove state from store is disabled by config')
+      this.logger.error({ err }, err.message)
+      throw err
     }
 
     const err = new UnhandledError(StatusCode.NotImplemented, 'removeState is not implemented in state store')
@@ -53,7 +57,9 @@ export class StateStoreBaseClass<ConfigType> implements StateStore {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async setState(stateName: string, stateValue: unknown) {
     if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
+      const err = new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
+      this.logger.error({ err }, err.message)
+      throw err
     }
 
     const err = new UnhandledError(StatusCode.NotImplemented, 'setState is not implemented in state store')

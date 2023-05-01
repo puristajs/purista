@@ -139,9 +139,11 @@ export const addServiceEndpoints = (
                 // empty response
                 if (result.payload === undefined || result.payload === '') {
                   span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.NoContent)
-                  const response = c.text('', StatusCode.NoContent, header)
                   span.end()
-                  return response
+
+                  c.status(StatusCode.NoContent)
+                  Object.values(header).forEach((val) => c.header(val[0], val[1]))
+                  return c.body(null)
                 }
 
                 span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.OK)

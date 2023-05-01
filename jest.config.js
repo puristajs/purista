@@ -1,21 +1,25 @@
 module.exports = {
+  clearMocks: true,
   transform: {
     '^.+\\.(t|j)sx?$': '@swc/jest',
   },
   testEnvironment: 'node',
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/database/', '/test/', '/lib/'],
-  coverageReporters: ['json', 'lcov', 'text', 'clover', 'html'],
-  collectCoverage: false,
+  coverageReporters: ['json', 'lcov', 'text', 'clover', 'html', 'text-summary'],
+  collectCoverage: true,
   collectCoverageFrom: [
-    'src/**/*.(ts|tsx)',
-    'src/**/*.impl.(ts|tsx)',
+    'packages/**/**/src/**/*.(ts|tsx)',
     '!**/testhelper/**/*.test.{ts}',
     '!**/*.test.{ts}',
     '!**/*.mock.{ts}',
     '!**/node_modules/**',
     '!**/dist/**',
+    '!**/website/**',
+    '!**/test/**',
+    '!**/_testdata/**',
+    '!packages/cli/**',
   ],
-  /*
+
   coverageThreshold: {
     global: {
       branches: 20,
@@ -24,7 +28,7 @@ module.exports = {
       statements: 50,
     },
   },
-  */
+
   coverageProvider: 'v8',
   projects: [
     {

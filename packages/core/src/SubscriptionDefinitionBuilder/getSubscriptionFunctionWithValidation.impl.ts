@@ -38,18 +38,18 @@ export const getSubscriptionFunctionWithValidation = function <
   ServiceClassType,
   MessagePayloadType,
   MessageParamsType,
-  MessagePayloadType,
-  MessageParamsType,
-  MessageResultType
+  FunctionPayloadType,
+  FunctionParamsType,
+  FunctionResultType
 > {
   const wrapped: SubscriptionFunction<
     ServiceClassType,
     MessagePayloadType,
     MessageParamsType,
-    MessagePayloadType,
-    MessageParamsType,
-    MessageResultType
-  > = async function (context, payload, parameter): Promise<MessageResultType> {
+    FunctionPayloadType,
+    FunctionParamsType,
+    FunctionResultType
+  > = async function (context, payload, parameter): Promise<FunctionResultType> {
     const { logger, startActiveSpan, wrapInSpan } = context
     let safePayload = payload as unknown as FunctionPayloadType
     if (inputPayloadSchema) {
@@ -108,12 +108,12 @@ export const getSubscriptionFunctionWithValidation = function <
     })
 
     if (!outputPayloadSchema) {
-      return output as unknown as MessageResultType
+      return output
     }
 
     return await startActiveSpan('outputValidation', {}, undefined, async (span) => {
       try {
-        return outputPayloadSchema.parse(output)
+        return outputPayloadSchema.parse(output) as any
       } catch (error) {
         const err = error as ZodError
         span.recordException(err)

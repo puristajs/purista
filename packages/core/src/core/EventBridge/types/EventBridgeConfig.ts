@@ -9,7 +9,7 @@ import { Logger, LogLevelName } from '../../types'
  */
 export type EventBridgeConfig<CustomConfig> = {
   /** Specific configuration settings for the event bridge depending on the used message broker */
-  config: CustomConfig
+  config?: CustomConfig
   /** A logger instance */
   logger?: Logger
   /**
@@ -17,7 +17,7 @@ export type EventBridgeConfig<CustomConfig> = {
    */
   logLevel?: LogLevelName
   /** A OpenTelemetry span processor */
-  spanProcessor?: SpanProcessor
+  spanProcessor?: SpanProcessor | undefined
   /** The instance id of the event bridge.
    * If not set, a id will generated each time a instance is created.
    * Use this if there is a need to always have the same instance id.

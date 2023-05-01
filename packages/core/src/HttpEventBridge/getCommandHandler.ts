@@ -10,7 +10,6 @@ import {
   CommandSuccessResponse,
   DefinitionEventBridgeConfig,
   EBMessageAddress,
-  getErrorMessageForCode,
   HandledError,
   HttpExposedServiceMeta,
   PuristaSpanName,
@@ -94,32 +93,20 @@ export const getCommandHandler = function (
 
             span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, status)
 
-            return new Response(undefined, { status, statusText: getErrorMessageForCode(status) })
+            c.status(status)
+            return c.body(null)
           }
 
           const payload = typeof msg.payload === 'string' ? msg.payload : JSON.stringify(msg)
 
           const status = StatusCode.OK
-          return new Response(payload, {
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-            },
-            status,
-            statusText: getErrorMessageForCode(status),
-          })
+          return c.json(payload, status as any)
         } catch (error) {
           const err = error instanceof UnhandledError ? error : UnhandledError.fromError(error)
           span.recordException(err)
           this.logger.error({ err }, err.message)
-          const status = err.errorCode
 
-          return new Response(JSON.stringify(err.getErrorResponse()), {
-            headers: {
-              'content-type': 'application/json; charset=utf-8',
-            },
-            status,
-            statusText: getErrorMessageForCode(status),
-          })
+          return c.json(err.getErrorResponse(), err.errorCode as any)
         }
       },
     )
