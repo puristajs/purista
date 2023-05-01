@@ -42,8 +42,10 @@ import { getCommandHandler } from './getCommandHandler'
 import { getCommandHandlerRestApi } from './getCommandHandlerRestApi'
 import { getDefaultConfig } from './getDefaultConfig'
 import { getSubscriptionHandler } from './getSubscriptionHandler'
-import { healthzRoute } from './healthzRoute'
+import { healthzRoute } from './healthzRoute.impl'
 import { HttpEventBridgeClient, HttpEventBridgeConfig } from './types'
+
+// EventBridgeConfig<Complete<CustomConfig>>
 
 /**
  * The HTTP event bridge is a generic event bridge.
@@ -73,10 +75,11 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 
   constructor(config: EventBridgeConfig<CustomConfig>, client: HttpEventBridgeClient) {
     const defaults = getDefaultConfig()
-    const conf: EventBridgeConfig<Complete<CustomConfig>> = {
+    const conf: Required<Pick<EventBridgeConfig<Complete<CustomConfig>>, 'config'>> &
+      Omit<EventBridgeConfig<Complete<CustomConfig>>, 'config'> = {
       ...defaults,
       ...config,
-      config: { ...defaults.config, ...config.config },
+      config: { ...defaults.config, ...config.config } as CustomConfig,
     }
 
     super(conf.config.name || 'HttpEventBridge', conf)
@@ -194,6 +197,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
     const currentContext = await deserializeOtp(this.logger, input.otp)
     return this.startActiveSpan(PuristaSpanName.EventBridgeInvokeCommand, {}, currentContext, async (span) => {
       const command: Command = Object.freeze({
+        ...input,
         id: getNewEBMessageId(),
         instanceId: this.instanceId,
         correlationId: getNewCorrelationId(),
@@ -201,7 +205,6 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
         messageType: EBMessageType.Command,
         traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
         otp: serializeOtp(),
-        ...input,
       })
 
       span.setAttribute(PuristaSpanTag.SenderServiceName, command.sender.serviceName)

@@ -84,7 +84,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
     ...plainEncrypter,
   }
 
-  constructor(config: EventBridgeConfig<AmqpBridgeConfig>) {
+  constructor(config?: EventBridgeConfig<AmqpBridgeConfig>) {
     //= getDefaultConfig()
     const conf = {
       ...config,
@@ -355,6 +355,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
       const correlationId = getNewCorrelationId()
 
       const command: Command = Object.freeze({
+        ...input,
         id: getNewEBMessageId(),
         instanceId: this.instanceId,
         correlationId,
@@ -362,7 +363,6 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
         messageType: EBMessageType.Command,
         traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
         otp: serializeOtp(),
-        ...input,
       })
 
       const removeFromPending = () => {

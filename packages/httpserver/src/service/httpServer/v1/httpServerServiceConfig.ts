@@ -62,7 +62,7 @@ export const httpServerServiceV1ConfigSchema = z.object({
   logLevel: z.enum(['info', 'error', 'warn', 'debug', 'trace', 'fatal']).optional(),
   port: z.number().int().min(1),
   host: z.string().optional(),
-  domain: z.string(),
+  domain: z.string().optional().default('localhost'),
   uploadDir: z.string().optional(),
   cookieSecret: z.string().optional(),
   apiMountPath: z.string().optional(),

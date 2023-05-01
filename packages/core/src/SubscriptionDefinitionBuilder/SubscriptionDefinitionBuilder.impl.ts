@@ -550,9 +550,9 @@ export class SubscriptionDefinitionBuilder<
     ServiceClassType,
     MessagePayloadType,
     MessageParamsType,
-    MessagePayloadType,
-    MessageParamsType,
-    MessageResultType
+    FunctionPayloadType,
+    FunctionParamsType,
+    FunctionResultType
   > {
     if (!this.fn) {
       throw new Error(`No function implementation for ${this.subscriptionName}`)

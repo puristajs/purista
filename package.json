@@ -5,7 +5,7 @@
     "start": "npm run dev -w examples/fullexample",
     "build": "turbo run build",
     "lint": "turbo run lint --parallel",
-    "test": "turbo run test --parallel",
+    "test": "jest",
     "dev:doc": "npm run dev -w website",
     "bump:major": "npm version major --no-git-tag-version",
     "bump:minor": "npm version minor --no-git-tag-version",
@@ -29,10 +29,10 @@
     "./website"
   ],
   "devDependencies": {
-    "@swc/jest": "^0.2.24",
+    "@swc/jest": "^0.2.26",
     "@types/jest": "^29.5.0",
-    "@types/node": "^18.15.11",
-    "@types/sinon": "^10.0.13",
+    "@types/node": "^18.16.2",
+    "@types/sinon": "^10.0.14",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@typescript-eslint/parser": "^5.56.0",
     "esbuild": "^0.17.13",

@@ -30,13 +30,13 @@ export const getHttpServer = (input: GetHttpServerConfig, name = 'K8sHttpHelperS
   app.onError((error, c) => {
     const err = UnhandledError.fromError(error)
     logger.error(`${err}`)
-    return c.json(err.getErrorResponse())
+    return c.json(err.getErrorResponse(), err.errorCode as any)
   })
 
   app.notFound(async (c) => {
     const err = new UnhandledError(StatusCode.NotFound, 'endpoint not found')
     logger.error(`${err}`)
-    return c.json(err.getErrorResponse())
+    return c.json(err.getErrorResponse(), err.errorCode as any)
   })
 
   let isShuttingDown = false

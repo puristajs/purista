@@ -4,7 +4,7 @@ module.exports = {
   },
   testEnvironment: 'node',
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/database/', '/test/', '/lib/'],
-  coverageReporters: ['json', 'lcov', 'text', 'clover', 'html'],
+  coverageReporters: ['json', 'lcov', 'text', 'clover', 'html', 'text-summary'],
   collectCoverage: false,
   collectCoverageFrom: [
     'src/**/*.(ts|tsx)',
@@ -14,7 +14,6 @@ module.exports = {
     '!**/node_modules/**',
     '!**/dist/**',
   ],
-  /*
   coverageThreshold: {
     global: {
       branches: 20,
@@ -23,7 +22,6 @@ module.exports = {
       statements: 50,
     },
   },
-  */
   coverageProvider: 'v8',
   projects: [
     {
@@ -31,14 +29,7 @@ module.exports = {
       transform: {
         '^.+\\.(t|j)sx?$': ['@swc/jest'],
       },
-      testMatch: [
-        '**/*.test.ts',
-        '!**/*.test.{ts}',
-        '!**/*.mock.{ts}',
-        '!**/node_modules/**',
-        '!**/dist/**',
-        '!**/lib/**',
-      ],
+      testMatch: ['**/*.test.ts', '!**/*.test.{ts}', '!**/*.mock.{ts}', '!**/node_modules/**', '!**/dist/**'],
       transformIgnorePatterns: [],
     },
   ],
