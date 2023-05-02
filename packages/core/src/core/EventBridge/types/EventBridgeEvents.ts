@@ -1,5 +1,5 @@
 import { UnhandledError } from '../../Error/UnhandledError.impl'
-import { addPrefixToObject } from '../../types'
+import { addPrefixToObject, Prettify } from '../../types'
 
 export enum EventBridgeEventNames {
   EventbridgeConnected = 'eventbridge-connected',
@@ -38,4 +38,4 @@ type CustomEvents = {
   [key: string]: unknown
 }
 
-export type EventBridgeEvents = EventBridgeEventsBasic & addPrefixToObject<CustomEvents, 'adapter-'>
+export type EventBridgeEvents = Prettify<EventBridgeEventsBasic & addPrefixToObject<CustomEvents, 'adapter-'>>

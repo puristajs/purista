@@ -2,6 +2,7 @@ import { ContextBase } from '../ContextBase'
 import { EBMessage } from '../EBMessage'
 import { EmitCustomMessageFunction } from '../EmitCustomMessageFunction'
 import { InvokeFunction } from '../InvokeFunction'
+import { Prettify } from '../Prettify'
 
 /**
  * It provides the original command message.
@@ -43,4 +44,4 @@ export type SubscriptionFunctionContextEnhancements = {
  *
  * @group Subscription
  */
-export type SubscriptionFunctionContext = ContextBase & SubscriptionFunctionContextEnhancements
+export type SubscriptionFunctionContext = Prettify<ContextBase & SubscriptionFunctionContextEnhancements>

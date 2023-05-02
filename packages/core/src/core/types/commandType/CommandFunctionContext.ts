@@ -1,6 +1,7 @@
 import { ContextBase } from '../ContextBase'
 import { EmitCustomMessageFunction } from '../EmitCustomMessageFunction'
 import { InvokeFunction } from '../InvokeFunction'
+import { Prettify } from '../Prettify'
 import type { Command } from './Command'
 
 /**
@@ -43,5 +44,6 @@ export type CommandFunctionContextEnhancements<MessagePayloadType = unknown, Mes
  *
  * @group Command
  */
-export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsType = unknown> = ContextBase &
-  CommandFunctionContextEnhancements<MessagePayloadType, MessageParamsType>
+export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsType = unknown> = Prettify<
+  ContextBase & CommandFunctionContextEnhancements<MessagePayloadType, MessageParamsType>
+>

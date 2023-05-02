@@ -2,6 +2,7 @@ import type { CorrelationId } from '../CorrelationId'
 import type { EBMessageAddress } from '../EBMessageAddress'
 import type { EBMessageBase } from '../EBMessageBase'
 import { EBMessageType } from '../EBMessageType.enum'
+import { Prettify } from '../Prettify'
 import type { StatusCode } from '../StatusCode.enum'
 
 /**
@@ -9,17 +10,19 @@ import type { StatusCode } from '../StatusCode.enum'
  *
  * @group Command
  */
-export type CommandErrorResponse = {
-  messageType: EBMessageType.CommandErrorResponse
-  contentType: 'application/json'
-  contentEncoding: 'utf-8'
-  isHandledError: boolean
-  correlationId: CorrelationId
-  sender: EBMessageAddress
-  receiver: EBMessageAddress
-  payload: {
-    status: StatusCode
-    message: string
-    data?: unknown
-  }
-} & EBMessageBase
+export type CommandErrorResponse = Prettify<
+  {
+    messageType: EBMessageType.CommandErrorResponse
+    contentType: 'application/json'
+    contentEncoding: 'utf-8'
+    isHandledError: boolean
+    correlationId: CorrelationId
+    sender: EBMessageAddress
+    receiver: EBMessageAddress
+    payload: {
+      status: StatusCode
+      message: string
+      data?: unknown
+    }
+  } & EBMessageBase
+>
