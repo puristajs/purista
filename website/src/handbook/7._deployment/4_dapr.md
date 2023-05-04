@@ -10,14 +10,7 @@ tag:
   - deployment
 ---
 
-A detailed description and examples will come, as soon as more event bridges implemented.  
-Stay tuned!
 
-__You can follow updated on Twitter [@purista_js](https://twitter.com/purista_js) or join the [Discord server](https://discord.gg/9feaUm3H2v) to get in touch with PURISTA maintainers and other developers.__
-
-
-Dapr and PURISTA share some basic concepts.  While PURISTA is focusing on the implementation level, Dapr is focusing on the infrastructure level.  
-In this chapter, you will learn how to deploy your PURSITA services as independent instances on a Dapr infrastructure.
 
 ## Dapr core concept
 
@@ -25,9 +18,11 @@ Deployments to Dapr as similar to Kubernetes deployments.
 Your single services are deployed as container (pod) on a Kubernetes cluster.  
 On plain Kubernetes deployments, the event bridge of a service is directly connected to the message broker.  
 If you are on a Dapr infrastructure, Dapr will automatically add a sidecar container to your service instance.  
-The whole communication from and to your service is normally passed through this sidecar container, based on HTTP.  
+The whole communication from and to your service is passed through this sidecar container.  
 
 Dapr also provides some abstraction and adapters for config, state and secret stores.
+
+![single instance](/graphic/dapr.svg)
 
 ## Prepare your code
 
