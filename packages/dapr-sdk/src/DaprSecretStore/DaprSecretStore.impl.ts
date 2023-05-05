@@ -16,17 +16,17 @@ import { DaprSecretStoreConfig } from './types'
 export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig> {
   private client: HttpClient<DaprClientConfig>
 
-  constructor(config: StoreBaseConfig<DaprSecretStoreConfig>) {
-    super('DaprSecretStore', config)
+  constructor(config?: StoreBaseConfig<DaprSecretStoreConfig>) {
+    super(config?.secretStoreName || 'DaprSecretStore', { ...config })
     const logger = this.logger
     const conf = {
       secretStoreName: 'secretStore',
       logger,
+      ...config,
       clientConfig: {
         ...getDefaultClientConfig(),
-        ...config.config?.clientConfig,
+        ...config?.clientConfig,
       },
-      ...config,
     }
 
     let baseUrl = `${conf.clientConfig.daprHost}:${conf.clientConfig.daprPort}`
@@ -58,16 +58,16 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
 
     const fetchSecretFromStore = async (secretName: string) => {
       const path = join(
-        this.config.config?.clientConfig?.daprApiToken || DAPR_API_VERSION,
+        this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
         'secrets',
-        this.config.config?.secretStoreName as string,
+        this.config.secretStoreName as string,
         secretName,
       )
 
       const query: Record<string, string> = {}
 
-      if (this.config.config?.metadata?.namespace) {
-        query['metadata.namespace'] = this.config.config?.metadata?.namespace
+      if (this.config.metadata?.namespace) {
+        query['metadata.namespace'] = this.config.metadata?.namespace
       }
 
       return this.client.get<Record<string, string>>(path, { query })

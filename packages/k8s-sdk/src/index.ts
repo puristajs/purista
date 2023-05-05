@@ -37,7 +37,7 @@
  *   const stateStore = new DefaultStateStore({ logger })
  *
  *   // set up the eventbridge and start the event bridge
- *   const eventBridge = new DefaultEventBridge({}, { spanProcessor })
+ *   const eventBridge = new DefaultEventBridge({ spanProcessor })
  *   await eventBridge.start()
  *
  *   // set up the service

@@ -14,16 +14,16 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
   private client: HttpClient<DaprClientConfig>
 
   constructor(config?: StoreBaseConfig<DaprStateStoreConfig>) {
-    super('DaprStateStore', config)
+    super(config?.stateStoreName || 'DaprStateStore', { ...config })
     const logger = this.logger
     const conf = {
       stateStoreName: 'stateStore',
       logger,
+      ...config,
       clientConfig: {
         ...getDefaultClientConfig(),
-        ...config?.config?.clientConfig,
+        ...config?.clientConfig,
       },
-      ...config,
     }
 
     let baseUrl = `${conf.clientConfig.daprHost}:${conf.clientConfig.daprPort}`
@@ -53,11 +53,11 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
       throw new UnhandledError(StatusCode.Unauthorized, 'get state from store is disabled by config')
     }
 
-    const fetchSecretFromStore = async (stateName: string) => {
+    const fetchStatesFromStore = async (stateName: string) => {
       const path = join(
-        this.config.config?.clientConfig?.daprApiToken || DAPR_API_VERSION,
+        this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
         'state',
-        this.config.config?.stateStoreName as string,
+        this.config.stateStoreName as string,
         stateName,
       )
 
@@ -68,7 +68,7 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
       return this.client.get<string>(path, { query })
     }
 
-    const result = await Promise.all(stateNames.map((stateName) => fetchSecretFromStore(stateName)))
+    const result = await Promise.all(stateNames.map((stateName) => fetchStatesFromStore(stateName)))
 
     const returnValue: Record<string, string> = {}
 
@@ -85,9 +85,9 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
     }
 
     const path = join(
-      this.config.config?.clientConfig?.daprApiToken || DAPR_API_VERSION,
+      this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
       'state',
-      this.config.config?.stateStoreName as string,
+      this.config.stateStoreName as string,
     )
 
     const payload = [
@@ -106,9 +106,9 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
     }
 
     const path = join(
-      this.config.config?.clientConfig?.daprApiToken || DAPR_API_VERSION,
+      this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
       'state',
-      this.config.config?.stateStoreName as string,
+      this.config.stateStoreName as string,
       stateName,
     )
 
