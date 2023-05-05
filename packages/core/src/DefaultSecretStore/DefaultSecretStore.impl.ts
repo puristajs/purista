@@ -33,7 +33,7 @@ import { DefaultSecretStoreConfig } from './types'
 export class DefaultSecretStore extends SecretStoreBaseClass<DefaultSecretStoreConfig> implements SecretStore {
   private map = new Map<string, string>()
   constructor(config?: StoreBaseConfig<DefaultSecretStoreConfig>) {
-    super('DefaultSecretStore', config)
+    super('DefaultSecretStore', { ...config })
     if (config?.config) {
       this.map = new Map(Object.entries(config.config))
       this.logger.warn(

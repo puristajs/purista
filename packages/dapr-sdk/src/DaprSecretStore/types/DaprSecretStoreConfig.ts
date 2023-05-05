@@ -7,7 +7,7 @@ export type DaprSecretStoreConfig = {
   /**
    * The name of the secret store
    */
-  secretStoreName: string
+  secretStoreName?: string
 
   /**
    * The Dapr client config to interact with Dapr sidecar

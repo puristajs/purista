@@ -15,16 +15,16 @@ export class DaprConfigStore extends ConfigStoreBaseClass<DaprConfigStoreConfig>
   private client: HttpClient<DaprClientConfig>
 
   constructor(config?: StoreBaseConfig<DaprConfigStoreConfig>) {
-    super('DaprConfigStore', config)
+    super(config?.configStoreName || 'DaprConfigStore', { ...config })
     const logger = this.logger
     const conf = {
       configStoreName: 'configStore',
       logger,
+      ...config,
       clientConfig: {
         ...getDefaultClientConfig(),
-        ...config?.config?.clientConfig,
+        ...config?.clientConfig,
       },
-      ...config,
     }
 
     let baseUrl = `${conf.clientConfig.daprHost}:${conf.clientConfig.daprPort}`
@@ -56,9 +56,9 @@ export class DaprConfigStore extends ConfigStoreBaseClass<DaprConfigStoreConfig>
 
     const fetchConfigFromStore = async (configName: string) => {
       const path = join(
-        this.config.config?.clientConfig?.daprApiToken || DAPR_API_VERSION,
+        this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
         'configuration',
-        this.config.config?.configStoreName as string,
+        this.config.configStoreName as string,
       )
 
       return this.client.get<{ key: string; value: unknown }[]>(path, { query: { key: configName } })

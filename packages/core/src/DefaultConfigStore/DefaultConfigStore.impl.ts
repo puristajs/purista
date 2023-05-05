@@ -25,7 +25,7 @@ import { DefaultConfigStoreConfig } from './types'
 export class DefaultConfigStore extends ConfigStoreBaseClass<DefaultConfigStoreConfig> {
   private map = new Map<string, unknown>()
   constructor(config?: StoreBaseConfig<DefaultConfigStoreConfig>) {
-    super('DefaultConfigStore', config)
+    super('DefaultConfigStore', { ...config })
     if (config?.config) {
       this.map = new Map(Object.entries(config.config))
       if (config.logger) {

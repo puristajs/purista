@@ -7,7 +7,7 @@ export type DaprConfigStoreConfig = {
   /**
    * The name of the config store
    */
-  configStoreName: string
+  configStoreName?: string
   /**
    * The Dapr client config to interact with Dapr sidecar
    */

@@ -1,31 +1,26 @@
 import { HttpClient, UnhandledError } from '@purista/core'
-import { SinonSandbox } from 'sinon'
-import * as sinon from 'sinon'
+import { createSandbox, SinonSandbox } from 'sinon'
 
 import { DAPR_API_VERSION } from '../types'
 import { DaprSecretStore } from './DaprSecretStore.impl'
 
 describe('DaprSecretStore', () => {
   let sandbox: SinonSandbox
-  let httpClientGetStub: sinon.SinonStub
 
   const config = {
     storeName: 'mySecretStore',
     enableGet: true,
-    config: {
-      secretStoreName: 'test',
-      clientConfig: {
-        daprHost: 'localhost',
-        daprPort: '5000',
-        daprApiToken: 'myToken',
-        daprApiVersion: DAPR_API_VERSION,
-      },
+    secretStoreName: 'test',
+    clientConfig: {
+      daprHost: 'localhost',
+      daprPort: '5000',
+      daprApiToken: 'myToken',
+      daprApiVersion: DAPR_API_VERSION,
     },
   }
 
   beforeEach(() => {
-    sandbox = sinon.createSandbox()
-    httpClientGetStub = sandbox.stub(HttpClient.prototype, 'get')
+    sandbox = createSandbox()
   })
 
   afterEach(() => {
@@ -39,6 +34,7 @@ describe('DaprSecretStore', () => {
       const secretName2 = 'mySecret2'
       const secretValue1 = 'mySecretValue1'
       const secretValue2 = 'mySecretValue2'
+      const httpClientGetStub = sandbox.stub(HttpClient.prototype, 'get')
       httpClientGetStub.onFirstCall().resolves({ [secretName1]: secretValue1 })
       httpClientGetStub.onSecondCall().resolves({ [secretName2]: secretValue2 })
 
@@ -79,7 +75,7 @@ describe('DaprSecretStore', () => {
       const secretName = 'test-secret'
 
       const secretStore = new DaprSecretStore({
-        config: config.config,
+        ...config,
         enableGet: true,
         enableSet: true,
         enableRemove: true,
@@ -97,7 +93,7 @@ describe('DaprSecretStore', () => {
     it('should throw an UnhandledError with StatusCode.Unauthorized if enableSet is false', async () => {
       const secretName = 'test-secret'
       const secretStore = new DaprSecretStore({
-        config: config.config,
+        ...config,
         enableGet: true,
         enableSet: false,
         enableRemove: true,
@@ -118,7 +114,7 @@ describe('DaprSecretStore', () => {
       const secretName = 'test-secret'
 
       const secretStore = new DaprSecretStore({
-        config: config.config,
+        ...config,
         enableGet: true,
         enableSet: true,
         enableRemove: true,
@@ -136,7 +132,7 @@ describe('DaprSecretStore', () => {
     it('should throw an UnhandledError with StatusCode.Unauthorized if enableSet is false', async () => {
       const secretName = 'test-secret'
       const secretStore = new DaprSecretStore({
-        config: config.config,
+        ...config,
         enableGet: false,
         enableSet: false,
         enableRemove: false,

@@ -6,6 +6,7 @@ import {
   convertToKebabCase,
   EBMessage,
   EBMessageAddress,
+  EventBridgeConfig,
   HttpClient,
   HttpEventBridgeClient,
   HttpExposedServiceMeta,
@@ -16,28 +17,28 @@ import {
 import { DaprEventBridgeConfig } from '../DaprEventBridge'
 import { DAPR_API_VERSION } from '../types'
 
-export class DaprClient extends HttpClient<DaprEventBridgeConfig> implements HttpEventBridgeClient {
+export class DaprClient extends HttpClient<EventBridgeConfig<DaprEventBridgeConfig>> implements HttpEventBridgeClient {
   getInternalPathForSubscription(address: EBMessageAddress) {
     // [baseUrl]/v1.0/invoke/app-user-v1/method/purista/subscription/[subscription-name]
-    return join(this.config.config?.pathPrefix || 'purista', 'subscription', convertToKebabCase(address.serviceTarget))
+    return join(this.config.pathPrefix || 'purista', 'subscription', convertToKebabCase(address.serviceTarget))
   }
 
   getInternalPathForCommand(address: EBMessageAddress) {
     // [baseUrl]/v1.0/invoke/user-v1/method/purista/command/[command-name]
-    return join(this.config.config?.pathPrefix || 'purista', 'command', convertToKebabCase(address.serviceTarget))
+    return join(this.config.pathPrefix || 'purista', 'command', convertToKebabCase(address.serviceTarget))
   }
 
   getApiPathForCommand(addess: EBMessageAddress, metadata: HttpExposedServiceMeta) {
     // [baseUrl]/api/v1/[command expose.http.path]
-    return join(this.config.config?.apiPrefix || 'api', `v${addess.serviceVersion}`, metadata.expose.http.path)
+    return join(this.config.apiPrefix || 'api', `v${addess.serviceVersion}`, metadata.expose.http.path)
   }
 
   async invoke(command: Command, headers?: Record<string, string>, timeout?: number): Promise<CommandResponse> {
     // [baseUrl]/v1.0/invoke/user-v1/method/purista/command/[commandName]
     const path = join(
-      this.config.config?.clientConfig.daprApiVersion || DAPR_API_VERSION,
+      this.config.clientConfig?.daprApiVersion || DAPR_API_VERSION,
       'invoke',
-      `${this.config.config?.clientConfig.appPrefix || ''}${convertToKebabCase(command.receiver.serviceName)}-v${
+      `${this.config.clientConfig?.appPrefix || ''}${convertToKebabCase(command.receiver.serviceName)}-v${
         command.receiver.serviceVersion
       }`,
       'method',
@@ -53,9 +54,9 @@ export class DaprClient extends HttpClient<DaprEventBridgeConfig> implements Htt
     }
 
     const path = join(
-      this.config.config?.clientConfig.daprApiVersion || DAPR_API_VERSION,
+      this.config.clientConfig?.daprApiVersion || DAPR_API_VERSION,
       'publish',
-      this.config.config?.clientConfig.pubSubName || 'pubsub',
+      this.config.clientConfig?.pubSubName || 'pubsub',
       message.eventName,
     )
 
@@ -64,7 +65,7 @@ export class DaprClient extends HttpClient<DaprEventBridgeConfig> implements Htt
 
   async isSidecarAvailable() {
     try {
-      const path = join(this.config.config?.clientConfig.daprApiVersion || DAPR_API_VERSION, 'metadata')
+      const path = join(this.config.clientConfig?.daprApiVersion || DAPR_API_VERSION, 'metadata')
       const result = await this.get(path)
       return !!result
     } catch (e) {

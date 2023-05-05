@@ -11,7 +11,7 @@ import { DefaultStateStoreConfig } from './types'
 export class DefaultStateStore extends StateStoreBaseClass<DefaultStateStoreConfig> {
   private map = new Map<string, unknown>()
   constructor(config?: StoreBaseConfig<DefaultStateStoreConfig>) {
-    super('DefaultStateStore', config)
+    super('DefaultStateStore', { ...config })
     if (config?.config) {
       this.map = new Map(Object.entries(config.config))
       if (config.logger) {

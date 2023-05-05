@@ -72,11 +72,8 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
   constructor(config?: EventBridgeConfig<DefaultEventBridgeConfig>) {
     const conf = {
+      logWarnOnMessagesWithoutReceiver: true,
       ...config,
-      config: {
-        logWarnOnMessagesWithoutReceiver: true,
-        ...config?.config,
-      },
     }
     super('DefaultEventBridge', conf)
   }
@@ -180,7 +177,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
               return next()
             }
 
-            if (!isAtLeastDeliveredOnce && this.config.config?.logWarnOnMessagesWithoutReceiver) {
+            if (!isAtLeastDeliveredOnce && this.config.logWarnOnMessagesWithoutReceiver) {
               const err = new UnhandledError(
                 StatusCode.BadGateway,
                 'InvalidMessage: received a message which is not consumed by any service command or subscription',
