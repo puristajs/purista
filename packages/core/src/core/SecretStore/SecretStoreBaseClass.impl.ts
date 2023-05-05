@@ -1,6 +1,6 @@
 import { initLogger } from '../../DefaultLogger'
 import { UnhandledError } from '../Error'
-import { Logger, StatusCode, StoreBaseConfig } from '../types'
+import { Logger, Prettify, StatusCode, StoreBaseConfig } from '../types'
 import { SecretStore } from './types'
 
 /**
@@ -8,13 +8,13 @@ import { SecretStore } from './types'
  *
  * @group Store
  */
-export class SecretStoreBaseClass<ConfigType> implements SecretStore {
+export class SecretStoreBaseClass<ConfigType extends Record<string, unknown>> implements SecretStore {
   logger: Logger
-  config: StoreBaseConfig<ConfigType>
+  config: Prettify<StoreBaseConfig<ConfigType>>
 
   name: string
 
-  constructor(name: string, config?: StoreBaseConfig<ConfigType>) {
+  constructor(name: string, config: StoreBaseConfig<ConfigType>) {
     const logger = config?.logger || initLogger(config?.logLevel)
     this.logger = logger.getChildLogger({ name })
 
@@ -28,8 +28,7 @@ export class SecretStoreBaseClass<ConfigType> implements SecretStore {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async getSecret(...secretNames: string[]): Promise<Record<string, string | undefined>> {
+  async getSecret(..._secretNames: string[]): Promise<Record<string, string | undefined>> {
     if (!this.config.enableGet) {
       const err = new UnhandledError(StatusCode.Unauthorized, 'get secret from store is disabled by config')
       this.logger.error({ err }, err.message)
@@ -41,8 +40,7 @@ export class SecretStoreBaseClass<ConfigType> implements SecretStore {
     throw err
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async removeSecret(secretName: string): Promise<void> {
+  async removeSecret(_secretName: string): Promise<void> {
     if (!this.config.enableRemove) {
       const err = new UnhandledError(StatusCode.Unauthorized, 'remove secret from store is disabled by config')
       this.logger.error({ err }, err.message)
@@ -54,8 +52,7 @@ export class SecretStoreBaseClass<ConfigType> implements SecretStore {
     throw err
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async setSecret(secretName: string, secretValue: string) {
+  async setSecret(_secretName: string, _secretValue: string) {
     if (!this.config.enableSet) {
       const err = new UnhandledError(StatusCode.Unauthorized, 'set secret at store is disabled by config')
       this.logger.error({ err }, err.message)

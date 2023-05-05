@@ -1,6 +1,6 @@
 import { GenericContainer, StartedTestContainer, Wait } from 'testcontainers'
 
-import { RedisStateStore } from './RedisStateStore.impl'
+import { RedisStateStore } from '../src/RedisStateStore.impl'
 
 const REDIS_PORT = 6379
 

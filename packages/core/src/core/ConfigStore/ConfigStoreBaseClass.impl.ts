@@ -8,13 +8,13 @@ import { ConfigStore } from './types'
  *
  * @group Store
  */
-export class ConfigStoreBaseClass<ConfigType> implements ConfigStore {
+export class ConfigStoreBaseClass<ConfigType extends Record<string, unknown>> implements ConfigStore {
   logger: Logger
   config: StoreBaseConfig<ConfigType>
 
   name: string
 
-  constructor(name: string, config?: StoreBaseConfig<ConfigType>) {
+  constructor(name: string, config: StoreBaseConfig<ConfigType>) {
     const logger = config?.logger || initLogger(config?.logLevel)
     this.logger = logger.getChildLogger({ name })
 

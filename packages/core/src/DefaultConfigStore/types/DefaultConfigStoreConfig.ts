@@ -1,1 +1,1 @@
-export type DefaultConfigStoreConfig = Record<string, string>
+export type DefaultConfigStoreConfig = Record<string, unknown>

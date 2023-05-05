@@ -32,3 +32,4 @@
  * @module
  */
 export * from './RedisStateStore.impl'
+export * from './types'

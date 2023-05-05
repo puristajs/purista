@@ -1,10 +1,10 @@
 import {
-  Complete,
   CustomMessage,
   EBMessage,
   EventBridge,
   EventBridgeConfig,
   EventBridgeEventNames,
+  getDefaultHttpEventBridgeConfig,
   HttpEventBridge,
   initLogger,
   StatusCode,
@@ -19,9 +19,6 @@ import { getDefaultConfig } from './getDefaultConfig.impl'
 import { configRoute } from './routes'
 import { DaprEventBridgeConfig } from './types'
 
-type CompleteConfig = Required<Pick<EventBridgeConfig<Complete<DaprEventBridgeConfig>>, 'config'>> &
-  Omit<EventBridgeConfig<Complete<DaprEventBridgeConfig>>, 'config'>
-
 /**
  * The DaprEventBridge connects to the Dapr sidecar container.
  * It provides endpoints for invoking commands, triggering subscriptions and emitting event messages.
@@ -34,15 +31,16 @@ type CompleteConfig = Required<Pick<EventBridgeConfig<Complete<DaprEventBridgeCo
 export class DaprEventBridge extends HttpEventBridge<DaprEventBridgeConfig> implements EventBridge {
   private pubSubSubscriptions: DaprPubSubType[] = []
 
-  constructor(config: CompleteConfig) {
+  constructor(config: EventBridgeConfig<DaprEventBridgeConfig>) {
     const conf = {
+      ...getDefaultHttpEventBridgeConfig(),
       ...config,
-      config: { ...getDefaultConfig(), ...config?.config },
+      ...getDefaultConfig(),
     }
 
-    const logger = conf.logger || initLogger(config?.logLevel, { name: conf.config.name || 'DaprEventBridge' })
+    const logger = conf.logger || initLogger(config.logLevel, { name: conf.name || 'DaprEventBridge' })
 
-    const clientConfig = conf.config.clientConfig
+    const clientConfig = conf.clientConfig
 
     let baseUrl = `${clientConfig.daprHost}:${clientConfig.daprPort}`
     if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
@@ -62,11 +60,10 @@ export class DaprEventBridge extends HttpEventBridge<DaprEventBridgeConfig> impl
       logger,
       baseUrl,
       defaultHeaders,
-      spanProcessor: conf.spanProcessor,
-      ...clientConfig,
+      ...conf,
     })
 
-    super({ ...conf, config: { ...conf.config } }, client)
+    super(conf, client)
   }
 
   async start() {
@@ -97,7 +94,7 @@ export class DaprEventBridge extends HttpEventBridge<DaprEventBridgeConfig> impl
     }
     const path = await super.registerSubscription(subscription, cb)
     this.pubSubSubscriptions.push({
-      pubsubname: this.config.config.clientConfig.pubSubName as string,
+      pubsubname: this.config.clientConfig?.pubSubName as string,
       topic: subscription.eventName,
       route: path,
     })

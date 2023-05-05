@@ -1,12 +1,7 @@
 import { StateStoreBaseClass, StatusCode, StoreBaseConfig, UnhandledError } from '@purista/core'
-import {
-  createClient,
-  RedisClientOptions,
-  RedisClientType,
-  RedisFunctions,
-  RedisModules,
-  RedisScripts,
-} from '@redis/client'
+import { createClient, RedisClientType, RedisFunctions, RedisModules, RedisScripts } from '@redis/client'
+
+import { RedisStoreConfig } from './types'
 
 /**
  * A state store for using redis as storage.
@@ -44,11 +39,11 @@ export class RedisStateStore<
   M extends RedisModules = RedisModules,
   F extends RedisFunctions = RedisFunctions,
   S extends RedisScripts = RedisScripts,
-> extends StateStoreBaseClass<RedisClientOptions<M, F, S>> {
+> extends StateStoreBaseClass<RedisStoreConfig<M, F, S>> {
   public client: RedisClientType<M, F, S>
 
-  constructor(config?: StoreBaseConfig<RedisClientOptions<M, F, S>>) {
-    super('RedisStateStore', config)
+  constructor(config?: StoreBaseConfig<RedisStoreConfig<M, F, S>>) {
+    super('RedisStateStore', { ...config })
     this.client = createClient(this.config.config)
     this.client.on('error', (err) => this.logger.error({ err }, 'Redis Client Error'))
   }

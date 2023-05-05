@@ -18,19 +18,14 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
   logger: Logger
   traceProvider: NodeTracerProvider
 
-  config: Required<Pick<EventBridgeConfig<Complete<ConfigType>>, 'config'>> &
-    Omit<EventBridgeConfig<Complete<ConfigType>>, 'config'>
+  config: Complete<EventBridgeConfig<ConfigType>>
 
   name: string
 
   instanceId: Readonly<InstanceId>
 
   defaultCommandTimeout: Readonly<number>
-  constructor(
-    name: string,
-    config: Required<Pick<EventBridgeConfig<Complete<ConfigType>>, 'config'>> &
-      Omit<EventBridgeConfig<Complete<ConfigType>>, 'config'>,
-  ) {
+  constructor(name: string, config: EventBridgeConfig<ConfigType>) {
     super()
     this.name = name
     const logger = config?.logger || initLogger(config?.logLevel)

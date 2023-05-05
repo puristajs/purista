@@ -10,7 +10,6 @@ import {
   CommandErrorResponse,
   CommandResponse,
   CommandSuccessResponse,
-  Complete,
   CustomMessage,
   DefinitionEventBridgeConfig,
   deserializeOtp,
@@ -38,14 +37,12 @@ import {
   UnhandledError,
 } from '../core'
 import { HonoTRouter } from '../helper'
-import { getCommandHandler } from './getCommandHandler'
-import { getCommandHandlerRestApi } from './getCommandHandlerRestApi'
-import { getDefaultConfig } from './getDefaultConfig'
-import { getSubscriptionHandler } from './getSubscriptionHandler'
+import { getCommandHandler } from './getCommandHandler.impl'
+import { getCommandHandlerRestApi } from './getCommandHandlerRestApi.impl'
+import { getDefaultHttpEventBridgeConfig } from './getDefaultHttpEventBridgeConfig.impl'
+import { getSubscriptionHandler } from './getSubscriptionHandler.impl'
 import { healthzRoute } from './healthzRoute.impl'
 import { HttpEventBridgeClient, HttpEventBridgeConfig } from './types'
-
-// EventBridgeConfig<Complete<CustomConfig>>
 
 /**
  * The HTTP event bridge is a generic event bridge.
@@ -74,15 +71,13 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
   public client: HttpEventBridgeClient
 
   constructor(config: EventBridgeConfig<CustomConfig>, client: HttpEventBridgeClient) {
-    const defaults = getDefaultConfig()
-    const conf: Required<Pick<EventBridgeConfig<Complete<CustomConfig>>, 'config'>> &
-      Omit<EventBridgeConfig<Complete<CustomConfig>>, 'config'> = {
+    const defaults = getDefaultHttpEventBridgeConfig()
+    const conf = {
       ...defaults,
       ...config,
-      config: { ...defaults.config, ...config.config } as CustomConfig,
     }
 
-    super(conf.config.name || 'HttpEventBridge', conf)
+    super(conf.name || 'HttpEventBridge', conf)
 
     this.client = client
 
@@ -126,10 +121,10 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 
     this.app.get('/healthz', healthzRoute)
 
-    this.server = this.config.config.serve({
+    this.server = this.config.serve({
       fetch: this.app.fetch,
-      port: this.config.config.serverPort,
-      hostname: this.config.config.serverHost,
+      port: this.config.serverPort,
+      hostname: this.config.serverHost,
     })
   }
 
@@ -252,14 +247,14 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
     eventBridgeConfig: DefinitionEventBridgeConfig,
   ): Promise<string> {
     const fn = getCommandHandler.bind(this)
-    const handler = fn(address, cb, metadata, eventBridgeConfig, this.config.config.commandPayloadAsCloudEvent)
+    const handler = fn(address, cb, metadata, eventBridgeConfig, this.config.commandPayloadAsCloudEvent)
 
     const path = this.client.getInternalPathForCommand(address)
 
     this.app.post(path, handler)
     this.logger.debug({ path }, 'command added')
 
-    if (isHttpExposedServiceMeta(metadata) && this.config.config.enableRestApiExpose) {
+    if (isHttpExposedServiceMeta(metadata) && this.config.enableRestApiExpose) {
       const httpMeta = metadata.expose.http
       const apiPath = this.client.getApiPathForCommand(address, metadata)
 
@@ -307,7 +302,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
     }
 
     const fn = getSubscriptionHandler.bind(this)
-    const handler = fn(subscription, cb, this.config.config.subscriptionPayloadAsCloudEvent)
+    const handler = fn(subscription, cb, this.config.subscriptionPayloadAsCloudEvent)
 
     const path = this.client.getInternalPathForSubscription(subscription.subscriber)
 

@@ -1,9 +1,6 @@
-import { Complete } from '@purista/core'
-
 import { getDefaultClientConfig } from '../DaprClient/getDefaultClientConfig.impl'
-import { DaprEventBridgeConfig } from './types'
 
-export const getDefaultConfig = (): Complete<Omit<Complete<DaprEventBridgeConfig>, 'client' | 'serve'>> => {
+export const getDefaultConfig = () => {
   const serverPort = process.env.APP_PORT ? parseInt(process.env.APP_PORT, 10) : 8080
 
   return {
@@ -15,7 +12,6 @@ export const getDefaultConfig = (): Complete<Omit<Complete<DaprEventBridgeConfig
     enableRestApiExpose: true,
     subscriptionPayloadAsCloudEvent: true,
     commandPayloadAsCloudEvent: false,
-
     clientConfig: getDefaultClientConfig(),
   }
 }

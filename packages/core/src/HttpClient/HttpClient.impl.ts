@@ -142,7 +142,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = never> im
       url.username = this.auth.basicAuth.username
     }
 
-    const headers = {
+    const headers: Record<string, string> = {
       ...this.config.defaultHeaders,
       ...options?.headers,
     }
