@@ -39,6 +39,7 @@ import {
   UnhandledError,
 } from '../core'
 import { puristaVersion } from '../version'
+import { getDefaultEventBridgeConfig } from './getDefaultEventBridgeConfig.impl'
 import { getNewSubscriptionStorageEntry } from './getNewSubscriptionStorageEntry.impl'
 import { isMessageMatchingSubscription } from './isMessageMatchingSubscription.impl'
 import { DefaultEventBridgeConfig, PendigInvocation, SubscriptionStorageEntry } from './types'
@@ -72,6 +73,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
   constructor(config?: EventBridgeConfig<DefaultEventBridgeConfig>) {
     const conf = {
+      ...getDefaultEventBridgeConfig(),
       logWarnOnMessagesWithoutReceiver: true,
       ...config,
     }

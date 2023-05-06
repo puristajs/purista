@@ -8,7 +8,7 @@ import { ConfigStore } from './types'
  *
  * @group Store
  */
-export class ConfigStoreBaseClass<ConfigType extends Record<string, unknown>> implements ConfigStore {
+export class ConfigStoreBaseClass<ConfigType extends Record<string, unknown> = {}> implements ConfigStore {
   logger: Logger
   config: StoreBaseConfig<ConfigType>
 

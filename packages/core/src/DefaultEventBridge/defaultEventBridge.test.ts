@@ -3,7 +3,6 @@ import { assert, spy, stub } from 'sinon'
 import { createInfoMessage, EBMessageType, Subscription } from '../core'
 import { getCustomMessageMessageMock, getLoggerMock } from '../mocks'
 import { DefaultEventBridge } from './DefaultEventBridge.impl'
-import { getDefaultEventBridgeConfig } from './getDefaultEventBridgeConfig.impl'
 
 describe('DefaultEventBridge', () => {
   const sender = {
@@ -33,21 +32,17 @@ describe('DefaultEventBridge', () => {
   const eventName = 'testEventName'
 
   it('creates a DefaultEventBridge', () => {
-    const config = getDefaultEventBridgeConfig()
-
     const logger = getLoggerMock()
 
-    const eventBridge = new DefaultEventBridge({ logger: logger.mock, config })
+    const eventBridge = new DefaultEventBridge({ logger: logger.mock })
 
     expect(eventBridge).toBeDefined()
   })
 
   it('routes custom messages to subscriptions', async () => {
-    const config = getDefaultEventBridgeConfig()
-
     const logger = getLoggerMock()
 
-    const eventBridge = new DefaultEventBridge({ logger: logger.mock, config })
+    const eventBridge = new DefaultEventBridge({ logger: logger.mock })
     await eventBridge.start()
 
     const callback = stub().resolves()
@@ -128,11 +123,8 @@ describe('DefaultEventBridge', () => {
   })
 
   it('traces info messages', async () => {
-    const config = getDefaultEventBridgeConfig()
-
     const logger = getLoggerMock()
-
-    const eventBridge = new DefaultEventBridge({ logger: logger.mock, config })
+    const eventBridge = new DefaultEventBridge({ logger: logger.mock })
     await eventBridge.start()
 
     const callback = stub().resolves()

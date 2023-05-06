@@ -30,7 +30,7 @@ describe('service HttpServer version 1 - subscription serviceCommandsToRestApi',
     const serviceCommandsToRestApi = serviceCommandsToRestApiSubscriptionBuilder.getSubscriptionFunction().bind(service)
 
     // define the test input payload
-    const payload: HttpServerV1ServiceCommandsToRestApiInputPayload = undefined
+    const payload = undefined as unknown as Readonly<HttpServerV1ServiceCommandsToRestApiInputPayload>
 
     // define the test input parameter
     const parameter = undefined
