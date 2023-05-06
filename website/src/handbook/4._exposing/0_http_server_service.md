@@ -47,7 +47,6 @@ When running on local and with default configuration:
 - the OpenAPI definition in JSON format on [http://localhost:9090/api/openapi.json](http://localhost:9090/api/openapi.json)
 
 You will see, that the descriptions for commands are used in the OpenAPI documentation.  
-Also, if the `@anatine/zod-openapi` package is used, the extra information from schema is used to improve the OpenAPI documentation.
 
 ## Usage example
 

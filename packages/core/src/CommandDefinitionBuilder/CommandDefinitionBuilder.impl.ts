@@ -1,4 +1,3 @@
-import { generateSchema, OpenApiZodAny } from '@anatine/zod-openapi'
 import type { z, ZodType } from 'zod'
 
 import type {
@@ -17,6 +16,7 @@ import type {
   SupportedHttpMethod,
 } from '../core'
 import { HttpExposedServiceMeta, QueryParameter } from '../core'
+import { generateSchema, OpenApiZodAny } from '../zodOpenApi'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl'
 
 /**

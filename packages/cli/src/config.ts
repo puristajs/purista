@@ -1,12 +1,6 @@
 export const TEMPLATE_BASE = '../../blueprint'
 
-export const dependencies: string[] = [
-  'typescript@^5.0.2',
-  '@purista/core@latest',
-  'zod@3.21.4',
-  'ts-node@^10.9.1',
-  '@anatine/zod-openapi@^1.12.0',
-]
+export const dependencies: string[] = ['typescript@^5.0.2', '@purista/core@latest', 'zod@3.21.4', 'ts-node@^10.9.1']
 
 export const httpserverDependencies: string[] = ['@purista/httpserver@latest']
 

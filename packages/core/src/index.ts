@@ -29,6 +29,7 @@ export * from './DefaultSecretStore'
 export * from './DefaultStateStore'
 export * from './ServiceBuilder'
 export * from './mocks'
+export * from './zodOpenApi'
 
 declare global {
   interface FetchEvent extends Event {
