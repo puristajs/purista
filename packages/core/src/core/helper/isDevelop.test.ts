@@ -12,7 +12,7 @@ describe('check if env is develop or production', () => {
   })
 
   it('returns true if NODE_ENV is develop', () => {
-    process.env.NODE_ENV = 'develop'
+    process.env.NODE_ENV = 'develop' as any
     expect(isDevelop()).toBeTruthy()
   })
 
@@ -27,12 +27,12 @@ describe('check if env is develop or production', () => {
   })
 
   it('returns false if NODE_ENV different from develop', () => {
-    process.env.NODE_ENV = 'something'
+    process.env.NODE_ENV = 'something' as any
     expect(isDevelop()).toBeFalsy()
   })
 
   it('returns false if NODE_ENV is not set', () => {
-    process.env.NODE_ENV = undefined
+    process.env.NODE_ENV = undefined as any
     expect(isDevelop()).toBeFalsy()
   })
 })

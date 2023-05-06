@@ -8,7 +8,7 @@ import { StateStore } from './types'
  *
  * @group Store
  */
-export class StateStoreBaseClass<ConfigType extends Record<string, unknown>> implements StateStore {
+export class StateStoreBaseClass<ConfigType extends Record<string, unknown> = {}> implements StateStore {
   logger: Logger
   config: StoreBaseConfig<ConfigType>
 
