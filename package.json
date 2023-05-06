@@ -4,6 +4,7 @@
   "scripts": {
     "start": "npm run dev -w examples/fullexample",
     "build": "turbo run build",
+    "build:dev": "turbo run build:dev",
     "lint": "turbo run lint --parallel",
     "test": "jest",
     "dev:doc": "npm run dev -w website",
