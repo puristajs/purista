@@ -16,6 +16,10 @@
       "dependsOn": ["^build"],
       "outputs": ["lib/**"]
     },
+    "build:dev": {
+      "dependsOn": ["^build:dev"],
+      "outputs": ["lib/**"]
+    },
     "test": {},
     "lint": {},
     "document":{
