@@ -297,7 +297,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
     if (this.isStarted) {
       throw new UnhandledError(
         StatusCode.InternalServerError,
-        'subscriptions must be registered before starting the Dapr event bridge',
+        'subscriptions must be registered before starting the http event bridge',
       )
     }
 
