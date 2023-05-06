@@ -1,4 +1,4 @@
-import { extendApi } from '@anatine/zod-openapi'
+import { extendApi } from '@purista/core'
 import { z } from 'zod'
 
 // define the input parameters

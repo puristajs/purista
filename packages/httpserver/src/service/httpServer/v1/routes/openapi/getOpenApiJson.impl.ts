@@ -1,7 +1,7 @@
 import { StatusCode } from '@purista/core'
 import { RouteHandlerMethod, RouteOptions } from 'fastify'
-import type { OpenAPIObject, ParameterObject, RequestBodyObject, SchemaObject } from 'openapi3-ts'
-import { isReferenceObject } from 'openapi3-ts'
+import type { OpenAPIObject, ParameterObject, RequestBodyObject, SchemaObject } from 'openapi3-ts/oas31'
+import { isReferenceObject } from 'openapi3-ts/oas31'
 import { posix } from 'path'
 
 import { HttpServerClass } from '../../HttpServerClass.impl'
@@ -320,6 +320,9 @@ export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV
     })
 
     if (isHealthzEnabled) {
+      if (!json.paths) {
+        json.paths = {}
+      }
       json.paths['/healthz'] = {
         get: {
           description: 'indicates if the http server service is healthy',

@@ -178,7 +178,7 @@ export const signUpCommandBuilder = userV1ServiceBuilder
 The schema file contains the schemas for input and output validation.
 
 ```typescript
-import { extendApi } from '@anatine/zod-openapi'
+import { extendApi } from '@purista/core'
 import { z } from 'zod'
 
 // define the input parameters
@@ -191,7 +191,7 @@ export const userV1SignUpInputPayloadSchema = extendApi(z.any(), { title: 'sign 
 export const userV1SignUpOutputPayloadSchema = extendApi(z.any(), { title: 'sign up output payload schema' })
 ```
 
-As you can see, the package [`@anatine/zod-openapi`](https://github.com/anatine/zod-plugins/blob/main/packages/zod-openapi/README.md) is used.  
+The core package contains some helper here, which are based on the package [`@anatine/zod-openapi`](https://github.com/anatine/zod-plugins/blob/main/packages/zod-openapi/README.md).  
 This gives the opportunity, to enrich the schema with more information and details, which than can be used, to improve a generated OpenAPI/AsyncAPI documentation.  
 Because of this, you can add human understandable titles, descriptions, examples and so on.  
 It is not required, but recommended, to use this package. You can also use plain [zod](https://zod.dev).

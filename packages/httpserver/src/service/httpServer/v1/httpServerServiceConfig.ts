@@ -3,7 +3,7 @@ import { Http2SecureServer } from 'node:http2'
 import { FastifyCompressOptions } from '@fastify/compress'
 import { FastifyCorsOptions } from '@fastify/cors'
 import { FastifyHttp2SecureOptions, FastifyServerOptions } from 'fastify'
-import { InfoObject } from 'openapi3-ts'
+import { InfoObject } from 'openapi3-ts/oas31'
 import { z } from 'zod'
 
 // define the service config schema and the default service configuration

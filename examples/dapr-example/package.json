@@ -34,7 +34,6 @@
     "pino-pretty": "^10.0.0"
   },
   "dependencies": {
-    "@anatine/zod-openapi": "^1.12.1",
     "@opentelemetry/exporter-zipkin": "^1.12.0",
     "@opentelemetry/sdk-trace-base": "^1.12.0",
     "@purista/dapr-sdk": "*",

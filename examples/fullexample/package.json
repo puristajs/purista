@@ -47,7 +47,6 @@
     "ts-node-dev": "^2.0.0"
   },
   "dependencies": {
-    "@anatine/zod-openapi": "^1.12.1",
     "@fastify/static": "^6.10.1",
     "@opentelemetry/exporter-trace-otlp-http": "^0.38.0",
     "@opentelemetry/exporter-zipkin": "^1.12.0",
