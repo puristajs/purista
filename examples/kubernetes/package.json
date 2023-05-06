@@ -35,7 +35,6 @@
     "typescript": "^5.0.2"
   },
   "dependencies": {
-    "@anatine/zod-openapi": "^1.12.1",
     "@opentelemetry/exporter-trace-otlp-http": "^0.38.0",
     "@purista/amqpbridge": "*",
     "@purista/core": "*",

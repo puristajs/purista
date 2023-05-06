@@ -1,4 +1,3 @@
-import { generateSchema, OpenApiZodAny } from '@anatine/zod-openapi'
 import { z, ZodType } from 'zod'
 
 import type {
@@ -17,6 +16,7 @@ import type {
   SubscriptionTransformInputHook,
   SubscriptionTransformOutputHook,
 } from '../core'
+import { generateSchema, OpenApiZodAny } from '../zodOpenApi'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl'
 
 /**

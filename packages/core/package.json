@@ -51,13 +51,12 @@
     "trouter": "^3.2.1"
   },
   "dependencies": {
-    "@anatine/zod-openapi": "^1.12.1",
     "@opentelemetry/api": "^1.4.1",
     "@opentelemetry/resources": "^1.12.0",
     "@opentelemetry/sdk-trace-node": "^1.10.1",
     "@opentelemetry/semantic-conventions": "^1.12.0",
     "cloudevents": "^7.0.0",
-    "openapi3-ts": "3.2.0",
+    "openapi3-ts": "^4.1.2",
     "pino": "^8.12.1",
     "zod": "^3.21.4"
   },
