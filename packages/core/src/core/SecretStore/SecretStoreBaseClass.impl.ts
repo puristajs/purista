@@ -8,7 +8,7 @@ import { SecretStore } from './types'
  *
  * @group Store
  */
-export class SecretStoreBaseClass<ConfigType extends Record<string, unknown>> implements SecretStore {
+export class SecretStoreBaseClass<ConfigType extends Record<string, unknown> = {}> implements SecretStore {
   logger: Logger
   config: Prettify<StoreBaseConfig<ConfigType>>
 

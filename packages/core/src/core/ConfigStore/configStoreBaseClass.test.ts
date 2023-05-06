@@ -6,13 +6,13 @@ import { ConfigStoreBaseClass } from './ConfigStoreBaseClass.impl'
 
 describe('ConfigStoreBaseClass', () => {
   let sandbox: SinonSandbox
-  let configStore: ConfigStoreBaseClass<unknown>
+  let configStore: ConfigStoreBaseClass
   let logger: ReturnType<typeof getLoggerMock>
 
   beforeEach(() => {
     sandbox = createSandbox()
     logger = getLoggerMock(sandbox)
-    configStore = new ConfigStoreBaseClass<unknown>('test', { logger: logger.mock })
+    configStore = new ConfigStoreBaseClass('test', { logger: logger.mock })
   })
 
   afterEach(() => {

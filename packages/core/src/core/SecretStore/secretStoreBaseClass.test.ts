@@ -6,13 +6,13 @@ import { SecretStoreBaseClass } from './SecretStoreBaseClass.impl'
 
 describe('SecretStoreBaseClass', () => {
   let sandbox: SinonSandbox
-  let secretStore: SecretStoreBaseClass<unknown>
+  let secretStore: SecretStoreBaseClass
   let logger: ReturnType<typeof getLoggerMock>
 
   beforeEach(() => {
     sandbox = createSandbox()
     logger = getLoggerMock(sandbox)
-    secretStore = new SecretStoreBaseClass<unknown>('test', { logger: logger.mock })
+    secretStore = new SecretStoreBaseClass('test', { logger: logger.mock })
   })
 
   afterEach(() => {
