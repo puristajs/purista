@@ -414,7 +414,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
   public async executeCommand(message: Readonly<Command>) {
     const command = this.commands.get(message.receiver.serviceTarget)
 
-    const context = await deserializeOtp(this.logger, message.otp)
+    const context = deserializeOtp(this.logger, message.otp)
 
     return this.startActiveSpan(command?.commandName || 'purista.executeCommand', {}, context, async (span) => {
       const traceId = message.traceId || span.spanContext().traceId
@@ -570,7 +570,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
   ): Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined> {
     const subscription = this.subscriptions.get(subscriptionName)
 
-    const otpContext = await deserializeOtp(this.logger, message.otp)
+    const otpContext = deserializeOtp(this.logger, message.otp)
     const spanContext = otpContext ? trace.getSpanContext(otpContext) : undefined
 
     return this.startActiveSpan(

@@ -31,7 +31,7 @@ export const deserializeOtpFromAmqpHeader = async (
       encoder,
     )
 
-    return await deserializeOtp(logger, msg.otp)
+    return deserializeOtp(logger, msg.otp)
   } catch (err) {
     logger.error({ err }, 'unable to deserialize otp entry from amqp header')
   }

@@ -9,7 +9,7 @@ describe('serializeOtp', () => {
 
   it('logs error and returns undefined JSON.parse fails', async () => {
     const logger = getLoggerMock()
-    const result = await deserializeOtp(logger.mock, 'wrong_input')
+    const result = deserializeOtp(logger.mock, 'wrong_input')
 
     expect(result).toBeUndefined()
     expect(logger.stubs.error.called).toBeTruthy()
