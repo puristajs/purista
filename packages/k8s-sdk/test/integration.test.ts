@@ -1,5 +1,5 @@
+import { serve } from '@hono/node-server'
 import { DefaultEventBridge, getLoggerMock, HttpClient } from '@purista/core'
-import { serve } from '@purista/hono-node-server'
 
 import { getHttpServer } from '../src/'
 import { theServiceV1Service } from './service/theService/v1'

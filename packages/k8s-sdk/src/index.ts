@@ -6,7 +6,7 @@
  *
  * @example ```typescript
  * // src/index.ts
- * import { serve } from '@purista/hono-node-server'
+ * import { serve } from '@hono/node-server'
  * import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
  * import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
  * import {
