@@ -1,5 +1,5 @@
+import { serve } from '@hono/node-server'
 import { getLoggerMock } from '@purista/core'
-import { serve } from '@purista/hono-node-server'
 import { createSandbox } from 'sinon'
 
 import { DaprEventBridge } from '../DaprEventBridge'

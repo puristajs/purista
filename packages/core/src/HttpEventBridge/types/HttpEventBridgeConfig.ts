@@ -8,7 +8,7 @@ export type HttpEventBridgeConfig = {
    * The serve function is depending on the runtime.
    *
    * - Bun: `Bun.serve`
-   * - Node.js: `serve` function from additional package `@purista/hono-node-server`
+   * - Node.js: `serve` function from additional package `@hono/hono-node-server`
    * - Deno: `serve` function from package `https://deno.land/std/http/server.ts`
    *
    * @see https://hono.dev
