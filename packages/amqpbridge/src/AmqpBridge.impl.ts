@@ -261,7 +261,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
     contentType = 'application/json',
     contentEncoding = 'utf-8',
   ): Promise<Readonly<EBMessage>> {
-    const context = await deserializeOtp(this.logger, message.otp)
+    const context = deserializeOtp(this.logger, message.otp)
 
     const name = isCommandResponse(message as EBMessage)
       ? PuristaSpanName.EventBridgeCommandResponseSent
@@ -331,7 +331,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
     input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
     commandTimeout: number = this.defaultCommandTimeout,
   ): Promise<T> {
-    const context = await deserializeOtp(this.logger, input.otp)
+    const context = deserializeOtp(this.logger, input.otp)
     return this.startActiveSpan(PuristaSpanName.EventBridgeInvokeCommand, {}, context, async (span) => {
       if (!this.channel) {
         const err = new UnhandledError(StatusCode.InternalServerError, 'invoke failed: No channel - not connected')
@@ -491,7 +491,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
               const result = await cb(command)
 
-              const returnContext = await deserializeOtp(this.logger, result.otp)
+              const returnContext = deserializeOtp(this.logger, result.otp)
               return this.startActiveSpan(
                 PuristaSpanName.EventBridgeCommandResponseSent,
                 { kind: SpanKind.CONSUMER },

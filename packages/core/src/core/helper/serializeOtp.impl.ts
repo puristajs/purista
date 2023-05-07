@@ -23,7 +23,7 @@ export const serializeOtp = () => {
  *
  * @group Helper
  */
-export const deserializeOtp = async (logger: Logger, otp?: string) => {
+export const deserializeOtp = (logger: Logger, otp?: string) => {
   try {
     let header = {}
 
