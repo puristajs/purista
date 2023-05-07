@@ -1,8 +1,8 @@
+import { serve } from '@hono/node-server'
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { DefaultLogger, gracefulShutdown, LogLevelName } from '@purista/core'
 import { DaprConfigStore, DaprEventBridge, DaprSecretStore, DaprStateStore } from '@purista/dapr-sdk'
-import { serve } from '@purista/hono-node-server'
 import pino from 'pino'
 import pretty from 'pino-pretty'
 

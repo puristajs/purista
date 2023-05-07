@@ -40,6 +40,6 @@
     "@purista/core": "*",
     "@purista/k8s-sdk": "*",
     "zod": "3.21.4",
-    "@hono/node-server":"0.4.0"
+    "@hono/node-server":"^1.0.0-rc.1"
   }
 }
