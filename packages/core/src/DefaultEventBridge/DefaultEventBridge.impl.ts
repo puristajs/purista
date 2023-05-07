@@ -91,7 +91,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
   async start() {
     await super.start()
     const write = async (message: Readonly<EBMessage>, _encoding: string, next: (error?: Error) => void) => {
-      const context = await deserializeOtp(this.logger, message.otp)
+      const context = deserializeOtp(this.logger, message.otp)
 
       return this.startActiveSpan(
         PuristaSpanName.EventBridgeHandleIncomingMessage,
@@ -270,7 +270,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
   async emitMessage(
     message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>,
   ): Promise<Readonly<EBMessage>> {
-    const context = await deserializeOtp(this.logger, message.otp)
+    const context = deserializeOtp(this.logger, message.otp)
 
     const name = isCommandResponse(message as EBMessage)
       ? PuristaSpanName.EventBridgeCommandResponse
@@ -309,7 +309,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
     input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
     commandTimeout = this.defaultCommandTimeout,
   ): Promise<T> {
-    const context = await deserializeOtp(this.logger, input.otp)
+    const context = deserializeOtp(this.logger, input.otp)
 
     return this.startActiveSpan(PuristaSpanName.EventBridgeInvokeCommand, {}, context, async (span) => {
       const correlationId = getNewCorrelationId()

@@ -131,7 +131,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
   async emitMessage<T extends EBMessage>(
     message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>,
   ): Promise<Readonly<EBMessage>> {
-    const currentContext = await deserializeOtp(this.logger, message.otp)
+    const currentContext = deserializeOtp(this.logger, message.otp)
 
     return this.startActiveSpan(
       PuristaSpanName.EventBridgeEmitMessage,
@@ -189,7 +189,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
     input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
     ttl?: number,
   ): Promise<T> {
-    const currentContext = await deserializeOtp(this.logger, input.otp)
+    const currentContext = deserializeOtp(this.logger, input.otp)
     return this.startActiveSpan(PuristaSpanName.EventBridgeInvokeCommand, {}, currentContext, async (span) => {
       const command: Command = Object.freeze({
         ...input,
