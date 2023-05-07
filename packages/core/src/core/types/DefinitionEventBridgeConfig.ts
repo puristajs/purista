@@ -8,14 +8,14 @@ export type DefinitionEventBridgeConfig = {
    * Advise the underlaying message broker to store messages if no consumer is available.
    * Messages will be send as soon as the service is able to consume.
    * */
-  durable?: boolean
+  durable: boolean
   /**
    * Send the acknowledge to message broker as soon as the message arrives
    * - defaults to true for commands
    * - defaults to false for subscriptions
    *
    * */
-  autoacknowledge?: boolean
+  autoacknowledge: boolean
   /**
    * If set to true, the event bridge is adviced to deliver one message to at least one consumer instance.
    * True is the default value.
@@ -27,5 +27,5 @@ export type DefinitionEventBridgeConfig = {
    *
    * @default true
    */
-  shared?: boolean
+  shared: boolean
 }
