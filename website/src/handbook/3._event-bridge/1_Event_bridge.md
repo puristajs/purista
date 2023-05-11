@@ -22,11 +22,11 @@ tag:
 | name                                        | scale | subscriptions*                        | durable   | status   |
 |---                                          |---    |---                                    |---        |---       |
 | [__Default__](./2_default-event-bridge.md)  | 🚫     | ✅ __complex__                        | 🚫        | stable   |
-| [__MQTT__](./4_mqtt.md)                     | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/98) |
-| [__AMQP__](./3_amqp-event-bridge.md)        | ✅     | ✅ __complex__                        | ✅        | beta   |
+| [__MQTT__](./4_mqtt.md)                     | ✅     | ✅ __complex__                        | ✅        | beta |
+| [__AMQP__](./3_amqp-event-bridge.md)        | ✅     | ✅ __complex__                        | ✅        | beta |
 | [__KubeMQ__](./6_kubemq.md)                | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/64)     |
 | [__NATS__](./7_nats.md)                | ✅     | 🔎 under investigation                       | 🔎        | [requested](https://github.com/sebastianwessel/purista/issues/64)     |
-| [__Dapr__](./5_dapr.md)                     | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/85) |
+| [__Dapr__](./5_dapr.md)                     | ✅     | ☑️ _event only_                        | ✅        | beta |
 | [__Knative__](./9_knative.md)| ✅     | 🔎 under investigation   | 🔎        | [requested](https://github.com/sebastianwessel/purista/issues/113)|
 | [__AWS EventBridge__](./8_aws_eventbridge.md)| ✅     | ☑️ _event only<br>(max 5 per event)_   | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/99)|
 

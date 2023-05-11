@@ -6,7 +6,10 @@ description: Dapr event bridge
 tag:
   - Dapr
   - event bridge
+image: /graphic/dapr_event_bridge_header.png
 ---
+
+![Dapr event bridge](/graphic/dapr_event_bridge_header.png)
 
 Dapr support will coming soon.
 

@@ -18,7 +18,12 @@ describe('@purista/amqpbridge', () => {
   let service: Service
 
   beforeAll(async () => {
-    container = await new GenericContainer('rabbitmq:alpine').withExposedPorts(AMQP_PORT).start()
+    container = await new GenericContainer('rabbitmq:alpine')
+      .withExposedPorts({
+        container: AMQP_PORT,
+        host: AMQP_PORT,
+      })
+      .start()
 
     eventbridge = new AmqpBridge({ logger: logger.mock })
     await eventbridge.start()

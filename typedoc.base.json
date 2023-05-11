@@ -1,0 +1,7 @@
+{
+  "hideGenerator": true,
+  "includeVersion":true,
+  "excludeInternal": true,
+  "excludeExternals": true,
+  "exclude": ["**/**/*.(test).ts","**/*+(index|.spec|.e2e|.test).ts","lib/**","/examples/**/*","node_modules","**/node_modules"]
+}
