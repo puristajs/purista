@@ -1,6 +1,5 @@
 {
-    "$schema": "https://typedoc.org/schema.json",
-    "name":"PURISTA API",
+  "name":"PURISTA API",
     "entryPointStrategy":"packages",
     "entryPoints": [
       "./packages/core",
@@ -8,8 +7,10 @@
       "./packages/amqpbridge",
       "./packages/state-store-redis",
       "./packages/k8s-sdk",
-      "./packages/dapr-sdk"
+      "./packages/dapr-sdk",
+      "./packages/mqttbridge"
     ],
+    "plugin": ["typedoc-plugin-markdown"],
     "out": "website/src/api",
     "readme":"CHANGELOG.md",
     "hideGenerator": true,

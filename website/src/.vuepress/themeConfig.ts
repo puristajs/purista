@@ -23,6 +23,10 @@ const apiSidebar = [
         text: '@purista/amqpbridge',
         link: '/api/modules/purista_amqpbridge.md',
       },
+      {
+        text: '@purista/mqttbridge',
+        link: '/api/modules/purista_mqttbridge.md',
+      },
     ],
   },
   {

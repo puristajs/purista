@@ -8,7 +8,7 @@ Example usage:
 import { AmqpBridge } from '@purista/amqpbridge'
 
 // create and init our eventbridge
-  const eventBridge = new AmqpBridge(undefined)
+  const eventBridge = new AmqpBridge()
   await eventBridge.start()
 
 ```
