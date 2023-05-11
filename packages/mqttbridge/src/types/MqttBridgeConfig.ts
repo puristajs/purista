@@ -1,6 +1,9 @@
 import { Prettify } from '@purista/core'
 import type { IClientOptions, QoS } from 'mqtt'
 
+/**
+ * the configuration for the MQTT event bridge
+ */
 export type MqttBridgeConfig = Prettify<
   {
     /**
