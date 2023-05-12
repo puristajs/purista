@@ -36,6 +36,7 @@ export const getCommandHandler = (
       { kind: SpanKind.CONSUMER },
       context,
       async (span) => {
+        const log = this.logger.getChildLogger({ ...span.spanContext(), traceId: command.traceId })
         try {
           const responseTopic = packet.properties?.responseTopic
 
@@ -44,7 +45,7 @@ export const getCommandHandler = (
               StatusCode.InternalServerError,
               'received a command message without response topic',
             )
-            this.logger.error({ err }, err.message)
+            log.error({ err }, err.message)
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: err.message,
@@ -56,7 +57,7 @@ export const getCommandHandler = (
 
           if (!isCommand(command)) {
             const err = new UnhandledError(StatusCode.InternalServerError, 'expected a command message')
-            this.logger.error({ err }, err.message)
+            log.error({ err }, err.message)
             span.setStatus({
               code: SpanStatusCode.ERROR,
               message: err.message,
@@ -70,7 +71,7 @@ export const getCommandHandler = (
 
           result.otp = result.otp || serializeOtp()
 
-          const returnContext = deserializeOtp(this.logger, result.otp)
+          const returnContext = deserializeOtp(log, result.otp)
           return this.startActiveSpan(
             PuristaSpanName.EventBridgeCommandResponseSent,
             { kind: SpanKind.CONSUMER },
@@ -144,7 +145,7 @@ export const getCommandHandler = (
           })
           span.recordException(err)
           this.emit(EventBridgeEventNames.EventbridgeError, err)
-          this.logger.error({ err }, 'Failed to consume command response message')
+          log.error({ err }, 'Failed to consume command response message')
         }
       },
     )
