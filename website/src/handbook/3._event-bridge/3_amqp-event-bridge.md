@@ -7,7 +7,8 @@ tag:
   - event bridge
   - AMQP
   - rabbitMQ
-image: /graphic/amqp_event_bridge_header.png
+image: https://purista.dev/graphic/amqp_event_bridge_header.png
+cover: https://purista.dev/graphic/amqp_event_bridge_header.png
 ---
 
 ![AMQP event bridge](/graphic/amqp_event_bridge_header.png)
