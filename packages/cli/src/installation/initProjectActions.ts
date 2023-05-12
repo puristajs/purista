@@ -110,27 +110,49 @@ export const initProjectActions: Actions = [
     templateFile: TEMPLATE_BASE + '/eslintrc.js.hbs',
   },
   async (answers) => {
-    if (answers.eventBridge !== 'AmqpEventBridge') {
-      return '[SKIPPED] no additional packages required'
+    switch (answers.eventBridge) {
+      case 'AmqpEventBridge':
+        await installDependencies('npm install -s @purista/amqpbridge')
+        return '@purista/amqpbridge added'
+      case 'MqttEventBridge':
+        await installDependencies('npm install -s @purista/mqttbridge')
+        return '@purista/mqttbridge added'
+      case 'DaprEventBridge':
+        await installDependencies('npm install -s @purista/dapr-sdk')
+        return '@purista/dapr-sdk added'
+      default:
+        return '[SKIPPED] no additional packages required'
     }
-    await installDependencies('npm install -s @purista/amqpbridge')
-
-    return '@purista/amqpbridge added'
   },
   {
     type: 'add',
     skip: (answers: Record<string, string[] | string>) => {
       if (answers.eventBridge !== 'AmqpEventBridge') {
-        return '[SKIPPED] no additional packages required'
+        return '[SKIPPED] AMQP event bridge config'
       }
     },
     skipIfExists: true,
     path: 'config/amqpBridgeConfig.ts',
     templateFile: TEMPLATE_BASE + '/config/amqpBridgeConfig.ts.hbs',
   },
-
   {
     type: 'add',
+    skip: (answers: Record<string, string[] | string>) => {
+      if (answers.eventBridge !== 'MqttEventBridge') {
+        return '[SKIPPED] MQTT event bridge config'
+      }
+    },
+    skipIfExists: true,
+    path: 'config/mqttBridgeConfig.ts',
+    templateFile: TEMPLATE_BASE + '/config/mqttBridgeConfig.ts.hbs',
+  },
+  {
+    type: 'add',
+    skip: (answers: Record<string, string[] | string>) => {
+      if (answers.eventBridge === 'DaprEventBridge') {
+        return '[SKIPPED] index files must be created for each service individual'
+      }
+    },
     skipIfExists: true,
     path: 'src/index.ts',
     templateFile: TEMPLATE_BASE + '/src/index.ts.hbs',
@@ -168,10 +190,17 @@ export const initProjectActions: Actions = [
     path: 'public/index.html',
     templateFile: TEMPLATE_BASE + '/public/index.html.hbs',
   },
-  (_answers) => {
+  (answers) => {
     console.log('')
     console.log('🎉 SUCCESS - PURISTA project ready 🎉')
     console.log('Enjoy building awesome applications with PURISTA 🚀')
+    console.log('')
+    if (answers.eventBridge === 'DaprEventBridge') {
+      console.log('🚨 As you are using the Dapr event bridge you might need to install additional packages!')
+      console.log('🚨 You also need to setup the config for your runtime environment.')
+      console.log('🚨 see https://purista.dev/handbook/3._event-bridge/5_dapr.html')
+    }
+    console.log('')
     console.log('Now it is time to add your first service!')
     console.log('')
     console.log('➡️  purista add service')
