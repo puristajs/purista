@@ -20,11 +20,11 @@ export const handleCommandResponse: IncomingMessageFunction = async function (me
     { kind: SpanKind.CONSUMER },
     context,
     async (span) => {
+      const log = this.logger.getChildLogger({ ...span.spanContext(), traceId: message.traceId })
+
       if (message.eventName) {
         span.addEvent(message.eventName)
       }
-
-      const log = this.logger.getChildLogger({ traceId: message.traceId })
 
       if (!isCommandResponse(message)) {
         const err = new UnhandledError(StatusCode.InternalServerError, 'the received message is not a command')

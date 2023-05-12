@@ -184,6 +184,8 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
         otp: serializeOtp(),
       })
 
+      const log = this.logger.getChildLogger({ ...span.spanContext(), traceId: command.traceId })
+
       const removeFromPending = () => {
         this.pendingInvocations.delete(correlationId)
       }
@@ -191,7 +193,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
       const executionPromise = new Promise<T>((resolve, reject) => {
         const timeout = setTimeout(() => {
           const err = new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out', undefined, command.traceId)
-          this.logger.warn({ err })
+          log.warn({ err })
           rejectFn(err)
         }, commandTimeout)
 

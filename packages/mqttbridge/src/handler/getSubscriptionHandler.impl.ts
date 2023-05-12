@@ -28,6 +28,8 @@ export const getSubscriptionHandler = (
       { kind: SpanKind.CONSUMER },
       context,
       async (span) => {
+        const log = this.logger.getChildLogger({ ...span.spanContext(), traceId: message.traceId })
+
         try {
           const result = await cb(message)
 
@@ -35,7 +37,7 @@ export const getSubscriptionHandler = (
             return
           }
 
-          const returnContext = deserializeOtp(this.logger, result.otp)
+          const returnContext = deserializeOtp(log, result.otp)
           return this.startActiveSpan(
             PuristaSpanName.EventBridgeCommandResponseSent,
             { kind: SpanKind.CONSUMER },
@@ -91,7 +93,7 @@ export const getSubscriptionHandler = (
           })
           span.recordException(err)
           this.emit(EventBridgeEventNames.EventbridgeError, err)
-          this.logger.error({ err }, 'Failed to consume subscription message')
+          log.error({ err }, 'Failed to consume subscription message')
         }
       },
     )
