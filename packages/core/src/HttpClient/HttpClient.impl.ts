@@ -211,9 +211,13 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = never> im
         span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, response.status)
 
         if (!response.ok) {
-          let txt = ''
+          let body = ''
           try {
-            txt = await response.text()
+            if (response.headers.get('Content-Type')?.startsWith('application/json')) {
+              body = await response.json()
+            } else {
+              body = await response.text()
+            }
           } catch (err) {
             log.warn({ err, method, url, path }, 'unable to get response text')
           }
@@ -226,7 +230,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = never> im
             url,
             path,
             headers,
-            response: txt,
+            response: body,
           })
           throw err
         }
@@ -240,7 +244,6 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = never> im
         }
         return response.text()
       } catch (error) {
-        log.error({ err: error }, (error as Error).message)
         const err =
           error instanceof UnhandledError || error instanceof HandledError ? error : UnhandledError.fromError(error)
         err.data = {
