@@ -53,6 +53,10 @@ const apiSidebar = [
         text: '@purista/k8s-sdk',
         link: '/api/modules/purista_k8s_sdk.md',
       },
+      {
+        text: '@purista/dapr-sdk',
+        link: '/api/modules/purista_dapr_sdk.md',
+      },
     ],
   },
 ]
@@ -150,6 +154,7 @@ export default hopeTheme({
     blog: {
       filter: ({ filePathRelative }) => (filePathRelative ? filePathRelative.startsWith('posts/') : false),
       excerptFilter: ({ filePathRelative }) => (filePathRelative ? filePathRelative.startsWith('posts/') : false),
+      hotReload: true,
     },
     photoSwipe: true,
     mdEnhance: {
