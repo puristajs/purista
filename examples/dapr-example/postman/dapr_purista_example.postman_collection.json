@@ -1,0 +1,627 @@
+{
+	"info": {
+		"_postman_id": "14effa9e-1e90-49e9-928c-a4854145aa40",
+		"name": "Dapr PURISTA example",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "14763140"
+	},
+	"item": [
+		{
+			"name": "Email",
+			"item": [
+				{
+					"name": "Sidecar",
+					"item": [
+						{
+							"name": "Sidecar Metadata",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{dapr_host}}:{{dapr_port_email}}/v1.0/metadata",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{dapr_port_email}}",
+									"path": [
+										"v1.0",
+										"metadata"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetAll from config store",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{dapr_host}}:{{dapr_port_email}}/v1.0-alpha1/configuration/local-config-store",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{dapr_port_email}}",
+									"path": [
+										"v1.0-alpha1",
+										"configuration",
+										"local-config-store"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetAll from state store",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{dapr_host}}:{{dapr_port_email}}/v1.0/state/local-state-store/bulk",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{dapr_port_email}}",
+									"path": [
+										"v1.0",
+										"state",
+										"local-state-store",
+										"bulk"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetAll from secret store",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{dapr_host}}:{{dapr_port_email}}/v1.0/secrets/local-secret-store/bulk",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{dapr_port_email}}",
+									"path": [
+										"v1.0",
+										"secrets",
+										"local-secret-store",
+										"bulk"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Emit ping event",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "dapr-app-id",
+										"value": "email-1",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"123-abc\",\n    \"correlationId\": \"123\",\n    \"traceId\": \"123\",\n    \"contentType\": \"application/json\",\n    \"contentEncoding\": \"utf-8\",\n    \"timestamp\": 1680366684785,\n    \"eventName\": \"{{eventName}}\",\n    \"messageType\": \"commandSuccessResponse\",\n    \"sender\": {\n        \"serviceName\": \"Email\",\n        \"serviceVersion\": \"1\",\n        \"serviceTarget\": \"ping\"\n    },\n    \"receiver\": {\n        \"serviceName\": \"\",\n        \"serviceVersion\": \"1\",\n        \"serviceTarget\": \"\"\n    },\n    \"payload\": {\n        \"pong\": \"PING\"\n    },\n    \"otp\": \"{\\\"traceparent\\\":\\\"00-b83c45d38fa9cfaaf7693b812f47f2af-3257d5381d99b790-01\\\"}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{dapr_host}}:{{dapr_port_email}}/v1.0/publish/{{pubsub_name}}/{{eventname}}",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{dapr_port_email}}",
+									"path": [
+										"v1.0",
+										"publish",
+										"{{pubsub_name}}",
+										"{{eventname}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ping (Command)",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"123-abc\",\n    \"timestamp\": 1680274981573,\n    \"messageType\": \"command\",\n    \"correlationId\": \"123\",\n    \"traceId\": \"123\",\n    \"instanceId\": \"123\",\n    \"principalId\": \"mocked-principal-id\",\n    \"contentType\": \"application/json\",\n    \"contentEncoding\": \"utf-8\",\n    \"sender\": {\n      \"serviceName\": \"\",\n      \"serviceVersion\": \"1\",\n      \"serviceTarget\": \"\"\n    },\n    \"receiver\": {\n      \"serviceName\": \"Email\",\n      \"serviceVersion\": \"1\",\n      \"serviceTarget\": \"ping\"\n    },\n    \"payload\": {\n      \"payload\": \"PING\",\n      \"parameter\": {}\n    }\n  }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{dapr_host}}:{{dapr_port_email}}/v1.0/invoke/email-v1/method/purista/command/ping",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{dapr_port_email}}",
+									"path": [
+										"v1.0",
+										"invoke",
+										"email-v1",
+										"method",
+										"purista",
+										"command",
+										"ping"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "App email-1",
+					"item": [
+						{
+							"name": "Invoke as command",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"123-abc\",\n    \"timestamp\": 1680274981573,\n    \"messageType\": \"command\",\n    \"correlationId\": \"123\",\n    \"traceId\": \"123\",\n    \"instanceId\": \"123\",\n    \"principalId\": \"mocked-principal-id\",\n    \"contentType\": \"application/json\",\n    \"contentEncoding\": \"utf-8\",\n    \"sender\": {\n      \"serviceName\": \"\",\n      \"serviceVersion\": \"1\",\n      \"serviceTarget\": \"\"\n    },\n    \"receiver\": {\n      \"serviceName\": \"Email\",\n      \"serviceVersion\": \"1\",\n      \"serviceTarget\": \"ping\"\n    },\n    \"payload\": {\n      \"payload\": \"PING\",\n      \"parameter\": {}\n    }\n  }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{app_host}}:{{app_port_email}}/purista/command/ping",
+									"protocol": "http",
+									"host": [
+										"{{app_host}}"
+									],
+									"port": "{{app_port_email}}",
+									"path": [
+										"purista",
+										"command",
+										"ping"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "List subscriptions",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{app_host}}:{{app_port_email}}/dapr/subscribe",
+									"protocol": "http",
+									"host": [
+										"{{app_host}}"
+									],
+									"port": "{{app_port_email}}",
+									"path": [
+										"dapr",
+										"subscribe"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "Sidecar",
+					"item": [
+						{
+							"name": "Sidecar Metadata",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0/metadata",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{dapr_port_user}}",
+									"path": [
+										"v1.0",
+										"metadata"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetAll from config store",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0-alpha1/configuration/local-config-store",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{dapr_port_user}}",
+									"path": [
+										"v1.0-alpha1",
+										"configuration",
+										"local-config-store"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetAll from state store",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0/state/local-state-store/bulk",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{dapr_port_user}}",
+									"path": [
+										"v1.0",
+										"state",
+										"local-state-store",
+										"bulk"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "GetAll from secret store",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0/secrets/local-secret-store/bulk",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{dapr_port_user}}",
+									"path": [
+										"v1.0",
+										"secrets",
+										"local-secret-store",
+										"bulk"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Emit ping event",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"123-abc\",\n    \"correlationId\": \"123\",\n    \"traceId\": \"123\",\n    \"contentType\": \"application/json\",\n    \"contentEncoding\": \"utf-8\",\n    \"timestamp\": 1680366684785,\n    \"eventName\": \"{{eventName}}\",\n    \"messageType\": \"commandSuccessResponse\",\n    \"sender\": {\n        \"serviceName\": \"User\",\n        \"serviceVersion\": \"1\",\n        \"serviceTarget\": \"ping\"\n    },\n    \"receiver\": {\n        \"serviceName\": \"\",\n        \"serviceVersion\": \"1\",\n        \"serviceTarget\": \"\"\n    },\n    \"payload\": {\n        \"pong\": \"PING\"\n    },\n    \"otp\": \"{\\\"traceparent\\\":\\\"00-b83c45d38fa9cfaaf7693b812f47f2af-3257d5381d99b790-01\\\"}\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0/publish/{{pubsub_name}}/{{eventname}}",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{dapr_port_user}}",
+									"path": [
+										"v1.0",
+										"publish",
+										"{{pubsub_name}}",
+										"{{eventname}}"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ping (invoke Command)",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"123-abc\",\n    \"timestamp\": 1680274981573,\n    \"messageType\": \"command\",\n    \"correlationId\": \"123\",\n    \"traceId\": \"123\",\n    \"instanceId\": \"123\",\n    \"principalId\": \"mocked-principal-id\",\n    \"contentType\": \"application/json\",\n    \"contentEncoding\": \"utf-8\",\n    \"sender\": {\n      \"serviceName\": \"POSTMAN\",\n      \"serviceVersion\": \"1\",\n      \"serviceTarget\": \"POSTMAN\"\n    },\n    \"receiver\": {\n      \"serviceName\": \"User\",\n      \"serviceVersion\": \"1\",\n      \"serviceTarget\": \"ping\"\n    },\n    \"payload\": {\n      \"payload\": \"PING\",\n      \"parameter\": {}\n    }\n  }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0/invoke/user-v1/method/purista/command/compute-data",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{dapr_port_user}}",
+									"path": [
+										"v1.0",
+										"invoke",
+										"user-v1",
+										"method",
+										"purista",
+										"command",
+										"compute-data"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "signUp (invoke Command)",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"123-abc\",\n    \"timestamp\": 1680274981573,\n    \"messageType\": \"command\",\n    \"correlationId\": \"123\",\n    \"traceId\": \"123\",\n    \"instanceId\": \"123\",\n    \"principalId\": \"mocked-principal-id\",\n    \"contentType\": \"application/json\",\n    \"contentEncoding\": \"utf-8\",\n    \"sender\": {\n      \"serviceName\": \"POSTMAN\",\n      \"serviceVersion\": \"1\",\n      \"serviceTarget\": \"POSTMAN\"\n    },\n    \"receiver\": {\n      \"serviceName\": \"User\",\n      \"serviceVersion\": \"1\",\n      \"serviceTarget\": \"signUp\"\n    },\n    \"payload\": {\n        \"payload\": {\n            \"name\": \"test user\",\n            \"email\": \"email@example.com\",\n            \"password\": \"password\"\n        },\n        \"parameter\": {}\n    }\n  }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0/invoke/user-v1/method/purista/command/sign-up",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{dapr_port_user}}",
+									"path": [
+										"v1.0",
+										"invoke",
+										"user-v1",
+										"method",
+										"purista",
+										"command",
+										"sign-up"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "App user-1",
+					"item": [
+						{
+							"name": "List subscriptions",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"id\": \"123-abc\",\n    \"timestamp\": 1680274981573,\n    \"messageType\": \"command\",\n    \"correlationId\": \"123\",\n    \"traceId\": \"123\",\n    \"instanceId\": \"123\",\n    \"principalId\": \"mocked-principal-id\",\n    \"contentType\": \"application/json\",\n    \"contentEncoding\": \"utf-8\",\n    \"sender\": {\n      \"serviceName\": \"\",\n      \"serviceVersion\": \"1\",\n      \"serviceTarget\": \"\"\n    },\n    \"receiver\": {\n      \"serviceName\": \"Email\",\n      \"serviceVersion\": \"1\",\n      \"serviceTarget\": \"ping\"\n    },\n    \"payload\": {\n      \"payload\": \"PING\",\n      \"parameter\": {}\n    }\n  }",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{app_host}}:{{app_port_user}}/dapr/subscribe",
+									"protocol": "http",
+									"host": [
+										"{{app_host}}"
+									],
+									"port": "{{app_port_user}}",
+									"path": [
+										"dapr",
+										"subscribe"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Ping (Command endpoint)",
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "\"PING\"",
+									"options": {
+										"raw": {
+											"language": "text"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{dapr_host}}:{{app_port_user}}/api/v1/ping",
+									"protocol": "http",
+									"host": [
+										"{{dapr_host}}"
+									],
+									"port": "{{app_port_user}}",
+									"path": [
+										"api",
+										"v1",
+										"ping"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "signUp (REST)",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"pm.test(\"Returns a userId\", function () {",
+											"    pm.response.to.be.ok;",
+											"     pm.response.to.be.withBody;",
+											"     pm.response.to.be.json;",
+											"",
+											"    var jsonData = pm.response.json();",
+											"    pm.environment.set('userId',jsonData.userId)",
+											"    pm.expect(jsonData.userId).not.undefined",
+											"});"
+										],
+										"type": "text/javascript"
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"name\": \"test user\",\n    \"email\": \"email3@example.com\",\n    \"password\": \"password\"\n}",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{app_host}}:{{app_port_user}}/api/v1/user/signup",
+									"protocol": "http",
+									"host": [
+										"{{app_host}}"
+									],
+									"port": "{{app_port_user}}",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"signup"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getAllUsers (REST)",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{app_host}}:{{app_port_user}}/api/v1/user",
+									"protocol": "http",
+									"host": [
+										"{{app_host}}"
+									],
+									"port": "{{app_port_user}}",
+									"path": [
+										"api",
+										"v1",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "getUserById (REST)",
+							"protocolProfileBehavior": {
+								"disableBodyPruning": true
+							},
+							"request": {
+								"method": "GET",
+								"header": [],
+								"body": {
+									"mode": "raw",
+									"raw": "",
+									"options": {
+										"raw": {
+											"language": "json"
+										}
+									}
+								},
+								"url": {
+									"raw": "http://{{app_host}}:{{app_port_user}}/api/v1/user/{{userId}}",
+									"protocol": "http",
+									"host": [
+										"{{app_host}}"
+									],
+									"port": "{{app_port_user}}",
+									"path": [
+										"api",
+										"v1",
+										"user",
+										"{{userId}}"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	]
+}
