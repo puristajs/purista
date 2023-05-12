@@ -161,7 +161,8 @@ export const addServiceEndpoints = (
                     ? error
                     : UnhandledError.fromError(error)
 
-                logger.error({ err }, err.message)
+                logger.error({ err, ...span.spanContext() }, err.message)
+
                 span.setStatus({
                   code: SpanStatusCode.ERROR,
                   message: err.message,
