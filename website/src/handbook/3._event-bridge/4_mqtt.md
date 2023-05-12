@@ -7,7 +7,8 @@ tag:
   - event bridge
   - MQTT
   - mosquitto
-image: /graphic/mqtt_event_bridge_header.png
+image: https://purista.dev/graphic/mqtt_event_bridge_header.png
+cover: https://purista.dev/graphic/mqtt_event_bridge_header.png
 ---
 
 ![AMQP event bridge](/graphic/mqtt_event_bridge_header.png)
@@ -53,3 +54,13 @@ const eventBridge = new MqttBridge()
 await eventBridge.start()
 
 ```
+
+## Topic names
+
+The MQTT protocol relays on topics for message publish/subscribe.
+
+PURISTA is using the following schema for topics:
+
+## Message timeouts, QOS and subscriptions
+
+Handling of messages which
