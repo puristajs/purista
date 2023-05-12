@@ -20,7 +20,21 @@ cover: https://purista.dev/graphic/advertise_large.png
 
 
 PURISTA version 1.6.0 comes with a set of new event bridges.  
-Also, there are some improvements for configs and types
+Starting from version 1.6.0, the new MQTT event bridge supports the MQTT protocol.  
+This is a huge step forward if you're developing solutions for IoT and Edge.
+
+On the other side, Dapr support is now added for cloud environments.  
+This not only includes simple deployments and usage of the core event functionality.  
+The new Dapr-SDK provides also the integration of state, config, and secret stores via Dapr.
+
+**PURISTA now requires Node version >= 18.15**.  
+Also, the provided PURISTA packages no longer contain source map files, resulting in a much smaller size.
+
+A very common task is, to build an HTTP adapter and call external REST APIs.  
+For such a task, the new base class `HttpClient` is available, which is based on the native fetch function.  
+Error handling, JSON decoding, timeout handling, and OpenTelemetry support are built in.
+
+In addition, there are a bunch of improvements regarding types, and configurations, and some bugs have been fixed.
 
 <!-- more -->
 
@@ -30,8 +44,8 @@ Also, there are some improvements for configs and types
 
 ## Http client
 
-The core package contains now a nice helper.  
-With the `HttpClient` class it is possible to build HTTP based clients quick & easy.
+The core package has some new nice helpers.  
+With the `HttpClient` class, it is possible to build HTTP-based clients quickly & easily.
 
 The `HttpClient` is based on Node.js native `fetch`.
 
