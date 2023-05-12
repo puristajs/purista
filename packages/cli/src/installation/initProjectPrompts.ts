@@ -50,6 +50,8 @@ export const initProjectPrompts: Prompts = [
     choices: [
       { value: 'DefaultEventBridge', name: 'local internal default eventbridge', checked: true },
       { value: 'AmqpEventBridge', name: 'AMQP eventbridge (RabbitMQ)' },
+      { value: 'MqttEventBridge', name: 'MQTT eventbridge (mosquitto)' },
+      { value: 'DaprEventBridge', name: 'Dapr eventbridge' },
     ],
   },
   {
@@ -57,7 +59,7 @@ export const initProjectPrompts: Prompts = [
     message: 'Should the @purista/httpserver package be installed, to automatically provide a REST api server?',
     name: 'installHttpService',
     when(answers) {
-      return answers.initialize
+      return answers.initialize && answers.eventBridge !== 'DaprEventBridge'
     },
   },
   {
@@ -65,7 +67,7 @@ export const initProjectPrompts: Prompts = [
     message: 'Should the http service be able to provide static files - files and assets like images & css?',
     name: 'installStaticPlugin',
     when(answers) {
-      return answers.initialize && answers.installHttpService
+      return answers.initialize && answers.installHttpService && answers.eventBridge !== 'DaprEventBridge'
     },
   },
 ]

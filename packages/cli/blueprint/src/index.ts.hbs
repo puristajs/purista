@@ -18,6 +18,9 @@ import { HttpServerService } from '@purista/httpserver'
 {{#if (eq eventBridge "AmqpEventBridge")}}
 import amqpBridgeConfig from '../config/amqpBridgeConfig'
 {{/if}}
+{{#if (eq eventBridge "MqttEventBridge")}}
+import mqttBridgeConfig from '../config/mqttBridgeConfig'
+{{/if}}
 {{#if installHttpService}}
 import httpServerConfig from '../config/httpServerConfig'
 {{/if}}
@@ -26,6 +29,10 @@ export const main = async () => {
   // initiate the event bridge as first step
   {{#if (eq eventBridge "AmqpEventBridge")}}
   const eventBridge = new AmqpBridge(amqpBridgeConfig)
+  await eventBridge.start()
+  {{/if}}
+  {{#if (eq eventBridge "MqttEventBridge")}}
+  const eventBridge = new MqttBridge(mqttBridgeConfig)
   await eventBridge.start()
   {{/if}}
   {{#if (eq eventBridge "DefaultEventBridge")}}
