@@ -1,0 +1,9 @@
+import { MqttBridgeConfig } from '@purista/mqttbridge'
+import { getNewInstanceId } from '@purista/core'
+
+const mqttBridgeConfig: MqttBridgeConfig = {
+  instanceId: getNewInstanceId(), // can be replaced with fixed value like device serial number
+  host: 'localhost',
+}
+
+export default mqttBridgeConfig
