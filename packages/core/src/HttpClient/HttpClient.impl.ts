@@ -194,6 +194,8 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = never> im
     return this.startActiveSpan(`${this.name}.${method}`, { kind: SpanKind.CLIENT }, context.active(), async (span) => {
       span.setAttribute(SemanticAttributes.HTTP_METHOD, method)
 
+      const log = this.logger.getChildLogger({ ...span.spanContext() })
+
       try {
         const { url, headers } = this.getUrlAndHeader(path, options)
         span.setAttribute(SemanticAttributes.HTTP_URL, url.toString())
@@ -213,16 +215,19 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = never> im
           try {
             txt = await response.text()
           } catch (err) {
-            this.logger.warn({ err }, 'unable to get response text')
+            log.warn({ err, method, url, path }, 'unable to get response text')
           }
 
+          const headers = Array.from(response.headers)
+
           const err = new UnhandledError(response.status as StatusCode, response.statusText, {
+            statusCode: response.status,
             method,
             url,
             path,
+            headers,
             response: txt,
           })
-          span.recordException(err)
           throw err
         }
 
@@ -235,14 +240,14 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = never> im
         }
         return response.text()
       } catch (error) {
-        this.logger.error({ err: error }, (error as Error).message)
+        log.error({ err: error }, (error as Error).message)
         const err =
           error instanceof UnhandledError || error instanceof HandledError ? error : UnhandledError.fromError(error)
         err.data = {
           method,
           path,
         }
-        this.logger.error({ err, method, path }, err.message)
+        log.error({ err, method, path }, err.message)
         span.recordException(err)
         throw err
       } finally {
