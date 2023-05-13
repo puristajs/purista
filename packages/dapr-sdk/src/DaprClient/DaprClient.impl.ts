@@ -38,9 +38,9 @@ export class DaprClient extends HttpClient<EventBridgeConfig<DaprEventBridgeConf
     const path = join(
       this.config.clientConfig?.daprApiVersion || DAPR_API_VERSION,
       'invoke',
-      `${this.config.clientConfig?.appPrefix || ''}${convertToKebabCase(command.receiver.serviceName)}-v${
-        command.receiver.serviceVersion
-      }`,
+      `${this.config.clientConfig?.appPrefix || ''}${convertToKebabCase(
+        command.receiver.serviceName,
+      )}-v${convertToKebabCase(command.receiver.serviceVersion)}`,
       'method',
       this.getInternalPathForCommand(command.receiver),
     )
