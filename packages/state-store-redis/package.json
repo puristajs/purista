@@ -46,7 +46,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
-    "@types/node": "^18.16.8",
+    "@types/node": "^18.16.9",
     "@types/sinon": "^10.x",
     "jest": "^29.5.0",
     "sinon": "^15.x",
