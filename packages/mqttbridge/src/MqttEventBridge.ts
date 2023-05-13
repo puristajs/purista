@@ -245,9 +245,14 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
       const responseTopic = getCommandResponseTopic.bind(this)()
 
       await this.client.publish(topic, JSON.stringify(command), {
-        qos: this.config.qosCommand,
+        // if event name is set use the largest QOS
+        qos: command.eventName
+          ? this.config.qoSSubscription > this.config.qosCommand
+            ? this.config.qoSSubscription
+            : this.config.qosCommand
+          : this.config.qosCommand,
         properties: {
-          messageExpiryInterval: msToSec(commandTimeout),
+          messageExpiryInterval: command.eventName ? this.config.defaultMessageExpiryInterval : msToSec(commandTimeout),
           contentType: 'application/json',
           userProperties,
           correlationData: Buffer.from(command.correlationId),
