@@ -118,6 +118,11 @@ export default hopeTheme({
   blog: {
     sidebarDisplay: 'none',
     articleInfo: ['Author', 'Date'],
+    medias: {
+      Twitter: 'https://twitter.com/purista_js',
+      Discord: 'https://discord.gg/9feaUm3H2v',
+      GitHub: 'https://github.com/sebastianwessel/purista/',
+    },
   },
   plugins: {
     git: {
@@ -161,7 +166,7 @@ export default hopeTheme({
       container: true,
       mermaid: true,
       flowchart: true,
-      linkCheck: true,
+      checkLinks: { status: 'dev' },
       codetabs: true,
       tabs: true,
       presentation: {

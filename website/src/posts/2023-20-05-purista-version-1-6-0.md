@@ -40,6 +40,9 @@ In addition, there are a bunch of improvements regarding types, and configuratio
 
 ## MQTT event bridge
 
+By providing the MQTT event bridge, PURISTA is making a huge step into the IoT and edge device area.  
+The MQTT bridge is based on the MQTT 5 protocol, which makes it possible to provide nearly the same functionality as on other event bridges.
+
 ## Dapr SDK
 
 ## Http client
