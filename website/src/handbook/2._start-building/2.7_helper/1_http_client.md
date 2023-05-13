@@ -80,7 +80,7 @@ This error object will contain in the data object:
 - headers (array)
 - response (string or JSON parse result)
 
-Error responses are automatically logged.
+Error responses are automatically logged and the error is added to the OpenTelemetry trace.
 
 ## Alternative
 

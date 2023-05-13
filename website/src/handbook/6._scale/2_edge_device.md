@@ -33,6 +33,9 @@ As a simplified illustration how it might look like this:
 
 ![edge device example](/graphic/edge.svg)
 
+PURISTA is providing the `@purista/mqttbridge` package, which is focusing on IoT and edge devices.  
+You can learn more about it at [MQTT event bridge](../3._event-bridge/4_mqtt.md).
+
 ::: tip Pros
 
 - low footprint
