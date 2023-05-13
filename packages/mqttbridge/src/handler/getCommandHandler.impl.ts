@@ -10,6 +10,7 @@ import {
   EBMessageAddress,
   EventBridgeEventNames,
   isCommand,
+  isCommandErrorResponse,
   PuristaSpanName,
   PuristaSpanTag,
   serializeOtp,
@@ -114,20 +115,28 @@ export const getCommandHandler = (
               await this.client.publish(packet.properties?.responseTopic as string, JSON.stringify(responseMessage), {
                 qos: this.config.qosCommand,
                 properties: {
-                  messageExpiryInterval: this.config.defaultMessageExpiryInterval,
+                  messageExpiryInterval: this.config.defaultCommandTimeout,
                   contentType: 'application/json',
                   userProperties,
                   correlationData: Buffer.from(responseMessage.correlationId),
                 },
               })
 
+              if (this.config.commandResponsePublishTwice === 'never') {
+                return
+              }
+
               // emit the message 2nd time as event
-              if (responseMessage.eventName) {
+              if (
+                this.config.commandResponsePublishTwice === 'always' ||
+                (responseMessage.eventName && this.config.commandResponsePublishTwice === 'eventOnly') ||
+                (isCommandErrorResponse(responseMessage) && this.config.commandResponsePublishTwice === 'eventAndError')
+              ) {
                 const eventTopic = getTopicName.bind(this)(responseMessage)
                 await this.client.publish(eventTopic, JSON.stringify(responseMessage), {
                   qos: this.config.qoSSubscription,
                   properties: {
-                    messageExpiryInterval: msToSec(this.defaultCommandTimeout),
+                    messageExpiryInterval: msToSec(this.config.defaultMessageExpiryInterval),
                     contentType: 'application/json',
                     userProperties,
                   },

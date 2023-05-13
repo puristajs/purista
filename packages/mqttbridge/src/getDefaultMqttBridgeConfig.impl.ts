@@ -15,6 +15,8 @@ export const getDefaultMqttBridgeConfig = (): MqttBridgeConfig => {
     defaultSessionExpiryInterval: 30 * SECONDS_PER_DAY,
     defaultMessageExpiryInterval: 30 * SECONDS_PER_DAY,
 
+    commandResponsePublishTwice: 'eventOnly',
+
     host: 'localhost',
     port: 1883,
     protocol: 'mqtt',
