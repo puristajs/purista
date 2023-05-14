@@ -43,8 +43,20 @@ import { getSubscriptionQueueName } from './getSubscriptionQueueName.impl'
 import { jsonEncoder, plainEncrypter } from './payloadHandling'
 import { serializeOtpForAmqpHeader } from './serializeOtpForAmqpHeader.impl'
 import { AmqpBridgeConfig, Encoder, Encrypter } from './types'
+
 /**
- * A adapter to use rabbitMQ as event bridge.
+ * The AMQP event bridge connects to a AMQP broker.
+ *
+ * @example ```typescript
+ * import { AmqpBridge } from '@purista/amqpbridge'
+ *
+ * // create and init our eventbridge
+ *   const eventBridge = new AmqpBridge()
+ *   await eventBridge.start()
+ *
+ * ```
+ *
+ * @group Event bridge
  */
 export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implements EventBridge {
   protected connection?: Connection
