@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.5.0] - 2023-03-29
+## [unreleased]
 
 ### Bug Fixes
 
@@ -18,6 +18,12 @@ All notable changes to this project will be documented in this file.
 - Esbuild issue
 - Redis state store and add integration test
 - Issues and improve code and add inline documentation
+- Strip and check query parameter
+- Generate correlation id only once
+- Use loglevel from config
+- Typo
+- Add types to exports in package.json
+- Use correct package in examples
 
 ### Depreciation
 
@@ -41,6 +47,23 @@ All notable changes to this project will be documented in this file.
 - Update api documentation
 - Update documentation
 - Update CHANGELOG
+- Update doc
+- Add Product hunt upvote
+- Update website
+- Update website
+- Update twitter img
+- Add inline code documentation
+- Improve doc
+- Update dapr doc
+- Update typedoc config and update packages
+- Add postman collection to Dapr example
+- Update block entry
+- Update
+- Update doc
+- Update doc
+- Update api documentation
+- Update api documentation
+- Update documentation
 
 ### Features
 
@@ -65,6 +88,14 @@ All notable changes to this project will be documented in this file.
 - Add receiveMessageOnEveryInstance flag
 - Add package @purista/redis-state-store #103
 - Add k8s helper package #110
+- Add helper and cleanup code
+- Add Dapr eventbridge #85
+- Add optional log level to general event bridge config
+- Add HttpEventBridge and HttpClient
+- Implement Dapr SDK
+- MQTT eventBridge #98
+- Add AMQP & MQTT bridges to cli tool
+- Add js emit event to bridges
 
 ### Miscellaneous Tasks
 
@@ -127,6 +158,29 @@ All notable changes to this project will be documented in this file.
 - Update packages
 - Set current version
 - Package
+- Bump versions to 1.5.0
+- Improve k8s-sdk
+- Improve event bridge config typ
+- Use node query parser instead of external qs package
+- Require at least node v 18.15
+- Use enum EventBridgeEventNames
+- Cleanup code
+- Improve span names
+- Improve setup
+- Improve k8s-sdk and enable http compression
+- Improve setup
+- Add testcontainers package
+- Add test and cleanup and improve code
+- Improve types
+- Add test
+- Minor fixes
+- Update dependencies
+- Remove async if not needed
+- Use @hono/node-server 1.0.0-rc.1 with native fetch
+- Log span context and traceId
+- Add inline doc and cleanup code
+- Minor changes
+- Minor cleanup
 
 ### Refactor
 
