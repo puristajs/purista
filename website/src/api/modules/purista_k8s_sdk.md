@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / @purista/k8s-sdk
+[PURISTA API](../README.md) / [Modules](../modules.md) / @purista/k8s-sdk
 
 # Module: @purista/k8s-sdk
 
@@ -10,6 +10,7 @@ Here is a full example, how the index file might look like, if you want to deplo
 
 ```typescript
 // src/index.ts
+import { serve } from '@hono/node-server'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
 import {
@@ -40,7 +41,7 @@ const main = async () => {
   const stateStore = new DefaultStateStore({ logger })
 
   // set up the eventbridge and start the event bridge
-  const eventBridge = new DefaultEventBridge({}, { spanProcessor })
+  const eventBridge = new DefaultEventBridge({ spanProcessor })
   await eventBridge.start()
 
   // set up the service
@@ -53,7 +54,7 @@ const main = async () => {
   await theService.start()
 
   // create http server
-  const server = getHttpServer({
+  const app = getHttpServer({
     logger,
     // check event bridge health if /healthz endpoint is called
     healthFn: () => eventBridge.isHealthy(),
@@ -64,9 +65,16 @@ const main = async () => {
     apiMountPath: '/api',
   })
 
+   // start the http server
+   // defaults to port 3000
+   // optional: you can set the port in the optional parameter of this method
+   const server = serve({
+     fetch: app.fetch,
+   })
+
   // register shut down methods
   gracefulShutdown(logger, [
-    // start with the event bridge to no longer accept incoming messages
+    // begin with the event bridge to no longer accept incoming messages
     eventBridge,
     // optional: shut down the service
     theService,
@@ -77,13 +85,14 @@ const main = async () => {
     // optional: shut down the state store
     stateStore,
     // stop the http server
-    server,
+    {
+       name: 'httpserver',
+       destroy: async () => {
+       server.closeIdleConnections()
+       server.close()
+    },
+ },,
   ])
-
-  // start the http server
-  // defaults to port 8080
-  // optional: you can set the port in the optional parameter of this method
-  await server.start()
 }
 
 main()
@@ -91,14 +100,9 @@ main()
 
 ## Table of contents
 
-### Namespaces
-
-- [internal](purista_k8s_sdk.internal.md)
-
 ### Type Aliases
 
 - [GetHttpServerConfig](purista_k8s_sdk.md#gethttpserverconfig)
-- [RouterFunction](purista_k8s_sdk.md#routerfunction)
 
 ### Functions
 
@@ -117,60 +121,37 @@ The configuration object for creating the k8s http server
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `apiMountPath?` | `string` | the api mount path **`Default`** /api |
+| `apiMountPath?` | `string` | the api mount path **`Default`** ```ts /api ``` |
+| `disableEndpointExposing?` | `boolean` | disables adding of all endpoints for commands which are marked to be exposed as http endpoints |
 | `healthFn` | () => `Promise`<`boolean`\> | health function to be executed on health check |
-| `httpServerOptions?` | `ServerOptions` | node http module server options |
-| `logger` | [`Logger`](../classes/purista_k8s_sdk.internal.Logger.md) | a logger instance |
-| `services?` | [`Service`](../classes/purista_k8s_sdk.internal.Service.md) \| [`Service`](../classes/purista_k8s_sdk.internal.Service.md)[] | service or array of services which should expose their commands as endpoints if defined |
+| `hostname?` | `string` | hostname used in tracing and logging |
+| `logger` | `Logger` | a logger instance |
+| `services?` | `Service` \| `Service`[] | service or array of services which should expose their commands as endpoints if defined |
 
 #### Defined in
 
-[packages/k8s-sdk/src/types.ts:8](https://github.com/sebastianwessel/purista/blob/8c66693/packages/k8s-sdk/src/types.ts#L8)
-
-___
-
-### RouterFunction
-
-Ƭ **RouterFunction**: (`request`: `IncomingMessage`, `response`: `ServerResponse`, `parameter`: `Record`<`string`, `unknown`\>) => `Promise`<`void`\>
-
-#### Type declaration
-
-▸ (`request`, `response`, `parameter`): `Promise`<`void`\>
-
-##### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `request` | `IncomingMessage` |
-| `response` | `ServerResponse` |
-| `parameter` | `Record`<`string`, `unknown`\> |
-
-##### Returns
-
-`Promise`<`void`\>
-
-#### Defined in
-
-[packages/k8s-sdk/src/getHttpServer.impl.ts:10](https://github.com/sebastianwessel/purista/blob/8c66693/packages/k8s-sdk/src/getHttpServer.impl.ts#L10)
+[types.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/k8s-sdk/src/types.ts#L6)
 
 ## Functions
 
 ### addServiceEndpoints
 
-▸ **addServiceEndpoints**(`services`, `router`, `logger`, `apiMountPath?`): `void`
+▸ **addServiceEndpoints**(`services`, `app`, `logger`, `apiMountPath?`): `void`
 
 **`Default`**
 
+```ts
 /api
+```
 
 #### Parameters
 
 | Name | Type | Default value | Description |
 | :------ | :------ | :------ | :------ |
-| `services` | `undefined` \| [`Service`](../classes/purista_k8s_sdk.internal.Service.md)<`unknown`\> \| [`Service`](../classes/purista_k8s_sdk.internal.Service.md)<`unknown`\>[] | `undefined` | instance of the service to add |
-| `router` | `default`<`Function`\> | `undefined` | the TRouter instance |
-| `logger` | [`Logger`](../classes/purista_k8s_sdk.internal.Logger.md) | `undefined` | the logger used for logging the addition |
-| `apiMountPath` | `string` | `'/api'` |  |
+| `services` | `undefined` \| `Service`<`unknown`\> \| `Service`<`unknown`\>[] | `undefined` | instance of the service to add |
+| `app` | `Hono`<`Env`, {}, ``""``\> | `undefined` | - |
+| `logger` | `Logger` | `undefined` | the logger used for logging the addition |
+| `apiMountPath` | `string` | `'/api'` | - |
 
 #### Returns
 
@@ -178,15 +159,15 @@ ___
 
 #### Defined in
 
-[packages/k8s-sdk/src/addServiceEndpoints.impl.ts:30](https://github.com/sebastianwessel/purista/blob/8c66693/packages/k8s-sdk/src/addServiceEndpoints.impl.ts#L30)
+[addServiceEndpoints.impl.ts:29](https://github.com/sebastianwessel/purista/blob/master/packages/k8s-sdk/src/addServiceEndpoints.impl.ts#L29)
 
 ___
 
 ### getHttpServer
 
-▸ **getHttpServer**(`input`, `name?`): `Object`
+▸ **getHttpServer**(`input`, `name?`): `Hono`<`Env`, {}, ``""``\>
 
-Create a basic http web server.
+Create a Hono web server.
 It adds per default the /healthz endpoint
 If services is set in options, all commands, which have defined http endpoints, will also be added as endpoints
 
@@ -201,18 +182,10 @@ The returned server is not started. You need to do it manually.
 
 #### Returns
 
-`Object`
+`Hono`<`Env`, {}, ``""``\>
 
 a object with server, router, start and destroy functions and name var
 
-| Name | Type |
-| :------ | :------ |
-| `destroy` | () => `Promise`<`void`\> |
-| `name` | `string` |
-| `router` | `default`<[`RouterFunction`](purista_k8s_sdk.md#routerfunction)\> |
-| `server` | `Server`<typeof `IncomingMessage`, typeof `ServerResponse`\> |
-| `start` | (`port`: `number`) => `Promise`<`void`\> |
-
 #### Defined in
 
-[packages/k8s-sdk/src/getHttpServer.impl.ts:26](https://github.com/sebastianwessel/purista/blob/8c66693/packages/k8s-sdk/src/getHttpServer.impl.ts#L26)
+[getHttpServer.impl.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/k8s-sdk/src/getHttpServer.impl.ts#L20)

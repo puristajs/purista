@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ILogger
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ILogger
 
 # Interface: ILogger
 
@@ -6,6 +6,7 @@
 
 ## Implemented by
 
+- [`DefaultLogger`](../classes/purista_core.DefaultLogger.md)
 - [`DefaultLogger`](../classes/purista_core.DefaultLogger.md)
 
 ## Table of contents
@@ -37,7 +38,7 @@
 
 #### Defined in
 
-[packages/core/src/core/types/Logger.ts:34](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/Logger.ts#L34)
+[core/types/Logger.ts:34](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L34)
 
 ___
 
@@ -57,7 +58,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/Logger.ts:32](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/Logger.ts#L32)
+[core/types/Logger.ts:32](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L32)
 
 ___
 
@@ -77,7 +78,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/Logger.ts:31](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/Logger.ts#L31)
+[core/types/Logger.ts:31](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L31)
 
 ___
 
@@ -97,7 +98,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/Logger.ts:30](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/Logger.ts#L30)
+[core/types/Logger.ts:30](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L30)
 
 ___
 
@@ -117,7 +118,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/Logger.ts:35](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/Logger.ts#L35)
+[core/types/Logger.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L35)
 
 ___
 
@@ -137,4 +138,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/Logger.ts:33](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/Logger.ts#L33)
+[core/types/Logger.ts:33](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L33)

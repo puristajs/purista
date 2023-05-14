@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ServiceClass
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ServiceClass
 
 # Interface: ServiceClass<ConfigType\>
 
@@ -14,6 +14,7 @@ The ServiceClass interface
 
 ## Implemented by
 
+- [`Service`](../classes/purista_core.Service.md)
 - [`Service`](../classes/purista_core.Service.md)
 
 ## Table of contents
@@ -40,7 +41,7 @@ The ServiceClass interface
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceClass.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceClass.ts#L12)
+[core/types/ServiceClass.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L12)
 
 ## Methods
 
@@ -56,7 +57,7 @@ Stop and destroy the current service
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceClass.ts:17](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceClass.ts#L17)
+[core/types/ServiceClass.ts:17](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L17)
 
 ___
 
@@ -72,7 +73,7 @@ get the opentelemetry tracer of the service
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceClass.ts:54](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceClass.ts#L54)
+[core/types/ServiceClass.ts:54](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L54)
 
 ___
 
@@ -94,7 +95,7 @@ Registers a new command for the service
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceClass.ts:60](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceClass.ts#L60)
+[core/types/ServiceClass.ts:60](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L60)
 
 ___
 
@@ -116,7 +117,7 @@ Registers a new subscription for the service
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceClass.ts:66](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceClass.ts#L66)
+[core/types/ServiceClass.ts:66](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L66)
 
 ___
 
@@ -132,7 +133,7 @@ Start the service
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceClass.ts:22](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceClass.ts#L22)
+[core/types/ServiceClass.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L22)
 
 ___
 
@@ -164,7 +165,7 @@ A active span will be below the current span in hierarchy
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceClass.ts:44](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceClass.ts#L44)
+[core/types/ServiceClass.ts:44](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L44)
 
 ___
 
@@ -196,4 +197,4 @@ The span will be on same hierarchy level as the current span.
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceClass.ts:33](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceClass.ts#L33)
+[core/types/ServiceClass.ts:33](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L33)

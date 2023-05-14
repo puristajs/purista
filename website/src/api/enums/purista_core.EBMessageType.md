@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / EBMessageType
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / EBMessageType
 
 # Enumeration: EBMessageType
 
@@ -36,7 +36,7 @@ If the sender does not receive a answer within this time frame, the command will
 
 #### Defined in
 
-[packages/core/src/core/types/EBMessageType.enum.ts:11](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/EBMessageType.enum.ts#L11)
+[core/types/EBMessageType.enum.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L11)
 
 ___
 
@@ -48,7 +48,7 @@ a error response from receiver of a command message
 
 #### Defined in
 
-[packages/core/src/core/types/EBMessageType.enum.ts:17](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/EBMessageType.enum.ts#L17)
+[core/types/EBMessageType.enum.ts:17](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L17)
 
 ___
 
@@ -60,7 +60,7 @@ a success response from receiver of a command message
 
 #### Defined in
 
-[packages/core/src/core/types/EBMessageType.enum.ts:14](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/EBMessageType.enum.ts#L14)
+[core/types/EBMessageType.enum.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L14)
 
 ___
 
@@ -72,7 +72,7 @@ a custom message / custom event
 
 #### Defined in
 
-[packages/core/src/core/types/EBMessageType.enum.ts:42](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/EBMessageType.enum.ts#L42)
+[core/types/EBMessageType.enum.ts:42](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L42)
 
 ___
 
@@ -84,7 +84,7 @@ a service invoked a other function and did not get a answer within given ttl
 
 #### Defined in
 
-[packages/core/src/core/types/EBMessageType.enum.ts:38](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/EBMessageType.enum.ts#L38)
+[core/types/EBMessageType.enum.ts:38](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L38)
 
 ___
 
@@ -96,7 +96,7 @@ indicates that a service is going to shut down and does no longer accept new req
 
 #### Defined in
 
-[packages/core/src/core/types/EBMessageType.enum.ts:34](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/EBMessageType.enum.ts#L34)
+[core/types/EBMessageType.enum.ts:34](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L34)
 
 ___
 
@@ -108,7 +108,7 @@ send when a service provides a new function
 
 #### Defined in
 
-[packages/core/src/core/types/EBMessageType.enum.ts:32](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/EBMessageType.enum.ts#L32)
+[core/types/EBMessageType.enum.ts:32](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L32)
 
 ___
 
@@ -120,7 +120,7 @@ indicates that a service is booting
 
 #### Defined in
 
-[packages/core/src/core/types/EBMessageType.enum.ts:26](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/EBMessageType.enum.ts#L26)
+[core/types/EBMessageType.enum.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L26)
 
 ___
 
@@ -132,7 +132,7 @@ indicates that a service is not able to process requests (e.g. db not available)
 
 #### Defined in
 
-[packages/core/src/core/types/EBMessageType.enum.ts:30](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/EBMessageType.enum.ts#L30)
+[core/types/EBMessageType.enum.ts:30](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L30)
 
 ___
 
@@ -144,7 +144,7 @@ indicates that a service is ready
 
 #### Defined in
 
-[packages/core/src/core/types/EBMessageType.enum.ts:28](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/EBMessageType.enum.ts#L28)
+[core/types/EBMessageType.enum.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L28)
 
 ___
 
@@ -156,7 +156,7 @@ last event from service before service is destroyed
 
 #### Defined in
 
-[packages/core/src/core/types/EBMessageType.enum.ts:36](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/EBMessageType.enum.ts#L36)
+[core/types/EBMessageType.enum.ts:36](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L36)
 
 ___
 
@@ -168,4 +168,4 @@ a subscription function is throwing
 
 #### Defined in
 
-[packages/core/src/core/types/EBMessageType.enum.ts:40](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/EBMessageType.enum.ts#L40)
+[core/types/EBMessageType.enum.ts:40](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L40)

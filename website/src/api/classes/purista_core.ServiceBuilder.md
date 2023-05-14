@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ServiceBuilder
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ServiceBuilder
 
 # Class: ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType\>
 
@@ -73,7 +73,7 @@ to create an instance of the service class.
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:53](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L53)
+[ServiceBuilder/ServiceBuilder.impl.ts:53](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L53)
 
 ## Properties
 
@@ -83,7 +83,7 @@ to create an instance of the service class.
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:50](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L50)
+[ServiceBuilder/ServiceBuilder.impl.ts:50](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L50)
 
 ___
 
@@ -93,7 +93,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:43](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L43)
+[ServiceBuilder/ServiceBuilder.impl.ts:43](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L43)
 
 ___
 
@@ -103,7 +103,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:46](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L46)
+[ServiceBuilder/ServiceBuilder.impl.ts:46](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L46)
 
 ___
 
@@ -113,7 +113,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:47](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L47)
+[ServiceBuilder/ServiceBuilder.impl.ts:47](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L47)
 
 ___
 
@@ -123,7 +123,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:53](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L53)
+[ServiceBuilder/ServiceBuilder.impl.ts:53](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L53)
 
 ___
 
@@ -133,7 +133,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:49](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L49)
+[ServiceBuilder/ServiceBuilder.impl.ts:49](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L49)
 
 ___
 
@@ -143,7 +143,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:44](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L44)
+[ServiceBuilder/ServiceBuilder.impl.ts:44](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L44)
 
 ## Methods
 
@@ -167,7 +167,7 @@ The service builder
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:94](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L94)
+[ServiceBuilder/ServiceBuilder.impl.ts:94](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L94)
 
 ___
 
@@ -191,7 +191,7 @@ use addCommandDefinition instead of addFunctionDefinition as it will be removed 
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:85](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L85)
+[ServiceBuilder/ServiceBuilder.impl.ts:85](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L85)
 
 ___
 
@@ -215,7 +215,7 @@ The service builder
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:117](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L117)
+[ServiceBuilder/ServiceBuilder.impl.ts:117](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L117)
 
 ___
 
@@ -242,7 +242,7 @@ A CommandDefinitionBuilder object.
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:248](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L248)
+[ServiceBuilder/ServiceBuilder.impl.ts:248](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L248)
 
 ___
 
@@ -258,7 +258,7 @@ the definition of registered commands
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:273](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L273)
+[ServiceBuilder/ServiceBuilder.impl.ts:273](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L273)
 
 ___
 
@@ -272,7 +272,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:145](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L145)
+[ServiceBuilder/ServiceBuilder.impl.ts:145](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L145)
 
 ___
 
@@ -298,7 +298,7 @@ user getCommandBuilder instead. It will be removed soon.
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:231](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L231)
+[ServiceBuilder/ServiceBuilder.impl.ts:231](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L231)
 
 ___
 
@@ -331,7 +331,7 @@ The instance of the service class
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:156](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L156)
+[ServiceBuilder/ServiceBuilder.impl.ts:156](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L156)
 
 ___
 
@@ -357,7 +357,7 @@ A SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:263](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L263)
+[ServiceBuilder/ServiceBuilder.impl.ts:263](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L263)
 
 ___
 
@@ -373,7 +373,7 @@ the definition of registered subscriptions
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:280](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L280)
+[ServiceBuilder/ServiceBuilder.impl.ts:280](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L280)
 
 ___
 
@@ -405,7 +405,7 @@ ServiceBuilder
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:61](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L61)
+[ServiceBuilder/ServiceBuilder.impl.ts:61](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L61)
 
 ___
 
@@ -435,7 +435,7 @@ The builder itself, but with the type of the service class changed.
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:140](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L140)
+[ServiceBuilder/ServiceBuilder.impl.ts:140](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L140)
 
 ___
 
@@ -459,7 +459,7 @@ The ServiceBuilder instance.
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:72](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L72)
+[ServiceBuilder/ServiceBuilder.impl.ts:72](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L72)
 
 ___
 
@@ -473,7 +473,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:284](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L284)
+[ServiceBuilder/ServiceBuilder.impl.ts:284](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L284)
 
 ___
 
@@ -487,4 +487,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:310](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L310)
+[ServiceBuilder/ServiceBuilder.impl.ts:310](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L310)

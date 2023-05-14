@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / PuristaSpanName
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / PuristaSpanName
 
 # Enumeration: PuristaSpanName
 
@@ -34,188 +34,188 @@ Opentelemetry span names used by PURISTA framework
 
 ### ConfigStoreGetValue
 
-• **ConfigStoreGetValue** = ``"purista.configStoreGetValue"``
+• **ConfigStoreGetValue** = ``"purista.configStore.getValue"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:19](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L19)
+[core/types/PuristaSpanName.enum.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L20)
 
 ___
 
 ### ConfigStoreRemoveValue
 
-• **ConfigStoreRemoveValue** = ``"purista.configStoreRemoveValue"``
+• **ConfigStoreRemoveValue** = ``"purista.configStore.removeValue"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:21](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L21)
+[core/types/PuristaSpanName.enum.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L22)
 
 ___
 
 ### ConfigStoreSetValue
 
-• **ConfigStoreSetValue** = ``"purista.configStoreSetValue"``
+• **ConfigStoreSetValue** = ``"purista.configStore.setValue"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:20](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L20)
+[core/types/PuristaSpanName.enum.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L21)
 
 ___
 
 ### EventBridgeCommandReceived
 
-• **EventBridgeCommandReceived** = ``"purista.commandReceived"``
+• **EventBridgeCommandReceived** = ``"purista.command.received"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:11](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L11)
+[core/types/PuristaSpanName.enum.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L11)
 
 ___
 
 ### EventBridgeCommandResponse
 
-• **EventBridgeCommandResponse** = ``"purista.commandResponse"``
+• **EventBridgeCommandResponse** = ``"purista.command.response"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:7](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L7)
+[core/types/PuristaSpanName.enum.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L7)
 
 ___
 
 ### EventBridgeCommandResponseReceived
 
-• **EventBridgeCommandResponseReceived** = ``"purista.commandResponseReceived"``
+• **EventBridgeCommandResponseReceived** = ``"purista.command.response.received"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:13](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L13)
+[core/types/PuristaSpanName.enum.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L13)
 
 ___
 
 ### EventBridgeCommandResponseSent
 
-• **EventBridgeCommandResponseSent** = ``"purista.commandResponseSent"``
+• **EventBridgeCommandResponseSent** = ``"purista.command.response.sent"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L12)
+[core/types/PuristaSpanName.enum.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L12)
 
 ___
 
 ### EventBridgeCommandSent
 
-• **EventBridgeCommandSent** = ``"purista.commandSent"``
+• **EventBridgeCommandSent** = ``"purista.command.sent"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:10](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L10)
+[core/types/PuristaSpanName.enum.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L10)
 
 ___
 
 ### EventBridgeEmitMessage
 
-• **EventBridgeEmitMessage** = ``"purista.emitMessageToBridge"``
+• **EventBridgeEmitMessage** = ``"purista.emit.MessageToBridge"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:5](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L5)
+[core/types/PuristaSpanName.enum.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L5)
 
 ___
 
 ### EventBridgeHandleIncomingMessage
 
-• **EventBridgeHandleIncomingMessage** = ``"purista.handleIncomingMessage"``
+• **EventBridgeHandleIncomingMessage** = ``"purista.handle.incomingMessage"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:8](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L8)
+[core/types/PuristaSpanName.enum.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L8)
 
 ___
 
 ### EventBridgeInvokeCommand
 
-• **EventBridgeInvokeCommand** = ``"purista.commandSent"``
+• **EventBridgeInvokeCommand** = ``"purista.command.invoke"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:6](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L6)
+[core/types/PuristaSpanName.enum.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L6)
 
 ___
 
 ### EventBridgeSubscriptionEventReceived
 
-• **EventBridgeSubscriptionEventReceived** = ``"purista.subscriptionEventReceived"``
+• **EventBridgeSubscriptionEventReceived** = ``"purista.subscription.eventReceived"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:14](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L14)
+[core/types/PuristaSpanName.enum.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L14)
 
 ___
 
 ### KubernetesHttpRequest
 
-• **KubernetesHttpRequest** = ``"purist.kubernetesHttpRequest"``
+• **KubernetesHttpRequest** = ``"purist.kubernetes.HttpRequest"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:26](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L26)
+[core/types/PuristaSpanName.enum.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L28)
 
 ___
 
 ### SecretStoreGetValue
 
-• **SecretStoreGetValue** = ``"purista.secretStoreGetValue"``
+• **SecretStoreGetValue** = ``"purista.secretStore.getValue"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:16](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L16)
+[core/types/PuristaSpanName.enum.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L16)
 
 ___
 
 ### SecretStoreRemoveValue
 
-• **SecretStoreRemoveValue** = ``"purista.secretStoreRemoveValue"``
+• **SecretStoreRemoveValue** = ``"purista.secretStore.removeValue"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:18](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L18)
+[core/types/PuristaSpanName.enum.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L18)
 
 ___
 
 ### SecretStoreSetValue
 
-• **SecretStoreSetValue** = ``"purista.secretStoreSetValue"``
+• **SecretStoreSetValue** = ``"purista.secretStore.setValue"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:17](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L17)
+[core/types/PuristaSpanName.enum.ts:17](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L17)
 
 ___
 
 ### StateStoreGetValue
 
-• **StateStoreGetValue** = ``"purista.stateStoreGetValue"``
+• **StateStoreGetValue** = ``"purista.stateStore.getValue"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:22](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L22)
+[core/types/PuristaSpanName.enum.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L24)
 
 ___
 
 ### StateStoreRemoveValue
 
-• **StateStoreRemoveValue** = ``"purista.stateStoreRemoveValue"``
+• **StateStoreRemoveValue** = ``"purista.stateStore.removeValue"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:24](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L24)
+[core/types/PuristaSpanName.enum.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L26)
 
 ___
 
 ### StateStoreSetValue
 
-• **StateStoreSetValue** = ``"purista.stateStoreSetValue"``
+• **StateStoreSetValue** = ``"purista.stateStore.setValue"``
 
 #### Defined in
 
-[packages/core/src/core/types/PuristaSpanName.enum.ts:23](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/PuristaSpanName.enum.ts#L23)
+[core/types/PuristaSpanName.enum.ts:25](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L25)

@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / DefaultSecretStore
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / DefaultSecretStore
 
 # Class: DefaultSecretStore
 
@@ -71,9 +71,14 @@ const store = new DefaultSecretStore({
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `config?` | [`StoreBaseConfig`](../modules/purista_core.md#storebaseconfig)<[`DefaultSecretStoreConfig`](../modules/purista_core.md#defaultsecretstoreconfig)\> |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `config?` | `Object` | - |
+| `config.enableGet?` | `boolean` | Enable generally get method |
+| `config.enableRemove?` | `boolean` | Enable generally remove method |
+| `config.enableSet?` | `boolean` | Enable generally set method |
+| `config.logLevel?` | [`LogLevelName`](../modules/purista_core.md#loglevelname) | A log level for new logger if logger is not set |
+| `config.logger?` | [`Logger`](purista_core.Logger.md) | A logger instance |
 
 #### Overrides
 
@@ -81,13 +86,23 @@ const store = new DefaultSecretStore({
 
 #### Defined in
 
-[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:35](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L35)
+[DefaultSecretStore/DefaultSecretStore.impl.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L35)
 
 ## Properties
 
 ### config
 
-• **config**: [`StoreBaseConfig`](../modules/purista_core.md#storebaseconfig)<[`DefaultSecretStoreConfig`](../modules/purista_core.md#defaultsecretstoreconfig)\>
+• **config**: `Object`
+
+#### Type declaration
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `enableGet?` | `boolean` | Enable generally get method |
+| `enableRemove?` | `boolean` | Enable generally remove method |
+| `enableSet?` | `boolean` | Enable generally set method |
+| `logLevel?` | [`LogLevelName`](../modules/purista_core.md#loglevelname) | A log level for new logger if logger is not set |
+| `logger?` | [`Logger`](purista_core.Logger.md) | A logger instance |
 
 #### Inherited from
 
@@ -95,7 +110,7 @@ const store = new DefaultSecretStore({
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L13)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L13)
 
 ___
 
@@ -109,7 +124,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L12)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L12)
 
 ___
 
@@ -119,7 +134,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:34](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L34)
+[DefaultSecretStore/DefaultSecretStore.impl.ts:34](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L34)
 
 ___
 
@@ -139,7 +154,7 @@ name of store
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:15](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L15)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:15](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L15)
 
 ## Methods
 
@@ -163,7 +178,7 @@ disconnects and shuts down the secret store
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:64](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L64)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L67)
 
 ___
 
@@ -191,7 +206,7 @@ SecretStore.getSecret
 
 #### Defined in
 
-[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:47](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L47)
+[DefaultSecretStore/DefaultSecretStore.impl.ts:45](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L45)
 
 ___
 
@@ -219,7 +234,7 @@ SecretStore.removeSecret
 
 #### Defined in
 
-[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:67](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L67)
+[DefaultSecretStore/DefaultSecretStore.impl.ts:65](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L65)
 
 ___
 
@@ -248,4 +263,4 @@ SecretStore.setSecret
 
 #### Defined in
 
-[packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:59](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L59)
+[DefaultSecretStore/DefaultSecretStore.impl.ts:57](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L57)

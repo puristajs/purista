@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / @purista/redis-state-store
+[PURISTA API](../README.md) / [Modules](../modules.md) / @purista/redis-state-store
 
 # Module: @purista/redis-state-store
 
@@ -38,10 +38,37 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 ## Table of contents
 
-### Namespaces
-
-- [internal](purista_redis_state_store.internal.md)
-
 ### Classes
 
 - [RedisStateStore](../classes/purista_redis_state_store.RedisStateStore.md)
+
+### Type Aliases
+
+- [RedisStoreConfig](purista_redis_state_store.md#redisstoreconfig)
+
+## Type Aliases
+
+### RedisStoreConfig
+
+Ƭ **RedisStoreConfig**<`M`, `F`, `S`\>: `Object`
+
+The redis state store configuration.
+It will extend the StoreBaseConfig.
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `M` | extends `RedisModules` = `RedisModules` |
+| `F` | extends `RedisFunctions` = `RedisFunctions` |
+| `S` | extends `RedisScripts` = `RedisScripts` |
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `config?` | `RedisClientOptions`<`M`, `F`, `S`\> |
+
+#### Defined in
+
+[state-store-redis/src/types.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/state-store-redis/src/types.ts#L7)

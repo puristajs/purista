@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / SecretStore
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / SecretStore
 
 # Interface: SecretStore
 
@@ -9,6 +9,8 @@ Interface definition for a secret store implementation
 ## Implemented by
 
 - [`DefaultSecretStore`](../classes/purista_core.DefaultSecretStore.md)
+- [`DefaultSecretStore`](../classes/purista_core.DefaultSecretStore.md)
+- [`SecretStoreBaseClass`](../classes/purista_core.SecretStoreBaseClass.md)
 - [`SecretStoreBaseClass`](../classes/purista_core.SecretStoreBaseClass.md)
 
 ## Table of contents
@@ -42,7 +44,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/types/SecretStore.ts:18](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/types/SecretStore.ts#L18)
+[core/SecretStore/types/SecretStore.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L18)
 
 ___
 
@@ -54,7 +56,7 @@ name of store
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/types/SecretStore.ts:11](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/types/SecretStore.ts#L11)
+[core/SecretStore/types/SecretStore.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L11)
 
 ___
 
@@ -74,7 +76,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/types/SecretStore.ts:25](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/types/SecretStore.ts#L25)
+[core/SecretStore/types/SecretStore.ts:25](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L25)
 
 ___
 
@@ -98,7 +100,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/types/SecretStore.ts:33](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/types/SecretStore.ts#L33)
+[core/SecretStore/types/SecretStore.ts:33](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L33)
 
 ## Methods
 
@@ -114,4 +116,4 @@ disconnects and shuts down the secret store
 
 #### Defined in
 
-[packages/core/src/core/SecretStore/types/SecretStore.ts:38](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/SecretStore/types/SecretStore.ts#L38)
+[core/SecretStore/types/SecretStore.ts:38](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L38)

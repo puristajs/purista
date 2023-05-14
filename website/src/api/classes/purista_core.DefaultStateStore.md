@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / DefaultStateStore
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / DefaultStateStore
 
 # Class: DefaultStateStore
 
@@ -41,9 +41,14 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `config?` | [`StoreBaseConfig`](../modules/purista_core.md#storebaseconfig)<[`DefaultStateStoreConfig`](../modules/purista_core.md#defaultstatestoreconfig)\> |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `config?` | `Object` | - |
+| `config.enableGet?` | `boolean` | Enable generally get method |
+| `config.enableRemove?` | `boolean` | Enable generally remove method |
+| `config.enableSet?` | `boolean` | Enable generally set method |
+| `config.logLevel?` | [`LogLevelName`](../modules/purista_core.md#loglevelname) | A log level for new logger if logger is not set |
+| `config.logger?` | [`Logger`](purista_core.Logger.md) | A logger instance |
 
 #### Overrides
 
@@ -51,13 +56,23 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 #### Defined in
 
-[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:13](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L13)
+[DefaultStateStore/DefaultStateStore.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L13)
 
 ## Properties
 
 ### config
 
-• **config**: [`StoreBaseConfig`](../modules/purista_core.md#storebaseconfig)<[`DefaultStateStoreConfig`](../modules/purista_core.md#defaultstatestoreconfig)\>
+• **config**: `Object`
+
+#### Type declaration
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `enableGet?` | `boolean` | Enable generally get method |
+| `enableRemove?` | `boolean` | Enable generally remove method |
+| `enableSet?` | `boolean` | Enable generally set method |
+| `logLevel?` | [`LogLevelName`](../modules/purista_core.md#loglevelname) | A log level for new logger if logger is not set |
+| `logger?` | [`Logger`](purista_core.Logger.md) | A logger instance |
 
 #### Inherited from
 
@@ -65,7 +80,7 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 #### Defined in
 
-[packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L13)
+[core/StateStore/StateStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L13)
 
 ___
 
@@ -79,7 +94,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L12)
+[core/StateStore/StateStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L12)
 
 ___
 
@@ -89,7 +104,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L12)
+[DefaultStateStore/DefaultStateStore.impl.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L12)
 
 ___
 
@@ -105,7 +120,7 @@ name of store
 
 #### Defined in
 
-[packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:15](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L15)
+[core/StateStore/StateStoreBaseClass.impl.ts:15](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L15)
 
 ## Methods
 
@@ -125,7 +140,7 @@ disconnects and shuts down the state store
 
 #### Defined in
 
-[packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:64](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L64)
+[core/StateStore/StateStoreBaseClass.impl.ts:70](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L70)
 
 ___
 
@@ -149,7 +164,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:25](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L25)
+[DefaultStateStore/DefaultStateStore.impl.ts:25](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L25)
 
 ___
 
@@ -173,7 +188,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:45](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L45)
+[DefaultStateStore/DefaultStateStore.impl.ts:45](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L45)
 
 ___
 
@@ -198,4 +213,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts:37](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L37)
+[DefaultStateStore/DefaultStateStore.impl.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L37)

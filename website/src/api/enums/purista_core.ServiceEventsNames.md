@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ServiceEventsNames
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ServiceEventsNames
 
 # Enumeration: ServiceEventsNames
 
@@ -31,7 +31,7 @@ emitted when a command throws a HandledError
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceEvents.ts:36](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceEvents.ts#L36)
+[core/types/ServiceEvents.ts:36](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L36)
 
 ___
 
@@ -43,7 +43,7 @@ emitted when a command throws an error other than a HandledError
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceEvents.ts:42](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceEvents.ts#L42)
+[core/types/ServiceEvents.ts:42](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L42)
 
 ___
 
@@ -57,7 +57,7 @@ It is not emitted by default
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceEvents.ts:21](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceEvents.ts#L21)
+[core/types/ServiceEvents.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L21)
 
 ___
 
@@ -69,7 +69,7 @@ emitted when the service is going to be stopped
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceEvents.ts:24](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceEvents.ts#L24)
+[core/types/ServiceEvents.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L24)
 
 ___
 
@@ -81,7 +81,7 @@ emitted when the service is started, but not fully initialized and not ready yet
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceEvents.ts:13](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceEvents.ts#L13)
+[core/types/ServiceEvents.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L13)
 
 ___
 
@@ -93,7 +93,7 @@ emitted when the service has been stopped
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceEvents.ts:27](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceEvents.ts#L27)
+[core/types/ServiceEvents.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L27)
 
 ___
 
@@ -105,7 +105,7 @@ emitted when the service is not available (for example database connection could
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceEvents.ts:30](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceEvents.ts#L30)
+[core/types/ServiceEvents.ts:30](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L30)
 
 ___
 
@@ -117,7 +117,7 @@ emitted when a subscription throws a HandledError
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceEvents.ts:33](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceEvents.ts#L33)
+[core/types/ServiceEvents.ts:33](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L33)
 
 ___
 
@@ -129,4 +129,4 @@ emitted when a subscription throws an error other than a HandledError
 
 #### Defined in
 
-[packages/core/src/core/types/ServiceEvents.ts:39](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/ServiceEvents.ts#L39)
+[core/types/ServiceEvents.ts:39](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L39)

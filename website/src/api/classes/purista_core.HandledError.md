@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / HandledError
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / HandledError
 
 # Class: HandledError
 
@@ -54,7 +54,7 @@ Error.constructor
 
 #### Defined in
 
-[packages/core/src/core/Error/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/HandledError.impl.ts#L10)
+[core/Error/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L10)
 
 ## Properties
 
@@ -64,7 +64,7 @@ Error.constructor
 
 #### Defined in
 
-[packages/core/src/core/Error/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/HandledError.impl.ts#L10)
+[core/Error/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L10)
 
 ___
 
@@ -74,7 +74,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Error/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/HandledError.impl.ts#L10)
+[core/Error/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L10)
 
 ___
 
@@ -84,7 +84,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Error/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/HandledError.impl.ts#L10)
+[core/Error/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L10)
 
 ## Methods
 
@@ -108,7 +108,7 @@ ErrorResponsePayload
 
 #### Defined in
 
-[packages/core/src/core/Error/HandledError.impl.ts:45](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/HandledError.impl.ts#L45)
+[core/Error/HandledError.impl.ts:45](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L45)
 
 ___
 
@@ -126,7 +126,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[packages/core/src/core/Error/HandledError.impl.ts:60](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/HandledError.impl.ts#L60)
+[core/Error/HandledError.impl.ts:60](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L60)
 
 ___
 
@@ -153,7 +153,7 @@ HandledError
 
 #### Defined in
 
-[packages/core/src/core/Error/HandledError.impl.ts:34](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/HandledError.impl.ts#L34)
+[core/Error/HandledError.impl.ts:34](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L34)
 
 ___
 
@@ -167,7 +167,7 @@ Create a error object from EBMessage error message
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `message` | `Readonly`<[`CommandErrorResponse`](../modules/purista_core.md#commanderrorresponse)\> | CommandErrorResponse |
+| `message` | `Readonly`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `instanceId`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }\> | CommandErrorResponse |
 
 #### Returns
 
@@ -177,4 +177,4 @@ HandledError
 
 #### Defined in
 
-[packages/core/src/core/Error/HandledError.impl.ts:21](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/HandledError.impl.ts#L21)
+[core/Error/HandledError.impl.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L21)
