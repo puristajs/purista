@@ -35,9 +35,7 @@
   },
   "scripts": {
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
-    "pretest": "(docker stop redis-state-store-test || true) && (docker rm redis-state-store-test || true) && (docker run -p 6379:6379 --name redis-state-store-test -d redis)",
     "test": "jest",
-    "posttest": "docker stop redis-state-store-test",
     "build": "rimraf lib && node ../../scripts/buildesm.js && tsc --emitDeclarationOnly --declarationMap false --declaration --outDir lib/types --project ./tsconfig.ref.json",
     "build:dev": "rimraf lib && node ../../scripts/buildesm.js && tsc --emitDeclarationOnly --declaration --outDir lib/types --project ./tsconfig.ref.json",
     "bump:major": "npm version major --no-git-tag-version",

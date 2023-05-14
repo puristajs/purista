@@ -5,7 +5,7 @@ module.exports = {
   testEnvironment: 'node',
   coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/database/', '/test/', '/lib/'],
   coverageReporters: ['json', 'lcov', 'text', 'clover', 'html', 'text-summary'],
-  collectCoverage: true,
+  collectCoverage: false,
   collectCoverageFrom: [
     'src/**/*.(ts|tsx)',
     'src/**/*.impl.(ts|tsx)',

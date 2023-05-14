@@ -42,7 +42,7 @@ describe('@purista/redis-state-store', () => {
 
   it('throws on disabled features', async () => {
     const config = {
-      url: 'redis://localhost:6379',
+      url: `redis://127.0.0.1:${REDIS_PORT}`,
     }
 
     const store = new RedisStateStore({ enableGet: false, enableRemove: false, enableSet: false, config })

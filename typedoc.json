@@ -2,13 +2,13 @@
   "name":"PURISTA API",
     "entryPointStrategy":"packages",
     "entryPoints": [
-      "./packages/core",
-      "./packages/httpserver",
       "./packages/amqpbridge",
-      "./packages/state-store-redis",
-      "./packages/k8s-sdk",
+      "./packages/core",
       "./packages/dapr-sdk",
-      "./packages/mqttbridge"
+      "./packages/httpserver",
+      "./packages/k8s-sdk",
+      "./packages/mqttbridge",
+      "./packages/state-store-redis"
     ],
     "plugin": ["typedoc-plugin-markdown"],
     "out": "website/src/api",
