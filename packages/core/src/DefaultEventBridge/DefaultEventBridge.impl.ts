@@ -47,6 +47,15 @@ import { DefaultEventBridgeConfig, PendigInvocation, SubscriptionStorageEntry } 
  * Simple implementation of some simple in-memory event bridge.
  * Does not support threads and does not need any external databases.
  *
+ * @example ```typescript
+ * import { DefaultEventBridge } from '@purista/core'
+ *
+ * const eventBridge = new DefaultEventBridge()
+ * await eventBridge.start()
+ *
+ * // add your services
+ * ```
+ *
  * @group Event bridge
  */
 export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeConfig> implements EventBridge {
