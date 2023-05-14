@@ -27,6 +27,26 @@ import { DaprEventBridgeConfig } from './types'
  *
  * Names for services, commands, subscriptions and events are converted to kebab-case.
  * If the event bridge is configured to expose REST endpoints defined in command builder, the endpoints are generated as defined in the command builder.
+ *
+ * The event bridge is using Hono under the hood. You need to provide a `serve` function.
+ * Depending on your runtime (Node, Bun, Deno) an adapter might be needed.
+ *
+ * @see [Hono website](https://hono.dev)
+ *
+ * @group Event bridge
+ *
+ * @example ```typescript
+ * import { DaprConfigStore, DaprEventBridge, DaprSecretStore, DaprStateStore } from '@purista/dapr-sdk'
+ *
+ * const eventBridge = new DaprEventBridge({
+ *    serve,
+ *  })
+ *
+ * // start the services first ...
+ *
+ * await eventBridge.start()
+ *```
+ *
  */
 export class DaprEventBridge extends HttpEventBridge<DaprEventBridgeConfig> implements EventBridge {
   private pubSubSubscriptions: DaprPubSubType[] = []

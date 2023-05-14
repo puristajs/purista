@@ -1,4 +1,4 @@
-import { SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 
 import { Logger, LogLevelName, Prettify } from '../../types'
 

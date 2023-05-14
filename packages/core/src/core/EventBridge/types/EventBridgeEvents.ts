@@ -34,8 +34,18 @@ export type EventBridgeEventsBasic = {
   [EventBridgeEventNames.EventbridgeError]: UnhandledError | unknown
 }
 
-type CustomEvents = {
+export type EventBridgeCustomEvents = {
+  /** emitted a EBMessage if event name is provided and if it is enabled and supported on the event bridge @event */
   [key: string]: unknown
 }
 
-export type EventBridgeEvents = Prettify<EventBridgeEventsBasic & addPrefixToObject<CustomEvents, 'adapter-'>>
+export type EventBridgeAdapterEvents = {
+  /** currently not used, but reserved for further events @event */
+  [key: string]: unknown
+}
+
+export type EventBridgeEvents = Prettify<
+  EventBridgeEventsBasic &
+    addPrefixToObject<EventBridgeAdapterEvents, 'adapter-'> &
+    addPrefixToObject<EventBridgeCustomEvents, 'custom-'>
+>
