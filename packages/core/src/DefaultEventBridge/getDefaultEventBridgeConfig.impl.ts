@@ -4,6 +4,7 @@ import { DefaultEventBridgeConfig } from './types'
 export const getDefaultEventBridgeConfig = (): Complete<DefaultEventBridgeConfig> => {
   const defaultConfig: Complete<DefaultEventBridgeConfig> = {
     logWarnOnMessagesWithoutReceiver: true,
+    emitMessagesAsEventBridgeEvents: false,
   }
 
   return defaultConfig

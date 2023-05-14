@@ -292,6 +292,11 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
         span.setAttribute(PuristaSpanTag.SenderServiceTarget, msg.sender.serviceTarget)
 
         this.readStream.push(msg)
+
+        if (this.config.emitMessagesAsEventBridgeEvents && msg.eventName) {
+          this.emit(`custom-${msg.eventName}`, msg)
+        }
+
         return msg as Readonly<EBMessage>
       } catch (err) {
         span.recordException(err as Error)

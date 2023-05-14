@@ -126,6 +126,18 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
       port: this.config.serverPort,
       hostname: this.config.serverHost,
     })
+
+    this.server.on('listening', () => {
+      this.emit(EventBridgeEventNames.EventbridgeConnected)
+    })
+
+    this.server.on('close', () => {
+      this.emit(EventBridgeEventNames.EventbridgeDisconnected)
+    })
+
+    this.server.on('error', (err) => {
+      this.emit(EventBridgeEventNames.EventbridgeError, err)
+    })
   }
 
   async emitMessage<T extends EBMessage>(

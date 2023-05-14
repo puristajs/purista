@@ -15,6 +15,7 @@ import {
   EventBridge,
   EventBridgeBaseClass,
   EventBridgeConfig,
+  EventBridgeEventNames,
   getNewCorrelationId,
   getNewEBMessageId,
   getNewInstanceId,
@@ -45,6 +46,19 @@ import {
 } from './topic'
 import { MqttBridgeConfig } from './types'
 
+/**
+ * The MQTT event bridge connects to a MQTT broker.
+ * The broker must support the MQTT 5 protocol version
+ *
+ * @example ```typescript
+ * import { MqttBridge } from '@purista/mqttbridge'
+ *
+ * // create and init our eventbridge
+ * const eventBridge = new MqttBridge()
+ * await eventBridge.start()
+ *
+ * @group Event bridge
+ */
 export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implements EventBridge {
   private healthy = false
   private ready = false
@@ -67,6 +81,22 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
       { ...this.config, properties: { sessionExpiryInterval: this.config.defaultSessionExpiryInterval } },
       this.config.allowRetries,
     )
+
+    this.client.on('connect', () => {
+      this.emit(EventBridgeEventNames.EventbridgeConnected)
+    })
+
+    this.client.on('error', (err: Error) => {
+      this.emit(EventBridgeEventNames.EventbridgeError, err)
+    })
+
+    this.client.on('disconnect', () => {
+      this.emit(EventBridgeEventNames.EventbridgeDisconnected)
+    })
+
+    this.client.on('reconnect', () => {
+      this.emit(EventBridgeEventNames.EventbridgeReconnecting)
+    })
 
     const topic = getCommandResponseTopic.bind(this)()
     const subscriptionIdentifier = this.router.add(topic, handleCommandResponse)
