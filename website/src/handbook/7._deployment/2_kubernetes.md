@@ -50,6 +50,10 @@ As you will see, you can optional expose commands as HTTP endpoints. This will a
 Here is a full example, of how the index file might look like, if you want to deploy a service to Kubernetes.
 You can adjust this example for your actual requirements.
 
+::: warning Node.js package required
+If you use Node.js as runtime, you need to install the additional package `@hono/node-server` with version `1.0.0-rc.1` or higher!
+:::
+
 ::: code-tabs#code
 
 @tab:active Node.js
@@ -416,3 +420,5 @@ server.router.add('GET', '/metrics', async (_request, response) => {
 ```
 
 The new endpoint `/metrics` can now be added to the __deployment.yaml__ file for Kubernetes.
+
+__You can follow updated on Twitter [@purista_js](https://twitter.com/purista_js) or join the [Discord server](https://discord.gg/9feaUm3H2v) to get in touch with PURISTA maintainers and other developers.__

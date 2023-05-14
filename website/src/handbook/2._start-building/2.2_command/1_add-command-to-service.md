@@ -4,7 +4,6 @@ title: Add a command to a service
 shortTitle: Add a command
 description: Add a command to an existing service
 image: https://purista.dev/graphic/add_command.png
-cover: https://purista.dev/graphic/add_command.png
 tag:
   - typescript
   - nodejs

@@ -3,6 +3,7 @@ order: 20
 title: Test a command
 shortTitle: Test a command
 description: Learn how to unit test a single service command
+image: https://purista.dev/graphic/add_command.png
 tag:
   - service
   - command

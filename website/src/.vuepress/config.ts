@@ -11,5 +11,11 @@ export default defineUserConfig({
   dest: '../docs',
   base: '/',
 
+  head: [
+    ['link', { rel: 'stylesheet', type: 'text/css', media: 'all', href: '/cookieconsent.css' }],
+    ['script', { src: '/cookieconsent.js', defer: true }],
+    ['script', { src: '/cookieconsent-init.js', defer: true }],
+  ],
+
   theme,
 })

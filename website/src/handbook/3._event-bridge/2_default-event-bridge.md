@@ -50,4 +50,25 @@ A simplified schema of how the `DefaultEventBridge` works:
 
 ## Config
 
+The `DefaultEventBridge` can be configured to emit every message, which has set the  `eventName` property as javascript event.  
+This must be enabled in the configuration by setting the `emitMessagesAsEventBridgeEvents` property to true.  
+Than, you can subscribe to specific events in regular JavaScript fashion.  
+The event names will be prefixed with `custom-` to avoid name collisions.
+
 ## Example
+
+```typescript
+import { DefaultEventBridge } from '@purista/core'
+
+const eventBridge = new DefaultEventBridge({ emitMessagesAsEventBridgeEvents: true })
+await eventBridge.start()
+
+eventBridge.on('custom-example-event', (msg)=> {
+  console.log(JSON.stringify(msg, null, 2))
+})
+
+// ... register and start your services
+
+```
+
+__You can follow updated on Twitter [@purista_js](https://twitter.com/purista_js) or join the [Discord server](https://discord.gg/9feaUm3H2v) to get in touch with PURISTA maintainers and other developers.__

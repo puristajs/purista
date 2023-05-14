@@ -3,6 +3,7 @@ order: 10
 title: Quickstart with CLI
 shortTitle: Quickstart with CLI
 description: Install and setup a PURISTA typescript framework project.
+image: https://purista.dev/graphic/advertise_large.png
 ---
 
 The easiest and fastest way to start with PURISTA is the usage of the PURISTA CLI tool.  

@@ -32,6 +32,7 @@ The secret store is a simple interface to a key-value-store. Keys and values are
 | [Azure Key Vault](https://azure.microsoft.com/en-us/products/key-vault)   | [planned](https://github.com/sebastianwessel/purista/issues/107)      |
 | [Google Cloud Secret Manager](https://cloud.google.com/secret-manager)    | [planned](https://github.com/sebastianwessel/purista/issues/108)      |
 | [HashiCorp Vault](https://www.vaultproject.io)                            | [planned](https://github.com/sebastianwessel/purista/issues/109)      |
+| [Dapr](https://dapr.io)       | [@purista/dapr-sdk](../../7._deployment/4_dapr.md) |
 
 ## Usage
 

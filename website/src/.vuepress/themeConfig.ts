@@ -106,7 +106,7 @@ export default hopeTheme({
   },
 
   footer:
-    'Made from developers for developers with ❤️ | <a href="/privacy.html">Privacy</a> | <a href="javascript:cc.showSettings()">Cookie preferences</a> | <a href="/imprint.html">Imprint</a>',
+    'Made from developers for developers with ❤️ | <a href="/privacy.html">Privacy</a> | <a href="javascript:cc.showSettings()">Cookie preferences</a> | <a rel="me" href="https://mastodon.social/@purista">mastodon@purista</a> | <a href="/imprint.html">Imprint</a>',
 
   displayFooter: true,
   darkmode: 'disable',

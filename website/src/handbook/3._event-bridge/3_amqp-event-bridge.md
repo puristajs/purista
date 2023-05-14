@@ -76,3 +76,9 @@ const eventBridge = new AmqpBridge({ config })
 await eventBridge.start()
 
 ```
+
+## Brokers and tools
+
+- [RabbitMQ](https://www.rabbitmq.com/)
+
+__You can follow updated on Twitter [@purista_js](https://twitter.com/purista_js) or join the [Discord server](https://discord.gg/9feaUm3H2v) to get in touch with PURISTA maintainers and other developers.__
