@@ -1,6 +1,6 @@
 {
   "name": "@purista/kubernetes-example",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "example how to deploy a single service in kubernetes",
   "homepage": "https://purista.dev",
   "private": true,
@@ -40,6 +40,6 @@
     "@purista/core": "*",
     "@purista/k8s-sdk": "*",
     "zod": "3.21.4",
-    "@hono/node-server":"^1.0.0-rc.1"
+    "@hono/node-server": "^1.0.0-rc.1"
   }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@purista/dapr-example",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "description": "example how to use the dapr package",
   "homepage": "https://purista.dev",
   "private": true,
@@ -39,6 +39,6 @@
     "@purista/dapr-sdk": "*",
     "@purista/core": "*",
     "zod": "3.21.4",
-    "@hono/node-server":"^1.0.0-rc.1"
+    "@hono/node-server": "^1.0.0-rc.1"
   }
 }
