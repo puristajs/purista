@@ -11,7 +11,7 @@
     "bump:major": "npm version major --no-git-tag-version",
     "bump:minor": "npm version minor --no-git-tag-version",
     "bump:patch": "npm version patch --no-git-tag-version",
-    "update:doc": "npm run gitclean && typedoc && git commit -S -am \"doc: update api documentation\" && npm run document -w website && git-cliff > CHANGELOG.md && git commit -am \"doc: update CHANGELOG\"",
+    "update:doc": "npm run gitclean && typedoc && git add --all && git commit -S -am \"doc: update api documentation\" && npm run document -w website && git-cliff > CHANGELOG.md && git commit -am \"doc: update CHANGELOG\"",
     "release:major": "turbo run gitclean && npm run release:prepare && npm run update:doc && turbo run gitclean && turbo run bump:major && npm run commit:major && npm publish --workspaces",
     "release:minor": "turbo run gitclean && npm run release:prepare && npm run update:doc && turbo run gitclean && turbo run bump:minor && npm run commit:minor && npm publish --workspaces",
     "release:patch": "turbo run gitclean && npm run release:prepare && npm run update:doc && turbo run gitclean && turbo run bump:patch && npm run commit:patch && npm publish --workspaces",
