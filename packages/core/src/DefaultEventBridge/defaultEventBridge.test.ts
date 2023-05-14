@@ -51,6 +51,8 @@ describe('DefaultEventBridge', () => {
       sender,
       subscriber,
       eventBridgeConfig: {
+        autoacknowledge: true,
+        shared: true,
         durable: false,
       },
     }
@@ -63,6 +65,8 @@ describe('DefaultEventBridge', () => {
       subscriber: otherSubscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
@@ -134,6 +138,8 @@ describe('DefaultEventBridge', () => {
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
