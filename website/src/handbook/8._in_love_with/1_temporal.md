@@ -33,4 +33,6 @@ In future, there will be some helpers, examples and documentation available, on 
 It's on the roadmap: [GitHub issue](https://github.com/sebastianwessel/purista/issues/86)
 :::
 
-**see: [Temporal](https://temporal.io)**
+__see: [Temporal](https://temporal.io)__
+
+__You can follow updated on Twitter [@purista_js](https://twitter.com/purista_js) or join the [Discord server](https://discord.gg/9feaUm3H2v) to get in touch with PURISTA maintainers and other developers.__

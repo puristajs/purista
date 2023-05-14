@@ -3,6 +3,7 @@ order: 30
 title: Advanced
 shortTitle: Advanced
 description: Use a custom service class.
+image: https://purista.dev/graphic/add_service.png
 tag:
   - service
 ---

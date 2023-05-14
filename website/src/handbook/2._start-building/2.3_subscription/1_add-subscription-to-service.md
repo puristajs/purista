@@ -4,7 +4,6 @@ title: Add a subscription to a service
 shortTitle: Add a subscription
 description: Add a subscription to an existing service
 image: https://purista.dev/graphic/add_subscription.png
-cover: https://purista.dev/graphic/add_subscription.png
 tag:
   - typescript
   - nodejs

@@ -4,7 +4,6 @@ title: Builders in PURISTA
 shortTitle: Builders
 description: Learn how to use builders in nodejs backend framework PURISTA within your typescript application
 image: https://purista.dev/graphic/builder.png
-cover: https://purista.dev/graphic/builder.png
 tag:
   - typescript
   - nodejs

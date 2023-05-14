@@ -3,6 +3,7 @@ order: 20
 title: Test a subscription
 shortTitle: Test a subscription
 description: Learn how to unit test a single service subscription
+image: https://purista.dev/graphic/add_subscription.png
 tag:
   - service
   - subscription

@@ -3,6 +3,7 @@ order: 30
 title: Transformer & Guards
 shortTitle: Transformer & Guards
 description: Learn how to unit test a single service command
+image: https://purista.dev/graphic/add_command.png
 tag:
   - service
   - command

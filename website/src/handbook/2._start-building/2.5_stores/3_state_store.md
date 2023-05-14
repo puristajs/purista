@@ -26,6 +26,7 @@ The state store is a simple interface to a key-value-store. They key must be a s
 | vendor                        | package                                                                       |
 |---                            |---                                                                            |
 | [Redis](https://redis.io)     | [@purista/redis-state-store](../../../api/modules/purista_redis_state_store.md)  |
+| [Dapr](https://dapr.io)       | [@purista/dapr-sdk](../../7._deployment/4_dapr.md) |
 
 ## Usage
 

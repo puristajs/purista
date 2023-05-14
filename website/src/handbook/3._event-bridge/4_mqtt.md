@@ -133,6 +133,8 @@ It defaults to `eventOnly`.
 
 - `never` (not recommended) disables publishing the command responses a second time. This means, that you will not be able to subscribe to command responses correctly. This is only useful if you don't have any subscriptions
 
+## Hints
+
 ::: warning Ensure settings across instances
 Remember to ensure, that QOS, prefixes, and so on are the same on every event bridge instance.  
 Otherwise, you might get some unexpected behaviour.
@@ -142,3 +144,13 @@ Otherwise, you might get some unexpected behaviour.
 PURISTA is using the MQTT 5 user properties feature to add the OpenTelemetry information to each message, as recommended:  
 [https://w3c.github.io/trace-context-mqtt/](https://w3c.github.io/trace-context-mqtt/)
 :::
+
+## Brokers and tools
+
+- [Eclipse Mosquitto™](https://mosquitto.org/)
+- [NanoMQ](https://www.emqx.com/en/products/nanomq) and a MQTT UI [MQTTX](https://www.emqx.com/en/products/mqttx)
+- [HiveMQ](https://www.hivemq.com/)
+- [VerneMQ](https://vernemq.com/)
+- [ActiveMQ](https://activemq.apache.org/)
+
+__You can follow updated on Twitter [@purista_js](https://twitter.com/purista_js) or join the [Discord server](https://discord.gg/9feaUm3H2v) to get in touch with PURISTA maintainers and other developers.__

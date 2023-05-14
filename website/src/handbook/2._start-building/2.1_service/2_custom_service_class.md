@@ -3,6 +3,7 @@ order: 20
 title: Custom service class
 shortTitle: Custom service class
 description: Use a custom service class.
+image: https://purista.dev/graphic/add_service.png
 tag:
   - service
 ---

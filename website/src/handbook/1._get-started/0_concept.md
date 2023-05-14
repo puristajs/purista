@@ -4,7 +4,6 @@ title: Concept of PURISTA
 shortTitle: Concept
 description: A general description of the concept of the typescript based nodejs backend PURISTA.
 image: https://purista.dev/graphic/advertise_large.png
-cover: https://purista.dev/graphic/advertise_large.png
 tag:
   - typescript
   - nodejs

@@ -3,7 +3,6 @@ order: 10
 title: Create a new service
 shortTitle: Create a new Service
 description: Create your first typescript service in PURISTA with a function and a subscription implementation in simple typescript/javascript.
-cover: https://purista.dev/graphic/add_service.png
 image: https://purista.dev/graphic/add_service.png
 tag:
   - typescript

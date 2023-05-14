@@ -3,6 +3,7 @@ order: 30
 title: Transforms and Hooks
 shortTitle: Transforms and Hooks
 description: Learn how to unit test a single service subscription
+image: https://purista.dev/graphic/add_subscription.png
 tag:
   - service
   - subscription

@@ -2,6 +2,10 @@ import { defineClientConfig } from '@vuepress/client'
 
 export default defineClientConfig({
   setup() {
+    /*
+    moved to header in config.ts
+
+    
     if (!__VUEPRESS_SSR__) {
       const css = document.createElement('link')
       css.href = '/cookieconsent.css'
@@ -20,6 +24,7 @@ export default defineClientConfig({
 
       document.body.appendChild(script)
     }
+    */
   },
   rootComponents: [],
 })

@@ -2,8 +2,8 @@
 # This control sidebar index
 index: true
 # This is the title of the article
-title: PURISTA version 1.6.0 - Dapr, MQTT and more
-shortTitle: PURISTA version 1.6.0
+title: PURISTA version 1.6 - Dapr, MQTT and more
+shortTitle: PURISTA version 1.6
 description: Checkout all the awesome features, improvements and changes in PURISTA v1.6.0 typescript framework.
 tag:
  - purista
@@ -14,8 +14,8 @@ category:
  - announcement
 star: true
 isOriginal: true
-image: https://purista.dev/graphic/advertise_large.png
-cover: https://purista.dev/graphic/advertise_large.png
+image: https://purista.dev/graphic/purista_1_6_cover.png
+cover: https://purista.dev/graphic/purista_1_6_cover.png
 ---
 
 
@@ -44,6 +44,9 @@ By providing the MQTT event bridge, PURISTA is making a huge step into the IoT a
 The MQTT bridge is based on the MQTT 5 protocol, which makes it possible to provide nearly the same functionality as on other event bridges.
 
 ## Dapr SDK
+
+The SDK for Dapr includes an event bridge and adapters for config, secret and state stores.  
+This allows an easy integration into the Dapr infrastructure without touching the business logic.
 
 ## Http client
 
@@ -89,3 +92,23 @@ const main = async () => {
 
 main()
 ```
+
+## Improvements
+
+This release contains a lot of improvements.  
+By default, HTTP compression is enabled in the Dapr event bridge and the Kubernetes webserver.  
+Configurations are now more flat to avoid too much nested parameters.  
+
+Dependencies have been updated to the most recent versions. Because of this, the plugin `@anatine/zod-openapi` is replaced by a own version.  
+A lot of unit and integration tests have been added to the project.
+
+## Shout out
+
+A special "Thank You!" to the contributors and developers of:
+
+- [Hono](https://hono.dev)
+- [EMQ](https://www.emqx.io)
+- [typedoc-plugin-markdown](https://github.com/tgreyuk/typedoc-plugin-markdown)
+- [Snappify](https://snappify.com/)
+
+Thanks for your cool stuff and your help - I appreciate it!

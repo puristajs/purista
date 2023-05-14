@@ -71,4 +71,3 @@ But what about subscriptions? Subscriptions are kind of dynamic and unknown. You
 Also, you do not want to have a 1:1 relation. You always have one message producer, but you might have n message consumers.
 
 The broker should be able to deliver the same message to n different consumers, based on the message and the consumers.
-
