@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / @purista/httpserver
+[PURISTA API](../README.md) / [Modules](../modules.md) / @purista/httpserver
 
 # Module: @purista/httpserver
 
@@ -62,7 +62,7 @@ const main = async() => {
  // ...
 
  gracefulShutdown(logger, [
-   // start with the event bridge to no longer accept incoming messages
+   // begin with the event bridge to no longer accept incoming messages
    eventBridge,
    // shut down optional services
    // ...
@@ -76,12 +76,14 @@ main()
 
 ## Table of contents
 
-### Namespaces
+### Enumerations
 
-- [internal](purista_httpserver.internal.md)
+- [ServiceEvent](../enums/purista_httpserver.ServiceEvent.md)
 
 ### Type Aliases
 
+- [BeforeResponseHook](purista_httpserver.md#beforeresponsehook)
+- [HttpServerServiceV1Config](purista_httpserver.md#httpserverservicev1config)
 - [HttpServerV1ServiceCommandsToRestApiInputPayload](purista_httpserver.md#httpserverv1servicecommandstorestapiinputpayload)
 
 ### Variables
@@ -93,50 +95,93 @@ main()
 
 ## Type Aliases
 
-### HttpServerV1ServiceCommandsToRestApiInputPayload
+### BeforeResponseHook
 
-Ƭ **HttpServerV1ServiceCommandsToRestApiInputPayload**: `z.output`<typeof [`httpServerV1ServiceCommandsToRestApiInputPayloadSchema`](purista_httpserver.internal.md#httpserverv1servicecommandstorestapiinputpayloadschema)\>
+Ƭ **BeforeResponseHook**: <T\>(`payload`: `T`, `request`: `FastifyRequest`, `reply`: `FastifyReply`, `parameter`: `Record`<`string`, `unknown`\>) => `void`
+
+#### Type declaration
+
+▸ <`T`\>(`payload`, `request`, `reply`, `parameter`): `void`
+
+##### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `T` | `unknown` |
+
+##### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `payload` | `T` |
+| `request` | `FastifyRequest` |
+| `reply` | `FastifyReply` |
+| `parameter` | `Record`<`string`, `unknown`\> |
+
+##### Returns
+
+`void`
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/types.ts:5](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/types.ts#L5)
+[packages/httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts#L3)
+
+___
+
+### HttpServerServiceV1Config
+
+Ƭ **HttpServerServiceV1Config**: `HttpServerServiceV1ConfigRaw` & { `compressOptions?`: `FastifyCompressOptions` ; `corsOptions?`: `FastifyCorsOptions` ; `fastify`: `Partial`<`FastifyServerOptions`\> & `Partial`<`FastifyHttp2SecureOptions`<`Http2SecureServer`\>\>  }
+
+#### Defined in
+
+[packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts:92](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts#L92)
+
+___
+
+### HttpServerV1ServiceCommandsToRestApiInputPayload
+
+Ƭ **HttpServerV1ServiceCommandsToRestApiInputPayload**: `z.output`<typeof `httpServerV1ServiceCommandsToRestApiInputPayloadSchema`\>
+
+#### Defined in
+
+[packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/types.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/types.ts#L5)
 
 ## Variables
 
 ### httpServerServiceInfo
 
-• `Const` **httpServerServiceInfo**: [`ServiceInfoType`](purista_httpserver.internal.md#serviceinfotype)
+• `Const` **httpServerServiceInfo**: `ServiceInfoType`
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts:11](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts#L11)
+[packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts#L11)
 
 ___
 
 ### httpServerV1Service
 
-• `Const` **httpServerV1Service**: [`ServiceBuilder`](../classes/purista_httpserver.internal.ServiceBuilder.md)<{ `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain`: `string` ; `enableCompress?`: `boolean` ; `enableCors?`: `boolean` ; `enableHealthz?`: `boolean` ; `enableHelmet?`: `boolean` ; `fastify?`: `any` ; `helmetOptions?`: { enableCSPNonces?: boolean \| undefined; global?: boolean \| undefined; } ; `host?`: `string` ; `logLevel?`: ``"error"`` \| ``"debug"`` \| ``"fatal"`` \| ``"warn"`` \| ``"info"`` \| ``"trace"`` ; `openApi?`: { info: { title: string; version: string; description?: string \| undefined; termsOfService?: string \| undefined; contact?: { name?: string \| undefined; url?: string \| undefined; email?: string \| undefined; } \| undefined; license?: { ...; } \| undefined; }; ... 6 more ...; tags?: { ...; }[] \| undefined; } ; `port`: `number` ; `uploadDir?`: `string`  }, { `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain`: `string` ; `enableCompress?`: `boolean` ; `enableCors?`: `boolean` ; `enableHealthz?`: `boolean` ; `enableHelmet?`: `boolean` ; `fastify?`: `any` ; `helmetOptions?`: { enableCSPNonces?: boolean \| undefined; global?: boolean \| undefined; } ; `host?`: `string` ; `logLevel?`: ``"error"`` \| ``"debug"`` \| ``"fatal"`` \| ``"warn"`` \| ``"info"`` \| ``"trace"`` ; `openApi?`: { info: { title: string; version: string; description?: string \| undefined; termsOfService?: string \| undefined; contact?: { name?: string \| undefined; url?: string \| undefined; email?: string \| undefined; } \| undefined; license?: { ...; } \| undefined; }; ... 6 more ...; tags?: { ...; }[] \| undefined; } ; `port`: `number` ; `uploadDir?`: `string`  }, [`HttpServerClass`](../classes/purista_httpserver.internal.HttpServerClass.md)<{ `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain`: `string` ; `enableCompress?`: `boolean` ; `enableCors?`: `boolean` ; `enableHealthz?`: `boolean` ; `enableHelmet?`: `boolean` ; `fastify?`: `any` ; `helmetOptions?`: { enableCSPNonces?: boolean \| undefined; global?: boolean \| undefined; } ; `host?`: `string` ; `logLevel?`: ``"error"`` \| ``"debug"`` \| ``"fatal"`` \| ``"warn"`` \| ``"info"`` \| ``"trace"`` ; `openApi?`: { info: { title: string; version: string; description?: string \| undefined; termsOfService?: string \| undefined; contact?: { name?: string \| undefined; url?: string \| undefined; email?: string \| undefined; } \| undefined; license?: { ...; } \| undefined; }; ... 6 more ...; tags?: { ...; }[] \| undefined; } ; `port`: `number` ; `uploadDir?`: `string`  }\>\>
+• `Const` **httpServerV1Service**: `ServiceBuilder`<{ `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain`: `string` ; `enableCompress?`: `boolean` ; `enableCors?`: `boolean` ; `enableHealthz?`: `boolean` ; `enableHelmet?`: `boolean` ; `fastify?`: `any` ; `helmetOptions?`: { enableCSPNonces?: boolean \| undefined; global?: boolean \| undefined; } ; `host?`: `string` ; `logLevel?`: ``"error"`` \| ``"debug"`` \| ``"fatal"`` \| ``"warn"`` \| ``"info"`` \| ``"trace"`` ; `openApi?`: { info: { title: string; version: string; description?: string \| undefined; termsOfService?: string \| undefined; contact?: { name?: string \| undefined; url?: string \| undefined; email?: string \| undefined; } \| undefined; license?: { ...; } \| undefined; }; ... 6 more ...; tags?: { ...; }[] \| undefined; } ; `port`: `number` ; `uploadDir?`: `string`  }, { `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain?`: `string` ; `enableCompress?`: `boolean` ; `enableCors?`: `boolean` ; `enableHealthz?`: `boolean` ; `enableHelmet?`: `boolean` ; `fastify?`: `any` ; `helmetOptions?`: { enableCSPNonces?: boolean \| undefined; global?: boolean \| undefined; } ; `host?`: `string` ; `logLevel?`: ``"error"`` \| ``"debug"`` \| ``"fatal"`` \| ``"warn"`` \| ``"info"`` \| ``"trace"`` ; `openApi?`: { info: { title: string; version: string; description?: string \| undefined; termsOfService?: string \| undefined; contact?: { name?: string \| undefined; url?: string \| undefined; email?: string \| undefined; } \| undefined; license?: { ...; } \| undefined; }; ... 6 more ...; tags?: { ...; }[] \| undefined; } ; `port`: `number` ; `uploadDir?`: `string`  }, `HttpServerClass`<{ `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain`: `string` ; `enableCompress?`: `boolean` ; `enableCors?`: `boolean` ; `enableHealthz?`: `boolean` ; `enableHelmet?`: `boolean` ; `fastify?`: `any` ; `helmetOptions?`: { enableCSPNonces?: boolean \| undefined; global?: boolean \| undefined; } ; `host?`: `string` ; `logLevel?`: ``"error"`` \| ``"debug"`` \| ``"fatal"`` \| ``"warn"`` \| ``"info"`` \| ``"trace"`` ; `openApi?`: { info: { title: string; version: string; description?: string \| undefined; termsOfService?: string \| undefined; contact?: { name?: string \| undefined; url?: string \| undefined; email?: string \| undefined; } \| undefined; license?: { ...; } \| undefined; }; ... 6 more ...; tags?: { ...; }[] \| undefined; } ; `port`: `number` ; `uploadDir?`: `string`  }\>\>
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts:16](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts#L16)
+[packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts#L16)
 
 ___
 
 ### httpServerV1ServiceBuilder
 
-• `Const` **httpServerV1ServiceBuilder**: [`ServiceBuilder`](../classes/purista_httpserver.internal.ServiceBuilder.md)<{ `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain`: `string` ; `enableCompress?`: `boolean` ; `enableCors?`: `boolean` ; `enableHealthz?`: `boolean` ; `enableHelmet?`: `boolean` ; `fastify?`: `any` ; `helmetOptions?`: { enableCSPNonces?: boolean \| undefined; global?: boolean \| undefined; } ; `host?`: `string` ; `logLevel?`: ``"error"`` \| ``"debug"`` \| ``"fatal"`` \| ``"warn"`` \| ``"info"`` \| ``"trace"`` ; `openApi?`: { info: { title: string; version: string; description?: string \| undefined; termsOfService?: string \| undefined; contact?: { name?: string \| undefined; url?: string \| undefined; email?: string \| undefined; } \| undefined; license?: { ...; } \| undefined; }; ... 6 more ...; tags?: { ...; }[] \| undefined; } ; `port`: `number` ; `uploadDir?`: `string`  }, { `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain`: `string` ; `enableCompress?`: `boolean` ; `enableCors?`: `boolean` ; `enableHealthz?`: `boolean` ; `enableHelmet?`: `boolean` ; `fastify?`: `any` ; `helmetOptions?`: { enableCSPNonces?: boolean \| undefined; global?: boolean \| undefined; } ; `host?`: `string` ; `logLevel?`: ``"error"`` \| ``"debug"`` \| ``"fatal"`` \| ``"warn"`` \| ``"info"`` \| ``"trace"`` ; `openApi?`: { info: { title: string; version: string; description?: string \| undefined; termsOfService?: string \| undefined; contact?: { name?: string \| undefined; url?: string \| undefined; email?: string \| undefined; } \| undefined; license?: { ...; } \| undefined; }; ... 6 more ...; tags?: { ...; }[] \| undefined; } ; `port`: `number` ; `uploadDir?`: `string`  }, [`HttpServerClass`](../classes/purista_httpserver.internal.HttpServerClass.md)<{ `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain`: `string` ; `enableCompress?`: `boolean` ; `enableCors?`: `boolean` ; `enableHealthz?`: `boolean` ; `enableHelmet?`: `boolean` ; `fastify?`: `any` ; `helmetOptions?`: { enableCSPNonces?: boolean \| undefined; global?: boolean \| undefined; } ; `host?`: `string` ; `logLevel?`: ``"error"`` \| ``"debug"`` \| ``"fatal"`` \| ``"warn"`` \| ``"info"`` \| ``"trace"`` ; `openApi?`: { info: { title: string; version: string; description?: string \| undefined; termsOfService?: string \| undefined; contact?: { name?: string \| undefined; url?: string \| undefined; email?: string \| undefined; } \| undefined; license?: { ...; } \| undefined; }; ... 6 more ...; tags?: { ...; }[] \| undefined; } ; `port`: `number` ; `uploadDir?`: `string`  }\>\>
+• `Const` **httpServerV1ServiceBuilder**: `ServiceBuilder`<{ `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain`: `string` ; `enableCompress?`: `boolean` ; `enableCors?`: `boolean` ; `enableHealthz?`: `boolean` ; `enableHelmet?`: `boolean` ; `fastify?`: `any` ; `helmetOptions?`: { enableCSPNonces?: boolean \| undefined; global?: boolean \| undefined; } ; `host?`: `string` ; `logLevel?`: ``"error"`` \| ``"debug"`` \| ``"fatal"`` \| ``"warn"`` \| ``"info"`` \| ``"trace"`` ; `openApi?`: { info: { title: string; version: string; description?: string \| undefined; termsOfService?: string \| undefined; contact?: { name?: string \| undefined; url?: string \| undefined; email?: string \| undefined; } \| undefined; license?: { ...; } \| undefined; }; ... 6 more ...; tags?: { ...; }[] \| undefined; } ; `port`: `number` ; `uploadDir?`: `string`  }, { `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain?`: `string` ; `enableCompress?`: `boolean` ; `enableCors?`: `boolean` ; `enableHealthz?`: `boolean` ; `enableHelmet?`: `boolean` ; `fastify?`: `any` ; `helmetOptions?`: { enableCSPNonces?: boolean \| undefined; global?: boolean \| undefined; } ; `host?`: `string` ; `logLevel?`: ``"error"`` \| ``"debug"`` \| ``"fatal"`` \| ``"warn"`` \| ``"info"`` \| ``"trace"`` ; `openApi?`: { info: { title: string; version: string; description?: string \| undefined; termsOfService?: string \| undefined; contact?: { name?: string \| undefined; url?: string \| undefined; email?: string \| undefined; } \| undefined; license?: { ...; } \| undefined; }; ... 6 more ...; tags?: { ...; }[] \| undefined; } ; `port`: `number` ; `uploadDir?`: `string`  }, `HttpServerClass`<{ `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain`: `string` ; `enableCompress?`: `boolean` ; `enableCors?`: `boolean` ; `enableHealthz?`: `boolean` ; `enableHelmet?`: `boolean` ; `fastify?`: `any` ; `helmetOptions?`: { enableCSPNonces?: boolean \| undefined; global?: boolean \| undefined; } ; `host?`: `string` ; `logLevel?`: ``"error"`` \| ``"debug"`` \| ``"fatal"`` \| ``"warn"`` \| ``"info"`` \| ``"trace"`` ; `openApi?`: { info: { title: string; version: string; description?: string \| undefined; termsOfService?: string \| undefined; contact?: { name?: string \| undefined; url?: string \| undefined; email?: string \| undefined; } \| undefined; license?: { ...; } \| undefined; }; ... 6 more ...; tags?: { ...; }[] \| undefined; } ; `port`: `number` ; `uploadDir?`: `string`  }\>\>
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts:18](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts#L18)
+[packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts#L18)
 
 ___
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.4.9"``
+• `Const` **puristaVersion**: ``"1.5.0"``
 
 #### Defined in
 
-[packages/httpserver/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/8c66693/packages/httpserver/src/version.ts#L1)
+[packages/httpserver/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/version.ts#L1)

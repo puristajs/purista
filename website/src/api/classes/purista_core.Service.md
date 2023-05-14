@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / Service
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / Service
 
 # Class: Service<ConfigType\>
 
@@ -32,7 +32,7 @@ class MyService extends Service {
 
 ## Hierarchy
 
-- [`ServiceBaseClass`](purista_core.internal.ServiceBaseClass.md)
+- `ServiceBaseClass`
 
   ↳ **`Service`**
 
@@ -108,11 +108,11 @@ class MyService extends Service {
 
 #### Overrides
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[constructor](purista_core.internal.ServiceBaseClass.md#constructor)
+ServiceBaseClass.constructor
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:81](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L81)
+[core/Service/Service.impl.ts:81](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L81)
 
 ## Properties
 
@@ -122,7 +122,7 @@ class MyService extends Service {
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:77](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L77)
+[core/Service/Service.impl.ts:77](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L77)
 
 ___
 
@@ -132,7 +132,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:75](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L75)
+[core/Service/Service.impl.ts:75](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L75)
 
 ___
 
@@ -146,7 +146,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:79](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L79)
+[core/Service/Service.impl.ts:79](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L79)
 
 ___
 
@@ -156,11 +156,11 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[configStore](purista_core.internal.ServiceBaseClass.md#configstore)
+ServiceBaseClass.configStore
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:35](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L35)
+[core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L35)
 
 ___
 
@@ -170,11 +170,11 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[eventBridge](purista_core.internal.ServiceBaseClass.md#eventbridge)
+ServiceBaseClass.eventBridge
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:26](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L26)
+[core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L26)
 
 ___
 
@@ -184,11 +184,11 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[info](purista_core.internal.ServiceBaseClass.md#info)
+ServiceBaseClass.info
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:24](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L24)
+[core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L24)
 
 ___
 
@@ -198,11 +198,11 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[logger](purista_core.internal.ServiceBaseClass.md#logger)
+ServiceBaseClass.logger
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:28](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L28)
+[core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L28)
 
 ___
 
@@ -212,11 +212,11 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[secretStore](purista_core.internal.ServiceBaseClass.md#secretstore)
+ServiceBaseClass.secretStore
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:34](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L34)
+[core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:34](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L34)
 
 ___
 
@@ -226,11 +226,11 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[spanProcessor](purista_core.internal.ServiceBaseClass.md#spanprocessor)
+ServiceBaseClass.spanProcessor
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:30](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L30)
+[core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:30](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L30)
 
 ___
 
@@ -240,11 +240,11 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[stateStore](purista_core.internal.ServiceBaseClass.md#statestore)
+ServiceBaseClass.stateStore
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:36](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L36)
+[core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:36](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L36)
 
 ___
 
@@ -254,7 +254,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:78](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L78)
+[core/Service/Service.impl.ts:78](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L78)
 
 ___
 
@@ -264,7 +264,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:74](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L74)
+[core/Service/Service.impl.ts:74](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L74)
 
 ___
 
@@ -274,11 +274,11 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[traceProvider](purista_core.internal.ServiceBaseClass.md#traceprovider)
+ServiceBaseClass.traceProvider
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:32](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L32)
+[core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:32](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L32)
 
 ## Accessors
 
@@ -292,7 +292,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:97](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L97)
+[core/Service/Service.impl.ts:97](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L97)
 
 ___
 
@@ -312,7 +312,7 @@ ServiceBaseClass.serviceInfo
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:94](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L94)
+[core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:94](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L94)
 
 ## Methods
 
@@ -332,11 +332,11 @@ Stop and destroy the current service
 
 #### Overrides
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[destroy](purista_core.internal.ServiceBaseClass.md#destroy)
+ServiceBaseClass.destroy
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:749](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L749)
+[core/Service/Service.impl.ts:749](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L749)
 
 ___
 
@@ -363,17 +363,17 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[emit](purista_core.internal.ServiceBaseClass.md#emit)
+ServiceBaseClass.emit
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
 ### executeCommand
 
-▸ **executeCommand**(`message`): `Promise`<`Readonly`<`Omit`<[`CommandErrorResponse`](../modules/purista_core.md#commanderrorresponse), ``"instanceId"``\>\> \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+▸ **executeCommand**(`message`): `Promise`<`Readonly`<`Omit`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `instanceId`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\> \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 Called when a command is received by the service
 
@@ -381,21 +381,21 @@ Called when a command is received by the service
 
 | Name | Type |
 | :------ | :------ |
-| `message` | `Readonly`<[`Command`](../modules/purista_core.md#command)\> |
+| `message` | `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `instanceId`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
 
 #### Returns
 
-`Promise`<`Readonly`<`Omit`<[`CommandErrorResponse`](../modules/purista_core.md#commanderrorresponse), ``"instanceId"``\>\> \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+`Promise`<`Readonly`<`Omit`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `instanceId`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\> \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:414](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L414)
+[core/Service/Service.impl.ts:414](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L414)
 
 ___
 
 ### executeSubscription
 
-▸ **executeSubscription**(`message`, `subscriptionName`): `Promise`<`undefined` \| `Omit`<[`CustomMessage`](../modules/purista_core.md#custommessage), ``"id"`` \| ``"instanceId"`` \| ``"timestamp"``\>\>
+▸ **executeSubscription**(`message`, `subscriptionName`): `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `instanceId`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"instanceId"`` \| ``"timestamp"``\>\>
 
 #### Parameters
 
@@ -406,11 +406,11 @@ ___
 
 #### Returns
 
-`Promise`<`undefined` \| `Omit`<[`CustomMessage`](../modules/purista_core.md#custommessage), ``"id"`` \| ``"instanceId"`` \| ``"timestamp"``\>\>
+`Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `instanceId`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"instanceId"`` \| ``"timestamp"``\>\>
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:567](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L567)
+[core/Service/Service.impl.ts:567](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L567)
 
 ___
 
@@ -430,7 +430,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:241](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L241)
+[core/Service/Service.impl.ts:241](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L241)
 
 ___
 
@@ -473,7 +473,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:208](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L208)
+[core/Service/Service.impl.ts:208](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L208)
 
 ___
 
@@ -511,7 +511,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:174](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L174)
+[core/Service/Service.impl.ts:174](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L174)
 
 ___
 
@@ -540,11 +540,11 @@ Tracer
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[getTracer](purista_core.internal.ServiceBaseClass.md#gettracer)
+ServiceBaseClass.getTracer
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:103](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L103)
+[core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:103](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L103)
 
 ___
 
@@ -567,7 +567,7 @@ Connect service to event bridge to receive commands and command responses
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:125](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L125)
+[core/Service/Service.impl.ts:125](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L125)
 
 ___
 
@@ -586,7 +586,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | [`EventReceiver`](../modules/purista_core.internal.md#eventreceiver)<[`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`]\> |
+| `fn` | `EventReceiver`<[`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`]\> |
 
 #### Returns
 
@@ -594,11 +594,11 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[off](purista_core.internal.ServiceBaseClass.md#off)
+ServiceBaseClass.off
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -617,7 +617,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | [`EventReceiver`](../modules/purista_core.internal.md#eventreceiver)<[`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`]\> |
+| `fn` | `EventReceiver`<[`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`]\> |
 
 #### Returns
 
@@ -625,11 +625,11 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[on](purista_core.internal.ServiceBaseClass.md#on)
+ServiceBaseClass.on
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L16)
 
 ___
 
@@ -655,7 +655,7 @@ Registers a new command for the service
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:540](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L540)
+[core/Service/Service.impl.ts:540](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L540)
 
 ___
 
@@ -681,7 +681,7 @@ Registers a new subscription for the service
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:713](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L713)
+[core/Service/Service.impl.ts:713](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L713)
 
 ___
 
@@ -695,11 +695,11 @@ ___
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[removeAllListeners](purista_core.internal.ServiceBaseClass.md#removealllisteners)
+ServiceBaseClass.removeAllListeners
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:28](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L28)
+[core/types/GenericEventEmitter.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L28)
 
 ___
 
@@ -723,7 +723,7 @@ Broadcast service info message
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:159](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L159)
+[core/Service/Service.impl.ts:159](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L159)
 
 ___
 
@@ -743,7 +743,7 @@ It connects to the event bridge and subscribes to the topics that are in the sub
 
 #### Defined in
 
-[packages/core/src/core/Service/Service.impl.ts:104](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/Service.impl.ts#L104)
+[core/Service/Service.impl.ts:104](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L104)
 
 ___
 
@@ -780,11 +780,11 @@ return value of fn
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[startActiveSpan](purista_core.internal.ServiceBaseClass.md#startactivespan)
+ServiceBaseClass.startActiveSpan
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:118](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L118)
+[core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:118](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L118)
 
 ___
 
@@ -827,8 +827,8 @@ return value of fn
 
 #### Inherited from
 
-[ServiceBaseClass](purista_core.internal.ServiceBaseClass.md).[wrapInSpan](purista_core.internal.ServiceBaseClass.md#wrapinspan)
+ServiceBaseClass.wrapInSpan
 
 #### Defined in
 
-[packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:168](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L168)
+[core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:168](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L168)

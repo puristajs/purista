@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / IEmitter
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / IEmitter
 
 # Interface: IEmitter<T\>
 
@@ -12,6 +12,7 @@
 
 ## Implemented by
 
+- [`GenericEventEmitter`](../classes/purista_core.GenericEventEmitter.md)
 - [`GenericEventEmitter`](../classes/purista_core.GenericEventEmitter.md)
 
 ## Table of contents
@@ -47,7 +48,7 @@
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:11](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L11)
+[core/types/GenericEventEmitter.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L11)
 
 ___
 
@@ -66,7 +67,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | [`EventReceiver`](../modules/purista_core.internal.md#eventreceiver)<`T`[`K`]\> |
+| `fn` | `EventReceiver`<`T`[`K`]\> |
 
 #### Returns
 
@@ -74,7 +75,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:10](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L10)
+[core/types/GenericEventEmitter.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L10)
 
 ___
 
@@ -93,7 +94,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | [`EventReceiver`](../modules/purista_core.internal.md#eventreceiver)<`T`[`K`]\> |
+| `fn` | `EventReceiver`<`T`[`K`]\> |
 
 #### Returns
 
@@ -101,4 +102,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:9](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L9)
+[core/types/GenericEventEmitter.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L9)

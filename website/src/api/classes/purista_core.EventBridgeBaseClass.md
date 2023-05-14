@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / EventBridgeBaseClass
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / EventBridgeBaseClass
 
 # Class: EventBridgeBaseClass<ConfigType\>
 
@@ -19,6 +19,12 @@ The base class to be extended by event bridge implementations
   ↳ **`EventBridgeBaseClass`**
 
   ↳↳ [`DefaultEventBridge`](purista_core.DefaultEventBridge.md)
+
+  ↳↳ [`HttpEventBridge`](purista_core.HttpEventBridge.md)
+
+  ↳↳ [`DefaultEventBridge`](purista_core.DefaultEventBridge.md)
+
+  ↳↳ [`HttpEventBridge`](purista_core.HttpEventBridge.md)
 
 ## Table of contents
 
@@ -64,7 +70,7 @@ The base class to be extended by event bridge implementations
 | Name | Type |
 | :------ | :------ |
 | `name` | `string` |
-| `config` | [`EventBridgeConfig`](../modules/purista_core.md#eventbridgeconfig)<[`Complete`](../modules/purista_core.md#complete)<`ConfigType`\>\> |
+| `config` | { [K in string \| number \| symbol]: (Object & ConfigType)[K] } |
 
 #### Overrides
 
@@ -72,17 +78,17 @@ The base class to be extended by event bridge implementations
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:28](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L28)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L28)
 
 ## Properties
 
 ### config
 
-• **config**: [`Complete`](../modules/purista_core.md#complete)<[`EventBridgeConfig`](../modules/purista_core.md#eventbridgeconfig)<[`Complete`](../modules/purista_core.md#complete)<`ConfigType`\>\>\>
+• **config**: [`Complete`](../modules/purista_core.md#complete)<{ [K in string \| number \| symbol]: (Object & ConfigType)[K] }\>
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:21](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L21)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L21)
 
 ___
 
@@ -92,7 +98,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:27](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L27)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L27)
 
 ___
 
@@ -102,7 +108,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:25](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L25)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:25](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L25)
 
 ___
 
@@ -112,7 +118,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:18](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L18)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L18)
 
 ___
 
@@ -122,7 +128,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:23](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L23)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:23](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L23)
 
 ___
 
@@ -132,7 +138,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:19](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L19)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L19)
 
 ## Methods
 
@@ -146,7 +152,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:154](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L154)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:153](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L153)
 
 ___
 
@@ -158,14 +164,14 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)<[`EventBridgeEvents`](../modules/purista_core.md#eventbridgeevents)\> |
+| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `parameter?` | [`EventBridgeEvents`](../modules/purista_core.md#eventbridgeevents)[`K`] |
+| `parameter?` | { `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`] |
 
 #### Returns
 
@@ -177,7 +183,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
@@ -195,7 +201,7 @@ Tracer
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:69](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L69)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:68](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L68)
 
 ___
 
@@ -207,14 +213,14 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)<[`EventBridgeEvents`](../modules/purista_core.md#eventbridgeevents)\> |
+| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | [`EventReceiver`](../modules/purista_core.internal.md#eventreceiver)<[`EventBridgeEvents`](../modules/purista_core.md#eventbridgeevents)[`K`]\> |
+| `fn` | `EventReceiver`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
 
 #### Returns
 
@@ -226,7 +232,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -238,14 +244,14 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)<[`EventBridgeEvents`](../modules/purista_core.md#eventbridgeevents)\> |
+| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | [`EventReceiver`](../modules/purista_core.internal.md#eventreceiver)<[`EventBridgeEvents`](../modules/purista_core.md#eventbridgeevents)[`K`]\> |
+| `fn` | `EventReceiver`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
 
 #### Returns
 
@@ -257,7 +263,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L16)
 
 ___
 
@@ -275,7 +281,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/types/GenericEventEmitter.ts:28](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/types/GenericEventEmitter.ts#L28)
+[core/types/GenericEventEmitter.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L28)
 
 ___
 
@@ -289,7 +295,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:155](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L155)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:154](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L154)
 
 ___
 
@@ -322,7 +328,7 @@ return value of fn
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:81](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L81)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:80](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L80)
 
 ___
 
@@ -361,4 +367,4 @@ return value of fn
 
 #### Defined in
 
-[packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:131](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L131)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:130](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L130)

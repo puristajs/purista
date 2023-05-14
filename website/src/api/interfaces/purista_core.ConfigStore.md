@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ConfigStore
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ConfigStore
 
 # Interface: ConfigStore
 
@@ -8,6 +8,7 @@ Interface definition for config store adapters
 
 ## Implemented by
 
+- [`ConfigStoreBaseClass`](../classes/purista_core.ConfigStoreBaseClass.md)
 - [`ConfigStoreBaseClass`](../classes/purista_core.ConfigStoreBaseClass.md)
 
 ## Table of contents
@@ -41,7 +42,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/types/ConfigStore.ts:19](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L19)
+[core/ConfigStore/types/ConfigStore.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L19)
 
 ___
 
@@ -53,7 +54,7 @@ name of store
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/types/ConfigStore.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L12)
+[core/ConfigStore/types/ConfigStore.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L12)
 
 ___
 
@@ -73,7 +74,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/types/ConfigStore.ts:34](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L34)
+[core/ConfigStore/types/ConfigStore.ts:34](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L34)
 
 ___
 
@@ -97,7 +98,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/types/ConfigStore.ts:27](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L27)
+[core/ConfigStore/types/ConfigStore.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L27)
 
 ## Methods
 
@@ -113,4 +114,4 @@ disconnects and shuts down the config store
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/types/ConfigStore.ts:39](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L39)
+[core/ConfigStore/types/ConfigStore.ts:39](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L39)

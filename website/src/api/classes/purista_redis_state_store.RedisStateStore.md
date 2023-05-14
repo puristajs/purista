@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/redis-state-store](../modules/purista_redis_state_store.md) / RedisStateStore
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/redis-state-store](../modules/purista_redis_state_store.md) / RedisStateStore
 
 # Class: RedisStateStore<M, F, S\>
 
@@ -48,7 +48,7 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 ## Hierarchy
 
-- [`StateStoreBaseClass`](purista_redis_state_store.internal.StateStoreBaseClass.md)<`RedisClientOptions`<`M`, `F`, `S`\>\>
+- `StateStoreBaseClass`<[`RedisStoreConfig`](../modules/purista_redis_state_store.md#redisstoreconfig)<`M`, `F`, `S`\>\>
 
   ↳ **`RedisStateStore`**
 
@@ -88,17 +88,23 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `config?` | [`StoreBaseConfig`](../modules/purista_redis_state_store.internal.md#storebaseconfig)<`RedisClientOptions`<`M`, `F`, `S`\>\> |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `config?` | `Object` | - |
+| `config.config?` | `RedisClientOptions`<`M`, `F`, `S`\> | - |
+| `config.enableGet?` | `boolean` | Enable generally get method |
+| `config.enableRemove?` | `boolean` | Enable generally remove method |
+| `config.enableSet?` | `boolean` | Enable generally set method |
+| `config.logLevel?` | `LogLevelName` | A log level for new logger if logger is not set |
+| `config.logger?` | `Logger` | A logger instance |
 
 #### Overrides
 
-[StateStoreBaseClass](purista_redis_state_store.internal.StateStoreBaseClass.md).[constructor](purista_redis_state_store.internal.StateStoreBaseClass.md#constructor)
+StateStoreBaseClass&lt;RedisStoreConfig&lt;M, F, S\&gt;\&gt;.constructor
 
 #### Defined in
 
-[packages/state-store-redis/src/RedisStateStore.impl.ts:50](https://github.com/sebastianwessel/purista/blob/8c66693/packages/state-store-redis/src/RedisStateStore.impl.ts#L50)
+[state-store-redis/src/RedisStateStore.impl.ts:45](https://github.com/sebastianwessel/purista/blob/master/packages/state-store-redis/src/RedisStateStore.impl.ts#L45)
 
 ## Properties
 
@@ -108,35 +114,46 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 #### Defined in
 
-[packages/state-store-redis/src/RedisStateStore.impl.ts:48](https://github.com/sebastianwessel/purista/blob/8c66693/packages/state-store-redis/src/RedisStateStore.impl.ts#L48)
+[state-store-redis/src/RedisStateStore.impl.ts:43](https://github.com/sebastianwessel/purista/blob/master/packages/state-store-redis/src/RedisStateStore.impl.ts#L43)
 
 ___
 
 ### config
 
-• **config**: [`StoreBaseConfig`](../modules/purista_redis_state_store.internal.md#storebaseconfig)<`RedisClientOptions`<`M`, `F`, `S`\>\>
+• **config**: `Object`
+
+#### Type declaration
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `config?` | `RedisClientOptions`<`M`, `F`, `S`\> | - |
+| `enableGet?` | `boolean` | Enable generally get method |
+| `enableRemove?` | `boolean` | Enable generally remove method |
+| `enableSet?` | `boolean` | Enable generally set method |
+| `logLevel?` | `LogLevelName` | A log level for new logger if logger is not set |
+| `logger?` | `Logger` | A logger instance |
 
 #### Inherited from
 
-[StateStoreBaseClass](purista_redis_state_store.internal.StateStoreBaseClass.md).[config](purista_redis_state_store.internal.StateStoreBaseClass.md#config)
+StateStoreBaseClass.config
 
 #### Defined in
 
-packages/core/lib/core/StateStore/StateStoreBaseClass.impl.d.ts:10
+core/lib/types/core/StateStore/StateStoreBaseClass.impl.d.ts:10
 
 ___
 
 ### logger
 
-• **logger**: [`Logger`](purista_redis_state_store.internal.Logger.md)
+• **logger**: `Logger`
 
 #### Inherited from
 
-[StateStoreBaseClass](purista_redis_state_store.internal.StateStoreBaseClass.md).[logger](purista_redis_state_store.internal.StateStoreBaseClass.md#logger)
+StateStoreBaseClass.logger
 
 #### Defined in
 
-packages/core/lib/core/StateStore/StateStoreBaseClass.impl.d.ts:9
+core/lib/types/core/StateStore/StateStoreBaseClass.impl.d.ts:9
 
 ___
 
@@ -144,15 +161,13 @@ ___
 
 • **name**: `string`
 
-name of store
-
 #### Inherited from
 
-[StateStoreBaseClass](purista_redis_state_store.internal.StateStoreBaseClass.md).[name](purista_redis_state_store.internal.StateStoreBaseClass.md#name)
+StateStoreBaseClass.name
 
 #### Defined in
 
-packages/core/lib/core/StateStore/StateStoreBaseClass.impl.d.ts:11
+core/lib/types/core/StateStore/StateStoreBaseClass.impl.d.ts:11
 
 ## Methods
 
@@ -160,19 +175,17 @@ packages/core/lib/core/StateStore/StateStoreBaseClass.impl.d.ts:11
 
 ▸ **destroy**(): `Promise`<`void`\>
 
-disconnects and shuts down the state store
-
 #### Returns
 
 `Promise`<`void`\>
 
 #### Overrides
 
-[StateStoreBaseClass](purista_redis_state_store.internal.StateStoreBaseClass.md).[destroy](purista_redis_state_store.internal.StateStoreBaseClass.md#destroy)
+StateStoreBaseClass.destroy
 
 #### Defined in
 
-[packages/state-store-redis/src/RedisStateStore.impl.ts:113](https://github.com/sebastianwessel/purista/blob/8c66693/packages/state-store-redis/src/RedisStateStore.impl.ts#L113)
+[state-store-redis/src/RedisStateStore.impl.ts:109](https://github.com/sebastianwessel/purista/blob/master/packages/state-store-redis/src/RedisStateStore.impl.ts#L109)
 
 ___
 
@@ -192,11 +205,11 @@ ___
 
 #### Overrides
 
-[StateStoreBaseClass](purista_redis_state_store.internal.StateStoreBaseClass.md).[getState](purista_redis_state_store.internal.StateStoreBaseClass.md#getstate)
+StateStoreBaseClass.getState
 
 #### Defined in
 
-[packages/state-store-redis/src/RedisStateStore.impl.ts:55](https://github.com/sebastianwessel/purista/blob/8c66693/packages/state-store-redis/src/RedisStateStore.impl.ts#L55)
+[state-store-redis/src/RedisStateStore.impl.ts:51](https://github.com/sebastianwessel/purista/blob/master/packages/state-store-redis/src/RedisStateStore.impl.ts#L51)
 
 ___
 
@@ -216,11 +229,11 @@ ___
 
 #### Overrides
 
-[StateStoreBaseClass](purista_redis_state_store.internal.StateStoreBaseClass.md).[removeState](purista_redis_state_store.internal.StateStoreBaseClass.md#removestate)
+StateStoreBaseClass.removeState
 
 #### Defined in
 
-[packages/state-store-redis/src/RedisStateStore.impl.ts:78](https://github.com/sebastianwessel/purista/blob/8c66693/packages/state-store-redis/src/RedisStateStore.impl.ts#L78)
+[state-store-redis/src/RedisStateStore.impl.ts:74](https://github.com/sebastianwessel/purista/blob/master/packages/state-store-redis/src/RedisStateStore.impl.ts#L74)
 
 ___
 
@@ -241,8 +254,8 @@ ___
 
 #### Overrides
 
-[StateStoreBaseClass](purista_redis_state_store.internal.StateStoreBaseClass.md).[setState](purista_redis_state_store.internal.StateStoreBaseClass.md#setstate)
+StateStoreBaseClass.setState
 
 #### Defined in
 
-[packages/state-store-redis/src/RedisStateStore.impl.ts:96](https://github.com/sebastianwessel/purista/blob/8c66693/packages/state-store-redis/src/RedisStateStore.impl.ts#L96)
+[state-store-redis/src/RedisStateStore.impl.ts:92](https://github.com/sebastianwessel/purista/blob/master/packages/state-store-redis/src/RedisStateStore.impl.ts#L92)

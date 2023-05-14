@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / DefaultConfigStore
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / DefaultConfigStore
 
 # Class: DefaultConfigStore
 
@@ -58,9 +58,14 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 #### Parameters
 
-| Name | Type |
-| :------ | :------ |
-| `config?` | [`StoreBaseConfig`](../modules/purista_core.md#storebaseconfig)<[`DefaultConfigStoreConfig`](../modules/purista_core.md#defaultconfigstoreconfig)\> |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `config?` | `Object` | - |
+| `config.enableGet?` | `boolean` | Enable generally get method |
+| `config.enableRemove?` | `boolean` | Enable generally remove method |
+| `config.enableSet?` | `boolean` | Enable generally set method |
+| `config.logLevel?` | [`LogLevelName`](../modules/purista_core.md#loglevelname) | A log level for new logger if logger is not set |
+| `config.logger?` | [`Logger`](purista_core.Logger.md) | A logger instance |
 
 #### Overrides
 
@@ -68,13 +73,23 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 #### Defined in
 
-[packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:27](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L27)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L27)
 
 ## Properties
 
 ### config
 
-• **config**: [`StoreBaseConfig`](../modules/purista_core.md#storebaseconfig)<[`DefaultConfigStoreConfig`](../modules/purista_core.md#defaultconfigstoreconfig)\>
+• **config**: `Object`
+
+#### Type declaration
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `enableGet?` | `boolean` | Enable generally get method |
+| `enableRemove?` | `boolean` | Enable generally remove method |
+| `enableSet?` | `boolean` | Enable generally set method |
+| `logLevel?` | [`LogLevelName`](../modules/purista_core.md#loglevelname) | A log level for new logger if logger is not set |
+| `logger?` | [`Logger`](purista_core.Logger.md) | A logger instance |
 
 #### Inherited from
 
@@ -82,7 +97,7 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L13)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L13)
 
 ___
 
@@ -96,7 +111,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L12)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L12)
 
 ___
 
@@ -106,7 +121,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:26](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L26)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L26)
 
 ___
 
@@ -122,7 +137,7 @@ name of store
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:15](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L15)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:15](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L15)
 
 ## Methods
 
@@ -142,7 +157,7 @@ disconnects and shuts down the config store
 
 #### Defined in
 
-[packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:61](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L61)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L67)
 
 ___
 
@@ -166,7 +181,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:39](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L39)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:39](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L39)
 
 ___
 
@@ -190,7 +205,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:59](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L59)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:59](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L59)
 
 ___
 
@@ -215,4 +230,4 @@ ___
 
 #### Defined in
 
-[packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:51](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L51)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:51](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L51)

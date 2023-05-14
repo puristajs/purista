@@ -1,4 +1,4 @@
-[PURISTA API - v1.4.9](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / UnhandledError
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / UnhandledError
 
 # Class: UnhandledError
 
@@ -57,7 +57,7 @@ Error.constructor
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:14](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L14)
+[core/Error/UnhandledError.impl.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L14)
 
 ## Properties
 
@@ -67,7 +67,7 @@ Error.constructor
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:17](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L17)
+[core/Error/UnhandledError.impl.ts:17](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L17)
 
 ___
 
@@ -77,7 +77,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:15](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L15)
+[core/Error/UnhandledError.impl.ts:15](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L15)
 
 ___
 
@@ -87,7 +87,7 @@ ___
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:18](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L18)
+[core/Error/UnhandledError.impl.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L18)
 
 ## Methods
 
@@ -105,7 +105,7 @@ ErrorResponsePayload
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:61](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L61)
+[core/Error/UnhandledError.impl.ts:61](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L61)
 
 ___
 
@@ -123,7 +123,7 @@ HandledError
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:53](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L53)
+[core/Error/UnhandledError.impl.ts:53](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L53)
 
 ___
 
@@ -141,7 +141,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:76](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L76)
+[core/Error/UnhandledError.impl.ts:76](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L76)
 
 ___
 
@@ -168,7 +168,7 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L42)
+[core/Error/UnhandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L42)
 
 ___
 
@@ -182,7 +182,7 @@ Create a error object from EBMessage error message
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `message` | `Readonly`<[`CommandErrorResponse`](../modules/purista_core.md#commanderrorresponse)\> | CommandErrorResponse |
+| `message` | `Readonly`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `instanceId`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }\> | CommandErrorResponse |
 
 #### Returns
 
@@ -192,4 +192,4 @@ UnhandledError
 
 #### Defined in
 
-[packages/core/src/core/Error/UnhandledError.impl.ts:29](https://github.com/sebastianwessel/purista/blob/8c66693/packages/core/src/core/Error/UnhandledError.impl.ts#L29)
+[core/Error/UnhandledError.impl.ts:29](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L29)
