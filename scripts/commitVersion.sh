@@ -12,7 +12,7 @@ echo $CONTENT > ./packages/dapr-sdk/src/version.ts
 echo $CONTENT > ./packages/httpserver/src/version.ts
 echo $CONTENT > ./packages/k8s-sdk/src/version.ts
 echo $CONTENT > ./packages/mqttbridge/src/version.ts
-echo $CONTENT > ./packages/redis-state-store/src/version.ts
+echo $CONTENT > ./packages/state-store-redis/src/version.ts
 
 git add .
 git commit -am "chore: bump versions to $NODE_VERSION"
