@@ -18,9 +18,9 @@
     "gitclean": "./scripts/isGitClean.sh",
     "release:prepare": "turbo run lint build test --parallel",
     "tag": "git push && git push --tags && rm -rf build/temp",
-    "commit:major": "npm version major --no-git-tag-version && scripts/commitVersion.sh",
-    "commit:minor": "npm version minor --no-git-tag-version && scripts/commitVersion.sh",
-    "commit:patch": "npm version patch --no-git-tag-version && scripts/commitVersion.sh",
+    "commit:major": "npm version major --no-git-tag-version && scripts/commitVersion.sh && npm run build",
+    "commit:minor": "npm version minor --no-git-tag-version && scripts/commitVersion.sh && npm run build",
+    "commit:patch": "npm version patch --no-git-tag-version && scripts/commitVersion.sh && npm run build",
     "vuepress": "npm run vuepress -w website",
     "check:cycling": "npx madge --circular --exclude '\\.d\\.ts$' --extensions ts ./packages",
     "sign": "git rebase --exec \"git commit --amend --no-edit -n -S\" -i"
