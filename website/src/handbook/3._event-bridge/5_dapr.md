@@ -38,7 +38,7 @@ This small, simple, and ultrafast web framework provides the ability, to profit 
 You can use regular [Node.js](https://nodejs.org/) or [Bun](https://bun.sh/) or [Deno](https://deno.com/runtime).
 
 ::: warning Node.js package required
-If you use Node.js as runtime, you need to install the additional package `@hono/node-server` with version `1.0.0-rc.1` or higher!
+If you use Node.js as runtime, you need to install the additional package `@hono/node-server` with version `1.0.0` or higher!
 :::
 
 
