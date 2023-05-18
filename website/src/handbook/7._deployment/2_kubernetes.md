@@ -51,7 +51,7 @@ Here is a full example, of how the index file might look like, if you want to de
 You can adjust this example for your actual requirements.
 
 ::: warning Node.js package required
-If you use Node.js as runtime, you need to install the additional package `@hono/node-server` with version `1.0.0-rc.1` or higher!
+If you use Node.js as runtime, you need to install the additional package `@hono/node-server` with version `1.0.0` or higher!
 :::
 
 ::: code-tabs#code
