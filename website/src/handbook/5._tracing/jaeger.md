@@ -4,7 +4,6 @@ title: Jaeger
 shortTitle: Jaeger
 description: Jaeger
 image: https://purista.dev/graphic/jaeger_screenshot.png
-cover: https://purista.dev/graphic/jaeger_screenshot.png
 tag:
   - opentelemetry
   - Jaeger

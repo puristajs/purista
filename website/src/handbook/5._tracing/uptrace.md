@@ -4,7 +4,6 @@ title: Uptrace
 shortTitle: Uptrace
 description: Uptrace
 image: https://purista.dev/graphic/uptrace_screenshot.png
-cover: https://purista.dev/graphic/uptrace_screenshot.png
 tag:
   - opentelemetry
   - Uptrace
