@@ -53,3 +53,9 @@ purista add command
 
 Please help us to provide a secure software.  
 See: [Security](./SECURITY.md)
+
+## Contributors
+
+Contributors are welcome!  
+
+[![Sebastian Wessel](https://contrib.rocks/image?repo=sebastianwessel/purista)](https://github.com/sebastianwessel/purista)
