@@ -9,8 +9,16 @@ describe('@purista/redis-state-store', () => {
 
   beforeAll(async () => {
     container = await new GenericContainer('redis')
-      .withExposedPorts(REDIS_PORT)
+      .withExposedPorts({
+        container: REDIS_PORT,
+        host: REDIS_PORT,
+      })
       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
+      .withLogConsumer((stream) => {
+        // stream.on('data', (line) => console.debug(line))
+        // eslint-disable-next-line no-console
+        stream.on('err', (line) => console.error(line))
+      })
       .start()
   })
 
