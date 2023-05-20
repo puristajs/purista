@@ -2,11 +2,15 @@
 
 This is a full example of PURISTA.  
 
-## Setup
+- [Grafana](#grafana)
+- [Uptrace](#uptrace)
+- [Teletrace](#teletrace)
+- [Zipkin](#zipkin)
+- [Jaeger](#jaeger)
 
-## Grafana setup
+## Grafana
 
-As example, you will find in folder `grafana` a ready to go `docker-compose` for [grafana](https://grafana.com).  
+You will find in the folder `grafana`, a ready to go `docker-compose` for [grafana](https://grafana.com).  
 This docker compose spins up [Grafana](https://grafana.com/grafana/) itself, [Tempo](https://grafana.com/traces/) for traces, [Loki](https://grafana.com/logs/) for logs and [Prometheus](https://grafana.com/metrics/) for metrics.
 
 The docker compose file also includes a RabbitMQ broker.
@@ -22,7 +26,7 @@ Start the example project:
 
 ```bash
 npm run start:grafana
-````
+```
 
 Open in your browser [http://localhost:8080](http://localhost:8080).  
 
@@ -33,9 +37,9 @@ npm run grafana:down
 
 ```
 
-## Uptrace setup
+## Uptrace
 
-As example, you will find in folder `uptrace` a ready to go `docker-compose` for [Uptrace](https://uptrace.dev).  
+You will find in the folder `uptrace`, a ready to go `docker-compose` for [Uptrace](https://uptrace.dev).  
 
 The docker compose file also includes a RabbitMQ broker.
 
@@ -44,13 +48,13 @@ npm run uptrace:up
 
 ```
 
-Visit Uptrace ui in browser: [http://localhost:14318](http://localhost:14318) and choose in upper left corner our example project `PURISTA`.
+Visit the Uptrace ui in browser: [http://localhost:14318](http://localhost:14318) and choose in upper left corner our example project `PURISTA`.
 
 Start the example project:
 
 ```bash
 npm run start:uptrace
-````
+```
 
 Visit example swagger ui in browser: [http://localhost:8080/api](http://localhost:8080/api).  
 
@@ -58,6 +62,34 @@ To stop uptrace you can use this command:
 
 ```bash
 npm run uptrace:down
+
+```
+
+## Teletrace
+
+You will find in the folder `teletrace`, a ready to go `docker-compose` for [Teletrace on GitHub](https://github.com/teletrace/teletrace).  
+
+The docker compose file also includes a RabbitMQ broker.
+
+```bash
+npm run teletrace:up
+
+```
+
+Visit the Teletrace UI in browser: [http://localhost:8081](http://localhost:8081)
+
+Start the example project:
+
+```bash
+npm run start:teletrace
+```
+
+Visit the example swagger UI in browser: [http://localhost:8080/api](http://localhost:8080/api).  
+
+To stop teletrace you can use this command:
+
+```bash
+npm run teletrace:down
 
 ```
 
@@ -92,7 +124,6 @@ docker run -d --name jaeger \
 ```
 
 You can access the jaeger ui via [http://localhost:16686](http://localhost:16686)
-
 
 ### Zipkin
 

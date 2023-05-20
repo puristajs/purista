@@ -1,8 +1,9 @@
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { ZipkinExporter } from '@opentelemetry/exporter-zipkin'
-import { ConsoleSpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { ConsoleSpanExporter, SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node'
 
 import { jaegerExporterOptions } from './config/jaegerConfig'
+import { teletraceExporterOptions } from './config/teletrace'
 import { uptraceConfig } from './config/uptraceConfig'
 import { zipkinExporterOptions } from './config/zipkinConfig'
 
@@ -12,6 +13,12 @@ import { zipkinExporterOptions } from './config/zipkinConfig'
  */
 export const getJaegerExporter = () => {
   const exporter = new OTLPTraceExporter(jaegerExporterOptions)
+
+  return new SimpleSpanProcessor(exporter)
+}
+
+export const getTeletraceExporter = () => {
+  const exporter = new OTLPTraceExporter(teletraceExporterOptions)
 
   return new SimpleSpanProcessor(exporter)
 }

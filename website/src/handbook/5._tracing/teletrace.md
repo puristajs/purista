@@ -1,17 +1,17 @@
 ---
-order: 60
-title: SignNoz
-shortTitle: SignNoz
-description: SignNoz
-image: https://purista.dev/graphic/signoz_screenshot.png
+order: 65
+title: Teletrace
+shortTitle: Teletrace
+description: Teletrace
+image: https://purista.dev/graphic/teletrace_screenshot.png
 tag:
   - opentelemetry
-  - SignNoz
+  - Teletrace
 ---
 
-![SigNoz](/graphic/signoz_screenshot.png)
+![SigNoz](/graphic/teletrace_screenshot.png)
 
-__Official website: [SignNoz](https://signoz.io)__
+__GitHub Repo: [Teletrace](https://github.com/teletrace/teletrace)__
 
 See it in action and try out!  
 You will need docker and docker-compose installed at your machine.  
@@ -20,23 +20,22 @@ At the [PURISTA repository](https://github.com/sebastianwessel/purista) in `exam
 Start the required docker containers:
 
 ```bash
-npm run signoz:up
+npm run teletrace:up
 ```
 
-Open the SigNoz in your browser: [http://localhost:3301](http://localhost:3301).  
-You should be able to login with the test user account: username: `admin@example.com` / password:`PURISTA4love`
+Open the Teletrace UI in your browser: [http://localhost:8081](http://localhost:8081).  
 
 Start the example:
 
 ```bash
-npm run signoz:start
+npm run teletrace:start
 ```
 
 To generate some traces, go to the OpenAPI UI at [http://localhost:8080/](http://localhost:8080/) and call some commands.  
 To stop and cleanup and stop all docker containers:
 
 ```bash
-npm run signoz:down
+npm run teletrace:down
 ```
 
 __You can follow updated on Twitter [@purista_js](https://twitter.com/purista_js) or join the [Discord server](https://discord.gg/9feaUm3H2v) to get in touch with PURISTA maintainers and other developers.__
