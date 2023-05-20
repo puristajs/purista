@@ -4,7 +4,6 @@ title: Zipkin
 shortTitle: Zipkin
 description: Zipkin
 image: https://purista.dev/graphic/zipkin_screenshot.png
-cover: https://purista.dev/graphic/zipkin_screenshot.png
 tag:
   - opentelemetry
   - Zipkin
