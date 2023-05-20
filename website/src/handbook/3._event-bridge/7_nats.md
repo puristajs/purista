@@ -7,8 +7,9 @@ tag:
   - event bridge
   - EventBridge
   - NATS
-  - mqtt
 ---
+
+![NATS event bridge](/graphic/nats_event_bridge_header.png)
 
 NATS is currently on the _might be intersting_ list.  
 Especially for IoT solutions, it might be a good choice.
