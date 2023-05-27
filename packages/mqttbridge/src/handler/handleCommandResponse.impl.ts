@@ -61,6 +61,12 @@ export const handleCommandResponse: IncomingMessageFunction = async function (me
         invocation.resolve(message.payload)
       } else if (isCommandErrorResponse(message)) {
         const error = message.isHandledError ? HandledError.fromMessage(message) : UnhandledError.fromMessage(message)
+        log.error({ err: error }, error.message)
+        span.recordException(error)
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error.message,
+        })
         invocation.reject(error)
       }
     },

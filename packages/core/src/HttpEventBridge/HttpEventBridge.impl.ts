@@ -234,7 +234,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 
       if (isCommandErrorResponse(message)) {
         const err = message.isHandledError ? HandledError.fromMessage(message) : UnhandledError.fromMessage(message)
-        this.logger.error({ err }, 'invoke was returning an error')
+        this.logger.error({ err }, err.message)
         span.recordException(err)
         span.setStatus({
           code: SpanStatusCode.ERROR,
