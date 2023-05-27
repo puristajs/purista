@@ -4,6 +4,8 @@ import Trouter, { Methods } from 'trouter'
 export class HonoTRouter<T> implements Router<T> {
   router: Trouter<T>
 
+  name = 'Trouter'
+
   constructor() {
     this.router = new Trouter<T>()
   }
