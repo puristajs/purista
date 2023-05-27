@@ -5,8 +5,8 @@ import { createSandbox } from 'sinon'
 import { GenericContainer, StartedTestContainer } from 'testcontainers'
 import { z } from 'zod'
 
+import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1'
 import { MqttBridge } from '../src'
-import { theServiceServiceBuilder, theServiceV1Service } from './service/theService/v1'
 
 const MQTT_PORT = 1883
 const EXAMPLE_EVENT = 'exampleEvent'
@@ -33,6 +33,11 @@ describe('@purista/mqttbridge', () => {
           target: '/mosquitto/config/mosquitto.conf',
         },
       ])
+      .withLogConsumer((stream) => {
+        // stream.on('data', (line) => console.debug(line))
+        // eslint-disable-next-line no-console
+        stream.on('err', (line) => console.error(line))
+      })
       .start()
 
     eventbridge = new MqttBridge({ logger: logger.mock })
