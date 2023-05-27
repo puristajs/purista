@@ -225,6 +225,8 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
                   const error = message.isHandledError
                     ? HandledError.fromMessage(message)
                     : UnhandledError.fromMessage(message)
+                  span.recordException(error)
+                  this.logger.error({ err: error, ...span.spanContext() }, error.message)
                   mapEntry.reject(error)
                 }
                 return
