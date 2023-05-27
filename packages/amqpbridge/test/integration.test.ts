@@ -3,8 +3,8 @@ import { createSandbox } from 'sinon'
 import { GenericContainer, StartedTestContainer } from 'testcontainers'
 import { z } from 'zod'
 
+import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1'
 import { AmqpBridge } from '../src'
-import { theServiceServiceBuilder, theServiceV1Service } from './service/theService/v1'
 
 const AMQP_PORT = 5672
 const EXAMPLE_EVENT = 'exampleEvent'
@@ -18,7 +18,14 @@ describe('@purista/amqpbridge', () => {
   let service: Service
 
   beforeAll(async () => {
-    container = await new GenericContainer('rabbitmq:alpine').withExposedPorts(AMQP_PORT).start()
+    container = await new GenericContainer('rabbitmq:alpine')
+      .withLogConsumer((stream) => {
+        // stream.on('data', (line) => console.debug(line))
+        // eslint-disable-next-line no-console
+        stream.on('err', (line) => console.error(line))
+      })
+      .withExposedPorts({ host: AMQP_PORT, container: AMQP_PORT })
+      .start()
 
     eventbridge = new AmqpBridge({ logger: logger.mock })
     await eventbridge.start()
