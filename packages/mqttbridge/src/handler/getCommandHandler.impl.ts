@@ -70,8 +70,6 @@ export const getCommandHandler = (
 
           const result = await cb(command)
 
-          result.otp = result.otp || serializeOtp()
-
           const returnContext = deserializeOtp(log, result.otp)
           return this.startActiveSpan(
             PuristaSpanName.EventBridgeCommandResponseSent,
@@ -81,7 +79,7 @@ export const getCommandHandler = (
               const responseMessage = {
                 ...result,
                 instanceId: this.instanceId,
-                otp: serializeOtp(),
+                otp: result.otp || serializeOtp(),
               }
 
               subSpan.setAttribute(PuristaSpanTag.SenderServiceName, responseMessage.sender.serviceName)
