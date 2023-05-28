@@ -1,8 +1,9 @@
 import { resolve } from 'node:path'
 
 import fastifyStatic from '@fastify/static'
-import { DefaultStateStore, gracefulShutdown, initLogger } from '@purista/core'
+import { gracefulShutdown, initLogger } from '@purista/core'
 import { httpServerV1Service } from '@purista/httpserver'
+import { NatsStateStore } from '@purista/nats-state-store'
 import { NatsBridge } from '@purista/natsbridge'
 
 import httpServerConfig from './config/httpServerConfig'
@@ -20,7 +21,7 @@ export const main = async () => {
   await eventBridge.start()
 
   // create a state store
-  const stateStore = new DefaultStateStore({ logger })
+  const stateStore = new NatsStateStore({ logger })
 
   // create and init a webserver
   const httpServerService = httpServerV1Service.getInstance(eventBridge, {
