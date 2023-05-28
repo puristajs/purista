@@ -200,98 +200,110 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
     commandTimeout: number = this.defaultCommandTimeout,
   ): Promise<T> {
     const context = deserializeOtp(this.logger, input.otp)
-    return this.startActiveSpan(PuristaSpanName.EventBridgeInvokeCommand, {}, context, async (span) => {
-      const correlationId = getNewCorrelationId()
+    return this.startActiveSpan(
+      PuristaSpanName.EventBridgeInvokeCommand,
+      { kind: SpanKind.PRODUCER },
+      context,
+      async (span) => {
+        const correlationId = getNewCorrelationId()
 
-      const command: Command = Object.freeze({
-        ...input,
-        id: getNewEBMessageId(),
-        instanceId: this.instanceId,
-        correlationId,
-        timestamp: Date.now(),
-        messageType: EBMessageType.Command,
-        traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
-        otp: serializeOtp(),
-      })
-
-      const log = this.logger.getChildLogger({ ...span.spanContext(), traceId: command.traceId })
-
-      const removeFromPending = () => {
-        this.pendingInvocations.delete(correlationId)
-      }
-
-      const executionPromise = new Promise<T>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          const err = new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out', undefined, command.traceId)
-          log.warn({ err })
-          rejectFn(err)
-        }, commandTimeout)
-
-        const resolveFn = (successPayload: T) => {
-          clearTimeout(timeout)
-          removeFromPending()
-          resolve(successPayload)
-        }
-
-        const rejectFn = (err: unknown) => {
-          clearTimeout(timeout)
-          removeFromPending()
-          reject(err)
-        }
-
-        this.pendingInvocations.set(command.correlationId, {
-          resolve: resolveFn,
-          reject: rejectFn,
+        const command: Command = Object.freeze({
+          ...input,
+          id: getNewEBMessageId(),
+          instanceId: this.instanceId,
+          correlationId,
+          timestamp: Date.now(),
+          messageType: EBMessageType.Command,
+          traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
+          otp: serializeOtp(),
         })
-      })
 
-      span.setAttribute(PuristaSpanTag.SenderServiceName, command.sender.serviceName)
-      span.setAttribute(PuristaSpanTag.SenderServiceVersion, command.sender.serviceVersion)
-      span.setAttribute(PuristaSpanTag.SenderServiceTarget, command.sender.serviceTarget)
-      span.setAttribute(PuristaSpanTag.ReceiverServiceName, command.receiver.serviceName)
-      span.setAttribute(PuristaSpanTag.ReceiverServiceVersion, command.receiver.serviceVersion)
-      span.setAttribute(PuristaSpanTag.ReceiverServiceTarget, command.receiver.serviceTarget)
+        const log = this.logger.getChildLogger({ ...span.spanContext(), traceId: command.traceId })
 
-      const userProperties: Record<string, string> = serializeOtpToMqtt({
-        messageType: command.messageType,
-        senderServiceName: command.sender.serviceName,
-        senderServiceVersion: command.sender.serviceVersion,
-        senderServiceTarget: command.sender.serviceTarget,
-        receiverServiceName: command.receiver.serviceName,
-        receiverServiceVersion: command.receiver.serviceVersion,
-        receiverServiceTarget: command.receiver.serviceTarget,
-        instanceId: command.instanceId,
-      })
+        const removeFromPending = () => {
+          this.pendingInvocations.delete(correlationId)
+        }
 
-      if (command.eventName) {
-        userProperties.eventName = command.eventName
-      }
+        const executionPromise = new Promise<T>((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            const err = new UnhandledError(
+              StatusCode.GatewayTimeout,
+              'invocation timed out',
+              undefined,
+              command.traceId,
+            )
+            log.warn({ err })
+            rejectFn(err)
+          }, commandTimeout)
 
-      if (command.principalId) {
-        userProperties.principalId = command.principalId
-      }
+          const resolveFn = (successPayload: T) => {
+            clearTimeout(timeout)
+            removeFromPending()
+            resolve(successPayload)
+          }
 
-      const topic = getTopicName.bind(this)(command)
-      const responseTopic = getCommandResponseTopic.bind(this)()
+          const rejectFn = (err: unknown) => {
+            clearTimeout(timeout)
+            removeFromPending()
+            reject(err)
+          }
 
-      await this.client.publish(topic, JSON.stringify(command), {
-        // if event name is set use the largest QOS
-        qos: command.eventName
-          ? this.config.qoSSubscription > this.config.qosCommand
-            ? this.config.qoSSubscription
-            : this.config.qosCommand
-          : this.config.qosCommand,
-        properties: {
-          messageExpiryInterval: command.eventName ? this.config.defaultMessageExpiryInterval : msToSec(commandTimeout),
-          contentType: 'application/json',
-          userProperties,
-          correlationData: Buffer.from(command.correlationId),
-          responseTopic,
-        },
-      })
+          this.pendingInvocations.set(command.correlationId, {
+            resolve: resolveFn,
+            reject: rejectFn,
+          })
+        })
 
-      return executionPromise
-    })
+        span.setAttribute(PuristaSpanTag.SenderServiceName, command.sender.serviceName)
+        span.setAttribute(PuristaSpanTag.SenderServiceVersion, command.sender.serviceVersion)
+        span.setAttribute(PuristaSpanTag.SenderServiceTarget, command.sender.serviceTarget)
+        span.setAttribute(PuristaSpanTag.ReceiverServiceName, command.receiver.serviceName)
+        span.setAttribute(PuristaSpanTag.ReceiverServiceVersion, command.receiver.serviceVersion)
+        span.setAttribute(PuristaSpanTag.ReceiverServiceTarget, command.receiver.serviceTarget)
+
+        const userProperties: Record<string, string> = serializeOtpToMqtt({
+          messageType: command.messageType,
+          senderServiceName: command.sender.serviceName,
+          senderServiceVersion: command.sender.serviceVersion,
+          senderServiceTarget: command.sender.serviceTarget,
+          receiverServiceName: command.receiver.serviceName,
+          receiverServiceVersion: command.receiver.serviceVersion,
+          receiverServiceTarget: command.receiver.serviceTarget,
+          instanceId: command.instanceId,
+        })
+
+        if (command.eventName) {
+          userProperties.eventName = command.eventName
+        }
+
+        if (command.principalId) {
+          userProperties.principalId = command.principalId
+        }
+
+        const topic = getTopicName.bind(this)(command)
+        const responseTopic = getCommandResponseTopic.bind(this)()
+
+        await this.client.publish(topic, JSON.stringify(command), {
+          // if event name is set use the largest QOS
+          qos: command.eventName
+            ? this.config.qoSSubscription > this.config.qosCommand
+              ? this.config.qoSSubscription
+              : this.config.qosCommand
+            : this.config.qosCommand,
+          properties: {
+            messageExpiryInterval: command.eventName
+              ? this.config.defaultMessageExpiryInterval
+              : msToSec(commandTimeout),
+            contentType: 'application/json',
+            userProperties,
+            correlationData: Buffer.from(command.correlationId),
+            responseTopic,
+          },
+        })
+
+        return executionPromise
+      },
+    )
   }
 
   async registerCommand(
