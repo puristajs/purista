@@ -24,22 +24,48 @@ const apiSidebar = [
         link: '/api/modules/purista_amqpbridge.md',
       },
       {
+        text: '@purista/dapr-sdk',
+        link: '/api/classes/purista_dapr_sdk.DaprEventBridge.md',
+      },
+      {
         text: '@purista/mqttbridge',
         link: '/api/modules/purista_mqttbridge.md',
+      },
+      {
+        text: '@purista/natsbridge',
+        link: '/api/modules/purista_natsbridge.md',
       },
     ],
   },
   {
     text: 'Config stores',
-    children: [],
+    children: [
+      {
+        text: '@purista/dapr-sdk',
+        link: '/api/classes/purista_dapr_sdk.DaprConfigStore.md',
+      },
+    ],
   },
   {
     text: 'Secret stores',
-    children: [],
+    children: [
+      {
+        text: '@purista/dapr-sdk',
+        link: '/api/classes/purista_dapr_sdk.DaprSecretStore.md',
+      },
+    ],
   },
   {
     text: 'State stores',
     children: [
+      {
+        text: '@purista/dapr-sdk',
+        link: '/api/classes/purista_dapr_sdk.DaprStateStore.md',
+      },
+      {
+        text: '@purista/nats-state-store',
+        link: '/api/modules/purista_nats_state_store.md',
+      },
       {
         text: '@purista/redis-state-store',
         link: '/api/modules/purista_redis_state_store.md',
@@ -50,12 +76,12 @@ const apiSidebar = [
     text: 'Deployment SDK',
     children: [
       {
-        text: '@purista/k8s-sdk',
-        link: '/api/modules/purista_k8s_sdk.md',
-      },
-      {
         text: '@purista/dapr-sdk',
         link: '/api/modules/purista_dapr_sdk.md',
+      },
+      {
+        text: '@purista/k8s-sdk',
+        link: '/api/modules/purista_k8s_sdk.md',
       },
     ],
   },
