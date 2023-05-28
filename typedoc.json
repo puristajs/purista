@@ -11,7 +11,8 @@
       "./packages/natsbridge",
       "./packages/redis-state-store",
       "./packages/redis-config-store",
-      "./packages/nats-state-store"
+      "./packages/nats-state-store",
+      "./packages/nats-config-store"
     ],
     "plugin": ["typedoc-plugin-markdown"],
     "out": "website/src/api",
