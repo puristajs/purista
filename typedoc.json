@@ -10,6 +10,7 @@
       "./packages/mqttbridge",
       "./packages/natsbridge",
       "./packages/redis-state-store",
+      "./packages/redis-config-store",
       "./packages/nats-state-store"
     ],
     "plugin": ["typedoc-plugin-markdown"],
