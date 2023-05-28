@@ -8,7 +8,9 @@
       "./packages/httpserver",
       "./packages/k8s-sdk",
       "./packages/mqttbridge",
-      "./packages/redis-state-store"
+      "./packages/natsbridge",
+      "./packages/redis-state-store",
+      "./packages/nats-state-store"
     ],
     "plugin": ["typedoc-plugin-markdown"],
     "out": "website/src/api",
