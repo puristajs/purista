@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "./lib",
+  },
+  "exclude": [
+    "./**/*.d.ts",
+    "./lib/*"
+  ],
+  "ts-node": {
+    "files": true
+  },
+  "files": [
+    "src/index.ts"
+  ],
+}
