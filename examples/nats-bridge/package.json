@@ -17,7 +17,7 @@
   "scripts": {
     "start": "ts-node src/index.ts | pino-pretty",
     "dev": "NODE_ENV=development ts-node-dev src/index.ts | pino-pretty",
-    "nats:up": "docker start purista-nats ||  docker run -p 4222:4222 -p 8222:8222 -js --http_port 8222 --name purista-nats nats:alpine",
+    "nats:up": "docker start purista-nats ||  docker run -p 4222:4222 --name purista-nats nats:alpine -js",
     "nats:down": "docker container stop $(docker container ls -q --filter name=purista-nats)",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
     "test": "jest",
@@ -36,6 +36,7 @@
   "dependencies": {
     "@fastify/static": "^6.10.2",
     "@purista/natsbridge": "*",
+    "@purista/nats-state-store": "*",
     "@purista/core": "*",
     "@purista/httpserver": "*",
     "pino-pretty": "^10.0.0",
