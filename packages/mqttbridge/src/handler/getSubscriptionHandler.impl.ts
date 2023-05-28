@@ -40,7 +40,7 @@ export const getSubscriptionHandler = (
           const returnContext = deserializeOtp(log, result.otp)
           return this.startActiveSpan(
             PuristaSpanName.EventBridgeCommandResponseSent,
-            { kind: SpanKind.CONSUMER },
+            { kind: SpanKind.PRODUCER },
             returnContext,
             async (subSpan) => {
               const responseMessage = {
