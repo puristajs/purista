@@ -44,6 +44,10 @@ const apiSidebar = [
         text: '@purista/dapr-sdk',
         link: '/api/classes/purista_dapr_sdk.DaprConfigStore.md',
       },
+      {
+        text: '@purista/redis-config-store',
+        link: '/api/modules/purista_redis_config_store.md',
+      },
     ],
   },
   {
