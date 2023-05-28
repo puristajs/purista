@@ -346,97 +346,107 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
     commandTimeout: number = this.defaultCommandTimeout,
   ): Promise<T> {
     const context = deserializeOtp(this.logger, input.otp)
-    return this.startActiveSpan(PuristaSpanName.EventBridgeInvokeCommand, {}, context, async (span) => {
-      if (!this.channel) {
-        const err = new UnhandledError(StatusCode.InternalServerError, 'invoke failed: No channel - not connected')
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: err.message,
-        })
-        span.recordException(err)
-        this.logger.error({ err, ...span.spanContext() }, err.message)
-        throw err
-      }
-
-      const correlationId = getNewCorrelationId()
-
-      const command: Command = Object.freeze({
-        ...input,
-        id: getNewEBMessageId(),
-        instanceId: this.instanceId,
-        correlationId,
-        timestamp: Date.now(),
-        messageType: EBMessageType.Command,
-        traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
-        otp: serializeOtp(),
-      })
-
-      const removeFromPending = () => {
-        this.pendingInvocations.delete(correlationId)
-      }
-
-      const executionPromise = new Promise<T>((resolve, reject) => {
-        const timeout = setTimeout(() => {
-          const err = new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out', undefined, command.traceId)
-          this.logger.warn({ err })
-          rejectFn(err)
-        }, commandTimeout)
-
-        const resolveFn = (successPayload: T) => {
-          clearTimeout(timeout)
-          removeFromPending()
-          resolve(successPayload)
+    return this.startActiveSpan(
+      PuristaSpanName.EventBridgeInvokeCommand,
+      { kind: SpanKind.PRODUCER },
+      context,
+      async (span) => {
+        if (!this.channel) {
+          const err = new UnhandledError(StatusCode.InternalServerError, 'invoke failed: No channel - not connected')
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: err.message,
+          })
+          span.recordException(err)
+          this.logger.error({ err, ...span.spanContext() }, err.message)
+          throw err
         }
 
-        const rejectFn = (err: unknown) => {
-          clearTimeout(timeout)
-          removeFromPending()
-          reject(err)
+        const correlationId = getNewCorrelationId()
+
+        const command: Command = Object.freeze({
+          ...input,
+          id: getNewEBMessageId(),
+          instanceId: this.instanceId,
+          correlationId,
+          timestamp: Date.now(),
+          messageType: EBMessageType.Command,
+          traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
+          otp: serializeOtp(),
+        })
+
+        const removeFromPending = () => {
+          this.pendingInvocations.delete(correlationId)
         }
 
-        this.pendingInvocations.set(command.correlationId, {
-          resolve: resolveFn,
-          reject: rejectFn,
+        const executionPromise = new Promise<T>((resolve, reject) => {
+          const timeout = setTimeout(() => {
+            const err = new UnhandledError(
+              StatusCode.GatewayTimeout,
+              'invocation timed out',
+              undefined,
+              command.traceId,
+            )
+            this.logger.warn({ err })
+            rejectFn(err)
+          }, commandTimeout)
+
+          const resolveFn = (successPayload: T) => {
+            clearTimeout(timeout)
+            removeFromPending()
+            resolve(successPayload)
+          }
+
+          const rejectFn = (err: unknown) => {
+            clearTimeout(timeout)
+            removeFromPending()
+            reject(err)
+          }
+
+          this.pendingInvocations.set(command.correlationId, {
+            resolve: resolveFn,
+            reject: rejectFn,
+          })
         })
-      })
 
-      span.setAttribute(PuristaSpanTag.SenderServiceName, command.sender.serviceName)
-      span.setAttribute(PuristaSpanTag.SenderServiceVersion, command.sender.serviceVersion)
-      span.setAttribute(PuristaSpanTag.SenderServiceTarget, command.sender.serviceTarget)
-      span.setAttribute(PuristaSpanTag.ReceiverServiceName, command.receiver.serviceName)
-      span.setAttribute(PuristaSpanTag.ReceiverServiceVersion, command.receiver.serviceVersion)
-      span.setAttribute(PuristaSpanTag.ReceiverServiceTarget, command.receiver.serviceTarget)
+        span.setAttribute(PuristaSpanTag.SenderServiceName, command.sender.serviceName)
+        span.setAttribute(PuristaSpanTag.SenderServiceVersion, command.sender.serviceVersion)
+        span.setAttribute(PuristaSpanTag.SenderServiceTarget, command.sender.serviceTarget)
+        span.setAttribute(PuristaSpanTag.ReceiverServiceName, command.receiver.serviceName)
+        span.setAttribute(PuristaSpanTag.ReceiverServiceVersion, command.receiver.serviceVersion)
+        span.setAttribute(PuristaSpanTag.ReceiverServiceTarget, command.receiver.serviceTarget)
 
-      const headers: Record<string, string | undefined> = {
-        messageType: command.messageType,
-        senderServiceName: command.sender.serviceName,
-        senderServiceVersion: command.sender.serviceVersion,
-        senderServiceTarget: command.sender.serviceTarget,
-        receiverServiceName: command.receiver.serviceName,
-        receiverServiceVersion: command.receiver.serviceVersion,
-        receiverServiceTarget: command.receiver.serviceTarget,
-        instanceId: command.instanceId,
-        eventName: command.eventName,
-        principalId: command.principalId,
-      }
-      serializeOtpForAmqpHeader(headers)
+        const headers: Record<string, string | undefined> = {
+          messageType: command.messageType,
+          senderServiceName: command.sender.serviceName,
+          senderServiceVersion: command.sender.serviceVersion,
+          senderServiceTarget: command.sender.serviceTarget,
+          receiverServiceName: command.receiver.serviceName,
+          receiverServiceVersion: command.receiver.serviceVersion,
+          receiverServiceTarget: command.receiver.serviceTarget,
+          instanceId: command.instanceId,
+          eventName: command.eventName,
+          principalId: command.principalId,
+        }
+        serializeOtpForAmqpHeader(headers)
 
-      const content = await this.encodeContent(command, 'application/json', 'utf-8')
+        const content = await this.encodeContent(command, 'application/json', 'utf-8')
 
-      this.channel.publish(this.config.exchangeName || getDefaultConfig().exchangeName, '', content, {
-        messageId: command.id,
-        timestamp: command.timestamp,
-        correlationId: command.correlationId,
-        contentType: 'application/json',
-        contentEncoding: 'utf-8',
-        type: command.messageType,
-        headers,
-        replyTo: this.replyQueueName,
-        persistent: true,
-      })
+        this.channel.publish(this.config.exchangeName || getDefaultConfig().exchangeName, '', content, {
+          messageId: command.id,
+          timestamp: command.timestamp,
+          correlationId: command.correlationId,
+          contentType: 'application/json',
+          contentEncoding: 'utf-8',
+          type: command.messageType,
+          headers,
+          replyTo: this.replyQueueName,
+          persistent: true,
+        })
 
-      return executionPromise
-    })
+        return executionPromise
+      },
+    )
   }
 
   /**
@@ -508,7 +518,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
               const returnContext = deserializeOtp(this.logger, result.otp)
               return this.startActiveSpan(
                 PuristaSpanName.EventBridgeCommandResponseSent,
-                { kind: SpanKind.CONSUMER },
+                { kind: SpanKind.PRODUCER },
                 returnContext,
                 async (subSpan) => {
                   const responseMessage = {
