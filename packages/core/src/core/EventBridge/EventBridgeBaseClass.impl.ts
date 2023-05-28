@@ -31,15 +31,15 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
     const logger = config?.logger || initLogger(config?.logLevel)
     this.logger = logger.getChildLogger({ name })
 
+    this.instanceId = config.instanceId || getNewInstanceId()
     this.config = {
       logger: logger.getChildLogger({ name }),
-      instanceId: config.instanceId || getNewInstanceId(),
+      instanceId: this.instanceId,
       defaultCommandTimeout: config.defaultCommandTimeout || 30000,
       spanProcessor: undefined,
       ...config,
     }
 
-    this.instanceId = config.instanceId || getNewInstanceId()
     this.defaultCommandTimeout = config.defaultCommandTimeout || 30000
 
     const resource = Resource.default().merge(
