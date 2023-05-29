@@ -31,7 +31,7 @@
     "bump:patch": "npm version patch --no-git-tag-version"
   },
   "devDependencies": {
-    "@types/eslint": "^8.37.0",
+    "@types/eslint": "^8.40.0",
     "@types/minimist": "^1.2.2",
     "@types/node": "^18.15.9"
   },
