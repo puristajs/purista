@@ -39,6 +39,6 @@
     "@purista/dapr-sdk": "*",
     "@purista/core": "*",
     "zod": "3.21.4",
-    "@hono/node-server": "^1.0.1"
+    "@hono/node-server": "^1.0.2"
   }
 }
