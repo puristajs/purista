@@ -16,6 +16,7 @@ echo $CONTENT > ./packages/redis-state-store/src/version.ts
 echo $CONTENT > ./packages/redis-config-store/src/version.ts
 echo $CONTENT > ./packages/nats-state-store/src/version.ts
 echo $CONTENT > ./packages/nats-config-store/src/version.ts
+echo $CONTENT > ./packages/infisical-secret-store/src/version.ts
 
 git add .
 git commit -am "chore: bump versions to $NODE_VERSION"
