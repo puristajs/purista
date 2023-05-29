@@ -1,14 +1,18 @@
-# @purista/mqttbridge
+# @purista/natsbridge
 
-Package for using a MQTT broker like rabbitMQ as event bridge.
+Package for using a [NATS](https://nats.io/) broker as event bridge.  
+The event bridge supports brokers with and without JetStream enabled.
+
+If JetStream is enabled, subscriptions which are marked as durable are persisted by using JetStream.  
+If JetStream is not available, subscription fall back to live-subscriptions without any persistence.  
 
 Example usage:
 
 ```typescript
-import { MqttBridge } from '@purista/mqttbridge'
+import { NatsBridge } from '@purista/natsbridge'
 
 // create and init our eventbridge
-  const eventBridge = new MqttBridge()
+  const eventBridge = new NatsBridge()
   await eventBridge.start()
 
 ```

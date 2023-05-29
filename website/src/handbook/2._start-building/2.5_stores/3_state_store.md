@@ -30,6 +30,16 @@ The state store is a simple interface to a key-value-store. They key must be a s
 
 ## Usage
 
+State stores are provided to services during instance creation.
+
+```typescript
+const stateStore = new DaprStateStore({ stateStoreName: 'local-state-store' })
+
+const myService = myV1Service.getInstance(eventBridge, {
+    stateStore,
+  })
+```
+
 The state store is provided inside the `context` of command functions and subscription functions.  
 It can be used like this:
 

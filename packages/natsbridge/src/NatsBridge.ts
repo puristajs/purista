@@ -54,6 +54,23 @@ import { serializeOtpToNats } from './serializeOtpToNats.impl'
 import { getCommandSubscriptionTopic, getSubscriptionTopic, getTopicName } from './topic'
 import { NatsBridgeConfig } from './types'
 
+/**
+The event bridge supports brokers with and without JetStream enabled.
+
+If JetStream is enabled, subscriptions which are marked as durable are persisted by using JetStream.  
+If JetStream is not available, subscription fall back to live-subscriptions without any persistence.  
+
+Example usage:
+
+@example ```typescript
+import { NatsBridge } from '@purista/natsbridge'
+
+// create and init our eventbridge
+  const eventBridge = new NatsBridge()
+  await eventBridge.start()
+
+```
+ */
 export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implements EventBridge {
   public connection: NatsConnection | undefined
 

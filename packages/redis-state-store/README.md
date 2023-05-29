@@ -15,7 +15,7 @@
  await store.setState('stateKey',{ myState: 'value' })
 
  let value = await store.getState('stateKey')
- console.log(value) // outputs: { myState: 'value' }
+ console.log(value) // outputs: { stateKey: { myState: 'value' } }
 
  await store.removeState('stateKey')
 
