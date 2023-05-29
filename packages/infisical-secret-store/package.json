@@ -1,0 +1,60 @@
+{
+  "name": "@purista/infisical-secret-store",
+  "version": "1.6.0",
+  "description": "State store with Infisical as database",
+  "homepage": "https://purista.dev",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:sebastianwessel/purista.git"
+  },
+  "author": "Sebastian Wessel",
+  "license": "ISC",
+  "directories": {
+    "lib": "lib/index.js",
+    "man": "docs",
+    "example": "example"
+  },
+  "main": "./lib/cjs/index.cjs",
+  "module": "./lib/esm/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./lib/esm/index.mjs",
+      "require": "./lib/cjs/index.cjs",
+      "types": "./lib/types/index.d.ts"
+    }
+  },
+  "typings": "lib/types/index.d.ts",
+  "files": [
+    "lib/**/*"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=18.15"
+  },
+  "scripts": {
+    "lint": "eslint . --ext .ts,.json  --cache . --fix",
+    "test": "npm run env:up && jest && npm run env:down",
+    "build": "rimraf lib && node ../../scripts/buildesm.js && tsc --emitDeclarationOnly --declarationMap false --declaration --outDir lib/types --project ./tsconfig.ref.json",
+    "build:dev": "rimraf lib && node ../../scripts/buildesm.js && tsc --emitDeclarationOnly --declaration --outDir lib/types --project ./tsconfig.ref.json",
+    "env:up": "docker-compose -f docker-compose.yml up -d",
+    "env:down": "docker-compose -f docker-compose.yml down",
+    "bump:major": "npm version major --no-git-tag-version",
+    "bump:minor": "npm version minor --no-git-tag-version",
+    "bump:patch": "npm version patch --no-git-tag-version"
+  },
+  "devDependencies": {
+    "@types/jest": "^29.5.1",
+    "@types/node": "^18.16.16",
+    "@types/sinon": "^10.x",
+    "jest": "^29.5.0",
+    "sinon": "^15.x",
+    "@swc/core": "^1.3.60",
+    "@swc/jest": "^0.2.26"
+  },
+  "dependencies": {
+    "@purista/core": "*"
+  },
+  "peerDependenciesMeta": {}
+}

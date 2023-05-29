@@ -61,6 +61,10 @@ const apiSidebar = [
         text: '@purista/dapr-sdk',
         link: '/api/classes/purista_dapr_sdk.DaprSecretStore.md',
       },
+      {
+        text: '@purista/infisical-secret-store',
+        link: '/api/modules/purista_infisical_secret_store.md',
+      },
     ],
   },
   {
