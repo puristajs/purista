@@ -15,7 +15,7 @@
  await store.setConfig('configKey',{ myConfig: 'value' })
 
  let value = await store.getConfig('configKey')
- console.log(value) // outputs: { myConfig: 'value' }
+ console.log(value) // outputs: { configKey: { myConfig: 'value' }}
 
  await store.removeConfig('configKey')
 

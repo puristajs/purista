@@ -33,8 +33,19 @@ The config store is a simple interface to a key-value-store. They key must be a 
 | [AWS Systems Manager Parameter Store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)             | [planned](https://github.com/sebastianwessel/purista/issues/104)      |
 | [Azure App Configuration](https://azure.microsoft.com/en-us/products/app-configuration)   | [planned](https://github.com/sebastianwessel/purista/issues/105)      |
 | [Dapr](https://dapr.io)       | [@purista/dapr-sdk](../../7._deployment/4_dapr.md) |
+| [Redis](https://redis.io)     | [@purista/redis-config-store](../../../api/modules/purista_redis_config_store.md)  |
 
 ## Usage
+
+Config stores are provided to services during instance creation.
+
+```typescript
+const configStore = new DaprConfigStore({ configStoreName: 'local-config-store' })
+
+const myService = myV1Service.getInstance(eventBridge, {
+    configStore,
+  })
+```
 
 The config store is provided inside the `context` of command functions and subscription functions.  
 It can be used like this:
