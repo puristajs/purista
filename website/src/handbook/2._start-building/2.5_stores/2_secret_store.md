@@ -33,8 +33,19 @@ The secret store is a simple interface to a key-value-store. Keys and values are
 | [Google Cloud Secret Manager](https://cloud.google.com/secret-manager)    | [planned](https://github.com/sebastianwessel/purista/issues/108)      |
 | [HashiCorp Vault](https://www.vaultproject.io)                            | [planned](https://github.com/sebastianwessel/purista/issues/109)      |
 | [Dapr](https://dapr.io)       | [@purista/dapr-sdk](../../7._deployment/4_dapr.md) |
+| [Infisical](https://infisical.com)       | @purista/infisical-secret-store |
 
 ## Usage
+
+Secret stores are provided to services during instance creation.
+
+```typescript
+const secretStore = new DaprSecretStore({ secretStoreName: 'local-secret-store' })
+
+const myService = myV1Service.getInstance(eventBridge, {
+    secretStore,
+  })
+```
 
 The secret store is provided inside the `context` of command functions and subscription functions.  
 It can be used like this:
@@ -84,7 +95,6 @@ const store = new DefaultSecretStore({
 
 console.log(store.getSecret('mySecret')) // outputs: secret_value
 ```
-
 
 ## Custom secret store
 
