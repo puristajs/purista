@@ -1,28 +1,26 @@
-# @purista/redis-state-store
+# @purista/nats-config-store
 
- A state store for using redis as storage.  
- State values are stored as stringified JSON in the redis database.
-
- By default `get
+A config store for using NATS (with JetStream) as storage.  
+JetStream must be enabled at the NATS broker.
 
 ```typescript
- const config = {
-  url: 'redis://alice:foobared@awesome.redis.server:6380'
- }
+const config = {
+  port: 8222
+}
 
- const store = new RedisStateStore({ config })
+const store = new NatsConfigStore({ config })
 
- await store.setState('stateKey',{ myState: 'value' })
+await store.setConfig('configKey',{ myConfig: 'value' })
 
- let value = await store.getState('stateKey')
- console.log(value) // outputs: { myState: 'value' }
+let value = await store.getConfig('configKey')
+console.log(value) // outputs: { configKey: { myConfig: 'value' } }
 
- await store.removeState('stateKey')
+await store.removeConfig('configKey')
 
- value = await store.getState('stateKey')
- console.log(value) // outputs: undefined
+value = await store.getConfig('configKey')
+console.log(value) // outputs: undefined
 
- ```
+```
 
  See documentation of underlaying redis lib package for detailed configuration options - [NODE-REDIS](https://redis.js.org).
 

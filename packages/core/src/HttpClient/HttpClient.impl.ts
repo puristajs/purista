@@ -21,7 +21,7 @@ import { AuthCredentials, HttpClientConfig, HttpClientRequestOptions, RestClient
  * const result = await client.get('v1/orders')
  * ```
  */
-export class HttpClient<CustomConfig extends Record<string, unknown> = never> implements RestClient {
+export class HttpClient<CustomConfig extends Record<string, unknown> = {}> implements RestClient {
   public name = 'HttpClient'
   public logger: Logger
   public config: HttpClientConfig<CustomConfig>
@@ -188,8 +188,13 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = never> im
       )
     }, this.timeout)
 
-    const payloadString = typeof payload === 'string' ? payload : JSON.stringify(payload)
-    const body = payload ? payloadString : undefined
+    let body: string | undefined
+
+    if (typeof payload === 'string') {
+      body = payload
+    } else {
+      body = payload ? JSON.stringify(payload) : undefined
+    }
 
     return this.startActiveSpan(`${this.name}.${method}`, { kind: SpanKind.CLIENT }, context.active(), async (span) => {
       span.setAttribute(SemanticAttributes.HTTP_METHOD, method)
@@ -199,6 +204,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = never> im
       try {
         const { url, headers } = this.getUrlAndHeader(path, options)
         span.setAttribute(SemanticAttributes.HTTP_URL, url.toString())
+
         const response = await fetch(url, {
           method,
           signal: controller.signal,
@@ -305,7 +311,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = never> im
    * @param options
    * @returns
    */
-  async delete<T>(path: string, options?: HttpClientRequestOptions): Promise<T> {
-    return this.execute('DELETE', path, options) as Promise<T>
+  async delete<T>(path: string, options?: HttpClientRequestOptions, payload?: unknown): Promise<T> {
+    return this.execute('DELETE', path, options, payload) as Promise<T>
   }
 }
