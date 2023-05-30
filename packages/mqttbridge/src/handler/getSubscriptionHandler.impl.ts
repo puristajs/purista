@@ -1,5 +1,6 @@
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
+  BrokerHeaderCustomMsg,
   CustomMessage,
   deserializeOtp,
   EBMessage,
@@ -19,7 +20,7 @@ import { IncomingMessageFunction } from '../types'
 
 export const getSubscriptionHandler = (
   _subscription: Subscription,
-  cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+  cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
 ) => {
   const handler: IncomingMessageFunction = async function (message: EBMessage, packet) {
     const context = deserializeOtpFromMqtt(this.logger, message, packet.properties?.userProperties)
@@ -45,7 +46,10 @@ export const getSubscriptionHandler = (
             async (subSpan) => {
               const responseMessage = {
                 ...result,
-                instanceId: this.instanceId,
+                sender: {
+                  ...result.sender,
+                  instanceId: this.instanceId,
+                },
                 otp: serializeOtp(),
               }
 
@@ -59,12 +63,12 @@ export const getSubscriptionHandler = (
 
               subSpan.addEvent(responseMessage.eventName)
 
-              const userProperties: Record<string, string> = serializeOtpToMqtt({
+              const userProperties: BrokerHeaderCustomMsg = serializeOtpToMqtt({
                 messageType: responseMessage.messageType,
                 senderServiceName: responseMessage.sender.serviceName,
                 senderServiceVersion: responseMessage.sender.serviceVersion,
                 senderServiceTarget: responseMessage.sender.serviceTarget,
-                instanceId: responseMessage.instanceId,
+                senderInstanceId: responseMessage.sender.instanceId,
                 eventName: responseMessage.eventName,
               })
 

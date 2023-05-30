@@ -1,6 +1,6 @@
 import type { CorrelationId } from '../CorrelationId'
-import type { EBMessageAddress } from '../EBMessageAddress'
 import type { EBMessageBase } from '../EBMessageBase'
+import { EBMessageSenderAddress } from '../EBMessageSenderAddress'
 import { EBMessageType } from '../EBMessageType.enum'
 import { Prettify } from '../Prettify'
 
@@ -14,8 +14,7 @@ export type CommandSuccessResponse<PayloadType = unknown> = Prettify<
   {
     messageType: EBMessageType.CommandSuccessResponse
     correlationId: CorrelationId
-    sender: EBMessageAddress
-    receiver: EBMessageAddress
+    receiver: EBMessageSenderAddress
     payload: PayloadType // result payload
   } & EBMessageBase
 >

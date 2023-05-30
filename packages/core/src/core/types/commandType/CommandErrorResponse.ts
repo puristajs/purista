@@ -1,6 +1,6 @@
 import type { CorrelationId } from '../CorrelationId'
-import type { EBMessageAddress } from '../EBMessageAddress'
 import type { EBMessageBase } from '../EBMessageBase'
+import { EBMessageSenderAddress } from '../EBMessageSenderAddress'
 import { EBMessageType } from '../EBMessageType.enum'
 import { Prettify } from '../Prettify'
 import type { StatusCode } from '../StatusCode.enum'
@@ -17,8 +17,7 @@ export type CommandErrorResponse = Prettify<
     contentEncoding: 'utf-8'
     isHandledError: boolean
     correlationId: CorrelationId
-    sender: EBMessageAddress
-    receiver: EBMessageAddress
+    receiver: EBMessageSenderAddress
     payload: {
       status: StatusCode
       message: string

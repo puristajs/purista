@@ -16,6 +16,6 @@ describe('getSharedTopicName', () => {
     const originalTopic = 'purista/command/test_service/1/test_command'
     const topic = getSharedTopicName.bind(bridge)(originalTopic)
 
-    expect(topic).toBe('$share/purista/purista/command/test_service/1/test_command')
+    expect(topic).toBe('$share/sharedpurista/purista/command/test_service/1/test_command')
   })
 })

@@ -73,7 +73,6 @@ export const getCommandHandlerRestApi = function (
           const command: Command = {
             id: '',
             messageType: EBMessageType.Command,
-            instanceId: '',
             correlationId: '',
             timestamp: Date.now(),
             contentType: metadata.expose.contentTypeResponse || 'application/json',
@@ -86,6 +85,7 @@ export const getCommandHandlerRestApi = function (
               serviceName: '',
               serviceVersion: '',
               serviceTarget: '',
+              instanceId: '',
             },
             payload: {
               payload: body,

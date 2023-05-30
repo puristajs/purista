@@ -53,7 +53,6 @@ As PURISTA is a message based framework, the structure of messages might be inte
 |---|---|---|
 |messageType|yes|the type of message eg. command, response, custom...|
 |id|yes|the unique id off a single message|
-|instanceId|yes|the unique id off the event bridge instance which sends the message|
 |timestamp|yes|the timestamp as number in ms when the message was created|
 |correlationId|only used in Command and CommandResponse messages|a unique id generated when a comman message is send. the command response is using same correlationId|
 |principalId|no|the unique id of the user|
@@ -62,10 +61,12 @@ As PURISTA is a message based framework, the structure of messages might be inte
 |sender.serviceName|yes|the service name|
 |sender.serviceVersion|yes|the service version|
 |sender.serviceTarget|yes|the service function or subscription name|
+|sender.instanceId|yes|the unique id of the event bridge instance which sends the message|
 |receiver|depends on message type|the service function or subscription who should receive the message|
-|receiver.serviceName|yes|the service name|
-|receiver.serviceVersion|yes|the service version|
-|receiver.serviceTarget|yes|the service function or subscription name|
+|receiver.serviceName|only for commands & responses|the service name|
+|receiver.serviceVersion|only for commands & responses|the service version|
+|receiver.serviceTarget|only for commands & responses|the service function or subscription name|
+|receiver.instanceId|only for command responses|the unique id of the event bridge instance which receives the message|
 |payload|depends on message type|the message payload (business data)|
 |otp|no|OpenTelemetry context propagation as json stringified string|
 

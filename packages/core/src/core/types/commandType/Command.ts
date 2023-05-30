@@ -19,7 +19,6 @@ export type Command<PayloadType = unknown, ParameterType = unknown> = Prettify<
   {
     messageType: EBMessageType.Command
     correlationId: CorrelationId
-    sender: EBMessageAddress
     receiver: EBMessageAddress
     payload: {
       parameter: ParameterType

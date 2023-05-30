@@ -3,18 +3,19 @@ import { SubscriptionStorageEntry } from './types'
 
 export const getNewSubscriptionStorageEntry = (
   subscription: Subscription,
-  cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+  cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
 ): SubscriptionStorageEntry => {
   const entry: SubscriptionStorageEntry = {
     isMatchingMessageType: () => true,
     isMatchingSenderServiceName: () => true,
     isMatchingSenderServiceVersion: () => true,
     isMatchingSenderServiceTarget: () => true,
+    isMatchingSenderInstanceId: () => true,
     isMatchingReceiverServiceName: () => true,
     isMatchingReceiverServiceVersion: () => true,
     isMatchingReceiverServiceTarget: () => true,
+    isMatchingReceiverInstanceId: () => true,
     isMatchingPrincipalId: () => true,
-    isMatchingInstanceId: () => true,
     isMatchingEventName: () => true,
     emitEventName: subscription.emitEventName,
     cb,
@@ -24,8 +25,12 @@ export const getNewSubscriptionStorageEntry = (
     entry.isMatchingPrincipalId = (input: EBMessageType) => input === subscription.principalId
   }
 
-  if (subscription.instanceId) {
-    entry.isMatchingInstanceId = (input: EBMessageType) => input === subscription.instanceId
+  if (subscription.sender?.instanceId) {
+    entry.isMatchingSenderInstanceId = (input: EBMessageType) => input === subscription.sender?.instanceId
+  }
+
+  if (subscription.receiver?.instanceId) {
+    entry.isMatchingReceiverInstanceId = (input: EBMessageType) => input === subscription.receiver?.instanceId
   }
 
   if (subscription.messageType) {

@@ -46,7 +46,6 @@ describe('HandledError', () => {
 
     const commandErrorResponse: CommandErrorResponse = {
       messageType: EBMessageType.CommandErrorResponse,
-      instanceId: 'myInstance',
       isHandledError: true,
       id: 'messageTestId',
       traceId,

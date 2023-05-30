@@ -224,7 +224,7 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
   }
 
   async invoke<T>(
-    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId' | 'sender'>,
+    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'sender'>,
     endpoint: string,
   ): Promise<T> {
     return this.eventBridge.invoke<T>({
@@ -232,6 +232,7 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
         serviceName: this.serviceInfo.serviceName,
         serviceVersion: this.serviceInfo.serviceVersion,
         serviceTarget: `$$endpoint:${endpoint}`,
+        instanceId: this.eventBridge.instanceId,
       },
       ...input,
     })

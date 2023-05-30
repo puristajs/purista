@@ -83,7 +83,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
   protected subscriptions = new Map<
     string,
     {
-      cb: (message: CustomMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>
+      cb: (message: CustomMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>
       channel: Channel
     }
   >()
@@ -271,7 +271,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
   }
 
   async emitMessage<T extends EBMessage>(
-    message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>,
+    message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>,
     contentType = 'application/json',
     contentEncoding = 'utf-8',
   ): Promise<Readonly<EBMessage>> {
@@ -301,8 +301,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
         id: getNewEBMessageId(),
         timestamp: Date.now(),
         traceId: message.traceId || span.spanContext().traceId,
-        instanceId: this.instanceId,
         otp: serializeOtp(),
+        sender: {
+          ...message.sender,
+          instanceId: this.instanceId,
+        },
       })
 
       span.setAttribute(PuristaSpanTag.SenderServiceName, msg.sender.serviceName)
@@ -318,7 +321,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
         senderServiceName: msg.sender.serviceName,
         senderServiceVersion: msg.sender.serviceVersion,
         senderServiceTarget: msg.sender.serviceTarget,
-        instanceId: msg.instanceId,
+        senderInstanceId: msg.sender.instanceId,
         eventName: msg.eventName,
         principalId: msg.principalId,
       }
@@ -342,7 +345,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
   }
 
   async invoke<T>(
-    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
+    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
     commandTimeout: number = this.defaultCommandTimeout,
   ): Promise<T> {
     const context = deserializeOtp(this.logger, input.otp)
@@ -367,12 +370,15 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
         const command: Command = Object.freeze({
           ...input,
           id: getNewEBMessageId(),
-          instanceId: this.instanceId,
           correlationId,
           timestamp: Date.now(),
           messageType: EBMessageType.Command,
           traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
           otp: serializeOtp(),
+          sender: {
+            ...input.sender,
+            instanceId: this.instanceId,
+          },
         })
 
         const removeFromPending = () => {
@@ -421,10 +427,10 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
           senderServiceName: command.sender.serviceName,
           senderServiceVersion: command.sender.serviceVersion,
           senderServiceTarget: command.sender.serviceTarget,
+          senderInstanceId: command.sender.instanceId,
           receiverServiceName: command.receiver.serviceName,
           receiverServiceVersion: command.receiver.serviceVersion,
           receiverServiceTarget: command.receiver.serviceTarget,
-          instanceId: command.instanceId,
           eventName: command.eventName,
           principalId: command.principalId,
         }
@@ -523,8 +529,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
                 async (subSpan) => {
                   const responseMessage = {
                     ...result,
-                    instanceId: this.instanceId,
                     otp: serializeOtp(),
+                    sennder: {
+                      ...result.sender,
+                      instanceId: this.instanceId,
+                    },
                   }
 
                   subSpan.setAttribute(PuristaSpanTag.SenderServiceName, responseMessage.sender.serviceName)
@@ -540,10 +549,11 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
                     senderServiceName: responseMessage.sender.serviceName,
                     senderServiceVersion: responseMessage.sender.serviceVersion,
                     senderServiceTarget: responseMessage.sender.serviceTarget,
+                    senderInstanceId: responseMessage.sender.instanceId,
                     receiverServiceName: responseMessage.receiver.serviceName,
                     receiverServiceVersion: responseMessage.receiver.serviceVersion,
                     receiverServiceTarget: responseMessage.receiver.serviceTarget,
-                    instanceId: responseMessage.instanceId,
+                    receiverServiceInstanceId: responseMessage.receiver.instanceId,
                     replyTo: msg.properties.replyTo,
                     eventName: responseMessage.eventName,
                     principalId: responseMessage.principalId,
@@ -601,7 +611,13 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
     this.serviceFunctions.set(queueName, { cb, channel })
 
-    const info = createInfoMessage(EBMessageType.InfoServiceFunctionAdded, address, { payload: metadata })
+    const info = createInfoMessage(
+      EBMessageType.InfoServiceFunctionAdded,
+      { ...address, instanceId: this.instanceId },
+      {
+        payload: metadata,
+      },
+    )
     await this.emitMessage(info)
 
     return queueName
@@ -628,7 +644,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
   async registerSubscription(
     subscription: Subscription,
-    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
   ): Promise<string> {
     if (!this.connection) {
       throw new Error('No connection - not connected')
@@ -667,12 +683,13 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
       senderServiceName: subscription.sender?.serviceName,
       senderServiceVersion: subscription.sender?.serviceVersion,
       senderServiceTarget: subscription.sender?.serviceTarget,
+      senderInstanceId: subscription.sender?.instanceId,
       receiverServiceName: subscription.receiver?.serviceName,
       receiverServiceVersion: subscription.receiver?.serviceVersion,
       receiverServiceTarget: subscription.receiver?.serviceTarget,
+      receiverInstanceId: subscription.receiver?.instanceId,
       eventName: subscription.eventName,
       principalId: subscription.principalId,
-      instanceId: subscription.instanceId,
     })
 
     const consume = await channel.consume(

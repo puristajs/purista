@@ -141,7 +141,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
   }
 
   async emitMessage<T extends EBMessage>(
-    message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>,
+    message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>,
   ): Promise<Readonly<EBMessage>> {
     const currentContext = deserializeOtp(this.logger, message.otp)
 
@@ -152,10 +152,13 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
       async (span) => {
         const msg = Object.freeze({
           ...message,
+          sender: {
+            ...message.sender,
+            instanceId: this.instanceId,
+          },
           id: getNewEBMessageId(),
           timestamp: Date.now(),
           traceId: message.traceId || span.spanContext().traceId,
-          instanceId: this.instanceId,
           otp: serializeOtp(),
         })
 
@@ -198,15 +201,18 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
   }
 
   async invoke<T>(
-    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
+    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
     ttl?: number,
   ): Promise<T> {
     const currentContext = deserializeOtp(this.logger, input.otp)
     return this.startActiveSpan(PuristaSpanName.EventBridgeInvokeCommand, {}, currentContext, async (span) => {
       const command: Command = Object.freeze({
         ...input,
+        sender: {
+          ...input.sender,
+          instanceId: this.instanceId,
+        },
         id: getNewEBMessageId(),
-        instanceId: this.instanceId,
         correlationId: getNewCorrelationId(),
         timestamp: Date.now(),
         messageType: EBMessageType.Command,
@@ -304,7 +310,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 
   async registerSubscription(
     subscription: Subscription,
-    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
   ): Promise<string> {
     if (this.isStarted) {
       throw new UnhandledError(

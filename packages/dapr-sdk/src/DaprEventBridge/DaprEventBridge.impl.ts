@@ -105,7 +105,7 @@ export class DaprEventBridge extends HttpEventBridge<DaprEventBridgeConfig> impl
 
   async registerSubscription(
     subscription: Subscription,
-    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
   ): Promise<string> {
     if (!subscription.eventName) {
       const err = new UnhandledError(StatusCode.InternalServerError, 'only subscriptions by event name are supported')

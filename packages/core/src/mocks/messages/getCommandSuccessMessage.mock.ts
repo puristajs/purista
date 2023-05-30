@@ -14,8 +14,7 @@ export const getCommandSuccessMessageMock = <PayloadType>(
   const cmdMessage: Readonly<Command<unknown, unknown>> = commandMessage || getCommandMessageMock()
 
   const successResponse: Readonly<CommandSuccessResponse<PayloadType>> = Object.freeze({
-    ...createSuccessResponse(cmdMessage, payload),
-    instanceId: getNewInstanceId(),
+    ...createSuccessResponse(commandMessage?.receiver.instanceId || getNewInstanceId(), cmdMessage, payload),
     ...input,
   })
 

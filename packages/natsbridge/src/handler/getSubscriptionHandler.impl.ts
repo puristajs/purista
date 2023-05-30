@@ -1,5 +1,6 @@
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
+  BrokerHeaderCustomMsg,
   CustomMessage,
   deserializeOtp,
   EBMessage,
@@ -20,7 +21,7 @@ import { getTopicName } from '../topic'
 
 export const getSubscriptionHandler = (
   subscription: Subscription,
-  cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+  cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
 ) => {
   const handler = async function (this: NatsBridge, error: NatsError | null, msg: Msg | JsMsg) {
     if (error) {
@@ -60,7 +61,10 @@ export const getSubscriptionHandler = (
             async (subSpan) => {
               const responseMessage = {
                 ...result,
-                instanceId: this.instanceId,
+                sender: {
+                  ...result.sender,
+                  instanceId: this.instanceId,
+                },
                 otp: serializeOtp(),
               }
 
@@ -74,12 +78,12 @@ export const getSubscriptionHandler = (
 
               subSpan.addEvent(responseMessage.eventName)
 
-              const userProperties: Record<string, string> = serializeOtpToNats({
+              const userProperties: BrokerHeaderCustomMsg = serializeOtpToNats({
                 messageType: responseMessage.messageType,
                 senderServiceName: responseMessage.sender.serviceName,
                 senderServiceVersion: responseMessage.sender.serviceVersion,
                 senderServiceTarget: responseMessage.sender.serviceTarget,
-                instanceId: responseMessage.instanceId,
+                senderInstanceId: responseMessage.sender.instanceId,
                 eventName: responseMessage.eventName,
               })
 

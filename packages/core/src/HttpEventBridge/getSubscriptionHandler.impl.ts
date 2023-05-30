@@ -21,7 +21,7 @@ import { HttpEventBridgeConfig, RouterFunction } from './types'
 export const getSubscriptionHandler = function (
   this: HttpEventBridge<HttpEventBridgeConfig>,
   subscription: Subscription,
-  cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+  cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
   wrappedInCloudEvent = false,
 ): RouterFunction {
   const handler: RouterFunction = async (c) => {

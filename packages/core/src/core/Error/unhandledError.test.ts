@@ -49,7 +49,6 @@ describe('UnhandledError', () => {
       messageType: EBMessageType.CommandErrorResponse,
       isHandledError: false,
       id: 'messageTestId',
-      instanceId: 'myInstance',
       traceId,
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',

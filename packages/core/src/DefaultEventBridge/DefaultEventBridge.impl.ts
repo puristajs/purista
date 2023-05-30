@@ -141,7 +141,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
                 this.logger.error({ err, ...span.spanContext() }, err.message)
                 this.emit(EventBridgeEventNames.EventbridgeError, err)
 
-                const errorResponse = createErrorResponse(message, StatusCode.BadGateway, err)
+                const errorResponse = createErrorResponse(this.instanceId, message, StatusCode.BadGateway, err)
                 this.emitMessage(errorResponse)
                 return next()
               }
@@ -245,7 +245,13 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
     const queueName = getCommandQueueName(address)
     this.serviceFunctions.set(queueName, cb)
 
-    const info = createInfoMessage(EBMessageType.InfoServiceFunctionAdded, address, { payload: metadata })
+    const info = createInfoMessage(
+      EBMessageType.InfoServiceFunctionAdded,
+      { ...address, instanceId: this.instanceId },
+      {
+        payload: metadata,
+      },
+    )
     await this.emitMessage(info)
 
     return queueName
@@ -258,7 +264,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
   async registerSubscription(
     subscription: Subscription,
-    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
   ): Promise<string> {
     const queueName = getSubscriptionQueueName(subscription.subscriber)
     const entry = getNewSubscriptionStorageEntry(subscription, cb)
@@ -276,9 +282,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
    *
    * @param message EBMessage
    */
-  async emitMessage(
-    message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>,
-  ): Promise<Readonly<EBMessage>> {
+  async emitMessage(message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>): Promise<Readonly<EBMessage>> {
     const context = deserializeOtp(this.logger, message.otp)
 
     const name = isCommandResponse(message as EBMessage)
@@ -320,7 +324,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
   }
 
   async invoke<T>(
-    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
+    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
     commandTimeout = this.defaultCommandTimeout,
   ): Promise<T> {
     const context = deserializeOtp(this.logger, input.otp)
@@ -330,8 +334,11 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
       const command: Command = Object.freeze({
         ...input,
+        sender: {
+          ...input.sender,
+          instanceId: this.instanceId,
+        },
         id: getNewEBMessageId(),
-        instanceId: this.instanceId,
         correlationId: getNewCorrelationId(),
         timestamp: Date.now(),
         messageType: EBMessageType.Command,
