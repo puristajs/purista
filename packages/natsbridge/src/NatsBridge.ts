@@ -29,26 +29,19 @@ import {
   Subscription,
   UnhandledError,
 } from '@purista/core'
-import { createHash } from 'crypto'
 import {
-  AckPolicy,
   connect,
-  DeliverPolicy,
-  DiscardPolicy,
   headers as getNewHeaders,
   JetStreamManager,
   JSONCodec,
   MsgHdrs,
-  nanos,
   NatsConnection,
-  RetentionPolicy,
   Subscription as NatsSubscription,
 } from 'nats'
 
 import { deserializeOtpFromNats } from './deserializeOtpFromNats.impl'
 import { getDefaultNatsBridgeConfig } from './getDefaultNatsBridgeConfig'
 import { getQueueGroupName } from './getQueueGroupName.impl'
-import { getStreamName } from './getStreamName.impl'
 import { getCommandHandler, getSubscriptionHandler } from './handler'
 import { serializeOtpToNats } from './serializeOtpToNats.impl'
 import { getCommandSubscriptionTopic, getSubscriptionTopic, getTopicName } from './topic'
@@ -248,8 +241,14 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 
         try {
           const msg = await this.connection.request(topic, data, {
-            timeout: command.eventName ? this.config.defaultMessageExpiryInterval : commandTimeout,
+            timeout: commandTimeout,
           })
+
+          await new Promise((resolve) =>
+            setTimeout(() => {
+              resolve(true)
+            }, 3000),
+          )
 
           const response: CommandResponse = this.sc.decode(msg.data) as CommandResponse
           const returnContext = deserializeOtpFromNats(this.logger, response, msg.headers)
@@ -265,7 +264,10 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
               }
 
               if (!isCommandResponse(response)) {
-                const err = new UnhandledError(StatusCode.InternalServerError, 'the received message is not a command')
+                const err = new UnhandledError(
+                  StatusCode.InternalServerError,
+                  'the received message is not a command response',
+                )
                 responseLog.error({ err }, err.message)
                 returnSpan.setStatus({
                   code: SpanStatusCode.ERROR,
@@ -342,60 +344,11 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
   ): Promise<string> {
     const topic = getSubscriptionTopic.bind(this)(subscription)
 
-    // if no JetStream support is available on broker or the subscription is not persisted
-    if (!subscription.eventBridgeConfig.durable || !this.isJetStreamEnabled) {
-      const queueName = getQueueGroupName(this.config.topicPrefix, subscription.subscriber)
-      const queue = subscription.eventBridgeConfig.shared ? queueName : undefined
-      this.connection?.subscribe(topic, {
-        callback: getSubscriptionHandler(subscription, cb).bind(this),
-        queue,
-      })
-
-      return topic
-    }
-
-    const streamName = getStreamName(this.config.topicPrefix, subscription)
-    await this.jsm?.streams.add({
-      name: streamName,
-      retention: subscription.eventBridgeConfig.shared ? RetentionPolicy.Workqueue : RetentionPolicy.Limits,
-      discard: DiscardPolicy.Old,
-      max_age: nanos(this.config.defaultMessageExpiryInterval * 1000),
-      subjects: [topic],
-    })
-
-    const consumerName = createHash('md5').update(`consumer-${streamName}`).digest('hex')
-    const consumer = await this.jsm?.consumers.add(streamName, {
-      name: consumerName,
-      ack_policy: AckPolicy.Explicit,
-      deliver_policy: DeliverPolicy.All,
-      durable_name: consumerName,
-    })
-
-    if (!consumer) {
-      throw new UnhandledError(StatusCode.InternalServerError, 'consumer not added')
-    }
-
-    const js = this.connection?.jetstream()
-    const c = await js?.consumers.get(streamName, consumer.name)
-    if (!c) {
-      throw new UnhandledError(StatusCode.InternalServerError, 'consumer not found')
-    }
-
-    const handler = getSubscriptionHandler(subscription, cb).bind(this)
-
-    await c.consume({
-      max_messages: this.config.maxMessages,
-      callback: async (msg) => {
-        if (subscription.eventBridgeConfig.autoacknowledge) {
-          msg.ack()
-        }
-
-        await handler(null, msg)
-
-        if (!subscription.eventBridgeConfig.autoacknowledge) {
-          msg.ack()
-        }
-      },
+    const queueName = getQueueGroupName(this.config.topicPrefix, subscription.subscriber)
+    const queue = subscription.eventBridgeConfig.shared ? queueName : undefined
+    this.connection?.subscribe(topic, {
+      callback: getSubscriptionHandler(subscription, cb).bind(this),
+      queue,
     })
 
     return topic
