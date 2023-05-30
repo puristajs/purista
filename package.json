@@ -6,7 +6,7 @@
     "build": "turbo run build",
     "build:dev": "turbo run build:dev",
     "lint": "turbo run lint --parallel",
-    "test": "jest --runInBand",
+    "test": "turbo run test",
     "dev:doc": "npm run dev -w website",
     "bump:major": "npm version major --no-git-tag-version",
     "bump:minor": "npm version minor --no-git-tag-version",

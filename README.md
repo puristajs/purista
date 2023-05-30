@@ -10,6 +10,8 @@ Run your application as a single instance, microservices or as cloud functions w
 
 Highly modular and easy to extend and to be customized for your needs.
 
+<div style="overflow:hidden;margin-left:auto;margin-right:auto;border-radius:10px;width:100%;max-width:800px;position:relative"><div style="width:100%;padding-bottom:75%"></div><iframe width="800" height="600" title="A quick intro how to start using the typescript framework PURISTA." src="https://snappify.com/embed/9309a984-a36b-4302-9335-990254c9d313?responsive" allow="clipboard-write" allowfullscreen="" style="background:#eee;position:absolute;left:0;top:0;width:100%" frameborder="0"></iframe></div>
+
 ![PURISTA](advertise_large.svg)
 **Visit [purista.dev](https://purista.dev)**
 
