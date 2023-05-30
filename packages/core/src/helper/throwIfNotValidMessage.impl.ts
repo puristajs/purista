@@ -12,7 +12,12 @@ export const throwIfNotValidMessage = (input: unknown) => {
     .object({
       messageType: z.nativeEnum(EBMessageType),
       id: z.string(),
-      instanceId: z.string(),
+      sender: z.object({
+        serviceName: z.string(),
+        serviceVersion: z.string(),
+        serviceTarget: z.string(),
+        instanceId: z.string(),
+      }),
       timestamp: z.number(),
       contentType: z.string(),
       contentEncoding: z.string(),

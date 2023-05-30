@@ -1,8 +1,8 @@
-/*
+import { execSync } from 'node:child_process'
 import { resolve } from 'node:path'
 
-import { DockerComposeEnvironment, StartedDockerComposeEnvironment } from 'testcontainers'
-*/
+import { getLoggerMock } from '@purista/core'
+
 import { InfisicalSecretStore } from '../src/InfisicalSecretStore.impl'
 /*
 read and write:
@@ -15,15 +15,8 @@ st.64746e08fd775a75b3f6e6db.82cd9d993fa4e5981a8132bdadea6adc.0c902c3ca70cb49d996
 describe('Infisical secret store', () => {
   const baseUrl = 'http://localhost:8080/'
 
-  /*
-  let environment: StartedDockerComposeEnvironment
   beforeAll(async () => {
-    const composeFilePath = resolve(__dirname, '../')
-    const composeFile = 'docker-compose.yml'
-    environment = await new DockerComposeEnvironment(composeFilePath, composeFile)
-      .withEnvironmentFile(resolve(__dirname, '../.env'))
-      .withNoRecreate()
-      .up()
+    execSync(`cd ${resolve(__dirname, '../')} && npm run env:up`)
 
     await new Promise((resolve) => {
       setTimeout(() => {
@@ -33,17 +26,7 @@ describe('Infisical secret store', () => {
   })
 
   afterAll(async () => {
-    await new Promise(() => {})
-    await environment.down()
-  })
-  */
-
-  beforeAll(async () => {
-    await new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(undefined)
-      }, 5000)
-    })
+    execSync(`cd ${resolve(__dirname, '../')} && npm run env:down`)
   })
 
   const store = new InfisicalSecretStore({
@@ -52,6 +35,7 @@ describe('Infisical secret store', () => {
     enableGet: true,
     enableRemove: true,
     enableSet: true,
+    logger: getLoggerMock().mock,
   })
 
   it('set a secret key', async () => {

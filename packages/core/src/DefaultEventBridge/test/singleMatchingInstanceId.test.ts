@@ -10,12 +10,14 @@ describe('subscription matching for instanceId', () => {
     serviceName: 'SenderService',
     serviceVersion: '1',
     serviceTarget: 'senderServiceTarget',
+    instanceId: 'SenderServiceInstance',
   }
 
   const receiver = {
     serviceName: 'ReceiverService',
     serviceVersion: '2',
     serviceTarget: 'receiverServiceTarget',
+    instanceId: 'ReceiverServiceInstance',
   }
 
   const subscriber = {
@@ -30,7 +32,6 @@ describe('subscription matching for instanceId', () => {
 
   const getTestMessage = (): EBMessage => {
     return {
-      instanceId: 'instanceId',
       sender,
       receiver,
       payload: {},
@@ -46,12 +47,16 @@ describe('subscription matching for instanceId', () => {
     }
   }
 
-  it('matches on instanceId', () => {
+  it('matches on sender instanceId', () => {
     const subscription: Subscription = {
-      instanceId: 'instanceId',
+      sender: {
+        instanceId: 'SenderServiceInstance',
+      },
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
@@ -62,12 +67,58 @@ describe('subscription matching for instanceId', () => {
     expect(result).toBeTruthy()
   })
 
-  it('fails on different instanceId', () => {
+  it('fails on different sender instanceId', () => {
     const subscription: Subscription = {
-      instanceId: 'otherInstanceId',
+      sender: {
+        ...sender,
+        instanceId: 'otherInstanceId',
+      },
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
+      },
+    }
+
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
+
+    const result = isMessageMatchingSubscription(getLoggerMock().mock, getTestMessage(), storageEntry)
+
+    expect(result).toBeFalsy()
+  })
+
+  it('matches on receiver instanceId', () => {
+    const subscription: Subscription = {
+      receiver: {
+        instanceId: 'ReceiverServiceInstance',
+      },
+      subscriber,
+      eventBridgeConfig: {
+        durable: false,
+        autoacknowledge: true,
+        shared: true,
+      },
+    }
+
+    const storageEntry = getNewSubscriptionStorageEntry(subscription, callback)
+
+    const result = isMessageMatchingSubscription(getLoggerMock().mock, getTestMessage(), storageEntry)
+
+    expect(result).toBeTruthy()
+  })
+
+  it('fails on different receiver instanceId', () => {
+    const subscription: Subscription = {
+      receiver: {
+        ...receiver,
+        instanceId: 'otherInstanceId',
+      },
+      subscriber,
+      eventBridgeConfig: {
+        durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 

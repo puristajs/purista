@@ -21,6 +21,7 @@ export const getEventBridgeMock = (sandbox?: SinonSandbox): { mock: EventBridge;
 
   const mock: EventBridge = {
     name: 'EventBridgeMock',
+    instanceId: 'mockedInstanceId',
     defaultCommandTimeout: 30000,
     emitMessage,
     registerCommand,

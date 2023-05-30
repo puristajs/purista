@@ -26,7 +26,6 @@ export const getCommandMessageMock = <Payload = unknown, Parameter = unknown>(
     messageType: EBMessageType.Command,
     correlationId: getNewCorrelationId(),
     traceId: getNewTraceId(),
-    instanceId: getNewInstanceId(),
     principalId: 'mocked-principal-id',
     contentType: 'application/json',
     contentEncoding: 'utf-8',
@@ -34,11 +33,13 @@ export const getCommandMessageMock = <Payload = unknown, Parameter = unknown>(
       serviceName: 'mocked_sender',
       serviceVersion: '1',
       serviceTarget: 'mockedSenderFunction',
+      instanceId: getNewInstanceId(),
     },
     receiver: {
       serviceName: 'mocked_receiver',
       serviceVersion: '1',
       serviceTarget: 'mockedReceiverFunction',
+      instanceId: getNewInstanceId(),
     },
     payload: {
       payload: input?.payload?.payload as Payload,

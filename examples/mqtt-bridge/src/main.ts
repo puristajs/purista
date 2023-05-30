@@ -16,7 +16,10 @@ export const main = async () => {
   logger.info('application starts')
 
   // create and init our eventbridge
-  const eventBridge = new MqttBridge({ logger, host: 'localhost' })
+  const eventBridge = new MqttBridge({
+    logger,
+    host: 'localhost',
+  })
   await eventBridge.start()
 
   // create a state store

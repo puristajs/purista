@@ -1,3 +1,5 @@
+import { InstanceId } from './InstanceId'
+
 /**
  * A event bridge message address describes the sender or receiver of a message.
  */
@@ -8,4 +10,6 @@ export type EBMessageAddress = {
   serviceVersion: string
   /** the name of the command or subscription */
   serviceTarget: string
+  /** instance id of eventbridge */
+  instanceId?: InstanceId
 }

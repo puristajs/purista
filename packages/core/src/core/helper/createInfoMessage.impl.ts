@@ -1,4 +1,4 @@
-import { EBMessageAddress, InfoMessage, InfoMessageType } from '../types'
+import { EBMessageSenderAddress, InfoMessage, InfoMessageType } from '../types'
 import { getNewEBMessageId } from './getNewEBMessageId.impl'
 import { getNewTraceId } from './getNewTraceId.impl'
 
@@ -13,10 +13,10 @@ import { getNewTraceId } from './getNewTraceId.impl'
  */
 export const createInfoMessage = (
   messageType: InfoMessageType,
-  sender: EBMessageAddress,
+  sender: EBMessageSenderAddress,
   additional?: Partial<InfoMessage>,
-): Omit<InfoMessage, 'instanceId'> => {
-  const info: Readonly<Omit<InfoMessage, 'instanceId'>> = Object.freeze({
+): InfoMessage => {
+  const info: Readonly<InfoMessage> = Object.freeze({
     messageType,
     id: getNewEBMessageId(),
     traceId: getNewTraceId(),

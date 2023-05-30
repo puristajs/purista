@@ -35,7 +35,7 @@
   },
   "scripts": {
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
-    "test": "npm run env:up && jest && npm run env:down",
+    "test": "jest",
     "build": "rimraf lib && node ../../scripts/buildesm.js && tsc --emitDeclarationOnly --declarationMap false --declaration --outDir lib/types --project ./tsconfig.ref.json",
     "build:dev": "rimraf lib && node ../../scripts/buildesm.js && tsc --emitDeclarationOnly --declaration --outDir lib/types --project ./tsconfig.ref.json",
     "env:up": "docker-compose -f docker-compose.yml up -d",

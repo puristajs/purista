@@ -14,8 +14,6 @@ export type CustomMessage<Payload = unknown> = Prettify<
     messageType: EBMessageType.CustomMessage
     /** the event name assigned to this custom message */
     eventName: string
-    /** the sender of the event */
-    sender: EBMessageAddress
     /** an optional receiver */
     receiver?: EBMessageAddress
     /** the message payload */

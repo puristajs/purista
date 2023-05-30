@@ -8,7 +8,6 @@ describe('createSuccessResponse', () => {
     const message: Command = {
       messageType: EBMessageType.Command,
       id: 'messageTestId',
-      instanceId: 'myInstance',
       traceId: 'testTraceId',
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
@@ -17,6 +16,7 @@ describe('createSuccessResponse', () => {
         serviceName: 'SenderService',
         serviceVersion: '1.1.1',
         serviceTarget: 'senderServiceTarget',
+        instanceId: 'SenderServiceInstance',
       },
       contentType: 'application/json',
       contentEncoding: 'utf-8',
@@ -24,6 +24,7 @@ describe('createSuccessResponse', () => {
         serviceName: 'ReceiverService',
         serviceVersion: '2.2.2',
         serviceTarget: 'receiverServiceTarget',
+        instanceId: 'ReceiverServiceInstance',
       },
       payload: {
         payload: { input: 'input payload' },
@@ -31,7 +32,7 @@ describe('createSuccessResponse', () => {
       },
     }
 
-    const result = createSuccessResponse(message, payload)
+    const result = createSuccessResponse('ReceiverServiceInstance', message, payload)
 
     expect(result.messageType).toBe(EBMessageType.CommandSuccessResponse)
     expect(result.payload).toBe(payload)
@@ -48,7 +49,6 @@ describe('createSuccessResponse', () => {
     const message: Command = {
       messageType: EBMessageType.Command,
       id: 'messageTestId',
-      instanceId: 'myInstance',
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
@@ -56,6 +56,7 @@ describe('createSuccessResponse', () => {
         serviceName: 'SenderService',
         serviceVersion: '1.1.1',
         serviceTarget: 'senderServiceTarget',
+        instanceId: 'SenderServiceInstance',
       },
       contentType: 'application/json',
       contentEncoding: 'utf-8',
@@ -63,6 +64,7 @@ describe('createSuccessResponse', () => {
         serviceName: 'ReceiverService',
         serviceVersion: '2.2.2',
         serviceTarget: 'receiverServiceTarget',
+        instanceId: 'ReceiverServiceInstance',
       },
       payload: {
         payload: { input: 'input payload' },
@@ -70,7 +72,7 @@ describe('createSuccessResponse', () => {
       },
     }
 
-    const result = createSuccessResponse(message, payload)
+    const result = createSuccessResponse('ReceiverServiceInstance', message, payload)
 
     expect(result.messageType).toBe(EBMessageType.CommandSuccessResponse)
     expect(result.payload).toBe(payload)

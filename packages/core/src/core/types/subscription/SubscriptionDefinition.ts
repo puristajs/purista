@@ -49,12 +49,14 @@ export type SubscriptionDefinition<
     serviceName?: string
     serviceVersion?: string
     serviceTarget?: string
+    instanceId?: InstanceId
   }
   /** filter for messages consumed by given receiver */
   receiver?: {
     serviceName?: string
     serviceVersion?: string
     serviceTarget?: string
+    instanceId?: InstanceId
   }
   /** filter for message type */
   messageType?: EBMessageType
@@ -62,8 +64,6 @@ export type SubscriptionDefinition<
   eventName?: string
   /** event name to be used for custom message if the subscription functions returns value  */
   emitEventName?: string
-  /** filter for instance id */
-  instanceId?: InstanceId
   /** filter for principal id */
   principalId?: PrincipalId
   /** hooks of subscription */

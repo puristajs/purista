@@ -1,4 +1,4 @@
-export * from './getCommandResponseTopic.impl'
+export * from './getCommandResponseSubscriptionTopic.impl'
 export * from './getCommandSubscriptionTopic.impl'
 export * from './getSharedTopicName.impl'
 export * from './getSubscriptionTopic.impl'

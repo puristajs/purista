@@ -76,6 +76,7 @@ describe('@purista/mqttbridge', () => {
         serviceName: service.info.serviceName,
         serviceVersion: service.info.serviceVersion,
         serviceTarget: 'some',
+        instanceId: eventbridge.instanceId,
       },
       payload: {
         payload: undefined,

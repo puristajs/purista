@@ -5,9 +5,14 @@ describe('throwIfNotValidMessage', () => {
   test("valid input doesn't throw", () => {
     expect(() => {
       throwIfNotValidMessage({
+        sender: {
+          serviceName: 'SenderService',
+          serviceVersion: '1',
+          serviceTarget: 'senderServiceTarget',
+          instanceId: 'SenderServiceInstance',
+        },
         messageType: 'command',
         id: 'my-id',
-        instanceId: 'my-instance-id',
         timestamp: 123456,
         contentType: 'application/json',
         contentEncoding: 'utf-8',

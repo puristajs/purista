@@ -15,12 +15,14 @@ export type Subscription<PayloadType = unknown, ParameterType = unknown> = {
     serviceName?: string
     serviceVersion?: string
     serviceTarget?: string
+    instanceId?: InstanceId
   }
   /** the consumer address of the message */
   receiver?: {
     serviceName?: string
     serviceVersion?: string
     serviceTarget?: string
+    instanceId?: InstanceId
   }
   /** the message type */
   messageType?: EBMessageType
@@ -30,8 +32,6 @@ export type Subscription<PayloadType = unknown, ParameterType = unknown> = {
   emitEventName?: string // event to emit if output payload is set
   /** the principal id  */
   principalId?: PrincipalId
-  /** the principal id  */
-  instanceId?: InstanceId
   /** the message payload */
   payload?: {
     parameter?: ParameterType

@@ -18,6 +18,8 @@ import {
  */
 export interface EventBridge {
   readonly name: string
+
+  readonly instanceId: string
   /**
    * The default time until when a command invocation automatically returns a time out error
    */
@@ -32,9 +34,7 @@ export interface EventBridge {
    * Emit a message to the eventbridge without awaiting a result
    * @param message the message
    */
-  emitMessage(
-    message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>,
-  ): Promise<Readonly<EBMessage>>
+  emitMessage(message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>): Promise<Readonly<EBMessage>>
 
   /**
    * Call a command of a service and return the result of this command
@@ -43,10 +43,7 @@ export interface EventBridge {
    * @param contentEncoding the content encoding of the message
    * @param ttl the time to live (timeout) of the invocation
    */
-  invoke<T>(
-    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
-    ttl?: number,
-  ): Promise<T>
+  invoke<T>(input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>, ttl?: number): Promise<T>
 
   /**
    *
@@ -77,7 +74,7 @@ export interface EventBridge {
    */
   registerSubscription(
     subscription: Subscription,
-    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
   ): Promise<string>
 
   /**
