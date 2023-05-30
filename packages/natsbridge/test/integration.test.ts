@@ -18,11 +18,12 @@ describe('@purista/natsbridge', () => {
 
   beforeAll(async () => {
     container = await new NatsContainer('nats:alpine')
-      .withArg('-js', '-js')
+      // .withArg('-js', '-js')
       .withLogConsumer((stream) => {
+        // eslint-disable-next-line no-console
         // stream.on('data', (line) => console.debug(line))
         // eslint-disable-next-line no-console
-        stream.on('err', (line) => console.error(line))
+        stream.on('err', (line) => console.error('Error in NATS container', line))
       })
       .start()
 
@@ -62,6 +63,7 @@ describe('@purista/natsbridge', () => {
         serviceName: service.info.serviceName,
         serviceVersion: service.info.serviceVersion,
         serviceTarget: 'some',
+        instanceId: eventbridge.instanceId,
       },
       payload: {
         payload: undefined,

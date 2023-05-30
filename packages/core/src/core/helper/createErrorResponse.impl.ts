@@ -1,5 +1,5 @@
 import { HandledError, UnhandledError } from '../Error'
-import { Command, CommandErrorResponse, EBMessageType, StatusCode, TraceId } from '../types'
+import { Command, CommandErrorResponse, EBMessageType, InstanceId, StatusCode, TraceId } from '../types'
 import { getErrorMessageForCode } from './getErrorMessageForCode.impl'
 import { getNewTraceId } from './getNewTraceId.impl'
 import { serializeOtp } from './serializeOtp.impl'
@@ -16,6 +16,7 @@ import { serializeOtp } from './serializeOtp.impl'
  * @group Helper
  */
 export const createErrorResponse = (
+  instanceId: InstanceId,
   originalEBMessage: Readonly<Command>,
   statusCode = StatusCode.InternalServerError,
   error?: unknown | string | Error | HandledError | UnhandledError,
@@ -31,7 +32,7 @@ export const createErrorResponse = (
 
   const traceId = originalEBMessage.traceId || errorTraceId || getNewTraceId()
 
-  const errorResponse: Readonly<Omit<CommandErrorResponse, 'instanceId'>> = Object.freeze({
+  const errorResponse: Readonly<CommandErrorResponse> = Object.freeze({
     id: originalEBMessage.id,
     isHandledError,
     traceId,
@@ -42,6 +43,7 @@ export const createErrorResponse = (
     messageType: EBMessageType.CommandErrorResponse,
     sender: {
       ...originalEBMessage.receiver,
+      instanceId,
     },
     receiver: {
       ...originalEBMessage.sender,

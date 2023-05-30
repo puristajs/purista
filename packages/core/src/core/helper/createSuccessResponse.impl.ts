@@ -1,4 +1,4 @@
-import { Command, CommandSuccessResponse, EBMessageType } from '../types'
+import { Command, CommandSuccessResponse, EBMessageType, InstanceId } from '../types'
 import { getNewTraceId } from './getNewTraceId.impl'
 
 /**
@@ -13,13 +13,14 @@ import { getNewTraceId } from './getNewTraceId.impl'
  * @group Helper
  */
 export const createSuccessResponse = <T>(
+  instanceId: InstanceId,
   originalEBMessage: Readonly<Command>,
   payload: T,
   eventName?: string,
   contentType = 'application/json',
   contentEncoding = 'utf-8',
-): Readonly<Omit<CommandSuccessResponse<T>, 'instanceId'>> => {
-  const successResponse: Omit<CommandSuccessResponse<T>, 'instanceId'> = Object.freeze({
+): Readonly<CommandSuccessResponse<T>> => {
+  const successResponse: CommandSuccessResponse<T> = Object.freeze({
     id: originalEBMessage.id,
     correlationId: originalEBMessage.correlationId,
     traceId: originalEBMessage.traceId || getNewTraceId(),
@@ -30,6 +31,7 @@ export const createSuccessResponse = <T>(
     messageType: EBMessageType.CommandSuccessResponse,
     sender: {
       ...originalEBMessage.receiver,
+      instanceId,
     },
     receiver: {
       ...originalEBMessage.sender,

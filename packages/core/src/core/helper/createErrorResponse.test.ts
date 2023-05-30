@@ -6,7 +6,6 @@ describe('createErrorResponse', () => {
   const message: Command = {
     messageType: EBMessageType.Command,
     id: 'messageTestId',
-    instanceId: 'myInstance',
     traceId: 'testTraceId',
     timestamp: Date.now(),
     contentType: 'application/json',
@@ -17,12 +16,14 @@ describe('createErrorResponse', () => {
       serviceName: 'SenderService',
       serviceVersion: '1.1.1',
       serviceTarget: 'senderServiceTarget',
+      instanceId: 'SenderServiceInstance',
     },
 
     receiver: {
       serviceName: 'ReceiverService',
       serviceVersion: '2.2.2',
       serviceTarget: 'receiverServiceTarget',
+      instanceId: 'ReceiverServiceInstance',
     },
     payload: {
       payload: { input: 'input payload' },
@@ -33,7 +34,7 @@ describe('createErrorResponse', () => {
   const statusCode = StatusCode.InternalServerError
 
   it('creates a error response', () => {
-    const result = createErrorResponse(message, statusCode)
+    const result = createErrorResponse('ReceiverServiceInstance', message, statusCode)
 
     const payload = { status: statusCode, message: 'Internal Server Error', traceId: message.traceId }
 
@@ -54,7 +55,7 @@ describe('createErrorResponse', () => {
 
     const error = new HandledError(StatusCode.BadRequest, messageText, data)
 
-    const result = createErrorResponse(message, statusCode, error)
+    const result = createErrorResponse('ReceiverServiceInstance', message, statusCode, error)
 
     const payload = { status: StatusCode.BadRequest, message: messageText, traceId: message.traceId, data }
 
@@ -75,7 +76,7 @@ describe('createErrorResponse', () => {
 
     const error = new UnhandledError(StatusCode.BadRequest, messageText, data)
 
-    const result = createErrorResponse(message, statusCode, error)
+    const result = createErrorResponse('ReceiverServiceInstance', message, statusCode, error)
 
     const payload = { status: statusCode, message: 'Internal Server Error', traceId: message.traceId }
 

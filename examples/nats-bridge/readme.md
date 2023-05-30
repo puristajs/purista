@@ -1,6 +1,6 @@
 # Full example
 
-This is an example of PURISTA using the NATS event bridge.  
+This is an example of PURISTA using the NATS event bridge & NATS state store.  
 
 ## Setup
 

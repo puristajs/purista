@@ -16,11 +16,6 @@ export const isMessageMatchingSubscription = (
     return false
   }
 
-  // if message type does not match, the principal id does not match
-  if (!subscription.isMatchingInstanceId(message.instanceId)) {
-    return false
-  }
-
   // if we are looking for a named event, if is does not match, the subscription does not match
   if (!subscription.isMatchingEventName(message.eventName)) {
     return false
@@ -31,7 +26,8 @@ export const isMessageMatchingSubscription = (
     if (
       !subscription.isMatchingReceiverServiceName() ||
       !subscription.isMatchingReceiverServiceVersion() ||
-      !subscription.isMatchingReceiverServiceTarget()
+      !subscription.isMatchingReceiverServiceTarget() ||
+      !subscription.isMatchingReceiverInstanceId()
     ) {
       return false
     }
@@ -40,7 +36,8 @@ export const isMessageMatchingSubscription = (
     if (
       !subscription.isMatchingSenderServiceName(message.sender.serviceName) ||
       !subscription.isMatchingSenderServiceTarget(message.sender.serviceTarget) ||
-      !subscription.isMatchingSenderServiceVersion(message.sender.serviceVersion)
+      !subscription.isMatchingSenderServiceVersion(message.sender.serviceVersion) ||
+      !subscription.isMatchingSenderInstanceId(message.sender.instanceId)
     ) {
       return false
     }
@@ -54,7 +51,8 @@ export const isMessageMatchingSubscription = (
     if (
       !subscription.isMatchingSenderServiceName(message.sender.serviceName) ||
       !subscription.isMatchingSenderServiceTarget(message.sender.serviceTarget) ||
-      !subscription.isMatchingSenderServiceVersion(message.sender.serviceVersion)
+      !subscription.isMatchingSenderServiceVersion(message.sender.serviceVersion) ||
+      !subscription.isMatchingSenderInstanceId(message.sender.instanceId)
     ) {
       return false
     }
@@ -62,7 +60,8 @@ export const isMessageMatchingSubscription = (
     if (
       !subscription.isMatchingReceiverServiceName(message.receiver?.serviceName) ||
       !subscription.isMatchingReceiverServiceTarget(message.receiver?.serviceTarget) ||
-      !subscription.isMatchingReceiverServiceVersion(message.receiver?.serviceVersion)
+      !subscription.isMatchingReceiverServiceVersion(message.receiver?.serviceVersion) ||
+      !subscription.isMatchingReceiverInstanceId(message.receiver?.instanceId)
     ) {
       return false
     }

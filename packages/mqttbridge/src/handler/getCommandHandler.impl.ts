@@ -1,5 +1,6 @@
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
+  BrokerHeaderCommandResponseMsg,
   Command,
   CommandDefinitionMetadataBase,
   CommandErrorResponse,
@@ -10,7 +11,6 @@ import {
   EBMessageAddress,
   EventBridgeEventNames,
   isCommand,
-  isCommandErrorResponse,
   PuristaSpanName,
   PuristaSpanTag,
   serializeOtp,
@@ -39,23 +39,6 @@ export const getCommandHandler = (
       async (span) => {
         const log = this.logger.getChildLogger({ ...span.spanContext(), traceId: command.traceId })
         try {
-          const responseTopic = packet.properties?.responseTopic
-
-          if (!responseTopic) {
-            const err = new UnhandledError(
-              StatusCode.InternalServerError,
-              'received a command message without response topic',
-            )
-            log.error({ err }, err.message)
-            span.setStatus({
-              code: SpanStatusCode.ERROR,
-              message: err.message,
-            })
-            span.recordException(err)
-            this.emit(EventBridgeEventNames.EventbridgeError, err)
-            return
-          }
-
           if (!isCommand(command)) {
             const err = new UnhandledError(StatusCode.InternalServerError, 'expected a command message')
             log.error({ err }, err.message)
@@ -78,7 +61,10 @@ export const getCommandHandler = (
             async (subSpan) => {
               const responseMessage = {
                 ...result,
-                instanceId: this.instanceId,
+                sender: {
+                  ...result.sender,
+                  instanceId: this.instanceId,
+                },
                 otp: result.otp || serializeOtp(),
               }
 
@@ -90,15 +76,16 @@ export const getCommandHandler = (
                 subSpan.addEvent(responseMessage.eventName)
               }
 
-              const userProperties: Record<string, string> = serializeOtpToMqtt({
+              const userProperties: BrokerHeaderCommandResponseMsg = serializeOtpToMqtt({
                 messageType: responseMessage.messageType,
                 senderServiceName: responseMessage.sender.serviceName,
                 senderServiceVersion: responseMessage.sender.serviceVersion,
                 senderServiceTarget: responseMessage.sender.serviceTarget,
+                senderInstanceId: responseMessage.sender.instanceId,
                 receiverServiceName: responseMessage.receiver.serviceName,
                 receiverServiceVersion: responseMessage.receiver.serviceVersion,
                 receiverServiceTarget: responseMessage.receiver.serviceTarget,
-                instanceId: responseMessage.instanceId,
+                receiverInstanceId: responseMessage.receiver.instanceId,
               })
 
               if (responseMessage.eventName) {
@@ -110,36 +97,18 @@ export const getCommandHandler = (
               }
 
               // emit the message 1st time as direct response
-              await this.client.publish(packet.properties?.responseTopic as string, JSON.stringify(responseMessage), {
+              const responseTopic = getTopicName.bind(this)(responseMessage)
+              await this.client.publish(responseTopic, JSON.stringify(responseMessage), {
                 qos: this.config.qosCommand,
                 properties: {
-                  messageExpiryInterval: this.config.defaultCommandTimeout,
+                  messageExpiryInterval: responseMessage.eventName
+                    ? msToSec(this.config.defaultMessageExpiryInterval)
+                    : this.config.defaultCommandTimeout,
                   contentType: 'application/json',
                   userProperties,
                   correlationData: Buffer.from(responseMessage.correlationId),
                 },
               })
-
-              if (this.config.commandResponsePublishTwice === 'never') {
-                return
-              }
-
-              // emit the message 2nd time as event
-              if (
-                this.config.commandResponsePublishTwice === 'always' ||
-                (responseMessage.eventName && this.config.commandResponsePublishTwice === 'eventOnly') ||
-                (isCommandErrorResponse(responseMessage) && this.config.commandResponsePublishTwice === 'eventAndError')
-              ) {
-                const eventTopic = getTopicName.bind(this)(responseMessage)
-                await this.client.publish(eventTopic, JSON.stringify(responseMessage), {
-                  qos: this.config.qoSSubscription,
-                  properties: {
-                    messageExpiryInterval: msToSec(this.config.defaultMessageExpiryInterval),
-                    contentType: 'application/json',
-                    userProperties,
-                  },
-                })
-              }
             },
           )
         } catch (error) {

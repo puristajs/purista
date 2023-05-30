@@ -11,7 +11,7 @@ describe('@purista/redis-state-store', () => {
     container = await new GenericContainer('redis')
       .withExposedPorts({
         container: REDIS_PORT,
-        host: REDIS_PORT,
+        host: REDIS_PORT - 1,
       })
       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
       .withLogConsumer((stream) => {
@@ -28,7 +28,7 @@ describe('@purista/redis-state-store', () => {
 
   it('set, get and remove values', async () => {
     const config = {
-      url: `redis://127.0.0.1:${REDIS_PORT}`,
+      url: `redis://127.0.0.1:${REDIS_PORT - 1}`,
     }
 
     const store = new RedisConfigStore({ config, enableSet: true, enableRemove: true })
@@ -50,7 +50,7 @@ describe('@purista/redis-state-store', () => {
 
   it('throws on disabled features', async () => {
     const config = {
-      url: `redis://127.0.0.1:${REDIS_PORT}`,
+      url: `redis://127.0.0.1:${REDIS_PORT - 1}`,
     }
 
     const store = new RedisConfigStore({ enableGet: false, enableRemove: false, enableSet: false, config })

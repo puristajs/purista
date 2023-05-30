@@ -72,12 +72,14 @@ export class SubscriptionDefinitionBuilder<
     serviceName?: string
     serviceVersion?: string
     serviceTarget?: string
+    instanceId?: InstanceId
   }
 
   private receiver?: {
     serviceName?: string
     serviceVersion?: string
     serviceTarget?: string
+    instanceId?: InstanceId
   }
 
   private fn?: SubscriptionFunction<
@@ -93,8 +95,6 @@ export class SubscriptionDefinitionBuilder<
   private emitEventName?: string
 
   private principalId?: PrincipalId
-
-  private instanceId?: InstanceId
 
   private durable = true
 
@@ -121,9 +121,11 @@ export class SubscriptionDefinitionBuilder<
    * Filter messages only from instance id
    * @param instanceId the instance id to subscribe
    * @returns
+   * @deprecated Use filterSentFrom or filterReceivedBy
    */
   filterInstanceId(instanceId: InstanceId) {
-    this.instanceId = instanceId
+    this.sender = this.sender || {}
+    this.sender.instanceId = instanceId
     return this
   }
 
@@ -194,17 +196,20 @@ export class SubscriptionDefinitionBuilder<
    * @param serviceName the name of the service that produces the message
    * @param serviceVersion the version of the service that produces the message
    * @param serviceTarget the command or subscription name of the service that produces the message
+   * @param instanceId the event bridge instance id which was publishing the message
    * @returns
    */
   filterSentFrom(
     serviceName: string | undefined,
     serviceVersion: string | undefined,
     serviceTarget: string | undefined,
+    instanceId: InstanceId | undefined,
   ) {
     this.sender = {
       serviceName,
       serviceVersion,
       serviceTarget,
+      instanceId,
     }
     return this
   }
@@ -224,17 +229,20 @@ export class SubscriptionDefinitionBuilder<
    * @param serviceName the name of the service that consumes the message
    * @param serviceVersion the version of the service that consumes the message
    * @param serviceTarget the command or subscription name of the service that consumes the message
+   * @param instanceId the event bridge instance id which should receive the message
    * @returns
    */
   filterReceivedBy(
     serviceName: string | undefined,
     serviceVersion: string | undefined,
     serviceTarget: string | undefined,
+    instanceId: InstanceId | undefined,
   ) {
     this.receiver = {
       serviceName,
       serviceVersion,
       serviceTarget,
+      instanceId,
     }
     return this
   }
@@ -637,7 +645,6 @@ export class SubscriptionDefinitionBuilder<
       eventName: this.eventName,
       emitEventName: this.emitEventName,
       principalId: this.principalId,
-      instanceId: this.instanceId,
       call: getSubscriptionFunctionWithValidation<
         ServiceClassType,
         MessagePayloadType,

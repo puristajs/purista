@@ -1,5 +1,6 @@
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
+  BrokerHeaderCommandResponseMsg,
   Command,
   CommandDefinitionMetadataBase,
   CommandErrorResponse,
@@ -8,6 +9,7 @@ import {
   deserializeOtp,
   EBMessageAddress,
   EventBridgeEventNames,
+  InstanceId,
   isCommand,
   isCommandErrorResponse,
   PuristaSpanName,
@@ -74,7 +76,10 @@ export const getCommandHandler = (
             async (subSpan) => {
               const responseMessage = {
                 ...result,
-                instanceId: this.instanceId,
+                sender: {
+                  ...result.sender,
+                  instanceId: this.instanceId,
+                },
                 otp: result.otp || serializeOtp(),
               }
 
@@ -90,15 +95,16 @@ export const getCommandHandler = (
               if (this.connection?.info?.headers) {
                 headers = getNewHeaders()
 
-                const userProperties: Record<string, string> = serializeOtpToNats({
+                const userProperties: BrokerHeaderCommandResponseMsg = serializeOtpToNats({
                   messageType: responseMessage.messageType,
                   senderServiceName: responseMessage.sender.serviceName,
                   senderServiceVersion: responseMessage.sender.serviceVersion,
                   senderServiceTarget: responseMessage.sender.serviceTarget,
+                  senderInstanceId: responseMessage.sender.instanceId,
                   receiverServiceName: responseMessage.receiver.serviceName,
                   receiverServiceVersion: responseMessage.receiver.serviceVersion,
                   receiverServiceTarget: responseMessage.receiver.serviceTarget,
-                  instanceId: responseMessage.instanceId,
+                  receiverInstanceId: responseMessage.receiver.instanceId as InstanceId,
                 })
 
                 if (responseMessage.eventName) {

@@ -88,7 +88,6 @@ export const addServiceEndpoints = (
                 const command: Command = {
                   id: '',
                   messageType: EBMessageType.Command,
-                  instanceId: '',
                   correlationId: '',
                   timestamp: Date.now(),
                   contentType: definition.metadata.expose.contentTypeResponse || 'application/json',
@@ -103,6 +102,7 @@ export const addServiceEndpoints = (
                     serviceName: '',
                     serviceVersion: '',
                     serviceTarget: '',
+                    instanceId: '',
                   },
                   payload: {
                     payload: body,

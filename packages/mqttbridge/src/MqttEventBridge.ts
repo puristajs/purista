@@ -1,5 +1,7 @@
 import { SpanKind } from '@opentelemetry/api'
 import {
+  BrokerHeaderCommandMsg,
+  BrokerHeaderCustomMsg,
   Command,
   CommandDefinitionMetadataBase,
   CommandErrorResponse,
@@ -37,7 +39,7 @@ import { getCommandHandler, getSubscriptionHandler, handleCommandResponse } from
 import { msToSec } from './msToSec.impl'
 import { serializeOtpToMqtt } from './serializeOtpToMqtt.impl'
 import {
-  getCommandResponseTopic,
+  getCommandResponseSubscriptionTopic,
   getCommandSubscriptionTopic,
   getSharedTopicName,
   getSubscriptionTopic,
@@ -98,7 +100,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
       this.emit(EventBridgeEventNames.EventbridgeReconnecting)
     })
 
-    const topic = getCommandResponseTopic.bind(this)()
+    const topic = getCommandResponseSubscriptionTopic.bind(this)()
     const subscriptionIdentifier = this.router.add(topic, handleCommandResponse)
     await this.client.subscribe(topic, {
       qos: this.config.qosCommand,
@@ -107,6 +109,14 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 
     this.client.on('message', (topic: string, payload: Buffer, packet: IPublishPacket) => {
       const handler = this.router.match(topic, packet.properties?.subscriptionIdentifier)
+      if (!handler.length) {
+        const err = new UnhandledError(StatusCode.InternalServerError, 'received message for unknown topic ', {
+          topic: packet.topic,
+          id: packet.properties?.subscriptionIdentifier,
+        })
+        this.logger.error({ err }, err.message)
+      }
+
       let content: EBMessage
       try {
         content = JSON.parse(payload.toString())
@@ -116,18 +126,11 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
       }
 
       handler.forEach((fn) => fn.bind(this)(content, packet))
-      if (!handler.length) {
-        const err = new UnhandledError(StatusCode.InternalServerError, 'received message for unknown topic ', {
-          topic: packet.topic,
-          id: packet.properties?.subscriptionIdentifier,
-        })
-        this.logger.error({ err }, err.message)
-      }
     })
   }
 
   async emitMessage<T extends EBMessage>(
-    message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>,
+    message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>,
     contentType = 'application/json',
     contentEncoding = 'utf-8',
   ): Promise<Readonly<EBMessage>> {
@@ -140,10 +143,13 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
     return this.startActiveSpan(name, { kind: SpanKind.PRODUCER }, context, async (span) => {
       const msg = Object.freeze({
         ...message,
+        sender: {
+          ...message.sender,
+          instanceId: this.instanceId,
+        },
         id: getNewEBMessageId(),
         timestamp: Date.now(),
         traceId: message.traceId || span.spanContext().traceId,
-        instanceId: this.instanceId,
         otp: serializeOtp(),
         contentType,
         contentEncoding,
@@ -157,12 +163,12 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
         span.addEvent(msg.eventName)
       }
 
-      const userProperties: Record<string, string> = serializeOtpToMqtt({
+      const userProperties: BrokerHeaderCustomMsg = serializeOtpToMqtt({
         messageType: msg.messageType,
         senderServiceName: msg.sender.serviceName,
         senderServiceVersion: msg.sender.serviceVersion,
         senderServiceTarget: msg.sender.serviceTarget,
-        instanceId: msg.instanceId,
+        senderInstanceId: msg.sender.instanceId,
       })
 
       if (msg.eventName) {
@@ -196,7 +202,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
   }
 
   async invoke<T>(
-    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
+    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
     commandTimeout: number = this.defaultCommandTimeout,
   ): Promise<T> {
     const context = deserializeOtp(this.logger, input.otp)
@@ -209,8 +215,11 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 
         const command: Command = Object.freeze({
           ...input,
+          sender: {
+            ...input.sender,
+            instanceId: this.instanceId,
+          },
           id: getNewEBMessageId(),
-          instanceId: this.instanceId,
           correlationId,
           timestamp: Date.now(),
           messageType: EBMessageType.Command,
@@ -261,19 +270,23 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
         span.setAttribute(PuristaSpanTag.ReceiverServiceVersion, command.receiver.serviceVersion)
         span.setAttribute(PuristaSpanTag.ReceiverServiceTarget, command.receiver.serviceTarget)
 
-        const userProperties: Record<string, string> = serializeOtpToMqtt({
+        const userProperties: BrokerHeaderCommandMsg = serializeOtpToMqtt({
           messageType: command.messageType,
           senderServiceName: command.sender.serviceName,
           senderServiceVersion: command.sender.serviceVersion,
           senderServiceTarget: command.sender.serviceTarget,
+          senderInstanceId: command.sender.instanceId,
           receiverServiceName: command.receiver.serviceName,
           receiverServiceVersion: command.receiver.serviceVersion,
           receiverServiceTarget: command.receiver.serviceTarget,
-          instanceId: command.instanceId,
         })
 
         if (command.eventName) {
           userProperties.eventName = command.eventName
+        }
+
+        if (command.receiver.instanceId) {
+          userProperties.receiverInstanceId = command.receiver.instanceId
         }
 
         if (command.principalId) {
@@ -281,7 +294,6 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
         }
 
         const topic = getTopicName.bind(this)(command)
-        const responseTopic = getCommandResponseTopic.bind(this)()
 
         await this.client.publish(topic, JSON.stringify(command), {
           // if event name is set use the largest QOS
@@ -297,7 +309,6 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
             contentType: 'application/json',
             userProperties,
             correlationData: Buffer.from(command.correlationId),
-            responseTopic,
           },
         })
 
@@ -314,13 +325,16 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
   ): Promise<string> {
     const topic = getSharedTopicName.bind(this)(getCommandSubscriptionTopic.bind(this)(address))
     const subscriptionIdentifier = this.router.add(topic, getCommandHandler(address, cb, metadata, eventBridgeConfig))
-
     await this.client.subscribe(topic, {
       qos: this.config.qosCommand,
       properties: { subscriptionIdentifier },
     })
 
-    const info = createInfoMessage(EBMessageType.InfoServiceFunctionAdded, address, { payload: metadata })
+    const info = createInfoMessage(
+      EBMessageType.InfoServiceFunctionAdded,
+      { ...address, instanceId: this.instanceId },
+      { payload: metadata },
+    )
     await this.emitMessage(info)
 
     return topic
@@ -334,7 +348,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 
   async registerSubscription(
     subscription: Subscription,
-    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
   ): Promise<string> {
     const opts: IClientSubscribeOptions = { qos: this.config.qoSSubscription, properties: {} }
 

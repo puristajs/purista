@@ -5,7 +5,7 @@ const SECONDS_PER_DAY = 86_400
 export const getDefaultMqttBridgeConfig = (): MqttBridgeConfig => {
   return {
     topicPrefix: 'purista',
-    shareTopicName: 'purista',
+    shareTopicName: 'sharedpurista',
     shareTopicPrefix: '$share',
     emptyTopicPartString: '__none__',
 
@@ -14,8 +14,6 @@ export const getDefaultMqttBridgeConfig = (): MqttBridgeConfig => {
 
     defaultSessionExpiryInterval: 30 * SECONDS_PER_DAY,
     defaultMessageExpiryInterval: 30 * SECONDS_PER_DAY,
-
-    commandResponsePublishTwice: 'eventOnly',
 
     host: 'localhost',
     port: 1883,

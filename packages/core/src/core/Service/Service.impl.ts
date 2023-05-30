@@ -27,6 +27,7 @@ import {
   CustomMessage,
   EBMessage,
   EBMessageAddress,
+  EBMessageSenderAddress,
   EBMessageType,
   InfoMessageType,
   Logger,
@@ -160,7 +161,12 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     return this.startActiveSpan('purista.sendServiceInfo', {}, undefined, async (span) => {
       const info = createInfoMessage(
         infoType,
-        { serviceName: this.info.serviceName, serviceVersion: this.info.serviceVersion, serviceTarget: target || '' },
+        {
+          serviceName: this.info.serviceName,
+          serviceVersion: this.info.serviceVersion,
+          serviceTarget: target || '',
+          instanceId: this.eventBridge.instanceId,
+        },
         { payload },
       )
 
@@ -172,10 +178,11 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
   }
 
   protected getInvokeFunction(serviceTarget: string, traceId: TraceId, principalId?: string) {
-    const sender: EBMessageAddress = {
+    const sender: EBMessageSenderAddress = {
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
       serviceTarget,
+      instanceId: this.eventBridge.instanceId,
     }
 
     const invokeCommand = async (
@@ -185,7 +192,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       contentType = 'application/json',
       contentEncoding = 'utf-8',
     ): Promise<any> => {
-      const msg: Readonly<Omit<Command, 'correlationId' | 'id' | 'timestamp' | 'instanceId'>> = Object.freeze({
+      const msg: Readonly<Omit<Command, 'correlationId' | 'id' | 'timestamp'>> = Object.freeze({
         messageType: EBMessageType.Command,
         traceId,
         sender,
@@ -206,10 +213,11 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
   }
 
   protected getEmitFunction(serviceTarget: string, traceId: TraceId, principalId: string | undefined) {
-    const sender: EBMessageAddress = {
+    const sender: EBMessageSenderAddress = {
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
       serviceTarget,
+      instanceId: this.eventBridge.instanceId,
     }
 
     const emitCustomEvent = async <Payload>(
@@ -220,7 +228,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     ) => {
       await this.startActiveSpan('purista.emitEvent', {}, undefined, async (span) => {
         span.addEvent(eventName)
-        const msg: Readonly<Omit<CustomMessage<Payload>, 'id' | 'instanceId' | 'timestamp'>> = Object.freeze({
+        const msg: Readonly<Omit<CustomMessage<Payload>, 'id' | 'timestamp'>> = Object.freeze({
           messageType: EBMessageType.CustomMessage,
           traceId,
           contentType,
@@ -437,7 +445,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           message: 'received invalid command',
         })
         return await this.startActiveSpan('sendErrorResponse', {}, undefined, async () =>
-          createErrorResponse(message, StatusCode.NotImplemented),
+          createErrorResponse(this.eventBridge.instanceId, message, StatusCode.NotImplemented),
         )
       }
 
@@ -501,7 +509,10 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
             subSpan.addEvent(command.eventName)
             this.emit(`custom-${command.eventName}`, result)
           }
-          return { ...createSuccessResponse(message, result, command.eventName), otp: serializeOtp() }
+          return {
+            ...createSuccessResponse(this.eventBridge.instanceId, message, result, command.eventName),
+            otp: serializeOtp(),
+          }
         })
       } catch (error) {
         span.recordException(error as Error)
@@ -514,7 +525,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           })
 
           return await this.startActiveSpan('sendErrorResponse', {}, undefined, async () =>
-            createErrorResponse(message, (error as HandledError).errorCode, error),
+            createErrorResponse(this.eventBridge.instanceId, message, (error as HandledError).errorCode, error),
           )
         }
 
@@ -531,7 +542,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
         })
 
         return await this.startActiveSpan(command.commandName + '.error', {}, undefined, async () =>
-          createErrorResponse(message, StatusCode.InternalServerError, error),
+          createErrorResponse(this.eventBridge.instanceId, message, StatusCode.InternalServerError, error),
         )
       }
     })
@@ -567,7 +578,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
   public async executeSubscription(
     message: Readonly<EBMessage>,
     subscriptionName: string,
-  ): Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined> {
+  ): Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined> {
     const subscription = this.subscriptions.get(subscriptionName)
 
     const otpContext = deserializeOtp(this.logger, message.otp)
@@ -668,7 +679,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
               async (subSpan) => {
                 this.emit(`custom-${subscription.emitEventName}`, result)
                 subSpan.addEvent(subscription.emitEventName as string)
-                const resultMsg: Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> = {
+                const resultMsg: Omit<CustomMessage, 'id' | 'timestamp'> = {
                   messageType: EBMessageType.CustomMessage,
                   contentType: subscription.metadata.expose.contentTypeResponse || 'application/json',
                   contentEncoding: subscription.metadata.expose.contentEncodingResponse || 'utf-8',
@@ -676,6 +687,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
                     serviceName: this.serviceInfo.serviceName,
                     serviceVersion: this.serviceInfo.serviceVersion,
                     serviceTarget: subscription.subscriptionName,
+                    instanceId: this.eventBridge.instanceId,
                   },
                   payload: result,
                   eventName: subscription.emitEventName as string,
@@ -735,7 +747,6 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
         },
         eventBridgeConfig: subscriptionDefinition.eventBridgeConfig,
         principalId: subscriptionDefinition.principalId,
-        instanceId: subscriptionDefinition.instanceId,
       }
 
       await this.eventBridge.registerSubscription(subscription, (message: EBMessage) =>
@@ -747,8 +758,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
   }
 
   async destroy() {
-    this.emit(ServiceEventsNames.ServiceDrain, undefined)
-    this.emit(ServiceEventsNames.ServiceStopped, undefined)
+    this.emit(ServiceEventsNames.ServiceDrain)
+    this.emit(ServiceEventsNames.ServiceStopped)
     this.removeAllListeners()
     await super.destroy()
   }

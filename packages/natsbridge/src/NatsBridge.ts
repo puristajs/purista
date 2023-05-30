@@ -1,5 +1,7 @@
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
+  BrokerHeaderCommandMsg,
+  BrokerHeaderCustomMsg,
   Command,
   CommandDefinitionMetadataBase,
   CommandErrorResponse,
@@ -107,7 +109,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
   }
 
   async emitMessage<T extends EBMessage>(
-    message: Omit<EBMessage, 'id' | 'timestamp' | 'instanceId' | 'correlationId'>,
+    message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>,
     contentType = 'application/json',
     contentEncoding = 'utf-8',
   ): Promise<Readonly<EBMessage>> {
@@ -124,10 +126,13 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
     return this.startActiveSpan(name, { kind: SpanKind.PRODUCER }, context, async (span) => {
       const msg = Object.freeze({
         ...message,
+        sender: {
+          ...message.sender,
+          instanceId: this.instanceId,
+        },
         id: getNewEBMessageId(),
         timestamp: Date.now(),
         traceId: message.traceId || span.spanContext().traceId,
-        instanceId: this.instanceId,
         otp: serializeOtp(),
         contentType,
         contentEncoding,
@@ -144,12 +149,12 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
       let headers: MsgHdrs | undefined
       if (this.connection?.info?.headers) {
         headers = getNewHeaders()
-        const userProperties: Record<string, string> = serializeOtpToNats({
+        const userProperties: BrokerHeaderCustomMsg = serializeOtpToNats({
           messageType: msg.messageType,
           senderServiceName: msg.sender.serviceName,
           senderServiceVersion: msg.sender.serviceVersion,
           senderServiceTarget: msg.sender.serviceTarget,
-          instanceId: msg.instanceId,
+          senderInstanceId: msg.sender.instanceId,
         })
 
         if (msg.eventName) {
@@ -171,7 +176,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
   }
 
   async invoke<T>(
-    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'instanceId'>,
+    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
     commandTimeout: number = this.defaultCommandTimeout,
   ): Promise<T> {
     if (!this.connection) {
@@ -192,8 +197,11 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 
         const command: Command = Object.freeze({
           ...input,
+          sender: {
+            ...input.sender,
+            instanceId: this.instanceId,
+          },
           id: getNewEBMessageId(),
-          instanceId: this.instanceId,
           correlationId,
           timestamp: Date.now(),
           messageType: EBMessageType.Command,
@@ -213,19 +221,23 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
         let headers: MsgHdrs | undefined
         if (this.connection?.info?.headers) {
           headers = getNewHeaders()
-          const userProperties: Record<string, string> = serializeOtpToNats({
+          const userProperties: BrokerHeaderCommandMsg = serializeOtpToNats({
             messageType: command.messageType,
             senderServiceName: command.sender.serviceName,
             senderServiceVersion: command.sender.serviceVersion,
             senderServiceTarget: command.sender.serviceTarget,
+            senderInstanceId: command.sender.instanceId,
             receiverServiceName: command.receiver.serviceName,
             receiverServiceVersion: command.receiver.serviceVersion,
             receiverServiceTarget: command.receiver.serviceTarget,
-            instanceId: command.instanceId,
           })
 
           if (command.eventName) {
             userProperties.eventName = command.eventName
+          }
+
+          if (command.receiver.instanceId) {
+            userProperties.receiverInstanceId = command.receiver.instanceId
           }
 
           if (command.principalId) {
@@ -321,7 +333,13 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 
     this.commands.set(`${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`, subscription)
 
-    const info = createInfoMessage(EBMessageType.InfoServiceFunctionAdded, address, { payload: metadata })
+    const info = createInfoMessage(
+      EBMessageType.InfoServiceFunctionAdded,
+      { ...address, instanceId: this.instanceId },
+      {
+        payload: metadata,
+      },
+    )
     await this.emitMessage(info)
 
     return topic
@@ -340,7 +358,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 
   async registerSubscription(
     subscription: Subscription,
-    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp' | 'instanceId'> | undefined>,
+    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
   ): Promise<string> {
     const topic = getSubscriptionTopic.bind(this)(subscription)
 

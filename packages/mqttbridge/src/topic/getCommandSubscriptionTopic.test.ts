@@ -19,6 +19,6 @@ describe('getCommandSubscriptionTopic', () => {
       serviceTarget: 'testCommand',
     })
 
-    expect(topic).toBe('purista/command/+/+/+/+/+/+/test_service/1/test_command')
+    expect(topic).toBe('purista/command/+/+/+/+/+/+/+/test_service/1/test_command')
   })
 })

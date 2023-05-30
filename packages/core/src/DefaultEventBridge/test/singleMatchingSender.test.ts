@@ -10,18 +10,21 @@ describe('subscription matching for sender', () => {
     serviceName: 'SenderService',
     serviceVersion: '1',
     serviceTarget: 'senderServiceTarget',
+    instanceId: 'SenderServiceInstance',
   }
 
   const receiver = {
     serviceName: 'ReceiverService',
     serviceVersion: '2',
     serviceTarget: 'receiverServiceTarget',
+    instanceId: 'ReceiverServiceInstance',
   }
 
   const subscriber = {
     serviceName: 'SubscriberService',
     serviceVersion: '3',
     serviceTarget: 'subscriberServiceTarget',
+    instanceId: 'instanceId',
   }
 
   const callback = stub().resolves()
@@ -30,7 +33,6 @@ describe('subscription matching for sender', () => {
 
   const getTestMessage = (): EBMessage => {
     return {
-      instanceId: 'instanceId',
       sender,
       receiver,
       payload: {},
@@ -54,6 +56,8 @@ describe('subscription matching for sender', () => {
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
@@ -72,6 +76,8 @@ describe('subscription matching for sender', () => {
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
@@ -90,6 +96,8 @@ describe('subscription matching for sender', () => {
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
@@ -108,6 +116,8 @@ describe('subscription matching for sender', () => {
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
@@ -126,6 +136,8 @@ describe('subscription matching for sender', () => {
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
@@ -144,6 +156,8 @@ describe('subscription matching for sender', () => {
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
