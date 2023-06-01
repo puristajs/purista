@@ -81,4 +81,9 @@ await eventBridge.start()
 
 - [RabbitMQ](https://www.rabbitmq.com/)
 
+::: tip OpenTelemetry
+PURISTA is using the AMQP header feature to add the OpenTelemetry information to each message, as recommended:  
+[https://w3c.github.io/trace-context-mqtt/](https://w3c.github.io/trace-context-mqtt/).
+:::
+
 __You can follow updated on Twitter [@purista_js](https://twitter.com/purista_js) or join the [Discord server](https://discord.gg/9feaUm3H2v) to get in touch with PURISTA maintainers and other developers.__
