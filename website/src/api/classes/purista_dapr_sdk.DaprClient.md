@@ -222,7 +222,7 @@ core/lib/types/HttpClient/HttpClient.impl.d.ts:24
 
 ### delete
 
-▸ **delete**<`T`\>(`path`, `options?`): `Promise`<`T`\>
+▸ **delete**<`T`\>(`path`, `options?`, `payload?`): `Promise`<`T`\>
 
 DELETE request
 
@@ -238,6 +238,7 @@ DELETE request
 | :------ | :------ |
 | `path` | `string` |
 | `options?` | `HttpClientRequestOptions` |
+| `payload?` | `unknown` |
 
 #### Returns
 
@@ -396,7 +397,6 @@ ___
 | `command.correlationId` | `string` | correlation id to know which command response referrs to which command |
 | `command.eventName?` | `string` | event name for this message |
 | `command.id` | `string` | global unique id of message |
-| `command.instanceId` | `string` | instance id of eventbridge which was creating the message |
 | `command.messageType` | `Command` | - |
 | `command.otp?` | `string` | stringified Opentelemetry parent trace id |
 | `command.payload` | `Object` | - |
@@ -404,7 +404,7 @@ ___
 | `command.payload.payload` | `unknown` | - |
 | `command.principalId?` | `string` | principal id |
 | `command.receiver` | `EBMessageAddress` | - |
-| `command.sender` | `EBMessageAddress` | - |
+| `command.sender` | { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } | - |
 | `command.timestamp` | `number` | timestamp of message creation time |
 | `command.traceId?` | `string` | trace id of message |
 | `headers?` | `Record`<`string`, `string`\> | - |

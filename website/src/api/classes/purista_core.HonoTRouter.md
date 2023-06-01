@@ -22,6 +22,7 @@
 
 ### Properties
 
+- [name](purista_core.HonoTRouter.md#name)
 - [router](purista_core.HonoTRouter.md#router)
 
 ### Methods
@@ -43,9 +44,23 @@
 
 #### Defined in
 
-[helper/HonoTRouter.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/HonoTRouter.ts#L7)
+[helper/HonoTRouter.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/HonoTRouter.ts#L9)
 
 ## Properties
+
+### name
+
+• **name**: `string` = `'Trouter'`
+
+#### Implementation of
+
+Router.name
+
+#### Defined in
+
+[helper/HonoTRouter.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/HonoTRouter.ts#L7)
+
+___
 
 ### router
 
@@ -79,7 +94,7 @@ Router.add
 
 #### Defined in
 
-[helper/HonoTRouter.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/HonoTRouter.ts#L11)
+[helper/HonoTRouter.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/HonoTRouter.ts#L13)
 
 ___
 
@@ -104,4 +119,4 @@ Router.match
 
 #### Defined in
 
-[helper/HonoTRouter.ts:15](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/HonoTRouter.ts#L15)
+[helper/HonoTRouter.ts:17](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/HonoTRouter.ts#L17)

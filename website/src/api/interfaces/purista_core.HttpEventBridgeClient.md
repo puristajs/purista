@@ -112,7 +112,7 @@ ___
 
 ### invoke
 
-• **invoke**: (`command`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `instanceId`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `timestamp`: `number` ; `traceId?`: `string`  }, `headers?`: `Record`<`string`, `string`\>, `timeout?`: `number`) => `Promise`<[`CommandResponse`](../modules/purista_core.md#commandresponse)\>
+• **invoke**: (`command`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }, `headers?`: `Record`<`string`, `string`\>, `timeout?`: `number`) => `Promise`<[`CommandResponse`](../modules/purista_core.md#commandresponse)\>
 
 #### Type declaration
 
@@ -130,7 +130,6 @@ Invoke a command
 | `command.correlationId` | `string` | correlation id to know which command response referrs to which command |
 | `command.eventName?` | `string` | event name for this message |
 | `command.id` | `string` | global unique id of message |
-| `command.instanceId` | `string` | instance id of eventbridge which was creating the message |
 | `command.messageType` | [`Command`](../enums/purista_core.EBMessageType.md#command) | - |
 | `command.otp?` | `string` | stringified Opentelemetry parent trace id |
 | `command.payload` | `Object` | - |
@@ -138,7 +137,7 @@ Invoke a command
 | `command.payload.payload` | `unknown` | - |
 | `command.principalId?` | `string` | principal id |
 | `command.receiver` | [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) | - |
-| `command.sender` | [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) | - |
+| `command.sender` | { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } | - |
 | `command.timestamp` | `number` | timestamp of message creation time |
 | `command.traceId?` | `string` | trace id of message |
 | `headers?` | `Record`<`string`, `string`\> | optional HTTP header |

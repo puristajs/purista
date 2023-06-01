@@ -1,9 +1,9 @@
-[PURISTA API](../README.md) / [Modules](../modules.md) / @purista/redis-state-store
+[PURISTA API](../README.md) / [Modules](../modules.md) / @purista/redis-config-store
 
-# Module: @purista/redis-state-store
+# Module: @purista/redis-config-store
 
 A state store for using redis as storage.
-State values are stored as stringified JSON.
+Config values are stored as stringified JSON.
 
 Per default, setting/changing and removal of values are enabled.
 
@@ -17,16 +17,16 @@ const config = {
  url: 'redis://alice:foobared@awesome.redis.server:6379'
 }
 
-const store = new RedisStateStore({ config })
+const store = new RedisConfigStore({ config })
 
-await store.setState('stateKey',{ myState: 'value' })
+await store.setConfig('stateKey',{ myConfig: 'value' })
 
-let value = await store.getState('stateKey')
-console.log(value) // outputs: { myState: 'value' }
+let value = await store.getConfig('stateKey')
+console.log(value) // outputs: { myConfig: 'value' }
 
-await store.removeState('stateKey')
+await store.removeConfig('stateKey')
 
-value = await store.getState('stateKey')
+value = await store.getConfig('stateKey')
 console.log(value) // outputs: undefined
 ```
 
@@ -40,11 +40,11 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 ### Classes
 
-- [RedisStateStore](../classes/purista_redis_state_store.RedisStateStore.md)
+- [RedisConfigStore](../classes/purista_redis_config_store.RedisConfigStore.md)
 
 ### Type Aliases
 
-- [RedisStoreConfig](purista_redis_state_store.md#redisstoreconfig)
+- [RedisStoreConfig](purista_redis_config_store.md#redisstoreconfig)
 
 ## Type Aliases
 
@@ -71,4 +71,4 @@ It will extend the StoreBaseConfig.
 
 #### Defined in
 
-[redis-state-store/src/types.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/types.ts#L7)
+[redis-config-store/src/types.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/types.ts#L7)
