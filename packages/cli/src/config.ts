@@ -11,23 +11,23 @@ export const devDependencies: string[] = ['pino-pretty@^9.1.1', '@types/node@^18
 export const cliDependencies = ['@purista/cli@latest']
 
 export const testDependencies: string[] = [
-  '@swc/jest@^0.2.24',
-  '@types/jest@^29.5.0',
-  '@types/sinon@^10.0.13',
+  '@swc/jest@^0.2.26',
+  '@types/jest@^29.5.2',
+  '@types/sinon@^10.x',
   'jest@^29.5.0',
-  'sinon@^15.0.2',
+  'sinon@^15.x',
 ]
 
 export const lintDependencies: string[] = [
-  '@typescript-eslint/eslint-plugin@^5.56.0',
-  '@typescript-eslint/parser@^5.56.0',
-  'eslint@^8.36.0',
+  '@typescript-eslint/eslint-plugin@^5.59.8',
+  '@typescript-eslint/parser@^5.59.8',
+  'eslint@^8.41.0',
   'eslint-config-prettier@^8.8.0',
-  'eslint-config-standard@^17.0.0',
+  'eslint-config-standard@^17.1.0',
   'eslint-plugin-import@^2.27.5',
   'eslint-plugin-json@^3.1.0',
   'eslint-plugin-node@^11.1.0',
   'eslint-plugin-prettier@^4.2.1',
   'eslint-plugin-simple-import-sort@^10.0.0',
-  'prettier@^2.8.7',
+  'prettier@^2.8.8',
 ]
