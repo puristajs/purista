@@ -19,5 +19,5 @@ echo $CONTENT > ./packages/nats-config-store/src/version.ts
 echo $CONTENT > ./packages/infisical-secret-store/src/version.ts
 
 git add .
-git commit -am "chore: bump versions to $NODE_VERSION"
+git commit -am "chore: bump versions to $NODE_VERSION" -S
 git tag -a v$NODE_VERSION -m "v$NODE_VERSION"
