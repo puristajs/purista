@@ -6,14 +6,14 @@
       "./packages/core",
       "./packages/dapr-sdk",
       "./packages/httpserver",
+      "./packages/infisical-secret-store",
       "./packages/k8s-sdk",
       "./packages/mqttbridge",
-      "./packages/natsbridge",
-      "./packages/nats-state-store",
       "./packages/nats-config-store",
-      "./packages/redis-state-store",
+      "./packages/nats-state-store",
+      "./packages/natsbridge",
       "./packages/redis-config-store",
-      "./packages/infisical-secret-store"
+      "./packages/redis-state-store"
     ],
     "plugin": ["typedoc-plugin-markdown"],
     "out": "website/src/api",
