@@ -34,7 +34,7 @@ await eventBridge.start()
 ### Functions
 
 - [getCommandHandler](purista_mqttbridge.md#getcommandhandler)
-- [getCommandResponseTopic](purista_mqttbridge.md#getcommandresponsetopic)
+- [getCommandResponseSubscriptionTopic](purista_mqttbridge.md#getcommandresponsesubscriptiontopic)
 - [getCommandSubscriptionTopic](purista_mqttbridge.md#getcommandsubscriptiontopic)
 - [getDefaultMqttBridgeConfig](purista_mqttbridge.md#getdefaultmqttbridgeconfig)
 - [getSharedTopicName](purista_mqttbridge.md#getsharedtopicname)
@@ -85,7 +85,7 @@ ___
 
 ### MqttBridgeConfig
 
-Ƭ **MqttBridgeConfig**: `Prettify`<{ `allowRetries?`: `boolean` ; `commandResponsePublishTwice`: ``"always"`` \| ``"eventOnly"`` \| ``"eventAndError"`` \| ``"never"`` ; `defaultMessageExpiryInterval`: `number` ; `defaultSessionExpiryInterval`: `number` ; `emptyTopicPartString`: `string` ; `qoSSubscription`: `QoS` ; `qosCommand`: `QoS` ; `shareTopicName`: `string` ; `shareTopicPrefix`: `string` ; `topicPrefix`: `string`  } & `IClientOptions`\>
+Ƭ **MqttBridgeConfig**: `Prettify`<{ `allowRetries?`: `boolean` ; `defaultMessageExpiryInterval`: `number` ; `defaultSessionExpiryInterval`: `number` ; `emptyTopicPartString`: `string` ; `qoSSubscription`: `QoS` ; `qosCommand`: `QoS` ; `shareTopicName`: `string` ; `shareTopicPrefix`: `string` ; `topicPrefix`: `string`  } & `IClientOptions`\>
 
 the configuration for the MQTT event bridge
 
@@ -104,7 +104,7 @@ the configuration for the MQTT event bridge
 | Name | Type |
 | :------ | :------ |
 | `address` | `EBMessageAddress` |
-| `cb` | (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `instanceId`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: `EBMessageAddress` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `instanceId`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: `EBMessageAddress` ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `instanceId`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: `EBMessageAddress` ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
+| `cb` | (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
 | `_metadata` | `CommandDefinitionMetadataBase` |
 | `_eventBridgeConfig` | `DefinitionEventBridgeConfig` |
 
@@ -118,16 +118,15 @@ the configuration for the MQTT event bridge
 
 ___
 
-### getCommandResponseTopic
+### getCommandResponseSubscriptionTopic
 
-▸ **getCommandResponseTopic**(`this`, `instanceId?`): `string`
+▸ **getCommandResponseSubscriptionTopic**(`this`): `string`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `this` | [`MqttBridge`](../classes/purista_mqttbridge.MqttBridge.md) |
-| `instanceId?` | `string` |
 
 #### Returns
 
@@ -135,7 +134,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/topic/getCommandResponseTopic.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getCommandResponseTopic.impl.ts#L7)
+[packages/mqttbridge/src/topic/getCommandResponseSubscriptionTopic.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getCommandResponseSubscriptionTopic.impl.ts#L7)
 
 ___
 
@@ -171,13 +170,12 @@ ___
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `allowRetries?` | `boolean` | allow retry of the initial connect |
-| `commandResponsePublishTwice` | ``"always"`` \| ``"never"`` \| ``"eventOnly"`` \| ``"eventAndError"`` | Indicates if a command response should be published a second time. If the command response gets published, it will be published to the regular topic pattern. The QOS and expiry will be set to subscription configuration values. If set to `never`, subscription might not get messages they are expecting because of the timing. If set to `always`, every command response is published. Because there might not be a consumer for every message, the broker will store the messages until the `defaultMessageExpiryInterval` is reached. This might result in a high ressource consumption of the broker. If set to `eventOnly`, only success responses which have a event name set, are published twice. There, we expect, that an event has at least one consumer subscription and the broker does not unnecessarily stores messages for a long time. **`Default`** ```ts eventOnly ``` |
 | `defaultMessageExpiryInterval` | `number` | the message expiry interval in seconds **`Default`** ```ts ``` |
 | `defaultSessionExpiryInterval` | `number` | **`Default`** ```ts 0 ``` |
 | `emptyTopicPartString` | `string` | The string which should be used in topics for parts, which are undefined **`Default`** ```ts __none__ ``` |
 | `qoSSubscription` | `QoS` | QOS for all subscriptions **`Default`** ```ts 1 ``` |
 | `qosCommand` | `QoS` | QOS for command, command responses and command response subscriptions messages **`Default`** ```ts 1 ``` |
-| `shareTopicName` | `string` | the name of the shared topic (similar to pubsub name) **`Default`** ```ts purista ``` |
+| `shareTopicName` | `string` | the name of the shared topic (similar to pubsub name) **`Default`** ```ts sharedpurista ``` |
 | `shareTopicPrefix` | `string` | the prefix to be used to dynamically create topic names for shared subscriptions **`Default`** ```ts $share ``` |
 | `topicPrefix` | `string` | the prefix for topic to prevent name collisions **`Default`** ```ts purista ``` |
 
@@ -217,7 +215,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `_subscription` | `Subscription` |
-| `cb` | (`message`: `EBMessage`) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `instanceId`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: `EBMessageAddress` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"instanceId"`` \| ``"timestamp"``\>\> |
+| `cb` | (`message`: `EBMessage`) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
 
 #### Returns
 
@@ -225,7 +223,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/handler/getSubscriptionHandler.impl.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/handler/getSubscriptionHandler.impl.ts#L20)
+[packages/mqttbridge/src/handler/getSubscriptionHandler.impl.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/handler/getSubscriptionHandler.impl.ts#L21)
 
 ___
 
@@ -256,7 +254,18 @@ ___
 
 Calculates the MQTT topic name for a message which should be sent.
 Something like:
-purista/message_type/instance_id/sender_name/sender_version/sender_target/eventname/receiver_name/receiver_version/receiver_target
+purista/
+message_type/
+principal_id/
+sender_instance_id/
+sender_name/
+sender_version/
+sender_target/
+eventname/
+sender_instance_id/
+receiver_name/
+receiver_version/
+receiver_target
 
 #### Parameters
 

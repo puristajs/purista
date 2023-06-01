@@ -24,7 +24,7 @@ const store = new RedisStateStore({ config })
 await store.setState('stateKey',{ myState: 'value' })
 
 let value = await store.getState('stateKey')
-console.log(value) // outputs: { myState: 'value' }
+console.log(value) // outputs: { stateKey: { myState: 'value' } }
 
 await store.removeState('stateKey')
 
@@ -104,7 +104,7 @@ StateStoreBaseClass&lt;RedisStoreConfig&lt;M, F, S\&gt;\&gt;.constructor
 
 #### Defined in
 
-[state-store-redis/src/RedisStateStore.impl.ts:45](https://github.com/sebastianwessel/purista/blob/master/packages/state-store-redis/src/RedisStateStore.impl.ts#L45)
+[redis-state-store/src/RedisStateStore.impl.ts:45](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L45)
 
 ## Properties
 
@@ -114,7 +114,7 @@ StateStoreBaseClass&lt;RedisStoreConfig&lt;M, F, S\&gt;\&gt;.constructor
 
 #### Defined in
 
-[state-store-redis/src/RedisStateStore.impl.ts:43](https://github.com/sebastianwessel/purista/blob/master/packages/state-store-redis/src/RedisStateStore.impl.ts#L43)
+[redis-state-store/src/RedisStateStore.impl.ts:43](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L43)
 
 ___
 
@@ -185,7 +185,7 @@ StateStoreBaseClass.destroy
 
 #### Defined in
 
-[state-store-redis/src/RedisStateStore.impl.ts:109](https://github.com/sebastianwessel/purista/blob/master/packages/state-store-redis/src/RedisStateStore.impl.ts#L109)
+[redis-state-store/src/RedisStateStore.impl.ts:109](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L109)
 
 ___
 
@@ -209,7 +209,7 @@ StateStoreBaseClass.getState
 
 #### Defined in
 
-[state-store-redis/src/RedisStateStore.impl.ts:51](https://github.com/sebastianwessel/purista/blob/master/packages/state-store-redis/src/RedisStateStore.impl.ts#L51)
+[redis-state-store/src/RedisStateStore.impl.ts:51](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L51)
 
 ___
 
@@ -233,7 +233,7 @@ StateStoreBaseClass.removeState
 
 #### Defined in
 
-[state-store-redis/src/RedisStateStore.impl.ts:74](https://github.com/sebastianwessel/purista/blob/master/packages/state-store-redis/src/RedisStateStore.impl.ts#L74)
+[redis-state-store/src/RedisStateStore.impl.ts:74](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L74)
 
 ___
 
@@ -258,4 +258,4 @@ StateStoreBaseClass.setState
 
 #### Defined in
 
-[state-store-redis/src/RedisStateStore.impl.ts:92](https://github.com/sebastianwessel/purista/blob/master/packages/state-store-redis/src/RedisStateStore.impl.ts#L92)
+[redis-state-store/src/RedisStateStore.impl.ts:92](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L92)
