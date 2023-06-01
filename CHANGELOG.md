@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.6.0] - 2023-05-14
+## [unreleased]
 
 ### Bug Fixes
 
@@ -24,6 +24,13 @@ All notable changes to this project will be documented in this file.
 - Typo
 - Add types to exports in package.json
 - Use correct package in examples
+- Use function from core in generated code
+- Rebuild packages after version bump to reflect correct version
+- Version bump of state-store-redis
+- Trace and log command error responses
+- Mqtt command handler
+- Disable durable for endpoint info subscription
+- Setting instance id in event bridge
 
 ### Depreciation
 
@@ -65,6 +72,12 @@ All notable changes to this project will be documented in this file.
 - Update api documentation
 - Update documentation
 - Update CHANGELOG
+- Add quickstart example code
+- Update package readme files
+- Update nav
+- Add nats bridge info
+- Update api documentation
+- Update documentation
 
 ### Features
 
@@ -97,6 +110,11 @@ All notable changes to this project will be documented in this file.
 - MQTT eventBridge #98
 - Add AMQP & MQTT bridges to cli tool
 - Add js emit event to bridges
+- NATS as message broker #112
+- Add NATS JetStream state store package #124
+- Redis config store #125
+- NATS config store for JetStream enabled NATS server #126
+- Infisical secret store #127
 
 ### Miscellaneous Tasks
 
@@ -182,6 +200,20 @@ All notable changes to this project will be documented in this file.
 - Add inline doc and cleanup code
 - Minor changes
 - Minor cleanup
+- Bump versions to 1.6.0
+- Update packages
+- Add Teletrace example and docu #122
+- Share bridge integration test setup
+- Set hono router name
+- Unify folder name to package name
+- Minor opentelemetry improvements
+- Update config
+- Minor code improvements
+- Update dependencies
+- NATS only without durable
+- Minor updates
+- Cleanup
+- Do not run release build parallel
 
 ### Refactor
 
