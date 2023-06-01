@@ -21,7 +21,7 @@ const result = await client.get('v1/orders')
 
 | Name | Type |
 | :------ | :------ |
-| `CustomConfig` | extends `Record`<`string`, `unknown`\> = `never` |
+| `CustomConfig` | extends `Record`<`string`, `unknown`\> = {} |
 
 ## Implements
 
@@ -67,7 +67,7 @@ const result = await client.get('v1/orders')
 
 | Name | Type |
 | :------ | :------ |
-| `CustomConfig` | extends `Record`<`string`, `unknown`\> = `never` |
+| `CustomConfig` | extends `Record`<`string`, `unknown`\> = {} |
 
 #### Parameters
 
@@ -163,7 +163,7 @@ ___
 
 ### delete
 
-▸ **delete**<`T`\>(`path`, `options?`): `Promise`<`T`\>
+▸ **delete**<`T`\>(`path`, `options?`, `payload?`): `Promise`<`T`\>
 
 DELETE request
 
@@ -179,6 +179,7 @@ DELETE request
 | :------ | :------ |
 | `path` | `string` |
 | `options?` | [`HttpClientRequestOptions`](../modules/purista_core.md#httpclientrequestoptions) |
+| `payload?` | `unknown` |
 
 #### Returns
 
@@ -190,7 +191,7 @@ DELETE request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:308](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L308)
+[HttpClient/HttpClient.impl.ts:314](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L314)
 
 ___
 
@@ -252,7 +253,7 @@ GET request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:268](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L268)
+[HttpClient/HttpClient.impl.ts:274](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L274)
 
 ___
 
@@ -330,7 +331,7 @@ PATCH request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:298](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L298)
+[HttpClient/HttpClient.impl.ts:304](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L304)
 
 ___
 
@@ -364,7 +365,7 @@ POST request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:278](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L278)
+[HttpClient/HttpClient.impl.ts:284](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L284)
 
 ___
 
@@ -398,7 +399,7 @@ PUT request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:288](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L288)
+[HttpClient/HttpClient.impl.ts:294](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L294)
 
 ___
 

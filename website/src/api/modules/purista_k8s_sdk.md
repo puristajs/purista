@@ -149,7 +149,7 @@ The configuration object for creating the k8s http server
 | Name | Type | Default value | Description |
 | :------ | :------ | :------ | :------ |
 | `services` | `undefined` \| `Service`<`unknown`\> \| `Service`<`unknown`\>[] | `undefined` | instance of the service to add |
-| `app` | `Hono`<`Env`, {}, ``""``\> | `undefined` | - |
+| `app` | `Hono`<`Env`, {}, ``"/"``\> | `undefined` | - |
 | `logger` | `Logger` | `undefined` | the logger used for logging the addition |
 | `apiMountPath` | `string` | `'/api'` | - |
 
@@ -165,7 +165,7 @@ ___
 
 ### getHttpServer
 
-▸ **getHttpServer**(`input`, `name?`): `Hono`<`Env`, {}, ``""``\>
+▸ **getHttpServer**(`input`, `name?`): `Hono`<`Env`, {}, ``"/"``\>
 
 Create a Hono web server.
 It adds per default the /healthz endpoint
@@ -182,7 +182,7 @@ The returned server is not started. You need to do it manually.
 
 #### Returns
 
-`Hono`<`Env`, {}, ``""``\>
+`Hono`<`Env`, {}, ``"/"``\>
 
 a object with server, router, start and destroy functions and name var
 
