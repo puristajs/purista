@@ -16,7 +16,7 @@
     "release:minor": "turbo run gitclean && npm run release:prepare && npm run update:doc && turbo run gitclean && turbo run bump:minor && npm run commit:minor && npm publish --workspaces",
     "release:patch": "turbo run gitclean && npm run release:prepare && npm run update:doc && turbo run gitclean && turbo run bump:patch && npm run commit:patch && npm publish --workspaces",
     "gitclean": "./scripts/isGitClean.sh",
-    "release:prepare": "turbo run lint build test --parallel",
+    "release:prepare": "turbo run lint build test",
     "tag": "git push && git push --tags && rm -rf build/temp",
     "commit:major": "npm version major --no-git-tag-version && scripts/commitVersion.sh && npm run build",
     "commit:minor": "npm version minor --no-git-tag-version && scripts/commitVersion.sh && npm run build",
