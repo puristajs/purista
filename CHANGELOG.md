@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [1.7.0] - 2023-06-01
 
 ### Bug Fixes
 
@@ -78,6 +78,7 @@ All notable changes to this project will be documented in this file.
 - Add nats bridge info
 - Update api documentation
 - Update documentation
+- Update CHANGELOG
 
 ### Features
 
