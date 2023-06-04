@@ -16,6 +16,7 @@ star: true
 isOriginal: true
 image: https://purista.dev/graphic/purista_1_6_cover.png
 cover: https://purista.dev/graphic/purista_1_6_cover.png
+sticky: 20230520
 ---
 
 
