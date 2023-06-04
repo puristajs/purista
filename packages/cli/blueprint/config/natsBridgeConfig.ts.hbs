@@ -1,0 +1,8 @@
+import { NatsBridgeConfig } from '@purista/natsbridge'
+import { getNewInstanceId } from '@purista/core'
+
+const natsBridgeConfig: NatsBridgeConfig = {
+  instanceId: getNewInstanceId(), // can be replaced with fixed value like device serial number
+}
+
+export default natsBridgeConfig

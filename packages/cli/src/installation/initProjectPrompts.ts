@@ -51,6 +51,7 @@ export const initProjectPrompts: Prompts = [
       { value: 'DefaultEventBridge', name: 'local internal default eventbridge', checked: true },
       { value: 'AmqpEventBridge', name: 'AMQP eventbridge (RabbitMQ)' },
       { value: 'MqttEventBridge', name: 'MQTT eventbridge (mosquitto)' },
+      { value: 'NatsEventBridge', name: 'NATS eventbridge' },
       { value: 'DaprEventBridge', name: 'Dapr eventbridge' },
     ],
   },

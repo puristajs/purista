@@ -117,6 +117,9 @@ export const initProjectActions: Actions = [
       case 'MqttEventBridge':
         await installDependencies('npm install -s @purista/mqttbridge')
         return '@purista/mqttbridge added'
+      case 'NatsEventBridge':
+        await installDependencies('npm install -s @purista/natsbridge')
+        return '@purista/natsbridge added'
       case 'DaprEventBridge':
         await installDependencies('npm install -s @purista/dapr-sdk')
         return '@purista/dapr-sdk added'
@@ -145,6 +148,17 @@ export const initProjectActions: Actions = [
     skipIfExists: true,
     path: 'config/mqttBridgeConfig.ts',
     templateFile: TEMPLATE_BASE + '/config/mqttBridgeConfig.ts.hbs',
+  },
+  {
+    type: 'add',
+    skip: (answers: Record<string, string[] | string>) => {
+      if (answers.eventBridge !== 'NatsEventBridge') {
+        return '[SKIPPED] NATS event bridge config'
+      }
+    },
+    skipIfExists: true,
+    path: 'config/natsBridgeConfig.ts',
+    templateFile: TEMPLATE_BASE + '/config/natsBridgeConfig.ts.hbs',
   },
   {
     type: 'add',
