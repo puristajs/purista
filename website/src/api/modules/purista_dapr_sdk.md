@@ -212,7 +212,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprEventBridge/types/DaprEventBridgeConfig.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/types/DaprEventBridgeConfig.ts#L5)
+[dapr-sdk/src/DaprEventBridge/types/DaprEventBridgeConfig.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/types/DaprEventBridgeConfig.ts#L6)
 
 ___
 
@@ -617,7 +617,7 @@ ___
 
 #### Defined in
 
-core/lib/types/HttpEventBridge/types/RouterFunction.d.ts:4
+base-http-bridge/lib/types/HttpEventBridge/types/RouterFunction.d.ts:4
 
 ___
 

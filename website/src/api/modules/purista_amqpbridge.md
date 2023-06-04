@@ -127,7 +127,7 @@ ___
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.6.0"``
+• `Const` **puristaVersion**: ``"1.7.0"``
 
 #### Defined in
 

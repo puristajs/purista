@@ -20,11 +20,7 @@ The base class to be extended by event bridge implementations
 
   ↳↳ [`DefaultEventBridge`](purista_core.DefaultEventBridge.md)
 
-  ↳↳ [`HttpEventBridge`](purista_core.HttpEventBridge.md)
-
   ↳↳ [`DefaultEventBridge`](purista_core.DefaultEventBridge.md)
-
-  ↳↳ [`HttpEventBridge`](purista_core.HttpEventBridge.md)
 
 ## Table of contents
 

@@ -1,43 +1,34 @@
-[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/dapr-sdk](../modules/purista_dapr_sdk.md) / DaprEventBridge
+[PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/base-http-bridge](../modules/purista_base_http_bridge.md) / HttpEventBridge
 
-# Class: DaprEventBridge
+# Class: HttpEventBridge<CustomConfig\>
 
-[@purista/dapr-sdk](../modules/purista_dapr_sdk.md).DaprEventBridge
+[@purista/base-http-bridge](../modules/purista_base_http_bridge.md).HttpEventBridge
 
-The DaprEventBridge connects to the Dapr sidecar container.
-It provides endpoints for invoking commands, triggering subscriptions and emitting event messages.
-The sidecar container invokes commands and subscriptions of the service connected to the event bridge.
-A DaprClient (http fetch) is used for communication from the service/event bridge to the sidecar container.
+The HTTP event bridge is a generic event bridge.
+In environments like Dapr or Knative, the communication is done via sidecar containers and via HTTP.
 
-Names for services, commands, subscriptions and events are converted to kebab-case.
-If the event bridge is configured to expose REST endpoints defined in command builder, the endpoints are generated as defined in the command builder.
+In these cases, it is expected, that the current instance is a HTTP server, which provides REST endpoints for commands and subscriptions.
+The communication from the current instance to the sidecar is also done via REST endpoints.
 
-The event bridge is using Hono under the hood. You need to provide a `serve` function.
-Depending on your runtime (Node, Bun, Deno) an adapter might be needed.
+HTTP calls from the sidecar to the current instance might be done via CloudEvent schema, which wraps the payload into a defined structure.
+The HttpEventBridge can be configured to respect this, and to extract the information from CloudEvents.
 
-**`See`**
+To use the HttpEventBridge, you will need following peer-dependencies installed:
 
-[Hono website](https://hono.dev)
+- hono
+- trouter
 
-**`Example`**
+## Type parameters
 
-```typescript
-import { DaprConfigStore, DaprEventBridge, DaprSecretStore, DaprStateStore } from '@purista/dapr-sdk'
-
-const eventBridge = new DaprEventBridge({
-   serve,
- })
-
-// start the services first ...
-
-await eventBridge.start()
-```
+| Name | Type |
+| :------ | :------ |
+| `CustomConfig` | extends [`HttpEventBridgeConfig`](../modules/purista_base_http_bridge.md#httpeventbridgeconfig) |
 
 ## Hierarchy
 
-- `HttpEventBridge`<[`DaprEventBridgeConfig`](../modules/purista_dapr_sdk.md#dapreventbridgeconfig)\>
+- `EventBridgeBaseClass`<`CustomConfig`\>
 
-  ↳ **`DaprEventBridge`**
+  ↳ **`HttpEventBridge`**
 
 ## Implements
 
@@ -47,77 +38,68 @@ await eventBridge.start()
 
 ### Constructors
 
-- [constructor](purista_dapr_sdk.DaprEventBridge.md#constructor)
+- [constructor](purista_base_http_bridge.HttpEventBridge.md#constructor)
 
 ### Properties
 
-- [app](purista_dapr_sdk.DaprEventBridge.md#app)
-- [client](purista_dapr_sdk.DaprEventBridge.md#client)
-- [config](purista_dapr_sdk.DaprEventBridge.md#config)
-- [defaultCommandTimeout](purista_dapr_sdk.DaprEventBridge.md#defaultcommandtimeout)
-- [instanceId](purista_dapr_sdk.DaprEventBridge.md#instanceid)
-- [isShuttingDown](purista_dapr_sdk.DaprEventBridge.md#isshuttingdown)
-- [isStarted](purista_dapr_sdk.DaprEventBridge.md#isstarted)
-- [logger](purista_dapr_sdk.DaprEventBridge.md#logger)
-- [name](purista_dapr_sdk.DaprEventBridge.md#name)
-- [pubSubSubscriptions](purista_dapr_sdk.DaprEventBridge.md#pubsubsubscriptions)
-- [server](purista_dapr_sdk.DaprEventBridge.md#server)
-- [traceProvider](purista_dapr_sdk.DaprEventBridge.md#traceprovider)
+- [app](purista_base_http_bridge.HttpEventBridge.md#app)
+- [client](purista_base_http_bridge.HttpEventBridge.md#client)
+- [config](purista_base_http_bridge.HttpEventBridge.md#config)
+- [defaultCommandTimeout](purista_base_http_bridge.HttpEventBridge.md#defaultcommandtimeout)
+- [instanceId](purista_base_http_bridge.HttpEventBridge.md#instanceid)
+- [isShuttingDown](purista_base_http_bridge.HttpEventBridge.md#isshuttingdown)
+- [isStarted](purista_base_http_bridge.HttpEventBridge.md#isstarted)
+- [logger](purista_base_http_bridge.HttpEventBridge.md#logger)
+- [name](purista_base_http_bridge.HttpEventBridge.md#name)
+- [server](purista_base_http_bridge.HttpEventBridge.md#server)
+- [traceProvider](purista_base_http_bridge.HttpEventBridge.md#traceprovider)
 
 ### Methods
 
-- [destroy](purista_dapr_sdk.DaprEventBridge.md#destroy)
-- [emit](purista_dapr_sdk.DaprEventBridge.md#emit)
-- [emitMessage](purista_dapr_sdk.DaprEventBridge.md#emitmessage)
-- [getTracer](purista_dapr_sdk.DaprEventBridge.md#gettracer)
-- [invoke](purista_dapr_sdk.DaprEventBridge.md#invoke)
-- [isHealthy](purista_dapr_sdk.DaprEventBridge.md#ishealthy)
-- [isReady](purista_dapr_sdk.DaprEventBridge.md#isready)
-- [off](purista_dapr_sdk.DaprEventBridge.md#off)
-- [on](purista_dapr_sdk.DaprEventBridge.md#on)
-- [registerCommand](purista_dapr_sdk.DaprEventBridge.md#registercommand)
-- [registerSubscription](purista_dapr_sdk.DaprEventBridge.md#registersubscription)
-- [removeAllListeners](purista_dapr_sdk.DaprEventBridge.md#removealllisteners)
-- [start](purista_dapr_sdk.DaprEventBridge.md#start)
-- [startActiveSpan](purista_dapr_sdk.DaprEventBridge.md#startactivespan)
-- [unregisterCommand](purista_dapr_sdk.DaprEventBridge.md#unregistercommand)
-- [unregisterSubscription](purista_dapr_sdk.DaprEventBridge.md#unregistersubscription)
-- [wrapInSpan](purista_dapr_sdk.DaprEventBridge.md#wrapinspan)
+- [destroy](purista_base_http_bridge.HttpEventBridge.md#destroy)
+- [emit](purista_base_http_bridge.HttpEventBridge.md#emit)
+- [emitMessage](purista_base_http_bridge.HttpEventBridge.md#emitmessage)
+- [getTracer](purista_base_http_bridge.HttpEventBridge.md#gettracer)
+- [invoke](purista_base_http_bridge.HttpEventBridge.md#invoke)
+- [isHealthy](purista_base_http_bridge.HttpEventBridge.md#ishealthy)
+- [isReady](purista_base_http_bridge.HttpEventBridge.md#isready)
+- [off](purista_base_http_bridge.HttpEventBridge.md#off)
+- [on](purista_base_http_bridge.HttpEventBridge.md#on)
+- [registerCommand](purista_base_http_bridge.HttpEventBridge.md#registercommand)
+- [registerSubscription](purista_base_http_bridge.HttpEventBridge.md#registersubscription)
+- [removeAllListeners](purista_base_http_bridge.HttpEventBridge.md#removealllisteners)
+- [start](purista_base_http_bridge.HttpEventBridge.md#start)
+- [startActiveSpan](purista_base_http_bridge.HttpEventBridge.md#startactivespan)
+- [unregisterCommand](purista_base_http_bridge.HttpEventBridge.md#unregistercommand)
+- [unregisterSubscription](purista_base_http_bridge.HttpEventBridge.md#unregistersubscription)
+- [wrapInSpan](purista_base_http_bridge.HttpEventBridge.md#wrapinspan)
 
 ## Constructors
 
 ### constructor
 
-• **new DaprEventBridge**(`config`)
+• **new HttpEventBridge**<`CustomConfig`\>(`config`, `client`)
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `CustomConfig` | extends [`HttpEventBridgeConfig`](../modules/purista_base_http_bridge.md#httpeventbridgeconfig) |
 
 #### Parameters
 
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `config` | `Object` | - |
-| `config.apiPrefix?` | `string` | the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI defintion needs to `enableRestApiExpose` set to `true` |
-| `config.clientConfig?` | [`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig) | - |
-| `config.commandPayloadAsCloudEvent?` | `boolean` | command invocations are wrapped in CloudEvent **`Link`** https://github.com/cloudevents/spec/tree/v1.0 |
-| `config.defaultCommandTimeout?` | `number` | Overwrite the hardcoded default timeout of command invocations |
-| `config.enableRestApiExpose?` | `boolean` | expose commands as regular REST endpoints when they are configured as endpoints |
-| `config.instanceId?` | `string` | The instance id of the event bridge. If not set, a id will generated each time a instance is created. Use this if there is a need to always have the same instance id. |
-| `config.logLevel?` | `LogLevelName` | If no logger instance is given, use this log level |
-| `config.logger?` | `Logger` | A logger instance |
-| `config.name?` | `string` | name of the bridge |
-| `config.pathPrefix?` | `string` | the prefix to be used for exposing commands as endpoints expecting a event bus message |
-| `config.serve` | (`options`: { `fetch`: (`request`: `Request`) => `unknown` ; `hostname?`: `string` ; `port?`: `number`  }) => `Server`<typeof `IncomingMessage`, typeof `ServerResponse`\> | The serve function is depending on the runtime. - Bun: `Bun.serve` - Node.js: `serve` function from additional package `@hono/hono-node-server` - Deno: `serve` function from package `https://deno.land/std/http/server.ts` **`See`** https://hono.dev |
-| `config.serverHost?` | `string` | Host of the server. |
-| `config.serverPort?` | `number` | Port of the server. |
-| `config.spanProcessor?` | `SpanProcessor` | A OpenTelemetry span processor |
-| `config.subscriptionPayloadAsCloudEvent?` | `boolean` | subscription invocations are wrapped in CloudEvent **`Link`** https://github.com/cloudevents/spec/tree/v1.0 |
+| Name | Type |
+| :------ | :------ |
+| `config` | { [K in string \| number \| symbol]: (Object & CustomConfig)[K] } |
+| `client` | [`HttpEventBridgeClient`](../interfaces/purista_base_http_bridge.HttpEventBridgeClient.md) |
 
 #### Overrides
 
-HttpEventBridge&lt;DaprEventBridgeConfig\&gt;.constructor
+EventBridgeBaseClass&lt;CustomConfig\&gt;.constructor
 
 #### Defined in
 
-[dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts:53](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts#L53)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:73](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L73)
 
 ## Properties
 
@@ -125,37 +107,29 @@ HttpEventBridge&lt;DaprEventBridgeConfig\&gt;.constructor
 
 • **app**: `Hono`<`Env`, {}, ``"/"``\>
 
-#### Inherited from
-
-HttpEventBridge.app
-
 #### Defined in
 
-base-http-bridge/lib/types/HttpEventBridge/HttpEventBridge.impl.d.ts:23
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L67)
 
 ___
 
 ### client
 
-• **client**: `HttpEventBridgeClient`
-
-#### Inherited from
-
-HttpEventBridge.client
+• **client**: [`HttpEventBridgeClient`](../interfaces/purista_base_http_bridge.HttpEventBridgeClient.md)
 
 #### Defined in
 
-base-http-bridge/lib/types/HttpEventBridge/HttpEventBridge.impl.d.ts:26
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:71](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L71)
 
 ___
 
 ### config
 
-• **config**: `Complete`<{ `apiPrefix?`: `string` ; `clientConfig?`: [`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig) ; `commandPayloadAsCloudEvent?`: `boolean` ; `defaultCommandTimeout?`: `number` ; `enableRestApiExpose?`: `boolean` ; `instanceId?`: `string` ; `logLevel?`: `LogLevelName` ; `logger?`: `Logger` ; `name?`: `string` ; `pathPrefix?`: `string` ; `serve`: (`options`: { `fetch`: (`request`: `Request`) => `unknown` ; `hostname?`: `string` ; `port?`: `number`  }) => `Server`<typeof `IncomingMessage`, typeof `ServerResponse`\> ; `serverHost?`: `string` ; `serverPort?`: `number` ; `spanProcessor?`: `SpanProcessor` ; `subscriptionPayloadAsCloudEvent?`: `boolean`  }\>
+• **config**: `Complete`<{ [K in string \| number \| symbol]: (Object & CustomConfig)[K] }\>
 
 #### Inherited from
 
-HttpEventBridge.config
+EventBridgeBaseClass.config
 
 #### Defined in
 
@@ -173,7 +147,7 @@ EventBridge.defaultCommandTimeout
 
 #### Inherited from
 
-HttpEventBridge.defaultCommandTimeout
+EventBridgeBaseClass.defaultCommandTimeout
 
 #### Defined in
 
@@ -191,7 +165,7 @@ EventBridge.instanceId
 
 #### Inherited from
 
-HttpEventBridge.instanceId
+EventBridgeBaseClass.instanceId
 
 #### Defined in
 
@@ -201,29 +175,21 @@ ___
 
 ### isShuttingDown
 
-• **isShuttingDown**: `boolean`
-
-#### Inherited from
-
-HttpEventBridge.isShuttingDown
+• **isShuttingDown**: `boolean` = `false`
 
 #### Defined in
 
-base-http-bridge/lib/types/HttpEventBridge/HttpEventBridge.impl.d.ts:24
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:68](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L68)
 
 ___
 
 ### isStarted
 
-• **isStarted**: `boolean`
-
-#### Inherited from
-
-HttpEventBridge.isStarted
+• **isStarted**: `boolean` = `false`
 
 #### Defined in
 
-base-http-bridge/lib/types/HttpEventBridge/HttpEventBridge.impl.d.ts:25
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:69](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L69)
 
 ___
 
@@ -233,7 +199,7 @@ ___
 
 #### Inherited from
 
-HttpEventBridge.logger
+EventBridgeBaseClass.logger
 
 #### Defined in
 
@@ -251,7 +217,7 @@ EventBridge.name
 
 #### Inherited from
 
-HttpEventBridge.name
+EventBridgeBaseClass.name
 
 #### Defined in
 
@@ -259,27 +225,13 @@ core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:14
 
 ___
 
-### pubSubSubscriptions
-
-• `Private` **pubSubSubscriptions**: [`DaprPubSubType`](../modules/purista_dapr_sdk.md#daprpubsubtype)[] = `[]`
-
-#### Defined in
-
-[dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts:51](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts#L51)
-
-___
-
 ### server
 
 • **server**: `undefined` \| `Server`<typeof `IncomingMessage`, typeof `ServerResponse`\>
 
-#### Inherited from
-
-HttpEventBridge.server
-
 #### Defined in
 
-base-http-bridge/lib/types/HttpEventBridge/HttpEventBridge.impl.d.ts:22
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:66](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L66)
 
 ___
 
@@ -289,7 +241,7 @@ ___
 
 #### Inherited from
 
-HttpEventBridge.traceProvider
+EventBridgeBaseClass.traceProvider
 
 #### Defined in
 
@@ -311,13 +263,13 @@ Shut down event bridge as gracefully as possible
 
 EventBridge.destroy
 
-#### Inherited from
+#### Overrides
 
-HttpEventBridge.destroy
+EventBridgeBaseClass.destroy
 
 #### Defined in
 
-base-http-bridge/lib/types/HttpEventBridge/HttpEventBridge.impl.d.ts:40
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:350](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L350)
 
 ___
 
@@ -344,7 +296,7 @@ ___
 
 #### Inherited from
 
-HttpEventBridge.emit
+EventBridgeBaseClass.emit
 
 #### Defined in
 
@@ -376,13 +328,9 @@ ___
 
 EventBridge.emitMessage
 
-#### Inherited from
-
-HttpEventBridge.emitMessage
-
 #### Defined in
 
-base-http-bridge/lib/types/HttpEventBridge/HttpEventBridge.impl.d.ts:29
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:143](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L143)
 
 ___
 
@@ -400,7 +348,7 @@ Tracer
 
 #### Inherited from
 
-HttpEventBridge.getTracer
+EventBridgeBaseClass.getTracer
 
 #### Defined in
 
@@ -433,13 +381,9 @@ ___
 
 EventBridge.invoke
 
-#### Inherited from
-
-HttpEventBridge.invoke
-
 #### Defined in
 
-base-http-bridge/lib/types/HttpEventBridge/HttpEventBridge.impl.d.ts:30
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:203](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L203)
 
 ___
 
@@ -455,13 +399,9 @@ ___
 
 EventBridge.isHealthy
 
-#### Inherited from
-
-HttpEventBridge.isHealthy
-
 #### Defined in
 
-base-http-bridge/lib/types/HttpEventBridge/HttpEventBridge.impl.d.ts:36
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:340](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L340)
 
 ___
 
@@ -477,13 +417,9 @@ ___
 
 EventBridge.isReady
 
-#### Inherited from
-
-HttpEventBridge.isReady
-
 #### Defined in
 
-base-http-bridge/lib/types/HttpEventBridge/HttpEventBridge.impl.d.ts:35
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:336](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L336)
 
 ___
 
@@ -510,7 +446,7 @@ ___
 
 #### Inherited from
 
-HttpEventBridge.off
+EventBridgeBaseClass.off
 
 #### Defined in
 
@@ -541,7 +477,7 @@ ___
 
 #### Inherited from
 
-HttpEventBridge.on
+EventBridgeBaseClass.on
 
 #### Defined in
 
@@ -571,13 +507,9 @@ ___
 
 EventBridge.registerCommand
 
-#### Inherited from
-
-HttpEventBridge.registerCommand
-
 #### Defined in
 
-base-http-bridge/lib/types/HttpEventBridge/HttpEventBridge.impl.d.ts:31
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:257](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L257)
 
 ___
 
@@ -600,13 +532,9 @@ ___
 
 EventBridge.registerSubscription
 
-#### Overrides
-
-HttpEventBridge.registerSubscription
-
 #### Defined in
 
-[dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts:105](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts#L105)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:311](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L311)
 
 ___
 
@@ -620,7 +548,7 @@ ___
 
 #### Inherited from
 
-HttpEventBridge.removeAllListeners
+EventBridgeBaseClass.removeAllListeners
 
 #### Defined in
 
@@ -642,11 +570,11 @@ EventBridge.start
 
 #### Overrides
 
-HttpEventBridge.start
+EventBridgeBaseClass.start
 
 #### Defined in
 
-[dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts:88](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts#L88)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:87](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L87)
 
 ___
 
@@ -679,7 +607,7 @@ return value of fn
 
 #### Inherited from
 
-HttpEventBridge.startActiveSpan
+EventBridgeBaseClass.startActiveSpan
 
 #### Defined in
 
@@ -705,13 +633,9 @@ ___
 
 EventBridge.unregisterCommand
 
-#### Inherited from
-
-HttpEventBridge.unregisterCommand
-
 #### Defined in
 
-base-http-bridge/lib/types/HttpEventBridge/HttpEventBridge.impl.d.ts:32
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:307](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L307)
 
 ___
 
@@ -733,13 +657,9 @@ ___
 
 EventBridge.unregisterSubscription
 
-#### Inherited from
-
-HttpEventBridge.unregisterSubscription
-
 #### Defined in
 
-base-http-bridge/lib/types/HttpEventBridge/HttpEventBridge.impl.d.ts:34
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:332](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L332)
 
 ___
 
@@ -778,7 +698,7 @@ return value of fn
 
 #### Inherited from
 
-HttpEventBridge.wrapInSpan
+EventBridgeBaseClass.wrapInSpan
 
 #### Defined in
 
