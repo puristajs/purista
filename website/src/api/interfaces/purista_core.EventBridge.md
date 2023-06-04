@@ -11,8 +11,6 @@ The event bridge must implement this interface.
 
 - [`DefaultEventBridge`](../classes/purista_core.DefaultEventBridge.md)
 - [`DefaultEventBridge`](../classes/purista_core.DefaultEventBridge.md)
-- [`HttpEventBridge`](../classes/purista_core.HttpEventBridge.md)
-- [`HttpEventBridge`](../classes/purista_core.HttpEventBridge.md)
 
 ## Table of contents
 

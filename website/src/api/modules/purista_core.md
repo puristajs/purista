@@ -31,15 +31,12 @@ Learn PURIST at [purista.dev](https://purista.dev)
 - [DefaultLogger](../classes/purista_core.DefaultLogger.md)
 - [GenericEventEmitter](../classes/purista_core.GenericEventEmitter.md)
 - [HandledError](../classes/purista_core.HandledError.md)
-- [HonoTRouter](../classes/purista_core.HonoTRouter.md)
 - [HttpClient](../classes/purista_core.HttpClient.md)
-- [HttpEventBridge](../classes/purista_core.HttpEventBridge.md)
 - [Logger](../classes/purista_core.Logger.md)
 - [UnhandledError](../classes/purista_core.UnhandledError.md)
 
 ### Interfaces
 
-- [HttpEventBridgeClient](../interfaces/purista_core.HttpEventBridgeClient.md)
 - [IEmitter](../interfaces/purista_core.IEmitter.md)
 - [ILogger](../interfaces/purista_core.ILogger.md)
 - [OpenApiZodAny](../interfaces/purista_core.OpenApiZodAny.md)
@@ -80,7 +77,6 @@ Learn PURIST at [purista.dev](https://purista.dev)
 - [EventMap](purista_core.md#eventmap)
 - [HttpClientConfig](purista_core.md#httpclientconfig)
 - [HttpClientRequestOptions](purista_core.md#httpclientrequestoptions)
-- [HttpEventBridgeConfig](purista_core.md#httpeventbridgeconfig)
 - [HttpExposedServiceMeta](purista_core.md#httpexposedservicemeta)
 - [InfoInvokeTimeout](purista_core.md#infoinvoketimeout)
 - [InfoInvokeTimeoutPayload](purista_core.md#infoinvoketimeoutpayload)
@@ -105,7 +101,6 @@ Learn PURIST at [purista.dev](https://purista.dev)
 - [Prettify](purista_core.md#prettify)
 - [PrincipalId](purista_core.md#principalid)
 - [QueryParameter](purista_core.md#queryparameter)
-- [RouterFunction](purista_core.md#routerfunction)
 - [ServiceEvents](purista_core.md#serviceevents)
 - [ServiceInfoType](purista_core.md#serviceinfotype)
 - [ShutdownEntry](purista_core.md#shutdownentry)
@@ -130,7 +125,6 @@ Learn PURIST at [purista.dev](https://purista.dev)
 - [generateSchema](purista_core.md#generateschema)
 - [getCommandFunctionWithValidation](purista_core.md#getcommandfunctionwithvalidation)
 - [getDefaultEventBridgeConfig](purista_core.md#getdefaulteventbridgeconfig)
-- [getDefaultHttpEventBridgeConfig](purista_core.md#getdefaulthttpeventbridgeconfig)
 - [getDefaultLogLevel](purista_core.md#getdefaultloglevel)
 - [getNewSubscriptionStorageEntry](purista_core.md#getnewsubscriptionstorageentry)
 - [getSubscriptionFunctionWithValidation](purista_core.md#getsubscriptionfunctionwithvalidation)
@@ -856,30 +850,6 @@ Options for a single request
 
 ___
 
-### HttpEventBridgeConfig
-
-Ƭ **HttpEventBridgeConfig**: `Object`
-
-#### Type declaration
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `apiPrefix?` | `string` | the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI defintion needs to `enableRestApiExpose` set to `true` |
-| `commandPayloadAsCloudEvent?` | `boolean` | command invocations are wrapped in CloudEvent **`Link`** https://github.com/cloudevents/spec/tree/v1.0 |
-| `enableRestApiExpose?` | `boolean` | expose commands as regular REST endpoints when they are configured as endpoints |
-| `name?` | `string` | name of the bridge |
-| `pathPrefix?` | `string` | the prefix to be used for exposing commands as endpoints expecting a event bus message |
-| `serve` | (`options`: { `fetch`: (`request`: `Request`) => `Promise`<`unknown`\> \| `unknown` ; `hostname?`: `string` ; `port?`: `number`  }) => `Server` | The serve function is depending on the runtime. - Bun: `Bun.serve` - Node.js: `serve` function from additional package `@hono/hono-node-server` - Deno: `serve` function from package `https://deno.land/std/http/server.ts` **`See`** https://hono.dev |
-| `serverHost?` | `string` | Host of the server. |
-| `serverPort?` | `number` | Port of the server. |
-| `subscriptionPayloadAsCloudEvent?` | `boolean` | subscription invocations are wrapped in CloudEvent **`Link`** https://github.com/cloudevents/spec/tree/v1.0 |
-
-#### Defined in
-
-[HttpEventBridge/types/HttpEventBridgeConfig.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L3)
-
-___
-
 ### HttpExposedServiceMeta
 
 Ƭ **HttpExposedServiceMeta**<`ParameterType`\>: [`Prettify`](purista_core.md#prettify)<[`CommandDefinitionMetadataBase`](purista_core.md#commanddefinitionmetadatabase) & { `expose`: { `http`: { `method`: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` ; `openApi?`: { `additionalStatusCodes?`: [`StatusCode`](../enums/purista_core.StatusCode.md)[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: [`QueryParameter`](purista_core.md#queryparameter)<`ParameterType`\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  }  }\>
@@ -1260,37 +1230,6 @@ ___
 
 ___
 
-### RouterFunction
-
-Ƭ **RouterFunction**<`T`\>: (`this`: `T`, `c`: `Context`) => `Promise`<`Response`\>
-
-#### Type parameters
-
-| Name | Type |
-| :------ | :------ |
-| `T` | extends [`HttpEventBridge`](../classes/purista_core.HttpEventBridge.md)<[`HttpEventBridgeConfig`](purista_core.md#httpeventbridgeconfig)\> = [`HttpEventBridge`](../classes/purista_core.HttpEventBridge.md)<[`HttpEventBridgeConfig`](purista_core.md#httpeventbridgeconfig)\> |
-
-#### Type declaration
-
-▸ (`this`, `c`): `Promise`<`Response`\>
-
-##### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `this` | `T` |
-| `c` | `Context` |
-
-##### Returns
-
-`Promise`<`Response`\>
-
-#### Defined in
-
-[HttpEventBridge/types/RouterFunction.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpEventBridge/types/RouterFunction.ts#L6)
-
-___
-
 ### ServiceEvents
 
 Ƭ **ServiceEvents**: [`ServiceEventsInternal`](purista_core.md#serviceeventsinternal) & [`addPrefixToObject`](purista_core.md#addprefixtoobject)<`CustomEvents`, ``"custom-"``\> & [`addPrefixToObject`](purista_core.md#addprefixtoobject)<`CustomEvents`, ``"misc-"``\>
@@ -1521,7 +1460,7 @@ ___
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.6.0"``
+• `Const` **puristaVersion**: ``"1.7.0"``
 
 #### Defined in
 
@@ -1624,36 +1563,6 @@ ___
 #### Defined in
 
 [DefaultEventBridge/getDefaultEventBridgeConfig.impl.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/getDefaultEventBridgeConfig.impl.ts#L4)
-
-___
-
-### getDefaultHttpEventBridgeConfig
-
-▸ **getDefaultHttpEventBridgeConfig**(): `Object`
-
-#### Returns
-
-`Object`
-
-| Name | Type | Description |
-| :------ | :------ | :------ |
-| `apiPrefix?` | `string` | the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI defintion needs to `enableRestApiExpose` set to `true` |
-| `commandPayloadAsCloudEvent?` | `boolean` | command invocations are wrapped in CloudEvent **`Link`** https://github.com/cloudevents/spec/tree/v1.0 |
-| `defaultCommandTimeout?` | `number` | Overwrite the hardcoded default timeout of command invocations |
-| `enableRestApiExpose?` | `boolean` | expose commands as regular REST endpoints when they are configured as endpoints |
-| `instanceId?` | `string` | The instance id of the event bridge. If not set, a id will generated each time a instance is created. Use this if there is a need to always have the same instance id. |
-| `logLevel?` | [`LogLevelName`](purista_core.md#loglevelname) | If no logger instance is given, use this log level |
-| `logger?` | [`Logger`](../classes/purista_core.Logger.md) | A logger instance |
-| `name?` | `string` | name of the bridge |
-| `pathPrefix?` | `string` | the prefix to be used for exposing commands as endpoints expecting a event bus message |
-| `serverHost?` | `string` | Host of the server. |
-| `serverPort?` | `number` | Port of the server. |
-| `spanProcessor?` | `SpanProcessor` | A OpenTelemetry span processor |
-| `subscriptionPayloadAsCloudEvent?` | `boolean` | subscription invocations are wrapped in CloudEvent **`Link`** https://github.com/cloudevents/spec/tree/v1.0 |
-
-#### Defined in
-
-[HttpEventBridge/getDefaultHttpEventBridgeConfig.impl.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpEventBridge/getDefaultHttpEventBridgeConfig.impl.ts#L4)
 
 ___
 
