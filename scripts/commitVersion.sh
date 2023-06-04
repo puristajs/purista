@@ -6,6 +6,7 @@ git-cliff --tag v$NODE_VERSION > CHANGELOG.md
 CONTENT="export const puristaVersion = '$NODE_VERSION'"
 
 echo $CONTENT > ./packages/amqpbridge/src/version.ts
+echo $CONTENT > ./packages/base-http-bridge/src/version.ts
 echo $CONTENT > ./packages/cli/src/version.ts
 echo $CONTENT > ./packages/core/src/version.ts
 echo $CONTENT > ./packages/dapr-sdk/src/version.ts

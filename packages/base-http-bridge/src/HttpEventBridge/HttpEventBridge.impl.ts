@@ -2,9 +2,6 @@
 import { Server } from 'node:http'
 
 import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
-import { Hono } from 'hono'
-import { compress } from 'hono/compress'
-
 import {
   Command,
   CommandErrorResponse,
@@ -35,8 +32,11 @@ import {
   StatusCode,
   Subscription,
   UnhandledError,
-} from '../core'
-import { HonoTRouter } from '../helper'
+} from '@purista/core'
+import { Hono } from 'hono'
+import { compress } from 'hono/compress'
+
+import { HonoTRouter } from '../HonoTRouter'
 import { getCommandHandler } from './getCommandHandler.impl'
 import { getCommandHandlerRestApi } from './getCommandHandlerRestApi.impl'
 import { getDefaultHttpEventBridgeConfig } from './getDefaultHttpEventBridgeConfig.impl'

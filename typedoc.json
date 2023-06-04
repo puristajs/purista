@@ -3,6 +3,7 @@
     "entryPointStrategy":"packages",
     "entryPoints": [
       "./packages/amqpbridge",
+      "./packages/base-http-bridge",
       "./packages/core",
       "./packages/dapr-sdk",
       "./packages/httpserver",

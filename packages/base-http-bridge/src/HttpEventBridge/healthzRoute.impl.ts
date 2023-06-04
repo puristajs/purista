@@ -1,4 +1,5 @@
-import { StatusCode } from '../core'
+import { StatusCode } from '@purista/core'
+
 import { RouterFunction } from './types'
 
 export const healthzRoute: RouterFunction = async function (c) {

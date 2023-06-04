@@ -1,4 +1,4 @@
-import { Command, CommandResponse, EBMessage, EBMessageAddress, HttpExposedServiceMeta } from '../../core'
+import { Command, CommandResponse, EBMessage, EBMessageAddress, HttpExposedServiceMeta } from '@purista/core'
 
 /**
  * The HttpEventBridgeClient connects the HTTPEventBridge with the sidecar service.

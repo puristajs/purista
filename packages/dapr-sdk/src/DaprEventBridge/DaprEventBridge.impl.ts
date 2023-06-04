@@ -1,11 +1,10 @@
+import { getDefaultHttpEventBridgeConfig, HttpEventBridge } from '@purista/base-http-bridge'
 import {
   CustomMessage,
   EBMessage,
   EventBridge,
   EventBridgeConfig,
   EventBridgeEventNames,
-  getDefaultHttpEventBridgeConfig,
-  HttpEventBridge,
   initLogger,
   StatusCode,
   Subscription,
