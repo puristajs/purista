@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [1.7.1] - 2023-06-04
 
 ### Bug Fixes
 
@@ -86,6 +86,7 @@ All notable changes to this project will be documented in this file.
 - Fix order of posts in blog
 - Update api documentation
 - Update documentation
+- Update CHANGELOG
 
 ### Features
 

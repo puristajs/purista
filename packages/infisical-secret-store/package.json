@@ -1,6 +1,6 @@
 {
   "name": "@purista/infisical-secret-store",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "State store with Infisical as database",
   "homepage": "https://purista.dev",
   "repository": {

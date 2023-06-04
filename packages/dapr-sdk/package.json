@@ -1,6 +1,6 @@
 {
   "name": "@purista/dapr-sdk",
-  "version": "1.7.0",
+  "version": "1.7.1",
   "description": "SDK and helper to run PURISTA services in Dapr",
   "homepage": "https://purista.dev",
   "repository": {
