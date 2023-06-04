@@ -2,7 +2,6 @@ import { parse, ParsedUrlQuery } from 'node:querystring'
 
 import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
-
 import {
   Command,
   CommandErrorResponse,
@@ -11,6 +10,7 @@ import {
   EBMessageAddress,
   EBMessageType,
   getErrorMessageForCode,
+  getTimeoutPromise,
   HandledError,
   HttpExposedServiceMeta,
   isCommandErrorResponse,
@@ -18,8 +18,8 @@ import {
   serializeOtp,
   StatusCode,
   UnhandledError,
-} from '../core'
-import { getTimeoutPromise } from '../helper'
+} from '@purista/core'
+
 import { HttpEventBridge } from './HttpEventBridge.impl'
 import { HttpEventBridgeConfig, RouterFunction } from './types'
 

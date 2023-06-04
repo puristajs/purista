@@ -36,9 +36,6 @@ it('exports core functions', () => {
   // http client
   expect(index.HttpClient).toBeDefined()
 
-  // http event bridge
-  expect(index.HttpEventBridge).toBeDefined()
-
   // helper
   expect(index.ServiceBuilder).toBeDefined()
   expect(index.CommandDefinitionBuilder).toBeDefined()

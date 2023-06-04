@@ -56,7 +56,7 @@
     "@opentelemetry/api": "^1.4.0",
     "@opentelemetry/semantic-conventions": "^1.13.0",
     "@purista/core": "*",
-    "hono": "^3.2.1"
+    "hono": "^3.2.3"
   },
   "peerDependencies": {
     "@hono/node-server": "^1.0.2"

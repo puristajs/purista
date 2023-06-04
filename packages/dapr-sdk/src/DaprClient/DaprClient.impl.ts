@@ -1,5 +1,6 @@
 import { join } from 'node:path'
 
+import { HttpEventBridgeClient } from '@purista/base-http-bridge'
 import {
   Command,
   CommandResponse,
@@ -8,7 +9,6 @@ import {
   EBMessageAddress,
   EventBridgeConfig,
   HttpClient,
-  HttpEventBridgeClient,
   HttpExposedServiceMeta,
   StatusCode,
   UnhandledError,
