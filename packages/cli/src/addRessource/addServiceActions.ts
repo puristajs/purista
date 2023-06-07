@@ -9,8 +9,8 @@ export const addServiceActions: Actions = [
   {
     type: 'add',
     skipIfExists: true,
-    path: 'src/service/ServiceEvent.enum.ts',
-    templateFile: TEMPLATE_BASE + '/src/service/ServiceEvent.enum.ts.hbs',
+    path: 'src/service/serviceEvent.enum.ts',
+    templateFile: TEMPLATE_BASE + '/src/service/serviceEvent.enum.ts.hbs',
   },
   {
     type: 'add',
@@ -68,7 +68,7 @@ export const addServiceActions: Actions = [
           answers.name,
         )}ServiceConfig.ts`,
         `src/service/${camelCase(answers.name, { pascalCase: false })}/v${answers.version}/index.ts`,
-        `src/service/ServiceEvent.enum.ts`,
+        `src/service/serviceEvent.enum.ts`,
       ]
 
       await lintFiles(files)
