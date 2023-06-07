@@ -84,7 +84,7 @@ export const addCommandActions: Actions = [
         )}CommandBuilder.ts`,
         serviceBuilderFile,
         `src/service/${answers.service.path}/index.ts`,
-        `src/service/ServiceEvent.enum.ts`,
+        `src/service/serviceEvent.enum.ts`,
       ]
 
       await lintFiles(files)
