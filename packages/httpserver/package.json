@@ -64,8 +64,7 @@
     "fastify": "^4.17.0",
     "openapi3-ts": "4.1.2",
     "swagger-ui-dist": "^5.0.0-alpha.14",
-    "trouter": "^3.2.1",
-    "ts-deepmerge": "^6.0.2"
+    "trouter": "^3.2.1"
   },
   "peerDependenciesMeta": {}
 }
