@@ -4,7 +4,7 @@ PURISTA API / [Modules](modules.md)
 
 All notable changes to this project will be documented in this file.
 
-## [1.7.0] - 2023-06-01
+## [1.7.1] - 2023-06-04
 
 ### Bug Fixes
 
@@ -33,6 +33,9 @@ All notable changes to this project will be documented in this file.
 - Mqtt command handler
 - Disable durable for endpoint info subscription
 - Setting instance id in event bridge
+- Cli init template outdated fixes #128
+- Cli init does not contain nats bridge #130
+- Core package requires Hono package fixes #129
 
 ### Depreciation
 
@@ -78,6 +81,11 @@ All notable changes to this project will be documented in this file.
 - Update package readme files
 - Update nav
 - Add nats bridge info
+- Update api documentation
+- Update documentation
+- Update CHANGELOG
+- Add version 1.7 blog article
+- Fix order of posts in blog
 - Update api documentation
 - Update documentation
 - Update CHANGELOG
@@ -217,6 +225,8 @@ All notable changes to this project will be documented in this file.
 - Minor updates
 - Cleanup
 - Do not run release build parallel
+- Bump versions to 1.7.0
+- Disable coverage threshold for quickfix
 
 ### Refactor
 

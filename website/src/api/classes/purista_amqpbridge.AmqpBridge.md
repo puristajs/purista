@@ -12,8 +12,12 @@ The AMQP event bridge connects to a AMQP broker.
 import { AmqpBridge } from '@purista/amqpbridge'
 
 // create and init our eventbridge
-  const eventBridge = new AmqpBridge()
-  await eventBridge.start()
+const config = {
+   url: 'amqp://localhost'
+}
+
+const eventBridge = new AmqpBridge(config)
+await eventBridge.start()
 
 ```
 
@@ -106,7 +110,7 @@ EventBridgeBaseClass&lt;AmqpBridgeConfig\&gt;.constructor
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:99](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L99)
+[amqpbridge/src/AmqpBridge.impl.ts:103](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L103)
 
 ## Properties
 
@@ -116,7 +120,7 @@ EventBridgeBaseClass&lt;AmqpBridgeConfig\&gt;.constructor
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:63](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L63)
+[amqpbridge/src/AmqpBridge.impl.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L67)
 
 ___
 
@@ -140,7 +144,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:62](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L62)
+[amqpbridge/src/AmqpBridge.impl.ts:66](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L66)
 
 ___
 
@@ -150,7 +154,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:68](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L68)
+[amqpbridge/src/AmqpBridge.impl.ts:72](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L72)
 
 ___
 
@@ -178,7 +182,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:91](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L91)
+[amqpbridge/src/AmqpBridge.impl.ts:95](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L95)
 
 ___
 
@@ -188,7 +192,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:95](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L95)
+[amqpbridge/src/AmqpBridge.impl.ts:99](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L99)
 
 ___
 
@@ -198,7 +202,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:65](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L65)
+[amqpbridge/src/AmqpBridge.impl.ts:69](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L69)
 
 ___
 
@@ -258,7 +262,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:79](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L79)
+[amqpbridge/src/AmqpBridge.impl.ts:83](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L83)
 
 ___
 
@@ -268,7 +272,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:66](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L66)
+[amqpbridge/src/AmqpBridge.impl.ts:70](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L70)
 
 ___
 
@@ -278,7 +282,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:70](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L70)
+[amqpbridge/src/AmqpBridge.impl.ts:74](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L74)
 
 ___
 
@@ -288,7 +292,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:81](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L81)
+[amqpbridge/src/AmqpBridge.impl.ts:85](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L85)
 
 ___
 
@@ -298,7 +302,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:71](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L71)
+[amqpbridge/src/AmqpBridge.impl.ts:75](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L75)
 
 ___
 
@@ -308,7 +312,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:83](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L83)
+[amqpbridge/src/AmqpBridge.impl.ts:87](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L87)
 
 ___
 
@@ -352,7 +356,7 @@ Decode buffer into given type
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:811](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L811)
+[amqpbridge/src/AmqpBridge.impl.ts:815](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L815)
 
 ___
 
@@ -374,7 +378,7 @@ EventBridgeBaseClass.destroy
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:826](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L826)
+[amqpbridge/src/AmqpBridge.impl.ts:830](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L830)
 
 ___
 
@@ -437,7 +441,7 @@ EventBridge.emitMessage
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:273](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L273)
+[amqpbridge/src/AmqpBridge.impl.ts:277](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L277)
 
 ___
 
@@ -467,7 +471,7 @@ Encode given payload to buffer
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:790](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L790)
+[amqpbridge/src/AmqpBridge.impl.ts:794](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L794)
 
 ___
 
@@ -520,7 +524,7 @@ EventBridge.invoke
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:347](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L347)
+[amqpbridge/src/AmqpBridge.impl.ts:351](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L351)
 
 ___
 
@@ -538,7 +542,7 @@ EventBridge.isHealthy
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:122](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L122)
+[amqpbridge/src/AmqpBridge.impl.ts:126](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L126)
 
 ___
 
@@ -556,7 +560,7 @@ EventBridge.isReady
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:118](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L118)
+[amqpbridge/src/AmqpBridge.impl.ts:122](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L122)
 
 ___
 
@@ -649,7 +653,7 @@ EventBridge.registerCommand
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:464](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L464)
+[amqpbridge/src/AmqpBridge.impl.ts:468](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L468)
 
 ___
 
@@ -674,7 +678,7 @@ EventBridge.registerSubscription
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:645](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L645)
+[amqpbridge/src/AmqpBridge.impl.ts:649](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L649)
 
 ___
 
@@ -716,7 +720,7 @@ EventBridgeBaseClass.start
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:129](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L129)
+[amqpbridge/src/AmqpBridge.impl.ts:133](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L133)
 
 ___
 
@@ -777,7 +781,7 @@ EventBridge.unregisterCommand
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:626](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L626)
+[amqpbridge/src/AmqpBridge.impl.ts:630](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L630)
 
 ___
 
@@ -801,7 +805,7 @@ EventBridge.unregisterSubscription
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:764](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L764)
+[amqpbridge/src/AmqpBridge.impl.ts:768](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L768)
 
 ___
 

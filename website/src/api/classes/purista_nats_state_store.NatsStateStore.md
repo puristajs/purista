@@ -13,7 +13,7 @@ const config = {
   port: 8222
 }
 
-const store = new NatsStateStore( config )
+const store = new NatsStateStore({ config })
 
 await store.setState('stateKey',{ myState: 'value' })
 
