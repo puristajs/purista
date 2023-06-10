@@ -53,8 +53,8 @@ export class DaprEventBridge extends HttpEventBridge<DaprEventBridgeConfig> impl
   constructor(config: EventBridgeConfig<DaprEventBridgeConfig>) {
     const conf = {
       ...getDefaultHttpEventBridgeConfig(),
-      ...config,
       ...getDefaultConfig(),
+      ...config,
     }
 
     const logger = conf.logger || initLogger(config.logLevel, { name: conf.name || 'DaprEventBridge' })

@@ -51,8 +51,12 @@ import { AmqpBridgeConfig, Encoder, Encrypter } from './types'
  * import { AmqpBridge } from '@purista/amqpbridge'
  *
  * // create and init our eventbridge
- *   const eventBridge = new AmqpBridge()
- *   await eventBridge.start()
+ * const config = {
+ *    url: 'amqp://localhost'
+ * }
+ *
+ * const eventBridge = new AmqpBridge(config)
+ * await eventBridge.start()
  *
  * ```
  *
@@ -99,8 +103,8 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
   constructor(config?: EventBridgeConfig<AmqpBridgeConfig>) {
     //= getDefaultConfig()
     const conf = {
-      ...config,
       ...getDefaultConfig(),
+      ...config,
     }
     super('AmqpBridge', conf)
 
