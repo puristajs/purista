@@ -12,7 +12,7 @@ const config = {
   port: 8222
 }
 
-const store = new NatsConfigStore({ config })
+const store = new NatsConfigStore(config)
 
 await store.setConfig('configKey',{ myConfig: 'value' })
 

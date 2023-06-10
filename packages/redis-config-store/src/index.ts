@@ -12,7 +12,7 @@
  *  url: 'redis://alice:foobared@awesome.redis.server:6379'
  * }
  *
- * const store = new RedisConfigStore({ config })
+ * const store = new RedisConfigStore(config)
  *
  * await store.setConfig('stateKey',{ myConfig: 'value' })
  *

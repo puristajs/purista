@@ -13,7 +13,7 @@ const config = {
   url: 'redis://alice:foobared@awesome.redis.server:6380'
 }
 
-const store = new InfisicalSecretStore({ config })
+const store = new InfisicalSecretStore( config )
 
 await store.setSecret('mySecret', 'value')
 

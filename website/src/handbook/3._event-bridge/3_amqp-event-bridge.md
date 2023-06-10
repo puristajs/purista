@@ -72,7 +72,7 @@ const config:AmqpBridgeConfig = {
     url: 'amqp://my-amqp-host.example.com'
   }
 
-const eventBridge = new AmqpBridge({ config })
+const eventBridge = new AmqpBridge( config )
 await eventBridge.start()
 
 ```

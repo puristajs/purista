@@ -8,10 +8,10 @@ A secret store for using [Infisical](https://infisical.com/) as storage.
 
 @example ```typescript
 const config = {
-  url: 'redis://alice:foobared@awesome.redis.server:6380'
+  baseUrl: 'http://example.com'
 }
 
-const store = new InfisicalSecretStore({ config })
+const store = new InfisicalSecretStore( config )
 
 await store.setSecret('mySecret', 'value')
 
