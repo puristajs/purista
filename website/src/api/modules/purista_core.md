@@ -1460,7 +1460,7 @@ ___
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.7.1"``
+• `Const` **puristaVersion**: ``"1.7.2"``
 
 #### Defined in
 
@@ -1476,7 +1476,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends [`OpenApiZodAny`](../interfaces/purista_core.OpenApiZodAny.md)<`T`\> |
+| `T` | extends [`OpenApiZodAny`](../interfaces/purista_core.OpenApiZodAny.md) |
 
 #### Parameters
 
@@ -1524,7 +1524,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`, `ServiceClassType`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`\> |
 | `MessagePayloadType` | `unknown` |
 | `MessageParamsType` | `unknown` |
 | `MessageResultType` | `unknown` |
@@ -1609,7 +1609,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`, `ServiceClassType`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`\> |
 | `MessagePayloadType` | `unknown` |
 | `MessageParamsType` | `unknown` |
 | `MessageResultType` | `unknown` |

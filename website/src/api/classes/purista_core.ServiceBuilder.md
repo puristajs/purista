@@ -63,7 +63,7 @@ to create an instance of the service class.
 | :------ | :------ |
 | `ConfigType` | `Record`<`string`, `unknown`\> |
 | `ConfigInputType` | `Record`<`string`, `unknown`\> |
-| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`, `ServiceClassType`\> = [`Service`](purista_core.Service.md)<`ConfigType`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`\> = [`Service`](purista_core.Service.md)<`ConfigType`\> |
 
 #### Parameters
 
@@ -419,7 +419,7 @@ It sets the class type of the service.
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`ConfigType`, `T`\> |
+| `T` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`ConfigType`\> |
 
 #### Parameters
 
