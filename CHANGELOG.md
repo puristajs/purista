@@ -2,19 +2,22 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.7.3] - 2023-07-06
+## [unreleased]
 
 ### Bug Fixes
 
 - Make instanceof working with custom errors
 - Cli package and add prettierrc file
 - Lint
+- Error handling
 
 ### Documentation
 
 - Update api documentation
 - Update documentation
 - Update CHANGELOG
+- Update api documentation
+- Update documentation
 
 ### Features
 
@@ -25,6 +28,8 @@ All notable changes to this project will be documented in this file.
 - Update dependencies
 - Update deps in cli auto generator
 - Update package.lock
+- Bump versions to 1.7.3
+- Use node 20 for develop
 
 ## [1.7.2] - 2023-06-10
 
