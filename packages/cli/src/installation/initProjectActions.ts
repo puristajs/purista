@@ -54,7 +54,7 @@ export const initProjectActions: Actions = [
       deps.push(...httpStaticDependencies)
     }
 
-    await installDependencies('npm install -s ' + deps.join(' '))
+    await installDependencies('npm install --save-prod ' + deps.join(' '))
 
     const devDeps = devDependencies
 
@@ -64,14 +64,14 @@ export const initProjectActions: Actions = [
       await installDependencies('npm install -g ' + cliDependencies.join(' '))
     }
 
-    await installDependencies('npm install -d ' + devDeps.join(' '))
+    await installDependencies('npm install --save-dev ' + devDeps.join(' '))
 
     if (answers.lintTestModules.includes('installTest')) {
-      await installDependencies('npm install -d ' + testDependencies.join(' '))
+      await installDependencies('npm install --save-dev ' + testDependencies.join(' '))
     }
 
     if (answers.lintTestModules.includes('installLint')) {
-      await installDependencies('npm install -d ' + lintDependencies.join(' '))
+      await installDependencies('npm install --save-dev ' + lintDependencies.join(' '))
     }
 
     return 'needed packages installed'
@@ -100,6 +100,17 @@ export const initProjectActions: Actions = [
   },
   {
     type: 'add',
+    skip: (answers: Record<string, string[] | string>) => {
+      if (!answers.lintTestModules?.includes('installLint')) {
+        return '[SKIPPED] lint setup'
+      }
+    },
+    skipIfExists: true,
+    path: '.prettierrc',
+    templateFile: TEMPLATE_BASE + '/prettierrc.hbs',
+  },
+  {
+    type: 'add',
     skip: (answers: Record<string, string[]>) => {
       if (!answers.lintTestModules?.includes('installLint')) {
         return '[SKIPPED] lint setup'
@@ -112,16 +123,16 @@ export const initProjectActions: Actions = [
   async (answers) => {
     switch (answers.eventBridge) {
       case 'AmqpEventBridge':
-        await installDependencies('npm install -s @purista/amqpbridge')
+        await installDependencies('npm install --save-prod @purista/amqpbridge')
         return '@purista/amqpbridge added'
       case 'MqttEventBridge':
-        await installDependencies('npm install -s @purista/mqttbridge')
+        await installDependencies('npm install --save-prod @purista/mqttbridge')
         return '@purista/mqttbridge added'
       case 'NatsEventBridge':
-        await installDependencies('npm install -s @purista/natsbridge')
+        await installDependencies('npm install --save-prod @purista/natsbridge')
         return '@purista/natsbridge added'
       case 'DaprEventBridge':
-        await installDependencies('npm install -s @purista/dapr-sdk')
+        await installDependencies('npm install --save-prod @purista/dapr-sdk')
         return '@purista/dapr-sdk added'
       default:
         return '[SKIPPED] no additional packages required'
