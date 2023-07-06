@@ -17,6 +17,12 @@ export const addCommandActions: Actions = [
   {
     type: 'add',
     skipIfExists: true,
+    path: 'src/service/{{service.path}}/command/{{camelCase name}}/readme.md',
+    templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/command/name/readme.md',
+  },
+  {
+    type: 'add',
+    skipIfExists: true,
     path: 'src/service/{{service.path}}/command/{{camelCase name}}/index.ts',
     templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/command/name/index.ts.hbs',
   },

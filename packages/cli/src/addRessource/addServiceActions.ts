@@ -15,8 +15,20 @@ export const addServiceActions: Actions = [
   {
     type: 'add',
     skipIfExists: true,
+    path: 'src/service/{{camelCase name}}/readme.md',
+    templateFile: TEMPLATE_BASE + '/src/service/serviceName/readme.md',
+  },
+  {
+    type: 'add',
+    skipIfExists: true,
     path: 'src/service/{{camelCase name}}/general{{properCase name}}ServiceInfo.ts',
     templateFile: TEMPLATE_BASE + '/src/service/serviceName/generalServicenameServiceInfo.ts.hbs',
+  },
+  {
+    type: 'add',
+    skipIfExists: true,
+    path: 'src/service/{{camelCase name}}/v{{version}}/readme.md',
+    templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/readme.md',
   },
   {
     type: 'add',
