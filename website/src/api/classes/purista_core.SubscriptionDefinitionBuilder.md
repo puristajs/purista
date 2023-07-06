@@ -84,7 +84,7 @@ A working schema definition needs at least a subscription name, a short descript
 
 | Name | Type |
 | :------ | :------ |
-| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`, `ServiceClassType`\> = [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`\> = [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`\> |
 | `MessagePayloadType` | `unknown` |
 | `MessageParamsType` | `undefined` |
 | `MessageResultType` | `void` |

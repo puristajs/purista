@@ -85,7 +85,7 @@ the configuration for the NATS event bridge
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.7.1"``
+• `Const` **puristaVersion**: ``"1.7.2"``
 
 #### Defined in
 

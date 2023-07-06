@@ -4,7 +4,7 @@ PURISTA API / [Modules](modules.md)
 
 All notable changes to this project will be documented in this file.
 
-## [1.7.1] - 2023-06-04
+## [1.7.2] - 2023-06-10
 
 ### Bug Fixes
 
@@ -36,6 +36,9 @@ All notable changes to this project will be documented in this file.
 - Cli init template outdated fixes #128
 - Cli init does not contain nats bridge #130
 - Core package requires Hono package fixes #129
+- Blueprint tsconfig files
+- Deps in package.json
+- Do not overwrite user config with defaults
 
 ### Depreciation
 
@@ -86,6 +89,10 @@ All notable changes to this project will be documented in this file.
 - Update CHANGELOG
 - Add version 1.7 blog article
 - Fix order of posts in blog
+- Update api documentation
+- Update documentation
+- Update CHANGELOG
+- Update outdated docs
 - Update api documentation
 - Update documentation
 - Update CHANGELOG
@@ -227,6 +234,9 @@ All notable changes to this project will be documented in this file.
 - Do not run release build parallel
 - Bump versions to 1.7.0
 - Disable coverage threshold for quickfix
+- Bump versions to 1.7.1
+- Cleanup tsconfig blueprint in cli tool
+- Remove unused dependency
 
 ### Refactor
 
