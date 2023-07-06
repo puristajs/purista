@@ -1,6 +1,6 @@
 {
   "name": "@purista/base-http-bridge",
-  "version": "1.7.3",
+  "version": "1.7.4",
   "description": "HTTP base eventbridge core functions for PURISTA backend framework",
   "homepage": "https://purista.dev",
   "repository": {
