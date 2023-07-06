@@ -27,7 +27,7 @@ export const lintDependencies: string[] = [
   'eslint-plugin-import@^2.27.5',
   'eslint-plugin-json@^3.1.0',
   'eslint-plugin-node@^11.1.0',
-  'eslint-plugin-prettier@^4.2.1',
+  'eslint-plugin-prettier@5.0.0-alpha.2',
   'eslint-plugin-simple-import-sort@^10.0.0',
   'prettier@^3.0.0',
 ]
