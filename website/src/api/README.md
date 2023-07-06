@@ -4,6 +4,30 @@ PURISTA API / [Modules](modules.md)
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.3] - 2023-07-06
+
+### Bug Fixes
+
+- Make instanceof working with custom errors
+- Cli package and add prettierrc file
+- Lint
+
+### Documentation
+
+- Update api documentation
+- Update documentation
+- Update CHANGELOG
+
+### Features
+
+- Add readme files in code gen
+
+### Miscellaneous Tasks
+
+- Update dependencies
+- Update deps in cli auto generator
+- Update package.lock
+
 ## [1.7.2] - 2023-06-10
 
 ### Bug Fixes
@@ -237,6 +261,7 @@ All notable changes to this project will be documented in this file.
 - Bump versions to 1.7.1
 - Cleanup tsconfig blueprint in cli tool
 - Remove unused dependency
+- Bump versions to 1.7.2
 
 ### Refactor
 

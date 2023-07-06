@@ -64,7 +64,7 @@ Error.constructor
 
 #### Defined in
 
-[core/Error/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L10)
+[core/Error/HandledError.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L13)
 
 ___
 
@@ -74,7 +74,7 @@ ___
 
 #### Defined in
 
-[core/Error/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L10)
+[core/Error/HandledError.impl.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L11)
 
 ___
 
@@ -84,7 +84,7 @@ ___
 
 #### Defined in
 
-[core/Error/HandledError.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L10)
+[core/Error/HandledError.impl.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L14)
 
 ## Methods
 
@@ -108,7 +108,7 @@ ErrorResponsePayload
 
 #### Defined in
 
-[core/Error/HandledError.impl.ts:47](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L47)
+[core/Error/HandledError.impl.ts:53](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L53)
 
 ___
 
@@ -126,7 +126,7 @@ ErrorResponse as string
 
 #### Defined in
 
-[core/Error/HandledError.impl.ts:62](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L62)
+[core/Error/HandledError.impl.ts:68](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L68)
 
 ___
 
@@ -153,7 +153,7 @@ HandledError
 
 #### Defined in
 
-[core/Error/HandledError.impl.ts:36](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L36)
+[core/Error/HandledError.impl.ts:42](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L42)
 
 ___
 
@@ -177,4 +177,4 @@ HandledError
 
 #### Defined in
 
-[core/Error/HandledError.impl.ts:23](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L23)
+[core/Error/HandledError.impl.ts:29](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L29)
