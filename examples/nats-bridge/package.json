@@ -1,6 +1,6 @@
 {
   "name": "@purista/nats-example",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "purista backend framework",
   "homepage": "https://purista.dev",
   "private": true,
