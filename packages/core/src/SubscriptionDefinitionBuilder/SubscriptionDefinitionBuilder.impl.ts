@@ -102,7 +102,10 @@ export class SubscriptionDefinitionBuilder<
   private autoacknowledge = false
 
   // eslint-disable-next-line no-useless-constructor
-  constructor(private subscriptionName: string, private subscriptionDescription: string) {}
+  constructor(
+    private subscriptionName: string,
+    private subscriptionDescription: string,
+  ) {}
 
   /**
    * Add a filter to only subscribe to messages with matching event name

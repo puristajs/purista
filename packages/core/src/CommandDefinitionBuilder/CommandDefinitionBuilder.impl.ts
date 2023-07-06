@@ -110,7 +110,11 @@ export class CommandDefinitionBuilder<
   >
 
   // eslint-disable-next-line no-useless-constructor
-  constructor(private commandName: string, private commandDescription: string, private eventName?: string) {}
+  constructor(
+    private commandName: string,
+    private commandDescription: string,
+    private eventName?: string,
+  ) {}
 
   /*
    * Event name of success response message.
