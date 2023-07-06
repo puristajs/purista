@@ -191,7 +191,7 @@ DELETE request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:314](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L314)
+[HttpClient/HttpClient.impl.ts:318](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L318)
 
 ___
 
@@ -253,7 +253,7 @@ GET request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:274](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L274)
+[HttpClient/HttpClient.impl.ts:278](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L278)
 
 ___
 
@@ -331,7 +331,7 @@ PATCH request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:304](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L304)
+[HttpClient/HttpClient.impl.ts:308](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L308)
 
 ___
 
@@ -365,7 +365,7 @@ POST request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:284](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L284)
+[HttpClient/HttpClient.impl.ts:288](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L288)
 
 ___
 
@@ -399,7 +399,7 @@ PUT request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:294](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L294)
+[HttpClient/HttpClient.impl.ts:298](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L298)
 
 ___
 

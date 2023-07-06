@@ -180,7 +180,7 @@ ___
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.7.3"``
+• `Const` **puristaVersion**: ``"1.7.4"``
 
 #### Defined in
 
