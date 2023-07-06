@@ -17,6 +17,12 @@ export const addSubscriptionActions: Actions = [
   {
     type: 'add',
     skipIfExists: true,
+    path: 'src/service/{{service.path}}/subscription/{{camelCase name}}/readme.md',
+    templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/subscription/name/readme.md',
+  },
+  {
+    type: 'add',
+    skipIfExists: true,
     path: 'src/service/{{service.path}}/subscription/{{camelCase name}}/index.ts',
     templateFile: TEMPLATE_BASE + '/src/service/serviceName/v1/subscription/name/index.ts.hbs',
   },

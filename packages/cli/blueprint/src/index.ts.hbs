@@ -47,7 +47,7 @@ export const main = async () => {
 
   {{#if installHttpService}}
   // initiate the webserver service as second step
-  const httpServerService = httpServerV1Service.getInstance(eventBridge, httpServerConfig)
+  const httpServerService = httpServerV1Service.getInstance(eventBridge, { serviceConfig: httpServerConfig })
   {{/if}}
 
   {{#if installStaticPlugin}}
