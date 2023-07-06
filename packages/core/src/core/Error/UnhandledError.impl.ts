@@ -20,9 +20,9 @@ export class UnhandledError extends Error {
     super(message || getErrorMessageForCode(errorCode))
     Error.captureStackTrace(this, this.constructor)
 
-    this.name = this.constructor.name
-
     Object.setPrototypeOf(this, UnhandledError.prototype)
+
+    this.name = this.constructor.name
   }
 
   /**

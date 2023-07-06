@@ -16,9 +16,9 @@ export class HandledError extends Error {
     /* Calling the constructor of the parent class (Error) and passing the message. */
     super(message || getErrorMessageForCode(errorCode))
     Error.captureStackTrace(this, this.constructor)
-    this.name = this.constructor.name
 
     Object.setPrototypeOf(this, HandledError.prototype)
+    this.name = this.constructor.name
   }
 
   /**

@@ -252,10 +252,14 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
       } catch (error) {
         const err =
           error instanceof UnhandledError || error instanceof HandledError ? error : UnhandledError.fromError(error)
+
+        /*
         err.data = {
           method,
           path,
+          ...err.data,
         }
+        */
         log.error({ err, method, path }, err.message)
         span.recordException(err)
         throw err
