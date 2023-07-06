@@ -7,10 +7,16 @@ import { CommandErrorResponse, ErrorResponsePayload, StatusCode, TraceId } from 
  * Scenarios are input validation failures or "404 Not Found" errors which should be returned to the caller.
  */
 export class HandledError extends Error {
-  constructor(public errorCode: StatusCode, message?: string, public data?: unknown, public traceId?: TraceId) {
+  constructor(
+    public errorCode: StatusCode,
+    message?: string,
+    public data?: unknown,
+    public traceId?: TraceId,
+  ) {
     /* Calling the constructor of the parent class (Error) and passing the message. */
     super(message || getErrorMessageForCode(errorCode))
     Error.captureStackTrace(this, this.constructor)
+    this.name = this.constructor.name
 
     Object.setPrototypeOf(this, HandledError.prototype)
   }
