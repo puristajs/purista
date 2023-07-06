@@ -156,7 +156,7 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
   }
 
   addBeforeResponse(method: HTTPMethods, pattern: string, handler: BeforeResponseHook) {
-    this.beforeResponse.add(method, pattern, handler)
+    this.beforeResponse.add(method.toUpperCase() as Methods, pattern, handler)
   }
 
   async start(): Promise<void> {
