@@ -1,5 +1,6 @@
 export * from './ClientConfig'
 export * from './DecryptInput'
 export * from './EncryptInput'
+export * from './Scope'
 export * from './Secret'
 export * from './TokenData'

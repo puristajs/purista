@@ -98,7 +98,7 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
     try {
       const { secret: encryptedSecret } = await this.get<{ secret: Secret }>(encodeURI(`/api/v3/secrets/${name}`), {
         query: {
-          environment: this.tokenData.environment,
+          environment: this.tokenData.scopes[0].environment,
           workspaceId: this.tokenData.workspace,
           type: SECRET_TYPE,
         },
@@ -130,7 +130,7 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
     }
 
     const payload = {
-      environment: this.tokenData.environment,
+      environment: this.tokenData.scopes[0].environment,
       workspaceId: this.tokenData.workspace,
       type: SECRET_TYPE,
       ...this.encryptSecret(name, value),
@@ -162,7 +162,7 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
       encodeURI(`/api/v3/secrets/${name}`),
       {},
       {
-        environment: this.tokenData.environment,
+        environment: this.tokenData.scopes[0].environment,
         workspaceId: this.tokenData.workspace,
         type: SECRET_TYPE,
       },
