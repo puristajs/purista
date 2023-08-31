@@ -20,7 +20,7 @@ export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV
   const p = (this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath) as string
   const url = posix.join(p, '/openapi.json')
 
-  const info = this.config.openApi?.info || OPENAPI_DEFAULT_INFO
+  const info = { ...OPENAPI_DEFAULT_INFO, ...this.config.openApi?.info }
   const servers = this.config.openApi?.servers || [
     { url: `${this.config.fastify?.https ? 'https' : 'http'}://${this.config.domain}:${this.config.port}` },
   ]
