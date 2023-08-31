@@ -15,6 +15,31 @@ export const getCommandContextMock = <MessagePayloadType = unknown, MessageParam
   sandbox?: SinonSandbox,
 ) => {
   const logger = getLoggerMock(sandbox)
+
+  const getMockSpan = () => {
+    return {
+      spanContext: () => {
+        return {
+          traceId: 'fake',
+          spanId: 'fake',
+          isRemote: false,
+          traceFlags: 0,
+        }
+      },
+      setAttribute: sandbox?.stub() || stub(),
+      setAttributes: sandbox?.stub() || stub(),
+      addEvent: sandbox?.stub() || stub(),
+      setStatus: sandbox?.stub() || stub(),
+      updateName: sandbox?.stub() || stub(),
+      end: sandbox?.stub() || stub(),
+      isRecording: () => true,
+      recordException: (sandbox?.stub() || stub()).callsFake((err: any) => {
+        // eslint-disable-next-line no-console
+        console.error(err)
+      }),
+    }
+  }
+
   const stubs = {
     logger: logger.stubs,
     emit: sandbox?.stub() || stub(),
@@ -44,8 +69,8 @@ export const getCommandContextMock = <MessagePayloadType = unknown, MessageParam
     message,
     emit: stubs.emit.rejects(new Error('emit is not stubbed')),
     invoke: stubs.invoke.rejects(new Error('Invoke is not stubbed')),
-    wrapInSpan: stubs.wrapInSpan.callsFake((_name, _opts, fn) => fn()),
-    startActiveSpan: stubs.startActiveSpan.callsFake((_name, _opts, _context, fn) => fn()),
+    wrapInSpan: stubs.wrapInSpan.callsFake((_name, _opts, fn) => fn(getMockSpan())),
+    startActiveSpan: stubs.startActiveSpan.callsFake((_name, _opts, _context, fn) => fn(getMockSpan())),
     secrets: {
       getSecret: stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
       setSecret: stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
