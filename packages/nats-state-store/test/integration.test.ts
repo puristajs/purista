@@ -1,4 +1,4 @@
-import { NatsContainer, StartedNatsContainer } from 'testcontainers'
+import { NatsContainer, StartedNatsContainer } from '@testcontainers/nats'
 
 import { NatsStateStore } from '../src/NatsStateStore.impl'
 

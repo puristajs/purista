@@ -44,7 +44,7 @@
   },
   "devDependencies": {
     "@types/jest": "^29.5.1",
-    "@types/node": "^18.16.19",
+    "@types/node": "^20.5.7",
     "@types/sinon": "^10.x",
     "jest": "^29.6.0",
     "sinon": "^15.2",
@@ -53,7 +53,7 @@
   },
   "dependencies": {
     "@purista/core": "*",
-    "@redis/client": "^1.5.8"
+    "@redis/client": "^1.5.9"
   },
   "peerDependenciesMeta": {}
 }
