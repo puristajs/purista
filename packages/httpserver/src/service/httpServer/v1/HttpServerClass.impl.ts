@@ -55,6 +55,7 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
 
     this.server
       .decorateRequest('principalId', undefined)
+      .decorateRequest('tenantId', undefined)
       .setNotFoundHandler(async (request, reply) => {
         const parentContext = propagation.extract(context.active(), request.headers)
         await new Promise((resolve) => api.context.with(parentContext, async () => resolve(undefined)))

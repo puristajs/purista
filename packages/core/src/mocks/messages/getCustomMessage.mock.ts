@@ -26,6 +26,7 @@ export const getCustomMessageMessageMock = <PayloadType>(
     correlationId: getNewCorrelationId(),
     traceId: getNewTraceId(),
     principalId: 'mocked-principal-id',
+    tenantId: 'mocked-tenant-id',
     eventName,
     sender: {
       serviceName: 'mocked_sender',

@@ -34,6 +34,7 @@ export const getTopicName: GetTopicNameFn = function (message: EBMessage) {
     this.config.topicPrefix,
     convertToSnakeCase(message.messageType),
     convertToSnakeCase(message.principalId || empty),
+    convertToSnakeCase(message.tenantId || empty),
     convertToSnakeCase(message.sender.instanceId),
     convertToSnakeCase(message.sender.serviceName),
     convertToSnakeCase(message.sender.serviceVersion),

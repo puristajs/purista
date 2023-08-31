@@ -1,5 +1,6 @@
 import { InstanceId } from './InstanceId'
 import { PrincipalId } from './PrincipalId'
+import { TenantId } from './TenantId'
 import { TraceId } from './TraceId'
 
 export type LoggerOptions = {
@@ -11,6 +12,7 @@ export type LoggerOptions = {
   traceId?: TraceId
   instanceId?: InstanceId
   principalId?: PrincipalId
+  tenantId?: TenantId
   hostname?: string
 }
 

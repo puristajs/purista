@@ -165,6 +165,10 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
           userProperties.principalId = msg.principalId
         }
 
+        if (msg.tenantId) {
+          userProperties.tenantId = msg.tenantId
+        }
+
         Object.entries(userProperties).forEach((value) => headers?.set(value[0], value[1]))
       }
       const topic = getTopicName.bind(this)(msg)
@@ -242,6 +246,10 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 
           if (command.principalId) {
             userProperties.principalId = command.principalId
+          }
+
+          if (command.tenantId) {
+            userProperties.tenantId = command.tenantId
           }
 
           Object.entries(userProperties).forEach((value) => headers?.set(value[0], value[1]))

@@ -12,6 +12,7 @@ describe('createErrorResponse', () => {
     contentEncoding: 'utf-8',
     correlationId: 'messageCorrelationId',
     principalId: 'messagePrincipalId',
+    tenantId: 'messageTenantId',
     sender: {
       serviceName: 'SenderService',
       serviceVersion: '1.1.1',

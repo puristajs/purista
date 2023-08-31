@@ -41,6 +41,7 @@ describe('subscription matching for instanceId', () => {
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
+      tenantId: 'messageTenantId',
       eventName,
       contentType: 'application/json',
       contentEncoding: 'utf-8',

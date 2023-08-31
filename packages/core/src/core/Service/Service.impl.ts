@@ -31,6 +31,7 @@ import {
   EBMessageType,
   InfoMessageType,
   Logger,
+  PrincipalId,
   PuristaSpanName,
   PuristaSpanTag,
   ServiceClass,
@@ -42,6 +43,7 @@ import {
   SubscriptionDefinition,
   SubscriptionDefinitionList,
   SubscriptionFunctionContext,
+  TenantId,
   TraceId,
 } from '../types'
 import { commandTransformInput } from './commandTransformInput.impl'
@@ -177,7 +179,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     })
   }
 
-  protected getInvokeFunction(serviceTarget: string, traceId: TraceId, principalId?: string) {
+  protected getInvokeFunction(serviceTarget: string, traceId: TraceId, principalId?: PrincipalId, tenantId?: TenantId) {
     const sender: EBMessageSenderAddress = {
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
@@ -204,6 +206,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           parameter,
         },
         principalId,
+        tenantId,
       })
 
       return this.eventBridge.invoke(msg)
@@ -212,7 +215,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     return invokeCommand.bind(this)
   }
 
-  protected getEmitFunction(serviceTarget: string, traceId: TraceId, principalId: string | undefined) {
+  protected getEmitFunction(serviceTarget: string, traceId: TraceId, principalId?: PrincipalId, tenantId?: TenantId) {
     const sender: EBMessageSenderAddress = {
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
@@ -237,6 +240,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           eventName,
           payload: eventPayload,
           principalId,
+          tenantId,
         })
 
         return this.eventBridge.emitMessage(msg)
@@ -431,10 +435,15 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
         serviceTarget: command?.commandName,
         ...span.spanContext(),
         principalId: message.principalId,
+        tenantId: message.tenantId,
       })
 
       if (message.principalId) {
         span.setAttribute(PuristaSpanTag.PrincipalId, message.principalId)
+      }
+
+      if (message.tenantId) {
+        span.setAttribute(PuristaSpanTag.TenantId, message.tenantId)
       }
 
       if (!command) {
@@ -459,8 +468,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           async (_subSpan) => {
             const context: CommandFunctionContext = {
               message,
-              emit: this.getEmitFunction(command.commandName, traceId, message.principalId),
-              invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId),
+              emit: this.getEmitFunction(command.commandName, traceId, message.principalId, message.tenantId),
+              invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId, message.tenantId),
               ...this.getContextFunctions(logger),
             }
             const call = command.call.bind(this, context)
@@ -477,8 +486,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
             for (const [name, hook] of Object.entries(guards || {})) {
               const context: CommandFunctionContext = {
                 message,
-                emit: this.getEmitFunction(command.commandName, traceId, message.principalId),
-                invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId),
+                emit: this.getEmitFunction(command.commandName, traceId, message.principalId, message.tenantId),
+                invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId, message.tenantId),
                 ...this.getContextFunctions(logger),
               }
 
@@ -595,10 +604,15 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           serviceTarget: subscriptionName,
           ...span.spanContext(),
           principalId: message.principalId,
+          tenantId: message.tenantId,
         })
 
         if (message.principalId) {
           span.setAttribute(PuristaSpanTag.PrincipalId, message.principalId)
+        }
+
+        if (message.tenantId) {
+          span.setAttribute(PuristaSpanTag.TenantId, message.tenantId)
         }
 
         if (!subscription) {
@@ -621,8 +635,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
             async (_subSpan) => {
               const context: SubscriptionFunctionContext = {
                 message,
-                emit: this.getEmitFunction(subscriptionName, traceId, message.principalId),
-                invoke: this.getInvokeFunction(subscriptionName, traceId, message.principalId),
+                emit: this.getEmitFunction(subscriptionName, traceId, message.principalId, message.tenantId),
+                invoke: this.getInvokeFunction(subscriptionName, traceId, message.principalId, message.tenantId),
                 ...this.getContextFunctions(logger),
               }
               const call2 = subscription.call.bind(this, context)
@@ -639,8 +653,18 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
               for (const [name, hook] of Object.entries(guards || {})) {
                 const context: SubscriptionFunctionContext = {
                   message,
-                  emit: this.getEmitFunction(subscription.subscriptionName, traceId, message.principalId),
-                  invoke: this.getInvokeFunction(subscription.subscriptionName, traceId, message.principalId),
+                  emit: this.getEmitFunction(
+                    subscription.subscriptionName,
+                    traceId,
+                    message.principalId,
+                    message.tenantId,
+                  ),
+                  invoke: this.getInvokeFunction(
+                    subscription.subscriptionName,
+                    traceId,
+                    message.principalId,
+                    message.tenantId,
+                  ),
                   ...this.getContextFunctions(logger),
                 }
 
@@ -747,6 +771,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
         },
         eventBridgeConfig: subscriptionDefinition.eventBridgeConfig,
         principalId: subscriptionDefinition.principalId,
+        tenantId: subscriptionDefinition.tenantId,
       }
 
       await this.eventBridge.registerSubscription(subscription, (message: EBMessage) =>

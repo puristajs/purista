@@ -52,6 +52,7 @@ describe('HandledError', () => {
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
+      tenantId: 'messageTenantId',
       contentType: 'application/json',
       contentEncoding: 'utf-8',
       sender,

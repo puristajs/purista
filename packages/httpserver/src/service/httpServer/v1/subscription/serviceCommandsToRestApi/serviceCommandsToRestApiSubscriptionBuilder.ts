@@ -77,6 +77,7 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
             }
 
             const principalId = request.principalId
+            const tenantId = request.tenantId
 
             const response = await this.invoke(
               {
@@ -88,6 +89,7 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
                 },
                 payload: { payload: request.body, parameter: parameterExtended },
                 principalId,
+                tenantId,
                 contentType,
                 contentEncoding,
               },

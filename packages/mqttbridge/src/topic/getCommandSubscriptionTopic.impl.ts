@@ -17,6 +17,7 @@ export const getCommandSubscriptionTopic: GetCommandTopicFn = function (address)
     convertToSnakeCase('+'),
     convertToSnakeCase('+'),
     convertToSnakeCase('+'),
+    convertToSnakeCase('+'),
     convertToSnakeCase(address.serviceName),
     convertToSnakeCase(address.serviceVersion),
     convertToSnakeCase(address.serviceTarget),

@@ -15,6 +15,7 @@ export const getCommandResponseSubscriptionTopic: GetCommandResponseSubscription
     '+',
     '+',
     '+',
+    '+',
     convertToSnakeCase(this.instanceId as string),
     '+',
     '+',

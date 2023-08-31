@@ -76,6 +76,10 @@ export const getSubscriptionHandler = (
                 userProperties.principalId = responseMessage.principalId
               }
 
+              if (responseMessage.tenantId) {
+                userProperties.tenantId = responseMessage.tenantId
+              }
+
               const topic = getTopicName.bind(this)(responseMessage as EBMessage)
               await this.client.publish(topic, JSON.stringify(responseMessage), {
                 qos: this.config.qoSSubscription,

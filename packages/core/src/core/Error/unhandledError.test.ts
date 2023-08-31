@@ -53,6 +53,7 @@ describe('UnhandledError', () => {
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
+      tenantId: 'messageTenantId',
       sender,
       receiver,
       contentType: 'application/json',

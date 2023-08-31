@@ -16,6 +16,6 @@ describe('getCommandResponseSubscriptionTopic', () => {
 
     const topic = getCommandResponseSubscriptionTopic.bind(bridge)()
 
-    expect(topic).toBe('purista/+/+/+/+/+/+/+/abc123/+/+/+')
+    expect(topic).toBe('purista/+/+/+/+/+/+/+/+/abc123/+/+/+')
   })
 })

@@ -25,6 +25,7 @@ describe('prevent sensitive data to be logged in production', () => {
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
+      tenantId: 'messageTenantId',
       payload: {
         payload: { content: 'content' },
         parameter: { param: 1 },
@@ -59,6 +60,7 @@ describe('prevent sensitive data to be logged in production', () => {
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
+      tenantId: 'messageTenantId',
       payload: {
         payload: { content: 'content' },
         parameter: { param: 1 },
@@ -95,6 +97,7 @@ describe('prevent sensitive data to be logged in production', () => {
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
+      tenantId: 'messageTenantId',
       payload: { content: 'content' },
     }
 

@@ -5,6 +5,7 @@ import { EBMessageType } from '../EBMessageType.enum'
 import { InstanceId } from '../InstanceId'
 import { PrincipalId } from '../PrincipalId'
 import type { ServiceClass } from '../ServiceClass'
+import { TenantId } from '../TenantId'
 import type { SubscriptionAfterGuardHook } from './SubscriptionAfterGuardHook'
 import type { SubscriptionBeforeGuardHook } from './SubscriptionBeforeGuardHook'
 import { SubscriptionDefinitionMetadataBase } from './SubscriptionDefinitionMetadataBase'
@@ -66,6 +67,8 @@ export type SubscriptionDefinition<
   emitEventName?: string
   /** filter for principal id */
   principalId?: PrincipalId
+  /** filter for tenant id */
+  tenantId?: TenantId
   /** hooks of subscription */
   hooks: {
     transformInput?: {
