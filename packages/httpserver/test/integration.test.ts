@@ -69,7 +69,7 @@ describe('', () => {
     expect(response.info.description).toEqual(config.serviceConfig.openApi.info.description)
     expect(response.info.title).toEqual(config.serviceConfig.openApi.info.title)
     expect(response.info.version).toEqual(config.serviceConfig.openApi.info.version)
-    expect(response.paths['/healthz']).toBeDefined()
+    expect(response.paths?.['/healthz']).toBeDefined()
   })
 
   describe('with services', () => {
@@ -84,14 +84,14 @@ describe('', () => {
     it('returns ' + apiMountPath + '/openapi.json', async () => {
       const response = await client.get<OpenAPIObject>(apiMountPath + '/openapi.json')
 
-      expect(response.paths['/healthz']).toBeDefined()
-      expect(response.paths[apiMountPath + '/v1/ping']).toBeDefined()
-      expect(response.paths[apiMountPath + '/v1/unknown']).toBeUndefined()
-      expect(response.paths[apiMountPath + '/v1/error']).toBeDefined()
-      expect(response.paths[apiMountPath + '/v1/post']).toBeDefined()
-      expect(response.paths[apiMountPath + '/v1/patch']).toBeDefined()
-      expect(response.paths[apiMountPath + '/v1/put']).toBeDefined()
-      expect(response.paths[apiMountPath + '/v1/delete']).toBeDefined()
+      expect(response.paths?.['/healthz']).toBeDefined()
+      expect(response.paths?.[apiMountPath + '/v1/ping']).toBeDefined()
+      expect(response.paths?.[apiMountPath + '/v1/unknown']).toBeUndefined()
+      expect(response.paths?.[apiMountPath + '/v1/error']).toBeDefined()
+      expect(response.paths?.[apiMountPath + '/v1/post']).toBeDefined()
+      expect(response.paths?.[apiMountPath + '/v1/patch']).toBeDefined()
+      expect(response.paths?.[apiMountPath + '/v1/put']).toBeDefined()
+      expect(response.paths?.[apiMountPath + '/v1/delete']).toBeDefined()
     })
 
     it('exposes http get endpoint', async () => {

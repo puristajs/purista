@@ -12,9 +12,9 @@
     "vuepress": "vuepress build src  --clean-cache"
   },
   "devDependencies": {
-    "@vuepress/client": "2.0.0-beta.64",
-    "vue": "^3.2.47",
-    "vuepress": "2.0.0-beta.64",
-    "vuepress-theme-hope": "2.0.0-beta.230"
+    "@vuepress/client": "2.0.0-beta.67",
+    "vue": "^3.3.4",
+    "vuepress": "2.0.0-beta.67",
+    "vuepress-theme-hope": "2.0.0-beta.236"
   }
 }
