@@ -96,6 +96,10 @@ export const getCommandHandler = (
                 userProperties.principalId = responseMessage.principalId
               }
 
+              if (responseMessage.tenantId) {
+                userProperties.tenantId = responseMessage.tenantId
+              }
+
               // emit the message 1st time as direct response
               const responseTopic = getTopicName.bind(this)(responseMessage)
               await this.client.publish(responseTopic, JSON.stringify(responseMessage), {

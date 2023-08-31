@@ -12,6 +12,7 @@ describe('createSuccessResponse', () => {
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
+      tenantId: 'messageTenantId',
       sender: {
         serviceName: 'SenderService',
         serviceVersion: '1.1.1',
@@ -52,6 +53,7 @@ describe('createSuccessResponse', () => {
       timestamp: Date.now(),
       correlationId: 'messageCorrelationId',
       principalId: 'messagePrincipalId',
+      tenantId: 'messageTenantId',
       sender: {
         serviceName: 'SenderService',
         serviceVersion: '1.1.1',

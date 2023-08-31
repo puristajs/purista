@@ -1,4 +1,4 @@
-import { CustomMessage, EBMessage, EBMessageType, InstanceId, PrincipalId } from '../../core'
+import { CustomMessage, EBMessage, EBMessageType, InstanceId, PrincipalId, TenantId } from '../../core'
 
 export type SubscriptionStorageEntry = {
   isMatchingMessageType(input: EBMessageType): boolean
@@ -12,6 +12,7 @@ export type SubscriptionStorageEntry = {
   isMatchingReceiverInstanceId(input?: InstanceId): boolean
   isMatchingEventName(input?: string): boolean
   isMatchingPrincipalId(input?: PrincipalId): boolean
+  isMatchingTenantId(input?: TenantId): boolean
   emitEventName?: string
   cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>
 }

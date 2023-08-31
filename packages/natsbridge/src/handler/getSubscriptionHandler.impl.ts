@@ -91,6 +91,10 @@ export const getSubscriptionHandler = (
                 userProperties.principalId = responseMessage.principalId
               }
 
+              if (responseMessage.tenantId) {
+                userProperties.tenantId = responseMessage.tenantId
+              }
+
               const topic = getTopicName.bind(this)(responseMessage as EBMessage)
 
               this.connection?.publish(topic, this.sc.encode(responseMessage))

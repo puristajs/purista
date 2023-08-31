@@ -27,6 +27,7 @@ export const getCommandMessageMock = <Payload = unknown, Parameter = unknown>(
     correlationId: getNewCorrelationId(),
     traceId: getNewTraceId(),
     principalId: 'mocked-principal-id',
+    tenantId: 'mocked-tenant-id',
     contentType: 'application/json',
     contentEncoding: 'utf-8',
     sender: {

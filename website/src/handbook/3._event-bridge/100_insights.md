@@ -45,6 +45,13 @@ It is recommended to use the message principal id for any authentication/authori
 
 The principal id is propagated down - like the trace id - in the whole process flow. So it will be available in subscriptions and function invocations. Each message has a unique id, which might be used by the underlying event bridge/infrastructure or for persistence purposes.
 
+### tenantId
+
+The tenant id is an optional field, which can be set by business logic to the tenant id.  
+The principal id should be some technical tenant id and not something like an company name, as it might be logged.  
+
+The tenant id is propagated down - like the principal id - in the whole process flow. So it will be available in subscriptions and function invocations. Each message has a unique id, which might be used by the underlying event bridge/infrastructure or for persistence purposes.
+
 ## Message structure
 
 As PURISTA is a message based framework, the structure of messages might be interesting.
@@ -56,6 +63,7 @@ As PURISTA is a message based framework, the structure of messages might be inte
 |timestamp|yes|the timestamp as number in ms when the message was created|
 |correlationId|only used in Command and CommandResponse messages|a unique id generated when a comman message is send. the command response is using same correlationId|
 |principalId|no|the unique id of the user|
+|tenantId|no|the unique id of the tenant|
 |eventName|no|a string representing the business event name|
 |sender|yes|the service function or subscription who sends the message|
 |sender.serviceName|yes|the service name|

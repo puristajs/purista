@@ -3,6 +3,7 @@ import type { CorrelationId } from './CorrelationId'
 import type { EBMessageId } from './EBMessageId'
 import { EBMessageSenderAddress } from './EBMessageSenderAddress'
 import type { PrincipalId } from './PrincipalId'
+import { TenantId } from './TenantId'
 import type { TraceId } from './TraceId'
 
 /**
@@ -23,6 +24,8 @@ export type EBMessageBase = {
   correlationId?: CorrelationId
   /** principal id */
   principalId?: PrincipalId
+  /** principal id */
+  tenantId?: TenantId
   /** event name for this message */
   eventName?: string
   /** stringified Opentelemetry parent trace id */

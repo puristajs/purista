@@ -115,6 +115,10 @@ export const getCommandHandler = (
                   userProperties.principalId = responseMessage.principalId
                 }
 
+                if (responseMessage.tenantId) {
+                  userProperties.tenantId = responseMessage.tenantId
+                }
+
                 Object.entries(userProperties).forEach((value) => headers?.set(value[0], value[1]))
               }
 

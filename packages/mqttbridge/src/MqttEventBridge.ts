@@ -179,6 +179,10 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
         userProperties.principalId = msg.principalId
       }
 
+      if (msg.tenantId) {
+        userProperties.tenantId = msg.tenantId
+      }
+
       const topic = getTopicName.bind(this)(msg)
       await this.client.publish(topic, JSON.stringify(msg), {
         qos: this.config.qoSSubscription,
@@ -291,6 +295,10 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 
         if (command.principalId) {
           userProperties.principalId = command.principalId
+        }
+
+        if (command.tenantId) {
+          userProperties.tenantId = command.tenantId
         }
 
         const topic = getTopicName.bind(this)(command)

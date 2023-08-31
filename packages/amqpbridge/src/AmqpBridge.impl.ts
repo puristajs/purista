@@ -328,6 +328,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
         senderInstanceId: msg.sender.instanceId,
         eventName: msg.eventName,
         principalId: msg.principalId,
+        tenantId: msg.tenantId,
       }
 
       serializeOtpForAmqpHeader(headers)
@@ -437,6 +438,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
           receiverServiceTarget: command.receiver.serviceTarget,
           eventName: command.eventName,
           principalId: command.principalId,
+          tenantId: command.tenantId,
         }
         serializeOtpForAmqpHeader(headers)
 
@@ -561,6 +563,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
                     replyTo: msg.properties.replyTo,
                     eventName: responseMessage.eventName,
                     principalId: responseMessage.principalId,
+                    tenantId: responseMessage.tenantId,
                   }
 
                   serializeOtpForAmqpHeader(headers)
@@ -694,6 +697,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
       receiverInstanceId: subscription.receiver?.instanceId,
       eventName: subscription.eventName,
       principalId: subscription.principalId,
+      tenantId: subscription.tenantId,
     })
 
     const consume = await channel.consume(

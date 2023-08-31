@@ -19,6 +19,7 @@ describe('throwIfNotValidMessage', () => {
         traceId: 'my-trace-id',
         correlationId: 'my-correlation-id',
         principalId: 'my-principal-id',
+        tenantId: 'my-tenant-id',
         eventName: 'my-event-name',
         otp: 'my-otp',
       })

@@ -16,6 +16,11 @@ export const isMessageMatchingSubscription = (
     return false
   }
 
+  // if message type does not match, the tenantId id does not match
+  if (!subscription.isMatchingTenantId(message.tenantId)) {
+    return false
+  }
+
   // if we are looking for a named event, if is does not match, the subscription does not match
   if (!subscription.isMatchingEventName(message.eventName)) {
     return false

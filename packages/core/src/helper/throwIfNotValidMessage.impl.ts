@@ -24,6 +24,7 @@ export const throwIfNotValidMessage = (input: unknown) => {
       traceId: z.string().optional(),
       correlationId: z.string().optional(),
       principalId: z.string().optional(),
+      tenantId: z.string().optional(),
       eventName: z.string().optional(),
       otp: z.string().optional(),
     })

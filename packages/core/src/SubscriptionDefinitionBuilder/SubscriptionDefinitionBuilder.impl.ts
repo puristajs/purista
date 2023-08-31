@@ -15,6 +15,7 @@ import type {
   SubscriptionFunction,
   SubscriptionTransformInputHook,
   SubscriptionTransformOutputHook,
+  TenantId,
 } from '../core'
 import { generateSchema, OpenApiZodAny } from '../zodOpenApi'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl'
@@ -95,6 +96,7 @@ export class SubscriptionDefinitionBuilder<
   private emitEventName?: string
 
   private principalId?: PrincipalId
+  private tenantId?: TenantId
 
   private durable = true
 
@@ -139,6 +141,16 @@ export class SubscriptionDefinitionBuilder<
    */
   filterPrincipalId(principalId: PrincipalId) {
     this.principalId = principalId
+    return this
+  }
+
+  /**
+   * Filter messages only for tenantId
+   * @param tenantId the principal id to subscribe
+   * @returns
+   */
+  filterTenantId(tenantId: TenantId) {
+    this.tenantId = tenantId
     return this
   }
 
@@ -648,6 +660,7 @@ export class SubscriptionDefinitionBuilder<
       eventName: this.eventName,
       emitEventName: this.emitEventName,
       principalId: this.principalId,
+      tenantId: this.tenantId,
       call: getSubscriptionFunctionWithValidation<
         ServiceClassType,
         MessagePayloadType,

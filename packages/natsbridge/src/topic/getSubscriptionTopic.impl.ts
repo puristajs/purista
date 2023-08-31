@@ -9,6 +9,7 @@ export const getSubscriptionTopic: GetSubscriptionTopicFn = function (subscripti
     this.config.topicPrefix,
     convertToSnakeCase(subscription.messageType || '*'),
     convertToSnakeCase(subscription.principalId || '*'),
+    convertToSnakeCase(subscription.tenantId || '*'),
     convertToSnakeCase(subscription.sender?.instanceId || '*'),
     convertToSnakeCase(subscription.sender?.serviceName || '*'),
     convertToSnakeCase(subscription.sender?.serviceVersion || '*'),

@@ -3,6 +3,7 @@ import { EBMessageAddress } from '../EBMessageAddress'
 import { EBMessageType } from '../EBMessageType.enum'
 import { InstanceId } from '../InstanceId'
 import { PrincipalId } from '../PrincipalId'
+import { TenantId } from '../TenantId'
 
 /**
  * A subscription managed by the event bridge
@@ -32,6 +33,8 @@ export type Subscription<PayloadType = unknown, ParameterType = unknown> = {
   emitEventName?: string // event to emit if output payload is set
   /** the principal id  */
   principalId?: PrincipalId
+  /** the tenant id  */
+  tenantId?: TenantId
   /** the message payload */
   payload?: {
     parameter?: ParameterType

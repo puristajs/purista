@@ -16,6 +16,7 @@ export const getNewSubscriptionStorageEntry = (
     isMatchingReceiverServiceTarget: () => true,
     isMatchingReceiverInstanceId: () => true,
     isMatchingPrincipalId: () => true,
+    isMatchingTenantId: () => true,
     isMatchingEventName: () => true,
     emitEventName: subscription.emitEventName,
     cb,
@@ -23,6 +24,10 @@ export const getNewSubscriptionStorageEntry = (
 
   if (subscription.principalId) {
     entry.isMatchingPrincipalId = (input: EBMessageType) => input === subscription.principalId
+  }
+
+  if (subscription.tenantId) {
+    entry.isMatchingTenantId = (input: EBMessageType) => input === subscription.tenantId
   }
 
   if (subscription.sender?.instanceId) {
