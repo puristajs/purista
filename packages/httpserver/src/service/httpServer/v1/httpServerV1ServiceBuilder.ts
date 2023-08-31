@@ -23,7 +23,7 @@ export const httpServerV1ServiceBuilder = new ServiceBuilder(httpServerServiceIn
     },
     logLevel: 'warn',
     port: 9090,
-    host: undefined,
+    host: '0.0.0.0',
     domain: 'localhost',
     uploadDir: undefined,
     cookieSecret: undefined,

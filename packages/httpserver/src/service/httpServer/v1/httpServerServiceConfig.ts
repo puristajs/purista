@@ -3,14 +3,13 @@ import { Http2SecureServer } from 'node:http2'
 import { FastifyCompressOptions } from '@fastify/compress'
 import { FastifyCorsOptions } from '@fastify/cors'
 import { FastifyHttp2SecureOptions, FastifyServerOptions } from 'fastify'
-import { InfoObject } from 'openapi3-ts/oas31'
 import { z } from 'zod'
 
 // define the service config schema and the default service configuration
 
 export const OPENAPI_DEFAULT_MOUNT_PATH = '/api'
 
-export const OPENAPI_DEFAULT_INFO: InfoObject = {
+export const OPENAPI_DEFAULT_INFO = {
   title: 'Server api',
   description: 'OpenApi definition for server endpoints',
   version: '1.0.0',
@@ -33,8 +32,8 @@ export const FastifyHelmetOptionsSchema = z.object({
 })
 
 export const InfoObjectSchema = z.object({
-  title: z.string(),
-  description: z.string().optional(),
+  title: z.string().default('PURISTA'),
+  description: z.string().default('OpenApi definition for server endpoints'),
   termsOfService: z.string().optional(),
   contact: z
     .object({
@@ -49,7 +48,7 @@ export const InfoObjectSchema = z.object({
       url: z.string().optional(),
     })
     .optional(),
-  version: z.string(),
+  version: z.string().default('1.0.0'),
 })
 
 export const ServerObjectSchema = z.object({
@@ -61,22 +60,22 @@ export const httpServerServiceV1ConfigSchema = z.object({
   fastify: z.any(), //
   logLevel: z.enum(['info', 'error', 'warn', 'debug', 'trace', 'fatal']).optional(),
   port: z.number().int().min(1),
-  host: z.string().optional(),
+  host: z.string().optional().default('0.0.0.0'),
   domain: z.string().optional().default('localhost'),
   uploadDir: z.string().optional(),
   cookieSecret: z.string().optional(),
   apiMountPath: z.string().optional(),
-  enableHelmet: z.boolean().optional(),
-  enableHealthz: z.boolean().optional(),
+  enableHelmet: z.boolean().optional().default(false),
+  enableHealthz: z.boolean().optional().default(true),
   helmetOptions: FastifyHelmetOptionsSchema.optional(),
-  enableCompress: z.boolean().optional(),
+  enableCompress: z.boolean().optional().default(false),
   compressOptions: z.any().optional(),
-  enableCors: z.boolean().optional(),
+  enableCors: z.boolean().optional().default(false),
   corsOptions: z.any().optional(),
   openApi: z
     .object({
-      enabled: z.boolean().optional(),
-      path: z.string().optional(),
+      enabled: z.boolean().optional().default(true),
+      path: z.string().optional().default('/api'),
       info: InfoObjectSchema,
       servers: z.array(ServerObjectSchema).optional(),
       components: z.any().optional(),
