@@ -30,7 +30,7 @@ describe('Infisical secret store', () => {
   })
 
   const store = new InfisicalSecretStore({
-    bearerToken: 'st.647467a4fd775a75b3f6dd67.9a0a41e44f1847dd83f5710179011997.4a5b4c1e8e4380aca242ca20915762b1',
+    bearerToken: 'st.64f099f22d1513b001b732b6.61aa81633200b752868d9ca701ce1a61.0dd80b7bf98043da184dc719233d476d',
     baseUrl,
     enableGet: true,
     enableRemove: true,
