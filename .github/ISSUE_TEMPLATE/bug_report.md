@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Create a report to improve PURISTA
 title: "fix:"
 labels: bug
 assignees: sebastianwessel
@@ -15,6 +15,7 @@ A clear and concise description of what the bug is.
 
 **To Reproduce**
 Which version do you use:
+
 - PURISTA version
 - node/bun/deno version
 
