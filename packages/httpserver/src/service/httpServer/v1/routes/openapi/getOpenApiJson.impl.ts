@@ -284,6 +284,15 @@ export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV
           }
         })
 
+      const traceIdParameter: ParameterObject = {
+        in: 'header',
+        required: false,
+        name: this.config.traceHeaderField || 'x-trace-id',
+        schema: { type: 'string' },
+        example: '022bcd32-0a7c-4635-90ce-7940d0b9793f',
+        description: 'TraceID which can be used by business logic',
+      }
+
       const requestIdParameter: ParameterObject = {
         in: 'header',
         required: false,
@@ -300,7 +309,7 @@ export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV
           security: securitySchema.length > 0 && definition.openApi?.isSecure ? securitySchema : [],
           description: definition.openApi?.description,
           summary: definition.openApi?.summary,
-          parameters: [...pathParams, ...queryParams, requestIdParameter],
+          parameters: [...pathParams, ...queryParams, traceIdParameter, requestIdParameter],
           tags: definition.openApi?.tags,
           operationId: definition.openApi?.operationId,
           requestBody,
