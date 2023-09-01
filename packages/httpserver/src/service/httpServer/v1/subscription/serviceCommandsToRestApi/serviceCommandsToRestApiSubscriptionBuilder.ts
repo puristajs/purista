@@ -1,12 +1,14 @@
 import { posix } from 'node:path'
 
-import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import {
   convertToSnakeCase,
   EBMessageType,
+  getNewTraceId,
   HandledError,
   isHttpExposedServiceMeta,
+  serializeOtp,
   StatusCode,
   UnhandledError,
 } from '@purista/core'
@@ -51,7 +53,8 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 
     const getHandler = () => {
       return async (request: FastifyRequest, reply: FastifyReply, parameter: Record<string, unknown>) => {
-        return this.startActiveSpan('handler', { kind: SpanKind.SERVER }, undefined, async (span) => {
+        const parentContext = propagation.extract(context.active(), request.headers)
+        return this.startActiveSpan('handler', { kind: SpanKind.SERVER }, parentContext, async (span) => {
           try {
             addHeaders(span, reply)
             const fastifyParams = request.params as Record<string, unknown>
@@ -79,9 +82,18 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
             const principalId = request.principalId
             const tenantId = request.tenantId
 
+            let traceId: string | undefined
+
+            const headerTraceId = request.headers[this.config.traceHeaderField]
+            if (Array.isArray(headerTraceId)) {
+              traceId = headerTraceId[0]
+            } else {
+              traceId = headerTraceId
+            }
+
             const response = await this.invoke(
               {
-                traceId: span.spanContext().traceId,
+                traceId: traceId || span.spanContext().traceId || getNewTraceId(),
                 receiver: {
                   serviceName: message.sender.serviceName,
                   serviceVersion: message.sender.serviceVersion,
@@ -92,6 +104,7 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
                 tenantId,
                 contentType,
                 contentEncoding,
+                otp: serializeOtp(),
               },
               `${method}:${url}`,
             )

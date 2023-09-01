@@ -35,6 +35,7 @@ export const httpServerV1ServiceBuilder = new ServiceBuilder(httpServerServiceIn
     helmetOptions: undefined,
     compressOptions: undefined,
     corsOptions: undefined,
+    traceHeaderField: 'x-trace-id',
     openApi: {
       enabled: true,
       path: OPENAPI_DEFAULT_MOUNT_PATH,

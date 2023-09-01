@@ -72,6 +72,7 @@ export const httpServerServiceV1ConfigSchema = z.object({
   compressOptions: z.any().optional(),
   enableCors: z.boolean().optional().default(false),
   corsOptions: z.any().optional(),
+  traceHeaderField: z.string().default('x-trace-id'),
   openApi: z
     .object({
       enabled: z.boolean().optional().default(true),
