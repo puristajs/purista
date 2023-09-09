@@ -2,6 +2,36 @@
 
 All notable changes to this project will be documented in this file.
 
+## [unreleased]
+
+### Bug Fixes
+
+- Openapi security
+- Improve mock of startActiveSpan and wrapInSpan
+- Update InfisicalClient to api changes
+- Http server service default config
+- Handle traceId in HttpServerService correctly #140
+
+### Documentation
+
+- Update api documentation
+- Update documentation
+
+### Features
+
+- Add optional tenantId to message body #136
+- Update to mqtt lib version 5
+
+### Miscellaneous Tasks
+
+- Update tsconfig
+- Update packages
+- Cleanup bun test
+- Update github issue bug template
+- Bump dependency versions
+- Update package log
+- Update build config
+
 ## [1.7.5] - 2023-07-06
 
 ### Bug Fixes
@@ -13,6 +43,10 @@ All notable changes to this project will be documented in this file.
 - Update api documentation
 - Update documentation
 - Update CHANGELOG
+
+### Miscellaneous Tasks
+
+- Bump versions to 1.7.5
 
 ## [1.7.4] - 2023-07-06
 
