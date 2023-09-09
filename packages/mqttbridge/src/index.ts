@@ -14,7 +14,6 @@
  *
  * @module
  */
-export * from './AsyncClient'
 export * from './getDefaultMqttBridgeConfig.impl'
 export * from './handler'
 export * from './MqttEventBridge'

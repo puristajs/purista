@@ -31,9 +31,8 @@ import {
   Subscription,
   UnhandledError,
 } from '@purista/core'
-import { IClientSubscribeOptions, IPublishPacket } from 'mqtt'
+import { connectAsync, IClientSubscribeOptions, IPublishPacket, MqttClient } from 'mqtt'
 
-import { AsyncClient } from './AsyncClient'
 import { getDefaultMqttBridgeConfig } from './getDefaultMqttBridgeConfig.impl'
 import { getCommandHandler, getSubscriptionHandler, handleCommandResponse } from './handler'
 import { msToSec } from './msToSec.impl'
@@ -64,7 +63,7 @@ import { MqttBridgeConfig } from './types'
 export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implements EventBridge {
   private healthy = false
   private ready = false
-  public client: AsyncClient
+  public client: MqttClient | undefined
   public pendingInvocations = new Map<EBMessageId, PendigInvocation>()
   private router = new TopicRouter()
 
@@ -75,14 +74,10 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
       clientId: config?.clientId || config?.instanceId || getNewInstanceId(),
     }
     super('MqttBridge', conf)
-    this.client = new AsyncClient(this.logger)
   }
 
   async start() {
-    await this.client.connect(
-      { ...this.config, properties: { sessionExpiryInterval: this.config.defaultSessionExpiryInterval } },
-      this.config.allowRetries,
-    )
+    this.client = await connectAsync(this.config)
 
     this.client.on('connect', () => {
       this.emit(EventBridgeEventNames.EventbridgeConnected)
@@ -102,13 +97,13 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 
     const topic = getCommandResponseSubscriptionTopic.bind(this)()
     const subscriptionIdentifier = this.router.add(topic, handleCommandResponse)
-    await this.client.subscribe(topic, {
+    await this.client.subscribeAsync(topic, {
       qos: this.config.qosCommand,
       properties: { subscriptionIdentifier },
     })
 
     this.client.on('message', (topic: string, payload: Buffer, packet: IPublishPacket) => {
-      const handler = this.router.match(topic, packet.properties?.subscriptionIdentifier)
+      const handler = this.router.match(topic, packet.properties?.subscriptionIdentifier as number | undefined)
       if (!handler.length) {
         const err = new UnhandledError(StatusCode.InternalServerError, 'received message for unknown topic ', {
           topic: packet.topic,
@@ -184,7 +179,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
       }
 
       const topic = getTopicName.bind(this)(msg)
-      await this.client.publish(topic, JSON.stringify(msg), {
+      await this.client?.publishAsync(topic, JSON.stringify(msg), {
         qos: this.config.qoSSubscription,
         properties: {
           contentType: 'application/json',
@@ -198,11 +193,11 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
   }
 
   async isReady() {
-    return this.client.connected
+    return !!this.client?.connected
   }
 
   async isHealthy() {
-    return this.client.connected
+    return !!this.client?.connected
   }
 
   async invoke<T>(
@@ -303,7 +298,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 
         const topic = getTopicName.bind(this)(command)
 
-        await this.client.publish(topic, JSON.stringify(command), {
+        await this.client?.publishAsync(topic, JSON.stringify(command), {
           // if event name is set use the largest QOS
           qos: command.eventName
             ? this.config.qoSSubscription > this.config.qosCommand
@@ -333,7 +328,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
   ): Promise<string> {
     const topic = getSharedTopicName.bind(this)(getCommandSubscriptionTopic.bind(this)(address))
     const subscriptionIdentifier = this.router.add(topic, getCommandHandler(address, cb, metadata, eventBridgeConfig))
-    await this.client.subscribe(topic, {
+    await this.client?.subscribeAsync(topic, {
       qos: this.config.qosCommand,
       properties: { subscriptionIdentifier },
     })
@@ -350,7 +345,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 
   async unregisterCommand(address: EBMessageAddress): Promise<void> {
     const topic = getSharedTopicName.bind(this)(getCommandSubscriptionTopic.bind(this)(address))
-    await this.client.unsubscribe(topic)
+    await this.client?.unsubscribeAsync(topic)
     this.router.remove(topic)
   }
 
@@ -375,7 +370,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
       subscriptionIdentifier,
     }
 
-    await this.client.subscribe(topic, opts)
+    await this.client?.subscribeAsync(topic, opts)
 
     return topic
   }
@@ -383,6 +378,6 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
   async unregisterSubscription(_address: EBMessageAddress): Promise<void> {}
 
   async destroy() {
-    this.client.end(true)
+    this.client?.end(true)
   }
 }

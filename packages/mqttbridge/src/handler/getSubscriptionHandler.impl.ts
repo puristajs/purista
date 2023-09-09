@@ -81,7 +81,7 @@ export const getSubscriptionHandler = (
               }
 
               const topic = getTopicName.bind(this)(responseMessage as EBMessage)
-              await this.client.publish(topic, JSON.stringify(responseMessage), {
+              await this.client?.publish(topic, JSON.stringify(responseMessage), {
                 qos: this.config.qoSSubscription,
                 properties: {
                   messageExpiryInterval: this.config.defaultMessageExpiryInterval,
