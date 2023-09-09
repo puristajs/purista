@@ -5,8 +5,6 @@ title: "fix:"
 labels: bug
 assignees: sebastianwessel
 Prio: high
-Status: Todo
-Iteration: @current
 
 ---
 
