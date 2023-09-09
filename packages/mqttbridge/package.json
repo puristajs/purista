@@ -58,7 +58,7 @@
     "@opentelemetry/sdk-trace-node": "^1.14.0",
     "@opentelemetry/semantic-conventions": "^1.15.2",
     "@purista/core": "*",
-    "mqtt": "^4.3.7"
+    "mqtt": "^5.0.5"
   },
   "peerDependenciesMeta": {}
 }

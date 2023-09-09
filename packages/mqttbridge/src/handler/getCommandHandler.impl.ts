@@ -102,7 +102,7 @@ export const getCommandHandler = (
 
               // emit the message 1st time as direct response
               const responseTopic = getTopicName.bind(this)(responseMessage)
-              await this.client.publish(responseTopic, JSON.stringify(responseMessage), {
+              await this.client?.publish(responseTopic, JSON.stringify(responseMessage), {
                 qos: this.config.qosCommand,
                 properties: {
                   messageExpiryInterval: responseMessage.eventName

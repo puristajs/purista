@@ -1,5 +1,6 @@
 import { Prettify } from '@purista/core'
-import type { IClientOptions, QoS } from 'mqtt'
+import type { IClientOptions } from 'mqtt'
+import type { QoS } from 'mqtt-packet'
 
 /**
  * the configuration for the MQTT event bridge
