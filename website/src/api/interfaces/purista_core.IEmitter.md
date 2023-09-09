@@ -13,7 +13,6 @@
 ## Implemented by
 
 - [`GenericEventEmitter`](../classes/purista_core.GenericEventEmitter.md)
-- [`GenericEventEmitter`](../classes/purista_core.GenericEventEmitter.md)
 
 ## Table of contents
 

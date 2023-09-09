@@ -4,6 +4,18 @@ PURISTA API / [Modules](modules.md)
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.5] - 2023-07-06
+
+### Bug Fixes
+
+- Error handling
+
+### Documentation
+
+- Update api documentation
+- Update documentation
+- Update CHANGELOG
+
 ## [1.7.4] - 2023-07-06
 
 ### Bug Fixes
@@ -33,6 +45,7 @@ All notable changes to this project will be documented in this file.
 - Update package.lock
 - Bump versions to 1.7.3
 - Use node 20 for develop
+- Bump versions to 1.7.4
 
 ## [1.7.2] - 2023-06-10
 

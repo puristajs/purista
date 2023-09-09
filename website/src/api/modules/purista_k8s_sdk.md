@@ -138,12 +138,6 @@ The configuration object for creating the k8s http server
 
 ▸ **addServiceEndpoints**(`services`, `app`, `logger`, `apiMountPath?`): `void`
 
-**`Default`**
-
-```ts
-/api
-```
-
 #### Parameters
 
 | Name | Type | Default value | Description |
@@ -156,6 +150,12 @@ The configuration object for creating the k8s http server
 #### Returns
 
 `void`
+
+**`Default`**
+
+```ts
+/api
+```
 
 #### Defined in
 

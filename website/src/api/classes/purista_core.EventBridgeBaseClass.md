@@ -20,8 +20,6 @@ The base class to be extended by event bridge implementations
 
   ↳↳ [`DefaultEventBridge`](purista_core.DefaultEventBridge.md)
 
-  ↳↳ [`DefaultEventBridge`](purista_core.DefaultEventBridge.md)
-
 ## Table of contents
 
 ### Constructors

@@ -18,8 +18,6 @@ Base class for config store adapters
 
   ↳ [`DefaultConfigStore`](purista_core.DefaultConfigStore.md)
 
-  ↳ [`DefaultConfigStore`](purista_core.DefaultConfigStore.md)
-
 ## Implements
 
 - [`ConfigStore`](../interfaces/purista_core.ConfigStore.md)

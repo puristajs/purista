@@ -15,7 +15,6 @@ The ServiceClass interface
 ## Implemented by
 
 - [`Service`](../classes/purista_core.Service.md)
-- [`Service`](../classes/purista_core.Service.md)
 
 ## Table of contents
 

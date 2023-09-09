@@ -18,8 +18,6 @@ Base class for secret store adapters
 
   ↳ [`DefaultSecretStore`](purista_core.DefaultSecretStore.md)
 
-  ↳ [`DefaultSecretStore`](purista_core.DefaultSecretStore.md)
-
 ## Implements
 
 - [`SecretStore`](../interfaces/purista_core.SecretStore.md)

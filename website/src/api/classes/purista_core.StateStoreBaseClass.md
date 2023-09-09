@@ -18,8 +18,6 @@ Base class for config store implementations
 
   ↳ [`DefaultStateStore`](purista_core.DefaultStateStore.md)
 
-  ↳ [`DefaultStateStore`](purista_core.DefaultStateStore.md)
-
 ## Implements
 
 - [`StateStore`](../interfaces/purista_core.StateStore.md)

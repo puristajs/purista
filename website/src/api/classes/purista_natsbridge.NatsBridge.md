@@ -84,7 +84,7 @@ import { NatsBridge } from '@purista/natsbridge'
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `config?` | `Object` | - |
-| `config.commandResponsePublishTwice?` | ``"always"`` \| ``"never"`` \| ``"eventOnly"`` \| ``"eventAndError"`` | Indicates if a command response should be published a second time. If the command response gets published, it will be published to the regular topic pattern. If set to `never`, subscription might not get messages they are expecting because of the timing. If set to `always`, every command response is published. Because there might not be a consumer for every message, the broker will store the messages until the `defaultMessageExpiryInterval` is reached. This might result in a high ressource consumption of the broker. If set to `eventOnly`, only success responses which have a event name set, are published twice. There, we expect, that an event has at least one consumer subscription and the broker does not unnecessarily stores messages for a long time. **`Default`** ```ts eventOnly ``` |
+| `config.commandResponsePublishTwice?` | ``"always"`` \| ``"eventOnly"`` \| ``"eventAndError"`` \| ``"never"`` | Indicates if a command response should be published a second time. If the command response gets published, it will be published to the regular topic pattern. If set to `never`, subscription might not get messages they are expecting because of the timing. If set to `always`, every command response is published. Because there might not be a consumer for every message, the broker will store the messages until the `defaultMessageExpiryInterval` is reached. This might result in a high ressource consumption of the broker. If set to `eventOnly`, only success responses which have a event name set, are published twice. There, we expect, that an event has at least one consumer subscription and the broker does not unnecessarily stores messages for a long time. **`Default`** ```ts eventOnly ``` |
 | `config.defaultCommandTimeout?` | `number` | Overwrite the hardcoded default timeout of command invocations |
 | `config.defaultMessageExpiryInterval?` | `number` | the message expiry interval in seconds **`Default`** ```ts 30 days in seconds ``` |
 | `config.emptyTopicPartString?` | `string` | The string which should be used in topics for parts, which are undefined **`Default`** ```ts __none__ ``` |
@@ -117,7 +117,7 @@ ___
 
 ### config
 
-• **config**: `Complete`<{ `commandResponsePublishTwice`: ``"always"`` \| ``"never"`` \| ``"eventOnly"`` \| ``"eventAndError"`` ; `defaultCommandTimeout?`: `number` ; `defaultMessageExpiryInterval`: `number` ; `emptyTopicPartString`: `string` ; `instanceId?`: `string` ; `logLevel?`: `LogLevelName` ; `logger?`: `Logger` ; `maxMessages`: `number` ; `spanProcessor?`: `SpanProcessor` ; `topicPrefix`: `string`  }\>
+• **config**: `Complete`<{ `commandResponsePublishTwice`: ``"always"`` \| ``"eventOnly"`` \| ``"eventAndError"`` \| ``"never"`` ; `defaultCommandTimeout?`: `number` ; `defaultMessageExpiryInterval`: `number` ; `emptyTopicPartString`: `string` ; `instanceId?`: `string` ; `logLevel?`: `LogLevelName` ; `logger?`: `Logger` ; `maxMessages`: `number` ; `spanProcessor?`: `SpanProcessor` ; `topicPrefix`: `string`  }\>
 
 #### Inherited from
 
@@ -279,7 +279,7 @@ EventBridgeBaseClass.destroy
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:388](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L388)
+[natsbridge/src/NatsBridge.ts:396](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L396)
 
 ___
 
@@ -382,7 +382,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `input` | `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"messageType"`` \| ``"timestamp"`` \| ``"correlationId"``\> |
+| `input` | `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"`` \| ``"correlationId"`` \| ``"messageType"``\> |
 | `commandTimeout` | `number` |
 
 #### Returns
@@ -395,7 +395,7 @@ EventBridge.invoke
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:178](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L178)
+[natsbridge/src/NatsBridge.ts:182](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L182)
 
 ___
 
@@ -506,7 +506,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `address` | `EBMessageAddress` |
-| `cb` | (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
+| `cb` | (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
 | `metadata` | `CommandDefinitionMetadataBase` |
 | `eventBridgeConfig` | `DefinitionEventBridgeConfig` |
 
@@ -520,7 +520,7 @@ EventBridge.registerCommand
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:318](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L318)
+[natsbridge/src/NatsBridge.ts:326](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L326)
 
 ___
 
@@ -533,7 +533,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `subscription` | `Subscription` |
-| `cb` | (`message`: `EBMessage`) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
+| `cb` | (`message`: `EBMessage`) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
 
 #### Returns
 
@@ -545,7 +545,7 @@ EventBridge.registerSubscription
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:359](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L359)
+[natsbridge/src/NatsBridge.ts:367](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L367)
 
 ___
 
@@ -646,7 +646,7 @@ EventBridge.unregisterCommand
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:348](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L348)
+[natsbridge/src/NatsBridge.ts:356](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L356)
 
 ___
 
@@ -670,7 +670,7 @@ EventBridge.unregisterSubscription
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:375](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L375)
+[natsbridge/src/NatsBridge.ts:383](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L383)
 
 ___
 

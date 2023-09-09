@@ -201,10 +201,6 @@ ___
 
 Helper method
 
-**`Throws`**
-
-UnhandledError
-
 #### Parameters
 
 | Name | Type |
@@ -217,6 +213,10 @@ UnhandledError
 #### Returns
 
 `Promise`<`any`\>
+
+**`Throws`**
+
+UnhandledError
 
 #### Defined in
 

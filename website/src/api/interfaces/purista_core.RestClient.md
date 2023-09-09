@@ -10,7 +10,6 @@ The client provides error and timeout handling and tries to decode the responses
 ## Implemented by
 
 - [`HttpClient`](../classes/purista_core.HttpClient.md)
-- [`HttpClient`](../classes/purista_core.HttpClient.md)
 
 ## Table of contents
 

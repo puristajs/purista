@@ -298,7 +298,7 @@ ___
 
 ### serviceFunctions
 
-• `Protected` **serviceFunctions**: `Map`<`string`, { `cb`: (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\> ; `channel`: `Channel`  }\>
+• `Protected` **serviceFunctions**: `Map`<`string`, { `cb`: (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> ; `channel`: `Channel`  }\>
 
 #### Defined in
 
@@ -308,7 +308,7 @@ ___
 
 ### subscriptions
 
-• `Protected` **subscriptions**: `Map`<`string`, { `cb`: (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> ; `channel`: `Channel`  }\>
+• `Protected` **subscriptions**: `Map`<`string`, { `cb`: (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> ; `channel`: `Channel`  }\>
 
 #### Defined in
 
@@ -356,7 +356,7 @@ Decode buffer into given type
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:815](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L815)
+[amqpbridge/src/AmqpBridge.impl.ts:819](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L819)
 
 ___
 
@@ -378,7 +378,7 @@ EventBridgeBaseClass.destroy
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:830](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L830)
+[amqpbridge/src/AmqpBridge.impl.ts:834](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L834)
 
 ___
 
@@ -471,7 +471,7 @@ Encode given payload to buffer
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:794](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L794)
+[amqpbridge/src/AmqpBridge.impl.ts:798](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L798)
 
 ___
 
@@ -511,7 +511,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `input` | `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"messageType"`` \| ``"timestamp"`` \| ``"correlationId"``\> |
+| `input` | `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"`` \| ``"correlationId"`` \| ``"messageType"``\> |
 | `commandTimeout` | `number` |
 
 #### Returns
@@ -524,7 +524,7 @@ EventBridge.invoke
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:351](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L351)
+[amqpbridge/src/AmqpBridge.impl.ts:352](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L352)
 
 ___
 
@@ -637,7 +637,7 @@ Register a service function and ensure that there is a queue for all incoming co
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `address` | `EBMessageAddress` | The service function address |
-| `cb` | (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\> | the function to call if a matching command message arrives |
+| `cb` | (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | the function to call if a matching command message arrives |
 | `metadata` | `CommandDefinitionMetadataBase` | - |
 | `eventBridgeConfig` | `DefinitionEventBridgeConfig` | - |
 
@@ -653,7 +653,7 @@ EventBridge.registerCommand
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:468](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L468)
+[amqpbridge/src/AmqpBridge.impl.ts:470](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L470)
 
 ___
 
@@ -666,7 +666,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `subscription` | `Subscription` |
-| `cb` | (`message`: `EBMessage`) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
+| `cb` | (`message`: `EBMessage`) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
 
 #### Returns
 
@@ -678,7 +678,7 @@ EventBridge.registerSubscription
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:649](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L649)
+[amqpbridge/src/AmqpBridge.impl.ts:652](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L652)
 
 ___
 
@@ -781,7 +781,7 @@ EventBridge.unregisterCommand
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:630](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L630)
+[amqpbridge/src/AmqpBridge.impl.ts:633](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L633)
 
 ___
 
@@ -805,7 +805,7 @@ EventBridge.unregisterSubscription
 
 #### Defined in
 
-[amqpbridge/src/AmqpBridge.impl.ts:768](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L768)
+[amqpbridge/src/AmqpBridge.impl.ts:772](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L772)
 
 ___
 

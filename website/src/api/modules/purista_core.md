@@ -109,6 +109,7 @@ Learn PURIST at [purista.dev](https://purista.dev)
 - [SubscriptionDefinitionMetadataBase](purista_core.md#subscriptiondefinitionmetadatabase)
 - [SubscriptionStorageEntry](purista_core.md#subscriptionstorageentry)
 - [SupportedHttpMethod](purista_core.md#supportedhttpmethod)
+- [TenantId](purista_core.md#tenantid)
 - [TraceId](purista_core.md#traceid)
 - [addPrefixToObject](purista_core.md#addprefixtoobject)
 
@@ -300,15 +301,16 @@ ___
 | :------ | :------ |
 | `eventName?` | `string` |
 | `messageType` | [`EBMessageType`](../enums/purista_core.EBMessageType.md) |
-| `principalId?` | `string` |
+| `principalId?` | [`PrincipalId`](purista_core.md#principalid) |
 | `senderInstanceId` | [`InstanceId`](purista_core.md#instanceid) |
 | `senderServiceName` | `string` |
 | `senderServiceTarget` | `string` |
 | `senderServiceVersion` | `string` |
+| `tenantId?` | [`TenantId`](purista_core.md#tenantid) |
 
 #### Defined in
 
-[core/types/BrokerHeaderCustomMsg.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/BrokerHeaderCustomMsg.ts#L4)
+[core/types/BrokerHeaderCustomMsg.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/BrokerHeaderCustomMsg.ts#L6)
 
 ___
 
@@ -632,12 +634,13 @@ Default fields which are part of any purista message
 | `otp?` | `string` | stringified Opentelemetry parent trace id |
 | `principalId?` | [`PrincipalId`](purista_core.md#principalid) | principal id |
 | `sender` | [`EBMessageSenderAddress`](purista_core.md#ebmessagesenderaddress) | - |
+| `tenantId?` | [`TenantId`](purista_core.md#tenantid) | principal id |
 | `timestamp` | `number` | timestamp of message creation time |
 | `traceId?` | [`TraceId`](purista_core.md#traceid) | trace id of message |
 
 #### Defined in
 
-[core/types/EBMessageBase.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageBase.ts#L11)
+[core/types/EBMessageBase.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageBase.ts#L12)
 
 ___
 
@@ -675,12 +678,6 @@ ___
 
 Emits the given payload as custom message with the given event name.
 
-**`Example`**
-
-```typescript
-await emit('my-custom-event-name', { the: 'payload' })
-```
-
 ##### Type parameters
 
 | Name | Type |
@@ -699,6 +696,12 @@ await emit('my-custom-event-name', { the: 'payload' })
 ##### Returns
 
 `Promise`<`void`\>
+
+**`Example`**
+
+```typescript
+await emit('my-custom-event-name', { the: 'payload' })
+```
 
 #### Defined in
 
@@ -1025,22 +1028,6 @@ ___
 Invokes a command and returns the result.
 It is recommended to validate the result against a schema which only contains the data you actually need.
 
-**`Example`**
-
-```typescript
-
-const address: EBMessageAddress = {
-  serviceName: 'name-of-service-to-invoke',
-  serviceVersion: '1',
-  serviceTarget: 'command-name-to-invoke',
-}
-
-const inputPayload = { my: 'input' }
-const inputParameter = { search: 'for_me' }
-
-const result = await invoke<MyResultType>(address, inputPayload inputParameter )
-```
-
 ##### Type parameters
 
 | Name | Type |
@@ -1061,6 +1048,22 @@ const result = await invoke<MyResultType>(address, inputPayload inputParameter )
 
 `Promise`<`InvokeResponseType`\>
 
+**`Example`**
+
+```typescript
+
+const address: EBMessageAddress = {
+  serviceName: 'name-of-service-to-invoke',
+  serviceVersion: '1',
+  serviceTarget: 'command-name-to-invoke',
+}
+
+const inputPayload = { my: 'input' }
+const inputParameter = { search: 'for_me' }
+
+const result = await invoke<MyResultType>(address, inputPayload inputParameter )
+```
+
 #### Defined in
 
 [core/types/InvokeFunction.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/InvokeFunction.ts#L21)
@@ -1073,7 +1076,7 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:17](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L17)
+[core/types/Logger.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L19)
 
 ___
 
@@ -1103,11 +1106,12 @@ ___
 | `serviceName?` | `string` |
 | `serviceTarget?` | `string` |
 | `serviceVersion?` | `string` |
+| `tenantId?` | [`TenantId`](purista_core.md#tenantid) |
 | `traceId?` | [`TraceId`](purista_core.md#traceid) |
 
 #### Defined in
 
-[core/types/Logger.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L5)
+[core/types/Logger.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L6)
 
 ___
 
@@ -1369,6 +1373,7 @@ ___
 | `isMatchingSenderServiceName` | (`input?`: `string`) => `boolean` |
 | `isMatchingSenderServiceTarget` | (`input?`: `string`) => `boolean` |
 | `isMatchingSenderServiceVersion` | (`input?`: `string`) => `boolean` |
+| `isMatchingTenantId` | (`input?`: `string`) => `boolean` |
 
 #### Defined in
 
@@ -1385,6 +1390,18 @@ Supported HTTP-Methods for defining endpoints
 #### Defined in
 
 [core/HttpServer/types/SupportedHttpMethod.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/HttpServer/types/SupportedHttpMethod.ts#L2)
+
+___
+
+### TenantId
+
+Ƭ **TenantId**: `string`
+
+the tenant id
+
+#### Defined in
+
+[core/types/TenantId.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/TenantId.ts#L2)
 
 ___
 
@@ -1460,7 +1477,7 @@ ___
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.7.4"``
+• `Const` **puristaVersion**: ``"1.7.5"``
 
 #### Defined in
 
@@ -1589,7 +1606,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `subscription` | [`Subscription`](purista_core.md#subscription) |
-| `cb` | (`message`: [`EBMessage`](purista_core.md#ebmessage)) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
+| `cb` | (`message`: [`EBMessage`](purista_core.md#ebmessage)) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
 
 #### Returns
 
@@ -1641,12 +1658,6 @@ ___
 
 ▸ **getTimeoutPromise**<`T`\>(`fn`, `ttl?`): `Promise`<`T`\>
 
-**`Default`**
-
-```ts
-30000
-```
-
 #### Type parameters
 
 | Name |
@@ -1663,6 +1674,12 @@ ___
 #### Returns
 
 `Promise`<`T`\>
+
+**`Default`**
+
+```ts
+30000
+```
 
 #### Defined in
 
@@ -2467,10 +2484,6 @@ ___
 
 Converts a string into camelCase
 
-**`Link`**
-
-https://github.com/30-seconds/30-seconds-of-code
-
 #### Parameters
 
 | Name | Type | Description |
@@ -2482,6 +2495,10 @@ https://github.com/30-seconds/30-seconds-of-code
 `string`
 
 string converted to camelCase
+
+**`Link`**
+
+https://github.com/30-seconds/30-seconds-of-code
 
 #### Defined in
 
@@ -2495,10 +2512,6 @@ ___
 
 Converts a string into kebab-case
 
-**`Link`**
-
-https://github.com/30-seconds/30-seconds-of-code
-
 #### Parameters
 
 | Name | Type | Description |
@@ -2510,6 +2523,10 @@ https://github.com/30-seconds/30-seconds-of-code
 `string`
 
 string converted to kebab-case
+
+**`Link`**
+
+https://github.com/30-seconds/30-seconds-of-code
 
 #### Defined in
 
@@ -2523,10 +2540,6 @@ ___
 
 Converts a string into PascalCase
 
-**`Link`**
-
-https://github.com/30-seconds/30-seconds-of-code
-
 #### Parameters
 
 | Name | Type | Description |
@@ -2538,6 +2551,10 @@ https://github.com/30-seconds/30-seconds-of-code
 `string`
 
 string converted to PascalCase
+
+**`Link`**
+
+https://github.com/30-seconds/30-seconds-of-code
 
 #### Defined in
 
@@ -2551,10 +2568,6 @@ ___
 
 Converts a string into snake_case
 
-**`Link`**
-
-https://github.com/30-seconds/30-seconds-of-code
-
 #### Parameters
 
 | Name | Type | Description |
@@ -2567,6 +2580,10 @@ https://github.com/30-seconds/30-seconds-of-code
 
 string converted to snake_case
 
+**`Link`**
+
+https://github.com/30-seconds/30-seconds-of-code
+
 #### Defined in
 
 [helper/string/convertToSnakeCase.impl.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/string/convertToSnakeCase.impl.ts#L9)
@@ -2575,7 +2592,7 @@ ___
 
 ### createErrorResponse
 
-▸ **createErrorResponse**(`instanceId`, `originalEBMessage`, `statusCode?`, `error?`): `Readonly`<`Omit`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\>
+▸ **createErrorResponse**(`instanceId`, `originalEBMessage`, `statusCode?`, `error?`): `Readonly`<`Omit`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\>
 
 Creates a error response object based on original command
 Toggles sender and receiver
@@ -2585,13 +2602,13 @@ Toggles sender and receiver
 | Name | Type | Default value |
 | :------ | :------ | :------ |
 | `instanceId` | `string` | `undefined` |
-| `originalEBMessage` | `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\> | `undefined` |
+| `originalEBMessage` | `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | `undefined` |
 | `statusCode` | [`StatusCode`](../enums/purista_core.StatusCode.md) | `StatusCode.InternalServerError` |
 | `error?` | `unknown` | `undefined` |
 
 #### Returns
 
-`Readonly`<`Omit`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\>
+`Readonly`<`Omit`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\>
 
 CommandErrorResponse message object
 
@@ -2629,7 +2646,7 @@ ___
 
 ### createSuccessResponse
 
-▸ **createSuccessResponse**<`T`\>(`instanceId`, `originalEBMessage`, `payload`, `eventName?`, `contentType?`, `contentEncoding?`): `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `T` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+▸ **createSuccessResponse**<`T`\>(`instanceId`, `originalEBMessage`, `payload`, `eventName?`, `contentType?`, `contentEncoding?`): `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `T` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Type parameters
 
@@ -2642,7 +2659,7 @@ ___
 | Name | Type | Default value |
 | :------ | :------ | :------ |
 | `instanceId` | `string` | `undefined` |
-| `originalEBMessage` | `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\> | `undefined` |
+| `originalEBMessage` | `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | `undefined` |
 | `payload` | `T` | `undefined` |
 | `eventName?` | `string` | `undefined` |
 | `contentType` | `string` | `'application/json'` |
@@ -2650,7 +2667,7 @@ ___
 
 #### Returns
 
-`Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `T` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+`Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `T` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Defined in
 
@@ -2835,6 +2852,18 @@ Provide in list objects. The objects contains a name and a promise function whic
 
 The execution of array list functions is done sequential.
 
+#### Parameters
+
+| Name | Type | Default value | Description |
+| :------ | :------ | :------ | :------ |
+| `logger` | [`Logger`](../classes/purista_core.Logger.md) | `undefined` | the logger object |
+| `list` | [`ShutdownEntry`](purista_core.md#shutdownentry)[] | `undefined` | a object containing name and function |
+| `timeoutMs` | `number` | `30000` | in ms to shut |
+
+#### Returns
+
+`void`
+
 **`Example`**
 
 ```typescript
@@ -2862,18 +2891,6 @@ gracefulShutdown(logger, shutDownList)
 ```ts
 30000 milliseconds
 ```
-
-#### Parameters
-
-| Name | Type | Default value | Description |
-| :------ | :------ | :------ | :------ |
-| `logger` | [`Logger`](../classes/purista_core.Logger.md) | `undefined` | the logger object |
-| `list` | [`ShutdownEntry`](purista_core.md#shutdownentry)[] | `undefined` | a object containing name and function |
-| `timeoutMs` | `number` | `30000` | in ms to shut |
-
-#### Returns
-
-`void`
 
 #### Defined in
 
@@ -2950,7 +2967,7 @@ class MyService extends Service {
 
 #### Defined in
 
-[core/Service/Service.impl.ts:74](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L74)
+[core/Service/Service.impl.ts:76](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L76)
 
 • **ServiceBuilder**<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>: `Object`
 
@@ -3452,7 +3469,7 @@ A working schema definition needs at least a subscription name, a short descript
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:30](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L30)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:31](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L31)
 
 ### Subscription
 
@@ -3490,10 +3507,11 @@ A subscription managed by the event bridge
 | `sender.serviceTarget?` | `string` | - |
 | `sender.serviceVersion?` | `string` | - |
 | `subscriber` | [`EBMessageAddress`](purista_core.md#ebmessageaddress) | the address of the subscription (service name, version and subscription name) |
+| `tenantId?` | [`TenantId`](purista_core.md#tenantid) | the tenant id |
 
 #### Defined in
 
-[core/types/subscription/Subscription.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L12)
+[core/types/subscription/Subscription.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L13)
 
 ___
 
@@ -3628,10 +3646,11 @@ The definition for a subscription provided by some service.
 | `sender.serviceVersion?` | `string` | - |
 | `subscriptionDescription` | `string` | the description of the subscription |
 | `subscriptionName` | `string` | the name of the subscription |
+| `tenantId?` | [`TenantId`](purista_core.md#tenantid) | filter for tenant id |
 
 #### Defined in
 
-[core/types/subscription/SubscriptionDefinition.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L20)
+[core/types/subscription/SubscriptionDefinition.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L21)
 
 ___
 
@@ -3823,7 +3842,7 @@ A function that returns a mock object for command function context
 
 | Name | Type |
 | :------ | :------ |
-| `mock` | { `configs`: { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } ; `emit`: [`EmitCustomMessageFunction`](purista_core.md#emitcustommessagefunction) ; `invoke`: [`InvokeFunction`](purista_core.md#invokefunction) ; `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: `Readonly`<{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: { parameter: MessageParamsType; payload: MessagePayloadType; }; ... 8 more ...; sender: { ...; }; }\> ; `secrets`: { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } ; `startActiveSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> ; `states`: { `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } ; `wrapInSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\>  } |
+| `mock` | { `configs`: { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } ; `emit`: [`EmitCustomMessageFunction`](purista_core.md#emitcustommessagefunction) ; `invoke`: [`InvokeFunction`](purista_core.md#invokefunction) ; `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: `Readonly`<{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: { parameter: MessageParamsType; payload: MessagePayloadType; }; ... 9 more ...; sender: { ...; }; }\> ; `secrets`: { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } ; `startActiveSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> ; `states`: { `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } ; `wrapInSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\>  } |
 | `mock.configs` | { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } |
 | `mock.configs.getConfig` | [`ConfigGetterFunction`](purista_core.md#configgetterfunction) |
 | `mock.configs.removeConfig` | [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) |
@@ -3831,7 +3850,7 @@ A function that returns a mock object for command function context
 | `mock.emit` | [`EmitCustomMessageFunction`](purista_core.md#emitcustommessagefunction) |
 | `mock.invoke` | [`InvokeFunction`](purista_core.md#invokefunction) |
 | `mock.logger` | [`Logger`](../classes/purista_core.Logger.md) |
-| `mock.message` | `Readonly`<{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: { parameter: MessageParamsType; payload: MessagePayloadType; }; ... 8 more ...; sender: { ...; }; }\> |
+| `mock.message` | `Readonly`<{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: { parameter: MessageParamsType; payload: MessagePayloadType; }; ... 9 more ...; sender: { ...; }; }\> |
 | `mock.secrets` | { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } |
 | `mock.secrets.getSecret` | [`SecretGetterFunction`](purista_core.md#secretgetterfunction) |
 | `mock.secrets.removeSecret` | [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) |
@@ -3872,7 +3891,7 @@ ___
 
 ### getCommandErrorMessageMock
 
-▸ **getCommandErrorMessageMock**(`error?`, `input?`, `commandMessage?`): `Readonly`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+▸ **getCommandErrorMessageMock**(`error?`, `input?`, `commandMessage?`): `Readonly`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 A function that returns a mocked command error response message
 
@@ -3881,7 +3900,7 @@ A function that returns a mocked command error response message
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `error?` | [`HandledError`](../classes/purista_core.HandledError.md) \| [`UnhandledError`](../classes/purista_core.UnhandledError.md) | - |
-| `input?` | `Partial`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\> | - |
+| `input?` | `Partial`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | - |
 | `commandMessage?` | `Object` | - |
 | `commandMessage.contentEncoding` | `string` | content encoding of message payload |
 | `commandMessage.contentType` | `string` | content type of message payload |
@@ -3896,12 +3915,13 @@ A function that returns a mocked command error response message
 | `commandMessage.principalId?` | `string` | principal id |
 | `commandMessage.receiver` | [`EBMessageAddress`](purista_core.md#ebmessageaddress) | - |
 | `commandMessage.sender` | { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } | - |
+| `commandMessage.tenantId?` | `string` | principal id |
 | `commandMessage.timestamp` | `number` | timestamp of message creation time |
 | `commandMessage.traceId?` | `string` | trace id of message |
 
 #### Returns
 
-`Readonly`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+`Readonly`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Defined in
 
@@ -3911,7 +3931,7 @@ ___
 
 ### getCommandMessageMock
 
-▸ **getCommandMessageMock**<`Payload`, `Parameter`\>(`input?`): `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `Parameter` ; `payload`: `Payload`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+▸ **getCommandMessageMock**<`Payload`, `Parameter`\>(`input?`): `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `Parameter` ; `payload`: `Payload`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 A function that returns a mocked command message.
 
@@ -3926,11 +3946,11 @@ A function that returns a mocked command message.
 
 | Name | Type |
 | :------ | :------ |
-| `input?` | `Partial`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `Parameter` ; `payload`: `Payload`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\> & { `payload?`: { `parameter?`: `Parameter` ; `payload?`: `Payload`  }  } |
+| `input?` | `Partial`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `Parameter` ; `payload`: `Payload`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> & { `payload?`: { `parameter?`: `Parameter` ; `payload?`: `Payload`  }  } |
 
 #### Returns
 
-`Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `Parameter` ; `payload`: `Payload`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+`Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `Parameter` ; `payload`: `Payload`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Defined in
 
@@ -3940,7 +3960,7 @@ ___
 
 ### getCommandSuccessMessageMock
 
-▸ **getCommandSuccessMessageMock**<`PayloadType`\>(`payload`, `input?`, `commandMessage?`): `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `PayloadType` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+▸ **getCommandSuccessMessageMock**<`PayloadType`\>(`payload`, `input?`, `commandMessage?`): `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `PayloadType` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 A function that returns a mocked command success response message.
 
@@ -3955,7 +3975,7 @@ A function that returns a mocked command success response message.
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `payload` | `PayloadType` | - |
-| `input?` | `Partial`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `PayloadType` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\> | - |
+| `input?` | `Partial`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `PayloadType` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | - |
 | `commandMessage?` | `Object` | - |
 | `commandMessage.contentEncoding` | `string` | content encoding of message payload |
 | `commandMessage.contentType` | `string` | content type of message payload |
@@ -3970,12 +3990,13 @@ A function that returns a mocked command success response message.
 | `commandMessage.principalId?` | `string` | principal id |
 | `commandMessage.receiver` | [`EBMessageAddress`](purista_core.md#ebmessageaddress) | - |
 | `commandMessage.sender` | { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } | - |
+| `commandMessage.tenantId?` | `string` | principal id |
 | `commandMessage.timestamp` | `number` | timestamp of message creation time |
 | `commandMessage.traceId?` | `string` | trace id of message |
 
 #### Returns
 
-`Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `PayloadType` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+`Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `PayloadType` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Defined in
 
@@ -4010,13 +4031,13 @@ A function that returns a mock object for command transform function context
 
 | Name | Type |
 | :------ | :------ |
-| `mock` | { `configs`: { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } ; `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: `Readonly`<{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: { parameter: MessageParamsType; payload: MessagePayloadType; }; ... 8 more ...; sender: { ...; }; }\> ; `secrets`: { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } ; `startActiveSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> ; `states`: { `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } ; `wrapInSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\>  } |
+| `mock` | { `configs`: { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } ; `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: `Readonly`<{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: { parameter: MessageParamsType; payload: MessagePayloadType; }; ... 9 more ...; sender: { ...; }; }\> ; `secrets`: { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } ; `startActiveSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> ; `states`: { `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } ; `wrapInSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\>  } |
 | `mock.configs` | { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } |
 | `mock.configs.getConfig` | [`ConfigGetterFunction`](purista_core.md#configgetterfunction) |
 | `mock.configs.removeConfig` | [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) |
 | `mock.configs.setConfig` | [`ConfigSetterFunction`](purista_core.md#configsetterfunction) |
 | `mock.logger` | [`Logger`](../classes/purista_core.Logger.md) |
-| `mock.message` | `Readonly`<{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: { parameter: MessageParamsType; payload: MessagePayloadType; }; ... 8 more ...; sender: { ...; }; }\> |
+| `mock.message` | `Readonly`<{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: { parameter: MessageParamsType; payload: MessagePayloadType; }; ... 9 more ...; sender: { ...; }; }\> |
 | `mock.secrets` | { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } |
 | `mock.secrets.getSecret` | [`SecretGetterFunction`](purista_core.md#secretgetterfunction) |
 | `mock.secrets.removeSecret` | [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) |
@@ -4055,7 +4076,7 @@ ___
 
 ### getCustomMessageMessageMock
 
-▸ **getCustomMessageMessageMock**<`PayloadType`\>(`eventName`, `payload`, `input?`): `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `PayloadType` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+▸ **getCustomMessageMessageMock**<`PayloadType`\>(`eventName`, `payload`, `input?`): `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `PayloadType` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 A function that returns a mocked custom message.
 
@@ -4071,11 +4092,11 @@ A function that returns a mocked custom message.
 | :------ | :------ |
 | `eventName` | `string` |
 | `payload` | `PayloadType` |
-| `input?` | `Partial`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `PayloadType` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
+| `input?` | `Partial`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `PayloadType` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
 
 #### Returns
 
-`Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `PayloadType` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+`Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `PayloadType` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Defined in
 

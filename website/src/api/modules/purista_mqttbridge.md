@@ -21,13 +21,11 @@ await eventBridge.start()
 
 ### Classes
 
-- [AsyncClient](../classes/purista_mqttbridge.AsyncClient.md)
 - [MqttBridge](../classes/purista_mqttbridge.MqttBridge.md)
 - [TopicRouter](../classes/purista_mqttbridge.TopicRouter.md)
 
 ### Type Aliases
 
-- [ISubscriptionResponse](purista_mqttbridge.md#isubscriptionresponse)
 - [IncomingMessageFunction](purista_mqttbridge.md#incomingmessagefunction)
 - [MqttBridgeConfig](purista_mqttbridge.md#mqttbridgeconfig)
 
@@ -46,16 +44,6 @@ await eventBridge.start()
 - [msToSec](purista_mqttbridge.md#mstosec)
 
 ## Type Aliases
-
-### ISubscriptionResponse
-
-Ƭ **ISubscriptionResponse**: `Prettify`<`ISubscriptionGrant` & { `properties?`: { `subscriptionIdentifier?`: `number`  }  }\>
-
-#### Defined in
-
-[packages/mqttbridge/src/AsyncClient/AsyncClient.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/AsyncClient/AsyncClient.ts#L12)
-
-___
 
 ### IncomingMessageFunction
 
@@ -79,7 +67,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/types/IncomingMessageFunction.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/types/IncomingMessageFunction.ts#L6)
+[mqttbridge/src/types/IncomingMessageFunction.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/types/IncomingMessageFunction.ts#L6)
 
 ___
 
@@ -91,7 +79,7 @@ the configuration for the MQTT event bridge
 
 #### Defined in
 
-[packages/mqttbridge/src/types/MqttBridgeConfig.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/types/MqttBridgeConfig.ts#L7)
+[mqttbridge/src/types/MqttBridgeConfig.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/types/MqttBridgeConfig.ts#L8)
 
 ## Functions
 
@@ -104,7 +92,7 @@ the configuration for the MQTT event bridge
 | Name | Type |
 | :------ | :------ |
 | `address` | `EBMessageAddress` |
-| `cb` | (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
+| `cb` | (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
 | `_metadata` | `CommandDefinitionMetadataBase` |
 | `_eventBridgeConfig` | `DefinitionEventBridgeConfig` |
 
@@ -114,7 +102,7 @@ the configuration for the MQTT event bridge
 
 #### Defined in
 
-[packages/mqttbridge/src/handler/getCommandHandler.impl.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/handler/getCommandHandler.impl.ts#L27)
+[mqttbridge/src/handler/getCommandHandler.impl.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/handler/getCommandHandler.impl.ts#L27)
 
 ___
 
@@ -134,7 +122,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/topic/getCommandResponseSubscriptionTopic.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getCommandResponseSubscriptionTopic.impl.ts#L7)
+[mqttbridge/src/topic/getCommandResponseSubscriptionTopic.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getCommandResponseSubscriptionTopic.impl.ts#L7)
 
 ___
 
@@ -155,7 +143,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/topic/getCommandSubscriptionTopic.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getCommandSubscriptionTopic.impl.ts#L7)
+[mqttbridge/src/topic/getCommandSubscriptionTopic.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getCommandSubscriptionTopic.impl.ts#L7)
 
 ___
 
@@ -181,7 +169,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/getDefaultMqttBridgeConfig.impl.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/getDefaultMqttBridgeConfig.impl.ts#L5)
+[mqttbridge/src/getDefaultMqttBridgeConfig.impl.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/getDefaultMqttBridgeConfig.impl.ts#L5)
 
 ___
 
@@ -202,7 +190,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/topic/getSharedTopicName.impl.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getSharedTopicName.impl.ts#L5)
+[mqttbridge/src/topic/getSharedTopicName.impl.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getSharedTopicName.impl.ts#L5)
 
 ___
 
@@ -215,7 +203,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `_subscription` | `Subscription` |
-| `cb` | (`message`: `EBMessage`) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
+| `cb` | (`message`: `EBMessage`) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
 
 #### Returns
 
@@ -223,7 +211,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/handler/getSubscriptionHandler.impl.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/handler/getSubscriptionHandler.impl.ts#L21)
+[mqttbridge/src/handler/getSubscriptionHandler.impl.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/handler/getSubscriptionHandler.impl.ts#L21)
 
 ___
 
@@ -244,7 +232,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/topic/getSubscriptionTopic.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getSubscriptionTopic.impl.ts#L7)
+[mqttbridge/src/topic/getSubscriptionTopic.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getSubscriptionTopic.impl.ts#L7)
 
 ___
 
@@ -282,7 +270,7 @@ the MQTT topic
 
 #### Defined in
 
-[packages/mqttbridge/src/topic/getTopicName.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getTopicName.impl.ts#L7)
+[mqttbridge/src/topic/getTopicName.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getTopicName.impl.ts#L7)
 
 ___
 
@@ -304,7 +292,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/types/IncomingMessageFunction.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/types/IncomingMessageFunction.ts#L6)
+[mqttbridge/src/types/IncomingMessageFunction.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/types/IncomingMessageFunction.ts#L6)
 
 ___
 
@@ -327,7 +315,7 @@ Checks if a given topic is matching against a subscription pattern
 
 #### Defined in
 
-[packages/mqttbridge/src/topic/isMatchingTopic.impl.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/isMatchingTopic.impl.ts#L8)
+[mqttbridge/src/topic/isMatchingTopic.impl.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/isMatchingTopic.impl.ts#L8)
 
 ___
 
@@ -351,4 +339,4 @@ rounded value in seconds
 
 #### Defined in
 
-[packages/mqttbridge/src/msToSec.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/msToSec.impl.ts#L7)
+[mqttbridge/src/msToSec.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/msToSec.impl.ts#L7)

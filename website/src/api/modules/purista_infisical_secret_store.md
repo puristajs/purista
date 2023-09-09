@@ -39,6 +39,7 @@ console.log(value) // outputs: undefined
 - [EncryptInput](purista_infisical_secret_store.md#encryptinput)
 - [HttpClientConfigCustom](purista_infisical_secret_store.md#httpclientconfigcustom)
 - [InfisicalSecretConfig](purista_infisical_secret_store.md#infisicalsecretconfig)
+- [Scope](purista_infisical_secret_store.md#scope)
 - [Secret](purista_infisical_secret_store.md#secret)
 - [TokenData](purista_infisical_secret_store.md#tokendata)
 
@@ -110,6 +111,24 @@ ___
 
 ___
 
+### Scope
+
+Ƭ **Scope**: `Object`
+
+#### Type declaration
+
+| Name | Type |
+| :------ | :------ |
+| `_id` | `string` |
+| `environment` | `string` |
+| `secretPath` | `string` |
+
+#### Defined in
+
+[infisical-secret-store/src/InfisicalClient/types/Scope.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/Scope.ts#L1)
+
+___
+
 ### Secret
 
 Ƭ **Secret**: `Object`
@@ -153,17 +172,23 @@ ___
 | `_id` | `string` |
 | `createdAt` | `string` |
 | `encryptedKey` | `string` |
-| `environment` | `string` |
 | `expiresAt` | `Date` |
 | `iv` | `string` |
 | `lastUsed` | `Date` |
 | `name` | `string` |
+| `permissions` | `string`[] |
+| `scopes` | [`Scope`](purista_infisical_secret_store.md#scope)[] |
 | `serviceAccount` | `string` |
 | `tag` | `string` |
 | `updatedAt` | `string` |
-| `user` | `string` |
+| `user` | { `_id`: `string` ; `authMethods`: `string`[] ; `email`: `string` ; `firstName`: `string` ; `lastName`: `string`  } |
+| `user._id` | `string` |
+| `user.authMethods` | `string`[] |
+| `user.email` | `string` |
+| `user.firstName` | `string` |
+| `user.lastName` | `string` |
 | `workspace` | `string` |
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/types/TokenData.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/TokenData.ts#L1)
+[infisical-secret-store/src/InfisicalClient/types/TokenData.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/TokenData.ts#L3)

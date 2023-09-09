@@ -10,8 +10,6 @@
 
   ↳ [`DefaultLogger`](purista_core.DefaultLogger.md)
 
-  ↳ [`DefaultLogger`](purista_core.DefaultLogger.md)
-
 ## Table of contents
 
 ### Constructors
@@ -52,7 +50,7 @@
 
 #### Defined in
 
-[core/types/Logger.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L24)
+[core/types/Logger.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L26)
 
 ___
 
@@ -72,7 +70,7 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L22)
+[core/types/Logger.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L24)
 
 ___
 
@@ -92,7 +90,7 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L21)
+[core/types/Logger.ts:23](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L23)
 
 ___
 
@@ -112,7 +110,7 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L26)
+[core/types/Logger.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L28)
 
 ___
 
@@ -132,7 +130,7 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L20)
+[core/types/Logger.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L22)
 
 ___
 
@@ -152,7 +150,7 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:25](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L25)
+[core/types/Logger.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L27)
 
 ___
 
@@ -172,4 +170,4 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:23](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L23)
+[core/types/Logger.ts:25](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L25)

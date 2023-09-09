@@ -100,17 +100,17 @@ EventBridgeBaseClass&lt;MqttBridgeConfig\&gt;.constructor
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:71](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L71)
+[mqttbridge/src/MqttEventBridge.ts:70](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L70)
 
 ## Properties
 
 ### client
 
-• **client**: [`AsyncClient`](purista_mqttbridge.AsyncClient.md)
+• **client**: `undefined` \| `default`
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L67)
+[mqttbridge/src/MqttEventBridge.ts:66](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L66)
 
 ___
 
@@ -124,7 +124,7 @@ EventBridgeBaseClass.config
 
 #### Defined in
 
-packages/core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:13
+core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:13
 
 ___
 
@@ -142,7 +142,7 @@ EventBridgeBaseClass.defaultCommandTimeout
 
 #### Defined in
 
-packages/core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:16
+core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:16
 
 ___
 
@@ -152,7 +152,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:65](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L65)
+[mqttbridge/src/MqttEventBridge.ts:64](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L64)
 
 ___
 
@@ -170,7 +170,7 @@ EventBridgeBaseClass.instanceId
 
 #### Defined in
 
-packages/core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:15
+core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:15
 
 ___
 
@@ -184,7 +184,7 @@ EventBridgeBaseClass.logger
 
 #### Defined in
 
-packages/core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:11
+core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:11
 
 ___
 
@@ -202,7 +202,7 @@ EventBridgeBaseClass.name
 
 #### Defined in
 
-packages/core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:14
+core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:14
 
 ___
 
@@ -212,7 +212,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:68](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L68)
+[mqttbridge/src/MqttEventBridge.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L67)
 
 ___
 
@@ -222,7 +222,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:66](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L66)
+[mqttbridge/src/MqttEventBridge.ts:65](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L65)
 
 ___
 
@@ -232,7 +232,7 @@ ___
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:69](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L69)
+[mqttbridge/src/MqttEventBridge.ts:68](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L68)
 
 ___
 
@@ -246,7 +246,7 @@ EventBridgeBaseClass.traceProvider
 
 #### Defined in
 
-packages/core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:12
+core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:12
 
 ## Methods
 
@@ -268,7 +268,7 @@ EventBridgeBaseClass.destroy
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:377](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L377)
+[mqttbridge/src/MqttEventBridge.ts:380](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L380)
 
 ___
 
@@ -299,7 +299,7 @@ EventBridgeBaseClass.emit
 
 #### Defined in
 
-packages/core/lib/types/core/types/GenericEventEmitter.d.ts:13
+core/lib/types/core/types/GenericEventEmitter.d.ts:13
 
 ___
 
@@ -331,7 +331,7 @@ EventBridge.emitMessage
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:132](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L132)
+[mqttbridge/src/MqttEventBridge.ts:127](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L127)
 
 ___
 
@@ -353,7 +353,7 @@ EventBridgeBaseClass.getTracer
 
 #### Defined in
 
-packages/core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
+core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
 
 ___
 
@@ -371,7 +371,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `input` | `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"messageType"`` \| ``"timestamp"`` \| ``"correlationId"``\> |
+| `input` | `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"`` \| ``"correlationId"`` \| ``"messageType"``\> |
 | `commandTimeout` | `number` |
 
 #### Returns
@@ -384,7 +384,7 @@ EventBridge.invoke
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:204](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L204)
+[mqttbridge/src/MqttEventBridge.ts:203](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L203)
 
 ___
 
@@ -402,7 +402,7 @@ EventBridge.isHealthy
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:200](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L200)
+[mqttbridge/src/MqttEventBridge.ts:199](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L199)
 
 ___
 
@@ -420,7 +420,7 @@ EventBridge.isReady
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:196](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L196)
+[mqttbridge/src/MqttEventBridge.ts:195](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L195)
 
 ___
 
@@ -451,7 +451,7 @@ EventBridgeBaseClass.off
 
 #### Defined in
 
-packages/core/lib/types/core/types/GenericEventEmitter.d.ts:12
+core/lib/types/core/types/GenericEventEmitter.d.ts:12
 
 ___
 
@@ -482,7 +482,7 @@ EventBridgeBaseClass.on
 
 #### Defined in
 
-packages/core/lib/types/core/types/GenericEventEmitter.d.ts:11
+core/lib/types/core/types/GenericEventEmitter.d.ts:11
 
 ___
 
@@ -495,7 +495,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `address` | `EBMessageAddress` |
-| `cb` | (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
+| `cb` | (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
 | `metadata` | `CommandDefinitionMetadataBase` |
 | `eventBridgeConfig` | `DefinitionEventBridgeConfig` |
 
@@ -509,7 +509,7 @@ EventBridge.registerCommand
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:320](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L320)
+[mqttbridge/src/MqttEventBridge.ts:323](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L323)
 
 ___
 
@@ -522,7 +522,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `subscription` | `Subscription` |
-| `cb` | (`message`: `EBMessage`) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
+| `cb` | (`message`: `EBMessage`) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
 
 #### Returns
 
@@ -534,7 +534,7 @@ EventBridge.registerSubscription
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:349](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L349)
+[mqttbridge/src/MqttEventBridge.ts:352](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L352)
 
 ___
 
@@ -552,7 +552,7 @@ EventBridgeBaseClass.removeAllListeners
 
 #### Defined in
 
-packages/core/lib/types/core/types/GenericEventEmitter.d.ts:14
+core/lib/types/core/types/GenericEventEmitter.d.ts:14
 
 ___
 
@@ -574,7 +574,7 @@ EventBridgeBaseClass.start
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:81](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L81)
+[mqttbridge/src/MqttEventBridge.ts:79](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L79)
 
 ___
 
@@ -611,7 +611,7 @@ EventBridgeBaseClass.startActiveSpan
 
 #### Defined in
 
-packages/core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:32
+core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:32
 
 ___
 
@@ -635,7 +635,7 @@ EventBridge.unregisterCommand
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:343](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L343)
+[mqttbridge/src/MqttEventBridge.ts:346](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L346)
 
 ___
 
@@ -659,7 +659,7 @@ EventBridge.unregisterSubscription
 
 #### Defined in
 
-[packages/mqttbridge/src/MqttEventBridge.ts:375](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L375)
+[mqttbridge/src/MqttEventBridge.ts:378](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L378)
 
 ___
 
@@ -702,4 +702,4 @@ EventBridgeBaseClass.wrapInSpan
 
 #### Defined in
 
-packages/core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:48
+core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:48

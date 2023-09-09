@@ -16,8 +16,6 @@
 
   ↳ [`EventBridgeBaseClass`](purista_core.EventBridgeBaseClass.md)
 
-  ↳ [`EventBridgeBaseClass`](purista_core.EventBridgeBaseClass.md)
-
 ## Implements
 
 - [`IEmitter`](../interfaces/purista_core.IEmitter.md)<`T`\>

@@ -9,8 +9,6 @@ Interface definition for a secret store implementation
 ## Implemented by
 
 - [`DefaultSecretStore`](../classes/purista_core.DefaultSecretStore.md)
-- [`DefaultSecretStore`](../classes/purista_core.DefaultSecretStore.md)
-- [`SecretStoreBaseClass`](../classes/purista_core.SecretStoreBaseClass.md)
 - [`SecretStoreBaseClass`](../classes/purista_core.SecretStoreBaseClass.md)
 
 ## Table of contents

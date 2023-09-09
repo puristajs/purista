@@ -175,10 +175,6 @@ ___
 
 ▸ **addFunctionDefinition**(`...functions`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
-**`Deprecated`**
-
-use addCommandDefinition instead of addFunctionDefinition as it will be removed soon.
-
 #### Parameters
 
 | Name | Type |
@@ -188,6 +184,10 @@ use addCommandDefinition instead of addFunctionDefinition as it will be removed 
 #### Returns
 
 [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+
+**`Deprecated`**
+
+use addCommandDefinition instead of addFunctionDefinition as it will be removed soon.
 
 #### Defined in
 
@@ -280,10 +280,6 @@ ___
 
 ▸ **getFunctionBuilder**(`commandName`, `description`, `eventName?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
 
-**`Deprecated`**
-
-user getCommandBuilder instead. It will be removed soon.
-
 #### Parameters
 
 | Name | Type |
@@ -295,6 +291,10 @@ user getCommandBuilder instead. It will be removed soon.
 #### Returns
 
 [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
+
+**`Deprecated`**
+
+user getCommandBuilder instead. It will be removed soon.
 
 #### Defined in
 

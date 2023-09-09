@@ -405,6 +405,7 @@ ___
 | `command.principalId?` | `string` | principal id |
 | `command.receiver` | `EBMessageAddress` | - |
 | `command.sender` | { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } | - |
+| `command.tenantId?` | `string` | principal id |
 | `command.timestamp` | `number` | timestamp of message creation time |
 | `command.traceId?` | `string` | trace id of message |
 | `headers?` | `Record`<`string`, `string`\> | - |
