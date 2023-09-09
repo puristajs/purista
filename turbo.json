@@ -30,18 +30,6 @@
       "dependsOn": [],
       "outputs": []
     },
-    "bump:major":{
-      "dependsOn": ["^build","^lint","^test"],
-      "outputs": ["package.json","package-lock.json"]
-    },
-    "bump:minor":{
-      "dependsOn": ["^build","^lint","^test"],
-      "outputs": ["package.json","package-lock.json"]
-    },
-    "bump:patch":{
-      "dependsOn": ["^build","^lint","^test"],
-      "outputs": ["package.json","package-lock.json"]
-    },
     "dev": {
       "cache": false
     }

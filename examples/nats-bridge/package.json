@@ -20,10 +20,7 @@
     "nats:up": "docker start purista-nats ||  docker run -p 4222:4222 --name purista-nats nats:alpine -js",
     "nats:down": "docker container stop $(docker container ls -q --filter name=purista-nats)",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
-    "test": "jest",
-    "bump:major": "npm version major --no-git-tag-version",
-    "bump:minor": "npm version minor --no-git-tag-version",
-    "bump:patch": "npm version patch --no-git-tag-version"
+    "test": "jest"
   },
   "devDependencies": {
     "@types/node": "^20.6.0",

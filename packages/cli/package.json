@@ -25,10 +25,7 @@
     "start": "./lib/index.js",
     "build": "tsc --project ./tsconfig.json && chmod 755 lib/index.js",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
-    "test": "jest --passWithNoTests",
-    "bump:major": "npm version major --no-git-tag-version",
-    "bump:minor": "npm version minor --no-git-tag-version",
-    "bump:patch": "npm version patch --no-git-tag-version"
+    "test": "jest --passWithNoTests"
   },
   "devDependencies": {
     "@types/eslint": "^8.40.2",
