@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [1.8.1] - 2023-09-12
 
 ### Bug Fixes
 
@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 
 - Update api documentation
 - Update documentation
+- Update CHANGELOG
 
 ## [1.8.0] - 2023-09-09
 
