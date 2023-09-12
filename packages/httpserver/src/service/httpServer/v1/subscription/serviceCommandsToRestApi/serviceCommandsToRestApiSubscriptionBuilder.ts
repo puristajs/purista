@@ -1,6 +1,6 @@
 import { posix } from 'node:path'
 
-import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
+import { Context, context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import {
   convertToSnakeCase,
@@ -8,7 +8,6 @@ import {
   getNewTraceId,
   HandledError,
   isHttpExposedServiceMeta,
-  serializeOtp,
   StatusCode,
   UnhandledError,
 } from '@purista/core'
@@ -53,7 +52,21 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 
     const getHandler = () => {
       return async (request: FastifyRequest, reply: FastifyReply, parameter: Record<string, unknown>) => {
-        const parentContext = propagation.extract(context.active(), request.headers)
+        let parentContext: Context | undefined
+
+        if (request.headers['traceparent']) {
+          let traceparent: string
+          if (Array.isArray(request.headers['traceparent'])) {
+            traceparent = request.headers['traceparent'][0]
+          } else {
+            traceparent = request.headers['traceparent']
+          }
+
+          if (traceparent.trim().length) {
+            parentContext = propagation.extract(context.active(), request.headers)
+          }
+        }
+
         return this.startActiveSpan('handler', { kind: SpanKind.SERVER }, parentContext, async (span) => {
           try {
             addHeaders(span, reply)
@@ -104,7 +117,6 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
                 tenantId,
                 contentType,
                 contentEncoding,
-                otp: serializeOtp(),
               },
               `${method}:${url}`,
             )

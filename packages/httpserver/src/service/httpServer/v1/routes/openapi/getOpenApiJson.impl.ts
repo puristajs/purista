@@ -293,12 +293,11 @@ export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV
         description: 'TraceID which can be used by business logic',
       }
 
-      const requestIdParameter: ParameterObject = {
+      const traceParent: ParameterObject = {
         in: 'header',
         required: false,
         name: 'traceparent',
         schema: { type: 'string' },
-        example: '00-d5dbb17eec16e3c9fce9cf8adc766999-b78f55dcdd1fe3ba-01',
         description: 'see: https://www.w3.org/TR/trace-context/#traceparent-header-field-values',
       }
 
@@ -309,7 +308,7 @@ export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV
           security: securitySchema.length > 0 && definition.openApi?.isSecure ? securitySchema : [],
           description: definition.openApi?.description,
           summary: definition.openApi?.summary,
-          parameters: [...pathParams, ...queryParams, traceIdParameter, requestIdParameter],
+          parameters: [...pathParams, ...queryParams, traceIdParameter, traceParent],
           tags: definition.openApi?.tags,
           operationId: definition.openApi?.operationId,
           requestBody,
