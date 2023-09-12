@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [unreleased]
+
+### Bug Fixes
+
+- Downgrade esbuild
+- Traceparent handling in HttpServerService
+
+### Documentation
+
+- Update api documentation
+- Update documentation
+
 ## [1.8.0] - 2023-09-09
 
 ### Bug Fixes
@@ -32,6 +44,7 @@ All notable changes to this project will be documented in this file.
 - Bump dependency versions
 - Update package log
 - Update build config
+- Bump versions to 1.8.0
 
 ## [1.7.5] - 2023-07-06
 
