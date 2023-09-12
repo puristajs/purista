@@ -13,6 +13,7 @@ esbuild
     target: 'node18',
     minify: true,
     packages: 'external',
+    keepNames: true,
   })
   .catch(() => process.exit(1))
 
@@ -28,5 +29,6 @@ esbuild
     target: 'node18',
     minify: true,
     packages: 'external',
+    keepNames: true,
   })
   .catch(() => process.exit(1))
