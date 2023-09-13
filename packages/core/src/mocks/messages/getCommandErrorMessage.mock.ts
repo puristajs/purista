@@ -1,10 +1,10 @@
 import {
-  Command,
-  CommandErrorResponse,
+  type Command,
+  type CommandErrorResponse,
   createErrorResponse,
   getNewInstanceId,
-  HandledError,
-  UnhandledError,
+  type HandledError,
+  type UnhandledError,
 } from '../../core'
 import { getCommandMessageMock } from './getCommandMessage.mock'
 
