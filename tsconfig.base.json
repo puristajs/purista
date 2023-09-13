@@ -19,11 +19,6 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "declarationMap": true,
-    "paths": {
-      "@purista/*": [
-        "./packages/*"
-      ]
-    },
     "types": [
       "jest",
       "node"
