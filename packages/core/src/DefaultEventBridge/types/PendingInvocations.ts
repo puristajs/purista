@@ -1,4 +1,4 @@
-import { HandledError, UnhandledError } from '../../core'
+import type { HandledError, UnhandledError } from '../../core'
 
 export type PendigInvocation = {
   resolve(responsePayload: unknown): void
