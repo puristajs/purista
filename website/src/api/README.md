@@ -4,6 +4,19 @@ PURISTA API / [Modules](modules.md)
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.1] - 2023-09-12
+
+### Bug Fixes
+
+- Downgrade esbuild
+- Traceparent handling in HttpServerService
+
+### Documentation
+
+- Update api documentation
+- Update documentation
+- Update CHANGELOG
+
 ## [1.8.0] - 2023-09-09
 
 ### Bug Fixes
@@ -34,6 +47,7 @@ All notable changes to this project will be documented in this file.
 - Bump dependency versions
 - Update package log
 - Update build config
+- Bump versions to 1.8.0
 
 ## [1.7.5] - 2023-07-06
 
