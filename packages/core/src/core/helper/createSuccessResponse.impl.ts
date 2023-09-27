@@ -24,6 +24,8 @@ export const createSuccessResponse = <T>(
     id: originalEBMessage.id,
     correlationId: originalEBMessage.correlationId,
     traceId: originalEBMessage.traceId || getNewTraceId(),
+    principalId: originalEBMessage.principalId,
+    tenantId: originalEBMessage.tenantId,
     contentType,
     contentEncoding,
     timestamp: Date.now(),

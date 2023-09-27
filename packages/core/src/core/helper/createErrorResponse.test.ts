@@ -46,6 +46,8 @@ describe('createErrorResponse', () => {
     expect(result.traceId).toBe(message.traceId)
     expect(result.correlationId).toBe(message.correlationId)
     expect(result.id).toBe(message.id)
+    expect(result.tenantId).toBe(message.tenantId)
+    expect(result.principalId).toBe(message.principalId)
     expect(result.isHandledError).toBeFalsy()
   })
 

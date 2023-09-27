@@ -41,6 +41,8 @@ describe('createSuccessResponse', () => {
     expect(result.receiver).toStrictEqual(message.sender)
     expect(result.traceId).toBe(message.traceId)
     expect(result.correlationId).toBe(message.correlationId)
+    expect(result.tenantId).toBe(message.tenantId)
+    expect(result.principalId).toBe(message.principalId)
     expect(result.id).toBe(message.id)
   })
 
