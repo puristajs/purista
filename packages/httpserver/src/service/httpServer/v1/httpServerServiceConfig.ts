@@ -67,6 +67,7 @@ export const httpServerServiceV1ConfigSchema = z.object({
   apiMountPath: z.string().optional(),
   enableHelmet: z.boolean().optional().default(false),
   enableHealthz: z.boolean().optional().default(true),
+  healthzFunction: z.function().args(z.any(), z.any()).returns(z.promise(z.void())).optional(),
   helmetOptions: FastifyHelmetOptionsSchema.optional(),
   enableCompress: z.boolean().optional().default(false),
   compressOptions: z.any().optional(),

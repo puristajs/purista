@@ -141,18 +141,22 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
     })
 
     if (this.config.enableHealthz) {
-      this.server.get('/healthz', async (_request, reply) => {
-        const isEventBridgeReady = await this.eventBridge.isHealthy()
+      if (this.config.healthzFunction) {
+        this.server.get('/healthz', this.config.healthzFunction)
+      } else {
+        this.server.get('/healthz', async (_request, reply) => {
+          const isEventBridgeReady = await this.eventBridge.isHealthy()
 
-        reply.header('content-type', 'application/json; charset=utf-8')
-        if (isEventBridgeReady) {
-          reply.status(StatusCode.OK)
-          reply.send(new HandledError(StatusCode.OK).getErrorResponse())
-          return
-        }
-        reply.status(StatusCode.InternalServerError)
-        reply.send(new HandledError(StatusCode.InternalServerError).getErrorResponse())
-      })
+          reply.header('content-type', 'application/json; charset=utf-8')
+          if (isEventBridgeReady) {
+            reply.status(StatusCode.OK)
+            reply.send(new HandledError(StatusCode.OK).getErrorResponse())
+            return
+          }
+          reply.status(StatusCode.InternalServerError)
+          reply.send(new HandledError(StatusCode.InternalServerError).getErrorResponse())
+        })
+      }
     }
   }
 
