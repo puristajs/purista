@@ -49,7 +49,7 @@
     "sinon": "^15.x"
   },
   "dependencies": {
-    "@opentelemetry/api": "^1.4.1",
+    "@opentelemetry/api": "^1.6.0",
     "@opentelemetry/semantic-conventions": "^1.15.2",
     "@purista/core": "*",
     "cloudevents": "^8.0.0",
