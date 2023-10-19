@@ -34,8 +34,7 @@ describe('HonoTRouter', () => {
 
     const result = router.match(method, path)
 
-    expect(result?.handlers).toEqual([handler])
-    expect(result?.params).toEqual({})
+    expect(result?.[0][0]).toStrictEqual([handler, {}])
   })
 
   it('returns null when no route is found', () => {
@@ -44,6 +43,6 @@ describe('HonoTRouter', () => {
 
     const result = router.match(method, path)
 
-    expect(result).toBeNull()
+    expect(result).toStrictEqual([[]])
   })
 })

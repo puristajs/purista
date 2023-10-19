@@ -14,15 +14,15 @@ export class HonoTRouter<T> implements Router<T> {
     this.router.add(method as Methods, path, handler)
   }
 
-  match(method: string, path: string): Result<T> | null {
+  match(method: string, path: string): Result<T> {
     const routeAll = this.router.find('ALL' as Methods, path)
     const route = this.router.find(method as Methods, path)
 
-    const result: Result<T> = {
-      handlers: [...routeAll.handlers, ...route.handlers],
-      params: { ...routeAll.params, ...route.params },
-    }
+    const handlers: [T, Record<string, string>][] = []
 
-    return route.handlers.length ? result : null
+    routeAll.handlers.forEach((handler) => handlers.push([handler, routeAll.params]))
+    route.handlers.forEach((handler) => handlers.push([handler, { ...routeAll.params, ...route.params }]))
+
+    return [handlers]
   }
 }
