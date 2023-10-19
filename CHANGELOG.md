@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [unreleased]
+
+### Documentation
+
+- Update api documentation
+- Update documentation
+
+### Features
+
+- Make healthz function configurable
+- Add optional openapi paths in config
+
+### Miscellaneous Tasks
+
+- Bump dependencies
+- Update hono router
+
 ## [1.8.2] - 2023-09-27
 
 ### Bug Fixes
@@ -18,6 +35,7 @@ All notable changes to this project will be documented in this file.
 ### Miscellaneous Tasks
 
 - Improve type imports
+- Bump versions to 1.8.2
 
 ## [1.8.1] - 2023-09-12
 
