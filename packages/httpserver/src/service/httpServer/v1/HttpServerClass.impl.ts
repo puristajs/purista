@@ -1,4 +1,3 @@
-import compress from '@fastify/compress'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import fastifyStatic from '@fastify/static'
@@ -44,14 +43,6 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
     this.server = fastify({
       ...this.config.fastify,
     }) as unknown as FastifyInstance
-
-    if (this.config.enableCors) {
-      this.server.register(cors, this.config.corsOptions)
-    }
-
-    if (this.config.enableCompress) {
-      this.server.register(compress, this.config.compressOptions)
-    }
 
     this.server
       .decorateRequest('principalId', undefined)
@@ -112,10 +103,6 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
         })
       })
 
-    if (this.config.enableHelmet) {
-      this.server.register(helmet, this.config.helmetOptions)
-    }
-
     this.server.addHook('onError', async (request, reply, err) => {
       const parentContext = propagation.extract(context.active(), request.headers)
       await new Promise((resolve) => api.context.with(parentContext, async () => resolve(undefined)))
@@ -139,12 +126,30 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
         reply.send(new UnhandledError().getErrorResponse())
       }
     })
+  }
+
+  addBeforeResponse(method: HTTPMethods, pattern: string, handler: BeforeResponseHook) {
+    this.beforeResponse.add(method.toUpperCase() as Methods, pattern, handler)
+  }
+
+  async start(): Promise<void> {
+    if (this.config.enableCompress) {
+      await this.server?.register(import('@fastify/compress'), this.config.compressOptions)
+    }
+
+    if (this.config.enableCors) {
+      await this.server?.register(cors, this.config.corsOptions)
+    }
+
+    if (this.config.enableHelmet) {
+      await this.server?.register(helmet, this.config.helmetOptions)
+    }
 
     if (this.config.enableHealthz) {
       if (this.config.healthzFunction) {
-        this.server.get('/healthz', this.config.healthzFunction)
+        this.server?.get('/healthz', this.config.healthzFunction)
       } else {
-        this.server.get('/healthz', async (_request, reply) => {
+        this.server?.get('/healthz', async (_request, reply) => {
           const isEventBridgeReady = await this.eventBridge.isHealthy()
 
           reply.header('content-type', 'application/json; charset=utf-8')
@@ -158,13 +163,7 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
         })
       }
     }
-  }
 
-  addBeforeResponse(method: HTTPMethods, pattern: string, handler: BeforeResponseHook) {
-    this.beforeResponse.add(method.toUpperCase() as Methods, pattern, handler)
-  }
-
-  async start(): Promise<void> {
     const apiBasePath = posix.join(this.config.apiMountPath || 'api', '/v*')
 
     this.server?.all(apiBasePath, async (request, reply) => {
@@ -204,7 +203,7 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
       }
       const prefix = posix.join(apiUrl, '/assets')
 
-      this.server?.register(fastifyStatic, {
+      await this.server?.register(fastifyStatic, {
         root: swaggerUi.absolutePath(),
         prefix,
         decorateReply: false, // the reply decorator has been added by the first plugin registration
