@@ -2,12 +2,13 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [1.8.3] - 2023-10-19
 
 ### Documentation
 
 - Update api documentation
 - Update documentation
+- Update CHANGELOG
 
 ### Features
 
