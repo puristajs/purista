@@ -4,6 +4,23 @@ PURISTA API / [Modules](modules.md)
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.2] - 2023-09-27
+
+### Bug Fixes
+
+- Correct build config and upgrade esbuild
+- Pass principalId and tenantId to response msg
+
+### Documentation
+
+- Update api documentation
+- Update documentation
+- Update CHANGELOG
+
+### Miscellaneous Tasks
+
+- Improve type imports
+
 ## [1.8.1] - 2023-09-12
 
 ### Bug Fixes
@@ -16,6 +33,10 @@ All notable changes to this project will be documented in this file.
 - Update api documentation
 - Update documentation
 - Update CHANGELOG
+
+### Miscellaneous Tasks
+
+- Bump versions to 1.8.1
 
 ## [1.8.0] - 2023-09-09
 
