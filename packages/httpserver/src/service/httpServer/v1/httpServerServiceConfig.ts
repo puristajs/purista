@@ -84,6 +84,7 @@ export const httpServerServiceV1ConfigSchema = z.object({
       security: z.array(z.any()).optional(),
       externalDocs: ExternalDocumentationObjectSchema.optional(),
       tags: z.array(TagObjectSchema).optional(),
+      paths: z.record(z.string(), z.record(z.string(), z.any())).optional(),
     })
     .optional(),
 })

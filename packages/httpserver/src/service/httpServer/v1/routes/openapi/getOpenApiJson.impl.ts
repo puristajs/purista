@@ -15,7 +15,7 @@ import { HttpServerServiceV1ConfigRaw, OPENAPI_DEFAULT_INFO } from '../../httpSe
  * @returns A route definition for the openApi.json file
  */
 export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV1ConfigRaw>): RouteOptions {
-  const paths: Record<string, Record<string, unknown>> = {}
+  const paths: Record<string, Record<string, unknown>> = this.config.openApi?.paths || {}
 
   const p = (this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath) as string
   const url = posix.join(p, '/openapi.json')

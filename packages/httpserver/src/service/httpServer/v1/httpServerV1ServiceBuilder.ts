@@ -31,6 +31,7 @@ export const httpServerV1ServiceBuilder = new ServiceBuilder(httpServerServiceIn
     enableHelmet: true,
     enableCompress: true,
     enableHealthz: true,
+    healthzFunction: undefined,
     enableCors: false,
     helmetOptions: undefined,
     compressOptions: undefined,
@@ -40,6 +41,7 @@ export const httpServerV1ServiceBuilder = new ServiceBuilder(httpServerServiceIn
       enabled: true,
       path: OPENAPI_DEFAULT_MOUNT_PATH,
       info: OPENAPI_DEFAULT_INFO,
+      paths: undefined,
     },
   })
   .setCustomClass(HttpServerClass)
