@@ -1,6 +1,6 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/redis-state-store](../modules/purista_redis_state_store.md) / RedisStateStore
 
-# Class: RedisStateStore<M, F, S\>
+# Class: RedisStateStore\<M, F, S\>
 
 [@purista/redis-state-store](../modules/purista_redis_state_store.md).RedisStateStore
 
@@ -48,7 +48,7 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 ## Hierarchy
 
-- `StateStoreBaseClass`<[`RedisStoreConfig`](../modules/purista_redis_state_store.md#redisstoreconfig)<`M`, `F`, `S`\>\>
+- `StateStoreBaseClass`\<[`RedisStoreConfig`](../modules/purista_redis_state_store.md#redisstoreconfig)\<`M`, `F`, `S`\>\>
 
   ↳ **`RedisStateStore`**
 
@@ -76,7 +76,7 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 ### constructor
 
-• **new RedisStateStore**<`M`, `F`, `S`\>(`config?`)
+• **new RedisStateStore**\<`M`, `F`, `S`\>(`config?`): [`RedisStateStore`](purista_redis_state_store.RedisStateStore.md)\<`M`, `F`, `S`\>
 
 #### Type parameters
 
@@ -91,16 +91,22 @@ See documentation of underlaying redis lib package for detailed configuration op
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `config?` | `Object` | - |
-| `config.config?` | `RedisClientOptions`<`M`, `F`, `S`\> | - |
+| `config.cacheTtl?` | `number` | Cache time to live in ms |
+| `config.config?` | `RedisClientOptions`\<`M`, `F`, `S`\> | - |
+| `config.enableCache?` | `boolean` | Enable cache |
 | `config.enableGet?` | `boolean` | Enable generally get method |
 | `config.enableRemove?` | `boolean` | Enable generally remove method |
 | `config.enableSet?` | `boolean` | Enable generally set method |
 | `config.logLevel?` | `LogLevelName` | A log level for new logger if logger is not set |
 | `config.logger?` | `Logger` | A logger instance |
 
+#### Returns
+
+[`RedisStateStore`](purista_redis_state_store.RedisStateStore.md)\<`M`, `F`, `S`\>
+
 #### Overrides
 
-StateStoreBaseClass&lt;RedisStoreConfig&lt;M, F, S\&gt;\&gt;.constructor
+StateStoreBaseClass\&lt;RedisStoreConfig\&lt;M, F, S\&gt;\&gt;.constructor
 
 #### Defined in
 
@@ -110,7 +116,7 @@ StateStoreBaseClass&lt;RedisStoreConfig&lt;M, F, S\&gt;\&gt;.constructor
 
 ### client
 
-• **client**: `RedisClientType`<`M`, `F`, `S`\>
+• **client**: `RedisClientType`\<`M`, `F`, `S`\>
 
 #### Defined in
 
@@ -126,7 +132,9 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `config?` | `RedisClientOptions`<`M`, `F`, `S`\> | - |
+| `cacheTtl?` | `number` | Cache time to live in ms |
+| `config?` | `RedisClientOptions`\<`M`, `F`, `S`\> | - |
+| `enableCache?` | `boolean` | Enable cache |
 | `enableGet?` | `boolean` | Enable generally get method |
 | `enableRemove?` | `boolean` | Enable generally remove method |
 | `enableSet?` | `boolean` | Enable generally set method |
@@ -173,11 +181,11 @@ core/lib/types/core/StateStore/StateStoreBaseClass.impl.d.ts:11
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 
@@ -191,7 +199,7 @@ ___
 
 ### getState
 
-▸ **getState**(`...stateNames`): `Promise`<`Record`<`string`, `unknown`\>\>
+▸ **getState**(`...stateNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Parameters
 
@@ -201,7 +209,7 @@ ___
 
 #### Returns
 
-`Promise`<`Record`<`string`, `unknown`\>\>
+`Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Overrides
 
@@ -215,7 +223,7 @@ ___
 
 ### removeState
 
-▸ **removeState**(`stateName`): `Promise`<`void`\>
+▸ **removeState**(`stateName`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -225,7 +233,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 
@@ -239,7 +247,7 @@ ___
 
 ### setState
 
-▸ **setState**(`stateName`, `stateValue`): `Promise`<`void`\>
+▸ **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -250,7 +258,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 

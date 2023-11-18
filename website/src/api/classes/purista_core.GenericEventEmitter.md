@@ -1,6 +1,6 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / GenericEventEmitter
 
-# Class: GenericEventEmitter<T\>
+# Class: GenericEventEmitter\<T\>
 
 [@purista/core](../modules/purista_core.md).GenericEventEmitter
 
@@ -18,7 +18,7 @@
 
 ## Implements
 
-- [`IEmitter`](../interfaces/purista_core.IEmitter.md)<`T`\>
+- [`IEmitter`](../interfaces/purista_core.IEmitter.md)\<`T`\>
 
 ## Table of contents
 
@@ -41,13 +41,17 @@
 
 ### constructor
 
-• **new GenericEventEmitter**<`T`\>()
+• **new GenericEventEmitter**\<`T`\>(): [`GenericEventEmitter`](purista_core.GenericEventEmitter.md)\<`T`\>
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
 | `T` | extends [`EventMap`](../modules/purista_core.md#eventmap) |
+
+#### Returns
+
+[`GenericEventEmitter`](purista_core.GenericEventEmitter.md)\<`T`\>
 
 ## Properties
 
@@ -63,7 +67,7 @@
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
+▸ **emit**\<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
@@ -94,7 +98,7 @@ ___
 
 ### off
 
-▸ **off**<`K`\>(`eventName`, `fn`): `void`
+▸ **off**\<`K`\>(`eventName`, `fn`): `void`
 
 #### Type parameters
 
@@ -107,7 +111,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | `EventReceiver`<`T`[`K`]\> |
+| `fn` | `EventReceiver`\<`T`[`K`]\> |
 
 #### Returns
 
@@ -125,7 +129,7 @@ ___
 
 ### on
 
-▸ **on**<`K`\>(`eventName`, `fn`): `void`
+▸ **on**\<`K`\>(`eventName`, `fn`): `void`
 
 #### Type parameters
 
@@ -138,7 +142,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | `EventReceiver`<`T`[`K`]\> |
+| `fn` | `EventReceiver`\<`T`[`K`]\> |
 
 #### Returns
 

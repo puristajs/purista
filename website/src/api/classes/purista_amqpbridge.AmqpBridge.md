@@ -23,7 +23,7 @@ await eventBridge.start()
 
 ## Hierarchy
 
-- `EventBridgeBaseClass`<[`AmqpBridgeConfig`](../modules/purista_amqpbridge.md#amqpbridgeconfig)\>
+- `EventBridgeBaseClass`\<[`AmqpBridgeConfig`](../modules/purista_amqpbridge.md#amqpbridgeconfig)\>
 
   ↳ **`AmqpBridge`**
 
@@ -84,7 +84,7 @@ await eventBridge.start()
 
 ### constructor
 
-• **new AmqpBridge**(`config?`)
+• **new AmqpBridge**(`config?`): [`AmqpBridge`](purista_amqpbridge.AmqpBridge.md)
 
 #### Parameters
 
@@ -104,9 +104,13 @@ await eventBridge.start()
 | `config.spanProcessor?` | `SpanProcessor` | A OpenTelemetry span processor |
 | `config.url?` | `string` \| `Connect` | the AMQP broker url **`Default`** ```ts amqp://localhost ``` |
 
+#### Returns
+
+[`AmqpBridge`](purista_amqpbridge.AmqpBridge.md)
+
 #### Overrides
 
-EventBridgeBaseClass&lt;AmqpBridgeConfig\&gt;.constructor
+EventBridgeBaseClass\&lt;AmqpBridgeConfig\&gt;.constructor
 
 #### Defined in
 
@@ -126,7 +130,7 @@ ___
 
 ### config
 
-• **config**: `Complete`<{ `defaultCommandTimeout?`: `number` ; `encoder?`: [`Encoder`](../modules/purista_amqpbridge.md#encoder) ; `encrypter?`: [`Encrypter`](../modules/purista_amqpbridge.md#encrypter) ; `exchangeName?`: `string` ; `exchangeOptions?`: `AssertExchange` ; `instanceId?`: `string` ; `logLevel?`: `LogLevelName` ; `logger?`: `Logger` ; `namePrefix?`: `string` ; `socketOptions?`: `any` ; `spanProcessor?`: `SpanProcessor` ; `url?`: `string` \| `Connect`  }\>
+• **config**: `Complete`\<\{ `defaultCommandTimeout?`: `number` ; `encoder?`: [`Encoder`](../modules/purista_amqpbridge.md#encoder) ; `encrypter?`: [`Encrypter`](../modules/purista_amqpbridge.md#encrypter) ; `exchangeName?`: `string` ; `exchangeOptions?`: `AssertExchange` ; `instanceId?`: `string` ; `logLevel?`: `LogLevelName` ; `logger?`: `Logger` ; `namePrefix?`: `string` ; `socketOptions?`: `any` ; `spanProcessor?`: `SpanProcessor` ; `url?`: `string` \| `Connect`  }\>
 
 #### Inherited from
 
@@ -258,7 +262,7 @@ ___
 
 ### pendingInvocations
 
-• `Protected` **pendingInvocations**: `Map`<`string`, `PendigInvocation`\>
+• `Protected` **pendingInvocations**: `Map`\<`string`, `PendigInvocation`\>
 
 #### Defined in
 
@@ -298,7 +302,7 @@ ___
 
 ### serviceFunctions
 
-• `Protected` **serviceFunctions**: `Map`<`string`, { `cb`: (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> ; `channel`: `Channel`  }\>
+• `Protected` **serviceFunctions**: `Map`\<`string`, \{ `cb`: (`message`: \{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: \{ `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: \{ `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  } \| \{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> ; `channel`: `Channel`  }\>
 
 #### Defined in
 
@@ -308,7 +312,7 @@ ___
 
 ### subscriptions
 
-• `Protected` **subscriptions**: `Map`<`string`, { `cb`: (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> ; `channel`: `Channel`  }\>
+• `Protected` **subscriptions**: `Map`\<`string`, \{ `cb`: (`message`: \{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`\<`undefined` \| `Omit`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> ; `channel`: `Channel`  }\>
 
 #### Defined in
 
@@ -332,7 +336,7 @@ core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:12
 
 ### decodeContent
 
-▸ `Protected` **decodeContent**<`T`\>(`input`, `contentType`, `contentEncoding`): `Promise`<`T`\>
+▸ **decodeContent**\<`T`\>(`input`, `contentType`, `contentEncoding`): `Promise`\<`T`\>
 
 Decode buffer into given type
 
@@ -352,7 +356,7 @@ Decode buffer into given type
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Defined in
 
@@ -362,11 +366,11 @@ ___
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -384,20 +388,20 @@ ___
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
+▸ **emit**\<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends `EventKey`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
+| `K` | extends `EventKey`\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `parameter?` | { `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`] |
+| `parameter?` | \{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`] |
 
 #### Returns
 
@@ -415,7 +419,7 @@ ___
 
 ### emitMessage
 
-▸ **emitMessage**<`T`\>(`message`, `contentType?`, `contentEncoding?`): `Promise`<`Readonly`<`EBMessage`\>\>
+▸ **emitMessage**\<`T`\>(`message`, `contentType?`, `contentEncoding?`): `Promise`\<`Readonly`\<`EBMessage`\>\>
 
 #### Type parameters
 
@@ -427,13 +431,13 @@ ___
 
 | Name | Type | Default value |
 | :------ | :------ | :------ |
-| `message` | `Omit`<`EBMessage`, ``"id"`` \| ``"timestamp"`` \| ``"correlationId"``\> | `undefined` |
+| `message` | `Omit`\<`EBMessage`, ``"id"`` \| ``"timestamp"`` \| ``"correlationId"``\> | `undefined` |
 | `contentType` | `string` | `'application/json'` |
 | `contentEncoding` | `string` | `'utf-8'` |
 
 #### Returns
 
-`Promise`<`Readonly`<`EBMessage`\>\>
+`Promise`\<`Readonly`\<`EBMessage`\>\>
 
 #### Implementation of
 
@@ -447,7 +451,7 @@ ___
 
 ### encodeContent
 
-▸ `Protected` **encodeContent**<`T`\>(`input`, `contentType`, `contentEncoding`): `Promise`<`Buffer`\>
+▸ **encodeContent**\<`T`\>(`input`, `contentType`, `contentEncoding`): `Promise`\<`Buffer`\>
 
 Encode given payload to buffer
 
@@ -467,7 +471,7 @@ Encode given payload to buffer
 
 #### Returns
 
-`Promise`<`Buffer`\>
+`Promise`\<`Buffer`\>
 
 #### Defined in
 
@@ -499,7 +503,7 @@ ___
 
 ### invoke
 
-▸ **invoke**<`T`\>(`input`, `commandTimeout?`): `Promise`<`T`\>
+▸ **invoke**\<`T`\>(`input`, `commandTimeout?`): `Promise`\<`T`\>
 
 #### Type parameters
 
@@ -511,12 +515,12 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `input` | `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"`` \| ``"correlationId"`` \| ``"messageType"``\> |
+| `input` | `Omit`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: \{ `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"`` \| ``"correlationId"`` \| ``"messageType"``\> |
 | `commandTimeout` | `number` |
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Implementation of
 
@@ -530,11 +534,11 @@ ___
 
 ### isHealthy
 
-▸ **isHealthy**(): `Promise`<`boolean`\>
+▸ **isHealthy**(): `Promise`\<`boolean`\>
 
 #### Returns
 
-`Promise`<`boolean`\>
+`Promise`\<`boolean`\>
 
 #### Implementation of
 
@@ -548,11 +552,11 @@ ___
 
 ### isReady
 
-▸ **isReady**(): `Promise`<`boolean`\>
+▸ **isReady**(): `Promise`\<`boolean`\>
 
 #### Returns
 
-`Promise`<`boolean`\>
+`Promise`\<`boolean`\>
 
 #### Implementation of
 
@@ -566,20 +570,20 @@ ___
 
 ### off
 
-▸ **off**<`K`\>(`eventName`, `fn`): `void`
+▸ **off**\<`K`\>(`eventName`, `fn`): `void`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends `EventKey`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
+| `K` | extends `EventKey`\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | `EventReceiver`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
+| `fn` | `EventReceiver`\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
 
 #### Returns
 
@@ -597,20 +601,20 @@ ___
 
 ### on
 
-▸ **on**<`K`\>(`eventName`, `fn`): `void`
+▸ **on**\<`K`\>(`eventName`, `fn`): `void`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends `EventKey`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
+| `K` | extends `EventKey`\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | `EventReceiver`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
+| `fn` | `EventReceiver`\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
 
 #### Returns
 
@@ -628,7 +632,7 @@ ___
 
 ### registerCommand
 
-▸ **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`<`string`\>
+▸ **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
 Register a service function and ensure that there is a queue for all incoming command requests.
 
@@ -637,13 +641,13 @@ Register a service function and ensure that there is a queue for all incoming co
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `address` | `EBMessageAddress` | The service function address |
-| `cb` | (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  } \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | the function to call if a matching command message arrives |
+| `cb` | (`message`: \{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: \{ `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: \{ `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  } \| \{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | the function to call if a matching command message arrives |
 | `metadata` | `CommandDefinitionMetadataBase` | - |
 | `eventBridgeConfig` | `DefinitionEventBridgeConfig` | - |
 
 #### Returns
 
-`Promise`<`string`\>
+`Promise`\<`string`\>
 
 the id of command function queue
 
@@ -659,18 +663,18 @@ ___
 
 ### registerSubscription
 
-▸ **registerSubscription**(`subscription`, `cb`): `Promise`<`string`\>
+▸ **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `subscription` | `Subscription` |
-| `cb` | (`message`: `EBMessage`) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
+| `cb` | (`message`: `EBMessage`) => `Promise`\<`undefined` \| `Omit`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
 
 #### Returns
 
-`Promise`<`string`\>
+`Promise`\<`string`\>
 
 #### Implementation of
 
@@ -702,13 +706,13 @@ ___
 
 ### start
 
-▸ **start**(): `Promise`<`void`\>
+▸ **start**(): `Promise`\<`void`\>
 
 Connect to RabbitMQ broker, ensure exchange, call back queue
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -726,7 +730,7 @@ ___
 
 ### startActiveSpan
 
-▸ **startActiveSpan**<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`<`F`\>
+▸ **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
 Start a child span for opentelemetry tracking
 
@@ -743,11 +747,11 @@ Start a child span for opentelemetry tracking
 | `name` | `string` | name of span |
 | `opts` | `SpanOptions` | span options |
 | `context` | `undefined` \| `Context` | optional context |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function to be executed within the span |
+| `fn` | (`span`: `Span`) => `Promise`\<`F`\> | function to be executed within the span |
 
 #### Returns
 
-`Promise`<`F`\>
+`Promise`\<`F`\>
 
 return value of fn
 
@@ -763,7 +767,7 @@ ___
 
 ### unregisterCommand
 
-▸ **unregisterCommand**(`address`): `Promise`<`void`\>
+▸ **unregisterCommand**(`address`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -773,7 +777,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -787,7 +791,7 @@ ___
 
 ### unregisterSubscription
 
-▸ **unregisterSubscription**(`address`): `Promise`<`void`\>
+▸ **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -797,7 +801,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -811,7 +815,7 @@ ___
 
 ### wrapInSpan
 
-▸ **wrapInSpan**<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`<`F`\>
+▸ **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!
@@ -833,12 +837,12 @@ but not to trace the program flow itself
 | :------ | :------ | :------ |
 | `name` | `string` | name of span |
 | `opts` | `SpanOptions` | span options |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function te be executed in the span |
+| `fn` | (`span`: `Span`) => `Promise`\<`F`\> | function te be executed in the span |
 | `context?` | `Context` | span context |
 
 #### Returns
 
-`Promise`<`F`\>
+`Promise`\<`F`\>
 
 return value of fn
 

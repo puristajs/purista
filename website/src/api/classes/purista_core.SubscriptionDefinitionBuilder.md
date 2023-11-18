@@ -1,6 +1,6 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / SubscriptionDefinitionBuilder
 
-# Class: SubscriptionDefinitionBuilder<ServiceClassType, MessagePayloadType, MessageParamsType, MessageResultType, FunctionPayloadType, FunctionParamsType, FunctionResultType\>
+# Class: SubscriptionDefinitionBuilder\<ServiceClassType, MessagePayloadType, MessageParamsType, MessageResultType, FunctionPayloadType, FunctionParamsType, FunctionResultType\>
 
 [@purista/core](../modules/purista_core.md).SubscriptionDefinitionBuilder
 
@@ -80,13 +80,13 @@ A working schema definition needs at least a subscription name, a short descript
 
 ### constructor
 
-• **new SubscriptionDefinitionBuilder**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>(`subscriptionName`, `subscriptionDescription`)
+• **new SubscriptionDefinitionBuilder**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>(`subscriptionName`, `subscriptionDescription`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`\> = [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)\<`unknown`\> = [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)\<`unknown`\> |
 | `MessagePayloadType` | `unknown` |
 | `MessageParamsType` | `undefined` |
 | `MessageResultType` | `void` |
@@ -100,6 +100,10 @@ A working schema definition needs at least a subscription name, a short descript
 | :------ | :------ |
 | `subscriptionName` | `string` |
 | `subscriptionDescription` | `string` |
+
+#### Returns
+
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Defined in
 
@@ -149,7 +153,7 @@ ___
 
 ### fn
 
-• `Private` `Optional` **fn**: [`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+• `Private` `Optional` **fn**: [`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Defined in
 
@@ -165,15 +169,15 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `afterGuard` | `Record`<`string`, [`SubscriptionAfterGuardHook`](../modules/purista_core.md#subscriptionafterguardhook)<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
-| `beforeGuard` | `Record`<`string`, [`SubscriptionBeforeGuardHook`](../modules/purista_core.md#subscriptionbeforeguardhook)<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
-| `transformInput?` | { `transformFunction`: [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)<`ServiceClassType`, `any`, `any`, `any`, `any`\> ; `transformInputSchema`: `ZodType`<`any`, `ZodTypeDef`, `any`\> ; `transformParameterSchema`: `ZodType`<`any`, `ZodTypeDef`, `any`\>  } |
-| `transformInput.transformFunction` | [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)<`ServiceClassType`, `any`, `any`, `any`, `any`\> |
-| `transformInput.transformInputSchema` | `ZodType`<`any`, `ZodTypeDef`, `any`\> |
-| `transformInput.transformParameterSchema` | `ZodType`<`any`, `ZodTypeDef`, `any`\> |
-| `transformOutput?` | { `transformFunction`: [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `any`\> ; `transformOutputSchema`: `ZodType`<`any`, `ZodTypeDef`, `any`\>  } |
-| `transformOutput.transformFunction` | [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `any`\> |
-| `transformOutput.transformOutputSchema` | `ZodType`<`any`, `ZodTypeDef`, `any`\> |
+| `afterGuard` | `Record`\<`string`, [`SubscriptionAfterGuardHook`](../modules/purista_core.md#subscriptionafterguardhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
+| `beforeGuard` | `Record`\<`string`, [`SubscriptionBeforeGuardHook`](../modules/purista_core.md#subscriptionbeforeguardhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
+| `transformInput?` | \{ `transformFunction`: [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `any`, `any`, `any`, `any`\> ; `transformInputSchema`: `ZodType`\<`any`, `ZodTypeDef`, `any`\> ; `transformParameterSchema`: `ZodType`\<`any`, `ZodTypeDef`, `any`\>  } |
+| `transformInput.transformFunction` | [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `any`, `any`, `any`, `any`\> |
+| `transformInput.transformInputSchema` | `ZodType`\<`any`, `ZodTypeDef`, `any`\> |
+| `transformInput.transformParameterSchema` | `ZodType`\<`any`, `ZodTypeDef`, `any`\> |
+| `transformOutput?` | \{ `transformFunction`: [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `any`\> ; `transformOutputSchema`: `ZodType`\<`any`, `ZodTypeDef`, `any`\>  } |
+| `transformOutput.transformFunction` | [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `any`\> |
+| `transformOutput.transformOutputSchema` | `ZodType`\<`any`, `ZodTypeDef`, `any`\> |
 
 #### Defined in
 
@@ -243,7 +247,7 @@ ___
 
 ### outputSchema
 
-• `Private` **outputSchema**: `ZodType`<`any`, `ZodTypeDef`, `any`\>
+• `Private` **outputSchema**: `ZodType`\<`any`, `ZodTypeDef`, `any`\>
 
 #### Defined in
 
@@ -253,7 +257,7 @@ ___
 
 ### parameterSchema
 
-• `Private` `Optional` **parameterSchema**: `ZodType`<`any`, `ZodTypeDef`, `any`\>
+• `Private` `Optional` **parameterSchema**: `ZodType`\<`any`, `ZodTypeDef`, `any`\>
 
 #### Defined in
 
@@ -351,7 +355,7 @@ ___
 
 ### addOutputSchema
 
-▸ **addOutputSchema**<`I`, `D`, `O`\>(`eventName`, `outputSchema`, `outputContentType?`, `outputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `O`, `FunctionPayloadType`, `FunctionParamsType`, `I`\>
+▸ **addOutputSchema**\<`I`, `D`, `O`\>(`eventName`, `outputSchema`, `outputContentType?`, `outputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `O`, `FunctionPayloadType`, `FunctionParamsType`, `I`\>
 
 Add a schema for output payload validation.
 Types for payload of message and function payload output are generated from given schema.
@@ -369,13 +373,13 @@ Types for payload of message and function payload output are generated from give
 | Name | Type | Default value | Description |
 | :------ | :------ | :------ | :------ |
 | `eventName` | `string` | `undefined` | the event name to be used when the subscription result is emitted as custom event |
-| `outputSchema` | `ZodType`<`O`, `D`, `I`\> | `undefined` | the validation schema for the output payload |
+| `outputSchema` | `ZodType`\<`O`, `D`, `I`\> | `undefined` | the validation schema for the output payload |
 | `outputContentType` | `string` | `'application/json'` | optional the content type of payload |
 | `outputContentEncoding` | `string` | `'utf-8'` | optional the content encoding |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `O`, `FunctionPayloadType`, `FunctionParamsType`, `I`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `O`, `FunctionPayloadType`, `FunctionParamsType`, `I`\>
 
 SubscriptionDefinitionBuilder
 
@@ -387,7 +391,7 @@ ___
 
 ### addParameterSchema
 
-▸ **addParameterSchema**<`I`, `D`, `O`\>(`parameterSchema`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `I`, `MessageResultType`, `FunctionPayloadType`, `O`, `FunctionResultType`\>
+▸ **addParameterSchema**\<`I`, `D`, `O`\>(`parameterSchema`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `I`, `MessageResultType`, `FunctionPayloadType`, `O`, `FunctionResultType`\>
 
 Add a schema for output parameter validation.
 Types for parameter of message and function parameter output are generated from given schema.
@@ -404,11 +408,11 @@ Types for parameter of message and function parameter output are generated from 
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `parameterSchema` | `ZodType`<`O`, `D`, `I`\> | the validation schema for output parameter |
+| `parameterSchema` | `ZodType`\<`O`, `D`, `I`\> | the validation schema for output parameter |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `I`, `MessageResultType`, `FunctionPayloadType`, `O`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `I`, `MessageResultType`, `FunctionPayloadType`, `O`, `FunctionResultType`\>
 
 SubscriptionDefinitionBuilder
 
@@ -420,7 +424,7 @@ ___
 
 ### addPayloadSchema
 
-▸ **addPayloadSchema**<`I`, `D`, `O`\>(`inputSchema`, `inputContentType?`, `inputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `I`, `MessageParamsType`, `MessageResultType`, `O`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **addPayloadSchema**\<`I`, `D`, `O`\>(`inputSchema`, `inputContentType?`, `inputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `I`, `MessageParamsType`, `MessageResultType`, `O`, `FunctionParamsType`, `FunctionResultType`\>
 
 Add a schema for input payload validation.
 Types for payload of message and function payload input are generated from given schema.
@@ -437,13 +441,13 @@ Types for payload of message and function payload input are generated from given
 
 | Name | Type | Default value | Description |
 | :------ | :------ | :------ | :------ |
-| `inputSchema` | `ZodType`<`O`, `D`, `I`\> | `undefined` | the validation schema for input payload |
+| `inputSchema` | `ZodType`\<`O`, `D`, `I`\> | `undefined` | the validation schema for input payload |
 | `inputContentType` | `string` | `'application/json'` | optional the content type of payload |
 | `inputContentEncoding` | `string` | `'utf-8'` | optional the content encoding |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `I`, `MessageParamsType`, `MessageResultType`, `O`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `I`, `MessageParamsType`, `MessageResultType`, `O`, `FunctionParamsType`, `FunctionResultType`\>
 
 SubscriptionDefinitionBuilder
 
@@ -455,7 +459,7 @@ ___
 
 ### adviceAutoacknowledgeMessage
 
-▸ **adviceAutoacknowledgeMessage**(`acknowledge?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **adviceAutoacknowledgeMessage**(`acknowledge?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Instruct the event bridge message broker to autoacknowledge messages as soon as they arrive.
 This means, a message will not be resent, if the subscription execution fails unexpected.
@@ -473,7 +477,7 @@ If set to false, the message will be resent from message broker to eventbridge, 
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 SubscriptionDefinition
 
@@ -485,7 +489,7 @@ ___
 
 ### adviceDurable
 
-▸ **adviceDurable**(`durable`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **adviceDurable**(`durable`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 False: defines the subscription as a live-subscription, which is only able to process messages while the subscription itself is running.
 
@@ -500,7 +504,7 @@ As soon as the subscription is back again, all missed messages will be sent firs
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Defined in
 
@@ -510,7 +514,7 @@ ___
 
 ### filterForMessageType
 
-▸ **filterForMessageType**(`messageType`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **filterForMessageType**(`messageType`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Adds a filter to match specific message type.
 
@@ -526,7 +530,7 @@ See  EBMessageType for full available list.
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Defined in
 
@@ -536,7 +540,7 @@ ___
 
 ### filterInstanceId
 
-▸ **filterInstanceId**(`instanceId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **filterInstanceId**(`instanceId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Filter messages only from instance id
 
@@ -548,7 +552,7 @@ Filter messages only from instance id
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 **`Deprecated`**
 
@@ -562,7 +566,7 @@ ___
 
 ### filterPrincipalId
 
-▸ **filterPrincipalId**(`principalId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **filterPrincipalId**(`principalId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Filter messages only for principalId
 
@@ -574,7 +578,7 @@ Filter messages only for principalId
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Defined in
 
@@ -584,7 +588,7 @@ ___
 
 ### filterReceivedBy
 
-▸ **filterReceivedBy**(`serviceName`, `serviceVersion`, `serviceTarget`, `instanceId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **filterReceivedBy**(`serviceName`, `serviceVersion`, `serviceTarget`, `instanceId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Add filter to only match messages received by given service function & version.
 Set one or more parameters to undefined means "do not filter by this criteria".
@@ -608,7 +612,7 @@ receivedBy('UserService', undefined, 'testFunction')
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Defined in
 
@@ -618,7 +622,7 @@ ___
 
 ### filterSentFrom
 
-▸ **filterSentFrom**(`serviceName`, `serviceVersion`, `serviceTarget`, `instanceId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **filterSentFrom**(`serviceName`, `serviceVersion`, `serviceTarget`, `instanceId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Add filter to only match messages send by given service function & version.
 Set one or more parameters to undefined means "do not filter by this criteria".
@@ -642,7 +646,7 @@ sentFrom('UserService', undefined, 'testFunction')
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Defined in
 
@@ -652,7 +656,7 @@ ___
 
 ### filterTenantId
 
-▸ **filterTenantId**(`tenantId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **filterTenantId**(`tenantId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Filter messages only for tenantId
 
@@ -664,7 +668,7 @@ Filter messages only for tenantId
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Defined in
 
@@ -674,13 +678,13 @@ ___
 
 ### getDefinition
 
-▸ **getDefinition**(): [`SubscriptionDefinition`](../modules/purista_core.md#subscriptiondefinition)<`ServiceClassType`, [`SubscriptionDefinitionMetadataBase`](../modules/purista_core.md#subscriptiondefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **getDefinition**(): [`SubscriptionDefinition`](../modules/purista_core.md#subscriptiondefinition)\<`ServiceClassType`, [`SubscriptionDefinitionMetadataBase`](../modules/purista_core.md#subscriptiondefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Returns the final subscription definition which will be passed into the service class.
 
 #### Returns
 
-[`SubscriptionDefinition`](../modules/purista_core.md#subscriptiondefinition)<`ServiceClassType`, [`SubscriptionDefinitionMetadataBase`](../modules/purista_core.md#subscriptiondefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinition`](../modules/purista_core.md#subscriptiondefinition)\<`ServiceClassType`, [`SubscriptionDefinitionMetadataBase`](../modules/purista_core.md#subscriptiondefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 SubscriptionDefinition
 
@@ -692,13 +696,13 @@ ___
 
 ### getSubscriptionFunction
 
-▸ **getSubscriptionFunction**(): [`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **getSubscriptionFunction**(): [`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Get the function implementation
 
 #### Returns
 
-[`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 the subscription function
 
@@ -710,13 +714,13 @@ ___
 
 ### getTransformInputFunction
 
-▸ **getTransformInputFunction**(): `undefined` \| [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `MessagePayloadType`, `MessageParamsType`\>
+▸ **getTransformInputFunction**(): `undefined` \| [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `MessagePayloadType`, `MessageParamsType`\>
 
 Return the transform input function
 
 #### Returns
 
-`undefined` \| [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `MessagePayloadType`, `MessageParamsType`\>
+`undefined` \| [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `MessagePayloadType`, `MessageParamsType`\>
 
 the input transform function if defined
 
@@ -728,13 +732,13 @@ ___
 
 ### getTransformOutputFunction
 
-▸ **getTransformOutputFunction**(): `undefined` \| [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **getTransformOutputFunction**(): `undefined` \| [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Return the transform output function
 
 #### Returns
 
-`undefined` \| [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `FunctionResultType`\>
+`undefined` \| [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `FunctionResultType`\>
 
 the transform output function if defined
 
@@ -746,7 +750,7 @@ ___
 
 ### receiveMessageOnEveryInstance
 
-▸ **receiveMessageOnEveryInstance**(`enforce?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **receiveMessageOnEveryInstance**(`enforce?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Instruct the event bridge message broker to send the matching message to every running instance.
 The underlaying message broker must support this functionality.
@@ -761,7 +765,7 @@ In serverless environments, this flag should not have any effect
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 SubscriptionDefinition
 
@@ -773,7 +777,7 @@ ___
 
 ### setAfterGuardHooks
 
-▸ **setAfterGuardHooks**(`afterGuards`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setAfterGuardHooks**(`afterGuards`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Set one or more after guard hook(s).
 If there are multiple after guard hooks, they are executed in parallel
@@ -782,11 +786,11 @@ If there are multiple after guard hooks, they are executed in parallel
 
 | Name | Type |
 | :------ | :------ |
-| `afterGuards` | `Record`<`string`, [`SubscriptionAfterGuardHook`](../modules/purista_core.md#subscriptionafterguardhook)<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
+| `afterGuards` | `Record`\<`string`, [`SubscriptionAfterGuardHook`](../modules/purista_core.md#subscriptionafterguardhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 SubscriptionDefinitionBuilder
 
@@ -798,7 +802,7 @@ ___
 
 ### setBeforeGuardHooks
 
-▸ **setBeforeGuardHooks**(`beforeGuards`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setBeforeGuardHooks**(`beforeGuards`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Set one or more before guard hook(s).
 If there are multiple before guard hooks, they are executed in parallel
@@ -807,11 +811,11 @@ If there are multiple before guard hooks, they are executed in parallel
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `beforeGuards` | `Record`<`string`, [`SubscriptionBeforeGuardHook`](../modules/purista_core.md#subscriptionbeforeguardhook)<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`\>\> | Object of key = name of guard, value = function |
+| `beforeGuards` | `Record`\<`string`, [`SubscriptionBeforeGuardHook`](../modules/purista_core.md#subscriptionbeforeguardhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`\>\> | Object of key = name of guard, value = function |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 SubscriptionDefinitionBuilder
 
@@ -823,7 +827,7 @@ ___
 
 ### setSubscriptionFunction
 
-▸ **setSubscriptionFunction**(`fn`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setSubscriptionFunction**(`fn`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Required: Set the function implementation.
 The types should be automatically set as soon as schemas previously defined.
@@ -834,11 +838,11 @@ Anonymous functions do not have access to the `this` scope.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `fn` | [`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\> | the function implementation |
+| `fn` | [`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\> | the function implementation |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 SubscriptionDefinitionBuilder
 
@@ -859,7 +863,7 @@ ___
 
 ### setTransformInput
 
-▸ **setTransformInput**<`PayloadIn`, `ParamsIn`, `PayloadOut`, `ParamsOut`, `PayloadD`, `ParamsD`\>(`transformInputSchema`, `transformParameterSchema`, `transformFunction`, `inputContentType?`, `inputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `PayloadIn`, `ParamsIn`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setTransformInput**\<`PayloadIn`, `ParamsIn`, `PayloadOut`, `ParamsOut`, `PayloadD`, `ParamsD`\>(`transformInputSchema`, `transformParameterSchema`, `transformFunction`, `inputContentType?`, `inputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `PayloadIn`, `ParamsIn`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Set a transform input hook which will encode or transform the input payload and parameters.
 Will be executed as first step before input validation, before guard and the function itself.
@@ -880,15 +884,15 @@ This will change the type of input message payload and input message parameter.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `transformInputSchema` | `ZodType`<`PayloadOut`, `PayloadD`, `PayloadIn`\> | Input payload validation schema |
-| `transformParameterSchema` | `ZodType`<`ParamsOut`, `ParamsD`, `ParamsIn`\> | Input parameter validation schema |
-| `transformFunction` | [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `PayloadIn`, `ParamsIn`\> | the transform input function |
+| `transformInputSchema` | `ZodType`\<`PayloadOut`, `PayloadD`, `PayloadIn`\> | Input payload validation schema |
+| `transformParameterSchema` | `ZodType`\<`ParamsOut`, `ParamsD`, `ParamsIn`\> | Input parameter validation schema |
+| `transformFunction` | [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `PayloadIn`, `ParamsIn`\> | the transform input function |
 | `inputContentType?` | `string` | optional the content type of payload |
 | `inputContentEncoding?` | `string` | optional the content encoding |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `PayloadIn`, `ParamsIn`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `PayloadIn`, `ParamsIn`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 SubscriptionDefinitionBuilder
 
@@ -900,7 +904,7 @@ ___
 
 ### setTransformOutput
 
-▸ **setTransformOutput**<`PayloadOut`, `PayloadD`, `PayloadIn`\>(`transformOutputSchema`, `transformFunction`, `outputContentType?`, `outputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `PayloadOut`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setTransformOutput**\<`PayloadOut`, `PayloadD`, `PayloadIn`\>(`transformOutputSchema`, `transformFunction`, `outputContentType?`, `outputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `PayloadOut`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Set a transform output hook which will encode or transform the response payload.
 Will be executed at very last step after function execution, output validation and after guard hooks.
@@ -918,14 +922,14 @@ This will change the type of output message payload.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `transformOutputSchema` | `ZodType`<`PayloadOut`, `PayloadD`, `PayloadIn`\> | The output validation schema |
-| `transformFunction` | [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `PayloadIn`\> | the transform output function |
+| `transformOutputSchema` | `ZodType`\<`PayloadOut`, `PayloadD`, `PayloadIn`\> | The output validation schema |
+| `transformFunction` | [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `PayloadIn`\> | the transform output function |
 | `outputContentType?` | `string` | optional the content type of payload |
 | `outputContentEncoding?` | `string` | optional the content encoding |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `PayloadOut`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `PayloadOut`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 SubscriptionDefinitionBuilder
 
@@ -937,7 +941,7 @@ ___
 
 ### subscribeToEvent
 
-▸ **subscribeToEvent**(`eventName`, `serviceVersion?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **subscribeToEvent**(`eventName`, `serviceVersion?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Add a filter to only subscribe to messages with matching event name
 
@@ -950,7 +954,7 @@ Add a filter to only subscribe to messages with matching event name
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 SubscriptionDefinitionBuilder
 

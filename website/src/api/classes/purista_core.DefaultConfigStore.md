@@ -26,7 +26,7 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 ## Hierarchy
 
-- [`ConfigStoreBaseClass`](purista_core.ConfigStoreBaseClass.md)<[`DefaultConfigStoreConfig`](../modules/purista_core.md#defaultconfigstoreconfig)\>
+- [`ConfigStoreBaseClass`](purista_core.ConfigStoreBaseClass.md)\<[`DefaultConfigStoreConfig`](../modules/purista_core.md#defaultconfigstoreconfig)\>
 
   ↳ **`DefaultConfigStore`**
 
@@ -54,18 +54,24 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 ### constructor
 
-• **new DefaultConfigStore**(`config?`)
+• **new DefaultConfigStore**(`config?`): [`DefaultConfigStore`](purista_core.DefaultConfigStore.md)
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `config?` | `Object` | - |
+| `config.cacheTtl?` | `number` | Cache time to live in ms |
+| `config.enableCache?` | `boolean` | Enable cache |
 | `config.enableGet?` | `boolean` | Enable generally get method |
 | `config.enableRemove?` | `boolean` | Enable generally remove method |
 | `config.enableSet?` | `boolean` | Enable generally set method |
 | `config.logLevel?` | [`LogLevelName`](../modules/purista_core.md#loglevelname) | A log level for new logger if logger is not set |
 | `config.logger?` | [`Logger`](purista_core.Logger.md) | A logger instance |
+
+#### Returns
+
+[`DefaultConfigStore`](purista_core.DefaultConfigStore.md)
 
 #### Overrides
 
@@ -85,6 +91,8 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
+| `cacheTtl?` | `number` | Cache time to live in ms |
+| `enableCache?` | `boolean` | Enable cache |
 | `enableGet?` | `boolean` | Enable generally get method |
 | `enableRemove?` | `boolean` | Enable generally remove method |
 | `enableSet?` | `boolean` | Enable generally set method |
@@ -117,7 +125,7 @@ ___
 
 ### map
 
-• `Private` **map**: `Map`<`string`, `unknown`\>
+• `Private` **map**: `Map`\<`string`, `unknown`\>
 
 #### Defined in
 
@@ -143,13 +151,13 @@ name of store
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 disconnects and shuts down the config store
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Inherited from
 
@@ -163,7 +171,7 @@ ___
 
 ### getConfig
 
-▸ **getConfig**(`...configNames`): `Promise`<`Record`<`string`, `unknown`\>\>
+▸ **getConfig**(`...configNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Parameters
 
@@ -173,7 +181,7 @@ ___
 
 #### Returns
 
-`Promise`<`Record`<`string`, `unknown`\>\>
+`Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Overrides
 
@@ -187,7 +195,7 @@ ___
 
 ### removeConfig
 
-▸ **removeConfig**(`configName`): `Promise`<`void`\>
+▸ **removeConfig**(`configName`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -197,7 +205,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 
@@ -211,7 +219,7 @@ ___
 
 ### setConfig
 
-▸ **setConfig**(`configName`, `configValue`): `Promise`<`void`\>
+▸ **setConfig**(`configName`, `configValue`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -222,7 +230,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 

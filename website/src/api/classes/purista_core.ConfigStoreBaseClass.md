@@ -1,6 +1,6 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ConfigStoreBaseClass
 
-# Class: ConfigStoreBaseClass<ConfigType\>
+# Class: ConfigStoreBaseClass\<ConfigType\>
 
 [@purista/core](../modules/purista_core.md).ConfigStoreBaseClass
 
@@ -10,7 +10,7 @@ Base class for config store adapters
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | extends `Record`<`string`, `unknown`\> = {} |
+| `ConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
 
 ## Hierarchy
 
@@ -45,20 +45,24 @@ Base class for config store adapters
 
 ### constructor
 
-• **new ConfigStoreBaseClass**<`ConfigType`\>(`name`, `config`)
+• **new ConfigStoreBaseClass**\<`ConfigType`\>(`name`, `config`): [`ConfigStoreBaseClass`](purista_core.ConfigStoreBaseClass.md)\<`ConfigType`\>
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | extends `Record`<`string`, `unknown`\> = {} |
+| `ConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `name` | `string` |
-| `config` | { [K in string \| number \| symbol]: (Object & ConfigType)[K] } |
+| `config` | \{ [K in string \| number \| symbol]: (Object & ConfigType)[K] } |
+
+#### Returns
+
+[`ConfigStoreBaseClass`](purista_core.ConfigStoreBaseClass.md)\<`ConfigType`\>
 
 #### Defined in
 
@@ -68,7 +72,7 @@ Base class for config store adapters
 
 ### config
 
-• **config**: { [K in string \| number \| symbol]: (Object & ConfigType)[K] }
+• **config**: \{ [K in string \| number \| symbol]: (Object & ConfigType)[K] }
 
 #### Defined in
 
@@ -104,13 +108,13 @@ name of store
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 disconnects and shuts down the config store
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -124,7 +128,7 @@ ___
 
 ### getConfig
 
-▸ **getConfig**(`..._configNames`): `Promise`<`Record`<`string`, `unknown`\>\>
+▸ **getConfig**(`..._configNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Parameters
 
@@ -134,7 +138,7 @@ ___
 
 #### Returns
 
-`Promise`<`Record`<`string`, `unknown`\>\>
+`Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Implementation of
 
@@ -148,7 +152,7 @@ ___
 
 ### removeConfig
 
-▸ **removeConfig**(`_configName`): `Promise`<`void`\>
+▸ **removeConfig**(`_configName`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -158,7 +162,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -172,7 +176,7 @@ ___
 
 ### setConfig
 
-▸ **setConfig**(`_configName`, `_configValue`): `Promise`<`void`\>
+▸ **setConfig**(`_configName`, `_configValue`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -183,7 +187,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 

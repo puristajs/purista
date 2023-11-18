@@ -1,6 +1,6 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / EventBridgeBaseClass
 
-# Class: EventBridgeBaseClass<ConfigType\>
+# Class: EventBridgeBaseClass\<ConfigType\>
 
 [@purista/core](../modules/purista_core.md).EventBridgeBaseClass
 
@@ -14,7 +14,7 @@ The base class to be extended by event bridge implementations
 
 ## Hierarchy
 
-- [`GenericEventEmitter`](purista_core.GenericEventEmitter.md)<[`EventBridgeEvents`](../modules/purista_core.md#eventbridgeevents)\>
+- [`GenericEventEmitter`](purista_core.GenericEventEmitter.md)\<[`EventBridgeEvents`](../modules/purista_core.md#eventbridgeevents)\>
 
   ↳ **`EventBridgeBaseClass`**
 
@@ -51,7 +51,7 @@ The base class to be extended by event bridge implementations
 
 ### constructor
 
-• **new EventBridgeBaseClass**<`ConfigType`\>(`name`, `config`)
+• **new EventBridgeBaseClass**\<`ConfigType`\>(`name`, `config`): [`EventBridgeBaseClass`](purista_core.EventBridgeBaseClass.md)\<`ConfigType`\>
 
 #### Type parameters
 
@@ -64,7 +64,11 @@ The base class to be extended by event bridge implementations
 | Name | Type |
 | :------ | :------ |
 | `name` | `string` |
-| `config` | { [K in string \| number \| symbol]: (Object & ConfigType)[K] } |
+| `config` | \{ [K in string \| number \| symbol]: (Object & ConfigType)[K] } |
+
+#### Returns
+
+[`EventBridgeBaseClass`](purista_core.EventBridgeBaseClass.md)\<`ConfigType`\>
 
 #### Overrides
 
@@ -78,7 +82,7 @@ The base class to be extended by event bridge implementations
 
 ### config
 
-• **config**: [`Complete`](../modules/purista_core.md#complete)<{ [K in string \| number \| symbol]: (Object & ConfigType)[K] }\>
+• **config**: [`Complete`](../modules/purista_core.md#complete)\<\{ [K in string \| number \| symbol]: (Object & ConfigType)[K] }\>
 
 #### Defined in
 
@@ -138,11 +142,11 @@ ___
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -152,20 +156,20 @@ ___
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
+▸ **emit**\<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
+| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `parameter?` | { `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`] |
+| `parameter?` | \{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`] |
 
 #### Returns
 
@@ -201,20 +205,20 @@ ___
 
 ### off
 
-▸ **off**<`K`\>(`eventName`, `fn`): `void`
+▸ **off**\<`K`\>(`eventName`, `fn`): `void`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
+| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | `EventReceiver`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
+| `fn` | `EventReceiver`\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
 
 #### Returns
 
@@ -232,20 +236,20 @@ ___
 
 ### on
 
-▸ **on**<`K`\>(`eventName`, `fn`): `void`
+▸ **on**\<`K`\>(`eventName`, `fn`): `void`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
+| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | `EventReceiver`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
+| `fn` | `EventReceiver`\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
 
 #### Returns
 
@@ -281,11 +285,11 @@ ___
 
 ### start
 
-▸ **start**(): `Promise`<`void`\>
+▸ **start**(): `Promise`\<`void`\>
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -295,7 +299,7 @@ ___
 
 ### startActiveSpan
 
-▸ **startActiveSpan**<`F`\>(`name`, `opts`, `context?`, `fn`): `Promise`<`F`\>
+▸ **startActiveSpan**\<`F`\>(`name`, `opts`, `context?`, `fn`): `Promise`\<`F`\>
 
 Start a child span for opentelemetry tracking
 
@@ -312,11 +316,11 @@ Start a child span for opentelemetry tracking
 | `name` | `string` | `undefined` | name of span |
 | `opts` | `SpanOptions` | `undefined` | span options |
 | `context` | `undefined` \| `Context` | `undefined` | optional context |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | `undefined` | function to be executed within the span |
+| `fn` | (`span`: `Span`) => `Promise`\<`F`\> | `undefined` | function to be executed within the span |
 
 #### Returns
 
-`Promise`<`F`\>
+`Promise`\<`F`\>
 
 return value of fn
 
@@ -328,7 +332,7 @@ ___
 
 ### wrapInSpan
 
-▸ **wrapInSpan**<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`<`F`\>
+▸ **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!
@@ -350,12 +354,12 @@ but not to trace the program flow itself
 | :------ | :------ | :------ |
 | `name` | `string` | name of span |
 | `opts` | `SpanOptions` | span options |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function te be executed in the span |
+| `fn` | (`span`: `Span`) => `Promise`\<`F`\> | function te be executed in the span |
 | `context?` | `Context` | span context |
 
 #### Returns
 
-`Promise`<`F`\>
+`Promise`\<`F`\>
 
 return value of fn
 

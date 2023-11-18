@@ -47,11 +47,11 @@ import { NatsBridge } from '@purista/natsbridge'
 
 ### IncomingMessageFunction
 
-Ƭ **IncomingMessageFunction**: (`this`: [`NatsBridge`](../classes/purista_natsbridge.NatsBridge.md), `error`: `NatsError` \| ``null``, `msg`: `Msg`) => `Promise`<`void`\>
+Ƭ **IncomingMessageFunction**: (`this`: [`NatsBridge`](../classes/purista_natsbridge.NatsBridge.md), `error`: `NatsError` \| ``null``, `msg`: `Msg`) => `Promise`\<`void`\>
 
 #### Type declaration
 
-▸ (`this`, `error`, `msg`): `Promise`<`void`\>
+▸ (`this`, `error`, `msg`): `Promise`\<`void`\>
 
 ##### Parameters
 
@@ -63,7 +63,7 @@ import { NatsBridge } from '@purista/natsbridge'
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -73,7 +73,7 @@ ___
 
 ### NatsBridgeConfig
 
-Ƭ **NatsBridgeConfig**: `Prettify`<{ `commandResponsePublishTwice`: ``"always"`` \| ``"eventOnly"`` \| ``"eventAndError"`` \| ``"never"`` ; `defaultMessageExpiryInterval`: `number` ; `emptyTopicPartString`: `string` ; `maxMessages`: `number` ; `topicPrefix`: `string`  } & `ConnectionOptions`\>
+Ƭ **NatsBridgeConfig**: `Prettify`\<\{ `commandResponsePublishTwice`: ``"always"`` \| ``"eventOnly"`` \| ``"eventAndError"`` \| ``"never"`` ; `defaultMessageExpiryInterval`: `number` ; `emptyTopicPartString`: `string` ; `maxMessages`: `number` ; `topicPrefix`: `string`  } & `ConnectionOptions`\>
 
 the configuration for the NATS event bridge
 
@@ -85,7 +85,7 @@ the configuration for the NATS event bridge
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.8.2"``
+• `Const` **puristaVersion**: ``"1.8.3"``
 
 #### Defined in
 

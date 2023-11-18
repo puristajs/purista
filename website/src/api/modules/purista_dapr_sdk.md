@@ -208,7 +208,7 @@ ___
 
 ### DaprEventBridgeConfig
 
-Ƭ **DaprEventBridgeConfig**: `Prettify`<`HttpEventBridgeConfig` & { `clientConfig?`: [`DaprClientConfig`](purista_dapr_sdk.md#daprclientconfig)  }\>
+Ƭ **DaprEventBridgeConfig**: `Prettify`\<`HttpEventBridgeConfig` & \{ `clientConfig?`: [`DaprClientConfig`](purista_dapr_sdk.md#daprclientconfig)  }\>
 
 #### Defined in
 
@@ -289,7 +289,7 @@ Dapr secret store configuration
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `clientConfig?` | [`DaprClientConfig`](purista_dapr_sdk.md#daprclientconfig) | The Dapr client config to interact with Dapr sidecar |
-| `metadata?` | { `namespace?`: `string`  } | Dapr secret store metadata |
+| `metadata?` | \{ `namespace?`: `string`  } | Dapr secret store metadata |
 | `metadata.namespace?` | `string` | In case of deploying into namespace other than default, the namespace (e.g. production) must be set |
 | `secretStoreName?` | `string` | The name of the secret store |
 
@@ -547,11 +547,11 @@ ___
 
 ### TypeDaprPubSubCallback
 
-Ƭ **TypeDaprPubSubCallback**: (`data`: `any`, `headers`: `object`) => `Promise`<`any` \| `void`\>
+Ƭ **TypeDaprPubSubCallback**: (`data`: `any`, `headers`: `object`) => `Promise`\<`any` \| `void`\>
 
 #### Type declaration
 
-▸ (`data`, `headers`): `Promise`<`any` \| `void`\>
+▸ (`data`, `headers`): `Promise`\<`any` \| `void`\>
 
 ##### Parameters
 
@@ -562,7 +562,7 @@ ___
 
 ##### Returns
 
-`Promise`<`any` \| `void`\>
+`Promise`\<`any` \| `void`\>
 
 #### Defined in
 
@@ -602,18 +602,18 @@ ___
 
 ### configRoute
 
-▸ **configRoute**(`this`, `c`): `Promise`<`Response`\>
+▸ **configRoute**(`this`, `c`): `Promise`\<`Response`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `this` | `HttpEventBridge`<`HttpEventBridgeConfig`\> |
-| `c` | `Context`<`any`, `any`, {}\> |
+| `this` | `HttpEventBridge`\<`HttpEventBridgeConfig`\> |
+| `c` | `Context`\<`any`, `any`, {}\> |
 
 #### Returns
 
-`Promise`<`Response`\>
+`Promise`\<`Response`\>
 
 #### Defined in
 
@@ -656,7 +656,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `apiPrefix` | `string` |
-| `clientConfig` | { `appPrefix`: `string` = 'app-'; `daprApiToken`: `undefined` = undefined; `daprApiVersion`: `string` = DAPR\_API\_VERSION; `daprHost`: `string` ; `daprPort`: `string` ; `isKeepAlive`: `boolean` = true; `pubSubName`: `string` = 'pubsub' } |
+| `clientConfig` | \{ `appPrefix`: `string` = 'app-'; `daprApiToken`: `undefined` = undefined; `daprApiVersion`: `string` = DAPR\_API\_VERSION; `daprHost`: `string` ; `daprPort`: `string` ; `isKeepAlive`: `boolean` = true; `pubSubName`: `string` = 'pubsub' } |
 | `clientConfig.appPrefix` | `string` |
 | `clientConfig.daprApiToken` | `undefined` |
 | `clientConfig.daprApiVersion` | `string` |

@@ -26,7 +26,7 @@ The client provides error and timeout handling and tries to decode the responses
 
 ### delete
 
-▸ **delete**<`T`\>(`path`, `options`): `Promise`<`T`\>
+▸ **delete**\<`T`\>(`path`, `options`): `Promise`\<`T`\>
 
 Make a DELETE request against baseUrl+path
 Returns body text if response content type is not set to `application/json`.
@@ -47,7 +47,7 @@ If response content type is `application/json`, the JSON parsed result will be r
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Defined in
 
@@ -57,7 +57,7 @@ ___
 
 ### get
 
-▸ **get**<`T`\>(`path`, `options`): `Promise`<`T`\>
+▸ **get**\<`T`\>(`path`, `options`): `Promise`\<`T`\>
 
 Make a GET request against baseUrl+path
 Returns body text if response content type is not set to `application/json`.
@@ -78,7 +78,7 @@ If response content type is `application/json`, the JSON parsed result will be r
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Defined in
 
@@ -88,7 +88,7 @@ ___
 
 ### patch
 
-▸ **patch**<`T`\>(`path`, `payload`, `options`): `Promise`<`T`\>
+▸ **patch**\<`T`\>(`path`, `payload`, `options`): `Promise`\<`T`\>
 
 Make a PATCH request against baseUrl+path
 Returns body text if response content type is not set to `application/json`.
@@ -110,7 +110,7 @@ If response content type is `application/json`, the JSON parsed result will be r
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Defined in
 
@@ -120,7 +120,7 @@ ___
 
 ### post
 
-▸ **post**<`T`\>(`path`, `payload`, `options`): `Promise`<`T`\>
+▸ **post**\<`T`\>(`path`, `payload`, `options`): `Promise`\<`T`\>
 
 Make a POST request against baseUrl+path
 Returns body text if response content type is not set to `application/json`.
@@ -142,7 +142,7 @@ If response content type is `application/json`, the JSON parsed result will be r
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Defined in
 
@@ -152,7 +152,7 @@ ___
 
 ### put
 
-▸ **put**<`T`\>(`path`, `payload`, `options`): `Promise`<`T`\>
+▸ **put**\<`T`\>(`path`, `payload`, `options`): `Promise`\<`T`\>
 
 Make a PUT request against baseUrl+path
 Returns body text if response content type is not set to `application/json`.
@@ -174,7 +174,7 @@ If response content type is `application/json`, the JSON parsed result will be r
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Defined in
 

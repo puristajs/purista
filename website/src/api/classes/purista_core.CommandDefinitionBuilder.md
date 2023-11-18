@@ -1,6 +1,6 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / CommandDefinitionBuilder
 
-# Class: CommandDefinitionBuilder<ServiceClassType, MessagePayloadType, MessageParamsType, MessageResultType, FunctionPayloadType, FunctionParamsType, FunctionResultType\>
+# Class: CommandDefinitionBuilder\<ServiceClassType, MessagePayloadType, MessageParamsType, MessageResultType, FunctionPayloadType, FunctionParamsType, FunctionResultType\>
 
 [@purista/core](../modules/purista_core.md).CommandDefinitionBuilder
 
@@ -84,13 +84,13 @@ A working schema definition needs at least a command name, a short description a
 
 ### constructor
 
-• **new CommandDefinitionBuilder**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>(`commandName`, `commandDescription`, `eventName?`)
+• **new CommandDefinitionBuilder**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>(`commandName`, `commandDescription`, `eventName?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)\<`unknown`\> |
 | `MessagePayloadType` | `unknown` |
 | `MessageParamsType` | `undefined` |
 | `MessageResultType` | `void` |
@@ -105,6 +105,10 @@ A working schema definition needs at least a command name, a short description a
 | `commandName` | `string` |
 | `commandDescription` | `string` |
 | `eventName?` | `string` |
+
+#### Returns
+
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Defined in
 
@@ -184,7 +188,7 @@ ___
 
 ### fn
 
-• `Private` `Optional` **fn**: [`CommandFunction`](../modules/purista_core.md#commandfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+• `Private` `Optional` **fn**: [`CommandFunction`](../modules/purista_core.md#commandfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Defined in
 
@@ -200,15 +204,15 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `afterGuard` | `Record`<`string`, [`CommandAfterGuardHook`](../modules/purista_core.md#commandafterguardhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
-| `beforeGuard` | `Record`<`string`, [`CommandBeforeGuardHook`](../modules/purista_core.md#commandbeforeguardhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
-| `transformInput?` | { `transformFunction`: [`CommandTransformInputHook`](../modules/purista_core.md#commandtransforminputhook)<`ServiceClassType`, `any`, `any`, `any`, `any`\> ; `transformInputSchema`: `ZodType`<`any`, `ZodTypeDef`, `any`\> ; `transformParameterSchema`: `ZodType`<`any`, `ZodTypeDef`, `any`\>  } |
-| `transformInput.transformFunction` | [`CommandTransformInputHook`](../modules/purista_core.md#commandtransforminputhook)<`ServiceClassType`, `any`, `any`, `any`, `any`\> |
-| `transformInput.transformInputSchema` | `ZodType`<`any`, `ZodTypeDef`, `any`\> |
-| `transformInput.transformParameterSchema` | `ZodType`<`any`, `ZodTypeDef`, `any`\> |
-| `transformOutput?` | { `transformFunction`: [`CommandTransformOutputHook`](../modules/purista_core.md#commandtransformoutputhook)<`ServiceClassType`, `any`, `any`, `FunctionParamsType`, `any`\> ; `transformOutputSchema`: `ZodType`<`any`, `ZodTypeDef`, `any`\>  } |
-| `transformOutput.transformFunction` | [`CommandTransformOutputHook`](../modules/purista_core.md#commandtransformoutputhook)<`ServiceClassType`, `any`, `any`, `FunctionParamsType`, `any`\> |
-| `transformOutput.transformOutputSchema` | `ZodType`<`any`, `ZodTypeDef`, `any`\> |
+| `afterGuard` | `Record`\<`string`, [`CommandAfterGuardHook`](../modules/purista_core.md#commandafterguardhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
+| `beforeGuard` | `Record`\<`string`, [`CommandBeforeGuardHook`](../modules/purista_core.md#commandbeforeguardhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
+| `transformInput?` | \{ `transformFunction`: [`CommandTransformInputHook`](../modules/purista_core.md#commandtransforminputhook)\<`ServiceClassType`, `any`, `any`, `any`, `any`\> ; `transformInputSchema`: `ZodType`\<`any`, `ZodTypeDef`, `any`\> ; `transformParameterSchema`: `ZodType`\<`any`, `ZodTypeDef`, `any`\>  } |
+| `transformInput.transformFunction` | [`CommandTransformInputHook`](../modules/purista_core.md#commandtransforminputhook)\<`ServiceClassType`, `any`, `any`, `any`, `any`\> |
+| `transformInput.transformInputSchema` | `ZodType`\<`any`, `ZodTypeDef`, `any`\> |
+| `transformInput.transformParameterSchema` | `ZodType`\<`any`, `ZodTypeDef`, `any`\> |
+| `transformOutput?` | \{ `transformFunction`: [`CommandTransformOutputHook`](../modules/purista_core.md#commandtransformoutputhook)\<`ServiceClassType`, `any`, `any`, `FunctionParamsType`, `any`\> ; `transformOutputSchema`: `ZodType`\<`any`, `ZodTypeDef`, `any`\>  } |
+| `transformOutput.transformFunction` | [`CommandTransformOutputHook`](../modules/purista_core.md#commandtransformoutputhook)\<`ServiceClassType`, `any`, `any`, `FunctionParamsType`, `any`\> |
+| `transformOutput.transformOutputSchema` | `ZodType`\<`any`, `ZodTypeDef`, `any`\> |
 
 #### Defined in
 
@@ -224,7 +228,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `expose` | { `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: `string` ; `contentTypeResponse?`: `string` ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } & { `http`: { `method`: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` ; `openApi?`: { `additionalStatusCodes?`: [`StatusCode`](../enums/purista_core.StatusCode.md)[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: [`QueryParameter`](../modules/purista_core.md#queryparameter)<`FunctionParamsType`\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  } |
+| `expose` | \{ `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: `string` ; `contentTypeResponse?`: `string` ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } & \{ `http`: \{ `method`: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` ; `openApi?`: \{ `additionalStatusCodes?`: [`StatusCode`](../enums/purista_core.StatusCode.md)[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: [`QueryParameter`](../modules/purista_core.md#queryparameter)\<`FunctionParamsType`\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  } |
 
 #### Defined in
 
@@ -254,7 +258,7 @@ ___
 
 ### inputSchema
 
-• `Private` `Optional` **inputSchema**: `ZodType`<`any`, `ZodTypeDef`, `any`\>
+• `Private` `Optional` **inputSchema**: `ZodType`\<`any`, `ZodTypeDef`, `any`\>
 
 #### Defined in
 
@@ -304,7 +308,7 @@ ___
 
 ### outputSchema
 
-• `Private` `Optional` **outputSchema**: `ZodType`<`any`, `ZodTypeDef`, `any`\>
+• `Private` `Optional` **outputSchema**: `ZodType`\<`any`, `ZodTypeDef`, `any`\>
 
 #### Defined in
 
@@ -314,7 +318,7 @@ ___
 
 ### parameterSchema
 
-• `Private` `Optional` **parameterSchema**: `ZodType`<`any`, `ZodTypeDef`, `any`\>
+• `Private` `Optional` **parameterSchema**: `ZodType`\<`any`, `ZodTypeDef`, `any`\>
 
 #### Defined in
 
@@ -324,7 +328,7 @@ ___
 
 ### queryParameter
 
-• `Private` **queryParameter**: [`QueryParameter`](../modules/purista_core.md#queryparameter)<`FunctionParamsType`\>[] = `[]`
+• `Private` **queryParameter**: [`QueryParameter`](../modules/purista_core.md#queryparameter)\<`FunctionParamsType`\>[] = `[]`
 
 #### Defined in
 
@@ -354,7 +358,7 @@ ___
 
 ### addOpenApiErrorStatusCodes
 
-▸ **addOpenApiErrorStatusCodes**(`...codes`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **addOpenApiErrorStatusCodes**(`...codes`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 If a function can return other status codes, than the default ones, you should add them to openApi definition.
 Per default, 200, 204, 400, 401 and 500 can be autogenerated in most cases.
@@ -368,7 +372,7 @@ Special cases or different status codes should be added with this function.
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -386,7 +390,7 @@ ___
 
 ### addOpenApiTags
 
-▸ **addOpenApiTags**(`...tags`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **addOpenApiTags**(`...tags`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Add tags for openApi definition for given function.
 It is recommended to use some enum for tags to avoid typo issues.
@@ -399,7 +403,7 @@ It is recommended to use some enum for tags to avoid typo issues.
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -417,7 +421,7 @@ ___
 
 ### addOutputSchema
 
-▸ **addOutputSchema**<`I`, `D`, `O`\>(`outputSchema`, `outputContentType?`, `outputContentEncoding?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `O`, `FunctionPayloadType`, `FunctionParamsType`, `I`\>
+▸ **addOutputSchema**\<`I`, `D`, `O`\>(`outputSchema`, `outputContentType?`, `outputContentEncoding?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `O`, `FunctionPayloadType`, `FunctionParamsType`, `I`\>
 
 Add a schema for output payload validation.
 Types for payload of message and function payload output are generated from given schema.
@@ -434,13 +438,13 @@ Types for payload of message and function payload output are generated from give
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `outputSchema` | `ZodType`<`O`, `D`, `I`\> | The schema validation for output payload |
+| `outputSchema` | `ZodType`\<`O`, `D`, `I`\> | The schema validation for output payload |
 | `outputContentType?` | `string` | optional the content type of payload |
 | `outputContentEncoding?` | `string` | optional the content encoding |
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `O`, `FunctionPayloadType`, `FunctionParamsType`, `I`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `O`, `FunctionPayloadType`, `FunctionParamsType`, `I`\>
 
 CommandDefinitionBuilder
 
@@ -452,7 +456,7 @@ ___
 
 ### addParameterSchema
 
-▸ **addParameterSchema**<`I`, `D`, `O`\>(`parameterSchema`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `I`, `MessageResultType`, `FunctionPayloadType`, `O`, `FunctionResultType`\>
+▸ **addParameterSchema**\<`I`, `D`, `O`\>(`parameterSchema`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `I`, `MessageResultType`, `FunctionPayloadType`, `O`, `FunctionResultType`\>
 
 Add a schema for output parameter validation.
 Types for parameter of message and function parameter output are generated from given schema.
@@ -469,11 +473,11 @@ Types for parameter of message and function parameter output are generated from 
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `parameterSchema` | `ZodType`<`O`, `D`, `I`\> | The schema validation for output parameter |
+| `parameterSchema` | `ZodType`\<`O`, `D`, `I`\> | The schema validation for output parameter |
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `I`, `MessageResultType`, `FunctionPayloadType`, `O`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `I`, `MessageResultType`, `FunctionPayloadType`, `O`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -485,7 +489,7 @@ ___
 
 ### addPayloadSchema
 
-▸ **addPayloadSchema**<`I`, `D`, `O`\>(`inputSchema`, `inputContentType?`, `inputContentEncoding?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `I`, `MessageParamsType`, `MessageResultType`, `O`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **addPayloadSchema**\<`I`, `D`, `O`\>(`inputSchema`, `inputContentType?`, `inputContentEncoding?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `I`, `MessageParamsType`, `MessageResultType`, `O`, `FunctionParamsType`, `FunctionResultType`\>
 
 Add a schema for input payload validation.
 Types for payload of message and function payload input are generated from given schema.
@@ -502,13 +506,13 @@ Types for payload of message and function payload input are generated from given
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `inputSchema` | `ZodType`<`O`, `D`, `I`\> | The schema validation for input payload |
+| `inputSchema` | `ZodType`\<`O`, `D`, `I`\> | The schema validation for input payload |
 | `inputContentType?` | `string` | optional the content type of payload |
 | `inputContentEncoding?` | `string` | optional the content encoding |
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `I`, `MessageParamsType`, `MessageResultType`, `O`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `I`, `MessageParamsType`, `MessageResultType`, `O`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -520,7 +524,7 @@ ___
 
 ### addQueryParameters
 
-▸ **addQueryParameters**(`...queryParams`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **addQueryParameters**(`...queryParams`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Define query parameters if you expose the function as http endpoint.
 Query parameters are add to openApi definition.
@@ -530,11 +534,11 @@ Query parameters are add to input parameters.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `...queryParams` | [`QueryParameter`](../modules/purista_core.md#queryparameter)<`FunctionParamsType`\>[] | Add one or more query parameter definitions |
+| `...queryParams` | [`QueryParameter`](../modules/purista_core.md#queryparameter)\<`FunctionParamsType`\>[] | Add one or more query parameter definitions |
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -561,7 +565,7 @@ ___
 
 ### adviceAutoacknowledgeMessages
 
-▸ **adviceAutoacknowledgeMessages**(`acknowledge?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **adviceAutoacknowledgeMessages**(`acknowledge?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Instruct the event bridge message broker to autoacknowledge commands as soon as they arrive.
 This means, a message will not be resent, if the command execution fails unexpected.
@@ -579,7 +583,7 @@ If set to false, the command message will be resent from message broker to event
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinition
 
@@ -591,7 +595,7 @@ ___
 
 ### disableHttpSecurity
 
-▸ **disableHttpSecurity**(`disabled?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **disableHttpSecurity**(`disabled?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 enable or disable security for this endpoint
 
@@ -603,7 +607,7 @@ enable or disable security for this endpoint
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -615,7 +619,7 @@ ___
 
 ### enableHttpSecurity
 
-▸ **enableHttpSecurity**(`enabled?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **enableHttpSecurity**(`enabled?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 enable or disable security for this endpoint
 
@@ -627,7 +631,7 @@ enable or disable security for this endpoint
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -639,7 +643,7 @@ ___
 
 ### exposeAsHttpEndpoint
 
-▸ **exposeAsHttpEndpoint**(`method`, `path`, `contentTypeRequest?`, `contentEncodingRequest?`, `contentTypeResponse?`, `contentEncodingResponse?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **exposeAsHttpEndpoint**(`method`, `path`, `contentTypeRequest?`, `contentEncodingRequest?`, `contentTypeResponse?`, `contentEncodingResponse?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Mark the function to be exposed as http endpoint.
 
@@ -660,7 +664,7 @@ For exposing a url like: `/api/V1/user/login` simply provide `user/login`as path
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -672,17 +676,17 @@ ___
 
 ### extendWithHttpMetadata
 
-▸ `Private` **extendWithHttpMetadata**(`definition`): [`Complete`](../modules/purista_core.md#complete)<[`CommandDefinition`](../modules/purista_core.md#commanddefinition)<`ServiceClassType`, [`CommandDefinitionMetadataBase`](../modules/purista_core.md#commanddefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>\>
+▸ **extendWithHttpMetadata**(`definition`): [`Complete`](../modules/purista_core.md#complete)\<[`CommandDefinition`](../modules/purista_core.md#commanddefinition)\<`ServiceClassType`, [`CommandDefinitionMetadataBase`](../modules/purista_core.md#commanddefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `definition` | [`Complete`](../modules/purista_core.md#complete)<[`CommandDefinition`](../modules/purista_core.md#commanddefinition)<`ServiceClassType`, [`CommandDefinitionMetadataBase`](../modules/purista_core.md#commanddefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>\> |
+| `definition` | [`Complete`](../modules/purista_core.md#complete)\<[`CommandDefinition`](../modules/purista_core.md#commanddefinition)\<`ServiceClassType`, [`CommandDefinitionMetadataBase`](../modules/purista_core.md#commanddefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>\> |
 
 #### Returns
 
-[`Complete`](../modules/purista_core.md#complete)<[`CommandDefinition`](../modules/purista_core.md#commanddefinition)<`ServiceClassType`, [`CommandDefinitionMetadataBase`](../modules/purista_core.md#commanddefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>\>
+[`Complete`](../modules/purista_core.md#complete)\<[`CommandDefinition`](../modules/purista_core.md#commanddefinition)\<`ServiceClassType`, [`CommandDefinitionMetadataBase`](../modules/purista_core.md#commanddefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>\>
 
 #### Defined in
 
@@ -692,13 +696,13 @@ ___
 
 ### getCommandFunction
 
-▸ **getCommandFunction**(): [`CommandFunction`](../modules/purista_core.md#commandfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **getCommandFunction**(): [`CommandFunction`](../modules/purista_core.md#commandfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Get the function implementation
 
 #### Returns
 
-[`CommandFunction`](../modules/purista_core.md#commandfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandFunction`](../modules/purista_core.md#commandfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 the function
 
@@ -710,13 +714,13 @@ ___
 
 ### getDefinition
 
-▸ **getDefinition**(): [`CommandDefinition`](../modules/purista_core.md#commanddefinition)<`ServiceClassType`, [`CommandDefinitionMetadataBase`](../modules/purista_core.md#commanddefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **getDefinition**(): [`CommandDefinition`](../modules/purista_core.md#commanddefinition)\<`ServiceClassType`, [`CommandDefinitionMetadataBase`](../modules/purista_core.md#commanddefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Creates and returns the CommandDefinition used as input for the service.
 
 #### Returns
 
-[`CommandDefinition`](../modules/purista_core.md#commanddefinition)<`ServiceClassType`, [`CommandDefinitionMetadataBase`](../modules/purista_core.md#commanddefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinition`](../modules/purista_core.md#commanddefinition)\<`ServiceClassType`, [`CommandDefinitionMetadataBase`](../modules/purista_core.md#commanddefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinition
 
@@ -728,13 +732,13 @@ ___
 
 ### getTransformInputFunction
 
-▸ **getTransformInputFunction**(): `undefined` \| [`CommandTransformInputHook`](../modules/purista_core.md#commandtransforminputhook)<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `MessagePayloadType`, `MessageParamsType`\>
+▸ **getTransformInputFunction**(): `undefined` \| [`CommandTransformInputHook`](../modules/purista_core.md#commandtransforminputhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `MessagePayloadType`, `MessageParamsType`\>
 
 Return the transform input function
 
 #### Returns
 
-`undefined` \| [`CommandTransformInputHook`](../modules/purista_core.md#commandtransforminputhook)<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `MessagePayloadType`, `MessageParamsType`\>
+`undefined` \| [`CommandTransformInputHook`](../modules/purista_core.md#commandtransforminputhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `MessagePayloadType`, `MessageParamsType`\>
 
 the input transform function if defined
 
@@ -746,13 +750,13 @@ ___
 
 ### getTransformOutputFunction
 
-▸ **getTransformOutputFunction**(): `undefined` \| [`CommandTransformOutputHook`](../modules/purista_core.md#commandtransformoutputhook)<`ServiceClassType`, `MessagePayloadType`, `FunctionResultType`, `FunctionParamsType`, `MessageResultType`\>
+▸ **getTransformOutputFunction**(): `undefined` \| [`CommandTransformOutputHook`](../modules/purista_core.md#commandtransformoutputhook)\<`ServiceClassType`, `MessagePayloadType`, `FunctionResultType`, `FunctionParamsType`, `MessageResultType`\>
 
 Return the transform output function
 
 #### Returns
 
-`undefined` \| [`CommandTransformOutputHook`](../modules/purista_core.md#commandtransformoutputhook)<`ServiceClassType`, `MessagePayloadType`, `FunctionResultType`, `FunctionParamsType`, `MessageResultType`\>
+`undefined` \| [`CommandTransformOutputHook`](../modules/purista_core.md#commandtransformoutputhook)\<`ServiceClassType`, `MessagePayloadType`, `FunctionResultType`, `FunctionParamsType`, `MessageResultType`\>
 
 the transform output function if defined
 
@@ -764,13 +768,13 @@ ___
 
 ### markAsDeprecated
 
-▸ **markAsDeprecated**(): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **markAsDeprecated**(): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Mark this endpoint/command as deprecated
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -782,7 +786,7 @@ ___
 
 ### setAfterGuardHooks
 
-▸ **setAfterGuardHooks**(`afterGuards`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setAfterGuardHooks**(`afterGuards`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Set one or more after guard hook(s).
 If there are multiple after guard hooks, they are executed in parallel
@@ -791,11 +795,11 @@ If there are multiple after guard hooks, they are executed in parallel
 
 | Name | Type |
 | :------ | :------ |
-| `afterGuards` | `Record`<`string`, [`CommandAfterGuardHook`](../modules/purista_core.md#commandafterguardhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
+| `afterGuards` | `Record`\<`string`, [`CommandAfterGuardHook`](../modules/purista_core.md#commandafterguardhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -807,7 +811,7 @@ ___
 
 ### setBeforeGuardHooks
 
-▸ **setBeforeGuardHooks**(`beforeGuards`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setBeforeGuardHooks**(`beforeGuards`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Set one or more before guard hook(s).
 If there are multiple before guard hooks, they are executed in parallel
@@ -816,11 +820,11 @@ If there are multiple before guard hooks, they are executed in parallel
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `beforeGuards` | `Record`<`string`, [`CommandBeforeGuardHook`](../modules/purista_core.md#commandbeforeguardhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>\> | Object of key = name of guard, value = function |
+| `beforeGuards` | `Record`\<`string`, [`CommandBeforeGuardHook`](../modules/purista_core.md#commandbeforeguardhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>\> | Object of key = name of guard, value = function |
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -832,7 +836,7 @@ ___
 
 ### setCommandFunction
 
-▸ **setCommandFunction**(`fn`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setCommandFunction**(`fn`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Required: Set the function implementation.
 The types should be automatically set as soon as schemas previously defined.
@@ -843,11 +847,11 @@ Anonymous functions do not have access to the `this` scope.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `fn` | [`CommandFunction`](../modules/purista_core.md#commandfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\> | the function implementation |
+| `fn` | [`CommandFunction`](../modules/purista_core.md#commandfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\> | the function implementation |
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -868,7 +872,7 @@ ___
 
 ### setOpenApiOperationId
 
-▸ **setOpenApiOperationId**(`operationId`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setOpenApiOperationId**(`operationId`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Set the operationId for openApi documentation
 
@@ -880,7 +884,7 @@ Set the operationId for openApi documentation
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -892,7 +896,7 @@ ___
 
 ### setOpenApiSummary
 
-▸ **setOpenApiSummary**(`summary`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setOpenApiSummary**(`summary`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Set the function summary text used for example in openApi documentation
 
@@ -904,7 +908,7 @@ Set the function summary text used for example in openApi documentation
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -922,7 +926,7 @@ ___
 
 ### setSuccessEventName
 
-▸ **setSuccessEventName**(`eventName`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setSuccessEventName**(`eventName`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Parameters
 
@@ -932,7 +936,7 @@ ___
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Defined in
 
@@ -942,7 +946,7 @@ ___
 
 ### setTransformInput
 
-▸ **setTransformInput**<`PayloadIn`, `ParamsIn`, `PayloadOut`, `ParamsOut`, `PayloadD`, `ParamsD`\>(`transformInputSchema`, `transformParameterSchema`, `transformFunction`, `inputContentType?`, `inputContentEncoding?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `PayloadIn`, `ParamsIn`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setTransformInput**\<`PayloadIn`, `ParamsIn`, `PayloadOut`, `ParamsOut`, `PayloadD`, `ParamsD`\>(`transformInputSchema`, `transformParameterSchema`, `transformFunction`, `inputContentType?`, `inputContentEncoding?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `PayloadIn`, `ParamsIn`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Set a transform input hook which will encode or transform the input payload and parameters.
 Will be executed as first step before input validation, before guard and the function itself.
@@ -963,15 +967,15 @@ This will change the type of input message payload and input message parameter.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `transformInputSchema` | `ZodType`<`PayloadOut`, `PayloadD`, `PayloadIn`\> | Input payload validation schema |
-| `transformParameterSchema` | `ZodType`<`ParamsOut`, `ParamsD`, `ParamsIn`\> | Input parameter validation schema |
-| `transformFunction` | [`CommandTransformInputHook`](../modules/purista_core.md#commandtransforminputhook)<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `PayloadIn`, `ParamsIn`\> | Transform input function |
+| `transformInputSchema` | `ZodType`\<`PayloadOut`, `PayloadD`, `PayloadIn`\> | Input payload validation schema |
+| `transformParameterSchema` | `ZodType`\<`ParamsOut`, `ParamsD`, `ParamsIn`\> | Input parameter validation schema |
+| `transformFunction` | [`CommandTransformInputHook`](../modules/purista_core.md#commandtransforminputhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `PayloadIn`, `ParamsIn`\> | Transform input function |
 | `inputContentType?` | `string` | optional the content type of payload |
 | `inputContentEncoding?` | `string` | optional the content encoding |
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `PayloadIn`, `ParamsIn`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `PayloadIn`, `ParamsIn`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 
@@ -983,7 +987,7 @@ ___
 
 ### setTransformOutput
 
-▸ **setTransformOutput**<`PayloadOut`, `PayloadD`, `PayloadIn`\>(`transformOutputSchema`, `transformFunction`, `outputContentType?`, `outputContentEncoding?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `PayloadOut`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **setTransformOutput**\<`PayloadOut`, `PayloadD`, `PayloadIn`\>(`transformOutputSchema`, `transformFunction`, `outputContentType?`, `outputContentEncoding?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `PayloadOut`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 Set a transform output hook which will encode or transform the response payload.
 Will be executed at very last step after function execution, output validation and after guard hooks.
@@ -1001,14 +1005,14 @@ This will change the type of output message payload.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `transformOutputSchema` | `ZodType`<`PayloadOut`, `PayloadD`, `PayloadIn`\> | The output validation schema |
-| `transformFunction` | [`CommandTransformOutputHook`](../modules/purista_core.md#commandtransformoutputhook)<`ServiceClassType`, `MessagePayloadType`, `FunctionResultType`, `FunctionParamsType`, `PayloadIn`\> | Transform output function |
+| `transformOutputSchema` | `ZodType`\<`PayloadOut`, `PayloadD`, `PayloadIn`\> | The output validation schema |
+| `transformFunction` | [`CommandTransformOutputHook`](../modules/purista_core.md#commandtransformoutputhook)\<`ServiceClassType`, `MessagePayloadType`, `FunctionResultType`, `FunctionParamsType`, `PayloadIn`\> | Transform output function |
 | `outputContentType?` | `string` | optional the content type of payload |
 | `outputContentEncoding?` | `string` | optional the content encoding |
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `PayloadOut`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `PayloadOut`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 CommandDefinitionBuilder
 

@@ -36,7 +36,7 @@
 | `enableRestApiExpose?` | `boolean` | expose commands as regular REST endpoints when they are configured as endpoints |
 | `name?` | `string` | name of the bridge |
 | `pathPrefix?` | `string` | the prefix to be used for exposing commands as endpoints expecting a event bus message |
-| `serve` | (`options`: { `fetch`: (`request`: `Request`) => `Promise`<`unknown`\> \| `unknown` ; `hostname?`: `string` ; `port?`: `number`  }) => `Server` | The serve function is depending on the runtime. - Bun: `Bun.serve` - Node.js: `serve` function from additional package `@hono/hono-node-server` - Deno: `serve` function from package `https://deno.land/std/http/server.ts` **`See`** https://hono.dev |
+| `serve` | (`options`: \{ `fetch`: (`request`: `Request`) => `Promise`\<`unknown`\> \| `unknown` ; `hostname?`: `string` ; `port?`: `number`  }) => `Server` | The serve function is depending on the runtime. - Bun: `Bun.serve` - Node.js: `serve` function from additional package `@hono/hono-node-server` - Deno: `serve` function from package `https://deno.land/std/http/server.ts` **`See`** https://hono.dev |
 | `serverHost?` | `string` | Host of the server. |
 | `serverPort?` | `number` | Port of the server. |
 | `subscriptionPayloadAsCloudEvent?` | `boolean` | subscription invocations are wrapped in CloudEvent **`Link`** https://github.com/cloudevents/spec/tree/v1.0 |
@@ -49,17 +49,17 @@ ___
 
 ### RouterFunction
 
-Ƭ **RouterFunction**<`T`\>: (`this`: `T`, `c`: `Context`) => `Promise`<`Response`\>
+Ƭ **RouterFunction**\<`T`\>: (`this`: `T`, `c`: `Context`) => `Promise`\<`Response`\>
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends [`HttpEventBridge`](../classes/purista_base_http_bridge.HttpEventBridge.md)<[`HttpEventBridgeConfig`](purista_base_http_bridge.md#httpeventbridgeconfig)\> = [`HttpEventBridge`](../classes/purista_base_http_bridge.HttpEventBridge.md)<[`HttpEventBridgeConfig`](purista_base_http_bridge.md#httpeventbridgeconfig)\> |
+| `T` | extends [`HttpEventBridge`](../classes/purista_base_http_bridge.HttpEventBridge.md)\<[`HttpEventBridgeConfig`](purista_base_http_bridge.md#httpeventbridgeconfig)\> = [`HttpEventBridge`](../classes/purista_base_http_bridge.HttpEventBridge.md)\<[`HttpEventBridgeConfig`](purista_base_http_bridge.md#httpeventbridgeconfig)\> |
 
 #### Type declaration
 
-▸ (`this`, `c`): `Promise`<`Response`\>
+▸ (`this`, `c`): `Promise`\<`Response`\>
 
 ##### Parameters
 
@@ -70,7 +70,7 @@ ___
 
 ##### Returns
 
-`Promise`<`Response`\>
+`Promise`\<`Response`\>
 
 #### Defined in
 

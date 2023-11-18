@@ -10,7 +10,7 @@ Dapr currently provides only the possibility to fetch a secret. Creating a new s
 
 ## Hierarchy
 
-- `SecretStoreBaseClass`<[`DaprSecretStoreConfig`](../modules/purista_dapr_sdk.md#daprsecretstoreconfig)\>
+- `SecretStoreBaseClass`\<[`DaprSecretStoreConfig`](../modules/purista_dapr_sdk.md#daprsecretstoreconfig)\>
 
   ↳ **`DaprSecretStore`**
 
@@ -22,6 +22,7 @@ Dapr currently provides only the possibility to fetch a secret. Creating a new s
 
 ### Properties
 
+- [cache](purista_dapr_sdk.DaprSecretStore.md#cache)
 - [client](purista_dapr_sdk.DaprSecretStore.md#client)
 - [config](purista_dapr_sdk.DaprSecretStore.md#config)
 - [logger](purista_dapr_sdk.DaprSecretStore.md#logger)
@@ -38,14 +39,16 @@ Dapr currently provides only the possibility to fetch a secret. Creating a new s
 
 ### constructor
 
-• **new DaprSecretStore**(`config?`)
+• **new DaprSecretStore**(`config?`): [`DaprSecretStore`](purista_dapr_sdk.DaprSecretStore.md)
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `config?` | `Object` | - |
+| `config.cacheTtl?` | `number` | Cache time to live in ms |
 | `config.clientConfig?` | [`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig) | The Dapr client config to interact with Dapr sidecar |
+| `config.enableCache?` | `boolean` | Enable cache |
 | `config.enableGet?` | `boolean` | Enable generally get method |
 | `config.enableRemove?` | `boolean` | Enable generally remove method |
 | `config.enableSet?` | `boolean` | Enable generally set method |
@@ -55,9 +58,13 @@ Dapr currently provides only the possibility to fetch a secret. Creating a new s
 | `config.metadata.namespace?` | `string` | In case of deploying into namespace other than default, the namespace (e.g. production) must be set |
 | `config.secretStoreName?` | `string` | The name of the secret store |
 
+#### Returns
+
+[`DaprSecretStore`](purista_dapr_sdk.DaprSecretStore.md)
+
 #### Overrides
 
-SecretStoreBaseClass&lt;DaprSecretStoreConfig\&gt;.constructor
+SecretStoreBaseClass\&lt;DaprSecretStoreConfig\&gt;.constructor
 
 #### Defined in
 
@@ -65,9 +72,23 @@ SecretStoreBaseClass&lt;DaprSecretStoreConfig\&gt;.constructor
 
 ## Properties
 
+### cache
+
+• **cache**: `SecretStoreCacheMap`
+
+#### Inherited from
+
+SecretStoreBaseClass.cache
+
+#### Defined in
+
+core/lib/types/core/SecretStore/SecretStoreBaseClass.impl.d.ts:12
+
+___
+
 ### client
 
-• `Private` **client**: `HttpClient`<[`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig)\>
+• `Private` **client**: `HttpClient`\<[`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig)\>
 
 #### Defined in
 
@@ -83,13 +104,15 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
+| `cacheTtl?` | `number` | Cache time to live in ms |
 | `clientConfig?` | [`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig) | The Dapr client config to interact with Dapr sidecar |
+| `enableCache?` | `boolean` | Enable cache |
 | `enableGet?` | `boolean` | Enable generally get method |
 | `enableRemove?` | `boolean` | Enable generally remove method |
 | `enableSet?` | `boolean` | Enable generally set method |
 | `logLevel?` | `LogLevelName` | A log level for new logger if logger is not set |
 | `logger?` | `Logger` | A logger instance |
-| `metadata?` | { `namespace?`: `string`  } | Dapr secret store metadata |
+| `metadata?` | \{ `namespace?`: `string`  } | Dapr secret store metadata |
 | `metadata.namespace?` | `string` | In case of deploying into namespace other than default, the namespace (e.g. production) must be set |
 | `secretStoreName?` | `string` | The name of the secret store |
 
@@ -133,11 +156,11 @@ core/lib/types/core/SecretStore/SecretStoreBaseClass.impl.d.ts:11
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Inherited from
 
@@ -145,13 +168,13 @@ SecretStoreBaseClass.destroy
 
 #### Defined in
 
-core/lib/types/core/SecretStore/SecretStoreBaseClass.impl.d.ts:16
+core/lib/types/core/SecretStore/SecretStoreBaseClass.impl.d.ts:17
 
 ___
 
 ### getSecret
 
-▸ **getSecret**(`...secretNames`): `Promise`<`Record`<`string`, `string`\>\>
+▸ **getSecret**(`...secretNames`): `Promise`\<`Record`\<`string`, `string`\>\>
 
 #### Parameters
 
@@ -161,7 +184,7 @@ ___
 
 #### Returns
 
-`Promise`<`Record`<`string`, `string`\>\>
+`Promise`\<`Record`\<`string`, `string`\>\>
 
 #### Overrides
 
@@ -175,7 +198,7 @@ ___
 
 ### removeSecret
 
-▸ **removeSecret**(`_secretName`): `Promise`<`void`\>
+▸ **removeSecret**(`_secretName`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -185,7 +208,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 
@@ -199,7 +222,7 @@ ___
 
 ### setSecret
 
-▸ **setSecret**(`_secretName`): `Promise`<`void`\>
+▸ **setSecret**(`_secretName`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -209,7 +232,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 

@@ -8,7 +8,7 @@ The internal http client to connect to the Infisical server.
 
 ## Hierarchy
 
-- `HttpClient`<[`HttpClientConfigCustom`](../modules/purista_infisical_secret_store.md#httpclientconfigcustom)\>
+- `HttpClient`\<[`HttpClientConfigCustom`](../modules/purista_infisical_secret_store.md#httpclientconfigcustom)\>
 
   ↳ **`InfisicalClient`**
 
@@ -51,7 +51,7 @@ The internal http client to connect to the Infisical server.
 
 ### constructor
 
-• **new InfisicalClient**(`conf`)
+• **new InfisicalClient**(`conf`): [`InfisicalClient`](purista_infisical_secret_store.InfisicalClient.md)
 
 #### Parameters
 
@@ -63,7 +63,7 @@ The internal http client to connect to the Infisical server.
 | `conf.basicAuth.password` | `string` | Basic-Auth password |
 | `conf.basicAuth.username` | `string` | Basic-Auth username |
 | `conf.bearerToken` | `string` | Auth-Bearer token |
-| `conf.defaultHeaders?` | `Record`<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
+| `conf.defaultHeaders?` | `Record`\<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
 | `conf.defaultTimeout?` | `number` | set global timeout for requests in ms **`Default`** ```ts 30000 ``` |
 | `conf.enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own ressource. |
 | `conf.isKeepAlive?` | `boolean` | If set to false, the HTTP client will not reuse the same connection for multiple requests. Default is true. |
@@ -72,9 +72,13 @@ The internal http client to connect to the Infisical server.
 | `conf.name?` | `string` | Name of the client |
 | `conf.spanProcessor?` | `SpanProcessor` | Opentelemetry span processor |
 
+#### Returns
+
+[`InfisicalClient`](purista_infisical_secret_store.InfisicalClient.md)
+
 #### Overrides
 
-HttpClient&lt;HttpClientConfigCustom\&gt;.constructor
+HttpClient\&lt;HttpClientConfigCustom\&gt;.constructor
 
 #### Defined in
 
@@ -105,11 +109,11 @@ ___
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `baseUrl` | `string` | the base url to be used **`Example`** ```typescript const config = { baseUrl: 'http://localhost/api` } // each request will be below http://localhost/api // get('v1/orders') will call http://localhost/api/v1/orders ``` |
-| `basicAuth?` | { `password`: `string` ; `username`: `string`  } | Basic-Auth information |
+| `basicAuth?` | \{ `password`: `string` ; `username`: `string`  } | Basic-Auth information |
 | `basicAuth.password` | `string` | Basic-Auth password |
 | `basicAuth.username` | `string` | Basic-Auth username |
 | `bearerToken?` | `string` | Auth-Bearer token |
-| `defaultHeaders?` | `Record`<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
+| `defaultHeaders?` | `Record`\<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
 | `defaultTimeout?` | `number` | set global timeout for requests in ms **`Default`** ```ts 30000 ``` |
 | `enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own ressource. |
 | `isKeepAlive?` | `boolean` | If set to false, the HTTP client will not reuse the same connection for multiple requests. Default is true. |
@@ -230,7 +234,7 @@ core/lib/types/HttpClient/HttpClient.impl.d.ts:24
 
 ### delete
 
-▸ **delete**<`T`\>(`path`, `options?`, `payload?`): `Promise`<`T`\>
+▸ **delete**\<`T`\>(`path`, `options?`, `payload?`): `Promise`\<`T`\>
 
 DELETE request
 
@@ -250,7 +254,7 @@ DELETE request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Inherited from
 
@@ -264,7 +268,7 @@ ___
 
 ### encryptSecret
 
-▸ `Private` **encryptSecret**(`secretKey`, `secretValue`, `secretComment?`): `Object`
+▸ **encryptSecret**(`secretKey`, `secretValue`, `secretComment?`): `Object`
 
 Encrypt the given key, value and optional comment
 
@@ -300,7 +304,7 @@ ___
 
 ### get
 
-▸ **get**<`T`\>(`path`, `options?`): `Promise`<`T`\>
+▸ **get**\<`T`\>(`path`, `options?`): `Promise`\<`T`\>
 
 GET request
 
@@ -319,7 +323,7 @@ GET request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Inherited from
 
@@ -333,7 +337,7 @@ ___
 
 ### getSecret
 
-▸ **getSecret**(`name`): `Promise`<`undefined` \| `string`\>
+▸ **getSecret**(`name`): `Promise`\<`undefined` \| `string`\>
 
 Get a single secret
 
@@ -345,7 +349,7 @@ Get a single secret
 
 #### Returns
 
-`Promise`<`undefined` \| `string`\>
+`Promise`\<`undefined` \| `string`\>
 
 #### Defined in
 
@@ -355,13 +359,13 @@ ___
 
 ### getServiceTokenData
 
-▸ **getServiceTokenData**(): `Promise`<[`TokenData`](../modules/purista_infisical_secret_store.md#tokendata)\>
+▸ **getServiceTokenData**(): `Promise`\<[`TokenData`](../modules/purista_infisical_secret_store.md#tokendata)\>
 
 Fetches the token data from the server for given access token
 
 #### Returns
 
-`Promise`<[`TokenData`](../modules/purista_infisical_secret_store.md#tokendata)\>
+`Promise`\<[`TokenData`](../modules/purista_infisical_secret_store.md#tokendata)\>
 
 #### Defined in
 
@@ -393,7 +397,7 @@ ___
 
 ### patch
 
-▸ **patch**<`T`\>(`path`, `payload`, `options?`): `Promise`<`T`\>
+▸ **patch**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
 PATCH request
 
@@ -413,7 +417,7 @@ PATCH request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Inherited from
 
@@ -427,7 +431,7 @@ ___
 
 ### post
 
-▸ **post**<`T`\>(`path`, `payload`, `options?`): `Promise`<`T`\>
+▸ **post**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
 POST request
 
@@ -447,7 +451,7 @@ POST request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Inherited from
 
@@ -461,7 +465,7 @@ ___
 
 ### put
 
-▸ **put**<`T`\>(`path`, `payload`, `options?`): `Promise`<`T`\>
+▸ **put**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
 PUT request
 
@@ -481,7 +485,7 @@ PUT request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Inherited from
 
@@ -495,7 +499,7 @@ ___
 
 ### removeSecret
 
-▸ **removeSecret**(`name`): `Promise`<`void`\>
+▸ **removeSecret**(`name`): `Promise`\<`void`\>
 
 Remove a secret
 
@@ -507,7 +511,7 @@ Remove a secret
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -543,7 +547,7 @@ ___
 
 ### setSecret
 
-▸ **setSecret**(`name`, `value`): `Promise`<`void`\>
+▸ **setSecret**(`name`, `value`): `Promise`\<`void`\>
 
 Set a secret.
 It will first try to update and if the secret does not exist, it will create a new one
@@ -557,7 +561,7 @@ It will first try to update and if the secret does not exist, it will create a n
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -567,7 +571,7 @@ ___
 
 ### startActiveSpan
 
-▸ **startActiveSpan**<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`<`F`\>
+▸ **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
 Start a child span for opentelemetry tracking
 
@@ -584,11 +588,11 @@ Start a child span for opentelemetry tracking
 | `name` | `string` | name of span |
 | `opts` | `SpanOptions` | span options |
 | `context` | `undefined` \| `Context` | optional context |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function to be executed within the span |
+| `fn` | (`span`: `Span`) => `Promise`\<`F`\> | function to be executed within the span |
 
 #### Returns
 
-`Promise`<`F`\>
+`Promise`\<`F`\>
 
 return value of fn
 

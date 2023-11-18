@@ -30,13 +30,17 @@
 
 ### constructor
 
-• **new Logger**()
+• **new Logger**(): [`Logger`](purista_core.Logger.md)
+
+#### Returns
+
+[`Logger`](purista_core.Logger.md)
 
 ## Methods
 
 ### debug
 
-▸ `Abstract` **debug**(`...args`): `void`
+▸ **debug**(`...args`): `void`
 
 #### Parameters
 
@@ -56,7 +60,7 @@ ___
 
 ### error
 
-▸ `Abstract` **error**(`...args`): `void`
+▸ **error**(`...args`): `void`
 
 #### Parameters
 
@@ -76,7 +80,7 @@ ___
 
 ### fatal
 
-▸ `Abstract` **fatal**(`...args`): `void`
+▸ **fatal**(`...args`): `void`
 
 #### Parameters
 
@@ -96,7 +100,7 @@ ___
 
 ### getChildLogger
 
-▸ `Abstract` **getChildLogger**(`options`): [`Logger`](purista_core.Logger.md)
+▸ **getChildLogger**(`options`): [`Logger`](purista_core.Logger.md)
 
 #### Parameters
 
@@ -116,7 +120,7 @@ ___
 
 ### info
 
-▸ `Abstract` **info**(`...args`): `void`
+▸ **info**(`...args`): `void`
 
 #### Parameters
 
@@ -136,7 +140,7 @@ ___
 
 ### trace
 
-▸ `Abstract` **trace**(`...args`): `void`
+▸ **trace**(`...args`): `void`
 
 #### Parameters
 
@@ -156,7 +160,7 @@ ___
 
 ### warn
 
-▸ `Abstract` **warn**(`...args`): `void`
+▸ **warn**(`...args`): `void`
 
 #### Parameters
 

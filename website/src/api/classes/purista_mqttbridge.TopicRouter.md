@@ -26,13 +26,17 @@
 
 ### constructor
 
-• **new TopicRouter**(`logger?`)
+• **new TopicRouter**(`logger?`): [`TopicRouter`](purista_mqttbridge.TopicRouter.md)
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `logger?` | `Logger` |
+
+#### Returns
+
+[`TopicRouter`](purista_mqttbridge.TopicRouter.md)
 
 #### Defined in
 
@@ -62,7 +66,7 @@ ___
 
 ### routes
 
-• **routes**: `Map`<`number`, { `fn`: [`IncomingMessageFunction`](../modules/purista_mqttbridge.md#incomingmessagefunction) ; `topic`: `string`  }\>
+• **routes**: `Map`\<`number`, \{ `fn`: [`IncomingMessageFunction`](../modules/purista_mqttbridge.md#incomingmessagefunction) ; `topic`: `string`  }\>
 
 #### Defined in
 

@@ -2,13 +2,23 @@
 
 # Module: @purista/infisical-secret-store
 
-A secret store for using [Infisical](https://infisical.com/) as storage.
+A secret store for using [Infisical](https://infisical.com/) as storage.  
+
+For performance reasons, and to reduce costs, the secret values are cached in memory after first fetch.
+
+You can disable the whole caching via config by setting enableCache to false.  
+If the cache is enabled, you can set the ttl for cached secret values via config cacheTtl (in ms).  
+
+This will return the cached secret if available and if ttl is not exceeded.  
+If a secret value exceeds the ttl, it does not automatically get removed from cache.  
+It will be removed/overwritten on next get request.
 
 **`Example`**
 
 ```typescript
 const config = {
-  url: 'redis://alice:foobared@awesome.redis.server:6380'
+  bearerToken: 'YOUR_INFISICAL_TOKEN',
+  baseUrl: 'https://app.infisical.com'
 }
 
 const store = new InfisicalSecretStore({ config })
@@ -47,7 +57,7 @@ console.log(value) // outputs: undefined
 
 ### ClientConfig
 
-Ƭ **ClientConfig**: `Prettify`<`Required`<`Pick`<`HttpClientConfig`<[`HttpClientConfigCustom`](purista_infisical_secret_store.md#httpclientconfigcustom)\>, ``"bearerToken"``\>\> & `Omit`<`HttpClientConfig`<[`HttpClientConfigCustom`](purista_infisical_secret_store.md#httpclientconfigcustom)\>, ``"bearerToken"``\>\>
+Ƭ **ClientConfig**: `Prettify`\<`Required`\<`Pick`\<`HttpClientConfig`\<[`HttpClientConfigCustom`](purista_infisical_secret_store.md#httpclientconfigcustom)\>, ``"bearerToken"``\>\> & `Omit`\<`HttpClientConfig`\<[`HttpClientConfigCustom`](purista_infisical_secret_store.md#httpclientconfigcustom)\>, ``"bearerToken"``\>\>
 
 #### Defined in
 
@@ -181,7 +191,7 @@ ___
 | `serviceAccount` | `string` |
 | `tag` | `string` |
 | `updatedAt` | `string` |
-| `user` | { `_id`: `string` ; `authMethods`: `string`[] ; `email`: `string` ; `firstName`: `string` ; `lastName`: `string`  } |
+| `user` | \{ `_id`: `string` ; `authMethods`: `string`[] ; `email`: `string` ; `firstName`: `string` ; `lastName`: `string`  } |
 | `user._id` | `string` |
 | `user.authMethods` | `string`[] |
 | `user.email` | `string` |

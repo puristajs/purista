@@ -1,6 +1,6 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / HttpClient
 
-# Class: HttpClient<CustomConfig\>
+# Class: HttpClient\<CustomConfig\>
 
 [@purista/core](../modules/purista_core.md).HttpClient
 
@@ -21,7 +21,7 @@ const result = await client.get('v1/orders')
 
 | Name | Type |
 | :------ | :------ |
-| `CustomConfig` | extends `Record`<`string`, `unknown`\> = {} |
+| `CustomConfig` | extends `Record`\<`string`, `unknown`\> = {} |
 
 ## Implements
 
@@ -61,19 +61,23 @@ const result = await client.get('v1/orders')
 
 ### constructor
 
-• **new HttpClient**<`CustomConfig`\>(`config`)
+• **new HttpClient**\<`CustomConfig`\>(`config`): [`HttpClient`](purista_core.HttpClient.md)\<`CustomConfig`\>
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `CustomConfig` | extends `Record`<`string`, `unknown`\> = {} |
+| `CustomConfig` | extends `Record`\<`string`, `unknown`\> = {} |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `config` | { [K in string \| number \| symbol]: (Object & CustomConfig)[K] } |
+| `config` | \{ [K in string \| number \| symbol]: (Object & CustomConfig)[K] } |
+
+#### Returns
+
+[`HttpClient`](purista_core.HttpClient.md)\<`CustomConfig`\>
 
 #### Defined in
 
@@ -103,7 +107,7 @@ ___
 
 ### config
 
-• **config**: { [K in string \| number \| symbol]: (Object & CustomConfig)[K] }
+• **config**: \{ [K in string \| number \| symbol]: (Object & CustomConfig)[K] }
 
 #### Defined in
 
@@ -163,7 +167,7 @@ ___
 
 ### delete
 
-▸ **delete**<`T`\>(`path`, `options?`, `payload?`): `Promise`<`T`\>
+▸ **delete**\<`T`\>(`path`, `options?`, `payload?`): `Promise`\<`T`\>
 
 DELETE request
 
@@ -183,7 +187,7 @@ DELETE request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Implementation of
 
@@ -197,7 +201,7 @@ ___
 
 ### execute
 
-▸ `Private` **execute**(`method`, `path`, `options?`, `payload?`): `Promise`<`any`\>
+▸ **execute**(`method`, `path`, `options?`, `payload?`): `Promise`\<`any`\>
 
 Helper method
 
@@ -212,7 +216,7 @@ Helper method
 
 #### Returns
 
-`Promise`<`any`\>
+`Promise`\<`any`\>
 
 **`Throws`**
 
@@ -226,7 +230,7 @@ ___
 
 ### get
 
-▸ **get**<`T`\>(`path`, `options?`): `Promise`<`T`\>
+▸ **get**\<`T`\>(`path`, `options?`): `Promise`\<`T`\>
 
 GET request
 
@@ -245,7 +249,7 @@ GET request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Implementation of
 
@@ -277,7 +281,7 @@ ___
 
 ### getUrlAndHeader
 
-▸ `Private` **getUrlAndHeader**(`path`, `options?`): `Object`
+▸ **getUrlAndHeader**(`path`, `options?`): `Object`
 
 #### Parameters
 
@@ -292,7 +296,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `headers` | `Record`<`string`, `string`\> |
+| `headers` | `Record`\<`string`, `string`\> |
 | `url` | `URL` |
 
 #### Defined in
@@ -303,7 +307,7 @@ ___
 
 ### patch
 
-▸ **patch**<`T`\>(`path`, `payload`, `options?`): `Promise`<`T`\>
+▸ **patch**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
 PATCH request
 
@@ -323,7 +327,7 @@ PATCH request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Implementation of
 
@@ -337,7 +341,7 @@ ___
 
 ### post
 
-▸ **post**<`T`\>(`path`, `payload`, `options?`): `Promise`<`T`\>
+▸ **post**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
 POST request
 
@@ -357,7 +361,7 @@ POST request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Implementation of
 
@@ -371,7 +375,7 @@ ___
 
 ### put
 
-▸ **put**<`T`\>(`path`, `payload`, `options?`): `Promise`<`T`\>
+▸ **put**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
 PUT request
 
@@ -391,7 +395,7 @@ PUT request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Implementation of
 
@@ -431,7 +435,7 @@ ___
 
 ### startActiveSpan
 
-▸ **startActiveSpan**<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`<`F`\>
+▸ **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
 Start a child span for opentelemetry tracking
 
@@ -448,11 +452,11 @@ Start a child span for opentelemetry tracking
 | `name` | `string` | name of span |
 | `opts` | `SpanOptions` | span options |
 | `context` | `undefined` \| `Context` | optional context |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function to be executed within the span |
+| `fn` | (`span`: `Span`) => `Promise`\<`F`\> | function to be executed within the span |
 
 #### Returns
 
-`Promise`<`F`\>
+`Promise`\<`F`\>
 
 return value of fn
 

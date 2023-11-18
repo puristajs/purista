@@ -40,7 +40,7 @@ Unhandled error are automatically converted into "500 Internal Server Error" to 
 
 ### constructor
 
-• **new UnhandledError**(`errorCode?`, `message?`, `data?`, `traceId?`)
+• **new UnhandledError**(`errorCode?`, `message?`, `data?`, `traceId?`): [`UnhandledError`](purista_core.UnhandledError.md)
 
 #### Parameters
 
@@ -50,6 +50,10 @@ Unhandled error are automatically converted into "500 Internal Server Error" to 
 | `message?` | `string` | `undefined` |
 | `data?` | `unknown` | `undefined` |
 | `traceId?` | `string` | `undefined` |
+
+#### Returns
+
+[`UnhandledError`](purista_core.UnhandledError.md)
 
 #### Overrides
 
@@ -93,13 +97,13 @@ ___
 
 ### getErrorResponse
 
-▸ **getErrorResponse**(): `Readonly`<[`ErrorResponsePayload`](../modules/purista_core.md#errorresponsepayload)\>
+▸ **getErrorResponse**(): `Readonly`\<[`ErrorResponsePayload`](../modules/purista_core.md#errorresponsepayload)\>
 
 Returns error response object
 
 #### Returns
 
-`Readonly`<[`ErrorResponsePayload`](../modules/purista_core.md#errorresponsepayload)\>
+`Readonly`\<[`ErrorResponsePayload`](../modules/purista_core.md#errorresponsepayload)\>
 
 ErrorResponsePayload
 
@@ -147,7 +151,7 @@ ___
 
 ### fromError
 
-▸ `Static` **fromError**(`err`, `errorCode?`, `data?`, `traceId?`): [`HandledError`](purista_core.HandledError.md)
+▸ **fromError**(`err`, `errorCode?`, `data?`, `traceId?`): [`HandledError`](purista_core.HandledError.md)
 
 Creates a UnhandledError from an input
 
@@ -174,7 +178,7 @@ ___
 
 ### fromMessage
 
-▸ `Static` **fromMessage**(`message`): [`UnhandledError`](purista_core.UnhandledError.md)
+▸ **fromMessage**(`message`): [`UnhandledError`](purista_core.UnhandledError.md)
 
 Create a error object from EBMessage error message
 
@@ -182,7 +186,7 @@ Create a error object from EBMessage error message
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `message` | `Readonly`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | CommandErrorResponse |
+| `message` | `Readonly`\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: \{ `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | CommandErrorResponse |
 
 #### Returns
 

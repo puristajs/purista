@@ -8,7 +8,7 @@ DaprConfigStore is an adapter which connects to the config store provided by the
 
 ## Hierarchy
 
-- `ConfigStoreBaseClass`<[`DaprConfigStoreConfig`](../modules/purista_dapr_sdk.md#daprconfigstoreconfig)\>
+- `ConfigStoreBaseClass`\<[`DaprConfigStoreConfig`](../modules/purista_dapr_sdk.md#daprconfigstoreconfig)\>
 
   ↳ **`DaprConfigStore`**
 
@@ -36,24 +36,30 @@ DaprConfigStore is an adapter which connects to the config store provided by the
 
 ### constructor
 
-• **new DaprConfigStore**(`config?`)
+• **new DaprConfigStore**(`config?`): [`DaprConfigStore`](purista_dapr_sdk.DaprConfigStore.md)
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `config?` | `Object` | - |
+| `config.cacheTtl?` | `number` | Cache time to live in ms |
 | `config.clientConfig?` | [`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig) | The Dapr client config to interact with Dapr sidecar |
 | `config.configStoreName?` | `string` | The name of the config store |
+| `config.enableCache?` | `boolean` | Enable cache |
 | `config.enableGet?` | `boolean` | Enable generally get method |
 | `config.enableRemove?` | `boolean` | Enable generally remove method |
 | `config.enableSet?` | `boolean` | Enable generally set method |
 | `config.logLevel?` | `LogLevelName` | A log level for new logger if logger is not set |
 | `config.logger?` | `Logger` | A logger instance |
 
+#### Returns
+
+[`DaprConfigStore`](purista_dapr_sdk.DaprConfigStore.md)
+
 #### Overrides
 
-ConfigStoreBaseClass&lt;DaprConfigStoreConfig\&gt;.constructor
+ConfigStoreBaseClass\&lt;DaprConfigStoreConfig\&gt;.constructor
 
 #### Defined in
 
@@ -63,7 +69,7 @@ ConfigStoreBaseClass&lt;DaprConfigStoreConfig\&gt;.constructor
 
 ### client
 
-• `Private` **client**: `HttpClient`<[`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig)\>
+• `Private` **client**: `HttpClient`\<[`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig)\>
 
 #### Defined in
 
@@ -79,8 +85,10 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
+| `cacheTtl?` | `number` | Cache time to live in ms |
 | `clientConfig?` | [`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig) | The Dapr client config to interact with Dapr sidecar |
 | `configStoreName?` | `string` | The name of the config store |
+| `enableCache?` | `boolean` | Enable cache |
 | `enableGet?` | `boolean` | Enable generally get method |
 | `enableRemove?` | `boolean` | Enable generally remove method |
 | `enableSet?` | `boolean` | Enable generally set method |
@@ -127,11 +135,11 @@ core/lib/types/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:11
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Inherited from
 
@@ -145,7 +153,7 @@ ___
 
 ### getConfig
 
-▸ **getConfig**(`...configNames`): `Promise`<`Record`<`string`, `unknown`\>\>
+▸ **getConfig**(`...configNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Parameters
 
@@ -155,7 +163,7 @@ ___
 
 #### Returns
 
-`Promise`<`Record`<`string`, `unknown`\>\>
+`Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Overrides
 
@@ -169,7 +177,7 @@ ___
 
 ### removeConfig
 
-▸ **removeConfig**(`_configName`): `Promise`<`void`\>
+▸ **removeConfig**(`_configName`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -179,7 +187,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 
@@ -193,7 +201,7 @@ ___
 
 ### setConfig
 
-▸ **setConfig**(`_configName`, `_configValue`): `Promise`<`void`\>
+▸ **setConfig**(`_configName`, `_configValue`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -204,7 +212,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 

@@ -35,7 +35,7 @@ await eventBridge.start()
 
 ## Hierarchy
 
-- `HttpEventBridge`<[`DaprEventBridgeConfig`](../modules/purista_dapr_sdk.md#dapreventbridgeconfig)\>
+- `HttpEventBridge`\<[`DaprEventBridgeConfig`](../modules/purista_dapr_sdk.md#dapreventbridgeconfig)\>
 
   ↳ **`DaprEventBridge`**
 
@@ -88,7 +88,7 @@ await eventBridge.start()
 
 ### constructor
 
-• **new DaprEventBridge**(`config`)
+• **new DaprEventBridge**(`config`): [`DaprEventBridge`](purista_dapr_sdk.DaprEventBridge.md)
 
 #### Parameters
 
@@ -105,15 +105,19 @@ await eventBridge.start()
 | `config.logger?` | `Logger` | A logger instance |
 | `config.name?` | `string` | name of the bridge |
 | `config.pathPrefix?` | `string` | the prefix to be used for exposing commands as endpoints expecting a event bus message |
-| `config.serve` | (`options`: { `fetch`: (`request`: `Request`) => `unknown` ; `hostname?`: `string` ; `port?`: `number`  }) => `Server`<typeof `IncomingMessage`, typeof `ServerResponse`\> | The serve function is depending on the runtime. - Bun: `Bun.serve` - Node.js: `serve` function from additional package `@hono/hono-node-server` - Deno: `serve` function from package `https://deno.land/std/http/server.ts` **`See`** https://hono.dev |
+| `config.serve` | (`options`: \{ `fetch`: (`request`: `Request`) => `unknown` ; `hostname?`: `string` ; `port?`: `number`  }) => `Server`\<typeof `IncomingMessage`, typeof `ServerResponse`\> | The serve function is depending on the runtime. - Bun: `Bun.serve` - Node.js: `serve` function from additional package `@hono/hono-node-server` - Deno: `serve` function from package `https://deno.land/std/http/server.ts` **`See`** https://hono.dev |
 | `config.serverHost?` | `string` | Host of the server. |
 | `config.serverPort?` | `number` | Port of the server. |
 | `config.spanProcessor?` | `SpanProcessor` | A OpenTelemetry span processor |
 | `config.subscriptionPayloadAsCloudEvent?` | `boolean` | subscription invocations are wrapped in CloudEvent **`Link`** https://github.com/cloudevents/spec/tree/v1.0 |
 
+#### Returns
+
+[`DaprEventBridge`](purista_dapr_sdk.DaprEventBridge.md)
+
 #### Overrides
 
-HttpEventBridge&lt;DaprEventBridgeConfig\&gt;.constructor
+HttpEventBridge\&lt;DaprEventBridgeConfig\&gt;.constructor
 
 #### Defined in
 
@@ -123,7 +127,7 @@ HttpEventBridge&lt;DaprEventBridgeConfig\&gt;.constructor
 
 ### app
 
-• **app**: `Hono`<`Env`, {}, ``"/"``\>
+• **app**: `Hono`\<`Env`, {}, ``"/"``\>
 
 #### Inherited from
 
@@ -151,7 +155,7 @@ ___
 
 ### config
 
-• **config**: `Complete`<{ `apiPrefix?`: `string` ; `clientConfig?`: [`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig) ; `commandPayloadAsCloudEvent?`: `boolean` ; `defaultCommandTimeout?`: `number` ; `enableRestApiExpose?`: `boolean` ; `instanceId?`: `string` ; `logLevel?`: `LogLevelName` ; `logger?`: `Logger` ; `name?`: `string` ; `pathPrefix?`: `string` ; `serve`: (`options`: { `fetch`: (`request`: `Request`) => `unknown` ; `hostname?`: `string` ; `port?`: `number`  }) => `Server`<typeof `IncomingMessage`, typeof `ServerResponse`\> ; `serverHost?`: `string` ; `serverPort?`: `number` ; `spanProcessor?`: `SpanProcessor` ; `subscriptionPayloadAsCloudEvent?`: `boolean`  }\>
+• **config**: `Complete`\<\{ `apiPrefix?`: `string` ; `clientConfig?`: [`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig) ; `commandPayloadAsCloudEvent?`: `boolean` ; `defaultCommandTimeout?`: `number` ; `enableRestApiExpose?`: `boolean` ; `instanceId?`: `string` ; `logLevel?`: `LogLevelName` ; `logger?`: `Logger` ; `name?`: `string` ; `pathPrefix?`: `string` ; `serve`: (`options`: \{ `fetch`: (`request`: `Request`) => `unknown` ; `hostname?`: `string` ; `port?`: `number`  }) => `Server`\<typeof `IncomingMessage`, typeof `ServerResponse`\> ; `serverHost?`: `string` ; `serverPort?`: `number` ; `spanProcessor?`: `SpanProcessor` ; `subscriptionPayloadAsCloudEvent?`: `boolean`  }\>
 
 #### Inherited from
 
@@ -271,7 +275,7 @@ ___
 
 ### server
 
-• **server**: `undefined` \| `Server`<typeof `IncomingMessage`, typeof `ServerResponse`\>
+• **server**: `undefined` \| `Server`\<typeof `IncomingMessage`, typeof `ServerResponse`\>
 
 #### Inherited from
 
@@ -299,13 +303,13 @@ core/lib/types/core/EventBridge/EventBridgeBaseClass.impl.d.ts:12
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 Shut down event bridge as gracefully as possible
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -323,20 +327,20 @@ ___
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
+▸ **emit**\<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends `EventKey`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
+| `K` | extends `EventKey`\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `parameter?` | { `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`] |
+| `parameter?` | \{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`] |
 
 #### Returns
 
@@ -354,7 +358,7 @@ ___
 
 ### emitMessage
 
-▸ **emitMessage**<`T`\>(`message`): `Promise`<`Readonly`<`EBMessage`\>\>
+▸ **emitMessage**\<`T`\>(`message`): `Promise`\<`Readonly`\<`EBMessage`\>\>
 
 #### Type parameters
 
@@ -366,11 +370,11 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `message` | `Omit`<`EBMessage`, ``"id"`` \| ``"timestamp"`` \| ``"correlationId"``\> |
+| `message` | `Omit`\<`EBMessage`, ``"id"`` \| ``"timestamp"`` \| ``"correlationId"``\> |
 
 #### Returns
 
-`Promise`<`Readonly`<`EBMessage`\>\>
+`Promise`\<`Readonly`\<`EBMessage`\>\>
 
 #### Implementation of
 
@@ -410,7 +414,7 @@ ___
 
 ### invoke
 
-▸ **invoke**<`T`\>(`input`, `ttl?`): `Promise`<`T`\>
+▸ **invoke**\<`T`\>(`input`, `ttl?`): `Promise`\<`T`\>
 
 #### Type parameters
 
@@ -422,12 +426,12 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `input` | `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"`` \| ``"correlationId"`` \| ``"messageType"``\> |
+| `input` | `Omit`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: \{ `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"`` \| ``"correlationId"`` \| ``"messageType"``\> |
 | `ttl?` | `number` |
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Implementation of
 
@@ -445,11 +449,11 @@ ___
 
 ### isHealthy
 
-▸ **isHealthy**(): `Promise`<`boolean`\>
+▸ **isHealthy**(): `Promise`\<`boolean`\>
 
 #### Returns
 
-`Promise`<`boolean`\>
+`Promise`\<`boolean`\>
 
 #### Implementation of
 
@@ -467,11 +471,11 @@ ___
 
 ### isReady
 
-▸ **isReady**(): `Promise`<`boolean`\>
+▸ **isReady**(): `Promise`\<`boolean`\>
 
 #### Returns
 
-`Promise`<`boolean`\>
+`Promise`\<`boolean`\>
 
 #### Implementation of
 
@@ -489,20 +493,20 @@ ___
 
 ### off
 
-▸ **off**<`K`\>(`eventName`, `fn`): `void`
+▸ **off**\<`K`\>(`eventName`, `fn`): `void`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends `EventKey`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
+| `K` | extends `EventKey`\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | `EventReceiver`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
+| `fn` | `EventReceiver`\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
 
 #### Returns
 
@@ -520,20 +524,20 @@ ___
 
 ### on
 
-▸ **on**<`K`\>(`eventName`, `fn`): `void`
+▸ **on**\<`K`\>(`eventName`, `fn`): `void`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends `EventKey`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
+| `K` | extends `EventKey`\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | `EventReceiver`<{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
+| `fn` | `EventReceiver`\<\{ `eventbridge-connected`: `never` ; `eventbridge-connection-error`: `unknown` ; `eventbridge-disconnected`: `never` ; `eventbridge-error`: `unknown` ; `eventbridge-reconnecting`: `never`  }[`K`]\> |
 
 #### Returns
 
@@ -551,21 +555,21 @@ ___
 
 ### registerCommand
 
-▸ **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`<`string`\>
+▸ **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `address` | `EBMessageAddress` |
-| `cb` | (`message`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`<`Readonly`<`Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\> \| `Readonly`<`Omit`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\>\> |
+| `cb` | (`message`: \{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: \{ `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `CommandSuccessResponse` ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\> \| `Readonly`\<`Omit`\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: `CommandErrorResponse` ; `otp?`: `string` ; `payload`: \{ `data?`: `unknown` ; `message`: `string` ; `status`: `StatusCode`  } ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\>\> |
 | `metadata` | `Object` |
-| `metadata.expose` | { `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: `string` ; `contentTypeResponse?`: `string` ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } & { `http`: { `method`: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` ; `openApi?`: { `additionalStatusCodes?`: `StatusCode`[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: `QueryParameter`<{}\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  } |
+| `metadata.expose` | \{ `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: `string` ; `contentTypeResponse?`: `string` ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } & \{ `http`: \{ `method`: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` ; `openApi?`: \{ `additionalStatusCodes?`: `StatusCode`[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: `QueryParameter`\<{}\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  } |
 | `eventBridgeConfig` | `DefinitionEventBridgeConfig` |
 
 #### Returns
 
-`Promise`<`string`\>
+`Promise`\<`string`\>
 
 #### Implementation of
 
@@ -583,18 +587,18 @@ ___
 
 ### registerSubscription
 
-▸ **registerSubscription**(`subscription`, `cb`): `Promise`<`string`\>
+▸ **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `subscription` | `Subscription` |
-| `cb` | (`message`: `EBMessage`) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
+| `cb` | (`message`: `EBMessage`) => `Promise`\<`undefined` \| `Omit`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: `CustomMessage` ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: `EBMessageAddress` ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
 
 #### Returns
 
-`Promise`<`string`\>
+`Promise`\<`string`\>
 
 #### Implementation of
 
@@ -630,11 +634,11 @@ ___
 
 ### start
 
-▸ **start**(): `Promise`<`void`\>
+▸ **start**(): `Promise`\<`void`\>
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -652,7 +656,7 @@ ___
 
 ### startActiveSpan
 
-▸ **startActiveSpan**<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`<`F`\>
+▸ **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
 Start a child span for opentelemetry tracking
 
@@ -669,11 +673,11 @@ Start a child span for opentelemetry tracking
 | `name` | `string` | name of span |
 | `opts` | `SpanOptions` | span options |
 | `context` | `undefined` \| `Context` | optional context |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function to be executed within the span |
+| `fn` | (`span`: `Span`) => `Promise`\<`F`\> | function to be executed within the span |
 
 #### Returns
 
-`Promise`<`F`\>
+`Promise`\<`F`\>
 
 return value of fn
 
@@ -689,7 +693,7 @@ ___
 
 ### unregisterCommand
 
-▸ **unregisterCommand**(`address`): `Promise`<`void`\>
+▸ **unregisterCommand**(`address`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -699,7 +703,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -717,7 +721,7 @@ ___
 
 ### unregisterSubscription
 
-▸ **unregisterSubscription**(`address`): `Promise`<`void`\>
+▸ **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -727,7 +731,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -745,7 +749,7 @@ ___
 
 ### wrapInSpan
 
-▸ **wrapInSpan**<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`<`F`\>
+▸ **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!
@@ -767,12 +771,12 @@ but not to trace the program flow itself
 | :------ | :------ | :------ |
 | `name` | `string` | name of span |
 | `opts` | `SpanOptions` | span options |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function te be executed in the span |
+| `fn` | (`span`: `Span`) => `Promise`\<`F`\> | function te be executed in the span |
 | `context?` | `Context` | span context |
 
 #### Returns
 
-`Promise`<`F`\>
+`Promise`\<`F`\>
 
 return value of fn
 

@@ -101,6 +101,7 @@ Learn PURIST at [purista.dev](https://purista.dev)
 - [Prettify](purista_core.md#prettify)
 - [PrincipalId](purista_core.md#principalid)
 - [QueryParameter](purista_core.md#queryparameter)
+- [SecretStoreCacheMap](purista_core.md#secretstorecachemap)
 - [ServiceEvents](purista_core.md#serviceevents)
 - [ServiceInfoType](purista_core.md#serviceinfotype)
 - [ShutdownEntry](purista_core.md#shutdownentry)
@@ -260,7 +261,7 @@ HTTP authentication information
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `basicAuth?` | { `password`: `string` ; `username`: `string`  } | Basic-Auth information |
+| `basicAuth?` | \{ `password`: `string` ; `username`: `string`  } | Basic-Auth information |
 | `basicAuth.password` | `string` | Basic-Auth password |
 | `basicAuth.username` | `string` | Basic-Auth username |
 | `bearerToken?` | `string` | Bearer token header |
@@ -273,7 +274,7 @@ ___
 
 ### BrokerHeaderCommandMsg
 
-Ƭ **BrokerHeaderCommandMsg**: [`Prettify`](purista_core.md#prettify)<[`BrokerHeaderCustomMsg`](purista_core.md#brokerheadercustommsg) & { `receiverInstanceId?`: [`InstanceId`](purista_core.md#instanceid) ; `receiverServiceName`: `string` ; `receiverServiceTarget`: `string` ; `receiverServiceVersion`: `string`  }\>
+Ƭ **BrokerHeaderCommandMsg**: [`Prettify`](purista_core.md#prettify)\<[`BrokerHeaderCustomMsg`](purista_core.md#brokerheadercustommsg) & \{ `receiverInstanceId?`: [`InstanceId`](purista_core.md#instanceid) ; `receiverServiceName`: `string` ; `receiverServiceTarget`: `string` ; `receiverServiceVersion`: `string`  }\>
 
 #### Defined in
 
@@ -283,7 +284,7 @@ ___
 
 ### BrokerHeaderCommandResponseMsg
 
-Ƭ **BrokerHeaderCommandResponseMsg**: [`Prettify`](purista_core.md#prettify)<[`BrokerHeaderCommandMsg`](purista_core.md#brokerheadercommandmsg) & { `receiverInstanceId`: [`InstanceId`](purista_core.md#instanceid)  }\>
+Ƭ **BrokerHeaderCommandResponseMsg**: [`Prettify`](purista_core.md#prettify)\<[`BrokerHeaderCommandMsg`](purista_core.md#brokerheadercommandmsg) & \{ `receiverInstanceId`: [`InstanceId`](purista_core.md#instanceid)  }\>
 
 #### Defined in
 
@@ -316,7 +317,7 @@ ___
 
 ### Command
 
-Ƭ **Command**<`PayloadType`, `ParameterType`\>: [`Prettify`](purista_core.md#prettify)<{ `correlationId`: [`CorrelationId`](purista_core.md#correlationid) ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `payload`: { `parameter`: `ParameterType` ; `payload`: `PayloadType`  } ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress)  } & [`EBMessageBase`](purista_core.md#ebmessagebase)\>
+Ƭ **Command**\<`PayloadType`, `ParameterType`\>: [`Prettify`](purista_core.md#prettify)\<\{ `correlationId`: [`CorrelationId`](purista_core.md#correlationid) ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `payload`: \{ `parameter`: `ParameterType` ; `payload`: `PayloadType`  } ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress)  } & [`EBMessageBase`](purista_core.md#ebmessagebase)\>
 
 Command is a event bridge message, which is emitted by sender to event bridge.
 The event bridge dispatches the event to the receiver.
@@ -343,7 +344,7 @@ ___
 
 ### CommandDefinitionList
 
-Ƭ **CommandDefinitionList**<`ServiceClassType`\>: [`CommandDefinition`](purista_core.md#commanddefinition)<`ServiceClassType`, [`CommandDefinitionMetadataBase`](purista_core.md#commanddefinitionmetadatabase), `any`, `any`, `any`, `any`, `any`, `any`\>[]
+Ƭ **CommandDefinitionList**\<`ServiceClassType`\>: [`CommandDefinition`](purista_core.md#commanddefinition)\<`ServiceClassType`, [`CommandDefinitionMetadataBase`](purista_core.md#commanddefinitionmetadatabase), `any`, `any`, `any`, `any`, `any`, `any`\>[]
 
 Helper type for creating list of service commands to be passed as input to service class
 
@@ -371,7 +372,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `expose` | { `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: [`ContentType`](purista_core.md#contenttype) ; `contentTypeResponse?`: [`ContentType`](purista_core.md#contenttype) ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } |
+| `expose` | \{ `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: [`ContentType`](purista_core.md#contenttype) ; `contentTypeResponse?`: [`ContentType`](purista_core.md#contenttype) ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } |
 | `expose.contentEncodingRequest?` | `string` |
 | `expose.contentEncodingResponse?` | `string` |
 | `expose.contentTypeRequest?` | [`ContentType`](purista_core.md#contenttype) |
@@ -389,7 +390,7 @@ ___
 
 ### Complete
 
-Ƭ **Complete**<`T`\>: { [P in keyof Required<T\>]: Pick<T, P\> extends Required<Pick<T, P\>\> ? T[P] : T[P] \| undefined }
+Ƭ **Complete**\<`T`\>: \{ [P in keyof Required\<T\>]: Pick\<T, P\> extends Required\<Pick\<T, P\>\> ? T[P] : T[P] \| undefined }
 
 A helper which forces to provide all object keys, even if they are optional.
 
@@ -458,21 +459,21 @@ Each context for command function, subscription function and all Hooks and trans
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `configs` | { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } | the config store |
+| `configs` | \{ `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } | the config store |
 | `configs.getConfig` | [`ConfigGetterFunction`](purista_core.md#configgetterfunction) | get a config value from the config store |
 | `configs.removeConfig` | [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) | delete a config value from the config store |
 | `configs.setConfig` | [`ConfigSetterFunction`](purista_core.md#configsetterfunction) | set a config value in the config store |
 | `logger` | [`Logger`](../classes/purista_core.Logger.md) | the logger instance |
-| `secrets` | { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } | the secret store |
+| `secrets` | \{ `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } | the secret store |
 | `secrets.getSecret` | [`SecretGetterFunction`](purista_core.md#secretgetterfunction) | get a secret from the secret store |
 | `secrets.removeSecret` | [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) | delete a secret from the secret store |
 | `secrets.setSecret` | [`SecretSetterFunction`](purista_core.md#secretsetterfunction) | set a secret in the secret store |
-| `startActiveSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `Context` \| `undefined`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> | wrap given function in an opentelemetry active span |
-| `states` | { `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } | the state store |
+| `startActiveSpan` | \<F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `Context` \| `undefined`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>) => `Promise`\<`F`\> | wrap given function in an opentelemetry active span |
+| `states` | \{ `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } | the state store |
 | `states.getState` | [`StateGetterFunction`](purista_core.md#stategetterfunction) | get a state value from the state store |
 | `states.removeState` | [`StateDeleteFunction`](purista_core.md#statedeletefunction) | delete a state value from the state store |
 | `states.setState` | [`StateSetterFunction`](purista_core.md#statesetterfunction) | set a state value in the state store |
-| `wrapInSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\> | wrap given function in an opentelemetry span |
+| `wrapInSpan` | \<F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>, `context?`: `Context`) => `Promise`\<`F`\> | wrap given function in an opentelemetry span |
 
 #### Defined in
 
@@ -494,7 +495,7 @@ ___
 
 ### CustomMessage
 
-Ƭ **CustomMessage**<`Payload`\>: [`Prettify`](purista_core.md#prettify)<{ `eventName`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `payload?`: `Payload` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress)  } & [`EBMessageBase`](purista_core.md#ebmessagebase)\>
+Ƭ **CustomMessage**\<`Payload`\>: [`Prettify`](purista_core.md#prettify)\<\{ `eventName`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `payload?`: `Payload` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress)  } & [`EBMessageBase`](purista_core.md#ebmessagebase)\>
 
 A custom message is a message which can be used to pass business information.
 The producer emits the message without knowledge about any consumer.
@@ -514,7 +515,7 @@ ___
 
 ### DefaultConfigStoreConfig
 
-Ƭ **DefaultConfigStoreConfig**: `Record`<`string`, `unknown`\>
+Ƭ **DefaultConfigStoreConfig**: `Record`\<`string`, `unknown`\>
 
 #### Defined in
 
@@ -543,7 +544,7 @@ ___
 
 ### DefaultSecretStoreConfig
 
-Ƭ **DefaultSecretStoreConfig**: `Record`<`string`, `unknown`\>
+Ƭ **DefaultSecretStoreConfig**: `Record`\<`string`, `unknown`\>
 
 #### Defined in
 
@@ -553,7 +554,7 @@ ___
 
 ### DefaultStateStoreConfig
 
-Ƭ **DefaultStateStoreConfig**: `Record`<`string`, `unknown`\>
+Ƭ **DefaultStateStoreConfig**: `Record`\<`string`, `unknown`\>
 
 #### Defined in
 
@@ -658,7 +659,7 @@ ___
 
 ### EBMessageSenderAddress
 
-Ƭ **EBMessageSenderAddress**: [`Prettify`](purista_core.md#prettify)<`Omit`<[`EBMessageAddress`](purista_core.md#ebmessageaddress), ``"instanceId"``\> & `Required`<`Pick`<[`EBMessageAddress`](purista_core.md#ebmessageaddress), ``"instanceId"``\>\>\>
+Ƭ **EBMessageSenderAddress**: [`Prettify`](purista_core.md#prettify)\<`Omit`\<[`EBMessageAddress`](purista_core.md#ebmessageaddress), ``"instanceId"``\> & `Required`\<`Pick`\<[`EBMessageAddress`](purista_core.md#ebmessageaddress), ``"instanceId"``\>\>\>
 
 A event bridge message address describes the sender or receiver of a message.
 
@@ -670,11 +671,11 @@ ___
 
 ### EmitCustomMessageFunction
 
-Ƭ **EmitCustomMessageFunction**: <Payload\>(`eventName`: `string`, `payload?`: `Payload`, `contentType?`: [`ContentType`](purista_core.md#contenttype), `contentEncoding?`: `string`) => `Promise`<`void`\>
+Ƭ **EmitCustomMessageFunction**: \<Payload\>(`eventName`: `string`, `payload?`: `Payload`, `contentType?`: [`ContentType`](purista_core.md#contenttype), `contentEncoding?`: `string`) => `Promise`\<`void`\>
 
 #### Type declaration
 
-▸ <`Payload`\>(`eventName`, `payload?`, `contentType?`, `contentEncoding?`): `Promise`<`void`\>
+▸ \<`Payload`\>(`eventName`, `payload?`, `contentType?`, `contentEncoding?`): `Promise`\<`void`\>
 
 Emits the given payload as custom message with the given event name.
 
@@ -695,7 +696,7 @@ Emits the given payload as custom message with the given event name.
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 **`Example`**
 
@@ -738,6 +739,12 @@ ___
 
 ▪ [key: `string`]: `unknown`
 
+currently not used, but reserved for further events
+
+**`Group`**
+
+Events
+
 #### Defined in
 
 [core/EventBridge/types/EventBridgeEvents.ts:42](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L42)
@@ -746,7 +753,7 @@ ___
 
 ### EventBridgeConfig
 
-Ƭ **EventBridgeConfig**<`CustomConfig`\>: [`Prettify`](purista_core.md#prettify)<{ `defaultCommandTimeout?`: `number` ; `instanceId?`: `string` ; `logLevel?`: [`LogLevelName`](purista_core.md#loglevelname) ; `logger?`: [`Logger`](../classes/purista_core.Logger.md) ; `spanProcessor?`: `SpanProcessor`  } & `CustomConfig`\>
+Ƭ **EventBridgeConfig**\<`CustomConfig`\>: [`Prettify`](purista_core.md#prettify)\<\{ `defaultCommandTimeout?`: `number` ; `instanceId?`: `string` ; `logLevel?`: [`LogLevelName`](purista_core.md#loglevelname) ; `logger?`: [`Logger`](../classes/purista_core.Logger.md) ; `spanProcessor?`: `SpanProcessor`  } & `CustomConfig`\>
 
 The config object for an event bridge.
 Every event bridge implementation must use this type for configuration.
@@ -771,6 +778,12 @@ ___
 
 ▪ [key: `string`]: `unknown`
 
+emitted a EBMessage if event name is provided and if it is enabled and supported on the event bridge
+
+**`Group`**
+
+Events
+
 #### Defined in
 
 [core/EventBridge/types/EventBridgeEvents.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L37)
@@ -779,7 +792,7 @@ ___
 
 ### EventBridgeEvents
 
-Ƭ **EventBridgeEvents**: [`Prettify`](purista_core.md#prettify)<[`EventBridgeEventsBasic`](purista_core.md#eventbridgeeventsbasic) & [`addPrefixToObject`](purista_core.md#addprefixtoobject)<[`EventBridgeAdapterEvents`](purista_core.md#eventbridgeadapterevents), ``"adapter-"``\> & [`addPrefixToObject`](purista_core.md#addprefixtoobject)<[`EventBridgeCustomEvents`](purista_core.md#eventbridgecustomevents), ``"custom-"``\>\>
+Ƭ **EventBridgeEvents**: [`Prettify`](purista_core.md#prettify)\<[`EventBridgeEventsBasic`](purista_core.md#eventbridgeeventsbasic) & [`addPrefixToObject`](purista_core.md#addprefixtoobject)\<[`EventBridgeAdapterEvents`](purista_core.md#eventbridgeadapterevents), ``"adapter-"``\> & [`addPrefixToObject`](purista_core.md#addprefixtoobject)\<[`EventBridgeCustomEvents`](purista_core.md#eventbridgecustomevents), ``"custom-"``\>\>
 
 #### Defined in
 
@@ -789,7 +802,7 @@ ___
 
 ### EventKey
 
-Ƭ **EventKey**<`T`\>: `string` & keyof `T`
+Ƭ **EventKey**\<`T`\>: `string` & keyof `T`
 
 #### Type parameters
 
@@ -805,7 +818,7 @@ ___
 
 ### EventMap
 
-Ƭ **EventMap**: `Record`<`string`, `any`\>
+Ƭ **EventMap**: `Record`\<`string`, `any`\>
 
 #### Defined in
 
@@ -815,7 +828,7 @@ ___
 
 ### HttpClientConfig
 
-Ƭ **HttpClientConfig**<`CustomConfig`\>: [`Prettify`](purista_core.md#prettify)<{ `baseUrl`: `string` ; `basicAuth?`: { `password`: `string` ; `username`: `string`  } ; `bearerToken?`: `string` ; `defaultHeaders?`: `Record`<`string`, `string`\> ; `defaultTimeout?`: `number` ; `enableOpentelemetry?`: `boolean` ; `isKeepAlive?`: `boolean` ; `logLevel?`: [`LogLevelName`](purista_core.md#loglevelname) ; `logger?`: [`Logger`](../classes/purista_core.Logger.md) ; `name?`: `string` ; `spanProcessor?`: `SpanProcessor`  } & `CustomConfig`\>
+Ƭ **HttpClientConfig**\<`CustomConfig`\>: [`Prettify`](purista_core.md#prettify)\<\{ `baseUrl`: `string` ; `basicAuth?`: \{ `password`: `string` ; `username`: `string`  } ; `bearerToken?`: `string` ; `defaultHeaders?`: `Record`\<`string`, `string`\> ; `defaultTimeout?`: `number` ; `enableOpentelemetry?`: `boolean` ; `isKeepAlive?`: `boolean` ; `logLevel?`: [`LogLevelName`](purista_core.md#loglevelname) ; `logger?`: [`Logger`](../classes/purista_core.Logger.md) ; `name?`: `string` ; `spanProcessor?`: `SpanProcessor`  } & `CustomConfig`\>
 
 Tha basic configuration for a HTTPClient
 Requires as least a `baseUrl`
@@ -824,7 +837,7 @@ Requires as least a `baseUrl`
 
 | Name | Type |
 | :------ | :------ |
-| `CustomConfig` | extends `Record`<`string`, `unknown`\> |
+| `CustomConfig` | extends `Record`\<`string`, `unknown`\> |
 
 #### Defined in
 
@@ -843,8 +856,8 @@ Options for a single request
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `hash?` | `string` | url hash @example: http://example.com/index.html#hash |
-| `headers?` | `Record`<`string`, `string`\> | additional headers |
-| `query?` | `Record`<`string`, `string`\> | query/search string parameter |
+| `headers?` | `Record`\<`string`, `string`\> | additional headers |
+| `query?` | `Record`\<`string`, `string`\> | query/search string parameter |
 | `timeout?` | `number` | Timeout for the request in ms **`Default`** ```ts 30000 ``` |
 
 #### Defined in
@@ -855,7 +868,7 @@ ___
 
 ### HttpExposedServiceMeta
 
-Ƭ **HttpExposedServiceMeta**<`ParameterType`\>: [`Prettify`](purista_core.md#prettify)<[`CommandDefinitionMetadataBase`](purista_core.md#commanddefinitionmetadatabase) & { `expose`: { `http`: { `method`: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` ; `openApi?`: { `additionalStatusCodes?`: [`StatusCode`](../enums/purista_core.StatusCode.md)[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: [`QueryParameter`](purista_core.md#queryparameter)<`ParameterType`\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  }  }\>
+Ƭ **HttpExposedServiceMeta**\<`ParameterType`\>: [`Prettify`](purista_core.md#prettify)\<[`CommandDefinitionMetadataBase`](purista_core.md#commanddefinitionmetadatabase) & \{ `expose`: \{ `http`: \{ `method`: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` ; `openApi?`: \{ `additionalStatusCodes?`: [`StatusCode`](../enums/purista_core.StatusCode.md)[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: [`QueryParameter`](purista_core.md#queryparameter)\<`ParameterType`\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  }  }\>
 
 #### Type parameters
 
@@ -871,7 +884,7 @@ ___
 
 ### InfoInvokeTimeout
 
-Ƭ **InfoInvokeTimeout**: { `messageType`: [`InfoInvokeTimeout`](../enums/purista_core.EBMessageType.md#infoinvoketimeout)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)
+Ƭ **InfoInvokeTimeout**: \{ `messageType`: [`InfoInvokeTimeout`](../enums/purista_core.EBMessageType.md#infoinvoketimeout)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)
 
 #### Defined in
 
@@ -888,11 +901,11 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `correlationId` | [`CorrelationId`](purista_core.md#correlationid) |
-| `receiver` | { `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } |
+| `receiver` | \{ `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } |
 | `receiver.serviceName` | `string` |
 | `receiver.serviceTarget` | `string` |
 | `receiver.serviceVersion` | `string` |
-| `sender` | { `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } |
+| `sender` | \{ `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } |
 | `sender.serviceName` | `string` |
 | `sender.serviceTarget` | `string` |
 | `sender.serviceVersion` | `string` |
@@ -927,7 +940,7 @@ ___
 
 ### InfoServiceBase
 
-Ƭ **InfoServiceBase**: [`Prettify`](purista_core.md#prettify)<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `payload?`: `unknown`  } & [`EBMessageBase`](purista_core.md#ebmessagebase)\>
+Ƭ **InfoServiceBase**: [`Prettify`](purista_core.md#prettify)\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `payload?`: `unknown`  } & [`EBMessageBase`](purista_core.md#ebmessagebase)\>
 
 #### Defined in
 
@@ -937,7 +950,7 @@ ___
 
 ### InfoServiceDrain
 
-Ƭ **InfoServiceDrain**: [`Prettify`](purista_core.md#prettify)<{ `messageType`: [`InfoServiceDrain`](../enums/purista_core.EBMessageType.md#infoservicedrain)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
+Ƭ **InfoServiceDrain**: [`Prettify`](purista_core.md#prettify)\<\{ `messageType`: [`InfoServiceDrain`](../enums/purista_core.EBMessageType.md#infoservicedrain)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
 
 #### Defined in
 
@@ -947,7 +960,7 @@ ___
 
 ### InfoServiceFunctionAdded
 
-Ƭ **InfoServiceFunctionAdded**: [`Prettify`](purista_core.md#prettify)<{ `messageType`: [`InfoServiceFunctionAdded`](../enums/purista_core.EBMessageType.md#infoservicefunctionadded)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
+Ƭ **InfoServiceFunctionAdded**: [`Prettify`](purista_core.md#prettify)\<\{ `messageType`: [`InfoServiceFunctionAdded`](../enums/purista_core.EBMessageType.md#infoservicefunctionadded)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
 
 #### Defined in
 
@@ -957,7 +970,7 @@ ___
 
 ### InfoServiceInit
 
-Ƭ **InfoServiceInit**: [`Prettify`](purista_core.md#prettify)<{ `messageType`: [`InfoServiceInit`](../enums/purista_core.EBMessageType.md#infoserviceinit)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
+Ƭ **InfoServiceInit**: [`Prettify`](purista_core.md#prettify)\<\{ `messageType`: [`InfoServiceInit`](../enums/purista_core.EBMessageType.md#infoserviceinit)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
 
 #### Defined in
 
@@ -967,7 +980,7 @@ ___
 
 ### InfoServiceNotReady
 
-Ƭ **InfoServiceNotReady**: [`Prettify`](purista_core.md#prettify)<{ `messageType`: [`InfoServiceNotReady`](../enums/purista_core.EBMessageType.md#infoservicenotready)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
+Ƭ **InfoServiceNotReady**: [`Prettify`](purista_core.md#prettify)\<\{ `messageType`: [`InfoServiceNotReady`](../enums/purista_core.EBMessageType.md#infoservicenotready)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
 
 #### Defined in
 
@@ -977,7 +990,7 @@ ___
 
 ### InfoServiceReady
 
-Ƭ **InfoServiceReady**: [`Prettify`](purista_core.md#prettify)<{ `messageType`: [`InfoServiceReady`](../enums/purista_core.EBMessageType.md#infoserviceready)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
+Ƭ **InfoServiceReady**: [`Prettify`](purista_core.md#prettify)\<\{ `messageType`: [`InfoServiceReady`](../enums/purista_core.EBMessageType.md#infoserviceready)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
 
 #### Defined in
 
@@ -987,7 +1000,7 @@ ___
 
 ### InfoServiceShutdown
 
-Ƭ **InfoServiceShutdown**: [`Prettify`](purista_core.md#prettify)<{ `messageType`: [`InfoServiceShutdown`](../enums/purista_core.EBMessageType.md#infoserviceshutdown)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
+Ƭ **InfoServiceShutdown**: [`Prettify`](purista_core.md#prettify)\<\{ `messageType`: [`InfoServiceShutdown`](../enums/purista_core.EBMessageType.md#infoserviceshutdown)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
 
 #### Defined in
 
@@ -997,7 +1010,7 @@ ___
 
 ### InfoSubscriptionError
 
-Ƭ **InfoSubscriptionError**: [`Prettify`](purista_core.md#prettify)<{ `messageType`: [`InfoSubscriptionError`](../enums/purista_core.EBMessageType.md#infosubscriptionerror)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
+Ƭ **InfoSubscriptionError**: [`Prettify`](purista_core.md#prettify)\<\{ `messageType`: [`InfoSubscriptionError`](../enums/purista_core.EBMessageType.md#infosubscriptionerror)  } & [`InfoServiceBase`](purista_core.md#infoservicebase)\>
 
 #### Defined in
 
@@ -1019,11 +1032,11 @@ ___
 
 ### InvokeFunction
 
-Ƭ **InvokeFunction**: <InvokeResponseType, PayloadType, ParameterType\>(`address`: [`EBMessageAddress`](purista_core.md#ebmessageaddress), `payload`: `PayloadType`, `parameter`: `ParameterType`) => `Promise`<`InvokeResponseType`\>
+Ƭ **InvokeFunction**: \<InvokeResponseType, PayloadType, ParameterType\>(`address`: [`EBMessageAddress`](purista_core.md#ebmessageaddress), `payload`: `PayloadType`, `parameter`: `ParameterType`) => `Promise`\<`InvokeResponseType`\>
 
 #### Type declaration
 
-▸ <`InvokeResponseType`, `PayloadType`, `ParameterType`\>(`address`, `payload`, `parameter`): `Promise`<`InvokeResponseType`\>
+▸ \<`InvokeResponseType`, `PayloadType`, `ParameterType`\>(`address`, `payload`, `parameter`): `Promise`\<`InvokeResponseType`\>
 
 Invokes a command and returns the result.
 It is recommended to validate the result against a schema which only contains the data you actually need.
@@ -1046,7 +1059,7 @@ It is recommended to validate the result against a schema which only contains th
 
 ##### Returns
 
-`Promise`<`InvokeResponseType`\>
+`Promise`\<`InvokeResponseType`\>
 
 **`Example`**
 
@@ -1137,7 +1150,7 @@ ___
 
 ### Newable
 
-Ƭ **Newable**<`T`, `ConfigType`\>: (`config`: [`ServiceConstructorInput`](purista_core.md#serviceconstructorinput)<`ConfigType`\>) => `T`
+Ƭ **Newable**\<`T`, `ConfigType`\>: (`config`: [`ServiceConstructorInput`](purista_core.md#serviceconstructorinput)\<`ConfigType`\>) => `T`
 
 #### Type parameters
 
@@ -1154,7 +1167,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `config` | [`ServiceConstructorInput`](purista_core.md#serviceconstructorinput)<`ConfigType`\> |
+| `config` | [`ServiceConstructorInput`](purista_core.md#serviceconstructorinput)\<`ConfigType`\> |
 
 ##### Returns
 
@@ -1185,7 +1198,7 @@ ___
 
 ### Prettify
 
-Ƭ **Prettify**<`T`\>: { [K in keyof T]: T[K] } & {}
+Ƭ **Prettify**\<`T`\>: \{ [K in keyof T]: T[K] } & {}
 
 #### Type parameters
 
@@ -1213,7 +1226,7 @@ ___
 
 ### QueryParameter
 
-Ƭ **QueryParameter**<`ParameterType`\>: `Object`
+Ƭ **QueryParameter**\<`ParameterType`\>: `Object`
 
 #### Type parameters
 
@@ -1234,9 +1247,19 @@ ___
 
 ___
 
+### SecretStoreCacheMap
+
+Ƭ **SecretStoreCacheMap**: `Map`\<`string`, \{ `createdAt`: `number` ; `value`: `string`  }\>
+
+#### Defined in
+
+[core/SecretStore/types/SecretStoreCacheMap.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStoreCacheMap.ts#L1)
+
+___
+
 ### ServiceEvents
 
-Ƭ **ServiceEvents**: [`ServiceEventsInternal`](purista_core.md#serviceeventsinternal) & [`addPrefixToObject`](purista_core.md#addprefixtoobject)<`CustomEvents`, ``"custom-"``\> & [`addPrefixToObject`](purista_core.md#addprefixtoobject)<`CustomEvents`, ``"misc-"``\>
+Ƭ **ServiceEvents**: [`ServiceEventsInternal`](purista_core.md#serviceeventsinternal) & [`addPrefixToObject`](purista_core.md#addprefixtoobject)\<`CustomEvents`, ``"custom-"``\> & [`addPrefixToObject`](purista_core.md#addprefixtoobject)\<`CustomEvents`, ``"misc-"``\>
 
 ServiceEvents are plain javascript events sent by the service.
 There are three types:
@@ -1280,7 +1303,7 @@ Entry of thing you like to shutdown gracefully
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `destroy` | () => `Promise`<`void`\> | a async function that is called during shutdown |
+| `destroy` | () => `Promise`\<`void`\> | a async function that is called during shutdown |
 | `name` | `string` | the name |
 
 #### Defined in
@@ -1291,7 +1314,7 @@ ___
 
 ### StoreBaseConfig
 
-Ƭ **StoreBaseConfig**<`Config`\>: [`Prettify`](purista_core.md#prettify)<{ `enableGet?`: `boolean` ; `enableRemove?`: `boolean` ; `enableSet?`: `boolean` ; `logLevel?`: [`LogLevelName`](purista_core.md#loglevelname) ; `logger?`: [`Logger`](../classes/purista_core.Logger.md)  } & `Config`\>
+Ƭ **StoreBaseConfig**\<`Config`\>: [`Prettify`](purista_core.md#prettify)\<\{ `cacheTtl?`: `number` ; `enableCache?`: `boolean` ; `enableGet?`: `boolean` ; `enableRemove?`: `boolean` ; `enableSet?`: `boolean` ; `logLevel?`: [`LogLevelName`](purista_core.md#loglevelname) ; `logger?`: [`Logger`](../classes/purista_core.Logger.md)  } & `Config`\>
 
 Basic configuration object which is used by any store
 
@@ -1299,7 +1322,7 @@ Basic configuration object which is used by any store
 
 | Name | Type |
 | :------ | :------ |
-| `Config` | extends `Record`<`string`, `unknown`\> |
+| `Config` | extends `Record`\<`string`, `unknown`\> |
 
 #### Defined in
 
@@ -1309,7 +1332,7 @@ ___
 
 ### SubscriptionDefinitionList
 
-Ƭ **SubscriptionDefinitionList**<`ServiceClassType`\>: [`SubscriptionDefinition`](purista_core.md#subscriptiondefinition)<`ServiceClassType`, `any`, `any`, `any`, `any`\>[]
+Ƭ **SubscriptionDefinitionList**\<`ServiceClassType`\>: [`SubscriptionDefinition`](purista_core.md#subscriptiondefinition)\<`ServiceClassType`, `any`, `any`, `any`, `any`\>[]
 
 Helper type for creating list of service commands to be passed as input to service class
 
@@ -1337,7 +1360,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `expose` | { `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: [`ContentType`](purista_core.md#contenttype) ; `contentTypeResponse?`: [`ContentType`](purista_core.md#contenttype) ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } |
+| `expose` | \{ `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: [`ContentType`](purista_core.md#contenttype) ; `contentTypeResponse?`: [`ContentType`](purista_core.md#contenttype) ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } |
 | `expose.contentEncodingRequest?` | `string` |
 | `expose.contentEncodingResponse?` | `string` |
 | `expose.contentTypeRequest?` | [`ContentType`](purista_core.md#contenttype) |
@@ -1360,7 +1383,7 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `cb` | (`message`: [`EBMessage`](purista_core.md#ebmessage)) => `Promise`<`Omit`<[`CustomMessage`](purista_core.md#custommessage), ``"id"`` \| ``"timestamp"``\> \| `undefined`\> |
+| `cb` | (`message`: [`EBMessage`](purista_core.md#ebmessage)) => `Promise`\<`Omit`\<[`CustomMessage`](purista_core.md#custommessage), ``"id"`` \| ``"timestamp"``\> \| `undefined`\> |
 | `emitEventName?` | `string` |
 | `isMatchingEventName` | (`input?`: `string`) => `boolean` |
 | `isMatchingMessageType` | (`input`: [`EBMessageType`](../enums/purista_core.EBMessageType.md)) => `boolean` |
@@ -1419,7 +1442,7 @@ ___
 
 ### addPrefixToObject
 
-Ƭ **addPrefixToObject**<`T`, `P`\>: { [K in keyof T as K extends string ? \`${P}${K}\` : never]: T[K] }
+Ƭ **addPrefixToObject**\<`T`, `P`\>: \{ [K in keyof T as K extends string ? \`$\{P}$\{K}\` : never]: T[K] }
 
 Helper for better typescript type.
 All keys of given object must start with the given prefix. Otherwise Typescript will complain.
@@ -1477,7 +1500,7 @@ ___
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.8.2"``
+• `Const` **puristaVersion**: ``"1.8.3"``
 
 #### Defined in
 
@@ -1487,7 +1510,7 @@ ___
 
 ### extendApi
 
-▸ **extendApi**<`T`\>(`schema`, `SchemaObject?`): `T`
+▸ **extendApi**\<`T`\>(`schema`, `SchemaObject?`): `T`
 
 #### Type parameters
 
@@ -1535,13 +1558,13 @@ ___
 
 ### getCommandFunctionWithValidation
 
-▸ **getCommandFunctionWithValidation**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>(`fn`, `inputPayloadSchema`, `inputParameterSchema`, `outputPayloadSchema`, `beforeGuards?`): [`CommandFunction`](purista_core.md#commandfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **getCommandFunctionWithValidation**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>(`fn`, `inputPayloadSchema`, `inputParameterSchema`, `outputPayloadSchema`, `beforeGuards?`): [`CommandFunction`](purista_core.md#commandfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)\<`unknown`\> |
 | `MessagePayloadType` | `unknown` |
 | `MessageParamsType` | `unknown` |
 | `MessageResultType` | `unknown` |
@@ -1553,15 +1576,15 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `fn` | [`CommandFunction`](purista_core.md#commandfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\> |
-| `inputPayloadSchema` | `undefined` \| `ZodType`<`FunctionPayloadType`, `ZodTypeDef`, `MessagePayloadType`\> |
-| `inputParameterSchema` | `undefined` \| `ZodType`<`FunctionParamsType`, `ZodTypeDef`, `MessageParamsType`\> |
-| `outputPayloadSchema` | `undefined` \| `ZodType`<`MessageResultType`, `ZodTypeDef`, `FunctionResultType`\> |
-| `beforeGuards` | `Record`<`string`, [`CommandBeforeGuardHook`](purista_core.md#commandbeforeguardhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
+| `fn` | [`CommandFunction`](purista_core.md#commandfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\> |
+| `inputPayloadSchema` | `undefined` \| `ZodType`\<`FunctionPayloadType`, `ZodTypeDef`, `MessagePayloadType`\> |
+| `inputParameterSchema` | `undefined` \| `ZodType`\<`FunctionParamsType`, `ZodTypeDef`, `MessageParamsType`\> |
+| `outputPayloadSchema` | `undefined` \| `ZodType`\<`MessageResultType`, `ZodTypeDef`, `FunctionResultType`\> |
+| `beforeGuards` | `Record`\<`string`, [`CommandBeforeGuardHook`](purista_core.md#commandbeforeguardhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
 
 #### Returns
 
-[`CommandFunction`](purista_core.md#commandfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`CommandFunction`](purista_core.md#commandfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Defined in
 
@@ -1571,11 +1594,11 @@ ___
 
 ### getDefaultEventBridgeConfig
 
-▸ **getDefaultEventBridgeConfig**(): [`Complete`](purista_core.md#complete)<[`DefaultEventBridgeConfig`](purista_core.md#defaulteventbridgeconfig)\>
+▸ **getDefaultEventBridgeConfig**(): [`Complete`](purista_core.md#complete)\<[`DefaultEventBridgeConfig`](purista_core.md#defaulteventbridgeconfig)\>
 
 #### Returns
 
-[`Complete`](purista_core.md#complete)<[`DefaultEventBridgeConfig`](purista_core.md#defaulteventbridgeconfig)\>
+[`Complete`](purista_core.md#complete)\<[`DefaultEventBridgeConfig`](purista_core.md#defaulteventbridgeconfig)\>
 
 #### Defined in
 
@@ -1606,7 +1629,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `subscription` | [`Subscription`](purista_core.md#subscription) |
-| `cb` | (`message`: [`EBMessage`](purista_core.md#ebmessage)) => `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
+| `cb` | (`message`: [`EBMessage`](purista_core.md#ebmessage)) => `Promise`\<`undefined` \| `Omit`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\> |
 
 #### Returns
 
@@ -1620,13 +1643,13 @@ ___
 
 ### getSubscriptionFunctionWithValidation
 
-▸ **getSubscriptionFunctionWithValidation**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>(`fn`, `inputPayloadSchema`, `inputParameterSchema`, `outputPayloadSchema`, `beforeGuards?`): [`SubscriptionFunction`](purista_core.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **getSubscriptionFunctionWithValidation**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>(`fn`, `inputPayloadSchema`, `inputParameterSchema`, `outputPayloadSchema`, `beforeGuards?`): [`SubscriptionFunction`](purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)\<`unknown`\> |
 | `MessagePayloadType` | `unknown` |
 | `MessageParamsType` | `unknown` |
 | `MessageResultType` | `unknown` |
@@ -1638,15 +1661,15 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `fn` | [`SubscriptionFunction`](purista_core.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\> |
-| `inputPayloadSchema` | `undefined` \| `ZodType`<`FunctionPayloadType`, `ZodTypeDef`, `MessagePayloadType`\> |
-| `inputParameterSchema` | `undefined` \| `ZodType`<`FunctionParamsType`, `ZodTypeDef`, `MessageParamsType`\> |
-| `outputPayloadSchema` | `undefined` \| `ZodType`<`MessageResultType`, `ZodTypeDef`, `FunctionResultType`\> |
-| `beforeGuards` | `Record`<`string`, [`SubscriptionBeforeGuardHook`](purista_core.md#subscriptionbeforeguardhook)<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
+| `fn` | [`SubscriptionFunction`](purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\> |
+| `inputPayloadSchema` | `undefined` \| `ZodType`\<`FunctionPayloadType`, `ZodTypeDef`, `MessagePayloadType`\> |
+| `inputParameterSchema` | `undefined` \| `ZodType`\<`FunctionParamsType`, `ZodTypeDef`, `MessageParamsType`\> |
+| `outputPayloadSchema` | `undefined` \| `ZodType`\<`MessageResultType`, `ZodTypeDef`, `FunctionResultType`\> |
+| `beforeGuards` | `Record`\<`string`, [`SubscriptionBeforeGuardHook`](purista_core.md#subscriptionbeforeguardhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`\>\> |
 
 #### Returns
 
-[`SubscriptionFunction`](purista_core.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
+[`SubscriptionFunction`](purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>
 
 #### Defined in
 
@@ -1656,7 +1679,7 @@ ___
 
 ### getTimeoutPromise
 
-▸ **getTimeoutPromise**<`T`\>(`fn`, `ttl?`): `Promise`<`T`\>
+▸ **getTimeoutPromise**\<`T`\>(`fn`, `ttl?`): `Promise`\<`T`\>
 
 #### Type parameters
 
@@ -1668,12 +1691,12 @@ ___
 
 | Name | Type | Default value | Description |
 | :------ | :------ | :------ | :------ |
-| `fn` | `Promise`<`T`\> | `undefined` | the promise which should get a timeout |
+| `fn` | `Promise`\<`T`\> | `undefined` | the promise which should get a timeout |
 | `ttl` | `number` | `30000` | the timeout in ms |
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 **`Default`**
 
@@ -1906,7 +1929,7 @@ It only checks for "technically possible"
 
 ## Command
 
-• **CommandDefinitionBuilder**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: `Object`
+• **CommandDefinitionBuilder**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: `Object`
 
 Command definition builder is a helper to create and define a command for a service.
 It helps to set all needed information like schemas and hooks.
@@ -1932,7 +1955,7 @@ A working schema definition needs at least a command name, a short description a
 
 ### CommandAfterGuardHook
 
-Ƭ **CommandAfterGuardHook**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>: (`this`: `ServiceClassType`, `context`: [`CommandFunctionContext`](purista_core.md#commandfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\>, `result`: `Readonly`<`FunctionResultType`\>, `input`: `Readonly`<`FunctionPayloadType`\>, `parameter`: `Readonly`<`FunctionParamsType`\>) => `Promise`<`void`\>
+Ƭ **CommandAfterGuardHook**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>: (`this`: `ServiceClassType`, `context`: [`CommandFunctionContext`](purista_core.md#commandfunctioncontext)\<`MessagePayloadType`, `MessageParamsType`\>, `result`: `Readonly`\<`FunctionResultType`\>, `input`: `Readonly`\<`FunctionPayloadType`\>, `parameter`: `Readonly`\<`FunctionParamsType`\>) => `Promise`\<`void`\>
 
 #### Type parameters
 
@@ -1947,7 +1970,7 @@ A working schema definition needs at least a command name, a short description a
 
 #### Type declaration
 
-▸ (`this`, `context`, `result`, `input`, `parameter`): `Promise`<`void`\>
+▸ (`this`, `context`, `result`, `input`, `parameter`): `Promise`\<`void`\>
 
 Definition of after guard hook functions.
 This guard is called after function successfully returns and after output validation.
@@ -1957,14 +1980,14 @@ This guard is called after function successfully returns and after output valida
 | Name | Type |
 | :------ | :------ |
 | `this` | `ServiceClassType` |
-| `context` | [`CommandFunctionContext`](purista_core.md#commandfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\> |
-| `result` | `Readonly`<`FunctionResultType`\> |
-| `input` | `Readonly`<`FunctionPayloadType`\> |
-| `parameter` | `Readonly`<`FunctionParamsType`\> |
+| `context` | [`CommandFunctionContext`](purista_core.md#commandfunctioncontext)\<`MessagePayloadType`, `MessageParamsType`\> |
+| `result` | `Readonly`\<`FunctionResultType`\> |
+| `input` | `Readonly`\<`FunctionPayloadType`\> |
+| `parameter` | `Readonly`\<`FunctionParamsType`\> |
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -1974,7 +1997,7 @@ ___
 
 ### CommandBeforeGuardHook
 
-Ƭ **CommandBeforeGuardHook**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>: (`this`: `ServiceClassType`, `context`: [`CommandFunctionContext`](purista_core.md#commandfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\>, `payload`: `Readonly`<`FunctionPayloadType`\>, `parameter`: `Readonly`<`FunctionParamsType`\>) => `Promise`<`void`\>
+Ƭ **CommandBeforeGuardHook**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>: (`this`: `ServiceClassType`, `context`: [`CommandFunctionContext`](purista_core.md#commandfunctioncontext)\<`MessagePayloadType`, `MessageParamsType`\>, `payload`: `Readonly`\<`FunctionPayloadType`\>, `parameter`: `Readonly`\<`FunctionParamsType`\>) => `Promise`\<`void`\>
 
 #### Type parameters
 
@@ -1988,7 +2011,7 @@ ___
 
 #### Type declaration
 
-▸ (`this`, `context`, `payload`, `parameter`): `Promise`<`void`\>
+▸ (`this`, `context`, `payload`, `parameter`): `Promise`\<`void`\>
 
 Guard is called after command function input validation and before executing the command function.
 The guard is usefull to separate for example auth checks from business logic.
@@ -1999,13 +2022,13 @@ It should throw HandledError or return void.
 | Name | Type |
 | :------ | :------ |
 | `this` | `ServiceClassType` |
-| `context` | [`CommandFunctionContext`](purista_core.md#commandfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\> |
-| `payload` | `Readonly`<`FunctionPayloadType`\> |
-| `parameter` | `Readonly`<`FunctionParamsType`\> |
+| `context` | [`CommandFunctionContext`](purista_core.md#commandfunctioncontext)\<`MessagePayloadType`, `MessageParamsType`\> |
+| `payload` | `Readonly`\<`FunctionPayloadType`\> |
+| `parameter` | `Readonly`\<`FunctionParamsType`\> |
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -2015,7 +2038,7 @@ ___
 
 ### CommandDefinition
 
-Ƭ **CommandDefinition**<`ServiceClassType`, `MetadataType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: `Object`
+Ƭ **CommandDefinition**\<`ServiceClassType`, `MetadataType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: `Object`
 
 The definition for a command provided by some service.
 
@@ -2036,20 +2059,20 @@ The definition for a command provided by some service.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `call` | [`CommandFunction`](purista_core.md#commandfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\> | the command function |
+| `call` | [`CommandFunction`](purista_core.md#commandfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\> | the command function |
 | `commandDescription` | `string` | the description of the command |
 | `commandName` | `string` | the name of the command |
 | `eventBridgeConfig` | [`DefinitionEventBridgeConfig`](purista_core.md#definitioneventbridgeconfig) | config information for event bridge |
 | `eventName?` | `string` | the eventName for the command response |
-| `hooks` | { `afterGuard?`: `Record`<`string`, [`CommandAfterGuardHook`](purista_core.md#commandafterguardhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> ; `beforeGuard?`: `Record`<`string`, [`CommandBeforeGuardHook`](purista_core.md#commandbeforeguardhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>\> ; `transformInput?`: { `transformFunction`: [`CommandTransformInputHook`](purista_core.md#commandtransforminputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> ; `transformInputSchema`: `z.ZodType` ; `transformParameterSchema`: `z.ZodType`  } ; `transformOutput?`: { `transformFunction`: [`CommandTransformOutputHook`](purista_core.md#commandtransformoutputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `FunctionParamsType`, `unknown`\> ; `transformOutputSchema`: `z.ZodType`  }  } | hooks of command |
-| `hooks.afterGuard?` | `Record`<`string`, [`CommandAfterGuardHook`](purista_core.md#commandafterguardhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> | - |
-| `hooks.beforeGuard?` | `Record`<`string`, [`CommandBeforeGuardHook`](purista_core.md#commandbeforeguardhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>\> | - |
-| `hooks.transformInput?` | { `transformFunction`: [`CommandTransformInputHook`](purista_core.md#commandtransforminputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> ; `transformInputSchema`: `z.ZodType` ; `transformParameterSchema`: `z.ZodType`  } | - |
-| `hooks.transformInput.transformFunction` | [`CommandTransformInputHook`](purista_core.md#commandtransforminputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> | - |
+| `hooks` | \{ `afterGuard?`: `Record`\<`string`, [`CommandAfterGuardHook`](purista_core.md#commandafterguardhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> ; `beforeGuard?`: `Record`\<`string`, [`CommandBeforeGuardHook`](purista_core.md#commandbeforeguardhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>\> ; `transformInput?`: \{ `transformFunction`: [`CommandTransformInputHook`](purista_core.md#commandtransforminputhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> ; `transformInputSchema`: `z.ZodType` ; `transformParameterSchema`: `z.ZodType`  } ; `transformOutput?`: \{ `transformFunction`: [`CommandTransformOutputHook`](purista_core.md#commandtransformoutputhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `FunctionParamsType`, `unknown`\> ; `transformOutputSchema`: `z.ZodType`  }  } | hooks of command |
+| `hooks.afterGuard?` | `Record`\<`string`, [`CommandAfterGuardHook`](purista_core.md#commandafterguardhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> | - |
+| `hooks.beforeGuard?` | `Record`\<`string`, [`CommandBeforeGuardHook`](purista_core.md#commandbeforeguardhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`\>\> | - |
+| `hooks.transformInput?` | \{ `transformFunction`: [`CommandTransformInputHook`](purista_core.md#commandtransforminputhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> ; `transformInputSchema`: `z.ZodType` ; `transformParameterSchema`: `z.ZodType`  } | - |
+| `hooks.transformInput.transformFunction` | [`CommandTransformInputHook`](purista_core.md#commandtransforminputhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> | - |
 | `hooks.transformInput.transformInputSchema` | `z.ZodType` | - |
 | `hooks.transformInput.transformParameterSchema` | `z.ZodType` | - |
-| `hooks.transformOutput?` | { `transformFunction`: [`CommandTransformOutputHook`](purista_core.md#commandtransformoutputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `FunctionParamsType`, `unknown`\> ; `transformOutputSchema`: `z.ZodType`  } | - |
-| `hooks.transformOutput.transformFunction` | [`CommandTransformOutputHook`](purista_core.md#commandtransformoutputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `FunctionParamsType`, `unknown`\> | - |
+| `hooks.transformOutput?` | \{ `transformFunction`: [`CommandTransformOutputHook`](purista_core.md#commandtransformoutputhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `FunctionParamsType`, `unknown`\> ; `transformOutputSchema`: `z.ZodType`  } | - |
+| `hooks.transformOutput.transformFunction` | [`CommandTransformOutputHook`](purista_core.md#commandtransformoutputhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `FunctionParamsType`, `unknown`\> | - |
 | `hooks.transformOutput.transformOutputSchema` | `z.ZodType` | - |
 | `metadata` | `MetadataType` | the metadata of the command |
 
@@ -2061,7 +2084,7 @@ ___
 
 ### CommandErrorResponse
 
-Ƭ **CommandErrorResponse**: [`Prettify`](purista_core.md#prettify)<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: [`CorrelationId`](purista_core.md#correlationid) ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `receiver`: [`EBMessageSenderAddress`](purista_core.md#ebmessagesenderaddress)  } & [`EBMessageBase`](purista_core.md#ebmessagebase)\>
+Ƭ **CommandErrorResponse**: [`Prettify`](purista_core.md#prettify)\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: [`CorrelationId`](purista_core.md#correlationid) ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `payload`: \{ `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `receiver`: [`EBMessageSenderAddress`](purista_core.md#ebmessagesenderaddress)  } & [`EBMessageBase`](purista_core.md#ebmessagebase)\>
 
 CommandErrorResponse is a response to a specific previously received command which indicates some failure.
 
@@ -2073,7 +2096,7 @@ ___
 
 ### CommandFunction
 
-Ƭ **CommandFunction**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: (`this`: `ServiceClassType`, `context`: [`CommandFunctionContext`](purista_core.md#commandfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\>, `payload`: `Readonly`<`FunctionPayloadType`\>, `parameter`: `Readonly`<`FunctionParamsType`\>) => `Promise`<`FunctionResultType`\>
+Ƭ **CommandFunction**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: (`this`: `ServiceClassType`, `context`: [`CommandFunctionContext`](purista_core.md#commandfunctioncontext)\<`MessagePayloadType`, `MessageParamsType`\>, `payload`: `Readonly`\<`FunctionPayloadType`\>, `parameter`: `Readonly`\<`FunctionParamsType`\>) => `Promise`\<`FunctionResultType`\>
 
 #### Type parameters
 
@@ -2088,7 +2111,7 @@ ___
 
 #### Type declaration
 
-▸ (`this`, `context`, `payload`, `parameter`): `Promise`<`FunctionResultType`\>
+▸ (`this`, `context`, `payload`, `parameter`): `Promise`\<`FunctionResultType`\>
 
 CommandFunction is a function which will be triggered when a matching event bridge message is received by the service
 
@@ -2097,13 +2120,13 @@ CommandFunction is a function which will be triggered when a matching event brid
 | Name | Type |
 | :------ | :------ |
 | `this` | `ServiceClassType` |
-| `context` | [`CommandFunctionContext`](purista_core.md#commandfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\> |
-| `payload` | `Readonly`<`FunctionPayloadType`\> |
-| `parameter` | `Readonly`<`FunctionParamsType`\> |
+| `context` | [`CommandFunctionContext`](purista_core.md#commandfunctioncontext)\<`MessagePayloadType`, `MessageParamsType`\> |
+| `payload` | `Readonly`\<`FunctionPayloadType`\> |
+| `parameter` | `Readonly`\<`FunctionParamsType`\> |
 
 ##### Returns
 
-`Promise`<`FunctionResultType`\>
+`Promise`\<`FunctionResultType`\>
 
 #### Defined in
 
@@ -2113,7 +2136,7 @@ ___
 
 ### CommandFunctionContext
 
-Ƭ **CommandFunctionContext**<`MessagePayloadType`, `MessageParamsType`\>: [`Prettify`](purista_core.md#prettify)<[`ContextBase`](purista_core.md#contextbase) & [`CommandFunctionContextEnhancements`](purista_core.md#commandfunctioncontextenhancements)<`MessagePayloadType`, `MessageParamsType`\>\>
+Ƭ **CommandFunctionContext**\<`MessagePayloadType`, `MessageParamsType`\>: [`Prettify`](purista_core.md#prettify)\<[`ContextBase`](purista_core.md#contextbase) & [`CommandFunctionContextEnhancements`](purista_core.md#commandfunctioncontextenhancements)\<`MessagePayloadType`, `MessageParamsType`\>\>
 
 The command function context which will be passed into command function.
 
@@ -2132,7 +2155,7 @@ ___
 
 ### CommandFunctionContextEnhancements
 
-Ƭ **CommandFunctionContextEnhancements**<`MessagePayloadType`, `MessageParamsType`\>: `Object`
+Ƭ **CommandFunctionContextEnhancements**\<`MessagePayloadType`, `MessageParamsType`\>: `Object`
 
 It provides the original command message with types for payload and parameter.
 Also, the methods:
@@ -2153,7 +2176,7 @@ Also, the methods:
 | :------ | :------ | :------ |
 | `emit` | [`EmitCustomMessageFunction`](purista_core.md#emitcustommessagefunction) | emit a custom message |
 | `invoke` | [`InvokeFunction`](purista_core.md#invokefunction) | Invokes a command and returns the result. It is recommended to validate the result against a schema which only contains the data you actually need. **`Example`** ```typescript const address: EBMessageAddress = { serviceName: 'name-of-service-to-invoke', serviceVersion: '1', serviceTarget: 'command-name-to-invoke', } const inputPayload = { my: 'input' } const inputParameter = { search: 'for_me' } const result = await invoke<MyResultType>(address, inputPayload inputParameter ) ``` |
-| `message` | `Readonly`<[`Command`](purista_core.md#command)<`MessagePayloadType`, `MessageParamsType`\>\> | the original message |
+| `message` | `Readonly`\<[`Command`](purista_core.md#command)\<`MessagePayloadType`, `MessageParamsType`\>\> | the original message |
 
 #### Defined in
 
@@ -2163,7 +2186,7 @@ ___
 
 ### CommandResponse
 
-Ƭ **CommandResponse**<`T`\>: [`CommandSuccessResponse`](purista_core.md#commandsuccessresponse)<`T`\> \| [`CommandErrorResponse`](purista_core.md#commanderrorresponse)
+Ƭ **CommandResponse**\<`T`\>: [`CommandSuccessResponse`](purista_core.md#commandsuccessresponse)\<`T`\> \| [`CommandErrorResponse`](purista_core.md#commanderrorresponse)
 
 CommandResponse is a response to a specific previously received command which can be either a success or failure
 
@@ -2181,7 +2204,7 @@ ___
 
 ### CommandSuccessResponse
 
-Ƭ **CommandSuccessResponse**<`PayloadType`\>: [`Prettify`](purista_core.md#prettify)<{ `correlationId`: [`CorrelationId`](purista_core.md#correlationid) ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `payload`: `PayloadType` ; `receiver`: [`EBMessageSenderAddress`](purista_core.md#ebmessagesenderaddress)  } & [`EBMessageBase`](purista_core.md#ebmessagebase)\>
+Ƭ **CommandSuccessResponse**\<`PayloadType`\>: [`Prettify`](purista_core.md#prettify)\<\{ `correlationId`: [`CorrelationId`](purista_core.md#correlationid) ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `payload`: `PayloadType` ; `receiver`: [`EBMessageSenderAddress`](purista_core.md#ebmessagesenderaddress)  } & [`EBMessageBase`](purista_core.md#ebmessagebase)\>
 
 CommandSuccessResponse is a response to a specific previously received command.
 It indicates that the command was executed successfully and contains the result payload
@@ -2200,7 +2223,7 @@ ___
 
 ### CommandTransformFunctionContext
 
-Ƭ **CommandTransformFunctionContext**<`PayloadType`, `ParameterType`\>: [`Prettify`](purista_core.md#prettify)<[`ContextBase`](purista_core.md#contextbase) & { `message`: `Readonly`<[`Command`](purista_core.md#command)<`PayloadType`, `ParameterType`\>\>  }\>
+Ƭ **CommandTransformFunctionContext**\<`PayloadType`, `ParameterType`\>: [`Prettify`](purista_core.md#prettify)\<[`ContextBase`](purista_core.md#contextbase) & \{ `message`: `Readonly`\<[`Command`](purista_core.md#command)\<`PayloadType`, `ParameterType`\>\>  }\>
 
 #### Type parameters
 
@@ -2217,7 +2240,7 @@ ___
 
 ### CommandTransformInputHook
 
-Ƭ **CommandTransformInputHook**<`ServiceClassType`, `PayloadOutput`, `ParamsOutput`, `PayloadInput`, `ParamsInput`\>: (`this`: `ServiceClassType`, `context`: [`CommandTransformFunctionContext`](purista_core.md#commandtransformfunctioncontext)<`PayloadInput`, `ParamsInput`\>, `payload`: `Readonly`<`PayloadInput`\>, `parameter`: `Readonly`<`ParamsInput`\>) => `Promise`<{ `parameter`: `Readonly`<`ParamsOutput`\> ; `payload`: `Readonly`<`PayloadOutput`\>  }\>
+Ƭ **CommandTransformInputHook**\<`ServiceClassType`, `PayloadOutput`, `ParamsOutput`, `PayloadInput`, `ParamsInput`\>: (`this`: `ServiceClassType`, `context`: [`CommandTransformFunctionContext`](purista_core.md#commandtransformfunctioncontext)\<`PayloadInput`, `ParamsInput`\>, `payload`: `Readonly`\<`PayloadInput`\>, `parameter`: `Readonly`\<`ParamsInput`\>) => `Promise`\<\{ `parameter`: `Readonly`\<`ParamsOutput`\> ; `payload`: `Readonly`\<`PayloadOutput`\>  }\>
 
 #### Type parameters
 
@@ -2231,7 +2254,7 @@ ___
 
 #### Type declaration
 
-▸ (`this`, `context`, `payload`, `parameter`): `Promise`<{ `parameter`: `Readonly`<`ParamsOutput`\> ; `payload`: `Readonly`<`PayloadOutput`\>  }\>
+▸ (`this`, `context`, `payload`, `parameter`): `Promise`\<\{ `parameter`: `Readonly`\<`ParamsOutput`\> ; `payload`: `Readonly`\<`PayloadOutput`\>  }\>
 
 The command transform gets the raw message payload and parameter input, which is validated against the transform input schemas.
 The command transform function is called before guard hooks and before the actual command function.
@@ -2244,13 +2267,13 @@ The type of returned payload and parameter must match the command function input
 | Name | Type |
 | :------ | :------ |
 | `this` | `ServiceClassType` |
-| `context` | [`CommandTransformFunctionContext`](purista_core.md#commandtransformfunctioncontext)<`PayloadInput`, `ParamsInput`\> |
-| `payload` | `Readonly`<`PayloadInput`\> |
-| `parameter` | `Readonly`<`ParamsInput`\> |
+| `context` | [`CommandTransformFunctionContext`](purista_core.md#commandtransformfunctioncontext)\<`PayloadInput`, `ParamsInput`\> |
+| `payload` | `Readonly`\<`PayloadInput`\> |
+| `parameter` | `Readonly`\<`ParamsInput`\> |
 
 ##### Returns
 
-`Promise`<{ `parameter`: `Readonly`<`ParamsOutput`\> ; `payload`: `Readonly`<`PayloadOutput`\>  }\>
+`Promise`\<\{ `parameter`: `Readonly`\<`ParamsOutput`\> ; `payload`: `Readonly`\<`PayloadOutput`\>  }\>
 
 #### Defined in
 
@@ -2260,7 +2283,7 @@ ___
 
 ### CommandTransformOutputHook
 
-Ƭ **CommandTransformOutputHook**<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `MessageParamsType`, `ResponseOutput`\>: (`this`: `ServiceClassType`, `context`: [`CommandTransformFunctionContext`](purista_core.md#commandtransformfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\>, `payload`: `Readonly`<`MessageResultType`\>, `parameter`: `Readonly`<`MessageParamsType`\>) => `Promise`<`ResponseOutput`\>
+Ƭ **CommandTransformOutputHook**\<`ServiceClassType`, `MessagePayloadType`, `MessageResultType`, `MessageParamsType`, `ResponseOutput`\>: (`this`: `ServiceClassType`, `context`: [`CommandTransformFunctionContext`](purista_core.md#commandtransformfunctioncontext)\<`MessagePayloadType`, `MessageParamsType`\>, `payload`: `Readonly`\<`MessageResultType`\>, `parameter`: `Readonly`\<`MessageParamsType`\>) => `Promise`\<`ResponseOutput`\>
 
 #### Type parameters
 
@@ -2274,7 +2297,7 @@ ___
 
 #### Type declaration
 
-▸ (`this`, `context`, `payload`, `parameter`): `Promise`<`ResponseOutput`\>
+▸ (`this`, `context`, `payload`, `parameter`): `Promise`\<`ResponseOutput`\>
 
 This transform hook is executed after function output validation and AfterGuardHooks.
 
@@ -2283,13 +2306,13 @@ This transform hook is executed after function output validation and AfterGuardH
 | Name | Type |
 | :------ | :------ |
 | `this` | `ServiceClassType` |
-| `context` | [`CommandTransformFunctionContext`](purista_core.md#commandtransformfunctioncontext)<`MessagePayloadType`, `MessageParamsType`\> |
-| `payload` | `Readonly`<`MessageResultType`\> |
-| `parameter` | `Readonly`<`MessageParamsType`\> |
+| `context` | [`CommandTransformFunctionContext`](purista_core.md#commandtransformfunctioncontext)\<`MessagePayloadType`, `MessageParamsType`\> |
+| `payload` | `Readonly`\<`MessageResultType`\> |
+| `parameter` | `Readonly`\<`MessageParamsType`\> |
 
 ##### Returns
 
-`Promise`<`ResponseOutput`\>
+`Promise`\<`ResponseOutput`\>
 
 #### Defined in
 
@@ -2413,7 +2436,7 @@ await eventBridge.start()
 
 [DefaultEventBridge/DefaultEventBridge.impl.ts:61](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L61)
 
-• **EventBridgeBaseClass**<`ConfigType`\>: `Object`
+• **EventBridgeBaseClass**\<`ConfigType`\>: `Object`
 
 The base class to be extended by event bridge implementations
 
@@ -2592,7 +2615,7 @@ ___
 
 ### createErrorResponse
 
-▸ **createErrorResponse**(`instanceId`, `originalEBMessage`, `statusCode?`, `error?`): `Readonly`<`Omit`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\>
+▸ **createErrorResponse**(`instanceId`, `originalEBMessage`, `statusCode?`, `error?`): `Readonly`\<`Omit`\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: \{ `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\>
 
 Creates a error response object based on original command
 Toggles sender and receiver
@@ -2602,13 +2625,13 @@ Toggles sender and receiver
 | Name | Type | Default value |
 | :------ | :------ | :------ |
 | `instanceId` | `string` | `undefined` |
-| `originalEBMessage` | `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | `undefined` |
+| `originalEBMessage` | `Readonly`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: \{ `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | `undefined` |
 | `statusCode` | [`StatusCode`](../enums/purista_core.StatusCode.md) | `StatusCode.InternalServerError` |
 | `error?` | `unknown` | `undefined` |
 
 #### Returns
 
-`Readonly`<`Omit`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\>
+`Readonly`\<`Omit`\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: \{ `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\>
 
 CommandErrorResponse message object
 
@@ -2632,7 +2655,7 @@ ___
 | `sender.serviceName` | `string` | the name of the service |
 | `sender.serviceTarget` | `string` | the name of the command or subscription |
 | `sender.serviceVersion` | `string` | the version of the service |
-| `additional?` | `Partial`<[`InfoMessage`](purista_core.md#infomessage)\> | - |
+| `additional?` | `Partial`\<[`InfoMessage`](purista_core.md#infomessage)\> | - |
 
 #### Returns
 
@@ -2646,7 +2669,7 @@ ___
 
 ### createSuccessResponse
 
-▸ **createSuccessResponse**<`T`\>(`instanceId`, `originalEBMessage`, `payload`, `eventName?`, `contentType?`, `contentEncoding?`): `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `T` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+▸ **createSuccessResponse**\<`T`\>(`instanceId`, `originalEBMessage`, `payload`, `eventName?`, `contentType?`, `contentEncoding?`): `Readonly`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `T` ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Type parameters
 
@@ -2659,7 +2682,7 @@ ___
 | Name | Type | Default value |
 | :------ | :------ | :------ |
 | `instanceId` | `string` | `undefined` |
-| `originalEBMessage` | `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | `undefined` |
+| `originalEBMessage` | `Readonly`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: \{ `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | `undefined` |
 | `payload` | `T` | `undefined` |
 | `eventName?` | `string` | `undefined` |
 | `contentType` | `string` | `'application/json'` |
@@ -2667,7 +2690,7 @@ ___
 
 #### Returns
 
-`Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `T` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+`Readonly`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `T` ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Defined in
 
@@ -2698,7 +2721,7 @@ ___
 
 ### getCleanedMessage
 
-▸ **getCleanedMessage**(`message`, `stripeOutContent?`): `Record`<`string`, `unknown`\>
+▸ **getCleanedMessage**(`message`, `stripeOutContent?`): `Record`\<`string`, `unknown`\>
 
 Helper function for logging.
 Returns a message object, where fields which might contain sensitive data, are overwritten with string values.
@@ -2712,12 +2735,12 @@ Command error responses are not changed.
 
 | Name | Type | Default value |
 | :------ | :------ | :------ |
-| `message` | `Readonly`<[`EBMessage`](purista_core.md#ebmessage)\> | `undefined` |
+| `message` | `Readonly`\<[`EBMessage`](purista_core.md#ebmessage)\> | `undefined` |
 | `stripeOutContent` | `boolean` | `!isDevelop()` |
 
 #### Returns
 
-`Record`<`string`, `unknown`\>
+`Record`\<`string`, `unknown`\>
 
 #### Defined in
 
@@ -2937,7 +2960,7 @@ Internal events are prefixed with `service-`
 
 [core/types/ServiceEvents.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L11)
 
-• **Service**<`ConfigType`\>: `Object`
+• **Service**\<`ConfigType`\>: `Object`
 
 Base class for all services.
 This class provides base functions to work with the event bridge, logging and so on
@@ -2969,7 +2992,7 @@ class MyService extends Service {
 
 [core/Service/Service.impl.ts:76](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L76)
 
-• **ServiceBuilder**<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>: `Object`
+• **ServiceBuilder**\<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>: `Object`
 
 This class is used to build a service.
 The `ServiceBuilder` class is used to build a service. It has a few methods that are used to add
@@ -2980,15 +3003,15 @@ to create an instance of the service class.
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | `Record`<`string`, `unknown`\> |
-| `ConfigInputType` | `Record`<`string`, `unknown`\> |
-| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md) = [`Service`](../classes/purista_core.Service.md)<`ConfigType`\> |
+| `ConfigType` | `Record`\<`string`, `unknown`\> |
+| `ConfigInputType` | `Record`\<`string`, `unknown`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md) = [`Service`](../classes/purista_core.Service.md)\<`ConfigType`\> |
 
 #### Defined in
 
 [ServiceBuilder/ServiceBuilder.impl.ts:38](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L38)
 
-• **ServiceClass**<`ConfigType`\>: `Object`
+• **ServiceClass**\<`ConfigType`\>: `Object`
 
 The ServiceClass interface
 
@@ -3004,7 +3027,7 @@ The ServiceClass interface
 
 ### ServiceConstructorInput
 
-Ƭ **ServiceConstructorInput**<`ConfigType`\>: `Object`
+Ƭ **ServiceConstructorInput**\<`ConfigType`\>: `Object`
 
 #### Type parameters
 
@@ -3016,7 +3039,7 @@ The ServiceClass interface
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `commandDefinitionList` | [`CommandDefinitionList`](purista_core.md#commanddefinitionlist)<`any`\> | The list of command definitions for this service |
+| `commandDefinitionList` | [`CommandDefinitionList`](purista_core.md#commanddefinitionlist)\<`any`\> | The list of command definitions for this service |
 | `config` | `ConfigType` | The service specific config |
 | `configStore?` | [`ConfigStore`](../interfaces/purista_core.ConfigStore.md) | The config store instance |
 | `eventBridge` | [`EventBridge`](../interfaces/purista_core.EventBridge.md) | The eventBridge instance |
@@ -3025,7 +3048,7 @@ The ServiceClass interface
 | `secretStore?` | [`SecretStore`](../interfaces/purista_core.SecretStore.md) | The secret store instance |
 | `spanProcessor?` | `SpanProcessor` | The opentelemetry span processor instance |
 | `stateStore?` | [`StateStore`](../interfaces/purista_core.StateStore.md) | the state store instance |
-| `subscriptionDefinitionList` | [`SubscriptionDefinitionList`](purista_core.md#subscriptiondefinitionlist)<`any`\> | The list of subscription definitions for this service |
+| `subscriptionDefinitionList` | [`SubscriptionDefinitionList`](purista_core.md#subscriptiondefinitionlist)\<`any`\> | The list of subscription definitions for this service |
 
 #### Defined in
 
@@ -3049,22 +3072,22 @@ If you like to use your own events, the event name must be prefixed with `misc-`
 | :------ | :------ | :------ |
 | `service-available` | `undefined` | emitted when the service is fully initialized and ready Should be emitted by custom service class. It is not emitted by default |
 | `service-drain` | `undefined` | emitted when the service is going to be stopped |
-| `service-handled-command-error` | { `commandName`: `string` ; `error`: [`HandledError`](../classes/purista_core.HandledError.md) ; `traceId`: [`TraceId`](purista_core.md#traceid)  } | emitted when a command throws a HandledError |
+| `service-handled-command-error` | \{ `commandName`: `string` ; `error`: [`HandledError`](../classes/purista_core.HandledError.md) ; `traceId`: [`TraceId`](purista_core.md#traceid)  } | emitted when a command throws a HandledError |
 | `service-handled-command-error.commandName` | `string` | - |
 | `service-handled-command-error.error` | [`HandledError`](../classes/purista_core.HandledError.md) | - |
 | `service-handled-command-error.traceId` | [`TraceId`](purista_core.md#traceid) | - |
-| `service-handled-subscription-error` | { `error`: [`HandledError`](../classes/purista_core.HandledError.md) ; `subscriptionName`: `string` ; `traceId`: [`TraceId`](purista_core.md#traceid)  } | emitted when a subscription throws a HandledError |
+| `service-handled-subscription-error` | \{ `error`: [`HandledError`](../classes/purista_core.HandledError.md) ; `subscriptionName`: `string` ; `traceId`: [`TraceId`](purista_core.md#traceid)  } | emitted when a subscription throws a HandledError |
 | `service-handled-subscription-error.error` | [`HandledError`](../classes/purista_core.HandledError.md) | - |
 | `service-handled-subscription-error.subscriptionName` | `string` | - |
 | `service-handled-subscription-error.traceId` | [`TraceId`](purista_core.md#traceid) | - |
 | `service-not-available` | `undefined` \| `unknown` | emitted when the service is not available (for example database connection could not be established) |
 | `service-started` | `undefined` | emitted when the service is started, but not fully initialized and not ready yet |
 | `service-stopped` | `undefined` | emitted when the service has been stopped |
-| `service-unhandled-command-error` | { `commandName`: `string` ; `error`: `unknown` ; `traceId`: [`TraceId`](purista_core.md#traceid)  } | emitted when a command throws an error other than a HandledError |
+| `service-unhandled-command-error` | \{ `commandName`: `string` ; `error`: `unknown` ; `traceId`: [`TraceId`](purista_core.md#traceid)  } | emitted when a command throws an error other than a HandledError |
 | `service-unhandled-command-error.commandName` | `string` | - |
 | `service-unhandled-command-error.error` | `unknown` | - |
 | `service-unhandled-command-error.traceId` | [`TraceId`](purista_core.md#traceid) | - |
-| `service-unhandled-subscription-error` | { `error`: `unknown` ; `subscriptionName`: `string` ; `traceId`: [`TraceId`](purista_core.md#traceid)  } | emitted when a subscription throws an error other than a HandledError |
+| `service-unhandled-subscription-error` | \{ `error`: `unknown` ; `subscriptionName`: `string` ; `traceId`: [`TraceId`](purista_core.md#traceid)  } | emitted when a subscription throws an error other than a HandledError |
 | `service-unhandled-subscription-error.error` | `unknown` | - |
 | `service-unhandled-subscription-error.subscriptionName` | `string` | - |
 | `service-unhandled-subscription-error.traceId` | [`TraceId`](purista_core.md#traceid) | - |
@@ -3075,7 +3098,7 @@ If you like to use your own events, the event name must be prefixed with `misc-`
 
 ## Store
 
-• **ConfigStoreBaseClass**<`ConfigType`\>: `Object`
+• **ConfigStoreBaseClass**\<`ConfigType`\>: `Object`
 
 Base class for config store adapters
 
@@ -3083,7 +3106,7 @@ Base class for config store adapters
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | extends `Record`<`string`, `unknown`\> = {} |
+| `ConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
 
 #### Defined in
 
@@ -3159,7 +3182,7 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 [DefaultStateStore/DefaultStateStore.impl.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L11)
 
-• **SecretStoreBaseClass**<`ConfigType`\>: `Object`
+• **SecretStoreBaseClass**\<`ConfigType`\>: `Object`
 
 Base class for secret store adapters
 
@@ -3167,13 +3190,13 @@ Base class for secret store adapters
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | extends `Record`<`string`, `unknown`\> = {} |
+| `ConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
 
 #### Defined in
 
 [core/SecretStore/SecretStoreBaseClass.impl.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L11)
 
-• **StateStoreBaseClass**<`ConfigType`\>: `Object`
+• **StateStoreBaseClass**\<`ConfigType`\>: `Object`
 
 Base class for config store implementations
 
@@ -3181,7 +3204,7 @@ Base class for config store implementations
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | extends `Record`<`string`, `unknown`\> = {} |
+| `ConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
 
 #### Defined in
 
@@ -3213,11 +3236,11 @@ Interface definition for state store implementations
 
 ### ConfigDeleteFunction
 
-Ƭ **ConfigDeleteFunction**: (`configName`: `string`) => `Promise`<`void`\>
+Ƭ **ConfigDeleteFunction**: (`configName`: `string`) => `Promise`\<`void`\>
 
 #### Type declaration
 
-▸ (`configName`): `Promise`<`void`\>
+▸ (`configName`): `Promise`\<`void`\>
 
 delete a config value from the config store
 
@@ -3229,7 +3252,7 @@ delete a config value from the config store
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -3239,11 +3262,11 @@ ___
 
 ### ConfigGetterFunction
 
-Ƭ **ConfigGetterFunction**: (...`configNames`: `string`[]) => `Promise`<`Record`<`string`, `unknown` \| `undefined`\>\>
+Ƭ **ConfigGetterFunction**: (...`configNames`: `string`[]) => `Promise`\<`Record`\<`string`, `unknown` \| `undefined`\>\>
 
 #### Type declaration
 
-▸ (`...configNames`): `Promise`<`Record`<`string`, `unknown` \| `undefined`\>\>
+▸ (`...configNames`): `Promise`\<`Record`\<`string`, `unknown` \| `undefined`\>\>
 
 get a config value from the config store
 
@@ -3255,7 +3278,7 @@ get a config value from the config store
 
 ##### Returns
 
-`Promise`<`Record`<`string`, `unknown` \| `undefined`\>\>
+`Promise`\<`Record`\<`string`, `unknown` \| `undefined`\>\>
 
 #### Defined in
 
@@ -3265,11 +3288,11 @@ ___
 
 ### ConfigSetterFunction
 
-Ƭ **ConfigSetterFunction**: (`secretName`: `string`, `secretValue`: `unknown`) => `Promise`<`void`\>
+Ƭ **ConfigSetterFunction**: (`secretName`: `string`, `secretValue`: `unknown`) => `Promise`\<`void`\>
 
 #### Type declaration
 
-▸ (`secretName`, `secretValue`): `Promise`<`void`\>
+▸ (`secretName`, `secretValue`): `Promise`\<`void`\>
 
 set a config value in the config store
 
@@ -3282,7 +3305,7 @@ set a config value in the config store
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -3292,11 +3315,11 @@ ___
 
 ### SecretDeleteFunction
 
-Ƭ **SecretDeleteFunction**: (`secretName`: `string`) => `Promise`<`void`\>
+Ƭ **SecretDeleteFunction**: (`secretName`: `string`) => `Promise`\<`void`\>
 
 #### Type declaration
 
-▸ (`secretName`): `Promise`<`void`\>
+▸ (`secretName`): `Promise`\<`void`\>
 
 delete a secret from the secret store
 
@@ -3308,7 +3331,7 @@ delete a secret from the secret store
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -3318,11 +3341,11 @@ ___
 
 ### SecretGetterFunction
 
-Ƭ **SecretGetterFunction**: (...`secretName`: `string`[]) => `Promise`<`Record`<`string`, `string` \| `undefined`\>\>
+Ƭ **SecretGetterFunction**: (...`secretName`: `string`[]) => `Promise`\<`Record`\<`string`, `string` \| `undefined`\>\>
 
 #### Type declaration
 
-▸ (`...secretName`): `Promise`<`Record`<`string`, `string` \| `undefined`\>\>
+▸ (`...secretName`): `Promise`\<`Record`\<`string`, `string` \| `undefined`\>\>
 
 get a secret from the secret store
 
@@ -3334,7 +3357,7 @@ get a secret from the secret store
 
 ##### Returns
 
-`Promise`<`Record`<`string`, `string` \| `undefined`\>\>
+`Promise`\<`Record`\<`string`, `string` \| `undefined`\>\>
 
 #### Defined in
 
@@ -3344,11 +3367,11 @@ ___
 
 ### SecretSetterFunction
 
-Ƭ **SecretSetterFunction**: (`secretName`: `string`, `secretValue`: `string`) => `Promise`<`void`\>
+Ƭ **SecretSetterFunction**: (`secretName`: `string`, `secretValue`: `string`) => `Promise`\<`void`\>
 
 #### Type declaration
 
-▸ (`secretName`, `secretValue`): `Promise`<`void`\>
+▸ (`secretName`, `secretValue`): `Promise`\<`void`\>
 
 set a secret in the secret store
 
@@ -3361,7 +3384,7 @@ set a secret in the secret store
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -3371,11 +3394,11 @@ ___
 
 ### StateDeleteFunction
 
-Ƭ **StateDeleteFunction**: (`stateName`: `string`) => `Promise`<`void`\>
+Ƭ **StateDeleteFunction**: (`stateName`: `string`) => `Promise`\<`void`\>
 
 #### Type declaration
 
-▸ (`stateName`): `Promise`<`void`\>
+▸ (`stateName`): `Promise`\<`void`\>
 
 delete a state value from the state store
 
@@ -3387,7 +3410,7 @@ delete a state value from the state store
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -3397,11 +3420,11 @@ ___
 
 ### StateGetterFunction
 
-Ƭ **StateGetterFunction**: (...`stateNames`: `string`[]) => `Promise`<`Record`<`string`, `unknown` \| `undefined`\>\>
+Ƭ **StateGetterFunction**: (...`stateNames`: `string`[]) => `Promise`\<`Record`\<`string`, `unknown` \| `undefined`\>\>
 
 #### Type declaration
 
-▸ (`...stateNames`): `Promise`<`Record`<`string`, `unknown` \| `undefined`\>\>
+▸ (`...stateNames`): `Promise`\<`Record`\<`string`, `unknown` \| `undefined`\>\>
 
 get a state value from the state store
 
@@ -3413,7 +3436,7 @@ get a state value from the state store
 
 ##### Returns
 
-`Promise`<`Record`<`string`, `unknown` \| `undefined`\>\>
+`Promise`\<`Record`\<`string`, `unknown` \| `undefined`\>\>
 
 #### Defined in
 
@@ -3423,11 +3446,11 @@ ___
 
 ### StateSetterFunction
 
-Ƭ **StateSetterFunction**: (`secretName`: `string`, `secretValue`: `unknown`) => `Promise`<`void`\>
+Ƭ **StateSetterFunction**: (`secretName`: `string`, `secretValue`: `unknown`) => `Promise`\<`void`\>
 
 #### Type declaration
 
-▸ (`secretName`, `secretValue`): `Promise`<`void`\>
+▸ (`secretName`, `secretValue`): `Promise`\<`void`\>
 
 set a state value in the state store
 
@@ -3440,7 +3463,7 @@ set a state value in the state store
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -3448,7 +3471,7 @@ set a state value in the state store
 
 ## Subscription
 
-• **SubscriptionDefinitionBuilder**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: `Object`
+• **SubscriptionDefinitionBuilder**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: `Object`
 
 Subscription definition builder is a helper to create and define a subscriptions for a service.
 It helps to set all needed filters.
@@ -3473,7 +3496,7 @@ A working schema definition needs at least a subscription name, a short descript
 
 ### Subscription
 
-Ƭ **Subscription**<`PayloadType`, `ParameterType`\>: `Object`
+Ƭ **Subscription**\<`PayloadType`, `ParameterType`\>: `Object`
 
 A subscription managed by the event bridge
 
@@ -3492,16 +3515,16 @@ A subscription managed by the event bridge
 | `eventBridgeConfig` | [`DefinitionEventBridgeConfig`](purista_core.md#definitioneventbridgeconfig) | config information for event bridge |
 | `eventName?` | `string` | the event name to subscribe for |
 | `messageType?` | [`EBMessageType`](../enums/purista_core.EBMessageType.md) | the message type |
-| `payload?` | { `parameter?`: `ParameterType` ; `payload?`: `PayloadType`  } | the message payload |
+| `payload?` | \{ `parameter?`: `ParameterType` ; `payload?`: `PayloadType`  } | the message payload |
 | `payload.parameter?` | `ParameterType` | - |
 | `payload.payload?` | `PayloadType` | - |
 | `principalId?` | [`PrincipalId`](purista_core.md#principalid) | the principal id |
-| `receiver?` | { `instanceId?`: [`InstanceId`](purista_core.md#instanceid) ; `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } | the consumer address of the message |
+| `receiver?` | \{ `instanceId?`: [`InstanceId`](purista_core.md#instanceid) ; `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } | the consumer address of the message |
 | `receiver.instanceId?` | [`InstanceId`](purista_core.md#instanceid) | - |
 | `receiver.serviceName?` | `string` | - |
 | `receiver.serviceTarget?` | `string` | - |
 | `receiver.serviceVersion?` | `string` | - |
-| `sender?` | { `instanceId?`: [`InstanceId`](purista_core.md#instanceid) ; `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } | the producer address of the message |
+| `sender?` | \{ `instanceId?`: [`InstanceId`](purista_core.md#instanceid) ; `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } | the producer address of the message |
 | `sender.instanceId?` | [`InstanceId`](purista_core.md#instanceid) | - |
 | `sender.serviceName?` | `string` | - |
 | `sender.serviceTarget?` | `string` | - |
@@ -3517,7 +3540,7 @@ ___
 
 ### SubscriptionAfterGuardHook
 
-Ƭ **SubscriptionAfterGuardHook**<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadOutputType`, `FunctionParameterType`\>: (`this`: `ServiceClassType`, `context`: [`SubscriptionFunctionContext`](purista_core.md#subscriptionfunctioncontext), `result`: `Readonly`<`FunctionResultType`\>, `payload`: `Readonly`<`FunctionPayloadOutputType`\>, `parameter`: `Readonly`<`FunctionParameterType`\>) => `Promise`<`void`\>
+Ƭ **SubscriptionAfterGuardHook**\<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadOutputType`, `FunctionParameterType`\>: (`this`: `ServiceClassType`, `context`: [`SubscriptionFunctionContext`](purista_core.md#subscriptionfunctioncontext), `result`: `Readonly`\<`FunctionResultType`\>, `payload`: `Readonly`\<`FunctionPayloadOutputType`\>, `parameter`: `Readonly`\<`FunctionParameterType`\>) => `Promise`\<`void`\>
 
 #### Type parameters
 
@@ -3530,7 +3553,7 @@ ___
 
 #### Type declaration
 
-▸ (`this`, `context`, `result`, `payload`, `parameter`): `Promise`<`void`\>
+▸ (`this`, `context`, `result`, `payload`, `parameter`): `Promise`\<`void`\>
 
 Definition of after guard hook functions.
 This guard is called after function successfully returns and after output validation.
@@ -3541,13 +3564,13 @@ This guard is called after function successfully returns and after output valida
 | :------ | :------ |
 | `this` | `ServiceClassType` |
 | `context` | [`SubscriptionFunctionContext`](purista_core.md#subscriptionfunctioncontext) |
-| `result` | `Readonly`<`FunctionResultType`\> |
-| `payload` | `Readonly`<`FunctionPayloadOutputType`\> |
-| `parameter` | `Readonly`<`FunctionParameterType`\> |
+| `result` | `Readonly`\<`FunctionResultType`\> |
+| `payload` | `Readonly`\<`FunctionPayloadOutputType`\> |
+| `parameter` | `Readonly`\<`FunctionParameterType`\> |
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -3557,7 +3580,7 @@ ___
 
 ### SubscriptionBeforeGuardHook
 
-Ƭ **SubscriptionBeforeGuardHook**<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`\>: (`this`: `ServiceClassType`, `context`: [`SubscriptionFunctionContext`](purista_core.md#subscriptionfunctioncontext), `payload`: `Readonly`<`FunctionPayloadType`\>, `parameter`: `Readonly`<`FunctionParamsType`\>) => `Promise`<`void`\>
+Ƭ **SubscriptionBeforeGuardHook**\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`\>: (`this`: `ServiceClassType`, `context`: [`SubscriptionFunctionContext`](purista_core.md#subscriptionfunctioncontext), `payload`: `Readonly`\<`FunctionPayloadType`\>, `parameter`: `Readonly`\<`FunctionParamsType`\>) => `Promise`\<`void`\>
 
 #### Type parameters
 
@@ -3569,7 +3592,7 @@ ___
 
 #### Type declaration
 
-▸ (`this`, `context`, `payload`, `parameter`): `Promise`<`void`\>
+▸ (`this`, `context`, `payload`, `parameter`): `Promise`\<`void`\>
 
 Guard is called after command function input validation and before executing the command function.
 The guard is usefull to separate for example auth checks from business logic.
@@ -3581,12 +3604,12 @@ It should throw HandledError or return void.
 | :------ | :------ |
 | `this` | `ServiceClassType` |
 | `context` | [`SubscriptionFunctionContext`](purista_core.md#subscriptionfunctioncontext) |
-| `payload` | `Readonly`<`FunctionPayloadType`\> |
-| `parameter` | `Readonly`<`FunctionParamsType`\> |
+| `payload` | `Readonly`\<`FunctionPayloadType`\> |
+| `parameter` | `Readonly`\<`FunctionParamsType`\> |
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -3596,7 +3619,7 @@ ___
 
 ### SubscriptionDefinition
 
-Ƭ **SubscriptionDefinition**<`ServiceClassType`, `MetadataType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: `Object`
+Ƭ **SubscriptionDefinition**\<`ServiceClassType`, `MetadataType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: `Object`
 
 The definition for a subscription provided by some service.
 
@@ -3617,29 +3640,29 @@ The definition for a subscription provided by some service.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `call` | [`SubscriptionFunction`](purista_core.md#subscriptionfunction)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\> | the subscription function |
+| `call` | [`SubscriptionFunction`](purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\> | the subscription function |
 | `emitEventName?` | `string` | event name to be used for custom message if the subscription functions returns value |
 | `eventBridgeConfig` | [`DefinitionEventBridgeConfig`](purista_core.md#definitioneventbridgeconfig) | config information for event bridge |
 | `eventName?` | `string` | filter forevent name |
-| `hooks` | { `afterGuard?`: `Record`<`string`, [`SubscriptionAfterGuardHook`](purista_core.md#subscriptionafterguardhook)<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> ; `beforeGuard?`: `Record`<`string`, [`SubscriptionBeforeGuardHook`](purista_core.md#subscriptionbeforeguardhook)<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`\>\> ; `transformInput?`: { `transformFunction`: [`SubscriptionTransformInputHook`](purista_core.md#subscriptiontransforminputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> ; `transformInputSchema`: `z.ZodType` ; `transformParameterSchema`: `z.ZodType`  } ; `transformOutput?`: { `transformFunction`: [`SubscriptionTransformOutputHook`](purista_core.md#subscriptiontransformoutputhook)<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `any`\> ; `transformOutputSchema`: `z.ZodType`  }  } | hooks of subscription |
-| `hooks.afterGuard?` | `Record`<`string`, [`SubscriptionAfterGuardHook`](purista_core.md#subscriptionafterguardhook)<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> | - |
-| `hooks.beforeGuard?` | `Record`<`string`, [`SubscriptionBeforeGuardHook`](purista_core.md#subscriptionbeforeguardhook)<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`\>\> | - |
-| `hooks.transformInput?` | { `transformFunction`: [`SubscriptionTransformInputHook`](purista_core.md#subscriptiontransforminputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> ; `transformInputSchema`: `z.ZodType` ; `transformParameterSchema`: `z.ZodType`  } | - |
-| `hooks.transformInput.transformFunction` | [`SubscriptionTransformInputHook`](purista_core.md#subscriptiontransforminputhook)<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> | - |
+| `hooks` | \{ `afterGuard?`: `Record`\<`string`, [`SubscriptionAfterGuardHook`](purista_core.md#subscriptionafterguardhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> ; `beforeGuard?`: `Record`\<`string`, [`SubscriptionBeforeGuardHook`](purista_core.md#subscriptionbeforeguardhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`\>\> ; `transformInput?`: \{ `transformFunction`: [`SubscriptionTransformInputHook`](purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> ; `transformInputSchema`: `z.ZodType` ; `transformParameterSchema`: `z.ZodType`  } ; `transformOutput?`: \{ `transformFunction`: [`SubscriptionTransformOutputHook`](purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `any`\> ; `transformOutputSchema`: `z.ZodType`  }  } | hooks of subscription |
+| `hooks.afterGuard?` | `Record`\<`string`, [`SubscriptionAfterGuardHook`](purista_core.md#subscriptionafterguardhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`\>\> | - |
+| `hooks.beforeGuard?` | `Record`\<`string`, [`SubscriptionBeforeGuardHook`](purista_core.md#subscriptionbeforeguardhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`\>\> | - |
+| `hooks.transformInput?` | \{ `transformFunction`: [`SubscriptionTransformInputHook`](purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> ; `transformInputSchema`: `z.ZodType` ; `transformParameterSchema`: `z.ZodType`  } | - |
+| `hooks.transformInput.transformFunction` | [`SubscriptionTransformInputHook`](purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`\> | - |
 | `hooks.transformInput.transformInputSchema` | `z.ZodType` | - |
 | `hooks.transformInput.transformParameterSchema` | `z.ZodType` | - |
-| `hooks.transformOutput?` | { `transformFunction`: [`SubscriptionTransformOutputHook`](purista_core.md#subscriptiontransformoutputhook)<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `any`\> ; `transformOutputSchema`: `z.ZodType`  } | - |
-| `hooks.transformOutput.transformFunction` | [`SubscriptionTransformOutputHook`](purista_core.md#subscriptiontransformoutputhook)<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `any`\> | - |
+| `hooks.transformOutput?` | \{ `transformFunction`: [`SubscriptionTransformOutputHook`](purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `any`\> ; `transformOutputSchema`: `z.ZodType`  } | - |
+| `hooks.transformOutput.transformFunction` | [`SubscriptionTransformOutputHook`](purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `any`\> | - |
 | `hooks.transformOutput.transformOutputSchema` | `z.ZodType` | - |
 | `messageType?` | [`EBMessageType`](../enums/purista_core.EBMessageType.md) | filter for message type |
 | `metadata` | `MetadataType` | the metadata of the subscription |
 | `principalId?` | [`PrincipalId`](purista_core.md#principalid) | filter for principal id |
-| `receiver?` | { `instanceId?`: [`InstanceId`](purista_core.md#instanceid) ; `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } | filter for messages consumed by given receiver |
+| `receiver?` | \{ `instanceId?`: [`InstanceId`](purista_core.md#instanceid) ; `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } | filter for messages consumed by given receiver |
 | `receiver.instanceId?` | [`InstanceId`](purista_core.md#instanceid) | - |
 | `receiver.serviceName?` | `string` | - |
 | `receiver.serviceTarget?` | `string` | - |
 | `receiver.serviceVersion?` | `string` | - |
-| `sender?` | { `instanceId?`: [`InstanceId`](purista_core.md#instanceid) ; `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } | filter for messages produced by given sender |
+| `sender?` | \{ `instanceId?`: [`InstanceId`](purista_core.md#instanceid) ; `serviceName?`: `string` ; `serviceTarget?`: `string` ; `serviceVersion?`: `string`  } | filter for messages produced by given sender |
 | `sender.instanceId?` | [`InstanceId`](purista_core.md#instanceid) | - |
 | `sender.serviceName?` | `string` | - |
 | `sender.serviceTarget?` | `string` | - |
@@ -3656,7 +3679,7 @@ ___
 
 ### SubscriptionFunction
 
-Ƭ **SubscriptionFunction**<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: (`this`: `ServiceClassType`, `context`: [`SubscriptionFunctionContext`](purista_core.md#subscriptionfunctioncontext), `payload`: `Readonly`<`FunctionPayloadType`\>, `parameter`: `Readonly`<`FunctionParamsType`\>) => `Promise`<`FunctionResultType`\>
+Ƭ **SubscriptionFunction**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`\>: (`this`: `ServiceClassType`, `context`: [`SubscriptionFunctionContext`](purista_core.md#subscriptionfunctioncontext), `payload`: `Readonly`\<`FunctionPayloadType`\>, `parameter`: `Readonly`\<`FunctionParamsType`\>) => `Promise`\<`FunctionResultType`\>
 
 #### Type parameters
 
@@ -3671,7 +3694,7 @@ ___
 
 #### Type declaration
 
-▸ (`this`, `context`, `payload`, `parameter`): `Promise`<`FunctionResultType`\>
+▸ (`this`, `context`, `payload`, `parameter`): `Promise`\<`FunctionResultType`\>
 
 CommandFunction is a function which will be triggered when a matching event bridge message is received by the service
 
@@ -3681,12 +3704,12 @@ CommandFunction is a function which will be triggered when a matching event brid
 | :------ | :------ |
 | `this` | `ServiceClassType` |
 | `context` | [`SubscriptionFunctionContext`](purista_core.md#subscriptionfunctioncontext) |
-| `payload` | `Readonly`<`FunctionPayloadType`\> |
-| `parameter` | `Readonly`<`FunctionParamsType`\> |
+| `payload` | `Readonly`\<`FunctionPayloadType`\> |
+| `parameter` | `Readonly`\<`FunctionParamsType`\> |
 
 ##### Returns
 
-`Promise`<`FunctionResultType`\>
+`Promise`\<`FunctionResultType`\>
 
 #### Defined in
 
@@ -3696,7 +3719,7 @@ ___
 
 ### SubscriptionFunctionContext
 
-Ƭ **SubscriptionFunctionContext**: [`Prettify`](purista_core.md#prettify)<[`ContextBase`](purista_core.md#contextbase) & [`SubscriptionFunctionContextEnhancements`](purista_core.md#subscriptionfunctioncontextenhancements)\>
+Ƭ **SubscriptionFunctionContext**: [`Prettify`](purista_core.md#prettify)\<[`ContextBase`](purista_core.md#contextbase) & [`SubscriptionFunctionContextEnhancements`](purista_core.md#subscriptionfunctioncontextenhancements)\>
 
 The subscription function context which will be passed into subscription function.
 
@@ -3722,7 +3745,7 @@ Also, the methods:
 | :------ | :------ | :------ |
 | `emit` | [`EmitCustomMessageFunction`](purista_core.md#emitcustommessagefunction) | emit a custom message |
 | `invoke` | [`InvokeFunction`](purista_core.md#invokefunction) | Invokes a command and returns the result. It is recommended to validate the result against a schema which only contains the data you actually need. **`Example`** ```typescript const address: EBMessageAddress = { serviceName: 'name-of-service-to-invoke', serviceVersion: '1', serviceTarget: 'command-name-to-invoke', } const inputPayload = { my: 'input' } const inputParameter = { search: 'for_me' } const result = await invoke<MyResultType>(address, inputPayload inputParameter ) ``` |
-| `message` | `Readonly`<[`EBMessage`](purista_core.md#ebmessage)\> | the original message |
+| `message` | `Readonly`\<[`EBMessage`](purista_core.md#ebmessage)\> | the original message |
 
 #### Defined in
 
@@ -3732,7 +3755,7 @@ ___
 
 ### SubscriptionTransformFunctionContext
 
-Ƭ **SubscriptionTransformFunctionContext**: [`Prettify`](purista_core.md#prettify)<[`ContextBase`](purista_core.md#contextbase) & { `message`: `Readonly`<[`EBMessage`](purista_core.md#ebmessage)\>  }\>
+Ƭ **SubscriptionTransformFunctionContext**: [`Prettify`](purista_core.md#prettify)\<[`ContextBase`](purista_core.md#contextbase) & \{ `message`: `Readonly`\<[`EBMessage`](purista_core.md#ebmessage)\>  }\>
 
 #### Defined in
 
@@ -3742,7 +3765,7 @@ ___
 
 ### SubscriptionTransformInputHook
 
-Ƭ **SubscriptionTransformInputHook**<`ServiceClassType`, `PayloadOutput`, `ParamsOutput`, `PayloadInput`, `ParamsInput`\>: (`this`: `ServiceClassType`, `context`: [`SubscriptionTransformFunctionContext`](purista_core.md#subscriptiontransformfunctioncontext), `payload`: `Readonly`<`PayloadInput`\>, `parameter`: `Readonly`<`ParamsInput`\>) => `Promise`<{ `parameter`: `Readonly`<`ParamsOutput`\> ; `payload`: `Readonly`<`PayloadOutput`\>  }\>
+Ƭ **SubscriptionTransformInputHook**\<`ServiceClassType`, `PayloadOutput`, `ParamsOutput`, `PayloadInput`, `ParamsInput`\>: (`this`: `ServiceClassType`, `context`: [`SubscriptionTransformFunctionContext`](purista_core.md#subscriptiontransformfunctioncontext), `payload`: `Readonly`\<`PayloadInput`\>, `parameter`: `Readonly`\<`ParamsInput`\>) => `Promise`\<\{ `parameter`: `Readonly`\<`ParamsOutput`\> ; `payload`: `Readonly`\<`PayloadOutput`\>  }\>
 
 #### Type parameters
 
@@ -3756,7 +3779,7 @@ ___
 
 #### Type declaration
 
-▸ (`this`, `context`, `payload`, `parameter`): `Promise`<{ `parameter`: `Readonly`<`ParamsOutput`\> ; `payload`: `Readonly`<`PayloadOutput`\>  }\>
+▸ (`this`, `context`, `payload`, `parameter`): `Promise`\<\{ `parameter`: `Readonly`\<`ParamsOutput`\> ; `payload`: `Readonly`\<`PayloadOutput`\>  }\>
 
 ##### Parameters
 
@@ -3764,12 +3787,12 @@ ___
 | :------ | :------ |
 | `this` | `ServiceClassType` |
 | `context` | [`SubscriptionTransformFunctionContext`](purista_core.md#subscriptiontransformfunctioncontext) |
-| `payload` | `Readonly`<`PayloadInput`\> |
-| `parameter` | `Readonly`<`ParamsInput`\> |
+| `payload` | `Readonly`\<`PayloadInput`\> |
+| `parameter` | `Readonly`\<`ParamsInput`\> |
 
 ##### Returns
 
-`Promise`<{ `parameter`: `Readonly`<`ParamsOutput`\> ; `payload`: `Readonly`<`PayloadOutput`\>  }\>
+`Promise`\<\{ `parameter`: `Readonly`\<`ParamsOutput`\> ; `payload`: `Readonly`\<`PayloadOutput`\>  }\>
 
 #### Defined in
 
@@ -3779,7 +3802,7 @@ ___
 
 ### SubscriptionTransformOutputHook
 
-Ƭ **SubscriptionTransformOutputHook**<`ServiceClassType`, `MessageResultType`, `MessageParamsType`, `ResponseOutput`\>: (`this`: `ServiceClassType`, `context`: [`SubscriptionTransformFunctionContext`](purista_core.md#subscriptiontransformfunctioncontext), `payload`: `Readonly`<`MessageResultType`\>, `parameter`: `Readonly`<`MessageParamsType`\>) => `Promise`<`ResponseOutput`\>
+Ƭ **SubscriptionTransformOutputHook**\<`ServiceClassType`, `MessageResultType`, `MessageParamsType`, `ResponseOutput`\>: (`this`: `ServiceClassType`, `context`: [`SubscriptionTransformFunctionContext`](purista_core.md#subscriptiontransformfunctioncontext), `payload`: `Readonly`\<`MessageResultType`\>, `parameter`: `Readonly`\<`MessageParamsType`\>) => `Promise`\<`ResponseOutput`\>
 
 #### Type parameters
 
@@ -3792,7 +3815,7 @@ ___
 
 #### Type declaration
 
-▸ (`this`, `context`, `payload`, `parameter`): `Promise`<`ResponseOutput`\>
+▸ (`this`, `context`, `payload`, `parameter`): `Promise`\<`ResponseOutput`\>
 
 This transform hook is executed after function output validation and AfterGuardHooks.
 
@@ -3802,12 +3825,12 @@ This transform hook is executed after function output validation and AfterGuardH
 | :------ | :------ |
 | `this` | `ServiceClassType` |
 | `context` | [`SubscriptionTransformFunctionContext`](purista_core.md#subscriptiontransformfunctioncontext) |
-| `payload` | `Readonly`<`MessageResultType`\> |
-| `parameter` | `Readonly`<`MessageParamsType`\> |
+| `payload` | `Readonly`\<`MessageResultType`\> |
+| `parameter` | `Readonly`\<`MessageParamsType`\> |
 
 ##### Returns
 
-`Promise`<`ResponseOutput`\>
+`Promise`\<`ResponseOutput`\>
 
 #### Defined in
 
@@ -3817,7 +3840,7 @@ This transform hook is executed after function output validation and AfterGuardH
 
 ### getCommandContextMock
 
-▸ **getCommandContextMock**<`MessagePayloadType`, `MessageParamsType`\>(`payload`, `parameter`, `sandbox?`): `Object`
+▸ **getCommandContextMock**\<`MessagePayloadType`, `MessageParamsType`\>(`payload`, `parameter`, `sandbox?`): `Object`
 
 A function that returns a mock object for command function context
 
@@ -3842,46 +3865,46 @@ A function that returns a mock object for command function context
 
 | Name | Type |
 | :------ | :------ |
-| `mock` | { `configs`: { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } ; `emit`: [`EmitCustomMessageFunction`](purista_core.md#emitcustommessagefunction) ; `invoke`: [`InvokeFunction`](purista_core.md#invokefunction) ; `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: `Readonly`<{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: { parameter: MessageParamsType; payload: MessagePayloadType; }; ... 9 more ...; sender: { ...; }; }\> ; `secrets`: { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } ; `startActiveSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> ; `states`: { `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } ; `wrapInSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\>  } |
-| `mock.configs` | { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } |
+| `mock` | \{ `configs`: \{ `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } ; `emit`: [`EmitCustomMessageFunction`](purista_core.md#emitcustommessagefunction) ; `invoke`: [`InvokeFunction`](purista_core.md#invokefunction) ; `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: `Readonly`\<\{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: \{ parameter: MessageParamsType; payload: MessagePayloadType; }; ... 9 more ...; sender: \{ ...; }; }\> ; `secrets`: \{ `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } ; `startActiveSpan`: \<F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>) => `Promise`\<`F`\> ; `states`: \{ `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } ; `wrapInSpan`: \<F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>, `context?`: `Context`) => `Promise`\<`F`\>  } |
+| `mock.configs` | \{ `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } |
 | `mock.configs.getConfig` | [`ConfigGetterFunction`](purista_core.md#configgetterfunction) |
 | `mock.configs.removeConfig` | [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) |
 | `mock.configs.setConfig` | [`ConfigSetterFunction`](purista_core.md#configsetterfunction) |
 | `mock.emit` | [`EmitCustomMessageFunction`](purista_core.md#emitcustommessagefunction) |
 | `mock.invoke` | [`InvokeFunction`](purista_core.md#invokefunction) |
 | `mock.logger` | [`Logger`](../classes/purista_core.Logger.md) |
-| `mock.message` | `Readonly`<{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: { parameter: MessageParamsType; payload: MessagePayloadType; }; ... 9 more ...; sender: { ...; }; }\> |
-| `mock.secrets` | { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } |
+| `mock.message` | `Readonly`\<\{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: \{ parameter: MessageParamsType; payload: MessagePayloadType; }; ... 9 more ...; sender: \{ ...; }; }\> |
+| `mock.secrets` | \{ `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } |
 | `mock.secrets.getSecret` | [`SecretGetterFunction`](purista_core.md#secretgetterfunction) |
 | `mock.secrets.removeSecret` | [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) |
 | `mock.secrets.setSecret` | [`SecretSetterFunction`](purista_core.md#secretsetterfunction) |
-| `mock.startActiveSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> |
-| `mock.states` | { `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } |
+| `mock.startActiveSpan` | \<F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>) => `Promise`\<`F`\> |
+| `mock.states` | \{ `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } |
 | `mock.states.getState` | [`StateGetterFunction`](purista_core.md#stategetterfunction) |
 | `mock.states.removeState` | [`StateDeleteFunction`](purista_core.md#statedeletefunction) |
 | `mock.states.setState` | [`StateSetterFunction`](purista_core.md#statesetterfunction) |
-| `mock.wrapInSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\> |
-| `stubs` | { `emit`: `SinonStub`<`any`[], `any`\> ; `getConfig`: `SinonStub`<`any`[], `any`\> ; `getSecret`: `SinonStub`<`any`[], `any`\> ; `getState`: `SinonStub`<`any`[], `any`\> ; `invoke`: `SinonStub`<`any`[], `any`\> ; `logger`: { `debug`: `SinonStub`<`any`[], `any`\> ; `error`: `SinonStub`<`any`[], `any`\> ; `fatal`: `SinonStub`<`any`[], `any`\> ; `info`: `SinonStub`<`any`[], `any`\> ; `trace`: `SinonStub`<`any`[], `any`\> ; `warn`: `SinonStub`<`any`[], `any`\>  } = logger.stubs; `removeConfig`: `SinonStub`<`any`[], `any`\> ; `removeSecret`: `SinonStub`<`any`[], `any`\> ; `removeState`: `SinonStub`<`any`[], `any`\> ; `setConfig`: `SinonStub`<`any`[], `any`\> ; `setSecret`: `SinonStub`<`any`[], `any`\> ; `setState`: `SinonStub`<`any`[], `any`\> ; `startActiveSpan`: `SinonStub`<`any`[], `any`\> ; `wrapInSpan`: `SinonStub`<`any`[], `any`\>  } |
-| `stubs.emit` | `SinonStub`<`any`[], `any`\> |
-| `stubs.getConfig` | `SinonStub`<`any`[], `any`\> |
-| `stubs.getSecret` | `SinonStub`<`any`[], `any`\> |
-| `stubs.getState` | `SinonStub`<`any`[], `any`\> |
-| `stubs.invoke` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger` | { `debug`: `SinonStub`<`any`[], `any`\> ; `error`: `SinonStub`<`any`[], `any`\> ; `fatal`: `SinonStub`<`any`[], `any`\> ; `info`: `SinonStub`<`any`[], `any`\> ; `trace`: `SinonStub`<`any`[], `any`\> ; `warn`: `SinonStub`<`any`[], `any`\>  } |
-| `stubs.logger.debug` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.error` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.fatal` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.info` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.trace` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.warn` | `SinonStub`<`any`[], `any`\> |
-| `stubs.removeConfig` | `SinonStub`<`any`[], `any`\> |
-| `stubs.removeSecret` | `SinonStub`<`any`[], `any`\> |
-| `stubs.removeState` | `SinonStub`<`any`[], `any`\> |
-| `stubs.setConfig` | `SinonStub`<`any`[], `any`\> |
-| `stubs.setSecret` | `SinonStub`<`any`[], `any`\> |
-| `stubs.setState` | `SinonStub`<`any`[], `any`\> |
-| `stubs.startActiveSpan` | `SinonStub`<`any`[], `any`\> |
-| `stubs.wrapInSpan` | `SinonStub`<`any`[], `any`\> |
+| `mock.wrapInSpan` | \<F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>, `context?`: `Context`) => `Promise`\<`F`\> |
+| `stubs` | \{ `emit`: `SinonStub`\<`any`[], `any`\> ; `getConfig`: `SinonStub`\<`any`[], `any`\> ; `getSecret`: `SinonStub`\<`any`[], `any`\> ; `getState`: `SinonStub`\<`any`[], `any`\> ; `invoke`: `SinonStub`\<`any`[], `any`\> ; `logger`: \{ `debug`: `SinonStub`\<`any`[], `any`\> ; `error`: `SinonStub`\<`any`[], `any`\> ; `fatal`: `SinonStub`\<`any`[], `any`\> ; `info`: `SinonStub`\<`any`[], `any`\> ; `trace`: `SinonStub`\<`any`[], `any`\> ; `warn`: `SinonStub`\<`any`[], `any`\>  } = logger.stubs; `removeConfig`: `SinonStub`\<`any`[], `any`\> ; `removeSecret`: `SinonStub`\<`any`[], `any`\> ; `removeState`: `SinonStub`\<`any`[], `any`\> ; `setConfig`: `SinonStub`\<`any`[], `any`\> ; `setSecret`: `SinonStub`\<`any`[], `any`\> ; `setState`: `SinonStub`\<`any`[], `any`\> ; `startActiveSpan`: `SinonStub`\<`any`[], `any`\> ; `wrapInSpan`: `SinonStub`\<`any`[], `any`\>  } |
+| `stubs.emit` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.getConfig` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.getSecret` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.getState` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.invoke` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger` | \{ `debug`: `SinonStub`\<`any`[], `any`\> ; `error`: `SinonStub`\<`any`[], `any`\> ; `fatal`: `SinonStub`\<`any`[], `any`\> ; `info`: `SinonStub`\<`any`[], `any`\> ; `trace`: `SinonStub`\<`any`[], `any`\> ; `warn`: `SinonStub`\<`any`[], `any`\>  } |
+| `stubs.logger.debug` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.error` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.fatal` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.info` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.trace` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.warn` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.removeConfig` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.removeSecret` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.removeState` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.setConfig` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.setSecret` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.setState` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.startActiveSpan` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.wrapInSpan` | `SinonStub`\<`any`[], `any`\> |
 
 #### Defined in
 
@@ -3891,7 +3914,7 @@ ___
 
 ### getCommandErrorMessageMock
 
-▸ **getCommandErrorMessageMock**(`error?`, `input?`, `commandMessage?`): `Readonly`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+▸ **getCommandErrorMessageMock**(`error?`, `input?`, `commandMessage?`): `Readonly`\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: \{ `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 A function that returns a mocked command error response message
 
@@ -3900,7 +3923,7 @@ A function that returns a mocked command error response message
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `error?` | [`HandledError`](../classes/purista_core.HandledError.md) \| [`UnhandledError`](../classes/purista_core.UnhandledError.md) | - |
-| `input?` | `Partial`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | - |
+| `input?` | `Partial`\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: \{ `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | - |
 | `commandMessage?` | `Object` | - |
 | `commandMessage.contentEncoding` | `string` | content encoding of message payload |
 | `commandMessage.contentType` | `string` | content type of message payload |
@@ -3914,14 +3937,14 @@ A function that returns a mocked command error response message
 | `commandMessage.payload.payload` | `unknown` | - |
 | `commandMessage.principalId?` | `string` | principal id |
 | `commandMessage.receiver` | [`EBMessageAddress`](purista_core.md#ebmessageaddress) | - |
-| `commandMessage.sender` | { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } | - |
+| `commandMessage.sender` | \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } | - |
 | `commandMessage.tenantId?` | `string` | principal id |
 | `commandMessage.timestamp` | `number` | timestamp of message creation time |
 | `commandMessage.traceId?` | `string` | trace id of message |
 
 #### Returns
 
-`Readonly`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+`Readonly`\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: \{ `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Defined in
 
@@ -3931,7 +3954,7 @@ ___
 
 ### getCommandMessageMock
 
-▸ **getCommandMessageMock**<`Payload`, `Parameter`\>(`input?`): `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `Parameter` ; `payload`: `Payload`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+▸ **getCommandMessageMock**\<`Payload`, `Parameter`\>(`input?`): `Readonly`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: \{ `parameter`: `Parameter` ; `payload`: `Payload`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 A function that returns a mocked command message.
 
@@ -3946,11 +3969,11 @@ A function that returns a mocked command message.
 
 | Name | Type |
 | :------ | :------ |
-| `input?` | `Partial`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `Parameter` ; `payload`: `Payload`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> & { `payload?`: { `parameter?`: `Parameter` ; `payload?`: `Payload`  }  } |
+| `input?` | `Partial`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: \{ `parameter`: `Parameter` ; `payload`: `Payload`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> & \{ `payload?`: \{ `parameter?`: `Parameter` ; `payload?`: `Payload`  }  } |
 
 #### Returns
 
-`Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `Parameter` ; `payload`: `Payload`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+`Readonly`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: \{ `parameter`: `Parameter` ; `payload`: `Payload`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Defined in
 
@@ -3960,7 +3983,7 @@ ___
 
 ### getCommandSuccessMessageMock
 
-▸ **getCommandSuccessMessageMock**<`PayloadType`\>(`payload`, `input?`, `commandMessage?`): `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `PayloadType` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+▸ **getCommandSuccessMessageMock**\<`PayloadType`\>(`payload`, `input?`, `commandMessage?`): `Readonly`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `PayloadType` ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 A function that returns a mocked command success response message.
 
@@ -3975,7 +3998,7 @@ A function that returns a mocked command success response message.
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `payload` | `PayloadType` | - |
-| `input?` | `Partial`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `PayloadType` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | - |
+| `input?` | `Partial`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `PayloadType` ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> | - |
 | `commandMessage?` | `Object` | - |
 | `commandMessage.contentEncoding` | `string` | content encoding of message payload |
 | `commandMessage.contentType` | `string` | content type of message payload |
@@ -3989,14 +4012,14 @@ A function that returns a mocked command success response message.
 | `commandMessage.payload.payload` | `unknown` | - |
 | `commandMessage.principalId?` | `string` | principal id |
 | `commandMessage.receiver` | [`EBMessageAddress`](purista_core.md#ebmessageaddress) | - |
-| `commandMessage.sender` | { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } | - |
+| `commandMessage.sender` | \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } | - |
 | `commandMessage.tenantId?` | `string` | principal id |
 | `commandMessage.timestamp` | `number` | timestamp of message creation time |
 | `commandMessage.traceId?` | `string` | trace id of message |
 
 #### Returns
 
-`Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `PayloadType` ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+`Readonly`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `PayloadType` ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Defined in
 
@@ -4006,7 +4029,7 @@ ___
 
 ### getCommandTransformContextMock
 
-▸ **getCommandTransformContextMock**<`MessagePayloadType`, `MessageParamsType`\>(`payload`, `parameter`, `sandbox?`): `Object`
+▸ **getCommandTransformContextMock**\<`MessagePayloadType`, `MessageParamsType`\>(`payload`, `parameter`, `sandbox?`): `Object`
 
 A function that returns a mock object for command transform function context
 
@@ -4031,42 +4054,42 @@ A function that returns a mock object for command transform function context
 
 | Name | Type |
 | :------ | :------ |
-| `mock` | { `configs`: { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } ; `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: `Readonly`<{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: { parameter: MessageParamsType; payload: MessagePayloadType; }; ... 9 more ...; sender: { ...; }; }\> ; `secrets`: { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } ; `startActiveSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> ; `states`: { `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } ; `wrapInSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\>  } |
-| `mock.configs` | { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } |
+| `mock` | \{ `configs`: \{ `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } ; `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: `Readonly`\<\{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: \{ parameter: MessageParamsType; payload: MessagePayloadType; }; ... 9 more ...; sender: \{ ...; }; }\> ; `secrets`: \{ `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } ; `startActiveSpan`: \<F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>) => `Promise`\<`F`\> ; `states`: \{ `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } ; `wrapInSpan`: \<F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>, `context?`: `Context`) => `Promise`\<`F`\>  } |
+| `mock.configs` | \{ `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } |
 | `mock.configs.getConfig` | [`ConfigGetterFunction`](purista_core.md#configgetterfunction) |
 | `mock.configs.removeConfig` | [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) |
 | `mock.configs.setConfig` | [`ConfigSetterFunction`](purista_core.md#configsetterfunction) |
 | `mock.logger` | [`Logger`](../classes/purista_core.Logger.md) |
-| `mock.message` | `Readonly`<{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: { parameter: MessageParamsType; payload: MessagePayloadType; }; ... 9 more ...; sender: { ...; }; }\> |
-| `mock.secrets` | { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } |
+| `mock.message` | `Readonly`\<\{ messageType: EBMessageType.Command; correlationId: string; receiver: EBMessageAddress; payload: \{ parameter: MessageParamsType; payload: MessagePayloadType; }; ... 9 more ...; sender: \{ ...; }; }\> |
+| `mock.secrets` | \{ `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } |
 | `mock.secrets.getSecret` | [`SecretGetterFunction`](purista_core.md#secretgetterfunction) |
 | `mock.secrets.removeSecret` | [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) |
 | `mock.secrets.setSecret` | [`SecretSetterFunction`](purista_core.md#secretsetterfunction) |
-| `mock.startActiveSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> |
-| `mock.states` | { `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } |
+| `mock.startActiveSpan` | \<F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>) => `Promise`\<`F`\> |
+| `mock.states` | \{ `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } |
 | `mock.states.getState` | [`StateGetterFunction`](purista_core.md#stategetterfunction) |
 | `mock.states.removeState` | [`StateDeleteFunction`](purista_core.md#statedeletefunction) |
 | `mock.states.setState` | [`StateSetterFunction`](purista_core.md#statesetterfunction) |
-| `mock.wrapInSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\> |
-| `stubs` | { `getConfig`: `SinonStub`<`any`[], `any`\> ; `getSecret`: `SinonStub`<`any`[], `any`\> ; `getState`: `SinonStub`<`any`[], `any`\> ; `logger`: { `debug`: `SinonStub`<`any`[], `any`\> ; `error`: `SinonStub`<`any`[], `any`\> ; `fatal`: `SinonStub`<`any`[], `any`\> ; `info`: `SinonStub`<`any`[], `any`\> ; `trace`: `SinonStub`<`any`[], `any`\> ; `warn`: `SinonStub`<`any`[], `any`\>  } = logger.stubs; `removeConfig`: `SinonStub`<`any`[], `any`\> ; `removeSecret`: `SinonStub`<`any`[], `any`\> ; `removeState`: `SinonStub`<`any`[], `any`\> ; `setConfig`: `SinonStub`<`any`[], `any`\> ; `setSecret`: `SinonStub`<`any`[], `any`\> ; `setState`: `SinonStub`<`any`[], `any`\> ; `startActiveSpan`: `SinonStub`<`any`[], `any`\> ; `wrapInSpan`: `SinonStub`<`any`[], `any`\>  } |
-| `stubs.getConfig` | `SinonStub`<`any`[], `any`\> |
-| `stubs.getSecret` | `SinonStub`<`any`[], `any`\> |
-| `stubs.getState` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger` | { `debug`: `SinonStub`<`any`[], `any`\> ; `error`: `SinonStub`<`any`[], `any`\> ; `fatal`: `SinonStub`<`any`[], `any`\> ; `info`: `SinonStub`<`any`[], `any`\> ; `trace`: `SinonStub`<`any`[], `any`\> ; `warn`: `SinonStub`<`any`[], `any`\>  } |
-| `stubs.logger.debug` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.error` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.fatal` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.info` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.trace` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.warn` | `SinonStub`<`any`[], `any`\> |
-| `stubs.removeConfig` | `SinonStub`<`any`[], `any`\> |
-| `stubs.removeSecret` | `SinonStub`<`any`[], `any`\> |
-| `stubs.removeState` | `SinonStub`<`any`[], `any`\> |
-| `stubs.setConfig` | `SinonStub`<`any`[], `any`\> |
-| `stubs.setSecret` | `SinonStub`<`any`[], `any`\> |
-| `stubs.setState` | `SinonStub`<`any`[], `any`\> |
-| `stubs.startActiveSpan` | `SinonStub`<`any`[], `any`\> |
-| `stubs.wrapInSpan` | `SinonStub`<`any`[], `any`\> |
+| `mock.wrapInSpan` | \<F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>, `context?`: `Context`) => `Promise`\<`F`\> |
+| `stubs` | \{ `getConfig`: `SinonStub`\<`any`[], `any`\> ; `getSecret`: `SinonStub`\<`any`[], `any`\> ; `getState`: `SinonStub`\<`any`[], `any`\> ; `logger`: \{ `debug`: `SinonStub`\<`any`[], `any`\> ; `error`: `SinonStub`\<`any`[], `any`\> ; `fatal`: `SinonStub`\<`any`[], `any`\> ; `info`: `SinonStub`\<`any`[], `any`\> ; `trace`: `SinonStub`\<`any`[], `any`\> ; `warn`: `SinonStub`\<`any`[], `any`\>  } = logger.stubs; `removeConfig`: `SinonStub`\<`any`[], `any`\> ; `removeSecret`: `SinonStub`\<`any`[], `any`\> ; `removeState`: `SinonStub`\<`any`[], `any`\> ; `setConfig`: `SinonStub`\<`any`[], `any`\> ; `setSecret`: `SinonStub`\<`any`[], `any`\> ; `setState`: `SinonStub`\<`any`[], `any`\> ; `startActiveSpan`: `SinonStub`\<`any`[], `any`\> ; `wrapInSpan`: `SinonStub`\<`any`[], `any`\>  } |
+| `stubs.getConfig` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.getSecret` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.getState` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger` | \{ `debug`: `SinonStub`\<`any`[], `any`\> ; `error`: `SinonStub`\<`any`[], `any`\> ; `fatal`: `SinonStub`\<`any`[], `any`\> ; `info`: `SinonStub`\<`any`[], `any`\> ; `trace`: `SinonStub`\<`any`[], `any`\> ; `warn`: `SinonStub`\<`any`[], `any`\>  } |
+| `stubs.logger.debug` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.error` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.fatal` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.info` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.trace` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.warn` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.removeConfig` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.removeSecret` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.removeState` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.setConfig` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.setSecret` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.setState` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.startActiveSpan` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.wrapInSpan` | `SinonStub`\<`any`[], `any`\> |
 
 #### Defined in
 
@@ -4076,7 +4099,7 @@ ___
 
 ### getCustomMessageMessageMock
 
-▸ **getCustomMessageMessageMock**<`PayloadType`\>(`eventName`, `payload`, `input?`): `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `PayloadType` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+▸ **getCustomMessageMessageMock**\<`PayloadType`\>(`eventName`, `payload`, `input?`): `Readonly`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `PayloadType` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 A function that returns a mocked custom message.
 
@@ -4092,11 +4115,11 @@ A function that returns a mocked custom message.
 | :------ | :------ |
 | `eventName` | `string` |
 | `payload` | `PayloadType` |
-| `input?` | `Partial`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `PayloadType` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
+| `input?` | `Partial`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `PayloadType` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
 
 #### Returns
 
-`Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `PayloadType` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+`Readonly`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `PayloadType` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](purista_core.md#ebmessageaddress) ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Defined in
 
@@ -4125,7 +4148,7 @@ EventBridge mocked
 | Name | Type |
 | :------ | :------ |
 | `mock` | [`EventBridge`](../interfaces/purista_core.EventBridge.md) |
-| `stubs` | `Record`<`string`, `SinonStub`<`any`[], `any`\>\> |
+| `stubs` | `Record`\<`string`, `SinonStub`\<`any`[], `any`\>\> |
 
 #### Defined in
 
@@ -4154,13 +4177,13 @@ logger mocked
 | Name | Type |
 | :------ | :------ |
 | `mock` | [`Logger`](../classes/purista_core.Logger.md) |
-| `stubs` | { `debug`: `SinonStub`<`any`[], `any`\> ; `error`: `SinonStub`<`any`[], `any`\> ; `fatal`: `SinonStub`<`any`[], `any`\> ; `info`: `SinonStub`<`any`[], `any`\> ; `trace`: `SinonStub`<`any`[], `any`\> ; `warn`: `SinonStub`<`any`[], `any`\>  } |
-| `stubs.debug` | `SinonStub`<`any`[], `any`\> |
-| `stubs.error` | `SinonStub`<`any`[], `any`\> |
-| `stubs.fatal` | `SinonStub`<`any`[], `any`\> |
-| `stubs.info` | `SinonStub`<`any`[], `any`\> |
-| `stubs.trace` | `SinonStub`<`any`[], `any`\> |
-| `stubs.warn` | `SinonStub`<`any`[], `any`\> |
+| `stubs` | \{ `debug`: `SinonStub`\<`any`[], `any`\> ; `error`: `SinonStub`\<`any`[], `any`\> ; `fatal`: `SinonStub`\<`any`[], `any`\> ; `info`: `SinonStub`\<`any`[], `any`\> ; `trace`: `SinonStub`\<`any`[], `any`\> ; `warn`: `SinonStub`\<`any`[], `any`\>  } |
+| `stubs.debug` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.error` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.fatal` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.info` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.trace` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.warn` | `SinonStub`\<`any`[], `any`\> |
 
 #### Defined in
 
@@ -4187,46 +4210,46 @@ A function that returns a mock object for subscription function context
 
 | Name | Type |
 | :------ | :------ |
-| `mock` | { `configs`: { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } ; `emit`: [`EmitCustomMessageFunction`](purista_core.md#emitcustommessagefunction) ; `invoke`: [`InvokeFunction`](purista_core.md#invokefunction) ; `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: `Readonly`<[`EBMessage`](purista_core.md#ebmessage)\> ; `secrets`: { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } ; `startActiveSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> ; `states`: { `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } ; `wrapInSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\>  } |
-| `mock.configs` | { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } |
+| `mock` | \{ `configs`: \{ `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } ; `emit`: [`EmitCustomMessageFunction`](purista_core.md#emitcustommessagefunction) ; `invoke`: [`InvokeFunction`](purista_core.md#invokefunction) ; `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: `Readonly`\<[`EBMessage`](purista_core.md#ebmessage)\> ; `secrets`: \{ `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } ; `startActiveSpan`: \<F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>) => `Promise`\<`F`\> ; `states`: \{ `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } ; `wrapInSpan`: \<F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>, `context?`: `Context`) => `Promise`\<`F`\>  } |
+| `mock.configs` | \{ `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } |
 | `mock.configs.getConfig` | [`ConfigGetterFunction`](purista_core.md#configgetterfunction) |
 | `mock.configs.removeConfig` | [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) |
 | `mock.configs.setConfig` | [`ConfigSetterFunction`](purista_core.md#configsetterfunction) |
 | `mock.emit` | [`EmitCustomMessageFunction`](purista_core.md#emitcustommessagefunction) |
 | `mock.invoke` | [`InvokeFunction`](purista_core.md#invokefunction) |
 | `mock.logger` | [`Logger`](../classes/purista_core.Logger.md) |
-| `mock.message` | `Readonly`<[`EBMessage`](purista_core.md#ebmessage)\> |
-| `mock.secrets` | { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } |
+| `mock.message` | `Readonly`\<[`EBMessage`](purista_core.md#ebmessage)\> |
+| `mock.secrets` | \{ `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } |
 | `mock.secrets.getSecret` | [`SecretGetterFunction`](purista_core.md#secretgetterfunction) |
 | `mock.secrets.removeSecret` | [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) |
 | `mock.secrets.setSecret` | [`SecretSetterFunction`](purista_core.md#secretsetterfunction) |
-| `mock.startActiveSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> |
-| `mock.states` | { `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } |
+| `mock.startActiveSpan` | \<F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>) => `Promise`\<`F`\> |
+| `mock.states` | \{ `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } |
 | `mock.states.getState` | [`StateGetterFunction`](purista_core.md#stategetterfunction) |
 | `mock.states.removeState` | [`StateDeleteFunction`](purista_core.md#statedeletefunction) |
 | `mock.states.setState` | [`StateSetterFunction`](purista_core.md#statesetterfunction) |
-| `mock.wrapInSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\> |
-| `stubs` | { `emit`: `SinonStub`<`any`[], `any`\> ; `getConfig`: `SinonStub`<`any`[], `any`\> ; `getSecret`: `SinonStub`<`any`[], `any`\> ; `getState`: `SinonStub`<`any`[], `any`\> ; `invoke`: `SinonStub`<`any`[], `any`\> ; `logger`: { `debug`: `SinonStub`<`any`[], `any`\> ; `error`: `SinonStub`<`any`[], `any`\> ; `fatal`: `SinonStub`<`any`[], `any`\> ; `info`: `SinonStub`<`any`[], `any`\> ; `trace`: `SinonStub`<`any`[], `any`\> ; `warn`: `SinonStub`<`any`[], `any`\>  } = logger.stubs; `removeConfig`: `SinonStub`<`any`[], `any`\> ; `removeSecret`: `SinonStub`<`any`[], `any`\> ; `removeState`: `SinonStub`<`any`[], `any`\> ; `setConfig`: `SinonStub`<`any`[], `any`\> ; `setSecret`: `SinonStub`<`any`[], `any`\> ; `setState`: `SinonStub`<`any`[], `any`\> ; `startActiveSpan`: `SinonStub`<`any`[], `any`\> ; `wrapInSpan`: `SinonStub`<`any`[], `any`\>  } |
-| `stubs.emit` | `SinonStub`<`any`[], `any`\> |
-| `stubs.getConfig` | `SinonStub`<`any`[], `any`\> |
-| `stubs.getSecret` | `SinonStub`<`any`[], `any`\> |
-| `stubs.getState` | `SinonStub`<`any`[], `any`\> |
-| `stubs.invoke` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger` | { `debug`: `SinonStub`<`any`[], `any`\> ; `error`: `SinonStub`<`any`[], `any`\> ; `fatal`: `SinonStub`<`any`[], `any`\> ; `info`: `SinonStub`<`any`[], `any`\> ; `trace`: `SinonStub`<`any`[], `any`\> ; `warn`: `SinonStub`<`any`[], `any`\>  } |
-| `stubs.logger.debug` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.error` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.fatal` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.info` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.trace` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.warn` | `SinonStub`<`any`[], `any`\> |
-| `stubs.removeConfig` | `SinonStub`<`any`[], `any`\> |
-| `stubs.removeSecret` | `SinonStub`<`any`[], `any`\> |
-| `stubs.removeState` | `SinonStub`<`any`[], `any`\> |
-| `stubs.setConfig` | `SinonStub`<`any`[], `any`\> |
-| `stubs.setSecret` | `SinonStub`<`any`[], `any`\> |
-| `stubs.setState` | `SinonStub`<`any`[], `any`\> |
-| `stubs.startActiveSpan` | `SinonStub`<`any`[], `any`\> |
-| `stubs.wrapInSpan` | `SinonStub`<`any`[], `any`\> |
+| `mock.wrapInSpan` | \<F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>, `context?`: `Context`) => `Promise`\<`F`\> |
+| `stubs` | \{ `emit`: `SinonStub`\<`any`[], `any`\> ; `getConfig`: `SinonStub`\<`any`[], `any`\> ; `getSecret`: `SinonStub`\<`any`[], `any`\> ; `getState`: `SinonStub`\<`any`[], `any`\> ; `invoke`: `SinonStub`\<`any`[], `any`\> ; `logger`: \{ `debug`: `SinonStub`\<`any`[], `any`\> ; `error`: `SinonStub`\<`any`[], `any`\> ; `fatal`: `SinonStub`\<`any`[], `any`\> ; `info`: `SinonStub`\<`any`[], `any`\> ; `trace`: `SinonStub`\<`any`[], `any`\> ; `warn`: `SinonStub`\<`any`[], `any`\>  } = logger.stubs; `removeConfig`: `SinonStub`\<`any`[], `any`\> ; `removeSecret`: `SinonStub`\<`any`[], `any`\> ; `removeState`: `SinonStub`\<`any`[], `any`\> ; `setConfig`: `SinonStub`\<`any`[], `any`\> ; `setSecret`: `SinonStub`\<`any`[], `any`\> ; `setState`: `SinonStub`\<`any`[], `any`\> ; `startActiveSpan`: `SinonStub`\<`any`[], `any`\> ; `wrapInSpan`: `SinonStub`\<`any`[], `any`\>  } |
+| `stubs.emit` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.getConfig` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.getSecret` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.getState` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.invoke` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger` | \{ `debug`: `SinonStub`\<`any`[], `any`\> ; `error`: `SinonStub`\<`any`[], `any`\> ; `fatal`: `SinonStub`\<`any`[], `any`\> ; `info`: `SinonStub`\<`any`[], `any`\> ; `trace`: `SinonStub`\<`any`[], `any`\> ; `warn`: `SinonStub`\<`any`[], `any`\>  } |
+| `stubs.logger.debug` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.error` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.fatal` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.info` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.trace` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.warn` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.removeConfig` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.removeSecret` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.removeState` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.setConfig` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.setSecret` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.setState` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.startActiveSpan` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.wrapInSpan` | `SinonStub`\<`any`[], `any`\> |
 
 #### Defined in
 
@@ -4253,42 +4276,42 @@ A function that returns a mock object for subscription transform function contex
 
 | Name | Type |
 | :------ | :------ |
-| `mock` | { `configs`: { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } ; `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: `Readonly`<[`EBMessage`](purista_core.md#ebmessage)\> ; `secrets`: { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } ; `startActiveSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> ; `states`: { `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } ; `wrapInSpan`: <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\>  } |
-| `mock.configs` | { `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } |
+| `mock` | \{ `configs`: \{ `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } ; `logger`: [`Logger`](../classes/purista_core.Logger.md) ; `message`: `Readonly`\<[`EBMessage`](purista_core.md#ebmessage)\> ; `secrets`: \{ `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } ; `startActiveSpan`: \<F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>) => `Promise`\<`F`\> ; `states`: \{ `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } ; `wrapInSpan`: \<F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>, `context?`: `Context`) => `Promise`\<`F`\>  } |
+| `mock.configs` | \{ `getConfig`: [`ConfigGetterFunction`](purista_core.md#configgetterfunction) ; `removeConfig`: [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) ; `setConfig`: [`ConfigSetterFunction`](purista_core.md#configsetterfunction)  } |
 | `mock.configs.getConfig` | [`ConfigGetterFunction`](purista_core.md#configgetterfunction) |
 | `mock.configs.removeConfig` | [`ConfigDeleteFunction`](purista_core.md#configdeletefunction) |
 | `mock.configs.setConfig` | [`ConfigSetterFunction`](purista_core.md#configsetterfunction) |
 | `mock.logger` | [`Logger`](../classes/purista_core.Logger.md) |
-| `mock.message` | `Readonly`<[`EBMessage`](purista_core.md#ebmessage)\> |
-| `mock.secrets` | { `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } |
+| `mock.message` | `Readonly`\<[`EBMessage`](purista_core.md#ebmessage)\> |
+| `mock.secrets` | \{ `getSecret`: [`SecretGetterFunction`](purista_core.md#secretgetterfunction) ; `removeSecret`: [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) ; `setSecret`: [`SecretSetterFunction`](purista_core.md#secretsetterfunction)  } |
 | `mock.secrets.getSecret` | [`SecretGetterFunction`](purista_core.md#secretgetterfunction) |
 | `mock.secrets.removeSecret` | [`SecretDeleteFunction`](purista_core.md#secretdeletefunction) |
 | `mock.secrets.setSecret` | [`SecretSetterFunction`](purista_core.md#secretsetterfunction) |
-| `mock.startActiveSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`<`F`\>) => `Promise`<`F`\> |
-| `mock.states` | { `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } |
+| `mock.startActiveSpan` | \<F\>(`name`: `string`, `opts`: `SpanOptions`, `context`: `undefined` \| `Context`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>) => `Promise`\<`F`\> |
+| `mock.states` | \{ `getState`: [`StateGetterFunction`](purista_core.md#stategetterfunction) ; `removeState`: [`StateDeleteFunction`](purista_core.md#statedeletefunction) ; `setState`: [`StateSetterFunction`](purista_core.md#statesetterfunction)  } |
 | `mock.states.getState` | [`StateGetterFunction`](purista_core.md#stategetterfunction) |
 | `mock.states.removeState` | [`StateDeleteFunction`](purista_core.md#statedeletefunction) |
 | `mock.states.setState` | [`StateSetterFunction`](purista_core.md#statesetterfunction) |
-| `mock.wrapInSpan` | <F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`<`F`\>, `context?`: `Context`) => `Promise`<`F`\> |
-| `stubs` | { `getConfig`: `SinonStub`<`any`[], `any`\> ; `getSecret`: `SinonStub`<`any`[], `any`\> ; `getState`: `SinonStub`<`any`[], `any`\> ; `logger`: { `debug`: `SinonStub`<`any`[], `any`\> ; `error`: `SinonStub`<`any`[], `any`\> ; `fatal`: `SinonStub`<`any`[], `any`\> ; `info`: `SinonStub`<`any`[], `any`\> ; `trace`: `SinonStub`<`any`[], `any`\> ; `warn`: `SinonStub`<`any`[], `any`\>  } = logger.stubs; `removeConfig`: `SinonStub`<`any`[], `any`\> ; `removeSecret`: `SinonStub`<`any`[], `any`\> ; `removeState`: `SinonStub`<`any`[], `any`\> ; `setConfig`: `SinonStub`<`any`[], `any`\> ; `setSecret`: `SinonStub`<`any`[], `any`\> ; `setState`: `SinonStub`<`any`[], `any`\> ; `startActiveSpan`: `SinonStub`<`any`[], `any`\> ; `wrapInSpan`: `SinonStub`<`any`[], `any`\>  } |
-| `stubs.getConfig` | `SinonStub`<`any`[], `any`\> |
-| `stubs.getSecret` | `SinonStub`<`any`[], `any`\> |
-| `stubs.getState` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger` | { `debug`: `SinonStub`<`any`[], `any`\> ; `error`: `SinonStub`<`any`[], `any`\> ; `fatal`: `SinonStub`<`any`[], `any`\> ; `info`: `SinonStub`<`any`[], `any`\> ; `trace`: `SinonStub`<`any`[], `any`\> ; `warn`: `SinonStub`<`any`[], `any`\>  } |
-| `stubs.logger.debug` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.error` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.fatal` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.info` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.trace` | `SinonStub`<`any`[], `any`\> |
-| `stubs.logger.warn` | `SinonStub`<`any`[], `any`\> |
-| `stubs.removeConfig` | `SinonStub`<`any`[], `any`\> |
-| `stubs.removeSecret` | `SinonStub`<`any`[], `any`\> |
-| `stubs.removeState` | `SinonStub`<`any`[], `any`\> |
-| `stubs.setConfig` | `SinonStub`<`any`[], `any`\> |
-| `stubs.setSecret` | `SinonStub`<`any`[], `any`\> |
-| `stubs.setState` | `SinonStub`<`any`[], `any`\> |
-| `stubs.startActiveSpan` | `SinonStub`<`any`[], `any`\> |
-| `stubs.wrapInSpan` | `SinonStub`<`any`[], `any`\> |
+| `mock.wrapInSpan` | \<F\>(`name`: `string`, `opts`: `SpanOptions`, `fn`: (`span`: `Span`) => `Promise`\<`F`\>, `context?`: `Context`) => `Promise`\<`F`\> |
+| `stubs` | \{ `getConfig`: `SinonStub`\<`any`[], `any`\> ; `getSecret`: `SinonStub`\<`any`[], `any`\> ; `getState`: `SinonStub`\<`any`[], `any`\> ; `logger`: \{ `debug`: `SinonStub`\<`any`[], `any`\> ; `error`: `SinonStub`\<`any`[], `any`\> ; `fatal`: `SinonStub`\<`any`[], `any`\> ; `info`: `SinonStub`\<`any`[], `any`\> ; `trace`: `SinonStub`\<`any`[], `any`\> ; `warn`: `SinonStub`\<`any`[], `any`\>  } = logger.stubs; `removeConfig`: `SinonStub`\<`any`[], `any`\> ; `removeSecret`: `SinonStub`\<`any`[], `any`\> ; `removeState`: `SinonStub`\<`any`[], `any`\> ; `setConfig`: `SinonStub`\<`any`[], `any`\> ; `setSecret`: `SinonStub`\<`any`[], `any`\> ; `setState`: `SinonStub`\<`any`[], `any`\> ; `startActiveSpan`: `SinonStub`\<`any`[], `any`\> ; `wrapInSpan`: `SinonStub`\<`any`[], `any`\>  } |
+| `stubs.getConfig` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.getSecret` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.getState` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger` | \{ `debug`: `SinonStub`\<`any`[], `any`\> ; `error`: `SinonStub`\<`any`[], `any`\> ; `fatal`: `SinonStub`\<`any`[], `any`\> ; `info`: `SinonStub`\<`any`[], `any`\> ; `trace`: `SinonStub`\<`any`[], `any`\> ; `warn`: `SinonStub`\<`any`[], `any`\>  } |
+| `stubs.logger.debug` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.error` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.fatal` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.info` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.trace` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.logger.warn` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.removeConfig` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.removeSecret` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.removeState` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.setConfig` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.setSecret` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.setState` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.startActiveSpan` | `SinonStub`\<`any`[], `any`\> |
+| `stubs.wrapInSpan` | `SinonStub`\<`any`[], `any`\> |
 
 #### Defined in
 

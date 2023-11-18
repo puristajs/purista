@@ -1,6 +1,6 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / Service
 
-# Class: Service<ConfigType\>
+# Class: Service\<ConfigType\>
 
 [@purista/core](../modules/purista_core.md).Service
 
@@ -38,7 +38,7 @@ class MyService extends Service {
 
 ## Implements
 
-- [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`ConfigType`\>
+- [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)\<`ConfigType`\>
 
 ## Table of contents
 
@@ -92,7 +92,7 @@ class MyService extends Service {
 
 ### constructor
 
-• **new Service**<`ConfigType`\>(`config`)
+• **new Service**\<`ConfigType`\>(`config`): [`Service`](purista_core.Service.md)\<`ConfigType`\>
 
 #### Type parameters
 
@@ -104,7 +104,11 @@ class MyService extends Service {
 
 | Name | Type |
 | :------ | :------ |
-| `config` | [`ServiceConstructorInput`](../modules/purista_core.md#serviceconstructorinput)<`ConfigType`\> |
+| `config` | [`ServiceConstructorInput`](../modules/purista_core.md#serviceconstructorinput)\<`ConfigType`\> |
+
+#### Returns
+
+[`Service`](purista_core.Service.md)\<`ConfigType`\>
 
 #### Overrides
 
@@ -118,7 +122,7 @@ ServiceBaseClass.constructor
 
 ### commandDefinitionList
 
-• **commandDefinitionList**: [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)<`any`\>
+• **commandDefinitionList**: [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)\<`any`\>
 
 #### Defined in
 
@@ -128,7 +132,7 @@ ___
 
 ### commands
 
-• `Protected` **commands**: `Map`<`string`, [`CommandDefinition`](../modules/purista_core.md#commanddefinition)\>
+• `Protected` **commands**: `Map`\<`string`, [`CommandDefinition`](../modules/purista_core.md#commanddefinition)\>
 
 #### Defined in
 
@@ -250,7 +254,7 @@ ___
 
 ### subscriptionDefinitionList
 
-• **subscriptionDefinitionList**: [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)<`any`\>
+• **subscriptionDefinitionList**: [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)\<`any`\>
 
 #### Defined in
 
@@ -260,7 +264,7 @@ ___
 
 ### subscriptions
 
-• `Protected` **subscriptions**: `Map`<`string`, [`SubscriptionDefinition`](../modules/purista_core.md#subscriptiondefinition)\>
+• `Protected` **subscriptions**: `Map`\<`string`, [`SubscriptionDefinition`](../modules/purista_core.md#subscriptiondefinition)\>
 
 #### Defined in
 
@@ -318,13 +322,13 @@ ServiceBaseClass.serviceInfo
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 Stop and destroy the current service
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -342,13 +346,13 @@ ___
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
+▸ **emit**\<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)<[`ServiceEvents`](../modules/purista_core.md#serviceevents)\> |
+| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)\<[`ServiceEvents`](../modules/purista_core.md#serviceevents)\> |
 
 #### Parameters
 
@@ -373,7 +377,7 @@ ___
 
 ### executeCommand
 
-▸ **executeCommand**(`message`): `Promise`<`Readonly`<`Omit`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\> \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { `instanceId`: `string` ; `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } ; `sender`: { `instanceId`: `string` ; `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+▸ **executeCommand**(`message`): `Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: \{ `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\> \| \{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: \{ `instanceId`: `string` ; `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } ; `sender`: \{ `instanceId`: `string` ; `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 Called when a command is received by the service
 
@@ -381,11 +385,11 @@ Called when a command is received by the service
 
 | Name | Type |
 | :------ | :------ |
-| `message` | `Readonly`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
+| `message` | `Readonly`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: \{ `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\> |
 
 #### Returns
 
-`Promise`<`Readonly`<`Omit`<{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: { `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\> \| { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: { `instanceId`: `string` ; `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } ; `sender`: { `instanceId`: `string` ; `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
+`Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: \{ `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\> \| \{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: \{ `instanceId`: `string` ; `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } ; `sender`: \{ `instanceId`: `string` ; `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }\>
 
 #### Defined in
 
@@ -395,18 +399,18 @@ ___
 
 ### executeSubscription
 
-▸ **executeSubscription**(`message`, `subscriptionName`): `Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\>
+▸ **executeSubscription**(`message`, `subscriptionName`): `Promise`\<`undefined` \| `Omit`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `message` | `Readonly`<[`EBMessage`](../modules/purista_core.md#ebmessage)\> |
+| `message` | `Readonly`\<[`EBMessage`](../modules/purista_core.md#ebmessage)\> |
 | `subscriptionName` | `string` |
 
 #### Returns
 
-`Promise`<`undefined` \| `Omit`<{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\>
+`Promise`\<`undefined` \| `Omit`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId?`: `string` ; `eventName`: `string` ; `id`: `string` ; `messageType`: [`CustomMessage`](../enums/purista_core.EBMessageType.md#custommessage) ; `otp?`: `string` ; `payload?`: `unknown` ; `principalId?`: `string` ; `receiver?`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"id"`` \| ``"timestamp"``\>\>
 
 #### Defined in
 
@@ -436,7 +440,7 @@ ___
 
 ### getEmitFunction
 
-▸ `Protected` **getEmitFunction**(`serviceTarget`, `traceId`, `principalId?`, `tenantId?`): <Payload\>(`eventName`: `string`, `eventPayload?`: `Payload`, `contentType`: `string`, `contentEncoding`: `string`) => `Promise`<`void`\>
+▸ **getEmitFunction**(`serviceTarget`, `traceId`, `principalId?`, `tenantId?`): \<Payload\>(`eventName`: `string`, `eventPayload?`: `Payload`, `contentType`: `string`, `contentEncoding`: `string`) => `Promise`\<`void`\>
 
 #### Parameters
 
@@ -451,7 +455,7 @@ ___
 
 `fn`
 
-▸ <`Payload`\>(`eventName`, `eventPayload?`, `contentType?`, `contentEncoding?`): `Promise`<`void`\>
+▸ \<`Payload`\>(`eventName`, `eventPayload?`, `contentType?`, `contentEncoding?`): `Promise`\<`void`\>
 
 ##### Type parameters
 
@@ -470,7 +474,7 @@ ___
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -480,7 +484,7 @@ ___
 
 ### getInvokeFunction
 
-▸ `Protected` **getInvokeFunction**(`serviceTarget`, `traceId`, `principalId?`, `tenantId?`): (`receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress), `eventPayload`: `unknown`, `parameter`: `unknown`, `contentType`: `string`, `contentEncoding`: `string`) => `Promise`<`any`\>
+▸ **getInvokeFunction**(`serviceTarget`, `traceId`, `principalId?`, `tenantId?`): (`receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress), `eventPayload`: `unknown`, `parameter`: `unknown`, `contentType`: `string`, `contentEncoding`: `string`) => `Promise`\<`any`\>
 
 #### Parameters
 
@@ -495,7 +499,7 @@ ___
 
 `fn`
 
-▸ (`receiver`, `eventPayload`, `parameter`, `contentType?`, `contentEncoding?`): `Promise`<`any`\>
+▸ (`receiver`, `eventPayload`, `parameter`, `contentType?`, `contentEncoding?`): `Promise`\<`any`\>
 
 ##### Parameters
 
@@ -509,7 +513,7 @@ ___
 
 ##### Returns
 
-`Promise`<`any`\>
+`Promise`\<`any`\>
 
 #### Defined in
 
@@ -552,7 +556,7 @@ ___
 
 ### initializeEventbridgeConnect
 
-▸ `Protected` **initializeEventbridgeConnect**(`commandDefinitionList`, `subscriptions`): `Promise`<`void`\>
+▸ **initializeEventbridgeConnect**(`commandDefinitionList`, `subscriptions`): `Promise`\<`void`\>
 
 Connect service to event bridge to receive commands and command responses
 
@@ -560,12 +564,12 @@ Connect service to event bridge to receive commands and command responses
 
 | Name | Type |
 | :------ | :------ |
-| `commandDefinitionList` | [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)<`any`\> |
+| `commandDefinitionList` | [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)\<`any`\> |
 | `subscriptions` | [`SubscriptionDefinition`](../modules/purista_core.md#subscriptiondefinition)[] |
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -575,20 +579,20 @@ ___
 
 ### off
 
-▸ **off**<`K`\>(`eventName`, `fn`): `void`
+▸ **off**\<`K`\>(`eventName`, `fn`): `void`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)<[`ServiceEvents`](../modules/purista_core.md#serviceevents)\> |
+| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)\<[`ServiceEvents`](../modules/purista_core.md#serviceevents)\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | `EventReceiver`<[`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`]\> |
+| `fn` | `EventReceiver`\<[`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`]\> |
 
 #### Returns
 
@@ -606,20 +610,20 @@ ___
 
 ### on
 
-▸ **on**<`K`\>(`eventName`, `fn`): `void`
+▸ **on**\<`K`\>(`eventName`, `fn`): `void`
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)<[`ServiceEvents`](../modules/purista_core.md#serviceevents)\> |
+| `K` | extends [`EventKey`](../modules/purista_core.md#eventkey)\<[`ServiceEvents`](../modules/purista_core.md#serviceevents)\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | `EventReceiver`<[`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`]\> |
+| `fn` | `EventReceiver`\<[`ServiceEvents`](../modules/purista_core.md#serviceevents)[`K`]\> |
 
 #### Returns
 
@@ -637,7 +641,7 @@ ___
 
 ### registerCommand
 
-▸ **registerCommand**(`commandDefinition`): `Promise`<`void`\>
+▸ **registerCommand**(`commandDefinition`): `Promise`\<`void`\>
 
 Registers a new command for the service
 
@@ -649,7 +653,7 @@ Registers a new command for the service
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -663,7 +667,7 @@ ___
 
 ### registerSubscription
 
-▸ **registerSubscription**(`subscriptionDefinition`): `Promise`<`void`\>
+▸ **registerSubscription**(`subscriptionDefinition`): `Promise`\<`void`\>
 
 Registers a new subscription for the service
 
@@ -675,7 +679,7 @@ Registers a new subscription for the service
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -707,7 +711,7 @@ ___
 
 ### sendServiceInfo
 
-▸ **sendServiceInfo**(`infoType`, `target?`, `payload?`): `Promise`<`Readonly`<[`EBMessage`](../modules/purista_core.md#ebmessage)\>\>
+▸ **sendServiceInfo**(`infoType`, `target?`, `payload?`): `Promise`\<`Readonly`\<[`EBMessage`](../modules/purista_core.md#ebmessage)\>\>
 
 Broadcast service info message
 
@@ -717,11 +721,11 @@ Broadcast service info message
 | :------ | :------ | :------ |
 | `infoType` | [`InfoMessageType`](../modules/purista_core.md#infomessagetype) | type of info message |
 | `target?` | `string` | function name is need in messages like InfoServiceFunctionAdded |
-| `payload?` | `Record`<`string`, `unknown`\> | - |
+| `payload?` | `Record`\<`string`, `unknown`\> | - |
 
 #### Returns
 
-`Promise`<`Readonly`<[`EBMessage`](../modules/purista_core.md#ebmessage)\>\>
+`Promise`\<`Readonly`\<[`EBMessage`](../modules/purista_core.md#ebmessage)\>\>
 
 #### Defined in
 
@@ -731,13 +735,13 @@ ___
 
 ### start
 
-▸ **start**(): `Promise`<`void`\>
+▸ **start**(): `Promise`\<`void`\>
 
 It connects to the event bridge and subscribes to the topics that are in the subscription list.
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -751,7 +755,7 @@ ___
 
 ### startActiveSpan
 
-▸ **startActiveSpan**<`F`\>(`name`, `opts`, `context?`, `fn`): `Promise`<`F`\>
+▸ **startActiveSpan**\<`F`\>(`name`, `opts`, `context?`, `fn`): `Promise`\<`F`\>
 
 Start a child span for opentelemetry tracking
 
@@ -768,11 +772,11 @@ Start a child span for opentelemetry tracking
 | `name` | `string` | `undefined` | name of span |
 | `opts` | `SpanOptions` | `undefined` | span options |
 | `context` | `undefined` \| `Context` | `undefined` | optional context |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | `undefined` | function to be executed within the span |
+| `fn` | (`span`: `Span`) => `Promise`\<`F`\> | `undefined` | function to be executed within the span |
 
 #### Returns
 
-`Promise`<`F`\>
+`Promise`\<`F`\>
 
 return value of fn
 
@@ -792,7 +796,7 @@ ___
 
 ### wrapInSpan
 
-▸ **wrapInSpan**<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`<`F`\>
+▸ **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!
@@ -814,12 +818,12 @@ but not to trace the program flow itself
 | :------ | :------ | :------ |
 | `name` | `string` | name of span |
 | `opts` | `SpanOptions` | span options |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function te be executed in the span |
+| `fn` | (`span`: `Span`) => `Promise`\<`F`\> | function te be executed in the span |
 | `context?` | `Context` | span context |
 
 #### Returns
 
-`Promise`<`F`\>
+`Promise`\<`F`\>
 
 return value of fn
 

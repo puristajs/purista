@@ -6,7 +6,7 @@
 
 ## Hierarchy
 
-- `HttpClient`<`EventBridgeConfig`<[`DaprEventBridgeConfig`](../modules/purista_dapr_sdk.md#dapreventbridgeconfig)\>\>
+- `HttpClient`\<`EventBridgeConfig`\<[`DaprEventBridgeConfig`](../modules/purista_dapr_sdk.md#dapreventbridgeconfig)\>\>
 
   ↳ **`DaprClient`**
 
@@ -51,7 +51,7 @@
 
 ### constructor
 
-• **new DaprClient**(`config`)
+• **new DaprClient**(`config`): [`DaprClient`](purista_dapr_sdk.DaprClient.md)
 
 #### Parameters
 
@@ -67,7 +67,7 @@
 | `config.clientConfig?` | [`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig) | - |
 | `config.commandPayloadAsCloudEvent?` | `boolean` | command invocations are wrapped in CloudEvent **`Link`** https://github.com/cloudevents/spec/tree/v1.0 |
 | `config.defaultCommandTimeout?` | `number` | Overwrite the hardcoded default timeout of command invocations |
-| `config.defaultHeaders?` | `Record`<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
+| `config.defaultHeaders?` | `Record`\<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
 | `config.defaultTimeout?` | `number` | set global timeout for requests in ms **`Default`** ```ts 30000 ``` |
 | `config.enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own ressource. |
 | `config.enableRestApiExpose?` | `boolean` | expose commands as regular REST endpoints when they are configured as endpoints |
@@ -77,15 +77,19 @@
 | `config.logger?` | `Logger` | A logger instance |
 | `config.name?` | `string` | Name of the client |
 | `config.pathPrefix?` | `string` | the prefix to be used for exposing commands as endpoints expecting a event bus message |
-| `config.serve` | (`options`: { `fetch`: (`request`: `Request`) => `unknown` ; `hostname?`: `string` ; `port?`: `number`  }) => `Server`<typeof `IncomingMessage`, typeof `ServerResponse`\> | The serve function is depending on the runtime. - Bun: `Bun.serve` - Node.js: `serve` function from additional package `@hono/hono-node-server` - Deno: `serve` function from package `https://deno.land/std/http/server.ts` **`See`** https://hono.dev |
+| `config.serve` | (`options`: \{ `fetch`: (`request`: `Request`) => `unknown` ; `hostname?`: `string` ; `port?`: `number`  }) => `Server`\<typeof `IncomingMessage`, typeof `ServerResponse`\> | The serve function is depending on the runtime. - Bun: `Bun.serve` - Node.js: `serve` function from additional package `@hono/hono-node-server` - Deno: `serve` function from package `https://deno.land/std/http/server.ts` **`See`** https://hono.dev |
 | `config.serverHost?` | `string` | Host of the server. |
 | `config.serverPort?` | `number` | Port of the server. |
 | `config.spanProcessor?` | `SpanProcessor` | Opentelemetry span processor |
 | `config.subscriptionPayloadAsCloudEvent?` | `boolean` | subscription invocations are wrapped in CloudEvent **`Link`** https://github.com/cloudevents/spec/tree/v1.0 |
 
+#### Returns
+
+[`DaprClient`](purista_dapr_sdk.DaprClient.md)
+
 #### Inherited from
 
-HttpClient<EventBridgeConfig<DaprEventBridgeConfig\>\>.constructor
+HttpClient\<EventBridgeConfig\<DaprEventBridgeConfig\>\>.constructor
 
 #### Defined in
 
@@ -117,14 +121,14 @@ ___
 | :------ | :------ | :------ |
 | `apiPrefix?` | `string` | the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI defintion needs to `enableRestApiExpose` set to `true` |
 | `baseUrl` | `string` | the base url to be used **`Example`** ```typescript const config = { baseUrl: 'http://localhost/api` } // each request will be below http://localhost/api // get('v1/orders') will call http://localhost/api/v1/orders ``` |
-| `basicAuth?` | { `password`: `string` ; `username`: `string`  } | Basic-Auth information |
+| `basicAuth?` | \{ `password`: `string` ; `username`: `string`  } | Basic-Auth information |
 | `basicAuth.password` | `string` | Basic-Auth password |
 | `basicAuth.username` | `string` | Basic-Auth username |
 | `bearerToken?` | `string` | Auth-Bearer token |
 | `clientConfig?` | [`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig) | - |
 | `commandPayloadAsCloudEvent?` | `boolean` | command invocations are wrapped in CloudEvent **`Link`** https://github.com/cloudevents/spec/tree/v1.0 |
 | `defaultCommandTimeout?` | `number` | Overwrite the hardcoded default timeout of command invocations |
-| `defaultHeaders?` | `Record`<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
+| `defaultHeaders?` | `Record`\<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
 | `defaultTimeout?` | `number` | set global timeout for requests in ms **`Default`** ```ts 30000 ``` |
 | `enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own ressource. |
 | `enableRestApiExpose?` | `boolean` | expose commands as regular REST endpoints when they are configured as endpoints |
@@ -134,7 +138,7 @@ ___
 | `logger?` | `Logger` | A logger instance |
 | `name?` | `string` | Name of the client |
 | `pathPrefix?` | `string` | the prefix to be used for exposing commands as endpoints expecting a event bus message |
-| `serve` | (`options`: { `fetch`: (`request`: `Request`) => `unknown` ; `hostname?`: `string` ; `port?`: `number`  }) => `Server`<typeof `IncomingMessage`, typeof `ServerResponse`\> | The serve function is depending on the runtime. - Bun: `Bun.serve` - Node.js: `serve` function from additional package `@hono/hono-node-server` - Deno: `serve` function from package `https://deno.land/std/http/server.ts` **`See`** https://hono.dev |
+| `serve` | (`options`: \{ `fetch`: (`request`: `Request`) => `unknown` ; `hostname?`: `string` ; `port?`: `number`  }) => `Server`\<typeof `IncomingMessage`, typeof `ServerResponse`\> | The serve function is depending on the runtime. - Bun: `Bun.serve` - Node.js: `serve` function from additional package `@hono/hono-node-server` - Deno: `serve` function from package `https://deno.land/std/http/server.ts` **`See`** https://hono.dev |
 | `serverHost?` | `string` | Host of the server. |
 | `serverPort?` | `number` | Port of the server. |
 | `spanProcessor?` | `SpanProcessor` | Opentelemetry span processor |
@@ -222,7 +226,7 @@ core/lib/types/HttpClient/HttpClient.impl.d.ts:24
 
 ### delete
 
-▸ **delete**<`T`\>(`path`, `options?`, `payload?`): `Promise`<`T`\>
+▸ **delete**\<`T`\>(`path`, `options?`, `payload?`): `Promise`\<`T`\>
 
 DELETE request
 
@@ -242,7 +246,7 @@ DELETE request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Inherited from
 
@@ -256,7 +260,7 @@ ___
 
 ### get
 
-▸ **get**<`T`\>(`path`, `options?`): `Promise`<`T`\>
+▸ **get**\<`T`\>(`path`, `options?`): `Promise`\<`T`\>
 
 GET request
 
@@ -275,7 +279,7 @@ GET request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Inherited from
 
@@ -297,7 +301,7 @@ ___
 | :------ | :------ |
 | `addess` | `EBMessageAddress` |
 | `metadata` | `Object` |
-| `metadata.expose` | { `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: `string` ; `contentTypeResponse?`: `string` ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } & { `http`: { `method`: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` ; `openApi?`: { `additionalStatusCodes?`: `StatusCode`[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: `QueryParameter`<{}\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  } |
+| `metadata.expose` | \{ `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: `string` ; `contentTypeResponse?`: `string` ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } & \{ `http`: \{ `method`: ``"GET"`` \| ``"POST"`` \| ``"PATCH"`` \| ``"PUT"`` \| ``"DELETE"`` ; `openApi?`: \{ `additionalStatusCodes?`: `StatusCode`[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: `QueryParameter`\<{}\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  } |
 
 #### Returns
 
@@ -385,7 +389,7 @@ ___
 
 ### invoke
 
-▸ **invoke**(`command`, `headers?`, `timeout?`): `Promise`<`CommandResponse`\>
+▸ **invoke**(`command`, `headers?`, `timeout?`): `Promise`\<`CommandResponse`\>
 
 #### Parameters
 
@@ -404,16 +408,16 @@ ___
 | `command.payload.payload` | `unknown` | - |
 | `command.principalId?` | `string` | principal id |
 | `command.receiver` | `EBMessageAddress` | - |
-| `command.sender` | { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } | - |
+| `command.sender` | \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } | - |
 | `command.tenantId?` | `string` | principal id |
 | `command.timestamp` | `number` | timestamp of message creation time |
 | `command.traceId?` | `string` | trace id of message |
-| `headers?` | `Record`<`string`, `string`\> | - |
+| `headers?` | `Record`\<`string`, `string`\> | - |
 | `timeout?` | `number` | - |
 
 #### Returns
 
-`Promise`<`CommandResponse`\>
+`Promise`\<`CommandResponse`\>
 
 #### Implementation of
 
@@ -427,11 +431,11 @@ ___
 
 ### isSidecarAvailable
 
-▸ **isSidecarAvailable**(): `Promise`<`boolean`\>
+▸ **isSidecarAvailable**(): `Promise`\<`boolean`\>
 
 #### Returns
 
-`Promise`<`boolean`\>
+`Promise`\<`boolean`\>
 
 #### Implementation of
 
@@ -445,7 +449,7 @@ ___
 
 ### patch
 
-▸ **patch**<`T`\>(`path`, `payload`, `options?`): `Promise`<`T`\>
+▸ **patch**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
 PATCH request
 
@@ -465,7 +469,7 @@ PATCH request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Inherited from
 
@@ -479,7 +483,7 @@ ___
 
 ### post
 
-▸ **post**<`T`\>(`path`, `payload`, `options?`): `Promise`<`T`\>
+▸ **post**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
 POST request
 
@@ -499,7 +503,7 @@ POST request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Inherited from
 
@@ -513,7 +517,7 @@ ___
 
 ### put
 
-▸ **put**<`T`\>(`path`, `payload`, `options?`): `Promise`<`T`\>
+▸ **put**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
 PUT request
 
@@ -533,7 +537,7 @@ PUT request
 
 #### Returns
 
-`Promise`<`T`\>
+`Promise`\<`T`\>
 
 #### Inherited from
 
@@ -547,18 +551,18 @@ ___
 
 ### sendEvent
 
-▸ **sendEvent**(`message`, `headers?`): `Promise`<`void`\>
+▸ **sendEvent**(`message`, `headers?`): `Promise`\<`void`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `message` | `EBMessage` |
-| `headers?` | `Record`<`string`, `string`\> |
+| `headers?` | `Record`\<`string`, `string`\> |
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -598,7 +602,7 @@ ___
 
 ### startActiveSpan
 
-▸ **startActiveSpan**<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`<`F`\>
+▸ **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
 Start a child span for opentelemetry tracking
 
@@ -615,11 +619,11 @@ Start a child span for opentelemetry tracking
 | `name` | `string` | name of span |
 | `opts` | `SpanOptions` | span options |
 | `context` | `undefined` \| `Context` | optional context |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | function to be executed within the span |
+| `fn` | (`span`: `Span`) => `Promise`\<`F`\> | function to be executed within the span |
 
 #### Returns
 
-`Promise`<`F`\>
+`Promise`\<`F`\>
 
 return value of fn
 

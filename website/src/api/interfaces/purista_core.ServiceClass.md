@@ -1,6 +1,6 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ServiceClass
 
-# Interface: ServiceClass<ConfigType\>
+# Interface: ServiceClass\<ConfigType\>
 
 [@purista/core](../modules/purista_core.md).ServiceClass
 
@@ -46,13 +46,13 @@ The ServiceClass interface
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 Stop and destroy the current service
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -78,7 +78,7 @@ ___
 
 ### registerCommand
 
-▸ **registerCommand**(`commandDefinition`): `Promise`<`void`\>
+▸ **registerCommand**(`commandDefinition`): `Promise`\<`void`\>
 
 Registers a new command for the service
 
@@ -90,7 +90,7 @@ Registers a new command for the service
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -100,7 +100,7 @@ ___
 
 ### registerSubscription
 
-▸ **registerSubscription**(`subscriptionDefinition`): `Promise`<`void`\>
+▸ **registerSubscription**(`subscriptionDefinition`): `Promise`\<`void`\>
 
 Registers a new subscription for the service
 
@@ -112,7 +112,7 @@ Registers a new subscription for the service
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -122,13 +122,13 @@ ___
 
 ### start
 
-▸ **start**(): `Promise`<`void`\>
+▸ **start**(): `Promise`\<`void`\>
 
 Start the service
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 
@@ -138,7 +138,7 @@ ___
 
 ### startActiveSpan
 
-▸ **startActiveSpan**<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`<`F`\>
+▸ **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
 Start a new active opentelemetry span with given options.
 A active span will be below the current span in hierarchy
@@ -156,11 +156,11 @@ A active span will be below the current span in hierarchy
 | `name` | `string` | the name of the span |
 | `opts` | `SpanOptions` | the additional span options |
 | `context` | `undefined` \| `Context` | the span context |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | the function to be wrapped into the span |
+| `fn` | (`span`: `Span`) => `Promise`\<`F`\> | the function to be wrapped into the span |
 
 #### Returns
 
-`Promise`<`F`\>
+`Promise`\<`F`\>
 
 #### Defined in
 
@@ -170,7 +170,7 @@ ___
 
 ### wrapInSpan
 
-▸ **wrapInSpan**<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`<`F`\>
+▸ **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
 Wrap the given function in a opententelemetry span.
 The span will be on same hierarchy level as the current span.
@@ -187,12 +187,12 @@ The span will be on same hierarchy level as the current span.
 | :------ | :------ | :------ |
 | `name` | `string` | the name of the span |
 | `opts` | `SpanOptions` | the additional span options |
-| `fn` | (`span`: `Span`) => `Promise`<`F`\> | the function to be wrapped in span |
+| `fn` | (`span`: `Span`) => `Promise`\<`F`\> | the function to be wrapped in span |
 | `context?` | `Context` | the span context |
 
 #### Returns
 
-`Promise`<`F`\>
+`Promise`\<`F`\>
 
 #### Defined in
 

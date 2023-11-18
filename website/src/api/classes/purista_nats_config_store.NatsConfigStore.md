@@ -29,7 +29,7 @@ console.log(value) // outputs: undefined
 
 ## Hierarchy
 
-- `ConfigStoreBaseClass`<[`NatsConfigStoreConfig`](../modules/purista_nats_config_store.md#natsconfigstoreconfig)\>
+- `ConfigStoreBaseClass`\<[`NatsConfigStoreConfig`](../modules/purista_nats_config_store.md#natsconfigstoreconfig)\>
 
   ↳ **`NatsConfigStore`**
 
@@ -60,13 +60,15 @@ console.log(value) // outputs: undefined
 
 ### constructor
 
-• **new NatsConfigStore**(`config?`)
+• **new NatsConfigStore**(`config?`): [`NatsConfigStore`](purista_nats_config_store.NatsConfigStore.md)
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `config?` | `Object` | - |
+| `config.cacheTtl?` | `number` | Cache time to live in ms |
+| `config.enableCache?` | `boolean` | Enable cache |
 | `config.enableGet?` | `boolean` | Enable generally get method |
 | `config.enableRemove?` | `boolean` | Enable generally remove method |
 | `config.enableSet?` | `boolean` | Enable generally set method |
@@ -74,9 +76,13 @@ console.log(value) // outputs: undefined
 | `config.logLevel?` | `LogLevelName` | A log level for new logger if logger is not set |
 | `config.logger?` | `Logger` | A logger instance |
 
+#### Returns
+
+[`NatsConfigStore`](purista_nats_config_store.NatsConfigStore.md)
+
 #### Overrides
 
-ConfigStoreBaseClass&lt;NatsConfigStoreConfig\&gt;.constructor
+ConfigStoreBaseClass\&lt;NatsConfigStoreConfig\&gt;.constructor
 
 #### Defined in
 
@@ -92,6 +98,8 @@ ConfigStoreBaseClass&lt;NatsConfigStoreConfig\&gt;.constructor
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
+| `cacheTtl?` | `number` | Cache time to live in ms |
+| `enableCache?` | `boolean` | Enable cache |
 | `enableGet?` | `boolean` | Enable generally get method |
 | `enableRemove?` | `boolean` | Enable generally remove method |
 | `enableSet?` | `boolean` | Enable generally set method |
@@ -159,7 +167,7 @@ ___
 
 ### sc
 
-• **sc**: `Codec`<`unknown`\>
+• **sc**: `Codec`\<`unknown`\>
 
 #### Defined in
 
@@ -169,11 +177,11 @@ ___
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 
@@ -187,7 +195,7 @@ ___
 
 ### getConfig
 
-▸ **getConfig**(`...stateNames`): `Promise`<`Record`<`string`, `unknown`\>\>
+▸ **getConfig**(`...stateNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Parameters
 
@@ -197,7 +205,7 @@ ___
 
 #### Returns
 
-`Promise`<`Record`<`string`, `unknown`\>\>
+`Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Overrides
 
@@ -211,11 +219,11 @@ ___
 
 ### getStore
 
-▸ **getStore**(): `Promise`<`KV`\>
+▸ **getStore**(): `Promise`\<`KV`\>
 
 #### Returns
 
-`Promise`<`KV`\>
+`Promise`\<`KV`\>
 
 #### Defined in
 
@@ -225,7 +233,7 @@ ___
 
 ### removeConfig
 
-▸ **removeConfig**(`stateName`): `Promise`<`void`\>
+▸ **removeConfig**(`stateName`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -235,7 +243,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 
@@ -249,7 +257,7 @@ ___
 
 ### setConfig
 
-▸ **setConfig**(`stateName`, `stateValue`): `Promise`<`void`\>
+▸ **setConfig**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -260,7 +268,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 

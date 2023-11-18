@@ -1,6 +1,6 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / ServiceBuilder
 
-# Class: ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType\>
+# Class: ServiceBuilder\<ConfigType, ConfigInputType, ServiceClassType\>
 
 [@purista/core](../modules/purista_core.md).ServiceBuilder
 
@@ -13,9 +13,9 @@ to create an instance of the service class.
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | `Record`<`string`, `unknown`\> |
-| `ConfigInputType` | `Record`<`string`, `unknown`\> |
-| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md) = [`Service`](purista_core.Service.md)<`ConfigType`\> |
+| `ConfigType` | `Record`\<`string`, `unknown`\> |
+| `ConfigInputType` | `Record`\<`string`, `unknown`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md) = [`Service`](purista_core.Service.md)\<`ConfigType`\> |
 
 ## Table of contents
 
@@ -55,21 +55,25 @@ to create an instance of the service class.
 
 ### constructor
 
-• **new ServiceBuilder**<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>(`info`)
+• **new ServiceBuilder**\<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>(`info`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | `Record`<`string`, `unknown`\> |
-| `ConfigInputType` | `Record`<`string`, `unknown`\> |
-| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`unknown`\> = [`Service`](purista_core.Service.md)<`ConfigType`\> |
+| `ConfigType` | `Record`\<`string`, `unknown`\> |
+| `ConfigInputType` | `Record`\<`string`, `unknown`\> |
+| `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)\<`unknown`\> = [`Service`](purista_core.Service.md)\<`ConfigType`\> |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `info` | [`ServiceInfoType`](../modules/purista_core.md#serviceinfotype) |
+
+#### Returns
+
+[`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
 #### Defined in
 
@@ -79,7 +83,7 @@ to create an instance of the service class.
 
 ### SClass
 
-• **SClass**: [`Newable`](../modules/purista_core.md#newable)<`any`, `ConfigType`\> = `Service`
+• **SClass**: [`Newable`](../modules/purista_core.md#newable)\<`any`, `ConfigType`\> = `Service`
 
 #### Defined in
 
@@ -89,7 +93,7 @@ ___
 
 ### commandDefinitionList
 
-• `Private` **commandDefinitionList**: [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)<`ServiceClassType`\> = `[]`
+• `Private` **commandDefinitionList**: [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)\<`ServiceClassType`\> = `[]`
 
 #### Defined in
 
@@ -99,7 +103,7 @@ ___
 
 ### configSchema
 
-• `Private` `Optional` **configSchema**: `ZodType`<`any`, `ZodTypeDef`, `any`\>
+• `Private` `Optional` **configSchema**: `ZodType`\<`any`, `ZodTypeDef`, `any`\>
 
 #### Defined in
 
@@ -109,7 +113,7 @@ ___
 
 ### defaultConfig
 
-• `Private` `Optional` **defaultConfig**: [`Complete`](../modules/purista_core.md#complete)<`ConfigType`\>
+• `Private` `Optional` **defaultConfig**: [`Complete`](../modules/purista_core.md#complete)\<`ConfigType`\>
 
 #### Defined in
 
@@ -139,7 +143,7 @@ ___
 
 ### subscriptionDefinitionList
 
-• `Private` **subscriptionDefinitionList**: [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)<`ServiceClassType`\> = `[]`
+• `Private` **subscriptionDefinitionList**: [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)\<`ServiceClassType`\> = `[]`
 
 #### Defined in
 
@@ -149,7 +153,7 @@ ___
 
 ### addCommandDefinition
 
-▸ **addCommandDefinition**(`...commands`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+▸ **addCommandDefinition**(`...commands`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
 `addCommandDefinition` adds a list of command definitions to the service builder
 
@@ -157,11 +161,11 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `...commands` | [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)<`ServiceClassType`\> | CommandDefinitionList |
+| `...commands` | [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)\<`ServiceClassType`\> | CommandDefinitionList |
 
 #### Returns
 
-[`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+[`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
 The service builder
 
@@ -173,17 +177,17 @@ ___
 
 ### addFunctionDefinition
 
-▸ **addFunctionDefinition**(`...functions`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+▸ **addFunctionDefinition**(`...functions`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...functions` | [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)<`ServiceClassType`\> |
+| `...functions` | [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)\<`ServiceClassType`\> |
 
 #### Returns
 
-[`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+[`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
 **`Deprecated`**
 
@@ -197,7 +201,7 @@ ___
 
 ### addSubscriptionDefinition
 
-▸ **addSubscriptionDefinition**(`...subscription`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+▸ **addSubscriptionDefinition**(`...subscription`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
 It adds a subscription definition to the service builder
 
@@ -205,11 +209,11 @@ It adds a subscription definition to the service builder
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `...subscription` | [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)<`ServiceClassType`\> | SubscriptionDefinitionList |
+| `...subscription` | [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)\<`ServiceClassType`\> | SubscriptionDefinitionList |
 
 #### Returns
 
-[`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+[`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
 The service builder
 
@@ -221,7 +225,7 @@ ___
 
 ### getCommandBuilder
 
-▸ **getCommandBuilder**(`commandName`, `description`, `eventName?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
+▸ **getCommandBuilder**(`commandName`, `description`, `eventName?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
 
 It returns a new instance of the CommandDefinitionBuilder class, which is a class that is used to
 build a command definition
@@ -236,7 +240,7 @@ build a command definition
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
 
 A CommandDefinitionBuilder object.
 
@@ -248,11 +252,11 @@ ___
 
 ### getCommandDefinitions
 
-▸ **getCommandDefinitions**(): [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)<`ServiceClassType`\>
+▸ **getCommandDefinitions**(): [`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)\<`ServiceClassType`\>
 
 #### Returns
 
-[`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)<`ServiceClassType`\>
+[`CommandDefinitionList`](../modules/purista_core.md#commanddefinitionlist)\<`ServiceClassType`\>
 
 the definition of registered commands
 
@@ -264,11 +268,11 @@ ___
 
 ### getCustomClass
 
-▸ **getCustomClass**(): [`Newable`](../modules/purista_core.md#newable)<`any`, `ConfigType`\>
+▸ **getCustomClass**(): [`Newable`](../modules/purista_core.md#newable)\<`any`, `ConfigType`\>
 
 #### Returns
 
-[`Newable`](../modules/purista_core.md#newable)<`any`, `ConfigType`\>
+[`Newable`](../modules/purista_core.md#newable)\<`any`, `ConfigType`\>
 
 #### Defined in
 
@@ -278,7 +282,7 @@ ___
 
 ### getFunctionBuilder
 
-▸ **getFunctionBuilder**(`commandName`, `description`, `eventName?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
+▸ **getFunctionBuilder**(`commandName`, `description`, `eventName?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
 
 #### Parameters
 
@@ -290,7 +294,7 @@ ___
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`\>
 
 **`Deprecated`**
 
@@ -337,7 +341,7 @@ ___
 
 ### getSubscriptionBuilder
 
-▸ **getSubscriptionBuilder**(`subscriptionName`, `description`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `undefined` \| `void`\>
+▸ **getSubscriptionBuilder**(`subscriptionName`, `description`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `undefined` \| `void`\>
 
 It returns a new instance of the `SubscriptionDefinitionBuilder` class, which is a class that is
 used to build a subscription definition
@@ -351,7 +355,7 @@ used to build a subscription definition
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `undefined` \| `void`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `undefined` \| `void`\>
 
 A SubscriptionDefinitionBuilder
 
@@ -363,11 +367,11 @@ ___
 
 ### getSubscriptionDefinitions
 
-▸ **getSubscriptionDefinitions**(): [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)<`ServiceClassType`\>
+▸ **getSubscriptionDefinitions**(): [`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)\<`ServiceClassType`\>
 
 #### Returns
 
-[`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)<`ServiceClassType`\>
+[`SubscriptionDefinitionList`](../modules/purista_core.md#subscriptiondefinitionlist)\<`ServiceClassType`\>
 
 the definition of registered subscriptions
 
@@ -379,7 +383,7 @@ ___
 
 ### setConfigSchema
 
-▸ **setConfigSchema**<`I`, `D`, `O`\>(`schema`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`O`, `I`, [`Service`](purista_core.Service.md)<`O`\>\>
+▸ **setConfigSchema**\<`I`, `D`, `O`\>(`schema`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`O`, `I`, [`Service`](purista_core.Service.md)\<`O`\>\>
 
 "This function sets the config schema for the service builder."
 
@@ -395,11 +399,11 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `schema` | `ZodType`<`O`, `D`, `I`\> | The schema that will be used to validate the config. |
+| `schema` | `ZodType`\<`O`, `D`, `I`\> | The schema that will be used to validate the config. |
 
 #### Returns
 
-[`ServiceBuilder`](purista_core.ServiceBuilder.md)<`O`, `I`, [`Service`](purista_core.Service.md)<`O`\>\>
+[`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`O`, `I`, [`Service`](purista_core.Service.md)\<`O`\>\>
 
 ServiceBuilder
 
@@ -411,7 +415,7 @@ ___
 
 ### setCustomClass
 
-▸ **setCustomClass**<`T`\>(`customClass`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `T`\>
+▸ **setCustomClass**\<`T`\>(`customClass`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`ConfigType`, `ConfigInputType`, `T`\>
 
 It sets the class type of the service.
 
@@ -419,17 +423,17 @@ It sets the class type of the service.
 
 | Name | Type |
 | :------ | :------ |
-| `T` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)<`ConfigType`\> |
+| `T` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md)\<`ConfigType`\> |
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `customClass` | [`Newable`](../modules/purista_core.md#newable)<`T`, `ConfigType`\> | A class which extends the Service class |
+| `customClass` | [`Newable`](../modules/purista_core.md#newable)\<`T`, `ConfigType`\> | A class which extends the Service class |
 
 #### Returns
 
-[`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `T`\>
+[`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`ConfigType`, `ConfigInputType`, `T`\>
 
 The builder itself, but with the type of the service class changed.
 
@@ -441,7 +445,7 @@ ___
 
 ### setDefaultConfig
 
-▸ **setDefaultConfig**(`config`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+▸ **setDefaultConfig**(`config`): [`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
 "This function sets the default configuration for the service."
 
@@ -449,11 +453,11 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `config` | [`Complete`](../modules/purista_core.md#complete)<`ConfigType`\> | ConfigType - The default configuration for the service. |
+| `config` | [`Complete`](../modules/purista_core.md#complete)\<`ConfigType`\> | ConfigType - The default configuration for the service. |
 
 #### Returns
 
-[`ServiceBuilder`](purista_core.ServiceBuilder.md)<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
+[`ServiceBuilder`](purista_core.ServiceBuilder.md)\<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>
 
 The ServiceBuilder instance.
 

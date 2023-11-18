@@ -1,6 +1,6 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / StateStoreBaseClass
 
-# Class: StateStoreBaseClass<ConfigType\>
+# Class: StateStoreBaseClass\<ConfigType\>
 
 [@purista/core](../modules/purista_core.md).StateStoreBaseClass
 
@@ -10,7 +10,7 @@ Base class for config store implementations
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | extends `Record`<`string`, `unknown`\> = {} |
+| `ConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
 
 ## Hierarchy
 
@@ -45,20 +45,24 @@ Base class for config store implementations
 
 ### constructor
 
-• **new StateStoreBaseClass**<`ConfigType`\>(`name`, `config`)
+• **new StateStoreBaseClass**\<`ConfigType`\>(`name`, `config`): [`StateStoreBaseClass`](purista_core.StateStoreBaseClass.md)\<`ConfigType`\>
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | extends `Record`<`string`, `unknown`\> = {} |
+| `ConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `name` | `string` |
-| `config` | { [K in string \| number \| symbol]: (Object & ConfigType)[K] } |
+| `config` | \{ [K in string \| number \| symbol]: (Object & ConfigType)[K] } |
+
+#### Returns
+
+[`StateStoreBaseClass`](purista_core.StateStoreBaseClass.md)\<`ConfigType`\>
 
 #### Defined in
 
@@ -68,7 +72,7 @@ Base class for config store implementations
 
 ### config
 
-• **config**: { [K in string \| number \| symbol]: (Object & ConfigType)[K] }
+• **config**: \{ [K in string \| number \| symbol]: (Object & ConfigType)[K] }
 
 #### Defined in
 
@@ -104,13 +108,13 @@ name of store
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 disconnects and shuts down the state store
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -124,7 +128,7 @@ ___
 
 ### getState
 
-▸ **getState**(`...stateNames`): `Promise`<`Record`<`string`, `unknown`\>\>
+▸ **getState**(`...stateNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Parameters
 
@@ -134,7 +138,7 @@ ___
 
 #### Returns
 
-`Promise`<`Record`<`string`, `unknown`\>\>
+`Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Implementation of
 
@@ -148,7 +152,7 @@ ___
 
 ### removeState
 
-▸ **removeState**(`stateName`): `Promise`<`void`\>
+▸ **removeState**(`stateName`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -158,7 +162,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -172,7 +176,7 @@ ___
 
 ### setState
 
-▸ **setState**(`stateName`, `stateValue`): `Promise`<`void`\>
+▸ **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -183,7 +187,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 

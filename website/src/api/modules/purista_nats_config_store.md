@@ -39,7 +39,7 @@ console.log(value) // outputs: undefined
 
 ### NatsConfigStoreConfig
 
-Ƭ **NatsConfigStoreConfig**: `Prettify`<{ `keyValueStoreName`: `string`  } & `ConnectionOptions` & `Partial`<`KvOptions`\>\>
+Ƭ **NatsConfigStoreConfig**: `Prettify`\<\{ `keyValueStoreName`: `string`  } & `ConnectionOptions` & `Partial`\<`KvOptions`\>\>
 
 #### Defined in
 

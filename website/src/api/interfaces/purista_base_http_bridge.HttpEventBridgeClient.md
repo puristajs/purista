@@ -22,7 +22,7 @@ This client is responsible for the communication to the sidecar service.
 
 ### getApiPathForCommand
 
-• **getApiPathForCommand**: (`addess`: `EBMessageAddress`, `metadata`: { `expose`: { `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: `string` ; `contentTypeResponse?`: `string` ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } & { `http`: { `method`: ``"DELETE"`` \| ``"GET"`` \| ``"PATCH"`` \| ``"POST"`` \| ``"PUT"`` ; `openApi?`: { `additionalStatusCodes?`: `StatusCode`[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: `QueryParameter`<{}\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  }  }) => `string`
+• **getApiPathForCommand**: (`addess`: `EBMessageAddress`, `metadata`: \{ `expose`: \{ `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: `string` ; `contentTypeResponse?`: `string` ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } & \{ `http`: \{ `method`: ``"DELETE"`` \| ``"GET"`` \| ``"PATCH"`` \| ``"POST"`` \| ``"PUT"`` ; `openApi?`: \{ `additionalStatusCodes?`: `StatusCode`[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: `QueryParameter`\<{}\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  }  }) => `string`
 
 #### Type declaration
 
@@ -37,7 +37,7 @@ This url is a POST endpoint and expects the payload and parameter as defined for
 | :------ | :------ |
 | `addess` | `EBMessageAddress` |
 | `metadata` | `Object` |
-| `metadata.expose` | { `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: `string` ; `contentTypeResponse?`: `string` ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } & { `http`: { `method`: ``"DELETE"`` \| ``"GET"`` \| ``"PATCH"`` \| ``"POST"`` \| ``"PUT"`` ; `openApi?`: { `additionalStatusCodes?`: `StatusCode`[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: `QueryParameter`<{}\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  } |
+| `metadata.expose` | \{ `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: `string` ; `contentTypeResponse?`: `string` ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } & \{ `http`: \{ `method`: ``"DELETE"`` \| ``"GET"`` \| ``"PATCH"`` \| ``"POST"`` \| ``"PUT"`` ; `openApi?`: \{ `additionalStatusCodes?`: `StatusCode`[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: `QueryParameter`\<{}\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  } |
 
 ##### Returns
 
@@ -112,11 +112,11 @@ ___
 
 ### invoke
 
-• **invoke**: (`command`: { `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: { `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, `headers?`: `Record`<`string`, `string`\>, `timeout?`: `number`) => `Promise`<`CommandResponse`\>
+• **invoke**: (`command`: \{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: `Command` ; `otp?`: `string` ; `payload`: \{ `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: `EBMessageAddress` ; `sender`: \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, `headers?`: `Record`\<`string`, `string`\>, `timeout?`: `number`) => `Promise`\<`CommandResponse`\>
 
 #### Type declaration
 
-▸ (`command`, `headers?`, `timeout?`): `Promise`<`CommandResponse`\>
+▸ (`command`, `headers?`, `timeout?`): `Promise`\<`CommandResponse`\>
 
 Invoke a command
 
@@ -137,16 +137,16 @@ Invoke a command
 | `command.payload.payload` | `unknown` | - |
 | `command.principalId?` | `string` | principal id |
 | `command.receiver` | `EBMessageAddress` | - |
-| `command.sender` | { serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } | - |
+| `command.sender` | \{ serviceName: string; serviceVersion: string; serviceTarget: string; instanceId: string; } | - |
 | `command.tenantId?` | `string` | principal id |
 | `command.timestamp` | `number` | timestamp of message creation time |
 | `command.traceId?` | `string` | trace id of message |
-| `headers?` | `Record`<`string`, `string`\> | optional HTTP header |
+| `headers?` | `Record`\<`string`, `string`\> | optional HTTP header |
 | `timeout?` | `number` | the command timeout |
 
 ##### Returns
 
-`Promise`<`CommandResponse`\>
+`Promise`\<`CommandResponse`\>
 
 #### Defined in
 
@@ -156,17 +156,17 @@ ___
 
 ### isSidecarAvailable
 
-• **isSidecarAvailable**: () => `Promise`<`boolean`\>
+• **isSidecarAvailable**: () => `Promise`\<`boolean`\>
 
 #### Type declaration
 
-▸ (): `Promise`<`boolean`\>
+▸ (): `Promise`\<`boolean`\>
 
 Checks if the sidecar container is available to be able to send events and invoke commands
 
 ##### Returns
 
-`Promise`<`boolean`\>
+`Promise`\<`boolean`\>
 
 boolean
 
@@ -178,11 +178,11 @@ ___
 
 ### sendEvent
 
-• **sendEvent**: (`message`: `EBMessage`, `headers?`: `Record`<`string`, `string`\>) => `Promise`<`void`\>
+• **sendEvent**: (`message`: `EBMessage`, `headers?`: `Record`\<`string`, `string`\>) => `Promise`\<`void`\>
 
 #### Type declaration
 
-▸ (`message`, `headers?`): `Promise`<`void`\>
+▸ (`message`, `headers?`): `Promise`\<`void`\>
 
 Send a EBMessage as event to the underlaying message infrastructure.
 
@@ -191,11 +191,11 @@ Send a EBMessage as event to the underlaying message infrastructure.
 | Name | Type |
 | :------ | :------ |
 | `message` | `EBMessage` |
-| `headers?` | `Record`<`string`, `string`\> |
+| `headers?` | `Record`\<`string`, `string`\> |
 
 ##### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Defined in
 

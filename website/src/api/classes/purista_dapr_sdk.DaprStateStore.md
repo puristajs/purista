@@ -8,7 +8,7 @@ DaprStateStore is an adapter which connects to the state store provided by the u
 
 ## Hierarchy
 
-- `StateStoreBaseClass`<[`DaprStateStoreConfig`](../modules/purista_dapr_sdk.md#daprstatestoreconfig)\>
+- `StateStoreBaseClass`\<[`DaprStateStoreConfig`](../modules/purista_dapr_sdk.md#daprstatestoreconfig)\>
 
   ↳ **`DaprStateStore`**
 
@@ -36,14 +36,16 @@ DaprStateStore is an adapter which connects to the state store provided by the u
 
 ### constructor
 
-• **new DaprStateStore**(`config?`)
+• **new DaprStateStore**(`config?`): [`DaprStateStore`](purista_dapr_sdk.DaprStateStore.md)
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `config?` | `Object` | - |
+| `config.cacheTtl?` | `number` | Cache time to live in ms |
 | `config.clientConfig?` | [`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig) | The Dapr client config to interact with Dapr sidecar |
+| `config.enableCache?` | `boolean` | Enable cache |
 | `config.enableGet?` | `boolean` | Enable generally get method |
 | `config.enableRemove?` | `boolean` | Enable generally remove method |
 | `config.enableSet?` | `boolean` | Enable generally set method |
@@ -51,9 +53,13 @@ DaprStateStore is an adapter which connects to the state store provided by the u
 | `config.logger?` | `Logger` | A logger instance |
 | `config.stateStoreName?` | `string` | The name of the state store |
 
+#### Returns
+
+[`DaprStateStore`](purista_dapr_sdk.DaprStateStore.md)
+
 #### Overrides
 
-StateStoreBaseClass&lt;DaprStateStoreConfig\&gt;.constructor
+StateStoreBaseClass\&lt;DaprStateStoreConfig\&gt;.constructor
 
 #### Defined in
 
@@ -63,7 +69,7 @@ StateStoreBaseClass&lt;DaprStateStoreConfig\&gt;.constructor
 
 ### client
 
-• `Private` **client**: `HttpClient`<[`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig)\>
+• `Private` **client**: `HttpClient`\<[`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig)\>
 
 #### Defined in
 
@@ -79,7 +85,9 @@ ___
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
+| `cacheTtl?` | `number` | Cache time to live in ms |
 | `clientConfig?` | [`DaprClientConfig`](../modules/purista_dapr_sdk.md#daprclientconfig) | The Dapr client config to interact with Dapr sidecar |
+| `enableCache?` | `boolean` | Enable cache |
 | `enableGet?` | `boolean` | Enable generally get method |
 | `enableRemove?` | `boolean` | Enable generally remove method |
 | `enableSet?` | `boolean` | Enable generally set method |
@@ -127,11 +135,11 @@ core/lib/types/core/StateStore/StateStoreBaseClass.impl.d.ts:11
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Inherited from
 
@@ -145,7 +153,7 @@ ___
 
 ### getState
 
-▸ **getState**(`...stateNames`): `Promise`<`Record`<`string`, `string`\>\>
+▸ **getState**(`...stateNames`): `Promise`\<`Record`\<`string`, `string`\>\>
 
 #### Parameters
 
@@ -155,7 +163,7 @@ ___
 
 #### Returns
 
-`Promise`<`Record`<`string`, `string`\>\>
+`Promise`\<`Record`\<`string`, `string`\>\>
 
 #### Overrides
 
@@ -169,7 +177,7 @@ ___
 
 ### removeState
 
-▸ **removeState**(`stateName`): `Promise`<`void`\>
+▸ **removeState**(`stateName`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -179,7 +187,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 
@@ -193,7 +201,7 @@ ___
 
 ### setState
 
-▸ **setState**(`stateName`, `stateValue`): `Promise`<`void`\>
+▸ **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -204,7 +212,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 

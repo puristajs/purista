@@ -35,7 +35,7 @@ const store = new DefaultSecretStore({
 
 ## Hierarchy
 
-- [`SecretStoreBaseClass`](purista_core.SecretStoreBaseClass.md)<[`DefaultSecretStoreConfig`](../modules/purista_core.md#defaultsecretstoreconfig)\>
+- [`SecretStoreBaseClass`](purista_core.SecretStoreBaseClass.md)\<[`DefaultSecretStoreConfig`](../modules/purista_core.md#defaultsecretstoreconfig)\>
 
   ↳ **`DefaultSecretStore`**
 
@@ -51,6 +51,7 @@ const store = new DefaultSecretStore({
 
 ### Properties
 
+- [cache](purista_core.DefaultSecretStore.md#cache)
 - [config](purista_core.DefaultSecretStore.md#config)
 - [logger](purista_core.DefaultSecretStore.md#logger)
 - [map](purista_core.DefaultSecretStore.md#map)
@@ -67,18 +68,24 @@ const store = new DefaultSecretStore({
 
 ### constructor
 
-• **new DefaultSecretStore**(`config?`)
+• **new DefaultSecretStore**(`config?`): [`DefaultSecretStore`](purista_core.DefaultSecretStore.md)
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `config?` | `Object` | - |
+| `config.cacheTtl?` | `number` | Cache time to live in ms |
+| `config.enableCache?` | `boolean` | Enable cache |
 | `config.enableGet?` | `boolean` | Enable generally get method |
 | `config.enableRemove?` | `boolean` | Enable generally remove method |
 | `config.enableSet?` | `boolean` | Enable generally set method |
 | `config.logLevel?` | [`LogLevelName`](../modules/purista_core.md#loglevelname) | A log level for new logger if logger is not set |
 | `config.logger?` | [`Logger`](purista_core.Logger.md) | A logger instance |
+
+#### Returns
+
+[`DefaultSecretStore`](purista_core.DefaultSecretStore.md)
 
 #### Overrides
 
@@ -90,6 +97,20 @@ const store = new DefaultSecretStore({
 
 ## Properties
 
+### cache
+
+• **cache**: [`SecretStoreCacheMap`](../modules/purista_core.md#secretstorecachemap)
+
+#### Inherited from
+
+[SecretStoreBaseClass](purista_core.SecretStoreBaseClass.md).[cache](purista_core.SecretStoreBaseClass.md#cache)
+
+#### Defined in
+
+[core/SecretStore/SecretStoreBaseClass.impl.ts:17](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L17)
+
+___
+
 ### config
 
 • **config**: `Object`
@@ -98,6 +119,8 @@ const store = new DefaultSecretStore({
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
+| `cacheTtl?` | `number` | Cache time to live in ms |
+| `enableCache?` | `boolean` | Enable cache |
 | `enableGet?` | `boolean` | Enable generally get method |
 | `enableRemove?` | `boolean` | Enable generally remove method |
 | `enableSet?` | `boolean` | Enable generally set method |
@@ -130,7 +153,7 @@ ___
 
 ### map
 
-• `Private` **map**: `Map`<`string`, `string`\>
+• `Private` **map**: `Map`\<`string`, `string`\>
 
 #### Defined in
 
@@ -160,13 +183,13 @@ name of store
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 disconnects and shuts down the secret store
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -178,13 +201,13 @@ disconnects and shuts down the secret store
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L67)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:70](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L70)
 
 ___
 
 ### getSecret
 
-▸ **getSecret**(`...secretNames`): `Promise`<`Record`<`string`, `undefined` \| `string`\>\>
+▸ **getSecret**(`...secretNames`): `Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
 
 #### Parameters
 
@@ -194,7 +217,7 @@ ___
 
 #### Returns
 
-`Promise`<`Record`<`string`, `undefined` \| `string`\>\>
+`Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
 
 #### Implementation of
 
@@ -212,7 +235,7 @@ ___
 
 ### removeSecret
 
-▸ **removeSecret**(`secretName`): `Promise`<`void`\>
+▸ **removeSecret**(`secretName`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -222,7 +245,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 
@@ -240,7 +263,7 @@ ___
 
 ### setSecret
 
-▸ **setSecret**(`secretName`, `secretValue`): `Promise`<`void`\>
+▸ **setSecret**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -251,7 +274,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Implementation of
 

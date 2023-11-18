@@ -50,7 +50,7 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 ### RedisStoreConfig
 
-Ƭ **RedisStoreConfig**<`M`, `F`, `S`\>: `Object`
+Ƭ **RedisStoreConfig**\<`M`, `F`, `S`\>: `Object`
 
 The redis state store configuration.
 It will extend the StoreBaseConfig.
@@ -67,7 +67,7 @@ It will extend the StoreBaseConfig.
 
 | Name | Type |
 | :------ | :------ |
-| `config?` | `RedisClientOptions`<`M`, `F`, `S`\> |
+| `config?` | `RedisClientOptions`\<`M`, `F`, `S`\> |
 
 #### Defined in
 

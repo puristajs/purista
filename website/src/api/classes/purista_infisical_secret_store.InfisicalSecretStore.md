@@ -4,7 +4,16 @@
 
 [@purista/infisical-secret-store](../modules/purista_infisical_secret_store.md).InfisicalSecretStore
 
-A secret store for using [Infisical](https://infisical.com/) as storage.
+A secret store for using [Infisical](https://infisical.com/) as storage.  
+
+For performance reasons, and to reduce costs, the secret values are cached in memory after first fetch.
+
+You can disable the whole caching via config by setting enableCache to false.  
+If the cache is enabled, you can set the ttl for cached secret values via config cacheTtl (in ms).  
+
+This will return the cached secret if available and if ttl is not exceeded.  
+If a secret value exceeds the ttl, it does not automatically get removed from cache.  
+It will be removed/overwritten on next get request.
 
 **`Example`**
 
@@ -29,7 +38,7 @@ console.log(value) // outputs: undefined
 
 ## Hierarchy
 
-- `SecretStoreBaseClass`<[`InfisicalSecretConfig`](../modules/purista_infisical_secret_store.md#infisicalsecretconfig)\>
+- `SecretStoreBaseClass`\<[`InfisicalSecretConfig`](../modules/purista_infisical_secret_store.md#infisicalsecretconfig)\>
 
   ↳ **`InfisicalSecretStore`**
 
@@ -41,6 +50,7 @@ console.log(value) // outputs: undefined
 
 ### Properties
 
+- [cache](purista_infisical_secret_store.InfisicalSecretStore.md#cache)
 - [client](purista_infisical_secret_store.InfisicalSecretStore.md#client)
 - [config](purista_infisical_secret_store.InfisicalSecretStore.md#config)
 - [logger](purista_infisical_secret_store.InfisicalSecretStore.md#logger)
@@ -57,7 +67,7 @@ console.log(value) // outputs: undefined
 
 ### constructor
 
-• **new InfisicalSecretStore**(`config`)
+• **new InfisicalSecretStore**(`config`): [`InfisicalSecretStore`](purista_infisical_secret_store.InfisicalSecretStore.md)
 
 #### Parameters
 
@@ -69,8 +79,10 @@ console.log(value) // outputs: undefined
 | `config.basicAuth.password` | `string` | Basic-Auth password |
 | `config.basicAuth.username` | `string` | Basic-Auth username |
 | `config.bearerToken` | `string` | Auth-Bearer token |
-| `config.defaultHeaders?` | `Record`<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
+| `config.cacheTtl?` | `number` | Cache time to live in ms |
+| `config.defaultHeaders?` | `Record`\<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
 | `config.defaultTimeout?` | `number` | set global timeout for requests in ms **`Default`** ```ts 30000 ``` |
+| `config.enableCache?` | `boolean` | Enable cache |
 | `config.enableGet?` | `boolean` | Enable generally get method |
 | `config.enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own ressource. |
 | `config.enableRemove?` | `boolean` | Enable generally remove method |
@@ -81,15 +93,33 @@ console.log(value) // outputs: undefined
 | `config.name?` | `string` | Name of the client |
 | `config.spanProcessor?` | `SpanProcessor` | Opentelemetry span processor |
 
+#### Returns
+
+[`InfisicalSecretStore`](purista_infisical_secret_store.InfisicalSecretStore.md)
+
 #### Overrides
 
-SecretStoreBaseClass&lt;InfisicalSecretConfig\&gt;.constructor
+SecretStoreBaseClass\&lt;InfisicalSecretConfig\&gt;.constructor
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalSecretStore.impl.ts:31](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L31)
+[infisical-secret-store/src/InfisicalSecretStore.impl.ts:40](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L40)
 
 ## Properties
+
+### cache
+
+• **cache**: `SecretStoreCacheMap`
+
+#### Inherited from
+
+SecretStoreBaseClass.cache
+
+#### Defined in
+
+core/lib/types/core/SecretStore/SecretStoreBaseClass.impl.d.ts:12
+
+___
 
 ### client
 
@@ -97,7 +127,7 @@ SecretStoreBaseClass&lt;InfisicalSecretConfig\&gt;.constructor
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalSecretStore.impl.ts:29](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L29)
+[infisical-secret-store/src/InfisicalSecretStore.impl.ts:38](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L38)
 
 ___
 
@@ -110,12 +140,14 @@ ___
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `baseUrl` | `string` | the base url to be used **`Example`** ```typescript const config = { baseUrl: 'http://localhost/api` } // each request will be below http://localhost/api // get('v1/orders') will call http://localhost/api/v1/orders ``` |
-| `basicAuth?` | { `password`: `string` ; `username`: `string`  } | Basic-Auth information |
+| `basicAuth?` | \{ `password`: `string` ; `username`: `string`  } | Basic-Auth information |
 | `basicAuth.password` | `string` | Basic-Auth password |
 | `basicAuth.username` | `string` | Basic-Auth username |
 | `bearerToken` | `string` | Auth-Bearer token |
-| `defaultHeaders?` | `Record`<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
+| `cacheTtl?` | `number` | Cache time to live in ms |
+| `defaultHeaders?` | `Record`\<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
 | `defaultTimeout?` | `number` | set global timeout for requests in ms **`Default`** ```ts 30000 ``` |
+| `enableCache?` | `boolean` | Enable cache |
 | `enableGet?` | `boolean` | Enable generally get method |
 | `enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own ressource. |
 | `enableRemove?` | `boolean` | Enable generally remove method |
@@ -166,11 +198,11 @@ core/lib/types/core/SecretStore/SecretStoreBaseClass.impl.d.ts:11
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Inherited from
 
@@ -178,13 +210,13 @@ SecretStoreBaseClass.destroy
 
 #### Defined in
 
-core/lib/types/core/SecretStore/SecretStoreBaseClass.impl.d.ts:16
+core/lib/types/core/SecretStore/SecretStoreBaseClass.impl.d.ts:17
 
 ___
 
 ### getSecret
 
-▸ **getSecret**(`...secretNames`): `Promise`<`Record`<`string`, `undefined` \| `string`\>\>
+▸ **getSecret**(`...secretNames`): `Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
 
 #### Parameters
 
@@ -194,7 +226,7 @@ ___
 
 #### Returns
 
-`Promise`<`Record`<`string`, `undefined` \| `string`\>\>
+`Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
 
 #### Overrides
 
@@ -202,13 +234,13 @@ SecretStoreBaseClass.getSecret
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalSecretStore.impl.ts:41](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L41)
+[infisical-secret-store/src/InfisicalSecretStore.impl.ts:49](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L49)
 
 ___
 
 ### removeSecret
 
-▸ **removeSecret**(`secretName`): `Promise`<`void`\>
+▸ **removeSecret**(`secretName`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -218,7 +250,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 
@@ -226,24 +258,24 @@ SecretStoreBaseClass.removeSecret
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalSecretStore.impl.ts:59](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L59)
+[infisical-secret-store/src/InfisicalSecretStore.impl.ts:80](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L80)
 
 ___
 
 ### setSecret
 
-▸ **setSecret**(`secretName`, `configValue`): `Promise`<`void`\>
+▸ **setSecret**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `secretName` | `string` |
-| `configValue` | `string` |
+| `secretValue` | `string` |
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 
@@ -251,4 +283,4 @@ SecretStoreBaseClass.setSecret
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalSecretStore.impl.ts:73](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L73)
+[infisical-secret-store/src/InfisicalSecretStore.impl.ts:96](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L96)

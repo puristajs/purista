@@ -73,7 +73,7 @@ ___
 
 ### Encoder
 
-Ƭ **Encoder**: `Record`<`string`, [`EncoderFunctions`](purista_amqpbridge.md#encoderfunctions)\>
+Ƭ **Encoder**: `Record`\<`string`, [`EncoderFunctions`](purista_amqpbridge.md#encoderfunctions)\>
 
 #### Defined in
 
@@ -89,8 +89,8 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `decode` | <T\>(`input`: `Buffer`) => `Promise`<`T`\> |
-| `encode` | <T\>(`input`: `T`) => `Promise`<`Buffer`\> |
+| `decode` | \<T\>(`input`: `Buffer`) => `Promise`\<`T`\> |
+| `encode` | \<T\>(`input`: `T`) => `Promise`\<`Buffer`\> |
 
 #### Defined in
 
@@ -106,8 +106,8 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `decrypt` | (`input`: `Buffer`) => `Promise`<`Buffer`\> |
-| `encrypt` | (`input`: `Buffer`) => `Promise`<`Buffer`\> |
+| `decrypt` | (`input`: `Buffer`) => `Promise`\<`Buffer`\> |
+| `encrypt` | (`input`: `Buffer`) => `Promise`\<`Buffer`\> |
 
 #### Defined in
 
@@ -117,7 +117,7 @@ ___
 
 ### Encrypter
 
-Ƭ **Encrypter**: `Record`<`string`, [`EncryptFunctions`](purista_amqpbridge.md#encryptfunctions)\>
+Ƭ **Encrypter**: `Record`\<`string`, [`EncryptFunctions`](purista_amqpbridge.md#encryptfunctions)\>
 
 #### Defined in
 
@@ -127,7 +127,7 @@ ___
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.8.2"``
+• `Const` **puristaVersion**: ``"1.8.3"``
 
 #### Defined in
 
@@ -137,7 +137,7 @@ ___
 
 ### deserializeOtpFromAmqpHeader
 
-▸ **deserializeOtpFromAmqpHeader**(`logger`, `message`, `encrypter`, `encoder`): `Promise`<`undefined` \| `Context`\>
+▸ **deserializeOtpFromAmqpHeader**(`logger`, `message`, `encrypter`, `encoder`): `Promise`\<`undefined` \| `Context`\>
 
 #### Parameters
 
@@ -150,7 +150,7 @@ ___
 
 #### Returns
 
-`Promise`<`undefined` \| `Context`\>
+`Promise`\<`undefined` \| `Context`\>
 
 #### Defined in
 
@@ -160,11 +160,11 @@ ___
 
 ### getDefaultConfig
 
-▸ **getDefaultConfig**(): `Complete`<[`AmqpBridgeConfig`](purista_amqpbridge.md#amqpbridgeconfig)\> & { `exchangeName`: `string` ; `url`: `string`  }
+▸ **getDefaultConfig**(): `Complete`\<[`AmqpBridgeConfig`](purista_amqpbridge.md#amqpbridgeconfig)\> & \{ `exchangeName`: `string` ; `url`: `string`  }
 
 #### Returns
 
-`Complete`<[`AmqpBridgeConfig`](purista_amqpbridge.md#amqpbridgeconfig)\> & { `exchangeName`: `string` ; `url`: `string`  }
+`Complete`\<[`AmqpBridgeConfig`](purista_amqpbridge.md#amqpbridgeconfig)\> & \{ `exchangeName`: `string` ; `url`: `string`  }
 
 #### Defined in
 
@@ -174,17 +174,17 @@ ___
 
 ### serializeOtpForAmqpHeader
 
-▸ **serializeOtpForAmqpHeader**(`header`): `Record`<`string`, `undefined` \| `string`\>
+▸ **serializeOtpForAmqpHeader**(`header`): `Record`\<`string`, `undefined` \| `string`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `header` | `Record`<`string`, `undefined` \| `string`\> |
+| `header` | `Record`\<`string`, `undefined` \| `string`\> |
 
 #### Returns
 
-`Record`<`string`, `undefined` \| `string`\>
+`Record`\<`string`, `undefined` \| `string`\>
 
 #### Defined in
 

@@ -1,6 +1,6 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / IEmitter
 
-# Interface: IEmitter<T\>
+# Interface: IEmitter\<T\>
 
 [@purista/core](../modules/purista_core.md).IEmitter
 
@@ -26,7 +26,7 @@
 
 ### emit
 
-▸ **emit**<`K`\>(`eventName`, `parameter?`): `void`
+▸ **emit**\<`K`\>(`eventName`, `parameter?`): `void`
 
 #### Type parameters
 
@@ -53,7 +53,7 @@ ___
 
 ### off
 
-▸ **off**<`K`\>(`eventName`, `fn`): `void`
+▸ **off**\<`K`\>(`eventName`, `fn`): `void`
 
 #### Type parameters
 
@@ -66,7 +66,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | `EventReceiver`<`T`[`K`]\> |
+| `fn` | `EventReceiver`\<`T`[`K`]\> |
 
 #### Returns
 
@@ -80,7 +80,7 @@ ___
 
 ### on
 
-▸ **on**<`K`\>(`eventName`, `fn`): `void`
+▸ **on**\<`K`\>(`eventName`, `fn`): `void`
 
 #### Type parameters
 
@@ -93,7 +93,7 @@ ___
 | Name | Type |
 | :------ | :------ |
 | `eventName` | `K` |
-| `fn` | `EventReceiver`<`T`[`K`]\> |
+| `fn` | `EventReceiver`\<`T`[`K`]\> |
 
 #### Returns
 

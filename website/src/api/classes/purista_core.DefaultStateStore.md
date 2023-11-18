@@ -9,7 +9,7 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 ## Hierarchy
 
-- [`StateStoreBaseClass`](purista_core.StateStoreBaseClass.md)<[`DefaultStateStoreConfig`](../modules/purista_core.md#defaultstatestoreconfig)\>
+- [`StateStoreBaseClass`](purista_core.StateStoreBaseClass.md)\<[`DefaultStateStoreConfig`](../modules/purista_core.md#defaultstatestoreconfig)\>
 
   ↳ **`DefaultStateStore`**
 
@@ -37,18 +37,24 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 ### constructor
 
-• **new DefaultStateStore**(`config?`)
+• **new DefaultStateStore**(`config?`): [`DefaultStateStore`](purista_core.DefaultStateStore.md)
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `config?` | `Object` | - |
+| `config.cacheTtl?` | `number` | Cache time to live in ms |
+| `config.enableCache?` | `boolean` | Enable cache |
 | `config.enableGet?` | `boolean` | Enable generally get method |
 | `config.enableRemove?` | `boolean` | Enable generally remove method |
 | `config.enableSet?` | `boolean` | Enable generally set method |
 | `config.logLevel?` | [`LogLevelName`](../modules/purista_core.md#loglevelname) | A log level for new logger if logger is not set |
 | `config.logger?` | [`Logger`](purista_core.Logger.md) | A logger instance |
+
+#### Returns
+
+[`DefaultStateStore`](purista_core.DefaultStateStore.md)
 
 #### Overrides
 
@@ -68,6 +74,8 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
+| `cacheTtl?` | `number` | Cache time to live in ms |
+| `enableCache?` | `boolean` | Enable cache |
 | `enableGet?` | `boolean` | Enable generally get method |
 | `enableRemove?` | `boolean` | Enable generally remove method |
 | `enableSet?` | `boolean` | Enable generally set method |
@@ -100,7 +108,7 @@ ___
 
 ### map
 
-• `Private` **map**: `Map`<`string`, `unknown`\>
+• `Private` **map**: `Map`\<`string`, `unknown`\>
 
 #### Defined in
 
@@ -126,13 +134,13 @@ name of store
 
 ### destroy
 
-▸ **destroy**(): `Promise`<`void`\>
+▸ **destroy**(): `Promise`\<`void`\>
 
 disconnects and shuts down the state store
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Inherited from
 
@@ -146,7 +154,7 @@ ___
 
 ### getState
 
-▸ **getState**(`...stateNames`): `Promise`<`Record`<`string`, `unknown`\>\>
+▸ **getState**(`...stateNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Parameters
 
@@ -156,7 +164,7 @@ ___
 
 #### Returns
 
-`Promise`<`Record`<`string`, `unknown`\>\>
+`Promise`\<`Record`\<`string`, `unknown`\>\>
 
 #### Overrides
 
@@ -170,7 +178,7 @@ ___
 
 ### removeState
 
-▸ **removeState**(`stateName`): `Promise`<`void`\>
+▸ **removeState**(`stateName`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -180,7 +188,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 
@@ -194,7 +202,7 @@ ___
 
 ### setState
 
-▸ **setState**(`stateName`, `stateValue`): `Promise`<`void`\>
+▸ **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -205,7 +213,7 @@ ___
 
 #### Returns
 
-`Promise`<`void`\>
+`Promise`\<`void`\>
 
 #### Overrides
 

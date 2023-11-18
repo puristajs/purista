@@ -38,13 +38,17 @@
 
 ### constructor
 
-• **new DefaultLogger**(`log`)
+• **new DefaultLogger**(`log`): [`DefaultLogger`](purista_core.DefaultLogger.md)
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `log` | `Logger` |
+
+#### Returns
+
+[`DefaultLogger`](purista_core.DefaultLogger.md)
 
 #### Overrides
 
