@@ -3,7 +3,8 @@ A secret store for using [Infisical](https://infisical.com/) as storage.
 
 @example ```typescript
 const config = {
-  url: 'redis://alice:foobared@awesome.redis.server:6380'
+  bearerToken: 'YOUR_INFISICAL_TOKEN',
+  baseUrl: 'https://app.infisical.com'
 }
 
 const store = new InfisicalSecretStore({ config })
