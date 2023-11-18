@@ -1,6 +1,17 @@
 /**
 A secret store for using [Infisical](https://infisical.com/) as storage.  
 
+
+For performance reasons, and to reduce costs, the secret values are cached in memory after first fetch.
+
+You can disable the whole caching via config by setting enableCache to false.  
+If the cache is enabled, you can set the ttl for cached secret values via config cacheTtl (in ms).  
+
+This will return the cached secret if available and if ttl is not exceeded.  
+If a secret value exceeds the ttl, it does not automatically get removed from cache.  
+It will be removed/overwritten on next get request.  
+
+
 @example ```typescript
 const config = {
   bearerToken: 'YOUR_INFISICAL_TOKEN',
