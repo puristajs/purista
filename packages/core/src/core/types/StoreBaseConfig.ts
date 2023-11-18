@@ -27,5 +27,15 @@ export type StoreBaseConfig<Config extends Record<string, unknown>> = Prettify<
      * A log level for new logger if logger is not set
      */
     logLevel?: LogLevelName
+
+    /**
+     * Enable cache
+     */
+    enableCache?: boolean
+
+    /**
+     * Cache time to live in ms
+     */
+    cacheTtl?: number
   } & Config
 >

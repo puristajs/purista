@@ -1,7 +1,7 @@
 import { initLogger } from '../../DefaultLogger'
 import { UnhandledError } from '../Error'
 import { Logger, Prettify, StatusCode, StoreBaseConfig } from '../types'
-import { SecretStore } from './types'
+import type { SecretStore, SecretStoreCacheMap } from './types'
 
 /**
  * Base class for secret store adapters
@@ -14,6 +14,8 @@ export class SecretStoreBaseClass<ConfigType extends Record<string, unknown> = {
 
   name: string
 
+  cache: SecretStoreCacheMap = new Map()
+
   constructor(name: string, config: StoreBaseConfig<ConfigType>) {
     const logger = config?.logger || initLogger(config?.logLevel)
     this.logger = logger.getChildLogger({ name })
@@ -24,6 +26,7 @@ export class SecretStoreBaseClass<ConfigType extends Record<string, unknown> = {
       enableGet: true,
       enableSet: false,
       enableRemove: false,
+      enableCache: false,
       ...config,
     }
   }
