@@ -30,10 +30,10 @@ The secret store is a simple interface to a key-value-store. Keys and values are
 |---                                                                        |---        |
 | [AWS Secrets Manager](https://aws.amazon.com/secrets-manager)             | [planned](https://github.com/sebastianwessel/purista/issues/106)      |
 | [Azure Key Vault](https://azure.microsoft.com/en-us/products/key-vault)   | [planned](https://github.com/sebastianwessel/purista/issues/107)      |
-| [Google Cloud Secret Manager](https://cloud.google.com/secret-manager)    | [planned](https://github.com/sebastianwessel/purista/issues/108)      |
+| [Google Cloud Secret Manager](https://cloud.google.com/secret-manager)    | [@purista/gcloud-secret-store](../../../api/modules/purista_gcloud_secret_store.md)     |
 | [HashiCorp Vault](https://www.vaultproject.io)                            | [planned](https://github.com/sebastianwessel/purista/issues/109)      |
 | [Dapr](https://dapr.io)       | [@purista/dapr-sdk](../../7._deployment/4_dapr.md) |
-| [Infisical](https://infisical.com)       | @purista/infisical-secret-store |
+| [Infisical](https://infisical.com)       | [@@purista/infisical-secret-store](../../../api/modules/purista_infisical_secret_store.md)|
 
 ## Usage
 
