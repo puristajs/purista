@@ -4,6 +4,7 @@ A secret store for using [Infisical](https://infisical.com/) as storage.
 
 ```typescript
 const config = {
+  token: 'YOUR_INFISICAL_TOKEN',
   baseUrl: 'http://example.com'
 }
 
