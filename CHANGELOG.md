@@ -2,6 +2,27 @@
 
 All notable changes to this project will be documented in this file.
 
+## [unreleased]
+
+### Bug Fixes
+
+- InfisicalSecretStore docs
+
+### Documentation
+
+- Add Google Secret Manager secret store package
+- Update api documentation
+- Update documentation
+
+### Features
+
+- Add caching option to secret store
+- Add secret store for Google Cloud Secret Manager #108
+
+### Miscellaneous Tasks
+
+- Update dependencies
+
 ## [1.8.3] - 2023-10-19
 
 ### Documentation
@@ -19,6 +40,7 @@ All notable changes to this project will be documented in this file.
 
 - Bump dependencies
 - Update hono router
+- Bump versions to 1.8.3
 
 ## [1.8.2] - 2023-09-27
 
