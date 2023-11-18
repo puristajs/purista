@@ -28,12 +28,12 @@
     "test": "jest --passWithNoTests"
   },
   "devDependencies": {
-    "@types/eslint": "^8.40.2",
-    "@types/minimist": "^1.2.2",
+    "@types/eslint": "^8.44.7",
+    "@types/minimist": "^1.2.5",
     "@types/node": "^20.6.0"
   },
   "dependencies": {
-    "eslint": "^8.49.0",
+    "eslint": "^8.54.0",
     "camelcase": "^8.0.0",
     "minimist": "^1.2.8",
     "plop": "^4.0.0",
