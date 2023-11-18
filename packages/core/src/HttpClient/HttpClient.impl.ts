@@ -35,7 +35,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
 
   private auth: AuthCredentials
   constructor(config: HttpClientConfig<CustomConfig>) {
-    const name = config.name || this.name
+    const name = config.name ?? this.name
     this.name = name
 
     const logger = config.logger?.getChildLogger({ name }) || initLogger(config.logLevel, { name })
@@ -53,7 +53,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
       basicAuth: this.config.basicAuth,
       bearerToken: this.config.bearerToken,
     }
-    this.timeout = this.config.defaultTimeout || 30000
+    this.timeout = this.config.defaultTimeout ?? 30000
     this.logger = logger
 
     const resource = Resource.default().merge(
