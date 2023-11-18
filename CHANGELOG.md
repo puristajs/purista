@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [1.9.0] - 2023-11-18
 
 ### Bug Fixes
 
@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 - Add Google Secret Manager secret store package
 - Update api documentation
 - Update documentation
+- Update CHANGELOG
 
 ### Features
 

@@ -1,6 +1,6 @@
 {
   "name": "@purista/mqttbridge",
-  "version": "1.8.3",
+  "version": "1.9.0",
   "description": "MQTT eventbridge for PURISTA backend framework",
   "homepage": "https://purista.dev",
   "repository": {
