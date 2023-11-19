@@ -1,13 +1,13 @@
-# @purista/infisical-secret-store
+# @purista/gcloud-secret-store
 
-A secret store for using [Infisical](https://infisical.com/) as storage.  
+A secret store for using [Google Cloud Secret Manager](https://cloud.google.com/secret-manager) as storage.  
 
 ```typescript
 const config = {
-  baseUrl: 'http://example.com'
+  projectId: 'project/MY_GOOGLE_PROJECT_ID'
 }
 
-const store = new InfisicalSecretStore(config)
+const store = new GoogleSecretStore({ config })
 
 await store.setSecret('mySecret', 'value')
 
@@ -18,6 +18,7 @@ await store.removeSecret('mySecret')
 
 value = await store.getSecret('mySecret')
 console.log(value) // outputs: undefined
+
 
 ```
 
