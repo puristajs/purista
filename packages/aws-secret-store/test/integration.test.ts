@@ -5,7 +5,7 @@ import { getLoggerMock } from '@purista/core'
 
 import { AWSSecretStore } from '../src/AWSSecretStore.impl'
 
-describe('AWS Secret Maneger secret store', () => {
+describe('AWS Secret Manager secret store', () => {
   beforeAll(async () => {
     execSync(`cd ${resolve(__dirname, '../')} && npm run env:up`)
 
