@@ -1,0 +1,18 @@
+version: '3'
+
+services:
+  aws:
+    image: localstack/localstack:latest
+    environment:
+      DEBUG: 1
+      LAMBDA_DOCKER_NETWORK: my-local-aws-network
+      LAMBDA_REMOTE_DOCKER: 0
+      SERVICES: secretsmanager
+    ports:
+      - 4566:4566
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+networks:
+  default:
+    name: my-local-aws-network
