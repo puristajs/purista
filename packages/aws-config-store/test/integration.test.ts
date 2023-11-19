@@ -26,7 +26,7 @@ describe('AWS Config Manager config store', () => {
     enableSet: true,
     logger: getLoggerMock().mock,
     client: {
-      endpoint: 'http://localhost:4566',
+      endpoint: 'http://localhost:4567',
       region: 'us-east-1',
       credentials: {
         accessKeyId: 'test',

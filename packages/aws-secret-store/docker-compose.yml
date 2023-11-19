@@ -5,7 +5,7 @@ services:
     image: localstack/localstack:latest
     environment:
       DEBUG: 1
-      LAMBDA_DOCKER_NETWORK: my-local-aws-network
+      LAMBDA_DOCKER_NETWORK: aws-secret-store-network
       LAMBDA_REMOTE_DOCKER: 0
       SERVICES: secretsmanager
     ports:
@@ -15,4 +15,4 @@ services:
 
 networks:
   default:
-    name: my-local-aws-network
+    name: aws-secret-store-network
