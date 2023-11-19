@@ -3,14 +3,6 @@ import { getLoggerMock } from '@purista/core'
 import { GoogleSecretStore } from '../src/GoogleSecretStore.impl'
 
 describe('Google Secret Maneger secret store', () => {
-  beforeAll(async () => {
-    await new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(undefined)
-      }, 5000)
-    })
-  })
-
   const store = new GoogleSecretStore({
     project: 'projects/428371962963',
     enableGet: true,
