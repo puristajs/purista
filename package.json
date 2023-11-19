@@ -30,11 +30,11 @@
   "devDependencies": {
     "@swc/jest": "^0.2.26",
     "@types/jest": "^29.5.8",
-    "@types/node": "^20.9.1",
+    "@types/node": "^20.9.2",
     "@types/sinon": "^17.0.1",
     "@typescript-eslint/eslint-plugin": "^6.11.0",
     "@typescript-eslint/parser": "^6.11.0",
-    "esbuild": "^0.19.2",
+    "esbuild": "^0.19.6",
     "eslint": "^8.54.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-config-standard": "^17.1.0",
