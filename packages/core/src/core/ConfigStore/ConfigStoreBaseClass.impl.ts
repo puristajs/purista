@@ -1,7 +1,7 @@
 import { Logger, StatusCode, StoreBaseConfig } from '../../core'
 import { initLogger } from '../../DefaultLogger'
 import { UnhandledError } from '../Error'
-import { ConfigStore } from './types'
+import { ConfigStore, ConfigStoreCacheMap } from './types'
 
 /**
  * Base class for config store adapters
@@ -14,6 +14,8 @@ export class ConfigStoreBaseClass<ConfigType extends Record<string, unknown> = {
 
   name: string
 
+  cache: ConfigStoreCacheMap = new Map()
+
   constructor(name: string, config: StoreBaseConfig<ConfigType>) {
     const logger = config?.logger || initLogger(config?.logLevel)
     this.logger = logger.getChildLogger({ name })
@@ -24,6 +26,7 @@ export class ConfigStoreBaseClass<ConfigType extends Record<string, unknown> = {
       enableGet: true,
       enableSet: false,
       enableRemove: false,
+      enableCache: false,
       ...config,
     }
   }
