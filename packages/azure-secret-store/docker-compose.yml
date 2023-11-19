@@ -1,0 +1,17 @@
+version: "2"
+
+services:
+  lowkey-vault:
+    container_name: lowkey-vault-nodejs
+    image: nagyesta/lowkey-vault:2.1.47@sha256:d3255e0447373124aa4cdebe978724d8890a03c85515dbae71ea1e84e1bcbf75
+    ports:
+      - "8443:8443"
+    environment:
+      LOWKEY_ARGS: "--server.port=8443"
+  assumed-identity:
+    container_name: assumed-identity-nodejs
+    image: nagyesta/assumed-identity:1.1.16@sha256:ecb60ed6d5426d1c67e8d0e61079a9445c688d895023ebed9d8b2324325ca837
+    ports:
+      - "8081:8081"
+    environment:
+      ASSUMED_ID_PORT: "8081"

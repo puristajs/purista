@@ -8,6 +8,7 @@ CONTENT="export const puristaVersion = '$NODE_VERSION'"
 echo $CONTENT > ./packages/amqpbridge/src/version.ts
 echo $CONTENT > ./packages/aws-param-config-store/src/version.ts
 echo $CONTENT > ./packages/aws-secret-store/src/version.ts
+echo $CONTENT > ./packages/azure-secret-store/src/version.ts
 echo $CONTENT > ./packages/base-http-bridge/src/version.ts
 echo $CONTENT > ./packages/cli/src/version.ts
 echo $CONTENT > ./packages/core/src/version.ts
