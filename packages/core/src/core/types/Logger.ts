@@ -6,6 +6,7 @@ import { TraceId } from './TraceId'
 export type LoggerOptions = {
   puristaVersion?: string
   name?: string
+  module?: string
   serviceVersion?: string
   serviceName?: string
   serviceTarget?: string
