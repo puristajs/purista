@@ -28,6 +28,7 @@ module.exports = {
     '@typescript-eslint/no-var-requires': 'warn',
     '@typescript-eslint/no-this-alias': 'warn',
     '@typescript-eslint/explicit-module-boundary-types': 'off',
+    '@typescript-eslint/consistent-type-imports': 'error',
     'no-unused-vars': 'off',
     curly: ['error', 'all'],
     'brace-style': 'error',
