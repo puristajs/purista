@@ -28,60 +28,28 @@ export class AzureSecretStore extends SecretStoreBaseClass<AzureSecretStoreConfi
     this.client = new SecretClient(this.config.vaultUrl, credential, this.config.options)
   }
 
-  async getSecret(...secretNames: string[]): Promise<Record<string, string | undefined>> {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get secret from store is disabled by config')
-    }
-
+  async getSecretImpl(...secretNames: string[]): Promise<Record<string, string | undefined>> {
     const result: Record<string, string | undefined> = {}
 
     for (const name of secretNames) {
-      let value: string | undefined
-      if (this.config.enableCache) {
-        const cachedValue = this.cache.get(name)
-        if (cachedValue) {
-          if (this.config.cacheTtl !== undefined) {
-            value = cachedValue.createdAt + this.config.cacheTtl >= Date.now() ? cachedValue.value : undefined
-          } else {
-            value = cachedValue.value
-          }
-        }
+      try {
+        const response = await this.client.getSecret(name)
+        result[name] = response?.value
+      } catch (err) {
+        result[name] = undefined
+        this.logger.error({ err })
+        throw UnhandledError.fromError(err, StatusCode.InternalServerError)
       }
-
-      if (!value) {
-        try {
-          const result = await this.client.getSecret(name)
-          value = result?.value
-        } catch (err) {
-          this.logger.error({ err })
-        }
-      }
-
-      result[name] = value
     }
 
     return result
   }
 
-  async removeSecret(secretName: string) {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove secret from store is disabled by config')
-    }
-
-    this.cache.delete(secretName)
-
+  async removeSecretImpl(secretName: string) {
     await this.client.beginDeleteSecret(secretName)
   }
 
-  async setSecret(secretName: string, secretValue: string) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set secret at store is disabled by config')
-    }
-
+  async setSecretImpl(secretName: string, secretValue: string) {
     await this.client.setSecret(secretName, secretValue)
-
-    if (this.config.enableCache) {
-      this.cache.set(secretName, { value: secretValue, createdAt: Date.now() })
-    }
   }
 }

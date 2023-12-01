@@ -26,58 +26,30 @@ export class GoogleSecretStore extends SecretStoreBaseClass<GoogleSecretStoreCon
     this.client = new SecretManagerServiceClient(this.config.client)
   }
 
-  async getSecret(...secretNames: string[]): Promise<Record<string, string | undefined>> {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get secret from store is disabled by config')
-    }
-
+  async getSecretImpl(...secretNames: string[]): Promise<Record<string, string | undefined>> {
     const result: Record<string, string | undefined> = {}
 
     for (const name of secretNames) {
-      let value: string | undefined
-      if (this.config.enableCache) {
-        const cachedValue = this.cache.get(name)
-        if (cachedValue) {
-          if (this.config.cacheTtl !== undefined) {
-            value = cachedValue.createdAt + this.config.cacheTtl >= Date.now() ? cachedValue.value : undefined
-          } else {
-            value = cachedValue.value
-          }
-        }
+      result[name] = undefined
+      try {
+        const res = await this.client.accessSecretVersion({
+          name: join(this.config.project, 'secrets', name, 'versions', 'latest'),
+        })
+        result[name] = res[0].payload?.data?.toString()
+      } catch (err) {
+        this.logger.error({ err })
+        throw UnhandledError.fromError(err, StatusCode.InternalServerError)
       }
-
-      if (!value) {
-        try {
-          const res = await this.client.accessSecretVersion({
-            name: join(this.config.project, 'secrets', name, 'versions', 'latest'),
-          })
-          value = res[0].payload?.data?.toString()
-        } catch (err) {
-          this.logger.error({ err })
-        }
-      }
-
-      result[name] = value
     }
 
     return result
   }
 
-  async removeSecret(secretName: string) {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove secret from store is disabled by config')
-    }
-
-    this.cache.delete(secretName)
-
+  async removeSecretImpl(secretName: string) {
     await this.client.deleteSecret({ name: join(this.config.project, 'secrets', secretName) })
   }
 
-  async setSecret(secretName: string, secretValue: string) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set secret at store is disabled by config')
-    }
-
+  async setSecretImpl(secretName: string, secretValue: string) {
     const existingValue = await this.getSecret(secretName)
 
     if (!existingValue[secretName]) {
@@ -98,9 +70,5 @@ export class GoogleSecretStore extends SecretStoreBaseClass<GoogleSecretStoreCon
         data: Buffer.from(secretValue, 'utf8'),
       },
     })
-
-    if (this.config.enableCache) {
-      this.cache.set(secretName, { value: secretValue, createdAt: Date.now() })
-    }
   }
 }

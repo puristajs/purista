@@ -3,7 +3,7 @@ import { NatsContainer } from '@testcontainers/nats'
 
 import { NatsConfigStore } from '../src/NatsConfigStore.impl'
 
-describe('@purista/redis-state-store', () => {
+describe('@purista/nats-config-store', () => {
   let container: StartedNatsContainer
 
   beforeAll(async () => {
@@ -48,10 +48,10 @@ describe('@purista/redis-state-store', () => {
     })
 
     await expect(store.setConfig('myConfig', { some: 'value' })).rejects.toThrow(
-      'set state at store is disabled by config',
+      'set config at store is disabled by config',
     )
-    await expect(store.getConfig('myConfig')).rejects.toThrow('get state from store is disabled by config')
-    await expect(store.removeConfig('myConfig')).rejects.toThrow('remove state from store is disabled by config')
+    await expect(store.getConfig('myConfig')).rejects.toThrow('get config from store is disabled by config')
+    await expect(store.removeConfig('myConfig')).rejects.toThrow('remove config from store is disabled by config')
 
     await expect(store.destroy()).resolves.toBeUndefined()
   })

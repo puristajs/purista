@@ -3,7 +3,7 @@ import { NatsContainer } from '@testcontainers/nats'
 
 import { NatsStateStore } from '../src/NatsStateStore.impl'
 
-describe('@purista/redis-state-store', () => {
+describe('@purista/nats-state-store', () => {
   let container: StartedNatsContainer
 
   beforeAll(async () => {
