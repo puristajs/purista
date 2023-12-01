@@ -50,19 +50,24 @@ export class RedisStateStore<
     this.client.on('error', (err) => this.logger.error({ err }, 'Redis Client Error'))
   }
 
+  protected async getClient() {
+    if (this.client.isOpen) {
+      return this.client
+    }
+    return this.client.connect()
+  }
+
   async getState(...stateNames: string[]): Promise<Record<string, unknown>> {
     if (!this.config.enableGet) {
       throw new UnhandledError(StatusCode.Unauthorized, 'get state from store is disabled by config')
     }
 
-    if (!this.client.isOpen) {
-      await this.client.connect()
-    }
+    const client = await this.getClient()
 
     const result: Record<string, unknown> = {}
     for await (const name of stateNames) {
       try {
-        const value = await this.client.get(name)
+        const value = await client.get(name)
         result[name] = value ? JSON.parse(value) : undefined
       } catch (err) {
         const msg = `error in state store getting value ${name}`
@@ -78,12 +83,10 @@ export class RedisStateStore<
       throw new UnhandledError(StatusCode.Unauthorized, 'remove state from store is disabled by config')
     }
 
-    if (!this.client.isOpen) {
-      await this.client.connect()
-    }
+    const client = await this.getClient()
 
     try {
-      await this.client.del(stateName)
+      await client.del(stateName)
     } catch (err) {
       const msg = `error in state store removing value ${stateName}`
       this.logger.error({ err }, msg)
@@ -96,11 +99,9 @@ export class RedisStateStore<
       throw new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
     }
 
-    if (!this.client.isOpen) {
-      await this.client.connect()
-    }
+    const client = await this.getClient()
     try {
-      await this.client.set(stateName, JSON.stringify(stateValue))
+      await client.set(stateName, JSON.stringify(stateValue))
     } catch (err) {
       const msg = `error in state store setting value ${stateName}`
       this.logger.error({ err }, msg)

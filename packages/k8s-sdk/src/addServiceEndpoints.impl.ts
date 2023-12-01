@@ -2,7 +2,7 @@ import { posix } from 'node:path'
 
 import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
-import type { Command, HttpExposedServiceMeta, Logger, type Service } from '@purista/core'
+import type { Command, HttpExposedServiceMeta, Logger, Service } from '@purista/core'
 import {
   EBMessageType,
   HandledError,

@@ -31,53 +31,28 @@ export class AWSConfigStore extends ConfigStoreBaseClass<AWSConfigStoreConfig> {
     this.client = new SSMClient(this.config.client)
   }
 
-  async getConfig(...configNames: string[]): Promise<Record<string, string | undefined>> {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get config from store is disabled by config')
-    }
-
+  async getConfigImpl(...configNames: string[]): Promise<Record<string, string | undefined>> {
     const result: Record<string, string | undefined> = {}
 
     for (const name of configNames) {
-      let value: string | undefined
-      if (this.config.enableCache) {
-        const cachedValue = this.cache.get(name)
-        if (cachedValue) {
-          if (this.config.cacheTtl !== undefined) {
-            value = cachedValue.createdAt + this.config.cacheTtl >= Date.now() ? cachedValue.value : undefined
-          } else {
-            value = cachedValue.value
-          }
+      try {
+        const command = new GetParameterCommand({
+          Name: name,
+        })
+        const res = await this.client.send(command)
+        result[name] = res.Parameter?.Value
+      } catch (err) {
+        if (!(err instanceof ParameterNotFound)) {
+          throw UnhandledError.fromError(err, StatusCode.InternalServerError)
         }
+        result[name] = undefined
       }
-
-      if (!value) {
-        try {
-          const command = new GetParameterCommand({
-            Name: name,
-          })
-          const res = await this.client.send(command)
-          value = res.Parameter?.Value
-        } catch (err) {
-          if (!(err instanceof ParameterNotFound)) {
-            this.logger.error({ err })
-          }
-        }
-      }
-
-      result[name] = value
     }
 
     return result
   }
 
-  async removeConfig(configName: string) {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove config from store is disabled by config')
-    }
-
-    this.cache.delete(configName)
-
+  async removeConfigImpl(configName: string) {
     const command = new DeleteParameterCommand({
       Name: configName,
     })
@@ -85,11 +60,7 @@ export class AWSConfigStore extends ConfigStoreBaseClass<AWSConfigStoreConfig> {
     await this.client.send(command)
   }
 
-  async setConfig(configName: string, configValue: string) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set config at store is disabled by config')
-    }
-
+  async setConfigImpl(configName: string, configValue: string) {
     const command = new PutParameterCommand({
       Name: configName,
       Value: configValue,
@@ -98,9 +69,5 @@ export class AWSConfigStore extends ConfigStoreBaseClass<AWSConfigStoreConfig> {
     })
 
     await this.client.send(command)
-
-    if (this.config.enableCache) {
-      this.cache.set(configName, { value: configValue, createdAt: Date.now() })
-    }
   }
 }

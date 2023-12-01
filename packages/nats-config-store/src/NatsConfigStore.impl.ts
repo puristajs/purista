@@ -69,11 +69,7 @@ export class NatsConfigStore extends ConfigStoreBaseClass<NatsConfigStoreConfig>
     return this.kv
   }
 
-  async getConfig(...stateNames: string[]): Promise<Record<string, unknown>> {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get state from store is disabled by config')
-    }
-
+  async getConfigImpl(...stateNames: string[]): Promise<Record<string, unknown>> {
     const store = await this.getStore()
 
     const result: Record<string, unknown> = {}
@@ -90,11 +86,7 @@ export class NatsConfigStore extends ConfigStoreBaseClass<NatsConfigStoreConfig>
     return result
   }
 
-  async removeConfig(stateName: string) {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove state from store is disabled by config')
-    }
-
+  async removeConfigImpl(stateName: string) {
     const store = await this.getStore()
 
     try {
@@ -106,11 +98,7 @@ export class NatsConfigStore extends ConfigStoreBaseClass<NatsConfigStoreConfig>
     }
   }
 
-  async setConfig(stateName: string, stateValue: unknown) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
-    }
-
+  async setConfigImpl(stateName: string, stateValue: unknown) {
     const store = await this.getStore()
 
     try {

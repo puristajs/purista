@@ -50,19 +50,20 @@ export class RedisConfigStore<
     this.client.on('error', (err) => this.logger.error({ err }, 'Redis Client Error'))
   }
 
-  async getConfig(...configNames: string[]): Promise<Record<string, unknown>> {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get config from store is disabled by config')
+  protected async getClient() {
+    if (this.client.isOpen) {
+      return this.client
     }
+    return this.client.connect()
+  }
 
-    if (!this.client.isOpen) {
-      await this.client.connect()
-    }
+  async getConfigImpl(...configNames: string[]): Promise<Record<string, unknown>> {
+    const client = await this.getClient()
 
     const result: Record<string, unknown> = {}
     for await (const name of configNames) {
       try {
-        const value = await this.client.get(name)
+        const value = await client.get(name)
         result[name] = value ? JSON.parse(value) : undefined
       } catch (err) {
         const msg = `error in config store getting value ${name}`
@@ -73,17 +74,11 @@ export class RedisConfigStore<
     return result
   }
 
-  async removeConfig(configName: string) {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove config from store is disabled by config')
-    }
-
-    if (!this.client.isOpen) {
-      await this.client.connect()
-    }
+  async removeConfigImpl(configName: string) {
+    const client = await this.getClient()
 
     try {
-      await this.client.del(configName)
+      await client.del(configName)
     } catch (err) {
       const msg = `error in config store removing value ${configName}`
       this.logger.error({ err }, msg)
@@ -91,16 +86,10 @@ export class RedisConfigStore<
     }
   }
 
-  async setConfig(configName: string, configValue: unknown) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set config at store is disabled by config')
-    }
-
-    if (!this.client.isOpen) {
-      await this.client.connect()
-    }
+  async setConfigImpl(configName: string, configValue: unknown) {
+    const client = await this.getClient()
     try {
-      await this.client.set(configName, JSON.stringify(configValue))
+      await client.set(configName, JSON.stringify(configValue))
     } catch (err) {
       const msg = `error in config store setting value ${configName}`
       this.logger.error({ err }, msg)
