@@ -19,7 +19,7 @@ cover: https://purista.dev/graphic/nats_event_bridge_header.png
 sticky: 20230601
 ---
 
-PURISTA Logo
+PURISTA
 
 We are thrilled to announce the release of PURISTA TypeScript Framework v1.7, the latest version of our powerful and versatile framework for building robust applications.  
 This release introduces exciting new features, improvements, and bug fixes, making PURISTA even more reliable and efficient. Let's dive into the highlights of this release.
