@@ -41,6 +41,10 @@ const apiSidebar = [
     text: 'Config stores',
     children: [
       {
+        text: '@purista/aws-config-store',
+        link: '/api/classes/purista_aws_config_store.AWSConfigStore.md',
+      },
+      {
         text: '@purista/dapr-sdk',
         link: '/api/classes/purista_dapr_sdk.DaprConfigStore.md',
       },
@@ -58,8 +62,20 @@ const apiSidebar = [
     text: 'Secret stores',
     children: [
       {
+        text: '@purista/aws-secret-store',
+        link: '/api/classes/purista_aws_secret_store.AWSSecretStore.md',
+      },
+      {
+        text: '@purista/azure-secret-store',
+        link: '/api/classes/purista_azure_secret_store.AzureSecretStore.md',
+      },
+      {
         text: '@purista/dapr-sdk',
         link: '/api/classes/purista_dapr_sdk.DaprSecretStore.md',
+      },
+      {
+        text: '@purista/gcloud-secret-store',
+        link: '/api/classes/purista_gcloud_secret_store.GoogleSecretStore.md',
       },
       {
         text: '@purista/infisical-secret-store',
