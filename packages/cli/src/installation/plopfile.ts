@@ -1,4 +1,4 @@
-import { NodePlopAPI } from 'plop'
+import type { NodePlopAPI } from 'plop'
 
 import { registerHandlebarHelpers } from '../helper/registerHandlebarHelpers.js'
 import { initProjectActions } from './initProjectActions.js'
@@ -10,7 +10,7 @@ export default function (plop: NodePlopAPI) {
     return JSON.stringify(answers)
   })
 
-  plop.setWelcomeMessage('Welcome to PURISTA cli')
+  plop.setWelcomeMessage('Welcome to PURISTA CLI')
 
   plop.setGenerator('rootMenu', {
     description: 'Init a new project or add PURISTA to current project',

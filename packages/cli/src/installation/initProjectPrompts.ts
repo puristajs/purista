@@ -18,6 +18,15 @@ export const initProjectPrompts: Prompts = [
   },
   {
     type: 'list',
+    message: 'What do you want to do?',
+    name: 'isEsm',
+    choices: [
+      { value: true, name: 'esm module' },
+      { value: false, name: 'commonjs' },
+    ],
+  },
+  {
+    type: 'list',
     name: 'installCliGlobal',
     message: 'Install PURISTA cli globally?',
     when(answers) {
