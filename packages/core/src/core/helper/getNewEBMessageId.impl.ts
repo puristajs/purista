@@ -1,4 +1,4 @@
-import { EBMessageId } from '../types'
+import type { EBMessageId } from '../types'
 import { getUniqueId } from './getUniqueId.impl'
 
 /**

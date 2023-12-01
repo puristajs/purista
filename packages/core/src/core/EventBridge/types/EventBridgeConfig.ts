@@ -1,6 +1,6 @@
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 
-import { Logger, LogLevelName, Prettify } from '../../types'
+import type { Logger, LogLevelName, Prettify } from '../../types'
 
 /**
  * The config object for an event bridge.

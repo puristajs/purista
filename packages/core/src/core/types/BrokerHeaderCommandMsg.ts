@@ -1,6 +1,6 @@
-import { BrokerHeaderCustomMsg } from './BrokerHeaderCustomMsg'
-import { InstanceId } from './InstanceId'
-import { Prettify } from './Prettify'
+import type { BrokerHeaderCustomMsg } from './BrokerHeaderCustomMsg'
+import type { InstanceId } from './InstanceId'
+import type { Prettify } from './Prettify'
 
 export type BrokerHeaderCommandMsg = Prettify<
   BrokerHeaderCustomMsg & {

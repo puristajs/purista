@@ -1,4 +1,5 @@
-import { ServiceBuilder, ServiceInfoType } from '@purista/core'
+import type { ServiceInfoType } from '@purista/core'
+import { ServiceBuilder } from '@purista/core'
 
 import { generalTheServiceServiceInfo } from '../generalTheServiceServiceInfo'
 import { theServiceServiceV1ConfigSchema } from './theServiceServiceConfig'

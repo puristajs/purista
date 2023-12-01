@@ -1,5 +1,7 @@
-import { EBMessageAddress, getCommandMessageMock, getLoggerMock, HttpExposedServiceMeta } from '@purista/core'
-import { createSandbox, SinonSandbox } from 'sinon'
+import type { EBMessageAddress, HttpExposedServiceMeta } from '@purista/core'
+import { getCommandMessageMock, getLoggerMock } from '@purista/core'
+import type { SinonSandbox } from 'sinon'
+import { createSandbox } from 'sinon'
 
 import { DaprClient } from './DaprClient.impl'
 

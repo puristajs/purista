@@ -1,4 +1,4 @@
-import { SecretsManagerClientConfigType } from '@aws-sdk/client-secrets-manager'
+import type { SecretsManagerClientConfigType } from '@aws-sdk/client-secrets-manager'
 
 /**
  * AWS Secret Manager store config

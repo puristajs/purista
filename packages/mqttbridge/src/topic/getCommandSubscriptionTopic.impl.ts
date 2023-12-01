@@ -1,6 +1,7 @@
 import { join } from 'node:path/posix'
 
-import { convertToSnakeCase, EBMessageAddress, EBMessageType } from '@purista/core'
+import type { EBMessageAddress } from '@purista/core'
+import { convertToSnakeCase, EBMessageType } from '@purista/core'
 
 import type { MqttBridge } from '../MqttEventBridge'
 

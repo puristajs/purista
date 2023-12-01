@@ -1,6 +1,7 @@
 import { join } from 'node:path/posix'
 
-import { convertToSnakeCase, Subscription } from '@purista/core'
+import type { Subscription } from '@purista/core'
+import { convertToSnakeCase } from '@purista/core'
 
 import type { MqttBridge } from '../MqttEventBridge'
 

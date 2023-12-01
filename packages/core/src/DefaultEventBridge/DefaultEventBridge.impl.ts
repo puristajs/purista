@@ -2,22 +2,25 @@ import { Stream } from 'node:stream'
 
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 
-import {
+import type {
   Command,
   CommandDefinitionMetadataBase,
   CommandErrorResponse,
   CommandSuccessResponse,
-  createErrorResponse,
-  createInfoMessage,
   CustomMessage,
-  deserializeOtp,
   EBMessage,
   EBMessageAddress,
   EBMessageId,
-  EBMessageType,
   EventBridge,
-  EventBridgeBaseClass,
   EventBridgeConfig,
+  Subscription,
+} from '../core'
+import {
+  createErrorResponse,
+  createInfoMessage,
+  deserializeOtp,
+  EBMessageType,
+  EventBridgeBaseClass,
   EventBridgeEventNames,
   getCleanedMessage,
   getCommandQueueName,
@@ -35,14 +38,13 @@ import {
   PuristaSpanTag,
   serializeOtp,
   StatusCode,
-  Subscription,
   UnhandledError,
 } from '../core'
 import { puristaVersion } from '../version'
 import { getDefaultEventBridgeConfig } from './getDefaultEventBridgeConfig.impl'
 import { getNewSubscriptionStorageEntry } from './getNewSubscriptionStorageEntry.impl'
 import { isMessageMatchingSubscription } from './isMessageMatchingSubscription.impl'
-import { DefaultEventBridgeConfig, PendigInvocation, SubscriptionStorageEntry } from './types'
+import type { DefaultEventBridgeConfig, PendigInvocation, SubscriptionStorageEntry } from './types'
 /**
  * Simple implementation of some simple in-memory event bridge.
  * Does not support threads and does not need any external databases.

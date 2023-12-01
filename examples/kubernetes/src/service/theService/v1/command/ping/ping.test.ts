@@ -3,7 +3,7 @@ import { createSandbox } from 'sinon'
 
 import { theServiceV1Service } from '../../theServiceV1Service'
 import { pingCommandBuilder } from './pingCommandBuilder'
-import { TheServiceV1PingInputParameter, TheServiceV1PingInputPayload } from './types'
+import type { TheServiceV1PingInputParameter, TheServiceV1PingInputPayload } from './types'
 
 describe('service TheService version 1 - command ping', () => {
   let sandbox = createSandbox()

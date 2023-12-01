@@ -1,17 +1,17 @@
 import type { z } from 'zod'
 
-import { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig'
-import { EBMessageType } from '../EBMessageType.enum'
-import { InstanceId } from '../InstanceId'
-import { PrincipalId } from '../PrincipalId'
+import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig'
+import type { EBMessageType } from '../EBMessageType.enum'
+import type { InstanceId } from '../InstanceId'
+import type { PrincipalId } from '../PrincipalId'
 import type { ServiceClass } from '../ServiceClass'
-import { TenantId } from '../TenantId'
+import type { TenantId } from '../TenantId'
 import type { SubscriptionAfterGuardHook } from './SubscriptionAfterGuardHook'
 import type { SubscriptionBeforeGuardHook } from './SubscriptionBeforeGuardHook'
-import { SubscriptionDefinitionMetadataBase } from './SubscriptionDefinitionMetadataBase'
+import type { SubscriptionDefinitionMetadataBase } from './SubscriptionDefinitionMetadataBase'
 import type { SubscriptionFunction } from './SubscriptionFunction'
-import { SubscriptionTransformInputHook } from './SubscriptionTransformInputHook'
-import { SubscriptionTransformOutputHook } from './SubscriptionTransformOutputHook'
+import type { SubscriptionTransformInputHook } from './SubscriptionTransformInputHook'
+import type { SubscriptionTransformOutputHook } from './SubscriptionTransformOutputHook'
 
 /**
  * The definition for a subscription provided by some service.

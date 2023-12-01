@@ -1,4 +1,5 @@
-import { Command, CommandSuccessResponse, EBMessageType, InstanceId } from '../types'
+import type { Command, CommandSuccessResponse, InstanceId } from '../types'
+import { EBMessageType } from '../types'
 import { getNewTraceId } from './getNewTraceId.impl'
 
 /**

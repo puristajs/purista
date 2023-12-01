@@ -1,4 +1,5 @@
-import { z, ZodType } from 'zod'
+import type { ZodType } from 'zod'
+import { z } from 'zod'
 
 import type {
   Complete,
@@ -17,7 +18,8 @@ import type {
   SubscriptionTransformOutputHook,
   TenantId,
 } from '../core'
-import { generateSchema, OpenApiZodAny } from '../zodOpenApi'
+import type { OpenApiZodAny } from '../zodOpenApi'
+import { generateSchema } from '../zodOpenApi'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl'
 
 /**

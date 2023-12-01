@@ -1,4 +1,4 @@
-import { EBMessageAddress } from '../types'
+import type { EBMessageAddress } from '../types'
 import { getCommandQueueName } from './getCommandQueueName.impl'
 
 describe('creates a command function queue name', () => {

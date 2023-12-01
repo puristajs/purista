@@ -1,5 +1,5 @@
-import { CustomMessage } from './CustomMessage'
-import { EBMessage } from './EBMessage'
+import type { CustomMessage } from './CustomMessage'
+import type { EBMessage } from './EBMessage'
 import { EBMessageType } from './EBMessageType.enum'
 
 /**

@@ -1,4 +1,4 @@
-import { SubscriptionTransformFunctionContext } from './SubscriptionTransformFunctionContext'
+import type { SubscriptionTransformFunctionContext } from './SubscriptionTransformFunctionContext'
 
 /**
  * This transform hook is executed after function output validation and AfterGuardHooks.

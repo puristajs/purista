@@ -1,4 +1,4 @@
-import { RouterFunction } from '@purista/base-http-bridge'
+import type { RouterFunction } from '@purista/base-http-bridge'
 
 export const configRoute: RouterFunction = async function (c) {
   const payload = {

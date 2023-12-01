@@ -1,4 +1,4 @@
-import { StatusCode } from '../types'
+import type { StatusCode } from '../types'
 import { getErrorMessageForCode } from './getErrorMessageForCode.impl'
 
 it('returns a message string for error code', () => {

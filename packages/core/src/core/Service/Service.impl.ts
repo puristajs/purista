@@ -4,7 +4,7 @@ import { DefaultConfigStore } from '../../DefaultConfigStore'
 import { DefaultSecretStore } from '../../DefaultSecretStore'
 import { DefaultStateStore } from '../../DefaultStateStore'
 import { puristaVersion } from '../../version'
-import { ConfigDeleteFunction, ConfigGetterFunction, ConfigSetterFunction } from '../ConfigStore'
+import type { ConfigDeleteFunction, ConfigGetterFunction, ConfigSetterFunction } from '../ConfigStore'
 import { HandledError } from '../Error/HandledError.impl'
 import { UnhandledError } from '../Error/UnhandledError.impl'
 import {
@@ -16,9 +16,9 @@ import {
   getNewTraceId,
   serializeOtp,
 } from '../helper'
-import { SecretDeleteFunction, SecretGetterFunction, SecretSetterFunction } from '../SecretStore'
-import { StateDeleteFunction, StateGetterFunction, StateSetterFunction } from '../StateStore'
-import {
+import type { SecretDeleteFunction, SecretGetterFunction, SecretSetterFunction } from '../SecretStore'
+import type { StateDeleteFunction, StateGetterFunction, StateSetterFunction } from '../StateStore'
+import type {
   Command,
   CommandDefinition,
   CommandDefinitionList,
@@ -28,17 +28,11 @@ import {
   EBMessage,
   EBMessageAddress,
   EBMessageSenderAddress,
-  EBMessageType,
   InfoMessageType,
   Logger,
   PrincipalId,
-  PuristaSpanName,
-  PuristaSpanTag,
   ServiceClass,
   ServiceConstructorInput,
-  ServiceEventsNames,
-  StatusCode,
-  StoreType,
   Subscription,
   SubscriptionDefinition,
   SubscriptionDefinitionList,
@@ -46,6 +40,7 @@ import {
   TenantId,
   TraceId,
 } from '../types'
+import { EBMessageType, PuristaSpanName, PuristaSpanTag, ServiceEventsNames, StatusCode, StoreType } from '../types'
 import { commandTransformInput } from './commandTransformInput.impl'
 import { ServiceBaseClass } from './ServiceBaseClass'
 import { subscriptionTransformInput } from './subscriptionTransformInput.impl'

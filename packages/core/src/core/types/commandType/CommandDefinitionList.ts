@@ -1,6 +1,6 @@
 import type { ServiceClass } from '../ServiceClass'
 import type { CommandDefinition } from './CommandDefinition'
-import { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase'
+import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase'
 
 /**
  * Helper type for creating list of service commands to be passed as input to service class

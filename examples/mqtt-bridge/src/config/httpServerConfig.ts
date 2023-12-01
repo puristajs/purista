@@ -1,4 +1,4 @@
-import { HttpServerServiceV1Config } from '@purista/httpserver'
+import type { HttpServerServiceV1Config } from '@purista/httpserver'
 
 const httpServerConfig: HttpServerServiceV1Config = {
   fastify: {},

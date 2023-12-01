@@ -1,6 +1,6 @@
-import { EBMessage } from '../EBMessage'
+import type { EBMessage } from '../EBMessage'
 import { EBMessageType } from '../EBMessageType.enum'
-import { CommandErrorResponse } from './CommandErrorResponse'
+import type { CommandErrorResponse } from './CommandErrorResponse'
 
 /**
  * Checks if given message is type of CommandErrorResponse

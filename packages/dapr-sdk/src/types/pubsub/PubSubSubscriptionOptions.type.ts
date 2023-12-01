@@ -11,10 +11,10 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { BulkSubscribeConfig } from './BulkSubscribeConfig.type'
-import { TypeDaprPubSubCallback } from './DaprPubSubCallback.type'
-import { DaprPubSubRouteType } from './DaprPubSubRouteType.type'
-import { KeyValueType } from './KeyValue.type'
+import type { BulkSubscribeConfig } from './BulkSubscribeConfig.type'
+import type { TypeDaprPubSubCallback } from './DaprPubSubCallback.type'
+import type { DaprPubSubRouteType } from './DaprPubSubRouteType.type'
+import type { KeyValueType } from './KeyValue.type'
 
 /**
  * PubSubSubscriptionOptionsType defines the options we can pass while subscribing

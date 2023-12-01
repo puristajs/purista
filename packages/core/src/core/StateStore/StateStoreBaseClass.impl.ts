@@ -1,7 +1,8 @@
 import { initLogger } from '../../DefaultLogger'
 import { UnhandledError } from '../Error'
-import { Logger, StatusCode, StoreBaseConfig } from '../types'
-import { StateStore } from './types'
+import type { Logger, StoreBaseConfig } from '../types'
+import { StatusCode } from '../types'
+import type { StateStore } from './types'
 
 /**
  * Base class for config store implementations

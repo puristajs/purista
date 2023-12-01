@@ -1,6 +1,7 @@
 import { getLoggerMock } from '@purista/core'
-import { Context } from 'hono'
-import { createSandbox, SinonSandbox } from 'sinon'
+import type { Context } from 'hono'
+import type { SinonSandbox } from 'sinon'
+import { createSandbox } from 'sinon'
 
 import { configRoute } from './config.impl'
 

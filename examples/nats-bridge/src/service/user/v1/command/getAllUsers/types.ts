@@ -1,6 +1,6 @@
-import { z } from 'zod'
+import type { z } from 'zod'
 
-import {
+import type {
   userV1GetAllUsersInputParameterSchema,
   userV1GetAllUsersInputPayloadSchema,
   userV1GetAllUsersOutputPayloadSchema,

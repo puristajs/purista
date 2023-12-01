@@ -1,4 +1,4 @@
-import { ServiceInfoType } from '../types'
+import type { ServiceInfoType } from '../types'
 
 const serviceNameRegex = /^[a-zA-Z0-9-_]+$/
 const serviceVersionRegex = /^\d+$/

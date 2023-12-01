@@ -1,6 +1,7 @@
-import { SinonSandbox, SinonStub, stub } from 'sinon'
+import type { SinonSandbox, SinonStub } from 'sinon'
+import { stub } from 'sinon'
 
-import { Logger } from '../core'
+import type { Logger } from '../core'
 
 /**
  * Mocks the logger and methods are stubs

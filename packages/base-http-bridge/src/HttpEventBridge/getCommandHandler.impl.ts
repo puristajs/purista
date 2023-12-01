@@ -2,15 +2,17 @@
 
 import { context, propagation, SpanKind } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
-import {
+import type {
   Command,
   CommandErrorResponse,
   CommandSuccessResponse,
   DefinitionEventBridgeConfig,
   EBMessageAddress,
+  HttpExposedServiceMeta,
+} from '@purista/core'
+import {
   getTimeoutPromise,
   HandledError,
-  HttpExposedServiceMeta,
   PuristaSpanName,
   serializeOtp,
   StatusCode,
@@ -19,8 +21,8 @@ import {
 } from '@purista/core'
 import { HTTP } from 'cloudevents'
 
-import { HttpEventBridge } from './HttpEventBridge.impl'
-import { HttpEventBridgeConfig, RouterFunction } from './types'
+import type { HttpEventBridge } from './HttpEventBridge.impl'
+import type { HttpEventBridgeConfig, RouterFunction } from './types'
 
 export const getCommandHandler = function (
   this: HttpEventBridge<HttpEventBridgeConfig>,

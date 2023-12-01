@@ -1,4 +1,4 @@
-import { HttpExposedServiceMeta } from './HttpExposedServiceMeta'
+import type { HttpExposedServiceMeta } from './HttpExposedServiceMeta'
 import { isHttpExposedServiceMeta } from './isHttpExposedServiceMeta.impl'
 
 describe('isHttpExposedServiceMeta', () => {

@@ -1,6 +1,7 @@
 import { initLogger } from '../../DefaultLogger'
 import { UnhandledError } from '../Error'
-import { Logger, Prettify, StatusCode, StoreBaseConfig } from '../types'
+import type { Logger, Prettify, StoreBaseConfig } from '../types'
+import { StatusCode } from '../types'
 import type { SecretStore, SecretStoreCacheMap } from './types'
 
 /**

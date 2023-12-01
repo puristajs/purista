@@ -1,6 +1,7 @@
 import { HandledError, StatusCode } from '@purista/core'
 
-import { StateStoreKey, User } from '../../../../../types'
+import type { User } from '../../../../../types'
+import { StateStoreKey } from '../../../../../types'
 import { userV1ServiceBuilder } from '../../userV1ServiceBuilder'
 import {
   userV1GetUserByIdInputParameterSchema,

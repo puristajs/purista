@@ -11,8 +11,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { DaprPubSubRouteType } from './DaprPubSubRouteType.type'
-import { KeyValueType } from './KeyValue.type'
+import type { DaprPubSubRouteType } from './DaprPubSubRouteType.type'
+import type { KeyValueType } from './KeyValue.type'
 
 /**
  * BulkSubscribeOptions enlists the options for bulk subscribe

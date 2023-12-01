@@ -1,6 +1,6 @@
 import { StatusCode } from '@purista/core'
 
-import { RouterFunction } from './types'
+import type { RouterFunction } from './types'
 
 export const healthzRoute: RouterFunction = async function (c) {
   const isHealthy = await this.isHealthy()

@@ -1,4 +1,4 @@
-import { NodePlopAPI } from 'plop'
+import type { NodePlopAPI } from 'plop'
 
 import { registerHandlebarHelpers } from '../helper/registerHandlebarHelpers.js'
 import { addCommandActions } from './addCommandActions.js'

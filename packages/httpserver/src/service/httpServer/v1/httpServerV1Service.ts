@@ -1,4 +1,4 @@
-import { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
+import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
 
 import { httpServerV1ServiceBuilder } from './httpServerV1ServiceBuilder'
 import { serviceCommandsToRestApiSubscriptionBuilder } from './subscription/serviceCommandsToRestApi'

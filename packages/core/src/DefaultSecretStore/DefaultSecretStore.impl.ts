@@ -1,5 +1,6 @@
-import { SecretStore, SecretStoreBaseClass, StatusCode, StoreBaseConfig, UnhandledError } from '../core'
-import { DefaultSecretStoreConfig } from './types'
+import type { SecretStore, StoreBaseConfig } from '../core'
+import { SecretStoreBaseClass, StatusCode, UnhandledError } from '../core'
+import type { DefaultSecretStoreConfig } from './types'
 
 /**
  * The DefaultSecretStore is a placeholder which offers all needed methods.

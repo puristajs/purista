@@ -4,25 +4,20 @@ import fastifyStatic from '@fastify/static'
 import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import * as api from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
-import {
-  Command,
-  HandledError,
-  HttpExposedServiceMeta,
-  Service,
-  ServiceConstructorInput,
-  StatusCode,
-  UnhandledError,
-} from '@purista/core'
-import fastify, { FastifyInstance, HTTPMethods } from 'fastify'
+import type { Command, HttpExposedServiceMeta, ServiceConstructorInput } from '@purista/core'
+import { HandledError, Service, StatusCode, UnhandledError } from '@purista/core'
+import type { FastifyInstance, HTTPMethods } from 'fastify'
+import fastify from 'fastify'
 import { posix } from 'path'
 import * as swaggerUi from 'swagger-ui-dist'
-import Trouter, { Methods } from 'trouter'
+import type { Methods } from 'trouter'
+import Trouter from 'trouter'
 
-import { HttpServerServiceV1ConfigRaw } from './httpServerServiceConfig'
+import type { HttpServerServiceV1ConfigRaw } from './httpServerServiceConfig'
 import { OPEN_API_ROUTE_FUNCTIONS } from './routes'
 import { addHeaders } from './subscription/serviceCommandsToRestApi/helper'
 import { addSpanTags } from './subscription/serviceCommandsToRestApi/helper/addSpanTags'
-import { BeforeResponseHook } from './types'
+import type { BeforeResponseHook } from './types'
 
 /**
  * A simple http server based on fastify.

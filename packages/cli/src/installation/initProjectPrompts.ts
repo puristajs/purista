@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { Prompts } from 'node-plop'
+import type { Prompts } from 'node-plop'
 
 export const initProjectPrompts: Prompts = [
   {

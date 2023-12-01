@@ -1,8 +1,10 @@
 import { join } from 'node:path'
 
-import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock, Service } from '@purista/core'
+import type { Service } from '@purista/core'
+import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock } from '@purista/core'
 import { createSandbox } from 'sinon'
-import { GenericContainer, StartedTestContainer } from 'testcontainers'
+import type { StartedTestContainer } from 'testcontainers'
+import { GenericContainer } from 'testcontainers'
 import { z } from 'zod'
 
 import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1'

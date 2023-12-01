@@ -1,4 +1,5 @@
-import { createSandbox, SinonSandbox } from 'sinon'
+import type { SinonSandbox } from 'sinon'
+import { createSandbox } from 'sinon'
 
 import { StatusCode, UnhandledError } from '../../core'
 import { getLoggerMock } from '../../mocks'

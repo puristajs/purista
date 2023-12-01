@@ -1,6 +1,6 @@
-import { Span } from '@opentelemetry/api'
+import type { Span } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
-import { FastifyRequest } from 'fastify'
+import type { FastifyRequest } from 'fastify'
 
 export const addSpanTags = (span: Span, request: FastifyRequest) => {
   span.setAttribute(SemanticAttributes.HTTP_URL, request.url)

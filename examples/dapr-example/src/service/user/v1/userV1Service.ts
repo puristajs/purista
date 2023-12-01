@@ -1,4 +1,4 @@
-import { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
+import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
 
 import { computeDataCommandBuilder } from './command/computeData'
 import { getAllUsersCommandBuilder } from './command/getAllUsers'

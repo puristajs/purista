@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import camelCase from 'camelcase'
-import { Actions } from 'node-plop'
+import type { Actions } from 'node-plop'
 
 import { TEMPLATE_BASE } from '../config.js'
 import { collectInstallInfo, installInfo } from '../helper/installInfo.js'

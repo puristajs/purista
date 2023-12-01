@@ -1,6 +1,7 @@
-import { createSandbox, SinonSandbox } from 'sinon'
+import type { SinonSandbox } from 'sinon'
+import { createSandbox } from 'sinon'
 
-import { Logger, LoggerOptions } from '../core/types'
+import type { Logger, LoggerOptions } from '../core/types'
 import { DefaultLogger } from './DefaultLogger.impl'
 
 describe('DefaultLogger', () => {

@@ -1,8 +1,8 @@
-import { ContextBase } from '../ContextBase'
-import { EBMessage } from '../EBMessage'
-import { EmitCustomMessageFunction } from '../EmitCustomMessageFunction'
-import { InvokeFunction } from '../InvokeFunction'
-import { Prettify } from '../Prettify'
+import type { ContextBase } from '../ContextBase'
+import type { EBMessage } from '../EBMessage'
+import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction'
+import type { InvokeFunction } from '../InvokeFunction'
+import type { Prettify } from '../Prettify'
 
 /**
  * It provides the original command message.

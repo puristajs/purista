@@ -1,6 +1,7 @@
 import { stub } from 'sinon'
 
-import { EBMessageType, InfoMessage, Subscription } from '../../core'
+import type { InfoMessage, Subscription } from '../../core'
+import { EBMessageType } from '../../core'
 import { getLoggerMock } from '../../mocks'
 import { getNewSubscriptionStorageEntry } from '../getNewSubscriptionStorageEntry.impl'
 import { isMessageMatchingSubscription } from '../isMessageMatchingSubscription.impl'

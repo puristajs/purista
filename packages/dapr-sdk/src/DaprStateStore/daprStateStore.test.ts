@@ -1,5 +1,6 @@
 import { HttpClient, UnhandledError } from '@purista/core'
-import { createSandbox, SinonSandbox } from 'sinon'
+import type { SinonSandbox } from 'sinon'
+import { createSandbox } from 'sinon'
 
 import { DAPR_API_VERSION } from '../types'
 import { DaprStateStore } from './DaprStateStore.impl'

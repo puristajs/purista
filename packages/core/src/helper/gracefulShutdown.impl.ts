@@ -1,5 +1,5 @@
-import { Logger } from '../core'
-import { ShutdownEntry } from './types'
+import type { Logger } from '../core'
+import type { ShutdownEntry } from './types'
 
 /**
  * Helps to gracefully shut down your application.

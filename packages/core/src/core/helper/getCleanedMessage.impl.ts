@@ -1,4 +1,5 @@
-import { EBMessage, isCommand, isCommandSuccessResponse } from '../types'
+import type { EBMessage } from '../types'
+import { isCommand, isCommandSuccessResponse } from '../types'
 import { isDevelop } from './isDevelop.impl'
 
 /**

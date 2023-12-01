@@ -1,6 +1,10 @@
-import { z } from 'zod'
+import type { z } from 'zod'
 
-import { pingV1PingInputParameterSchema, pingV1PingInputPayloadSchema, pingV1PingOutputPayloadSchema } from './schema'
+import type {
+  pingV1PingInputParameterSchema,
+  pingV1PingInputPayloadSchema,
+  pingV1PingOutputPayloadSchema,
+} from './schema'
 
 export type PingV1PingInputParameter = z.input<typeof pingV1PingInputParameterSchema>
 

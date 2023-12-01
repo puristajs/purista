@@ -1,6 +1,7 @@
 import { posix } from 'node:path'
 
-import { Context, context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
+import type { Context } from '@opentelemetry/api'
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import {
   convertToSnakeCase,
@@ -11,8 +12,8 @@ import {
   StatusCode,
   UnhandledError,
 } from '@purista/core'
-import { FastifyReply, FastifyRequest } from 'fastify'
-import { Methods } from 'trouter'
+import type { FastifyReply, FastifyRequest } from 'fastify'
+import type { Methods } from 'trouter'
 
 import { httpServerV1ServiceBuilder } from '../../httpServerV1ServiceBuilder'
 import { addHeaders } from './helper'

@@ -1,5 +1,7 @@
-import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock, Service } from '@purista/core'
-import { NatsContainer, StartedNatsContainer } from '@testcontainers/nats'
+import type { Service } from '@purista/core'
+import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock } from '@purista/core'
+import type { StartedNatsContainer } from '@testcontainers/nats'
+import { NatsContainer } from '@testcontainers/nats'
 import { createSandbox } from 'sinon'
 import { z } from 'zod'
 

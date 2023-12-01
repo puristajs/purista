@@ -1,7 +1,7 @@
-import { ContextBase } from '../ContextBase'
-import { EmitCustomMessageFunction } from '../EmitCustomMessageFunction'
-import { InvokeFunction } from '../InvokeFunction'
-import { Prettify } from '../Prettify'
+import type { ContextBase } from '../ContextBase'
+import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction'
+import type { InvokeFunction } from '../InvokeFunction'
+import type { Prettify } from '../Prettify'
 import type { Command } from './Command'
 
 /**

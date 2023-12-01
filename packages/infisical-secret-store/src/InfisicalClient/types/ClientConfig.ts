@@ -1,4 +1,4 @@
-import { HttpClientConfig, Prettify } from '@purista/core'
+import type { HttpClientConfig, Prettify } from '@purista/core'
 
 export type HttpClientConfigCustom = {}
 

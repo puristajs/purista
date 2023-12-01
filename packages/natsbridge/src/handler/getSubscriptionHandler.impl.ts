@@ -1,21 +1,18 @@
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
+import type { BrokerHeaderCustomMsg, CustomMessage, EBMessage, Subscription } from '@purista/core'
 import {
-  BrokerHeaderCustomMsg,
-  CustomMessage,
   deserializeOtp,
-  EBMessage,
   EventBridgeEventNames,
   PuristaSpanName,
   PuristaSpanTag,
   serializeOtp,
   StatusCode,
-  Subscription,
   UnhandledError,
 } from '@purista/core'
-import { JsMsg, Msg, NatsError } from 'nats'
+import type { JsMsg, Msg, NatsError } from 'nats'
 
 import { deserializeOtpFromNats } from '../deserializeOtpFromNats.impl'
-import { NatsBridge } from '../NatsBridge'
+import type { NatsBridge } from '../NatsBridge'
 import { serializeOtpToNats } from '../serializeOtpToNats.impl'
 import { getTopicName } from '../topic'
 

@@ -1,4 +1,4 @@
-import { EBMessageAddress } from '../types'
+import type { EBMessageAddress } from '../types'
 
 /**
  *

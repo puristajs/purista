@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { BulkSubscribeResponseEntry } from './BulkSubscribeResponseEntry.type'
+import type { BulkSubscribeResponseEntry } from './BulkSubscribeResponseEntry.type'
 
 /**
  * BulkSubscribeResponse is the response for a bulk subscribe request

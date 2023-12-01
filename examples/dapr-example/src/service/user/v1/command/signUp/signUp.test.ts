@@ -4,7 +4,7 @@ import { createSandbox } from 'sinon'
 import { StateStoreKey } from '../../../../../types'
 import { userV1Service } from '../../userV1Service'
 import { signUpCommandBuilder } from './signUpCommandBuilder'
-import { UserV1SignUpInputParameter, UserV1SignUpInputPayload } from './types'
+import type { UserV1SignUpInputParameter, UserV1SignUpInputPayload } from './types'
 
 describe('service User version 1 - command signUp', () => {
   let sandbox = createSandbox()

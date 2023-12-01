@@ -1,4 +1,4 @@
-import { Logger } from '../core'
+import type { Logger } from '../core'
 import { DefaultConfigStore } from './DefaultConfigStore.impl'
 
 export const initDefaultConfigStore = (options: { logger: Logger }): DefaultConfigStore => {

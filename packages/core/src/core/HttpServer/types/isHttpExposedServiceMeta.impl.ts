@@ -1,4 +1,4 @@
-import { HttpExposedServiceMeta } from './HttpExposedServiceMeta'
+import type { HttpExposedServiceMeta } from './HttpExposedServiceMeta'
 
 /**
  * Checks if given input is type of HttpExposedServiceMeta

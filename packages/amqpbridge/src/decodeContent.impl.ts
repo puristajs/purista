@@ -1,4 +1,4 @@
-import { Encoder, Encrypter } from './types'
+import type { Encoder, Encrypter } from './types'
 
 export const decodeContent = async <T>(
   input: Buffer,

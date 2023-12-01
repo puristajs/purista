@@ -1,4 +1,5 @@
-import { Command, CommandSuccessResponse, createSuccessResponse, getNewInstanceId } from '../../core'
+import type { Command, CommandSuccessResponse } from '../../core'
+import { createSuccessResponse, getNewInstanceId } from '../../core'
 import { getCommandMessageMock } from './getCommandMessage.mock'
 
 /**

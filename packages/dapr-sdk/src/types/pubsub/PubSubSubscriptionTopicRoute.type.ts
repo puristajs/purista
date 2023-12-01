@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { TypeDaprPubSubCallback } from './DaprPubSubCallback.type'
+import type { TypeDaprPubSubCallback } from './DaprPubSubCallback.type'
 
 /**
  * This defines the routeName object

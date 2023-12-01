@@ -8,7 +8,7 @@ import { createSandbox } from 'sinon'
 
 import { pingV1Service } from '../../pingV1Service'
 import { logSubscriptionBuilder } from './logSubscriptionBuilder'
-import { PingV1LogInputPayload } from './types'
+import type { PingV1LogInputPayload } from './types'
 
 describe('service Ping version 1 - subscription log', () => {
   let sandbox = createSandbox()

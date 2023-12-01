@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { PubSubSubscriptionType } from './PubSubSubscription.type'
+import type { PubSubSubscriptionType } from './PubSubSubscription.type'
 
 /**
  * This defines the entire object containing pubsubNames

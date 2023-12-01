@@ -1,5 +1,6 @@
 import { createInfoMessage } from '../../helper'
-import { EBMessage, EBMessageType } from '../../types'
+import type { EBMessage } from '../../types'
+import { EBMessageType } from '../../types'
 import { isInfoServiceFunctionAdded } from './isInfoServiceFunctionAdded.impl'
 
 describe('isInfoServiceFunctionAdded', () => {

@@ -1,4 +1,5 @@
-import { Context, Span, SpanOptions, SpanStatusCode } from '@opentelemetry/api'
+import type { Context, Span, SpanOptions } from '@opentelemetry/api'
+import { SpanStatusCode } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
@@ -6,8 +7,9 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import { initLogger } from '../../DefaultLogger'
 import { puristaVersion } from '../../version'
 import { getNewInstanceId } from '../helper'
-import { Complete, GenericEventEmitter, InstanceId, Logger, PuristaSpanTag } from '../types'
-import { EventBridgeConfig, EventBridgeEvents } from './types'
+import type { Complete, InstanceId, Logger } from '../types'
+import { GenericEventEmitter, PuristaSpanTag } from '../types'
+import type { EventBridgeConfig, EventBridgeEvents } from './types'
 
 /**
  * The base class to be extended by event bridge implementations

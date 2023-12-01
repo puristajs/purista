@@ -1,4 +1,4 @@
-import { CorrelationId } from '../types'
+import type { CorrelationId } from '../types'
 import { getUniqueId } from './getUniqueId.impl'
 
 /**

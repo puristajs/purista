@@ -1,20 +1,17 @@
 import { join } from 'node:path'
 
-import { HttpEventBridgeClient } from '@purista/base-http-bridge'
-import {
+import type { HttpEventBridgeClient } from '@purista/base-http-bridge'
+import type {
   Command,
   CommandResponse,
-  convertToKebabCase,
   EBMessage,
   EBMessageAddress,
   EventBridgeConfig,
-  HttpClient,
   HttpExposedServiceMeta,
-  StatusCode,
-  UnhandledError,
 } from '@purista/core'
+import { convertToKebabCase, HttpClient, StatusCode, UnhandledError } from '@purista/core'
 
-import { DaprEventBridgeConfig } from '../DaprEventBridge'
+import type { DaprEventBridgeConfig } from '../DaprEventBridge'
 import { DAPR_API_VERSION } from '../types'
 
 export class DaprClient extends HttpClient<EventBridgeConfig<DaprEventBridgeConfig>> implements HttpEventBridgeClient {

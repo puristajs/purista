@@ -1,4 +1,4 @@
-import { RedisClientOptions, RedisFunctions, RedisModules, RedisScripts } from '@redis/client'
+import type { RedisClientOptions, RedisFunctions, RedisModules, RedisScripts } from '@redis/client'
 
 /**
  * The redis state store configuration.

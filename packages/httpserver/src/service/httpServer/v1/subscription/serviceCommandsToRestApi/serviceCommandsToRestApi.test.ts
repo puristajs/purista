@@ -8,7 +8,7 @@ import { createSandbox } from 'sinon'
 
 import { httpServerV1Service } from '../../httpServerV1Service'
 import { serviceCommandsToRestApiSubscriptionBuilder } from './serviceCommandsToRestApiSubscriptionBuilder'
-import { HttpServerV1ServiceCommandsToRestApiInputPayload } from './types'
+import type { HttpServerV1ServiceCommandsToRestApiInputPayload } from './types'
 
 describe('service HttpServer version 1 - subscription serviceCommandsToRestApi', () => {
   let sandbox = createSandbox()

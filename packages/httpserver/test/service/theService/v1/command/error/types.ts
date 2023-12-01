@@ -1,6 +1,6 @@
-import { z } from 'zod'
+import type { z } from 'zod'
 
-import {
+import type {
   theServiceV1ErrorInputParameterSchema,
   theServiceV1ErrorInputPayloadSchema,
   theServiceV1ErrorOutputPayloadSchema,

@@ -1,4 +1,5 @@
-import { ServiceBuilder, ServiceInfoType } from '@purista/core'
+import type { ServiceInfoType } from '@purista/core'
+import { ServiceBuilder } from '@purista/core'
 
 import { generalEmailServiceInfo } from '../generalEmailServiceInfo'
 import { emailServiceV1ConfigSchema } from './emailServiceConfig'

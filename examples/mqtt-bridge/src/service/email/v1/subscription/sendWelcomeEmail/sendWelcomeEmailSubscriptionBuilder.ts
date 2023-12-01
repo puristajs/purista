@@ -1,5 +1,5 @@
 import { ServiceEvent } from '../../../../ServiceEvent.enum'
-import { UserV1GetUserByIdOutputPayload } from '../../../../user/v1'
+import type { UserV1GetUserByIdOutputPayload } from '../../../../user/v1'
 import { emailV1ServiceBuilder } from '../../emailV1ServiceBuilder'
 import { emailV1SendWelcomeEmailInputPayloadSchema, emailV1SendWelcomeEmailOutputPayloadSchema } from './schema'
 

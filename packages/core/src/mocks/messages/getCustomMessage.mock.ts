@@ -1,11 +1,5 @@
-import {
-  CustomMessage,
-  EBMessageType,
-  getNewCorrelationId,
-  getNewEBMessageId,
-  getNewInstanceId,
-  getNewTraceId,
-} from '../../core'
+import type { CustomMessage } from '../../core'
+import { EBMessageType, getNewCorrelationId, getNewEBMessageId, getNewInstanceId, getNewTraceId } from '../../core'
 
 /**
  * A function that returns a mocked custom message.

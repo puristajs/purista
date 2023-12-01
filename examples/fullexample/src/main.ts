@@ -1,7 +1,7 @@
 import { resolve } from 'node:path'
 
 import fastifyStatic from '@fastify/static'
-import { SpanProcessor } from '@opentelemetry/sdk-trace-base'
+import type { SpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { AmqpBridge } from '@purista/amqpbridge'
 import { DefaultConfigStore, DefaultSecretStore, gracefulShutdown, initLogger } from '@purista/core'
 import { httpServerV1Service } from '@purista/httpserver'

@@ -1,6 +1,7 @@
 import type { SchemaObject, SchemaObjectType } from 'openapi3-ts/oas31'
 import merge from 'ts-deepmerge'
-import { AnyZodObject, z, ZodTypeAny } from 'zod'
+import type { AnyZodObject, ZodTypeAny } from 'zod'
+import { z } from 'zod'
 
 /**
  * Based on package `@anatine/zod-openapi`

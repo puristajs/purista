@@ -1,6 +1,7 @@
-import { SinonSandbox, stub } from 'sinon'
+import type { SinonSandbox } from 'sinon'
+import { stub } from 'sinon'
 
-import { EBMessage, SubscriptionTransformFunctionContext } from '../core'
+import type { EBMessage, SubscriptionTransformFunctionContext } from '../core'
 import { getLoggerMock } from './getLogger.mock'
 
 /**

@@ -1,8 +1,8 @@
 import type { CorrelationId } from '../CorrelationId'
 import type { EBMessageBase } from '../EBMessageBase'
-import { EBMessageSenderAddress } from '../EBMessageSenderAddress'
-import { EBMessageType } from '../EBMessageType.enum'
-import { Prettify } from '../Prettify'
+import type { EBMessageSenderAddress } from '../EBMessageSenderAddress'
+import type { EBMessageType } from '../EBMessageType.enum'
+import type { Prettify } from '../Prettify'
 import type { StatusCode } from '../StatusCode.enum'
 
 /**

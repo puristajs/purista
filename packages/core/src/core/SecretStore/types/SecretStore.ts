@@ -1,6 +1,6 @@
-import { SecretDeleteFunction } from './SecretDeleteFunction'
-import { SecretGetterFunction } from './SecretGetterFunction'
-import { SecretSetterFunction } from './SecretSetterFunction'
+import type { SecretDeleteFunction } from './SecretDeleteFunction'
+import type { SecretGetterFunction } from './SecretGetterFunction'
+import type { SecretSetterFunction } from './SecretSetterFunction'
 
 /**
  * Interface definition for a secret store implementation
