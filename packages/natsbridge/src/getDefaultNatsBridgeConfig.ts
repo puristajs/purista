@@ -1,4 +1,4 @@
-import { NatsBridgeConfig } from './types'
+import type { NatsBridgeConfig } from './types'
 
 const SECONDS_PER_DAY = 86_400
 export const getDefaultNatsBridgeConfig = (): NatsBridgeConfig => {

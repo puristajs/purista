@@ -1,7 +1,7 @@
 import { createDecipheriv } from 'node:crypto'
 
 import { ALGORITHM } from './constants'
-import { DecryptInput } from './types'
+import type { DecryptInput } from './types'
 
 export const decrypt = (input: DecryptInput) => {
   const { ciphertext, iv, tag, secret } = input

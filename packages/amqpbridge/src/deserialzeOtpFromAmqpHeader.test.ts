@@ -1,6 +1,7 @@
 import { getCommandMessageMock, getLoggerMock } from '@purista/core'
-import { ConsumeMessage } from 'amqplib'
-import { createSandbox, SinonSandbox } from 'sinon'
+import type { ConsumeMessage } from 'amqplib'
+import type { SinonSandbox } from 'sinon'
+import { createSandbox } from 'sinon'
 
 import { deserializeOtpFromAmqpHeader } from './deserializeOtpFromAmqpHeader.impl'
 import { jsonEncoder, plainEncrypter } from './payloadHandling'

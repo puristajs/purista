@@ -1,4 +1,4 @@
-import { EBMessageSenderAddress, InfoMessage, InfoMessageType } from '../types'
+import type { EBMessageSenderAddress, InfoMessage, InfoMessageType } from '../types'
 import { getNewEBMessageId } from './getNewEBMessageId.impl'
 import { getNewTraceId } from './getNewTraceId.impl'
 

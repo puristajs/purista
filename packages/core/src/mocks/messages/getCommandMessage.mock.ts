@@ -1,11 +1,5 @@
-import {
-  Command,
-  EBMessageType,
-  getNewCorrelationId,
-  getNewEBMessageId,
-  getNewInstanceId,
-  getNewTraceId,
-} from '../../core'
+import type { Command } from '../../core'
+import { EBMessageType, getNewCorrelationId, getNewEBMessageId, getNewInstanceId, getNewTraceId } from '../../core'
 
 /**
  * A function that returns a mocked command message.

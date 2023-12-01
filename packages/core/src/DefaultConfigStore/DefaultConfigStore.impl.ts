@@ -1,5 +1,6 @@
-import { ConfigStoreBaseClass, StatusCode, StoreBaseConfig, UnhandledError } from '../core'
-import { DefaultConfigStoreConfig } from './types'
+import type { StoreBaseConfig } from '../core'
+import { ConfigStoreBaseClass, StatusCode, UnhandledError } from '../core'
+import type { DefaultConfigStoreConfig } from './types'
 
 /**
  * The DefaultConfigStore is a placeholder which offers all needed methods.

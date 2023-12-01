@@ -1,6 +1,7 @@
-import { SinonSandbox, SinonStub, stub } from 'sinon'
+import type { SinonSandbox, SinonStub } from 'sinon'
+import { stub } from 'sinon'
 
-import { EventBridge } from '../core'
+import type { EventBridge } from '../core'
 
 /**
  * Mocks the eventBridge and stubs the methods

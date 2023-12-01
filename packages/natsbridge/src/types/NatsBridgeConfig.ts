@@ -1,4 +1,4 @@
-import { Prettify } from '@purista/core'
+import type { Prettify } from '@purista/core'
 import type { ConnectionOptions } from 'nats'
 /**
  * the configuration for the NATS event bridge

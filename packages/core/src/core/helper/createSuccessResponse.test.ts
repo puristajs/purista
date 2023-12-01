@@ -1,4 +1,5 @@
-import { Command, EBMessageType } from '../types'
+import type { Command } from '../types'
+import { EBMessageType } from '../types'
 import { createSuccessResponse } from './createSuccessResponse.impl'
 
 describe('createSuccessResponse', () => {

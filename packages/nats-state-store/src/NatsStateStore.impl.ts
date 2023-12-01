@@ -1,7 +1,9 @@
-import { StateStoreBaseClass, StatusCode, StoreBaseConfig, UnhandledError } from '@purista/core'
-import { connect, JSONCodec, KV, NatsConnection } from 'nats'
+import type { StoreBaseConfig } from '@purista/core'
+import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
+import type { KV, NatsConnection } from 'nats'
+import { connect, JSONCodec } from 'nats'
 
-import { NatsStateStoreConfig } from './types'
+import type { NatsStateStoreConfig } from './types'
 
 /**
 A state store for using NATS (with JetStream) as storage.  

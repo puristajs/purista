@@ -1,4 +1,5 @@
-import { convertToSnakeCase, Subscription } from '@purista/core'
+import type { Subscription } from '@purista/core'
+import { convertToSnakeCase } from '@purista/core'
 
 import type { NatsBridge } from '../NatsBridge'
 

@@ -1,8 +1,8 @@
 import type { CorrelationId } from '../CorrelationId'
 import type { EBMessageAddress } from '../EBMessageAddress'
 import type { EBMessageBase } from '../EBMessageBase'
-import { EBMessageType } from '../EBMessageType.enum'
-import { Prettify } from '../Prettify'
+import type { EBMessageType } from '../EBMessageType.enum'
+import type { Prettify } from '../Prettify'
 
 /**
  * Command is a event bridge message, which is emitted by sender to event bridge.

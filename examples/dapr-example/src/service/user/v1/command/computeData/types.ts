@@ -1,6 +1,6 @@
-import { z } from 'zod'
+import type { z } from 'zod'
 
-import {
+import type {
   userV1ComputeDataInputParameterSchema,
   userV1ComputeDataInputPayloadSchema,
   userV1ComputeDataOutputPayloadSchema,

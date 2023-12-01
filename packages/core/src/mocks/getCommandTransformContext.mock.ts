@@ -1,6 +1,7 @@
-import { SinonSandbox, stub } from 'sinon'
+import type { SinonSandbox } from 'sinon'
+import { stub } from 'sinon'
 
-import { CommandTransformFunctionContext } from '../core'
+import type { CommandTransformFunctionContext } from '../core'
 import { getLoggerMock } from './getLogger.mock'
 import { getCommandMessageMock } from './messages'
 

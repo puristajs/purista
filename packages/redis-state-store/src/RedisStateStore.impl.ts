@@ -1,7 +1,9 @@
-import { StateStoreBaseClass, StatusCode, StoreBaseConfig, UnhandledError } from '@purista/core'
-import { createClient, RedisClientType, RedisFunctions, RedisModules, RedisScripts } from '@redis/client'
+import type { StoreBaseConfig } from '@purista/core'
+import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
+import type { RedisClientType, RedisFunctions, RedisModules, RedisScripts } from '@redis/client'
+import { createClient } from '@redis/client'
 
-import { RedisStoreConfig } from './types'
+import type { RedisStoreConfig } from './types'
 
 /**
  * A state store for using redis as storage.

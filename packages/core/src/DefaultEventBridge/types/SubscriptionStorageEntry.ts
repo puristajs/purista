@@ -1,4 +1,4 @@
-import { CustomMessage, EBMessage, EBMessageType, InstanceId, PrincipalId, TenantId } from '../../core'
+import type { CustomMessage, EBMessage, EBMessageType, InstanceId, PrincipalId, TenantId } from '../../core'
 
 export type SubscriptionStorageEntry = {
   isMatchingMessageType(input: EBMessageType): boolean

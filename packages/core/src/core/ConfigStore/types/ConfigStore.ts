@@ -1,6 +1,6 @@
-import { ConfigDeleteFunction } from './ConfigDeleteFunction'
-import { ConfigGetterFunction } from './ConfigGetterFunction'
-import { ConfigSetterFunction } from './ConfigSetterFunction'
+import type { ConfigDeleteFunction } from './ConfigDeleteFunction'
+import type { ConfigGetterFunction } from './ConfigGetterFunction'
+import type { ConfigSetterFunction } from './ConfigSetterFunction'
 
 /**
  * Interface definition for config store adapters

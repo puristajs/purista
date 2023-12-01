@@ -1,6 +1,7 @@
 import { getCustomMessageMessageMock } from '../../../mocks'
 import { createInfoMessage } from '../../helper'
-import { EBMessage, EBMessageType } from '../../types'
+import type { EBMessage } from '../../types'
+import { EBMessageType } from '../../types'
 import { isInfoMessage } from './isInfoMessage.impl'
 
 describe('isInfoMessage', () => {

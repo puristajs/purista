@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import { Actions } from 'node-plop'
+import type { Actions } from 'node-plop'
 
 export const addVersionActions: Actions = [
   (answers) => {

@@ -1,7 +1,7 @@
-import { Options } from 'amqplib'
+import type { Options } from 'amqplib'
 
-import { Encoder } from './Encoder'
-import { Encrypter } from './Encrypter'
+import type { Encoder } from './Encoder'
+import type { Encrypter } from './Encrypter'
 
 /**
  * AmqpBridge bridge config

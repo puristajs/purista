@@ -2,7 +2,8 @@ import { fail } from 'assert'
 import { createSandbox } from 'sinon'
 import { z } from 'zod'
 
-import { DefaultEventBridge, EBMessageType, ServiceBuilder, ServiceInfoType, StatusCode } from '../src'
+import type { ServiceInfoType } from '../src'
+import { DefaultEventBridge, EBMessageType, ServiceBuilder, StatusCode } from '../src'
 import {
   getCommandContextMock,
   getCommandMessageMock,

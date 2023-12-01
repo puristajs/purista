@@ -1,6 +1,6 @@
-import { ContextBase } from '../ContextBase'
-import { EBMessage } from '../EBMessage'
-import { Prettify } from '../Prettify'
+import type { ContextBase } from '../ContextBase'
+import type { EBMessage } from '../EBMessage'
+import type { Prettify } from '../Prettify'
 
 /**
  * @group Subscription

@@ -1,6 +1,6 @@
 import type { EBMessage } from '../EBMessage'
 import { EBMessageType } from '../EBMessageType.enum'
-import { CommandResponse } from './CommandResponse'
+import type { CommandResponse } from './CommandResponse'
 
 /**
  * Checks if given message is type of CommandResponse (success or error)

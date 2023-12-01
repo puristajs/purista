@@ -1,5 +1,6 @@
 import { HandledError, UnhandledError } from '../Error'
-import { Command, CommandErrorResponse, EBMessageType, InstanceId, StatusCode, TraceId } from '../types'
+import type { Command, CommandErrorResponse, InstanceId, TraceId } from '../types'
+import { EBMessageType, StatusCode } from '../types'
 import { getErrorMessageForCode } from './getErrorMessageForCode.impl'
 import { getNewTraceId } from './getNewTraceId.impl'
 import { serializeOtp } from './serializeOtp.impl'

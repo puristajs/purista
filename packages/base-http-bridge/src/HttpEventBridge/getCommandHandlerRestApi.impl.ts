@@ -1,18 +1,21 @@
-import { parse, ParsedUrlQuery } from 'node:querystring'
+import type { ParsedUrlQuery } from 'node:querystring'
+import { parse } from 'node:querystring'
 
 import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
-import {
+import type {
   Command,
   CommandErrorResponse,
   CommandSuccessResponse,
   DefinitionEventBridgeConfig,
   EBMessageAddress,
+  HttpExposedServiceMeta,
+} from '@purista/core'
+import {
   EBMessageType,
   getErrorMessageForCode,
   getTimeoutPromise,
   HandledError,
-  HttpExposedServiceMeta,
   isCommandErrorResponse,
   PuristaSpanName,
   serializeOtp,
@@ -20,8 +23,8 @@ import {
   UnhandledError,
 } from '@purista/core'
 
-import { HttpEventBridge } from './HttpEventBridge.impl'
-import { HttpEventBridgeConfig, RouterFunction } from './types'
+import type { HttpEventBridge } from './HttpEventBridge.impl'
+import type { HttpEventBridgeConfig, RouterFunction } from './types'
 
 export const getCommandHandlerRestApi = function (
   this: HttpEventBridge<HttpEventBridgeConfig>,

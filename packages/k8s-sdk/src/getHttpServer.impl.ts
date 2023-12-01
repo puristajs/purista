@@ -3,7 +3,7 @@ import { Hono } from 'hono'
 import { compress } from 'hono/compress'
 
 import { addServiceEndpoints } from './addServiceEndpoints.impl'
-import { GetHttpServerConfig } from './types'
+import type { GetHttpServerConfig } from './types'
 import { puristaVersion } from './version'
 
 /**

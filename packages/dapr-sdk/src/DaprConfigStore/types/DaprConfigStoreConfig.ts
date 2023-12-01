@@ -1,4 +1,4 @@
-import { DaprClientConfig } from '../../DaprClient'
+import type { DaprClientConfig } from '../../DaprClient'
 
 /**
  * Dapr config store configuration

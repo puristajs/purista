@@ -1,14 +1,8 @@
 import { SpanStatusCode } from '@opentelemetry/api'
-import { z, ZodError } from 'zod'
+import type { z, ZodError } from 'zod'
 
-import {
-  HandledError,
-  ServiceClass,
-  StatusCode,
-  SubscriptionBeforeGuardHook,
-  SubscriptionFunction,
-  UnhandledError,
-} from '../core'
+import type { ServiceClass, SubscriptionBeforeGuardHook, SubscriptionFunction } from '../core'
+import { HandledError, StatusCode, UnhandledError } from '../core'
 
 export const getSubscriptionFunctionWithValidation = function <
   ServiceClassType extends ServiceClass,

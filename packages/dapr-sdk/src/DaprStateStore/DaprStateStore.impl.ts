@@ -1,11 +1,13 @@
 import { join } from 'node:path'
 
-import { HttpClient, StateStoreBaseClass, StatusCode, StoreBaseConfig, UnhandledError } from '@purista/core'
+import type { StoreBaseConfig } from '@purista/core'
+import { HttpClient, StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 
-import { DaprClientConfig, getDefaultClientConfig } from '../DaprClient'
+import type { DaprClientConfig } from '../DaprClient'
+import { getDefaultClientConfig } from '../DaprClient'
 import { DAPR_API_VERSION } from '../types'
 import { puristaVersion } from '../version'
-import { DaprStateStoreConfig } from './types'
+import type { DaprStateStoreConfig } from './types'
 
 /**
  * DaprStateStore is an adapter which connects to the state store provided by the underlaying Dapr infrastructure

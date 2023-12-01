@@ -1,20 +1,24 @@
 import { SpanKind, SpanStatusCode, trace } from '@opentelemetry/api'
-import {
+import type {
   Command,
   CommandDefinitionMetadataBase,
   CommandErrorResponse,
   CommandSuccessResponse,
-  createInfoMessage,
   CustomMessage,
   DefinitionEventBridgeConfig,
-  deserializeOtp,
   EBMessage,
   EBMessageAddress,
   EBMessageId,
-  EBMessageType,
   EventBridge,
-  EventBridgeBaseClass,
   EventBridgeConfig,
+  PendigInvocation,
+  Subscription,
+} from '@purista/core'
+import {
+  createInfoMessage,
+  deserializeOtp,
+  EBMessageType,
+  EventBridgeBaseClass,
   EventBridgeEventNames,
   getCleanedMessage,
   getNewCorrelationId,
@@ -25,12 +29,10 @@ import {
   isCommandResponse,
   isCommandSuccessResponse,
   isInfoMessage,
-  PendigInvocation,
   PuristaSpanName,
   PuristaSpanTag,
   serializeOtp,
   StatusCode,
-  Subscription,
   UnhandledError,
 } from '@purista/core'
 import type { Channel, Connection } from 'amqplib'
@@ -42,7 +44,7 @@ import { getDefaultConfig } from './getDefaultConfig.impl'
 import { getSubscriptionQueueName } from './getSubscriptionQueueName.impl'
 import { jsonEncoder, plainEncrypter } from './payloadHandling'
 import { serializeOtpForAmqpHeader } from './serializeOtpForAmqpHeader.impl'
-import { AmqpBridgeConfig, Encoder, Encrypter } from './types'
+import type { AmqpBridgeConfig, Encoder, Encrypter } from './types'
 
 /**
  * The AMQP event bridge connects to a AMQP broker.

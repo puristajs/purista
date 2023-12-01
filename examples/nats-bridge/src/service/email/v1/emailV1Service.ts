@@ -1,4 +1,4 @@
-import { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
+import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
 
 import { emailV1ServiceBuilder } from './emailV1ServiceBuilder'
 import { sendWelcomeEmailSubscriptionBuilder } from './subscription/sendWelcomeEmail'

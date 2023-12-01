@@ -1,5 +1,5 @@
 import type { Command, CommandResponse } from './commandType'
-import { CustomMessage } from './CustomMessage'
+import type { CustomMessage } from './CustomMessage'
 import type { InfoMessage } from './infoType'
 
 /**

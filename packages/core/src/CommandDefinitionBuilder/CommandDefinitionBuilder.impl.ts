@@ -11,12 +11,14 @@ import type {
   Complete,
   ContentType,
   DefinitionEventBridgeConfig,
+  HttpExposedServiceMeta,
+  QueryParameter,
   ServiceClass,
   StatusCode,
   SupportedHttpMethod,
 } from '../core'
-import { HttpExposedServiceMeta, QueryParameter } from '../core'
-import { generateSchema, OpenApiZodAny } from '../zodOpenApi'
+import type { OpenApiZodAny } from '../zodOpenApi'
+import { generateSchema } from '../zodOpenApi'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl'
 
 /**

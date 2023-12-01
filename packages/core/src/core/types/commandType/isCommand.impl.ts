@@ -1,6 +1,6 @@
 import type { EBMessage } from '../EBMessage'
 import { EBMessageType } from '../EBMessageType.enum'
-import { Command } from './Command'
+import type { Command } from './Command'
 
 /**
  * Checks if given message is type of Command

@@ -1,9 +1,10 @@
 import { context, propagation } from '@opentelemetry/api'
-import { deserializeOtp, EBMessage, Logger } from '@purista/core'
-import { ConsumeMessage } from 'amqplib'
+import type { EBMessage, Logger } from '@purista/core'
+import { deserializeOtp } from '@purista/core'
+import type { ConsumeMessage } from 'amqplib'
 
 import { decodeContent } from './decodeContent.impl'
-import { Encoder, Encrypter } from './types'
+import type { Encoder, Encrypter } from './types'
 
 export const deserializeOtpFromAmqpHeader = async (
   logger: Logger,

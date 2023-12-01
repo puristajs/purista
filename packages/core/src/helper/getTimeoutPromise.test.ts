@@ -1,4 +1,5 @@
-import { createSandbox, SinonFakeTimers, SinonSandbox } from 'sinon'
+import type { SinonFakeTimers, SinonSandbox } from 'sinon'
+import { createSandbox } from 'sinon'
 
 import { StatusCode, UnhandledError } from '../core'
 import { getTimeoutPromise } from './getTimeoutPromise.impl'

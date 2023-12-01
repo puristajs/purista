@@ -1,14 +1,17 @@
-import { Context, Span, SpanOptions, SpanStatusCode } from '@opentelemetry/api'
+import type { Context, Span, SpanOptions } from '@opentelemetry/api'
+import { SpanStatusCode } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
-import { NodeTracerProvider, SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
 import { puristaVersion } from '../../../version'
 import type { ConfigStore } from '../../ConfigStore'
-import { EventBridge } from '../../EventBridge'
+import type { EventBridge } from '../../EventBridge'
 import type { SecretStore } from '../../SecretStore'
 import type { StateStore } from '../../StateStore'
-import { GenericEventEmitter, Logger, PuristaSpanTag, ServiceEvents, ServiceInfoType } from '../../types'
+import type { Logger, ServiceEvents, ServiceInfoType } from '../../types'
+import { GenericEventEmitter, PuristaSpanTag } from '../../types'
 import { ServiceInfoValidator } from '../ServiceInfoValidator.impl'
 
 /**

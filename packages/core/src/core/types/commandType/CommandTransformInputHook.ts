@@ -1,4 +1,4 @@
-import { CommandTransformFunctionContext } from './CommandTransformFunctionContext'
+import type { CommandTransformFunctionContext } from './CommandTransformFunctionContext'
 
 /**
  * The command transform gets the raw message payload and parameter input, which is validated against the transform input schemas.

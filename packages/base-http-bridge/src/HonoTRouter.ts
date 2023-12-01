@@ -1,5 +1,6 @@
 import type { Result, Router } from 'hono/dist/types/router'
-import Trouter, { Methods } from 'trouter'
+import type { Methods } from 'trouter'
+import Trouter from 'trouter'
 
 export class HonoTRouter<T> implements Router<T> {
   router: Trouter<T>

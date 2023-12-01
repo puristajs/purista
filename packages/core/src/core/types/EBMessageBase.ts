@@ -1,9 +1,9 @@
-import { ContentType } from './ContentType'
+import type { ContentType } from './ContentType'
 import type { CorrelationId } from './CorrelationId'
 import type { EBMessageId } from './EBMessageId'
-import { EBMessageSenderAddress } from './EBMessageSenderAddress'
+import type { EBMessageSenderAddress } from './EBMessageSenderAddress'
 import type { PrincipalId } from './PrincipalId'
-import { TenantId } from './TenantId'
+import type { TenantId } from './TenantId'
 import type { TraceId } from './TraceId'
 
 /**

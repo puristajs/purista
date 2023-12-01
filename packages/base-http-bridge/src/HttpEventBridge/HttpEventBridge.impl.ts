@@ -1,28 +1,31 @@
 // file deepcode ignore ServerLeak: <please specify a reason of ignoring this>
-import { Server } from 'node:http'
+import type { Server } from 'node:http'
 
 import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
-import {
+import type {
   Command,
   CommandErrorResponse,
   CommandResponse,
   CommandSuccessResponse,
   CustomMessage,
   DefinitionEventBridgeConfig,
-  deserializeOtp,
   EBMessage,
   EBMessageAddress,
-  EBMessageType,
   EventBridge,
-  EventBridgeBaseClass,
   EventBridgeConfig,
+  HttpExposedServiceMeta,
+  Subscription,
+} from '@purista/core'
+import {
+  deserializeOtp,
+  EBMessageType,
+  EventBridgeBaseClass,
   EventBridgeEventNames,
   getErrorMessageForCode,
   getNewCorrelationId,
   getNewEBMessageId,
   getNewTraceId,
   HandledError,
-  HttpExposedServiceMeta,
   isCommandErrorResponse,
   isHttpExposedServiceMeta,
   isInfoMessage,
@@ -30,7 +33,6 @@ import {
   PuristaSpanTag,
   serializeOtp,
   StatusCode,
-  Subscription,
   UnhandledError,
 } from '@purista/core'
 import { Hono } from 'hono'
@@ -42,7 +44,7 @@ import { getCommandHandlerRestApi } from './getCommandHandlerRestApi.impl'
 import { getDefaultHttpEventBridgeConfig } from './getDefaultHttpEventBridgeConfig.impl'
 import { getSubscriptionHandler } from './getSubscriptionHandler.impl'
 import { healthzRoute } from './healthzRoute.impl'
-import { HttpEventBridgeClient, HttpEventBridgeConfig } from './types'
+import type { HttpEventBridgeClient, HttpEventBridgeConfig } from './types'
 
 /**
  * The HTTP event bridge is a generic event bridge.

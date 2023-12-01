@@ -1,4 +1,4 @@
-import { Encoder } from '../types'
+import type { Encoder } from '../types'
 
 /**
  * The JSON encoder.

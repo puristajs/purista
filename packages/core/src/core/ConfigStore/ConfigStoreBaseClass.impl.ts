@@ -1,7 +1,8 @@
-import { Logger, StatusCode, StoreBaseConfig } from '../../core'
+import type { Logger, StoreBaseConfig } from '../../core'
+import { StatusCode } from '../../core'
 import { initLogger } from '../../DefaultLogger'
 import { UnhandledError } from '../Error'
-import { ConfigStore, ConfigStoreCacheMap } from './types'
+import type { ConfigStore, ConfigStoreCacheMap } from './types'
 
 /**
  * Base class for config store adapters

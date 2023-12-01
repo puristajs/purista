@@ -1,4 +1,4 @@
-import { SecretClientOptions } from '@azure/keyvault-secrets'
+import type { SecretClientOptions } from '@azure/keyvault-secrets'
 
 /**
  * Azure Key Vault store config

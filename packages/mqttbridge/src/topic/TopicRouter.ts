@@ -1,6 +1,7 @@
-import { initLogger, Logger } from '@purista/core'
+import type { Logger } from '@purista/core'
+import { initLogger } from '@purista/core'
 
-import { IncomingMessageFunction } from '../types'
+import type { IncomingMessageFunction } from '../types'
 import { isMatchingTopic } from './isMatchingTopic.impl'
 
 export class TopicRouter {

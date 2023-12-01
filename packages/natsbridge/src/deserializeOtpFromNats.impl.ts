@@ -1,6 +1,7 @@
 import { context, propagation } from '@opentelemetry/api'
-import { deserializeOtp, EBMessage, Logger } from '@purista/core'
-import { MsgHdrs } from 'nats'
+import type { EBMessage, Logger } from '@purista/core'
+import { deserializeOtp } from '@purista/core'
+import type { MsgHdrs } from 'nats'
 
 export const deserializeOtpFromNats = (logger: Logger, message: EBMessage, headers?: MsgHdrs) => {
   // try to use mqtt user property first

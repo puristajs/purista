@@ -1,6 +1,6 @@
-import { StateDeleteFunction } from './StateDeleteFunction'
-import { StateGetterFunction } from './StateGetterFunction'
-import { StateSetterFunction } from './StateSetterFunction'
+import type { StateDeleteFunction } from './StateDeleteFunction'
+import type { StateGetterFunction } from './StateGetterFunction'
+import type { StateSetterFunction } from './StateSetterFunction'
 
 /**
  * Interface definition for state store implementations

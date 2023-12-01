@@ -1,4 +1,4 @@
-import { NodePlopAPI } from 'plop'
+import type { NodePlopAPI } from 'plop'
 
 export const registerHandlebarHelpers = (plop: NodePlopAPI) => {
   plop.setHelper('eq', (a: string, b: string) => a === b)

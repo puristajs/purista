@@ -1,4 +1,4 @@
-import { EBMessageAddress } from './EBMessageAddress'
+import type { EBMessageAddress } from './EBMessageAddress'
 
 /**
  * Invokes a command and returns the result.

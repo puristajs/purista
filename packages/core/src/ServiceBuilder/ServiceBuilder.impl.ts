@@ -1,25 +1,24 @@
 import { fail } from 'node:assert'
 
-import { SpanProcessor } from '@opentelemetry/sdk-trace-node'
-import { z } from 'zod'
+import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import type { z } from 'zod'
 
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder'
-import {
+import type {
   CommandDefinitionList,
   Complete,
   ConfigStore,
   EventBridge,
-  initLogger,
   Logger,
   LogLevelName,
   SecretStore,
-  Service,
   ServiceClass,
   ServiceConstructorInput,
   ServiceInfoType,
   StateStore,
   SubscriptionDefinitionList,
 } from '../core'
+import { initLogger, Service } from '../core'
 import { initDefaultConfigStore } from '../DefaultConfigStore'
 import { initDefaultSecretStore } from '../DefaultSecretStore'
 import { initDefaultStateStore } from '../DefaultStateStore'

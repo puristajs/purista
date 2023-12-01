@@ -1,4 +1,5 @@
-import { Command, convertToSnakeCase, EBMessage } from '@purista/core'
+import type { Command, EBMessage } from '@purista/core'
+import { convertToSnakeCase } from '@purista/core'
 
 import type { NatsBridge } from '../NatsBridge'
 

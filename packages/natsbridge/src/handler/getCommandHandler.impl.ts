@@ -1,15 +1,17 @@
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
-import {
+import type {
   BrokerHeaderCommandResponseMsg,
   Command,
   CommandDefinitionMetadataBase,
   CommandErrorResponse,
   CommandSuccessResponse,
   DefinitionEventBridgeConfig,
-  deserializeOtp,
   EBMessageAddress,
-  EventBridgeEventNames,
   InstanceId,
+} from '@purista/core'
+import {
+  deserializeOtp,
+  EventBridgeEventNames,
   isCommand,
   isCommandErrorResponse,
   PuristaSpanName,
@@ -18,12 +20,13 @@ import {
   StatusCode,
   UnhandledError,
 } from '@purista/core'
-import { headers as getNewHeaders, MsgHdrs } from 'nats'
+import type { MsgHdrs } from 'nats'
+import { headers as getNewHeaders } from 'nats'
 
 import { deserializeOtpFromNats } from '../deserializeOtpFromNats.impl'
 import { serializeOtpToNats } from '../serializeOtpToNats.impl'
 import { getTopicName } from '../topic'
-import { IncomingMessageFunction } from '../types'
+import type { IncomingMessageFunction } from '../types'
 
 export const getCommandHandler = (
   address: EBMessageAddress,

@@ -1,6 +1,6 @@
 import { context, propagation } from '@opentelemetry/api'
 
-import { Logger } from '../types'
+import type { Logger } from '../types'
 
 /**
  *

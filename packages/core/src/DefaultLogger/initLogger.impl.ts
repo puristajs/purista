@@ -1,4 +1,5 @@
-import pino, { LoggerOptions } from 'pino'
+import type { LoggerOptions } from 'pino'
+import pino from 'pino'
 
 import type { Logger, LogLevelName } from '../core/types'
 import { puristaVersion } from '../version'

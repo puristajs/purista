@@ -1,10 +1,10 @@
 import type { z } from 'zod'
 
-import { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig'
+import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig'
 import type { ServiceClass } from '../ServiceClass'
 import type { CommandAfterGuardHook } from './CommandAfterGuardHook'
 import type { CommandBeforeGuardHook } from './CommandBeforeGuardHook'
-import { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase'
+import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase'
 import type { CommandFunction } from './CommandFunction'
 import type { CommandTransformInputHook } from './CommandTransformInputHook'
 import type { CommandTransformOutputHook } from './CommandTransformOutputHook'

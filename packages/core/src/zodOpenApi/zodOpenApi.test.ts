@@ -1,4 +1,4 @@
-import { SchemaObject } from 'openapi3-ts/oas31'
+import type { SchemaObject } from 'openapi3-ts/oas31'
 import { z } from 'zod'
 
 import { extendApi, generateSchema } from './zodOpenApi.impl'

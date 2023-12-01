@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import { KeyValueType } from './KeyValue.type'
+import type { KeyValueType } from './KeyValue.type'
 
 /**
  * PubSubBulkPublishEntry defines an entry in a bulk publish request.

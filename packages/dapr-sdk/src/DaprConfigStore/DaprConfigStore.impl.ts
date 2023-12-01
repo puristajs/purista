@@ -1,10 +1,12 @@
 import { join } from 'node:path'
 
-import { ConfigStoreBaseClass, HttpClient, StatusCode, StoreBaseConfig, UnhandledError } from '@purista/core'
+import type { StoreBaseConfig } from '@purista/core'
+import { ConfigStoreBaseClass, HttpClient, StatusCode, UnhandledError } from '@purista/core'
 
-import { DaprClientConfig, getDefaultClientConfig } from '../DaprClient'
+import type { DaprClientConfig } from '../DaprClient'
+import { getDefaultClientConfig } from '../DaprClient'
 import { puristaVersion } from '../version'
-import { DaprConfigStoreConfig } from './types'
+import type { DaprConfigStoreConfig } from './types'
 
 const DAPR_API_VERSION = 'v1.0-alpha1'
 

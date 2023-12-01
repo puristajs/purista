@@ -2,22 +2,20 @@
 
 import { context, propagation, SpanKind } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
+import type { CustomMessage, EBMessage, Subscription } from '@purista/core'
 import {
-  CustomMessage,
-  EBMessage,
   getTimeoutPromise,
   HandledError,
   PuristaSpanName,
   serializeOtp,
   StatusCode,
-  Subscription,
   throwIfNotValidMessage,
   UnhandledError,
 } from '@purista/core'
 import { HTTP } from 'cloudevents'
 
-import { HttpEventBridge } from './HttpEventBridge.impl'
-import { HttpEventBridgeConfig, RouterFunction } from './types'
+import type { HttpEventBridge } from './HttpEventBridge.impl'
+import type { HttpEventBridgeConfig, RouterFunction } from './types'
 
 export const getSubscriptionHandler = function (
   this: HttpEventBridge<HttpEventBridgeConfig>,

@@ -1,9 +1,9 @@
-import { Context, Span, SpanOptions } from '@opentelemetry/api'
+import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 
 import type { ConfigDeleteFunction, ConfigGetterFunction, ConfigSetterFunction } from '../ConfigStore'
 import type { SecretDeleteFunction, SecretGetterFunction, SecretSetterFunction } from '../SecretStore'
 import type { StateDeleteFunction, StateGetterFunction, StateSetterFunction } from '../StateStore'
-import { Logger } from '../types'
+import type { Logger } from '../types'
 
 /**
  * The ContextBase provides is a basic type.

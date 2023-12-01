@@ -1,4 +1,5 @@
-import { createSandbox, SinonSandbox } from 'sinon'
+import type { SinonSandbox } from 'sinon'
+import { createSandbox } from 'sinon'
 
 import { HonoTRouter } from './HonoTRouter'
 

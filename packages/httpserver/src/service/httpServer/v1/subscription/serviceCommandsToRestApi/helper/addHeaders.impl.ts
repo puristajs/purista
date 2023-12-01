@@ -1,5 +1,6 @@
-import { context, propagation, Span, trace } from '@opentelemetry/api'
-import { FastifyReply } from 'fastify'
+import type { Span } from '@opentelemetry/api'
+import { context, propagation, trace } from '@opentelemetry/api'
+import type { FastifyReply } from 'fastify'
 
 export const addHeaders = (span: Span, reply: FastifyReply) => {
   const headers: Record<string, string> = {}

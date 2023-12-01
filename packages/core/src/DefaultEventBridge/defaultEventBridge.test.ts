@@ -1,6 +1,7 @@
 import { assert, spy, stub } from 'sinon'
 
-import { createInfoMessage, EBMessageType, Subscription } from '../core'
+import type { Subscription } from '../core'
+import { createInfoMessage, EBMessageType } from '../core'
 import { getCustomMessageMessageMock, getLoggerMock } from '../mocks'
 import { DefaultEventBridge } from './DefaultEventBridge.impl'
 

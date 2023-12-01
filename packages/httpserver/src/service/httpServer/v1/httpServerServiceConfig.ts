@@ -1,8 +1,8 @@
-import { Http2SecureServer } from 'node:http2'
+import type { Http2SecureServer } from 'node:http2'
 
-import { FastifyCompressOptions } from '@fastify/compress'
-import { FastifyCorsOptions } from '@fastify/cors'
-import { FastifyHttp2SecureOptions, FastifyServerOptions } from 'fastify'
+import type { FastifyCompressOptions } from '@fastify/compress'
+import type { FastifyCorsOptions } from '@fastify/cors'
+import type { FastifyHttp2SecureOptions, FastifyServerOptions } from 'fastify'
 import { z } from 'zod'
 
 // define the service config schema and the default service configuration

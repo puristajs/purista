@@ -1,6 +1,6 @@
 import type { SchemaObject } from 'openapi3-ts/oas31'
 
-import { ContentType } from '../ContentType'
+import type { ContentType } from '../ContentType'
 
 export type CommandDefinitionMetadataBase = {
   expose: {

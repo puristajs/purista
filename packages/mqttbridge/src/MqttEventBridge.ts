@@ -1,37 +1,40 @@
 import { SpanKind } from '@opentelemetry/api'
-import {
+import type {
   BrokerHeaderCommandMsg,
   BrokerHeaderCustomMsg,
   Command,
   CommandDefinitionMetadataBase,
   CommandErrorResponse,
   CommandSuccessResponse,
-  createInfoMessage,
   CustomMessage,
   DefinitionEventBridgeConfig,
-  deserializeOtp,
   EBMessage,
   EBMessageAddress,
   EBMessageId,
-  EBMessageType,
   EventBridge,
-  EventBridgeBaseClass,
   EventBridgeConfig,
+  PendigInvocation,
+  Subscription,
+} from '@purista/core'
+import {
+  createInfoMessage,
+  deserializeOtp,
+  EBMessageType,
+  EventBridgeBaseClass,
   EventBridgeEventNames,
   getNewCorrelationId,
   getNewEBMessageId,
   getNewInstanceId,
   getNewTraceId,
   isCommandResponse,
-  PendigInvocation,
   PuristaSpanName,
   PuristaSpanTag,
   serializeOtp,
   StatusCode,
-  Subscription,
   UnhandledError,
 } from '@purista/core'
-import { connectAsync, IClientSubscribeOptions, IPublishPacket, MqttClient } from 'mqtt'
+import type { IClientSubscribeOptions, IPublishPacket, MqttClient } from 'mqtt'
+import { connectAsync } from 'mqtt'
 
 import { getDefaultMqttBridgeConfig } from './getDefaultMqttBridgeConfig.impl'
 import { getCommandHandler, getSubscriptionHandler, handleCommandResponse } from './handler'
@@ -45,7 +48,7 @@ import {
   getTopicName,
   TopicRouter,
 } from './topic'
-import { MqttBridgeConfig } from './types'
+import type { MqttBridgeConfig } from './types'
 
 /**
  * The MQTT event bridge connects to a MQTT broker.

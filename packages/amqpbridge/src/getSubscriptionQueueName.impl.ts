@@ -1,4 +1,4 @@
-import { EBMessageAddress } from '@purista/core'
+import type { EBMessageAddress } from '@purista/core'
 
 export const getSubscriptionQueueName = (address: EBMessageAddress, prefix?: string): string => {
   let pre = ''

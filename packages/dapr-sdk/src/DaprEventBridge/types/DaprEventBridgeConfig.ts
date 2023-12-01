@@ -1,7 +1,7 @@
-import { HttpEventBridgeConfig } from '@purista/base-http-bridge'
-import { Prettify } from '@purista/core'
+import type { HttpEventBridgeConfig } from '@purista/base-http-bridge'
+import type { Prettify } from '@purista/core'
 
-import { DaprClientConfig } from '../../DaprClient'
+import type { DaprClientConfig } from '../../DaprClient'
 
 export type DaprEventBridgeConfig = Prettify<
   HttpEventBridgeConfig & {

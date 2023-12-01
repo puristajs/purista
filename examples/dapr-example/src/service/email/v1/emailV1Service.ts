@@ -1,4 +1,4 @@
-import { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
+import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
 
 import { pingCommandBuilder } from './command/ping'
 import { emailV1ServiceBuilder } from './emailV1ServiceBuilder'

@@ -1,5 +1,5 @@
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
-import {
+import type {
   BrokerHeaderCommandMsg,
   BrokerHeaderCustomMsg,
   Command,
@@ -7,16 +7,19 @@ import {
   CommandErrorResponse,
   CommandResponse,
   CommandSuccessResponse,
-  createInfoMessage,
   CustomMessage,
   DefinitionEventBridgeConfig,
-  deserializeOtp,
   EBMessage,
   EBMessageAddress,
-  EBMessageType,
   EventBridge,
-  EventBridgeBaseClass,
   EventBridgeConfig,
+  Subscription,
+} from '@purista/core'
+import {
+  createInfoMessage,
+  deserializeOtp,
+  EBMessageType,
+  EventBridgeBaseClass,
   EventBridgeEventNames,
   getNewCorrelationId,
   getNewEBMessageId,
@@ -28,18 +31,10 @@ import {
   PuristaSpanTag,
   serializeOtp,
   StatusCode,
-  Subscription,
   UnhandledError,
 } from '@purista/core'
-import {
-  connect,
-  headers as getNewHeaders,
-  JetStreamManager,
-  JSONCodec,
-  MsgHdrs,
-  NatsConnection,
-  Subscription as NatsSubscription,
-} from 'nats'
+import type { JetStreamManager, MsgHdrs, NatsConnection, Subscription as NatsSubscription } from 'nats'
+import { connect, headers as getNewHeaders, JSONCodec } from 'nats'
 
 import { deserializeOtpFromNats } from './deserializeOtpFromNats.impl'
 import { getDefaultNatsBridgeConfig } from './getDefaultNatsBridgeConfig'
@@ -47,7 +42,7 @@ import { getQueueGroupName } from './getQueueGroupName.impl'
 import { getCommandHandler, getSubscriptionHandler } from './handler'
 import { serializeOtpToNats } from './serializeOtpToNats.impl'
 import { getCommandSubscriptionTopic, getSubscriptionTopic, getTopicName } from './topic'
-import { NatsBridgeConfig } from './types'
+import type { NatsBridgeConfig } from './types'
 
 /**
 The event bridge supports brokers with and without JetStream enabled.
