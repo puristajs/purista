@@ -1,13 +1,16 @@
 import { join } from 'node:path'
 
-import { Context, context, propagation, Span, SpanKind, SpanOptions, SpanStatusCode } from '@opentelemetry/api'
+import type { Context, Span, SpanOptions } from '@opentelemetry/api'
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
-import { NodeTracerProvider, SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SemanticAttributes, SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
-import { HandledError, initLogger, Logger, PuristaSpanTag, StatusCode, UnhandledError } from '../core'
+import type { Logger } from '../core'
+import { HandledError, initLogger, PuristaSpanTag, StatusCode, UnhandledError } from '../core'
 import { puristaVersion } from '../version'
-import { AuthCredentials, HttpClientConfig, HttpClientRequestOptions, RestClient } from './types'
+import type { AuthCredentials, HttpClientConfig, HttpClientRequestOptions, RestClient } from './types'
 
 /**
  * A HTTP client which will provide simple methods for GET, POST, PATCH, PUT and DELETE.
@@ -33,7 +36,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
   spanProcessor: SpanProcessor | undefined
   traceProvider: NodeTracerProvider
 
-  private auth: AuthCredentials
+  protected auth: AuthCredentials
   constructor(config: HttpClientConfig<CustomConfig>) {
     const name = config.name ?? this.name
     this.name = name
@@ -124,7 +127,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
       : tracer.startActiveSpan(name, opts, callback)
   }
 
-  private getUrlAndHeader(path: string, options?: HttpClientRequestOptions) {
+  protected getUrlAndHeader(path: string, options?: HttpClientRequestOptions) {
     let fullPath = join(this.baseUrl.pathname, path)
 
     if (options?.hash) {
@@ -176,7 +179,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
    * @throws UnhandledError
    * @returns
    */
-  private async execute(method: string, path: string, options?: HttpClientRequestOptions, payload?: unknown) {
+  protected async execute(method: string, path: string, options?: HttpClientRequestOptions, payload?: unknown) {
     const controller = new AbortController()
     const timeout = setTimeout(() => {
       controller.abort(
