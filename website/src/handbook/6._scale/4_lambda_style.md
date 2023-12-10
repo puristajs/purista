@@ -34,7 +34,7 @@ In the picture below, you can see a simplified overview of how it might look on 
 - on most providers, functions can be triggered scheduled by time in addition to triggered by an event
 :::
 
-::: danger Cons
+::: caution Cons
 
 - needs special knowledge on the used provider to be configured correctly
 - deployment & configuration is more complex / bigger amount of stuff to be handled

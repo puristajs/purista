@@ -56,7 +56,7 @@ You will need some additional external, shared-state storage!
 - can be done at nearly any provider
 :::
 
-::: danger Cons
+::: caution Cons
 
 - the need to deploy always all services
 - different access levels, restrictions, and policies for services & functions is not possible

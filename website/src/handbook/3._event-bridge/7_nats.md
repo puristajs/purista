@@ -26,7 +26,7 @@ PURISTA provides the `@purista/natsbridge`
 - can be used with NATS Config store (`@purista/nats-config-store`)
 :::
 
-::: danger Cons
+::: caution Cons
 
 - needs managing of an NATS broker
 - no persistance of messages available

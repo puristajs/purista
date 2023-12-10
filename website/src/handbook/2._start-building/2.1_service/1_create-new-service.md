@@ -164,7 +164,7 @@ The `/src/service/user/v1/userV1ServiceBuilder.ts` file, is the initial service 
 Also, the optional custom service configuration will be add here.  
 If you want to create a new version of a service, you can simply copy the whole service version folder and align the service version in this file.
 
-::: danger Do not add commands or subscriptions here
+::: caution Do not add commands or subscriptions here
 because of:
 
 - cycling dependencies! the command and subscription builders are created by that builder
@@ -228,7 +228,7 @@ export const userV1ServiceBuilder = new ServiceBuilder(userServiceInfo)
   })
 ```
 
-::: danger Be aware
+::: caution Be aware
 PURISTA does not deep merge configurations! If you have nested configurations, you should be aware of.
 :::
 

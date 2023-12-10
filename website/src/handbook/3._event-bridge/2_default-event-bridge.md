@@ -41,7 +41,7 @@ A simplified schema of how the `DefaultEventBridge` works:
 - ideal for local development and debug purpose
 :::
 
-::: danger Cons
+::: caution Cons
 
 - does not scale
 - no persistance of messages

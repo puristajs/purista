@@ -71,7 +71,7 @@ You can learn more about it at [MQTT event bridge](../3._event-bridge/4_mqtt.md)
 - use the same application to run on edge and be able to scale on the cloud
 :::
 
-::: danger Cons
+::: caution Cons
 
 - 🤷
 :::
