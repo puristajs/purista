@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 
 import { getLoggerMock } from '@purista/core'
 
-import { AWSConfigStore } from '../src/AWSConfigStore.impl'
+import { AWSConfigStore } from '../src/AWSConfigStore.impl.js'
 
 describe('AWS Config Manager config store', () => {
   beforeAll(async () => {

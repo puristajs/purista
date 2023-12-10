@@ -36,10 +36,10 @@ import {
 import type { IClientSubscribeOptions, IPublishPacket, MqttClient } from 'mqtt'
 import { connectAsync } from 'mqtt'
 
-import { getDefaultMqttBridgeConfig } from './getDefaultMqttBridgeConfig.impl'
-import { getCommandHandler, getSubscriptionHandler, handleCommandResponse } from './handler'
-import { msToSec } from './msToSec.impl'
-import { serializeOtpToMqtt } from './serializeOtpToMqtt.impl'
+import { getDefaultMqttBridgeConfig } from './getDefaultMqttBridgeConfig.impl.js'
+import { getCommandHandler, getSubscriptionHandler, handleCommandResponse } from './handler/index.js'
+import { msToSec } from './msToSec.impl.js'
+import { serializeOtpToMqtt } from './serializeOtpToMqtt.impl.js'
 import {
   getCommandResponseSubscriptionTopic,
   getCommandSubscriptionTopic,
@@ -47,8 +47,8 @@ import {
   getSubscriptionTopic,
   getTopicName,
   TopicRouter,
-} from './topic'
-import type { MqttBridgeConfig } from './types'
+} from './topic/index.js'
+import type { MqttBridgeConfig } from './types/index.js'
 
 /**
  * The MQTT event bridge connects to a MQTT broker.

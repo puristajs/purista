@@ -1,2 +1,2 @@
-export * from './IncomingMessageFunction'
-export * from './NatsBridgeConfig'
+export * from './IncomingMessageFunction.js'
+export * from './NatsBridgeConfig.js'

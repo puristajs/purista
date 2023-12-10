@@ -1,4 +1,4 @@
-import { getCommandQueueName } from './getCommandQueueName.impl'
+import { getCommandQueueName } from './getCommandQueueName.impl.js'
 
 describe('getCommandQueueName', () => {
   it('returns the correct command queue name with prefix', () => {

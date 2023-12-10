@@ -1,12 +1,12 @@
-import { EBMessageType } from '../EBMessageType.enum'
-import type { InfoInvokeTimeout } from './InfoInvokeTimeout'
-import type { InfoServiceDrain } from './InfoServiceDrain'
-import type { InfoServiceFunctionAdded } from './InfoServiceFunctionAdded'
-import type { InfoServiceInit } from './InfoServiceInit'
-import type { InfoServiceNotReady } from './InfoServiceNotReady'
-import type { InfoServiceReady } from './InfoServiceReady'
-import type { InfoServiceShutdown } from './InfoServiceShutdown'
-import type { InfoSubscriptionError } from './InfoSubscriptionError'
+import { EBMessageType } from '../EBMessageType.enum.js'
+import type { InfoInvokeTimeout } from './InfoInvokeTimeout.js'
+import type { InfoServiceDrain } from './InfoServiceDrain.js'
+import type { InfoServiceFunctionAdded } from './InfoServiceFunctionAdded.js'
+import type { InfoServiceInit } from './InfoServiceInit.js'
+import type { InfoServiceNotReady } from './InfoServiceNotReady.js'
+import type { InfoServiceReady } from './InfoServiceReady.js'
+import type { InfoServiceShutdown } from './InfoServiceShutdown.js'
+import type { InfoSubscriptionError } from './InfoSubscriptionError.js'
 
 export type InfoMessage =
   | InfoServiceDrain

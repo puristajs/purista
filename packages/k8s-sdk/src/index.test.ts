@@ -1,5 +1,4 @@
-import * as index from './index'
-import { puristaVersion } from './version'
+import { getHttpServer, puristaVersion } from './index.js'
 
 describe('exports k8s-sdk', () => {
   it('has a version', () => {
@@ -7,6 +6,6 @@ describe('exports k8s-sdk', () => {
   })
 
   it('exports getHttpServer', () => {
-    expect(index.getHttpServer).toBeDefined()
+    expect(getHttpServer).toBeDefined()
   })
 })

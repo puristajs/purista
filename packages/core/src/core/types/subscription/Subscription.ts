@@ -1,9 +1,9 @@
-import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig'
-import type { EBMessageAddress } from '../EBMessageAddress'
-import type { EBMessageType } from '../EBMessageType.enum'
-import type { InstanceId } from '../InstanceId'
-import type { PrincipalId } from '../PrincipalId'
-import type { TenantId } from '../TenantId'
+import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
+import type { EBMessageAddress } from '../EBMessageAddress.js'
+import type { EBMessageType } from '../EBMessageType.enum.js'
+import type { InstanceId } from '../InstanceId.js'
+import type { PrincipalId } from '../PrincipalId.js'
+import type { TenantId } from '../TenantId.js'
 
 /**
  * A subscription managed by the event bridge

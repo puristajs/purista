@@ -1,7 +1,7 @@
 import type { EBMessageAddress } from '@purista/core'
 import { convertToSnakeCase, EBMessageType } from '@purista/core'
 
-import type { NatsBridge } from '../NatsBridge'
+import type { NatsBridge } from '../NatsBridge.js'
 
 type GetCommandTopicFn = (this: NatsBridge, address: EBMessageAddress) => string
 

@@ -1,3 +1,3 @@
-export * from './schema'
-export * from './sendWelcomeEmailSubscriptionBuilder'
-export * from './types'
+export * from './schema.js'
+export * from './sendWelcomeEmailSubscriptionBuilder.js'
+export * from './types.js'

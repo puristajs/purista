@@ -1,8 +1,8 @@
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
-import type { Logger, LoggerOptions } from '../core/types'
-import { DefaultLogger } from './DefaultLogger.impl'
+import type { Logger, LoggerOptions } from '../core/types/index.js'
+import { DefaultLogger } from './DefaultLogger.impl.js'
 
 describe('DefaultLogger', () => {
   let sandbox: SinonSandbox

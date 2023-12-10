@@ -3,7 +3,7 @@ import type { Context } from 'hono'
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
-import { configRoute } from './config.impl'
+import { configRoute } from './config.impl.js'
 
 describe('config route', () => {
   let sandbox: SinonSandbox

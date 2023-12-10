@@ -1,7 +1,7 @@
 import type { Logger as PinoLogger } from 'pino'
 
-import type { ILogger, LogFnParamType, LoggerOptions } from '../core/types'
-import { Logger } from '../core/types'
+import type { ILogger, LogFnParamType, LoggerOptions } from '../core/types/index.js'
+import { Logger } from '../core/types/index.js'
 
 export class DefaultLogger extends Logger implements ILogger {
   constructor(private log: PinoLogger) {

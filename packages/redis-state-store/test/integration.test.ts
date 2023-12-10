@@ -1,7 +1,7 @@
 import type { StartedTestContainer } from 'testcontainers'
 import { GenericContainer, Wait } from 'testcontainers'
 
-import { RedisStateStore } from '../src/RedisStateStore.impl'
+import { RedisStateStore } from '../src/RedisStateStore.impl.js'
 
 const REDIS_PORT = 6379
 
@@ -15,10 +15,10 @@ describe('@purista/redis-state-store', () => {
         host: REDIS_PORT,
       })
       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
-      .withLogConsumer((stream) => {
+      .withLogConsumer((_stream) => {
         // stream.on('data', (line) => console.debug(line))
         // eslint-disable-next-line no-console
-        stream.on('err', (line) => console.error(line))
+        // stream.on('err', (line) => console.error(line))
       })
       .start()
   })

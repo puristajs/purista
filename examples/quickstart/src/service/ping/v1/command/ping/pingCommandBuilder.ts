@@ -1,6 +1,10 @@
-import { ServiceEvent } from '../../../../ServiceEvent.enum'
-import { pingV1ServiceBuilder } from '../../pingV1ServiceBuilder'
-import { pingV1PingInputParameterSchema, pingV1PingInputPayloadSchema, pingV1PingOutputPayloadSchema } from './schema'
+import { ServiceEvent } from '../../../../ServiceEvent.enum.js'
+import { pingV1ServiceBuilder } from '../../pingV1ServiceBuilder.js'
+import {
+  pingV1PingInputParameterSchema,
+  pingV1PingInputPayloadSchema,
+  pingV1PingOutputPayloadSchema,
+} from './schema.js'
 
 export const pingCommandBuilder = pingV1ServiceBuilder
   .getCommandBuilder('ping', 'the ping command exposed as http endpoint')

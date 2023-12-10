@@ -15,8 +15,8 @@ import {
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { Methods } from 'trouter'
 
-import { httpServerV1ServiceBuilder } from '../../httpServerV1ServiceBuilder'
-import { addHeaders } from './helper'
+import { httpServerV1ServiceBuilder } from '../../httpServerV1ServiceBuilder.js'
+import { addHeaders } from './helper/index.js'
 
 export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBuilder
   .getSubscriptionBuilder(
@@ -58,7 +58,7 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
         if (request.headers['traceparent']) {
           let traceparent: string
           if (Array.isArray(request.headers['traceparent'])) {
-            traceparent = request.headers['traceparent'][0]
+            traceparent = request.headers['traceparent'][0] as string
           } else {
             traceparent = request.headers['traceparent']
           }

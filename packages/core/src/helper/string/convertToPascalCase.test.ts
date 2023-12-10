@@ -1,4 +1,4 @@
-import { convertToPascalCase } from './convertToPascalCase.impl'
+import { convertToPascalCase } from './convertToPascalCase.impl.js'
 
 describe('convertToPascalCase', () => {
   it('converts from snakeCase', () => {

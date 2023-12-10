@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-import { EBMessageType, StatusCode, UnhandledError } from '../core'
+import { EBMessageType, StatusCode, UnhandledError } from '../core/index.js'
 
 /**
  * Validates if the given input might be valid event bridge message

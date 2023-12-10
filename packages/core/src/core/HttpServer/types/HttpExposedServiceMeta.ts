@@ -1,5 +1,5 @@
-import type { CommandDefinitionMetadataBase, Prettify, StatusCode } from '../../../core'
-import type { QueryParameter } from './QueryParameter'
+import type { CommandDefinitionMetadataBase, Prettify, StatusCode } from '../../index.js'
+import type { QueryParameter } from './QueryParameter.js'
 
 export type HttpExposedServiceMeta<ParameterType = {}> = Prettify<
   CommandDefinitionMetadataBase & {

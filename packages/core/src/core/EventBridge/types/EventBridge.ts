@@ -8,7 +8,7 @@ import type {
   EBMessage,
   EBMessageAddress,
   Subscription,
-} from '../../../core'
+} from '../../index.js'
 
 /**
  * Event bridge interface

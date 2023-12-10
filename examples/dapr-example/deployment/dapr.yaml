@@ -8,9 +8,9 @@ apps:
     appDirPath: ./service-email
     appPort: 3000
     daprHTTPPort: 6100
-    command: ["ts-node", "--project","../../tsconfig.json","index.ts"]
+    command: ["tsx", "--tsconfig","../../tsconfig.json","index.ts"]
   - appID: user-v1
     appDirPath: ./service-user
     appPort: 3001
     daprHTTPPort: 6101
-    command: ["ts-node", "--project","../../tsconfig.json","index.ts"]
+    command: ["tsx", "--tsconfig","../../tsconfig.json","index.ts"]

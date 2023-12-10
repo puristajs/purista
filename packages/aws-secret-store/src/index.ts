@@ -31,5 +31,6 @@ console.log(value) // outputs: undefined
 ```
 @module
 */
-export * from './AWSSecretStore.impl'
-export * from './types'
+export * from './AWSSecretStore.impl.js'
+export * from './types.js'
+export * from './version.js'

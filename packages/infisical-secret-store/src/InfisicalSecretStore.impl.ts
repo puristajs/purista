@@ -1,8 +1,8 @@
 import type { StoreBaseConfig } from '@purista/core'
 import { SecretStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 
-import { InfisicalClient } from './InfisicalClient'
-import type { InfisicalSecretConfig } from './types'
+import { InfisicalClient } from './InfisicalClient/index.js'
+import type { InfisicalSecretConfig } from './types.js'
 
 /**
 A secret store for using [Infisical](https://infisical.com/) as storage.  

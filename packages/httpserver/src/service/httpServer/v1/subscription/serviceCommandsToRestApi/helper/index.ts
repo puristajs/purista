@@ -1,1 +1,1 @@
-export * from './addHeaders.impl'
+export * from './addHeaders.impl.js'

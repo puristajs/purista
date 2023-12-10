@@ -91,7 +91,7 @@ const register = collectData(serviceInstance)
 // if you use the @purista/k8s-sdk
 // expose the metrics like this
 server.router.add('GET', '/metrics', async (_request, response) => {
-  response.setHeader('Content-Type', register.contentType)
+  response.setHeader('content-type', register.contentType)
   response.end(await register.metrics())
 })
 

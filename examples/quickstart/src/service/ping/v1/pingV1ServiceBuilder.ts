@@ -1,8 +1,8 @@
 import type { ServiceInfoType } from '@purista/core'
 import { ServiceBuilder } from '@purista/core'
 
-import { generalPingServiceInfo } from '../generalPingServiceInfo'
-import { pingServiceV1ConfigSchema } from './pingServiceConfig'
+import { generalPingServiceInfo } from '../generalPingServiceInfo.js'
+import { pingServiceV1ConfigSchema } from './pingServiceConfig.js'
 
 export const pingServiceInfo: ServiceInfoType = {
   serviceVersion: '1',

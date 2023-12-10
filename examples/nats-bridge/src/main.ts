@@ -6,9 +6,9 @@ import { httpServerV1Service } from '@purista/httpserver'
 import { NatsStateStore } from '@purista/nats-state-store'
 import { NatsBridge } from '@purista/natsbridge'
 
-import httpServerConfig from './config/httpServerConfig'
-import { emailV1Service } from './service/email/v1'
-import { userV1Service } from './service/user/v1'
+import httpServerConfig from './config/httpServerConfig.js'
+import { emailV1Service } from './service/email/v1/index.js'
+import { userV1Service } from './service/user/v1/index.js'
 
 export const main = async () => {
   // initialize the logging

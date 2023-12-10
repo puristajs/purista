@@ -1,5 +1,5 @@
-import type { ServiceClass } from '../ServiceClass'
-import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext'
+import type { ServiceClass } from '../ServiceClass.js'
+import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.js'
 /**
  * CommandFunction is a function which will be triggered when a matching event bridge message is received by the service
  *

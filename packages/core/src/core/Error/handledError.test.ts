@@ -1,18 +1,20 @@
-import type { CommandErrorResponse } from '../types'
-import { EBMessageType, StatusCode } from '../types'
-import { HandledError } from './HandledError.impl'
+import type { CommandErrorResponse } from '../types/index.js'
+import { EBMessageType, StatusCode } from '../types/index.js'
+import { HandledError } from './HandledError.impl.js'
 
 describe('HandledError', () => {
   const sender = {
     serviceName: 'SenderService',
     serviceVersion: '1.1.1',
     serviceTarget: 'senderServiceTarget',
+    instanceId: 'a',
   }
 
   const receiver = {
     serviceName: 'ReceiverService',
     serviceVersion: '2.2.2',
     serviceTarget: 'receiverServiceTarget',
+    instanceId: 'a',
   }
 
   it('creates a new HandledError', () => {

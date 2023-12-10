@@ -1,4 +1,4 @@
-import { getJaegerExporter } from './getProcessor'
-import { main } from './main'
+import { getJaegerExporter } from './getProcessor.js'
+import { main } from './main.js'
 
 main(getJaegerExporter)

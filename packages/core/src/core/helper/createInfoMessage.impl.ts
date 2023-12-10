@@ -1,6 +1,6 @@
-import type { EBMessageSenderAddress, InfoMessage, InfoMessageType } from '../types'
-import { getNewEBMessageId } from './getNewEBMessageId.impl'
-import { getNewTraceId } from './getNewTraceId.impl'
+import type { EBMessageSenderAddress, InfoMessage, InfoMessageType } from '../types/index.js'
+import { getNewEBMessageId } from './getNewEBMessageId.impl.js'
+import { getNewTraceId } from './getNewTraceId.impl.js'
 
 /**
  *

@@ -1,7 +1,7 @@
 import type { Subscription } from '@purista/core'
 import { convertToSnakeCase } from '@purista/core'
 
-import type { NatsBridge } from '../NatsBridge'
+import type { NatsBridge } from '../NatsBridge.js'
 
 type GetSubscriptionTopicFn = (this: NatsBridge, subscription: Subscription) => string
 

@@ -1,14 +1,23 @@
-import { getLoggerMock } from '../mocks'
-import { HttpClient } from './HttpClient.impl'
+import { createSandbox } from 'sinon'
+
+import { getLoggerMock } from '../mocks/index.js'
+import { HttpClient } from './HttpClient.impl.js'
 
 describe('HttpClient', () => {
+  const sandbox = createSandbox()
+
+  afterEach(() => {
+    sandbox.restore()
+    sandbox.reset()
+  })
+
   it('can post', async () => {
     const logger = getLoggerMock()
     const client = new HttpClient({
       baseUrl: 'http://example.com',
       logger: logger.mock,
       defaultHeaders: {
-        'Content-Type': 'application/json; charset=utf-8',
+        'content-type': 'application/json; charset=utf-8',
       },
     })
 
@@ -17,13 +26,13 @@ describe('HttpClient', () => {
     const payload = { some: 'data' }
     const response = { ok: 'ok' }
 
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation((url, req) => {
+    sandbox.stub(global, 'fetch').callsFake((url, req) => {
       expect(url).toStrictEqual(new URL('http://example.com/example'))
       expect(req?.method).toBe('POST')
 
       const x = req?.headers as any
       expect(x['Authorization']).toBe('Bearer 123')
-      expect(x['Content-Type']).toBe('application/json; charset=utf-8')
+      expect(x['content-type']).toBe('application/json; charset=utf-8')
 
       return Promise.resolve({
         headers: {
@@ -35,11 +44,7 @@ describe('HttpClient', () => {
       } as any)
     })
 
-    try {
-      await expect(client.post('/example', payload)).resolves.toBe(response)
-    } finally {
-      fetchMock.mockRestore()
-    }
+    await expect(client.post('/example', payload)).resolves.toBe(response)
   })
 
   it('can patch', async () => {
@@ -49,7 +54,7 @@ describe('HttpClient', () => {
     const payload = { some: 'data' }
     const response = { ok: 'ok' }
 
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation((url, req) => {
+    sandbox.stub(global, 'fetch').callsFake((url, req) => {
       expect(url).toStrictEqual(new URL('http://example.com/example'))
       expect(req?.method).toBe('PATCH')
       expect(req?.body).toBe(JSON.stringify(payload))
@@ -63,11 +68,7 @@ describe('HttpClient', () => {
       } as any)
     })
 
-    try {
-      await expect(client.patch('/example', payload)).resolves.toBe(response)
-    } finally {
-      fetchMock.mockRestore()
-    }
+    await expect(client.patch('/example', payload)).resolves.toBe(response)
   })
 
   it('can put', async () => {
@@ -77,7 +78,7 @@ describe('HttpClient', () => {
     const payload = { some: 'data' }
     const response = { ok: 'ok' }
 
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation((url, req) => {
+    sandbox.stub(global, 'fetch').callsFake((url, req) => {
       expect(url).toStrictEqual(new URL('http://example.com/example'))
       expect(req?.method).toBe('PUT')
       expect(req?.body).toBe(JSON.stringify(payload))
@@ -91,11 +92,7 @@ describe('HttpClient', () => {
       } as any)
     })
 
-    try {
-      await expect(client.put('/example', payload)).resolves.toBe(response)
-    } finally {
-      fetchMock.mockRestore()
-    }
+    await expect(client.put('/example', payload)).resolves.toBe(response)
   })
 
   it('can delete', async () => {
@@ -104,7 +101,7 @@ describe('HttpClient', () => {
 
     const response = { ok: 'ok' }
 
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation((url, req) => {
+    sandbox.stub(global, 'fetch').callsFake((url, req) => {
       expect(url).toStrictEqual(new URL('http://example.com/example'))
       expect(req?.method).toBe('DELETE')
       expect(req?.body).toBeUndefined()
@@ -118,11 +115,7 @@ describe('HttpClient', () => {
       } as any)
     })
 
-    try {
-      await expect(client.delete('/example')).resolves.toBe(response)
-    } finally {
-      fetchMock.mockRestore()
-    }
+    await expect(client.delete('/example')).resolves.toBe(response)
   })
 
   it('can get', async () => {
@@ -131,7 +124,7 @@ describe('HttpClient', () => {
 
     const response = { ok: 'ok' }
 
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation((url, req) => {
+    sandbox.stub(global, 'fetch').callsFake((url, req) => {
       expect(url).toStrictEqual(new URL('http://example.com/example'))
       expect(req?.method).toBe('GET')
       expect(req?.body).toBeUndefined()
@@ -145,11 +138,7 @@ describe('HttpClient', () => {
       } as any)
     })
 
-    try {
-      await expect(client.get('/example')).resolves.toBe(response)
-    } finally {
-      fetchMock.mockRestore()
-    }
+    await expect(client.get('/example')).resolves.toBe(response)
   })
 
   it('can get json', async () => {
@@ -158,7 +147,7 @@ describe('HttpClient', () => {
 
     const response = { ok: 'ok' }
 
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation((url, req) => {
+    sandbox.stub(global, 'fetch').callsFake((url, req) => {
       expect(url).toStrictEqual(new URL('http://example.com/example'))
       expect(req?.method).toBe('GET')
       expect(req?.body).toBeUndefined()
@@ -172,11 +161,7 @@ describe('HttpClient', () => {
       } as any)
     })
 
-    try {
-      await expect(client.get('/example')).resolves.toBe(response)
-    } finally {
-      fetchMock.mockRestore()
-    }
+    await expect(client.get('/example')).resolves.toBe(response)
   })
 
   it('throws', async () => {
@@ -185,7 +170,7 @@ describe('HttpClient', () => {
 
     const response = { ok: 'ok' }
 
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation((url, req) => {
+    sandbox.stub(global, 'fetch').callsFake((url, req) => {
       expect(url).toStrictEqual(new URL('http://example.com/example'))
       expect(req?.method).toBe('GET')
       expect(req?.body).toBeUndefined()
@@ -200,10 +185,6 @@ describe('HttpClient', () => {
       } as any)
     })
 
-    try {
-      await expect(client.get('/example')).rejects.toThrow('Bad Request')
-    } finally {
-      fetchMock.mockRestore()
-    }
+    await expect(client.get('/example')).rejects.toThrow('Bad Request')
   })
 })

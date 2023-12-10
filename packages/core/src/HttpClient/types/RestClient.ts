@@ -1,4 +1,4 @@
-import type { HttpClientRequestOptions } from './HttpClientRequestOptions'
+import type { HttpClientRequestOptions } from './HttpClientRequestOptions.js'
 
 /**
  * A REST API client which will provide GET, POST, PUT, PATCH, DELETE methods

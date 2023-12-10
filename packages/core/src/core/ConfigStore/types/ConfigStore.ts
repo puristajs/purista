@@ -1,6 +1,6 @@
-import type { ConfigDeleteFunction } from './ConfigDeleteFunction'
-import type { ConfigGetterFunction } from './ConfigGetterFunction'
-import type { ConfigSetterFunction } from './ConfigSetterFunction'
+import type { ConfigDeleteFunction } from './ConfigDeleteFunction.js'
+import type { ConfigGetterFunction } from './ConfigGetterFunction.js'
+import type { ConfigSetterFunction } from './ConfigSetterFunction.js'
 
 /**
  * Interface definition for config store adapters

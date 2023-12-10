@@ -1,6 +1,6 @@
 import type { Complete, EventBridgeConfig } from '@purista/core'
 
-import type { HttpEventBridgeConfig } from './types'
+import type { HttpEventBridgeConfig } from './types/index.js'
 
 export const getDefaultHttpEventBridgeConfig = (): EventBridgeConfig<Omit<HttpEventBridgeConfig, 'serve'>> => {
   const config: Complete<Omit<HttpEventBridgeConfig, 'serve'>> = {
@@ -12,6 +12,7 @@ export const getDefaultHttpEventBridgeConfig = (): EventBridgeConfig<Omit<HttpEv
     pathPrefix: 'purista',
     subscriptionPayloadAsCloudEvent: false,
     commandPayloadAsCloudEvent: false,
+    enableHttpCompression: false,
   }
 
   return config

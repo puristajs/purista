@@ -1,3 +1,3 @@
-export * from './DefaultLogger.impl'
-export * from './getDefaultLogLevel'
-export * from './initLogger.impl'
+export * from './DefaultLogger.impl.js'
+export * from './getDefaultLogLevel.js'
+export * from './initLogger.impl.js'

@@ -414,7 +414,7 @@ const server = getHttpServer({
 
 // add the metrics route
 server.router.add('GET', '/metrics', async (_request, response) => {
-  response.setHeader('Content-Type', register.contentType)
+  response.setHeader('content-type', register.contentType)
   response.end(await register.metrics())
 })
 ```

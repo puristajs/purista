@@ -1,5 +1,5 @@
-import type { ServiceClass } from '../ServiceClass'
-import type { SubscriptionDefinition } from './SubscriptionDefinition'
+import type { ServiceClass } from '../ServiceClass.js'
+import type { SubscriptionDefinition } from './SubscriptionDefinition.js'
 
 /**
  * Helper type for creating list of service commands to be passed as input to service class

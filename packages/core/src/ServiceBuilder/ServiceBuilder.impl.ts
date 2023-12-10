@@ -3,7 +3,7 @@ import { fail } from 'node:assert'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import type { z } from 'zod'
 
-import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder'
+import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
 import type {
   CommandDefinitionList,
   Complete,
@@ -17,12 +17,12 @@ import type {
   ServiceInfoType,
   StateStore,
   SubscriptionDefinitionList,
-} from '../core'
-import { initLogger, Service } from '../core'
-import { initDefaultConfigStore } from '../DefaultConfigStore'
-import { initDefaultSecretStore } from '../DefaultSecretStore'
-import { initDefaultStateStore } from '../DefaultStateStore'
-import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder'
+} from '../core/index.js'
+import { initLogger, Service } from '../core/index.js'
+import { initDefaultConfigStore } from '../DefaultConfigStore/index.js'
+import { initDefaultSecretStore } from '../DefaultSecretStore/index.js'
+import { initDefaultStateStore } from '../DefaultStateStore/index.js'
+import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/index.js'
 
 export type Newable<T, ConfigType> = { new (config: ServiceConstructorInput<ConfigType>): T }
 

@@ -1,1 +1,1 @@
-export * from './DaprConfigStoreConfig'
+export * from './DaprConfigStoreConfig.js'

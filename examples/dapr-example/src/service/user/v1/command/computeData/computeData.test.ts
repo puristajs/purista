@@ -1,9 +1,9 @@
 import { getCommandContextMock, getEventBridgeMock, getLoggerMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 
-import { userV1Service } from '../../userV1Service'
-import { computeDataCommandBuilder } from './computeDataCommandBuilder'
-import type { UserV1ComputeDataInputParameter, UserV1ComputeDataInputPayload } from './types'
+import { userV1Service } from '../../userV1Service.js'
+import { computeDataCommandBuilder } from './computeDataCommandBuilder.js'
+import type { UserV1ComputeDataInputParameter, UserV1ComputeDataInputPayload } from './types.js'
 
 describe('service User version 1 - command computeData', () => {
   let sandbox = createSandbox()

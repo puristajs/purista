@@ -8,7 +8,7 @@ import {
 } from '@aws-sdk/client-ssm'
 import { ConfigStoreBaseClass, StatusCode, type StoreBaseConfig, UnhandledError } from '@purista/core'
 
-import type { AWSConfigStoreConfig } from './types'
+import type { AWSConfigStoreConfig } from './types.js'
 
 /**
  * The config store adapter for AWS System Manager.

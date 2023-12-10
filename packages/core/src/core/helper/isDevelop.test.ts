@@ -1,4 +1,4 @@
-import { isDevelop } from './isDevelop.impl'
+import { isDevelop } from './isDevelop.impl.js'
 
 describe('check if env is develop or production', () => {
   const env = process.env

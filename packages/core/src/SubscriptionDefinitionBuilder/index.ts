@@ -1,2 +1,2 @@
-export * from './getSubscriptionFunctionWithValidation.impl'
-export * from './SubscriptionDefinitionBuilder.impl'
+export * from './getSubscriptionFunctionWithValidation.impl.js'
+export * from './SubscriptionDefinitionBuilder.impl.js'

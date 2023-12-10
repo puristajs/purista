@@ -1,4 +1,4 @@
-import type { MqttBridgeConfig } from './types'
+import type { MqttBridgeConfig } from './types/index.js'
 
 const SECONDS_PER_DAY = 86_400
 

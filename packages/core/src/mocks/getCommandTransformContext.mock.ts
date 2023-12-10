@@ -1,9 +1,9 @@
 import type { SinonSandbox } from 'sinon'
 import { stub } from 'sinon'
 
-import type { CommandTransformFunctionContext } from '../core'
-import { getLoggerMock } from './getLogger.mock'
-import { getCommandMessageMock } from './messages'
+import type { CommandTransformFunctionContext } from '../core/index.js'
+import { getLoggerMock } from './getLogger.mock.js'
+import { getCommandMessageMock } from './messages/index.js'
 
 /**
  * A function that returns a mock object for command transform function context

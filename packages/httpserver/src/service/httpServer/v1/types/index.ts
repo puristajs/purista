@@ -1,1 +1,1 @@
-export * from './BeforeResponseHook'
+export * from './BeforeResponseHook.js'

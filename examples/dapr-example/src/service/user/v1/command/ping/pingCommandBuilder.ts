@@ -1,6 +1,10 @@
-import { ServiceEvent } from '../../../../ServiceEvent.enum'
-import { userV1ServiceBuilder } from '../../userV1ServiceBuilder'
-import { userV1PingInputParameterSchema, userV1PingInputPayloadSchema, userV1PingOutputPayloadSchema } from './schema'
+import { ServiceEvent } from '../../../../ServiceEvent.enum.js'
+import { userV1ServiceBuilder } from '../../userV1ServiceBuilder.js'
+import {
+  userV1PingInputParameterSchema,
+  userV1PingInputPayloadSchema,
+  userV1PingOutputPayloadSchema,
+} from './schema.js'
 
 export const pingCommandBuilder = userV1ServiceBuilder
   .getCommandBuilder('ping', 'ping pong')

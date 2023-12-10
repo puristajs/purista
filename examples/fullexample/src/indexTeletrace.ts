@@ -1,4 +1,4 @@
-import { getTeletraceExporter } from './getProcessor'
-import { main } from './main'
+import { getTeletraceExporter } from './getProcessor.js'
+import { main } from './main.js'
 
 main(getTeletraceExporter)

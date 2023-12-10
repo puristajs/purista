@@ -7,10 +7,10 @@ import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SemanticAttributes, SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
-import type { Logger } from '../core'
-import { HandledError, initLogger, PuristaSpanTag, StatusCode, UnhandledError } from '../core'
-import { puristaVersion } from '../version'
-import type { AuthCredentials, HttpClientConfig, HttpClientRequestOptions, RestClient } from './types'
+import type { Logger } from '../core/index.js'
+import { HandledError, initLogger, PuristaSpanTag, StatusCode, UnhandledError } from '../core/index.js'
+import { puristaVersion } from '../version.js'
+import type { AuthCredentials, HttpClientConfig, HttpClientRequestOptions, RestClient } from './types/index.js'
 
 /**
  * A HTTP client which will provide simple methods for GET, POST, PATCH, PUT and DELETE.
@@ -222,7 +222,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
         if (!response.ok) {
           let body = ''
           try {
-            if (response.headers.get('Content-Type')?.startsWith('application/json')) {
+            if (response.headers.get('content-type')?.startsWith('application/json')) {
               body = await response.json()
             } else {
               body = await response.text()
@@ -248,7 +248,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
           return undefined
         }
 
-        if (response.headers.get('Content-Type')?.startsWith('application/json')) {
+        if (response.headers.get('content-type')?.startsWith('application/json')) {
           return await response.json()
         }
         return response.text()

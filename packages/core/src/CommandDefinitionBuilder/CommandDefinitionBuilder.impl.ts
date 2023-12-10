@@ -16,10 +16,10 @@ import type {
   ServiceClass,
   StatusCode,
   SupportedHttpMethod,
-} from '../core'
-import type { OpenApiZodAny } from '../zodOpenApi'
-import { generateSchema } from '../zodOpenApi'
-import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl'
+} from '../core/index.js'
+import type { OpenApiZodAny } from '../zodOpenApi/index.js'
+import { generateSchema } from '../zodOpenApi/index.js'
+import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
 
 /**
  * Command definition builder is a helper to create and define a command for a service.

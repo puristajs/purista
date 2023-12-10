@@ -1,9 +1,9 @@
 import { HttpClient, StatusCode, UnhandledError } from '@purista/core'
 
-import { SECRET_TYPE } from './constants'
-import { decrypt } from './decrypt.impl'
-import { encrypt } from './encrypt.impl'
-import type { ClientConfig, HttpClientConfigCustom, Secret, TokenData } from './types'
+import { SECRET_TYPE } from './constants.js'
+import { decrypt } from './decrypt.impl.js'
+import { encrypt } from './encrypt.impl.js'
+import type { ClientConfig, HttpClientConfigCustom, Secret, TokenData } from './types/index.js'
 
 /**
  * The internal http client to connect to the Infisical server.
@@ -18,7 +18,7 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
       name: 'InfisicalClient',
       defaultHeaders: {
         'User-Agent': `InfisicalNodeSDK`,
-        'Content-Type': 'application/json',
+        'content-type': 'application/json',
         ...conf.defaultHeaders,
       },
       ...conf,
@@ -95,10 +95,16 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
       this.tokenData = await this.getServiceTokenData()
     }
 
+    const environment = this.tokenData.scopes[0]?.environment
+
+    if (!environment) {
+      throw new UnhandledError(StatusCode.InvalidToken, 'Invalid service token - environment is missing')
+    }
+
     try {
       const { secret: encryptedSecret } = await this.get<{ secret: Secret }>(encodeURI(`/api/v3/secrets/${name}`), {
         query: {
-          environment: this.tokenData.scopes[0].environment,
+          environment,
           workspaceId: this.tokenData.workspace,
           type: SECRET_TYPE,
         },
@@ -129,8 +135,14 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
       this.tokenData = await this.getServiceTokenData()
     }
 
+    const environment = this.tokenData.scopes[0]?.environment
+
+    if (!environment) {
+      throw new UnhandledError(StatusCode.InvalidToken, 'Invalid service token - environment is missing')
+    }
+
     const payload = {
-      environment: this.tokenData.scopes[0].environment,
+      environment,
       workspaceId: this.tokenData.workspace,
       type: SECRET_TYPE,
       ...this.encryptSecret(name, value),
@@ -158,11 +170,17 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
       this.tokenData = await this.getServiceTokenData()
     }
 
+    const environment = this.tokenData.scopes[0]?.environment
+
+    if (!environment) {
+      throw new UnhandledError(StatusCode.InvalidToken, 'Invalid service token - environment is missing')
+    }
+
     await this.delete(
       encodeURI(`/api/v3/secrets/${name}`),
       {},
       {
-        environment: this.tokenData.scopes[0].environment,
+        environment,
         workspaceId: this.tokenData.workspace,
         type: SECRET_TYPE,
       },

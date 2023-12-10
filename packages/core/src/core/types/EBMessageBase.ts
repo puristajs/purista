@@ -1,10 +1,10 @@
-import type { ContentType } from './ContentType'
-import type { CorrelationId } from './CorrelationId'
-import type { EBMessageId } from './EBMessageId'
-import type { EBMessageSenderAddress } from './EBMessageSenderAddress'
-import type { PrincipalId } from './PrincipalId'
-import type { TenantId } from './TenantId'
-import type { TraceId } from './TraceId'
+import type { ContentType } from './ContentType.js'
+import type { CorrelationId } from './CorrelationId.js'
+import type { EBMessageId } from './EBMessageId.js'
+import type { EBMessageSenderAddress } from './EBMessageSenderAddress.js'
+import type { PrincipalId } from './PrincipalId.js'
+import type { TenantId } from './TenantId.js'
+import type { TraceId } from './TraceId.js'
 
 /**
  * Default fields which are part of any purista message

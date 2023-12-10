@@ -71,6 +71,6 @@ main()
  * 
  * @module
  */
-export * from './service/httpServer/v1/'
-export * from './service/ServiceEvent.enum'
-export * from './version'
+export * from './service/httpServer/v1/index.js'
+export * from './service/ServiceEvent.enum.js'
+export * from './version.js'

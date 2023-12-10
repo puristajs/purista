@@ -1,7 +1,8 @@
 /* eslint-disable no-console */
+import path from 'node:path'
+
 import type { Answers } from 'inquirer'
 import type { Prompts } from 'node-plop'
-import path from 'path'
 
 import { getEventNames } from '../helper/getEventNames.js'
 import { collectServices, installInfo } from '../helper/installInfo.js'

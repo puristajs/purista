@@ -5,9 +5,9 @@ import { DefaultStateStore, gracefulShutdown, initLogger } from '@purista/core'
 import { httpServerV1Service } from '@purista/httpserver'
 import { MqttBridge } from '@purista/mqttbridge'
 
-import httpServerConfig from './config/httpServerConfig'
-import { emailV1Service } from './service/email/v1'
-import { userV1Service } from './service/user/v1'
+import httpServerConfig from './config/httpServerConfig.js'
+import { emailV1Service } from './service/email/v1/index.js'
+import { userV1Service } from './service/user/v1/index.js'
 
 export const main = async () => {
   // initialize the logging

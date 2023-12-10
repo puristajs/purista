@@ -1,2 +1,2 @@
-export * from './MinContentSizeForCompression.const'
-export * from './types'
+export * from './MinContentSizeForCompression.const.js'
+export * from './types/index.js'

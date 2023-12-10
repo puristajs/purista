@@ -1,3 +1,3 @@
-export * from './getAllUsersCommandBuilder'
-export * from './schema'
-export * from './types'
+export * from './getAllUsersCommandBuilder.js'
+export * from './schema.js'
+export * from './types.js'

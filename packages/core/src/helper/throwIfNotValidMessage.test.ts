@@ -1,5 +1,5 @@
-import { StatusCode, UnhandledError } from '../core'
-import { throwIfNotValidMessage } from './throwIfNotValidMessage.impl'
+import { StatusCode, UnhandledError } from '../core/index.js'
+import { throwIfNotValidMessage } from './throwIfNotValidMessage.impl.js'
 
 describe('throwIfNotValidMessage', () => {
   test("valid input doesn't throw", () => {

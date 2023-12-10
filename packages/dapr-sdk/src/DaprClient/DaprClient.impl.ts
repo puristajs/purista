@@ -11,8 +11,8 @@ import type {
 } from '@purista/core'
 import { convertToKebabCase, HttpClient, StatusCode, UnhandledError } from '@purista/core'
 
-import type { DaprEventBridgeConfig } from '../DaprEventBridge'
-import { DAPR_API_VERSION } from '../types'
+import type { DaprEventBridgeConfig } from '../DaprEventBridge/index.js'
+import { DAPR_API_VERSION } from '../types/index.js'
 
 export class DaprClient extends HttpClient<EventBridgeConfig<DaprEventBridgeConfig>> implements HttpEventBridgeClient {
   getInternalPathForSubscription(address: EBMessageAddress) {

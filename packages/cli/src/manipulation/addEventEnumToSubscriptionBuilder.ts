@@ -32,7 +32,7 @@ export const addEventEnumToSubscriptionBuilder = async (file: string, enumName?:
 
   sourceFile.addImportDeclaration({
     namedImports: ['ServiceEvent'],
-    moduleSpecifier: '../../../../ServiceEvent.enum',
+    moduleSpecifier: '../../../../ServiceEvent.enum.js',
   })
 
   console.log('👍  -> updated event to use enum in subscription builder')

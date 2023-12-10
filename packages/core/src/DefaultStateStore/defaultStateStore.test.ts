@@ -1,7 +1,7 @@
 import { createSandbox } from 'sinon'
 
-import { getLoggerMock } from '../mocks'
-import { DefaultStateStore } from './DefaultStateStore.impl'
+import { getLoggerMock } from '../mocks/index.js'
+import { DefaultStateStore } from './DefaultStateStore.impl.js'
 
 describe('DefaultStateStore', () => {
   const sandbox = createSandbox()
@@ -10,7 +10,7 @@ describe('DefaultStateStore', () => {
     sandbox.restore()
   })
 
-  it('it throws if operation is disabled', async () => {
+  it('throws if operation is disabled', async () => {
     const logger = getLoggerMock(sandbox)
     const store = new DefaultStateStore({
       logger: logger.mock,
@@ -32,7 +32,7 @@ describe('DefaultStateStore', () => {
     )
   })
 
-  it('it handles configs', async () => {
+  it('handles configs', async () => {
     const logger = getLoggerMock(sandbox)
     const store = new DefaultStateStore({
       logger: logger.mock,

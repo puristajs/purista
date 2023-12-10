@@ -1,10 +1,10 @@
 import type { LoggerOptions } from 'pino'
-import pino from 'pino'
+import { pino } from 'pino'
 
-import type { Logger, LogLevelName } from '../core/types'
-import { puristaVersion } from '../version'
-import { DefaultLogger } from './DefaultLogger.impl'
-import { getDefaultLogLevel } from './getDefaultLogLevel'
+import type { Logger, LogLevelName } from '../core/types/index.js'
+import { puristaVersion } from '../version.js'
+import { DefaultLogger } from './DefaultLogger.impl.js'
+import { getDefaultLogLevel } from './getDefaultLogLevel.js'
 
 /**
  * Create a new logger with the given minimum log level
@@ -15,10 +15,10 @@ export const initLogger = (level: LogLevelName = getDefaultLogLevel(), opt?: Log
   return new DefaultLogger(
     pino({
       name: 'PURISTA',
-      mixin(context, _level) {
+      mixin(context: any, _level: any) {
         return { puristaVersion, ...context }
       },
-      mixinMergeStrategy(mergeObject, mixinObject) {
+      mixinMergeStrategy(mergeObject: any, mixinObject: any) {
         return Object.assign(mixinObject, mergeObject)
       },
       ...opt,

@@ -1,12 +1,12 @@
 import { SpanStatusCode, trace } from '@opentelemetry/api'
 
-import { DefaultConfigStore } from '../../DefaultConfigStore'
-import { DefaultSecretStore } from '../../DefaultSecretStore'
-import { DefaultStateStore } from '../../DefaultStateStore'
-import { puristaVersion } from '../../version'
-import type { ConfigDeleteFunction, ConfigGetterFunction, ConfigSetterFunction } from '../ConfigStore'
-import { HandledError } from '../Error/HandledError.impl'
-import { UnhandledError } from '../Error/UnhandledError.impl'
+import { DefaultConfigStore } from '../../DefaultConfigStore/index.js'
+import { DefaultSecretStore } from '../../DefaultSecretStore/index.js'
+import { DefaultStateStore } from '../../DefaultStateStore/index.js'
+import { puristaVersion } from '../../version.js'
+import type { ConfigDeleteFunction, ConfigGetterFunction, ConfigSetterFunction } from '../ConfigStore/index.js'
+import { HandledError } from '../Error/HandledError.impl.js'
+import { UnhandledError } from '../Error/UnhandledError.impl.js'
 import {
   createErrorResponse,
   createInfoMessage,
@@ -15,9 +15,9 @@ import {
   getCleanedMessage,
   getNewTraceId,
   serializeOtp,
-} from '../helper'
-import type { SecretDeleteFunction, SecretGetterFunction, SecretSetterFunction } from '../SecretStore'
-import type { StateDeleteFunction, StateGetterFunction, StateSetterFunction } from '../StateStore'
+} from '../helper/index.js'
+import type { SecretDeleteFunction, SecretGetterFunction, SecretSetterFunction } from '../SecretStore/index.js'
+import type { StateDeleteFunction, StateGetterFunction, StateSetterFunction } from '../StateStore/index.js'
 import type {
   Command,
   CommandDefinition,
@@ -39,11 +39,18 @@ import type {
   SubscriptionFunctionContext,
   TenantId,
   TraceId,
-} from '../types'
-import { EBMessageType, PuristaSpanName, PuristaSpanTag, ServiceEventsNames, StatusCode, StoreType } from '../types'
-import { commandTransformInput } from './commandTransformInput.impl'
-import { ServiceBaseClass } from './ServiceBaseClass'
-import { subscriptionTransformInput } from './subscriptionTransformInput.impl'
+} from '../types/index.js'
+import {
+  EBMessageType,
+  PuristaSpanName,
+  PuristaSpanTag,
+  ServiceEventsNames,
+  StatusCode,
+  StoreType,
+} from '../types/index.js'
+import { commandTransformInput } from './commandTransformInput.impl.js'
+import { ServiceBaseClass } from './ServiceBaseClass/index.js'
+import { subscriptionTransformInput } from './subscriptionTransformInput.impl.js'
 
 /**
  * Base class for all services.

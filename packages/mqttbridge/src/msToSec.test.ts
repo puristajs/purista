@@ -1,4 +1,4 @@
-import { msToSec } from './msToSec.impl'
+import { msToSec } from './msToSec.impl.js'
 
 describe('msToSec', () => {
   it('converts milliseconds to seconds', () => {

@@ -1,7 +1,7 @@
-import { getErrorMessageForCode } from '../helper'
-import type { CommandErrorResponse, ErrorResponsePayload, TraceId } from '../types'
-import { StatusCode } from '../types'
-import { HandledError } from './HandledError.impl'
+import { getErrorMessageForCode } from '../helper/index.js'
+import type { CommandErrorResponse, ErrorResponsePayload, TraceId } from '../types/index.js'
+import { StatusCode } from '../types/index.js'
+import { HandledError } from './HandledError.impl.js'
 
 /**
  * A unhandled error will be thrown if some error response is returned during invoking a service function

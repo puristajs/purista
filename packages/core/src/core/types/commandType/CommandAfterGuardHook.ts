@@ -1,5 +1,5 @@
-import type { ServiceClass } from '../ServiceClass'
-import type { CommandFunctionContext } from './CommandFunctionContext'
+import type { ServiceClass } from '../ServiceClass.js'
+import type { CommandFunctionContext } from './CommandFunctionContext.js'
 
 /**
  * Definition of after guard hook functions.

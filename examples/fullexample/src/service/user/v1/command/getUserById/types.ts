@@ -4,7 +4,7 @@ import type {
   userV1GetUserByIdInputParameterSchema,
   userV1GetUserByIdInputPayloadSchema,
   userV1GetUserByIdOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export type UserV1GetUserByIdInputParameter = z.input<typeof userV1GetUserByIdInputParameterSchema>
 

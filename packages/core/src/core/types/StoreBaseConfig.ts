@@ -1,6 +1,6 @@
-import type { Logger } from './Logger'
-import type { LogLevelName } from './LogLevelName'
-import type { Prettify } from './Prettify'
+import type { Logger } from './Logger.js'
+import type { LogLevelName } from './LogLevelName.js'
+import type { Prettify } from './Prettify.js'
 
 /**
  * Basic configuration object which is used by any store

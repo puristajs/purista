@@ -64,7 +64,7 @@ export const addServiceEndpoints = (
               span.setAttribute(SemanticAttributes.HTTP_HOST, hostname)
 
               try {
-                const queryParams: Record<string, string> = {}
+                const queryParams: Record<string, string | undefined> = {}
 
                 // allow only defined parameters
                 if (metadata.expose.http.openApi?.query) {
@@ -139,15 +139,15 @@ export const addServiceEndpoints = (
                   span.end()
 
                   c.status(StatusCode.NoContent)
-                  Object.values(header).forEach((val) => c.header(val[0], val[1]))
+                  Object.values(header).forEach((val) => c.header(val[0] as string, val[1]))
                   return c.body(null)
                 }
 
                 span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.OK)
 
                 const response =
-                  typeof result.payload === 'string'
-                    ? c.text(result.payload, StatusCode.OK, header)
+                  result.contentType !== 'application/json'
+                    ? c.text(result.payload as string, StatusCode.OK, header)
                     : c.json(result.payload, StatusCode.OK, header)
 
                 span.end()
@@ -175,7 +175,7 @@ export const addServiceEndpoints = (
 
                 propagation.inject(context.active(), header)
 
-                const response = c.json(err, err.errorCode as any, header)
+                const response = c.json(err.getErrorResponse(), err.errorCode as number, header)
                 span.end()
                 return response
               }

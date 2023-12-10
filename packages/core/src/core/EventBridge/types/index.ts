@@ -1,3 +1,3 @@
-export * from './EventBridge'
-export * from './EventBridgeConfig'
-export * from './EventBridgeEvents'
+export * from './EventBridge.js'
+export * from './EventBridgeConfig.js'
+export * from './EventBridgeEvents.js'

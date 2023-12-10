@@ -5,7 +5,7 @@ import { DefaultAzureCredential } from '@azure/identity'
 import { getLoggerMock } from '@purista/core'
 import { stub } from 'sinon'
 
-import { AzureSecretStore } from '../src/AzureSecretStore.impl'
+import { AzureSecretStore } from '../src/AzureSecretStore.impl.js'
 
 describe('Azure Secret Manager secret store', () => {
   let store: AzureSecretStore

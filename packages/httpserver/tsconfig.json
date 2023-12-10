@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {"types": [
+      "vitest/globals",
+      "node"
+    ]},
+  "exclude": [
+    "./**/*.d.ts",
+    "./lib/*"
+  ],
+  
+  "files": [
+    "src/index.ts",
+    "fastify.d.ts"
+  ],
+}

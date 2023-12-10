@@ -36,13 +36,13 @@ import {
 import type { JetStreamManager, MsgHdrs, NatsConnection, Subscription as NatsSubscription } from 'nats'
 import { connect, headers as getNewHeaders, JSONCodec } from 'nats'
 
-import { deserializeOtpFromNats } from './deserializeOtpFromNats.impl'
-import { getDefaultNatsBridgeConfig } from './getDefaultNatsBridgeConfig'
-import { getQueueGroupName } from './getQueueGroupName.impl'
-import { getCommandHandler, getSubscriptionHandler } from './handler'
-import { serializeOtpToNats } from './serializeOtpToNats.impl'
-import { getCommandSubscriptionTopic, getSubscriptionTopic, getTopicName } from './topic'
-import type { NatsBridgeConfig } from './types'
+import { deserializeOtpFromNats } from './deserializeOtpFromNats.impl.js'
+import { getDefaultNatsBridgeConfig } from './getDefaultNatsBridgeConfig.js'
+import { getQueueGroupName } from './getQueueGroupName.impl.js'
+import { getCommandHandler, getSubscriptionHandler } from './handler/index.js'
+import { serializeOtpToNats } from './serializeOtpToNats.impl.js'
+import { getCommandSubscriptionTopic, getSubscriptionTopic, getTopicName } from './topic/index.js'
+import type { NatsBridgeConfig } from './types/index.js'
 
 /**
 The event bridge supports brokers with and without JetStream enabled.

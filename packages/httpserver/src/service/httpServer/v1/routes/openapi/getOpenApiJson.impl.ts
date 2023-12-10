@@ -1,12 +1,13 @@
+import { posix } from 'node:path'
+
 import { StatusCode } from '@purista/core'
 import type { RouteHandlerMethod, RouteOptions } from 'fastify'
 import type { OpenAPIObject, ParameterObject, RequestBodyObject, SchemaObject } from 'openapi3-ts/oas31'
 import { isReferenceObject } from 'openapi3-ts/oas31'
-import { posix } from 'path'
 
-import type { HttpServerClass } from '../../HttpServerClass.impl'
-import type { HttpServerServiceV1ConfigRaw } from '../../httpServerServiceConfig'
-import { OPENAPI_DEFAULT_INFO } from '../../httpServerServiceConfig'
+import type { HttpServerClass } from '../../HttpServerClass.impl.js'
+import type { HttpServerServiceV1ConfigRaw } from '../../httpServerServiceConfig.js'
+import { OPENAPI_DEFAULT_INFO } from '../../httpServerServiceConfig.js'
 
 /**
  * It creates a route handler that returns the OpenAPI JSON for all routes that are exposed via the

@@ -1,1 +1,1 @@
-export * from './DaprEventBridgeConfig'
+export * from './DaprEventBridgeConfig.js'

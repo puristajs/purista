@@ -1,10 +1,10 @@
 import { SpanStatusCode } from '@opentelemetry/api'
 import type { ZodError } from 'zod'
 
-import { HandledError, UnhandledError } from '../Error'
-import type { Command, CommandDefinition, Logger } from '../types'
-import { StatusCode } from '../types'
-import type { Service } from './Service.impl'
+import { HandledError, UnhandledError } from '../Error/index.js'
+import type { Command, CommandDefinition, Logger } from '../types/index.js'
+import { StatusCode } from '../types/index.js'
+import type { Service } from './Service.impl.js'
 
 export const commandTransformInput = async <PayloadType = unknown, ParameterType = unknown>(
   serviceInstance: Service,

@@ -21,5 +21,6 @@ console.log(value) // outputs: undefined
 ```
 @module
  */
-export * from './NatsConfigStore.impl'
-export * from './types'
+export * from './NatsConfigStore.impl.js'
+export * from './types/index.js'
+export * from './version.js'

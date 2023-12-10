@@ -6,10 +6,10 @@ import {
 } from '@purista/core'
 import { createSandbox } from 'sinon'
 
-import type { User } from '../../../../../types'
-import { emailV1Service } from '../../emailV1Service'
-import { sendWelcomeEmailSubscriptionBuilder } from './sendWelcomeEmailSubscriptionBuilder'
-import type { EmailV1SendWelcomeEmailInputPayload } from './types'
+import type { User } from '../../../../../types/index.js'
+import { emailV1Service } from '../../emailV1Service.js'
+import { sendWelcomeEmailSubscriptionBuilder } from './sendWelcomeEmailSubscriptionBuilder.js'
+import type { EmailV1SendWelcomeEmailInputPayload } from './types.js'
 
 describe('service Email version 1 - subscription sendWelcomeEmail', () => {
   let sandbox = createSandbox()

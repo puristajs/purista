@@ -1,8 +1,8 @@
-import type { ContextBase } from '../ContextBase'
-import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction'
-import type { InvokeFunction } from '../InvokeFunction'
-import type { Prettify } from '../Prettify'
-import type { Command } from './Command'
+import type { ContextBase } from '../ContextBase.js'
+import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
+import type { InvokeFunction } from '../InvokeFunction.js'
+import type { Prettify } from '../Prettify.js'
+import type { Command } from './Command.js'
 
 /**
  * It provides the original command message with types for payload and parameter.

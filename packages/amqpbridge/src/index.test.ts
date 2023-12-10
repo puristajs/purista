@@ -1,5 +1,4 @@
-import * as index from './index'
-import { puristaVersion } from './version'
+import { AmqpBridge, puristaVersion } from './index.js'
 
 describe('exports Version', () => {
   it('has a version', () => {
@@ -7,6 +6,6 @@ describe('exports Version', () => {
   })
 
   it('exports AmqpBridge', () => {
-    expect(index.AmqpBridge).toBeDefined()
+    expect(AmqpBridge).toBeDefined()
   })
 })

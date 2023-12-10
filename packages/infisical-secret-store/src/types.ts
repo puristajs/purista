@@ -1,3 +1,3 @@
-import type { ClientConfig } from './InfisicalClient'
+import type { ClientConfig } from './InfisicalClient/index.js'
 
 export type InfisicalSecretConfig = ClientConfig

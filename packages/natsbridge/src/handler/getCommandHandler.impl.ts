@@ -23,10 +23,10 @@ import {
 import type { MsgHdrs } from 'nats'
 import { headers as getNewHeaders } from 'nats'
 
-import { deserializeOtpFromNats } from '../deserializeOtpFromNats.impl'
-import { serializeOtpToNats } from '../serializeOtpToNats.impl'
-import { getTopicName } from '../topic'
-import type { IncomingMessageFunction } from '../types'
+import { deserializeOtpFromNats } from '../deserializeOtpFromNats.impl.js'
+import { serializeOtpToNats } from '../serializeOtpToNats.impl.js'
+import { getTopicName } from '../topic/index.js'
+import type { IncomingMessageFunction } from '../types/index.js'
 
 export const getCommandHandler = (
   address: EBMessageAddress,

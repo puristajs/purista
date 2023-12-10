@@ -1,7 +1,7 @@
 import type { SchemaObject } from 'openapi3-ts/oas31'
 import { z } from 'zod'
 
-import { extendApi, generateSchema } from './zodOpenApi.impl'
+import { extendApi, generateSchema } from './zodOpenApi.impl.js'
 
 /* eslint-disable max-len */
 // from http://goo.gl/0ejHHW
@@ -107,15 +107,15 @@ describe('zodOpenapi', () => {
     })
   })
 
-  it('It should support proper transform input/output', () => {
+  it('should support proper transform input/output', () => {
     const zodTransform = extendApi(
       z.string().transform((val) => val.length),
       { description: 'Will take in a string, returning the length' },
     )
     const schemaIn = generateSchema(zodTransform)
-    expect(schemaIn.type).toEqual('string')
+    expect(schemaIn.type).toBe('string')
     const schemaOut = generateSchema(zodTransform, true)
-    expect(schemaOut.type).toEqual('number')
+    expect(schemaOut.type).toBe('number')
   })
 
   it('should support catch-all types', () => {
@@ -130,8 +130,8 @@ describe('zodOpenapi', () => {
     )
     const apiSchema = generateSchema(zodSchema)
     expect(apiSchema.properties).toBeDefined()
-    expect((apiSchema.properties?.aAny as any).nullable).toEqual(true)
-    expect((apiSchema.properties?.aUnknown as any).nullable).toEqual(true)
+    expect((apiSchema.properties?.aAny as any).nullable).toBe(true)
+    expect((apiSchema.properties?.aUnknown as any).nullable).toBe(true)
   })
 
   it('should support never type', () => {
@@ -145,7 +145,7 @@ describe('zodOpenapi', () => {
     )
     const apiSchema = generateSchema(zodSchema)
     expect(apiSchema.properties).toBeDefined()
-    expect((apiSchema.properties?.aNever as SchemaObject).readOnly).toEqual(true)
+    expect((apiSchema.properties?.aNever as SchemaObject).readOnly).toBe(true)
   })
 
   it('should support string and string constraints', () => {

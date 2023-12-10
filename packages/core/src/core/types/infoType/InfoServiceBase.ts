@@ -1,5 +1,5 @@
-import type { EBMessageBase } from '../EBMessageBase'
-import type { Prettify } from '../Prettify'
+import type { EBMessageBase } from '../EBMessageBase.js'
+import type { Prettify } from '../Prettify.js'
 
 export type InfoServiceBase = Prettify<
   {

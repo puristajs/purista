@@ -1,6 +1,6 @@
-import { getErrorMessageForCode } from '../helper'
-import type { CommandErrorResponse, ErrorResponsePayload, TraceId } from '../types'
-import { StatusCode } from '../types'
+import { getErrorMessageForCode } from '../helper/index.js'
+import type { CommandErrorResponse, ErrorResponsePayload, TraceId } from '../types/index.js'
+import { StatusCode } from '../types/index.js'
 
 /**
  * A handled error is an error which is handled or thrown by business logic.

@@ -11,10 +11,10 @@ import {
 } from '@purista/core'
 import type { JsMsg, Msg, NatsError } from 'nats'
 
-import { deserializeOtpFromNats } from '../deserializeOtpFromNats.impl'
-import type { NatsBridge } from '../NatsBridge'
-import { serializeOtpToNats } from '../serializeOtpToNats.impl'
-import { getTopicName } from '../topic'
+import { deserializeOtpFromNats } from '../deserializeOtpFromNats.impl.js'
+import type { NatsBridge } from '../NatsBridge.js'
+import { serializeOtpToNats } from '../serializeOtpToNats.impl.js'
+import { getTopicName } from '../topic/index.js'
 
 export const getSubscriptionHandler = (
   subscription: Subscription,

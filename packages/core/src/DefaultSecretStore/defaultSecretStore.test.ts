@@ -1,7 +1,7 @@
 import { createSandbox } from 'sinon'
 
-import { getLoggerMock } from '../mocks'
-import { DefaultSecretStore } from './DefaultSecretStore.impl'
+import { getLoggerMock } from '../mocks/index.js'
+import { DefaultSecretStore } from './DefaultSecretStore.impl.js'
 
 describe('DefaultSecretStore', () => {
   const sandbox = createSandbox()
@@ -10,7 +10,7 @@ describe('DefaultSecretStore', () => {
     sandbox.restore()
   })
 
-  it('it throws if operation is disabled', async () => {
+  it('throws if operation is disabled', async () => {
     const logger = getLoggerMock(sandbox)
     const store = new DefaultSecretStore({
       logger: logger.mock,
@@ -32,7 +32,7 @@ describe('DefaultSecretStore', () => {
     )
   })
 
-  it('it handles secrets', async () => {
+  it('handles secrets', async () => {
     const logger = getLoggerMock(sandbox)
     const store = new DefaultSecretStore({
       logger: logger.mock,

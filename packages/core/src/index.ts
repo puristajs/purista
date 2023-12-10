@@ -9,26 +9,26 @@
  * It is build from ground up in typescript and highly focuses on schema, and auto generation of types, input-output-validation, OpenApi documentation (swagger).
  *
  * It contains the builders, classes & types and some helper functions.
- * For easier testing of commands and subscriptions, the package contains different mock creation helper based on [jest](https://jestjs.io) and [sinon](https://sinonjs.org)
+ * For easier testing of commands and subscriptions, the package contains different mock creation helper based on [sinon](https://sinonjs.org)
  *
  * Learn PURIST at [purista.dev](https://purista.dev)
  *
  * @module
  */
 
-export * from './version'
-export * from './core'
-export * from './helper'
-export * from './CommandDefinitionBuilder'
-export * from './SubscriptionDefinitionBuilder'
-export * from './DefaultConfigStore'
-export * from './DefaultEventBridge'
-export * from './HttpClient'
-export * from './DefaultSecretStore'
-export * from './DefaultStateStore'
-export * from './ServiceBuilder'
-export * from './mocks'
-export * from './zodOpenApi'
+export * from './version.js'
+export * from './core/index.js'
+export * from './helper/index.js'
+export * from './CommandDefinitionBuilder/index.js'
+export * from './SubscriptionDefinitionBuilder/index.js'
+export * from './DefaultConfigStore/index.js'
+export * from './DefaultEventBridge/index.js'
+export * from './HttpClient/index.js'
+export * from './DefaultSecretStore/index.js'
+export * from './DefaultStateStore/index.js'
+export * from './ServiceBuilder/index.js'
+export * from './mocks/index.js'
+export * from './zodOpenApi/index.js'
 
 declare global {
   interface FetchEvent extends Event {

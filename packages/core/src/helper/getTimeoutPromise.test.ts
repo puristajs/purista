@@ -1,8 +1,8 @@
 import type { SinonFakeTimers, SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
-import { StatusCode, UnhandledError } from '../core'
-import { getTimeoutPromise } from './getTimeoutPromise.impl'
+import { StatusCode, UnhandledError } from '../core/index.js'
+import { getTimeoutPromise } from './getTimeoutPromise.impl.js'
 
 describe('getTimeoutPromise', () => {
   let sandbox: SinonSandbox
@@ -21,22 +21,24 @@ describe('getTimeoutPromise', () => {
     const promise = Promise.resolve('foo')
     const result = await getTimeoutPromise(promise, 5000)
 
-    expect(result).toEqual('foo')
+    expect(result).toBe('foo')
   })
 
   test('should reject with a UnhandledError if the promise takes too long to resolve', async () => {
     const promise = new Promise((resolve) => setTimeout(() => resolve('foo'), 10000))
     const timeout = 50
 
-    const promiseSpy = jest.fn()
-    const errorSpy = jest.fn()
+    const promiseSpy = sandbox.stub()
+    const errorSpy = sandbox.stub()
 
     const result = getTimeoutPromise(promise, timeout).then(promiseSpy).catch(errorSpy)
 
     clock.tick(timeout + 1)
     await result
 
-    expect(errorSpy).toHaveBeenCalledWith(new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out'))
-    expect(promiseSpy).not.toHaveBeenCalled()
+    expect(errorSpy.firstCall.firstArg).toStrictEqual(
+      new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out'),
+    )
+    expect(promiseSpy.notCalled).toBeTruthy()
   })
 })

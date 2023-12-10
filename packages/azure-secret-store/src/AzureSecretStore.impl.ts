@@ -2,7 +2,7 @@ import { DefaultAzureCredential } from '@azure/identity'
 import { SecretClient } from '@azure/keyvault-secrets'
 import { SecretStoreBaseClass, StatusCode, type StoreBaseConfig, UnhandledError } from '@purista/core'
 
-import type { AzureSecretStoreConfig } from './types'
+import type { AzureSecretStoreConfig } from './types.js'
 
 /**
  * The secret store adapter for Azure Secrets Manager.

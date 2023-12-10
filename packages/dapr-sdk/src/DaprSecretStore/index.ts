@@ -1,2 +1,2 @@
-export * from './DaprSecretStore.impl'
-export * from './types'
+export * from './DaprSecretStore.impl.js'
+export * from './types/index.js'

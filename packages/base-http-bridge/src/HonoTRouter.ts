@@ -1,6 +1,16 @@
-import type { Result, Router } from 'hono/dist/types/router'
 import type { Methods } from 'trouter'
-import Trouter from 'trouter'
+import { Trouter } from 'trouter'
+
+type Params = Record<string, string>
+type ParamIndexMap = Record<string, number>
+type ParamStash = string[]
+
+type Result<T> = [[T, ParamIndexMap][], ParamStash] | [[T, Params][]]
+interface Router<T> {
+  name: string
+  add(method: string, path: string, handler: T): void
+  match(method: string, path: string): Result<T>
+}
 
 export class HonoTRouter<T> implements Router<T> {
   router: Trouter<T>

@@ -1,9 +1,9 @@
 import { getCommandContextMock, getEventBridgeMock, getLoggerMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 
-import { pingV1Service } from '../../pingV1Service'
-import { pingCommandBuilder } from './pingCommandBuilder'
-import type { PingV1PingInputParameter, PingV1PingInputPayload } from './types'
+import { pingV1Service } from '../../pingV1Service.js'
+import { pingCommandBuilder } from './pingCommandBuilder.js'
+import type { PingV1PingInputParameter, PingV1PingInputPayload } from './types.js'
 
 describe('service Ping version 1 - command ping', () => {
   let sandbox = createSandbox()

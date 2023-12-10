@@ -1,6 +1,6 @@
-import type { ContextBase } from '../ContextBase'
-import type { Prettify } from '../Prettify'
-import type { Command } from './Command'
+import type { ContextBase } from '../ContextBase.js'
+import type { Prettify } from '../Prettify.js'
+import type { Command } from './Command.js'
 
 /**
  * @group Command

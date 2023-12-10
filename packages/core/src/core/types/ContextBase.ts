@@ -1,9 +1,9 @@
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 
-import type { ConfigDeleteFunction, ConfigGetterFunction, ConfigSetterFunction } from '../ConfigStore'
-import type { SecretDeleteFunction, SecretGetterFunction, SecretSetterFunction } from '../SecretStore'
-import type { StateDeleteFunction, StateGetterFunction, StateSetterFunction } from '../StateStore'
-import type { Logger } from '../types'
+import type { ConfigDeleteFunction, ConfigGetterFunction, ConfigSetterFunction } from '../ConfigStore/index.js'
+import type { SecretDeleteFunction, SecretGetterFunction, SecretSetterFunction } from '../SecretStore/index.js'
+import type { StateDeleteFunction, StateGetterFunction, StateSetterFunction } from '../StateStore/index.js'
+import type { Logger } from './Logger.js'
 
 /**
  * The ContextBase provides is a basic type.

@@ -1,6 +1,6 @@
-import type { EBMessage } from '../EBMessage'
-import { EBMessageType } from '../EBMessageType.enum'
-import type { CommandSuccessResponse } from './CommandSuccessResponse'
+import type { EBMessage } from '../EBMessage.js'
+import { EBMessageType } from '../EBMessageType.enum.js'
+import type { CommandSuccessResponse } from './CommandSuccessResponse.js'
 
 /**
  * Checks if given message is type of CommandSuccessResponse

@@ -1,4 +1,4 @@
-import { StatusCode, UnhandledError } from '../core'
+import { StatusCode, UnhandledError } from '../core/index.js'
 
 /**
  *

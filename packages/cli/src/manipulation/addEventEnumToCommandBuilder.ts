@@ -32,7 +32,7 @@ export const addEventEnumToCommandBuilder = async (file: string, enumName?: stri
 
   sourceFile.addImportDeclaration({
     namedImports: ['ServiceEvent'],
-    moduleSpecifier: '../../../../ServiceEvent.enum',
+    moduleSpecifier: '../../../../ServiceEvent.enum.js',
   })
 
   console.log('👍  -> updated event to use enum in command builder')

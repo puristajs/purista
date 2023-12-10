@@ -1,7 +1,8 @@
+import { getLoggerMock } from '@purista/core'
 import type { StartedNatsContainer } from '@testcontainers/nats'
 import { NatsContainer } from '@testcontainers/nats'
 
-import { NatsConfigStore } from '../src/NatsConfigStore.impl'
+import { NatsConfigStore } from '../src/NatsConfigStore.impl.js'
 
 describe('@purista/nats-config-store', () => {
   let container: StartedNatsContainer
@@ -9,10 +10,10 @@ describe('@purista/nats-config-store', () => {
   beforeAll(async () => {
     container = await new NatsContainer('nats:alpine')
       .withArg('-js', '-js')
-      .withLogConsumer((stream) => {
+      .withLogConsumer((_stream) => {
         // stream.on('data', (line) => console.debug(line))
         // eslint-disable-next-line no-console
-        stream.on('err', (line) => console.error(line))
+        // stream.on('err', (line) => console.error(line))
       })
       .start()
   })
@@ -22,7 +23,12 @@ describe('@purista/nats-config-store', () => {
   })
 
   it('set, get and remove values', async () => {
-    const store = new NatsConfigStore({ ...container.getConnectionOptions(), enableRemove: true, enableSet: true })
+    const store = new NatsConfigStore({
+      ...container.getConnectionOptions(),
+      enableRemove: true,
+      enableSet: true,
+      logger: getLoggerMock().mock,
+    })
 
     await expect(store.setConfig('myConfig', { some: 'value' })).resolves.toBeUndefined()
 
@@ -45,6 +51,7 @@ describe('@purista/nats-config-store', () => {
       enableRemove: false,
       enableSet: false,
       ...container.getConnectionOptions(),
+      logger: getLoggerMock().mock,
     })
 
     await expect(store.setConfig('myConfig', { some: 'value' })).rejects.toThrow(

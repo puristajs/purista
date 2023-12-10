@@ -11,7 +11,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import type DaprPubSubStatusEnum from './DaprPubSubStatus.enum'
+import type DaprPubSubStatusEnum from './DaprPubSubStatus.enum.js'
 
 /**
  * BulkSubscribeResponseEntry is the response entry for a bulk subscribe request

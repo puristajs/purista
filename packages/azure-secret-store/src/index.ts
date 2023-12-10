@@ -31,5 +31,6 @@ console.log(value) // outputs: undefined
 ```
 @module
 */
-export * from './AzureSecretStore.impl'
-export * from './types'
+export * from './AzureSecretStore.impl.js'
+export * from './types.js'
+export * from './version.js'

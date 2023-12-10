@@ -1,1 +1,1 @@
-export * from './DefaultStateStoreConfig'
+export * from './DefaultStateStoreConfig.js'

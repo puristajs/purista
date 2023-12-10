@@ -1,8 +1,8 @@
 import { getLoggerMock } from '@purista/core'
 
-import { getDefaultNatsBridgeConfig } from '../getDefaultNatsBridgeConfig'
-import type { NatsBridge } from '../NatsBridge'
-import { getCommandSubscriptionTopic } from './getCommandSubscriptionTopic.impl'
+import { getDefaultNatsBridgeConfig } from '../getDefaultNatsBridgeConfig.js'
+import type { NatsBridge } from '../NatsBridge.js'
+import { getCommandSubscriptionTopic } from './getCommandSubscriptionTopic.impl.js'
 
 describe('getCommandSubscriptionTopic', () => {
   it('returns the command topic', () => {

@@ -6,9 +6,9 @@ import {
 } from '@purista/core'
 import { createSandbox } from 'sinon'
 
-import { pingV1Service } from '../../pingV1Service'
-import { logSubscriptionBuilder } from './logSubscriptionBuilder'
-import type { PingV1LogInputPayload } from './types'
+import { pingV1Service } from '../../pingV1Service.js'
+import { logSubscriptionBuilder } from './logSubscriptionBuilder.js'
+import type { PingV1LogInputPayload } from './types.js'
 
 describe('service Ping version 1 - subscription log', () => {
   let sandbox = createSandbox()

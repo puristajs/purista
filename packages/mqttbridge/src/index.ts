@@ -14,9 +14,10 @@
  *
  * @module
  */
-export * from './getDefaultMqttBridgeConfig.impl'
-export * from './handler'
-export * from './MqttEventBridge'
-export * from './msToSec.impl'
-export * from './topic'
-export * from './types'
+export * from './getDefaultMqttBridgeConfig.impl.js'
+export * from './handler/index.js'
+export * from './MqttEventBridge.js'
+export * from './msToSec.impl.js'
+export * from './topic/index.js'
+export * from './types/index.js'
+export * from './version.js'

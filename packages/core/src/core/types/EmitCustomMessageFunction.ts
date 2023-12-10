@@ -1,4 +1,4 @@
-import type { ContentType } from './ContentType'
+import type { ContentType } from './ContentType.js'
 
 /**
  * Emits the given payload as custom message with the given event name.

@@ -1,8 +1,8 @@
 import type { ServiceInfoType } from '@purista/core'
 import { ServiceBuilder } from '@purista/core'
 
-import { generalEmailServiceInfo } from '../generalEmailServiceInfo'
-import { emailServiceV1ConfigSchema } from './emailServiceConfig'
+import { generalEmailServiceInfo } from '../generalEmailServiceInfo.js'
+import { emailServiceV1ConfigSchema } from './emailServiceConfig.js'
 
 export const emailServiceInfo: ServiceInfoType = {
   serviceVersion: '1',

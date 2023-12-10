@@ -1,5 +1,4 @@
-import * as index from './index'
-import { puristaVersion } from './version'
+import { AWSConfigStore, puristaVersion } from './index.js'
 
 describe('exports AWSConfigStore', () => {
   it('has a version', () => {
@@ -7,6 +6,6 @@ describe('exports AWSConfigStore', () => {
   })
 
   it('exports AWSSecretStore', () => {
-    expect(index.AWSConfigStore).toBeDefined()
+    expect(AWSConfigStore).toBeDefined()
   })
 })

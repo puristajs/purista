@@ -1,1 +1,1 @@
-export * from './NatsStateStoreConfig'
+export * from './NatsStateStoreConfig.js'

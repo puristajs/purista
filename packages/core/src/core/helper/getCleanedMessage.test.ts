@@ -1,6 +1,6 @@
-import type { Command, CommandSuccessResponse } from '../types'
-import { EBMessageType } from '../types'
-import { getCleanedMessage } from './getCleanedMessage.impl'
+import type { Command, CommandSuccessResponse } from '../types/index.js'
+import { EBMessageType } from '../types/index.js'
+import { getCleanedMessage } from './getCleanedMessage.impl.js'
 
 describe('prevent sensitive data to be logged in production', () => {
   it('returns the original message', () => {

@@ -1,3 +1,3 @@
-export * from './DefaultConfigStore.impl'
-export * from './initDefaultConfigStore.impl'
-export * from './types'
+export * from './DefaultConfigStore.impl.js'
+export * from './initDefaultConfigStore.impl.js'
+export * from './types/index.js'

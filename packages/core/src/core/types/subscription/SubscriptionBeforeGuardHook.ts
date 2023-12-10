@@ -1,5 +1,5 @@
-import type { ServiceClass } from '../ServiceClass'
-import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext'
+import type { ServiceClass } from '../ServiceClass.js'
+import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.js'
 
 /**
  * Guard is called after command function input validation and before executing the command function.

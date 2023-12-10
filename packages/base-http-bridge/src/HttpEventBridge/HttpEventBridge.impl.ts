@@ -1,5 +1,6 @@
 // file deepcode ignore ServerLeak: <please specify a reason of ignoring this>
-import type { Server } from 'node:http'
+import { Server } from 'node:http'
+import type { Http2SecureServer, Http2Server } from 'node:http2'
 
 import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import type {
@@ -38,13 +39,13 @@ import {
 import { Hono } from 'hono'
 import { compress } from 'hono/compress'
 
-import { HonoTRouter } from '../HonoTRouter'
-import { getCommandHandler } from './getCommandHandler.impl'
-import { getCommandHandlerRestApi } from './getCommandHandlerRestApi.impl'
-import { getDefaultHttpEventBridgeConfig } from './getDefaultHttpEventBridgeConfig.impl'
-import { getSubscriptionHandler } from './getSubscriptionHandler.impl'
-import { healthzRoute } from './healthzRoute.impl'
-import type { HttpEventBridgeClient, HttpEventBridgeConfig } from './types'
+import { HonoTRouter } from '../HonoTRouter.js'
+import { getCommandHandler } from './getCommandHandler.impl.js'
+import { getCommandHandlerRestApi } from './getCommandHandlerRestApi.impl.js'
+import { getDefaultHttpEventBridgeConfig } from './getDefaultHttpEventBridgeConfig.impl.js'
+import { getSubscriptionHandler } from './getSubscriptionHandler.impl.js'
+import { healthzRoute } from './healthzRoute.impl.js'
+import type { HttpEventBridgeClient, HttpEventBridgeConfig } from './types/index.js'
 
 /**
  * The HTTP event bridge is a generic event bridge.
@@ -65,7 +66,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
   extends EventBridgeBaseClass<CustomConfig>
   // eslint-disable-next-line prettier/prettier
   implements EventBridge {
-  public server: Server | undefined
+  public server: Server | Http2Server | Http2SecureServer | undefined
   public app: Hono
   public isShuttingDown = false
   public isStarted = false
@@ -96,7 +97,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 
       this.logger.error({ err }, err.message)
 
-      return c.json(err.getErrorResponse())
+      return c.json(err.getErrorResponse(), err.errorCode as number)
     })
 
     this.app.onError((err, c) => {
@@ -105,7 +106,9 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
       return c.json(responseError.getErrorResponse(), responseError.errorCode as any)
     })
 
-    this.app.use('*', compress())
+    if (this.config.enableHttpCompression) {
+      this.app.use('*', compress())
+    }
 
     this.app.use('*', async (c, next) => {
       if (this.isShuttingDown) {
@@ -353,7 +356,10 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
     if (!this.server) {
       return
     }
-    this.server.closeIdleConnections()
-    await this.server.close()
+    if (this.server instanceof Server) {
+      this.server.closeIdleConnections()
+    }
+    const server = this.server
+    await new Promise((resolve) => server.close(resolve))
   }
 }

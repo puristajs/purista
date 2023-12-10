@@ -1,5 +1,4 @@
-import * as index from './index'
-import { puristaVersion } from './version'
+import { puristaVersion, RedisConfigStore } from './index.js'
 
 describe('exports redis-config-store', () => {
   it('has a version', () => {
@@ -7,6 +6,6 @@ describe('exports redis-config-store', () => {
   })
 
   it('exports RedisConfigStore', () => {
-    expect(index.RedisConfigStore).toBeDefined()
+    expect(RedisConfigStore).toBeDefined()
   })
 })

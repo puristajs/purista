@@ -11,8 +11,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import type { DaprPubSubType } from './DaprPubSub.type'
-import type { PubSubSubscriptionTopicRoutesType } from './PubSubSubscriptionTopicRoutes.type'
+import type { DaprPubSubType } from './DaprPubSub.type.js'
+import type { PubSubSubscriptionTopicRoutesType } from './PubSubSubscriptionTopicRoutes.type.js'
 
 /**
  * This defines the topicName object

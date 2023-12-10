@@ -1,11 +1,11 @@
-import type { User } from '../../../../../types'
-import { StateStoreKey } from '../../../../../types'
-import { userV1ServiceBuilder } from '../../userV1ServiceBuilder'
+import type { User } from '../../../../../types/index.js'
+import { StateStoreKey } from '../../../../../types/index.js'
+import { userV1ServiceBuilder } from '../../userV1ServiceBuilder.js'
 import {
   userV1GetAllUsersInputParameterSchema,
   userV1GetAllUsersInputPayloadSchema,
   userV1GetAllUsersOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export const getAllUsersCommandBuilder = userV1ServiceBuilder
   .getCommandBuilder('getAllUsers', 'returns a list of registered users')

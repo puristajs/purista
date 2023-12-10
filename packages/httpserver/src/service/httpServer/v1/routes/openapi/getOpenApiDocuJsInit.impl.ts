@@ -1,9 +1,10 @@
-import type { RouteHandlerMethod, RouteOptions } from 'fastify'
-import { posix } from 'path'
+import { posix } from 'node:path'
 
-import type { HttpServerClass } from '../../HttpServerClass.impl'
-import type { HttpServerServiceV1ConfigRaw } from '../../httpServerServiceConfig'
-import { getJsInit } from './getJsInit.imp'
+import type { RouteHandlerMethod, RouteOptions } from 'fastify'
+
+import type { HttpServerClass } from '../../HttpServerClass.impl.js'
+import type { HttpServerServiceV1ConfigRaw } from '../../httpServerServiceConfig.js'
+import { getJsInit } from './getJsInit.impl.js'
 
 export const getOpenApiDocuJsInit = function (this: HttpServerClass<HttpServerServiceV1ConfigRaw>): RouteOptions {
   const path = (this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath) as string

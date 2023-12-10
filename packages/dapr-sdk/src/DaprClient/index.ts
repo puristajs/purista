@@ -1,3 +1,3 @@
-export * from './DaprClient.impl'
-export * from './getDefaultClientConfig.impl'
-export * from './types'
+export * from './DaprClient.impl.js'
+export * from './getDefaultClientConfig.impl.js'
+export * from './types/index.js'

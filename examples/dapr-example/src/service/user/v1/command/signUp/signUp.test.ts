@@ -1,10 +1,10 @@
 import { getCommandContextMock, getEventBridgeMock, getLoggerMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 
-import { StateStoreKey } from '../../../../../types'
-import { userV1Service } from '../../userV1Service'
-import { signUpCommandBuilder } from './signUpCommandBuilder'
-import type { UserV1SignUpInputParameter, UserV1SignUpInputPayload } from './types'
+import { StateStoreKey } from '../../../../../types/index.js'
+import { userV1Service } from '../../userV1Service.js'
+import { signUpCommandBuilder } from './signUpCommandBuilder.js'
+import type { UserV1SignUpInputParameter, UserV1SignUpInputPayload } from './types.js'
 
 describe('service User version 1 - command signUp', () => {
   let sandbox = createSandbox()

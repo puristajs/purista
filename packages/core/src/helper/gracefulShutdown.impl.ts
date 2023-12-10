@@ -1,5 +1,5 @@
-import type { Logger } from '../core'
-import type { ShutdownEntry } from './types'
+import type { Logger } from '../core/index.js'
+import type { ShutdownEntry } from './types/index.js'
 
 /**
  * Helps to gracefully shut down your application.

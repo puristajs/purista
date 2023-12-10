@@ -1,8 +1,8 @@
-import type { Logger, StoreBaseConfig } from '../../core'
-import { StatusCode } from '../../core'
-import { initLogger } from '../../DefaultLogger'
-import { UnhandledError } from '../Error'
-import type { ConfigStore, ConfigStoreCacheMap } from './types'
+import { initLogger } from '../../DefaultLogger/index.js'
+import { UnhandledError } from '../Error/index.js'
+import type { Logger, StoreBaseConfig } from '../types/index.js'
+import { StatusCode } from '../types/index.js'
+import type { ConfigStore, ConfigStoreCacheMap } from './types/index.js'
 
 /**
  * Base class for config store adapters

@@ -1,2 +1,2 @@
-export * from './HttpClient.impl'
-export * from './types'
+export * from './HttpClient.impl.js'
+export * from './types/index.js'

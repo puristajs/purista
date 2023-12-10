@@ -14,8 +14,8 @@ import {
 } from '@purista/core'
 import { HTTP } from 'cloudevents'
 
-import type { HttpEventBridge } from './HttpEventBridge.impl'
-import type { HttpEventBridgeConfig, RouterFunction } from './types'
+import type { HttpEventBridge } from './HttpEventBridge.impl.js'
+import type { HttpEventBridgeConfig, RouterFunction } from './types/index.js'
 
 export const getSubscriptionHandler = function (
   this: HttpEventBridge<HttpEventBridgeConfig>,
@@ -83,7 +83,7 @@ export const getSubscriptionHandler = function (
           const err = error instanceof UnhandledError ? error : UnhandledError.fromError(error)
           span.recordException(err)
           this.logger.error({ err }, err.message)
-          return c.json(err.getErrorResponse(), err.errorCode as any)
+          return c.json(err.getErrorResponse(), err.errorCode as number)
         }
       },
     )

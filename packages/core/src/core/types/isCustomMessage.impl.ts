@@ -1,6 +1,6 @@
-import type { CustomMessage } from './CustomMessage'
-import type { EBMessage } from './EBMessage'
-import { EBMessageType } from './EBMessageType.enum'
+import type { CustomMessage } from './CustomMessage.js'
+import type { EBMessage } from './EBMessage.js'
+import { EBMessageType } from './EBMessageType.enum.js'
 
 /**
  * Checks if a PURISTA message is type of custom message

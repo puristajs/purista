@@ -1,3 +1,5 @@
+import { posix } from 'node:path'
+
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import fastifyStatic from '@fastify/static'
@@ -8,16 +10,15 @@ import type { Command, HttpExposedServiceMeta, ServiceConstructorInput } from '@
 import { HandledError, Service, StatusCode, UnhandledError } from '@purista/core'
 import type { FastifyInstance, HTTPMethods } from 'fastify'
 import fastify from 'fastify'
-import { posix } from 'path'
 import * as swaggerUi from 'swagger-ui-dist'
 import type { Methods } from 'trouter'
-import Trouter from 'trouter'
+import { Trouter } from 'trouter'
 
-import type { HttpServerServiceV1ConfigRaw } from './httpServerServiceConfig'
-import { OPEN_API_ROUTE_FUNCTIONS } from './routes'
-import { addHeaders } from './subscription/serviceCommandsToRestApi/helper'
-import { addSpanTags } from './subscription/serviceCommandsToRestApi/helper/addSpanTags'
-import type { BeforeResponseHook } from './types'
+import type { HttpServerServiceV1ConfigRaw } from './httpServerServiceConfig.js'
+import { OPEN_API_ROUTE_FUNCTIONS } from './routes/index.js'
+import { addSpanTags } from './subscription/serviceCommandsToRestApi/helper/addSpanTags.js'
+import { addHeaders } from './subscription/serviceCommandsToRestApi/helper/index.js'
+import type { BeforeResponseHook } from './types/index.js'
 
 /**
  * A simple http server based on fastify.
@@ -174,7 +175,8 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
         const path = posix.join(this.config.apiMountPath || 'api', `v${match}`)
 
         const route = this.routes.find(request.method as Methods, path)
-        if (!route.handlers.length) {
+        const firstHandler = route.handlers[0]
+        if (!firstHandler) {
           this.logger.debug({ method: request.method, url: request.url }, 'Route not found')
           const err = new HandledError(StatusCode.NotFound)
           span.recordException(err)
@@ -187,7 +189,7 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
           return err.getErrorResponse()
         }
 
-        await route.handlers[0](request, reply, route.params)
+        await firstHandler(request, reply, route.params)
       })
     })
 

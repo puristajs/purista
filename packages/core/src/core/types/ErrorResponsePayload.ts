@@ -1,5 +1,5 @@
-import type { StatusCode } from './StatusCode.enum'
-import type { TraceId } from './TraceId'
+import type { StatusCode } from './StatusCode.enum.js'
+import type { TraceId } from './TraceId.js'
 
 /**
  * Error message payload

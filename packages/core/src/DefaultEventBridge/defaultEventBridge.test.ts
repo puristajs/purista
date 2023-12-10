@@ -1,15 +1,16 @@
 import { assert, spy, stub } from 'sinon'
 
-import type { Subscription } from '../core'
-import { createInfoMessage, EBMessageType } from '../core'
-import { getCustomMessageMessageMock, getLoggerMock } from '../mocks'
-import { DefaultEventBridge } from './DefaultEventBridge.impl'
+import type { Subscription } from '../core/index.js'
+import { createInfoMessage, EBMessageType } from '../core/index.js'
+import { getCustomMessageMessageMock, getLoggerMock } from '../mocks/index.js'
+import { DefaultEventBridge } from './DefaultEventBridge.impl.js'
 
 describe('DefaultEventBridge', () => {
   const sender = {
     serviceName: 'SenderService',
     serviceVersion: '1',
     serviceTarget: 'senderServiceTarget',
+    instanceId: 'a',
   }
 
   const receiver = {
@@ -109,7 +110,7 @@ describe('DefaultEventBridge', () => {
 
     expect(callback.called).toBeFalsy()
 
-    expect(logger.stubs.warn.getCall(0).args[1]).toEqual(
+    expect(logger.stubs.warn.getCall(0).args[1]).toBe(
       'InvalidMessage: received a message which is not consumed by any service command or subscription',
     )
     expect(logger.stubs.error.called).toBeFalsy()

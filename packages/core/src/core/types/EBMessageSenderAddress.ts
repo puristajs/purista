@@ -1,5 +1,5 @@
-import type { EBMessageAddress } from './EBMessageAddress'
-import type { Prettify } from './Prettify'
+import type { EBMessageAddress } from './EBMessageAddress.js'
+import type { Prettify } from './Prettify.js'
 
 /**
  * A event bridge message address describes the sender or receiver of a message.

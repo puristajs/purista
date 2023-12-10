@@ -1,1 +1,1 @@
-export * from './DefaultSecretStoreConfig'
+export * from './DefaultSecretStoreConfig.js'

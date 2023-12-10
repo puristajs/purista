@@ -1,7 +1,7 @@
-import type { InstanceId } from './InstanceId'
-import type { PrincipalId } from './PrincipalId'
-import type { TenantId } from './TenantId'
-import type { TraceId } from './TraceId'
+import type { InstanceId } from './InstanceId.js'
+import type { PrincipalId } from './PrincipalId.js'
+import type { TenantId } from './TenantId.js'
+import type { TraceId } from './TraceId.js'
 
 export type LoggerOptions = {
   puristaVersion?: string

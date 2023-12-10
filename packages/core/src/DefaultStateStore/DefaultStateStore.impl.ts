@@ -1,6 +1,6 @@
-import type { StoreBaseConfig } from '../core'
-import { StateStoreBaseClass, StatusCode, UnhandledError } from '../core'
-import type { DefaultStateStoreConfig } from './types'
+import type { StoreBaseConfig } from '../core/index.js'
+import { StateStoreBaseClass, StatusCode, UnhandledError } from '../core/index.js'
+import type { DefaultStateStoreConfig } from './types/index.js'
 
 /**
  * The DefaultStateStore is a placeholder which offers all needed methods.

@@ -1,5 +1,5 @@
-import { uptraceTraceExporter } from './getProcessor'
-import { main } from './main'
+import { uptraceTraceExporter } from './getProcessor.js'
+import { main } from './main.js'
 
 const start = async () => {
   main(uptraceTraceExporter)

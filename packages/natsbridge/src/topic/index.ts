@@ -1,3 +1,3 @@
-export * from './getCommandSubscriptionTopic.impl'
-export * from './getSubscriptionTopic.impl'
-export * from './getTopicName.impl'
+export * from './getCommandSubscriptionTopic.impl.js'
+export * from './getSubscriptionTopic.impl.js'
+export * from './getTopicName.impl.js'

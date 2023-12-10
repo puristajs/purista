@@ -13,7 +13,7 @@ import {
 } from '@purista/core'
 import { getHttpServer } from '@purista/k8s-sdk'
 
-import { theServiceV1Service } from './service/theService/v1/'
+import { theServiceV1Service } from './service/theService/v1/index.js'
 
 const main = async () => {
   // create a logger

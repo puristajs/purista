@@ -1,3 +1,3 @@
-export * from './HttpEventBridgeClient'
-export * from './HttpEventBridgeConfig'
-export * from './RouterFunction'
+export * from './HttpEventBridgeClient.js'
+export * from './HttpEventBridgeConfig.js'
+export * from './RouterFunction.js'

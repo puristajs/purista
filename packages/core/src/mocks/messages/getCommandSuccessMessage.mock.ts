@@ -1,6 +1,6 @@
-import type { Command, CommandSuccessResponse } from '../../core'
-import { createSuccessResponse, getNewInstanceId } from '../../core'
-import { getCommandMessageMock } from './getCommandMessage.mock'
+import type { Command, CommandSuccessResponse } from '../../core/index.js'
+import { createSuccessResponse, getNewInstanceId } from '../../core/index.js'
+import { getCommandMessageMock } from './getCommandMessage.mock.js'
 
 /**
  * A function that returns a mocked command success response message.

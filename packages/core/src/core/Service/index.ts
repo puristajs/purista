@@ -1,2 +1,2 @@
-export * from './Service.impl'
-export * from './ServiceInfoValidator.impl'
+export * from './Service.impl.js'
+export * from './ServiceInfoValidator.impl.js'

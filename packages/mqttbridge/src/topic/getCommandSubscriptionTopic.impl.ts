@@ -3,7 +3,7 @@ import { join } from 'node:path/posix'
 import type { EBMessageAddress } from '@purista/core'
 import { convertToSnakeCase, EBMessageType } from '@purista/core'
 
-import type { MqttBridge } from '../MqttEventBridge'
+import type { MqttBridge } from '../MqttEventBridge.js'
 
 type GetCommandTopicFn = (this: MqttBridge, address: EBMessageAddress) => string
 

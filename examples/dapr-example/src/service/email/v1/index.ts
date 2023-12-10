@@ -1,4 +1,4 @@
-export type { EmailServiceV1Config } from './emailServiceConfig'
-export * from './emailV1Service'
-export * from './emailV1ServiceBuilder'
-export * from './subscription/sendWelcomeEmail/types'
+export type { EmailServiceV1Config } from './emailServiceConfig.js'
+export * from './emailV1Service.js'
+export * from './emailV1ServiceBuilder.js'
+export * from './subscription/sendWelcomeEmail/types.js'

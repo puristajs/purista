@@ -1,1 +1,1 @@
-export * from './ServiceBuilder.impl'
+export * from './ServiceBuilder.impl.js'
