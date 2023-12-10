@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 
 import { getLoggerMock } from '@purista/core'
 
-import { InfisicalSecretStore } from '../src/InfisicalSecretStore.impl'
+import { InfisicalSecretStore } from '../src/InfisicalSecretStore.impl.js'
 /*
 read and write:
 st.647467a4fd775a75b3f6dd67.9a0a41e44f1847dd83f5710179011997.4a5b4c1e8e4380aca242ca20915762b1

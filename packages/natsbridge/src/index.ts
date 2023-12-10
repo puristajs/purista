@@ -15,9 +15,9 @@ import { NatsBridge } from '@purista/natsbridge'
 ```
  * @module
  */
-export * from './getDefaultNatsBridgeConfig'
-export * from './getQueueGroupName.impl'
-export * from './NatsBridge'
-export * from './topic'
-export * from './types'
-export * from './version'
+export * from './getDefaultNatsBridgeConfig.js'
+export * from './getQueueGroupName.impl.js'
+export * from './NatsBridge.js'
+export * from './topic/index.js'
+export * from './types/index.js'
+export * from './version.js'

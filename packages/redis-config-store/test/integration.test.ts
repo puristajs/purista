@@ -1,7 +1,8 @@
+import { getLoggerMock } from '@purista/core'
 import type { StartedTestContainer } from 'testcontainers'
 import { GenericContainer, Wait } from 'testcontainers'
 
-import { RedisConfigStore } from '../src/RedisConfigStore.impl'
+import { RedisConfigStore } from '../src/RedisConfigStore.impl.js'
 
 const REDIS_PORT = 6379
 
@@ -15,10 +16,10 @@ describe('@purista/redis-state-store', () => {
         host: REDIS_PORT - 1,
       })
       .withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
-      .withLogConsumer((stream) => {
+      .withLogConsumer((_stream) => {
         // stream.on('data', (line) => console.debug(line))
         // eslint-disable-next-line no-console
-        stream.on('err', (line) => console.error(line))
+        // stream.on('err', (line) => console.error(line))
       })
       .start()
   })
@@ -32,7 +33,7 @@ describe('@purista/redis-state-store', () => {
       url: `redis://127.0.0.1:${REDIS_PORT - 1}`,
     }
 
-    const store = new RedisConfigStore({ config, enableSet: true, enableRemove: true })
+    const store = new RedisConfigStore({ config, enableSet: true, enableRemove: true, logger: getLoggerMock().mock })
 
     await expect(store.setConfig('myConfig', { some: 'value' })).resolves.toBeUndefined()
 
@@ -54,7 +55,13 @@ describe('@purista/redis-state-store', () => {
       url: `redis://127.0.0.1:${REDIS_PORT - 1}`,
     }
 
-    const store = new RedisConfigStore({ enableGet: false, enableRemove: false, enableSet: false, config })
+    const store = new RedisConfigStore({
+      enableGet: false,
+      enableRemove: false,
+      enableSet: false,
+      config,
+      logger: getLoggerMock().mock,
+    })
 
     await expect(store.setConfig('myConfig', { some: 'value' })).rejects.toThrow(
       'set config at store is disabled by config',

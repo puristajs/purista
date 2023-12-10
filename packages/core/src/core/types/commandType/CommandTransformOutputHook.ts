@@ -1,4 +1,4 @@
-import type { CommandTransformFunctionContext } from './CommandTransformFunctionContext'
+import type { CommandTransformFunctionContext } from './CommandTransformFunctionContext.js'
 
 /**
  * This transform hook is executed after function output validation and AfterGuardHooks.

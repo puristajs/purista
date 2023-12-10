@@ -1,6 +1,6 @@
-import type { StateDeleteFunction } from './StateDeleteFunction'
-import type { StateGetterFunction } from './StateGetterFunction'
-import type { StateSetterFunction } from './StateSetterFunction'
+import type { StateDeleteFunction } from './StateDeleteFunction.js'
+import type { StateGetterFunction } from './StateGetterFunction.js'
+import type { StateSetterFunction } from './StateSetterFunction.js'
 
 /**
  * Interface definition for state store implementations

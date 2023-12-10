@@ -1,7 +1,7 @@
-import { ServiceEvent } from '../../../../ServiceEvent.enum'
-import type { UserV1GetUserByIdOutputPayload } from '../../../../user/v1'
-import { emailV1ServiceBuilder } from '../../emailV1ServiceBuilder'
-import { emailV1SendWelcomeEmailInputPayloadSchema, emailV1SendWelcomeEmailOutputPayloadSchema } from './schema'
+import { ServiceEvent } from '../../../../ServiceEvent.enum.js'
+import type { UserV1GetUserByIdOutputPayload } from '../../../../user/v1/index.js'
+import { emailV1ServiceBuilder } from '../../emailV1ServiceBuilder.js'
+import { emailV1SendWelcomeEmailInputPayloadSchema, emailV1SendWelcomeEmailOutputPayloadSchema } from './schema.js'
 
 export const sendWelcomeEmailSubscriptionBuilder = emailV1ServiceBuilder
   .getSubscriptionBuilder('sendWelcomeEmail', 'send a welcome mail to new registered users')

@@ -1,7 +1,7 @@
-import { HandledError, UnhandledError } from '../Error'
-import type { Command } from '../types'
-import { EBMessageType, StatusCode } from '../types'
-import { createErrorResponse } from './createErrorResponse.impl'
+import { HandledError, UnhandledError } from '../Error/index.js'
+import type { Command } from '../types/index.js'
+import { EBMessageType, StatusCode } from '../types/index.js'
+import { createErrorResponse } from './createErrorResponse.impl.js'
 
 describe('createErrorResponse', () => {
   const message: Command = {

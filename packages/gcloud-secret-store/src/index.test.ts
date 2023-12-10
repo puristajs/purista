@@ -1,5 +1,4 @@
-import * as index from './index'
-import { puristaVersion } from './version'
+import { GoogleSecretStore, puristaVersion } from './index.js'
 
 describe('exports GoogleSecretStore', () => {
   it('has a version', () => {
@@ -7,6 +6,6 @@ describe('exports GoogleSecretStore', () => {
   })
 
   it('exports GoogleSecretStore', () => {
-    expect(index.GoogleSecretStore).toBeDefined()
+    expect(GoogleSecretStore).toBeDefined()
   })
 })

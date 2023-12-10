@@ -6,9 +6,9 @@ import {
 } from '@purista/core'
 import { createSandbox } from 'sinon'
 
-import { httpServerV1Service } from '../../httpServerV1Service'
-import { serviceCommandsToRestApiSubscriptionBuilder } from './serviceCommandsToRestApiSubscriptionBuilder'
-import type { HttpServerV1ServiceCommandsToRestApiInputPayload } from './types'
+import { httpServerV1Service } from '../../httpServerV1Service.js'
+import { serviceCommandsToRestApiSubscriptionBuilder } from './serviceCommandsToRestApiSubscriptionBuilder.js'
+import type { HttpServerV1ServiceCommandsToRestApiInputPayload } from './types.js'
 
 describe('service HttpServer version 1 - subscription serviceCommandsToRestApi', () => {
   let sandbox = createSandbox()

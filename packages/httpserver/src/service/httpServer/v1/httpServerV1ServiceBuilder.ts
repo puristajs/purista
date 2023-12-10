@@ -1,13 +1,13 @@
 import type { ServiceInfoType } from '@purista/core'
 import { ServiceBuilder } from '@purista/core'
 
-import { generalHttpServerServiceInfo } from '../generalHttpServerServiceInfo'
-import { HttpServerClass } from './HttpServerClass.impl'
+import { generalHttpServerServiceInfo } from '../generalHttpServerServiceInfo.js'
+import { HttpServerClass } from './HttpServerClass.impl.js'
 import {
   httpServerServiceV1ConfigSchema,
   OPENAPI_DEFAULT_INFO,
   OPENAPI_DEFAULT_MOUNT_PATH,
-} from './httpServerServiceConfig'
+} from './httpServerServiceConfig.js'
 
 export const httpServerServiceInfo: ServiceInfoType = {
   serviceVersion: '1',

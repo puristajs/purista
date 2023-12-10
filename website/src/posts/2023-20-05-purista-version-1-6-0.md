@@ -69,7 +69,7 @@ const main = async () => {
   const client = new HttpClient({
     baseUrl: 'http://example.com',
     defaultHeaders: {
-      'Content-Type': 'application/json; charset=utf-8',
+      'content-type': 'application/json; charset=utf-8',
     },
   })
 

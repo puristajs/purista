@@ -1,5 +1,4 @@
-import * as index from './index'
-import { puristaVersion } from './version'
+import { InfisicalSecretStore, puristaVersion } from './index.js'
 
 describe('exports InfisicalSecretStore', () => {
   it('has a version', () => {
@@ -7,6 +6,6 @@ describe('exports InfisicalSecretStore', () => {
   })
 
   it('exports InfisicalSecretStore', () => {
-    expect(index.InfisicalSecretStore).toBeDefined()
+    expect(InfisicalSecretStore).toBeDefined()
   })
 })

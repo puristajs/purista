@@ -20,11 +20,11 @@ import {
   UnhandledError,
 } from '@purista/core'
 
-import { deserializeOtpFromMqtt } from '../deserializeOtpFromMqtt.impl'
-import { msToSec } from '../msToSec.impl'
-import { serializeOtpToMqtt } from '../serializeOtpToMqtt.impl'
-import { getTopicName } from '../topic'
-import type { IncomingMessageFunction } from '../types'
+import { deserializeOtpFromMqtt } from '../deserializeOtpFromMqtt.impl.js'
+import { msToSec } from '../msToSec.impl.js'
+import { serializeOtpToMqtt } from '../serializeOtpToMqtt.impl.js'
+import { getTopicName } from '../topic/index.js'
+import type { IncomingMessageFunction } from '../types/index.js'
 
 export const getCommandHandler = (
   address: EBMessageAddress,

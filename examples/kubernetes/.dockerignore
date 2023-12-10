@@ -5,6 +5,5 @@ npm-debug.log
 .eslintcache
 .eslintignore
 deployment.yaml
-jest.config.js
 .turbo
 build

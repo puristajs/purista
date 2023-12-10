@@ -1,4 +1,4 @@
-import type { InstanceId } from './InstanceId'
+import type { InstanceId } from './InstanceId.js'
 
 /**
  * A event bridge message address describes the sender or receiver of a message.

@@ -1,6 +1,6 @@
-import type { EBMessage } from '../EBMessage'
-import { EBMessageType } from '../EBMessageType.enum'
-import type { Command } from './Command'
+import type { EBMessage } from '../EBMessage.js'
+import { EBMessageType } from '../EBMessageType.enum.js'
+import type { Command } from './Command.js'
 
 /**
  * Checks if given message is type of Command

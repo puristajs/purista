@@ -1,6 +1,6 @@
-import type { HandledError } from '../Error/HandledError.impl'
-import type { addPrefixToObject } from './addPrefixToObject'
-import type { TraceId } from './TraceId'
+import type { HandledError } from '../Error/HandledError.impl.js'
+import type { addPrefixToObject } from './addPrefixToObject.js'
+import type { TraceId } from './TraceId.js'
 
 /**
  * Events which can be emitted by a service.

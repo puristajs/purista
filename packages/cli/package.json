@@ -25,9 +25,16 @@
     "start": "./lib/index.js",
     "build": "tsc --project ./tsconfig.json && chmod 755 lib/index.js",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
-    "test": "jest --passWithNoTests"
+    "test": "vitest"
+  },
+"tshy": {
+    "exports": {
+      "./package.json": "./package.json",
+      ".": "./src/index.ts"
+    }
   },
   "devDependencies": {
+    "tshy": "^1.8.1",
     "@types/eslint": "^8.44.7",
     "@types/minimist": "^1.2.5",
     "@types/node": "^20.6.0"

@@ -208,7 +208,7 @@ describe('integration test', () => {
 
       const result = await commandOne(contextMock.mock, payload, parameter)
 
-      expect(result.output.commandOne).toStrictEqual('RECEIVED:MY INPUT')
+      expect(result.output.commandOne).toBe('RECEIVED:MY INPUT')
       expect(result.output.commandTwo).toStrictEqual(invokePayload.toUpperCase())
       expect(contextMock.stubs.logger.debug.calledWith('call commandTwo')).toBeTruthy()
     })
@@ -276,7 +276,7 @@ describe('integration test', () => {
   describe('creates a subscription for service one', () => {
     const subscriptionOneBuilder = serviceOneBuilder
       .getSubscriptionBuilder('subscriptionOne', 'a subscription in service one')
-      .filterReceivedBy(serviceOneInfo.serviceName, serviceOneInfo.serviceVersion, 'commandOne')
+      .filterReceivedBy(serviceOneInfo.serviceName, serviceOneInfo.serviceVersion, 'commandOne', undefined)
       .filterForMessageType(EBMessageType.Command)
       .addPayloadSchema(commandOnePayloadSchema)
       .addParameterSchema(commandParameterSchema)
@@ -350,7 +350,7 @@ describe('integration test', () => {
 
       const result = await subscriptionOne(contextMock.mock, payload, parameter)
 
-      expect(result.result).toStrictEqual('SUBSCRIPTION:MY INPUT')
+      expect(result.result).toBe('SUBSCRIPTION:MY INPUT')
       expect(contextMock.stubs.logger.debug.calledWith('subscription one')).toBeTruthy()
     })
 
@@ -489,7 +489,7 @@ describe('integration test', () => {
 
     // jest.runAllTimers()
 
-    expect(result).toStrictEqual('{"output":{"commandOne":"RECEIVED:ONE","commandTwo":"INPUT"}}')
+    expect(result).toBe('{"output":{"commandOne":"RECEIVED:ONE","commandTwo":"INPUT"}}')
     expect(logger.stubs.fatal.called).toBeFalsy()
     expect(logger.stubs.error.called).toBeFalsy()
     expect(logger.stubs.warn.called).toBeFalsy()

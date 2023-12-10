@@ -1,6 +1,6 @@
-import { getEventBridgeMock, getLoggerMock } from '../../mocks'
-import type { ServiceInfoType } from '../types'
-import { Service } from './Service.impl'
+import { getEventBridgeMock, getLoggerMock } from '../../mocks/index.js'
+import type { ServiceInfoType } from '../types/index.js'
+import { Service } from './Service.impl.js'
 
 describe('Service', () => {
   const serviceInfo: ServiceInfoType = {

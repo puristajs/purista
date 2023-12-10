@@ -17,10 +17,10 @@ import type {
   SubscriptionTransformInputHook,
   SubscriptionTransformOutputHook,
   TenantId,
-} from '../core'
-import type { OpenApiZodAny } from '../zodOpenApi'
-import { generateSchema } from '../zodOpenApi'
-import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl'
+} from '../core/index.js'
+import type { OpenApiZodAny } from '../zodOpenApi/index.js'
+import { generateSchema } from '../zodOpenApi/index.js'
+import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl.js'
 
 /**
  * Subscription definition builder is a helper to create and define a subscriptions for a service.

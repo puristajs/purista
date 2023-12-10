@@ -1,3 +1,3 @@
-export * from './computeDataCommandBuilder'
-export * from './schema'
-export * from './types'
+export * from './computeDataCommandBuilder.js'
+export * from './schema.js'
+export * from './types.js'

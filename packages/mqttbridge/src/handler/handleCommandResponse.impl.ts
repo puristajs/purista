@@ -10,8 +10,8 @@ import {
   UnhandledError,
 } from '@purista/core'
 
-import { deserializeOtpFromMqtt } from '../deserializeOtpFromMqtt.impl'
-import type { IncomingMessageFunction } from '../types'
+import { deserializeOtpFromMqtt } from '../deserializeOtpFromMqtt.impl.js'
+import type { IncomingMessageFunction } from '../types/index.js'
 
 export const handleCommandResponse: IncomingMessageFunction = async function (message, packet) {
   const context = deserializeOtpFromMqtt(this.logger, message, packet.properties?.userProperties)

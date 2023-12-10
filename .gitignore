@@ -3,6 +3,7 @@ node_modules
 .DS_Store
 
 lib
+dist
 
 .eslintcache
 .dccache
@@ -26,3 +27,6 @@ build
 lab
 
 __snapshots__
+
+.tshy-build
+.tshy

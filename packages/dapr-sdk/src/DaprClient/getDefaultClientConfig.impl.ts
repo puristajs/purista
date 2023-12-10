@@ -1,4 +1,4 @@
-import { DAPR_API_VERSION, DEFAULT_DAPR_HOST, DEFAULT_DAPR_PORT } from '../types'
+import { DAPR_API_VERSION, DEFAULT_DAPR_HOST, DEFAULT_DAPR_PORT } from '../types/index.js'
 
 export const getDefaultClientConfig = () => {
   return {

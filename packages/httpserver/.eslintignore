@@ -1,6 +1,0 @@
-**/lib/*
-.turbo
-docs
-coverage
-node_modules
-*.d.ts

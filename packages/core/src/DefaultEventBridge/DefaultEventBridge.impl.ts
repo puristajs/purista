@@ -14,7 +14,7 @@ import type {
   EventBridge,
   EventBridgeConfig,
   Subscription,
-} from '../core'
+} from '../core/index.js'
 import {
   createErrorResponse,
   createInfoMessage,
@@ -39,12 +39,12 @@ import {
   serializeOtp,
   StatusCode,
   UnhandledError,
-} from '../core'
-import { puristaVersion } from '../version'
-import { getDefaultEventBridgeConfig } from './getDefaultEventBridgeConfig.impl'
-import { getNewSubscriptionStorageEntry } from './getNewSubscriptionStorageEntry.impl'
-import { isMessageMatchingSubscription } from './isMessageMatchingSubscription.impl'
-import type { DefaultEventBridgeConfig, PendigInvocation, SubscriptionStorageEntry } from './types'
+} from '../core/index.js'
+import { puristaVersion } from '../version.js'
+import { getDefaultEventBridgeConfig } from './getDefaultEventBridgeConfig.impl.js'
+import { getNewSubscriptionStorageEntry } from './getNewSubscriptionStorageEntry.impl.js'
+import { isMessageMatchingSubscription } from './isMessageMatchingSubscription.impl.js'
+import type { DefaultEventBridgeConfig, PendigInvocation, SubscriptionStorageEntry } from './types/index.js'
 /**
  * Simple implementation of some simple in-memory event bridge.
  * Does not support threads and does not need any external databases.

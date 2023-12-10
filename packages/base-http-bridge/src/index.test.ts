@@ -1,6 +1,11 @@
-import * as index from './index'
+import { HttpEventBridge, puristaVersion } from './index.js'
 
-it('exports HttpEventBridge', () => {
-  // http event bridge
-  expect(index.HttpEventBridge).toBeDefined()
+describe('exports HttpEventBridge', () => {
+  it('has a version', () => {
+    expect(puristaVersion).toBeDefined()
+  })
+  it('exports HttpEventBridge', () => {
+    // http event bridge
+    expect(HttpEventBridge).toBeDefined()
+  })
 })

@@ -2,8 +2,8 @@ import { HttpClient, UnhandledError } from '@purista/core'
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
-import { DAPR_API_VERSION } from '../types'
-import { DaprSecretStore } from './DaprSecretStore.impl'
+import { DAPR_API_VERSION } from '../types/index.js'
+import { DaprSecretStore } from './DaprSecretStore.impl.js'
 
 describe('DaprSecretStore', () => {
   let sandbox: SinonSandbox

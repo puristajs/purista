@@ -1,2 +1,2 @@
-export * from './IncomingMessageFunction'
-export * from './MqttBridgeConfig'
+export * from './IncomingMessageFunction.js'
+export * from './MqttBridgeConfig.js'

@@ -1,12 +1,11 @@
-import type { Service } from '@purista/core'
 import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 import type { StartedTestContainer } from 'testcontainers'
 import { GenericContainer } from 'testcontainers'
 import { z } from 'zod'
 
-import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1'
-import { AmqpBridge } from '../src'
+import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1/index.js'
+import { AmqpBridge } from '../src/index.js'
 
 const AMQP_PORT = 5672
 const EXAMPLE_EVENT = 'exampleEvent'
@@ -17,14 +16,14 @@ describe('@purista/amqpbridge', () => {
   const sandbox = createSandbox()
   const subscriptionStub = sandbox.stub().resolves()
   const logger = getLoggerMock(sandbox)
-  let service: Service
+  let service: any
 
   beforeAll(async () => {
     container = await new GenericContainer('rabbitmq:alpine')
-      .withLogConsumer((stream) => {
+      .withLogConsumer((_stream) => {
         // stream.on('data', (line) => console.debug(line))
         // eslint-disable-next-line no-console
-        stream.on('err', (line) => console.error(line))
+        // stream.on('err', (line) => console.error(line))
       })
       .withExposedPorts({ host: AMQP_PORT, container: AMQP_PORT })
       .start()
@@ -60,11 +59,13 @@ describe('@purista/amqpbridge', () => {
         serviceName: service.info.serviceName,
         serviceVersion: service.info.serviceVersion,
         serviceTarget: 'ping',
+        instanceId: 'a',
       },
       sender: {
         serviceName: service.info.serviceName,
         serviceVersion: service.info.serviceVersion,
         serviceTarget: 'some',
+        instanceId: 'a',
       },
       payload: {
         payload: undefined,

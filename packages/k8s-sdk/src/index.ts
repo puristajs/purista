@@ -107,6 +107,7 @@ declare global {
   }
 }
 
-export * from './addServiceEndpoints.impl'
-export * from './getHttpServer.impl'
-export * from './types'
+export * from './addServiceEndpoints.impl.js'
+export * from './getHttpServer.impl.js'
+export * from './types.js'
+export * from './version.js'

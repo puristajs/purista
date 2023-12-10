@@ -21,11 +21,11 @@ describe('@purista/natsbridge', () => {
   beforeAll(async () => {
     container = await new NatsContainer('nats:alpine')
       // .withArg('-js', '-js')
-      .withLogConsumer((stream) => {
+      .withLogConsumer((_stream) => {
         // eslint-disable-next-line no-console
         // stream.on('data', (line) => console.debug(line))
         // eslint-disable-next-line no-console
-        stream.on('err', (line) => console.error('Error in NATS container', line))
+        // stream.on('err', (line) => console.error('Error in NATS container', line))
       })
       .start()
 

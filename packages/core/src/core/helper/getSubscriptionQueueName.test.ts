@@ -1,5 +1,5 @@
-import type { EBMessageAddress } from '../types'
-import { getSubscriptionQueueName } from './getSubscriptionQueueName.impl'
+import type { EBMessageAddress } from '../types/index.js'
+import { getSubscriptionQueueName } from './getSubscriptionQueueName.impl.js'
 
 describe('creates a subscription queue name', () => {
   it('returns a id string', () => {

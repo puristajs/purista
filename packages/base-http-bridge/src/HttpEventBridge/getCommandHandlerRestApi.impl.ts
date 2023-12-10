@@ -23,8 +23,8 @@ import {
   UnhandledError,
 } from '@purista/core'
 
-import type { HttpEventBridge } from './HttpEventBridge.impl'
-import type { HttpEventBridgeConfig, RouterFunction } from './types'
+import type { HttpEventBridge } from './HttpEventBridge.impl.js'
+import type { HttpEventBridgeConfig, RouterFunction } from './types/index.js'
 
 export const getCommandHandlerRestApi = function (
   this: HttpEventBridge<HttpEventBridgeConfig>,
@@ -171,7 +171,7 @@ export const getCommandHandlerRestApi = function (
           const status = err.errorCode
           span.end()
 
-          return c.json(err.getErrorResponse(), status as any)
+          return c.json(err.getErrorResponse(), status as number)
         }
       },
     )

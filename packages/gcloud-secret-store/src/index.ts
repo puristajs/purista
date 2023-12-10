@@ -31,5 +31,6 @@ console.log(value) // outputs: undefined
 ```
 @module
 */
-export * from './GoogleSecretStore.impl'
-export * from './types'
+export * from './GoogleSecretStore.impl.js'
+export * from './types.js'
+export * from './version.js'

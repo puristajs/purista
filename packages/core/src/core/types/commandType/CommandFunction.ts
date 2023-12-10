@@ -1,5 +1,5 @@
-import type { ServiceClass } from '../ServiceClass'
-import type { CommandFunctionContext } from './CommandFunctionContext'
+import type { ServiceClass } from '../ServiceClass.js'
+import type { CommandFunctionContext } from './CommandFunctionContext.js'
 
 /**
  * CommandFunction is a function which will be triggered when a matching event bridge message is received by the service

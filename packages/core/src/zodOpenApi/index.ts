@@ -1,1 +1,1 @@
-export * from './zodOpenApi.impl'
+export * from './zodOpenApi.impl.js'

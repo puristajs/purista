@@ -1,4 +1,4 @@
-import { ServiceInfoValidator } from './ServiceInfoValidator.impl'
+import { ServiceInfoValidator } from './ServiceInfoValidator.impl.js'
 
 describe('ServiceInfoValidator', () => {
   it('throws on empty service name', () => {

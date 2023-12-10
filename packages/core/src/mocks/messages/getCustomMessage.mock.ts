@@ -1,5 +1,11 @@
-import type { CustomMessage } from '../../core'
-import { EBMessageType, getNewCorrelationId, getNewEBMessageId, getNewInstanceId, getNewTraceId } from '../../core'
+import type { CustomMessage } from '../../core/index.js'
+import {
+  EBMessageType,
+  getNewCorrelationId,
+  getNewEBMessageId,
+  getNewInstanceId,
+  getNewTraceId,
+} from '../../core/index.js'
 
 /**
  * A function that returns a mocked custom message.

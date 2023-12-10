@@ -4,7 +4,7 @@ import type {
   userV1ComputeDataInputParameterSchema,
   userV1ComputeDataInputPayloadSchema,
   userV1ComputeDataOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export type UserV1ComputeDataInputParameter = z.input<typeof userV1ComputeDataInputParameterSchema>
 

@@ -1,4 +1,4 @@
-import { convertToCamelCase } from './convertToCamelCase.impl'
+import { convertToCamelCase } from './convertToCamelCase.impl.js'
 
 describe('convertToCamelCase', () => {
   it('converts from snakeCase', () => {

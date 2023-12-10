@@ -1,7 +1,7 @@
-import type { EBMessageAddress } from './EBMessageAddress'
-import type { EBMessageBase } from './EBMessageBase'
-import type { EBMessageType } from './EBMessageType.enum'
-import type { Prettify } from './Prettify'
+import type { EBMessageAddress } from './EBMessageAddress.js'
+import type { EBMessageBase } from './EBMessageBase.js'
+import type { EBMessageType } from './EBMessageType.enum.js'
+import type { Prettify } from './Prettify.js'
 
 /**
  * A custom message is a message which can be used to pass business information.

@@ -1,12 +1,12 @@
 import { createSandbox } from 'sinon'
 import { z } from 'zod'
 
-import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder'
-import type { ServiceInfoType } from '../core'
-import { Service } from '../core'
-import { getEventBridgeMock, getLoggerMock } from '../mocks'
-import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder'
-import { ServiceBuilder } from './ServiceBuilder.impl'
+import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
+import type { ServiceInfoType } from '../core/index.js'
+import { Service } from '../core/index.js'
+import { getEventBridgeMock, getLoggerMock } from '../mocks/index.js'
+import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/index.js'
+import { ServiceBuilder } from './ServiceBuilder.impl.js'
 
 describe('ServiceBuilder', () => {
   const serviceInfo: ServiceInfoType = {
@@ -49,7 +49,7 @@ describe('ServiceBuilder', () => {
       serviceConfig: { host: 'remote' },
     })
 
-    expect(serviceInstanceWithCustomConfig.config.host).toEqual('remote')
+    expect(serviceInstanceWithCustomConfig.config.host).toBe('remote')
   })
 
   it('returns a CommandBuilder', () => {
@@ -78,7 +78,7 @@ describe('ServiceBuilder', () => {
 
     const serviceInstance = service.getInstance(eventBridge.mock, { logger: logger.mock })
 
-    expect(serviceInstance.customFunction()).toEqual('custom')
+    expect(serviceInstance.customFunction()).toBe('custom')
     expect(serviceInstance).toBeInstanceOf(CustomClass)
   })
 })

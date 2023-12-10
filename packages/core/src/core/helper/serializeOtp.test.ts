@@ -1,5 +1,5 @@
-import { getLoggerMock } from '../../mocks'
-import { deserializeOtp, serializeOtp } from './serializeOtp.impl'
+import { getLoggerMock } from '../../mocks/index.js'
+import { deserializeOtp, serializeOtp } from './serializeOtp.impl.js'
 
 describe('serializeOtp', () => {
   it('serializes opentelemetry', () => {

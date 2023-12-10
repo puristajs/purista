@@ -3,8 +3,8 @@ import type { ConsumeMessage } from 'amqplib'
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
-import { deserializeOtpFromAmqpHeader } from './deserializeOtpFromAmqpHeader.impl'
-import { jsonEncoder, plainEncrypter } from './payloadHandling'
+import { deserializeOtpFromAmqpHeader } from './deserializeOtpFromAmqpHeader.impl.js'
+import { jsonEncoder, plainEncrypter } from './payloadHandling/index.js'
 
 describe('deserializeOtpFromAmqpHeader', () => {
   let sandbox: SinonSandbox
@@ -12,9 +12,9 @@ describe('deserializeOtpFromAmqpHeader', () => {
   beforeEach(() => {
     sandbox = createSandbox()
 
-    jest.mock('./decodeContent.impl', () => ({
+    sandbox.mock('./decodeContent.impl.js').returns({
       decodeContent: sandbox.stub().resolves({}),
-    }))
+    })
   })
 
   afterEach(() => {

@@ -1,4 +1,4 @@
-import { isMatchingTopic } from './isMatchingTopic.impl'
+import { isMatchingTopic } from './isMatchingTopic.impl.js'
 
 describe('isMatchingTopic', () => {
   it('matches on empty strings', () => {

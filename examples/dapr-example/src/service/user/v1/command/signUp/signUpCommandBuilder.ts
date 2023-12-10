@@ -2,15 +2,15 @@ import { randomUUID } from 'node:crypto'
 
 import { HandledError, StatusCode } from '@purista/core'
 
-import type { User } from '../../../../../types'
-import { StateStoreKey } from '../../../../../types'
-import { ServiceEvent } from '../../../../ServiceEvent.enum'
-import { userV1ServiceBuilder } from '../../userV1ServiceBuilder'
+import type { User } from '../../../../../types/index.js'
+import { StateStoreKey } from '../../../../../types/index.js'
+import { ServiceEvent } from '../../../../ServiceEvent.enum.js'
+import { userV1ServiceBuilder } from '../../userV1ServiceBuilder.js'
 import {
   userV1SignUpInputParameterSchema,
   userV1SignUpInputPayloadSchema,
   userV1SignUpOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export const signUpCommandBuilder = userV1ServiceBuilder
   .getCommandBuilder('signUp', 'registers a new user at our product')

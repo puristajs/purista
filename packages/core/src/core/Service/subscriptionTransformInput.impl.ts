@@ -1,10 +1,10 @@
 import { SpanStatusCode } from '@opentelemetry/api'
 import type { ZodError } from 'zod'
 
-import { HandledError, UnhandledError } from '../Error'
-import type { EBMessage, Logger, SubscriptionDefinition } from '../types'
-import { isCommand, StatusCode } from '../types'
-import type { Service } from './Service.impl'
+import { HandledError, UnhandledError } from '../Error/index.js'
+import type { EBMessage, Logger, SubscriptionDefinition } from '../types/index.js'
+import { isCommand, StatusCode } from '../types/index.js'
+import type { Service } from './Service.impl.js'
 
 export const subscriptionTransformInput = async (
   serviceInstance: Service,

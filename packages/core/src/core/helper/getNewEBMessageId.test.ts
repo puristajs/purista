@@ -1,4 +1,4 @@
-import { getNewEBMessageId } from './getNewEBMessageId.impl'
+import { getNewEBMessageId } from './getNewEBMessageId.impl.js'
 
 it('returns a unique id', () => {
   const id1 = getNewEBMessageId()

@@ -1,3 +1,3 @@
-export * from './schema'
-export * from './serviceCommandsToRestApiSubscriptionBuilder'
-export * from './types'
+export * from './schema.js'
+export * from './serviceCommandsToRestApiSubscriptionBuilder.js'
+export * from './types.js'

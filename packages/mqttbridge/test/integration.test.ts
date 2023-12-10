@@ -35,10 +35,10 @@ describe('@purista/mqttbridge', () => {
           target: '/mosquitto/config/mosquitto.conf',
         },
       ])
-      .withLogConsumer((stream) => {
+      .withLogConsumer((_stream) => {
         // stream.on('data', (line) => console.debug(line))
         // eslint-disable-next-line no-console
-        stream.on('err', (line) => console.error(line))
+        // stream.on('err', (line) => console.error(line))
       })
       .start()
 

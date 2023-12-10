@@ -1,8 +1,8 @@
 import type { SinonSandbox } from 'sinon'
 import { stub } from 'sinon'
 
-import type { EBMessage, SubscriptionFunctionContext } from '../core'
-import { getLoggerMock } from './getLogger.mock'
+import type { EBMessage, SubscriptionFunctionContext } from '../core/index.js'
+import { getLoggerMock } from './getLogger.mock.js'
 
 /**
  * A function that returns a mock object for subscription function context

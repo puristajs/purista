@@ -1,5 +1,5 @@
-import type { ServiceClass } from '../ServiceClass'
-import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext'
+import type { ServiceClass } from '../ServiceClass.js'
+import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.js'
 
 /**
  * Definition of after guard hook functions.

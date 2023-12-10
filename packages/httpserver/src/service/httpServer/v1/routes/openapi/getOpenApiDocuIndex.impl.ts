@@ -1,8 +1,8 @@
 import type { RouteHandlerMethod, RouteOptions } from 'fastify'
 
-import type { HttpServerClass } from '../../HttpServerClass.impl'
-import type { HttpServerServiceV1ConfigRaw } from '../../httpServerServiceConfig'
-import { getIndexHtml } from './getIndexHtml.impl'
+import type { HttpServerClass } from '../../HttpServerClass.impl.js'
+import type { HttpServerServiceV1ConfigRaw } from '../../httpServerServiceConfig.js'
+import { getIndexHtml } from './getIndexHtml.impl.js'
 
 export const getOpenApiDocuIndex = function (this: HttpServerClass<HttpServerServiceV1ConfigRaw>): RouteOptions {
   const path = (this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath) as string

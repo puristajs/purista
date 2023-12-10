@@ -1,4 +1,4 @@
-import { getDefaultEventBridgeConfig } from './getDefaultEventBridgeConfig.impl'
+import { getDefaultEventBridgeConfig } from './getDefaultEventBridgeConfig.impl.js'
 
 it('returns default config for DefaultEventBridge', () => {
   const config = getDefaultEventBridgeConfig()

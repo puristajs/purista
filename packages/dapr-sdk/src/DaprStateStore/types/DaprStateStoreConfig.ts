@@ -1,4 +1,4 @@
-import type { DaprClientConfig } from '../../DaprClient'
+import type { DaprClientConfig } from '../../DaprClient/index.js'
 
 /**
  * Dapr state store configuration

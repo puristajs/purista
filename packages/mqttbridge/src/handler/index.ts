@@ -1,3 +1,3 @@
-export * from './getCommandHandler.impl'
-export * from './getSubscriptionHandler.impl'
-export * from './handleCommandResponse.impl'
+export * from './getCommandHandler.impl.js'
+export * from './getSubscriptionHandler.impl.js'
+export * from './handleCommandResponse.impl.js'

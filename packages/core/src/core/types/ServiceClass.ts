@@ -1,7 +1,7 @@
 import type { Context, Span, SpanOptions, Tracer } from '@opentelemetry/api'
 
-import type { CommandDefinition } from './commandType'
-import type { SubscriptionDefinition } from './subscription'
+import type { CommandDefinition } from './commandType/index.js'
+import type { SubscriptionDefinition } from './subscription/index.js'
 
 /**
  * The ServiceClass interface

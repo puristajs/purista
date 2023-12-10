@@ -8,7 +8,7 @@ import {
 } from '@aws-sdk/client-secrets-manager'
 import { SecretStoreBaseClass, StatusCode, type StoreBaseConfig, UnhandledError } from '@purista/core'
 
-import type { AWSSecretStoreConfig } from './types'
+import type { AWSSecretStoreConfig } from './types.js'
 
 /**
  * The secret store adapter for AWS Secrets Manager.

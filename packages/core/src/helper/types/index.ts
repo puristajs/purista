@@ -1,1 +1,1 @@
-export * from './ShutdownEntry'
+export * from './ShutdownEntry.js'

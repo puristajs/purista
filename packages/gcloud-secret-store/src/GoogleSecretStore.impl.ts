@@ -3,7 +3,7 @@ import { join } from 'node:path/posix'
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
 import { SecretStoreBaseClass, StatusCode, type StoreBaseConfig, UnhandledError } from '@purista/core'
 
-import type { GoogleSecretStoreConfig } from './types'
+import type { GoogleSecretStoreConfig } from './types.js'
 
 /**
  * The secret store adapter for Google Secret Manager.

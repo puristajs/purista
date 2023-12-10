@@ -1,9 +1,9 @@
-import { HandledError, UnhandledError } from '../Error'
-import type { Command, CommandErrorResponse, InstanceId, TraceId } from '../types'
-import { EBMessageType, StatusCode } from '../types'
-import { getErrorMessageForCode } from './getErrorMessageForCode.impl'
-import { getNewTraceId } from './getNewTraceId.impl'
-import { serializeOtp } from './serializeOtp.impl'
+import { HandledError, UnhandledError } from '../Error/index.js'
+import type { Command, CommandErrorResponse, InstanceId, TraceId } from '../types/index.js'
+import { EBMessageType, StatusCode } from '../types/index.js'
+import { getErrorMessageForCode } from './getErrorMessageForCode.impl.js'
+import { getNewTraceId } from './getNewTraceId.impl.js'
+import { serializeOtp } from './serializeOtp.impl.js'
 
 /**
  * Creates a error response object based on original command

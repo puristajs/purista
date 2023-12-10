@@ -1,1 +1,1 @@
-export * from './ServiceBaseClass.impl'
+export * from './ServiceBaseClass.impl.js'

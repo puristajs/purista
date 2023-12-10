@@ -1,5 +1,9 @@
-import { getCommandErrorMessageMock, getCommandMessageMock, getCommandSuccessMessageMock } from '../../../mocks'
-import { isCommandResponse } from './isCommandResponse.impl'
+import {
+  getCommandErrorMessageMock,
+  getCommandMessageMock,
+  getCommandSuccessMessageMock,
+} from '../../../mocks/index.js'
+import { isCommandResponse } from './isCommandResponse.impl.js'
 
 describe('isCommandResponse', () => {
   it('returns true if it is a command error response message', () => {

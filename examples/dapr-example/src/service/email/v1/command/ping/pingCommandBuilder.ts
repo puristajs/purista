@@ -1,10 +1,10 @@
-import { ServiceEvent } from '../../../../ServiceEvent.enum'
-import { emailV1ServiceBuilder } from '../../emailV1ServiceBuilder'
+import { ServiceEvent } from '../../../../ServiceEvent.enum.js'
+import { emailV1ServiceBuilder } from '../../emailV1ServiceBuilder.js'
 import {
   emailV1PingInputParameterSchema,
   emailV1PingInputPayloadSchema,
   emailV1PingOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export const pingCommandBuilder = emailV1ServiceBuilder
   .getCommandBuilder('ping', 'ping pong')

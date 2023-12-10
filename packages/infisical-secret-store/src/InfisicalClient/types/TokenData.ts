@@ -1,4 +1,4 @@
-import type { Scope } from './Scope'
+import type { Scope } from './Scope.js'
 
 export type TokenData = {
   _id: string

@@ -1,3 +1,3 @@
-export * from './getDefaultHttpEventBridgeConfig.impl'
-export * from './HttpEventBridge.impl'
-export * from './types'
+export * from './getDefaultHttpEventBridgeConfig.impl.js'
+export * from './HttpEventBridge.impl.js'
+export * from './types/index.js'

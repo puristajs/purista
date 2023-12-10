@@ -5,8 +5,8 @@ import {
   getNewInstanceId,
   type HandledError,
   type UnhandledError,
-} from '../../core'
-import { getCommandMessageMock } from './getCommandMessage.mock'
+} from '../../core/index.js'
+import { getCommandMessageMock } from './getCommandMessage.mock.js'
 
 /**
  * A function that returns a mocked command error response message

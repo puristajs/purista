@@ -3,7 +3,7 @@ import { getCommandMessageMock, getLoggerMock } from '@purista/core'
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
-import { DaprClient } from './DaprClient.impl'
+import { DaprClient } from './DaprClient.impl.js'
 
 describe('DaprClient', () => {
   const baseUrl = 'http://example.com'
@@ -78,7 +78,7 @@ describe('DaprClient', () => {
     const response = { example: 'response' }
     const command = getCommandMessageMock()
 
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(() =>
+    sandbox.stub(global, 'fetch').callsFake(() =>
       Promise.resolve({
         headers: {
           get: () => 'application/json',
@@ -88,11 +88,7 @@ describe('DaprClient', () => {
         text: () => Promise.resolve(JSON.stringify(response)),
       } as any),
     )
-    try {
-      await expect(client.invoke(command)).resolves.toBe(response)
-    } finally {
-      fetchMock.mockRestore()
-    }
+    await expect(client.invoke(command)).resolves.toBe(response)
   })
 
   it('can send a event a command', async () => {
@@ -105,7 +101,7 @@ describe('DaprClient', () => {
     const response = { example: 'response' }
     const command = getCommandMessageMock({ eventName: 'test' })
 
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(() =>
+    sandbox.stub(global, 'fetch').callsFake(() =>
       Promise.resolve({
         headers: {
           get: () => 'application/json',
@@ -115,11 +111,7 @@ describe('DaprClient', () => {
         text: () => Promise.resolve(JSON.stringify(response)),
       } as any),
     )
-    try {
-      await expect(client.sendEvent(command)).resolves.toBeUndefined()
-    } finally {
-      fetchMock.mockRestore()
-    }
+    await expect(client.sendEvent(command)).resolves.toBeUndefined()
   })
 
   it('throws of no event name is provided', async () => {
@@ -142,7 +134,7 @@ describe('DaprClient', () => {
       serve: sandbox.stub(),
     })
 
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(() =>
+    sandbox.stub(global, 'fetch').callsFake(() =>
       Promise.resolve({
         headers: {
           get: () => 'application/json',
@@ -152,11 +144,7 @@ describe('DaprClient', () => {
         text: () => Promise.resolve(JSON.stringify({})),
       } as any),
     )
-    try {
-      await expect(client.isSidecarAvailable()).resolves.toBeTruthy()
-    } finally {
-      fetchMock.mockRestore()
-    }
+    await expect(client.isSidecarAvailable()).resolves.toBeTruthy()
   })
 
   it('returns true if sidecar is available', async () => {
@@ -166,7 +154,7 @@ describe('DaprClient', () => {
       serve: sandbox.stub(),
     })
 
-    const fetchMock = jest.spyOn(global, 'fetch').mockImplementation(() =>
+    sandbox.stub(global, 'fetch').callsFake(() =>
       Promise.resolve({
         headers: {
           get: () => 'application/json',
@@ -176,10 +164,7 @@ describe('DaprClient', () => {
         text: () => Promise.reject(new Error('unavailable')),
       } as any),
     )
-    try {
-      await expect(client.isSidecarAvailable()).resolves.toBeFalsy()
-    } finally {
-      fetchMock.mockRestore()
-    }
+
+    await expect(client.isSidecarAvailable()).resolves.toBeFalsy()
   })
 })

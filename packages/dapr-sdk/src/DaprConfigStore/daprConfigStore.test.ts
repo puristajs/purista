@@ -2,8 +2,8 @@ import { HttpClient } from '@purista/core'
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
-import { DaprConfigStore } from './DaprConfigStore.impl'
-import type { DaprConfigStoreConfig } from './types'
+import { DaprConfigStore } from './DaprConfigStore.impl.js'
+import type { DaprConfigStoreConfig } from './types/index.js'
 
 describe('DaprConfigStore', () => {
   let sandbox: SinonSandbox

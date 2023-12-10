@@ -1,5 +1,5 @@
-import type { HttpExposedServiceMeta } from './HttpExposedServiceMeta'
-import { isHttpExposedServiceMeta } from './isHttpExposedServiceMeta.impl'
+import type { HttpExposedServiceMeta } from './HttpExposedServiceMeta.js'
+import { isHttpExposedServiceMeta } from './isHttpExposedServiceMeta.impl.js'
 
 describe('isHttpExposedServiceMeta', () => {
   it('returns true if given input is type of HttpExposedServiceMeta', () => {

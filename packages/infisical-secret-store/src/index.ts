@@ -33,6 +33,7 @@ console.log(value) // outputs: undefined
 ```
 @module
 */
-export * from './InfisicalClient'
-export * from './InfisicalSecretStore.impl'
-export * from './types'
+export * from './InfisicalClient/index.js'
+export * from './InfisicalSecretStore.impl.js'
+export * from './types.js'
+export * from './version.js'

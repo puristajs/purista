@@ -2,7 +2,7 @@ import { join } from 'node:path/posix'
 
 import { convertToSnakeCase } from '@purista/core'
 
-import type { MqttBridge } from '../MqttEventBridge'
+import type { MqttBridge } from '../MqttEventBridge.js'
 
 type GetCommandResponseSubscriptionTopicFn = (this: MqttBridge) => string
 export const getCommandResponseSubscriptionTopic: GetCommandResponseSubscriptionTopicFn = function () {

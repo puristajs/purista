@@ -1,4 +1,4 @@
-import type { SubscriptionTransformFunctionContext } from './SubscriptionTransformFunctionContext'
+import type { SubscriptionTransformFunctionContext } from './SubscriptionTransformFunctionContext.js'
 
 /**
  * @group Subscription

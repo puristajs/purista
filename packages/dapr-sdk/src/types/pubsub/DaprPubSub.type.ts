@@ -12,9 +12,9 @@ limitations under the License.
 */
 
 // https://github.com/dapr/dapr/blob/master/pkg/apis/subscriptions/v2alpha1/types.go#L36
-import type { BulkSubscribeConfig } from './BulkSubscribeConfig.type'
-import type { DaprPubSubRouteType } from './DaprPubSubRouteType.type'
-import type { KeyValueType } from './KeyValue.type'
+import type { BulkSubscribeConfig } from './BulkSubscribeConfig.type.js'
+import type { DaprPubSubRouteType } from './DaprPubSubRouteType.type.js'
+import type { KeyValueType } from './KeyValue.type.js'
 
 /**
  * DaprPubSubType is the Type used by the Dapr API to interface with its PubSub component

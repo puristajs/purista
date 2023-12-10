@@ -1,5 +1,5 @@
-import type { UnhandledError } from '../../Error/UnhandledError.impl'
-import type { addPrefixToObject, Prettify } from '../../types'
+import type { UnhandledError } from '../../Error/UnhandledError.impl.js'
+import type { addPrefixToObject, Prettify } from '../../types/index.js'
 
 export enum EventBridgeEventNames {
   EventbridgeConnected = 'eventbridge-connected',

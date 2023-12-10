@@ -1,6 +1,6 @@
-import type { Command } from '../types'
-import { EBMessageType } from '../types'
-import { createSuccessResponse } from './createSuccessResponse.impl'
+import type { Command } from '../types/index.js'
+import { EBMessageType } from '../types/index.js'
+import { createSuccessResponse } from './createSuccessResponse.impl.js'
 
 describe('createSuccessResponse', () => {
   it('creates a success response', () => {
@@ -47,7 +47,7 @@ describe('createSuccessResponse', () => {
     expect(result.id).toBe(message.id)
   })
 
-  it('it adds a trace id', () => {
+  it('adds a trace id', () => {
     const payload = { content: 'result content' }
 
     const message: Command = {

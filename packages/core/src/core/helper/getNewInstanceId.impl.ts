@@ -1,4 +1,4 @@
-import { getUniqueId } from './getUniqueId.impl'
+import { getUniqueId } from './getUniqueId.impl.js'
 
 /**
  *

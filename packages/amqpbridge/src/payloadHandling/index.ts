@@ -1,2 +1,2 @@
-export * from './jsonEncoder'
-export * from './plainEncrypter'
+export * from './jsonEncoder.js'
+export * from './plainEncrypter.js'

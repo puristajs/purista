@@ -1,5 +1,5 @@
-import { EBMessageType } from '../types'
-import { createInfoMessage } from './createInfoMessage.impl'
+import { EBMessageType } from '../types/index.js'
+import { createInfoMessage } from './createInfoMessage.impl.js'
 
 describe('createInfoMessage', () => {
   it('creates a info message', () => {
@@ -9,6 +9,7 @@ describe('createInfoMessage', () => {
       serviceName: 'SenderService',
       serviceVersion: '1.1.1',
       serviceTarget: 'senderServiceTarget',
+      instanceId: 'a',
     }
 
     const result = createInfoMessage(EBMessageType.InfoServiceInit, sender, { payload })

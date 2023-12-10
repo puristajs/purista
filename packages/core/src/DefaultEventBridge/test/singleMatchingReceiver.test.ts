@@ -1,28 +1,31 @@
 import { stub } from 'sinon'
 
-import type { EBMessage, Subscription } from '../../core'
-import { EBMessageType } from '../../core'
-import { getLoggerMock } from '../../mocks'
-import { getNewSubscriptionStorageEntry } from '../getNewSubscriptionStorageEntry.impl'
-import { isMessageMatchingSubscription } from '../isMessageMatchingSubscription.impl'
+import type { EBMessage, Subscription } from '../../core/index.js'
+import { EBMessageType } from '../../core/index.js'
+import { getLoggerMock } from '../../mocks/index.js'
+import { getNewSubscriptionStorageEntry } from '../getNewSubscriptionStorageEntry.impl.js'
+import { isMessageMatchingSubscription } from '../isMessageMatchingSubscription.impl.js'
 
 describe('subscription matching for sender', () => {
   const sender = {
     serviceName: 'SenderService',
     serviceVersion: '1',
     serviceTarget: 'senderServiceTarget',
+    instanceId: 'instanceId',
   }
 
   const receiver = {
     serviceName: 'ReceiverService',
     serviceVersion: '2',
     serviceTarget: 'receiverServiceTarget',
+    instanceId: 'instanceId',
   }
 
   const subscriber = {
     serviceName: 'SubscriberService',
     serviceVersion: '3',
     serviceTarget: 'subscriberServiceTarget',
+    instanceId: 'instanceId',
   }
 
   const callback = stub().resolves()
@@ -31,7 +34,6 @@ describe('subscription matching for sender', () => {
 
   const getTestMessage = (): EBMessage => {
     return {
-      instanceId: 'instanceId',
       sender,
       receiver,
       payload: {},
@@ -56,6 +58,8 @@ describe('subscription matching for sender', () => {
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
@@ -74,6 +78,8 @@ describe('subscription matching for sender', () => {
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
@@ -92,6 +98,8 @@ describe('subscription matching for sender', () => {
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
@@ -110,6 +118,8 @@ describe('subscription matching for sender', () => {
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
@@ -128,6 +138,8 @@ describe('subscription matching for sender', () => {
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 
@@ -146,6 +158,8 @@ describe('subscription matching for sender', () => {
       subscriber,
       eventBridgeConfig: {
         durable: false,
+        autoacknowledge: true,
+        shared: true,
       },
     }
 

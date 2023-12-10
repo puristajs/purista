@@ -1,2 +1,2 @@
-export * from './EventBridgeBaseClass.impl'
-export * from './types'
+export * from './EventBridgeBaseClass.impl.js'
+export * from './types/index.js'

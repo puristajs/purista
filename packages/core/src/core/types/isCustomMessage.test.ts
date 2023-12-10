@@ -1,5 +1,5 @@
-import { getCommandSuccessMessageMock, getCustomMessageMessageMock } from '../../mocks'
-import { isCustomMessage } from './isCustomMessage.impl'
+import { getCommandSuccessMessageMock, getCustomMessageMessageMock } from '../../mocks/index.js'
+import { isCustomMessage } from './isCustomMessage.impl.js'
 
 describe('isCustomMessage', () => {
   it('returns true if it is a custom message', () => {

@@ -1,6 +1,6 @@
-import type { Command, CommandSuccessResponse, InstanceId } from '../types'
-import { EBMessageType } from '../types'
-import { getNewTraceId } from './getNewTraceId.impl'
+import type { Command, CommandSuccessResponse, InstanceId } from '../types/index.js'
+import { EBMessageType } from '../types/index.js'
+import { getNewTraceId } from './getNewTraceId.impl.js'
 
 /**
  *

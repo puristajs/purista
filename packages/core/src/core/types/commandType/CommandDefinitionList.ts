@@ -1,6 +1,6 @@
-import type { ServiceClass } from '../ServiceClass'
-import type { CommandDefinition } from './CommandDefinition'
-import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase'
+import type { ServiceClass } from '../ServiceClass.js'
+import type { CommandDefinition } from './CommandDefinition.js'
+import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase.js'
 
 /**
  * Helper type for creating list of service commands to be passed as input to service class

@@ -1,4 +1,4 @@
-import { getNewTraceId } from './getNewTraceId.impl'
+import { getNewTraceId } from './getNewTraceId.impl.js'
 
 it('returns a unique id', () => {
   const id1 = getNewTraceId()

@@ -1,13 +1,13 @@
 import type { z } from 'zod'
 
-import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig'
-import type { ServiceClass } from '../ServiceClass'
-import type { CommandAfterGuardHook } from './CommandAfterGuardHook'
-import type { CommandBeforeGuardHook } from './CommandBeforeGuardHook'
-import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase'
-import type { CommandFunction } from './CommandFunction'
-import type { CommandTransformInputHook } from './CommandTransformInputHook'
-import type { CommandTransformOutputHook } from './CommandTransformOutputHook'
+import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
+import type { ServiceClass } from '../ServiceClass.js'
+import type { CommandAfterGuardHook } from './CommandAfterGuardHook.js'
+import type { CommandBeforeGuardHook } from './CommandBeforeGuardHook.js'
+import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase.js'
+import type { CommandFunction } from './CommandFunction.js'
+import type { CommandTransformInputHook } from './CommandTransformInputHook.js'
+import type { CommandTransformOutputHook } from './CommandTransformOutputHook.js'
 
 /**
  * The definition for a command provided by some service.

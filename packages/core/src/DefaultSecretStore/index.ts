@@ -1,3 +1,3 @@
-export * from './DefaultSecretStore.impl'
-export * from './initDefaultSecretStore.impl'
-export * from './types'
+export * from './DefaultSecretStore.impl.js'
+export * from './initDefaultSecretStore.impl.js'
+export * from './types/index.js'

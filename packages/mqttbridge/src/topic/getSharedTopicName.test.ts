@@ -1,8 +1,8 @@
 import { getLoggerMock } from '@purista/core'
 
-import { getDefaultMqttBridgeConfig } from '../getDefaultMqttBridgeConfig.impl'
-import type { MqttBridge } from '../MqttEventBridge'
-import { getSharedTopicName } from './getSharedTopicName.impl'
+import { getDefaultMqttBridgeConfig } from '../getDefaultMqttBridgeConfig.impl.js'
+import type { MqttBridge } from '../MqttEventBridge.js'
+import { getSharedTopicName } from './getSharedTopicName.impl.js'
 
 describe('getSharedTopicName', () => {
   it('returns the topic name for a topic to be a shared one', () => {

@@ -1,2 +1,2 @@
-export * from './CommandDefinitionBuilder.impl'
-export * from './getCommandFunctionWithValidation.impl'
+export * from './CommandDefinitionBuilder.impl.js'
+export * from './getCommandFunctionWithValidation.impl.js'

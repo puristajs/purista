@@ -1,4 +1,4 @@
-import type { EBMessageAddress } from './EBMessageAddress'
+import type { EBMessageAddress } from './EBMessageAddress.js'
 
 /**
  * Invokes a command and returns the result.

@@ -1,8 +1,8 @@
-import { initLogger } from '../../DefaultLogger'
-import { UnhandledError } from '../Error'
-import type { Logger, Prettify, StoreBaseConfig } from '../types'
-import { StatusCode } from '../types'
-import type { SecretStore, SecretStoreCacheMap } from './types'
+import { initLogger } from '../../DefaultLogger/index.js'
+import { UnhandledError } from '../Error/index.js'
+import type { Logger, Prettify, StoreBaseConfig } from '../types/index.js'
+import { StatusCode } from '../types/index.js'
+import type { SecretStore, SecretStoreCacheMap } from './types/index.js'
 
 /**
  * Base class for secret store adapters

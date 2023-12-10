@@ -1,6 +1,6 @@
-import type { EBMessage } from '../types'
-import { isCommand, isCommandSuccessResponse } from '../types'
-import { isDevelop } from './isDevelop.impl'
+import type { EBMessage } from '../types/index.js'
+import { isCommand, isCommandSuccessResponse } from '../types/index.js'
+import { isDevelop } from './isDevelop.impl.js'
 
 /**
  * Helper function for logging.

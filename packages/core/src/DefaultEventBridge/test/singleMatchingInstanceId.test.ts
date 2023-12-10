@@ -1,10 +1,10 @@
 import { stub } from 'sinon'
 
-import type { EBMessage, Subscription } from '../../core'
-import { EBMessageType } from '../../core'
-import { getLoggerMock } from '../../mocks'
-import { getNewSubscriptionStorageEntry } from '../getNewSubscriptionStorageEntry.impl'
-import { isMessageMatchingSubscription } from '../isMessageMatchingSubscription.impl'
+import type { EBMessage, Subscription } from '../../core/index.js'
+import { EBMessageType } from '../../core/index.js'
+import { getLoggerMock } from '../../mocks/index.js'
+import { getNewSubscriptionStorageEntry } from '../getNewSubscriptionStorageEntry.impl.js'
+import { isMessageMatchingSubscription } from '../isMessageMatchingSubscription.impl.js'
 
 describe('subscription matching for instanceId', () => {
   const sender = {

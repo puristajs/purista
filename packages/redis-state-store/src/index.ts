@@ -31,5 +31,6 @@
  *
  * @module
  */
-export * from './RedisStateStore.impl'
-export * from './types'
+export * from './RedisStateStore.impl.js'
+export * from './types.js'
+export * from './version.js'

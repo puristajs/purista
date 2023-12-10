@@ -1,6 +1,6 @@
-import { ServiceEvent } from '../../../../ServiceEvent.enum'
-import { pingV1ServiceBuilder } from '../../pingV1ServiceBuilder'
-import { pingV1LogInputPayloadSchema } from './schema'
+import { ServiceEvent } from '../../../../ServiceEvent.enum.js'
+import { pingV1ServiceBuilder } from '../../pingV1ServiceBuilder.js'
+import { pingV1LogInputPayloadSchema } from './schema.js'
 
 export const logSubscriptionBuilder = pingV1ServiceBuilder
   .getSubscriptionBuilder('log', 'logs the ping events')

@@ -1,1 +1,1 @@
-export * from './config.impl'
+export * from './config.impl.js'

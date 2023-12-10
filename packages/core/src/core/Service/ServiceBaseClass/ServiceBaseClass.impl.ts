@@ -5,14 +5,14 @@ import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 
-import { puristaVersion } from '../../../version'
-import type { ConfigStore } from '../../ConfigStore'
-import type { EventBridge } from '../../EventBridge'
-import type { SecretStore } from '../../SecretStore'
-import type { StateStore } from '../../StateStore'
-import type { Logger, ServiceEvents, ServiceInfoType } from '../../types'
-import { GenericEventEmitter, PuristaSpanTag } from '../../types'
-import { ServiceInfoValidator } from '../ServiceInfoValidator.impl'
+import { puristaVersion } from '../../../version.js'
+import type { ConfigStore } from '../../ConfigStore/index.js'
+import type { EventBridge } from '../../EventBridge/index.js'
+import type { SecretStore } from '../../SecretStore/index.js'
+import type { StateStore } from '../../StateStore/index.js'
+import type { Logger, ServiceEvents, ServiceInfoType } from '../../types/index.js'
+import { GenericEventEmitter, PuristaSpanTag } from '../../types/index.js'
+import { ServiceInfoValidator } from '../ServiceInfoValidator.impl.js'
 
 /**
  * Class which contains basic functions that are not directly related to

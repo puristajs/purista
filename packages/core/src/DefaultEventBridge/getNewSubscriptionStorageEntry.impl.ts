@@ -1,5 +1,5 @@
-import type { CustomMessage, EBMessage, EBMessageType, Subscription } from '../core'
-import type { SubscriptionStorageEntry } from './types'
+import type { CustomMessage, EBMessage, EBMessageType, Subscription } from '../core/index.js'
+import type { SubscriptionStorageEntry } from './types/index.js'
 
 export const getNewSubscriptionStorageEntry = (
   subscription: Subscription,

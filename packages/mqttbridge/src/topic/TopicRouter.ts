@@ -1,8 +1,8 @@
 import type { Logger } from '@purista/core'
 import { initLogger } from '@purista/core'
 
-import type { IncomingMessageFunction } from '../types'
-import { isMatchingTopic } from './isMatchingTopic.impl'
+import type { IncomingMessageFunction } from '../types/index.js'
+import { isMatchingTopic } from './isMatchingTopic.impl.js'
 
 export class TopicRouter {
   routes = new Map<number, { topic: string; fn: IncomingMessageFunction }>()

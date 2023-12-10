@@ -1,7 +1,7 @@
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
-import { HonoTRouter } from './HonoTRouter'
+import { HonoTRouter } from './HonoTRouter.js'
 
 describe('HonoTRouter', () => {
   let router: HonoTRouter<unknown>

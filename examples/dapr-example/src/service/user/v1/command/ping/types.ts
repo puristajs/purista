@@ -4,7 +4,7 @@ import type {
   userV1PingInputParameterSchema,
   userV1PingInputPayloadSchema,
   userV1PingOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export type UserV1PingInputParameter = z.input<typeof userV1PingInputParameterSchema>
 

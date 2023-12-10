@@ -1,9 +1,10 @@
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
-import { StatusCode, UnhandledError } from '../../core'
-import { getLoggerMock } from '../../mocks'
-import { StateStoreBaseClass } from './StateStoreBaseClass.impl'
+import { getLoggerMock } from '../../mocks/index.js'
+import { UnhandledError } from '../Error/index.js'
+import { StatusCode } from '../types/StatusCode.enum.js'
+import { StateStoreBaseClass } from './StateStoreBaseClass.impl.js'
 
 describe('StateStoreBaseClass', () => {
   let sandbox: SinonSandbox

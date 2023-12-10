@@ -1,9 +1,9 @@
-import { userV1ServiceBuilder } from '../../userV1ServiceBuilder'
+import { userV1ServiceBuilder } from '../../userV1ServiceBuilder.js'
 import {
   userV1ComputeDataInputParameterSchema,
   userV1ComputeDataInputPayloadSchema,
   userV1ComputeDataOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export const computeDataCommandBuilder = userV1ServiceBuilder
   .getCommandBuilder('computeData', 'simulates something to demonstrate invoke')

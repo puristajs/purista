@@ -1,8 +1,8 @@
-import type { ContextBase } from '../ContextBase'
-import type { EBMessage } from '../EBMessage'
-import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction'
-import type { InvokeFunction } from '../InvokeFunction'
-import type { Prettify } from '../Prettify'
+import type { ContextBase } from '../ContextBase.js'
+import type { EBMessage } from '../EBMessage.js'
+import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
+import type { InvokeFunction } from '../InvokeFunction.js'
+import type { Prettify } from '../Prettify.js'
 
 /**
  * It provides the original command message.

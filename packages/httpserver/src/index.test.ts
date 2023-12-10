@@ -1,5 +1,4 @@
-import * as index from './index'
-import { puristaVersion } from './version'
+import { httpServerV1Service, puristaVersion } from './index.js'
 
 describe('exports httpserver service', () => {
   it('has a version', () => {
@@ -7,6 +6,6 @@ describe('exports httpserver service', () => {
   })
 
   it('exports httpServerV1Service', () => {
-    expect(index.httpServerV1Service).toBeDefined()
+    expect(httpServerV1Service).toBeDefined()
   })
 })

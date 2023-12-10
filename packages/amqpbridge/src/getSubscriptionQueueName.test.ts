@@ -1,6 +1,6 @@
 import type { EBMessageAddress } from '@purista/core'
 
-import { getSubscriptionQueueName } from './getSubscriptionQueueName.impl'
+import { getSubscriptionQueueName } from './getSubscriptionQueueName.impl.js'
 
 describe('getSubscriptionQueueName', () => {
   it('should return the correct subscription queue name with prefix', () => {

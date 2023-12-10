@@ -1,8 +1,8 @@
 import type { ServiceInfoType } from '@purista/core'
 import { ServiceBuilder } from '@purista/core'
 
-import { generalUserServiceInfo } from '../generalUserServiceInfo'
-import { userServiceV1ConfigSchema } from './userServiceConfig'
+import { generalUserServiceInfo } from '../generalUserServiceInfo.js'
+import { userServiceV1ConfigSchema } from './userServiceConfig.js'
 
 export const userServiceInfo: ServiceInfoType = {
   serviceVersion: '1',

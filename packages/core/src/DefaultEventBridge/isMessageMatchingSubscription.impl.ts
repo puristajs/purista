@@ -1,6 +1,6 @@
-import type { EBMessage, Logger } from '../core'
-import { isCommand, isCommandResponse, isCustomMessage, isInfoMessage } from '../core'
-import type { SubscriptionStorageEntry } from './types'
+import type { EBMessage, Logger } from '../core/index.js'
+import { isCommand, isCommandResponse, isCustomMessage, isInfoMessage } from '../core/index.js'
+import type { SubscriptionStorageEntry } from './types/index.js'
 
 export const isMessageMatchingSubscription = (
   _log: Logger,

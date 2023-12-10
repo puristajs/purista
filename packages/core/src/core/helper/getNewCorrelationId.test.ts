@@ -1,4 +1,4 @@
-import { getNewCorrelationId } from './getNewCorrelationId.impl'
+import { getNewCorrelationId } from './getNewCorrelationId.impl.js'
 
 it('returns a unique id', () => {
   const id1 = getNewCorrelationId()

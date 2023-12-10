@@ -3,11 +3,11 @@ import { join } from 'node:path'
 import type { StoreBaseConfig } from '@purista/core'
 import { HttpClient, SecretStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 
-import type { DaprClientConfig } from '../DaprClient'
-import { getDefaultClientConfig } from '../DaprClient/getDefaultClientConfig.impl'
-import { DAPR_API_VERSION } from '../types'
-import { puristaVersion } from '../version'
-import type { DaprSecretStoreConfig } from './types'
+import { getDefaultClientConfig } from '../DaprClient/getDefaultClientConfig.impl.js'
+import type { DaprClientConfig } from '../DaprClient/index.js'
+import { DAPR_API_VERSION } from '../types/index.js'
+import { puristaVersion } from '../version.js'
+import type { DaprSecretStoreConfig } from './types/index.js'
 
 /**
  * DaprSecretStore is an adapter which connects to the secret store provided by the underlaying Dapr infrastructure.

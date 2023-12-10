@@ -3,7 +3,7 @@ import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 import type { RedisClientType, RedisFunctions, RedisModules, RedisScripts } from '@redis/client'
 import { createClient } from '@redis/client'
 
-import type { RedisStoreConfig } from './types'
+import type { RedisStoreConfig } from './types.js'
 
 /**
  * A state store for using redis as storage.

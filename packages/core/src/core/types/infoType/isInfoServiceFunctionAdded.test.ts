@@ -1,7 +1,7 @@
-import { createInfoMessage } from '../../helper'
-import type { EBMessage } from '../../types'
-import { EBMessageType } from '../../types'
-import { isInfoServiceFunctionAdded } from './isInfoServiceFunctionAdded.impl'
+import { createInfoMessage } from '../../helper/index.js'
+import type { EBMessage } from '../EBMessage.js'
+import { EBMessageType } from '../EBMessageType.enum.js'
+import { isInfoServiceFunctionAdded } from './isInfoServiceFunctionAdded.impl.js'
 
 describe('isInfoServiceFunctionAdded', () => {
   it('returns true if it is a info service added message', () => {
@@ -9,6 +9,7 @@ describe('isInfoServiceFunctionAdded', () => {
       serviceName: 'serviceName',
       serviceVersion: '1',
       serviceTarget: '',
+      instanceId: 'a',
     })
     expect(isInfoServiceFunctionAdded(message as EBMessage)).toBeTruthy()
   })
@@ -18,6 +19,7 @@ describe('isInfoServiceFunctionAdded', () => {
       serviceName: 'serviceName',
       serviceVersion: '1',
       serviceTarget: '',
+      instanceId: 'a',
     })
     expect(isInfoServiceFunctionAdded(message as EBMessage)).toBeFalsy()
   })

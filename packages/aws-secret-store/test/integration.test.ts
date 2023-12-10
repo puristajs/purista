@@ -3,7 +3,7 @@ import { resolve } from 'node:path'
 
 import { getLoggerMock } from '@purista/core'
 
-import { AWSSecretStore } from '../src/AWSSecretStore.impl'
+import { AWSSecretStore } from '../src/AWSSecretStore.impl.js'
 
 describe('AWS Secret Manager secret store', () => {
   beforeAll(async () => {

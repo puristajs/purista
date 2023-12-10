@@ -21,8 +21,8 @@ import {
 } from '@purista/core'
 import { HTTP } from 'cloudevents'
 
-import type { HttpEventBridge } from './HttpEventBridge.impl'
-import type { HttpEventBridgeConfig, RouterFunction } from './types'
+import type { HttpEventBridge } from './HttpEventBridge.impl.js'
+import type { HttpEventBridgeConfig, RouterFunction } from './types/index.js'
 
 export const getCommandHandler = function (
   this: HttpEventBridge<HttpEventBridgeConfig>,

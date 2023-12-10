@@ -1,9 +1,9 @@
-import type { CorrelationId } from '../CorrelationId'
-import type { EBMessageBase } from '../EBMessageBase'
-import type { EBMessageSenderAddress } from '../EBMessageSenderAddress'
-import type { EBMessageType } from '../EBMessageType.enum'
-import type { Prettify } from '../Prettify'
-import type { StatusCode } from '../StatusCode.enum'
+import type { CorrelationId } from '../CorrelationId.js'
+import type { EBMessageBase } from '../EBMessageBase.js'
+import type { EBMessageSenderAddress } from '../EBMessageSenderAddress.js'
+import type { EBMessageType } from '../EBMessageType.enum.js'
+import type { Prettify } from '../Prettify.js'
+import type { StatusCode } from '../StatusCode.enum.js'
 
 /**
  * CommandErrorResponse is a response to a specific previously received command which indicates some failure.

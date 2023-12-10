@@ -1,5 +1,4 @@
-import * as index from './index'
-import { puristaVersion } from './version'
+import { AzureSecretStore, puristaVersion } from './index.js'
 
 describe('exports AzureSecretStore', () => {
   it('has a version', () => {
@@ -7,6 +6,6 @@ describe('exports AzureSecretStore', () => {
   })
 
   it('exports AzureSecretStore', () => {
-    expect(index.AzureSecretStore).toBeDefined()
+    expect(AzureSecretStore).toBeDefined()
   })
 })

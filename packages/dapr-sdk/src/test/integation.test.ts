@@ -2,7 +2,7 @@ import { serve } from '@hono/node-server'
 import { getLoggerMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 
-import { DaprEventBridge } from '../DaprEventBridge'
+import { DaprEventBridge } from '../DaprEventBridge/index.js'
 
 describe('DaprEventbridge', () => {
   let bridge: DaprEventBridge

@@ -1,5 +1,5 @@
-import type { StatusCode } from '../types'
-import { getErrorMessageForCode } from './getErrorMessageForCode.impl'
+import type { StatusCode } from '../types/index.js'
+import { getErrorMessageForCode } from './getErrorMessageForCode.impl.js'
 
 it('returns a message string for error code', () => {
   expect(getErrorMessageForCode(200)).toBe('OK')

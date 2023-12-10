@@ -1,4 +1,4 @@
-import { getNewInstanceId } from './getNewInstanceId.impl'
+import { getNewInstanceId } from './getNewInstanceId.impl.js'
 
 it('returns a unique id', () => {
   const id1 = getNewInstanceId()

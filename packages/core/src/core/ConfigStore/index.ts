@@ -1,2 +1,2 @@
-export * from './ConfigStoreBaseClass.impl'
-export * from './types'
+export * from './ConfigStoreBaseClass.impl.js'
+export * from './types/index.js'

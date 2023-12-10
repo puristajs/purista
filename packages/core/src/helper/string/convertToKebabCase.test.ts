@@ -1,4 +1,4 @@
-import { convertToKebabCase } from './convertToKebabCase.impl'
+import { convertToKebabCase } from './convertToKebabCase.impl.js'
 
 describe('convertToKebabCase', () => {
   it('converts from snakeCase', () => {

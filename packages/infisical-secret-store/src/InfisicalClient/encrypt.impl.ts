@@ -1,7 +1,7 @@
 import { createCipheriv, randomBytes } from 'node:crypto'
 
-import { ALGORITHM, BLOCK_SIZE_BYTES } from './constants'
-import type { EncryptInput } from './types'
+import { ALGORITHM, BLOCK_SIZE_BYTES } from './constants.js'
+import type { EncryptInput } from './types/index.js'
 
 export const encrypt = (input: EncryptInput) => {
   const { text, secret } = input

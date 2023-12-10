@@ -1,13 +1,13 @@
 import { HandledError, StatusCode } from '@purista/core'
 
-import type { User } from '../../../../../types'
-import { StateStoreKey } from '../../../../../types'
-import { userV1ServiceBuilder } from '../../userV1ServiceBuilder'
+import type { User } from '../../../../../types/index.js'
+import { StateStoreKey } from '../../../../../types/index.js'
+import { userV1ServiceBuilder } from '../../userV1ServiceBuilder.js'
 import {
   userV1GetUserByIdInputParameterSchema,
   userV1GetUserByIdInputPayloadSchema,
   userV1GetUserByIdOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export const getUserByIdCommandBuilder = userV1ServiceBuilder
   .getCommandBuilder('getUserById', 'returns the user given by the user id')

@@ -1,6 +1,6 @@
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 
-import type { Logger, LogLevelName, Prettify } from '../../core'
+import type { Logger, LogLevelName, Prettify } from '../../core/index.js'
 
 /**
  * Tha basic configuration for a HTTPClient

@@ -1,4 +1,4 @@
-import type { Encrypter } from '../types'
+import type { Encrypter } from '../types/index.js'
 
 export const plainEncrypter: Encrypter = {
   'utf-8': {

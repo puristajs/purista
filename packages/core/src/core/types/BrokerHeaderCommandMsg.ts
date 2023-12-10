@@ -1,6 +1,6 @@
-import type { BrokerHeaderCustomMsg } from './BrokerHeaderCustomMsg'
-import type { InstanceId } from './InstanceId'
-import type { Prettify } from './Prettify'
+import type { BrokerHeaderCustomMsg } from './BrokerHeaderCustomMsg.js'
+import type { InstanceId } from './InstanceId.js'
+import type { Prettify } from './Prettify.js'
 
 export type BrokerHeaderCommandMsg = Prettify<
   BrokerHeaderCustomMsg & {

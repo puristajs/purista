@@ -1,6 +1,6 @@
 import { join } from 'node:path/posix'
 
-import type { MqttBridge } from '../MqttEventBridge'
+import type { MqttBridge } from '../MqttEventBridge.js'
 
 type GetSharedTopicNameFn = (this: MqttBridge, topic: string) => string
 

@@ -1,8 +1,8 @@
-import { getCustomMessageMessageMock } from '../../../mocks'
-import { createInfoMessage } from '../../helper'
-import type { EBMessage } from '../../types'
-import { EBMessageType } from '../../types'
-import { isInfoMessage } from './isInfoMessage.impl'
+import { getCustomMessageMessageMock } from '../../../mocks/index.js'
+import { createInfoMessage } from '../../helper/index.js'
+import type { EBMessage } from '../EBMessage.js'
+import { EBMessageType } from '../EBMessageType.enum.js'
+import { isInfoMessage } from './isInfoMessage.impl.js'
 
 describe('isInfoMessage', () => {
   it('returns true if it is a info message', () => {
@@ -10,6 +10,7 @@ describe('isInfoMessage', () => {
       serviceName: 'serviceName',
       serviceVersion: '1',
       serviceTarget: '',
+      instanceId: 'a',
     })
     expect(isInfoMessage(message as EBMessage)).toBeTruthy()
   })

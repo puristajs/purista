@@ -1,7 +1,7 @@
 import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
 
-import type { Logger } from '../core'
+import type { Logger } from '../core/index.js'
 
 /**
  * Mocks the logger and methods are stubs

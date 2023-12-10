@@ -1,27 +1,39 @@
-import * as index from './index'
+import {
+  getCommandSubscriptionTopic,
+  getDefaultNatsBridgeConfig,
+  getQueueGroupName,
+  getSubscriptionTopic,
+  getTopicName,
+  NatsBridge,
+  puristaVersion,
+} from './index.js'
 
 describe('exports', () => {
+  it('has a version', () => {
+    expect(puristaVersion).toBeDefined()
+  })
+
   it('exports NatsBridge', () => {
-    expect(index.NatsBridge).toBeDefined()
+    expect(NatsBridge).toBeDefined()
   })
 
   it('exports getCommandSubscriptionTopic', () => {
-    expect(index.getCommandSubscriptionTopic).toBeDefined()
+    expect(getCommandSubscriptionTopic).toBeDefined()
   })
 
   it('exports getDefaultNatsBridgeConfig', () => {
-    expect(index.getDefaultNatsBridgeConfig).toBeDefined()
+    expect(getDefaultNatsBridgeConfig).toBeDefined()
   })
 
   it('exports getQueueGroupName', () => {
-    expect(index.getQueueGroupName).toBeDefined()
+    expect(getQueueGroupName).toBeDefined()
   })
 
   it('exports getSubscriptionTopic', () => {
-    expect(index.getSubscriptionTopic).toBeDefined()
+    expect(getSubscriptionTopic).toBeDefined()
   })
 
   it('exports getTopicName', () => {
-    expect(index.getTopicName).toBeDefined()
+    expect(getTopicName).toBeDefined()
   })
 })
