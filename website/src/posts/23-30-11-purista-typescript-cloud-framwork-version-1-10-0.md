@@ -12,7 +12,6 @@ category:
  - version
  - news
  - announcement
- - 
 star: true
 isOriginal: true
 image: https://purista.dev/graphic/nats_event_bridge_header.png

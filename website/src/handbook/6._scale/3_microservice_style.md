@@ -45,7 +45,7 @@ In case, you are using the `@purista/httpserver` package, keep in mind, that the
 - any bigger server/cloud provider has [kubernetes](https://kubernetes.io) focused solutions in his portfolio
 :::
 
-::: danger Cons
+::: caution Cons
 
 - much more complex orchestration to handle and will probably need some additional layer like [kubernetes.io](https://kubernetes.io) or [dapr.io](https://dapr.io)
 - needs knowledge, time, and ressources to be configured correctly

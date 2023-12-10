@@ -28,7 +28,7 @@ Some function "outside" your service can listen to these events, and process the
 - the dependency will become optional - e.g. can simpler replaced by other solutions
 :::
 
-::: danger CONTRA
+::: caution CONTRA
 
 - a bit more overhead at the beginning
 :::

@@ -37,7 +37,7 @@ You can:
 - dead letter queues
 :::
 
-::: danger Cons
+::: caution Cons
 
 - needs managing of an AMQP broker
 - no auto-reconnect

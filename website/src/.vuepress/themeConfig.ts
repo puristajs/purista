@@ -217,13 +217,13 @@ export default hopeTheme({
     },
     photoSwipe: true,
     mdEnhance: {
-      container: true,
       mermaid: true,
       flowchart: true,
       checkLinks: { status: 'dev' },
       codetabs: true,
       tabs: true,
-      presentation: {
+      hint: true,
+      revealJs: {
         plugins: ['highlight', 'math', 'search', 'notes', 'zoom'],
       },
     },

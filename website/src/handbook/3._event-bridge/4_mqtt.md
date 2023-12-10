@@ -27,7 +27,7 @@ PURISTA provides the `@purista/mqttbridge`
 - MQTT is a mature protocol and widely used (IoT/edge)
 :::
 
-::: danger Cons
+::: caution Cons
 
 - needs managing of an MQTT broker
 - only MQTT 5 is supported
@@ -89,7 +89,7 @@ The MQTT 5 topic alias feature is used for mapping a message to the correlating 
 Subscriptions are per default MQTT 5 shared subscriptions.  
 Shared subscriptions in MQTT are simple to use. It only requires prefixing the topic with `$share` and a shared subscription name (pubsub name).
 
-::: danger Be aware
+::: caution Be aware
 The shared subscription name (pubsub name) must differ from the topic prefix. Otherwise shared subscriptions are not working (at least in mosquitto).
 `$share/purista/purista/...` does not work, while `$share/purista_group/purista/...` is working
 :::
