@@ -12,7 +12,7 @@ export const getDefaultHttpEventBridgeConfig = (): EventBridgeConfig<Omit<HttpEv
     pathPrefix: 'purista',
     subscriptionPayloadAsCloudEvent: false,
     commandPayloadAsCloudEvent: false,
-    enableHttpCompression: false,
+    enableHttpCompression: true,
   }
 
   return config
