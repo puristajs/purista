@@ -16,6 +16,6 @@ export type GetHttpServerConfig = {
   disableEndpointExposing?: boolean
   /** the api mount path @default /api */
   apiMountPath?: string
-  /** enable HTTP compression in web server */
+  /** enable HTTP compression in web server @default true */
   enableHttpCompression?: boolean
 }

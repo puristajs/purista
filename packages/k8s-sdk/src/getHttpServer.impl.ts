@@ -25,7 +25,7 @@ export const getHttpServer = (input: GetHttpServerConfig, name = 'K8sHttpHelperS
   const logger = input.logger.getChildLogger({ name, puristaVersion, hostname: hostnameWithFallback })
   const app = new Hono()
 
-  if (input.enableHttpCompression) {
+  if (input.enableHttpCompression || input.enableHttpCompression === undefined) {
     app.use('*', compress())
   }
 

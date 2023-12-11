@@ -79,7 +79,7 @@ export type HttpEventBridgeConfig = {
   commandPayloadAsCloudEvent?: boolean
   /**
    * enable HTTP compression in web server
-   * @default false
+   * @default true
    */
   enableHttpCompression?: boolean
 }
