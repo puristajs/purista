@@ -78,14 +78,6 @@ export class ServiceBuilder<
   }
 
   /**
-   *
-   * @deprecated use addCommandDefinition instead of addFunctionDefinition as it will be removed soon.
-   */
-  addFunctionDefinition(...functions: CommandDefinitionList<ServiceClassType>) {
-    return this.addCommandDefinition(...functions)
-  }
-
-  /**
    * `addCommandDefinition` adds a list of command definitions to the service builder
    * @param commands - CommandDefinitionList
    * @returns The service builder
@@ -221,18 +213,6 @@ export class ServiceBuilder<
     })
 
     return this.instance as ServiceClassType
-  }
-
-  /**
-   *
-   * @deprecated user getCommandBuilder instead. It will be removed soon.
-   */
-  getFunctionBuilder(
-    commandName: string,
-    description: string,
-    eventName?: string,
-  ): CommandDefinitionBuilder<ServiceClassType> {
-    return new CommandDefinitionBuilder<ServiceClassType>(commandName, description, eventName)
   }
 
   /**

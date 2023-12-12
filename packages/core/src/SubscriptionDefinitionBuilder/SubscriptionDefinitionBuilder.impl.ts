@@ -125,18 +125,6 @@ export class SubscriptionDefinitionBuilder<
   }
 
   /**
-   * Filter messages only from instance id
-   * @param instanceId the instance id to subscribe
-   * @returns
-   * @deprecated Use filterSentFrom or filterReceivedBy
-   */
-  filterInstanceId(instanceId: InstanceId) {
-    this.sender = this.sender || {}
-    this.sender.instanceId = instanceId
-    return this
-  }
-
-  /**
    * Filter messages only for principalId
    * @param principalId the principal id to subscribe
    * @returns
