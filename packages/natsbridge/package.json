@@ -29,7 +29,6 @@
       }
     }
   },
-  "typings": "lib/types/index.d.ts",
   "files": [
     "lib/**/*"
   ],
