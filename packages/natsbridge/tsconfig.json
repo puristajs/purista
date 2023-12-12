@@ -1,6 +1,15 @@
 {
   "extends": "../../tsconfig.base.json",
-  
+  "compilerOptions": {
+    "outDir": "./dist",
+    "declaration": true,
+    "sourceMap": false,
+    "declarationMap": true,
+    "types": [
+      "vitest/globals",
+      "node"
+    ]
+  },
   "include": [
     "./src/index.ts"
   ],
