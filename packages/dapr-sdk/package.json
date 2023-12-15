@@ -55,7 +55,7 @@
     "@opentelemetry/semantic-conventions": "^1.18.1",
     "@purista/core": "*",
     "@purista/base-http-bridge": "*",
-    "hono": "^3.10.1",
+    "hono": "^3.11.7",
     "trouter": "^3.2.1"
   },
   "peerDependencies": {
