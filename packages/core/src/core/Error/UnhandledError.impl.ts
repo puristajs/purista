@@ -44,7 +44,7 @@ export class UnhandledError extends Error {
    * @returns UnhandledError
    */
   static fromError(err: any, errorCode?: StatusCode, data?: unknown, traceId?: TraceId): HandledError {
-    const error = new HandledError(errorCode || StatusCode.InternalServerError, err.message, data, traceId)
+    const error = new UnhandledError(errorCode || StatusCode.InternalServerError, err.message, data, traceId)
     error.stack = err.stack
     error.cause = err.cause
     return error
