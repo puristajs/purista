@@ -31,24 +31,24 @@
     }
   },
   "devDependencies": {
-    "tshy": "^1.8.1",
-    "@types/node": "^20.9.2",
-    "hono": "^3.11.4",
+    "tshy": "^1.8.2",
+    "@types/node": "^20.10.8",
+    "hono": "^3.12.1",
     "sinon": "^17.0.1",
     "trouter": "^4.0.0"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.7.0",
-    "@opentelemetry/resources": "^1.18.1",
-    "@opentelemetry/sdk-trace-node": "^1.18.1",
-    "@opentelemetry/semantic-conventions": "^1.18.1",
-    "openapi3-ts": "^4.1.2",
-    "pino": "^8.16.2",
+    "@opentelemetry/resources": "^1.19.0",
+    "@opentelemetry/sdk-trace-node": "^1.19.0",
+    "@opentelemetry/semantic-conventions": "^1.19.0",
+    "openapi3-ts": "^4.2.1",
+    "pino": "^8.17.2",
     "zod": "^3.22.4",
     "ts-deepmerge": "^6.1.0"
   },
   "peerDependencies": {
-    "@types/sinon": "^17.x",
+    "@types/sinon": "^17.0.3",
     "sinon": "^17.x"
   },
   "peerDependenciesMeta": {
