@@ -3,6 +3,7 @@
     // Required
     "module": "ESNext",
     "esModuleInterop": true,
+    "skipLibCheck": true,
     "moduleResolution": "node",
     // Not required
     "strict": true,
