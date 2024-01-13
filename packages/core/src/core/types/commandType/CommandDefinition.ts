@@ -1,6 +1,7 @@
 import type { z } from 'zod'
 
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
+import type { FromInvokeToOtherType } from '../FromInvokeToOtherType.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { CommandAfterGuardHook } from './CommandAfterGuardHook.js'
 import type { CommandBeforeGuardHook } from './CommandBeforeGuardHook.js'
@@ -23,6 +24,7 @@ export type CommandDefinition<
   FunctionPayloadType = MessagePayloadType,
   FunctionParamsType = MessageParamsType,
   FunctionResultType = unknown,
+  Invokes = {},
 > = {
   /** the name of the command */
   commandName: string
@@ -39,7 +41,8 @@ export type CommandDefinition<
     MessageParamsType,
     FunctionPayloadType,
     FunctionParamsType,
-    FunctionResultType
+    FunctionResultType,
+    Invokes
   >
   /** the eventName for the command response */
   eventName?: string
@@ -57,7 +60,8 @@ export type CommandDefinition<
         MessagePayloadType,
         MessageParamsType,
         FunctionPayloadType,
-        FunctionParamsType
+        FunctionParamsType,
+        Invokes
       >
     >
     afterGuard?: Record<
@@ -68,7 +72,8 @@ export type CommandDefinition<
         MessageParamsType,
         FunctionResultType,
         FunctionPayloadType,
-        FunctionParamsType
+        FunctionParamsType,
+        Invokes
       >
     >
     transformOutput?: {
@@ -82,4 +87,8 @@ export type CommandDefinition<
       >
     }
   }
+  invokes: FromInvokeToOtherType<
+    Invokes,
+    { outputSchema?: z.ZodType; payloadSchema?: z.ZodType; parameterSchema?: z.ZodType }
+  >
 }

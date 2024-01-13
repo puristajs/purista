@@ -2,7 +2,7 @@
  * General service information
  */
 export type ServiceInfoType = {
-  serviceName: string
-  serviceVersion: string
+  serviceName: Exclude<string, ''>
+  serviceVersion: Exclude<string, ''>
   serviceDescription: string
 }

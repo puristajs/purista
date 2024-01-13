@@ -1,5 +1,5 @@
 import { ServiceEvent } from '../../../../ServiceEvent.enum.js'
-import type { UserV1GetUserByIdOutputPayload } from '../../../../user/v1/index.js'
+import type { UserV1GetUserByIdInputParameter, UserV1GetUserByIdOutputPayload } from '../../../../user/v1/index.js'
 import { emailV1ServiceBuilder } from '../../emailV1ServiceBuilder.js'
 import { emailV1SendWelcomeEmailInputPayloadSchema, emailV1SendWelcomeEmailOutputPayloadSchema } from './schema.js'
 
@@ -8,6 +8,7 @@ export const sendWelcomeEmailSubscriptionBuilder = emailV1ServiceBuilder
   .subscribeToEvent(ServiceEvent.NewUserRegistered)
   .addPayloadSchema(emailV1SendWelcomeEmailInputPayloadSchema)
   .addOutputSchema(ServiceEvent.WelcomeEmailSent, emailV1SendWelcomeEmailOutputPayloadSchema)
+  .canInvoke<undefined, UserV1GetUserByIdInputParameter, UserV1GetUserByIdOutputPayload>('User', '1', 'getUserById')
   .setSubscriptionFunction(async function (context, payload, _parameter) {
     context.logger.info('sendWelcomeEmail starting')
     const config = await context.configs.getConfig('emailProviderUrl')
@@ -15,12 +16,7 @@ export const sendWelcomeEmailSubscriptionBuilder = emailV1ServiceBuilder
 
     context.logger.info(`Using email provider ${config.emailProviderUrl} with token ${secrets.emailProviderAuthToken}`)
 
-    const user = await context.invoke<UserV1GetUserByIdOutputPayload>(
-      { serviceName: 'User', serviceVersion: '1', serviceTarget: 'getUserById' },
-      undefined,
-      payload,
-    )
-
+    const user = await context.service.User['1'].getUserById(undefined, payload)
     // add your business logic here
     context.logger.info(`Welcome email to user sent to ${user.email}`)
 

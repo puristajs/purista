@@ -12,6 +12,7 @@ export const getCommandFunctionWithValidation = function <
   FunctionPayloadType = MessagePayloadType,
   FunctionParamsType = MessageParamsType,
   FunctionResultType = MessageResultType,
+  Invokes = {},
 >(
   fn: CommandFunction<
     ServiceClassType,
@@ -19,7 +20,8 @@ export const getCommandFunctionWithValidation = function <
     MessageParamsType,
     FunctionPayloadType,
     FunctionParamsType,
-    FunctionResultType
+    FunctionResultType,
+    Invokes
   >,
   inputPayloadSchema: z.ZodType<FunctionPayloadType, z.ZodTypeDef, MessagePayloadType> | undefined,
   inputParameterSchema: z.ZodType<FunctionParamsType, z.ZodTypeDef, MessageParamsType> | undefined,
@@ -31,7 +33,8 @@ export const getCommandFunctionWithValidation = function <
       MessagePayloadType,
       MessageParamsType,
       FunctionPayloadType,
-      FunctionParamsType
+      FunctionParamsType,
+      Invokes
     >
   > = {},
 ): CommandFunction<
@@ -40,7 +43,8 @@ export const getCommandFunctionWithValidation = function <
   MessageParamsType,
   FunctionPayloadType,
   FunctionParamsType,
-  FunctionResultType
+  FunctionResultType,
+  Invokes
 > {
   const wrapped: CommandFunction<
     ServiceClassType,
@@ -48,7 +52,8 @@ export const getCommandFunctionWithValidation = function <
     MessageParamsType,
     FunctionPayloadType,
     FunctionParamsType,
-    FunctionResultType
+    FunctionResultType,
+    Invokes
   > = async function (context, payload, parameter): Promise<FunctionResultType> {
     const { logger, startActiveSpan, wrapInSpan } = context
     let safePayload = payload as unknown as FunctionPayloadType

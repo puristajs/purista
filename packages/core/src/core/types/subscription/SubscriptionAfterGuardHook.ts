@@ -12,9 +12,10 @@ export type SubscriptionAfterGuardHook<
   FunctionResultType = unknown,
   FunctionPayloadOutputType = unknown,
   FunctionParameterType = unknown,
+  Invokes = {},
 > = (
   this: ServiceClassType,
-  context: SubscriptionFunctionContext,
+  context: SubscriptionFunctionContext<Invokes>,
   result: Readonly<FunctionResultType>,
   payload: Readonly<FunctionPayloadOutputType>,
   parameter: Readonly<FunctionParameterType>,

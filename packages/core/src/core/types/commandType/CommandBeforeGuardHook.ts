@@ -14,9 +14,10 @@ export type CommandBeforeGuardHook<
   MessageParamsType = unknown,
   FunctionPayloadType = MessagePayloadType,
   FunctionParamsType = MessageParamsType,
+  Invokes = {},
 > = (
   this: ServiceClassType,
-  context: CommandFunctionContext<MessagePayloadType, MessageParamsType>,
+  context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes>,
   payload: Readonly<FunctionPayloadType>,
   parameter: Readonly<FunctionParamsType>,
 ) => Promise<void>

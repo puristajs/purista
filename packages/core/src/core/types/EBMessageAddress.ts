@@ -5,11 +5,11 @@ import type { InstanceId } from './InstanceId.js'
  */
 export type EBMessageAddress = {
   /** the name of the service */
-  serviceName: string
+  serviceName: Exclude<string, ''>
   /** the version of the service */
-  serviceVersion: string
+  serviceVersion: Exclude<string, ''>
   /** the name of the command or subscription */
-  serviceTarget: string
+  serviceTarget: Exclude<string, ''>
   /** instance id of eventbridge */
-  instanceId?: InstanceId
+  instanceId?: Exclude<InstanceId, ''>
 }

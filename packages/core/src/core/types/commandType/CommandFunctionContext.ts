@@ -13,12 +13,19 @@ import type { Command } from './Command.js'
  *
  * @group Command
  */
-export type CommandFunctionContextEnhancements<MessagePayloadType = unknown, MessageParamsType = unknown> = {
+export type CommandFunctionContextEnhancements<
+  MessagePayloadType = unknown,
+  MessageParamsType = unknown,
+  Invokes = {},
+> = {
   /** the original message */
   message: Readonly<Command<MessagePayloadType, MessageParamsType>>
   /** emit a custom message */
   emit: EmitCustomMessageFunction
   /**
+   * @deprecated Please use service instead and define the invocations with canInvoke in command builder.
+   *
+   *
    * Invokes a command and returns the result.
    * It is recommended to validate the result against a schema which only contains the data you actually need.
    *
@@ -37,6 +44,21 @@ export type CommandFunctionContextEnhancements<MessagePayloadType = unknown, Mes
    * ```
    */
   invoke: InvokeFunction
+  /**
+   * Invokes a command and returns the result.
+   * It is recommended to validate the result against a schema which only contains the data you actually need.
+   *
+   * @example ```typescript
+   * // define your invocation in command builder
+   * .canInvoke('ServiceA', '1', 'test', responseOutputSchema, payloadSchema, parameterSchema)
+   * .setCommandFunction(async function (context, payload, _parameter) {
+   *    const inputPayload = { my: 'input' }
+   *    const inputParameter = { search: 'for_me' }
+   *    const result = await context.service.ServiceA[1].test(inputPayload,inputParameter)
+   * })
+   * ```
+   */
+  service: Invokes
 }
 
 /**
@@ -44,6 +66,6 @@ export type CommandFunctionContextEnhancements<MessagePayloadType = unknown, Mes
  *
  * @group Command
  */
-export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsType = unknown> = Prettify<
-  ContextBase & CommandFunctionContextEnhancements<MessagePayloadType, MessageParamsType>
+export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsType = unknown, Invokes = {}> = Prettify<
+  ContextBase & CommandFunctionContextEnhancements<MessagePayloadType, MessageParamsType, Invokes>
 >

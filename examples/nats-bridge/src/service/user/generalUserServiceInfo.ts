@@ -1,6 +1,6 @@
 import type { ServiceInfoType } from '@purista/core'
 
-export const generalUserServiceInfo: Omit<ServiceInfoType, 'serviceVersion'> = {
+export const generalUserServiceInfo = {
   serviceName: 'User',
   serviceDescription: 'manage user information',
-}
+} as const satisfies Omit<ServiceInfoType, 'serviceVersion'>

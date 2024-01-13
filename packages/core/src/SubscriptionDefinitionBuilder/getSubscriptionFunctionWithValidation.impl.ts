@@ -12,6 +12,7 @@ export const getSubscriptionFunctionWithValidation = function <
   FunctionPayloadType = MessagePayloadType,
   FunctionParamsType = MessageParamsType,
   FunctionResultType = MessageResultType,
+  Invokes = {},
 >(
   fn: SubscriptionFunction<
     ServiceClassType,
@@ -19,14 +20,15 @@ export const getSubscriptionFunctionWithValidation = function <
     MessageParamsType,
     FunctionPayloadType,
     FunctionParamsType,
-    FunctionResultType
+    FunctionResultType,
+    Invokes
   >,
   inputPayloadSchema: z.ZodType<FunctionPayloadType, z.ZodTypeDef, MessagePayloadType> | undefined,
   inputParameterSchema: z.ZodType<FunctionParamsType, z.ZodTypeDef, MessageParamsType> | undefined,
   outputPayloadSchema: z.ZodType<MessageResultType, z.ZodTypeDef, FunctionResultType> | undefined,
   beforeGuards: Record<
     string,
-    SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType>
+    SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType, Invokes>
   > = {},
 ): SubscriptionFunction<
   ServiceClassType,
@@ -34,7 +36,8 @@ export const getSubscriptionFunctionWithValidation = function <
   MessageParamsType,
   FunctionPayloadType,
   FunctionParamsType,
-  FunctionResultType
+  FunctionResultType,
+  Invokes
 > {
   const wrapped: SubscriptionFunction<
     ServiceClassType,
@@ -42,7 +45,8 @@ export const getSubscriptionFunctionWithValidation = function <
     MessageParamsType,
     FunctionPayloadType,
     FunctionParamsType,
-    FunctionResultType
+    FunctionResultType,
+    Invokes
   > = async function (context, payload, parameter): Promise<FunctionResultType> {
     const { logger, startActiveSpan, wrapInSpan } = context
     let safePayload = payload as unknown as FunctionPayloadType

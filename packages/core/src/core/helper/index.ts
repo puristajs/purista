@@ -1,5 +1,6 @@
 export * from './createErrorResponse.impl.js'
 export * from './createInfoMessage.impl.js'
+export * from './createInvokeFunctionProxy.impl.js'
 export * from './createSuccessResponse.impl.js'
 export * from './getCleanedMessage.impl.js'
 export * from './getCommandQueueName.impl.js'
