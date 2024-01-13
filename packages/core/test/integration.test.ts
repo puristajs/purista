@@ -5,12 +5,10 @@ import { z } from 'zod'
 import type { ServiceInfoType } from '../src'
 import { DefaultEventBridge, EBMessageType, ServiceBuilder, StatusCode } from '../src'
 import {
-  getCommandContextMock,
   getCommandMessageMock,
   getCommandTransformContextMock,
   getEventBridgeMock,
   getLoggerMock,
-  getSubscriptionContextMock,
   getSubscriptionTransformContextMock,
 } from '../src/mocks'
 
@@ -23,17 +21,17 @@ describe('integration test', () => {
   const beforeSubscriptionGuardHookStub = sandbox.stub()
   const afterSubscriptionGuardHookStub = sandbox.stub()
 
-  const serviceOneInfo: ServiceInfoType = {
+  const serviceOneInfo = {
     serviceName: 'ServiceOne',
     serviceVersion: '1',
     serviceDescription: 'service one description',
-  }
+  } as const satisfies ServiceInfoType
 
-  const serviceTwoInfo: ServiceInfoType = {
+  const serviceTwoInfo = {
     serviceName: 'ServiceTwo',
     serviceVersion: '1',
     serviceDescription: 'service two description',
-  }
+  } as const satisfies ServiceInfoType
 
   let serviceOneBuilder: ServiceBuilder
   let serviceTwoBuilder: ServiceBuilder
@@ -63,11 +61,8 @@ describe('integration test', () => {
     result: z.string(),
   })
 
-  type ParameterType = z.output<typeof commandParameterSchema>
-
   type CommandOnePayload = z.input<typeof commandOnePayloadSchema>
   type CommandTwoPayload = z.input<typeof commandTwoPayloadSchema>
-  type CommandTwoOutput = z.output<typeof commandTwoOutputSchema>
 
   afterAll(() => {
     sandbox.restore()
@@ -146,13 +141,15 @@ describe('integration test', () => {
       .enableHttpSecurity()
       .addQueryParameters({ required: false, name: 'param' })
       .markAsDeprecated()
+      .canInvoke(
+        serviceTwoInfo.serviceName,
+        serviceTwoInfo.serviceVersion,
+        'commandTwo',
+        commandTwoOutputSchema,
+        commandTwoPayloadSchema,
+        commandParameterSchema,
+      )
       .setCommandFunction(async (context, payload, parameter) => {
-        const address = {
-          serviceName: serviceTwoInfo.serviceName,
-          serviceVersion: serviceTwoInfo.serviceVersion,
-          serviceTarget: 'commandTwo',
-        }
-
         const invokePayload: CommandTwoPayload = {
           input: 'input',
         }
@@ -171,11 +168,7 @@ describe('integration test', () => {
 
         expect(spanResult).toBe('spanResult')
 
-        const commandTwoResult = await context.invoke<CommandTwoOutput, CommandTwoPayload, ParameterType>(
-          address,
-          invokePayload,
-          parameter,
-        )
+        const commandTwoResult = await context.service.ServiceTwo['1'].commandTwo(invokePayload, parameter)
         return {
           output: {
             commandOne: 'RECEIVED:' + payload.input.toUpperCase(),
@@ -202,9 +195,9 @@ describe('integration test', () => {
 
       const invokePayload = 'input for command two'
 
-      const contextMock = getCommandContextMock(messagePayload, messageParameter, sandbox)
+      const contextMock = commandOneDefinitionBuilder.getCommandContextMock(messagePayload, messageParameter, sandbox)
 
-      contextMock.stubs.invoke.resolves({ output: invokePayload.toUpperCase() })
+      contextMock.stubs.service.ServiceTwo['1'].commandTwo.resolves({ output: invokePayload.toUpperCase() })
 
       const result = await commandOne(contextMock.mock, payload, parameter)
 
@@ -346,7 +339,7 @@ describe('integration test', () => {
         },
       })
 
-      const contextMock = getSubscriptionContextMock(message, sandbox)
+      const contextMock = subscriptionOneBuilder.getSubscriptionContextMock(message, sandbox)
 
       const result = await subscriptionOne(contextMock.mock, payload, parameter)
 

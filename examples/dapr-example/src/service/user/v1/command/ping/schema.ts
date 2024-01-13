@@ -8,4 +8,9 @@ export const userV1PingInputParameterSchema = extendApi(z.object({}), { title: '
 export const userV1PingInputPayloadSchema = extendApi(z.any(), { title: 'ping input payload schema' })
 
 // define the output payload
-export const userV1PingOutputPayloadSchema = extendApi(z.any(), { title: 'ping output payload schema' })
+export const userV1PingOutputPayloadSchema = extendApi(
+  z.object({
+    pong: z.any(),
+  }),
+  { title: 'ping output payload schema' },
+)

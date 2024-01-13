@@ -1,4 +1,5 @@
 import { SpanStatusCode, trace } from '@opentelemetry/api'
+import { type z } from 'zod'
 
 import { DefaultConfigStore } from '../../DefaultConfigStore/index.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/index.js'
@@ -10,6 +11,7 @@ import { UnhandledError } from '../Error/UnhandledError.impl.js'
 import {
   createErrorResponse,
   createInfoMessage,
+  createInvokeFunctionProxy,
   createSuccessResponse,
   deserializeOtp,
   getCleanedMessage,
@@ -181,7 +183,19 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     })
   }
 
-  protected getInvokeFunction(serviceTarget: string, traceId: TraceId, principalId?: PrincipalId, tenantId?: TenantId) {
+  protected getInvokeFunction(
+    serviceTarget: string,
+    traceId: TraceId,
+    principalId?: PrincipalId,
+    tenantId?: TenantId,
+    invokes?: Record<
+      string,
+      Record<
+        string,
+        Record<string, { outputSchema?: z.ZodType; payloadSchema?: z.ZodType; parameterSchema?: z.ZodType }>
+      >
+    >,
+  ) {
     const sender: EBMessageSenderAddress = {
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
@@ -191,27 +205,116 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
 
     const invokeCommand = async (
       receiver: EBMessageAddress,
-      eventPayload: unknown,
-      parameter: unknown,
+      invokePayload: unknown,
+      invokeparameter: unknown,
       contentType = 'application/json',
       contentEncoding = 'utf-8',
     ): Promise<any> => {
-      const msg: Readonly<Omit<Command, 'correlationId' | 'id' | 'timestamp'>> = Object.freeze({
-        messageType: EBMessageType.Command,
-        traceId,
-        sender,
-        receiver,
-        contentType,
-        contentEncoding,
-        payload: {
-          payload: eventPayload,
-          parameter,
-        },
-        principalId,
-        tenantId,
-      })
+      let payload = invokePayload
+      let parameter = invokeparameter
 
-      return this.eventBridge.invoke(msg)
+      return await this.startActiveSpan(serviceTarget + '.invoke', {}, undefined, async (span) => {
+        span.setAttributes({
+          [PuristaSpanTag.ReceiverServiceName]: receiver.serviceName,
+          [PuristaSpanTag.ReceiverServiceVersion]: receiver.serviceVersion,
+          [PuristaSpanTag.ReceiverServiceTarget]: receiver.serviceTarget,
+        })
+
+        const payloadSchema =
+          invokes?.[receiver.serviceName]?.[receiver.serviceVersion]?.[receiver.serviceTarget]?.payloadSchema
+
+        if (payloadSchema) {
+          const res = payloadSchema.safeParse(payload)
+          if (!res.success) {
+            const err = new UnhandledError(StatusCode.BadRequest, 'invoke payload schema validation failed', {
+              issues: res.error,
+              invokedFrom: sender,
+              responseFrom: receiver,
+            })
+
+            span.recordException(err)
+            span.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: err.message,
+            })
+
+            throw err
+          }
+          payload = res.data
+        }
+
+        const parameterSchema =
+          invokes?.[receiver.serviceName]?.[receiver.serviceVersion]?.[receiver.serviceTarget]?.parameterSchema
+
+        if (parameterSchema) {
+          const res = parameterSchema.safeParse(parameter)
+          if (!res.success) {
+            const err = new UnhandledError(StatusCode.BadRequest, 'invoke parameter schema validation failed', {
+              issues: res.error,
+              invokedFrom: sender,
+              responseFrom: receiver,
+            })
+
+            span.recordException(err)
+            span.setStatus({
+              code: SpanStatusCode.ERROR,
+              message: err.message,
+            })
+
+            throw err
+          }
+
+          parameter = res.data
+        }
+
+        const msg: Readonly<Omit<Command, 'correlationId' | 'id' | 'timestamp'>> = Object.freeze({
+          messageType: EBMessageType.Command,
+          traceId,
+          sender,
+          receiver,
+          contentType,
+          contentEncoding,
+          payload: {
+            payload,
+            parameter,
+          },
+          principalId,
+          tenantId,
+        })
+
+        const outputSchema =
+          invokes?.[receiver.serviceName]?.[receiver.serviceVersion]?.[receiver.serviceTarget]?.outputSchema
+
+        if (!outputSchema) {
+          return this.eventBridge.invoke(msg)
+        }
+
+        const response = await this.eventBridge.invoke(msg)
+
+        const outResult = outputSchema.safeParse(response)
+
+        if (outResult.success) {
+          span.setStatus({
+            code: SpanStatusCode.OK,
+            message: 'OK',
+          })
+          return outResult.data
+        }
+
+        const err = new UnhandledError(StatusCode.BadRequest, 'invoke response output schema validation failed', {
+          issues: outResult.error,
+          invokedFrom: sender,
+          responseFrom: receiver,
+        })
+
+        span.recordException(err)
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: err.message,
+        })
+
+        throw err
+      })
     }
 
     return invokeCommand.bind(this)
@@ -471,8 +574,23 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
             const context: CommandFunctionContext = {
               message,
               emit: this.getEmitFunction(command.commandName, traceId, message.principalId, message.tenantId),
-              invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId, message.tenantId),
+              invoke: this.getInvokeFunction(
+                command.commandName,
+                traceId,
+                message.principalId,
+                message.tenantId,
+                command.invokes,
+              ),
               ...this.getContextFunctions(logger),
+              service: createInvokeFunctionProxy(
+                this.getInvokeFunction(
+                  command.commandName,
+                  traceId,
+                  message.principalId,
+                  message.tenantId,
+                  command.invokes,
+                ),
+              ),
             }
             const call = command.call.bind(this, context)
             return await call(payload, parameter)
@@ -489,8 +607,23 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
               const context: CommandFunctionContext = {
                 message,
                 emit: this.getEmitFunction(command.commandName, traceId, message.principalId, message.tenantId),
-                invoke: this.getInvokeFunction(command.commandName, traceId, message.principalId, message.tenantId),
+                invoke: this.getInvokeFunction(
+                  command.commandName,
+                  traceId,
+                  message.principalId,
+                  message.tenantId,
+                  command.invokes,
+                ),
                 ...this.getContextFunctions(logger),
+                service: createInvokeFunctionProxy(
+                  this.getInvokeFunction(
+                    command.commandName,
+                    traceId,
+                    message.principalId,
+                    message.tenantId,
+                    command.invokes,
+                  ),
+                ),
               }
 
               const guardPromise = this.wrapInSpan('afterGuardHook.' + name, {}, async (_subSpan) => {
@@ -638,8 +771,23 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
               const context: SubscriptionFunctionContext = {
                 message,
                 emit: this.getEmitFunction(subscriptionName, traceId, message.principalId, message.tenantId),
-                invoke: this.getInvokeFunction(subscriptionName, traceId, message.principalId, message.tenantId),
+                invoke: this.getInvokeFunction(
+                  subscriptionName,
+                  traceId,
+                  message.principalId,
+                  message.tenantId,
+                  subscription.invokes,
+                ),
                 ...this.getContextFunctions(logger),
+                service: createInvokeFunctionProxy(
+                  this.getInvokeFunction(
+                    subscriptionName,
+                    traceId,
+                    message.principalId,
+                    message.tenantId,
+                    subscription.invokes,
+                  ),
+                ),
               }
               const call2 = subscription.call.bind(this, context)
               return await call2(payload, parameter)
@@ -668,6 +816,14 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
                     message.tenantId,
                   ),
                   ...this.getContextFunctions(logger),
+                  service: createInvokeFunctionProxy(
+                    this.getInvokeFunction(
+                      subscription.subscriptionName,
+                      traceId,
+                      message.principalId,
+                      message.tenantId,
+                    ),
+                  ),
                 }
 
                 const guardPromise = this.wrapInSpan('afterGuardHook.' + name, {}, async (_subSpan) => {

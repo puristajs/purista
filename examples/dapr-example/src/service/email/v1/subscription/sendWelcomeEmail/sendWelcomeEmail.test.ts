@@ -1,9 +1,4 @@
-import {
-  getCommandSuccessMessageMock,
-  getEventBridgeMock,
-  getLoggerMock,
-  getSubscriptionContextMock,
-} from '@purista/core'
+import { getCommandSuccessMessageMock, getEventBridgeMock, getLoggerMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import type { User } from '../../../../../types/index.js'
@@ -47,9 +42,9 @@ describe('service Email version 1 - subscription sendWelcomeEmail', () => {
     const message = getCommandSuccessMessageMock(payload)
 
     // create a subscription context for the subscription function
-    const context = getSubscriptionContextMock(message, sandbox)
+    const context = sendWelcomeEmailSubscriptionBuilder.getSubscriptionContextMock(message, sandbox)
 
-    context.stubs.invoke.resolves(userMock)
+    context.stubs.service.User['1'].getUserById.resolves(userMock)
     context.stubs.getConfig.resolves({ emailProviderUrl: 'https://example.com' })
     context.stubs.getSecret.resolves({ emailProviderAuthToken: 'secret_token' })
 

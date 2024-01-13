@@ -1,4 +1,4 @@
-import { getCommandContextMock, getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { userV1Service } from '../../userV1Service.js'
@@ -24,7 +24,7 @@ describe('service User version 1 - command computeData', () => {
 
     const parameter: UserV1ComputeDataInputParameter = {}
 
-    const context = getCommandContextMock(payload, parameter, sandbox)
+    const context = computeDataCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
 
     const result = await computeData(context.mock, payload, parameter)
 

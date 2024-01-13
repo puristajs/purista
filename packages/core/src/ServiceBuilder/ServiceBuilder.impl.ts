@@ -22,6 +22,7 @@ import { initLogger, Service } from '../core/index.js'
 import { initDefaultConfigStore } from '../DefaultConfigStore/index.js'
 import { initDefaultSecretStore } from '../DefaultSecretStore/index.js'
 import { initDefaultStateStore } from '../DefaultStateStore/index.js'
+import type { NonEmptyString } from '../helper/index.js'
 import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/index.js'
 
 export type Newable<T, ConfigType> = { new (config: ServiceConstructorInput<ConfigType>): T }
@@ -224,10 +225,10 @@ export class ServiceBuilder<
    * executed.
    * @returns A CommandDefinitionBuilder object.
    */
-  getCommandBuilder(
-    commandName: string,
+  getCommandBuilder<T extends string, N extends string>(
+    commandName: NonEmptyString<T>,
     description: string,
-    eventName?: string,
+    eventName?: NonEmptyString<N>,
   ): CommandDefinitionBuilder<ServiceClassType> {
     return new CommandDefinitionBuilder<ServiceClassType>(commandName, description, eventName)
   }
@@ -239,8 +240,8 @@ export class ServiceBuilder<
    * @param description - The description of the subscription.
    * @returns A SubscriptionDefinitionBuilder
    */
-  getSubscriptionBuilder(
-    subscriptionName: string,
+  getSubscriptionBuilder<T extends string>(
+    subscriptionName: NonEmptyString<T>,
     description: string,
   ): SubscriptionDefinitionBuilder<ServiceClassType> {
     return new SubscriptionDefinitionBuilder<ServiceClassType>(subscriptionName, description)

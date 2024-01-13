@@ -13,13 +13,11 @@ export const pingCommandBuilder = userV1ServiceBuilder
   .addParameterSchema(userV1PingInputParameterSchema)
   .addOutputSchema(userV1PingOutputPayloadSchema)
   .exposeAsHttpEndpoint('POST', 'ping', 'text/plain')
-  .setCommandFunction(async function ({ invoke }, payload, _parameter) {
+  .canInvoke('User', '1', 'computeData')
+  .setCommandFunction(async function ({ service }, payload, _parameter) {
     // add your business logic here
-    const pong = await invoke(
-      { serviceName: this.info.serviceName, serviceVersion: this.info.serviceVersion, serviceTarget: 'computeData' },
-      payload,
-      {},
-    )
+    const pong = await service.User[1].computeData(payload, {})
+
     return {
       pong,
     }

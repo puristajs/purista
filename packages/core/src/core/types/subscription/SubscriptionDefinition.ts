@@ -2,6 +2,7 @@ import type { z } from 'zod'
 
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { EBMessageType } from '../EBMessageType.enum.js'
+import type { FromInvokeToOtherType } from '../FromInvokeToOtherType.js'
 import type { InstanceId } from '../InstanceId.js'
 import type { PrincipalId } from '../PrincipalId.js'
 import type { ServiceClass } from '../ServiceClass.js'
@@ -27,6 +28,7 @@ export type SubscriptionDefinition<
   FunctionPayloadType = MessagePayloadType,
   FunctionParamsType = MessageParamsType,
   FunctionResultType = MessageResultType,
+  Invokes = {},
 > = {
   /** the name of the subscription */
   subscriptionName: string
@@ -43,7 +45,8 @@ export type SubscriptionDefinition<
     MessageParamsType,
     FunctionPayloadType,
     FunctionParamsType,
-    FunctionResultType
+    FunctionResultType,
+    Invokes
   >
   /** filter for messages produced by given sender */
   sender?: {
@@ -76,14 +79,21 @@ export type SubscriptionDefinition<
       transformParameterSchema: z.ZodType
       transformFunction: SubscriptionTransformInputHook<ServiceClassType, MessagePayloadType, MessageParamsType>
     }
-    beforeGuard?: Record<string, SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType>>
+    beforeGuard?: Record<
+      string,
+      SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType, Invokes>
+    >
     afterGuard?: Record<
       string,
-      SubscriptionAfterGuardHook<ServiceClassType, FunctionResultType, FunctionPayloadType, FunctionParamsType>
+      SubscriptionAfterGuardHook<ServiceClassType, FunctionResultType, FunctionPayloadType, FunctionParamsType, Invokes>
     >
     transformOutput?: {
       transformOutputSchema: z.ZodType
       transformFunction: SubscriptionTransformOutputHook<ServiceClassType, FunctionResultType, FunctionParamsType, any>
     }
   }
+  invokes: FromInvokeToOtherType<
+    Invokes,
+    { outputSchema?: z.ZodType; payloadSchema?: z.ZodType; parameterSchema?: z.ZodType }
+  >
 }

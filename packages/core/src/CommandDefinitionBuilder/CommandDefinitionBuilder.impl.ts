@@ -1,4 +1,6 @@
-import type { z, ZodType } from 'zod'
+import type { SinonSandbox } from 'sinon'
+import type { ZodType } from 'zod'
+import { z } from 'zod'
 
 import type {
   CommandAfterGuardHook,
@@ -11,12 +13,15 @@ import type {
   Complete,
   ContentType,
   DefinitionEventBridgeConfig,
+  FromInvokeToOtherType,
   HttpExposedServiceMeta,
   QueryParameter,
   ServiceClass,
   StatusCode,
   SupportedHttpMethod,
 } from '../core/index.js'
+import type { NonEmptyString } from '../helper/index.js'
+import { getCommandContextMock } from '../mocks/index.js'
 import type { OpenApiZodAny } from '../zodOpenApi/index.js'
 import { generateSchema } from '../zodOpenApi/index.js'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
@@ -38,6 +43,7 @@ export class CommandDefinitionBuilder<
   FunctionPayloadType = MessagePayloadType,
   FunctionParamsType = MessageParamsType,
   FunctionResultType = MessageResultType,
+  Invokes = {},
 > {
   private httpMetadata?: HttpExposedServiceMeta<FunctionParamsType>
   private inputSchema?: z.ZodType
@@ -64,6 +70,14 @@ export class CommandDefinitionBuilder<
   private durable = false
   private autoacknowledge = true
 
+  private invokes: FromInvokeToOtherType<
+    Invokes,
+    { outputSchema?: z.ZodType; payloadSchema?: z.ZodType; parameterSchema?: z.ZodType }
+  > = {} as FromInvokeToOtherType<
+    Invokes,
+    { outputSchema?: z.ZodType; payloadSchema?: z.ZodType; parameterSchema?: z.ZodType }
+  >
+
   private hooks: {
     transformInput?: {
       transformInputSchema: z.ZodType
@@ -77,7 +91,8 @@ export class CommandDefinitionBuilder<
         MessagePayloadType,
         MessageParamsType,
         FunctionPayloadType,
-        FunctionParamsType
+        FunctionParamsType,
+        Invokes
       >
     >
     afterGuard: Record<
@@ -88,7 +103,8 @@ export class CommandDefinitionBuilder<
         MessageParamsType,
         FunctionResultType,
         FunctionPayloadType,
-        FunctionParamsType
+        FunctionParamsType,
+        Invokes
       >
     >
     transformOutput?: {
@@ -108,15 +124,82 @@ export class CommandDefinitionBuilder<
     MessageParamsType,
     FunctionPayloadType,
     FunctionParamsType,
-    FunctionResultType
+    FunctionResultType,
+    Invokes
   >
 
   // eslint-disable-next-line no-useless-constructor
   constructor(
-    private commandName: string,
+    private commandName: Exclude<string, ''>,
     private commandDescription: string,
-    private eventName?: string,
+    private eventName?: Exclude<string, ''>,
   ) {}
+
+  /**
+   * Define a command which can be invoked by the current command
+   * @param serviceName
+   * @param serviceVersion
+   * @param serviceTarget
+   * @param outputSchema
+   * @param payloadSchema
+   * @param parameterSchema
+   * @returns
+   */
+
+  canInvoke<
+    Payload = unknown,
+    Parameter = unknown,
+    Output = unknown,
+    SName extends string = string,
+    Version extends string = string,
+    Fname extends string = string,
+  >(
+    serviceName: SName,
+    serviceVersion: Version,
+    serviceTarget: Fname,
+    outputSchema: z.ZodType<Output, any, any> = z.any(),
+    payloadSchema: z.ZodType<Payload, any, any> = z.any(),
+    parameterSchema: z.ZodType<Parameter, any, any> = z.any(),
+  ) {
+    if (serviceName.trim() === '' || serviceVersion.trim() === '' || serviceTarget.trim() === '') {
+      throw new Error('canInvoke requires non-empty service name, version and target')
+    }
+
+    const x = this.invokes as any
+    if (!x[serviceName]) {
+      x[serviceName] = {}
+    }
+
+    if (!x[serviceName][serviceVersion]) {
+      x[serviceName][serviceVersion] = {}
+    }
+
+    const f = {
+      [serviceName]: {
+        [serviceVersion]: {
+          [serviceTarget]: { outputSchema, payloadSchema, parameterSchema },
+        },
+      },
+    } as Invokes &
+      Record<SName, Record<Version, Record<Fname, (payload: Payload, parameter: Parameter) => Promise<Output>>>>
+
+    this.invokes = {
+      ...this.invokes,
+      ...f,
+    }
+
+    return this as CommandDefinitionBuilder<
+      ServiceClassType,
+      MessagePayloadType,
+      MessageParamsType,
+      MessageResultType,
+      FunctionPayloadType,
+      FunctionParamsType,
+      FunctionResultType,
+      Invokes &
+        Record<SName, Record<Version, Record<Fname, (payload: Payload, parameter: Parameter) => Promise<Output>>>>
+    >
+  }
 
   /*
    * Event name of success response message.
@@ -124,7 +207,7 @@ export class CommandDefinitionBuilder<
    * Otherwise you will need to subscribe to service name, service function, and message type to get the message.
    * It is also essential to have this possibility to be able to build event sourcing architectures.
    */
-  setSuccessEventName(eventName: string) {
+  setSuccessEventName<N extends string>(eventName: NonEmptyString<N>) {
     this.eventName = eventName
     return this
   }
@@ -152,7 +235,8 @@ export class CommandDefinitionBuilder<
       MessageResultType,
       O,
       FunctionParamsType,
-      FunctionResultType
+      FunctionResultType,
+      Invokes
     >
   }
 
@@ -179,7 +263,8 @@ export class CommandDefinitionBuilder<
       O,
       FunctionPayloadType,
       FunctionParamsType,
-      I
+      I,
+      Invokes
     >
   }
 
@@ -207,7 +292,8 @@ export class CommandDefinitionBuilder<
       MessageResultType,
       FunctionPayloadType,
       O,
-      FunctionResultType
+      FunctionResultType,
+      Invokes
     >
   }
 
@@ -319,7 +405,8 @@ export class CommandDefinitionBuilder<
       MessageResultType,
       FunctionPayloadType,
       FunctionParamsType,
-      FunctionResultType
+      FunctionResultType,
+      Invokes
     >
   }
 
@@ -376,7 +463,8 @@ export class CommandDefinitionBuilder<
       PayloadOut,
       FunctionPayloadType,
       FunctionParamsType,
-      FunctionResultType
+      FunctionResultType,
+      Invokes
     >
   }
 
@@ -412,7 +500,8 @@ export class CommandDefinitionBuilder<
         MessagePayloadType,
         MessageParamsType,
         FunctionPayloadType,
-        FunctionParamsType
+        FunctionParamsType,
+        Invokes
       >
     >,
   ) {
@@ -435,7 +524,8 @@ export class CommandDefinitionBuilder<
         MessageParamsType,
         FunctionResultType,
         FunctionPayloadType,
-        FunctionParamsType
+        FunctionParamsType,
+        Invokes
       >
     >,
   ) {
@@ -537,7 +627,8 @@ export class CommandDefinitionBuilder<
         MessageResultType,
         FunctionPayloadType,
         FunctionParamsType,
-        FunctionResultType
+        FunctionResultType,
+        Invokes
       >
     >,
   ) {
@@ -554,7 +645,8 @@ export class CommandDefinitionBuilder<
         MessageResultType,
         FunctionPayloadType,
         FunctionParamsType,
-        FunctionResultType
+        FunctionResultType,
+        Invokes
       >
     > = {
       ...definition,
@@ -609,7 +701,8 @@ export class CommandDefinitionBuilder<
     MessageResultType,
     FunctionPayloadType,
     FunctionParamsType,
-    FunctionResultType
+    FunctionResultType,
+    Invokes
   > {
     if (!this.fn) {
       throw new Error('CommandDefinitionBuilder: missing function implementation')
@@ -638,7 +731,8 @@ export class CommandDefinitionBuilder<
         MessageResultType,
         FunctionPayloadType,
         FunctionParamsType,
-        FunctionResultType
+        FunctionResultType,
+        Invokes
       >
     > = {
       commandName: this.commandName,
@@ -668,9 +762,11 @@ export class CommandDefinitionBuilder<
         MessageResultType,
         FunctionPayloadType,
         FunctionParamsType,
-        FunctionResultType
+        FunctionResultType,
+        Invokes
       >(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard),
       hooks: this.hooks,
+      invokes: this.invokes,
     }
 
     return this.extendWithHttpMetadata(definition)
@@ -699,7 +795,8 @@ export class CommandDefinitionBuilder<
       MessageParamsType,
       FunctionPayloadType,
       FunctionParamsType,
-      FunctionResultType
+      FunctionResultType,
+      Invokes
     >,
   ): CommandDefinitionBuilder<
     ServiceClassType,
@@ -708,7 +805,8 @@ export class CommandDefinitionBuilder<
     MessageResultType,
     FunctionPayloadType,
     FunctionParamsType,
-    FunctionResultType
+    FunctionResultType,
+    Invokes
   > {
     this.fn = fn as unknown as CommandFunction<
       ServiceClassType,
@@ -716,7 +814,8 @@ export class CommandDefinitionBuilder<
       MessageParamsType,
       FunctionPayloadType,
       FunctionParamsType,
-      FunctionResultType
+      FunctionResultType,
+      Invokes
     >
 
     return this as unknown as CommandDefinitionBuilder<
@@ -726,7 +825,8 @@ export class CommandDefinitionBuilder<
       MessageResultType,
       FunctionPayloadType,
       FunctionParamsType,
-      FunctionResultType
+      FunctionResultType,
+      Invokes
     >
   }
 
@@ -740,7 +840,8 @@ export class CommandDefinitionBuilder<
     MessageParamsType,
     FunctionPayloadType,
     FunctionParamsType,
-    FunctionResultType
+    FunctionResultType,
+    Invokes
   > {
     if (!this.fn) {
       throw new Error(`No function implementation for ${this.commandName}`)
@@ -753,9 +854,22 @@ export class CommandDefinitionBuilder<
       MessageResultType,
       FunctionPayloadType,
       FunctionParamsType,
-      FunctionResultType
+      FunctionResultType,
+      Invokes
     >(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard)
 
     return f
+  }
+
+  /**
+   * Returns a mocked command function context, which can be used in unit tests.
+   *
+   * @param payload
+   * @param parameter
+   * @param sandbox Sinon sandbox
+   * @returns a mocked command function context
+   */
+  getCommandContextMock(payload: MessagePayloadType, parameter: MessageParamsType, sandbox?: SinonSandbox) {
+    return getCommandContextMock<MessagePayloadType, MessageParamsType, Invokes>(payload, parameter, sandbox)
   }
 }

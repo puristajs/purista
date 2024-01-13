@@ -1,4 +1,4 @@
-import { getCommandContextMock, getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import type { User } from '../../../../../types/index.js'
@@ -35,7 +35,7 @@ describe('service User version 1 - command getUserById', () => {
       userId: userMock.userId,
     }
 
-    const context = getCommandContextMock(payload, parameter, sandbox)
+    const context = getUserByIdCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
 
     context.stubs.getState.resolves({ [StateStoreKey.Users]: [userMock] })
 
@@ -62,7 +62,7 @@ describe('service User version 1 - command getUserById', () => {
       userId: userMock.userId,
     }
 
-    const context = getCommandContextMock(payload, parameter, sandbox)
+    const context = getUserByIdCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
 
     context.stubs.getState.resolves({ [StateStoreKey.Users]: [] })
 

@@ -13,12 +13,14 @@ import type { Prettify } from '../Prettify.js'
  *
  * @group Subscription
  */
-export type SubscriptionFunctionContextEnhancements = {
+export type SubscriptionFunctionContextEnhancements<Invokes = {}> = {
   /** the original message */
   message: Readonly<EBMessage>
   /** emit a custom message */
   emit: EmitCustomMessageFunction
   /**
+   * @deprecated Please use service instead and define the invocations with canInvoke in subscription builder.
+   *
    * Invokes a command and returns the result.
    * It is recommended to validate the result against a schema which only contains the data you actually need.
    *
@@ -37,6 +39,21 @@ export type SubscriptionFunctionContextEnhancements = {
    * ```
    */
   invoke: InvokeFunction
+  /**
+   * Invokes a command and returns the result.
+   * It is recommended to validate the result against a schema which only contains the data you actually need.
+   *
+   * @example ```typescript
+   * // define your invocation in subscription builder
+   * .canInvoke<{ response: string }>('ServiceA', '1', 'test', payloadSchema, parameterSchema)
+   * .setCommandFunction(async function (context, payload, _parameter) {
+   *    const inputPayload = { my: 'input' }
+   *    const inputParameter = { search: 'for_me' }
+   *    const result = await context.service.ServiceA[1].test(inputPayload,inputParameter)
+   * })
+   * ```
+   */
+  service: Invokes
 }
 
 /**
@@ -44,4 +61,6 @@ export type SubscriptionFunctionContextEnhancements = {
  *
  * @group Subscription
  */
-export type SubscriptionFunctionContext = Prettify<ContextBase & SubscriptionFunctionContextEnhancements>
+export type SubscriptionFunctionContext<Invokes = {}> = Prettify<
+  ContextBase & SubscriptionFunctionContextEnhancements<Invokes>
+>
