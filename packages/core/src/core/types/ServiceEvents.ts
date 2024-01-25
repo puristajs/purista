@@ -72,16 +72,16 @@ export type ServiceEventsInternal = {
   [ServiceEventsNames.ServiceUnavailable]: undefined | unknown
 
   /** emitted when a subscription throws a HandledError */
-  [ServiceEventsNames.SubscriptionHandledError]: { subscriptionName: string; error: HandledError; traceId: TraceId }
+  [ServiceEventsNames.SubscriptionHandledError]: { subscriptionName: string; error: HandledError; traceId?: TraceId }
 
   /** emitted when a command throws a HandledError */
-  [ServiceEventsNames.CommandHandledError]: { commandName: string; error: HandledError; traceId: TraceId }
+  [ServiceEventsNames.CommandHandledError]: { commandName: string; error: HandledError; traceId?: TraceId }
 
   /** emitted when a subscription throws an error other than a HandledError */
-  [ServiceEventsNames.SubscriptionUnhandledError]: { subscriptionName: string; error: unknown; traceId: TraceId }
+  [ServiceEventsNames.SubscriptionUnhandledError]: { subscriptionName: string; error: unknown; traceId?: TraceId }
 
   /** emitted when a command throws an error other than a HandledError */
-  [ServiceEventsNames.CommandUnhandledError]: { commandName: string; error: unknown; traceId: TraceId }
+  [ServiceEventsNames.CommandUnhandledError]: { commandName: string; error: unknown; traceId?: TraceId }
 }
 
 type CustomEvents = {

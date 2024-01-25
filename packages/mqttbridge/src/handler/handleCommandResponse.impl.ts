@@ -20,7 +20,7 @@ export const handleCommandResponse: IncomingMessageFunction = async function (me
     { kind: SpanKind.CONSUMER },
     context,
     async (span) => {
-      const log = this.logger.getChildLogger({ ...span.spanContext(), traceId: message.traceId })
+      const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: message.traceId })
 
       if (message.eventName) {
         span.addEvent(message.eventName)

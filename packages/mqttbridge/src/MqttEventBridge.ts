@@ -25,7 +25,6 @@ import {
   getNewCorrelationId,
   getNewEBMessageId,
   getNewInstanceId,
-  getNewTraceId,
   isCommandResponse,
   PuristaSpanName,
   PuristaSpanTag,
@@ -147,7 +146,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
         },
         id: getNewEBMessageId(),
         timestamp: Date.now(),
-        traceId: message.traceId || span.spanContext().traceId,
+        traceId: message.traceId,
         otp: serializeOtp(),
         contentType,
         contentEncoding,
@@ -225,11 +224,11 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
           correlationId,
           timestamp: Date.now(),
           messageType: EBMessageType.Command,
-          traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
+          traceId: input.traceId,
           otp: serializeOtp(),
         })
 
-        const log = this.logger.getChildLogger({ ...span.spanContext(), traceId: command.traceId })
+        const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: command.traceId })
 
         const removeFromPending = () => {
           this.pendingInvocations.delete(correlationId)

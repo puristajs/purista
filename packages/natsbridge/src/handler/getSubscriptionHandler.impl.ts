@@ -41,7 +41,7 @@ export const getSubscriptionHandler = (
       { kind: SpanKind.CONSUMER },
       context,
       async (span) => {
-        const log = this.logger.getChildLogger({ ...span.spanContext(), traceId: message.traceId })
+        const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: message.traceId })
 
         try {
           const result = await cb(message)

@@ -68,5 +68,7 @@ export type HttpClientConfig<CustomConfig extends Record<string, unknown>> = Pre
      * The client will be handled as own ressource.
      */
     enableOpentelemetry?: boolean
+    /** Custom trace Id */
+    traceId?: string
   } & CustomConfig
 >

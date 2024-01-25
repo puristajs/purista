@@ -107,7 +107,7 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 
             const response = await this.invoke(
               {
-                traceId: traceId || span.spanContext().traceId || getNewTraceId(),
+                traceId,
                 receiver: {
                   serviceName: message.sender.serviceName,
                   serviceVersion: message.sender.serviceVersion,
