@@ -156,7 +156,7 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
             })
             span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, unhandledError.errorCode)
 
-            logger.error({ err, ...span.spanContext() }, 'handler error')
+            logger.error({ err, ...span.spanContext() }, 'unhandled error')
 
             reply.statusCode = unhandledError.errorCode
             reply.send(unhandledError.getErrorResponse())
