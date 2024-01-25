@@ -6,7 +6,7 @@ import { httpServerV1Service } from '../src'
 import { getIndexHtml, getJsInit } from '../src/service/httpServer/v1/routes'
 import { theServiceV1Service } from './service/theService/v1'
 
-describe('', () => {
+describe('httpserver integration test', () => {
   let eventBridge: EventBridge
   let server: Service
   const port = 8083
