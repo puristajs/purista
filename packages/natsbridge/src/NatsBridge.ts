@@ -23,7 +23,6 @@ import {
   EventBridgeEventNames,
   getNewCorrelationId,
   getNewEBMessageId,
-  getNewTraceId,
   HandledError,
   isCommandResponse,
   isCommandSuccessResponse,
@@ -127,7 +126,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
         },
         id: getNewEBMessageId(),
         timestamp: Date.now(),
-        traceId: message.traceId || span.spanContext().traceId,
+        traceId: message.traceId,
         otp: serializeOtp(),
         contentType,
         contentEncoding,
@@ -204,11 +203,11 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
           correlationId,
           timestamp: Date.now(),
           messageType: EBMessageType.Command,
-          traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
+          traceId: input.traceId,
           otp: serializeOtp(),
         })
 
-        const log = this.logger.getChildLogger({ ...span.spanContext(), traceId: command.traceId })
+        const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: command.traceId })
 
         span.setAttribute(PuristaSpanTag.SenderServiceName, command.sender.serviceName)
         span.setAttribute(PuristaSpanTag.SenderServiceVersion, command.sender.serviceVersion)
@@ -272,7 +271,7 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
             { kind: SpanKind.CONSUMER },
             returnContext,
             async (returnSpan) => {
-              const responseLog = this.logger.getChildLogger({ ...span.spanContext(), traceId: response.traceId })
+              const responseLog = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: response.traceId })
 
               if (response.eventName) {
                 returnSpan.addEvent(response.eventName)

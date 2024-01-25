@@ -163,7 +163,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
           },
           id: getNewEBMessageId(),
           timestamp: Date.now(),
-          traceId: message.traceId || span.spanContext().traceId,
+          traceId: message.traceId,
           otp: serializeOtp(),
         })
 
@@ -221,7 +221,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
         correlationId: getNewCorrelationId(),
         timestamp: Date.now(),
         messageType: EBMessageType.Command,
-        traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
+        traceId: input.traceId,
         otp: serializeOtp(),
       })
 

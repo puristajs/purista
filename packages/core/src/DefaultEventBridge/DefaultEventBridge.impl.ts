@@ -26,7 +26,6 @@ import {
   getCommandQueueName,
   getNewCorrelationId,
   getNewEBMessageId,
-  getNewTraceId,
   getSubscriptionQueueName,
   HandledError,
   isCommand,
@@ -140,7 +139,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
                   message: err.message,
                 })
                 span.recordException(err)
-                this.logger.error({ err, ...span.spanContext() }, err.message)
+                this.logger.error({ err, ...span.spanContext(), customTraceId: message.traceId }, err.message)
                 this.emit(EventBridgeEventNames.EventbridgeError, err)
 
                 const errorResponse = createErrorResponse(this.instanceId, message, StatusCode.BadGateway, err)
@@ -168,7 +167,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
                   message: err.message,
                 })
                 span.recordException(err)
-                this.logger.error({ err, ...span.spanContext() }, err.message)
+                this.logger.error({ err, ...span.spanContext(), customTraceId: message.traceId }, err.message)
                 this.emit(EventBridgeEventNames.EventbridgeError, err)
                 return next()
               }
@@ -196,7 +195,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
                 'InvalidMessage: received a message which is not consumed by any service command or subscription',
                 message,
               )
-              this.logger.warn({ err, ...span.spanContext() }, err.message)
+              this.logger.warn({ err, ...span.spanContext(), customTraceId: message.traceId }, err.message)
               this.emit(EventBridgeEventNames.EventbridgeError, err)
             }
 
@@ -297,7 +296,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
           ...message,
           id: getNewEBMessageId(),
           timestamp: Date.now(),
-          traceId: message.traceId || span.spanContext().traceId,
+          traceId: message.traceId,
           instanceId: this.instanceId,
           otp: serializeOtp(),
         })
@@ -319,7 +318,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
           code: SpanStatusCode.ERROR,
           message: (err as Error).message,
         })
-        this.logger.error({ err, ...span.spanContext() }, 'emitMessage failed')
+        this.logger.error({ err, ...span.spanContext(), customTraceId: message.traceId }, 'emitMessage failed')
         throw err
       }
     })
@@ -331,11 +330,12 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
   ): Promise<T> {
     const context = deserializeOtp(this.logger, input.otp)
 
-    return this.startActiveSpan(PuristaSpanName.EventBridgeInvokeCommand, {}, context, async (span) => {
+    return this.startActiveSpan(PuristaSpanName.EventBridgeInvokeCommand, {}, context, async (_span) => {
       const correlationId = getNewCorrelationId()
 
       const command: Command = Object.freeze({
         ...input,
+        otp: serializeOtp(),
         sender: {
           ...input.sender,
           instanceId: this.instanceId,
@@ -344,7 +344,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
         correlationId: getNewCorrelationId(),
         timestamp: Date.now(),
         messageType: EBMessageType.Command,
-        traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
+        traceId: input.traceId,
       })
 
       const removeFromPending = () => {

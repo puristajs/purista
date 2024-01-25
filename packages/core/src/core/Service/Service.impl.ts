@@ -15,7 +15,6 @@ import {
   createSuccessResponse,
   deserializeOtp,
   getCleanedMessage,
-  getNewTraceId,
   serializeOtp,
 } from '../helper/index.js'
 import type { SecretDeleteFunction, SecretGetterFunction, SecretSetterFunction } from '../SecretStore/index.js'
@@ -185,7 +184,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
 
   protected getInvokeFunction(
     serviceTarget: string,
-    traceId: TraceId,
+    traceId?: TraceId,
     principalId?: PrincipalId,
     tenantId?: TenantId,
     invokes?: Record<
@@ -320,7 +319,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     return invokeCommand.bind(this)
   }
 
-  protected getEmitFunction(serviceTarget: string, traceId: TraceId, principalId?: PrincipalId, tenantId?: TenantId) {
+  protected getEmitFunction(serviceTarget: string, traceId?: TraceId, principalId?: PrincipalId, tenantId?: TenantId) {
     const sender: EBMessageSenderAddress = {
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
@@ -534,11 +533,12 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     const context = deserializeOtp(this.logger, message.otp)
 
     return this.startActiveSpan(command?.commandName || 'purista.executeCommand', {}, context, async (span) => {
-      const traceId = message.traceId || span.spanContext().traceId
+      const traceId = message.traceId
 
       const logger = this.logger.getChildLogger({
         serviceTarget: command?.commandName,
         ...span.spanContext(),
+        customTraceId: traceId,
         principalId: message.principalId,
         tenantId: message.tenantId,
       })
@@ -733,11 +733,12 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       { links: spanContext ? [{ context: spanContext }] : [] },
       undefined,
       async (span) => {
-        const traceId = message.traceId || span.spanContext().traceId || getNewTraceId()
+        const traceId = message.traceId
 
         const logger = this.logger.getChildLogger({
           serviceTarget: subscriptionName,
           ...span.spanContext(),
+          customTraceId: traceId,
           principalId: message.principalId,
           tenantId: message.tenantId,
         })

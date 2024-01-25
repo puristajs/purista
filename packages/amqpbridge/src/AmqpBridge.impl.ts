@@ -23,7 +23,6 @@ import {
   getCleanedMessage,
   getNewCorrelationId,
   getNewEBMessageId,
-  getNewTraceId,
   HandledError,
   isCommandErrorResponse,
   isCommandResponse,
@@ -206,7 +205,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
                 span.addEvent(message.eventName)
               }
 
-              const log = this.logger.getChildLogger({ traceId: message.traceId })
+              const log = this.logger.getChildLogger({ customTraceId: message.traceId, ...span.spanContext() })
 
               if (isCommandResponse(message)) {
                 const mapEntry = this.pendingInvocations.get(message.correlationId)
@@ -221,7 +220,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
                     message: err.message,
                   })
                   span.recordException(err)
-                  this.logger.error({ err, ...span.spanContext() }, 'received invalid command response')
+                  log.error({ err }, 'received invalid command response')
                   this.emit(EventBridgeEventNames.EventbridgeError, err)
                   return
                 }
@@ -232,7 +231,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
                     ? HandledError.fromMessage(message)
                     : UnhandledError.fromMessage(message)
                   span.recordException(error)
-                  this.logger.error({ err: error, ...span.spanContext() }, error.message)
+                  log.error({ err: error }, error.message)
                   mapEntry.reject(error)
                 }
                 return
@@ -249,7 +248,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
                 message: err.message,
               })
               span.recordException(err)
-              this.logger.error({ err }, 'received invalid message')
+              log.error({ err }, 'received invalid message')
               this.emit(EventBridgeEventNames.EventbridgeError, err)
             } catch (error) {
               const err = new HandledError(StatusCode.InternalServerError, 'failed to handle response message', error)
@@ -259,7 +258,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
               })
               span.recordException(err)
               this.emit(EventBridgeEventNames.EventbridgeError, err)
-              this.logger.error({ err }, 'failed to handle response message')
+              this.logger.error({ err, ...span.spanContext() }, 'failed to handle response message')
             }
           },
         )
@@ -306,7 +305,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
         ...message,
         id: getNewEBMessageId(),
         timestamp: Date.now(),
-        traceId: message.traceId || span.spanContext().traceId,
+        traceId: message.traceId,
         otp: serializeOtp(),
         sender: {
           ...message.sender,
@@ -380,7 +379,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
           correlationId,
           timestamp: Date.now(),
           messageType: EBMessageType.Command,
-          traceId: input.traceId || span.spanContext().traceId || getNewTraceId(),
+          traceId: input.traceId,
           otp: serializeOtp(),
           sender: {
             ...input.sender,

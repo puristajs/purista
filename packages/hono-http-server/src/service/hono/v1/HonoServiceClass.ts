@@ -127,7 +127,7 @@ export class HonoServiceClass<
           span.setAttribute(SemanticAttributes.HTTP_METHOD, 'GET')
           const isEventBridgeReady = await this.eventBridge.isHealthy()
 
-          const traceId = c.req.header(this.config.traceHeaderField) || span.spanContext().traceId
+          const traceId = c.req.header(this.config.traceHeaderField)
           c.header(this.config.traceHeaderField, traceId)
 
           if (!isEventBridgeReady) {
@@ -184,7 +184,7 @@ export class HonoServiceClass<
           message: (err as Error).message,
         })
 
-        this.logger.info({ ...span.spanContext() }, 'not found')
+        this.logger.info({ ...span.spanContext(), customTraceId: c.get('traceId') }, 'not found')
         return c.json(err.getErrorResponse(), StatusCode.NotFound)
       })
     })
@@ -206,7 +206,7 @@ export class HonoServiceClass<
           return c.json(err.getErrorResponse(), err.errorCode)
         }
 
-        this.logger.error({ err, ...span.spanContext() }, 'General error handler')
+        this.logger.error({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, 'General error handler')
 
         if (err instanceof HTTPException) {
           span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, err.status)
@@ -302,7 +302,7 @@ export class HonoServiceClass<
             }
           }
 
-          const traceId = c.req.header(this.config.traceHeaderField) || span.spanContext().traceId
+          const traceId = c.req.header(this.config.traceHeaderField)
 
           const result = await this.invoke(
             {
@@ -350,7 +350,7 @@ export class HonoServiceClass<
           })
 
           if (err instanceof HandledError) {
-            this.logger.debug({ err, ...span.spanContext() }, err.message)
+            this.logger.debug({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, err.message)
 
             span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, err.errorCode)
             return c.json(err.getErrorResponse(), err.errorCode)
@@ -360,7 +360,7 @@ export class HonoServiceClass<
           unhandledError.errorCode = StatusCode.InternalServerError
           span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, unhandledError.errorCode)
 
-          this.logger.error({ err, ...span.spanContext() }, 'unhandled error')
+          this.logger.error({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, 'unhandled error')
           return c.json(unhandledError.getErrorResponse(), unhandledError.errorCode)
         }
       })

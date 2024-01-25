@@ -202,7 +202,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
     return this.startActiveSpan(`${this.name}.${method}`, { kind: SpanKind.CLIENT }, context.active(), async (span) => {
       span.setAttribute(SemanticAttributes.HTTP_METHOD, method)
 
-      const log = this.logger.getChildLogger({ ...span.spanContext() })
+      const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: this.config.traceId })
 
       try {
         const { url, headers } = this.getUrlAndHeader(path, options)

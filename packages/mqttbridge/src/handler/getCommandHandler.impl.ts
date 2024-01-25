@@ -39,7 +39,7 @@ export const getCommandHandler = (
       { kind: SpanKind.CONSUMER },
       context,
       async (span) => {
-        const log = this.logger.getChildLogger({ ...span.spanContext(), traceId: command.traceId })
+        const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: command.traceId })
         try {
           if (!isCommand(command)) {
             const err = new UnhandledError(StatusCode.InternalServerError, 'expected a command message')
