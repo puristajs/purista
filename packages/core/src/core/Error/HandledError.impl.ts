@@ -1,6 +1,7 @@
 import { getErrorMessageForCode } from '../helper/index.js'
 import type { CommandErrorResponse, ErrorResponsePayload, TraceId } from '../types/index.js'
 import { StatusCode } from '../types/index.js'
+import { UnhandledError } from './UnhandledError.impl.js'
 
 /**
  * A handled error is an error which is handled or thrown by business logic.
@@ -32,7 +33,8 @@ export class HandledError extends Error {
   }
 
   /**
-   * Creates a HandledError from an input
+   * Creates a HandledError from an input.
+   * If the input error is a HandledError it will be returned without modifications.
    *
    * @param err the input
    * @param errorCode the error code
@@ -41,7 +43,16 @@ export class HandledError extends Error {
    * @returns HandledError
    */
   static fromError(err: any, errorCode?: StatusCode, data?: unknown, traceId?: TraceId): HandledError {
-    const error = new HandledError(errorCode || StatusCode.InternalServerError, err.message, data, traceId)
+    if (err instanceof HandledError) {
+      return err
+    }
+
+    let t
+    if (err instanceof HandledError || err instanceof UnhandledError) {
+      t = err.traceId
+    }
+
+    const error = new HandledError(errorCode || StatusCode.InternalServerError, err.message, data, traceId || t)
     error.stack = err.stack
     error.cause = err.cause
     return error
