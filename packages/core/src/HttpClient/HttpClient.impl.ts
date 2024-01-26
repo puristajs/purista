@@ -253,15 +253,12 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
         const err =
           error instanceof UnhandledError || error instanceof HandledError ? error : UnhandledError.fromError(error)
 
-        /*
-        err.data = {
-          method,
-          path,
-          ...err.data,
-        }
-        */
         log.error({ err, method, path }, err.message)
         span.recordException(err)
+        span.setStatus({
+           code: SpanStatusCode.ERROR,
+           message: err.message,
+         })
         throw err
       } finally {
         clearTimeout(timeout)
