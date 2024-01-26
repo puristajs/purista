@@ -80,6 +80,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
     }
 
     this.traceProvider.register()
+    this.spanProcessor = options.spanProcessor
 
     this.eventBridge = options.eventBridge
 
