@@ -25,6 +25,7 @@ export type CommandDefinition<
   FunctionParamsType = MessageParamsType,
   FunctionResultType = unknown,
   Invokes = {},
+  EmitListType = {},
 > = {
   /** the name of the command */
   commandName: string
@@ -88,4 +89,5 @@ export type CommandDefinition<
     }
   }
   invokes: FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
+  emitList: EmitListType
 }
