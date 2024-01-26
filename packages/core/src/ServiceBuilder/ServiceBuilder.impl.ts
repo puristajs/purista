@@ -1,7 +1,7 @@
 import { fail } from 'node:assert'
 
+import type { Infer, InferIn, Schema } from '@decs/typeschema'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
-import type { z } from 'zod'
 
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
 import type {
@@ -43,7 +43,7 @@ export class ServiceBuilder<
   private commandDefinitionList: CommandDefinitionList<ServiceClassType> = []
   private subscriptionDefinitionList: SubscriptionDefinitionList<ServiceClassType> = []
 
-  private configSchema?: z.ZodType
+  private configSchema?: Schema
   private defaultConfig?: Complete<ConfigType>
 
   instance?: ServiceClassType
@@ -58,9 +58,9 @@ export class ServiceBuilder<
    * @param schema - The schema that will be used to validate the config.
    * @returns ServiceBuilder
    */
-  setConfigSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(schema: z.ZodType<O, D, I>) {
+  setConfigSchema<T extends Schema>(schema: T) {
     this.configSchema = schema
-    return this as unknown as ServiceBuilder<O, I, Service<O>>
+    return this as unknown as ServiceBuilder<Infer<T>, InferIn<T>, Service<Infer<T>>>
   }
 
   /**
@@ -70,11 +70,7 @@ export class ServiceBuilder<
    * @returns The ServiceBuilder instance.
    */
   setDefaultConfig(config: Complete<ConfigType>): ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType> {
-    let conf = config
-    if (this.configSchema) {
-      conf = this.configSchema.parse(config)
-    }
-    this.defaultConfig = conf
+    this.defaultConfig = config
     return this
   }
 
@@ -157,7 +153,7 @@ export class ServiceBuilder<
       stateStore?: StateStore
     } = {},
   ) {
-    let config = {
+    const config = {
       ...this.defaultConfig,
       ...options?.serviceConfig,
     } as ConfigType
@@ -168,18 +164,6 @@ export class ServiceBuilder<
       : false
 
     const logger = options.logger || initLogger(hasLogLevel ? opt.logLevel : options.logLevel)
-
-    if (this.configSchema && options.serviceConfig) {
-      try {
-        config = {
-          ...this.defaultConfig,
-          ...this.configSchema.parse(options.serviceConfig),
-        }
-      } catch (err) {
-        logger.error({ err, ...this.info }, 'Invalid configuration for')
-        throw new Error('Fatal - unable to create service instance because provided configuration is invalid')
-      }
-    }
 
     const secretStore: SecretStore =
       options.secretStore ||
@@ -211,6 +195,7 @@ export class ServiceBuilder<
       secretStore,
       configStore,
       stateStore,
+      configSchema: this.configSchema,
     })
 
     return this.instance as ServiceClassType

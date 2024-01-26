@@ -31,21 +31,22 @@
     }
   },
   "devDependencies": {
-    "tshy": "^1.8.2",
     "@types/node": "^20.10.8",
     "hono": "^3.12.1",
     "sinon": "^17.0.1",
-    "trouter": "^4.0.0"
+    "trouter": "^4.0.0",
+    "tshy": "^1.8.2"
   },
   "dependencies": {
+    "@decs/typeschema": "^0.12.2",
     "@opentelemetry/api": "^1.7.0",
     "@opentelemetry/resources": "^1.19.0",
     "@opentelemetry/sdk-trace-node": "^1.19.0",
     "@opentelemetry/semantic-conventions": "^1.19.0",
     "openapi3-ts": "^4.2.1",
     "pino": "^8.17.2",
-    "zod": "^3.22.4",
-    "ts-deepmerge": "^6.1.0"
+    "ts-deepmerge": "^6.1.0",
+    "zod": "^3.22.4"
   },
   "peerDependencies": {
     "@types/sinon": "^17.0.3",

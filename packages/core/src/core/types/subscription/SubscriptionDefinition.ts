@@ -1,4 +1,4 @@
-import type { z } from 'zod'
+import type { Schema } from '@decs/typeschema'
 
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { EBMessageType } from '../EBMessageType.enum.js'
@@ -75,8 +75,8 @@ export type SubscriptionDefinition<
   /** hooks of subscription */
   hooks: {
     transformInput?: {
-      transformInputSchema: z.ZodType
-      transformParameterSchema: z.ZodType
+      transformInputSchema: Schema
+      transformParameterSchema: Schema
       transformFunction: SubscriptionTransformInputHook<ServiceClassType, MessagePayloadType, MessageParamsType>
     }
     beforeGuard?: Record<
@@ -88,12 +88,9 @@ export type SubscriptionDefinition<
       SubscriptionAfterGuardHook<ServiceClassType, FunctionResultType, FunctionPayloadType, FunctionParamsType, Invokes>
     >
     transformOutput?: {
-      transformOutputSchema: z.ZodType
+      transformOutputSchema: Schema
       transformFunction: SubscriptionTransformOutputHook<ServiceClassType, FunctionResultType, FunctionParamsType, any>
     }
   }
-  invokes: FromInvokeToOtherType<
-    Invokes,
-    { outputSchema?: z.ZodType; payloadSchema?: z.ZodType; parameterSchema?: z.ZodType }
-  >
+  invokes: FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
 }

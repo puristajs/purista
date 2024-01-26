@@ -1,5 +1,6 @@
+import type { Schema } from '@decs/typeschema'
+import { validate } from '@decs/typeschema'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
-import { type z } from 'zod'
 
 import { DefaultConfigStore } from '../../DefaultConfigStore/index.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/index.js'
@@ -93,6 +94,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       secretStore: config.secretStore || new DefaultSecretStore(),
       configStore: config.configStore || new DefaultConfigStore(),
       stateStore: config.stateStore || new DefaultStateStore(),
+      configSchema: config.configSchema,
     })
 
     this.config = config.config
@@ -110,6 +112,18 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
   async start() {
     return this.startActiveSpan('purista.start', {}, undefined, async (span) => {
       try {
+        if (this.configSchema) {
+          const validationResult = await validate(this.configSchema, this.config)
+          if (!validationResult.success) {
+            const err = new UnhandledError(
+              StatusCode.InternalServerError,
+              `service ${this.serviceInfo.serviceName} ${this.serviceInfo.serviceVersion}: invalid service configuration provided`,
+              validationResult.issues,
+            )
+            this.logger.error({ ...span.spanContext(), puristaVersion, err }, err.message)
+            throw err
+          }
+        }
         await this.initializeEventbridgeConnect(this.commandDefinitionList, this.subscriptionDefinitionList)
         await this.sendServiceInfo(EBMessageType.InfoServiceReady)
         this.logger.info(
@@ -189,10 +203,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     tenantId?: TenantId,
     invokes?: Record<
       string,
-      Record<
-        string,
-        Record<string, { outputSchema?: z.ZodType; payloadSchema?: z.ZodType; parameterSchema?: z.ZodType }>
-      >
+      Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
     >,
   ) {
     const sender: EBMessageSenderAddress = {
@@ -223,10 +234,10 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           invokes?.[receiver.serviceName]?.[receiver.serviceVersion]?.[receiver.serviceTarget]?.payloadSchema
 
         if (payloadSchema) {
-          const res = payloadSchema.safeParse(payload)
+          const res = await validate(payloadSchema, payload)
           if (!res.success) {
             const err = new UnhandledError(StatusCode.BadRequest, 'invoke payload schema validation failed', {
-              issues: res.error,
+              issues: res.issues,
               invokedFrom: sender,
               responseFrom: receiver,
             })
@@ -246,10 +257,10 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           invokes?.[receiver.serviceName]?.[receiver.serviceVersion]?.[receiver.serviceTarget]?.parameterSchema
 
         if (parameterSchema) {
-          const res = parameterSchema.safeParse(parameter)
+          const res = await validate(parameterSchema, parameter)
           if (!res.success) {
             const err = new UnhandledError(StatusCode.BadRequest, 'invoke parameter schema validation failed', {
-              issues: res.error,
+              issues: res.issues,
               invokedFrom: sender,
               responseFrom: receiver,
             })
@@ -290,7 +301,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
 
         const response = await this.eventBridge.invoke(msg)
 
-        const outResult = outputSchema.safeParse(response)
+        const outResult = await validate(outputSchema, response)
 
         if (outResult.success) {
           span.setStatus({
@@ -300,11 +311,15 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           return outResult.data
         }
 
-        const err = new UnhandledError(StatusCode.BadRequest, 'invoke response output schema validation failed', {
-          issues: outResult.error,
-          invokedFrom: sender,
-          responseFrom: receiver,
-        })
+        const err = new UnhandledError(
+          StatusCode.InternalServerError,
+          'invoke response output schema validation failed',
+          {
+            issues: outResult.issues,
+            invokedFrom: sender,
+            responseFrom: receiver,
+          },
+        )
 
         span.recordException(err)
         span.setStatus({
@@ -638,13 +653,26 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
 
         if (command.hooks.transformOutput) {
           const transformOutput = command.hooks.transformOutput
-          await this.startActiveSpan(command.commandName + '.outputTransformation', {}, undefined, async () => {
+          await this.startActiveSpan(command.commandName + '.outputTransformation', {}, undefined, async (subSpan) => {
             const afterTransform = transformOutput.transformFunction.bind(this, {
               message,
               ...this.getContextFunctions(logger),
             })
             const resultTransformed = await afterTransform(result as Readonly<unknown>, parameter)
-            result = transformOutput.transformOutputSchema.parse(resultTransformed)
+
+            const validationResult = await validate(transformOutput.transformOutputSchema, resultTransformed)
+            if (!validationResult.success) {
+              const err = new UnhandledError(StatusCode.InternalServerError, undefined, validationResult.issues)
+              subSpan.recordException(err)
+              logger.warn({ ...subSpan.spanContext(), err }, 'transform output validation failed:', err.message)
+
+              subSpan.setStatus({
+                code: SpanStatusCode.ERROR,
+                message: 'transform output validation failed',
+              })
+              throw err
+            }
+            result = validationResult.data
           })
         }
 
@@ -843,13 +871,26 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
               subscription.subscriptionName + '.outputTransformation',
               {},
               undefined,
-              async () => {
+              async (subSpan) => {
                 const afterTransform = transformOutput.transformFunction.bind(this, {
                   message,
                   ...this.getContextFunctions(logger),
                 })
                 const resultTransformed = await afterTransform(result as Readonly<unknown>, parameter)
-                result = transformOutput.transformOutputSchema.parse(resultTransformed)
+
+                const validationResult = await validate(transformOutput.transformOutputSchema, resultTransformed)
+                if (!validationResult.success) {
+                  const err = new UnhandledError(StatusCode.InternalServerError, undefined, validationResult.issues)
+                  subSpan.recordException(err)
+                  logger.warn({ ...subSpan.spanContext(), err }, 'transform output validation failed:', err.message)
+
+                  subSpan.setStatus({
+                    code: SpanStatusCode.ERROR,
+                    message: 'transform output validation failed',
+                  })
+                  throw err
+                }
+                result = validationResult.data
               },
             )
           }

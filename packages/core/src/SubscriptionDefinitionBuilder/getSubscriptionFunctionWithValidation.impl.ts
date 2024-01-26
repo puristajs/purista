@@ -1,5 +1,6 @@
+import type { Schema } from '@decs/typeschema'
+import { validate } from '@decs/typeschema'
 import { SpanStatusCode } from '@opentelemetry/api'
-import type { z, ZodError } from 'zod'
 
 import type { ServiceClass, SubscriptionBeforeGuardHook, SubscriptionFunction } from '../core/index.js'
 import { HandledError, StatusCode, UnhandledError } from '../core/index.js'
@@ -23,9 +24,9 @@ export const getSubscriptionFunctionWithValidation = function <
     FunctionResultType,
     Invokes
   >,
-  inputPayloadSchema: z.ZodType<FunctionPayloadType, z.ZodTypeDef, MessagePayloadType> | undefined,
-  inputParameterSchema: z.ZodType<FunctionParamsType, z.ZodTypeDef, MessageParamsType> | undefined,
-  outputPayloadSchema: z.ZodType<MessageResultType, z.ZodTypeDef, FunctionResultType> | undefined,
+  inputPayloadSchema: Schema | undefined,
+  inputParameterSchema: Schema | undefined,
+  outputPayloadSchema: Schema | undefined,
   beforeGuards: Record<
     string,
     SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType, Invokes>
@@ -52,36 +53,37 @@ export const getSubscriptionFunctionWithValidation = function <
     let safePayload = payload as unknown as FunctionPayloadType
     if (inputPayloadSchema) {
       safePayload = await startActiveSpan('validatePayload', {}, undefined, async (span) => {
-        try {
-          return inputPayloadSchema.parse(payload)
-        } catch (err) {
-          const error = err as ZodError
-          span.recordException(error)
-          span.setStatus({
-            code: SpanStatusCode.ERROR,
-            message: error.message,
-          })
-          logger.warn({ ...span.spanContext() }, 'input validation for payload failed:', error.message)
-          throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+        const validationResult = await validate(inputPayloadSchema, payload)
+        if (validationResult.success) {
+          return validationResult.data as FunctionPayloadType
         }
+        const err = new HandledError(StatusCode.BadRequest, undefined, validationResult.issues)
+        span.recordException(err)
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: err.message,
+        })
+        logger.warn({ ...span.spanContext() }, 'input validation for payload failed:', err.message)
+        throw err
       })
     }
 
     let safeParams = parameter as unknown as FunctionParamsType
     if (inputParameterSchema) {
       safeParams = await startActiveSpan('validateParameter', {}, undefined, async (span) => {
-        try {
-          return inputParameterSchema.parse(parameter)
-        } catch (err) {
-          const error = err as ZodError
-          span.recordException(error)
-          span.setStatus({
-            code: SpanStatusCode.ERROR,
-            message: error.message,
-          })
-          logger.warn({ ...span.spanContext() }, 'input validation for parameter failed:', error.message)
-          throw new HandledError(StatusCode.BadRequest, undefined, error.issues)
+        const validationResult = await validate(inputParameterSchema, parameter)
+        if (validationResult.success) {
+          return validationResult.data as FunctionParamsType
         }
+
+        const err = new HandledError(StatusCode.BadRequest, undefined, validationResult.issues)
+        span.recordException(err)
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: err.message,
+        })
+        logger.warn({ ...span.spanContext() }, 'input validation for parameter failed:', err.message)
+        throw err
       })
     }
 
@@ -110,18 +112,19 @@ export const getSubscriptionFunctionWithValidation = function <
     }
 
     return await startActiveSpan('outputValidation', {}, undefined, async (span) => {
-      try {
-        return outputPayloadSchema.parse(output) as any
-      } catch (error) {
-        const err = error as ZodError
-        span.recordException(err)
-        span.setStatus({
-          code: SpanStatusCode.ERROR,
-          message: err.message,
-        })
-        logger.error({ err, ...span.spanContext() }, 'output validation failed')
-        throw new UnhandledError(StatusCode.InternalServerError)
+      const validationResult = await validate(outputPayloadSchema, output)
+      if (validationResult.success) {
+        return validationResult.data as FunctionResultType
       }
+
+      const err = new UnhandledError(StatusCode.InternalServerError)
+      span.recordException(err)
+      span.setStatus({
+        code: SpanStatusCode.ERROR,
+        message: err.message,
+      })
+      logger.warn({ ...span.spanContext() }, 'output validation failed:', err.message)
+      throw err
     })
   }
   return wrapped

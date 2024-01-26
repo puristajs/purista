@@ -1,6 +1,5 @@
+import type { Infer, InferIn, Schema } from '@decs/typeschema'
 import type { SinonSandbox } from 'sinon'
-import type { ZodType } from 'zod'
-import { z } from 'zod'
 
 import type {
   CommandAfterGuardHook,
@@ -22,8 +21,7 @@ import type {
 } from '../core/index.js'
 import type { NonEmptyString } from '../helper/index.js'
 import { getCommandContextMock } from '../mocks/index.js'
-import type { OpenApiZodAny } from '../zodOpenApi/index.js'
-import { generateSchema } from '../zodOpenApi/index.js'
+import { validationToSchema } from '../zodOpenApi/index.js'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
 
 /**
@@ -46,13 +44,13 @@ export class CommandDefinitionBuilder<
   Invokes = {},
 > {
   private httpMetadata?: HttpExposedServiceMeta<FunctionParamsType>
-  private inputSchema?: z.ZodType
+  private inputSchema?: Schema
   private inputContentType: ContentType | undefined
   private inputContentEncoding: string | undefined
-  private outputSchema?: z.ZodType
+  private outputSchema?: Schema
   private outputContentType: ContentType | undefined
   private outputContentEncoding: string | undefined
-  private parameterSchema?: z.ZodType
+  private parameterSchema?: Schema
   private queryParameter: QueryParameter<FunctionParamsType>[] = []
 
   private tags: string[] = []
@@ -72,16 +70,13 @@ export class CommandDefinitionBuilder<
 
   private invokes: FromInvokeToOtherType<
     Invokes,
-    { outputSchema?: z.ZodType; payloadSchema?: z.ZodType; parameterSchema?: z.ZodType }
-  > = {} as FromInvokeToOtherType<
-    Invokes,
-    { outputSchema?: z.ZodType; payloadSchema?: z.ZodType; parameterSchema?: z.ZodType }
-  >
+    { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }
+  > = {} as FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
 
   private hooks: {
     transformInput?: {
-      transformInputSchema: z.ZodType
-      transformParameterSchema: z.ZodType
+      transformInputSchema: Schema
+      transformParameterSchema: Schema
       transformFunction: CommandTransformInputHook<ServiceClassType, any, any, any, any>
     }
     beforeGuard: Record<
@@ -108,7 +103,7 @@ export class CommandDefinitionBuilder<
       >
     >
     transformOutput?: {
-      transformOutputSchema: z.ZodType
+      transformOutputSchema: Schema
       transformFunction: CommandTransformOutputHook<ServiceClassType, any, any, FunctionParamsType, any>
     }
   } = {
@@ -147,9 +142,9 @@ export class CommandDefinitionBuilder<
    */
 
   canInvoke<
-    Payload = unknown,
-    Parameter = unknown,
-    Output = unknown,
+    Output extends Schema,
+    Payload extends Schema,
+    Parameter extends Schema,
     SName extends string = string,
     Version extends string = string,
     Fname extends string = string,
@@ -157,9 +152,9 @@ export class CommandDefinitionBuilder<
     serviceName: SName,
     serviceVersion: Version,
     serviceTarget: Fname,
-    outputSchema: z.ZodType<Output, any, any> = z.any(),
-    payloadSchema: z.ZodType<Payload, any, any> = z.any(),
-    parameterSchema: z.ZodType<Parameter, any, any> = z.any(),
+    outputSchema?: Output,
+    payloadSchema?: Payload,
+    parameterSchema?: Parameter,
   ) {
     if (serviceName.trim() === '' || serviceVersion.trim() === '' || serviceTarget.trim() === '') {
       throw new Error('canInvoke requires non-empty service name, version and target')
@@ -181,7 +176,13 @@ export class CommandDefinitionBuilder<
         },
       },
     } as Invokes &
-      Record<SName, Record<Version, Record<Fname, (payload: Payload, parameter: Parameter) => Promise<Output>>>>
+      Record<
+        SName,
+        Record<
+          Version,
+          Record<Fname, (payload: InferIn<Payload>, parameter: InferIn<Parameter>) => Promise<Infer<Output>>>
+        >
+      >
 
     this.invokes = {
       ...this.invokes,
@@ -197,7 +198,13 @@ export class CommandDefinitionBuilder<
       FunctionParamsType,
       FunctionResultType,
       Invokes &
-        Record<SName, Record<Version, Record<Fname, (payload: Payload, parameter: Parameter) => Promise<Output>>>>
+        Record<
+          SName,
+          Record<
+            Version,
+            Record<Fname, (payload: InferIn<Payload>, parameter: InferIn<Parameter>) => Promise<Infer<Output>>>
+          >
+        >
     >
   }
 
@@ -220,20 +227,16 @@ export class CommandDefinitionBuilder<
    * @param inputContentEncoding optional the content encoding
    * @returns CommandDefinitionBuilder
    */
-  addPayloadSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(
-    inputSchema: z.ZodType<O, D, I>,
-    inputContentType?: ContentType,
-    inputContentEncoding?: string,
-  ) {
+  addPayloadSchema<T extends Schema>(inputSchema: T, inputContentType?: ContentType, inputContentEncoding?: string) {
     this.inputContentType = inputContentType || this.inputContentType
     this.inputContentEncoding = inputContentEncoding || this.inputContentEncoding
     this.inputSchema = inputSchema
     return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
-      I,
+      InferIn<T>,
       MessageParamsType,
       MessageResultType,
-      O,
+      Infer<T>,
       FunctionParamsType,
       FunctionResultType,
       Invokes
@@ -248,11 +251,7 @@ export class CommandDefinitionBuilder<
    * @param outputContentEncoding optional the content encoding
    * @returns CommandDefinitionBuilder
    */
-  addOutputSchema<I, D extends z.ZodTypeDef, O>(
-    outputSchema: z.ZodType<O, D, I>,
-    outputContentType?: ContentType,
-    outputContentEncoding?: string,
-  ) {
+  addOutputSchema<T extends Schema>(outputSchema: T, outputContentType?: ContentType, outputContentEncoding?: string) {
     this.outputContentType = outputContentType || this.outputContentType
     this.outputContentEncoding = outputContentEncoding || this.outputContentEncoding
     this.outputSchema = outputSchema
@@ -260,10 +259,10 @@ export class CommandDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
-      O,
+      Infer<T>,
       FunctionPayloadType,
       FunctionParamsType,
-      I,
+      InferIn<T>,
       Invokes
     >
   }
@@ -283,15 +282,15 @@ export class CommandDefinitionBuilder<
    * @param parameterSchema The schema validation for output parameter
    * @returns CommandDefinitionBuilder
    */
-  addParameterSchema<I, D extends z.ZodTypeDef, O>(parameterSchema: z.ZodType<O, D, I>) {
+  addParameterSchema<T extends Schema>(parameterSchema: T) {
     this.parameterSchema = parameterSchema
     return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
-      I,
+      InferIn<T>,
       MessageResultType,
       FunctionPayloadType,
-      O,
+      Infer<T>,
       FunctionResultType,
       Invokes
     >
@@ -370,22 +369,15 @@ export class CommandDefinitionBuilder<
    * @param inputContentEncoding optional the content encoding
    * @returns CommandDefinitionBuilder
    */
-  setTransformInput<
-    PayloadIn = MessagePayloadType,
-    ParamsIn = MessageParamsType,
-    PayloadOut = MessagePayloadType,
-    ParamsOut = MessageParamsType,
-    PayloadD extends z.ZodTypeDef = z.ZodTypeDef,
-    ParamsD extends z.ZodTypeDef = z.ZodTypeDef,
-  >(
-    transformInputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
-    transformParameterSchema: z.ZodType<ParamsOut, ParamsD, ParamsIn>,
+  setTransformInput<Payload extends Schema, Parameter extends Schema>(
+    transformInputSchema: Payload,
+    transformParameterSchema: Parameter,
     transformFunction: CommandTransformInputHook<
       ServiceClassType,
       FunctionPayloadType,
       FunctionParamsType,
-      PayloadIn,
-      ParamsIn
+      InferIn<Payload>,
+      InferIn<Parameter>
     >,
     inputContentType?: ContentType,
     inputContentEncoding?: string,
@@ -400,8 +392,8 @@ export class CommandDefinitionBuilder<
     }
     return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
-      PayloadIn,
-      ParamsIn,
+      InferIn<Payload>,
+      InferIn<Parameter>,
       MessageResultType,
       FunctionPayloadType,
       FunctionParamsType,
@@ -438,14 +430,14 @@ export class CommandDefinitionBuilder<
    * @param outputContentEncoding optional the content encoding
    * @returns CommandDefinitionBuilder
    */
-  setTransformOutput<PayloadOut, PayloadD extends z.ZodTypeDef, PayloadIn>(
-    transformOutputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
+  setTransformOutput<Output extends Schema>(
+    transformOutputSchema: Output,
     transformFunction: CommandTransformOutputHook<
       ServiceClassType,
       MessagePayloadType,
       FunctionResultType,
       FunctionParamsType,
-      PayloadIn
+      InferIn<Output>
     >,
     outputContentType?: ContentType,
     outputContentEncoding?: string,
@@ -460,7 +452,7 @@ export class CommandDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
-      PayloadOut,
+      Infer<Output>,
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
@@ -710,10 +702,10 @@ export class CommandDefinitionBuilder<
 
     const eventName = this.eventName
 
-    const inputPayloadSchema: ZodType | undefined = this.hooks.transformInput?.transformInputSchema || this.inputSchema
-    const inputParameterSchema: ZodType | undefined =
+    const inputPayloadSchema: Schema | undefined = this.hooks.transformInput?.transformInputSchema || this.inputSchema
+    const inputParameterSchema: Schema | undefined =
       this.hooks.transformInput?.transformParameterSchema || this.parameterSchema
-    const outputPayloadSchema: ZodType | undefined =
+    const outputPayloadSchema: Schema | undefined =
       this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
 
     const eventBridgeConfig: Complete<DefinitionEventBridgeConfig> = {
@@ -744,13 +736,9 @@ export class CommandDefinitionBuilder<
           contentEncodingRequest: this.inputContentEncoding || 'utf-8',
           contentTypeResponse: this.outputContentType || 'application/json',
           contentEncodingResponse: this.outputContentEncoding || 'utf-8',
-          inputPayload: inputPayloadSchema ? generateSchema(inputPayloadSchema as unknown as OpenApiZodAny) : undefined,
-          parameter: inputParameterSchema
-            ? generateSchema(inputParameterSchema as unknown as OpenApiZodAny)
-            : undefined,
-          outputPayload: outputPayloadSchema
-            ? generateSchema(outputPayloadSchema as unknown as OpenApiZodAny)
-            : undefined,
+          inputPayload: validationToSchema(inputPayloadSchema),
+          parameter: validationToSchema(inputParameterSchema),
+          outputPayload: validationToSchema(outputPayloadSchema),
           deprecated: this.deprecated,
         },
       },

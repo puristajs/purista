@@ -1,4 +1,4 @@
-import type { z } from 'zod'
+import type { Schema } from '@decs/typeschema'
 
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { FromInvokeToOtherType } from '../FromInvokeToOtherType.js'
@@ -49,8 +49,8 @@ export type CommandDefinition<
   /** hooks of command */
   hooks: {
     transformInput?: {
-      transformInputSchema: z.ZodType
-      transformParameterSchema: z.ZodType
+      transformInputSchema: Schema
+      transformParameterSchema: Schema
       transformFunction: CommandTransformInputHook<ServiceClassType, MessagePayloadType, MessageParamsType>
     }
     beforeGuard?: Record<
@@ -77,7 +77,7 @@ export type CommandDefinition<
       >
     >
     transformOutput?: {
-      transformOutputSchema: z.ZodType
+      transformOutputSchema: Schema
       transformFunction: CommandTransformOutputHook<
         ServiceClassType,
         MessagePayloadType,
@@ -87,8 +87,5 @@ export type CommandDefinition<
       >
     }
   }
-  invokes: FromInvokeToOtherType<
-    Invokes,
-    { outputSchema?: z.ZodType; payloadSchema?: z.ZodType; parameterSchema?: z.ZodType }
-  >
+  invokes: FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
 }
