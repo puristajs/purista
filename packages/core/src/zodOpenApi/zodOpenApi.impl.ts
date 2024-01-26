@@ -53,16 +53,16 @@ function parseTransformation({
           ['integer', 'number'].includes(`${input.type}`)
             ? 0
             : input.type === 'string'
-            ? ''
-            : input.type === 'boolean'
-            ? false
-            : input.type === 'object'
-            ? {}
-            : input.type === 'null'
-            ? null
-            : input.type === 'array'
-            ? []
-            : undefined,
+              ? ''
+              : input.type === 'boolean'
+                ? false
+                : input.type === 'object'
+                  ? {}
+                  : input.type === 'null'
+                    ? null
+                    : input.type === 'array'
+                      ? []
+                      : undefined,
           { addIssue: () => undefined, path: [] }, // TODO: Discover if context is necessary here
         )
       } catch (e) {
