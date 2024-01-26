@@ -10,7 +10,7 @@ export const addServiceActions: Actions = [
     type: 'add',
     skipIfExists: true,
     path: 'src/service/ServiceEvent.enum.ts',
-    templateFile: TEMPLATE_BASE + '/src/service/ServiceEvent.enum.ts.hbs',
+    templateFile: TEMPLATE_BASE + '/src/service/serviceEvent.enum.ts.hbs',
   },
   {
     type: 'add',
