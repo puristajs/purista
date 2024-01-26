@@ -1,6 +1,5 @@
+import type { Infer, InferIn, Schema } from '@decs/typeschema'
 import type { SinonSandbox } from 'sinon'
-import type { ZodType } from 'zod'
-import { z } from 'zod'
 
 import type {
   Complete,
@@ -47,18 +46,18 @@ export class SubscriptionDefinitionBuilder<
 > {
   private messageType: EBMessageType | undefined
 
-  private inputSchema?: z.ZodTypeAny
+  private inputSchema?: Schema
   private inputContentType: ContentType | undefined
   private inputContentEncoding: string | undefined
-  private outputSchema: z.ZodType = z.void()
+  private outputSchema?: Schema
   private outputContentType: ContentType | undefined
   private outputContentEncoding: string | undefined
-  private parameterSchema?: z.ZodType
+  private parameterSchema?: Schema
 
   private hooks: {
     transformInput?: {
-      transformInputSchema: z.ZodType
-      transformParameterSchema: z.ZodType
+      transformInputSchema: Schema
+      transformParameterSchema: Schema
       transformFunction: SubscriptionTransformInputHook<ServiceClassType, any, any, any, any>
     }
     beforeGuard: Record<
@@ -70,7 +69,7 @@ export class SubscriptionDefinitionBuilder<
       SubscriptionAfterGuardHook<ServiceClassType, FunctionResultType, FunctionPayloadType, FunctionParamsType, Invokes>
     >
     transformOutput?: {
-      transformOutputSchema: z.ZodType
+      transformOutputSchema: Schema
       transformFunction: SubscriptionTransformOutputHook<ServiceClassType, FunctionResultType, FunctionParamsType, any>
     }
   } = {
@@ -117,11 +116,8 @@ export class SubscriptionDefinitionBuilder<
 
   private invokes: FromInvokeToOtherType<
     Invokes,
-    { outputSchema?: z.ZodType; payloadSchema?: z.ZodType; parameterSchema?: z.ZodType }
-  > = {} as FromInvokeToOtherType<
-    Invokes,
-    { outputSchema?: z.ZodType; payloadSchema?: z.ZodType; parameterSchema?: z.ZodType }
-  >
+    { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }
+  > = {} as FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
 
   // eslint-disable-next-line no-useless-constructor
   constructor(
@@ -130,9 +126,9 @@ export class SubscriptionDefinitionBuilder<
   ) {}
 
   canInvoke<
-    Payload = unknown,
-    Parameter = unknown,
-    Output = unknown,
+    Output extends Schema,
+    Payload extends Schema,
+    Parameter extends Schema,
     SName extends string = string,
     Version extends string = string,
     Fname extends string = string,
@@ -140,9 +136,9 @@ export class SubscriptionDefinitionBuilder<
     serviceName: SName,
     serviceVersion: Version,
     serviceTarget: Fname,
-    outputSchema: z.ZodType<Output, any, any> = z.any(),
-    payloadSchema: z.ZodType<Payload, any, any> = z.any(),
-    parameterSchema: z.ZodType<Parameter, any, any> = z.any(),
+    outputSchema?: Output,
+    payloadSchema?: Payload,
+    parameterSchema?: Parameter,
   ) {
     if (serviceName.trim() === '' || serviceVersion.trim() === '' || serviceTarget.trim() === '') {
       throw new Error('canInvoke requires non-empty service name, version and target')
@@ -164,7 +160,13 @@ export class SubscriptionDefinitionBuilder<
         },
       },
     } as Invokes &
-      Record<SName, Record<Version, Record<Fname, (payload: Payload, parameter: Parameter) => Promise<Output>>>>
+      Record<
+        SName,
+        Record<
+          Version,
+          Record<Fname, (payload: InferIn<Payload>, parameter: InferIn<Parameter>) => Promise<Infer<Output>>>
+        >
+      >
 
     this.invokes = {
       ...this.invokes,
@@ -180,7 +182,13 @@ export class SubscriptionDefinitionBuilder<
       FunctionParamsType,
       FunctionResultType,
       Invokes &
-        Record<SName, Record<Version, Record<Fname, (payload: Payload, parameter: Parameter) => Promise<Output>>>>
+        Record<
+          SName,
+          Record<
+            Version,
+            Record<Fname, (payload: InferIn<Payload>, parameter: InferIn<Parameter>) => Promise<Infer<Output>>>
+          >
+        >
     >
   }
 
@@ -352,8 +360,8 @@ export class SubscriptionDefinitionBuilder<
    * @param inputContentEncoding optional the content encoding
    * @returns SubscriptionDefinitionBuilder
    */
-  addPayloadSchema<I = unknown, D extends z.ZodTypeDef = z.ZodTypeDef, O = unknown>(
-    inputSchema: z.ZodType<O, D, I>,
+  addPayloadSchema<T extends Schema>(
+    inputSchema: T,
     inputContentType = 'application/json',
     inputContentEncoding = 'utf-8',
   ) {
@@ -363,10 +371,10 @@ export class SubscriptionDefinitionBuilder<
     this.inputSchema = inputSchema
     return this as unknown as SubscriptionDefinitionBuilder<
       ServiceClassType,
-      I,
+      InferIn<T>,
       MessageParamsType,
       MessageResultType,
-      O,
+      Infer<T>,
       FunctionParamsType,
       FunctionResultType,
       Invokes
@@ -382,9 +390,9 @@ export class SubscriptionDefinitionBuilder<
    * @param outputContentEncoding optional the content encoding
    * @returns SubscriptionDefinitionBuilder
    */
-  addOutputSchema<I, D extends z.ZodTypeDef, O>(
+  addOutputSchema<T extends Schema>(
     eventName: string,
-    outputSchema: z.ZodType<O, D, I>,
+    outputSchema: T,
     outputContentType = 'application/json',
     outputContentEncoding = 'utf-8',
   ) {
@@ -396,10 +404,10 @@ export class SubscriptionDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
-      O,
+      Infer<T>,
       FunctionPayloadType,
       FunctionParamsType,
-      I,
+      InferIn<T>,
       Invokes
     >
   }
@@ -410,15 +418,15 @@ export class SubscriptionDefinitionBuilder<
    * @param parameterSchema the validation schema for output parameter
    * @returns SubscriptionDefinitionBuilder
    */
-  addParameterSchema<I, D extends z.ZodTypeDef, O>(parameterSchema: z.ZodType<O, D, I>) {
+  addParameterSchema<T extends Schema>(parameterSchema: T) {
     this.parameterSchema = parameterSchema
     return this as unknown as SubscriptionDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
-      I,
+      InferIn<T>,
       MessageResultType,
       FunctionPayloadType,
-      O,
+      Infer<T>,
       FunctionResultType,
       Invokes
     >
@@ -435,22 +443,15 @@ export class SubscriptionDefinitionBuilder<
    * @param inputContentEncoding optional the content encoding
    * @returns SubscriptionDefinitionBuilder
    */
-  setTransformInput<
-    PayloadIn = MessagePayloadType,
-    ParamsIn = MessageParamsType,
-    PayloadOut = MessagePayloadType,
-    ParamsOut = MessageParamsType,
-    PayloadD extends z.ZodTypeDef = z.ZodTypeDef,
-    ParamsD extends z.ZodTypeDef = z.ZodTypeDef,
-  >(
-    transformInputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
-    transformParameterSchema: z.ZodType<ParamsOut, ParamsD, ParamsIn>,
+  setTransformInput(
+    transformInputSchema: Schema,
+    transformParameterSchema: Schema,
     transformFunction: SubscriptionTransformInputHook<
       ServiceClassType,
       FunctionPayloadType,
       FunctionParamsType,
-      PayloadIn,
-      ParamsIn
+      InferIn<typeof transformInputSchema>,
+      InferIn<typeof transformParameterSchema>
     >,
     inputContentType?: ContentType,
     inputContentEncoding?: string,
@@ -465,8 +466,8 @@ export class SubscriptionDefinitionBuilder<
     }
     return this as unknown as SubscriptionDefinitionBuilder<
       ServiceClassType,
-      PayloadIn,
-      ParamsIn,
+      InferIn<typeof transformInputSchema>,
+      InferIn<typeof transformParameterSchema>,
       MessageResultType,
       FunctionPayloadType,
       FunctionParamsType,
@@ -503,13 +504,13 @@ export class SubscriptionDefinitionBuilder<
    * @param outputContentEncoding optional the content encoding
    * @returns SubscriptionDefinitionBuilder
    */
-  setTransformOutput<PayloadOut, PayloadD extends z.ZodTypeDef, PayloadIn>(
-    transformOutputSchema: z.ZodType<PayloadOut, PayloadD, PayloadIn>,
+  setTransformOutput(
+    transformOutputSchema: Schema,
     transformFunction: SubscriptionTransformOutputHook<
       ServiceClassType,
       FunctionResultType,
       FunctionParamsType,
-      PayloadIn
+      InferIn<typeof transformOutputSchema>
     >,
     outputContentType?: ContentType,
     outputContentEncoding?: string,
@@ -525,7 +526,7 @@ export class SubscriptionDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
-      PayloadOut,
+      Infer<typeof transformOutputSchema>,
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
@@ -690,10 +691,10 @@ export class SubscriptionDefinitionBuilder<
       throw new Error(`SubscriptionDefinitionBuilder: missing function implementation for ${this.subscriptionName}`)
     }
 
-    const inputPayloadSchema: ZodType | undefined = this.hooks.transformInput?.transformInputSchema || this.inputSchema
-    const inputParameterSchema: ZodType | undefined =
+    const inputPayloadSchema: Schema | undefined = this.hooks.transformInput?.transformInputSchema || this.inputSchema
+    const inputParameterSchema: Schema | undefined =
       this.hooks.transformInput?.transformParameterSchema || this.parameterSchema
-    const outputPayloadSchema: ZodType | undefined =
+    const outputPayloadSchema: Schema | undefined =
       this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
 
     const eventBridgeConfig: Complete<DefinitionEventBridgeConfig> = {

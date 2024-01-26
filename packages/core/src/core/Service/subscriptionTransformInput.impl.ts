@@ -1,5 +1,5 @@
+import { validate } from '@decs/typeschema'
 import { SpanStatusCode } from '@opentelemetry/api'
-import type { ZodError } from 'zod'
 
 import { HandledError, UnhandledError } from '../Error/index.js'
 import type { EBMessage, Logger, SubscriptionDefinition } from '../types/index.js'
@@ -38,23 +38,23 @@ export const subscriptionTransformInput = async (
         subscription.subscriptionName + '.validateParameter',
         {},
         async (subSpan) => {
-          try {
-            return transformInput.transformParameterSchema.parse(msgPayload?.parameter)
-          } catch (error) {
-            const err = error as ZodError
-            subSpan.recordException(err)
-            logger.warn(
-              { ...subSpan.spanContext(), err },
-              'transform input validation for parameter failed:',
-              err.message,
-            )
-
-            subSpan.setStatus({
-              code: SpanStatusCode.ERROR,
-              message: 'transform input validation for parameters failed',
-            })
-            throw new HandledError(StatusCode.BadRequest, undefined, err.issues)
+          const validationResult = await validate(transformInput.transformParameterSchema, msgPayload?.parameter)
+          if (validationResult.success) {
+            return validationResult.data as Readonly<typeof validationResult.data>
           }
+          const err = new HandledError(StatusCode.BadRequest, undefined, validationResult.issues)
+          subSpan.recordException(err)
+          logger.warn(
+            { ...subSpan.spanContext(), err },
+            'transform input validation for parameters failed:',
+            err.message,
+          )
+
+          subSpan.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: 'transform input validation for parameters failed',
+          })
+          throw err
         },
       )
 
@@ -62,22 +62,19 @@ export const subscriptionTransformInput = async (
         subscription.subscriptionName + '.validatePayload',
         {},
         async (subSpan) => {
-          try {
-            return transformInput.transformInputSchema.parse(msgPayload?.payload)
-          } catch (error) {
-            const err = error as ZodError
-            subSpan.recordException(err)
-            logger.warn(
-              { ...subSpan.spanContext(), err },
-              'transform input validation for payload failed:',
-              err.message,
-            )
-            subSpan.setStatus({
-              code: SpanStatusCode.ERROR,
-              message: 'transform input validation for payload failed',
-            })
-            throw new HandledError(StatusCode.BadRequest, undefined, err.issues)
+          const validationResult = await validate(transformInput.transformInputSchema, msgPayload?.payload)
+          if (validationResult.success) {
+            return validationResult.data as Readonly<typeof validationResult.data>
           }
+          const err = new HandledError(StatusCode.BadRequest, undefined, validationResult.issues)
+          subSpan.recordException(err)
+          logger.warn({ ...subSpan.spanContext(), err }, 'transform input validation for payload failed:', err.message)
+
+          subSpan.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: 'transform input validation for payload failed',
+          })
+          throw err
         },
       )
 

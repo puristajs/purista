@@ -1,3 +1,4 @@
+import type { Schema } from '@decs/typeschema'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 
 import type { ConfigStore } from '../ConfigStore/index.js'
@@ -33,4 +34,6 @@ export type ServiceConstructorInput<ConfigType> = {
   stateStore?: StateStore
   /** The opentelemetry span processor instance */
   spanProcessor?: SpanProcessor
+  /** The config validation schema */
+  configSchema?: Schema
 }

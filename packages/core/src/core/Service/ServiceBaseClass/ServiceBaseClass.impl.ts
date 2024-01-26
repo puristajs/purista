@@ -1,3 +1,4 @@
+import type { Schema } from '@decs/typeschema'
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 import { SpanStatusCode } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
@@ -38,6 +39,8 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
   configStore: ConfigStore
   stateStore: StateStore
 
+  configSchema: Schema | undefined
+
   constructor(options: {
     logger: Logger
     info: ServiceInfoType
@@ -46,6 +49,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
     secretStore: SecretStore
     configStore: ConfigStore
     stateStore: StateStore
+    configSchema?: Schema
   }) {
     super()
     this.info = new Proxy(
