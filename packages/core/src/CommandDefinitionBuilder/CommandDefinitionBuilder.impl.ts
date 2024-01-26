@@ -42,6 +42,7 @@ export class CommandDefinitionBuilder<
   FunctionParamsType = MessageParamsType,
   FunctionResultType = MessageResultType,
   Invokes = {},
+  EmitListType = {},
 > {
   private httpMetadata?: HttpExposedServiceMeta<FunctionParamsType>
   private inputSchema?: Schema
@@ -72,6 +73,8 @@ export class CommandDefinitionBuilder<
     Invokes,
     { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }
   > = {} as FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
+
+  private emitList: EmitListType = {} as EmitListType
 
   private hooks: {
     transformInput?: {
@@ -204,7 +207,28 @@ export class CommandDefinitionBuilder<
             Version,
             Record<Fname, (payload: InferIn<Payload>, parameter: InferIn<Parameter>) => Promise<Infer<Output>>>
           >
-        >
+        >,
+      EmitListType
+    >
+  }
+
+  canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
+    if (eventName.trim() === '') {
+      throw new Error('canEmit requires non-empty event name')
+    }
+
+    this.emitList = { ...this.emitList, [eventName]: schema }
+
+    return this as CommandDefinitionBuilder<
+      ServiceClassType,
+      MessagePayloadType,
+      MessageParamsType,
+      MessageResultType,
+      FunctionPayloadType,
+      FunctionParamsType,
+      FunctionResultType,
+      Invokes,
+      EmitListType & Record<EventName, T>
     >
   }
 
@@ -239,7 +263,8 @@ export class CommandDefinitionBuilder<
       Infer<T>,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >
   }
 
@@ -263,7 +288,8 @@ export class CommandDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       InferIn<T>,
-      Invokes
+      Invokes,
+      EmitListType
     >
   }
 
@@ -292,7 +318,8 @@ export class CommandDefinitionBuilder<
       FunctionPayloadType,
       Infer<T>,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >
   }
 
@@ -398,7 +425,8 @@ export class CommandDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >
   }
 
@@ -456,7 +484,8 @@ export class CommandDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >
   }
 
@@ -620,7 +649,8 @@ export class CommandDefinitionBuilder<
         FunctionPayloadType,
         FunctionParamsType,
         FunctionResultType,
-        Invokes
+        Invokes,
+        EmitListType
       >
     >,
   ) {
@@ -638,7 +668,8 @@ export class CommandDefinitionBuilder<
         FunctionPayloadType,
         FunctionParamsType,
         FunctionResultType,
-        Invokes
+        Invokes,
+        EmitListType
       >
     > = {
       ...definition,
@@ -694,7 +725,8 @@ export class CommandDefinitionBuilder<
     FunctionPayloadType,
     FunctionParamsType,
     FunctionResultType,
-    Invokes
+    Invokes,
+    EmitListType
   > {
     if (!this.fn) {
       throw new Error('CommandDefinitionBuilder: missing function implementation')
@@ -724,7 +756,8 @@ export class CommandDefinitionBuilder<
         FunctionPayloadType,
         FunctionParamsType,
         FunctionResultType,
-        Invokes
+        Invokes,
+        EmitListType
       >
     > = {
       commandName: this.commandName,
@@ -755,6 +788,7 @@ export class CommandDefinitionBuilder<
       >(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard),
       hooks: this.hooks,
       invokes: this.invokes,
+      emitList: this.emitList,
     }
 
     return this.extendWithHttpMetadata(definition)
@@ -794,7 +828,8 @@ export class CommandDefinitionBuilder<
     FunctionPayloadType,
     FunctionParamsType,
     FunctionResultType,
-    Invokes
+    Invokes,
+    EmitListType
   > {
     this.fn = fn as unknown as CommandFunction<
       ServiceClassType,
@@ -814,7 +849,8 @@ export class CommandDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >
   }
 
