@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.9.1] - 2024-01-26
+
+### Bug Fixes
+
+- Filename typo in cli
+- Set opentelemetry status on error in HttpClient
+- Set span processor in service class
+
+### Miscellaneous Tasks
+
+- Lint
+
 ## [1.9.0] - 2023-11-18
 
 ### Bug Fixes
@@ -23,6 +35,7 @@ All notable changes to this project will be documented in this file.
 ### Miscellaneous Tasks
 
 - Update dependencies
+- Bump versions to 1.9.0
 
 ## [1.8.3] - 2023-10-19
 
