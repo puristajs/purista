@@ -6,7 +6,6 @@ import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import {
   convertToSnakeCase,
   EBMessageType,
-  getNewTraceId,
   HandledError,
   isHttpExposedServiceMeta,
   StatusCode,
