@@ -1,4 +1,4 @@
-import type { Schema } from '@decs/typeschema'
+import type { Infer, Schema } from '@decs/typeschema'
 import { validate } from '@decs/typeschema'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
 
@@ -30,6 +30,7 @@ import type {
   EBMessage,
   EBMessageAddress,
   EBMessageSenderAddress,
+  EmitSchemaList,
   InfoMessageType,
   Logger,
   PrincipalId,
@@ -334,7 +335,13 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     return invokeCommand.bind(this)
   }
 
-  protected getEmitFunction(serviceTarget: string, traceId?: TraceId, principalId?: PrincipalId, tenantId?: TenantId) {
+  protected getEmitFunction<EmitList = {}>(
+    serviceTarget: string,
+    traceId?: TraceId,
+    principalId?: PrincipalId,
+    tenantId?: TenantId,
+    emitList?: EmitList,
+  ) {
     const sender: EBMessageSenderAddress = {
       serviceName: this.info.serviceName,
       serviceVersion: this.info.serviceVersion,
@@ -342,27 +349,64 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       instanceId: this.eventBridge.instanceId,
     }
 
-    const emitCustomEvent = async <Payload>(
-      eventName: string,
+    const emitCustomEvent = async <K extends keyof EmitList, Payload = EmitList[K]>(
+      eventName: K,
       eventPayload?: Payload,
       contentType = 'application/json',
       contentEncoding = 'utf-8',
     ) => {
       await this.startActiveSpan('purista.emitEvent', {}, undefined, async (span) => {
-        span.addEvent(eventName)
-        const msg: Readonly<Omit<CustomMessage<Payload>, 'id' | 'timestamp'>> = Object.freeze({
+        const eventSchemas = emitList as EmitSchemaList<EmitList>
+        const schema = eventSchemas[eventName]
+
+        if (!schema) {
+          const err = new UnhandledError(StatusCode.InternalServerError, `No schema for ${eventName as string} found`, {
+            eventName,
+          })
+          span.recordException(err)
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: err.message,
+          })
+          throw err
+        }
+
+        const validation = await validate(schema, eventPayload)
+        if (!validation.success) {
+          const err = new UnhandledError(
+            StatusCode.InternalServerError,
+            `Payload validation for event ${eventName as string} failed`,
+            { eventName, issues: validation.issues },
+          )
+          span.recordException(err)
+          span.setStatus({
+            code: SpanStatusCode.ERROR,
+            message: err.message,
+          })
+          throw err
+        }
+
+        span.addEvent(eventName as string)
+        const msg: Readonly<Omit<CustomMessage<Infer<typeof schema>>, 'id' | 'timestamp'>> = Object.freeze({
           messageType: EBMessageType.CustomMessage,
           traceId,
           contentType,
           contentEncoding,
           sender,
-          eventName,
-          payload: eventPayload,
+          eventName: eventName as string,
+          payload: validation.data,
           principalId,
           tenantId,
         })
 
-        return this.eventBridge.emitMessage(msg)
+        const res = this.eventBridge.emitMessage(msg)
+
+        span.setStatus({
+          code: SpanStatusCode.OK,
+          message: 'OK',
+        })
+
+        return res
       })
     }
 
@@ -588,7 +632,13 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           async (_subSpan) => {
             const context: CommandFunctionContext = {
               message,
-              emit: this.getEmitFunction(command.commandName, traceId, message.principalId, message.tenantId),
+              emit: this.getEmitFunction(
+                command.commandName,
+                traceId,
+                message.principalId,
+                message.tenantId,
+                command.emitList,
+              ),
               invoke: this.getInvokeFunction(
                 command.commandName,
                 traceId,
@@ -621,7 +671,13 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
             for (const [name, hook] of Object.entries(guards || {})) {
               const context: CommandFunctionContext = {
                 message,
-                emit: this.getEmitFunction(command.commandName, traceId, message.principalId, message.tenantId),
+                emit: this.getEmitFunction(
+                  command.commandName,
+                  traceId,
+                  message.principalId,
+                  message.tenantId,
+                  command.emitList,
+                ),
                 invoke: this.getInvokeFunction(
                   command.commandName,
                   traceId,
@@ -799,7 +855,13 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
             async (_subSpan) => {
               const context: SubscriptionFunctionContext = {
                 message,
-                emit: this.getEmitFunction(subscriptionName, traceId, message.principalId, message.tenantId),
+                emit: this.getEmitFunction(
+                  subscriptionName,
+                  traceId,
+                  message.principalId,
+                  message.tenantId,
+                  subscription.emitList,
+                ),
                 invoke: this.getInvokeFunction(
                   subscriptionName,
                   traceId,
@@ -837,6 +899,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
                     traceId,
                     message.principalId,
                     message.tenantId,
+                    subscription.emitList,
                   ),
                   invoke: this.getInvokeFunction(
                     subscription.subscriptionName,

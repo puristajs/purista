@@ -11,20 +11,20 @@ import type { CommandTransformFunctionContext } from './CommandTransformFunction
  */
 export type CommandTransformInputHook<
   ServiceClassType,
-  PayloadOutput = unknown,
-  ParamsOutput = unknown,
-  PayloadInput = unknown,
-  ParamsInput = unknown,
+  FunctionPayloadOutput = unknown,
+  FunctionParamsOutput = unknown,
+  MessagePayloadInput = unknown,
+  MessageParamsInput = unknown,
 > = (
   /** the service instance */
   this: ServiceClassType,
   /** the transform function context */
-  context: CommandTransformFunctionContext<PayloadInput, ParamsInput>,
+  context: CommandTransformFunctionContext<MessagePayloadInput, MessageParamsInput>,
   /** the payload validated against the transform payload schema */
-  payload: Readonly<PayloadInput>,
+  payload: Readonly<MessagePayloadInput>,
   /** the payload validated against the transform parameter schema */
-  parameter: Readonly<ParamsInput>,
+  parameter: Readonly<MessageParamsInput>,
 ) => Promise<{
-  payload: Readonly<PayloadOutput>
-  parameter: Readonly<ParamsOutput>
+  payload: Readonly<FunctionPayloadOutput>
+  parameter: Readonly<FunctionParamsOutput>
 }>

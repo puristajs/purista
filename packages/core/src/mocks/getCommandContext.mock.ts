@@ -1,7 +1,13 @@
+import type { Schema } from '@decs/typeschema'
 import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
 
-import type { CommandFunctionContext, EBMessageAddress, FromInvokeToOtherType } from '../core/index.js'
+import type {
+  CommandFunctionContext,
+  EBMessageAddress,
+  FromEmitToOtherType,
+  FromInvokeToOtherType,
+} from '../core/index.js'
 import { getLoggerMock } from './getLogger.mock.js'
 import { getCommandMessageMock } from './messages/index.js'
 
@@ -10,10 +16,20 @@ import { getCommandMessageMock } from './messages/index.js'
  *
  * @group Unit test helper
  * */
-export const getCommandContextMock = <MessagePayloadType = unknown, MessageParamsType = unknown, Invokes = {}>(
+export const getCommandContextMock = <
+  MessagePayloadType = unknown,
+  MessageParamsType = unknown,
+  Invokes = {},
+  EmitListType = {},
+>(
   payload: MessagePayloadType,
   parameter: MessageParamsType,
   sandbox?: SinonSandbox,
+  _invokes?: FromInvokeToOtherType<
+    Invokes,
+    { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }
+  >,
+  emitList?: EmitListType,
 ) => {
   const logger = getLoggerMock(sandbox)
 
@@ -89,9 +105,16 @@ export const getCommandContextMock = <MessagePayloadType = unknown, MessageParam
     }) as TFaux
   }
 
+  const eventList = Object.keys(emitList || {}).reduce((prev, current) => {
+    return {
+      ...prev,
+      [current]: sandbox?.stub() || stub().resolves(),
+    }
+  }, {}) as FromEmitToOtherType<EmitListType, SinonStub>
+
   const stubs = {
     logger: logger.stubs,
-    emit: sandbox?.stub() || stub(),
+    emit: eventList,
     invoke: sandbox?.stub() || stub(),
     wrapInSpan: sandbox?.stub() || stub(),
     startActiveSpan: sandbox?.stub() || stub(),
@@ -114,10 +137,12 @@ export const getCommandContextMock = <MessagePayloadType = unknown, MessageParam
     },
   })
 
-  const mock: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes> = {
+  const mock: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType> = {
     logger: logger.mock,
     message,
-    emit: stubs.emit.rejects(new Error('emit is not stubbed')),
+    emit: async <K extends keyof EmitListType, Payload = EmitListType[K]>(eventName: K, payload: Payload) => {
+      return eventList[eventName](eventName, payload)
+    },
     invoke: stubs.invoke.rejects(new Error('Invoke is not stubbed')),
     wrapInSpan: stubs.wrapInSpan.callsFake((_name, _opts, fn) => fn(getMockSpan())),
     startActiveSpan: stubs.startActiveSpan.callsFake((_name, _opts, _context, fn) => fn(getMockSpan())),

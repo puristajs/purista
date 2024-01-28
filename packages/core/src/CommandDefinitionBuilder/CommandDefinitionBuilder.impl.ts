@@ -20,7 +20,7 @@ import type {
   SupportedHttpMethod,
 } from '../core/index.js'
 import type { NonEmptyString } from '../helper/index.js'
-import { getCommandContextMock } from '../mocks/index.js'
+import { getCommandContextMock, getCommandTransformContextMock } from '../mocks/index.js'
 import { validationToSchema } from '../zodOpenApi/index.js'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
 
@@ -90,7 +90,8 @@ export class CommandDefinitionBuilder<
         MessageParamsType,
         FunctionPayloadType,
         FunctionParamsType,
-        Invokes
+        Invokes,
+        EmitListType
       >
     >
     afterGuard: Record<
@@ -102,12 +103,13 @@ export class CommandDefinitionBuilder<
         FunctionResultType,
         FunctionPayloadType,
         FunctionParamsType,
-        Invokes
+        Invokes,
+        EmitListType
       >
     >
     transformOutput?: {
       transformOutputSchema: Schema
-      transformFunction: CommandTransformOutputHook<ServiceClassType, any, any, FunctionParamsType, any>
+      transformFunction: CommandTransformOutputHook<ServiceClassType, any, any, any, any, any>
     }
   } = {
     transformInput: undefined,
@@ -123,7 +125,8 @@ export class CommandDefinitionBuilder<
     FunctionPayloadType,
     FunctionParamsType,
     FunctionResultType,
-    Invokes
+    Invokes,
+    EmitListType
   >
 
   // eslint-disable-next-line no-useless-constructor
@@ -143,7 +146,6 @@ export class CommandDefinitionBuilder<
    * @param parameterSchema
    * @returns
    */
-
   canInvoke<
     Output extends Schema,
     Payload extends Schema,
@@ -212,6 +214,13 @@ export class CommandDefinitionBuilder<
     >
   }
 
+  /**
+   * Define which custom events the command can emit.
+   *
+   * @param eventName The custom event name
+   * @param schema the payload schema
+   * @returns
+   */
   canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
     if (eventName.trim() === '') {
       throw new Error('canEmit requires non-empty event name')
@@ -228,7 +237,7 @@ export class CommandDefinitionBuilder<
       FunctionParamsType,
       FunctionResultType,
       Invokes,
-      EmitListType & Record<EventName, T>
+      EmitListType & Record<EventName, InferIn<typeof schema>>
     >
   }
 
@@ -463,10 +472,12 @@ export class CommandDefinitionBuilder<
     transformFunction: CommandTransformOutputHook<
       ServiceClassType,
       MessagePayloadType,
+      MessageParamsType,
+      InferIn<Output>,
       FunctionResultType,
-      FunctionParamsType,
-      InferIn<Output>
+      FunctionParamsType
     >,
+
     outputContentType?: ContentType,
     outputContentEncoding?: string,
   ) {
@@ -501,9 +512,10 @@ export class CommandDefinitionBuilder<
     return this.hooks.transformOutput.transformFunction as CommandTransformOutputHook<
       ServiceClassType,
       MessagePayloadType,
+      MessageParamsType,
+      MessageResultType,
       FunctionResultType,
-      FunctionParamsType,
-      MessageResultType
+      FunctionParamsType
     >
   }
 
@@ -522,7 +534,8 @@ export class CommandDefinitionBuilder<
         MessageParamsType,
         FunctionPayloadType,
         FunctionParamsType,
-        Invokes
+        Invokes,
+        EmitListType
       >
     >,
   ) {
@@ -546,7 +559,8 @@ export class CommandDefinitionBuilder<
         FunctionResultType,
         FunctionPayloadType,
         FunctionParamsType,
-        Invokes
+        Invokes,
+        EmitListType
       >
     >,
   ) {
@@ -784,7 +798,8 @@ export class CommandDefinitionBuilder<
         FunctionPayloadType,
         FunctionParamsType,
         FunctionResultType,
-        Invokes
+        Invokes,
+        EmitListType
       >(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard),
       hooks: this.hooks,
       invokes: this.invokes,
@@ -818,7 +833,8 @@ export class CommandDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >,
   ): CommandDefinitionBuilder<
     ServiceClassType,
@@ -838,7 +854,8 @@ export class CommandDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >
 
     return this as unknown as CommandDefinitionBuilder<
@@ -865,7 +882,8 @@ export class CommandDefinitionBuilder<
     FunctionPayloadType,
     FunctionParamsType,
     FunctionResultType,
-    Invokes
+    Invokes,
+    EmitListType
   > {
     if (!this.fn) {
       throw new Error(`No function implementation for ${this.commandName}`)
@@ -879,7 +897,8 @@ export class CommandDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard)
 
     return f
@@ -894,6 +913,23 @@ export class CommandDefinitionBuilder<
    * @returns a mocked command function context
    */
   getCommandContextMock(payload: MessagePayloadType, parameter: MessageParamsType, sandbox?: SinonSandbox) {
-    return getCommandContextMock<MessagePayloadType, MessageParamsType, Invokes>(payload, parameter, sandbox)
+    return getCommandContextMock<MessagePayloadType, MessageParamsType, Invokes, EmitListType>(
+      payload,
+      parameter,
+      sandbox,
+      this.invokes,
+      this.emitList,
+    )
+  }
+
+  /**
+   * Returns a mocked transform function context, which can be used in unit tests.
+   *
+   * @param message
+   * @param sandbox Sinon sandbox
+   * @returns a mocked transform function context
+   */
+  getCommandTransformContextMock(payload: MessagePayloadType, parameter: MessageParamsType, sandbox?: SinonSandbox) {
+    return getCommandTransformContextMock(payload, parameter, sandbox)
   }
 }

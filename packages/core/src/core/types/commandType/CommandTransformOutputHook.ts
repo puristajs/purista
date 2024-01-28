@@ -2,17 +2,24 @@ import type { CommandTransformFunctionContext } from './CommandTransformFunction
 
 /**
  * This transform hook is executed after function output validation and AfterGuardHooks.
+ *
  * @group Command
+ *
+ * @param context the Context
+ * @param commandFunctionOutput The output result output of command function
+ * @param commandFunctionInputParameter The parameter input given to command function
+ * @returns The transformed message payload
  */
 export type CommandTransformOutputHook<
   ServiceClassType,
   MessagePayloadType,
-  MessageResultType,
   MessageParamsType,
-  ResponseOutput = unknown,
+  MessageResultType,
+  FunctionResultType,
+  FunctionParamsType,
 > = (
   this: ServiceClassType,
   context: CommandTransformFunctionContext<MessagePayloadType, MessageParamsType>,
-  payload: Readonly<MessageResultType>,
-  parameter: Readonly<MessageParamsType>,
-) => Promise<ResponseOutput>
+  commandFunctionOutput: Readonly<FunctionResultType>,
+  commandFunctionInputParameter: Readonly<FunctionParamsType>,
+) => Promise<MessageResultType>

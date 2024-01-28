@@ -21,7 +21,7 @@ import type {
   TenantId,
 } from '../core/index.js'
 import type { NonEmptyString } from '../helper/index.js'
-import { getSubscriptionContextMock } from '../mocks/index.js'
+import { getSubscriptionContextMock, getSubscriptionTransformContextMock } from '../mocks/index.js'
 import type { OpenApiZodAny } from '../zodOpenApi/index.js'
 import { generateSchema } from '../zodOpenApi/index.js'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl.js'
@@ -43,6 +43,7 @@ export class SubscriptionDefinitionBuilder<
   FunctionParamsType = MessageParamsType,
   FunctionResultType = MessageResultType | void | undefined,
   Invokes = {},
+  EmitListType = {},
 > {
   private messageType: EBMessageType | undefined
 
@@ -62,11 +63,18 @@ export class SubscriptionDefinitionBuilder<
     }
     beforeGuard: Record<
       string,
-      SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType, Invokes>
+      SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType, Invokes, EmitListType>
     >
     afterGuard: Record<
       string,
-      SubscriptionAfterGuardHook<ServiceClassType, FunctionResultType, FunctionPayloadType, FunctionParamsType, Invokes>
+      SubscriptionAfterGuardHook<
+        ServiceClassType,
+        FunctionResultType,
+        FunctionPayloadType,
+        FunctionParamsType,
+        Invokes,
+        EmitListType
+      >
     >
     transformOutput?: {
       transformOutputSchema: Schema
@@ -100,7 +108,8 @@ export class SubscriptionDefinitionBuilder<
     FunctionPayloadType,
     FunctionParamsType,
     FunctionResultType,
-    Invokes
+    Invokes,
+    EmitListType
   >
 
   private eventName?: string
@@ -118,6 +127,8 @@ export class SubscriptionDefinitionBuilder<
     Invokes,
     { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }
   > = {} as FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
+
+  private emitList: EmitListType = {} as EmitListType
 
   // eslint-disable-next-line no-useless-constructor
   constructor(
@@ -188,7 +199,35 @@ export class SubscriptionDefinitionBuilder<
             Version,
             Record<Fname, (payload: InferIn<Payload>, parameter: InferIn<Parameter>) => Promise<Infer<Output>>>
           >
-        >
+        >,
+      EmitListType
+    >
+  }
+
+  /**
+   * Define which custom events the command can emit.
+   *
+   * @param eventName The custom event name
+   * @param schema the payload schema
+   * @returns
+   */
+  canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
+    if (eventName.trim() === '') {
+      throw new Error('canEmit requires non-empty event name')
+    }
+
+    this.emitList = { ...this.emitList, [eventName]: schema }
+
+    return this as SubscriptionDefinitionBuilder<
+      ServiceClassType,
+      MessagePayloadType,
+      MessageParamsType,
+      MessageResultType,
+      FunctionPayloadType,
+      FunctionParamsType,
+      FunctionResultType,
+      Invokes,
+      EmitListType & Record<EventName, InferIn<typeof schema>>
     >
   }
 
@@ -377,7 +416,8 @@ export class SubscriptionDefinitionBuilder<
       Infer<T>,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >
   }
 
@@ -408,7 +448,8 @@ export class SubscriptionDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       InferIn<T>,
-      Invokes
+      Invokes,
+      EmitListType
     >
   }
 
@@ -428,7 +469,8 @@ export class SubscriptionDefinitionBuilder<
       FunctionPayloadType,
       Infer<T>,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >
   }
 
@@ -443,15 +485,15 @@ export class SubscriptionDefinitionBuilder<
    * @param inputContentEncoding optional the content encoding
    * @returns SubscriptionDefinitionBuilder
    */
-  setTransformInput(
-    transformInputSchema: Schema,
-    transformParameterSchema: Schema,
+  setTransformInput<Payload extends Schema, Parameter extends Schema>(
+    transformInputSchema: Payload,
+    transformParameterSchema: Parameter,
     transformFunction: SubscriptionTransformInputHook<
       ServiceClassType,
       FunctionPayloadType,
       FunctionParamsType,
-      InferIn<typeof transformInputSchema>,
-      InferIn<typeof transformParameterSchema>
+      InferIn<Payload>,
+      InferIn<Parameter>
     >,
     inputContentType?: ContentType,
     inputContentEncoding?: string,
@@ -472,7 +514,8 @@ export class SubscriptionDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >
   }
 
@@ -504,13 +547,13 @@ export class SubscriptionDefinitionBuilder<
    * @param outputContentEncoding optional the content encoding
    * @returns SubscriptionDefinitionBuilder
    */
-  setTransformOutput(
-    transformOutputSchema: Schema,
+  setTransformOutput<Output extends Schema>(
+    transformOutputSchema: Output,
     transformFunction: SubscriptionTransformOutputHook<
       ServiceClassType,
       FunctionResultType,
       FunctionParamsType,
-      InferIn<typeof transformOutputSchema>
+      InferIn<Output>
     >,
     outputContentType?: ContentType,
     outputContentEncoding?: string,
@@ -530,7 +573,8 @@ export class SubscriptionDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >
   }
 
@@ -560,7 +604,7 @@ export class SubscriptionDefinitionBuilder<
   setBeforeGuardHooks(
     beforeGuards: Record<
       string,
-      SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType, Invokes>
+      SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType, Invokes, EmitListType>
     >,
   ) {
     this.hooks.beforeGuard = { ...this.hooks.beforeGuard, ...beforeGuards }
@@ -576,7 +620,14 @@ export class SubscriptionDefinitionBuilder<
   setAfterGuardHooks(
     afterGuards: Record<
       string,
-      SubscriptionAfterGuardHook<ServiceClassType, FunctionResultType, FunctionPayloadType, FunctionParamsType, Invokes>
+      SubscriptionAfterGuardHook<
+        ServiceClassType,
+        FunctionResultType,
+        FunctionPayloadType,
+        FunctionParamsType,
+        Invokes,
+        EmitListType
+      >
     >,
   ) {
     this.hooks.afterGuard = { ...this.hooks.afterGuard, ...afterGuards }
@@ -607,7 +658,8 @@ export class SubscriptionDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >,
   ): SubscriptionDefinitionBuilder<
     ServiceClassType,
@@ -617,7 +669,8 @@ export class SubscriptionDefinitionBuilder<
     FunctionPayloadType,
     FunctionParamsType,
     FunctionResultType,
-    Invokes
+    Invokes,
+    EmitListType
   > {
     this.fn = fn as unknown as SubscriptionFunction<
       ServiceClassType,
@@ -626,7 +679,8 @@ export class SubscriptionDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >
 
     return this as unknown as SubscriptionDefinitionBuilder<
@@ -637,7 +691,8 @@ export class SubscriptionDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >
   }
 
@@ -652,7 +707,8 @@ export class SubscriptionDefinitionBuilder<
     FunctionPayloadType,
     FunctionParamsType,
     FunctionResultType,
-    Invokes
+    Invokes,
+    EmitListType
   > {
     if (!this.fn) {
       throw new Error(`No function implementation for ${this.subscriptionName}`)
@@ -666,7 +722,8 @@ export class SubscriptionDefinitionBuilder<
       FunctionPayloadType,
       FunctionParamsType,
       FunctionResultType,
-      Invokes
+      Invokes,
+      EmitListType
     >(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard)
 
     return f
@@ -685,7 +742,8 @@ export class SubscriptionDefinitionBuilder<
     FunctionPayloadType,
     FunctionParamsType,
     FunctionResultType,
-    Invokes
+    Invokes,
+    EmitListType
   > {
     if (!this.fn) {
       throw new Error(`SubscriptionDefinitionBuilder: missing function implementation for ${this.subscriptionName}`)
@@ -713,7 +771,8 @@ export class SubscriptionDefinitionBuilder<
         FunctionPayloadType,
         FunctionParamsType,
         FunctionResultType,
-        Invokes
+        Invokes,
+        EmitListType
       >
     > = {
       subscriptionName: this.subscriptionName,
@@ -749,10 +808,12 @@ export class SubscriptionDefinitionBuilder<
         FunctionPayloadType,
         FunctionParamsType,
         FunctionResultType,
-        Invokes
+        Invokes,
+        EmitListType
       >(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard),
       hooks: this.hooks,
       invokes: this.invokes,
+      emitList: this.emitList,
     }
 
     return subscription
@@ -761,12 +822,22 @@ export class SubscriptionDefinitionBuilder<
   /**
    * Returns a mocked command function context, which can be used in unit tests.
    *
-   * @param payload
-   * @param parameter
+   * @param message
    * @param sandbox Sinon sandbox
    * @returns a mocked command function context
    */
   getSubscriptionContextMock(message: EBMessage, sandbox?: SinonSandbox) {
-    return getSubscriptionContextMock<Invokes>(message, sandbox)
+    return getSubscriptionContextMock<Invokes, EmitListType>(message, sandbox, this.invokes, this.emitList)
+  }
+
+  /**
+   * Returns a mocked transform function context, which can be used in unit tests.
+   *
+   * @param message
+   * @param sandbox Sinon sandbox
+   * @returns a mocked transform function context
+   */
+  getSubscriptionTransformContextMock(message: EBMessage, sandbox?: SinonSandbox) {
+    return getSubscriptionTransformContextMock(message, sandbox)
   }
 }

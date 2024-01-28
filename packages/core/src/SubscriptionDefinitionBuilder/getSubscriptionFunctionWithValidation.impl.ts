@@ -14,6 +14,7 @@ export const getSubscriptionFunctionWithValidation = function <
   FunctionParamsType = MessageParamsType,
   FunctionResultType = MessageResultType,
   Invokes = {},
+  EmitListType = {},
 >(
   fn: SubscriptionFunction<
     ServiceClassType,
@@ -22,14 +23,15 @@ export const getSubscriptionFunctionWithValidation = function <
     FunctionPayloadType,
     FunctionParamsType,
     FunctionResultType,
-    Invokes
+    Invokes,
+    EmitListType
   >,
   inputPayloadSchema: Schema | undefined,
   inputParameterSchema: Schema | undefined,
   outputPayloadSchema: Schema | undefined,
   beforeGuards: Record<
     string,
-    SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType, Invokes>
+    SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType, Invokes, EmitListType>
   > = {},
 ): SubscriptionFunction<
   ServiceClassType,
@@ -38,7 +40,8 @@ export const getSubscriptionFunctionWithValidation = function <
   FunctionPayloadType,
   FunctionParamsType,
   FunctionResultType,
-  Invokes
+  Invokes,
+  EmitListType
 > {
   const wrapped: SubscriptionFunction<
     ServiceClassType,
@@ -47,7 +50,8 @@ export const getSubscriptionFunctionWithValidation = function <
     FunctionPayloadType,
     FunctionParamsType,
     FunctionResultType,
-    Invokes
+    Invokes,
+    EmitListType
   > = async function (context, payload, parameter): Promise<FunctionResultType> {
     const { logger, startActiveSpan, wrapInSpan } = context
     let safePayload = payload as unknown as FunctionPayloadType
