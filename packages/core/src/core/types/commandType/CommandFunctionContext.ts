@@ -17,11 +17,12 @@ export type CommandFunctionContextEnhancements<
   MessagePayloadType = unknown,
   MessageParamsType = unknown,
   Invokes = {},
+  EmitListType = {},
 > = {
   /** the original message */
   message: Readonly<Command<MessagePayloadType, MessageParamsType>>
   /** emit a custom message */
-  emit: EmitCustomMessageFunction
+  emit: EmitCustomMessageFunction<EmitListType>
   /**
    * @deprecated Please use service instead and define the invocations with canInvoke in command builder.
    *
@@ -66,6 +67,11 @@ export type CommandFunctionContextEnhancements<
  *
  * @group Command
  */
-export type CommandFunctionContext<MessagePayloadType = unknown, MessageParamsType = unknown, Invokes = {}> = Prettify<
-  ContextBase & CommandFunctionContextEnhancements<MessagePayloadType, MessageParamsType, Invokes>
+export type CommandFunctionContext<
+  MessagePayloadType = unknown,
+  MessageParamsType = unknown,
+  Invokes = {},
+  EmitListType = {},
+> = Prettify<
+  ContextBase & CommandFunctionContextEnhancements<MessagePayloadType, MessageParamsType, Invokes, EmitListType>
 >

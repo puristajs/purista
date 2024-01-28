@@ -43,7 +43,8 @@ export type CommandDefinition<
     FunctionPayloadType,
     FunctionParamsType,
     FunctionResultType,
-    Invokes
+    Invokes,
+    EmitListType
   >
   /** the eventName for the command response */
   eventName?: string
@@ -62,7 +63,8 @@ export type CommandDefinition<
         MessageParamsType,
         FunctionPayloadType,
         FunctionParamsType,
-        Invokes
+        Invokes,
+        EmitListType
       >
     >
     afterGuard?: Record<
@@ -74,7 +76,8 @@ export type CommandDefinition<
         FunctionResultType,
         FunctionPayloadType,
         FunctionParamsType,
-        Invokes
+        Invokes,
+        EmitListType
       >
     >
     transformOutput?: {
@@ -82,9 +85,10 @@ export type CommandDefinition<
       transformFunction: CommandTransformOutputHook<
         ServiceClassType,
         MessagePayloadType,
+        MessageParamsType,
         MessageResultType,
-        FunctionParamsType,
-        unknown
+        FunctionResultType,
+        FunctionParamsType
       >
     }
   }

@@ -13,11 +13,11 @@ import type { Prettify } from '../Prettify.js'
  *
  * @group Subscription
  */
-export type SubscriptionFunctionContextEnhancements<Invokes = {}> = {
+export type SubscriptionFunctionContextEnhancements<Invokes = {}, EmitListType = {}> = {
   /** the original message */
   message: Readonly<EBMessage>
   /** emit a custom message */
-  emit: EmitCustomMessageFunction
+  emit: EmitCustomMessageFunction<EmitListType>
   /**
    * @deprecated Please use service instead and define the invocations with canInvoke in subscription builder.
    *
@@ -61,6 +61,6 @@ export type SubscriptionFunctionContextEnhancements<Invokes = {}> = {
  *
  * @group Subscription
  */
-export type SubscriptionFunctionContext<Invokes = {}> = Prettify<
-  ContextBase & SubscriptionFunctionContextEnhancements<Invokes>
+export type SubscriptionFunctionContext<Invokes = {}, EmitListType = {}> = Prettify<
+  ContextBase & SubscriptionFunctionContextEnhancements<Invokes, EmitListType>
 >

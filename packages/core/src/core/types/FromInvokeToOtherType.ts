@@ -1,7 +1,7 @@
 /**
  * Changes the canInvoke proxy type to given type
  *
- * serviceName.ServiceVersion.FunctionName becomes type of SinonStub
+ * serviceName.ServiceVersion.FunctionName becomes type of NewType
  */
 export type FromInvokeToOtherType<Entry, NewType> = {
   [TKey in keyof Entry]: {
