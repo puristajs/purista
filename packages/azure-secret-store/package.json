@@ -46,7 +46,9 @@
     "env:down": "docker compose -f docker-compose.yml down"
   },
   "tshy": {
-    "exclude": ["src/**/*.test.ts"],
+    "exclude": [
+      "src/**/*.test.ts"
+    ],
     "exports": {
       "./package.json": "./package.json",
       ".": "./src/index.ts"
