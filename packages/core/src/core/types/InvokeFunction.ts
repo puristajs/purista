@@ -4,7 +4,8 @@ import type { EBMessageAddress } from './EBMessageAddress.js'
  * Invokes a command and returns the result.
  * It is recommended to validate the result against a schema which only contains the data you actually need.
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  *
  * const address: EBMessageAddress = {
  *   serviceName: 'name-of-service-to-invoke',

@@ -53,7 +53,8 @@ import type { MqttBridgeConfig } from './types/index.js'
  * The MQTT event bridge connects to a MQTT broker.
  * The broker must support the MQTT 5 protocol version
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * import { MqttBridge } from '@purista/mqttbridge'
  *
  * // create and init our eventbridge

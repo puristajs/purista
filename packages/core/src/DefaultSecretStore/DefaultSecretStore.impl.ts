@@ -8,7 +8,8 @@ import type { DefaultSecretStoreConfig } from './types/index.js'
  *
  * For development and testing purpose, you can initiate the store with values.
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * const store = new DefaultSecretStore({
  *  config: {
  *    secretOne: 'my_secret_one_value',
@@ -20,7 +21,8 @@ import type { DefaultSecretStoreConfig } from './types/index.js'
  * Per default, setting/changing and removal of values are disabled.
  * You can enable it on instance creation:
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * const store = new DefaultSecretStore({
  *  enableGet: true,
  *  enableRemove: true,

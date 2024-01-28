@@ -8,7 +8,8 @@ import type { NatsStateStoreConfig } from './types/index.js'
 /**
 A state store for using NATS (with JetStream) as storage.  
 
-@example ```typescript
+@example
+* ```typescript
 const config = {
   port: 8222
 }

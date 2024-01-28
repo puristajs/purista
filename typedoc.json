@@ -11,6 +11,7 @@
       "./packages/core",
       "./packages/dapr-sdk",
       "./packages/gcloud-secret-store",
+      "./packages/hono-http-server",
       "./packages/httpserver",
       "./packages/infisical-secret-store",
       "./packages/k8s-sdk",
@@ -22,7 +23,7 @@
       "./packages/redis-state-store"
     ],
     "plugin": ["typedoc-plugin-markdown"],
-    "out": "website/src/api",
+    "out": "website/doc/api",
     "readme":"CHANGELOG.md",
     "hideGenerator": true,
     "includeVersion":true,

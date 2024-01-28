@@ -19,7 +19,8 @@ import type { HonoServiceV1Config } from './honoServiceConfig.js'
  *
  * Minimal example:
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * import { serve } from '@hono/node-server'
  * import { DefaultEventBridge } from '@purista/core'
  * import { honoV1Service } from '@purista/hono-http-server'

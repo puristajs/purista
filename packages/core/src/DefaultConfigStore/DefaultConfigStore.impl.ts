@@ -8,7 +8,8 @@ import type { DefaultConfigStoreConfig } from './types/index.js'
  *
  * For development and testing purpose, you can initiate the store with values.
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * const store = new DefaultConfigStore({
  *    enableGet: true,
  *    enableRemove: true,

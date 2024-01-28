@@ -12,7 +12,8 @@ If a secret value exceeds the ttl, it does not automatically get removed from ca
 It will be removed/overwritten on next get request.  
 
 
-@example ```typescript
+@example
+* ```typescript
 const config = {
   bearerToken: 'YOUR_INFISICAL_TOKEN',
   baseUrl: 'https://app.infisical.com'

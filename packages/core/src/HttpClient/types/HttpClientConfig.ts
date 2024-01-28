@@ -10,7 +10,8 @@ export type HttpClientConfig<CustomConfig extends Record<string, unknown>> = Pre
   {
     /**
      * the base url to be used
-     * @example ```typescript
+     * @example
+     * ```typescript
      * const config = {
      *   baseUrl: 'http://localhost/api`
      * }

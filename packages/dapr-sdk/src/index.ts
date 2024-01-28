@@ -7,7 +7,8 @@
  *
  * Here is a full example, how the index file might look like, if you want to deploy a service to Kubernetes.
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * import { DaprConfigStore, DaprEventBridge, DaprSecretStore, DaprStateStore } from '@purista/dapr-sdk'
  * const eventBridge = new DaprEventBridge({
  *    spanProcessor,

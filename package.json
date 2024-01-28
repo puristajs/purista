@@ -11,7 +11,7 @@
     "test:unit": "jest  --config=jest.unit.ts",
     "test:integration": "jest --runInBand --config=jest.integration.ts",
     "dev:doc": "cd website && npm run dev",
-    "update:doc": "npm run gitclean && typedoc && git add --all && git commit -S -am \"doc: update api documentation\" && cd website npm run document && git-cliff > CHANGELOG.md && git commit -am \"doc: update CHANGELOG\"",
+    "update:doc": "npm run gitclean && typedoc && git add --all && git commit -S -am \"doc: update api documentation\" && cd website npm run build && git-cliff > CHANGELOG.md && git commit -am \"doc: update CHANGELOG\"",
     "release:major": "npm run gitclean && npm run release:prepare && npm run update:doc && npm run gitclean && npm version major --no-git-tag-version --workspaces && npm run commit:major && npm publish --workspaces",
     "release:minor": "npm run gitclean && npm run release:prepare && npm run update:doc && npm run gitclean && npm version minor --no-git-tag-version --workspaces && npm run commit:minor && npm publish --workspaces",
     "release:patch": "npm run gitclean && npm run release:prepare && npm run update:doc && npm run gitclean && npm version patch --no-git-tag-version --workspaces && npm run commit:patch && npm publish --workspaces",
@@ -21,7 +21,7 @@
     "commit:major": "npm version major --no-git-tag-version && scripts/commitVersion.sh && npm run build",
     "commit:minor": "npm version minor --no-git-tag-version && scripts/commitVersion.sh && npm run build",
     "commit:patch": "npm version patch --no-git-tag-version && scripts/commitVersion.sh && npm run build",
-    "vuepress": "cd website && npm run vuepress",
+    "vitepress": "cd website && npm run preview",
     "check:cycling": "npx madge --circular --exclude '\\.d\\.ts$' --extensions ts ./packages",
     "sign": "git rebase --exec \"git commit --amend --no-edit -n -S\" -i"
   },
