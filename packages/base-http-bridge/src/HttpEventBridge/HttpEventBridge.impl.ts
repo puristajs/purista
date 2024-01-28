@@ -25,7 +25,6 @@ import {
   getErrorMessageForCode,
   getNewCorrelationId,
   getNewEBMessageId,
-  getNewTraceId,
   HandledError,
   isCommandErrorResponse,
   isHttpExposedServiceMeta,
