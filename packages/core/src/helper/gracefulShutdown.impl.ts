@@ -7,7 +7,8 @@ import type { ShutdownEntry } from './types/index.js'
  *
  * The execution of array list functions is done sequential.
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * const shutDownList = [
  *  {
  *    name: `${serviceA.info.serviceName} version ${serviceA.info.serviceVersion}`,

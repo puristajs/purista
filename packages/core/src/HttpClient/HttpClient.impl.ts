@@ -17,7 +17,8 @@ import type { AuthCredentials, HttpClientConfig, HttpClientRequestOptions, RestC
  * Body payload will be handled as JSON requests
  * It includes timeout and error handling and simple json response body parsing
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * const client = new HttpClient({baseUrl: 'http://localhost/api})
  *
  * // GET http://localhost/api/v1/orders

@@ -3,7 +3,8 @@
  *
  * Example usage:
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * import { MqttBridge } from '@purista/mqttbridge'
  *
  * // create and init our eventbridge

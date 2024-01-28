@@ -25,7 +25,8 @@ import type { DaprEventBridgeConfig } from './types/index.js'
  *
  * @group Event bridge
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * import { DaprConfigStore, DaprEventBridge, DaprSecretStore, DaprStateStore } from '@purista/dapr-sdk'
  *
  * const eventBridge = new DaprEventBridge({

@@ -48,7 +48,8 @@ import type { AmqpBridgeConfig, Encoder, Encrypter } from './types/index.js'
 /**
  * The AMQP event bridge connects to a AMQP broker.
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * import { AmqpBridge } from '@purista/amqpbridge'
  *
  * // create and init our eventbridge

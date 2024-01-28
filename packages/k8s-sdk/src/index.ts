@@ -4,7 +4,8 @@
  *
  * Here is a full example, how the index file might look like, if you want to deploy a service to Kubernetes.
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * // src/index.ts
  * import { serve } from '@hono/node-server'
  * import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'

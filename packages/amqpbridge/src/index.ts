@@ -3,7 +3,8 @@
  *
  *Example usage:
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * import { AmqpBridge } from '@purista/amqpbridge'
  *
  * // create and init our eventbridge

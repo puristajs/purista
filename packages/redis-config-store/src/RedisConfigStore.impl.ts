@@ -11,7 +11,8 @@ import type { RedisStoreConfig } from './types.js'
  *
  * Per default, setting/changing and removal of values are enabled.
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * const config = {
  *  enableGet: true, // optional, default is true
  *  enableRemove: true, // optional, default is true

@@ -30,7 +30,8 @@ export type CommandFunctionContextEnhancements<
    * Invokes a command and returns the result.
    * It is recommended to validate the result against a schema which only contains the data you actually need.
    *
-   * @example ```typescript
+   * @example
+   * ```typescript
    *
    * const address: EBMessageAddress = {
    *   serviceName: 'name-of-service-to-invoke',
@@ -49,7 +50,8 @@ export type CommandFunctionContextEnhancements<
    * Invokes a command and returns the result.
    * It is recommended to validate the result against a schema which only contains the data you actually need.
    *
-   * @example ```typescript
+   * @example
+   * ```typescript
    * // define your invocation in command builder
    * .canInvoke('ServiceA', '1', 'test', responseOutputSchema, payloadSchema, parameterSchema)
    * .setCommandFunction(async function (context, payload, _parameter) {

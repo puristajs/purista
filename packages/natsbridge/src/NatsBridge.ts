@@ -51,7 +51,8 @@ If JetStream is not available, subscription fall back to live-subscriptions with
 
 Example usage:
 
-@example ```typescript
+@example
+* ```typescript
 import { NatsBridge } from '@purista/natsbridge'
 
 // create and init our eventbridge

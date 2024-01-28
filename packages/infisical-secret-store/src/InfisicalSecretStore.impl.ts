@@ -16,7 +16,8 @@ This will return the cached secret if available and if ttl is not exceeded.
 If a secret value exceeds the ttl, it does not automatically get removed from cache.  
 It will be removed/overwritten on next get request.  
 
-@example ```typescript
+@example
+* ```typescript
 const config = {
   baseUrl: 'http://example.com'
 }

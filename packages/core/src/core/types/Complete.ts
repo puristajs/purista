@@ -1,7 +1,8 @@
 /**
  * A helper which forces to provide all object keys, even if they are optional.
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * type A = {
  *  one?: string,
  *  two?: number,

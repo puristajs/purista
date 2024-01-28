@@ -2,5 +2,5 @@
   
   "extends": ["../../typedoc.base.json"],
   "entryPoints": ["src/index.ts"],
-  "tsconfig": "./tsconfig.ref.json"
+  "tsconfig": "./tsconfig.json"
 }

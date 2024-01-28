@@ -4,7 +4,8 @@ import type { EmitSchemaList } from './EmitSchemaList.js'
 /**
  * Emits the given payload as custom message with the given event name.
  *
- * @example ```typescript
+ * @example
+ * ```typescript
  * await emit('my-custom-event-name', { the: 'payload' })
  * ```
  */
