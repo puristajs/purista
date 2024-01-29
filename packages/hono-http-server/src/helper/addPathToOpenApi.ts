@@ -116,7 +116,12 @@ export const addPathToOpenApi = (
     },
   }
 
-  openApiBuilder.addPath(path, {
+  const pathConverted = path
+    .split('/')
+    .map((part) => (part.startsWith(':') ? `{${part.replace(':', '').replace('?', '')}}` : part))
+    .join('/')
+
+  openApiBuilder.addPath(pathConverted, {
     [method]: operation,
   })
 }
