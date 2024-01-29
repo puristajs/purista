@@ -1,6 +1,7 @@
 import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
 
 import { fooCommandBuilder } from './command/foo'
+import { paramTestCommandBuilder } from './command/paramTest'
 import { pingCommandBuilder } from './command/ping/index.js'
 import { pingV1ServiceBuilder } from './pingV1ServiceBuilder.js'
 import { logSubscriptionBuilder } from './subscription/log/index.js'
@@ -12,6 +13,7 @@ import { logSubscriptionBuilder } from './subscription/log/index.js'
 const commandDefinitions: CommandDefinitionList<any> = [
   pingCommandBuilder.getDefinition(),
   fooCommandBuilder.getDefinition(),
+  paramTestCommandBuilder.getDefinition(),
 ]
 
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = [logSubscriptionBuilder.getDefinition()]

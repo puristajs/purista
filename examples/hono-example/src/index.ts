@@ -33,7 +33,6 @@ export const main = async () => {
       const auth = basicAuth({ username: 'user', password: 'password' })
       c.set('additionalParameter', { userId: '123' })
       c.set('customVar', 'some custom var value')
-      this.logger.debug(c.env.customBind)
       return auth(c, next)
     })
 
@@ -42,16 +41,8 @@ export const main = async () => {
     port: 3000,
   })
 
-  await new Promise((resolve) =>
-    setTimeout(() => {
-      resolve(true)
-    }, 10_000),
-  )
-
   // start the webserver
   await honoService.start()
-
-  honoService.app.get('/test', (c) => c.text('ok test'))
 }
 
 main()
