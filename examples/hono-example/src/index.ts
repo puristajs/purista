@@ -24,23 +24,34 @@ export const main = async () => {
   honoService.openApi.addSecurityScheme('basicAuth', { type: 'http', scheme: 'basic' })
   honoService.openApi.addServer({ url: 'http://localhost:3000', description: 'the local server' })
 
-  honoService.setHealthFunction(async function () {
-    this.logger.info('custom health check')
-  })
-
-  honoService.setProtectMiddleware(async function (c, next) {
-    const auth = basicAuth({ username: 'user', password: 'password' })
-    c.set('additionalParameter', { userId: '123' })
-    return auth(c, next)
-  })
-
-  // start the webserver
-  await honoService.start()
+  honoService
+    .setHonoTypes<{ Variables: { customVar: string } }>()
+    .setHealthFunction(async function () {
+      this.logger.info('custom health check')
+    })
+    .setProtectMiddleware(async function (c, next) {
+      const auth = basicAuth({ username: 'user', password: 'password' })
+      c.set('additionalParameter', { userId: '123' })
+      c.set('customVar', 'some custom var value')
+      this.logger.debug(c.env.customBind)
+      return auth(c, next)
+    })
 
   const _serverInstance = serve({
     fetch: honoService.app.fetch,
     port: 3000,
   })
+
+  await new Promise((resolve) =>
+    setTimeout(() => {
+      resolve(true)
+    }, 10_000),
+  )
+
+  // start the webserver
+  await honoService.start()
+
+  honoService.app.get('/test', (c) => c.text('ok test'))
 }
 
 main()
