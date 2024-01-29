@@ -67,11 +67,25 @@ export class HonoServiceClass<
   }
 
   /**
+   * Set the Hono types for Variables and Bindings.
+   * @returns The service instance with propper types
+   */
+  setHonoTypes<
+    E extends { Bindings?: Record<string, unknown>; Variables?: Record<string, unknown> } = {
+      Bindings: {}
+      Variables: {}
+    },
+  >() {
+    return this as unknown as HonoServiceClass<Bindings & E['Bindings'], Variables & E['Variables']>
+  }
+
+  /**
    * Set a custom health function
    * @param fn
    */
-  setHealthFunction(fn: HealthFunction<HonoServiceClass<Bindings, Variables>>) {
+  setHealthFunction(fn: HealthFunction<typeof this>) {
     this.config.healthFunction = fn
+    return this
   }
 
   /**
@@ -89,8 +103,9 @@ export class HonoServiceClass<
    *
    * @param fn
    */
-  setProtectMiddleware(fn: EndpointProtectMiddleware<HonoServiceClass<Bindings, Variables>>) {
+  setProtectMiddleware(fn: EndpointProtectMiddleware<typeof this, Bindings, Variables>) {
     this.config.protectHandler = fn
+    return this
   }
 
   async start() {
@@ -236,6 +251,8 @@ export class HonoServiceClass<
         this.addEndpoint(command.metadata, command.commandName, service.serviceInfo)
       })
     })
+
+    return this
   }
 
   /**
@@ -245,7 +262,7 @@ export class HonoServiceClass<
    * @param service
    * @returns
    */
-  addEndpoint(metadata: CommandDefinitionMetadataBase, commandName: string, service: ServiceInfoType) {
+  private addEndpoint(metadata: CommandDefinitionMetadataBase, commandName: string, service: ServiceInfoType) {
     if (!isHttpExposedServiceMeta(metadata)) {
       return
     }
