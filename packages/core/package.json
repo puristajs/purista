@@ -35,9 +35,7 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.8",
-    "hono": "^3.12.1",
     "sinon": "^17.0.1",
-    "trouter": "^4.0.0",
     "tshy": "^1.8.2"
   },
   "dependencies": {
