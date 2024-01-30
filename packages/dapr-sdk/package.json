@@ -58,15 +58,14 @@
     "@types/node": "^20.10.8",
     "@types/sinon": "^17.0.3",
     "vitest": "^1.2.2",
-    "sinon": "^17.x"
+    "sinon": "^17.x",
+    "hono": "^3.12.1"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.7.0",
     "@opentelemetry/semantic-conventions": "^1.19.0",
     "@purista/core": "*",
-    "@purista/base-http-bridge": "*",
-    "hono": "^3.12.1",
-    "trouter": "^4.0.0"
+    "@purista/base-http-bridge": "*"
   },
   "peerDependencies": {
     "@hono/node-server": "^1.4.0"
