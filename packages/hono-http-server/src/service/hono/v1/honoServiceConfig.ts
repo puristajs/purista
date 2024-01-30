@@ -49,6 +49,7 @@ export const ServerObjectSchema = z.object({
 })
 export const honoServiceV1ConfigSchema = z.object({
   logLevel: z.enum(['info', 'error', 'warn', 'debug', 'trace', 'fatal']).optional(),
+  enableDynamicRoutes: z.boolean().default(false),
   apiMountPath: z.string().optional().default(DEFAULT_API_MOUNT_PATH),
   enableHealth: z.boolean().optional().default(true),
   healthPath: z.string().optional().default('/healthz'),

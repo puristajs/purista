@@ -1,4 +1,5 @@
 import { serve } from '@hono/node-server'
+import { swaggerUI } from '@hono/swagger-ui'
 import type { EventBridge } from '@purista/core'
 import { DefaultEventBridge, getLoggerMock, HttpClient } from '@purista/core'
 import type { OpenAPIObject } from 'openapi3-ts/oas31'
@@ -12,15 +13,20 @@ describe('httpserver integration test', () => {
   let server: HonoServiceClass
   let serverInstance: ReturnType<typeof serve>
   const port = 3000
-  const client = new HttpClient({ baseUrl: `http://127.0.0.1:${port}`, logger: getLoggerMock().mock })
+  const client = new HttpClient({
+    logger: getLoggerMock().mock,
+    baseUrl: `http://127.0.0.1:${port}`,
+    defaultHeaders: { 'content-type': 'application/json; charset=utf-8' },
+  })
 
-  const content = JSON.stringify({ some: 'content' })
+  const content = { some: 'content' }
 
   const apiMountPath = '/api'
 
   const config = {
     logger: getLoggerMock().mock,
     serviceConfig: {
+      enableDynamicRoutes: true,
       enableHealthz: true,
       apiMountPath,
       openApi: {
@@ -39,7 +45,8 @@ describe('httpserver integration test', () => {
     await eventBridge.start()
 
     server = honoV1Service.getInstance(eventBridge, config)
-    server.setProtectHandler(async function (_c, next) {
+    server.app.get('/api', swaggerUI({ url: '/api/openapi.json' }))
+    server.setProtectMiddleware(async function (_c, next) {
       await next()
     })
     await server.start()
@@ -83,7 +90,7 @@ describe('httpserver integration test', () => {
     expect(response.paths?.['/healthz']).toBeDefined()
   })
 
-  describe('with services', () => {
+  describe('with dynamic routes enabled', () => {
     beforeAll(async () => {
       // set up the service
       const theService = theServiceV1Service.getInstance(eventBridge, { logger: getLoggerMock().mock })
@@ -106,12 +113,12 @@ describe('httpserver integration test', () => {
     })
 
     it('exposes http get endpoint', async () => {
-      await expect(client.get(apiMountPath + '/v1/ping', { query: { required: 'true' } })).resolves.toEqual({
+      await expect(client.get(apiMountPath + '/v1/ping', { query: { required: 'my_param' } })).resolves.toEqual({
         ping: true,
       })
     })
 
-    it('returns a error on invalid query parameter', async () => {
+    it('returns a error on invalid or missing query parameter', async () => {
       await expect(client.get(apiMountPath + '/v1/ping')).rejects.toEqual(new Error('Bad Request'))
     })
 

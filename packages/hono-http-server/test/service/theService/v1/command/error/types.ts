@@ -4,7 +4,7 @@ import type {
   theServiceV1ErrorInputParameterSchema,
   theServiceV1ErrorInputPayloadSchema,
   theServiceV1ErrorOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export type TheServiceV1ErrorInputParameter = z.input<typeof theServiceV1ErrorInputParameterSchema>
 

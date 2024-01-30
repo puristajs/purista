@@ -48,6 +48,8 @@ export const addPathToOpenApi = (
     [name]: [],
   }))
 
+  const okCode = expose.outputPayload?.type ? StatusCode.OK : StatusCode.NoContent
+
   const errorCodes: Set<StatusCode> = new Set([...(expose.http.openApi?.additionalStatusCodes || [])])
 
   if (expose.http.openApi?.isSecure) {
@@ -80,8 +82,6 @@ export const addPathToOpenApi = (
     }
   }, {} as ResponsesObject)
 
-  const okCode = expose.outputPayload ? StatusCode.OK : StatusCode.NoContent
-
   const operation: OperationObject = {
     tags: expose.http.openApi?.tags,
     summary: expose.http.openApi?.summary,
@@ -105,12 +105,15 @@ export const addPathToOpenApi = (
     responses: {
       [`${okCode}`]: {
         description: getErrorName(okCode),
-        content: {
-          [responseContentType]: {
-            schema: expose.outputPayload,
-            encoding: responseEncodingType,
-          },
-        },
+        content:
+          okCode === StatusCode.NoContent
+            ? undefined
+            : {
+                [responseContentType]: {
+                  schema: expose.outputPayload,
+                  encoding: responseEncodingType,
+                },
+              },
       },
       ...errResponses,
     },
