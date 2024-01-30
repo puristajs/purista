@@ -47,8 +47,7 @@
     "@opentelemetry/semantic-conventions": "^1.19.0",
     "@purista/core": "*",
     "cloudevents": "^8.0.0",
-    "hono": "^3.12.1",
-    "trouter": "^4.0.0"
+    "hono": "^3.12.1"
   },
   "peerDependenciesMeta": {},
   "exports": {
