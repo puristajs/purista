@@ -1,9 +1,9 @@
-import { theServiceServiceBuilder } from '../../theServiceServiceBuilder'
+import { theServiceServiceBuilder } from '../../theServiceServiceBuilder.js'
 import {
   theServiceV1PostInputParameterSchema,
   theServiceV1PostInputPayloadSchema,
   theServiceV1PostOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export const postCommandBuilder = theServiceServiceBuilder
   .getCommandBuilder('post', 'provide a dummy command')

@@ -1,9 +1,9 @@
-import { theServiceServiceBuilder } from '../../theServiceServiceBuilder'
+import { theServiceServiceBuilder } from '../../theServiceServiceBuilder.js'
 import {
   theServiceV1PatchInputParameterSchema,
   theServiceV1PatchInputPayloadSchema,
   theServiceV1PatchOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export const patchCommandBuilder = theServiceServiceBuilder
   .getCommandBuilder('patch', 'provide a dummy command')

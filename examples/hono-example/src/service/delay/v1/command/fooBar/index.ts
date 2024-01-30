@@ -1,3 +1,3 @@
-export * from './putCommandBuilder.js'
+export * from './fooBarCommandBuilder.js'
 export * from './schema.js'
 export * from './types.js'

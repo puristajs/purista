@@ -2,11 +2,12 @@ import { posix } from 'node:path'
 
 import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
-import type { Command, CommandDefinitionMetadataBase, ServiceConstructorInput, ServiceInfoType } from '@purista/core'
+import type { Command, CommandDefinitionMetadataBase, EBMessageAddress, ServiceConstructorInput } from '@purista/core'
 import { HandledError, isHttpExposedServiceMeta, Service, StatusCode, UnhandledError } from '@purista/core'
 import type { Handler } from 'hono'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
+import { PatternRouter } from 'hono/router/pattern-router'
 import { OpenApiBuilder } from 'openapi3-ts/oas31'
 
 import { addPathToOpenApi } from '../../../helper/index.js'
@@ -54,7 +55,7 @@ export class HonoServiceClass<
   /**
    * The Hono instance
    */
-  public app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
+  public app
 
   /**
    * The OpenApiBuilder instance
@@ -64,6 +65,13 @@ export class HonoServiceClass<
   constructor(config: ServiceConstructorInput<HonoServiceV1Config>) {
     super(config)
     this.openApi = new OpenApiBuilder(this.config.openApi)
+
+    if (this.config.enableDynamicRoutes) {
+      this.app = new Hono<{ Bindings: Bindings; Variables: Variables }>({ router: new PatternRouter() })
+    } else {
+      this.app = new Hono<{ Bindings: Bindings; Variables: Variables }>()
+      this.subscriptionDefinitionList = []
+    }
   }
 
   /**
@@ -200,7 +208,7 @@ export class HonoServiceClass<
           message: (err as Error).message,
         })
 
-        this.logger.info({ ...span.spanContext(), customTraceId: c.get('traceId') }, 'not found')
+        this.logger.debug({ path: c.req.path, ...span.spanContext(), customTraceId: c.get('traceId') }, 'not found')
         return c.json(err.getErrorResponse(), StatusCode.NotFound)
       })
     })
@@ -248,7 +256,7 @@ export class HonoServiceClass<
   registerService(...services: Service[]) {
     services.forEach((service) => {
       service.commandDefinitionList.forEach((command) => {
-        this.addEndpoint(command.metadata, command.commandName, service.serviceInfo)
+        this.addEndpoint(command.metadata, { ...service.serviceInfo, serviceTarget: command.commandName })
       })
     })
 
@@ -262,7 +270,7 @@ export class HonoServiceClass<
    * @param service
    * @returns
    */
-  private addEndpoint(metadata: CommandDefinitionMetadataBase, commandName: string, service: ServiceInfoType) {
+  public addEndpoint(metadata: CommandDefinitionMetadataBase, service: EBMessageAddress) {
     if (!isHttpExposedServiceMeta(metadata)) {
       return
     }
@@ -298,25 +306,31 @@ export class HonoServiceClass<
             ...c.get('purista'),
           }
 
-          if (method !== 'get') {
+          if (method !== 'get' && method !== 'delete') {
             const contentType = c.req.header('content-type')?.toLowerCase()
 
-            if (!contentType?.includes(requestContentType) || !contentType?.includes(requestEncodingType)) {
+            if (!contentType?.includes(requestContentType)) {
               throw new HandledError(
                 StatusCode.BadRequest,
                 `Request must be content type ${requestContentType} ${requestEncodingType}`,
               )
             }
 
-            if (contentType?.includes('application/json')) {
-              payload = await c.req.json()
-            } else if (
-              contentType?.includes('multipart/form-data') ||
-              contentType?.includes('application/x-www-form-urlencoded')
-            ) {
-              payload = await c.req.parseBody()
-            } else {
-              payload = await c.req.text()
+            try {
+              if (contentType?.includes('application/json')) {
+                payload = await c.req.json()
+              } else if (
+                contentType?.includes('multipart/form-data') ||
+                contentType?.includes('application/x-www-form-urlencoded')
+              ) {
+                payload = await c.req.parseBody()
+              } else {
+                payload = await c.req.text()
+              }
+            } catch (error) {
+              const err = HandledError.fromError(error, StatusCode.BadRequest)
+              this.logger.error({ err, contentType, path: c.req.path, method }, 'Failed to decode body')
+              return c.json(err.getErrorResponse(), err.errorCode)
             }
           }
 
@@ -325,11 +339,7 @@ export class HonoServiceClass<
           const result = await this.invoke(
             {
               traceId,
-              receiver: {
-                serviceName: service.serviceName,
-                serviceVersion: service.serviceVersion,
-                serviceTarget: commandName,
-              },
+              receiver: service,
               payload: {
                 payload,
                 parameter,
@@ -350,7 +360,10 @@ export class HonoServiceClass<
 
           if (result === undefined || result === null || result === '') {
             span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.NoContent)
-            return c.text('', StatusCode.NoContent)
+            if (responseContentType.toLowerCase() !== 'application/json') {
+              return c.text('', StatusCode.NoContent)
+            }
+            return c.json(undefined, StatusCode.NoContent)
           }
 
           span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.OK)

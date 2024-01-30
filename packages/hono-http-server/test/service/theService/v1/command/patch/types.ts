@@ -4,7 +4,7 @@ import type {
   theServiceV1PatchInputParameterSchema,
   theServiceV1PatchInputPayloadSchema,
   theServiceV1PatchOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export type TheServiceV1PatchInputParameter = z.input<typeof theServiceV1PatchInputParameterSchema>
 

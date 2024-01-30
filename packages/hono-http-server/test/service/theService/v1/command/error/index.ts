@@ -1,3 +1,3 @@
-export * from './errorCommandBuilder'
-export * from './schema'
-export * from './types'
+export * from './errorCommandBuilder.js'
+export * from './schema.js'
+export * from './types.js'

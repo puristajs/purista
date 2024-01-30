@@ -16,6 +16,7 @@ export const honoV1ServiceBuilder = new ServiceBuilder(honoServiceInfo)
   .setConfigSchema(honoServiceV1ConfigSchema)
   .setDefaultConfig({
     logLevel: 'warn',
+    enableDynamicRoutes: false,
     apiMountPath: DEFAULT_API_MOUNT_PATH,
     enableHealth: true,
     healthPath: '/healthz',
