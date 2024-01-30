@@ -80,4 +80,8 @@ export class HandledError extends Error {
   toString() {
     return JSON.stringify(this.getErrorResponse())
   }
+
+  toJSON() {
+    return this.getErrorResponse()
+  }
 }
