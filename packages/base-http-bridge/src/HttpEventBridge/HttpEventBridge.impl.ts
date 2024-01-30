@@ -37,8 +37,8 @@ import {
 } from '@purista/core'
 import { Hono } from 'hono'
 import { compress } from 'hono/compress'
+import { PatternRouter } from 'hono/router/pattern-router'
 
-import { HonoTRouter } from '../HonoTRouter.js'
 import { getCommandHandler } from './getCommandHandler.impl.js'
 import { getCommandHandlerRestApi } from './getCommandHandlerRestApi.impl.js'
 import { getDefaultHttpEventBridgeConfig } from './getDefaultHttpEventBridgeConfig.impl.js'
@@ -83,7 +83,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 
     this.client = client
 
-    this.app = new Hono({ router: new HonoTRouter() })
+    this.app = new Hono({ router: new PatternRouter() })
   }
 
   async start() {
