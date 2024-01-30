@@ -34,9 +34,9 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^20.10.8",
+    "@types/node": "^20.11.12",
     "sinon": "^17.0.1",
-    "tshy": "^1.8.2"
+    "tshy": "^1.11.0"
   },
   "dependencies": {
     "@decs/typeschema": "^0.12.2",
@@ -46,7 +46,7 @@
     "@opentelemetry/semantic-conventions": "^1.19.0",
     "openapi3-ts": "^4.2.1",
     "pino": "^8.17.2",
-    "ts-deepmerge": "^6.1.0",
+    "ts-deepmerge": "^7.0.0",
     "zod": "^3.22.4"
   },
   "peerDependencies": {

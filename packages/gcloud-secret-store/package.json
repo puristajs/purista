@@ -53,15 +53,15 @@
     }
   },
   "devDependencies": {
-    "tshy": "^1.11.0",
-    "@types/node": "^20.10.8",
+    "@types/node": "^20.11.12",
     "@types/sinon": "^17.0.3",
-    "vitest": "^1.2.2",
-    "sinon": "^17.0.1"
+    "sinon": "^17.0.1",
+    "tshy": "^1.11.0",
+    "vitest": "^1.2.2"
   },
   "dependencies": {
-    "@purista/core": "*",
-    "@google-cloud/secret-manager": "^5.0.1"
+    "@google-cloud/secret-manager": "^5.0.1",
+    "@purista/core": "*"
   },
   "peerDependenciesMeta": {},
   "types": "./dist/commonjs/index.d.ts"

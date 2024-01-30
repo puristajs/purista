@@ -22,21 +22,21 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@types/node": "^20.10.8",
-    "vitest": "^1.2.2",
+    "@types/node": "^20.11.12",
+    "pino-pretty": "^10.3.1",
     "sinon": "^17.0.1",
     "tsx": "^4.7.0",
-    "typescript": "^5.2.2",
-    "pino-pretty": "^10.3.0"
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.2"
   },
   "dependencies": {
     "@fastify/static": "^6.12.0",
-    "@purista/core": "*",
+    "@hono/node-server": "^1.7.0",
+    "@hono/swagger-ui": "^0.2.1",
     "@purista/cli": "*",
-    "@purista/hono-http-server": "*",
-    "zod": "3.22.4",
-    "@hono/node-server": ">=1.4.1",
+    "@purista/core": "*",
+    "@purista/hono-http-server": "^1.9.0",
     "openapi3-ts": "4.2.1",
-    "@hono/swagger-ui": ">=0.2.1"
+    "zod": "3.22.4"
   }
 }
