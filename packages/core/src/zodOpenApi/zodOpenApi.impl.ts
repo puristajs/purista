@@ -1,5 +1,5 @@
 import type { SchemaObject, SchemaObjectType } from 'openapi3-ts/oas31'
-import merge from 'ts-deepmerge'
+import { merge } from 'ts-deepmerge'
 import type { AnyZodObject, ZodTypeAny } from 'zod'
 import { z } from 'zod'
 

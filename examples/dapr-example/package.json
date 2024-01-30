@@ -21,19 +21,19 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@types/node": "^20.10.8",
-    "vitest": "^1.2.2",
-    "sinon": "^17.0.1",
-    "typescript": "^5.2.2",
+    "@types/node": "^20.11.12",
     "pino-pretty": "^10.3.1",
-    "tsx": "^4.7.0"
+    "sinon": "^17.0.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.2"
   },
   "dependencies": {
+    "@hono/node-server": "^1.7.0",
     "@opentelemetry/exporter-zipkin": "^1.19.0",
     "@opentelemetry/sdk-trace-node": "^1.19.0",
-    "@purista/dapr-sdk": "*",
     "@purista/core": "*",
-    "zod": "^3.22.4",
-    "@hono/node-server": "^1.4.0"
+    "@purista/dapr-sdk": "*",
+    "zod": "^3.22.4"
   }
 }

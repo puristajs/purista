@@ -53,19 +53,19 @@
     }
   },
   "devDependencies": {
+    "@hono/node-server": "^1.7.0",
     "@types/jest": "^29.5.11",
-    "tshy": "^1.11.0",
-    "@hono/node-server": "^1.4.0",
-    "@types/node": "^20.10.8",
+    "@types/node": "^20.11.12",
     "@types/sinon": "^17.0.3",
-    "vitest": "^1.2.2",
-    "sinon": "^17.x"
+    "sinon": "^17.0.1",
+    "tshy": "^1.11.0",
+    "vitest": "^1.2.2"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.7.0",
     "@opentelemetry/semantic-conventions": "^1.19.0",
     "@purista/core": "*",
-    "hono": "^3.11.9"
+    "hono": "^3.12.8"
   },
   "peerDependencies": {
     "@hono/node-server": "^1.4.0"

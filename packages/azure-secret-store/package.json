@@ -55,16 +55,16 @@
     }
   },
   "devDependencies": {
-    "tshy": "^1.11.0",
-    "@types/node": "^20.10.8",
+    "@types/node": "^20.11.12",
     "@types/sinon": "^17.0.3",
-    "dotenv": "^16.3.1",
-    "vitest": "^1.2.2",
+    "dotenv": "^16.4.1",
     "sinon": "^17.0.1",
-    "testcontainers": "^10.4.0"
+    "testcontainers": "^10.6.0",
+    "tshy": "^1.11.0",
+    "vitest": "^1.2.2"
   },
   "dependencies": {
-    "@azure/identity": "^4.0.0",
+    "@azure/identity": "^4.0.1",
     "@azure/keyvault-secrets": "^4.7.0",
     "@purista/core": "*"
   },

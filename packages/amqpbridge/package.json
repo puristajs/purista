@@ -53,12 +53,12 @@
     }
   },
   "devDependencies": {
-    "tshy": "^1.11.0",
-    "@types/node": "^20.10.8",
     "@types/amqplib": "^0.10.4",
+    "@types/node": "^20.11.12",
     "@types/sinon": "^17.0.3",
-    "vitest": "^1.2.2",
-    "sinon": "^17.x"
+    "sinon": "^17.0.1",
+    "tshy": "^1.11.0",
+    "vitest": "^1.2.2"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.7.0",

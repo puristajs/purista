@@ -53,16 +53,16 @@
     }
   },
   "devDependencies": {
-    "tshy": "^1.11.0",
-    "@testcontainers/nats": "^10.4.0",
-    "@types/node": "^20.10.8",
+    "@testcontainers/nats": "^10.6.0",
+    "@types/node": "^20.11.12",
     "@types/sinon": "^17.0.3",
-    "vitest": "^1.2.2",
-    "sinon": "^17.x"
+    "sinon": "^17.0.1",
+    "tshy": "^1.11.0",
+    "vitest": "^1.2.2"
   },
   "dependencies": {
     "@purista/core": "*",
-    "nats": "^2.18.0"
+    "nats": "^2.19.0"
   },
   "peerDependenciesMeta": {},
   "types": "./dist/commonjs/index.d.ts"

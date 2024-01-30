@@ -27,22 +27,24 @@
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
     "test": "vitest"
   },
-"tshy": {
-    "exclude": ["src/**/*.test.ts"],
+  "tshy": {
+    "exclude": [
+      "src/**/*.test.ts"
+    ],
     "exports": {
       "./package.json": "./package.json",
       ".": "./src/index.ts"
     }
   },
   "devDependencies": {
-    "tshy": "^1.11.0",
-    "@types/eslint": "^8.56.1",
+    "@types/eslint": "^8.56.2",
     "@types/minimist": "^1.2.5",
-    "@types/node": "^20.6.0"
+    "@types/node": "^20.11.12",
+    "tshy": "^1.11.0"
   },
   "dependencies": {
-    "eslint": "^8.54.0",
     "camelcase": "^8.0.0",
+    "eslint": "^8.56.0",
     "minimist": "^1.2.8",
     "plop": "^4.0.1",
     "ts-morph": "^21.0.1",

@@ -55,16 +55,16 @@
     }
   },
   "devDependencies": {
-    "tshy": "^1.11.0",
-    "@types/node": "^20.10.8",
+    "@types/node": "^20.11.12",
     "@types/sinon": "^17.0.3",
-    "vitest": "^1.2.2",
     "sinon": "^17.0.1",
-    "testcontainers": "^10.4.0"
+    "testcontainers": "^10.6.0",
+    "tshy": "^1.11.0",
+    "vitest": "^1.2.2"
   },
   "dependencies": {
-    "@purista/core": "*",
-    "@aws-sdk/client-ssm": "^3.485.0"
+    "@aws-sdk/client-ssm": "^3.503.0",
+    "@purista/core": "*"
   },
   "peerDependenciesMeta": {},
   "types": "./dist/commonjs/index.d.ts"
