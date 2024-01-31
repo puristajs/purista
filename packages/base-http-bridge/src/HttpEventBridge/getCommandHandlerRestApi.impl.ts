@@ -38,7 +38,7 @@ export const getCommandHandlerRestApi = function (
   _eventBridgeConfig: DefinitionEventBridgeConfig,
 ): RouterFunction {
   const handler: RouterFunction = async (c) => {
-    const parentContext = propagation.extract(context.active(), c.req.headers)
+    const parentContext = propagation.extract(context.active(), c.req.raw.headers)
 
     return await this.startActiveSpan(
       PuristaSpanName.KubernetesHttpRequest,

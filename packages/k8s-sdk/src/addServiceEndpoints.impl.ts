@@ -48,7 +48,7 @@ export const addServiceEndpoints = (
       const url = posix.join(apiMountPath || '/api', `v${serviceVersion}`, data.http.path)
 
       const handler = async (c: HonoContext) => {
-        const parentContext = propagation.extract(context.active(), c.req.headers)
+        const parentContext = propagation.extract(context.active(), c.req.raw.headers)
 
         return await service
           .getTracer('PURISTA_k8s_http_server')

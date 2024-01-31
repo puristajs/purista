@@ -24,7 +24,7 @@ export const getSubscriptionHandler = function (
   wrappedInCloudEvent = false,
 ): RouterFunction {
   const handler: RouterFunction = async (c) => {
-    const parentContext = propagation.extract(context.active(), c.req.headers)
+    const parentContext = propagation.extract(context.active(), c.req.raw.headers)
 
     return await this.startActiveSpan(
       PuristaSpanName.EventBridgeCommandReceived,
