@@ -37,9 +37,9 @@ export const getCommandHandler = function (
   wrappedInCloudEvent = false,
 ): RouterFunction {
   const handler: RouterFunction = async (c) => {
-    const parentContext = propagation.extract(context.active(), c.req.headers)
+    const parentContext = propagation.extract(context.active(), c.req.raw.headers)
 
-    this.logger.info({ headers: c.req.headers }, 'command handler headers')
+    this.logger.info({ headers: c.req.raw.headers }, 'command handler headers')
 
     return await this.startActiveSpan(
       PuristaSpanName.EventBridgeCommandReceived,

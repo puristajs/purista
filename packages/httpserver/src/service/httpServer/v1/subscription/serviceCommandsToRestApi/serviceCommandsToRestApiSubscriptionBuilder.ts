@@ -1,6 +1,5 @@
 import { posix } from 'node:path'
 
-import type { Context } from '@opentelemetry/api'
 import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import {
@@ -52,20 +51,7 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 
     const getHandler = () => {
       return async (request: FastifyRequest, reply: FastifyReply, parameter: Record<string, unknown>) => {
-        let parentContext: Context | undefined
-
-        if (request.headers['traceparent']) {
-          let traceparent: string
-          if (Array.isArray(request.headers['traceparent'])) {
-            traceparent = request.headers['traceparent'][0] as string
-          } else {
-            traceparent = request.headers['traceparent']
-          }
-
-          if (traceparent.trim().length) {
-            parentContext = propagation.extract(context.active(), request.headers)
-          }
-        }
+        const parentContext = propagation.extract(context.active(), request.headers)
 
         return this.startActiveSpan('handler', { kind: SpanKind.SERVER }, parentContext, async (span) => {
           try {
