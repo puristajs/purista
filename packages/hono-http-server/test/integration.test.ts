@@ -72,15 +72,9 @@ describe('httpserver integration test', () => {
     })
   })
 
-  /*
   it('returns /api', async () => {
-    await expect(client.get(apiMountPath)).resolves.toEqual(getIndexHtml(apiMountPath))
+    await expect(client.get(apiMountPath)).resolves.toBeDefined()
   })
-
-  it('returns /api/initializer.js', async () => {
-    await expect(client.get(apiMountPath + '/initializer.js')).resolves.toEqual(getJsInit(apiMountPath))
-  })
-  */
 
   it('returns /api/openapi.json', async () => {
     const response = await client.get<OpenAPIObject>(apiMountPath + '/openapi.json')

@@ -28,6 +28,6 @@ describe('service Ping version 1 - command foo', () => {
 
     const result = await foo(context.mock, payload, parameter)
 
-    expect(result).toBeUndefined()
+    expect(result).toStrictEqual({ foo: 'foo' })
   })
 })

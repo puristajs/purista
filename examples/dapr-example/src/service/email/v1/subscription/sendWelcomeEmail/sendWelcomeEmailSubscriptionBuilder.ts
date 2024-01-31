@@ -1,5 +1,9 @@
 import { ServiceEvent } from '../../../../ServiceEvent.enum.js'
-import type { UserV1GetUserByIdInputParameter, UserV1GetUserByIdOutputPayload } from '../../../../user/v1/index.js'
+import {
+  userV1GetUserByIdInputParameterSchema,
+  userV1GetUserByIdInputPayloadSchema,
+  userV1GetUserByIdOutputPayloadSchema,
+} from '../../../../user/v1/command/getUserById/index.js'
 import { emailV1ServiceBuilder } from '../../emailV1ServiceBuilder.js'
 import { emailV1SendWelcomeEmailInputPayloadSchema, emailV1SendWelcomeEmailOutputPayloadSchema } from './schema.js'
 
@@ -8,7 +12,14 @@ export const sendWelcomeEmailSubscriptionBuilder = emailV1ServiceBuilder
   .subscribeToEvent(ServiceEvent.NewUserRegistered)
   .addPayloadSchema(emailV1SendWelcomeEmailInputPayloadSchema)
   .addOutputSchema(ServiceEvent.WelcomeEmailSent, emailV1SendWelcomeEmailOutputPayloadSchema)
-  .canInvoke<undefined, UserV1GetUserByIdInputParameter, UserV1GetUserByIdOutputPayload>('User', '1', 'getUserById')
+  .canInvoke(
+    'User',
+    '1',
+    'getUserById',
+    userV1GetUserByIdOutputPayloadSchema,
+    userV1GetUserByIdInputPayloadSchema,
+    userV1GetUserByIdInputParameterSchema,
+  )
   .setSubscriptionFunction(async function (context, payload, _parameter) {
     context.logger.info('sendWelcomeEmail starting')
     const config = await context.configs.getConfig('emailProviderUrl')
