@@ -13,5 +13,10 @@ export type SubscriptionDefinitionList<ServiceClassType extends ServiceClass> = 
   any,
   any,
   any,
+  any,
+  any,
+  any,
+  any,
+  any,
   any
 >[]
