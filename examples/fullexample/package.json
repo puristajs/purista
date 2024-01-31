@@ -39,7 +39,7 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@types/node": "^20.11.12",
+    "@types/node": "^20.11.13",
     "sinon": "^17.0.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",

@@ -55,7 +55,7 @@
   "devDependencies": {
     "@hono/node-server": "^1.7.0",
     "@types/jest": "^29.5.11",
-    "@types/node": "^20.11.12",
+    "@types/node": "^20.11.13",
     "@types/sinon": "^17.0.3",
     "sinon": "^17.0.1",
     "tshy": "^1.11.0",
@@ -65,7 +65,7 @@
     "@opentelemetry/api": "^1.7.0",
     "@opentelemetry/semantic-conventions": "^1.19.0",
     "@purista/core": "*",
-    "hono": "^3.12.8"
+    "hono": "^3.12.9"
   },
   "peerDependencies": {
     "@hono/node-server": "^1.4.0"
