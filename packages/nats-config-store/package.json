@@ -54,7 +54,7 @@
   },
   "devDependencies": {
     "@testcontainers/nats": "^10.6.0",
-    "@types/node": "^20.11.12",
+    "@types/node": "^20.11.13",
     "@types/sinon": "^17.0.3",
     "sinon": "^17.0.1",
     "tshy": "^1.11.0",
