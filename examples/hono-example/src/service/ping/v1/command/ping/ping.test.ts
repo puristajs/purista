@@ -22,7 +22,9 @@ describe('service Ping version 1 - command ping', () => {
 
     const payload: PingV1PingInputPayload = { ping: 'test' }
 
-    const parameter: PingV1PingInputParameter = {}
+    const parameter: PingV1PingInputParameter = {
+      query: 'myQuery',
+    }
 
     const context = pingCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
 

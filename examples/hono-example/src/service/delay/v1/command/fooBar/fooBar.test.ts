@@ -24,12 +24,17 @@ describe('service Delay version 1 - command fooBar', () => {
 
     const payload: DelayV1FooBarInputPayload = undefined
 
-    const parameter: DelayV1FooBarInputParameter = {}
+    const parameter: DelayV1FooBarInputParameter = {
+      p: 'the_p',
+    }
 
     const context = getCommandContextMock(payload, parameter, sandbox)
 
     const result = await fooBar(context.mock, payload, parameter)
 
-    expect(result).toBeUndefined()
+    expect(result).toStrictEqual({
+      foo: 'bar',
+      parameter: { p: 'the_p' },
+    })
   })
 })

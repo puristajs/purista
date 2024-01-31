@@ -22,12 +22,15 @@ describe('service Ping version 1 - command paramTest', () => {
 
     const payload: PingV1ParamTestInputPayload = undefined
 
-    const parameter: PingV1ParamTestInputParameter = {}
+    const parameter: PingV1ParamTestInputParameter = {
+      requiredQuery: 'required',
+      requiredParam: 'required_id',
+    }
 
     const context = getCommandContextMock(payload, parameter, sandbox)
 
     const result = await paramTest(context.mock, payload, parameter)
 
-    expect(result).toBeUndefined()
+    expect(result).toStrictEqual({ parameter: { requiredParam: 'required_id', requiredQuery: 'required' } })
   })
 })
