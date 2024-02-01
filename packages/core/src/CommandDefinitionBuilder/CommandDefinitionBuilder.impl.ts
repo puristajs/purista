@@ -1,25 +1,26 @@
 import type { Infer, InferIn, Schema } from '@decs/typeschema'
 import type { SinonSandbox } from 'sinon'
 
-import type {
-  CommandAfterGuardHook,
-  CommandBeforeGuardHook,
-  CommandDefinition,
-  CommandDefinitionMetadataBase,
-  CommandFunction,
-  CommandTransformInputHook,
-  CommandTransformOutputHook,
-  Complete,
-  ContentType,
-  DefinitionEventBridgeConfig,
-  FromInvokeToOtherType,
-  HttpExposedServiceMeta,
-  QueryParameter,
-  ServiceClass,
+import {
+  type CommandAfterGuardHook,
+  type CommandBeforeGuardHook,
+  type CommandDefinition,
+  type CommandDefinitionMetadataBase,
+  type CommandFunction,
+  type CommandTransformInputHook,
+  type CommandTransformOutputHook,
+  type Complete,
+  type ContentType,
+  type DefinitionEventBridgeConfig,
+  type FromInvokeToOtherType,
+  type HttpExposedServiceMeta,
+  type QueryParameter,
+  type ServiceClass,
   StatusCode,
-  SupportedHttpMethod,
+  type SupportedHttpMethod,
+  UnhandledError,
 } from '../core/index.js'
-import type { NonEmptyString } from '../helper/index.js'
+import { type NonEmptyString } from '../helper/index.js'
 import { getCommandContextMock, getCommandTransformContextMock } from '../mocks/index.js'
 import { validationToSchema } from '../zodOpenApi/index.js'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
@@ -36,23 +37,23 @@ import { getCommandFunctionWithValidation } from './getCommandFunctionWithValida
 export class CommandDefinitionBuilder<
   ServiceClassType extends ServiceClass,
   MessagePayloadType = unknown,
-  MessageParamsType = undefined,
+  MessageParamsType = {},
   MessageResultType = void,
-  FunctionPayloadType = MessagePayloadType,
-  FunctionParamsType = MessageParamsType,
-  FunctionResultType = MessageResultType,
+  PayloadSchema extends Schema = Schema,
+  ParameterSchema extends Schema = Schema,
+  ResultSchema extends Schema = Schema,
   Invokes = {},
   EmitListType = {},
 > {
-  private httpMetadata?: HttpExposedServiceMeta<FunctionParamsType>
-  private inputSchema?: Schema
+  private httpMetadata?: HttpExposedServiceMeta<Infer<ParameterSchema>>
+  private inputSchema?: PayloadSchema
   private inputContentType: ContentType | undefined
   private inputContentEncoding: string | undefined
-  private outputSchema?: Schema
+  private outputSchema?: ResultSchema
   private outputContentType: ContentType | undefined
   private outputContentEncoding: string | undefined
-  private parameterSchema?: Schema
-  private queryParameter: QueryParameter<FunctionParamsType>[] = []
+  private parameterSchema?: ParameterSchema
+  private queryParameter: QueryParameter<Infer<ParameterSchema>>[] = []
 
   private tags: string[] = []
 
@@ -88,8 +89,8 @@ export class CommandDefinitionBuilder<
         ServiceClassType,
         MessagePayloadType,
         MessageParamsType,
-        FunctionPayloadType,
-        FunctionParamsType,
+        Infer<PayloadSchema>,
+        Infer<ParameterSchema>,
         Invokes,
         EmitListType
       >
@@ -100,9 +101,9 @@ export class CommandDefinitionBuilder<
         ServiceClassType,
         MessagePayloadType,
         MessageParamsType,
-        FunctionResultType,
-        FunctionPayloadType,
-        FunctionParamsType,
+        Infer<ResultSchema>,
+        Infer<PayloadSchema>,
+        Infer<ParameterSchema>,
         Invokes,
         EmitListType
       >
@@ -122,9 +123,9 @@ export class CommandDefinitionBuilder<
     ServiceClassType,
     MessagePayloadType,
     MessageParamsType,
-    FunctionPayloadType,
-    FunctionParamsType,
-    FunctionResultType,
+    Infer<PayloadSchema>,
+    Infer<ParameterSchema>,
+    InferIn<ResultSchema>,
     Invokes,
     EmitListType
   >
@@ -199,9 +200,9 @@ export class CommandDefinitionBuilder<
       MessagePayloadType,
       MessageParamsType,
       MessageResultType,
-      FunctionPayloadType,
-      FunctionParamsType,
-      FunctionResultType,
+      PayloadSchema,
+      ParameterSchema,
+      ResultSchema,
       Invokes &
         Record<
           SName,
@@ -233,9 +234,9 @@ export class CommandDefinitionBuilder<
       MessagePayloadType,
       MessageParamsType,
       MessageResultType,
-      FunctionPayloadType,
-      FunctionParamsType,
-      FunctionResultType,
+      PayloadSchema,
+      ParameterSchema,
+      ResultSchema,
       Invokes,
       EmitListType & Record<EventName, InferIn<typeof schema>>
     >
@@ -263,15 +264,15 @@ export class CommandDefinitionBuilder<
   addPayloadSchema<T extends Schema>(inputSchema: T, inputContentType?: ContentType, inputContentEncoding?: string) {
     this.inputContentType = inputContentType || this.inputContentType
     this.inputContentEncoding = inputContentEncoding || this.inputContentEncoding
-    this.inputSchema = inputSchema
+    this.inputSchema = inputSchema as unknown as PayloadSchema
     return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
       InferIn<T>,
       MessageParamsType,
       MessageResultType,
-      Infer<T>,
-      FunctionParamsType,
-      FunctionResultType,
+      T,
+      ParameterSchema,
+      ResultSchema,
       Invokes,
       EmitListType
     >
@@ -288,15 +289,15 @@ export class CommandDefinitionBuilder<
   addOutputSchema<T extends Schema>(outputSchema: T, outputContentType?: ContentType, outputContentEncoding?: string) {
     this.outputContentType = outputContentType || this.outputContentType
     this.outputContentEncoding = outputContentEncoding || this.outputContentEncoding
-    this.outputSchema = outputSchema
+    this.outputSchema = outputSchema as unknown as ResultSchema
     return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
       Infer<T>,
-      FunctionPayloadType,
-      FunctionParamsType,
-      InferIn<T>,
+      PayloadSchema,
+      ParameterSchema,
+      T,
       Invokes,
       EmitListType
     >
@@ -318,15 +319,15 @@ export class CommandDefinitionBuilder<
    * @returns CommandDefinitionBuilder
    */
   addParameterSchema<T extends Schema>(parameterSchema: T) {
-    this.parameterSchema = parameterSchema
+    this.parameterSchema = parameterSchema as unknown as ParameterSchema
     return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
       InferIn<T>,
       MessageResultType,
-      FunctionPayloadType,
-      Infer<T>,
-      FunctionResultType,
+      PayloadSchema,
+      T,
+      ResultSchema,
       Invokes,
       EmitListType
     >
@@ -354,7 +355,7 @@ export class CommandDefinitionBuilder<
    * @param queryParams Add one or more query parameter definitions
    * @returns CommandDefinitionBuilder
    */
-  addQueryParameters(...queryParams: QueryParameter<FunctionParamsType>[]) {
+  addQueryParameters(...queryParams: QueryParameter<Infer<ParameterSchema>>[]) {
     this.queryParameter.push(...queryParams)
     return this
   }
@@ -405,15 +406,15 @@ export class CommandDefinitionBuilder<
    * @param inputContentEncoding optional the content encoding
    * @returns CommandDefinitionBuilder
    */
-  setTransformInput<Payload extends Schema, Parameter extends Schema>(
-    transformInputSchema: Payload,
-    transformParameterSchema: Parameter,
+  setTransformInput<TransFormPayloadSchema extends Schema, TransFormParameterSchema extends Schema>(
+    transformInputSchema: TransFormPayloadSchema,
+    transformParameterSchema: TransFormParameterSchema,
     transformFunction: CommandTransformInputHook<
       ServiceClassType,
-      FunctionPayloadType,
-      FunctionParamsType,
-      InferIn<Payload>,
-      InferIn<Parameter>
+      InferIn<PayloadSchema>,
+      InferIn<ParameterSchema>,
+      Infer<TransFormPayloadSchema>,
+      Infer<TransFormParameterSchema>
     >,
     inputContentType?: ContentType,
     inputContentEncoding?: string,
@@ -428,12 +429,12 @@ export class CommandDefinitionBuilder<
     }
     return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
-      InferIn<Payload>,
-      InferIn<Parameter>,
+      InferIn<TransFormPayloadSchema>,
+      InferIn<TransFormParameterSchema>,
       MessageResultType,
-      FunctionPayloadType,
-      FunctionParamsType,
-      FunctionResultType,
+      PayloadSchema,
+      ParameterSchema,
+      ResultSchema,
       Invokes,
       EmitListType
     >
@@ -450,8 +451,8 @@ export class CommandDefinitionBuilder<
 
     return this.hooks.transformInput.transformFunction as CommandTransformInputHook<
       ServiceClassType,
-      FunctionPayloadType,
-      FunctionParamsType,
+      InferIn<PayloadSchema>,
+      InferIn<ParameterSchema>,
       MessagePayloadType,
       MessageParamsType
     >
@@ -474,8 +475,8 @@ export class CommandDefinitionBuilder<
       MessagePayloadType,
       MessageParamsType,
       InferIn<Output>,
-      FunctionResultType,
-      FunctionParamsType
+      Infer<ResultSchema>,
+      Infer<ParameterSchema>
     >,
 
     outputContentType?: ContentType,
@@ -492,9 +493,9 @@ export class CommandDefinitionBuilder<
       MessagePayloadType,
       MessageParamsType,
       Infer<Output>,
-      FunctionPayloadType,
-      FunctionParamsType,
-      FunctionResultType,
+      PayloadSchema,
+      ParameterSchema,
+      ResultSchema,
       Invokes,
       EmitListType
     >
@@ -514,8 +515,8 @@ export class CommandDefinitionBuilder<
       MessagePayloadType,
       MessageParamsType,
       MessageResultType,
-      FunctionResultType,
-      FunctionParamsType
+      Infer<ResultSchema>,
+      Infer<ParameterSchema>
     >
   }
 
@@ -532,8 +533,8 @@ export class CommandDefinitionBuilder<
         ServiceClassType,
         MessagePayloadType,
         MessageParamsType,
-        FunctionPayloadType,
-        FunctionParamsType,
+        Infer<PayloadSchema>,
+        Infer<ParameterSchema>,
         Invokes,
         EmitListType
       >
@@ -556,9 +557,9 @@ export class CommandDefinitionBuilder<
         ServiceClassType,
         MessagePayloadType,
         MessageParamsType,
-        FunctionResultType,
-        FunctionPayloadType,
-        FunctionParamsType,
+        Infer<ResultSchema>,
+        Infer<PayloadSchema>,
+        Infer<ParameterSchema>,
         Invokes,
         EmitListType
       >
@@ -660,9 +661,9 @@ export class CommandDefinitionBuilder<
         MessagePayloadType,
         MessageParamsType,
         MessageResultType,
-        FunctionPayloadType,
-        FunctionParamsType,
-        FunctionResultType,
+        Infer<PayloadSchema>,
+        Infer<ParameterSchema>,
+        Infer<ResultSchema>,
         Invokes,
         EmitListType
       >
@@ -675,13 +676,13 @@ export class CommandDefinitionBuilder<
     const def: Complete<
       CommandDefinition<
         ServiceClassType,
-        HttpExposedServiceMeta<FunctionParamsType>,
+        HttpExposedServiceMeta<Infer<ParameterSchema>>,
         MessagePayloadType,
         MessageParamsType,
         MessageResultType,
-        FunctionPayloadType,
-        FunctionParamsType,
-        FunctionResultType,
+        Infer<PayloadSchema>,
+        Infer<ParameterSchema>,
+        Infer<ResultSchema>,
         Invokes,
         EmitListType
       >
@@ -736,9 +737,9 @@ export class CommandDefinitionBuilder<
     MessagePayloadType,
     MessageParamsType,
     MessageResultType,
-    FunctionPayloadType,
-    FunctionParamsType,
-    FunctionResultType,
+    Infer<PayloadSchema>,
+    Infer<ParameterSchema>,
+    Infer<ResultSchema>,
     Invokes,
     EmitListType
   > {
@@ -767,9 +768,9 @@ export class CommandDefinitionBuilder<
         MessagePayloadType,
         MessageParamsType,
         MessageResultType,
-        FunctionPayloadType,
-        FunctionParamsType,
-        FunctionResultType,
+        Infer<PayloadSchema>,
+        Infer<ParameterSchema>,
+        Infer<ResultSchema>,
         Invokes,
         EmitListType
       >
@@ -790,17 +791,7 @@ export class CommandDefinitionBuilder<
         },
       },
       eventName,
-      call: getCommandFunctionWithValidation<
-        ServiceClassType,
-        MessagePayloadType,
-        MessageParamsType,
-        MessageResultType,
-        FunctionPayloadType,
-        FunctionParamsType,
-        FunctionResultType,
-        Invokes,
-        EmitListType
-      >(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard),
+      call: this.getCommandFunction(),
       hooks: this.hooks,
       invokes: this.invokes,
       emitList: this.emitList,
@@ -830,9 +821,9 @@ export class CommandDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
-      FunctionPayloadType,
-      FunctionParamsType,
-      FunctionResultType,
+      Infer<PayloadSchema>,
+      Infer<ParameterSchema>,
+      InferIn<ResultSchema>,
       Invokes,
       EmitListType
     >,
@@ -841,9 +832,9 @@ export class CommandDefinitionBuilder<
     MessagePayloadType,
     MessageParamsType,
     MessageResultType,
-    FunctionPayloadType,
-    FunctionParamsType,
-    FunctionResultType,
+    PayloadSchema,
+    ParameterSchema,
+    ResultSchema,
     Invokes,
     EmitListType
   > {
@@ -851,9 +842,9 @@ export class CommandDefinitionBuilder<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
-      FunctionPayloadType,
-      FunctionParamsType,
-      FunctionResultType,
+      Infer<PayloadSchema>,
+      Infer<ParameterSchema>,
+      InferIn<ResultSchema>,
       Invokes,
       EmitListType
     >
@@ -863,45 +854,70 @@ export class CommandDefinitionBuilder<
       MessagePayloadType,
       MessageParamsType,
       MessageResultType,
-      FunctionPayloadType,
-      FunctionParamsType,
-      FunctionResultType,
+      PayloadSchema,
+      ParameterSchema,
+      ResultSchema,
       Invokes,
       EmitListType
     >
   }
 
   /**
-   * Get the function implementation
+   * Get the function implementation including input and output validation.
+   * Also, before and after hooks are triggered during execution.
+   *
    * @returns the function
    */
-  getCommandFunction(): CommandFunction<
-    ServiceClassType,
-    MessagePayloadType,
-    MessageParamsType,
-    FunctionPayloadType,
-    FunctionParamsType,
-    FunctionResultType,
-    Invokes,
-    EmitListType
-  > {
+  getCommandFunction() {
     if (!this.fn) {
-      throw new Error(`No function implementation for ${this.commandName}`)
+      throw new UnhandledError(StatusCode.NotImplemented, `No function implementation for ${this.commandName}`, {
+        commandName: this.commandName,
+      })
     }
 
-    const f = getCommandFunctionWithValidation<
+    const f: CommandFunction<
       ServiceClassType,
       MessagePayloadType,
       MessageParamsType,
-      MessageResultType,
-      FunctionPayloadType,
-      FunctionParamsType,
-      FunctionResultType,
+      InferIn<PayloadSchema>,
+      InferIn<ParameterSchema>,
+      Infer<ResultSchema>,
       Invokes,
       EmitListType
-    >(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard)
+    > = getCommandFunctionWithValidation(
+      this.fn,
+      this.inputSchema,
+      this.parameterSchema,
+      this.outputSchema,
+      this.hooks.beforeGuard,
+    )
 
     return f
+  }
+
+  /**
+   * Get the function implementation without input and output validation.
+   * No hooks are triggered during execution.
+   *
+   * @returns the function
+   */
+  getCommandFunctionPlain() {
+    if (!this.fn) {
+      throw new UnhandledError(StatusCode.NotImplemented, `No function implementation for ${this.commandName}`, {
+        commandName: this.commandName,
+      })
+    }
+
+    return this.fn as CommandFunction<
+      ServiceClassType,
+      MessagePayloadType,
+      MessageParamsType,
+      Infer<PayloadSchema>,
+      Infer<ParameterSchema>,
+      InferIn<ResultSchema>,
+      Invokes,
+      EmitListType
+    >
   }
 
   /**
