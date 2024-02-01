@@ -1,4 +1,6 @@
 /**
+ * @deprecated Since version 1.10.0. Use {@purista/hono-http-server} instead.
+ * 
  * The HttpServerService is a service which exposes commands of services as http endpoints.  
  * All exposed commands must be marked as exposed endpoints in the CommandBuilder.
  *
