@@ -44,7 +44,7 @@ export const getCommandMessageMock = <Payload = unknown, Parameter = unknown>(
     },
     payload: {
       payload: input?.payload?.payload as Payload,
-      parameter: input?.payload?.parameter as Parameter,
+      parameter: (input?.payload?.parameter || {}) as Parameter,
     },
     ...input,
   })
