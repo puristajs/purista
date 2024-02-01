@@ -1,5 +1,9 @@
 # @purista/httpserver
 
+> [!CAUTION]
+> 🚨 This Package is deprecated and maintenance will end soon.
+> 🚨 Please migrate to `@purista/hono-http-server` package.
+
 The HttpServerService is a service which exposes commands of services as http endpoints.
 All exposed commands must be marked as exposed endpoints in the CommandBuilder.
 
