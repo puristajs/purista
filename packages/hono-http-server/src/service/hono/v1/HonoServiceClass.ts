@@ -62,6 +62,8 @@ export class HonoServiceClass<
    */
   public openApi: OpenApiBuilder
 
+  private knownServices: Set<string> = new Set()
+
   constructor(config: ServiceConstructorInput<HonoServiceV1Config>) {
     super(config)
     this.openApi = new OpenApiBuilder(this.config.openApi)
@@ -275,6 +277,10 @@ export class HonoServiceClass<
       return
     }
 
+    if (this.knownServices.has(`${service.serviceName}-${service.serviceVersion}-${service.serviceTarget}`)) {
+      return
+    }
+
     const expose = metadata.expose
 
     const method = expose.http.method.toLowerCase() as 'put' | 'post' | 'patch' | 'get' | 'delete'
@@ -402,6 +408,7 @@ export class HonoServiceClass<
     } else {
       this.app[method](path, handler)
     }
+    this.knownServices.add(`${service.serviceName}-${service.serviceVersion}-${service.serviceTarget}`)
   }
 
   async invoke<T>(
