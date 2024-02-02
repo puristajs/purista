@@ -3,7 +3,7 @@ import { createSandbox } from 'sinon'
 import { z } from 'zod'
 
 import type { ServiceInfoType } from '../src'
-import { DefaultEventBridge, EBMessageType, ServiceBuilder, StatusCode } from '../src'
+import { DefaultEventBridge, EBMessageType, safeBind, ServiceBuilder, StatusCode } from '../src'
 import {
   getCommandMessageMock,
   getCommandTransformContextMock,
@@ -185,7 +185,7 @@ describe('integration test', () => {
 
       const service = serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
 
-      const commandOne = commandOneDefinitionBuilder.getCommandFunction().bind(service)
+      const commandOne = safeBind(commandOneDefinitionBuilder.getCommandFunction(), service)
 
       const payload = { input: 'my input' }
       const parameter = { param: 1 }
@@ -225,7 +225,7 @@ describe('integration test', () => {
 
       const contextMock = getCommandTransformContextMock(messagePayload, messageParameter, sandbox)
 
-      const result = await transformInput.bind(service)(contextMock.mock, messagePayload, messageParameter)
+      const result = await safeBind(transformInput, service)(contextMock.mock, messagePayload, messageParameter)
 
       expect(result.parameter).toStrictEqual(messageParameter)
       expect(result.payload).toStrictEqual(payload)
@@ -258,7 +258,7 @@ describe('integration test', () => {
           commandTwo: 'two',
         },
       }
-      const result = await transformOutput.bind(service)(contextMock.mock, functionResult, parameter)
+      const result = await safeBind(transformOutput, service)(contextMock.mock, functionResult, parameter)
 
       expect(result).toStrictEqual(JSON.stringify(functionResult))
       expect(contextMock.stubs.logger.debug.calledWith('activeSpan')).toBeTruthy()
@@ -326,7 +326,7 @@ describe('integration test', () => {
 
       const service = serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
 
-      const subscriptionOne = subscriptionOneBuilder.getSubscriptionFunction().bind(service)
+      const subscriptionOne = safeBind(subscriptionOneBuilder.getSubscriptionFunction(), service)
 
       const payload = { input: 'my input' }
       const parameter = { param: 1 }
@@ -371,7 +371,7 @@ describe('integration test', () => {
 
       const contextMock = getSubscriptionTransformContextMock(message, sandbox)
 
-      const result = await transformInput.bind(service)(
+      const result = await safeBind(transformInput, service)(
         contextMock.mock,
         message.payload.payload,
         message.payload.parameter,
@@ -410,7 +410,7 @@ describe('integration test', () => {
       const functionResult = {
         result: 'SUBSCRIPTION:MY INPUT',
       }
-      const result = await transformOutput.bind(service)(contextMock.mock, functionResult, parameter)
+      const result = await safeBind(transformOutput, service)(contextMock.mock, functionResult, parameter)
 
       expect(result).toStrictEqual(JSON.stringify(functionResult))
       expect(contextMock.stubs.logger.debug.calledWith('activeSpan')).toBeTruthy()

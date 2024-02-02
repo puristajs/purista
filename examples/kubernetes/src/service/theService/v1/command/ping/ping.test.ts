@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { theServiceV1Service } from '../../theServiceV1Service.js'
@@ -20,7 +20,7 @@ describe('service TheService version 1 - command ping', () => {
       logger: getLoggerMock(sandbox).mock,
     })
 
-    const ping = pingCommandBuilder.getCommandFunction().bind(service)
+    const ping = safeBind(pingCommandBuilder.getCommandFunction(), service)
 
     const payload: TheServiceV1PingInputPayload = undefined
 

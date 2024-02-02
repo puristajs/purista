@@ -1,4 +1,4 @@
-import { getLoggerMock } from '@purista/core'
+import { getLoggerMock, safeBind } from '@purista/core'
 import type { Context } from 'hono'
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
@@ -27,7 +27,7 @@ describe('config route', () => {
       logger: getLoggerMock().mock,
     } as any
 
-    const fn = configRoute.bind(bridge)
+    const fn = safeBind(configRoute, bridge)
     await fn(context)
     expect(
       json.calledWith({

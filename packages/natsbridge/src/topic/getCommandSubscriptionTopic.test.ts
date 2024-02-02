@@ -1,4 +1,4 @@
-import { getLoggerMock } from '@purista/core'
+import { getLoggerMock, safeBind } from '@purista/core'
 
 import { getDefaultNatsBridgeConfig } from '../getDefaultNatsBridgeConfig.js'
 import type { NatsBridge } from '../NatsBridge.js'
@@ -13,7 +13,10 @@ describe('getCommandSubscriptionTopic', () => {
       },
     } as any as NatsBridge
 
-    const topic = getCommandSubscriptionTopic.bind(bridge)({
+    const topic = safeBind(
+      getCommandSubscriptionTopic,
+      bridge,
+    )({
       serviceName: 'testService',
       serviceVersion: '1',
       serviceTarget: 'testCommand',

@@ -1,4 +1,4 @@
-import { getCommandSuccessMessageMock, getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getCommandSuccessMessageMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import type { User } from '../../../../../types/index.js'
@@ -23,7 +23,7 @@ describe('service Email version 1 - subscription sendWelcomeEmail', () => {
     })
 
     // get the subscription function and bind to service instance to work properly
-    const sendWelcomeEmail = sendWelcomeEmailSubscriptionBuilder.getSubscriptionFunction().bind(service)
+    const sendWelcomeEmail = safeBind(sendWelcomeEmailSubscriptionBuilder.getSubscriptionFunction(), service)
 
     const userMock: User = {
       email: 'email@example.com',

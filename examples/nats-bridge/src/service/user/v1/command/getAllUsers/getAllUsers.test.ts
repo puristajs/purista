@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import type { User } from '../../../../../types/index.js'
@@ -20,7 +20,7 @@ describe('service User version 1 - command getAllUsers', () => {
   test('does not throw', async () => {
     const service = userV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
 
-    const getAllUsers = getAllUsersCommandBuilder.getCommandFunction().bind(service)
+    const getAllUsers = safeBind(getAllUsersCommandBuilder.getCommandFunction(), service)
 
     const payload: UserV1GetAllUsersInputPayload = undefined
 

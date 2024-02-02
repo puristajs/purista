@@ -3,6 +3,7 @@ import {
   getEventBridgeMock,
   getLoggerMock,
   getSubscriptionContextMock,
+  safeBind,
 } from '@purista/core'
 import { createSandbox } from 'sinon'
 
@@ -27,13 +28,16 @@ describe('service Hono version 1 - subscription serviceCommandsToRestApi', () =>
     })
 
     // get the subscription function and bind to service instance to work properly
-    const serviceCommandsToRestApi = serviceCommandsToRestApiSubscriptionBuilder.getSubscriptionFunction().bind(service)
+    const serviceCommandsToRestApi = safeBind(
+      serviceCommandsToRestApiSubscriptionBuilder.getSubscriptionFunction(),
+      service,
+    )
 
     // define the test input payload
     const payload: HonoV1ServiceCommandsToRestApiInputPayload = undefined
 
     // define the test input parameter
-    const parameter = undefined
+    const parameter = {}
 
     // create a mock message with the expected input for the subscription function
     const message = getCommandSuccessMessageMock(payload)
