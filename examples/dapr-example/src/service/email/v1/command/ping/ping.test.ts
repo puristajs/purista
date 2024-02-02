@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { emailV1Service } from '../../emailV1Service.js'
