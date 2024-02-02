@@ -262,8 +262,8 @@ export class CommandDefinitionBuilder<
    * @returns CommandDefinitionBuilder
    */
   addPayloadSchema<T extends Schema>(inputSchema: T, inputContentType?: ContentType, inputContentEncoding?: string) {
-    this.inputContentType = inputContentType || this.inputContentType
-    this.inputContentEncoding = inputContentEncoding || this.inputContentEncoding
+    this.inputContentType = inputContentType ?? this.inputContentType
+    this.inputContentEncoding = inputContentEncoding ?? this.inputContentEncoding
     this.inputSchema = inputSchema as unknown as PayloadSchema
     return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
@@ -287,8 +287,8 @@ export class CommandDefinitionBuilder<
    * @returns CommandDefinitionBuilder
    */
   addOutputSchema<T extends Schema>(outputSchema: T, outputContentType?: ContentType, outputContentEncoding?: string) {
-    this.outputContentType = outputContentType || this.outputContentType
-    this.outputContentEncoding = outputContentEncoding || this.outputContentEncoding
+    this.outputContentType = outputContentType ?? this.outputContentType
+    this.outputContentEncoding = outputContentEncoding ?? this.outputContentEncoding
     this.outputSchema = outputSchema as unknown as ResultSchema
     return this as unknown as CommandDefinitionBuilder<
       ServiceClassType,
@@ -419,8 +419,8 @@ export class CommandDefinitionBuilder<
     inputContentType?: ContentType,
     inputContentEncoding?: string,
   ) {
-    this.inputContentType = inputContentType || this.inputContentType
-    this.inputContentEncoding = inputContentEncoding || this.inputContentEncoding
+    this.inputContentType = inputContentType ?? this.inputContentType
+    this.inputContentEncoding = inputContentEncoding ?? this.inputContentEncoding
 
     this.hooks.transformInput = {
       transformFunction,
@@ -482,8 +482,8 @@ export class CommandDefinitionBuilder<
     outputContentType?: ContentType,
     outputContentEncoding?: string,
   ) {
-    this.outputContentEncoding = outputContentEncoding || this.outputContentEncoding
-    this.outputContentType = outputContentType || this.outputContentType
+    this.outputContentEncoding = outputContentEncoding ?? this.outputContentEncoding
+    this.outputContentType = outputContentType ?? this.outputContentType
     this.hooks.transformOutput = {
       transformFunction,
       transformOutputSchema,
@@ -594,10 +594,10 @@ export class CommandDefinitionBuilder<
   ) {
     this.httpMetadata = {
       expose: {
-        contentTypeRequest: contentTypeRequest || this.inputContentType || 'application/json',
-        contentEncodingRequest: contentEncodingRequest || this.inputContentEncoding || 'utf-8',
-        contentTypeResponse: contentTypeResponse || this.outputContentType || 'application/json',
-        contentEncodingResponse: contentEncodingResponse || this.outputContentEncoding || 'utf-8',
+        contentTypeRequest: contentTypeRequest ?? this.inputContentType ?? 'application/json',
+        contentEncodingRequest: contentEncodingRequest ?? this.inputContentEncoding ?? 'utf-8',
+        contentTypeResponse: contentTypeResponse ?? this.outputContentType ?? 'application/json',
+        contentEncodingResponse: contentEncodingResponse ?? this.outputContentEncoding ?? 'utf-8',
         http: {
           method,
           path,
@@ -699,12 +699,12 @@ export class CommandDefinitionBuilder<
 
     def.metadata.expose.http.openApi = {
       description: this.commandDescription,
-      summary: this.summary || this.commandName,
+      summary: this.summary ?? this.commandName,
       isSecure: this.isSecure,
       query: this.queryParameter,
       tags: this.tags,
       additionalStatusCodes: this.errorStatusCodes,
-      operationId: this.operationId || this.commandName,
+      operationId: this.operationId ?? this.commandName,
     }
 
     return def
@@ -749,11 +749,11 @@ export class CommandDefinitionBuilder<
 
     const eventName = this.eventName
 
-    const inputPayloadSchema: Schema | undefined = this.hooks.transformInput?.transformInputSchema || this.inputSchema
+    const inputPayloadSchema: Schema | undefined = this.hooks.transformInput?.transformInputSchema ?? this.inputSchema
     const inputParameterSchema: Schema | undefined =
-      this.hooks.transformInput?.transformParameterSchema || this.parameterSchema
+      this.hooks.transformInput?.transformParameterSchema ?? this.parameterSchema
     const outputPayloadSchema: Schema | undefined =
-      this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
+      this.hooks.transformOutput?.transformOutputSchema ?? this.outputSchema
 
     const eventBridgeConfig: Complete<DefinitionEventBridgeConfig> = {
       durable: this.durable,
@@ -780,10 +780,10 @@ export class CommandDefinitionBuilder<
       eventBridgeConfig,
       metadata: {
         expose: {
-          contentTypeRequest: this.inputContentType || 'application/json',
-          contentEncodingRequest: this.inputContentEncoding || 'utf-8',
-          contentTypeResponse: this.outputContentType || 'application/json',
-          contentEncodingResponse: this.outputContentEncoding || 'utf-8',
+          contentTypeRequest: this.inputContentType ?? 'application/json',
+          contentEncodingRequest: this.inputContentEncoding ?? 'utf-8',
+          contentTypeResponse: this.outputContentType ?? 'application/json',
+          contentEncodingResponse: this.outputContentEncoding ?? 'utf-8',
           inputPayload: validationToSchema(inputPayloadSchema),
           parameter: validationToSchema(inputParameterSchema),
           outputPayload: validationToSchema(outputPayloadSchema),
@@ -901,23 +901,23 @@ export class CommandDefinitionBuilder<
    *
    * @returns the function
    */
-  getCommandFunctionPlain() {
+  getCommandFunctionPlain(): CommandFunction<
+    ServiceClassType,
+    MessagePayloadType,
+    MessageParamsType,
+    Infer<PayloadSchema>,
+    Infer<ParameterSchema>,
+    InferIn<ResultSchema>,
+    Invokes,
+    EmitListType
+  > {
     if (!this.fn) {
       throw new UnhandledError(StatusCode.NotImplemented, `No function implementation for ${this.commandName}`, {
         commandName: this.commandName,
       })
     }
 
-    return this.fn as CommandFunction<
-      ServiceClassType,
-      MessagePayloadType,
-      MessageParamsType,
-      Infer<PayloadSchema>,
-      Infer<ParameterSchema>,
-      InferIn<ResultSchema>,
-      Invokes,
-      EmitListType
-    >
+    return this.fn
   }
 
   /**
