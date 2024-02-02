@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { userV1Service } from '../../userV1Service.js'
@@ -18,7 +18,7 @@ describe('service User version 1 - command computeData', () => {
   test('does not throw', async () => {
     const service = userV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
 
-    const computeData = computeDataCommandBuilder.getCommandFunction().bind(service)
+    const computeData = safeBind(computeDataCommandBuilder.getCommandFunction(), service)
 
     const payload: UserV1ComputeDataInputPayload = 'example value'
 

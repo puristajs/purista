@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { pingV1Service } from '../../pingV1Service.js'
@@ -18,7 +18,7 @@ describe('service Ping version 1 - command ping', () => {
   test('does not throw', async () => {
     const service = pingV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
 
-    const ping = pingCommandBuilder.getCommandFunction().bind(service)
+    const ping = safeBind(pingCommandBuilder.getCommandFunction(), service)
 
     const payload: PingV1PingInputPayload = { ping: 'test' }
 

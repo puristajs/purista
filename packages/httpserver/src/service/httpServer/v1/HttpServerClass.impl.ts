@@ -7,7 +7,7 @@ import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/a
 import * as api from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import type { Command, HttpExposedServiceMeta, ServiceConstructorInput } from '@purista/core'
-import { HandledError, Service, StatusCode, UnhandledError } from '@purista/core'
+import { HandledError, safeBind, Service, StatusCode, UnhandledError } from '@purista/core'
 import type { FastifyInstance, HTTPMethods } from 'fastify'
 import fastify from 'fastify'
 import * as swaggerUi from 'swagger-ui-dist'
@@ -207,7 +207,7 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
       })
 
       OPEN_API_ROUTE_FUNCTIONS.forEach((route) => {
-        const def = route.bind(this)()
+        const def = safeBind(route, this)()
         this.server?.route(def)
         this.logger.debug(`add route ${def.method} ${def.url}`)
       })

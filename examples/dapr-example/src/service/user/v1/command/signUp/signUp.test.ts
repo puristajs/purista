@@ -1,4 +1,4 @@
-import { getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { StateStoreKey } from '../../../../../types/index.js'
@@ -19,7 +19,7 @@ describe('service User version 1 - command signUp', () => {
   test('can register a new user', async () => {
     const service = userV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
 
-    const signUp = signUpCommandBuilder.getCommandFunction().bind(service)
+    const signUp = safeBind(signUpCommandBuilder.getCommandFunction(), service)
 
     const payload: UserV1SignUpInputPayload = {
       name: 'test user',
@@ -42,7 +42,7 @@ describe('service User version 1 - command signUp', () => {
   test('throws when a user with same email exist', async () => {
     const service = userV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
 
-    const signUp = signUpCommandBuilder.getCommandFunction().bind(service)
+    const signUp = safeBind(signUpCommandBuilder.getCommandFunction(), service)
 
     const payload: UserV1SignUpInputPayload = {
       name: 'test user',

@@ -20,7 +20,7 @@ describe('service Email version 1 - command ping', () => {
       logger: getLoggerMock(sandbox).mock,
     })
 
-    const ping = pingCommandBuilder.getCommandFunction().bind(service)
+    const ping = safeBind(pingCommandBuilder.getCommandFunction(), service)
 
     const payload: EmailV1PingInputPayload = 'input value'
 

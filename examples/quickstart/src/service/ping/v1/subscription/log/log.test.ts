@@ -1,4 +1,4 @@
-import { getCommandSuccessMessageMock, getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getCommandSuccessMessageMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { pingV1Service } from '../../pingV1Service.js'
@@ -22,7 +22,7 @@ describe('service Ping version 1 - subscription log', () => {
     })
 
     // get the subscription function and bind to service instance to work properly
-    const log = logSubscriptionBuilder.getSubscriptionFunction().bind(service)
+    const log = safeBind(logSubscriptionBuilder.getSubscriptionFunction(), service)
 
     // define the test input payload
     const payload: PingV1LogInputPayload = {

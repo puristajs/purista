@@ -1,4 +1,4 @@
-import { getCommandContextMock, getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { delayV1Service } from '../../delayV1Service.js'
@@ -20,7 +20,7 @@ describe('service Delay version 1 - command fooBar', () => {
       logger: getLoggerMock(sandbox).mock,
     })
 
-    const fooBar = fooBarCommandBuilder.getCommandFunction().bind(service)
+    const fooBar = safeBind(fooBarCommandBuilder.getCommandFunction(), service)
 
     const payload: DelayV1FooBarInputPayload = undefined
 

@@ -1,6 +1,6 @@
 import { getDefaultHttpEventBridgeConfig, HttpEventBridge } from '@purista/base-http-bridge'
 import type { CustomMessage, EBMessage, EventBridge, EventBridgeConfig, Subscription } from '@purista/core'
-import { EventBridgeEventNames, initLogger, StatusCode, UnhandledError } from '@purista/core'
+import { EventBridgeEventNames, initLogger, safeBind, StatusCode, UnhandledError } from '@purista/core'
 
 import { DaprClient } from '../DaprClient/index.js'
 import type { DaprPubSubType } from '../types/index.js'
@@ -89,7 +89,7 @@ export class DaprEventBridge extends HttpEventBridge<DaprEventBridgeConfig> impl
     this.app.put('/actors/:actorTypeName/:actorId/method/remind/:reminderName')
     */
 
-    this.app.get('/dapr/config', configRoute.bind(this))
+    this.app.get('/dapr/config', safeBind(configRoute, this))
 
     await super.start()
   }

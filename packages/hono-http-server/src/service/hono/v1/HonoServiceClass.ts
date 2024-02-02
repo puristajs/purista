@@ -3,7 +3,7 @@ import { posix } from 'node:path'
 import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
 import type { Command, CommandDefinitionMetadataBase, EBMessageAddress, ServiceConstructorInput } from '@purista/core'
-import { HandledError, isHttpExposedServiceMeta, Service, StatusCode, UnhandledError } from '@purista/core'
+import { HandledError, isHttpExposedServiceMeta, safeBind, Service, StatusCode, UnhandledError } from '@purista/core'
 import type { Handler } from 'hono'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
@@ -135,7 +135,7 @@ export class HonoServiceClass<
 
       const fn = this.config.healthFunction
 
-      const healthFn = fn.bind(this)
+      const healthFn = safeBind(fn, this)
 
       this.app.use('*', async (c, next) => {
         const traceId = c.req.header(this.config.traceHeaderField)
@@ -292,7 +292,7 @@ export class HonoServiceClass<
     const responseContentType = expose.contentTypeResponse || 'application/json'
     const responseEncodingType = expose.contentEncodingResponse || 'utf-8'
 
-    const protectHandler = this.config.protectHandler.bind(this)
+    const protectHandler = safeBind(this.config.protectHandler, this)
 
     addPathToOpenApi(this.openApi, metadata, path, this.config)
 
