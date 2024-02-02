@@ -43,14 +43,14 @@ export const getCommandContextMock = <
           traceFlags: 0,
         }
       },
-      setAttribute: sandbox?.stub() || stub(),
-      setAttributes: sandbox?.stub() || stub(),
-      addEvent: sandbox?.stub() || stub(),
-      setStatus: sandbox?.stub() || stub(),
-      updateName: sandbox?.stub() || stub(),
-      end: sandbox?.stub() || stub(),
+      setAttribute: sandbox?.stub() ?? stub(),
+      setAttributes: sandbox?.stub() ?? stub(),
+      addEvent: sandbox?.stub() ?? stub(),
+      setStatus: sandbox?.stub() ?? stub(),
+      updateName: sandbox?.stub() ?? stub(),
+      end: sandbox?.stub() ?? stub(),
       isRecording: () => true,
-      recordException: (sandbox?.stub() || stub()).callsFake((err: any) => {
+      recordException: (sandbox?.stub() ?? stub()).callsFake((err: any) => {
         // eslint-disable-next-line no-console
         console.error(err)
       }),
@@ -60,7 +60,7 @@ export const getCommandContextMock = <
   const invokeMocks: Record<string, Record<string, Record<string, SinonStub>>> = {}
 
   const getInvokeProxy = <TFaux>(address?: EBMessageAddress, lvl = 0): TFaux => {
-    const adr = address || {
+    const adr = address ?? {
       serviceName: '',
       serviceTarget: '',
       serviceVersion: '',
@@ -91,7 +91,7 @@ export const getCommandContextMock = <
         if (lvl === 2) {
           adr.serviceTarget = name
           if (!invokeMocks[adr.serviceName][adr.serviceVersion][adr.serviceTarget]) {
-            invokeMocks[adr.serviceName][adr.serviceVersion][adr.serviceTarget] = sandbox?.stub() || stub()
+            invokeMocks[adr.serviceName][adr.serviceVersion][adr.serviceTarget] = sandbox?.stub() ?? stub()
 
             invokeMocks[adr.serviceName][adr.serviceVersion][adr.serviceTarget].rejects(
               new Error(
@@ -105,28 +105,28 @@ export const getCommandContextMock = <
     }) as TFaux
   }
 
-  const eventList = Object.keys(emitList || {}).reduce((prev, current) => {
+  const eventList = Object.keys(emitList ?? {}).reduce((prev, current) => {
     return {
       ...prev,
-      [current]: sandbox?.stub() || stub().resolves(),
+      [current]: sandbox?.stub() ?? stub().resolves(),
     }
   }, {}) as FromEmitToOtherType<EmitListType, SinonStub>
 
   const stubs = {
     logger: logger.stubs,
     emit: eventList,
-    invoke: sandbox?.stub() || stub(),
-    wrapInSpan: sandbox?.stub() || stub(),
-    startActiveSpan: sandbox?.stub() || stub(),
-    getSecret: sandbox?.stub() || stub(),
-    setSecret: sandbox?.stub() || stub(),
-    removeSecret: sandbox?.stub() || stub(),
-    getConfig: sandbox?.stub() || stub(),
-    setConfig: sandbox?.stub() || stub(),
-    removeConfig: sandbox?.stub() || stub(),
-    getState: sandbox?.stub() || stub(),
-    setState: sandbox?.stub() || stub(),
-    removeState: sandbox?.stub() || stub(),
+    invoke: sandbox?.stub() ?? stub(),
+    wrapInSpan: sandbox?.stub() ?? stub(),
+    startActiveSpan: sandbox?.stub() ?? stub(),
+    getSecret: sandbox?.stub() ?? stub(),
+    setSecret: sandbox?.stub() ?? stub(),
+    removeSecret: sandbox?.stub() ?? stub(),
+    getConfig: sandbox?.stub() ?? stub(),
+    setConfig: sandbox?.stub() ?? stub(),
+    removeConfig: sandbox?.stub() ?? stub(),
+    getState: sandbox?.stub() ?? stub(),
+    setState: sandbox?.stub() ?? stub(),
+    removeState: sandbox?.stub() ?? stub(),
     service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
   }
 
