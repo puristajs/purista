@@ -23,7 +23,9 @@
     "types": [
       "vitest/globals",
       "node"
-    ]
+    ],
+    "noFallthroughCasesInSwitch": true,
+    "useUnknownInCatchVariables": true
   },
   "exclude": [
     "node_modules",

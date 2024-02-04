@@ -64,6 +64,8 @@ export class HonoServiceClass<
 
   private knownServices: Set<string> = new Set()
 
+  private isAvailable = false
+
   constructor(config: ServiceConstructorInput<HonoServiceV1Config>) {
     super(config)
     this.openApi = new OpenApiBuilder(this.config.openApi)
@@ -138,6 +140,10 @@ export class HonoServiceClass<
       const healthFn = safeBind(fn, this)
 
       this.app.use('*', async (c, next) => {
+        if (!this.isAvailable) {
+          throw new HandledError(StatusCode.ServiceUnavailable, 'server not available')
+        }
+
         const traceId = c.req.header(this.config.traceHeaderField)
         c.set('traceId', traceId)
         await next()
@@ -160,6 +166,12 @@ export class HonoServiceClass<
             const err = new HandledError(StatusCode.InternalServerError, 'event bridge not ready')
             span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, err.errorCode)
             return c.json(err.getErrorResponse(), StatusCode.InternalServerError)
+          }
+
+          if (!this.isAvailable) {
+            const err = new HandledError(StatusCode.ServiceUnavailable, 'server not available')
+            span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, err.errorCode)
+            return c.json(err.getErrorResponse(), StatusCode.ServiceUnavailable)
           }
 
           try {
@@ -245,6 +257,8 @@ export class HonoServiceClass<
     })
 
     this.registerService(...this.config.services)
+
+    await this.setServiceAvailable()
 
     return super.start()
   }
@@ -426,7 +440,24 @@ export class HonoServiceClass<
     })
   }
 
+  /**
+   * Set the service unavailable
+   * The webserver will return 503 Service Unavailable
+   */
+  async setServiceUnavailable() {
+    this.isAvailable = false
+  }
+
+  /**
+   * Set the service available
+   * Request will be processed.
+   */
+  async setServiceAvailable() {
+    this.isAvailable = true
+  }
+
   async destroy() {
+    await this.setServiceUnavailable()
     return super.destroy()
   }
 }

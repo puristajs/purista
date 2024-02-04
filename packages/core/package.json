@@ -34,7 +34,7 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^20.11.13",
+    "@types/node": "^20.11.16",
     "sinon": "^17.0.1",
     "tshy": "^1.11.0"
   },
@@ -45,7 +45,7 @@
     "@opentelemetry/sdk-trace-node": "^1.19.0",
     "@opentelemetry/semantic-conventions": "^1.19.0",
     "openapi3-ts": "^4.2.1",
-    "pino": "^8.17.2",
+    "pino": "^8.18.0",
     "ts-deepmerge": "^7.0.0",
     "zod": "^3.22.4"
   },
