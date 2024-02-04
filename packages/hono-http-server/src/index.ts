@@ -34,6 +34,7 @@
  * @module
  */
 export * from './helper/index.js'
+export * from './service/hono/v1/honoServiceConfig.js'
 export * from './service/hono/v1/honoV1Service.js'
 export * from './service/ServiceEvent.enum.js'
 export * from './types/index.js'
