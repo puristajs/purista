@@ -6,3 +6,4 @@ node_modules
 .vuepress/enhanceApp.js
 *.d.ts
 dist
+package-lock.json
