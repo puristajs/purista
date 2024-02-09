@@ -30,7 +30,6 @@
   },
   "dependencies": {
     "@fastify/static": "^6.12.0",
-    "@purista/cli": "*",
     "@purista/core": "*",
     "@purista/httpserver": "*",
     "zod": "3.22.4"
