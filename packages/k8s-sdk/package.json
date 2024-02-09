@@ -30,7 +30,7 @@
     }
   },
   "files": [
-    "lib/**/*"
+    "dist/**/*"
   ],
   "publishConfig": {
     "access": "public"
