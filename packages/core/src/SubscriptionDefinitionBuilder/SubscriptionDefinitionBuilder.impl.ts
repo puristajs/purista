@@ -1,5 +1,6 @@
 import type { Infer, InferIn, Schema } from '@decs/typeschema'
 import type { SinonSandbox } from 'sinon'
+import type { ZodAny } from 'zod'
 
 import {
   type Complete,
@@ -41,9 +42,9 @@ export class SubscriptionDefinitionBuilder<
   MessagePayloadType = unknown,
   MessageParamsType = undefined,
   MessageResultType = void,
-  PayloadSchema extends Schema = Schema,
-  ParameterSchema extends Schema = Schema,
-  ResultSchema extends Schema = Schema,
+  PayloadSchema extends Schema = ZodAny,
+  ParameterSchema extends Schema = ZodAny,
+  ResultSchema extends Schema = ZodAny,
   Invokes = {},
   EmitListType = {},
 > {

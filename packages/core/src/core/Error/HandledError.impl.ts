@@ -82,6 +82,6 @@ export class HandledError extends Error {
   }
 
   toJSON() {
-    return this.getErrorResponse()
+    return { stack: this.stack, name: this.name, ...this.getErrorResponse() }
   }
 }
