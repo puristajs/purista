@@ -32,7 +32,6 @@
   "dependencies": {
     "@hono/node-server": "^1.7.0",
     "@hono/swagger-ui": "^0.2.1",
-    "@purista/cli": "*",
     "@purista/core": "*",
     "@purista/hono-http-server": "^1.9.0",
     "zod": "3.22.4"
