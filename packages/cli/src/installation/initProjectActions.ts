@@ -2,14 +2,15 @@
 import type { Actions } from 'node-plop'
 
 import {
+  biomeDependencies,
   cliDependencies,
   dependencies,
   devDependencies,
+  eslintDependencies,
   httpserverDependencies,
-  httpStaticDependencies,
-  lintDependencies,
+  jestDependencies,
   TEMPLATE_BASE,
-  testDependencies,
+  vitestDependencies,
 } from '../config.js'
 import { installDependencies } from '../helper/installDependencies.js'
 
@@ -43,57 +44,11 @@ export const initProjectActions: Actions = [
     path: 'tsconfig.json',
     templateFile: TEMPLATE_BASE + '/tsconfig.json.hbs',
   },
-  async (answers) => {
-    const deps = dependencies
-
-    if (answers.installHttpService) {
-      deps.push(...httpserverDependencies)
-    }
-
-    if (answers.installStaticPlugin) {
-      deps.push(...httpStaticDependencies)
-    }
-
-    await installDependencies('npm install --save-prod ' + deps.join(' '))
-
-    const devDeps = devDependencies
-
-    if (answers.installCliGlobal === 'global') {
-      await installDependencies('npm install -g ' + cliDependencies.join(' '))
-    }
-
-    if (answers.installCliGlobal === 'local') {
-      devDeps.push(...cliDependencies)
-    }
-
-    await installDependencies('npm install --save-dev ' + devDeps.join(' '))
-
-    if (answers.lintTestModules.includes('installTest')) {
-      await installDependencies('npm install --save-dev ' + testDependencies.join(' '))
-    }
-
-    if (answers.lintTestModules.includes('installLint')) {
-      await installDependencies('npm install --save-dev ' + lintDependencies.join(' '))
-    }
-
-    return 'needed packages installed'
-  },
   {
     type: 'add',
     skip: (answers: Record<string, string[] | string>) => {
-      if (!answers.lintTestModules?.includes('installTest') || !answers.isEsm) {
-        return '[SKIPPED] test setup'
-      }
-    },
-    skipIfExists: true,
-    path: 'jest.config.cjs',
-    templateFile: TEMPLATE_BASE + '/jest.config.js.hbs',
-  },
-  {
-    type: 'add',
-    skip: (answers: Record<string, string[] | string>) => {
-      if (!answers.lintTestModules?.includes('installTest') && answers.isEsm) {
-        return '[SKIPPED] test setup'
+      if (answers.isEsm) {
+        return '[SKIPPED] jest test setup'
       }
     },
     skipIfExists: true,
@@ -103,7 +58,18 @@ export const initProjectActions: Actions = [
   {
     type: 'add',
     skip: (answers: Record<string, string[] | string>) => {
-      if (!answers.lintTestModules?.includes('installLint')) {
+      if (!answers.isEsm) {
+        return '[SKIPPED] vitest test setup'
+      }
+    },
+    skipIfExists: true,
+    path: 'vite.config.ts',
+    templateFile: TEMPLATE_BASE + '/vite.config.ts.hbs',
+  },
+  {
+    type: 'add',
+    skip: (answers: Record<string, string[] | string>) => {
+      if (answers.linter !== 'eslint') {
         return '[SKIPPED] lint setup'
       }
     },
@@ -114,7 +80,7 @@ export const initProjectActions: Actions = [
   {
     type: 'add',
     skip: (answers: Record<string, string[] | string>) => {
-      if (!answers.lintTestModules?.includes('installLint')) {
+      if (answers.linter !== 'eslint') {
         return '[SKIPPED] lint setup'
       }
     },
@@ -124,8 +90,8 @@ export const initProjectActions: Actions = [
   },
   {
     type: 'add',
-    skip: (answers: Record<string, string[]>) => {
-      if (!answers.lintTestModules?.includes('installLint') || !answers.isEsm) {
+    skip: (answers: Record<string, string[] | string>) => {
+      if (answers.linter !== 'eslint' || !answers.isEsm) {
         return '[SKIPPED] lint setup'
       }
     },
@@ -135,8 +101,8 @@ export const initProjectActions: Actions = [
   },
   {
     type: 'add',
-    skip: (answers: Record<string, string[]>) => {
-      if (!answers.lintTestModules?.includes('installLint') || answers.isEsm) {
+    skip: (answers: Record<string, string[] | string>) => {
+      if (answers.linter !== 'eslint' || answers.isEsm) {
         return '[SKIPPED] lint setup'
       }
     },
@@ -144,24 +110,70 @@ export const initProjectActions: Actions = [
     path: '.eslintrc.js',
     templateFile: TEMPLATE_BASE + '/eslintrc.js.hbs',
   },
+  {
+    type: 'add',
+    skip: (answers: Record<string, string[] | string>) => {
+      if (answers.linter !== 'biome') {
+        return '[SKIPPED] biome setup'
+      }
+    },
+    skipIfExists: true,
+    path: 'biome.json',
+    templateFile: TEMPLATE_BASE + '/biome.json.hbs',
+  },
   async (answers) => {
+    const deps = dependencies
+
+    if (answers.installHttpService) {
+      deps.push(...httpserverDependencies)
+    }
+
     switch (answers.eventBridge) {
       case 'AmqpEventBridge':
-        await installDependencies('npm install --save-prod @purista/amqpbridge')
+        await deps.push('@purista/amqpbridge')
         return '@purista/amqpbridge added'
       case 'MqttEventBridge':
-        await installDependencies('npm install --save-prod @purista/mqttbridge')
+        await deps.push('@purista/mqttbridge')
         return '@purista/mqttbridge added'
       case 'NatsEventBridge':
-        await installDependencies('npm install --save-prod @purista/natsbridge')
+        await deps.push('@purista/natsbridge')
         return '@purista/natsbridge added'
       case 'DaprEventBridge':
-        await installDependencies('npm install --save-prod @purista/dapr-sdk')
+        await deps.push('@purista/dapr-sdk')
         return '@purista/dapr-sdk added'
-      default:
-        return '[SKIPPED] no additional packages required'
     }
+
+    await installDependencies('npm install --save-prod ' + deps.join(' '))
+
+    const devDeps = devDependencies
+
+    if (answers.installCliGlobal === 'local') {
+      devDeps.push(...cliDependencies)
+    }
+
+    if (!answers.isEsm) {
+      devDeps.push(...jestDependencies)
+    } else {
+      devDeps.push(...vitestDependencies)
+    }
+
+    if (answers.linter === 'linter') {
+      devDeps.push(...eslintDependencies)
+    }
+
+    if (answers.linter === 'biome') {
+      devDeps.push(...biomeDependencies)
+    }
+
+    await installDependencies('npm install --save-dev ' + devDeps.join(' '))
+
+    if (answers.installCliGlobal === 'global') {
+      await installDependencies('npm install -g ' + cliDependencies.join(' '))
+    }
+
+    return 'needed packages installed'
   },
+
   {
     type: 'add',
     skip: (answers: Record<string, string[] | string>) => {
@@ -210,28 +222,6 @@ export const initProjectActions: Actions = [
     type: 'add',
     skip: (answers: Record<string, string[] | string>) => {
       if (!answers.installHttpService) {
-        return '[SKIPPED] http server config install'
-      }
-    },
-    skipIfExists: true,
-    path: 'config/httpServerConfig.ts',
-    templateFile: TEMPLATE_BASE + '/config/httpServerConfig.ts.hbs',
-  },
-  {
-    type: 'add',
-    skip: (answers: Record<string, string[] | string>) => {
-      if (!answers.installHttpService) {
-        return '[SKIPPED] http server config install'
-      }
-    },
-    skipIfExists: true,
-    path: 'fastify.d.ts',
-    templateFile: TEMPLATE_BASE + '/fastify.d.ts.hbs',
-  },
-  {
-    type: 'add',
-    skip: (answers: Record<string, string[] | string>) => {
-      if (!answers.installStaticPlugin) {
         return '[SKIPPED] http server static install'
       }
     },

@@ -3,7 +3,7 @@ module.exports = {
     '^.+\\.(t|j)sx?$': '@swc/jest',
   },
   testEnvironment: 'node',
-  coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/database/', '/test/', '/lib/'],
+  coveragePathIgnorePatterns: ['/node_modules/', '/dist/', '/database/', '/test/'],
   coverageReporters: ['json', 'lcov', 'text', 'clover', 'html'],
   collectCoverage: false,
   collectCoverageFrom: [
@@ -13,9 +13,8 @@ module.exports = {
     '!**/*.mock.{ts}',
     '!**/node_modules/**',
     '!**/dist/**',
-    '!**/lib/**',
   ],
-    coverageThreshold: {
+  coverageThreshold: {
     global: {
       branches: 20,
       functions: 80,
@@ -31,12 +30,12 @@ module.exports = {
         '^.+\\.(t|j)sx?$': ['@swc/jest'],
       },
       testMatch: [
-        '**/*.test.ts',
+        '**/*.ts',
         '!**/*.test.{ts}',
+        '!**/*.spec.{ts}',
         '!**/*.mock.{ts}',
         '!**/node_modules/**',
         '!**/dist/**',
-        '!**/lib/**',
       ],
       transformIgnorePatterns: [],
     },

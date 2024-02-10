@@ -39,15 +39,15 @@ export const initProjectPrompts: Prompts = [
     ],
   },
   {
-    type: 'checkbox',
-    message: 'Do you like to install eslint and prettier for better code formatting?',
-    name: 'lintTestModules',
+    type: 'list',
+    name: 'linter',
+    message: 'Choose code prettier & linter',
     when(answers) {
       return answers.initialize
     },
     choices: [
-      { name: 'code style: eslint and prettier', value: 'installLint', checked: true },
-      { name: 'testing: jest and sinon', value: 'installTest', checked: true },
+      { name: 'ESlint & prettier', value: 'eslint', checked: true },
+      { name: 'Biome', value: 'biome' },
     ],
   },
   {
@@ -58,7 +58,7 @@ export const initProjectPrompts: Prompts = [
       return answers.initialize
     },
     choices: [
-      { value: 'DefaultEventBridge', name: 'local internal default eventbridge', checked: true },
+      { value: 'DefaultEventBridge', name: 'Default In-Memory', checked: true },
       { value: 'AmqpEventBridge', name: 'AMQP eventbridge (RabbitMQ)' },
       { value: 'MqttEventBridge', name: 'MQTT eventbridge (mosquitto)' },
       { value: 'NatsEventBridge', name: 'NATS eventbridge' },
@@ -71,14 +71,6 @@ export const initProjectPrompts: Prompts = [
     name: 'installHttpService',
     when(answers) {
       return answers.initialize && answers.eventBridge !== 'DaprEventBridge'
-    },
-  },
-  {
-    type: 'confirm',
-    message: 'Should the http service be able to provide static files - files and assets like images & css?',
-    name: 'installStaticPlugin',
-    when(answers) {
-      return answers.initialize && answers.installHttpService && answers.eventBridge !== 'DaprEventBridge'
     },
   },
 ]

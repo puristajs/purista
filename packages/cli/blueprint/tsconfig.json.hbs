@@ -21,15 +21,17 @@
     "forceConsistentCasingInFileNames": true,
     "declarationMap": true,
     "noFallthroughCasesInSwitch": true,
-    "useUnknownInCatchVariables": true
+    "useUnknownInCatchVariables": true,
+    "types": [
+      {{#if isEsm}}"vitest/globals",{{/if}}
+      "node"
+    ],
   },
   "include": [
     "./src/index.ts"
   ],
   "files": [
-    "src/index.ts"{{#if installHttpService}},
-    "fastify.d.ts"
-    {{/if}}
+    "src/index.ts"
   ],
   "exclude": [
     "node_modules",
