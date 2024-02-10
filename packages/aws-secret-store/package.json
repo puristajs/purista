@@ -55,7 +55,7 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^20.11.13",
+    "@types/node": "^20.11.17",
     "@types/sinon": "^17.0.3",
     "sinon": "^17.0.1",
     "testcontainers": "^10.6.0",
@@ -63,7 +63,7 @@
     "vitest": "^1.2.2"
   },
   "dependencies": {
-    "@aws-sdk/client-secrets-manager": "^3.503.1",
+    "@aws-sdk/client-secrets-manager": "^3.511.0",
     "@purista/core": "*"
   },
   "peerDependenciesMeta": {},
