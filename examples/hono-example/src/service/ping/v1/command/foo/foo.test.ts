@@ -1,4 +1,4 @@
-import { getCommandContextMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { pingV1Service } from '../../pingV1Service'
@@ -24,7 +24,7 @@ describe('service Ping version 1 - command foo', () => {
 
     const parameter: PingV1FooInputParameter = {}
 
-    const context = getCommandContextMock(payload, parameter, sandbox)
+    const context = fooCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
 
     const result = await foo(context.mock, payload, parameter)
 
