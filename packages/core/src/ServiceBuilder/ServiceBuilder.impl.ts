@@ -145,7 +145,7 @@ export class ServiceBuilder<
     eventBridge: EventBridge,
     options: {
       logLevel?: LogLevelName
-      serviceConfig?: ConfigInputType
+      serviceConfig?: Partial<ConfigInputType>
       logger?: Logger
       spanProcessor?: SpanProcessor
       secretStore?: SecretStore
