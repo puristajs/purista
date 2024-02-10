@@ -1,5 +1,8 @@
 import { z } from 'zod'
 
-import { {{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema } from './schema{{fileExt}}'
+import { {{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema, {{camelCase service.name}}V{{service.version}}{{properCase name}}InputParameterSchema } from './schema{{fileExt}}'
+
+
+export type {{properCase service.name}}V{{service.version}}{{properCase name}}InputParameter = z.output<typeof {{camelCase service.name}}V{{service.version}}{{properCase name}}InputParameterSchema>
 
 export type {{properCase service.name}}V{{service.version}}{{properCase name}}InputPayload = z.output<typeof {{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema>
