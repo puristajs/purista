@@ -38,7 +38,6 @@
     }
   },
   "devDependencies": {
-    "@types/eslint": "^8.56.2",
     "@types/minimist": "^1.2.5",
     "@types/node": "^20.11.17",
     "rimraf": "^5.0.5",
@@ -47,7 +46,6 @@
   },
   "dependencies": {
     "camelcase": "^8.0.0",
-    "eslint": "^8.56.0",
     "minimist": "^1.2.8",
     "plop": "^4.0.1",
     "ts-morph": "^21.0.1",

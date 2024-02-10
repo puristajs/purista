@@ -11,13 +11,18 @@
   {{/if}}
   "scripts": {
     "start": "tsx src/index.ts | pino-pretty",
-    {{#if (includes lintTestModules "installTest")}}
-    "test": "jest --passWithNoTests",
-    "test:cov": "jest --coverage --passWithNoTests",
+    {{#if isEsm}}
+    "test": "vitest",
+    {{else}}
+    "test": "jest",
     {{/if}}
-    {{#if (includes lintTestModules "installLint")}}
+    {{#if (eq linter "eslint")}}
     "lint": "eslint --ext .ts,.js,.json --cache .",
     "lint:fix": "eslint . --ext .ts,.js,.json --fix",
+    {{/if}}
+    {{#if (eq linter "biome")}}
+    "lint": "biome lint ./src",
+    "lint:fix": "biome lint --apply ./src",
     {{/if}}
     "purista": "purista add"
   }

@@ -1,14 +1,14 @@
-/* eslint-disable no-console */
-import { ESLint } from 'eslint'
+import { exec } from 'node:child_process'
 
-export const lintFiles = async (files: string[]) => {
-  files.forEach((file) => console.log('👷🏗️ -> lint ', file))
+export const lintFiles = async (_files: string[]) => {
+  const cmd = 'npm run lint:fix'
 
-  const eslint = new ESLint({ fix: true })
-
-  // 2. Lint files.
-  const results = await eslint.lintFiles(files)
-  await ESLint.outputFixes(results)
-
-  console.log('👍  -> done linting')
+  const child = exec(cmd, (err) => {
+    if (err) {
+      throw err
+    }
+  })
+  child.stderr?.pipe(process.stderr)
+  child.stdout?.pipe(process.stdout)
+  return new Promise((resolve) => child.on('close', resolve))
 }
