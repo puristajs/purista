@@ -36,7 +36,7 @@ describe('service Email version 1 - subscription sendWelcomeEmail', () => {
     const payload: EmailV1SendWelcomeEmailInputPayload = { userId: userMock.userId }
 
     // define the test input parameter
-    const parameter = undefined
+    const parameter = undefined as unknown as Readonly<unknown>
 
     // create a mock message with the expected input for the subscription function
     const message = getCommandSuccessMessageMock(payload)
