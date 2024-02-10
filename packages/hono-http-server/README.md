@@ -43,9 +43,10 @@ export const main = async () => {
     return auth(c, next)
   })
 
-  // start the webserver
+  // start the webserver service
   await honoService.start()
 
+  // open socket
   const _serverInstance = serve({
     fetch: honoService.app.fetch,
     port: 3000,
