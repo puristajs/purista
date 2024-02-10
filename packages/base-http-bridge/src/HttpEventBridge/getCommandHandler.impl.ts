@@ -60,7 +60,7 @@ export const getCommandHandler = function (
 
           if (wrappedInCloudEvent) {
             const body = await c.req.text()
-            const headers = [...c.req.headers.entries()].reduce((prev: Record<string, string>, val) => {
+            const headers = [...c.req.raw.headers.entries()].reduce((prev: Record<string, string>, val) => {
               return { ...prev, [val[0]]: val[1] }
             }, {})
 

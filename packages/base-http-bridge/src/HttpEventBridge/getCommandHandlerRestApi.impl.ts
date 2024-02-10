@@ -22,6 +22,7 @@ import {
   StatusCode,
   UnhandledError,
 } from '@purista/core'
+import type { StatusCode as HonoStatusCode } from 'hono/utils/http-status'
 
 import type { HttpEventBridge } from './HttpEventBridge.impl.js'
 import type { HttpEventBridgeConfig, RouterFunction } from './types/index.js'
@@ -171,7 +172,7 @@ export const getCommandHandlerRestApi = function (
           const status = err.errorCode
           span.end()
 
-          return c.json(err.getErrorResponse(), status as number)
+          return c.json(err.getErrorResponse(), status as HonoStatusCode)
         }
       },
     )
