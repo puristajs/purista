@@ -38,6 +38,7 @@ import {
 import { Hono } from 'hono'
 import { compress } from 'hono/compress'
 import { PatternRouter } from 'hono/router/pattern-router'
+import type { StatusCode as HonoStatusCode } from 'hono/utils/http-status'
 
 import { getCommandHandler } from './getCommandHandler.impl.js'
 import { getCommandHandlerRestApi } from './getCommandHandlerRestApi.impl.js'
@@ -96,7 +97,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 
       this.logger.error({ err }, err.message)
 
-      return c.json(err.getErrorResponse(), err.errorCode as number)
+      return c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode)
     })
 
     this.app.onError((err, c) => {

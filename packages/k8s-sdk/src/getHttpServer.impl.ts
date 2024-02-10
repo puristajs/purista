@@ -1,6 +1,7 @@
 import { StatusCode, UnhandledError } from '@purista/core'
 import { Hono } from 'hono'
 import { compress } from 'hono/compress'
+import type { StatusCode as HonoStatusCode } from 'hono/utils/http-status'
 
 import { addServiceEndpoints } from './addServiceEndpoints.impl.js'
 import type { GetHttpServerConfig } from './types.js'
@@ -32,13 +33,13 @@ export const getHttpServer = (input: GetHttpServerConfig, name = 'K8sHttpHelperS
   app.onError((error, c) => {
     const err = UnhandledError.fromError(error)
     logger.error(`${err}`)
-    return c.json(err.getErrorResponse(), err.errorCode as number)
+    return c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode)
   })
 
   app.notFound(async (c) => {
     const err = new UnhandledError(StatusCode.NotFound, 'endpoint not found')
     logger.error(`${err}`)
-    return c.json(err.getErrorResponse(), err.errorCode as number)
+    return c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode)
   })
 
   let isShuttingDown = false
@@ -65,17 +66,17 @@ export const getHttpServer = (input: GetHttpServerConfig, name = 'K8sHttpHelperS
     const isHealthy = await healthFn()
     if (isShuttingDown) {
       const err = new UnhandledError(StatusCode.ServiceUnavailable, 'shut down in progress')
-      return c.json(err.getErrorResponse(), err.errorCode as number)
+      return c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode)
     }
 
     if (isHealthy) {
       const err = new UnhandledError(StatusCode.OK, 'ok')
-      return c.json(err.getErrorResponse(), err.errorCode as number)
+      return c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode)
     }
     logger.error('health not ok')
 
     const err = new UnhandledError(StatusCode.InternalServerError, 'not ok')
-    return c.json(err.getErrorResponse(), err.errorCode as number)
+    return c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode)
   })
 
   return app

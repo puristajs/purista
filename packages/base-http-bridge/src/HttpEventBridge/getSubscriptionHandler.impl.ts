@@ -13,6 +13,7 @@ import {
   UnhandledError,
 } from '@purista/core'
 import { HTTP } from 'cloudevents'
+import type { StatusCode as HonoStatusCode } from 'hono/utils/http-status'
 
 import type { HttpEventBridge } from './HttpEventBridge.impl.js'
 import type { HttpEventBridgeConfig, RouterFunction } from './types/index.js'
@@ -41,7 +42,7 @@ export const getSubscriptionHandler = function (
             throw new UnhandledError(StatusCode.MethodNotAllowed, 'Unsupported method ' + c.req.method)
           }
 
-          const headers = [...c.req.headers.entries()].reduce((prev: Record<string, string>, val) => {
+          const headers = [...c.req.raw.headers.entries()].reduce((prev: Record<string, string>, val) => {
             return { ...prev, [val[0]]: val[1] }
           }, {})
 
@@ -83,7 +84,7 @@ export const getSubscriptionHandler = function (
           const err = error instanceof UnhandledError ? error : UnhandledError.fromError(error)
           span.recordException(err)
           this.logger.error({ err }, err.message)
-          return c.json(err.getErrorResponse(), err.errorCode as number)
+          return c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode)
         }
       },
     )

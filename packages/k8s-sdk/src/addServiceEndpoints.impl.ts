@@ -14,6 +14,7 @@ import {
   UnhandledError,
 } from '@purista/core'
 import type { Context as HonoContext, Hono } from 'hono'
+import type { StatusCode as HonoStatusCode } from 'hono/utils/http-status'
 
 /**
  *
@@ -175,7 +176,7 @@ export const addServiceEndpoints = (
 
                 propagation.inject(context.active(), header)
 
-                const response = c.json(err.getErrorResponse(), err.errorCode as number, header)
+                const response = c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode, header)
                 span.end()
                 return response
               }
