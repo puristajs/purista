@@ -457,6 +457,29 @@ export class HonoServiceClass<
     this.isAvailable = true
   }
 
+  /**
+   * Helper function to be used in gracefulShutdown.
+   * It prevents to handle new requests during shut down.
+   * Incoming requests are rejected with 503 Service Unavailable.
+   *
+   * @example
+   * ```typescript
+   * gracefulShutdown(logger, [
+   * honoService.prepareDestroy(),
+   * eventbridge,
+   * ...services,
+   * honoService
+   * ])
+   * ```
+   * @returns
+   */
+  prepareDestroy() {
+    return {
+      name: `${this.serviceInfo.serviceName} ${this.serviceInfo.serviceVersion} prepare shutdown`,
+      destroy: this.setServiceUnavailable,
+    }
+  }
+
   async destroy() {
     await this.setServiceUnavailable()
     return super.destroy()
