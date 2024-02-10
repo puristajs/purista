@@ -32,6 +32,15 @@ export const getEventNames = (): { name: string; value: string }[] => {
     eventNames = serviceEventEnum
       .getMembers()
       .map((member) => ({ value: member.getValue() as string, name: member.getValue() as string }))
+      .sort((a, b) => {
+        if (a.value < b.value) {
+          return -1
+        }
+        if (a.value > b.value) {
+          return 1
+        }
+        return 0
+      })
 
     return eventNames
   } catch (error) {

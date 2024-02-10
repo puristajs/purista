@@ -1,9 +1,9 @@
-import { getCommandContextMock, getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 
-import { {{camelCase service.name}}V{{service.version}}Service } from '../../{{camelCase service.name}}V{{service.version}}Service'
-import { {{camelCase name}}CommandBuilder } from './{{camelCase name}}CommandBuilder'
-import { {{properCase service.name}}V{{service.version}}{{properCase name}}InputPayload, {{properCase service.name}}V{{service.version}}{{properCase name}}InputParameter } from './types'
+import { {{camelCase service.name}}V{{service.version}}Service } from '../../{{camelCase service.name}}V{{service.version}}Service{{fileExt}}'
+import { {{camelCase name}}CommandBuilder } from './{{camelCase name}}CommandBuilder{{fileExt}}'
+import { {{properCase service.name}}V{{service.version}}{{properCase name}}InputPayload, {{properCase service.name}}V{{service.version}}{{properCase name}}InputParameter } from './types{{fileExt}}'
 
 describe('service {{properCase service.name}} version {{service.version}} - command {{camelCase name}}', () => {
   let sandbox = createSandbox()
@@ -24,7 +24,7 @@ describe('service {{properCase service.name}} version {{service.version}} - comm
 
     const parameter: {{properCase service.name}}V{{service.version}}{{properCase name}}InputParameter = {}
 
-    const context = getCommandContextMock(payload, parameter, sandbox)
+    const context = {{camelCase name}}CommandBuilder.getCommandContextMock(payload, parameter, sandbox)
 
     const result = await {{camelCase name}}(context.mock, payload, parameter)
 

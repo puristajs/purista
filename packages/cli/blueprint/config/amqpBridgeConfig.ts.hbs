@@ -1,14 +1,8 @@
 import { AmqpBridgeConfig } from '@purista/amqpbridge'
-import { getNewInstanceId } from '@purista/core'
 
-const amqpBridgeConfig: AmqpBridgeConfig = {
-  defaultCommandTimeout: 30000,
+const amqpBridgeConfig: Partial<AmqpBridgeConfig> = {
   exchangeName: 'purista',
-  namePrefix: 'purista',
   url: 'amqp://localhost',
-  instanceId: getNewInstanceId(),
-  encoder: {},
-  encrypter: {},
 }
 
 export default amqpBridgeConfig

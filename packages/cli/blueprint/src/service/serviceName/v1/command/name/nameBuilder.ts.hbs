@@ -1,9 +1,9 @@
-import { {{camelCase service.name}}V{{service.version}}ServiceBuilder } from '../../{{camelCase service.name}}V{{service.version}}ServiceBuilder'
+import { {{camelCase service.name}}V{{service.version}}ServiceBuilder } from '../../{{camelCase service.name}}V{{service.version}}ServiceBuilder{{fileExt}}'
 import { 
   {{camelCase service.name}}V{{service.version}}{{properCase name}}InputParameterSchema,
   {{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema,
   {{camelCase service.name}}V{{service.version}}{{properCase name}}OutputPayloadSchema
-} from './schema'
+} from './schema{{fileExt}}'
 
 export const {{camelCase name}}CommandBuilder = {{camelCase service.name}}V{{service.version}}ServiceBuilder.getCommandBuilder(
   '{{camelCase name}}',

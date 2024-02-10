@@ -11,7 +11,7 @@
     "paths": {
       "plop": ["../../src/plop.d.ts"]
     },
-    "outDir": "./lib"
+    "outDir": "./dist"
   },
   "include": ["./src","./blueprint"]
 }

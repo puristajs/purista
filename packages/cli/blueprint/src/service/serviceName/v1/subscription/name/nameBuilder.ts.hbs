@@ -1,5 +1,5 @@
-import { {{camelCase service.name}}V{{service.version}}ServiceBuilder } from '../../{{camelCase service.name}}V{{service.version}}ServiceBuilder'
-import { {{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema } from './schema'
+import { {{camelCase service.name}}V{{service.version}}ServiceBuilder } from '../../{{camelCase service.name}}V{{service.version}}ServiceBuilder{{fileExt}}'
+import { {{camelCase service.name}}V{{service.version}}{{properCase name}}InputPayloadSchema } from './schema{{fileExt}}'
 
 export const {{camelCase name}}SubscriptionBuilder = {{camelCase service.name}}V{{service.version}}ServiceBuilder.getSubscriptionBuilder(
   '{{camelCase name}}',

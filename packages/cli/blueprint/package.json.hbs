@@ -6,8 +6,11 @@
   "node": ">=18"
   },
   "main": "src/index.ts",
+  {{#if isEsm}}
+  "type": "module",
+  {{/if}}
   "scripts": {
-    "start": "ts-node src/index.ts | pino-pretty",
+    "start": "tsx src/index.ts | pino-pretty",
     {{#if (includes lintTestModules "installTest")}}
     "test": "jest --passWithNoTests",
     "test:cov": "jest --coverage --passWithNoTests",

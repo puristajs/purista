@@ -75,7 +75,7 @@ export const addSubscriptionActions: Actions = [
       await addDefinitionToBuilder(
         'subscriptionDefinitions',
         serviceBuilderFile,
-        `./subscription/${camelCase(answers.name)}`,
+        `./subscription/${camelCase(answers.name)}/${camelCase(answers.name)}SubscriptionBuilder${answers.isEsm ? '.js' : ''}`,
         `${camelCase(answers.name)}SubscriptionBuilder`,
       )
 

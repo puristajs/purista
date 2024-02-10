@@ -2,13 +2,12 @@ import {
   getCommandSuccessMessageMock,
   getEventBridgeMock,
   getLoggerMock,
-  getSubscriptionContextMock
 } from '@purista/core'
 import { createSandbox } from 'sinon'
 
-import { {{camelCase service.name}}V{{service.version}}Service } from '../../{{camelCase service.name}}V{{service.version}}Service'
-import { {{camelCase name}}SubscriptionBuilder } from './{{camelCase name}}SubscriptionBuilder'
-import { {{properCase service.name}}V{{service.version}}{{properCase name}}InputPayload } from './types'
+import { {{camelCase service.name}}V{{service.version}}Service } from '../../{{camelCase service.name}}V{{service.version}}Service{{fileExt}}'
+import { {{camelCase name}}SubscriptionBuilder } from './{{camelCase name}}SubscriptionBuilder{{fileExt}}'
+import { {{properCase service.name}}V{{service.version}}{{properCase name}}InputPayload } from './types{{fileExt}}'
 
 describe('service {{properCase service.name}} version {{service.version}} - subscription {{camelCase name}}', () => {
   let sandbox = createSandbox()
@@ -39,7 +38,7 @@ describe('service {{properCase service.name}} version {{service.version}} - subs
     const message = getCommandSuccessMessageMock(payload)
 
     // create a subscription context for the subscription function
-    const context = getSubscriptionContextMock(message, sandbox)
+    const context = {{camelCase name}}SubscriptionBuilder.getSubscriptionContextMock(message, sandbox)
 
     // execute the subscription function
     const result = await {{camelCase name}}(context.mock, payload, parameter)

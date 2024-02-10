@@ -1,5 +1,6 @@
 import type { NodePlopAPI } from 'plop'
 
+import { loadPackageJson } from '../helper/loadPackageJson.js'
 import { registerHandlebarHelpers } from '../helper/registerHandlebarHelpers.js'
 import { addCommandActions } from './addCommandActions.js'
 import { addRessourcePrompts } from './addRessourcePrompts.js'
@@ -20,6 +21,13 @@ export default function (plop: NodePlopAPI) {
     prompts: addRessourcePrompts,
     actions: function (answers: any) {
       const actions: any[] = []
+
+      const packageJson = loadPackageJson(process.cwd())
+
+      const isEsm = packageJson['type'] === 'module'
+      answers.fileExt = isEsm ? '.js' : ''
+      answers.indexExt = isEsm ? '/index.js' : ''
+      answers.isEsm = isEsm
 
       switch (answers.ressource) {
         case 'service':
