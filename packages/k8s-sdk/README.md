@@ -5,24 +5,37 @@ SDK and helper to run PURISTA services in Kubernetes.
 Here is a full example, how the index file might look like, if you want to deploy a service to Kubernetes.
 
 ```typescript
-// src/index.ts
+import { serve } from '@hono/node-server'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { AmqpBridge } from '@purista/amqpbridge'
 import {
   DefaultConfigStore,
-  DefaultEventBridge,
   DefaultSecretStore,
   DefaultStateStore,
+  getNewInstanceId,
   gracefulShutdown,
   initLogger,
+  UnhandledError,
 } from '@purista/core'
 import { getHttpServer } from '@purista/k8s-sdk'
 
-import { theServiceV1Service } from './service/theService/v1/'
+import { theServiceV1Service } from './service/theService/v1/index.js'
 
 const main = async () => {
   // create a logger
-  const logger = initLogger()
+  const logger = initLogger('debug')
+
+  // add listeners to log really unexpected errors
+  process.on('uncaughtException', (error, origin) => {
+    const err = UnhandledError.fromError(error)
+    logger.error({ err, origin }, `unhandled error: ${err.message}`)
+  })
+
+  process.on('unhandledRejection', (error, origin) => {
+    const err = UnhandledError.fromError(error)
+    logger.error({ err, origin }, `unhandled rejection: ${err.message}`)
+  })
 
   // optional: set up opentelemetry if you like to use it
   const exporter = new OTLPTraceExporter({
@@ -36,7 +49,11 @@ const main = async () => {
   const stateStore = new DefaultStateStore({ logger })
 
   // set up the eventbridge and start the event bridge
-  const eventBridge = new DefaultEventBridge({}, { spanProcessor })
+  const eventBridge = new AmqpBridge({
+    spanProcessor,
+    instanceId: process.env.HOSTNAME || getNewInstanceId(),
+    url: process.env.AMQP_URL,
+  })
   await eventBridge.start()
 
   // set up the service
@@ -49,7 +66,7 @@ const main = async () => {
   await theService.start()
 
   // create http server
-  const server = getHttpServer({
+  const app = getHttpServer({
     logger,
     // check event bridge health if /healthz endpoint is called
     healthFn: () => eventBridge.isHealthy(),
@@ -60,9 +77,16 @@ const main = async () => {
     apiMountPath: '/api',
   })
 
+  // start the http server
+  // defaults to port 3000
+  // optional: you can set the port in the optional parameter of this method
+  const server = serve({
+    fetch: app.fetch,
+  })
+
   // register shut down methods
   gracefulShutdown(logger, [
-    // start with the event bridge to no longer accept incoming messages
+    // begin with the event bridge to no longer accept incoming messages
     eventBridge,
     // optional: shut down the service
     theService,
@@ -72,17 +96,16 @@ const main = async () => {
     configStore,
     // optional: shut down the state store
     stateStore,
-    // stop the http server
-    server,
+    {
+      name: 'httpserver',
+      destroy: async () =>
+        new Promise((resolve, reject) => server.close((err) => (err ? reject(err) : resolve(undefined)))),
+    },
   ])
-
-  // start the http server
-  // defaults to port 8080
-  // optional: you can set the port in the optional parameter of this method
-  await server.start()
 }
 
 main()
+
 ```
 
 **Visit [purista.dev](https://purista.dev)**

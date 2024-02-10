@@ -91,10 +91,8 @@ const main = async () => {
     stateStore,
     {
       name: 'httpserver',
-      destroy: async () => {
-        server.closeIdleConnections()
-        server.close()
-      },
+      destroy: async () =>
+        new Promise((resolve, reject) => server.close((err) => (err ? reject(err) : resolve(undefined)))),
     },
   ])
 }
