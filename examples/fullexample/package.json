@@ -39,14 +39,14 @@
     "test": "vitest"
   },
   "devDependencies": {
-    "@types/node": "^20.11.13",
+    "@types/node": "^20.11.17",
     "sinon": "^17.0.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
     "vitest": "^1.2.2"
   },
   "dependencies": {
-    "@fastify/static": "^6.12.0",
+    "@fastify/static": "^7.0.1",
     "@opentelemetry/exporter-trace-otlp-http": "^0.48.0",
     "@opentelemetry/exporter-zipkin": "^1.19.0",
     "@opentelemetry/sdk-trace-node": "^1.19.0",
