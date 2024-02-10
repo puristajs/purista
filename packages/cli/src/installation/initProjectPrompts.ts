@@ -33,8 +33,9 @@ export const initProjectPrompts: Prompts = [
       return answers.initialize
     },
     choices: [
-      { name: 'install as global npm module', checked: true },
-      { name: 'as local module in this project only' },
+      { name: 'install as global npm module', value: 'global', checked: true },
+      { name: 'as local module in this project only', value: 'local' },
+      { name: 'no install', value: 'none' },
     ],
   },
   {

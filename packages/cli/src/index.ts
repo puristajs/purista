@@ -6,6 +6,8 @@ import { fileURLToPath } from 'node:url'
 import minimist from 'minimist'
 import { Plop, run } from 'plop'
 
+import { puristaVersion } from './version.js'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 if (process.argv.length < 3) {
@@ -32,6 +34,11 @@ if (process.argv[2] === 'init') {
 }
 if (process.argv[2] === 'add') {
   configPath = path.join(__dirname, 'addRessource', 'plopfile.js')
+}
+
+if (process.argv[2] === 'version') {
+  console.log('PURISTA CLI version', puristaVersion)
+  process.exit()
 }
 
 const args = process.argv.slice(3)

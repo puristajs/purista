@@ -58,10 +58,12 @@ export const initProjectActions: Actions = [
 
     const devDeps = devDependencies
 
-    if (answers.installCliGlobal) {
-      devDeps.push(...cliDependencies)
-    } else {
+    if (answers.installCliGlobal === 'global') {
       await installDependencies('npm install -g ' + cliDependencies.join(' '))
+    }
+
+    if (answers.installCliGlobal === 'local') {
+      devDeps.push(...cliDependencies)
     }
 
     await installDependencies('npm install --save-dev ' + devDeps.join(' '))
@@ -79,7 +81,18 @@ export const initProjectActions: Actions = [
   {
     type: 'add',
     skip: (answers: Record<string, string[] | string>) => {
-      if (!answers.lintTestModules?.includes('installTest')) {
+      if (!answers.lintTestModules?.includes('installTest') || !answers.isEsm) {
+        return '[SKIPPED] test setup'
+      }
+    },
+    skipIfExists: true,
+    path: 'jest.config.cjs',
+    templateFile: TEMPLATE_BASE + '/jest.config.js.hbs',
+  },
+  {
+    type: 'add',
+    skip: (answers: Record<string, string[] | string>) => {
+      if (!answers.lintTestModules?.includes('installTest') && answers.isEsm) {
         return '[SKIPPED] test setup'
       }
     },
@@ -112,7 +125,18 @@ export const initProjectActions: Actions = [
   {
     type: 'add',
     skip: (answers: Record<string, string[]>) => {
-      if (!answers.lintTestModules?.includes('installLint')) {
+      if (!answers.lintTestModules?.includes('installLint') || !answers.isEsm) {
+        return '[SKIPPED] lint setup'
+      }
+    },
+    skipIfExists: true,
+    path: '.eslintrc.cjs',
+    templateFile: TEMPLATE_BASE + '/eslintrc.js.hbs',
+  },
+  {
+    type: 'add',
+    skip: (answers: Record<string, string[]>) => {
+      if (!answers.lintTestModules?.includes('installLint') || answers.isEsm) {
         return '[SKIPPED] lint setup'
       }
     },

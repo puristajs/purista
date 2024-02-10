@@ -76,7 +76,7 @@ export const addCommandActions: Actions = [
       await addDefinitionToBuilder(
         'commandDefinitions',
         serviceBuilderFile,
-        `./command/${camelCase(answers.name)}`,
+        `./command/${camelCase(answers.name)}/${camelCase(answers.name)}CommandBuilder${answers.isEsm ? '.js' : ''}`,
         `${camelCase(answers.name)}CommandBuilder`,
       )
 

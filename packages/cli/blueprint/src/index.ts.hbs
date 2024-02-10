@@ -7,7 +7,7 @@ import fastifyStatic from '@fastify/static'
 {{/if}}
 {{#if installHttpService}}
 import { httpServerV1Service } from '@purista/httpserver'
-import httpServerConfig from '../config/httpServerConfig'
+import httpServerConfig from '../config/httpServerConfig{{fileExt}}'
 {{/if}}
 
 {{#if (eq eventBridge "DefaultEventBridge")}}
@@ -15,15 +15,15 @@ import { DefaultEventBridge } from '@purista/core'
 {{/if}}
 {{#if (eq eventBridge "AmqpEventBridge")}}
 import { AmqpBridge } from '@purista/amqpbridge'
-import amqpBridgeConfig from '../config/amqpBridgeConfig'
+import amqpBridgeConfig from '../config/amqpBridgeConfig{{fileExt}}'
 {{/if}}
 {{#if (eq eventBridge "MqttEventBridge")}}
 import { MqttBridge } from '@purista/mqttbridge'
-import mqttBridgeConfig from '../config/mqttBridgeConfig'
+import mqttBridgeConfig from '../config/mqttBridgeConfig{{fileExt}}'
 {{/if}}
 {{#if (eq eventBridge "NatsEventBridge")}}
 import { NatsBridge } from '@purista/natsbridge'
-import natsBridgeConfig from '../config/natsBridgeConfig'
+import natsBridgeConfig from '../config/natsBridgeConfig{{fileExt}}'
 {{/if}}
 
 export const main = async () => {

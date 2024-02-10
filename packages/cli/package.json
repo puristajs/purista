@@ -10,10 +10,10 @@
   "author": "Sebastian Wessel",
   "license": "ISC",
   "preferGlobal": "true",
-  "main": "lib/index.js",
+  "main": "dist/index.js",
   "type": "module",
   "bin": {
-    "purista": "./lib/index.js"
+    "purista": "./dist/index.js"
   },
   "publishConfig": {
     "access": "public"
@@ -22,8 +22,9 @@
     "node": ">=18.15"
   },
   "scripts": {
-    "start": "./lib/index.js",
-    "build": "tsc --project ./tsconfig.json && chmod 755 lib/index.js",
+    "start": "./dist/index.js",
+    "dev": "tsx src/index.ts",
+    "build": "rimraf dist && tsc --project ./tsconfig.json && chmod 755 dist/index.js",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
     "test": "vitest"
   },
@@ -40,7 +41,9 @@
     "@types/eslint": "^8.56.2",
     "@types/minimist": "^1.2.5",
     "@types/node": "^20.11.13",
-    "tshy": "^1.11.0"
+    "rimraf": "^5.0.5",
+    "tshy": "^1.11.0",
+    "tsx": "^4.7.1"
   },
   "dependencies": {
     "camelcase": "^8.0.0",
@@ -53,6 +56,6 @@
   "peerDependenciesMeta": {},
   "files": [
     "blueprint/**/*",
-    "lib/**/*"
+    "dist/**/*"
   ]
 }
