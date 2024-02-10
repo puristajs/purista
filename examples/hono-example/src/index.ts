@@ -1,4 +1,5 @@
 import { serve } from '@hono/node-server'
+import { serveStatic } from '@hono/node-server/serve-static'
 import { swaggerUI } from '@hono/swagger-ui'
 import { DefaultEventBridge, initLogger } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
@@ -27,6 +28,7 @@ export const main = async () => {
 
   honoService.app.use('*', compress())
   honoService.app.get('/api', swaggerUI({ url: '/api/openapi.json' }))
+  honoService.app.get('*', serveStatic({ root: './public' }))
   honoService.openApi.addSecurityScheme('basicAuth', { type: 'http', scheme: 'basic' })
   honoService.openApi.addServer({ url: 'http://localhost:3000', description: 'the local server' })
 
