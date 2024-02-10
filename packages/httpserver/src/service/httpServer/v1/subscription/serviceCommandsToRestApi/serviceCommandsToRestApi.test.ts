@@ -37,7 +37,7 @@ describe('service HttpServer version 1 - subscription serviceCommandsToRestApi',
     const payload = undefined as unknown as Readonly<HttpServerV1ServiceCommandsToRestApiInputPayload>
 
     // define the test input parameter
-    const parameter = {}
+    const parameter = undefined as unknown as Readonly<unknown>
 
     // create a mock message with the expected input for the subscription function
     const message = getCommandSuccessMessageMock(payload)
