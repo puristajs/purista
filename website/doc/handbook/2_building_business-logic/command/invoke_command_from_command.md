@@ -5,3 +5,5 @@ order: 202040
 ---
 
 # Invoke a command from a command
+
+_documentation soon_
