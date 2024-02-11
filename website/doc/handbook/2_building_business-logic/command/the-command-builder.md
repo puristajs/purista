@@ -16,21 +16,99 @@ const myCommandBuilder = myServiceBuilder.getCommandBuilder(
 )
 ```
 
-## Input schema
+## Payload schema
+
+It is highly recommended to use schema validation for any input and output of a command.
+If you use the PURISTA CLI for adding commands, a `schema.ts` and `type.ts` file is generated.  
+The payload schema is already added to the command builder.
+
+```typescript
+import {  // [!code ++]
+  myServiceV1MyCommandInputPayloadSchema,  // [!code ++]
+} from './schema.js' // [!code ++]
+
+const myCommandBuilder = myServiceBuilder
+  .getCommandBuilder('functionName', 'some function description', 'functionEventEmitted')
+  .addPayloadSchema(myServiceV1MyCommandInputPayloadSchema) // [!code ++]
+```
+
+By adding a payload schema, the command input will be validated during runtime and typescript types are set during development.
 
 ## Parameter schema
 
+Parameter must be an object.  
+For example, if you expose your command via REST-API, query parameters and url parameters are passed to the command function as parameter entries.
+
+```typescript
+import {  
+  myServiceV1MyCommandInputPayloadSchema,  
+  myServiceV1MyCommandInputParameterSchema, // [!code ++]
+} from './schema.js'
+
+const myCommandBuilder = myServiceBuilder
+  .getCommandBuilder('functionName', 'some function description', 'functionEventEmitted')
+  .addPayloadSchema(myServiceV1MyCommandInputPayloadSchema) 
+  .addParameterSchema(myServiceV1MyCommandInputParameterSchema) // [!code ++]
+```
+
 ## Output schema
+
+```typescript
+import {  
+  myServiceV1MyCommandInputPayloadSchema,  
+  myServiceV1MyCommandInputParameterSchema,
+  myServiceV1MyCommandOutputSchema, // [!code ++]
+} from './schema.js'
+
+const myCommandBuilder = myServiceBuilder
+  .getCommandBuilder('functionName', 'some function description', 'functionEventEmitted')
+  .addPayloadSchema(myServiceV1MyCommandInputPayloadSchema) 
+  .addParameterSchema(myServiceV1MyCommandInputParameterSchema)
+  .addOutputSchema(myServiceV1MyCommandOutputSchema) // [!code ++]
+```
 
 ## The business logic
 
+For implementing your business logic, you will need to set the command function.
+
+```typescript
+import {  
+  myServiceV1MyCommandInputPayloadSchema,  
+  myServiceV1MyCommandInputParameterSchema,
+  myServiceV1MyCommandOutputSchema,
+} from './schema.js'
+
+const myCommandBuilder = myServiceBuilder
+  .getCommandBuilder('functionName', 'some function description', 'functionEventEmitted')
+  .addPayloadSchema(myServiceV1MyCommandInputPayloadSchema) 
+  .addParameterSchema(myServiceV1MyCommandInputParameterSchema)
+  .addOutputSchema(myServiceV1MyCommandOutputSchema)
+  .setCommandFunction(async function (context, payload, parameter) {  // [!code ++]
+    // implement your logic here // [!code ++]
+  }) // [!code ++]
+```
+
+The command function will be called with 3 parameters.
+
 ### Context
+
+The command function context will contain the original message.  
+This is usefull, if you like to access message information like `principalId`or `tenantId`.
+
+The context provides also a logger.  
+It is highly recommended to use `context.logger` instead of `this.logger`, to ensure correct logging of traces.
+
+Also, you can access config, secret and state store via the context, if they are provided during service instantiation.
+
+The context contains the `emit` method, which can be used to emit custom events, which might be consumed by subscriptions.
 
 ### Payload
 
+The payload is a validated value and typed based on the payload schema.
+
 ### Parameter
 
-
+The parameter is a validated value and typed based on the paramater schema.
 
 ## Transformer
 

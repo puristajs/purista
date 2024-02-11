@@ -7,3 +7,5 @@ order: 0
 # Handbook
 
 _documentation soon_
+
+[[toc]]

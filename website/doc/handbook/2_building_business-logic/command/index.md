@@ -9,3 +9,5 @@ order: 202000
 ![Add command with cli](/graphic/add_command.png)
 
 A command is a single function, which will be called (invoked) by someone with the expectation to get a result back.
+
+Add a command to an existing service with `purista add command`.
