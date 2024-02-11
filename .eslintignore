@@ -7,3 +7,4 @@ node_modules
 *.d.ts
 dist
 package-lock.json
+cookieconsent.js
