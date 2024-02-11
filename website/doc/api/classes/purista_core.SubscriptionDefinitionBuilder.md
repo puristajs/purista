@@ -1,6 +1,6 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / SubscriptionDefinitionBuilder
 
-# Class: SubscriptionDefinitionBuilder\<ServiceClassType, MessagePayloadType, MessageParamsType, MessageResultType, FunctionPayloadType, FunctionParamsType, FunctionResultType, Invokes, EmitListType\>
+# Class: SubscriptionDefinitionBuilder\<ServiceClassType, MessagePayloadType, MessageParamsType, MessageResultType, PayloadSchema, ParameterSchema, ResultSchema, Invokes, EmitListType\>
 
 [@purista/core](../modules/purista_core.md).SubscriptionDefinitionBuilder
 
@@ -17,9 +17,9 @@ A working schema definition needs at least a subscription name, a short descript
 | `MessagePayloadType` | `unknown` |
 | `MessageParamsType` | `undefined` |
 | `MessageResultType` | `void` |
-| `FunctionPayloadType` | `MessagePayloadType` |
-| `FunctionParamsType` | `MessageParamsType` |
-| `FunctionResultType` | `MessageResultType` \| `void` \| `undefined` |
+| `PayloadSchema` | extends `Schema` = `ZodAny` |
+| `ParameterSchema` | extends `Schema` = `ZodAny` |
+| `ResultSchema` | extends `Schema` = `ZodAny` |
 | `Invokes` | {} |
 | `EmitListType` | {} |
 
@@ -72,6 +72,7 @@ A working schema definition needs at least a subscription name, a short descript
 - [getDefinition](purista_core.SubscriptionDefinitionBuilder.md#getdefinition)
 - [getSubscriptionContextMock](purista_core.SubscriptionDefinitionBuilder.md#getsubscriptioncontextmock)
 - [getSubscriptionFunction](purista_core.SubscriptionDefinitionBuilder.md#getsubscriptionfunction)
+- [getSubscriptionFunctionPlain](purista_core.SubscriptionDefinitionBuilder.md#getsubscriptionfunctionplain)
 - [getSubscriptionTransformContextMock](purista_core.SubscriptionDefinitionBuilder.md#getsubscriptiontransformcontextmock)
 - [getTransformInputFunction](purista_core.SubscriptionDefinitionBuilder.md#gettransforminputfunction)
 - [getTransformOutputFunction](purista_core.SubscriptionDefinitionBuilder.md#gettransformoutputfunction)
@@ -87,7 +88,7 @@ A working schema definition needs at least a subscription name, a short descript
 
 ### constructor
 
-• **new SubscriptionDefinitionBuilder**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>(`subscriptionName`, `subscriptionDescription`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+• **new SubscriptionDefinitionBuilder**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>(`subscriptionName`, `subscriptionDescription`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 #### Type parameters
 
@@ -97,9 +98,9 @@ A working schema definition needs at least a subscription name, a short descript
 | `MessagePayloadType` | `unknown` |
 | `MessageParamsType` | `undefined` |
 | `MessageResultType` | `void` |
-| `FunctionPayloadType` | `MessagePayloadType` |
-| `FunctionParamsType` | `MessageParamsType` |
-| `FunctionResultType` | `undefined` \| `void` \| `MessageResultType` |
+| `PayloadSchema` | extends `Schema` = `ZodAny` |
+| `ParameterSchema` | extends `Schema` = `ZodAny` |
+| `ResultSchema` | extends `Schema` = `ZodAny` |
 | `Invokes` | {} |
 | `EmitListType` | {} |
 
@@ -112,11 +113,11 @@ A working schema definition needs at least a subscription name, a short descript
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:134](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L134)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:142](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L142)
 
 ## Properties
 
@@ -126,7 +127,7 @@ A working schema definition needs at least a subscription name, a short descript
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:124](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L124)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:132](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L132)
 
 ___
 
@@ -136,7 +137,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:121](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L121)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:129](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L129)
 
 ___
 
@@ -146,7 +147,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:116](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L116)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:124](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L124)
 
 ___
 
@@ -156,7 +157,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:131](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L131)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:139](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L139)
 
 ___
 
@@ -166,17 +167,17 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:115](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L115)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:123](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L123)
 
 ___
 
 ### fn
 
-• `Private` `Optional` **fn**: [`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+• `Private` `Optional` **fn**: [`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `UnknownIfNever`\<`IfDefined`\<`PayloadSchema` extends `Type` ? `PayloadSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`PayloadSchema` extends `CustomSchema`\<`any`\> ? keyof `PayloadSchema` extends `never` ? `Awaited`\<`ReturnType`\<`PayloadSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `TSchema` ? `Static`\<`PayloadSchema`\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`PayloadSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ParameterSchema` extends `Type` ? `ParameterSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `ParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `TSchema` ? `Static`\<`ParameterSchema`\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ParameterSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ResultSchema` extends `Type` ? `ResultSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`ResultSchema` extends `CustomSchema`\<`any`\> ? keyof `ResultSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ResultSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `TSchema` ? `Static`\<`ResultSchema`\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`ResultSchema`\> : `never`\>\>, `Invokes`, `EmitListType`\>
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:104](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L104)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:112](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L112)
 
 ___
 
@@ -188,19 +189,19 @@ ___
 
 | Name | Type |
 | :------ | :------ |
-| `afterGuard` | `Record`\<`string`, [`SubscriptionAfterGuardHook`](../modules/purista_core.md#subscriptionafterguardhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`, `Invokes`, `EmitListType`\>\> |
-| `beforeGuard` | `Record`\<`string`, [`SubscriptionBeforeGuardHook`](../modules/purista_core.md#subscriptionbeforeguardhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `Invokes`, `EmitListType`\>\> |
+| `afterGuard` | `Record`\<`string`, [`SubscriptionAfterGuardHook`](../modules/purista_core.md#subscriptionafterguardhook)\<`ServiceClassType`, `Infer`\<`ResultSchema`\>, `Infer`\<`PayloadSchema`\>, `Infer`\<`ParameterSchema`\>, `Invokes`, `EmitListType`\>\> |
+| `beforeGuard` | `Record`\<`string`, [`SubscriptionBeforeGuardHook`](../modules/purista_core.md#subscriptionbeforeguardhook)\<`ServiceClassType`, `Infer`\<`PayloadSchema`\>, `Infer`\<`ParameterSchema`\>, `Invokes`, `EmitListType`\>\> |
 | `transformInput?` | \{ `transformFunction`: [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `any`, `any`, `any`, `any`\> ; `transformInputSchema`: `Schema` ; `transformParameterSchema`: `Schema`  } |
 | `transformInput.transformFunction` | [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `any`, `any`, `any`, `any`\> |
 | `transformInput.transformInputSchema` | `Schema` |
 | `transformInput.transformParameterSchema` | `Schema` |
-| `transformOutput?` | \{ `transformFunction`: [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `any`\> ; `transformOutputSchema`: `Schema`  } |
-| `transformOutput.transformFunction` | [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `any`\> |
+| `transformOutput?` | \{ `transformFunction`: [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `Infer`\<`ResultSchema`\>, `Infer`\<`PayloadSchema`\>, `any`\> ; `transformOutputSchema`: `Schema`  } |
+| `transformOutput.transformFunction` | [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `Infer`\<`ResultSchema`\>, `Infer`\<`PayloadSchema`\>, `any`\> |
 | `transformOutput.transformOutputSchema` | `Schema` |
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:58](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L58)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:61](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L61)
 
 ___
 
@@ -210,7 +211,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:52](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L52)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:55](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L55)
 
 ___
 
@@ -220,17 +221,17 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:51](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L51)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:54](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L54)
 
 ___
 
 ### inputSchema
 
-• `Private` `Optional` **inputSchema**: `Schema`
+• `Private` `Optional` **inputSchema**: `PayloadSchema`
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:50](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L50)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:53](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L53)
 
 ___
 
@@ -240,7 +241,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:126](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L126)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:134](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L134)
 
 ___
 
@@ -250,7 +251,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:48](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L48)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:51](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L51)
 
 ___
 
@@ -260,7 +261,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:55](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L55)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:58](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L58)
 
 ___
 
@@ -270,27 +271,27 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:54](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L54)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:57](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L57)
 
 ___
 
 ### outputSchema
 
-• `Private` `Optional` **outputSchema**: `Schema`
+• `Private` `Optional` **outputSchema**: `ResultSchema`
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:53](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L53)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:56](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L56)
 
 ___
 
 ### parameterSchema
 
-• `Private` `Optional` **parameterSchema**: `Schema`
+• `Private` `Optional` **parameterSchema**: `ParameterSchema`
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:56](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L56)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:59](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L59)
 
 ___
 
@@ -300,7 +301,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:118](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L118)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:126](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L126)
 
 ___
 
@@ -319,7 +320,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:97](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L97)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:105](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L105)
 
 ___
 
@@ -338,7 +339,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:90](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L90)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:98](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L98)
 
 ___
 
@@ -348,7 +349,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:123](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L123)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:131](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L131)
 
 ___
 
@@ -358,7 +359,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:136](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L136)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:144](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L144)
 
 ___
 
@@ -368,7 +369,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:135](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L135)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:143](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L143)
 
 ___
 
@@ -378,13 +379,13 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:119](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L119)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:127](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L127)
 
 ## Methods
 
 ### addOutputSchema
 
-▸ **addOutputSchema**\<`T`\>(`eventName`, `outputSchema`, `outputContentType?`, `outputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"infer"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`T`\> : `never`\>\>, `FunctionPayloadType`, `FunctionParamsType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>, `Invokes`, `EmitListType`\>
+▸ **addOutputSchema**\<`T`\>(`eventName`, `outputSchema`, `outputContentType?`, `outputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `T`, `PayloadSchema`, `ParameterSchema`, `T`, `Invokes`, `EmitListType`\>
 
 Add a schema for output payload validation.
 Types for payload of message and function payload output are generated from given schema.
@@ -406,19 +407,19 @@ Types for payload of message and function payload output are generated from give
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"infer"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`T`\> : `never`\>\>, `FunctionPayloadType`, `FunctionParamsType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `T`, `PayloadSchema`, `ParameterSchema`, `T`, `Invokes`, `EmitListType`\>
 
 SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:433](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L433)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:441](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L441)
 
 ___
 
 ### addParameterSchema
 
-▸ **addParameterSchema**\<`T`\>(`parameterSchema`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>, `MessageResultType`, `FunctionPayloadType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"infer"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`T`\> : `never`\>\>, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **addParameterSchema**\<`T`\>(`parameterSchema`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>, `MessageResultType`, `PayloadSchema`, `T`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Add a schema for output parameter validation.
 Types for parameter of message and function parameter output are generated from given schema.
@@ -437,19 +438,19 @@ Types for parameter of message and function parameter output are generated from 
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>, `MessageResultType`, `FunctionPayloadType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"infer"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`T`\> : `never`\>\>, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>, `MessageResultType`, `PayloadSchema`, `T`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:462](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L462)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:470](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L470)
 
 ___
 
 ### addPayloadSchema
 
-▸ **addPayloadSchema**\<`T`\>(`inputSchema`, `inputContentType?`, `inputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>, `MessageParamsType`, `MessageResultType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"infer"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`T`\> : `never`\>\>, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **addPayloadSchema**\<`T`\>(`inputSchema`, `inputContentType?`, `inputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>, `MessageParamsType`, `MessageResultType`, `T`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Add a schema for input payload validation.
 Types for payload of message and function payload input are generated from given schema.
@@ -470,19 +471,19 @@ Types for payload of message and function payload input are generated from given
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>, `MessageParamsType`, `MessageResultType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"infer"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`T`\> : `never`\>\>, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>, `MessageParamsType`, `MessageResultType`, `T`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:402](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L402)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:410](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L410)
 
 ___
 
 ### adviceAutoacknowledgeMessage
 
-▸ **adviceAutoacknowledgeMessage**(`acknowledge?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **adviceAutoacknowledgeMessage**(`acknowledge?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Instruct the event bridge message broker to autoacknowledge messages as soon as they arrive.
 This means, a message will not be resent, if the subscription execution fails unexpected.
@@ -500,19 +501,19 @@ If set to false, the message will be resent from message broker to eventbridge, 
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 SubscriptionDefinition
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:282](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L282)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:290](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L290)
 
 ___
 
 ### adviceDurable
 
-▸ **adviceDurable**(`durable`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **adviceDurable**(`durable`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 False: defines the subscription as a live-subscription, which is only able to process messages while the subscription itself is running.
 
@@ -527,17 +528,17 @@ As soon as the subscription is back again, all missed messages will be sent firs
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:307](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L307)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:315](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L315)
 
 ___
 
 ### canEmit
 
-▸ **canEmit**\<`EventName`, `T`\>(`eventName`, `schema`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType` & `Record`\<`EventName`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>\>\>
+▸ **canEmit**\<`EventName`, `T`\>(`eventName`, `schema`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType` & `Record`\<`EventName`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>\>\>
 
 Define which custom events the command can emit.
 
@@ -557,17 +558,17 @@ Define which custom events the command can emit.
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType` & `Record`\<`EventName`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>\>\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType` & `Record`\<`EventName`, `UnknownIfNever`\<`IfDefined`\<`T` extends `Type` ? `T`[``"inferIn"``] : `never`\> \| `IfDefined`\<`T` extends `CustomSchema`\<`any`\> ? keyof `T` extends `never` ? `Awaited`\<`ReturnType`\<`T`\>\> : `never` : `never`\> \| `IfDefined`\<`T` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `TSchema` ? `Static`\<`T`\> : `never`\> \| `IfDefined`\<`T` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`T` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`T`\> : `never`\>\>\>\>
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:214](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L214)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:222](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L222)
 
 ___
 
 ### canInvoke
 
-▸ **canInvoke**\<`Output`, `Payload`, `Parameter`, `SName`, `Version`, `Fname`\>(`serviceName`, `serviceVersion`, `serviceTarget`, `outputSchema?`, `payloadSchema?`, `parameterSchema?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes` & `Record`\<`SName`, `Record`\<`Version`, `Record`\<`Fname`, (`payload`: `UnknownIfNever`\<`IfDefined`\<`Payload` extends `Type` ? `Payload`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Payload` extends `CustomSchema`\<`any`\> ? keyof `Payload` extends `never` ? `Awaited`\<`ReturnType`\<`Payload`\>\> : `never` : `never`\> \| `IfDefined`\<`Payload` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `TSchema` ? `Static`\<`Payload`\> : `never`\> \| `IfDefined`\<`Payload` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Payload`\> : `never`\>\>, `parameter`: `UnknownIfNever`\<`IfDefined`\<`Parameter` extends `Type` ? `Parameter`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Parameter` extends `CustomSchema`\<`any`\> ? keyof `Parameter` extends `never` ? `Awaited`\<`ReturnType`\<`Parameter`\>\> : `never` : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `TSchema` ? `Static`\<`Parameter`\> : `never`\> \| `IfDefined`\<`Parameter` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Parameter`\> : `never`\>\>) => `Promise`\<`UnknownIfNever`\<`IfDefined`\<`Output` extends `Type` ? `Output`[``"infer"``] : `never`\> \| `IfDefined`\<`Output` extends `CustomSchema`\<`any`\> ? keyof `Output` extends `never` ? `Awaited`\<`ReturnType`\<`Output`\>\> : `never` : `never`\> \| `IfDefined`\<`Output` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `TSchema` ? `Static`\<`Output`\> : `never`\> \| `IfDefined`\<`Output` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`Output`\> : `never`\>\>\>\>\>\>, `EmitListType`\>
+▸ **canInvoke**\<`Output`, `Payload`, `Parameter`, `SName`, `Version`, `Fname`\>(`serviceName`, `serviceVersion`, `serviceTarget`, `outputSchema?`, `payloadSchema?`, `parameterSchema?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes` & `Record`\<`SName`, `Record`\<`Version`, `Record`\<`Fname`, (`payload`: `UnknownIfNever`\<`IfDefined`\<`Payload` extends `Type` ? `Payload`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Payload` extends `CustomSchema`\<`any`\> ? keyof `Payload` extends `never` ? `Awaited`\<`ReturnType`\<`Payload`\>\> : `never` : `never`\> \| `IfDefined`\<`Payload` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `TSchema` ? `Static`\<`Payload`\> : `never`\> \| `IfDefined`\<`Payload` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Payload`\> : `never`\>\>, `parameter`: `UnknownIfNever`\<`IfDefined`\<`Parameter` extends `Type` ? `Parameter`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Parameter` extends `CustomSchema`\<`any`\> ? keyof `Parameter` extends `never` ? `Awaited`\<`ReturnType`\<`Parameter`\>\> : `never` : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `TSchema` ? `Static`\<`Parameter`\> : `never`\> \| `IfDefined`\<`Parameter` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Parameter`\> : `never`\>\>) => `Promise`\<`UnknownIfNever`\<`IfDefined`\<`Output` extends `Type` ? `Output`[``"infer"``] : `never`\> \| `IfDefined`\<`Output` extends `CustomSchema`\<`any`\> ? keyof `Output` extends `never` ? `Awaited`\<`ReturnType`\<`Output`\>\> : `never` : `never`\> \| `IfDefined`\<`Output` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `TSchema` ? `Static`\<`Output`\> : `never`\> \| `IfDefined`\<`Output` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`Output`\> : `never`\>\>\>\>\>\>, `EmitListType`\>
 
 #### Type parameters
 
@@ -593,17 +594,17 @@ ___
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes` & `Record`\<`SName`, `Record`\<`Version`, `Record`\<`Fname`, (`payload`: `UnknownIfNever`\<`IfDefined`\<`Payload` extends `Type` ? `Payload`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Payload` extends `CustomSchema`\<`any`\> ? keyof `Payload` extends `never` ? `Awaited`\<`ReturnType`\<`Payload`\>\> : `never` : `never`\> \| `IfDefined`\<`Payload` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `TSchema` ? `Static`\<`Payload`\> : `never`\> \| `IfDefined`\<`Payload` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Payload`\> : `never`\>\>, `parameter`: `UnknownIfNever`\<`IfDefined`\<`Parameter` extends `Type` ? `Parameter`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Parameter` extends `CustomSchema`\<`any`\> ? keyof `Parameter` extends `never` ? `Awaited`\<`ReturnType`\<`Parameter`\>\> : `never` : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `TSchema` ? `Static`\<`Parameter`\> : `never`\> \| `IfDefined`\<`Parameter` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Parameter`\> : `never`\>\>) => `Promise`\<`UnknownIfNever`\<`IfDefined`\<`Output` extends `Type` ? `Output`[``"infer"``] : `never`\> \| `IfDefined`\<`Output` extends `CustomSchema`\<`any`\> ? keyof `Output` extends `never` ? `Awaited`\<`ReturnType`\<`Output`\>\> : `never` : `never`\> \| `IfDefined`\<`Output` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `TSchema` ? `Static`\<`Output`\> : `never`\> \| `IfDefined`\<`Output` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`Output`\> : `never`\>\>\>\>\>\>, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes` & `Record`\<`SName`, `Record`\<`Version`, `Record`\<`Fname`, (`payload`: `UnknownIfNever`\<`IfDefined`\<`Payload` extends `Type` ? `Payload`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Payload` extends `CustomSchema`\<`any`\> ? keyof `Payload` extends `never` ? `Awaited`\<`ReturnType`\<`Payload`\>\> : `never` : `never`\> \| `IfDefined`\<`Payload` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `TSchema` ? `Static`\<`Payload`\> : `never`\> \| `IfDefined`\<`Payload` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Payload`\> : `never`\>\>, `parameter`: `UnknownIfNever`\<`IfDefined`\<`Parameter` extends `Type` ? `Parameter`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Parameter` extends `CustomSchema`\<`any`\> ? keyof `Parameter` extends `never` ? `Awaited`\<`ReturnType`\<`Parameter`\>\> : `never` : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `TSchema` ? `Static`\<`Parameter`\> : `never`\> \| `IfDefined`\<`Parameter` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Parameter`\> : `never`\>\>) => `Promise`\<`UnknownIfNever`\<`IfDefined`\<`Output` extends `Type` ? `Output`[``"infer"``] : `never`\> \| `IfDefined`\<`Output` extends `CustomSchema`\<`any`\> ? keyof `Output` extends `never` ? `Awaited`\<`ReturnType`\<`Output`\>\> : `never` : `never`\> \| `IfDefined`\<`Output` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `TSchema` ? `Static`\<`Output`\> : `never`\> \| `IfDefined`\<`Output` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`Output`\> : `never`\>\>\>\>\>\>, `EmitListType`\>
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:139](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L139)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:147](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L147)
 
 ___
 
 ### filterForMessageType
 
-▸ **filterForMessageType**(`messageType`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **filterForMessageType**(`messageType`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Adds a filter to match specific message type.
 
@@ -619,17 +620,17 @@ See  EBMessageType for full available list.
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:388](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L388)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:396](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L396)
 
 ___
 
 ### filterPrincipalId
 
-▸ **filterPrincipalId**\<`T`\>(`principalId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **filterPrincipalId**\<`T`\>(`principalId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Filter messages only for principalId
 
@@ -647,17 +648,17 @@ Filter messages only for principalId
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:255](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L255)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:263](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L263)
 
 ___
 
 ### filterReceivedBy
 
-▸ **filterReceivedBy**\<`N`, `V`, `T`, `I`\>(`serviceName`, `serviceVersion`, `serviceTarget`, `instanceId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **filterReceivedBy**\<`N`, `V`, `T`, `I`\>(`serviceName`, `serviceVersion`, `serviceTarget`, `instanceId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Add filter to only match messages received by given service function & version.
 Set one or more parameters to undefined means "do not filter by this criteria".
@@ -690,17 +691,17 @@ receivedBy('UserService', undefined, 'testFunction')
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:363](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L363)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:371](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L371)
 
 ___
 
 ### filterSentFrom
 
-▸ **filterSentFrom**\<`N`, `V`, `T`, `I`\>(`serviceName`, `serviceVersion`, `serviceTarget`, `instanceId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **filterSentFrom**\<`N`, `V`, `T`, `I`\>(`serviceName`, `serviceVersion`, `serviceTarget`, `instanceId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Add filter to only match messages send by given service function & version.
 Set one or more parameters to undefined means "do not filter by this criteria".
@@ -733,17 +734,17 @@ sentFrom('UserService', undefined, 'testFunction')
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:330](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L330)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:338](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L338)
 
 ___
 
 ### filterTenantId
 
-▸ **filterTenantId**\<`T`\>(`tenantId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **filterTenantId**\<`T`\>(`tenantId`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Filter messages only for tenantId
 
@@ -761,29 +762,29 @@ Filter messages only for tenantId
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:265](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L265)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:273](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L273)
 
 ___
 
 ### getDefinition
 
-▸ **getDefinition**(): [`SubscriptionDefinition`](../modules/purista_core.md#subscriptiondefinition)\<`ServiceClassType`, [`SubscriptionDefinitionMetadataBase`](../modules/purista_core.md#subscriptiondefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **getDefinition**(): [`SubscriptionDefinition`](../modules/purista_core.md#subscriptiondefinition)\<`ServiceClassType`, [`SubscriptionDefinitionMetadataBase`](../modules/purista_core.md#subscriptiondefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `Infer`\<`PayloadSchema`\>, `Infer`\<`ParameterSchema`\>, `Infer`\<`ResultSchema`\>, `Invokes`, `EmitListType`\>
 
 Returns the final subscription definition which will be passed into the service class.
 
 #### Returns
 
-[`SubscriptionDefinition`](../modules/purista_core.md#subscriptiondefinition)\<`ServiceClassType`, [`SubscriptionDefinitionMetadataBase`](../modules/purista_core.md#subscriptiondefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinition`](../modules/purista_core.md#subscriptiondefinition)\<`ServiceClassType`, [`SubscriptionDefinitionMetadataBase`](../modules/purista_core.md#subscriptiondefinitionmetadatabase), `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `Infer`\<`PayloadSchema`\>, `Infer`\<`ParameterSchema`\>, `Infer`\<`ResultSchema`\>, `Invokes`, `EmitListType`\>
 
 SubscriptionDefinition
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:736](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L736)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:773](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L773)
 
 ___
 
@@ -853,25 +854,45 @@ a mocked command function context
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:829](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L829)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:856](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L856)
 
 ___
 
 ### getSubscriptionFunction
 
-▸ **getSubscriptionFunction**(): [`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **getSubscriptionFunction**(): [`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `UnknownIfNever`\<`IfDefined`\<`PayloadSchema` extends `Type` ? `PayloadSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`PayloadSchema` extends `CustomSchema`\<`any`\> ? keyof `PayloadSchema` extends `never` ? `Awaited`\<`ReturnType`\<`PayloadSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `TSchema` ? `Static`\<`PayloadSchema`\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`PayloadSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ParameterSchema` extends `Type` ? `ParameterSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`ParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `ParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `TSchema` ? `Static`\<`ParameterSchema`\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`ParameterSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ResultSchema` extends `Type` ? `ResultSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ResultSchema` extends `CustomSchema`\<`any`\> ? keyof `ResultSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ResultSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `TSchema` ? `Static`\<`ResultSchema`\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ResultSchema`\> : `never`\>\>, `Invokes`, `EmitListType`\>
 
-Get the function implementation
+Get the function implementation including input and output validation.
+Also, before and after hooks are triggered during execution.
 
 #### Returns
 
-[`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `UnknownIfNever`\<`IfDefined`\<`PayloadSchema` extends `Type` ? `PayloadSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`PayloadSchema` extends `CustomSchema`\<`any`\> ? keyof `PayloadSchema` extends `never` ? `Awaited`\<`ReturnType`\<`PayloadSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `TSchema` ? `Static`\<`PayloadSchema`\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`PayloadSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ParameterSchema` extends `Type` ? `ParameterSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`ParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `ParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `TSchema` ? `Static`\<`ParameterSchema`\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`ParameterSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ResultSchema` extends `Type` ? `ResultSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ResultSchema` extends `CustomSchema`\<`any`\> ? keyof `ResultSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ResultSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `TSchema` ? `Static`\<`ResultSchema`\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ResultSchema`\> : `never`\>\>, `Invokes`, `EmitListType`\>
 
 the subscription function
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:703](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L703)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:713](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L713)
+
+___
+
+### getSubscriptionFunctionPlain
+
+▸ **getSubscriptionFunctionPlain**(): `void`
+
+Get the function implementation without input and output validation.
+No hooks are triggered during execution.
+
+#### Returns
+
+`void`
+
+the subscription function
+
+#### Defined in
+
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:750](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L750)
 
 ___
 
@@ -935,49 +956,49 @@ a mocked transform function context
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:840](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L840)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:867](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L867)
 
 ___
 
 ### getTransformInputFunction
 
-▸ **getTransformInputFunction**(): `undefined` \| [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `MessagePayloadType`, `MessageParamsType`\>
+▸ **getTransformInputFunction**(): `undefined` \| [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`PayloadSchema` extends `Type` ? `PayloadSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`PayloadSchema` extends `CustomSchema`\<`any`\> ? keyof `PayloadSchema` extends `never` ? `Awaited`\<`ReturnType`\<`PayloadSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `TSchema` ? `Static`\<`PayloadSchema`\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`PayloadSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ParameterSchema` extends `Type` ? `ParameterSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`ParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `ParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `TSchema` ? `Static`\<`ParameterSchema`\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`ParameterSchema`\> : `never`\>\>, `MessagePayloadType`, `MessageParamsType`\>
 
 Return the transform input function
 
 #### Returns
 
-`undefined` \| [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `MessagePayloadType`, `MessageParamsType`\>
+`undefined` \| [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`PayloadSchema` extends `Type` ? `PayloadSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`PayloadSchema` extends `CustomSchema`\<`any`\> ? keyof `PayloadSchema` extends `never` ? `Awaited`\<`ReturnType`\<`PayloadSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `TSchema` ? `Static`\<`PayloadSchema`\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`PayloadSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ParameterSchema` extends `Type` ? `ParameterSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`ParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `ParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `TSchema` ? `Static`\<`ParameterSchema`\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`ParameterSchema`\> : `never`\>\>, `MessagePayloadType`, `MessageParamsType`\>
 
 the input transform function if defined
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:526](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L526)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:534](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L534)
 
 ___
 
 ### getTransformOutputFunction
 
-▸ **getTransformOutputFunction**(): `undefined` \| [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `FunctionResultType`\>
+▸ **getTransformOutputFunction**(): `undefined` \| [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`ResultSchema` extends `Type` ? `ResultSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ResultSchema` extends `CustomSchema`\<`any`\> ? keyof `ResultSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ResultSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `TSchema` ? `Static`\<`ResultSchema`\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ResultSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ParameterSchema` extends `Type` ? `ParameterSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `ParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `TSchema` ? `Static`\<`ParameterSchema`\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ParameterSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ResultSchema` extends `Type` ? `ResultSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ResultSchema` extends `CustomSchema`\<`any`\> ? keyof `ResultSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ResultSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `TSchema` ? `Static`\<`ResultSchema`\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ResultSchema`\> : `never`\>\>\>
 
 Return the transform output function
 
 #### Returns
 
-`undefined` \| [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `FunctionResultType`\>
+`undefined` \| [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`ResultSchema` extends `Type` ? `ResultSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ResultSchema` extends `CustomSchema`\<`any`\> ? keyof `ResultSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ResultSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `TSchema` ? `Static`\<`ResultSchema`\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ResultSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ParameterSchema` extends `Type` ? `ParameterSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `ParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `TSchema` ? `Static`\<`ParameterSchema`\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ParameterSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ResultSchema` extends `Type` ? `ResultSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ResultSchema` extends `CustomSchema`\<`any`\> ? keyof `ResultSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ResultSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `TSchema` ? `Static`\<`ResultSchema`\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ResultSchema`\> : `never`\>\>\>
 
 the transform output function if defined
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:585](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L585)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:593](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L593)
 
 ___
 
 ### receiveMessageOnEveryInstance
 
-▸ **receiveMessageOnEveryInstance**(`enforce?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **receiveMessageOnEveryInstance**(`enforce?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Instruct the event bridge message broker to send the matching message to every running instance.
 The underlaying message broker must support this functionality.
@@ -992,19 +1013,19 @@ In serverless environments, this flag should not have any effect
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 SubscriptionDefinition
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:296](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L296)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:304](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L304)
 
 ___
 
 ### setAfterGuardHooks
 
-▸ **setAfterGuardHooks**(`afterGuards`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **setAfterGuardHooks**(`afterGuards`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Set one or more after guard hook(s).
 If there are multiple after guard hooks, they are executed in parallel
@@ -1013,23 +1034,23 @@ If there are multiple after guard hooks, they are executed in parallel
 
 | Name | Type |
 | :------ | :------ |
-| `afterGuards` | `Record`\<`string`, [`SubscriptionAfterGuardHook`](../modules/purista_core.md#subscriptionafterguardhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadType`, `FunctionParamsType`, `Invokes`, `EmitListType`\>\> |
+| `afterGuards` | `Record`\<`string`, [`SubscriptionAfterGuardHook`](../modules/purista_core.md#subscriptionafterguardhook)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`ResultSchema` extends `Type` ? `ResultSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ResultSchema` extends `CustomSchema`\<`any`\> ? keyof `ResultSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ResultSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `TSchema` ? `Static`\<`ResultSchema`\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ResultSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`PayloadSchema` extends `Type` ? `PayloadSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`PayloadSchema` extends `CustomSchema`\<`any`\> ? keyof `PayloadSchema` extends `never` ? `Awaited`\<`ReturnType`\<`PayloadSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `TSchema` ? `Static`\<`PayloadSchema`\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`PayloadSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ParameterSchema` extends `Type` ? `ParameterSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `ParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `TSchema` ? `Static`\<`ParameterSchema`\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ParameterSchema`\> : `never`\>\>, `Invokes`, `EmitListType`\>\> |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:620](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L620)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:628](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L628)
 
 ___
 
 ### setBeforeGuardHooks
 
-▸ **setBeforeGuardHooks**(`beforeGuards`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **setBeforeGuardHooks**(`beforeGuards`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Set one or more before guard hook(s).
 If there are multiple before guard hooks, they are executed in parallel
@@ -1038,23 +1059,23 @@ If there are multiple before guard hooks, they are executed in parallel
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `beforeGuards` | `Record`\<`string`, [`SubscriptionBeforeGuardHook`](../modules/purista_core.md#subscriptionbeforeguardhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `Invokes`, `EmitListType`\>\> | Object of key = name of guard, value = function |
+| `beforeGuards` | `Record`\<`string`, [`SubscriptionBeforeGuardHook`](../modules/purista_core.md#subscriptionbeforeguardhook)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`PayloadSchema` extends `Type` ? `PayloadSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`PayloadSchema` extends `CustomSchema`\<`any`\> ? keyof `PayloadSchema` extends `never` ? `Awaited`\<`ReturnType`\<`PayloadSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `TSchema` ? `Static`\<`PayloadSchema`\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`PayloadSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ParameterSchema` extends `Type` ? `ParameterSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `ParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `TSchema` ? `Static`\<`ParameterSchema`\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ParameterSchema`\> : `never`\>\>, `Invokes`, `EmitListType`\>\> | Object of key = name of guard, value = function |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:604](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L604)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:612](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L612)
 
 ___
 
 ### setSubscriptionFunction
 
-▸ **setSubscriptionFunction**(`fn`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **setSubscriptionFunction**(`fn`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Required: Set the function implementation.
 The types should be automatically set as soon as schemas previously defined.
@@ -1065,11 +1086,11 @@ Anonymous functions do not have access to the `this` scope.
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `fn` | [`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\> | the function implementation |
+| `fn` | [`SubscriptionFunction`](../modules/purista_core.md#subscriptionfunction)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `Infer`\<`PayloadSchema`\>, `Infer`\<`ParameterSchema`\>, `Infer`\<`ResultSchema`\>, `Invokes`, `EmitListType`\> | the function implementation |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 SubscriptionDefinitionBuilder
 
@@ -1084,13 +1105,13 @@ async function (context, payload, parameter) {
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:653](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L653)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:661](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L661)
 
 ___
 
 ### setTransformInput
 
-▸ **setTransformInput**\<`Payload`, `Parameter`\>(`transformInputSchema`, `transformParameterSchema`, `transformFunction`, `inputContentType?`, `inputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`Payload` extends `Type` ? `Payload`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Payload` extends `CustomSchema`\<`any`\> ? keyof `Payload` extends `never` ? `Awaited`\<`ReturnType`\<`Payload`\>\> : `never` : `never`\> \| `IfDefined`\<`Payload` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `TSchema` ? `Static`\<`Payload`\> : `never`\> \| `IfDefined`\<`Payload` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Payload`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`Parameter` extends `Type` ? `Parameter`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Parameter` extends `CustomSchema`\<`any`\> ? keyof `Parameter` extends `never` ? `Awaited`\<`ReturnType`\<`Parameter`\>\> : `never` : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `TSchema` ? `Static`\<`Parameter`\> : `never`\> \| `IfDefined`\<`Parameter` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Parameter`\> : `never`\>\>, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **setTransformInput**\<`TransFormPayloadSchema`, `TransFormParameterSchema`\>(`transformInputSchema`, `transformParameterSchema`, `transformFunction`, `inputContentType?`, `inputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`TransFormPayloadSchema` extends `Type` ? `TransFormPayloadSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `CustomSchema`\<`any`\> ? keyof `TransFormPayloadSchema` extends `never` ? `Awaited`\<`ReturnType`\<`TransFormPayloadSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `TSchema` ? `Static`\<`TransFormPayloadSchema`\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`TransFormPayloadSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`TransFormParameterSchema` extends `Type` ? `TransFormParameterSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `TransFormParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`TransFormParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `TSchema` ? `Static`\<`TransFormParameterSchema`\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`TransFormParameterSchema`\> : `never`\>\>, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Set a transform input hook which will encode or transform the input payload and parameters.
 Will be executed as first step before input validation, before guard and the function itself.
@@ -1100,34 +1121,34 @@ This will change the type of input message payload and input message parameter.
 
 | Name | Type |
 | :------ | :------ |
-| `Payload` | extends `Schema` |
-| `Parameter` | extends `Schema` |
+| `TransFormPayloadSchema` | extends `Schema` |
+| `TransFormParameterSchema` | extends `Schema` |
 
 #### Parameters
 
 | Name | Type | Description |
 | :------ | :------ | :------ |
-| `transformInputSchema` | `Payload` | Input payload validation schema |
-| `transformParameterSchema` | `Parameter` | Input parameter validation schema |
-| `transformFunction` | [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `UnknownIfNever`\<`IfDefined`\<`Payload` extends `Type` ? `Payload`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Payload` extends `CustomSchema`\<`any`\> ? keyof `Payload` extends `never` ? `Awaited`\<`ReturnType`\<`Payload`\>\> : `never` : `never`\> \| `IfDefined`\<`Payload` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `TSchema` ? `Static`\<`Payload`\> : `never`\> \| `IfDefined`\<`Payload` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Payload`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`Parameter` extends `Type` ? `Parameter`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Parameter` extends `CustomSchema`\<`any`\> ? keyof `Parameter` extends `never` ? `Awaited`\<`ReturnType`\<`Parameter`\>\> : `never` : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `TSchema` ? `Static`\<`Parameter`\> : `never`\> \| `IfDefined`\<`Parameter` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Parameter`\> : `never`\>\>\> | the transform input function |
+| `transformInputSchema` | `TransFormPayloadSchema` | Input payload validation schema |
+| `transformParameterSchema` | `TransFormParameterSchema` | Input parameter validation schema |
+| `transformFunction` | [`SubscriptionTransformInputHook`](../modules/purista_core.md#subscriptiontransforminputhook)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`PayloadSchema` extends `Type` ? `PayloadSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`PayloadSchema` extends `CustomSchema`\<`any`\> ? keyof `PayloadSchema` extends `never` ? `Awaited`\<`ReturnType`\<`PayloadSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `TSchema` ? `Static`\<`PayloadSchema`\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`PayloadSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`PayloadSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ParameterSchema` extends `Type` ? `ParameterSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`ParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `ParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `TSchema` ? `Static`\<`ParameterSchema`\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`ParameterSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`TransFormPayloadSchema` extends `Type` ? `TransFormPayloadSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `CustomSchema`\<`any`\> ? keyof `TransFormPayloadSchema` extends `never` ? `Awaited`\<`ReturnType`\<`TransFormPayloadSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `TSchema` ? `Static`\<`TransFormPayloadSchema`\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`TransFormPayloadSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`TransFormParameterSchema` extends `Type` ? `TransFormParameterSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `TransFormParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`TransFormParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `TSchema` ? `Static`\<`TransFormParameterSchema`\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`TransFormParameterSchema`\> : `never`\>\>\> | the transform input function |
 | `inputContentType?` | `string` | optional the content type of payload |
 | `inputContentEncoding?` | `string` | optional the content encoding |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`Payload` extends `Type` ? `Payload`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Payload` extends `CustomSchema`\<`any`\> ? keyof `Payload` extends `never` ? `Awaited`\<`ReturnType`\<`Payload`\>\> : `never` : `never`\> \| `IfDefined`\<`Payload` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `TSchema` ? `Static`\<`Payload`\> : `never`\> \| `IfDefined`\<`Payload` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Payload` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Payload`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`Parameter` extends `Type` ? `Parameter`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Parameter` extends `CustomSchema`\<`any`\> ? keyof `Parameter` extends `never` ? `Awaited`\<`ReturnType`\<`Parameter`\>\> : `never` : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `TSchema` ? `Static`\<`Parameter`\> : `never`\> \| `IfDefined`\<`Parameter` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Parameter` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Parameter`\> : `never`\>\>, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`TransFormPayloadSchema` extends `Type` ? `TransFormPayloadSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `CustomSchema`\<`any`\> ? keyof `TransFormPayloadSchema` extends `never` ? `Awaited`\<`ReturnType`\<`TransFormPayloadSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `TSchema` ? `Static`\<`TransFormPayloadSchema`\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormPayloadSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`TransFormPayloadSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`TransFormParameterSchema` extends `Type` ? `TransFormParameterSchema`[``"inferIn"``] : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `TransFormParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`TransFormParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `TSchema` ? `Static`\<`TransFormParameterSchema`\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`TransFormParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`TransFormParameterSchema`\> : `never`\>\>, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:488](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L488)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:496](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L496)
 
 ___
 
 ### setTransformOutput
 
-▸ **setTransformOutput**\<`Output`\>(`transformOutputSchema`, `transformFunction`, `outputContentType?`, `outputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `UnknownIfNever`\<`IfDefined`\<`Output` extends `Type` ? `Output`[``"infer"``] : `never`\> \| `IfDefined`\<`Output` extends `CustomSchema`\<`any`\> ? keyof `Output` extends `never` ? `Awaited`\<`ReturnType`\<`Output`\>\> : `never` : `never`\> \| `IfDefined`\<`Output` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `TSchema` ? `Static`\<`Output`\> : `never`\> \| `IfDefined`\<`Output` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`Output`\> : `never`\>\>, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **setTransformOutput**\<`Output`\>(`transformOutputSchema`, `transformFunction`, `outputContentType?`, `outputContentEncoding?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `UnknownIfNever`\<`IfDefined`\<`Output` extends `Type` ? `Output`[``"infer"``] : `never`\> \| `IfDefined`\<`Output` extends `CustomSchema`\<`any`\> ? keyof `Output` extends `never` ? `Awaited`\<`ReturnType`\<`Output`\>\> : `never` : `never`\> \| `IfDefined`\<`Output` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `TSchema` ? `Static`\<`Output`\> : `never`\> \| `IfDefined`\<`Output` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`Output`\> : `never`\>\>, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Set a transform output hook which will encode or transform the response payload.
 Will be executed at very last step after function execution, output validation and after guard hooks.
@@ -1144,25 +1165,25 @@ This will change the type of output message payload.
 | Name | Type | Description |
 | :------ | :------ | :------ |
 | `transformOutputSchema` | `Output` | The output validation schema |
-| `transformFunction` | [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `FunctionResultType`, `FunctionParamsType`, `UnknownIfNever`\<`IfDefined`\<`Output` extends `Type` ? `Output`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Output` extends `CustomSchema`\<`any`\> ? keyof `Output` extends `never` ? `Awaited`\<`ReturnType`\<`Output`\>\> : `never` : `never`\> \| `IfDefined`\<`Output` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `TSchema` ? `Static`\<`Output`\> : `never`\> \| `IfDefined`\<`Output` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Output`\> : `never`\>\>\> | the transform output function |
+| `transformFunction` | [`SubscriptionTransformOutputHook`](../modules/purista_core.md#subscriptiontransformoutputhook)\<`ServiceClassType`, `UnknownIfNever`\<`IfDefined`\<`ResultSchema` extends `Type` ? `ResultSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ResultSchema` extends `CustomSchema`\<`any`\> ? keyof `ResultSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ResultSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `TSchema` ? `Static`\<`ResultSchema`\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ResultSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ResultSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`ParameterSchema` extends `Type` ? `ParameterSchema`[``"infer"``] : `never`\> \| `IfDefined`\<`ParameterSchema` extends `CustomSchema`\<`any`\> ? keyof `ParameterSchema` extends `never` ? `Awaited`\<`ReturnType`\<`ParameterSchema`\>\> : `never` : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `TSchema` ? `Static`\<`ParameterSchema`\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`ParameterSchema` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`ParameterSchema`\> : `never`\>\>, `UnknownIfNever`\<`IfDefined`\<`Output` extends `Type` ? `Output`[``"inferIn"``] : `never`\> \| `IfDefined`\<`Output` extends `CustomSchema`\<`any`\> ? keyof `Output` extends `never` ? `Awaited`\<`ReturnType`\<`Output`\>\> : `never` : `never`\> \| `IfDefined`\<`Output` extends `Schema$1`\<`any`, `any`\> ? `From`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Any` ? `OutputOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `TSchema` ? `Static`\<`Output`\> : `never`\> \| `IfDefined`\<`Output` extends `any` ? `Input`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `input`\<`Output`\> : `never`\>\>\> | the transform output function |
 | `outputContentType?` | `string` | optional the content type of payload |
 | `outputContentEncoding?` | `string` | optional the content encoding |
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `UnknownIfNever`\<`IfDefined`\<`Output` extends `Type` ? `Output`[``"infer"``] : `never`\> \| `IfDefined`\<`Output` extends `CustomSchema`\<`any`\> ? keyof `Output` extends `never` ? `Awaited`\<`ReturnType`\<`Output`\>\> : `never` : `never`\> \| `IfDefined`\<`Output` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `TSchema` ? `Static`\<`Output`\> : `never`\> \| `IfDefined`\<`Output` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`Output`\> : `never`\>\>, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `UnknownIfNever`\<`IfDefined`\<`Output` extends `Type` ? `Output`[``"infer"``] : `never`\> \| `IfDefined`\<`Output` extends `CustomSchema`\<`any`\> ? keyof `Output` extends `never` ? `Awaited`\<`ReturnType`\<`Output`\>\> : `never` : `never`\> \| `IfDefined`\<`Output` extends `Schema$1`\<`any`, `any`\> ? `To`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Any` ? `TypeOf`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Predicate` ? `Infer$1`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Runtype` ? `Static`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Struct`\<`any`, `any`\> ? `Infer$2`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `TSchema` ? `Static`\<`Output`\> : `never`\> \| `IfDefined`\<`Output` extends `any` ? `Output`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `Schema$2` ? `InferType`\<`this`[``"schema"``]\> : `never`\> \| `IfDefined`\<`Output` extends `ZodType`\<`any`, `ZodTypeDef`, `any`\> ? `output`\<`Output`\> : `never`\>\>, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:550](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L550)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:558](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L558)
 
 ___
 
 ### subscribeToEvent
 
-▸ **subscribeToEvent**\<`N`, `V`\>(`eventName`, `serviceVersion?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+▸ **subscribeToEvent**\<`N`, `V`\>(`eventName`, `serviceVersion?`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 Add a filter to only subscribe to messages with matching event name
 
@@ -1182,10 +1203,10 @@ Add a filter to only subscribe to messages with matching event name
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>
 
 SubscriptionDefinitionBuilder
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:240](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L240)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:248](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L248)

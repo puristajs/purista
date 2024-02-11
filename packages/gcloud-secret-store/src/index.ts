@@ -12,7 +12,7 @@ If a secret value exceeds the ttl, it does not automatically get removed from ca
 It will be removed/overwritten on next get request.
 
 @example
-* ```typescript
+```typescript
 const config = {
   projectId: 'project/MY_GOOGLE_PROJECT_ID'
 }

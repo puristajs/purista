@@ -199,7 +199,7 @@ ___
 
 ### getCommandBuilder
 
-▸ **getCommandBuilder**\<`T`, `N`\>(`commandName`, `description`, `eventName?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`, {}, {}\>
+▸ **getCommandBuilder**\<`T`, `N`\>(`commandName`, `description`, `eventName?`): [`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, {}, `void`, `ZodAny`, `ZodAny`, `ZodAny`, {}, {}\>
 
 It returns a new instance of the CommandDefinitionBuilder class, which is a class that is used to
 build a command definition
@@ -221,7 +221,7 @@ build a command definition
 
 #### Returns
 
-[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `void`, {}, {}\>
+[`CommandDefinitionBuilder`](purista_core.CommandDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, {}, `void`, `ZodAny`, `ZodAny`, `ZodAny`, {}, {}\>
 
 A CommandDefinitionBuilder object.
 
@@ -278,7 +278,7 @@ command functions, subscription list, and configuration
 | `options.logLevel?` | [`LogLevelName`](../modules/purista_core.md#loglevelname) | - |
 | `options.logger?` | [`Logger`](purista_core.Logger.md) | - |
 | `options.secretStore?` | [`SecretStore`](../interfaces/purista_core.SecretStore.md) | - |
-| `options.serviceConfig?` | `ConfigInputType` | - |
+| `options.serviceConfig?` | `Partial`\<`ConfigInputType`\> | - |
 | `options.spanProcessor?` | `SpanProcessor` | - |
 | `options.stateStore?` | [`StateStore`](../interfaces/purista_core.StateStore.md) | - |
 
@@ -296,7 +296,7 @@ ___
 
 ### getSubscriptionBuilder
 
-▸ **getSubscriptionBuilder**\<`T`\>(`subscriptionName`, `description`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `undefined` \| `void`, {}, {}\>
+▸ **getSubscriptionBuilder**\<`T`\>(`subscriptionName`, `description`): [`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, `undefined`, `void`, `ZodAny`, `ZodAny`, `ZodAny`, {}, {}\>
 
 It returns a new instance of the `SubscriptionDefinitionBuilder` class, which is a class that is
 used to build a subscription definition
@@ -316,7 +316,7 @@ used to build a subscription definition
 
 #### Returns
 
-[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, `undefined`, `void`, `unknown`, `undefined`, `undefined` \| `void`, {}, {}\>
+[`SubscriptionDefinitionBuilder`](purista_core.SubscriptionDefinitionBuilder.md)\<`ServiceClassType`, `unknown`, `undefined`, `void`, `ZodAny`, `ZodAny`, `ZodAny`, {}, {}\>
 
 A SubscriptionDefinitionBuilder
 

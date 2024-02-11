@@ -128,7 +128,7 @@ await eventBridge.start()
 
 ### app
 
-• **app**: `Hono`\<`Env`, {}, ``"/"``\>
+• **app**: `Hono`\<`Env`, `BlankSchema`, ``"/"``\>
 
 #### Inherited from
 

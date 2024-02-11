@@ -103,17 +103,17 @@ To use the HttpEventBridge, you will need following peer-dependencies installed:
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:75](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L75)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:76](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L76)
 
 ## Properties
 
 ### app
 
-• **app**: `Hono`\<`Env`, {}, ``"/"``\>
+• **app**: `Hono`\<`Env`, `BlankSchema`, ``"/"``\>
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:69](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L69)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:70](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L70)
 
 ___
 
@@ -123,7 +123,7 @@ ___
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:73](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L73)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:74](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L74)
 
 ___
 
@@ -185,7 +185,7 @@ ___
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:70](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L70)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:71](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L71)
 
 ___
 
@@ -195,7 +195,7 @@ ___
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:71](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L71)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:72](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L72)
 
 ___
 
@@ -237,7 +237,7 @@ ___
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:68](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L68)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:69](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L69)
 
 ___
 
@@ -275,7 +275,7 @@ Shut down event bridge as gracefully as possible
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:354](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L354)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:355](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L355)
 
 ___
 
@@ -338,7 +338,7 @@ Emit a message to the eventbridge without awaiting a result
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:147](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L147)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:148](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L148)
 
 ___
 
@@ -393,7 +393,7 @@ Call a command of a service and return the result of this command
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:207](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L207)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:208](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L208)
 
 ___
 
@@ -413,7 +413,7 @@ Indicates if the eventbridge is running and works correctly
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:344](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L344)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:345](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L345)
 
 ___
 
@@ -433,7 +433,7 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:340](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L340)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:341](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L341)
 
 ___
 
@@ -510,7 +510,7 @@ ___
 | `address` | [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) |
 | `cb` | (`message`: \{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`Command`](../enums/purista_core.EBMessageType.md#command) ; `otp?`: `string` ; `payload`: \{ `parameter`: `unknown` ; `payload`: `unknown`  } ; `principalId?`: `string` ; `receiver`: [`EBMessageAddress`](../modules/purista_core.md#ebmessageaddress) ; `sender`: \{ `instanceId`: `string` ; `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }) => `Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: `string` ; `contentType`: `string` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `messageType`: [`CommandSuccessResponse`](../enums/purista_core.EBMessageType.md#commandsuccessresponse) ; `otp?`: `string` ; `payload`: `unknown` ; `principalId?`: `string` ; `receiver`: \{ `instanceId`: `string` ; `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } ; `sender`: \{ `instanceId`: `string` ; `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\> \| `Readonly`\<`Omit`\<\{ `contentEncoding`: ``"utf-8"`` ; `contentType`: ``"application/json"`` ; `correlationId`: `string` ; `eventName?`: `string` ; `id`: `string` ; `isHandledError`: `boolean` ; `messageType`: [`CommandErrorResponse`](../enums/purista_core.EBMessageType.md#commanderrorresponse) ; `otp?`: `string` ; `payload`: \{ `data?`: `unknown` ; `message`: `string` ; `status`: [`StatusCode`](../enums/purista_core.StatusCode.md)  } ; `principalId?`: `string` ; `receiver`: \{ `instanceId`: `string` ; `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } ; `sender`: \{ `instanceId`: `string` ; `serviceName`: `string` ; `serviceTarget`: `string` ; `serviceVersion`: `string`  } ; `tenantId?`: `string` ; `timestamp`: `number` ; `traceId?`: `string`  }, ``"instanceId"``\>\>\> |
 | `metadata` | `Object` |
-| `metadata.expose` | \{ `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: `string` ; `contentTypeResponse?`: `string` ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } & \{ `http`: \{ `method`: ``"DELETE"`` \| ``"GET"`` \| ``"PATCH"`` \| ``"POST"`` \| ``"PUT"`` ; `openApi?`: \{ `additionalStatusCodes?`: [`StatusCode`](../enums/purista_core.StatusCode.md)[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: [`QueryParameter`](../modules/purista_core.md#queryparameter)\<{}\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  } |
+| `metadata.expose` | \{ `contentEncodingRequest?`: `string` ; `contentEncodingResponse?`: `string` ; `contentTypeRequest?`: `string` ; `contentTypeResponse?`: `string` ; `deprecated?`: `boolean` ; `inputPayload?`: `SchemaObject` ; `outputPayload?`: `SchemaObject` ; `parameter?`: `SchemaObject`  } & \{ `http`: \{ `method`: ``"POST"`` \| ``"PUT"`` \| ``"PATCH"`` \| ``"GET"`` \| ``"DELETE"`` ; `openApi?`: \{ `additionalStatusCodes?`: [`StatusCode`](../enums/purista_core.StatusCode.md)[] ; `description`: `string` ; `isSecure`: `boolean` ; `operationId?`: `string` ; `query?`: [`QueryParameter`](../modules/purista_core.md#queryparameter)\<{}\>[] ; `summary`: `string` ; `tags?`: `string`[]  } ; `path`: `string`  }  } |
 | `eventBridgeConfig` | [`DefinitionEventBridgeConfig`](../modules/purista_core.md#definitioneventbridgeconfig) |
 
 #### Returns
@@ -523,7 +523,7 @@ ___
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:261](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L261)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:262](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L262)
 
 ___
 
@@ -550,7 +550,7 @@ Register a new subscription
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:315](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L315)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:316](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L316)
 
 ___
 
@@ -592,7 +592,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:89](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L89)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:90](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L90)
 
 ___
 
@@ -655,7 +655,7 @@ Unregister a service command
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:311](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L311)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:312](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L312)
 
 ___
 
@@ -679,7 +679,7 @@ ___
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:336](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L336)
+[base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts:337](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/HttpEventBridge.impl.ts#L337)
 
 ___
 

@@ -13,7 +13,7 @@ It will be removed/overwritten on next get request.
 
 
 @example
-* ```typescript
+```typescript
 const config = {
   bearerToken: 'YOUR_INFISICAL_TOKEN',
   baseUrl: 'https://app.infisical.com'

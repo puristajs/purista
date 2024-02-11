@@ -16,7 +16,7 @@ It will be removed/overwritten on next get request.
 
 **`Example`**
 
-* ```typescript
+```typescript
 const config = {
   projectId: 'project/MY_GOOGLE_PROJECT_ID'
 }

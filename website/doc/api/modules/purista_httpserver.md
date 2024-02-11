@@ -2,6 +2,10 @@
 
 # Module: @purista/httpserver
 
+**`Deprecated`**
+
+Since version 1.10.0. Use {@purista/hono-http-server} instead.
+
 The HttpServerService is a service which exposes commands of services as http endpoints.  
 All exposed commands must be marked as exposed endpoints in the CommandBuilder.
 
@@ -162,9 +166,13 @@ ___
 
 • `Const` **httpServerV1Service**: [`ServiceBuilder`](../classes/purista_core.ServiceBuilder.md)\<\{ `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain`: `string` ; `enableCompress`: `boolean` ; `enableCors`: `boolean` ; `enableHealthz`: `boolean` ; `enableHelmet`: `boolean` ; `fastify?`: `any` ; `healthzFunction?`: (...`args`: [`any`, `any`, ...unknown[]]) => `Promise`\<`void`\> ; `helmetOptions?`: \{ `enableCSPNonces?`: `boolean` ; `global?`: `boolean`  } ; `host`: `string` ; `logLevel?`: ``"info"`` \| ``"error"`` \| ``"warn"`` \| ``"debug"`` \| ``"trace"`` \| ``"fatal"`` ; `openApi?`: \{ `components?`: `any` ; `enabled`: `boolean` ; `externalDocs?`: \{ `description?`: `string` ; `url`: `string`  } ; `info`: \{ `contact?`: \{ `email?`: `string` ; `name?`: `string` ; `url?`: `string`  } ; `description`: `string` ; `license?`: \{ `name`: `string` ; `url?`: `string`  } ; `termsOfService?`: `string` ; `title`: `string` ; `version`: `string`  } = InfoObjectSchema; `path`: `string` ; `paths?`: `Record`\<`string`, `Record`\<`string`, `any`\>\> ; `security?`: `any`[] ; `servers?`: \{ `description?`: `string` ; `url`: `string` ; `variables?`: `any`  }[] ; `tags?`: \{ `description?`: `string` ; `externalDocs?`: \{ `description?`: `string` ; `url`: `string`  } ; `name`: `string`  }[]  } ; `port`: `number` ; `traceHeaderField`: `string` ; `uploadDir?`: `string`  }, \{ `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain?`: `string` ; `enableCompress?`: `boolean` ; `enableCors?`: `boolean` ; `enableHealthz?`: `boolean` ; `enableHelmet?`: `boolean` ; `fastify?`: `any` ; `healthzFunction?`: (...`args`: [`any`, `any`, ...unknown[]]) => `Promise`\<`void`\> ; `helmetOptions?`: \{ `enableCSPNonces?`: `boolean` ; `global?`: `boolean`  } ; `host?`: `string` ; `logLevel?`: ``"info"`` \| ``"error"`` \| ``"warn"`` \| ``"debug"`` \| ``"trace"`` \| ``"fatal"`` ; `openApi?`: \{ `components?`: `any` ; `enabled?`: `boolean` ; `externalDocs?`: \{ `description?`: `string` ; `url`: `string`  } ; `info`: \{ `contact?`: \{ `email?`: `string` ; `name?`: `string` ; `url?`: `string`  } ; `description?`: `string` ; `license?`: \{ `name`: `string` ; `url?`: `string`  } ; `termsOfService?`: `string` ; `title?`: `string` ; `version?`: `string`  } = InfoObjectSchema; `path?`: `string` ; `paths?`: `Record`\<`string`, `Record`\<`string`, `any`\>\> ; `security?`: `any`[] ; `servers?`: \{ `description?`: `string` ; `url`: `string` ; `variables?`: `any`  }[] ; `tags?`: \{ `description?`: `string` ; `externalDocs?`: \{ `description?`: `string` ; `url`: `string`  } ; `name`: `string`  }[]  } ; `port`: `number` ; `traceHeaderField?`: `string` ; `uploadDir?`: `string`  }, `HttpServerClass`\<\{ `apiMountPath?`: `string` ; `compressOptions?`: `any` ; `cookieSecret?`: `string` ; `corsOptions?`: `any` ; `domain`: `string` ; `enableCompress`: `boolean` ; `enableCors`: `boolean` ; `enableHealthz`: `boolean` ; `enableHelmet`: `boolean` ; `fastify?`: `any` ; `healthzFunction?`: (...`args`: [`any`, `any`, ...unknown[]]) => `Promise`\<`void`\> ; `helmetOptions?`: \{ `enableCSPNonces?`: `boolean` ; `global?`: `boolean`  } ; `host`: `string` ; `logLevel?`: ``"info"`` \| ``"error"`` \| ``"warn"`` \| ``"debug"`` \| ``"trace"`` \| ``"fatal"`` ; `openApi?`: \{ `components?`: `any` ; `enabled`: `boolean` ; `externalDocs?`: \{ `description?`: `string` ; `url`: `string`  } ; `info`: \{ `contact?`: \{ `email?`: `string` ; `name?`: `string` ; `url?`: `string`  } ; `description`: `string` ; `license?`: \{ `name`: `string` ; `url?`: `string`  } ; `termsOfService?`: `string` ; `title`: `string` ; `version`: `string`  } = InfoObjectSchema; `path`: `string` ; `paths?`: `Record`\<`string`, `Record`\<`string`, `any`\>\> ; `security?`: `any`[] ; `servers?`: \{ `description?`: `string` ; `url`: `string` ; `variables?`: `any`  }[] ; `tags?`: \{ `description?`: `string` ; `externalDocs?`: \{ `description?`: `string` ; `url`: `string`  } ; `name`: `string`  }[]  } ; `port`: `number` ; `traceHeaderField`: `string` ; `uploadDir?`: `string`  }\>\>
 
+**`Deprecated`**
+
+Since version 1.10.0. Use {@purista/hono-http-server} instead.
+
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts#L16)
+[packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts#L19)
 
 ___
 

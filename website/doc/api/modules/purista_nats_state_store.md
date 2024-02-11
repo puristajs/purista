@@ -6,7 +6,7 @@ A state store for using NATS (with JetStream) as storage.
 
 **`Example`**
 
-* ```typescript
+```typescript
 const config = {
   port: 8222
 }
