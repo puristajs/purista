@@ -4,8 +4,8 @@ import config from './cookieconsent-config.js';
 
 export default {
   install: (app) => {
-     document.documentElement.classList.add('cc--darkmode')
     CookieConsent.run(config);
     app.config.globalProperties.$CC = CookieConsent;
+    document.documentElement.classList.add('cc--darkmode')
   },
 };

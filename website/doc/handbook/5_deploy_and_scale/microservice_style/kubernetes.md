@@ -390,7 +390,7 @@ But, here we only focus on the PURISTA related stuff, and not go into details of
 ## Add custom endpoints
 
 There might be the need, that you want to add some custom endpoints.
-As an example, in [2.1 Service - Advanced](../../2_building_business-logic/service/3_service_advanced.md) we add [Prometheus](https://prometheus.io) to our service.  To allow Prometheus to collect the data, we need an additional `/metrics` endpoint.
+As an example, in [2.1 Service - Advanced](../../2_building_business-logic/advanced/index.md) we add [Prometheus](https://prometheus.io) to our service.  To allow Prometheus to collect the data, we need an additional `/metrics` endpoint.
 
 We can simply extend our file `/src/index.ts`, to provide the endpoint `/metrics`
 

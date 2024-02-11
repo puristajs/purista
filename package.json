@@ -11,7 +11,7 @@
     "test:unit": "jest  --config=jest.unit.ts",
     "test:integration": "jest --runInBand --config=jest.integration.ts",
     "dev:doc": "cd website && npm run dev",
-    "update:doc": "npm run gitclean && typedoc && git add --all && git commit -S -am \"doc: update api documentation\" && cd website npm run build && git-cliff > CHANGELOG.md && git commit -am \"doc: update CHANGELOG\"",
+    "update:doc": "npm run gitclean && typedoc && git add --all && git commit -S -am \"doc: update api documentation\" && cd website && npm run build && git-cliff > CHANGELOG.md && git commit -am \"doc: update CHANGELOG\"",
     "release:major": "npm run gitclean && npm run release:prepare && npm run update:doc && npm run gitclean && npm version major --no-git-tag-version --workspaces && npm run commit:major && npm publish --workspaces",
     "release:minor": "npm run gitclean && npm run release:prepare && npm run update:doc && npm run gitclean && npm version minor --no-git-tag-version --workspaces && npm run commit:minor && npm publish --workspaces",
     "release:patch": "npm run gitclean && npm run release:prepare && npm run update:doc && npm run gitclean && npm version patch --no-git-tag-version --workspaces && npm run commit:patch && npm publish --workspaces",
@@ -58,8 +58,5 @@
     "typescript": "^5.3.3",
     "vitest": "^1.2.2"
   },
-  "packageManager": "npm@9.6.2",
-  "dependencies": {
-    "vanilla-cookieconsent": "^3.0.0-rc.17"
-  }
+  "packageManager": "npm@9.6.2"
 }

@@ -8,7 +8,7 @@ import Posts from './components/blog/Posts.vue'
 import Post from './components/blog/Post.vue'
 import PostDetail from './components/blog/PostDetail.vue'
 import {ExternalLink} from './components/ExternalLink.js'
-import CookieConsentVue from './cookieconsentvue.js';
+// import CookieConsentVue from './cookieconsentvue.js';
 
 export default {
   extends: DefaultTheme,
@@ -22,6 +22,6 @@ export default {
     app.component('Posts', Posts)
     app.component('Post', Post)
     app.component('PostDetail', PostDetail)
-    app.use(CookieConsentVue)
-  }
+    // app.use(CookieConsentVue)
+  },
 } satisfies Theme

@@ -223,6 +223,6 @@ describe('service User version 1 - command signUp', () => {
 
 :::
 
-You can learn more about unit testing a command here: [Unit test a command](../2_building_business-logic/command/unit-test-a-command.md)
+You can learn more about unit testing a command here: [Unit test a command](../2_building_business-logic/command/test-a-command.md)
 
 ## Expose as HTTP endpoint

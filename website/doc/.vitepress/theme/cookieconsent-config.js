@@ -1,7 +1,4 @@
-
-
-
- export default {
+export default {
     guiOptions: {
       consentModal: {
         layout: 'box wide',
