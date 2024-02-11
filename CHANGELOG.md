@@ -2,7 +2,7 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [1.10.0] - 2024-02-11
 
 ### Bug Fixes
 
@@ -28,6 +28,7 @@ All notable changes to this project will be documented in this file.
 - Minor readme changes
 - Update documentation
 - Fix api doc generation
+- Update doc
 - Update doc
 
 ### Features

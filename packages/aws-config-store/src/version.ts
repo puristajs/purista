@@ -1,1 +1,1 @@
-export const puristaVersion = '1.9.0'
+export const puristaVersion = '1.10.0'
