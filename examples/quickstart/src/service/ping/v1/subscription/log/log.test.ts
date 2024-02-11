@@ -39,7 +39,7 @@ describe('service Ping version 1 - subscription log', () => {
     const context = logSubscriptionBuilder.getSubscriptionContextMock(message, sandbox)
 
     // execute the subscription function
-    const result = await log(context.mock, payload, parameter)
+    const result = await log(context.mock, payload, parameter as any)
 
     expect(result).toBeUndefined()
   })
