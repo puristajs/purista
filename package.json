@@ -16,7 +16,7 @@
     "release:minor": "npm run gitclean && npm run release:prepare && npm run update:doc && npm run gitclean && npm version minor --no-git-tag-version --workspaces && npm run commit:minor && npm publish --workspaces",
     "release:patch": "npm run gitclean && npm run release:prepare && npm run update:doc && npm run gitclean && npm version patch --no-git-tag-version --workspaces && npm run commit:patch && npm publish --workspaces",
     "gitclean": "./scripts/isGitClean.sh",
-    "release:prepare": "npm run lint build test",
+    "release:prepare": "npm run lint & npm run build & npm run test",
     "tag": "git push && git push --tags && rm -rf build/temp",
     "commit:major": "npm version major --no-git-tag-version && scripts/commitVersion.sh && npm run build",
     "commit:minor": "npm version minor --no-git-tag-version && scripts/commitVersion.sh && npm run build",
