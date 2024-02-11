@@ -32,6 +32,7 @@ Unhandled error are automatically converted into "500 Internal Server Error" to 
 
 - [getErrorResponse](purista_core.UnhandledError.md#geterrorresponse)
 - [intoHandledError](purista_core.UnhandledError.md#intohandlederror)
+- [toJSON](purista_core.UnhandledError.md#tojson)
 - [toString](purista_core.UnhandledError.md#tostring)
 - [fromError](purista_core.UnhandledError.md#fromerror)
 - [fromMessage](purista_core.UnhandledError.md#frommessage)
@@ -128,6 +129,29 @@ HandledError
 #### Defined in
 
 [core/Error/UnhandledError.impl.ts:61](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L61)
+
+___
+
+### toJSON
+
+▸ **toJSON**(): `Object`
+
+#### Returns
+
+`Object`
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `data?` | `unknown` | addition data |
+| `message` | `string` | a human readable error message |
+| `name` | `string` | - |
+| `stack` | `undefined` \| `string` | - |
+| `status` | [`StatusCode`](../enums/purista_core.StatusCode.md) | the error status code |
+| `traceId?` | `string` | the trace if of the request |
+
+#### Defined in
+
+[core/Error/UnhandledError.impl.ts:88](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L88)
 
 ___
 

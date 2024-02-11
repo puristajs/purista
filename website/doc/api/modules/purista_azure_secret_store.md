@@ -16,7 +16,7 @@ It will be removed/overwritten on next get request.
 
 **`Example`**
 
-* ```typescript
+```typescript
 const config = {
   vaultUrl: 'https://[KEY_VAULT_NAME].vault.azure.net'
 }

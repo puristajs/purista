@@ -10,7 +10,7 @@ If JetStream is not available, subscription fall back to live-subscriptions with
 
 **`Example`**
 
-* ```typescript
+```typescript
 import { NatsBridge } from '@purista/natsbridge'
 
 // create and init our eventbridge
@@ -18,7 +18,6 @@ import { NatsBridge } from '@purista/natsbridge'
   await eventBridge.start()
 
 ```
- *
 
 ## Table of contents
 

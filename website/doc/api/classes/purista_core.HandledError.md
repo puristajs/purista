@@ -29,6 +29,7 @@ Scenarios are input validation failures or "404 Not Found" errors which should b
 ### Methods
 
 - [getErrorResponse](purista_core.HandledError.md#geterrorresponse)
+- [toJSON](purista_core.HandledError.md#tojson)
 - [toString](purista_core.HandledError.md#tostring)
 - [fromError](purista_core.HandledError.md#fromerror)
 - [fromMessage](purista_core.HandledError.md#frommessage)
@@ -113,6 +114,29 @@ ErrorResponsePayload
 #### Defined in
 
 [core/Error/HandledError.impl.ts:65](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L65)
+
+___
+
+### toJSON
+
+▸ **toJSON**(): `Object`
+
+#### Returns
+
+`Object`
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `data?` | `unknown` | addition data |
+| `message` | `string` | a human readable error message |
+| `name` | `string` | - |
+| `stack` | `undefined` \| `string` | - |
+| `status` | [`StatusCode`](../enums/purista_core.StatusCode.md) | the error status code |
+| `traceId?` | `string` | the trace if of the request |
+
+#### Defined in
+
+[core/Error/HandledError.impl.ts:84](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L84)
 
 ___
 

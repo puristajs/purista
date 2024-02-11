@@ -6,7 +6,7 @@ If JetStream is enabled, subscriptions which are marked as durable are persisted
 If JetStream is not available, subscription fall back to live-subscriptions without any persistence.  
 
 @example
-* ```typescript
+```typescript
 import { NatsBridge } from '@purista/natsbridge'
 
 // create and init our eventbridge
@@ -14,7 +14,7 @@ import { NatsBridge } from '@purista/natsbridge'
   await eventBridge.start()
 
 ```
- * @module
+ @module
  */
 export * from './getDefaultNatsBridgeConfig.js'
 export * from './getQueueGroupName.impl.js'

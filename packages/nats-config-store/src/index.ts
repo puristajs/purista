@@ -3,7 +3,7 @@ A config store for using NATS (with JetStream) as storage.
 JetStream must be enabled at the NATS broker.
 
 @example
-* ```typescript
+ ```typescript
 const config = {
   port: 8222
 }

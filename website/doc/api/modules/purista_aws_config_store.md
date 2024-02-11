@@ -16,7 +16,7 @@ It will be removed/overwritten on next get request.
 
 **`Example`**
 
-* ```typescript
+```typescript
 const config = {
   region: 'us-east-1'
 }

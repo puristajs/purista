@@ -352,7 +352,7 @@ ___
 
 ### CommandDefinitionList
 
-Ƭ **CommandDefinitionList**\<`ServiceClassType`\>: [`CommandDefinition`](purista_core.md#commanddefinition)\<`ServiceClassType`, [`CommandDefinitionMetadataBase`](purista_core.md#commanddefinitionmetadatabase), `any`, `any`, `any`, `any`, `any`, `any`, `any`\>[]
+Ƭ **CommandDefinitionList**\<`ServiceClassType`\>: [`CommandDefinition`](purista_core.md#commanddefinition)\<`ServiceClassType`, [`CommandDefinitionMetadataBase`](purista_core.md#commanddefinitionmetadatabase), `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`\>[]
 
 Helper type for creating list of service commands to be passed as input to service class
 
@@ -1431,7 +1431,7 @@ ___
 
 ### SubscriptionDefinitionList
 
-Ƭ **SubscriptionDefinitionList**\<`ServiceClassType`\>: [`SubscriptionDefinition`](purista_core.md#subscriptiondefinition)\<`ServiceClassType`, `any`, `any`, `any`, `any`\>[]
+Ƭ **SubscriptionDefinitionList**\<`ServiceClassType`\>: [`SubscriptionDefinition`](purista_core.md#subscriptiondefinition)\<`ServiceClassType`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`\>[]
 
 Helper type for creating list of service commands to be passed as input to service class
 
@@ -2137,7 +2137,7 @@ ___
 
 ## Command
 
-• **CommandDefinitionBuilder**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>: `Object`
+• **CommandDefinitionBuilder**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>: `Object`
 
 Command definition builder is a helper to create and define a command for a service.
 It helps to set all needed information like schemas and hooks.
@@ -2151,17 +2151,17 @@ A working schema definition needs at least a command name, a short description a
 | :------ | :------ |
 | `ServiceClassType` | extends [`ServiceClass`](../interfaces/purista_core.ServiceClass.md) |
 | `MessagePayloadType` | `unknown` |
-| `MessageParamsType` | `undefined` |
+| `MessageParamsType` | {} |
 | `MessageResultType` | `void` |
-| `FunctionPayloadType` | `MessagePayloadType` |
-| `FunctionParamsType` | `MessageParamsType` |
-| `FunctionResultType` | `MessageResultType` |
+| `PayloadSchema` | extends `Schema` = `ZodAny` |
+| `ParameterSchema` | extends `Schema` = `ZodAny` |
+| `ResultSchema` | extends `Schema` = `ZodAny` |
 | `Invokes` | {} |
 | `EmitListType` | {} |
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:36](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L36)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:38](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L38)
 
 ### CommandAfterGuardHook
 
@@ -3698,7 +3698,7 @@ set a state value in the state store
 
 ## Subscription
 
-• **SubscriptionDefinitionBuilder**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionResultType`, `Invokes`, `EmitListType`\>: `Object`
+• **SubscriptionDefinitionBuilder**\<`ServiceClassType`, `MessagePayloadType`, `MessageParamsType`, `MessageResultType`, `PayloadSchema`, `ParameterSchema`, `ResultSchema`, `Invokes`, `EmitListType`\>: `Object`
 
 Subscription definition builder is a helper to create and define a subscriptions for a service.
 It helps to set all needed filters.
@@ -3713,15 +3713,15 @@ A working schema definition needs at least a subscription name, a short descript
 | `MessagePayloadType` | `unknown` |
 | `MessageParamsType` | `undefined` |
 | `MessageResultType` | `void` |
-| `FunctionPayloadType` | `MessagePayloadType` |
-| `FunctionParamsType` | `MessageParamsType` |
-| `FunctionResultType` | `MessageResultType` \| `void` \| `undefined` |
+| `PayloadSchema` | extends `Schema` = `ZodAny` |
+| `ParameterSchema` | extends `Schema` = `ZodAny` |
+| `ResultSchema` | extends `Schema` = `ZodAny` |
 | `Invokes` | {} |
 | `EmitListType` | {} |
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L37)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:40](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L40)
 
 ### Subscription
 

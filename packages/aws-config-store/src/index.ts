@@ -11,8 +11,8 @@ This will return the cached config if available and if ttl is not exceeded.
 If a config value exceeds the ttl, it does not automatically get removed from cache.
 It will be removed/overwritten on next get request.
 
-@example
-* ```typescript
+@example 
+```typescript
 const config = {
   region: 'us-east-1'
 }

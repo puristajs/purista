@@ -146,7 +146,7 @@ export default defineConfig({
             },
             {
               text: '@purista/dapr-sdk',
-              link: '/api/classes/purista_dapr_sdk.DaprEventBridge.md',
+              link: '/api/modules/purista_dapr_sdk.md',
             },
             {
               text: '@purista/mqttbridge',
@@ -163,11 +163,11 @@ export default defineConfig({
           items: [
             {
               text: '@purista/aws-config-store',
-              link: '/api/classes/purista_aws_config_store.AWSConfigStore.md',
+              link: '/api/modules/purista_aws_config_store.md',
             },
             {
               text: '@purista/dapr-sdk',
-              link: '/api/classes/purista_dapr_sdk.DaprConfigStore.md',
+              link: '/api/modules/purista_dapr_sdk.md',
             },
             {
               text: '@purista/nats-config-store',
@@ -184,19 +184,19 @@ export default defineConfig({
           items: [
             {
               text: '@purista/aws-secret-store',
-              link: '/api/classes/purista_aws_secret_store.AWSSecretStore.md',
+              link: '/api/modules/purista_aws_secret_store.md',
             },
             {
               text: '@purista/azure-secret-store',
-              link: '/api/classes/purista_azure_secret_store.AzureSecretStore.md',
+              link: '/api/modules/purista_azure_secret_store.md',
             },
             {
               text: '@purista/dapr-sdk',
-              link: '/api/classes/purista_dapr_sdk.DaprSecretStore.md',
+              link: '/api/modules/purista_dapr_sdk.md',
             },
             {
               text: '@purista/gcloud-secret-store',
-              link: '/api/classes/purista_gcloud_secret_store.GoogleSecretStore.md',
+              link: '/api/modules/purista_gcloud_secret_store.md',
             },
             {
               text: '@purista/infisical-secret-store',
@@ -209,7 +209,7 @@ export default defineConfig({
           items: [
             {
               text: '@purista/dapr-sdk',
-              link: '/api/classes/purista_dapr_sdk.DaprStateStore.md',
+              link: '/api/modules/purista_dapr_sdk.md',
             },
             {
               text: '@purista/nats-state-store',

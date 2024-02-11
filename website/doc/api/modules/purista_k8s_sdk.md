@@ -9,93 +9,107 @@ Here is a full example, how the index file might look like, if you want to deplo
 **`Example`**
 
 ```typescript
-// src/index.ts
 import { serve } from '@hono/node-server'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
+import { AmqpBridge } from '@purista/amqpbridge'
 import {
-  DefaultConfigStore,
-  DefaultEventBridge,
-  DefaultSecretStore,
-  DefaultStateStore,
-  gracefulShutdown,
-  initLogger,
+ DefaultConfigStore,
+ DefaultSecretStore,
+ DefaultStateStore,
+ getNewInstanceId,
+ gracefulShutdown,
+ initLogger,
+ UnhandledError,
 } from '@purista/core'
 import { getHttpServer } from '@purista/k8s-sdk'
 
-import { theServiceV1Service } from './service/theService/v1/'
+import { theServiceV1Service } from './service/theService/v1/index.js'
 
 const main = async () => {
-  // create a logger
-  const logger = initLogger()
+ // create a logger
+ const logger = initLogger('debug')
 
-  // optional: set up opentelemetry if you like to use it
-  const exporter = new OTLPTraceExporter({
-    url: `http://localhost:14268/api/traces`,
-  })
-  const spanProcessor = new SimpleSpanProcessor(exporter)
+ // add listeners to log really unexpected errors
+ process.on('uncaughtException', (error, origin) => {
+   const err = UnhandledError.fromError(error)
+   logger.error({ err, origin }, `unhandled error: ${err.message}`)
+ })
 
-  // optional: set up stores if they are needed for your service
-  const secretStore = new DefaultSecretStore({ logger })
-  const configStore = new DefaultConfigStore({ logger })
-  const stateStore = new DefaultStateStore({ logger })
+ process.on('unhandledRejection', (error, origin) => {
+   const err = UnhandledError.fromError(error)
+   logger.error({ err, origin }, `unhandled rejection: ${err.message}`)
+ })
 
-  // set up the eventbridge and start the event bridge
-  const eventBridge = new DefaultEventBridge({ spanProcessor })
-  await eventBridge.start()
+ // optional: set up opentelemetry if you like to use it
+ const exporter = new OTLPTraceExporter({
+   url: `http://localhost:14268/api/traces`,
+ })
+ const spanProcessor = new SimpleSpanProcessor(exporter)
 
-  // set up the service
-  const theService = theServiceV1Service.getInstance(eventBridge, {
-    spanProcessor,
-    configStore,
-    secretStore,
-    stateStore,
-  })
-  await theService.start()
+ // optional: set up stores if they are needed for your service
+ const secretStore = new DefaultSecretStore({ logger })
+ const configStore = new DefaultConfigStore({ logger })
+ const stateStore = new DefaultStateStore({ logger })
 
-  // create http server
-  const app = getHttpServer({
-    logger,
-    // check event bridge health if /healthz endpoint is called
-    healthFn: () => eventBridge.isHealthy(),
-    // optional: expose the commands if they are defined to have url endpoint
-    services: theService,
-    // optional: expose service endpoints at [apiMountPath]/v[serviceVersion]/[path defined for command]
-    // defaults to /api
-    apiMountPath: '/api',
-  })
+ // set up the eventbridge and start the event bridge
+ const eventBridge = new AmqpBridge({
+   spanProcessor,
+   instanceId: process.env.HOSTNAME || getNewInstanceId(),
+   url: process.env.AMQP_URL,
+ })
+ await eventBridge.start()
 
-   // start the http server
-   // defaults to port 3000
-   // optional: you can set the port in the optional parameter of this method
-   const server = serve({
-     fetch: app.fetch,
-   })
+ // set up the service
+ const theService = theServiceV1Service.getInstance(eventBridge, {
+   spanProcessor,
+   configStore,
+   secretStore,
+   stateStore,
+ })
+ await theService.start()
 
-  // register shut down methods
-  gracefulShutdown(logger, [
-    // begin with the event bridge to no longer accept incoming messages
-    eventBridge,
-    // optional: shut down the service
-    theService,
-    // optional: shut down the secret store
-    secretStore,
-    // optional: shut down the config store
-    configStore,
-    // optional: shut down the state store
-    stateStore,
-    // stop the http server
-    {
-       name: 'httpserver',
-       destroy: async () => {
-       server.closeIdleConnections()
-       server.close()
-    },
- },,
-  ])
+ // create http server
+ const app = getHttpServer({
+   logger,
+   // check event bridge health if /healthz endpoint is called
+   healthFn: () => eventBridge.isHealthy(),
+   // optional: expose the commands if they are defined to have url endpoint
+   services: theService,
+   // optional: expose service endpoints at [apiMountPath]/v[serviceVersion]/[path defined for command]
+   // defaults to /api
+   apiMountPath: '/api',
+ })
+
+ // start the http server
+ // defaults to port 3000
+ // optional: you can set the port in the optional parameter of this method
+ const server = serve({
+   fetch: app.fetch,
+ })
+
+ // register shut down methods
+ gracefulShutdown(logger, [
+   // begin with the event bridge to no longer accept incoming messages
+   eventBridge,
+   // optional: shut down the service
+   theService,
+   // optional: shut down the secret store
+   secretStore,
+   // optional: shut down the config store
+   configStore,
+   // optional: shut down the state store
+   stateStore,
+   {
+     name: 'httpserver',
+     destroy: async () =>
+       new Promise((resolve, reject) => server.close((err) => (err ? reject(err) : resolve(undefined)))),
+   },
+ ])
 }
 
 main()
+
 ```
 
 ## Table of contents
@@ -158,7 +172,7 @@ The configuration object for creating the k8s http server
 | Name | Type | Default value | Description |
 | :------ | :------ | :------ | :------ |
 | `services` | `undefined` \| [`Service`](../classes/purista_core.Service.md)\<`unknown`\> \| [`Service`](../classes/purista_core.Service.md)\<`unknown`\>[] | `undefined` | instance of the service to add |
-| `app` | `Hono`\<`Env`, {}, ``"/"``\> | `undefined` | - |
+| `app` | `Hono`\<`Env`, `BlankSchema`, ``"/"``\> | `undefined` | - |
 | `logger` | [`Logger`](../classes/purista_core.Logger.md) | `undefined` | the logger used for logging the addition |
 | `apiMountPath` | `string` | `'/api'` | - |
 
@@ -174,13 +188,13 @@ The configuration object for creating the k8s http server
 
 #### Defined in
 
-[addServiceEndpoints.impl.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/k8s-sdk/src/addServiceEndpoints.impl.ts#L26)
+[addServiceEndpoints.impl.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/k8s-sdk/src/addServiceEndpoints.impl.ts#L27)
 
 ___
 
 ### getHttpServer
 
-▸ **getHttpServer**(`input`, `name?`): `Hono`\<`Env`, {}, ``"/"``\>
+▸ **getHttpServer**(`input`, `name?`): `Hono`\<`Env`, `BlankSchema`, ``"/"``\>
 
 Create a Hono web server.
 It adds per default the /healthz endpoint
@@ -197,10 +211,10 @@ The returned server is not started. You need to do it manually.
 
 #### Returns
 
-`Hono`\<`Env`, {}, ``"/"``\>
+`Hono`\<`Env`, `BlankSchema`, ``"/"``\>
 
 a object with server, router, start and destroy functions and name var
 
 #### Defined in
 
-[getHttpServer.impl.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/k8s-sdk/src/getHttpServer.impl.ts#L20)
+[getHttpServer.impl.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/k8s-sdk/src/getHttpServer.impl.ts#L21)

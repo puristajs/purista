@@ -7,7 +7,7 @@ JetStream must be enabled at the NATS broker.
 
 **`Example`**
 
-* ```typescript
+```typescript
 const config = {
   port: 8222
 }
