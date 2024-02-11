@@ -12,8 +12,8 @@ export default defineConfig({
   lang: 'en-US',
   head: [
       ['link', { rel: 'stylesheet', type: 'text/css', media: 'all', href: '/cookieconsent.css' }],
-      ['script', { src: '/cookieconsent.js'  }],
-      ['script', { src: '/cookieconsent-init.js' }],
+    ['script', { src: '/cookieconsent.js'  }],
+    ['script', { src: '/cookieconsent-init.js'}],
     ],
   title: "PURISTA",
   //appearance: false,
