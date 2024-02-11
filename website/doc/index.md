@@ -15,7 +15,7 @@ hero:
   actions:
     - theme: brand
       text: Get Started
-      link: /handbook/
+      link: /handbook/cli
     - theme: alt
       text: API Documentation
       link: /api/README
@@ -29,20 +29,25 @@ features:
   - title: K.I.S.S
     details: simply just implement your logic without overhead
     link: /handbook/1._get-started/0_concept
+    icon: 💋
 
   - title: Modular & extendable
     details: adding new functions and services is simple, fast and isolated
     link: /handbook/1._get-started/0_concept
+    icon: 📦
 
   - title: Scales
     details: runs and scales from small single instance up to cloud clusters and cloud functions.
     link: /handbook/6._scale/0_scale
+    icon: 📈
 
   - title: Compliance & Monitoring
     details: flexible to trace, audit and monitor and to get a clear picture of what's going on
     link: /handbook/5._tracing/0_opentelemetry
+    icon: 🕵️
 
   - title: Easy to test
     details: "easy to test with ready to go mocks & stubs which increases productivity and reduces costs"
     link: /handbook/2._start-building/2.2_command/2_test-a-command
+    icon: ✅
 ---
