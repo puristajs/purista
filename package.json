@@ -58,5 +58,8 @@
     "typescript": "^5.3.3",
     "vitest": "^1.2.2"
   },
-  "packageManager": "npm@9.6.2"
+  "packageManager": "npm@9.6.2",
+  "dependencies": {
+    "vanilla-cookieconsent": "^3.0.0-rc.17"
+  }
 }

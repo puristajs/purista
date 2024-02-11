@@ -20,10 +20,9 @@ The logger is expected to log:
 - serviceVersion
 - serviceTarget (available logged in context of a command or subscription)
 - principalId (if available)
-- traceId
-- spanId
-- parentSpanId
-- traceFlags
+- tenantId (if available)
+- traceId (custom traceId)
+- OpenTelemetry traces
 
 When messages are logged - the message payload will be removed to prevent leaking of data.
 

@@ -5,3 +5,5 @@ order: 100000
 ---
 
 # PURISTA Quickstart
+
+_documentation soon_
