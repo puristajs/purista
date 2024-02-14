@@ -324,7 +324,7 @@ export class HonoServiceClass<
           const parameter = {
             ...c.req.query(),
             ...c.req.param(),
-            ...c.get('purista'),
+            ...c.get('additionalParameter'),
           }
 
           if (method !== 'get' && method !== 'delete') {
@@ -355,7 +355,7 @@ export class HonoServiceClass<
             }
           }
 
-          const traceId = c.req.header(this.config.traceHeaderField)
+          const traceId = c.get('traceId') || c.req.header(this.config.traceHeaderField)
 
           const result = await this.invoke(
             {
