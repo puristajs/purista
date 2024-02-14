@@ -1,6 +1,6 @@
 {
   "name": "@purista/hono-http-server",
-  "version": "1.10.0",
+  "version": "1.10.1",
   "description": "A http server service based on Hono for PURISTA backend framework",
   "homepage": "https://purista.dev",
   "repository": {

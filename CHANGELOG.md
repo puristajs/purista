@@ -2,6 +2,20 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.1] - 2024-02-14
+
+### Bug Fixes
+
+- Hono vars
+
+### Documentation
+
+- Update doc
+- Chore update
+- Fix analytics
+- Update
+- Update
+
 ## [1.10.0] - 2024-02-11
 
 ### Bug Fixes
@@ -90,6 +104,7 @@ All notable changes to this project will be documented in this file.
 - Add static file servering to example
 - Improve tests
 - Fix build package.json
+- Bump versions to 1.10.0
 
 ## [1.9.1] - 2024-01-26
 
