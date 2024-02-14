@@ -2,11 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.3] - 2024-02-14
+
+### Bug Fixes
+
+- Hono webserver request content type
+
 ## [1.10.2] - 2024-02-14
 
 ### Miscellaneous Tasks
 
 - Minor fixes and dep updates
+- Bump versions to 1.10.2
 
 ## [1.10.1] - 2024-02-14
 
