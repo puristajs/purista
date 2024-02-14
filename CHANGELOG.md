@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.2] - 2024-02-14
+
+### Miscellaneous Tasks
+
+- Minor fixes and dep updates
+
 ## [1.10.1] - 2024-02-14
 
 ### Bug Fixes
@@ -15,6 +21,10 @@ All notable changes to this project will be documented in this file.
 - Fix analytics
 - Update
 - Update
+
+### Miscellaneous Tasks
+
+- Bump versions to 1.10.1
 
 ## [1.10.0] - 2024-02-11
 
