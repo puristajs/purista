@@ -61,7 +61,11 @@ export const getSubscriptionFunctionWithValidation = function <
         if (validationResult.success) {
           return validationResult.data as FunctionPayloadType
         }
-        const err = new HandledError(StatusCode.BadRequest, undefined, validationResult.issues)
+        const err = new HandledError(
+          StatusCode.BadRequest,
+          'input validation for payload failed',
+          validationResult.issues,
+        )
         span.recordException(err)
         span.setStatus({
           code: SpanStatusCode.ERROR,
@@ -80,7 +84,11 @@ export const getSubscriptionFunctionWithValidation = function <
           return validationResult.data as FunctionParamsType
         }
 
-        const err = new HandledError(StatusCode.BadRequest, undefined, validationResult.issues)
+        const err = new HandledError(
+          StatusCode.BadRequest,
+          'input validation for parameter failed',
+          validationResult.issues,
+        )
         span.recordException(err)
         span.setStatus({
           code: SpanStatusCode.ERROR,
@@ -121,7 +129,7 @@ export const getSubscriptionFunctionWithValidation = function <
         return validationResult.data as FunctionResultType
       }
 
-      const err = new UnhandledError(StatusCode.InternalServerError)
+      const err = new UnhandledError(StatusCode.InternalServerError, 'output validation failed')
       span.recordException(err)
       span.setStatus({
         code: SpanStatusCode.ERROR,

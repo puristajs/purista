@@ -69,13 +69,17 @@ export const getCommandFunctionWithValidation = function <
         if (validationResult.success) {
           return validationResult.data as FunctionPayloadType
         }
-        const err = new HandledError(StatusCode.BadRequest, undefined, validationResult.issues)
+        const err = new HandledError(
+          StatusCode.BadRequest,
+          'input validation for payload failed:',
+          validationResult.issues,
+        )
         span.recordException(err)
         span.setStatus({
           code: SpanStatusCode.ERROR,
           message: err.message,
         })
-        logger.warn({ ...span.spanContext() }, 'input validation for payload failed:', err.message)
+        logger.warn({ ...span.spanContext() }, 'input validation for payload failed', err.message)
         throw err
       })
     }
@@ -88,13 +92,17 @@ export const getCommandFunctionWithValidation = function <
           return validationResult.data as FunctionParamsType
         }
 
-        const err = new HandledError(StatusCode.BadRequest, undefined, validationResult.issues)
+        const err = new HandledError(
+          StatusCode.BadRequest,
+          'input validation for parameter failed:',
+          validationResult.issues,
+        )
         span.recordException(err)
         span.setStatus({
           code: SpanStatusCode.ERROR,
           message: err.message,
         })
-        logger.warn({ ...span.spanContext() }, 'input validation for parameter failed:', err.message)
+        logger.warn({ ...span.spanContext() }, 'input validation for parameter failed', err.message)
         throw err
       })
     }
@@ -129,13 +137,13 @@ export const getCommandFunctionWithValidation = function <
         return validationResult.data as FunctionResultType
       }
 
-      const err = new UnhandledError(StatusCode.InternalServerError)
+      const err = new UnhandledError(StatusCode.InternalServerError, 'output validation failed')
       span.recordException(err)
       span.setStatus({
         code: SpanStatusCode.ERROR,
         message: err.message,
       })
-      logger.warn({ ...span.spanContext() }, 'output validation failed:', err.message)
+      logger.warn({ ...span.spanContext() }, 'output validation failed', err.message)
       throw err
     })
   }

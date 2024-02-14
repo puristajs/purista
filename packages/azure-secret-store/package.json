@@ -57,7 +57,7 @@
   "devDependencies": {
     "@types/node": "^20.11.17",
     "@types/sinon": "^17.0.3",
-    "dotenv": "^16.4.1",
+    "dotenv": "^16.4.4",
     "sinon": "^17.0.1",
     "testcontainers": "^10.6.0",
     "tshy": "^1.11.0",
