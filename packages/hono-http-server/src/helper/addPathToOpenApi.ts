@@ -21,8 +21,8 @@ export const addPathToOpenApi = (
 
   const method = expose.http.method.toLowerCase() as 'put' | 'post' | 'patch' | 'get' | 'delete'
 
-  const requestContentType = expose.contentTypeResponse || 'application/json'
-  const _requestEncodingType = expose.contentEncodingResponse || 'utf-8'
+  const requestContentType = expose.contentTypeRequest || 'application/json'
+  const _requestEncodingType = expose.contentEncodingRequest || 'utf-8'
 
   const responseContentType = expose.contentTypeResponse || 'application/json'
   const responseEncodingType = expose.contentEncodingResponse || 'utf-8'
