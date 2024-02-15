@@ -1,6 +1,6 @@
 {
   "name": "@purista/nats-config-store",
-  "version": "1.10.3",
+  "version": "1.10.4",
   "description": "State store with NATS as backend",
   "homepage": "https://purista.dev",
   "repository": {

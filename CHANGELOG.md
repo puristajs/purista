@@ -2,11 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.4] - 2024-02-15
+
+### Bug Fixes
+
+- Mutable issue in createInvokeFunctionProxy
+
 ## [1.10.3] - 2024-02-14
 
 ### Bug Fixes
 
 - Hono webserver request content type
+
+### Miscellaneous Tasks
+
+- Bump versions to 1.10.3
 
 ## [1.10.2] - 2024-02-14
 
