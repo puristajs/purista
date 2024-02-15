@@ -60,10 +60,11 @@ export const getCommandContextMock = <
   const invokeMocks: Record<string, Record<string, Record<string, SinonStub>>> = {}
 
   const getInvokeProxy = <TFaux>(address?: EBMessageAddress, lvl = 0): TFaux => {
-    const adr = address ?? {
+    const adr = {
       serviceName: '',
       serviceTarget: '',
       serviceVersion: '',
+      ...address,
     }
 
     return new Proxy(() => {}, {
@@ -74,32 +75,41 @@ export const getCommandContextMock = <
 
         const x = obj[name]
         if (lvl === 0) {
-          adr.serviceName = name
-          if (!invokeMocks[adr.serviceName]) {
-            invokeMocks[adr.serviceName] = {}
+          const na = {
+            ...adr,
+            serviceName: name,
           }
-          return getInvokeProxy<typeof x>(adr, lvl + 1)
+          if (!invokeMocks[na.serviceName]) {
+            invokeMocks[na.serviceName] = {}
+          }
+          return getInvokeProxy<typeof x>(na, lvl + 1)
         }
         if (lvl === 1) {
-          adr.serviceVersion = name
-          if (!invokeMocks[adr.serviceName][adr.serviceVersion]) {
-            invokeMocks[adr.serviceName][adr.serviceVersion] = {}
+          const na = {
+            ...adr,
+            serviceVersion: name,
+          }
+          if (!invokeMocks[na.serviceName][na.serviceVersion]) {
+            invokeMocks[na.serviceName][na.serviceVersion] = {}
           }
           return getInvokeProxy<typeof x>(adr, lvl + 1)
         }
 
         if (lvl === 2) {
-          adr.serviceTarget = name
-          if (!invokeMocks[adr.serviceName][adr.serviceVersion][adr.serviceTarget]) {
-            invokeMocks[adr.serviceName][adr.serviceVersion][adr.serviceTarget] = sandbox?.stub() ?? stub()
+          const na = {
+            ...adr,
+            serviceTarget: name,
+          }
+          if (!invokeMocks[na.serviceName][na.serviceVersion][na.serviceTarget]) {
+            invokeMocks[na.serviceName][na.serviceVersion][na.serviceTarget] = sandbox?.stub() ?? stub()
 
-            invokeMocks[adr.serviceName][adr.serviceVersion][adr.serviceTarget].rejects(
+            invokeMocks[na.serviceName][na.serviceVersion][na.serviceTarget].rejects(
               new Error(
-                `invocation of ${adr.serviceTarget} in service ${adr.serviceName} version ${adr.serviceVersion} is not stubbed`,
+                `invocation of ${na.serviceTarget} in service ${na.serviceName} version ${na.serviceVersion} is not stubbed`,
               ),
             )
           }
-          return invokeMocks[adr.serviceName]?.[adr.serviceVersion]?.[adr.serviceTarget]
+          return invokeMocks[na.serviceName]?.[na.serviceVersion]?.[na.serviceTarget]
         }
       },
     }) as TFaux
