@@ -2,11 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.6] - 2024-02-15
+
+### Bug Fixes
+
+- Mocked context invoke
+
 ## [1.10.5] - 2024-02-15
 
 ### Bug Fixes
 
 - Mutable obj issue in context mocks
+
+### Miscellaneous Tasks
+
+- Bump versions to 1.10.5
 
 ## [1.10.4] - 2024-02-15
 
