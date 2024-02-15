@@ -2,11 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.5] - 2024-02-15
+
+### Bug Fixes
+
+- Mutable obj issue in context mocks
+
 ## [1.10.4] - 2024-02-15
 
 ### Bug Fixes
 
 - Mutable issue in createInvokeFunctionProxy
+
+### Miscellaneous Tasks
+
+- Bump versions to 1.10.4
 
 ## [1.10.3] - 2024-02-14
 
