@@ -18,10 +18,11 @@ export const createInvokeFunctionProxy = <TFaux>(
   address?: EBMessageAddress,
   lvl = 0,
 ): TFaux => {
-  const adr = address || {
+  const adr = {
     serviceName: '',
     serviceTarget: '',
     serviceVersion: '',
+    ...address,
   }
 
   return new Proxy(noop, {
@@ -34,19 +35,28 @@ export const createInvokeFunctionProxy = <TFaux>(
 
       const x = obj[name]
       if (lvl === 0) {
-        adr.serviceName = name
-        return createInvokeFunctionProxy<typeof x>(invokeOg, adr, lvl + 1)
+        const na = {
+          ...adr,
+          serviceName: name,
+        }
+        return createInvokeFunctionProxy<typeof x>(invokeOg, na, lvl + 1)
       }
       if (lvl === 1) {
-        adr.serviceVersion = name
-        return createInvokeFunctionProxy<typeof x>(invokeOg, adr, lvl + 1)
+        const na = {
+          ...adr,
+          serviceVersion: name,
+        }
+        return createInvokeFunctionProxy<typeof x>(invokeOg, na, lvl + 1)
       }
 
       if (lvl === 2) {
-        adr.serviceTarget = name
+        const na = {
+          ...adr,
+          serviceTarget: name,
+        }
         return (payload: Parameters<typeof x>[0], parameter: Parameters<typeof x>[1]) => {
           return invokeOg<Parameters<typeof x>[0], Parameters<typeof x>[1], ReturnType<typeof x>>(
-            adr,
+            na,
             payload,
             parameter,
           )
