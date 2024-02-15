@@ -92,7 +92,7 @@ export const getCommandContextMock = <
           if (!invokeMocks[na.serviceName][na.serviceVersion]) {
             invokeMocks[na.serviceName][na.serviceVersion] = {}
           }
-          return getInvokeProxy<typeof x>(adr, lvl + 1)
+          return getInvokeProxy<typeof x>(na, lvl + 1)
         }
 
         if (lvl === 2) {
