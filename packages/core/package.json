@@ -36,7 +36,7 @@
   "devDependencies": {
     "@types/node": "^20.11.16",
     "sinon": "^17.0.1",
-    "tshy": "^1.11.0"
+    "tshy": "^1.11.1"
   },
   "dependencies": {
     "@decs/typeschema": "^0.12.2",

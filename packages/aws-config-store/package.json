@@ -59,11 +59,11 @@
     "@types/sinon": "^17.0.3",
     "sinon": "^17.0.1",
     "testcontainers": "^10.6.0",
-    "tshy": "^1.11.0",
+    "tshy": "^1.11.1",
     "vitest": "^1.2.2"
   },
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.513.0",
+    "@aws-sdk/client-ssm": "^3.515.0",
     "@purista/core": "*"
   },
   "peerDependenciesMeta": {},

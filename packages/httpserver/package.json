@@ -58,7 +58,7 @@
     "@types/sinon": "^17.0.3",
     "@types/swagger-ui-dist": "^3.30.4",
     "sinon": "^17.0.1",
-    "tshy": "^1.11.0",
+    "tshy": "^1.11.1",
     "vitest": "^1.2.2"
   },
   "dependencies": {
@@ -71,7 +71,7 @@
     "@purista/core": "*",
     "fastify": "^4.26.1",
     "openapi3-ts": "4.2.1",
-    "swagger-ui-dist": "^5.11.4",
+    "swagger-ui-dist": "^5.11.7",
     "trouter": "^4.0.0"
   },
   "peerDependenciesMeta": {},

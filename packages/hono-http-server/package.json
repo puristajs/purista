@@ -57,18 +57,18 @@
     "@types/sinon": "^17.0.3",
     "@hono/swagger-ui": "^0.2.1",
     "sinon": "^17.0.1",
-    "tshy": "^1.11.0",
+    "tshy": "^1.11.1",
     "vitest": "^1.2.2"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.7.0",
     "@opentelemetry/semantic-conventions": "^1.19.0",
     "@purista/core": "*",
-    "hono": "^4.0.2"
+    "hono": "^4.0.4"
   },
   "peerDependenciesMeta": {},
   "peerDependencies": {
-    "@hono/node-server": "^1.7.0",
+    "@hono/node-server": "^1.8.0",
     "@hono/swagger-ui": "^0.2.1"
   },
   "types": "./dist/commonjs/index.d.ts"

@@ -60,12 +60,12 @@
     "dotenv": "^16.4.4",
     "sinon": "^17.0.1",
     "testcontainers": "^10.6.0",
-    "tshy": "^1.11.0",
+    "tshy": "^1.11.1",
     "vitest": "^1.2.2"
   },
   "dependencies": {
     "@azure/identity": "^4.0.1",
-    "@azure/keyvault-secrets": "^4.7.0",
+    "@azure/keyvault-secrets": "^4.8.0",
     "@purista/core": "*"
   },
   "peerDependenciesMeta": {},

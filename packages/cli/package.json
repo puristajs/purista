@@ -41,7 +41,7 @@
     "@types/minimist": "^1.2.5",
     "@types/node": "^20.11.17",
     "rimraf": "^5.0.5",
-    "tshy": "^1.11.0",
+    "tshy": "^1.11.1",
     "tsx": "^4.7.1"
   },
   "dependencies": {
