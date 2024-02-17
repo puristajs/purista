@@ -1,4 +1,4 @@
-import type { StoreBaseConfig } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
 import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 import type { RedisClientType, RedisFunctions, RedisModules, RedisScripts } from '@redis/client'
 import { createClient } from '@redis/client'
@@ -58,11 +58,9 @@ export class RedisStateStore<
     return this.client.connect()
   }
 
-  async getState(...stateNames: string[]): Promise<Record<string, unknown>> {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get state from store is disabled by config')
-    }
-
+  protected async getStateImpl<StateNames extends string[]>(
+    ...stateNames: StateNames
+  ): Promise<ObjectWithKeysFromStringArray<StateNames>> {
     const client = await this.getClient()
 
     const result: Record<string, unknown> = {}
@@ -76,14 +74,10 @@ export class RedisStateStore<
         throw new UnhandledError(StatusCode.InternalServerError, msg)
       }
     }
-    return result
+    return result as ObjectWithKeysFromStringArray<StateNames>
   }
 
-  async removeState(stateName: string) {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove state from store is disabled by config')
-    }
-
+  protected async removeStateImpl(stateName: string) {
     const client = await this.getClient()
 
     try {
@@ -95,7 +89,7 @@ export class RedisStateStore<
     }
   }
 
-  async setState(stateName: string, stateValue: unknown) {
+  protected async setStateImpl(stateName: string, stateValue: unknown) {
     if (!this.config.enableSet) {
       throw new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
     }

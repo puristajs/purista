@@ -1,5 +1,6 @@
 import type { StoreBaseConfig } from '../core/index.js'
-import { StateStoreBaseClass, StatusCode, UnhandledError } from '../core/index.js'
+import { StateStoreBaseClass } from '../core/index.js'
+import type { ObjectWithKeysFromStringArray } from '../helper/index.js'
 import type { DefaultStateStoreConfig } from './types/index.js'
 
 /**
@@ -23,31 +24,21 @@ export class DefaultStateStore extends StateStoreBaseClass<DefaultStateStoreConf
     }
   }
 
-  async getState(...stateNames: string[]) {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get state from store is disabled by config')
-    }
-
+  protected async getStateImpl<StateNames extends string[]>(
+    ...stateNames: StateNames
+  ): Promise<ObjectWithKeysFromStringArray<StateNames>> {
     const result: Record<string, unknown | undefined> = {}
     stateNames.forEach((name) => {
       result[name] = this.map.get(name)
     })
-    return result
+    return result as ObjectWithKeysFromStringArray<StateNames>
   }
 
-  async setState(stateName: string, stateValue: unknown) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
-    }
-
+  protected async setStateImpl(stateName: string, stateValue: unknown) {
     this.map.set(stateName, stateValue)
   }
 
-  async removeState(stateName: string) {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove state from store is disabled by config')
-    }
-
+  protected async removeStateImpl(stateName: string) {
     this.map.delete(stateName)
   }
 }

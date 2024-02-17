@@ -1,4 +1,4 @@
-import type { StoreBaseConfig } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
 import { ConfigStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 import type { RedisClientType, RedisFunctions, RedisModules, RedisScripts } from '@redis/client'
 import { createClient } from '@redis/client'
@@ -58,7 +58,9 @@ export class RedisConfigStore<
     return this.client.connect()
   }
 
-  async getConfigImpl(...configNames: string[]): Promise<Record<string, unknown>> {
+  protected async getConfigImpl<ConfigNames extends string[]>(
+    ...configNames: ConfigNames
+  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
     const client = await this.getClient()
 
     const result: Record<string, unknown> = {}
@@ -72,10 +74,10 @@ export class RedisConfigStore<
         throw new UnhandledError(StatusCode.InternalServerError, msg)
       }
     }
-    return result
+    return result as ObjectWithKeysFromStringArray<ConfigNames>
   }
 
-  async removeConfigImpl(configName: string) {
+  protected async removeConfigImpl(configName: string) {
     const client = await this.getClient()
 
     try {
@@ -87,7 +89,7 @@ export class RedisConfigStore<
     }
   }
 
-  async setConfigImpl(configName: string, configValue: unknown) {
+  protected async setConfigImpl(configName: string, configValue: unknown) {
     const client = await this.getClient()
     try {
       await client.set(configName, JSON.stringify(configValue))

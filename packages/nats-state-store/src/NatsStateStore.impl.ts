@@ -1,4 +1,4 @@
-import type { StoreBaseConfig } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
 import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 import type { KV, NatsConnection } from 'nats'
 import { connect, JSONCodec } from 'nats'
@@ -70,11 +70,9 @@ export class NatsStateStore extends StateStoreBaseClass<NatsStateStoreConfig> {
     return this.kv
   }
 
-  async getState(...stateNames: string[]): Promise<Record<string, unknown>> {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get state from store is disabled by config')
-    }
-
+  protected async getSecretImpl<StateNames extends string[]>(
+    ...stateNames: StateNames
+  ): Promise<ObjectWithKeysFromStringArray<StateNames>> {
     const store = await this.getStore()
 
     const result: Record<string, unknown> = {}
@@ -88,14 +86,10 @@ export class NatsStateStore extends StateStoreBaseClass<NatsStateStoreConfig> {
         throw new UnhandledError(StatusCode.InternalServerError, msg)
       }
     }
-    return result
+    return result as ObjectWithKeysFromStringArray<StateNames>
   }
 
-  async removeState(stateName: string) {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove state from store is disabled by config')
-    }
-
+  protected async removeStateImpl(stateName: string) {
     const store = await this.getStore()
 
     try {
@@ -107,7 +101,7 @@ export class NatsStateStore extends StateStoreBaseClass<NatsStateStoreConfig> {
     }
   }
 
-  async setState(stateName: string, stateValue: unknown) {
+  protected async setStateImpl(stateName: string, stateValue: unknown) {
     if (!this.config.enableSet) {
       throw new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
     }

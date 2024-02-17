@@ -1,4 +1,5 @@
 import { initLogger } from '../../DefaultLogger/index.js'
+import type { ObjectWithKeysFromStringArray } from '../../helper/index.js'
 import { UnhandledError } from '../Error/index.js'
 import type { Logger, Prettify, StoreBaseConfig } from '../types/index.js'
 import { StatusCode } from '../types/index.js'
@@ -6,18 +7,25 @@ import type { SecretStore, SecretStoreCacheMap } from './types/index.js'
 
 /**
  * Base class for secret store adapters
+ * The actual store implementation must overwrite the protected methods:
+ *
+ * - `getSecretImpl`
+ * - `setSecretImpl`
+ * - `removeSecretImpl`
+ *
+ * __DO NOT OVERWRITE__: the regular methods getSecret, setSecret or removeSecret
  *
  * @group Store
  */
-export class SecretStoreBaseClass<ConfigType extends Record<string, unknown> = {}> implements SecretStore {
+export class SecretStoreBaseClass<SecretStoreConfigType extends Record<string, unknown> = {}> implements SecretStore {
   logger: Logger
-  config: Prettify<StoreBaseConfig<ConfigType>>
+  config: Prettify<StoreBaseConfig<SecretStoreConfigType>>
 
   name: string
 
   cache: SecretStoreCacheMap = new Map()
 
-  constructor(name: string, config: StoreBaseConfig<ConfigType>) {
+  constructor(name: string, config: StoreBaseConfig<SecretStoreConfigType>) {
     const logger = config?.logger || initLogger(config?.logLevel)
     this.logger = logger.getChildLogger({ name })
 
@@ -32,13 +40,18 @@ export class SecretStoreBaseClass<ConfigType extends Record<string, unknown> = {
     }
   }
 
-  protected async getSecretImpl(..._secretNames: string[]): Promise<Record<string, string | undefined>> {
+  protected async getSecretImpl<SecretNames extends string[]>(
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ...secretNames: SecretNames
+  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
     const err = new UnhandledError(StatusCode.NotImplemented, 'get secret is not implemented in secret store')
     this.logger.error({ err }, err.message)
     throw err
   }
 
-  async getSecret(...secretNames: string[]): Promise<Record<string, string | undefined>> {
+  async getSecret<SecretNames extends string[]>(
+    ...secretNames: SecretNames
+  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
     if (!this.config.enableGet) {
       const err = new UnhandledError(StatusCode.Unauthorized, 'get secret from store is disabled by config')
       this.logger.error({ err }, err.message)
@@ -73,7 +86,7 @@ export class SecretStoreBaseClass<ConfigType extends Record<string, unknown> = {
     })
 
     if (!toFetch.length) {
-      return result
+      return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
     }
 
     const freshSecrets = await this.getSecretImpl(...toFetch)
@@ -87,7 +100,7 @@ export class SecretStoreBaseClass<ConfigType extends Record<string, unknown> = {
       }
     })
 
-    return { ...result, ...freshSecrets }
+    return { ...result, ...freshSecrets } as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
   }
 
   protected async removeSecretImpl(_secretName: string): Promise<void> {

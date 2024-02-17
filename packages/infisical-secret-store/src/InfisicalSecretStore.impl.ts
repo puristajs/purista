@@ -1,4 +1,4 @@
-import type { StoreBaseConfig } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
 import { SecretStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 
 import { InfisicalClient } from './InfisicalClient/index.js'
@@ -48,7 +48,9 @@ export class InfisicalSecretStore extends SecretStoreBaseClass<InfisicalSecretCo
     })
   }
 
-  async getSecretImpl(...secretNames: string[]): Promise<Record<string, string | undefined>> {
+  protected async getSecretImpl<SecretNames extends string[]>(
+    ...secretNames: SecretNames
+  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
     const result: Record<string, string | undefined> = {}
     for (const name of secretNames) {
       try {
@@ -59,10 +61,10 @@ export class InfisicalSecretStore extends SecretStoreBaseClass<InfisicalSecretCo
         throw new UnhandledError(StatusCode.InternalServerError, msg)
       }
     }
-    return result
+    return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
   }
 
-  async removeSecretImpl(secretName: string) {
+  protected async removeSecretImpl(secretName: string) {
     try {
       await this.client.removeSecret(secretName)
     } catch (err) {
@@ -72,7 +74,7 @@ export class InfisicalSecretStore extends SecretStoreBaseClass<InfisicalSecretCo
     }
   }
 
-  async setSecretImpl(secretName: string, secretValue: string) {
+  protected async setSecretImpl(secretName: string, secretValue: string) {
     try {
       await this.client.setSecret(secretName, secretValue)
     } catch (err) {

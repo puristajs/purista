@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 
-import type { StoreBaseConfig } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
 import { HttpClient, SecretStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 
 import { getDefaultClientConfig } from '../DaprClient/getDefaultClientConfig.impl.js'
@@ -52,11 +52,9 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
     })
   }
 
-  async getSecret(...secretNames: string[]) {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get secret from store is disabled by config')
-    }
-
+  protected async getSecretImpl<SecretNames extends string[]>(
+    ...secretNames: SecretNames
+  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
     const fetchSecretFromStore = async (secretName: string) => {
       const path = join(
         this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
@@ -85,22 +83,14 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
       }
     })
 
-    return returnValue
+    return returnValue as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
   }
 
-  async setSecret(_secretName: string) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set secret at store is disabled by config')
-    }
-
+  protected async setSecretImpl(_secretName: string) {
     throw new UnhandledError(StatusCode.NotImplemented, 'setting or changing of secrets is not available')
   }
 
-  async removeSecret(_secretName: string) {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove secret from store is disabled by config')
-    }
-
+  protected async removeSecretImpl(_secretName: string) {
     throw new UnhandledError(StatusCode.NotImplemented, 'removing of secrets is not available')
   }
 }

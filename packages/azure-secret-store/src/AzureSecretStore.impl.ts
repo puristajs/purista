@@ -1,6 +1,12 @@
 import { DefaultAzureCredential } from '@azure/identity'
 import { SecretClient } from '@azure/keyvault-secrets'
-import { SecretStoreBaseClass, StatusCode, type StoreBaseConfig, UnhandledError } from '@purista/core'
+import {
+  type ObjectWithKeysFromStringArray,
+  SecretStoreBaseClass,
+  StatusCode,
+  type StoreBaseConfig,
+  UnhandledError,
+} from '@purista/core'
 
 import type { AzureSecretStoreConfig } from './types.js'
 
@@ -28,7 +34,9 @@ export class AzureSecretStore extends SecretStoreBaseClass<AzureSecretStoreConfi
     this.client = new SecretClient(this.config.vaultUrl, credential, this.config.options)
   }
 
-  async getSecretImpl(...secretNames: string[]): Promise<Record<string, string | undefined>> {
+  protected async getSecretImpl<SecretNames extends string[]>(
+    ...secretNames: SecretNames
+  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
     const result: Record<string, string | undefined> = {}
 
     for (const name of secretNames) {
@@ -42,14 +50,14 @@ export class AzureSecretStore extends SecretStoreBaseClass<AzureSecretStoreConfi
       }
     }
 
-    return result
+    return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
   }
 
-  async removeSecretImpl(secretName: string) {
+  protected async removeSecretImpl(secretName: string) {
     await this.client.beginDeleteSecret(secretName)
   }
 
-  async setSecretImpl(secretName: string, secretValue: string) {
+  protected async setSecretImpl(secretName: string, secretValue: string) {
     await this.client.setSecret(secretName, secretValue)
   }
 }

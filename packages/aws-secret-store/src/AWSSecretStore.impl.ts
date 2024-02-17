@@ -6,7 +6,13 @@ import {
   SecretsManagerClient,
   UpdateSecretCommand,
 } from '@aws-sdk/client-secrets-manager'
-import { SecretStoreBaseClass, StatusCode, type StoreBaseConfig, UnhandledError } from '@purista/core'
+import {
+  type ObjectWithKeysFromStringArray,
+  SecretStoreBaseClass,
+  StatusCode,
+  type StoreBaseConfig,
+  UnhandledError,
+} from '@purista/core'
 
 import type { AWSSecretStoreConfig } from './types.js'
 
@@ -31,7 +37,9 @@ export class AWSSecretStore extends SecretStoreBaseClass<AWSSecretStoreConfig> {
     this.client = new SecretsManagerClient(this.config.client)
   }
 
-  async getSecretImpl(...secretNames: string[]): Promise<Record<string, string | undefined>> {
+  protected async getSecretImpl<SecretNames extends string[]>(
+    ...secretNames: SecretNames
+  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
     const result: Record<string, string | undefined> = {}
 
     for (const name of secretNames) {
@@ -50,10 +58,10 @@ export class AWSSecretStore extends SecretStoreBaseClass<AWSSecretStoreConfig> {
       }
     }
 
-    return result
+    return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
   }
 
-  async removeSecretImpl(secretName: string) {
+  protected async removeSecretImpl(secretName: string) {
     const command = new DeleteSecretCommand({
       SecretId: secretName,
     })
@@ -61,7 +69,7 @@ export class AWSSecretStore extends SecretStoreBaseClass<AWSSecretStoreConfig> {
     await this.client.send(command)
   }
 
-  async setSecretImpl(secretName: string, secretValue: string) {
+  protected async setSecretImpl(secretName: string, secretValue: string) {
     try {
       const command = new UpdateSecretCommand({
         SecretId: secretName,

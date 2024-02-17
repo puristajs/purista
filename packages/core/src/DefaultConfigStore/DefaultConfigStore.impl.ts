@@ -1,5 +1,6 @@
 import type { StoreBaseConfig } from '../core/index.js'
 import { ConfigStoreBaseClass, StatusCode, UnhandledError } from '../core/index.js'
+import type { ObjectWithKeysFromStringArray } from '../helper/index.js'
 import type { DefaultConfigStoreConfig } from './types/index.js'
 
 /**
@@ -38,31 +39,28 @@ export class DefaultConfigStore extends ConfigStoreBaseClass<DefaultConfigStoreC
     }
   }
 
-  async getConfig(...configNames: string[]) {
+  protected async getConfigImpl<ConfigNames extends string[]>(
+    ...configNames: ConfigNames
+  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
     if (!this.config.enableGet) {
       throw new UnhandledError(StatusCode.Unauthorized, 'get config from store is disabled by config')
     }
 
-    const result: Record<string, unknown | undefined> = {}
-    configNames.forEach((name) => {
-      result[name] = this.map.get(name)
-    })
+    const result = configNames.reduce((prev, current) => {
+      return {
+        ...prev,
+        [current]: this.map.get(current),
+      }
+    }, {}) as ObjectWithKeysFromStringArray<ConfigNames>
+
     return result
   }
 
-  async setConfig(configName: string, configValue: unknown) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set config at store is disabled by config')
-    }
-
+  protected async setConfigImpl(configName: string, configValue: unknown) {
     this.map.set(configName, configValue)
   }
 
-  async removeConfig(configName: string) {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove config from store is disabled by config')
-    }
-
+  protected async removeConfigImpl(configName: string) {
     this.map.delete(configName)
   }
 }

@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 
-import type { StoreBaseConfig } from '@purista/core'
-import { HttpClient, StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
+import { HttpClient, StateStoreBaseClass } from '@purista/core'
 
 import type { DaprClientConfig } from '../DaprClient/index.js'
 import { getDefaultClientConfig } from '../DaprClient/index.js'
@@ -50,11 +50,9 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
     })
   }
 
-  async getState(...stateNames: string[]) {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get state from store is disabled by config')
-    }
-
+  protected async getStateImpl<StateNames extends string[]>(
+    ...stateNames: StateNames
+  ): Promise<ObjectWithKeysFromStringArray<StateNames>> {
     const fetchStatesFromStore = async (stateName: string) => {
       const path = join(
         this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
@@ -78,14 +76,10 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
       returnValue[value] = result[index] as string
     })
 
-    return returnValue
+    return returnValue as ObjectWithKeysFromStringArray<StateNames>
   }
 
-  async setState(stateName: string, stateValue: unknown) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
-    }
-
+  protected async setStateImpl(stateName: string, stateValue: unknown) {
     const path = join(
       this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
       'state',
@@ -102,11 +96,7 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
     await this.client.post(path, payload)
   }
 
-  async removeState(stateName: string) {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove state from store is disabled by config')
-    }
-
+  protected async removeStateImpl(stateName: string) {
     const path = join(
       this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
       'state',

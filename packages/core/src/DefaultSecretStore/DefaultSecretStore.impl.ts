@@ -1,5 +1,6 @@
 import type { SecretStore, StoreBaseConfig } from '../core/index.js'
-import { SecretStoreBaseClass, StatusCode, UnhandledError } from '../core/index.js'
+import { SecretStoreBaseClass } from '../core/index.js'
+import type { ObjectWithKeysFromStringArray } from '../helper/index.js'
 import type { DefaultSecretStoreConfig } from './types/index.js'
 
 /**
@@ -45,31 +46,21 @@ export class DefaultSecretStore extends SecretStoreBaseClass<DefaultSecretStoreC
     }
   }
 
-  async getSecret(...secretNames: string[]) {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get secret from store is disabled by config')
-    }
-
+  protected async getSecretImpl<SecretNames extends string[]>(
+    ...secretNames: SecretNames
+  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
     const result: Record<string, string | undefined> = {}
     secretNames.forEach((name) => {
       result[name] = this.map.get(name)
     })
-    return result
+    return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
   }
 
-  async setSecret(secretName: string, secretValue: string) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set secret at store is disabled by config')
-    }
-
+  protected async setSecretImpl(secretName: string, secretValue: string) {
     this.map.set(secretName, secretValue)
   }
 
-  async removeSecret(secretName: string) {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove secret from store is disabled by config')
-    }
-
+  protected async removeSecretImpl(secretName: string) {
     this.map.delete(secretName)
   }
 }

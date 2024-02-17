@@ -1,7 +1,13 @@
 import { join } from 'node:path/posix'
 
 import { SecretManagerServiceClient } from '@google-cloud/secret-manager'
-import { SecretStoreBaseClass, StatusCode, type StoreBaseConfig, UnhandledError } from '@purista/core'
+import {
+  type ObjectWithKeysFromStringArray,
+  SecretStoreBaseClass,
+  StatusCode,
+  type StoreBaseConfig,
+  UnhandledError,
+} from '@purista/core'
 
 import type { GoogleSecretStoreConfig } from './types.js'
 
@@ -26,7 +32,9 @@ export class GoogleSecretStore extends SecretStoreBaseClass<GoogleSecretStoreCon
     this.client = new SecretManagerServiceClient(this.config.client)
   }
 
-  async getSecretImpl(...secretNames: string[]): Promise<Record<string, string | undefined>> {
+  protected async getSecretImpl<SecretNames extends string[]>(
+    ...secretNames: SecretNames
+  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
     const result: Record<string, string | undefined> = {}
 
     for (const name of secretNames) {
@@ -42,7 +50,7 @@ export class GoogleSecretStore extends SecretStoreBaseClass<GoogleSecretStoreCon
       }
     }
 
-    return result
+    return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
   }
 
   async removeSecretImpl(secretName: string) {

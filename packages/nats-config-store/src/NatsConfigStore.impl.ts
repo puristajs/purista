@@ -1,4 +1,4 @@
-import type { StoreBaseConfig } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
 import { ConfigStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 import type { KV, NatsConnection } from 'nats'
 import { connect, JSONCodec } from 'nats'
@@ -70,7 +70,9 @@ export class NatsConfigStore extends ConfigStoreBaseClass<NatsConfigStoreConfig>
     return this.kv
   }
 
-  async getConfigImpl(...stateNames: string[]): Promise<Record<string, unknown>> {
+  protected async getConfigImpl<ConfigNames extends string[]>(
+    ...stateNames: ConfigNames
+  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
     const store = await this.getStore()
 
     const result: Record<string, unknown> = {}
@@ -84,10 +86,10 @@ export class NatsConfigStore extends ConfigStoreBaseClass<NatsConfigStoreConfig>
         throw new UnhandledError(StatusCode.InternalServerError, msg)
       }
     }
-    return result
+    return result as ObjectWithKeysFromStringArray<ConfigNames>
   }
 
-  async removeConfigImpl(stateName: string) {
+  protected async removeConfigImpl(stateName: string) {
     const store = await this.getStore()
 
     try {
@@ -99,7 +101,7 @@ export class NatsConfigStore extends ConfigStoreBaseClass<NatsConfigStoreConfig>
     }
   }
 
-  async setConfigImpl(stateName: string, stateValue: unknown) {
+  protected async setConfigImpl(stateName: string, stateValue: unknown) {
     const store = await this.getStore()
 
     try {

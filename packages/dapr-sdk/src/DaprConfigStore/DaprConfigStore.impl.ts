@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 
-import type { StoreBaseConfig } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
 import { ConfigStoreBaseClass, HttpClient, StatusCode, UnhandledError } from '@purista/core'
 
 import type { DaprClientConfig } from '../DaprClient/index.js'
@@ -51,11 +51,9 @@ export class DaprConfigStore extends ConfigStoreBaseClass<DaprConfigStoreConfig>
     })
   }
 
-  async getConfig(...configNames: string[]) {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get config from store is disabled by config')
-    }
-
+  async getConfigImpl<ConfigNames extends string[]>(
+    ...configNames: ConfigNames
+  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
     const fetchConfigFromStore = async (configName: string) => {
       const path = join(
         this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
@@ -76,22 +74,14 @@ export class DaprConfigStore extends ConfigStoreBaseClass<DaprConfigStoreConfig>
       })
     })
 
-    return returnValue
+    return returnValue as ObjectWithKeysFromStringArray<ConfigNames>
   }
 
-  async setConfig(_configName: string, _configValue: unknown) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set config at store is disabled by config')
-    }
-
+  async setConfigImpl(_configName: string, _configValue: unknown) {
     throw new UnhandledError(StatusCode.NotImplemented, 'setting or changing of configs is not available')
   }
 
-  async removeConfig(_configName: string) {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove config from store is disabled by config')
-    }
-
+  async removeConfigImpl(_configName: string) {
     throw new UnhandledError(StatusCode.NotImplemented, 'removing of configs is not available')
   }
 }

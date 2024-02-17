@@ -6,7 +6,8 @@ import {
   PutParameterCommand,
   SSMClient,
 } from '@aws-sdk/client-ssm'
-import { ConfigStoreBaseClass, StatusCode, type StoreBaseConfig, UnhandledError } from '@purista/core'
+import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
+import { ConfigStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 
 import type { AWSConfigStoreConfig } from './types.js'
 
@@ -31,7 +32,9 @@ export class AWSConfigStore extends ConfigStoreBaseClass<AWSConfigStoreConfig> {
     this.client = new SSMClient(this.config.client)
   }
 
-  async getConfigImpl(...configNames: string[]): Promise<Record<string, string | undefined>> {
+  protected async getConfigImpl<ConfigNames extends string[]>(
+    ...configNames: ConfigNames
+  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
     const result: Record<string, string | undefined> = {}
 
     for (const name of configNames) {
@@ -49,10 +52,10 @@ export class AWSConfigStore extends ConfigStoreBaseClass<AWSConfigStoreConfig> {
       }
     }
 
-    return result
+    return result as ObjectWithKeysFromStringArray<ConfigNames>
   }
 
-  async removeConfigImpl(configName: string) {
+  protected async removeConfigImpl(configName: string) {
     const command = new DeleteParameterCommand({
       Name: configName,
     })
@@ -60,7 +63,7 @@ export class AWSConfigStore extends ConfigStoreBaseClass<AWSConfigStoreConfig> {
     await this.client.send(command)
   }
 
-  async setConfigImpl(configName: string, configValue: string) {
+  protected async setConfigImpl(configName: string, configValue: string) {
     const command = new PutParameterCommand({
       Name: configName,
       Value: configValue,
