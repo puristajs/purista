@@ -7,17 +7,15 @@ image: /graphic/builder.png
 
 # Schemas and Validation in PURISTA
 
-PURISTA is highly using schemas.  
-Schemas are used for validations, typescript type generation and other generations like OpenApi definitions.
+PURISTA heavily utilizes schemas for various purposes. Schemas play a crucial role in validation, TypeScript type generation, and the creation of other structures such as OpenAPI definitions.
 
-PURISTA itself supports a wide range of schema libraries - thanks to [Typeschema.com](https://typeschema.com/#coverage).  
-But, it is recommended to use [Zod](https://zod.dev/) as schema library, as there is a large eco-system around, which enables us to provide features like OpenApi schema generation.
+While PURISTA offers support for a wide range of schema libraries, particularly thanks to [Typeschema.com](https://typeschema.com/#coverage), it is strongly recommended to utilize [Zod](https://zod.dev/) as the primary schema library. This recommendation is due to the extensive ecosystem surrounding Zod, which enables the implementation of advanced features like OpenAPI schema generation.
 
-__Only Zod schema will have first class support in PURISTA!__
+It's important to note that only Zod schemas will receive first-class support within PURISTA.
 
-We also provide a helper `extendApi`for Zod schema, to enable some cool features.
+Additionally, we provide a helper function called `extendApi` for Zod schemas, which enables the implementation of various advanced features.
 
-As an example:
+For example:
 
 ```typescript
 import { extendApi } from '@purista/core'
@@ -27,5 +25,4 @@ const mySchema = extendApi(z.object({
 }), { title: 'Some description', example: { value: 'example' } })
 ```
 
-This schema will not only contain the raw validation and type information. It also contains descriptions and example values. We are using these values, to enrich the OpenApi documentation and other automated documentations.  
-Also, any new developer will have some nice explanation and examples in the source code.
+This schema not only includes raw validation and type information but also encompasses descriptions and example values. We leverage these values to enhance the OpenAPI documentation and other automated documentation processes. Moreover, new developers will find helpful explanations and examples directly within the source code.

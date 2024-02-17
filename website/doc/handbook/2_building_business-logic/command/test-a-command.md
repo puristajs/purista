@@ -1,7 +1,7 @@
 ---
 title: Test a Command
 description: How to test a command with PURISTA typescript helpers
-order: 202020
+order: 202040
 ---
 
 # Test a command
@@ -68,4 +68,19 @@ As an example, a command might invoke other services and we need to mock the ret
 const context = fooCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
 
 context.stubs.service.OtherService[1].otherCommand.resolves('mock data')
+```
+
+
+## Testing
+
+During unit tests, you will need to mock command invokes.  
+PURISTA provides the `getCommandContextMock` in the command builder, which allows to easy mock service invocations.
+
+Only services defined with `canInvoke` are available in the context mock.
+
+```typescript
+const context = fooCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+
+// type/autocomplete is done magically
+context.stubs.service.OtherServiceName[1].otherCommandName.resolves({ resultValue: 'the mocked value })
 ```

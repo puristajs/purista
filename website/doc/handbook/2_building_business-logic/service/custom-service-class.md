@@ -6,16 +6,13 @@ order: 201040
 
 # Custom service class
 
-In general, a service itself should not contain any logic. It should only act as a logical container, which provides functionality defined and handled by PURISTA.
+In general, a service itself should not contain any logic. Its role should be limited to serving as a logical container, providing functionality defined and handled by PURISTA.
 
-The main reason for it:
-Command and subscription functions will become directly coupled to the service and the states of an actual service instance. This not only increases complexity and makes unit tests more difficult. It makes it very difficult, to be able to deploy single functions as FaaS and to scale things.
+The primary reason for this is that command and subscription functions become tightly coupled to the service and the states of an actual service instance. This not only increases complexity and complicates unit testing but also makes it challenging to deploy single functions as Function as a Service (FaaS) and to scale operations.
 
-But, there might be some edge cases, where it makes sense to have a custom class.
-A good example of such an edge case:
-Your service needs to act as a kind of adapter or gateway, to some other third-party solution, and there is no straightforward way, to solve this at the infrastructure level.
+However, there may be exceptional cases where it is sensible to have a custom class. One such example is when your service needs to function as an adapter or gateway to a third-party solution, and there is no straightforward solution at the infrastructure level.
 
-In this case, you know and might accept, that your service is running as an instance 24/7, and can't be deployed as FaaS.
+In such cases, you acknowledge and accept that your service runs as a continuous instance 24/7 and cannot be deployed as a FaaS.
 
 Example:
 

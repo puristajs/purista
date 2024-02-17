@@ -83,7 +83,7 @@ export default defineConfig({
         includeRootIndexFile: true,
         includeEmptyFolder: true,
         capitalizeEachWords: true,
-        collapseDepth: 2,
+        collapseDepth: 1,
       },
       {
           documentRootPath: 'doc',

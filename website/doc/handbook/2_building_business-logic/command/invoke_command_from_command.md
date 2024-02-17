@@ -1,17 +1,16 @@
 ---
 title: Invoke other Command
 description: How to call a other command and receive the response
-order: 202040
+order: 202020
 ---
 
 # Invoke a command from a command
 
-One cool feature of PURISTA is, that commands can invoke (call) other commands from other services.  
-The communication is done via the event bridge.
+One fantastic feature of PURISTA is that commands can trigger other commands from different services. This communication occurs through the event bridge.
 
-This means, the command which invokes a other command, does not have any knowledge where the other command is running.
+This implies that the command initiating the action doesn't need to know where the other command is located.
 
-To be able to invoke other command, you need to define the other command in the command builder. By setting the input and output schemas, it will be ensured, that no data is accidentally leaving the command function and no unexpected data is received by the command function.
+To trigger another command, you must specify it in the command builder. By setting the input and output schemas, we ensure that data is handled correctly, preventing any unintended data from leaving or entering the command function.
 
 ```typescript
 import {  
@@ -67,16 +66,4 @@ You can use `canInvoke` as often as needed. Meaning you can invoke more than one
 In the invoke schemas define only necessary data. Especially the response schema should only contain data, which is used by the command function.
 :::
 
-## Testing
 
-During unit tests, you will need to mock command invokes.  
-PURISTA provides the `getCommandContextMock` in the command builder, which allows to easy mock service invocations.
-
-Only services defined with `canInvoke` are available in the context mock.
-
-```typescript
-const context = fooCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
-
-// type/autocomplete is done magically
-context.stubs.service.OtherServiceName[1].otherCommandName.resolves({ resultValue: 'the mocked value })
-```

@@ -6,21 +6,17 @@ order: 10
 
 # PURISTA Concept
 
-The concept behind PURISTA is quite simple and a message based approach.
-There are message senders and receivers.
-Messages are exchanged via an event bridge, which is connected to some kind of message broker.
+PURISTA operates on a straightforward message-based system. In this system, there are message senders and receivers. Messages are passed through an event bridge, which connects to a message broker.
 
-The logic resists in Service. They are the DDD part.
-A service is a logical group of commands and subscriptions which relate to a single domain.
+The heart of PURISTA's logic lies in its Services, which follow the principles of Domain-Driven Design (DDD). Each Service represents a logical grouping of commands and subscriptions that pertain to a specific domain.
 
-Commands are active, triggered by someone, and the caller expects some kind of result. This is similar to functions in any programming language. It means the caller knows about the existence of the called service & command, and he knows at least the input and output format and maybe something about possible error responses.
-How the called command function is implemented or how it works is unknown and not related to the caller. Also, the caller does not know which instance is handling the requests.
+Commands are active actions triggered by an external source. When a command is invoked, the caller expects a response. Think of commands as similar to functions in traditional programming languages. The caller knows about the command's existence, its input and output formats, and potentially error responses. However, the caller doesn't need to understand how the command is implemented or executed, nor does it need to know which instance of the service is handling the request.
 
-Subscriptions are a passive part, like event listeners. A subscription is triggered as soon as a message matches the subscription criteria. The producer of this message does not have knowledge about this subscription.
+On the other hand, Subscriptions are passive listeners. When a message matches the criteria defined by a subscription, the subscription is triggered. Importantly, the producer of the message isn't aware of any subscriptions that may be listening.
 
-Commands and subscription can call other commands from same or other service by sending command messages. This means, there is a clean, structured and unified internal interface, which is also observable and traceable with error handling out of the box.
+Commands and subscriptions can invoke other commands within the same or different services by sending command messages. This creates a structured and unified internal interface that allows for clean communication between components. Additionally, this setup provides built-in error handling capabilities, making the system both observable and traceable.
 
-This allows real complex setups and scenarios.
+By leveraging this architecture, PURISTA enables the creation of complex setups and scenarios with ease.
 
 ## Example
 

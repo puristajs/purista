@@ -1,26 +1,42 @@
 ---
 title: Config Stores
-description: Config stores in PURISTA typescript framwork
+description: Config stores in PURISTA typescript framework
 order: 206010
 ---
 
 # Config Stores
 
-A configuration passed into the service creation, should focus on technical configurations and for the service itself.
-As an example, defining urls, ports, timeouts and similar, are technical configurations.
+In PURISTA applications, there are two general ways to make configuration data accessable for your commands and subscriptions.
 
-Configurations, related to business logic, like feature flags and values for business calculations, should be separated from pure technical configurations.
+You can provide conffigurations via the [service configuration](../service/add-a-service-config.md) or via config stores.  
+Both is valid and you might ask why and when to use which option.
 
-This allows to manage configuration, without the need to restart instances, and to use solutions like AWS Parameter Store, without directly coupling vendor specific solutions to business code.
+Configrations, which are necessarly needed to be able to start a service and which is not changeable during runtime, must be provided via the service configration. As an example: database configurations, setting of timeouts and similar.
+
+Configurations, like urls of third party provides credential user names (not passwords!), which you might also want to change during runtime, should be stored in config stores.
+
+|   | config store  | service config  |
+|---|---|---|
+| typed*                  | no  | yes  |
+| validated*              |  no | yes  |
+| changes during runtime  | possible  | no  |
+| distributed/shared      | possible  | no  |
+
+_(*) out of the box_
+
+::: tip Feature flags
+If you need feature flags in your application, you might have a look at [OpenFeature](https://openfeature.dev).
+:::
+
+Using config stores, allows to manage configuration, without the need to restart instances, and to use solutions like AWS Parameter Store, without directly coupling vendor specific solutions to business code.
 
 Also, if a command or subscriptions needs further configurations like urls of external services, than the config store is a good place to persist this information.
 
-The config store is a simple interface to a key-value-store. They key must be a string and the value can be any type which can be serialized via JSON stringify/parse.
-
+The config store is a simple interface to a key-value-store. The key must be a string and the value can be any type which can be serialized via JSON stringify/parse.
 
 ## Usage
 
-Config stores are provided to services during instance creation.
+Config stores are provided to the services during instance creation.
 
 ```typescript
 const configStore = new DaprConfigStore({ configStoreName: 'local-config-store' })
@@ -48,10 +64,9 @@ It can be used like this:
 })
 ```
 
-::: tip
-**Use schemas to validate**
-A production ready approach is, to validate the result of store getters against a schema.
-It validates the returned values and gives you proper types for further usage in one step.
+::: tip Use schemas to validate
+A production ready approach is, to validate the result of store getters and setters against a schema.
+It validates the input or return values and gives you proper types for further usage in one step.
 As an example:
 :::
 
@@ -97,6 +112,7 @@ const store = new DefaultConfigStore({
   enableSet: true,
   config: {
     initialValue: 'initial',
+    fromEnvVar: process.env.MY_VALUE;
   },
 })
 
@@ -109,7 +125,13 @@ It is quite simple to build a custom config store.
 You can simply extend the `ConfigStoreBaseClass` with type parameter of your custom store config.
 
 ```typescript
-import { ConfigStoreBaseClass, UnhandledError, StatusCode, StoreBaseConfig } from '@purista/core'
+import { 
+    ConfigStoreBaseClass,
+    UnhandledError, 
+    StatusCode,
+    StoreBaseConfig,
+    type ObjectWithKeysFromStringArray 
+  } from '@purista/core'
 
 type CustomStoreConfig = {
   url: string
@@ -125,11 +147,9 @@ export class CustomStore extends ConfigStoreBaseClass<CustomStoreConfig> {
     this.client = customCLient.connect(this.config.config.url)
   }
 
-  async getConfig(...configNames: string[]): Promise<Record<string, unknown>> {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get config from store is disabled by config')
-    }
-
+  protected async getConfigImpl<ConfigNames extends string[]>(
+    ...configNames: ConfigNames
+  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
     const result: Record<string, unknown> = {}
     for await (const name of configNames) {
       try {
@@ -142,15 +162,11 @@ export class CustomStore extends ConfigStoreBaseClass<CustomStoreConfig> {
         throw new UnhandledError(StatusCode.InternalServerError, msg)
       }
     }
-    return result
+    return result as ObjectWithKeysFromStringArray<ConfigNames>
 
   }
 
-  async removeConfig(configName: string): Promise<void> {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove config from store is disabled by config')
-    }
-
+  protected async removeConfigImpl(configName: string): Promise<void> {
     try {
       // your custom logic goes here:
       await this.client.del(configName)
@@ -161,11 +177,7 @@ export class CustomStore extends ConfigStoreBaseClass<CustomStoreConfig> {
     }
   }
 
-  async setConfig(configName: string, configValue: unknown) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set config at store is disabled by config')
-    }
-
+  protected async setConfigImpl(configName: string, configValue: unknown) {
     try {
       // your custom logic goes here:
       await this.client.set(configName, JSON.stringify(configValue))

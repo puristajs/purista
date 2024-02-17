@@ -6,12 +6,13 @@ order: 206020
 
 # Secret Stores
 
-The secret store is addressing two things.
-One focus is, to provide a solution, where the secret is short living, and only available, when there is an actual need for it. Secrets should not be provided via the general service configuration. They should also be persited in some secret way.
-The second reason for the secret store interface:
-It provides the possibility, to use different solutions without vendor specific code implementation, within your business code.
-The secret store is a simple interface to a key-value-store. Keys and values are strings.
+The secret store serves two main purposes.
 
+Firstly, it ensures that secrets have a short lifespan and are only accessible when needed in your implementation. Secrets should not be included in general service configurations and should be stored securely.
+
+Secondly, the secret store interface allows for the use of different solutions without the need for vendor-specific code implementation in your business logic.
+
+Essentially, the secret store offers a straightforward interface to a key-value store, where both keys and values are strings.
 
 ## Usage
 
@@ -80,7 +81,13 @@ It is quite simple to build a custom secret store.
 You can simply extend the `SecretStoreBaseClass` with type parameter of your custom store config.
 
 ```typescript
-import { SecretStoreBaseClass, UnhandledError, StatusCode, StoreBaseConfig } from '@purista/core'
+import { 
+    SecretStoreBaseClass, 
+    UnhandledError, 
+    StatusCode, 
+    StoreBaseConfig 
+    type ObjectWithKeysFromStringArray,
+  } from '@purista/core'
 
 type CustomStoreConfig = {
   url: string
@@ -96,11 +103,9 @@ export class CustomStore extends SecretStoreBaseClass<CustomStoreConfig> {
     this.client = customCLient.connect(this.config.config.url)
   }
 
-  async getSecret(...secretNames: string[]): Promise<Record<string, string>> {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get secret from store is disabled by config')
-    }
-
+  protected async getSecretImpl<SecretNames extends string []>(
+    ...secretNames: SecretNames
+  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
     const result: Record<string, string> = {}
     for await (const name of secretNames) {
       try {
@@ -112,15 +117,10 @@ export class CustomStore extends SecretStoreBaseClass<CustomStoreConfig> {
         throw new UnhandledError(StatusCode.InternalServerError, msg)
       }
     }
-    return result
-
+    return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
   }
 
-  async removeSecret(secretName: string): Promise<void> {
-    if (!this.config.enableRemove) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'remove secret from store is disabled by config')
-    }
-
+  protected async removeSecretImpl(secretName: string): Promise<void> {
     try {
     // your custom logic goes here:
       await this.client.del(secretName)
@@ -131,11 +131,7 @@ export class CustomStore extends SecretStoreBaseClass<CustomStoreConfig> {
     }
   }
 
-  async setSecret(secretName: string, secretValue: string) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set secret at store is disabled by config')
-    }
-
+  protected async setSecretImpl(secretName: string, secretValue: string) {
     try {
       // your custom logic goes here:
       await this.client.set(secretName, secretValue)

@@ -28,7 +28,7 @@ There is a bunch of type definition stuff behind the scene, to ensure correct ty
 
 To get an idea, take a look at this diagram. This is a kind of typescript-type dependency graph. This is the stuff you would need to manage within your code and your brain, without builders.
 
-![Example](/graphic/builder.svg)
+![Flow](/graphic/builder.svg)
 
 ::: warning Order matters
 You must declare the input and output schemas before adding transforms, hooks and functions!
