@@ -6,9 +6,6 @@ import { initProjectPrompts } from './initProjectPrompts.js'
 
 export default function (plop: NodePlopAPI) {
   registerHandlebarHelpers(plop)
-  plop.setActionType('select action', (answers) => {
-    return JSON.stringify(answers)
-  })
 
   plop.setWelcomeMessage('Welcome to PURISTA CLI')
 

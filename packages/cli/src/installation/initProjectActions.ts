@@ -121,59 +121,6 @@ export const initProjectActions: Actions = [
     path: 'biome.json',
     templateFile: TEMPLATE_BASE + '/biome.json.hbs',
   },
-  async (answers) => {
-    const deps = dependencies
-
-    if (answers.installHttpService) {
-      deps.push(...httpserverDependencies)
-    }
-
-    switch (answers.eventBridge) {
-      case 'AmqpEventBridge':
-        await deps.push('@purista/amqpbridge')
-        return '@purista/amqpbridge added'
-      case 'MqttEventBridge':
-        await deps.push('@purista/mqttbridge')
-        return '@purista/mqttbridge added'
-      case 'NatsEventBridge':
-        await deps.push('@purista/natsbridge')
-        return '@purista/natsbridge added'
-      case 'DaprEventBridge':
-        await deps.push('@purista/dapr-sdk')
-        return '@purista/dapr-sdk added'
-    }
-
-    await installDependencies('npm install --save-prod ' + deps.join(' '))
-
-    const devDeps = devDependencies
-
-    if (answers.installCliGlobal === 'local') {
-      devDeps.push(...cliDependencies)
-    }
-
-    if (!answers.isEsm) {
-      devDeps.push(...jestDependencies)
-    } else {
-      devDeps.push(...vitestDependencies)
-    }
-
-    if (answers.linter === 'linter') {
-      devDeps.push(...eslintDependencies)
-    }
-
-    if (answers.linter === 'biome') {
-      devDeps.push(...biomeDependencies)
-    }
-
-    await installDependencies('npm install --save-dev ' + devDeps.join(' '))
-
-    if (answers.installCliGlobal === 'global') {
-      await installDependencies('npm install -g ' + cliDependencies.join(' '))
-    }
-
-    return 'needed packages installed'
-  },
-
   {
     type: 'add',
     skip: (answers: Record<string, string[] | string>) => {
@@ -228,6 +175,62 @@ export const initProjectActions: Actions = [
     skipIfExists: true,
     path: 'public/index.html',
     templateFile: TEMPLATE_BASE + '/public/index.html.hbs',
+  },
+  async (answers) => {
+    console.log('Installing packages - please wait')
+    const deps = dependencies
+
+    if (answers.installHttpService) {
+      deps.push(...httpserverDependencies)
+    }
+
+    switch (answers.eventBridge) {
+      case 'AmqpEventBridge':
+        deps.push('@purista/amqpbridge')
+        break
+      case 'MqttEventBridge':
+        deps.push('@purista/mqttbridge')
+        break
+      case 'NatsEventBridge':
+        deps.push('@purista/natsbridge')
+        break
+      case 'DaprEventBridge':
+        deps.push('@purista/dapr-sdk')
+        break
+    }
+
+    await installDependencies('npm install --save-prod ' + deps.join(' '))
+
+    const devDeps = devDependencies
+
+    if (answers.installCliGlobal === 'local') {
+      devDeps.push(...cliDependencies)
+    }
+
+    if (!answers.isEsm) {
+      devDeps.push(...jestDependencies)
+    } else {
+      devDeps.push(...vitestDependencies)
+    }
+
+    if (answers.linter === 'eslint') {
+      if (answers.isEsm) {
+        devDeps.push('eslint-plugin-vitest')
+      }
+      devDeps.push(...eslintDependencies)
+    }
+
+    if (answers.linter === 'biome') {
+      devDeps.push(...biomeDependencies)
+    }
+
+    await installDependencies('npm install --save-dev ' + devDeps.join(' '))
+
+    if (answers.installCliGlobal === 'global') {
+      await installDependencies('npm install -g ' + cliDependencies.join(' '))
+    }
+
+    return 'needed packages installed'
   },
   (answers) => {
     console.log('')
