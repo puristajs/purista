@@ -1,5 +1,6 @@
 {
   "name": "myProject",
+  "private": true,
   "version": "1.4.10",
   "description": "PURISTA blueprint project",
   "engines": {
