@@ -1,4 +1,3 @@
-import type { Service } from '@purista/core'
 import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 import type { StartedTestContainer } from 'testcontainers'
@@ -13,11 +12,20 @@ const EXAMPLE_EVENT = 'exampleEvent'
 
 describe('@purista/amqpbridge', () => {
   let container: StartedTestContainer
-  let eventbridge: AmqpBridge
+
   const sandbox = createSandbox()
   const subscriptionStub = sandbox.stub().resolves()
   const logger = getLoggerMock(sandbox)
-  let service: Service
+  const eventbridge = new AmqpBridge({ logger: logger.mock })
+  const subscriptionBuilder = theServiceV1Service
+    .getSubscriptionBuilder('sendWelcomeEmail', 'send a welcome mail to new registered users')
+    .subscribeToEvent(EXAMPLE_EVENT)
+    .addPayloadSchema(z.any())
+    .setSubscriptionFunction(subscriptionStub)
+
+  theServiceServiceBuilder.addSubscriptionDefinition(subscriptionBuilder.getDefinition())
+
+  const service = theServiceServiceBuilder.getInstance(eventbridge, { logger: getLoggerMock(sandbox).mock })
 
   beforeAll(async () => {
     container = await new GenericContainer('rabbitmq:alpine')
@@ -29,18 +37,8 @@ describe('@purista/amqpbridge', () => {
       .withExposedPorts({ host: AMQP_PORT, container: AMQP_PORT })
       .start()
 
-    eventbridge = new AmqpBridge({ logger: logger.mock })
     await eventbridge.start()
 
-    const subscriptionBuilder = theServiceV1Service
-      .getSubscriptionBuilder('sendWelcomeEmail', 'send a welcome mail to new registered users')
-      .subscribeToEvent(EXAMPLE_EVENT)
-      .addPayloadSchema(z.any())
-      .setSubscriptionFunction(subscriptionStub)
-
-    theServiceServiceBuilder.addSubscriptionDefinition(subscriptionBuilder.getDefinition())
-
-    service = theServiceServiceBuilder.getInstance(eventbridge, { logger: getLoggerMock(sandbox).mock })
     await service.start()
   })
 
