@@ -1,0 +1,44 @@
+{
+  "name": "myProject",
+  "version": "1.4.9",
+  "description": "PURISTA blueprint project",
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "src/index.ts",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/index.ts | pino-pretty",
+    "dev": "tsx watch src/index.ts | pino-pretty",
+    "dev:worker": "tsx watch src/temporal/worker.ts workflow.watch",
+    "test": "vitest",
+    "lint": "eslint --ext .ts,.js,.json --cache .",
+    "lint:fix": "eslint . --ext .ts,.js,.json --fix",
+    "purista": "purista add"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.8.0",
+    "@hono/swagger-ui": "^0.2.1",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.48.0",
+    "@opentelemetry/sdk-trace-node": "^1.21.0",
+    "@purista/core": "*",
+    "@purista/hono-http-server": "*",
+    "@purista/natsbridge": "*",
+    "@temporalio/activity": "^1.9.1",
+    "@temporalio/client": "^1.9.1",
+    "@temporalio/interceptors-opentelemetry": "^1.9.1",
+    "@temporalio/worker": "^1.9.1",
+    "@temporalio/workflow": "^1.9.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3",
+    "@types/node": "^20.11.19",
+    "@types/sinon": "^17.0.3",
+    "pino-pretty": "^10.3.1",
+    "prettier": "^3.2.5",
+    "sinon": "^17.0.1",
+    "vitest": "^1.3.0"
+  }
+}

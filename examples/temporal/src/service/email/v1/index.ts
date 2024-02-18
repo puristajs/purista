@@ -1,0 +1,5 @@
+export * from './command/confirmEmail/types.js'
+export * from './command/sendVerificationEmail/types.js'
+export type { EmailServiceV1Config } from './emailServiceConfig.js'
+export * from './emailV1Service.js'
+export * from './emailV1ServiceBuilder.js'
