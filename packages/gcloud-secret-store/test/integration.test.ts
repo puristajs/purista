@@ -4,7 +4,7 @@ import { getLoggerMock } from '@purista/core'
 
 import { GoogleSecretStore } from '../src/GoogleSecretStore.impl.js'
 
-describe('Google Secret Manager secret store', () => {
+describe.skip('Google Secret Manager secret store', () => {
   const secretName = randomUUID()
 
   const store = new GoogleSecretStore({

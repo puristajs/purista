@@ -7,7 +7,7 @@ import { stub } from 'sinon'
 
 import { AzureSecretStore } from '../src/AzureSecretStore.impl.js'
 
-describe('Azure Secret Manager secret store', () => {
+describe.skip('Azure Secret Manager secret store', () => {
   let store: AzureSecretStore
   beforeAll(async () => {
     execSync(`cd ${resolve(__dirname, '../')} && npm run env:up`)

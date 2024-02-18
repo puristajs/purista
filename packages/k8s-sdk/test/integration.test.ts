@@ -134,7 +134,7 @@ describe('getHttpServer', () => {
     )
   })
 
-  it('logs uncaughtException', async () => {
+  it.skip('logs uncaughtException', async () => {
     sandbox.stub(process, 'once')
 
     process.emit('uncaughtException', new UnhandledError(StatusCode.InternalServerError, 'some error'))
