@@ -1,6 +1,6 @@
 {
   "name": "@purista/kubernetes-example",
-  "version": "1.10.7",
+  "version": "1.10.8",
   "description": "example how to deploy a single service in kubernetes",
   "homepage": "https://purista.dev",
   "private": true,
