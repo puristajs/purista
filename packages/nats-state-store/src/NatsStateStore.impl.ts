@@ -102,10 +102,6 @@ export class NatsStateStore extends StateStoreBaseClass<NatsStateStoreConfig> {
   }
 
   protected async setStateImpl(stateName: string, stateValue: unknown) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
-    }
-
     const store = await this.getStore()
 
     try {

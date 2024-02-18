@@ -83,7 +83,7 @@ describe('DaprSecretStore', () => {
       })
 
       try {
-        await secretStore.setSecret(secretName)
+        await secretStore.setSecret(secretName, 'test')
       } catch (err) {
         expect(err).toBeInstanceOf(UnhandledError)
         expect((err as UnhandledError).errorCode).toBe(501)
@@ -101,7 +101,7 @@ describe('DaprSecretStore', () => {
       })
 
       try {
-        await secretStore.setSecret(secretName)
+        await secretStore.setSecret(secretName, 'test')
       } catch (err) {
         expect(err).toBeInstanceOf(UnhandledError)
         expect((err as UnhandledError).errorCode).toBe(401)
