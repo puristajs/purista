@@ -603,7 +603,7 @@ ___
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.9.1"``
+• `Const` **puristaVersion**: ``"1.10.6"``
 
 #### Defined in
 

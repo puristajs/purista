@@ -76,7 +76,7 @@ It will be removed/overwritten on next get request.
 
 #### Defined in
 
-[aws-config-store/src/AWSConfigStore.impl.ts:29](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L29)
+[aws-config-store/src/AWSConfigStore.impl.ts:30](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L30)
 
 ## Properties
 
@@ -90,7 +90,7 @@ It will be removed/overwritten on next get request.
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:12
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:20
 
 ___
 
@@ -100,7 +100,7 @@ ___
 
 #### Defined in
 
-[aws-config-store/src/AWSConfigStore.impl.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L27)
+[aws-config-store/src/AWSConfigStore.impl.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L28)
 
 ___
 
@@ -127,7 +127,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:10
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:18
 
 ___
 
@@ -141,7 +141,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:9
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:17
 
 ___
 
@@ -157,7 +157,7 @@ name of store
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:11
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:19
 
 ## Methods
 
@@ -177,23 +177,35 @@ disconnects and shuts down the config store
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:20
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:70
 
 ___
 
 ### getConfig
 
-▸ **getConfig**(`...configNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
+▸ **getConfig**\<`ConfigNames`\>(`...configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+Returns the values for given config properties.
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `getConfigImpl`
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ConfigNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...configNames` | `string`[] |
+| `...configNames` | `ConfigNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `unknown`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+an object of { [configName]: value | undefined }
 
 #### Inherited from
 
@@ -201,23 +213,33 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:15
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:37
 
 ___
 
 ### getConfigImpl
 
-▸ **getConfigImpl**(`...configNames`): `Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
+▸ **getConfigImpl**\<`ConfigNames`\>(`...configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
 
-#### Parameters
+This method must be overwritten by actual store implementation.
+
+#### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...configNames` | `string`[] |
+| `ConfigNames` | extends `string`[] |
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `...configNames` | `ConfigNames` | list of config items |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+an object of { [configName]: value | undefined }
 
 #### Overrides
 
@@ -225,13 +247,17 @@ ___
 
 #### Defined in
 
-[aws-config-store/src/AWSConfigStore.impl.ts:34](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L34)
+[aws-config-store/src/AWSConfigStore.impl.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L35)
 
 ___
 
 ### removeConfig
 
 ▸ **removeConfig**(`configName`): `Promise`\<`void`\>
+
+Removes the config item given by config name.
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `removeConfigImpl`
 
 #### Parameters
 
@@ -249,13 +275,15 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:17
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:52
 
 ___
 
 ### removeConfigImpl
 
 ▸ **removeConfigImpl**(`configName`): `Promise`\<`void`\>
+
+This method must be overwritten by actual store implementation.
 
 #### Parameters
 
@@ -273,13 +301,17 @@ ___
 
 #### Defined in
 
-[aws-config-store/src/AWSConfigStore.impl.ts:55](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L55)
+[aws-config-store/src/AWSConfigStore.impl.ts:58](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L58)
 
 ___
 
 ### setConfig
 
 ▸ **setConfig**(`configName`, `configValue`): `Promise`\<`void`\>
+
+Sets a config value
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `setConfigImpl`
 
 #### Parameters
 
@@ -298,13 +330,15 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:19
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:69
 
 ___
 
 ### setConfigImpl
 
 ▸ **setConfigImpl**(`configName`, `configValue`): `Promise`\<`void`\>
+
+This method must be overwritten by actual store implementation.
 
 #### Parameters
 
@@ -323,4 +357,4 @@ ___
 
 #### Defined in
 
-[aws-config-store/src/AWSConfigStore.impl.ts:63](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L63)
+[aws-config-store/src/AWSConfigStore.impl.ts:66](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L66)

@@ -83,7 +83,7 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 #### Defined in
 
-[DefaultConfigStore/DefaultConfigStore.impl.ts:29](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L29)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:30](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L30)
 
 ## Properties
 
@@ -97,7 +97,7 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L18)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L26)
 
 ___
 
@@ -123,7 +123,7 @@ ___
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L14)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L22)
 
 ___
 
@@ -137,7 +137,7 @@ ___
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L13)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L21)
 
 ___
 
@@ -147,7 +147,7 @@ ___
 
 #### Defined in
 
-[DefaultConfigStore/DefaultConfigStore.impl.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L28)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:29](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L29)
 
 ___
 
@@ -163,7 +163,7 @@ name of store
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L16)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L24)
 
 ## Methods
 
@@ -183,61 +183,113 @@ disconnects and shuts down the config store
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:82](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L82)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:138](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L138)
 
 ___
 
 ### getConfig
 
-▸ **getConfig**(`...configNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
+▸ **getConfig**\<`ConfigNames`\>(`...configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+Returns the values for given config properties.
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `getConfigImpl`
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ConfigNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...configNames` | `string`[] |
+| `...configNames` | `ConfigNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `unknown`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
 
-#### Overrides
+an object of { [configName]: value | undefined }
+
+#### Inherited from
 
 [ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[getConfig](purista_core.ConfigStoreBaseClass.md#getconfig)
 
 #### Defined in
 
-[DefaultConfigStore/DefaultConfigStore.impl.ts:41](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L41)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:66](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L66)
 
 ___
 
 ### getConfigImpl
 
-▸ **getConfigImpl**(`..._configNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
+▸ **getConfigImpl**\<`ConfigNames`\>(`...configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
 
-#### Parameters
+This method must be overwritten by actual store implementation.
+
+#### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `..._configNames` | `string`[] |
+| `ConfigNames` | extends `string`[] |
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `...configNames` | `ConfigNames` | list of config items |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `unknown`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
 
-#### Inherited from
+an object of { [configName]: value | undefined }
+
+#### Overrides
 
 [ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[getConfigImpl](purista_core.ConfigStoreBaseClass.md#getconfigimpl)
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L35)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:42](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L42)
 
 ___
 
 ### removeConfig
 
 ▸ **removeConfig**(`configName`): `Promise`\<`void`\>
+
+Removes the config item given by config name.
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `removeConfigImpl`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `configName` | `string` |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Inherited from
+
+[ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[removeConfig](purista_core.ConfigStoreBaseClass.md#removeconfig)
+
+#### Defined in
+
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:97](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L97)
+
+___
+
+### removeConfigImpl
+
+▸ **removeConfigImpl**(`configName`): `Promise`\<`void`\>
+
+This method must be overwritten by actual store implementation.
 
 #### Parameters
 
@@ -251,23 +303,28 @@ ___
 
 #### Overrides
 
-[ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[removeConfig](purista_core.ConfigStoreBaseClass.md#removeconfig)
+[ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[removeConfigImpl](purista_core.ConfigStoreBaseClass.md#removeconfigimpl)
 
 #### Defined in
 
-[DefaultConfigStore/DefaultConfigStore.impl.ts:61](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L61)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:63](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L63)
 
 ___
 
-### removeConfigImpl
+### setConfig
 
-▸ **removeConfigImpl**(`_configName`): `Promise`\<`void`\>
+▸ **setConfig**(`configName`, `configValue`): `Promise`\<`void`\>
+
+Sets a config value
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `setConfigImpl`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `_configName` | `string` |
+| `configName` | `string` |
+| `configValue` | `unknown` |
 
 #### Returns
 
@@ -275,17 +332,19 @@ ___
 
 #### Inherited from
 
-[ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[removeConfigImpl](purista_core.ConfigStoreBaseClass.md#removeconfigimpl)
+[ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[setConfig](purista_core.ConfigStoreBaseClass.md#setconfig)
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:50](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L50)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:128](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L128)
 
 ___
 
-### setConfig
+### setConfigImpl
 
-▸ **setConfig**(`configName`, `configValue`): `Promise`\<`void`\>
+▸ **setConfigImpl**(`configName`, `configValue`): `Promise`\<`void`\>
+
+This method must be overwritten by actual store implementation.
 
 #### Parameters
 
@@ -300,33 +359,8 @@ ___
 
 #### Overrides
 
-[ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[setConfig](purista_core.ConfigStoreBaseClass.md#setconfig)
-
-#### Defined in
-
-[DefaultConfigStore/DefaultConfigStore.impl.ts:53](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L53)
-
-___
-
-### setConfigImpl
-
-▸ **setConfigImpl**(`_configName`, `_configValue`): `Promise`\<`void`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `_configName` | `string` |
-| `_configValue` | `unknown` |
-
-#### Returns
-
-`Promise`\<`void`\>
-
-#### Inherited from
-
 [ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[setConfigImpl](purista_core.ConfigStoreBaseClass.md#setconfigimpl)
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:66](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L66)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:59](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L59)

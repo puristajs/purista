@@ -30,8 +30,11 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 - [destroy](purista_core.DefaultStateStore.md#destroy)
 - [getState](purista_core.DefaultStateStore.md#getstate)
+- [getStateImpl](purista_core.DefaultStateStore.md#getstateimpl)
 - [removeState](purista_core.DefaultStateStore.md#removestate)
+- [removeStateImpl](purista_core.DefaultStateStore.md#removestateimpl)
 - [setState](purista_core.DefaultStateStore.md#setstate)
+- [setStateImpl](purista_core.DefaultStateStore.md#setstateimpl)
 
 ## Constructors
 
@@ -62,7 +65,7 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 #### Defined in
 
-[DefaultStateStore/DefaultStateStore.impl.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L14)
+[DefaultStateStore/DefaultStateStore.impl.ts:15](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L15)
 
 ## Properties
 
@@ -88,7 +91,7 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L14)
+[core/StateStore/StateStoreBaseClass.impl.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L21)
 
 ___
 
@@ -102,7 +105,7 @@ ___
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L13)
+[core/StateStore/StateStoreBaseClass.impl.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L20)
 
 ___
 
@@ -112,7 +115,7 @@ ___
 
 #### Defined in
 
-[DefaultStateStore/DefaultStateStore.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L13)
+[DefaultStateStore/DefaultStateStore.impl.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L14)
 
 ___
 
@@ -128,7 +131,7 @@ name of store
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L16)
+[core/StateStore/StateStoreBaseClass.impl.ts:23](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L23)
 
 ## Methods
 
@@ -148,31 +151,67 @@ disconnects and shuts down the state store
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:71](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L71)
+[core/StateStore/StateStoreBaseClass.impl.ts:95](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L95)
 
 ___
 
 ### getState
 
-▸ **getState**(`...stateNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
+▸ **getState**\<`StateNames`\>(`...stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `StateNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...stateNames` | `string`[] |
+| `...stateNames` | `StateNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `unknown`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
 
-#### Overrides
+#### Inherited from
 
 [StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[getState](purista_core.StateStoreBaseClass.md#getstate)
 
 #### Defined in
 
-[DefaultStateStore/DefaultStateStore.impl.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L26)
+[core/StateStore/StateStoreBaseClass.impl.ts:48](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L48)
+
+___
+
+### getStateImpl
+
+▸ **getStateImpl**\<`StateNames`\>(`...stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `StateNames` | extends `string`[] |
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `...stateNames` | `StateNames` |
+
+#### Returns
+
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
+
+#### Overrides
+
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[getStateImpl](purista_core.StateStoreBaseClass.md#getstateimpl)
+
+#### Defined in
+
+[DefaultStateStore/DefaultStateStore.impl.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L27)
 
 ___
 
@@ -190,13 +229,37 @@ ___
 
 `Promise`\<`void`\>
 
-#### Overrides
+#### Inherited from
 
 [StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[removeState](purista_core.StateStoreBaseClass.md#removestate)
 
 #### Defined in
 
-[DefaultStateStore/DefaultStateStore.impl.ts:46](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L46)
+[core/StateStore/StateStoreBaseClass.impl.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L67)
+
+___
+
+### removeStateImpl
+
+▸ **removeStateImpl**(`stateName`): `Promise`\<`void`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `stateName` | `string` |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Overrides
+
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[removeStateImpl](purista_core.StateStoreBaseClass.md#removestateimpl)
+
+#### Defined in
+
+[DefaultStateStore/DefaultStateStore.impl.ts:41](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L41)
 
 ___
 
@@ -215,10 +278,35 @@ ___
 
 `Promise`\<`void`\>
 
-#### Overrides
+#### Inherited from
 
 [StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[setState](purista_core.StateStoreBaseClass.md#setstate)
 
 #### Defined in
 
-[DefaultStateStore/DefaultStateStore.impl.ts:38](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L38)
+[core/StateStore/StateStoreBaseClass.impl.ts:85](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L85)
+
+___
+
+### setStateImpl
+
+▸ **setStateImpl**(`stateName`, `stateValue`): `Promise`\<`void`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `stateName` | `string` |
+| `stateValue` | `unknown` |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Overrides
+
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[setStateImpl](purista_core.StateStoreBaseClass.md#setstateimpl)
+
+#### Defined in
+
+[DefaultStateStore/DefaultStateStore.impl.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L37)

@@ -81,7 +81,7 @@ DaprConfigStore is an adapter which connects to the config store provided by the
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:12
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:20
 
 ___
 
@@ -119,7 +119,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:10
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:18
 
 ___
 
@@ -133,7 +133,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:9
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:17
 
 ___
 
@@ -149,7 +149,7 @@ name of store
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:11
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:19
 
 ## Methods
 
@@ -169,27 +169,73 @@ disconnects and shuts down the config store
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:20
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:70
 
 ___
 
 ### getConfig
 
-▸ **getConfig**(`...configNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
+▸ **getConfig**\<`ConfigNames`\>(`...configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+Returns the values for given config properties.
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `getConfigImpl`
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ConfigNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...configNames` | `string`[] |
+| `...configNames` | `ConfigNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `unknown`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+an object of { [configName]: value | undefined }
+
+#### Inherited from
+
+[ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[getConfig](purista_core.ConfigStoreBaseClass.md#getconfig)
+
+#### Defined in
+
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:37
+
+___
+
+### getConfigImpl
+
+▸ **getConfigImpl**\<`ConfigNames`\>(`...configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+This method must be overwritten by actual store implementation.
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ConfigNames` | extends `string`[] |
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `...configNames` | `ConfigNames` | list of config items |
+
+#### Returns
+
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+an object of { [configName]: value | undefined }
 
 #### Overrides
 
-[ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[getConfig](purista_core.ConfigStoreBaseClass.md#getconfig)
+[ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[getConfigImpl](purista_core.ConfigStoreBaseClass.md#getconfigimpl)
 
 #### Defined in
 
@@ -197,51 +243,31 @@ ___
 
 ___
 
-### getConfigImpl
-
-▸ **getConfigImpl**(`..._configNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `..._configNames` | `string`[] |
-
-#### Returns
-
-`Promise`\<`Record`\<`string`, `unknown`\>\>
-
-#### Inherited from
-
-[ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[getConfigImpl](purista_core.ConfigStoreBaseClass.md#getconfigimpl)
-
-#### Defined in
-
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:14
-
-___
-
 ### removeConfig
 
-▸ **removeConfig**(`_configName`): `Promise`\<`void`\>
+▸ **removeConfig**(`configName`): `Promise`\<`void`\>
+
+Removes the config item given by config name.
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `removeConfigImpl`
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `_configName` | `string` |
+| `configName` | `string` |
 
 #### Returns
 
 `Promise`\<`void`\>
 
-#### Overrides
+#### Inherited from
 
 [ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[removeConfig](purista_core.ConfigStoreBaseClass.md#removeconfig)
 
 #### Defined in
 
-[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:90](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L90)
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:52
 
 ___
 
@@ -249,6 +275,8 @@ ___
 
 ▸ **removeConfigImpl**(`_configName`): `Promise`\<`void`\>
 
+This method must be overwritten by actual store implementation.
+
 #### Parameters
 
 | Name | Type |
@@ -259,19 +287,50 @@ ___
 
 `Promise`\<`void`\>
 
-#### Inherited from
+#### Overrides
 
 [ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[removeConfigImpl](purista_core.ConfigStoreBaseClass.md#removeconfigimpl)
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:16
+[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:84](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L84)
 
 ___
 
 ### setConfig
 
-▸ **setConfig**(`_configName`, `_configValue`): `Promise`\<`void`\>
+▸ **setConfig**(`configName`, `configValue`): `Promise`\<`void`\>
+
+Sets a config value
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `setConfigImpl`
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `configName` | `string` |
+| `configValue` | `unknown` |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Inherited from
+
+[ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[setConfig](purista_core.ConfigStoreBaseClass.md#setconfig)
+
+#### Defined in
+
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:69
+
+___
+
+### setConfigImpl
+
+▸ **setConfigImpl**(`_configName`, `_configValue`): `Promise`\<`void`\>
+
+This method must be overwritten by actual store implementation.
 
 #### Parameters
 
@@ -286,33 +345,8 @@ ___
 
 #### Overrides
 
-[ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[setConfig](purista_core.ConfigStoreBaseClass.md#setconfig)
-
-#### Defined in
-
-[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:82](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L82)
-
-___
-
-### setConfigImpl
-
-▸ **setConfigImpl**(`_configName`, `_configValue`): `Promise`\<`void`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `_configName` | `string` |
-| `_configValue` | `unknown` |
-
-#### Returns
-
-`Promise`\<`void`\>
-
-#### Inherited from
-
 [ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[setConfigImpl](purista_core.ConfigStoreBaseClass.md#setconfigimpl)
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:18
+[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:80](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L80)

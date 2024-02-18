@@ -161,12 +161,13 @@ ___
 
 #### Type declaration
 
-| Name | Type |
-| :------ | :------ |
-| `additionalParameter?` | `Record`\<`string`, `unknown`\> |
-| `principalId?` | `string` |
-| `tenantId?` | `string` |
-| `traceId?` | `string` |
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `additionalParameter?` | `Record`\<`string`, `unknown`\> | Additional parameter passed to the commands |
+| `instanceId?` | `string` | The instance ID |
+| `principalId?` | `string` | The principal ID |
+| `tenantId?` | `string` | The tenant ID |
+| `traceId?` | `string` | The custom trace ID |
 
 #### Defined in
 
@@ -264,7 +265,7 @@ ___
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.9.1"``
+• `Const` **puristaVersion**: ``"1.10.6"``
 
 #### Defined in
 

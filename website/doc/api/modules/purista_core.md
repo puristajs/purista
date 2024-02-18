@@ -102,6 +102,7 @@ Learn PURIST at [purista.dev](https://purista.dev)
 - [LoggerStubs](purista_core.md#loggerstubs)
 - [Newable](purista_core.md#newable)
 - [NonEmptyString](purista_core.md#nonemptystring)
+- [ObjectWithKeysFromStringArray](purista_core.md#objectwithkeysfromstringarray)
 - [PendigInvocation](purista_core.md#pendiginvocation)
 - [Prettify](purista_core.md#prettify)
 - [PrincipalId](purista_core.md#principalid)
@@ -1278,6 +1279,25 @@ ___
 
 ___
 
+### ObjectWithKeysFromStringArray
+
+Ƭ **ObjectWithKeysFromStringArray**\<`T`, `Value`\>: \{ [K in T extends ReadonlyArray\<infer U\> ? U : never]: Value }
+
+Type helper which can create a typed record, based on given string array type.
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `T` | extends `ReadonlyArray`\<`string`\> |
+| `Value` | `unknown` \| `undefined` |
+
+#### Defined in
+
+[helper/types/ObjectWithKeysFromStringArray.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/types/ObjectWithKeysFromStringArray.ts#L5)
+
+___
+
 ### PendigInvocation
 
 Ƭ **PendigInvocation**: `Object`
@@ -1599,7 +1619,7 @@ ___
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.9.1"``
+• `Const` **puristaVersion**: ``"1.10.6"``
 
 #### Defined in
 
@@ -3325,19 +3345,26 @@ If you like to use your own events, the event name must be prefixed with `misc-`
 
 ## Store
 
-• **ConfigStoreBaseClass**\<`ConfigType`\>: `Object`
+• **ConfigStoreBaseClass**\<`ConfigStoreConfigType`\>: `Object`
 
-Base class for config store adapters
+Base class for config store adapters.
+The actual store implementation must overwrite the protected methods:
+
+- `getConfigImpl`
+- `setConfigImpl`
+- `removeConfigImpl`
+
+__DO NOT OVERWRITE__: the regular methods getConfig, setConfig or removeConfig
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
+| `ConfigStoreConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L12)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L20)
 
 • **DefaultConfigStore**: `Object`
 
@@ -3363,7 +3390,7 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 #### Defined in
 
-[DefaultConfigStore/DefaultConfigStore.impl.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L27)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L28)
 
 • **DefaultSecretStore**: `Object`
 
@@ -3398,7 +3425,7 @@ const store = new DefaultSecretStore({
 
 #### Defined in
 
-[DefaultSecretStore/DefaultSecretStore.impl.ts:36](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L36)
+[DefaultSecretStore/DefaultSecretStore.impl.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L37)
 
 • **DefaultStateStore**: `Object`
 
@@ -3407,35 +3434,49 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 #### Defined in
 
-[DefaultStateStore/DefaultStateStore.impl.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L12)
+[DefaultStateStore/DefaultStateStore.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L13)
 
-• **SecretStoreBaseClass**\<`ConfigType`\>: `Object`
+• **SecretStoreBaseClass**\<`SecretStoreConfigType`\>: `Object`
 
 Base class for secret store adapters
+The actual store implementation must overwrite the protected methods:
+
+- `getSecretImpl`
+- `setSecretImpl`
+- `removeSecretImpl`
+
+__DO NOT OVERWRITE__: the regular methods getSecret, setSecret or removeSecret
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
+| `SecretStoreConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L12)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L20)
 
-• **StateStoreBaseClass**\<`ConfigType`\>: `Object`
+• **StateStoreBaseClass**\<`StateStoreConfigType`\>: `Object`
 
 Base class for config store implementations
+The actual store implementation must overwrite the protected methods:
+
+- `getStateImpl`
+- `setStateImpl`
+- `removeStateImpl`
+
+__DO NOT OVERWRITE__: the regular methods getState, setState or removeState
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
+| `StateStoreConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L12)
+[core/StateStore/StateStoreBaseClass.impl.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L19)
 
 • **ConfigStore**: `Object`
 

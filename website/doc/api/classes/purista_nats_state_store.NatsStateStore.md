@@ -52,9 +52,12 @@ console.log(value) // outputs: undefined
 
 - [destroy](purista_nats_state_store.NatsStateStore.md#destroy)
 - [getState](purista_nats_state_store.NatsStateStore.md#getstate)
+- [getStateImpl](purista_nats_state_store.NatsStateStore.md#getstateimpl)
 - [getStore](purista_nats_state_store.NatsStateStore.md#getstore)
 - [removeState](purista_nats_state_store.NatsStateStore.md#removestate)
+- [removeStateImpl](purista_nats_state_store.NatsStateStore.md#removestateimpl)
 - [setState](purista_nats_state_store.NatsStateStore.md#setstate)
+- [setStateImpl](purista_nats_state_store.NatsStateStore.md#setstateimpl)
 
 ## Constructors
 
@@ -113,7 +116,7 @@ console.log(value) // outputs: undefined
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:10
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 ___
 
@@ -147,7 +150,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:9
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:16
 
 ___
 
@@ -163,7 +166,7 @@ name of store
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:11
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:18
 
 ___
 
@@ -193,27 +196,63 @@ disconnects and shuts down the state store
 
 #### Defined in
 
-[nats-state-store/src/NatsStateStore.impl.ts:126](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L126)
+[nats-state-store/src/NatsStateStore.impl.ts:116](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L116)
 
 ___
 
 ### getState
 
-▸ **getState**(`...stateNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
+▸ **getState**\<`StateNames`\>(`...stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `StateNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...stateNames` | `string`[] |
+| `...stateNames` | `StateNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `unknown`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
+
+#### Inherited from
+
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[getState](purista_core.StateStoreBaseClass.md#getstate)
+
+#### Defined in
+
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:21
+
+___
+
+### getStateImpl
+
+▸ **getStateImpl**\<`StateNames`\>(`...stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `StateNames` | extends `string`[] |
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `...stateNames` | `StateNames` |
+
+#### Returns
+
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
 
 #### Overrides
 
-[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[getState](purista_core.StateStoreBaseClass.md#getstate)
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[getStateImpl](purista_core.StateStoreBaseClass.md#getstateimpl)
 
 #### Defined in
 
@@ -249,13 +288,37 @@ ___
 
 `Promise`\<`void`\>
 
-#### Overrides
+#### Inherited from
 
 [StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[removeState](purista_core.StateStoreBaseClass.md#removestate)
 
 #### Defined in
 
-[nats-state-store/src/NatsStateStore.impl.ts:94](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L94)
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:23
+
+___
+
+### removeStateImpl
+
+▸ **removeStateImpl**(`stateName`): `Promise`\<`void`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `stateName` | `string` |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Overrides
+
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[removeStateImpl](purista_core.StateStoreBaseClass.md#removestateimpl)
+
+#### Defined in
+
+[nats-state-store/src/NatsStateStore.impl.ts:92](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L92)
 
 ___
 
@@ -274,10 +337,35 @@ ___
 
 `Promise`\<`void`\>
 
-#### Overrides
+#### Inherited from
 
 [StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[setState](purista_core.StateStoreBaseClass.md#setstate)
 
 #### Defined in
 
-[nats-state-store/src/NatsStateStore.impl.ts:110](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L110)
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:25
+
+___
+
+### setStateImpl
+
+▸ **setStateImpl**(`stateName`, `stateValue`): `Promise`\<`void`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `stateName` | `string` |
+| `stateValue` | `unknown` |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Overrides
+
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[setStateImpl](purista_core.StateStoreBaseClass.md#setstateimpl)
+
+#### Defined in
+
+[nats-state-store/src/NatsStateStore.impl.ts:104](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L104)

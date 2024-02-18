@@ -129,7 +129,7 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:12
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:20
 
 ___
 
@@ -166,7 +166,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:10
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:18
 
 ___
 
@@ -180,7 +180,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:9
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:17
 
 ___
 
@@ -196,7 +196,7 @@ name of store
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:11
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:19
 
 ## Methods
 
@@ -216,7 +216,7 @@ disconnects and shuts down the config store
 
 #### Defined in
 
-[redis-config-store/src/RedisConfigStore.impl.ts:101](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L101)
+[redis-config-store/src/RedisConfigStore.impl.ts:103](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L103)
 
 ___
 
@@ -236,17 +236,29 @@ ___
 
 ### getConfig
 
-▸ **getConfig**(`...configNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
+▸ **getConfig**\<`ConfigNames`\>(`...configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+Returns the values for given config properties.
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `getConfigImpl`
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ConfigNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...configNames` | `string`[] |
+| `...configNames` | `ConfigNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `unknown`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+an object of { [configName]: value | undefined }
 
 #### Inherited from
 
@@ -254,23 +266,33 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:15
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:37
 
 ___
 
 ### getConfigImpl
 
-▸ **getConfigImpl**(`...configNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
+▸ **getConfigImpl**\<`ConfigNames`\>(`...configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
 
-#### Parameters
+This method must be overwritten by actual store implementation.
+
+#### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...configNames` | `string`[] |
+| `ConfigNames` | extends `string`[] |
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `...configNames` | `ConfigNames` | list of config items |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `unknown`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+an object of { [configName]: value | undefined }
 
 #### Overrides
 
@@ -285,6 +307,10 @@ ___
 ### removeConfig
 
 ▸ **removeConfig**(`configName`): `Promise`\<`void`\>
+
+Removes the config item given by config name.
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `removeConfigImpl`
 
 #### Parameters
 
@@ -302,13 +328,15 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:17
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:52
 
 ___
 
 ### removeConfigImpl
 
 ▸ **removeConfigImpl**(`configName`): `Promise`\<`void`\>
+
+This method must be overwritten by actual store implementation.
 
 #### Parameters
 
@@ -326,13 +354,17 @@ ___
 
 #### Defined in
 
-[redis-config-store/src/RedisConfigStore.impl.ts:78](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L78)
+[redis-config-store/src/RedisConfigStore.impl.ts:80](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L80)
 
 ___
 
 ### setConfig
 
 ▸ **setConfig**(`configName`, `configValue`): `Promise`\<`void`\>
+
+Sets a config value
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `setConfigImpl`
 
 #### Parameters
 
@@ -351,13 +383,15 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:19
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:69
 
 ___
 
 ### setConfigImpl
 
 ▸ **setConfigImpl**(`configName`, `configValue`): `Promise`\<`void`\>
+
+This method must be overwritten by actual store implementation.
 
 #### Parameters
 
@@ -376,4 +410,4 @@ ___
 
 #### Defined in
 
-[redis-config-store/src/RedisConfigStore.impl.ts:90](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L90)
+[redis-config-store/src/RedisConfigStore.impl.ts:92](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L92)

@@ -85,7 +85,7 @@ Dapr currently provides only the possibility to fetch a secret. Creating a new s
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:12
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
 
 ___
 
@@ -125,7 +125,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:10
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:18
 
 ___
 
@@ -139,7 +139,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:9
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:17
 
 ___
 
@@ -155,7 +155,7 @@ name of store
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:11
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:19
 
 ## Methods
 
@@ -175,27 +175,63 @@ disconnects and shuts down the secret store
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
 
 ___
 
 ### getSecret
 
-▸ **getSecret**(`...secretNames`): `Promise`\<`Record`\<`string`, `string`\>\>
+▸ **getSecret**\<`SecretNames`\>(`...secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `undefined` \| `string`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `SecretNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...secretNames` | `string`[] |
+| `...secretNames` | `SecretNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `undefined` \| `string`\>\>
+
+#### Inherited from
+
+[SecretStoreBaseClass](purista_core.SecretStoreBaseClass.md).[getSecret](purista_core.SecretStoreBaseClass.md#getsecret)
+
+#### Defined in
+
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
+
+___
+
+### getSecretImpl
+
+▸ **getSecretImpl**\<`SecretNames`\>(`...secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `undefined` \| `string`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `SecretNames` | extends `string`[] |
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `...secretNames` | `SecretNames` |
+
+#### Returns
+
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `undefined` \| `string`\>\>
 
 #### Overrides
 
-[SecretStoreBaseClass](purista_core.SecretStoreBaseClass.md).[getSecret](purista_core.SecretStoreBaseClass.md#getsecret)
+[SecretStoreBaseClass](purista_core.SecretStoreBaseClass.md).[getSecretImpl](purista_core.SecretStoreBaseClass.md#getsecretimpl)
 
 #### Defined in
 
@@ -203,51 +239,27 @@ ___
 
 ___
 
-### getSecretImpl
-
-▸ **getSecretImpl**(`..._secretNames`): `Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `..._secretNames` | `string`[] |
-
-#### Returns
-
-`Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
-
-#### Inherited from
-
-[SecretStoreBaseClass](purista_core.SecretStoreBaseClass.md).[getSecretImpl](purista_core.SecretStoreBaseClass.md#getsecretimpl)
-
-#### Defined in
-
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:14
-
-___
-
 ### removeSecret
 
-▸ **removeSecret**(`_secretName`): `Promise`\<`void`\>
+▸ **removeSecret**(`secretName`): `Promise`\<`void`\>
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `_secretName` | `string` |
+| `secretName` | `string` |
 
 #### Returns
 
 `Promise`\<`void`\>
 
-#### Overrides
+#### Inherited from
 
 [SecretStoreBaseClass](purista_core.SecretStoreBaseClass.md).[removeSecret](purista_core.SecretStoreBaseClass.md#removesecret)
 
 #### Defined in
 
-[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:99](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L99)
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:25
 
 ___
 
@@ -265,19 +277,44 @@ ___
 
 `Promise`\<`void`\>
 
-#### Inherited from
+#### Overrides
 
 [SecretStoreBaseClass](purista_core.SecretStoreBaseClass.md).[removeSecretImpl](purista_core.SecretStoreBaseClass.md#removesecretimpl)
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:16
+[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:93](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L93)
 
 ___
 
 ### setSecret
 
-▸ **setSecret**(`_secretName`): `Promise`\<`void`\>
+▸ **setSecret**(`secretName`, `secretValue`): `Promise`\<`void`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `secretName` | `string` |
+| `secretValue` | `string` |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Inherited from
+
+[SecretStoreBaseClass](purista_core.SecretStoreBaseClass.md).[setSecret](purista_core.SecretStoreBaseClass.md#setsecret)
+
+#### Defined in
+
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:27
+
+___
+
+### setSecretImpl
+
+▸ **setSecretImpl**(`_secretName`): `Promise`\<`void`\>
 
 #### Parameters
 
@@ -291,33 +328,8 @@ ___
 
 #### Overrides
 
-[SecretStoreBaseClass](purista_core.SecretStoreBaseClass.md).[setSecret](purista_core.SecretStoreBaseClass.md#setsecret)
-
-#### Defined in
-
-[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:91](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L91)
-
-___
-
-### setSecretImpl
-
-▸ **setSecretImpl**(`_secretName`, `_secretValue`): `Promise`\<`void`\>
-
-#### Parameters
-
-| Name | Type |
-| :------ | :------ |
-| `_secretName` | `string` |
-| `_secretValue` | `string` |
-
-#### Returns
-
-`Promise`\<`void`\>
-
-#### Inherited from
-
 [SecretStoreBaseClass](purista_core.SecretStoreBaseClass.md).[setSecretImpl](purista_core.SecretStoreBaseClass.md#setsecretimpl)
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:18
+[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:89](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L89)

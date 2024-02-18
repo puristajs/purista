@@ -4,6 +4,157 @@ PURISTA API / [Modules](modules.md)
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.6] - 2024-02-15
+
+### Bug Fixes
+
+- Mocked context invoke
+
+## [1.10.5] - 2024-02-15
+
+### Bug Fixes
+
+- Mutable obj issue in context mocks
+
+### Miscellaneous Tasks
+
+- Bump versions to 1.10.5
+
+## [1.10.4] - 2024-02-15
+
+### Bug Fixes
+
+- Mutable issue in createInvokeFunctionProxy
+
+### Miscellaneous Tasks
+
+- Bump versions to 1.10.4
+
+## [1.10.3] - 2024-02-14
+
+### Bug Fixes
+
+- Hono webserver request content type
+
+### Miscellaneous Tasks
+
+- Bump versions to 1.10.3
+
+## [1.10.2] - 2024-02-14
+
+### Miscellaneous Tasks
+
+- Minor fixes and dep updates
+- Bump versions to 1.10.2
+
+## [1.10.1] - 2024-02-14
+
+### Bug Fixes
+
+- Hono vars
+
+### Documentation
+
+- Update doc
+- Chore update
+- Fix analytics
+- Update
+- Update
+
+### Miscellaneous Tasks
+
+- Bump versions to 1.10.1
+
+## [1.10.0] - 2024-02-11
+
+### Bug Fixes
+
+- Version bump for new packages
+- Hono based servers compress issue
+- UnhandledError.fromError returns UnhandledError
+- Minor code smells
+- Keep OT traceId and custom trace id separated
+- OpenApi path parameter and add example
+- Add missing type params
+- Refactor type handling in builders fixes #159
+- SafeBind
+- Package.json files use dist instead of lib
+- Service config type in service builder getInstance
+- Test
+
+### Documentation
+
+- Add new packages to api docs
+- Migrate to vitepress #152
+- Add schema page
+- Fix k8s examples
+- Minor readme changes
+- Update documentation
+- Fix api doc generation
+- Update doc
+- Update doc
+
+### Features
+
+- Add secret store for AWS Secrets Manager #106
+- Add cache map to basic config store class
+- Add config store for AWS Systems Manager Parameter Store #104
+- Add secret star for Azure Key Vault #107
+- Add chained invoke functions in commands and subscriptions #149
+- Hono based web server  #153
+- Allow different schema libs #154
+- Add schema for custom emit and improve types #158
+- Add dynamic route registration to hono server
+- Add esm support to cli
+- CLI support for ESM, vitest and Biome
+- Cli add parameter type and schema per default to subscriptions
+
+### Miscellaneous Tasks
+
+- Minor cleanup
+- Bump dependency versions
+- Fix typo
+- Fix test setup
+- Update nvmrc to node 20
+- Improve logger
+- Add lint rule to force imports with type scope
+- Make props available in subclass in HttpClient
+- Prepare esm support in purista cli
+- Improve imports to use type imports
+- Simplify stores and cleanup code
+- Refactor code base to ESM #147
+- Update vuepress setup
+- Bump dependency versions
+- Exclude test files from npm packages
+- Dev env should use repo typescript version
+- Improve error handling
+- Bump dependency versions
+- Fix lint
+- Exclude tests from build
+- Improve Hono types
+- Add toJSON method to error classes
+- Use PatternRouter instead of own implementation
+- Remove unused dev dependencies
+- Cleanup dependencies
+- Bump dependencies to most recent
+- Update and fix tests
+- Remove deprecated method calls
+- Update package-lock.json
+- Bump dependencies
+- Prevent multiple command endpoint registrations
+- Use safeBind instead of bind to keep types
+- Minor code improvements
+- Minor improvements
+- Improve example
+- Minor improvements
+- Bump dependencies
+- Migrate to hono v4
+- Minor improvements
+- Add static file servering to example
+- Improve tests
+- Fix build package.json
+- Bump versions to 1.10.0
+
 ## [1.9.1] - 2024-01-26
 
 ### Bug Fixes
@@ -15,6 +166,7 @@ All notable changes to this project will be documented in this file.
 ### Miscellaneous Tasks
 
 - Lint
+- Bump versions to 1.9.1
 
 ## [1.9.0] - 2023-11-18
 

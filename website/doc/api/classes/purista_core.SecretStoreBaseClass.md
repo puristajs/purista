@@ -1,16 +1,23 @@
 [PURISTA API](../README.md) / [Modules](../modules.md) / [@purista/core](../modules/purista_core.md) / SecretStoreBaseClass
 
-# Class: SecretStoreBaseClass\<ConfigType\>
+# Class: SecretStoreBaseClass\<SecretStoreConfigType\>
 
 [@purista/core](../modules/purista_core.md).SecretStoreBaseClass
 
 Base class for secret store adapters
+The actual store implementation must overwrite the protected methods:
+
+- `getSecretImpl`
+- `setSecretImpl`
+- `removeSecretImpl`
+
+__DO NOT OVERWRITE__: the regular methods getSecret, setSecret or removeSecret
 
 ## Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
+| `SecretStoreConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
 
 ## Hierarchy
 
@@ -49,28 +56,28 @@ Base class for secret store adapters
 
 ### constructor
 
-• **new SecretStoreBaseClass**\<`ConfigType`\>(`name`, `config`): [`SecretStoreBaseClass`](purista_core.SecretStoreBaseClass.md)\<`ConfigType`\>
+• **new SecretStoreBaseClass**\<`SecretStoreConfigType`\>(`name`, `config`): [`SecretStoreBaseClass`](purista_core.SecretStoreBaseClass.md)\<`SecretStoreConfigType`\>
 
 #### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `ConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
+| `SecretStoreConfigType` | extends `Record`\<`string`, `unknown`\> = {} |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
 | `name` | `string` |
-| `config` | \{ [K in string \| number \| symbol]: (Object & ConfigType)[K] } |
+| `config` | \{ [K in string \| number \| symbol]: (Object & SecretStoreConfigType)[K] } |
 
 #### Returns
 
-[`SecretStoreBaseClass`](purista_core.SecretStoreBaseClass.md)\<`ConfigType`\>
+[`SecretStoreBaseClass`](purista_core.SecretStoreBaseClass.md)\<`SecretStoreConfigType`\>
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L20)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L28)
 
 ## Properties
 
@@ -80,17 +87,17 @@ Base class for secret store adapters
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L18)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L26)
 
 ___
 
 ### config
 
-• **config**: \{ [K in string \| number \| symbol]: \{ [K in string \| number \| symbol]: (Object & ConfigType)[K] }[K] }
+• **config**: \{ [K in string \| number \| symbol]: \{ [K in string \| number \| symbol]: (Object & SecretStoreConfigType)[K] }[K] }
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L14)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L22)
 
 ___
 
@@ -100,7 +107,7 @@ ___
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L13)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L21)
 
 ___
 
@@ -116,7 +123,7 @@ name of store
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L16)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L24)
 
 ## Methods
 
@@ -136,23 +143,29 @@ disconnects and shuts down the secret store
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:135](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L135)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:148](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L148)
 
 ___
 
 ### getSecret
 
-▸ **getSecret**(`...secretNames`): `Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
+▸ **getSecret**\<`SecretNames`\>(`...secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `undefined` \| `string`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `SecretNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...secretNames` | `string`[] |
+| `...secretNames` | `SecretNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `undefined` \| `string`\>\>
 
 #### Implementation of
 
@@ -160,27 +173,33 @@ SecretStore.getSecret
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:41](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L41)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:52](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L52)
 
 ___
 
 ### getSecretImpl
 
-▸ **getSecretImpl**(`..._secretNames`): `Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
+▸ **getSecretImpl**\<`SecretNames`\>(`...secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `undefined` \| `string`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `SecretNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `..._secretNames` | `string`[] |
+| `...secretNames` | `SecretNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `undefined` \| `string`\>\>
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L35)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:43](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L43)
 
 ___
 
@@ -204,7 +223,7 @@ SecretStore.removeSecret
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:99](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L99)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:112](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L112)
 
 ___
 
@@ -224,7 +243,7 @@ ___
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:93](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L93)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:106](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L106)
 
 ___
 
@@ -249,7 +268,7 @@ SecretStore.setSecret
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:119](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L119)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:132](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L132)
 
 ___
 
@@ -270,4 +289,4 @@ ___
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:113](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L113)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:126](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L126)

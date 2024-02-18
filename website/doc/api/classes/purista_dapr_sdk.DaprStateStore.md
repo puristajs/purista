@@ -29,8 +29,11 @@ DaprStateStore is an adapter which connects to the state store provided by the u
 
 - [destroy](purista_dapr_sdk.DaprStateStore.md#destroy)
 - [getState](purista_dapr_sdk.DaprStateStore.md#getstate)
+- [getStateImpl](purista_dapr_sdk.DaprStateStore.md#getstateimpl)
 - [removeState](purista_dapr_sdk.DaprStateStore.md#removestate)
+- [removeStateImpl](purista_dapr_sdk.DaprStateStore.md#removestateimpl)
 - [setState](purista_dapr_sdk.DaprStateStore.md#setstate)
+- [setStateImpl](purista_dapr_sdk.DaprStateStore.md#setstateimpl)
 
 ## Constructors
 
@@ -101,7 +104,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:10
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 ___
 
@@ -115,7 +118,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:9
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:16
 
 ___
 
@@ -131,7 +134,7 @@ name of store
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:11
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:18
 
 ## Methods
 
@@ -151,27 +154,63 @@ disconnects and shuts down the state store
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:16
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:26
 
 ___
 
 ### getState
 
-▸ **getState**(`...stateNames`): `Promise`\<`Record`\<`string`, `string`\>\>
+▸ **getState**\<`StateNames`\>(`...stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `StateNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...stateNames` | `string`[] |
+| `...stateNames` | `StateNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
+
+#### Inherited from
+
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[getState](purista_core.StateStoreBaseClass.md#getstate)
+
+#### Defined in
+
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:21
+
+___
+
+### getStateImpl
+
+▸ **getStateImpl**\<`StateNames`\>(`...stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `StateNames` | extends `string`[] |
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `...stateNames` | `StateNames` |
+
+#### Returns
+
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
 
 #### Overrides
 
-[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[getState](purista_core.StateStoreBaseClass.md#getstate)
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[getStateImpl](purista_core.StateStoreBaseClass.md#getstateimpl)
 
 #### Defined in
 
@@ -193,13 +232,37 @@ ___
 
 `Promise`\<`void`\>
 
-#### Overrides
+#### Inherited from
 
 [StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[removeState](purista_core.StateStoreBaseClass.md#removestate)
 
 #### Defined in
 
-[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:105](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L105)
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:23
+
+___
+
+### removeStateImpl
+
+▸ **removeStateImpl**(`stateName`): `Promise`\<`void`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `stateName` | `string` |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Overrides
+
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[removeStateImpl](purista_core.StateStoreBaseClass.md#removestateimpl)
+
+#### Defined in
+
+[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:99](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L99)
 
 ___
 
@@ -218,10 +281,35 @@ ___
 
 `Promise`\<`void`\>
 
-#### Overrides
+#### Inherited from
 
 [StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[setState](purista_core.StateStoreBaseClass.md#setstate)
 
 #### Defined in
 
-[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:84](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L84)
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:25
+
+___
+
+### setStateImpl
+
+▸ **setStateImpl**(`stateName`, `stateValue`): `Promise`\<`void`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `stateName` | `string` |
+| `stateValue` | `unknown` |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Overrides
+
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[setStateImpl](purista_core.StateStoreBaseClass.md#setstateimpl)
+
+#### Defined in
+
+[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:82](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L82)

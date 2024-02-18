@@ -104,7 +104,7 @@ console.log(value) // outputs: undefined
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:12
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:20
 
 ___
 
@@ -131,7 +131,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:10
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:18
 
 ___
 
@@ -165,7 +165,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:9
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:17
 
 ___
 
@@ -181,7 +181,7 @@ name of store
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:11
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:19
 
 ___
 
@@ -211,23 +211,35 @@ disconnects and shuts down the config store
 
 #### Defined in
 
-[nats-config-store/src/NatsConfigStore.impl.ts:114](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L114)
+[nats-config-store/src/NatsConfigStore.impl.ts:116](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L116)
 
 ___
 
 ### getConfig
 
-▸ **getConfig**(`...configNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
+▸ **getConfig**\<`ConfigNames`\>(`...configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+Returns the values for given config properties.
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `getConfigImpl`
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ConfigNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...configNames` | `string`[] |
+| `...configNames` | `ConfigNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `unknown`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+an object of { [configName]: value | undefined }
 
 #### Inherited from
 
@@ -235,23 +247,33 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:15
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:37
 
 ___
 
 ### getConfigImpl
 
-▸ **getConfigImpl**(`...stateNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
+▸ **getConfigImpl**\<`ConfigNames`\>(`...stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
 
-#### Parameters
+This method must be overwritten by actual store implementation.
+
+#### Type parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...stateNames` | `string`[] |
+| `ConfigNames` | extends `string`[] |
+
+#### Parameters
+
+| Name | Type | Description |
+| :------ | :------ | :------ |
+| `...stateNames` | `ConfigNames` | list of config items |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `unknown`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+an object of { [configName]: value | undefined }
 
 #### Overrides
 
@@ -281,6 +303,10 @@ ___
 
 ▸ **removeConfig**(`configName`): `Promise`\<`void`\>
 
+Removes the config item given by config name.
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `removeConfigImpl`
+
 #### Parameters
 
 | Name | Type |
@@ -297,13 +323,15 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:17
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:52
 
 ___
 
 ### removeConfigImpl
 
 ▸ **removeConfigImpl**(`stateName`): `Promise`\<`void`\>
+
+This method must be overwritten by actual store implementation.
 
 #### Parameters
 
@@ -321,13 +349,17 @@ ___
 
 #### Defined in
 
-[nats-config-store/src/NatsConfigStore.impl.ts:90](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L90)
+[nats-config-store/src/NatsConfigStore.impl.ts:92](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L92)
 
 ___
 
 ### setConfig
 
 ▸ **setConfig**(`configName`, `configValue`): `Promise`\<`void`\>
+
+Sets a config value
+This function **SHOULD NOT** be overwritten by store implementation.
+For implementation overwrite protected `setConfigImpl`
 
 #### Parameters
 
@@ -346,13 +378,15 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:19
+core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:69
 
 ___
 
 ### setConfigImpl
 
 ▸ **setConfigImpl**(`stateName`, `stateValue`): `Promise`\<`void`\>
+
+This method must be overwritten by actual store implementation.
 
 #### Parameters
 
@@ -371,4 +405,4 @@ ___
 
 #### Defined in
 
-[nats-config-store/src/NatsConfigStore.impl.ts:102](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L102)
+[nats-config-store/src/NatsConfigStore.impl.ts:104](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L104)

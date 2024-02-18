@@ -70,8 +70,11 @@ See documentation of underlaying redis lib package for detailed configuration op
 - [destroy](purista_redis_state_store.RedisStateStore.md#destroy)
 - [getClient](purista_redis_state_store.RedisStateStore.md#getclient)
 - [getState](purista_redis_state_store.RedisStateStore.md#getstate)
+- [getStateImpl](purista_redis_state_store.RedisStateStore.md#getstateimpl)
 - [removeState](purista_redis_state_store.RedisStateStore.md#removestate)
+- [removeStateImpl](purista_redis_state_store.RedisStateStore.md#removestateimpl)
 - [setState](purista_redis_state_store.RedisStateStore.md#setstate)
+- [setStateImpl](purista_redis_state_store.RedisStateStore.md#setstateimpl)
 
 ## Constructors
 
@@ -148,7 +151,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:10
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 ___
 
@@ -162,7 +165,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:9
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:16
 
 ___
 
@@ -178,7 +181,7 @@ name of store
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:11
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:18
 
 ## Methods
 
@@ -198,7 +201,7 @@ disconnects and shuts down the state store
 
 #### Defined in
 
-[redis-state-store/src/RedisStateStore.impl.ts:113](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L113)
+[redis-state-store/src/RedisStateStore.impl.ts:107](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L107)
 
 ___
 
@@ -218,21 +221,57 @@ ___
 
 ### getState
 
-▸ **getState**(`...stateNames`): `Promise`\<`Record`\<`string`, `unknown`\>\>
+▸ **getState**\<`StateNames`\>(`...stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `StateNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...stateNames` | `string`[] |
+| `...stateNames` | `StateNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `unknown`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
+
+#### Inherited from
+
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[getState](purista_core.StateStoreBaseClass.md#getstate)
+
+#### Defined in
+
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:21
+
+___
+
+### getStateImpl
+
+▸ **getStateImpl**\<`StateNames`\>(`...stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `StateNames` | extends `string`[] |
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `...stateNames` | `StateNames` |
+
+#### Returns
+
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
 
 #### Overrides
 
-[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[getState](purista_core.StateStoreBaseClass.md#getstate)
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[getStateImpl](purista_core.StateStoreBaseClass.md#getstateimpl)
 
 #### Defined in
 
@@ -254,13 +293,37 @@ ___
 
 `Promise`\<`void`\>
 
-#### Overrides
+#### Inherited from
 
 [StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[removeState](purista_core.StateStoreBaseClass.md#removestate)
 
 #### Defined in
 
-[redis-state-store/src/RedisStateStore.impl.ts:82](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L82)
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:23
+
+___
+
+### removeStateImpl
+
+▸ **removeStateImpl**(`stateName`): `Promise`\<`void`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `stateName` | `string` |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Overrides
+
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[removeStateImpl](purista_core.StateStoreBaseClass.md#removestateimpl)
+
+#### Defined in
+
+[redis-state-store/src/RedisStateStore.impl.ts:80](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L80)
 
 ___
 
@@ -279,10 +342,35 @@ ___
 
 `Promise`\<`void`\>
 
-#### Overrides
+#### Inherited from
 
 [StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[setState](purista_core.StateStoreBaseClass.md#setstate)
 
 #### Defined in
 
-[redis-state-store/src/RedisStateStore.impl.ts:98](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L98)
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:25
+
+___
+
+### setStateImpl
+
+▸ **setStateImpl**(`stateName`, `stateValue`): `Promise`\<`void`\>
+
+#### Parameters
+
+| Name | Type |
+| :------ | :------ |
+| `stateName` | `string` |
+| `stateValue` | `unknown` |
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Overrides
+
+[StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[setStateImpl](purista_core.StateStoreBaseClass.md#setstateimpl)
+
+#### Defined in
+
+[redis-state-store/src/RedisStateStore.impl.ts:92](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L92)

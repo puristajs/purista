@@ -121,7 +121,7 @@ console.log(value) // outputs: undefined
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:12
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
 
 ___
 
@@ -169,7 +169,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:10
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:18
 
 ___
 
@@ -183,7 +183,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:9
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:17
 
 ___
 
@@ -199,7 +199,7 @@ name of store
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:11
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:19
 
 ## Methods
 
@@ -219,23 +219,29 @@ disconnects and shuts down the secret store
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
 
 ___
 
 ### getSecret
 
-▸ **getSecret**(`...secretNames`): `Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
+▸ **getSecret**\<`SecretNames`\>(`...secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `undefined` \| `string`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `SecretNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...secretNames` | `string`[] |
+| `...secretNames` | `SecretNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `undefined` \| `string`\>\>
 
 #### Inherited from
 
@@ -243,23 +249,29 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:15
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
 
 ___
 
 ### getSecretImpl
 
-▸ **getSecretImpl**(`...secretNames`): `Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
+▸ **getSecretImpl**\<`SecretNames`\>(`...secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `undefined` \| `string`\>\>
+
+#### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `SecretNames` | extends `string`[] |
 
 #### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...secretNames` | `string`[] |
+| `...secretNames` | `SecretNames` |
 
 #### Returns
 
-`Promise`\<`Record`\<`string`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `undefined` \| `string`\>\>
 
 #### Overrides
 
@@ -291,7 +303,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:17
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:25
 
 ___
 
@@ -315,7 +327,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalSecretStore.impl.ts:65](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L65)
+[infisical-secret-store/src/InfisicalSecretStore.impl.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L67)
 
 ___
 
@@ -340,7 +352,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:19
+core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:27
 
 ___
 
@@ -365,4 +377,4 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalSecretStore.impl.ts:75](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L75)
+[infisical-secret-store/src/InfisicalSecretStore.impl.ts:77](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L77)
