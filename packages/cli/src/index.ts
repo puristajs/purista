@@ -69,6 +69,7 @@ const timeoutId = setTimeout(() => controller.abort(), 5000)
 
 fetch('https://registry.npmjs.org/@purista/cli/latest', { signal: controller.signal })
   .then((response) => {
+    clearTimeout(timeoutId)
     response
       .json()
       .then((value: Record<string, string>) => {
