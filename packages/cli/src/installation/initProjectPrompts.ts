@@ -24,6 +24,9 @@ export const initProjectPrompts: Prompts = [
       { value: true, name: 'esm module' },
       { value: false, name: 'commonjs' },
     ],
+    when(answers) {
+      return answers.initialize
+    },
   },
   {
     type: 'list',
