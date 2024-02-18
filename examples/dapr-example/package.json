@@ -1,6 +1,6 @@
 {
   "name": "@purista/dapr-example",
-  "version": "1.10.6",
+  "version": "1.10.7",
   "description": "example how to use the dapr package",
   "homepage": "https://purista.dev",
   "private": true,
