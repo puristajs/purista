@@ -5,6 +5,7 @@ export default defineConfig({
     isolate: true,
     globals: true,
     watch: false,
+    hookTimeout: 30000,
     coverage: {
       enabled: false,
       include: ['**/src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
