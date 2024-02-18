@@ -70,7 +70,7 @@ export class NatsStateStore extends StateStoreBaseClass<NatsStateStoreConfig> {
     return this.kv
   }
 
-  protected async getSecretImpl<StateNames extends string[]>(
+  protected async getStateImpl<StateNames extends string[]>(
     ...stateNames: StateNames
   ): Promise<ObjectWithKeysFromStringArray<StateNames>> {
     const store = await this.getStore()
