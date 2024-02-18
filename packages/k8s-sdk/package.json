@@ -54,7 +54,6 @@
   },
   "devDependencies": {
     "@hono/node-server": "^1.8.0",
-    "@types/jest": "^29.5.11",
     "@types/node": "^20.11.17",
     "@types/sinon": "^17.0.3",
     "sinon": "^17.0.1",
