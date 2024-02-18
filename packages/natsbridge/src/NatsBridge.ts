@@ -259,12 +259,6 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
             timeout: commandTimeout,
           })
 
-          await new Promise((resolve) =>
-            setTimeout(() => {
-              resolve(true)
-            }, 3000),
-          )
-
           const response: CommandResponse = this.sc.decode(msg.data) as CommandResponse
           const returnContext = deserializeOtpFromNats(this.logger, response, msg.headers)
           return this.startActiveSpan(
@@ -310,6 +304,9 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
             },
           )
         } catch (error) {
+          if (error instanceof HandledError || error instanceof UnhandledError) {
+            throw error
+          }
           const err = UnhandledError.fromError(error)
           log.error({ err })
           throw err
