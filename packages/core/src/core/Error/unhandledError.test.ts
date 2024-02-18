@@ -42,7 +42,7 @@ describe('UnhandledError', () => {
     expect(result.traceId).toEqual(traceId)
   })
 
-  it('creates a new UnhandledError', () => {
+  it('creates a UnhandledError from error', () => {
     const statusCode = StatusCode.BadRequest
     const message = 'invalid input'
     const data = { some: 'data' }

@@ -29,7 +29,7 @@ describe('DefaultConfigStore', () => {
       logger.stubs.warn.calledWith(
         'Using the DefaultConfigStore is not secure! It should only be used for test or development purpose.',
       ),
-    )
+    ).toBeTruthy()
   })
 
   it('handles configs', async () => {

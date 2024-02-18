@@ -29,7 +29,7 @@ describe('DefaultSecretStore', () => {
       logger.stubs.warn.calledWith(
         'Using the DefaultSecretStore is not secure! It should only be used for test or development purpose.',
       ),
-    )
+    ).toBeTruthy()
   })
 
   it('handles secrets', async () => {

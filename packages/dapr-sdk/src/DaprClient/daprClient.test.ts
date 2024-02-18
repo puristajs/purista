@@ -147,7 +147,7 @@ describe('DaprClient', () => {
     await expect(client.isSidecarAvailable()).resolves.toBeTruthy()
   })
 
-  it('returns true if sidecar is available', async () => {
+  it('returns false if sidecar is not available', async () => {
     const client = new DaprClient({
       baseUrl,
       logger: getLoggerMock(sandbox).mock,

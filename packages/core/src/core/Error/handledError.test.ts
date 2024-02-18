@@ -41,7 +41,7 @@ describe('HandledError', () => {
     expect(result.traceId).toEqual(traceId)
   })
 
-  it('creates a new HandledError', () => {
+  it('creates a HandledError from error', () => {
     const statusCode = StatusCode.BadRequest
     const message = 'invalid input'
     const data = { some: 'data' }
