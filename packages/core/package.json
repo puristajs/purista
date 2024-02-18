@@ -45,7 +45,7 @@
     "@opentelemetry/sdk-trace-node": "^1.19.0",
     "@opentelemetry/semantic-conventions": "^1.19.0",
     "openapi3-ts": "^4.2.1",
-    "pino": "^8.18.0",
+    "pino": "^8.19.0",
     "ts-deepmerge": "^7.0.0",
     "zod": "^3.22.4"
   },
