@@ -215,7 +215,7 @@ export const initProjectActions: Actions = [
 
     if (answers.linter === 'eslint') {
       if (answers.isEsm) {
-        devDeps.push('eslint-plugin-vitest')
+        devDeps.push('eslint-plugin-vitest', 'eslint-plugin-vitest-globals')
       }
       devDeps.push(...eslintDependencies)
     }

@@ -2,10 +2,10 @@ import { {{camelCase name}}V{{version}}Service as service } from './{{camelCase 
 
 describe('service {{camelCase name}} version {{version}}', () => {
   it('has valid commands', () => {
-    service.validateCommandDefinitions()
+    expect(service.validateCommandDefinitions()).toBeUndefined()
   })
 
   it('has valid subscriptions', () => {
-    service.validateSubscriptionDefinitions()
+    expect(service.validateSubscriptionDefinitions()).toBeUndefined()
   })
 })

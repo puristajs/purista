@@ -4,7 +4,17 @@ module.exports = {
     node: true,
     jest: true,
   },
-  extends: ['standard', 'prettier', 'plugin:prettier/recommended'{{#if isEsm}},'plugin:vitest/recommended'{{/if}}],
+  extends: ['standard', 'prettier', 'plugin:prettier/recommended'{{#if isEsm}},'plugin:vitest/recommended', 'plugin:vitest-globals/recommended'{{/if}}],
+  {{#if isEsm}}
+  overrides: [
+    {
+      files: ['**/__tests__/*.{j,t}s?(x)', '**/*.spec.{j,t}s?(x)'],
+      env: {
+        'vitest-globals/env': true,
+      },
+    },
+  ],
+  {{/if}}
   parser: '@typescript-eslint/parser',
   parserOptions: {
     ecmaVersion: 'latest',
