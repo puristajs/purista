@@ -33,9 +33,6 @@ describe('integration test', () => {
     serviceDescription: 'service two description',
   } as const satisfies ServiceInfoType
 
-  let serviceOneBuilder: ServiceBuilder
-  let serviceTwoBuilder: ServiceBuilder
-
   const commandOnePayloadSchema = z.object({
     input: z.string(),
   })
@@ -64,28 +61,24 @@ describe('integration test', () => {
   type CommandOnePayload = z.input<typeof commandOnePayloadSchema>
   type CommandTwoPayload = z.input<typeof commandTwoPayloadSchema>
 
+  const serviceOneBuilder = new ServiceBuilder(serviceOneInfo)
+
+  const serviceOneSchema = z.object({
+    optionOne: z.string(),
+  })
+
+  serviceOneBuilder.setConfigSchema(serviceOneSchema).setDefaultConfig({ optionOne: 'option one' })
+
+  const serviceTwoBuilder = new ServiceBuilder(serviceTwoInfo)
+
+  const serviceTwoSchema = z.object({
+    optionTwo: z.string(),
+  })
+
+  serviceTwoBuilder.setConfigSchema(serviceTwoSchema).setDefaultConfig({ optionTwo: 'option two' })
+
   afterAll(() => {
     sandbox.restore()
-  })
-
-  describe('creates the service one', () => {
-    serviceOneBuilder = new ServiceBuilder(serviceOneInfo)
-
-    const serviceOneSchema = z.object({
-      optionOne: z.string(),
-    })
-
-    serviceOneBuilder.setConfigSchema(serviceOneSchema).setDefaultConfig({ optionOne: 'option one' })
-  })
-
-  describe('creates the service two', () => {
-    serviceTwoBuilder = new ServiceBuilder(serviceTwoInfo)
-
-    const serviceTwoSchema = z.object({
-      optionTwo: z.string(),
-    })
-
-    serviceTwoBuilder.setConfigSchema(serviceTwoSchema).setDefaultConfig({ optionTwo: 'option two' })
   })
 
   describe('creates a command for service one', () => {
@@ -95,7 +88,7 @@ describe('integration test', () => {
       .addPayloadSchema(commandOnePayloadSchema)
       .addParameterSchema(commandParameterSchema)
       .addOutputSchema(commandOneOutputSchema)
-      .setTransformInput(z.string(), commandParameterSchema, async (context, payload, parameter) => {
+      .setTransformInput(z.string(), commandParameterSchema, async function (context, payload, parameter) {
         const parsed = JSON.parse(payload)
 
         await context.startActiveSpan('activeSpan', {}, undefined, async () => {
@@ -418,7 +411,7 @@ describe('integration test', () => {
     })
   })
 
-  describe('creates a command for service two', () => {
+  it('creates a command for service two', () => {
     const commandTwoDefinitionBuilder = serviceTwoBuilder
       .getCommandBuilder('commandTwo', 'command two at service two', 'commandTwoCalled')
       .addPayloadSchema(commandTwoPayloadSchema)
@@ -431,9 +424,10 @@ describe('integration test', () => {
       })
 
     serviceTwoBuilder.addCommandDefinition(commandTwoDefinitionBuilder.getDefinition())
+    expect(true).toBeTruthy()
   })
 
-  describe('creates a subscription for service two', () => {
+  it('creates a subscription for service two', () => {
     const subscriptionTwoDefinitionBuilder = serviceTwoBuilder
       .getSubscriptionBuilder('subscriptionTwo', 'subscription two at service two')
       .subscribeToEvent('subscriptionOneConsumed', '1')
@@ -441,6 +435,7 @@ describe('integration test', () => {
       .setSubscriptionFunction(async (_context, _payload, _parameter) => {})
 
     serviceTwoBuilder.addSubscriptionDefinition(subscriptionTwoDefinitionBuilder.getDefinition())
+    expect(true).toBeTruthy()
   })
 
   it('works with default event bridge', async () => {

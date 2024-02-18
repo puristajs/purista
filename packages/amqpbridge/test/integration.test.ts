@@ -1,3 +1,4 @@
+import type { Service } from '@purista/core'
 import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 import type { StartedTestContainer } from 'testcontainers'
@@ -16,7 +17,7 @@ describe('@purista/amqpbridge', () => {
   const sandbox = createSandbox()
   const subscriptionStub = sandbox.stub().resolves()
   const logger = getLoggerMock(sandbox)
-  let service: any
+  let service: Service
 
   beforeAll(async () => {
     container = await new GenericContainer('rabbitmq:alpine')
@@ -44,7 +45,7 @@ describe('@purista/amqpbridge', () => {
   })
 
   afterAll(async () => {
-    await service.destroy()
+    await service?.destroy()
     await eventbridge.destroy()
     await container.stop()
   })
