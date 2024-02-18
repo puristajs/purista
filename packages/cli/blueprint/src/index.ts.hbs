@@ -35,19 +35,19 @@ export const main = async () => {
 
   // initiate the event bridge as first step
   {{#if (eq eventBridge "DefaultEventBridge")}}
-  const eventBridge = new DefaultEventBridge()
+  const eventBridge = new DefaultEventBridge({ logger })
   await eventBridge.start()
   {{/if}}
   {{#if (eq eventBridge "AmqpEventBridge")}}
-  const eventBridge = new AmqpBridge(amqpBridgeConfig, { logger })
+  const eventBridge = new AmqpBridge({ ...amqpBridgeConfig, logger })
   await eventBridge.start()
   {{/if}}
   {{#if (eq eventBridge "MqttEventBridge")}}
-  const eventBridge = new MqttBridge(mqttBridgeConfig, { logger })
+  const eventBridge = new MqttBridge({ ,,,mqttBridgeConfig, logger })
   await eventBridge.start()
   {{/if}}
   {{#if (eq eventBridge "NatsEventBridge")}}
-  const eventBridge = new NatsBridge(natsBridgeConfig, { logger })
+  const eventBridge = new NatsBridge({ ...natsBridgeConfig, logger })
   await eventBridge.start()
   {{/if}}
 
