@@ -418,7 +418,7 @@ export class HonoServiceClass<
       })
     }
 
-    if (expose.http.openApi?.isSecure) {
+    if (expose.http.openApi?.isSecure && this.config.protectHandler) {
       this.app[method](path, protectHandler, handler)
     } else {
       this.app[method](path, handler)
