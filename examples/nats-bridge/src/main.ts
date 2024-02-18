@@ -28,7 +28,7 @@ export const main = async () => {
     serviceConfig: httpServerConfig,
   })
 
-  const defaultPublicPath = resolve(__dirname, '..', 'public')
+  const defaultPublicPath = resolve(import.meta.url, '..', 'public')
 
   // static file handler
   httpServerService.server?.register(fastifyStatic, {
