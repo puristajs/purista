@@ -1,13 +1,15 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "../../tsconfig.json",
   
   "compilerOptions": {
     "outDir": "./build"
   },
   "include": [
-    "./src/index.ts"
+    "./src/index.ts",
+    "./test/*.ts",
   ],
-  "files": [
-    "src/index.ts"
+  "include": [
+    "./src/index.ts",
+    "./test/*.ts",
   ],
 }

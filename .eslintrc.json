@@ -8,7 +8,8 @@
     "standard",
     "prettier",
     "plugin:prettier/recommended",
-    "plugin:vitest/recommended"
+    "plugin:vitest/recommended",
+    "plugin:import-esm/recommended"
   ],
   "parser":"@typescript-eslint/parser",
   "parserOptions":{
@@ -17,12 +18,14 @@
     "extraFileExtensions":[".json"]
   },
   "plugins":[
+    "import-esm",
     "vitest",
     "@typescript-eslint",
     "simple-import-sort",
     "import",
     "json"
   ],
+  "ignorePatterns":["**/dist"],
   "rules":{
     "simple-import-sort/imports":"error",
     "simple-import-sort/exports":"error",

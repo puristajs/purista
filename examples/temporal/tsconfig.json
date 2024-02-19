@@ -31,8 +31,9 @@
     "./src/index.ts",
     "./src/worker.ts"
   ],
-  "files": [
-    "src/index.ts"
+  "include": [
+    "./src/index.ts",
+    "./test/*.ts",
   ],
   "exclude": [
     "node_modules",

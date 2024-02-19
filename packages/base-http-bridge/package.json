@@ -9,11 +9,6 @@
   },
   "author": "Sebastian Wessel",
   "license": "ISC",
-  "directories": {
-    "lib": "lib/index.js",
-    "man": "docs",
-    "example": "example"
-  },
   "type": "module",
   "publishConfig": {
     "access": "public"
