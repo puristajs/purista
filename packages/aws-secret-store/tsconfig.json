@@ -14,7 +14,7 @@
     "./**/*.d.ts"
   ],
   "include": [
-    "./src/index.ts",
-    "./test/*.ts",
+    "./src/**/*",
+    "./test/*",
   ],
 }

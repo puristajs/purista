@@ -5,11 +5,7 @@
     "outDir": "./build"
   },
   "include": [
-    "./src/index.ts",
-    "./test/*.ts",
-  ],
-  "include": [
-    "./src/index.ts",
-    "./test/*.ts",
-  ],
+    "src/**/*",
+    "./test/*",
+  ]
 }

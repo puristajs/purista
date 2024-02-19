@@ -5,10 +5,14 @@
     "declaration": true,
     "sourceMap": false,
     "declarationMap": true,
+    "types": [
+      "vitest/globals",
+      "node"
+    ],
   },
   "include": [
-    "./src/index.ts",
-    "./test/*.ts",
+    "./src/**/*",
+    "./test/*",
   ],
   "exclude": [
     "./**/*.d.ts",

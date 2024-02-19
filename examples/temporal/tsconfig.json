@@ -28,12 +28,8 @@
     ],
   },
   "include": [
-    "./src/index.ts",
-    "./src/worker.ts"
-  ],
-  "include": [
-    "./src/index.ts",
-    "./test/*.ts",
+    "./src/**/*",
+    "./test/*",
   ],
   "exclude": [
     "node_modules",
