@@ -4,7 +4,7 @@ import type {
   theServiceV1FooInputParameterSchema,
   theServiceV1FooInputPayloadSchema,
   theServiceV1FooOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export type TheServiceV1FooInputParameter = z.input<typeof theServiceV1FooInputParameterSchema>
 

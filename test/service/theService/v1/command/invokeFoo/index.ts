@@ -1,3 +1,3 @@
-export * from './invokeFooCommandBuilder'
-export * from './schema'
-export * from './types'
+export * from './invokeFooCommandBuilder.js'
+export * from './schema.js'
+export * from './types.js'

@@ -2,8 +2,8 @@ import { serve } from '@hono/node-server'
 import { DefaultEventBridge, getLoggerMock, HttpClient, StatusCode, UnhandledError } from '@purista/core'
 import { createSandbox } from 'sinon'
 
-import { getHttpServer } from '../src/'
-import { theServiceV1Service } from './service/theService/v1'
+import { getHttpServer } from '../src/index.js'
+import { theServiceV1Service } from './service/theService/v1/index.js'
 
 describe('getHttpServer', () => {
   let logger: ReturnType<typeof getLoggerMock>

@@ -3,7 +3,7 @@ import {
   delayV1FooBarInputParameterSchema,
   delayV1FooBarInputPayloadSchema,
   delayV1FooBarOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export const fooBarCommandBuilder = delayV1ServiceBuilder
   .getCommandBuilder('fooBar', 'Example for an exposed command')

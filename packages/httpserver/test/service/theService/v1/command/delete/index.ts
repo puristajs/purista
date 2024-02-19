@@ -1,3 +1,3 @@
-export * from './deleteCommandBuilder'
-export * from './schema'
-export * from './types'
+export * from './deleteCommandBuilder.js'
+export * from './schema.js'
+export * from './types.js'

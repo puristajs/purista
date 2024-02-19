@@ -1,8 +1,8 @@
 import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
 
 import { deleteCommandBuilder } from './command/delete/deleteCommandBuilder.js'
-import { fooCommandBuilder } from './command/foo'
-import { paramTestCommandBuilder } from './command/paramTest'
+import { fooCommandBuilder } from './command/foo/index.js'
+import { paramTestCommandBuilder } from './command/paramTest/index.js'
 import { pingCommandBuilder } from './command/ping/index.js'
 import { pingV1ServiceBuilder } from './pingV1ServiceBuilder.js'
 import { logSubscriptionBuilder } from './subscription/log/index.js'

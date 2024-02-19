@@ -7,7 +7,7 @@ import { DaprConfigStore, DaprEventBridge, DaprSecretStore, DaprStateStore } fro
 import pino from 'pino'
 import pretty from 'pino-pretty'
 
-import { emailV1Service } from '../../src/service/email/v1/emailV1Service'
+import { emailV1Service } from '../../src/service/email/v1/emailV1Service.js'
 
 const main = async () => {
   // initialize the logging

@@ -1,9 +1,9 @@
-import { pingV1ServiceBuilder } from '../../pingV1ServiceBuilder'
+import { pingV1ServiceBuilder } from '../../pingV1ServiceBuilder.js'
 import {
   pingV1ParamTestInputParameterSchema,
   pingV1ParamTestInputPayloadSchema,
   pingV1ParamTestOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export const paramTestCommandBuilder = pingV1ServiceBuilder
   .getCommandBuilder('paramTest', 'Show how to use path parmater and query params')

@@ -1,11 +1,11 @@
 import { z } from 'zod'
 
-import { theServiceServiceBuilder } from '../../theServiceServiceBuilder'
+import { theServiceServiceBuilder } from '../../theServiceServiceBuilder.js'
 import {
   theServiceV1InvokeFooInputParameterSchema,
   theServiceV1InvokeFooInputPayloadSchema,
   theServiceV1InvokeFooOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export const invokeFooCommandBuilder = theServiceServiceBuilder
   .getCommandBuilder('invokeFoo', 'invokes foo command')

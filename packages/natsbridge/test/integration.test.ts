@@ -5,8 +5,8 @@ import { NatsContainer } from '@testcontainers/nats'
 import { createSandbox } from 'sinon'
 import { z } from 'zod'
 
-import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1'
-import { NatsBridge } from '../src'
+import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1/index.js'
+import { NatsBridge } from '../src/index.js'
 
 const EXAMPLE_EVENT = 'exampleEvent'
 

@@ -1,7 +1,7 @@
 import { createSandbox } from 'sinon'
 
-import { theServiceV1Service } from '../../../test/service/theService/v1'
-import { DefaultEventBridge, EBMessageType } from '../src'
+import { theServiceV1Service } from '../../../test/service/theService/v1/index.js'
+import { DefaultEventBridge, EBMessageType } from '../src/index.js'
 
 describe('command invoke test', () => {
   const sandbox = createSandbox()

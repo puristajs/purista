@@ -1,5 +1,5 @@
-export * from './command/foo/types'
-export * from './command/paramTest/types'
+export * from './command/foo/types.js'
+export * from './command/paramTest/types.js'
 export * from './command/ping/types.js'
 export * from './command/ping/types.js'
 export type { PingServiceV1Config } from './pingServiceConfig.js'

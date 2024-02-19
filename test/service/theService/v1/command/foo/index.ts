@@ -1,3 +1,3 @@
-export * from './fooCommandBuilder'
-export * from './schema'
-export * from './types'
+export * from './fooCommandBuilder.js'
+export * from './schema.js'
+export * from './types.js'

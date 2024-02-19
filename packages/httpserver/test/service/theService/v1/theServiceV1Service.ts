@@ -1,12 +1,12 @@
 import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
 
-import { deleteCommandBuilder } from './command/delete'
-import { errorCommandBuilder } from './command/error'
-import { patchCommandBuilder } from './command/patch'
-import { pingCommandBuilder } from './command/ping'
-import { postCommandBuilder } from './command/post'
-import { putCommandBuilder } from './command/put'
-import { theServiceServiceBuilder } from './theServiceServiceBuilder'
+import { deleteCommandBuilder } from './command/delete/index.js'
+import { errorCommandBuilder } from './command/error/index.js'
+import { patchCommandBuilder } from './command/patch/index.js'
+import { pingCommandBuilder } from './command/ping/index.js'
+import { postCommandBuilder } from './command/post/index.js'
+import { putCommandBuilder } from './command/put/index.js'
+import { theServiceServiceBuilder } from './theServiceServiceBuilder.js'
 
 // bring service config definition, command definitions and subscription definitions together in the service
 // add only definitions and no further service config here

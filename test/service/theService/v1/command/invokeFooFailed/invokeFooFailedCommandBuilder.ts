@@ -1,11 +1,11 @@
 import { z } from 'zod'
 
-import { theServiceServiceBuilder } from '../../theServiceServiceBuilder'
+import { theServiceServiceBuilder } from '../../theServiceServiceBuilder.js'
 import {
   theServiceV1InvokeFooInputParameterSchema,
   theServiceV1InvokeFooInputPayloadSchema,
   theServiceV1InvokeFooOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export const invokeFooFailedCommandBuilder = theServiceServiceBuilder
   .getCommandBuilder('invokeFooFailed', 'invokes foo command with wrong invoke schema')

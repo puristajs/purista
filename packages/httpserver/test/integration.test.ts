@@ -2,9 +2,9 @@ import type { EventBridge, Service } from '@purista/core'
 import { DefaultEventBridge, getLoggerMock, HttpClient } from '@purista/core'
 import type { OpenAPIObject } from 'openapi3-ts/oas31'
 
-import { httpServerV1Service } from '../src'
-import { getIndexHtml, getJsInit } from '../src/service/httpServer/v1/routes'
-import { theServiceV1Service } from './service/theService/v1'
+import { httpServerV1Service } from '../src/index.js'
+import { getIndexHtml, getJsInit } from '../src/service/httpServer/v1/routes/index.js'
+import { theServiceV1Service } from './service/theService/v1/index.js'
 
 describe('httpserver integration test', () => {
   let eventBridge: EventBridge

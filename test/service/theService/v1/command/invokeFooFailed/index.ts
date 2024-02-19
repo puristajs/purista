@@ -1,3 +1,3 @@
-export * from './invokeFooFailedCommandBuilder'
-export * from './schema'
-export * from './types'
+export * from './invokeFooFailedCommandBuilder.js'
+export * from './schema.js'
+export * from './types.js'

@@ -2,15 +2,15 @@ import { fail } from 'assert'
 import { createSandbox } from 'sinon'
 import { z } from 'zod'
 
-import type { ServiceInfoType } from '../src'
-import { DefaultEventBridge, EBMessageType, safeBind, ServiceBuilder, StatusCode } from '../src'
+import type { ServiceInfoType } from '../src/index.js'
+import { DefaultEventBridge, EBMessageType, safeBind, ServiceBuilder, StatusCode } from '../src/index.js'
 import {
   getCommandMessageMock,
   getCommandTransformContextMock,
   getEventBridgeMock,
   getLoggerMock,
   getSubscriptionTransformContextMock,
-} from '../src/mocks'
+} from '../src/mocks/index.js'
 
 describe('integration test', () => {
   const sandbox = createSandbox()

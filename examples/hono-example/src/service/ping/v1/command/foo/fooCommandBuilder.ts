@@ -1,5 +1,5 @@
-import { pingV1ServiceBuilder } from '../../pingV1ServiceBuilder'
-import { pingV1FooInputParameterSchema, pingV1FooInputPayloadSchema, pingV1FooOutputPayloadSchema } from './schema'
+import { pingV1ServiceBuilder } from '../../pingV1ServiceBuilder.js'
+import { pingV1FooInputParameterSchema, pingV1FooInputPayloadSchema, pingV1FooOutputPayloadSchema } from './schema.js'
 
 export const fooCommandBuilder = pingV1ServiceBuilder
   .getCommandBuilder('foo', 'Calls foo command')

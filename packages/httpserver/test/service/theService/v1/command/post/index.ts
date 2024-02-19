@@ -1,3 +1,3 @@
-export * from './postCommandBuilder'
-export * from './schema'
-export * from './types'
+export * from './postCommandBuilder.js'
+export * from './schema.js'
+export * from './types.js'

@@ -7,8 +7,8 @@ import type { StartedTestContainer } from 'testcontainers'
 import { GenericContainer } from 'testcontainers'
 import { z } from 'zod'
 
-import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1'
-import { MqttBridge } from '../src'
+import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1/index.js'
+import { MqttBridge } from '../src/index.js'
 
 const MQTT_PORT = 1883
 const EXAMPLE_EVENT = 'exampleEvent'

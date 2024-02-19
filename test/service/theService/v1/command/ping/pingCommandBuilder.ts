@@ -1,9 +1,9 @@
-import { theServiceServiceBuilder } from '../../theServiceServiceBuilder'
+import { theServiceServiceBuilder } from '../../theServiceServiceBuilder.js'
 import {
   theServiceV1PingInputParameterSchema,
   theServiceV1PingInputPayloadSchema,
   theServiceV1PingOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export const pingCommandBuilder = theServiceServiceBuilder
   .getCommandBuilder('ping', 'provide a dummy command')

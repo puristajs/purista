@@ -1,9 +1,9 @@
-import { theServiceServiceBuilder } from '../../theServiceServiceBuilder'
+import { theServiceServiceBuilder } from '../../theServiceServiceBuilder.js'
 import {
   theServiceV1DeleteInputParameterSchema,
   theServiceV1DeleteInputPayloadSchema,
   theServiceV1DeleteOutputPayloadSchema,
-} from './schema'
+} from './schema.js'
 
 export const deleteCommandBuilder = theServiceServiceBuilder
   .getCommandBuilder('delete', 'provide a dummy command')
