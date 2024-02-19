@@ -16,12 +16,10 @@ export class DefaultStateStore extends StateStoreBaseClass<DefaultStateStoreConf
     super('DefaultStateStore', { ...config })
     if (config?.config) {
       this.map = new Map(Object.entries(config.config))
-      if (config.logger) {
-        this.logger.warn(
-          'Using the DefaultStateStore is not secure! It should only be used for test or development purpose.',
-        )
-      }
     }
+    this.logger.warn(
+      'Using the DefaultStateStore is not secure! It should only be used for test or development purpose.',
+    )
   }
 
   protected async getStateImpl<StateNames extends string[]>(

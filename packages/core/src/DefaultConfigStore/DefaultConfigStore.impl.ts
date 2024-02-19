@@ -31,12 +31,10 @@ export class DefaultConfigStore extends ConfigStoreBaseClass<DefaultConfigStoreC
     super('DefaultConfigStore', { ...config })
     if (config?.config) {
       this.map = new Map(Object.entries(config.config))
-      if (config.logger) {
-        this.logger.warn(
-          'Using the DefaultConfigStore is not secure! It should only be used for test or development purpose.',
-        )
-      }
     }
+    this.logger.warn(
+      'Using the DefaultConfigStore is not secure! It should only be used for test or development purpose.',
+    )
   }
 
   protected async getConfigImpl<ConfigNames extends string[]>(

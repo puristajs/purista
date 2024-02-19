@@ -40,10 +40,10 @@ export class DefaultSecretStore extends SecretStoreBaseClass<DefaultSecretStoreC
     super('DefaultSecretStore', { ...config })
     if (config?.config) {
       this.map = new Map(Object.entries(config.config))
-      this.logger.warn(
-        'Using the DefaultSecretStore is not secure! It should only be used for test or development purpose.',
-      )
     }
+    this.logger.warn(
+      'Using the DefaultSecretStore is not secure! It should only be used for test or development purpose.',
+    )
   }
 
   protected async getSecretImpl<SecretNames extends string[]>(
