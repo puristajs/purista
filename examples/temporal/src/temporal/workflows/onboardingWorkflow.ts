@@ -2,8 +2,7 @@ import { propagation } from '@opentelemetry/api'
 import { CompositePropagator, W3CBaggagePropagator, W3CTraceContextPropagator } from '@opentelemetry/core'
 import { condition, defineSignal, proxyActivities, setHandler } from '@temporalio/workflow'
 
-// Only import the activity types
-import type * as activities from '../activities/index.js'
+import type { ActivitiesType } from '../worker.js'
 
 propagation.setGlobalPropagator(
   new CompositePropagator({
@@ -11,7 +10,7 @@ propagation.setGlobalPropagator(
   }),
 )
 
-const { createAccount, validate, sendEmailVerification, createUser } = proxyActivities<typeof activities>({
+const { createAccount, validate, sendEmailVerification, createUser } = proxyActivities<ActivitiesType>({
   startToCloseTimeout: '1 minute',
 })
 

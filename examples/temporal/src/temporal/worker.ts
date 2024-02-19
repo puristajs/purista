@@ -5,8 +5,10 @@ import { Resource } from '@opentelemetry/resources'
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
+import type { EventBridge } from '@purista/core'
 import { initLogger } from '@purista/core'
 import { NatsBridge } from '@purista/natsbridge'
+import { Context } from '@temporalio/activity'
 import { makeWorkflowExporter, OpenTelemetryActivityInboundInterceptor } from '@temporalio/interceptors-opentelemetry'
 import { NativeConnection, Worker } from '@temporalio/worker'
 
@@ -14,7 +16,51 @@ import jaegerExporterOptions from '../../config/jaegerExporterOptions.js'
 import natsBridgeConfig from '../../config/natsBridgeConfig.js'
 import temporalConfig from '../../config/temporalConfig.js'
 import * as activities from './activities/index.js'
-import { ActivityInboundPuristaInterceptor } from './activities/interceptors.js'
+
+// a small get which returns the invoke function
+const getInvoke =
+  (eventBridge: EventBridge) =>
+  async <Output = unknown>(
+    serviceName: string,
+    serviceVersion: string,
+    serviceTarget: string,
+    payload: unknown,
+    parameter = {},
+  ): Promise<Output> => {
+    const ctx = Context.current()
+    return eventBridge.invoke<Output>({
+      sender: {
+        serviceName: ctx.info.workflowType,
+        serviceVersion: '1',
+        serviceTarget: ctx.info.activityType,
+        instanceId: eventBridge.instanceId,
+      },
+      receiver: {
+        serviceName,
+        serviceVersion,
+        serviceTarget,
+      },
+      payload: {
+        payload,
+        parameter,
+      },
+      contentEncoding: 'application/json',
+      contentType: 'utf-8',
+    })
+  }
+
+const getActivities = (eventBridge: EventBridge) => {
+  const invoke = getInvoke(eventBridge)
+
+  return {
+    createAccount: (input: unknown) => invoke<{ accountId: string }>('Account', '1', 'createAccount', input),
+    createUser: (input: unknown) => invoke<{ userId: string }>('User', '1', 'createUser', input),
+    sendEmailVerification: (email: string) =>
+      invoke<{ userId: string }>('Email', '1', 'sendVerificationEmail', { email }),
+  }
+}
+
+export type ActivitiesType = typeof activities & ReturnType<typeof getActivities>
 
 async function run() {
   // setup OpenTelemetry
@@ -47,14 +93,14 @@ async function run() {
     taskQueue: temporalConfig.taskQueue,
     // Workflows are registered using a path as they run in a separate JS context.
     workflowsPath: fileURLToPath(new URL('./workflows', import.meta.url)),
-    activities,
+    activities: {
+      ...activities,
+      ...getActivities(eventBridge),
+    },
     interceptors: {
       // example contains both workflow and interceptors
       workflowModules: [fileURLToPath(new URL('./workflows', import.meta.url))],
-      activityInbound: [
-        (ctx) => new OpenTelemetryActivityInboundInterceptor(ctx),
-        (ctx) => new ActivityInboundPuristaInterceptor(ctx, logger, eventBridge),
-      ],
+      activityInbound: [(ctx) => new OpenTelemetryActivityInboundInterceptor(ctx)],
     },
     sinks: {
       exporter: makeWorkflowExporter(exporter, resource),
