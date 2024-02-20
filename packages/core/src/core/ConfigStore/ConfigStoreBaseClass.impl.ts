@@ -3,7 +3,7 @@ import type { ObjectWithKeysFromStringArray } from '../../helper/index.js'
 import { UnhandledError } from '../Error/index.js'
 import type { Logger, StoreBaseConfig } from '../types/index.js'
 import { StatusCode } from '../types/index.js'
-import type { ConfigStore, ConfigStoreCacheMap } from './types/index.js'
+import type { ConfigStoreCacheMap } from './types/index.js'
 
 /**
  * Base class for config store adapters.
@@ -17,7 +17,7 @@ import type { ConfigStore, ConfigStoreCacheMap } from './types/index.js'
  *
  * @group Store
  */
-export class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<string, unknown> = {}> implements ConfigStore {
+export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<string, unknown> = {}> {
   logger: Logger
   config: StoreBaseConfig<ConfigStoreConfigType>
 
@@ -46,14 +46,10 @@ export class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<string, u
    * @param configNames list of config items
    * @returns an object of { [configName]: value | undefined }
    */
-  protected async getConfigImpl<ConfigNames extends string[]>(
+  protected abstract getConfigImpl<ConfigNames extends string[]>(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ...configNames: ConfigNames
-  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
-    const err = new UnhandledError(StatusCode.NotImplemented, 'get config is not implemented in config store')
-    this.logger.error({ err }, err.message)
-    throw err
-  }
+  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>>
 
   /**
    * Returns the values for given config properties.
@@ -80,11 +76,7 @@ export class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<string, u
    * @param configName
    */
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async removeConfigImpl(configName: string): Promise<void> {
-    const err = new UnhandledError(StatusCode.NotImplemented, 'remove config is not implemented in config store')
-    this.logger.error({ err }, err.message)
-    throw err
-  }
+  protected abstract removeConfigImpl(configName: string): Promise<void>
 
   /**
    * Removes the config item given by config name.
@@ -110,11 +102,7 @@ export class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<string, u
    * @param _configName
    * @param _configValue
    */
-  protected async setConfigImpl(_configName: string, _configValue: unknown) {
-    const err = new UnhandledError(StatusCode.NotImplemented, 'set config is not implemented in config store')
-    this.logger.error({ err }, err.message)
-    throw err
-  }
+  protected abstract setConfigImpl(_configName: string, _configValue: unknown): Promise<void>
 
   /**
    * Sets a config value

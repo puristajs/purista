@@ -25,7 +25,7 @@ export class DefaultStateStore extends StateStoreBaseClass<DefaultStateStoreConf
   protected async getStateImpl<StateNames extends string[]>(
     ...stateNames: StateNames
   ): Promise<ObjectWithKeysFromStringArray<StateNames>> {
-    const result: Record<string, unknown | undefined> = {}
+    const result: Record<string, unknown> = {}
     stateNames.forEach((name) => {
       result[name] = this.map.get(name)
     })

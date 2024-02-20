@@ -3,7 +3,6 @@ import type { ObjectWithKeysFromStringArray } from '../../helper/index.js'
 import { UnhandledError } from '../Error/index.js'
 import type { Logger, StoreBaseConfig } from '../types/index.js'
 import { StatusCode } from '../types/index.js'
-import type { StateStore } from './types/index.js'
 
 /**
  * Base class for config store implementations
@@ -16,7 +15,7 @@ import type { StateStore } from './types/index.js'
  * __DO NOT OVERWRITE__: the regular methods getState, setState or removeState
  * @group Store
  */
-export class StateStoreBaseClass<StateStoreConfigType extends Record<string, unknown> = {}> implements StateStore {
+export abstract class StateStoreBaseClass<StateStoreConfigType extends Record<string, unknown> = {}> {
   logger: Logger
   config: StoreBaseConfig<StateStoreConfigType>
 
@@ -36,14 +35,10 @@ export class StateStoreBaseClass<StateStoreConfigType extends Record<string, unk
     }
   }
 
-  protected async getStateImpl<StateNames extends string[]>(
+  protected abstract getStateImpl<StateNames extends string[]>(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ...stateNames: StateNames
-  ): Promise<ObjectWithKeysFromStringArray<StateNames>> {
-    const err = new UnhandledError(StatusCode.NotImplemented, 'getState is not implemented in state store')
-    this.logger.error({ err }, err.message)
-    throw err
-  }
+  ): Promise<ObjectWithKeysFromStringArray<StateNames>>
 
   async getState<StateNames extends string[]>(
     ...stateNames: StateNames
@@ -58,11 +53,7 @@ export class StateStoreBaseClass<StateStoreConfigType extends Record<string, unk
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async removeStateImpl(stateName: string) {
-    const err = new UnhandledError(StatusCode.NotImplemented, 'removeState is not implemented in state store')
-    this.logger.error({ err }, err.message)
-    throw err
-  }
+  protected abstract removeStateImpl(stateName: string): Promise<void>
 
   async removeState(stateName: string) {
     if (!this.config.enableRemove) {
@@ -75,11 +66,7 @@ export class StateStoreBaseClass<StateStoreConfigType extends Record<string, unk
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected async setStateImpl(stateName: string, stateValue: unknown) {
-    const err = new UnhandledError(StatusCode.NotImplemented, 'setState is not implemented in state store')
-    this.logger.error({ err }, err.message)
-    throw err
-  }
+  protected abstract setStateImpl(stateName: string, stateValue: unknown): Promise<void>
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async setState(stateName: string, stateValue: unknown) {

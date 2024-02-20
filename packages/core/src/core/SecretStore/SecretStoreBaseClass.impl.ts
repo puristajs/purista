@@ -3,7 +3,7 @@ import type { ObjectWithKeysFromStringArray } from '../../helper/index.js'
 import { UnhandledError } from '../Error/index.js'
 import type { Logger, Prettify, StoreBaseConfig } from '../types/index.js'
 import { StatusCode } from '../types/index.js'
-import type { SecretStore, SecretStoreCacheMap } from './types/index.js'
+import type { SecretStoreCacheMap } from './types/index.js'
 
 /**
  * Base class for secret store adapters
@@ -17,7 +17,7 @@ import type { SecretStore, SecretStoreCacheMap } from './types/index.js'
  *
  * @group Store
  */
-export class SecretStoreBaseClass<SecretStoreConfigType extends Record<string, unknown> = {}> implements SecretStore {
+export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<string, unknown> = {}> {
   logger: Logger
   config: Prettify<StoreBaseConfig<SecretStoreConfigType>>
 
@@ -40,14 +40,10 @@ export class SecretStoreBaseClass<SecretStoreConfigType extends Record<string, u
     }
   }
 
-  protected async getSecretImpl<SecretNames extends string[]>(
+  protected abstract getSecretImpl<SecretNames extends string[]>(
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ...secretNames: SecretNames
-  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
-    const err = new UnhandledError(StatusCode.NotImplemented, 'get secret is not implemented in secret store')
-    this.logger.error({ err }, err.message)
-    throw err
-  }
+  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>>
 
   async getSecret<SecretNames extends string[]>(
     ...secretNames: SecretNames
@@ -103,11 +99,7 @@ export class SecretStoreBaseClass<SecretStoreConfigType extends Record<string, u
     return { ...result, ...freshSecrets } as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
   }
 
-  protected async removeSecretImpl(_secretName: string): Promise<void> {
-    const err = new UnhandledError(StatusCode.NotImplemented, 'remove secret is not implemented in secret store')
-    this.logger.error({ err }, err.message)
-    throw err
-  }
+  protected abstract removeSecretImpl(_secretName: string): Promise<void>
 
   async removeSecret(secretName: string): Promise<void> {
     if (!this.config.enableRemove) {
@@ -123,11 +115,7 @@ export class SecretStoreBaseClass<SecretStoreConfigType extends Record<string, u
     return this.removeSecretImpl(secretName)
   }
 
-  protected async setSecretImpl(_secretName: string, _secretValue: string) {
-    const err = new UnhandledError(StatusCode.NotImplemented, 'set secret is not implemented in secret store')
-    this.logger.error({ err }, err.message)
-    throw err
-  }
+  protected abstract setSecretImpl(_secretName: string, _secretValue: string): Promise<void>
 
   async setSecret(secretName: string, secretValue: string) {
     if (!this.config.enableSet) {
