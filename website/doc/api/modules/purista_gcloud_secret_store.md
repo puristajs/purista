@@ -72,7 +72,7 @@ Google Secret Manager store config
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.10.6"``
+• `Const` **puristaVersion**: ``"1.10.8"``
 
 #### Defined in
 

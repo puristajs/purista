@@ -4,11 +4,69 @@ PURISTA API / [Modules](modules.md)
 
 All notable changes to this project will be documented in this file.
 
+## [1.10.8] - 2024-02-18
+
+### Bug Fixes
+
+- Cli init index event bridge configs
+- Hono server when no protect handler is provided
+- NATS example
+
+### Documentation
+
+- Update docs and examples
+
+### Miscellaneous Tasks
+
+- Bump vitest version
+- Add eslint vitest globals plugin
+- Improve naming
+- Improve NATS bridge
+- Improve cli install
+- Fix lint and improve tests
+- Update project settings
+
+## [1.10.7] - 2024-02-18
+
+### Bug Fixes
+
+- CLI init
+- NATS state store getter
+
+### Documentation
+
+- Update handbook
+- Update api documentation
+- Update doc
+
+### Features
+
+- Add version check to CLI
+
+### Miscellaneous Tasks
+
+- Improve store getter types and code cleanup in stores
+- Bump packages
+- Update package lock
+- Fix lint
+- Fix store tests
+- Use vitest instead of jest
+- Fix tests
+- Disable unstable integration tests
+- Impove test setup
+- Improve test
+- Increase vitest hookTimeout
+- Bump versions to 1.10.7
+
 ## [1.10.6] - 2024-02-15
 
 ### Bug Fixes
 
 - Mocked context invoke
+
+### Miscellaneous Tasks
+
+- Bump versions to 1.10.6
 
 ## [1.10.5] - 2024-02-15
 

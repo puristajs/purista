@@ -116,7 +116,7 @@ console.log(value) // outputs: undefined
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:16
 
 ___
 
@@ -150,7 +150,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:16
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:15
 
 ___
 
@@ -158,15 +158,13 @@ ___
 
 • **name**: `string`
 
-name of store
-
 #### Inherited from
 
 [StateStoreBaseClass](purista_core.StateStoreBaseClass.md).[name](purista_core.StateStoreBaseClass.md#name)
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:18
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 ___
 
@@ -183,8 +181,6 @@ ___
 ### destroy
 
 ▸ **destroy**(): `Promise`\<`void`\>
-
-disconnects and shuts down the state store
 
 #### Returns
 
@@ -226,7 +222,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:21
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:20
 
 ___
 
@@ -294,7 +290,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:23
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:22
 
 ___
 
@@ -343,7 +339,7 @@ ___
 
 #### Defined in
 
-core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:25
+core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:24
 
 ___
 

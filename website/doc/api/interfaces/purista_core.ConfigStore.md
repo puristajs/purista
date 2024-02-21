@@ -8,7 +8,7 @@ Interface definition for config store adapters
 
 ## Implemented by
 
-- [`ConfigStoreBaseClass`](../classes/purista_core.ConfigStoreBaseClass.md)
+- [`DefaultConfigStore`](../classes/purista_core.DefaultConfigStore.md)
 
 ## Table of contents
 

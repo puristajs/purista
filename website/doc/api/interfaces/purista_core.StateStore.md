@@ -8,7 +8,7 @@ Interface definition for state store implementations
 
 ## Implemented by
 
-- [`StateStoreBaseClass`](../classes/purista_core.StateStoreBaseClass.md)
+- [`DefaultStateStore`](../classes/purista_core.DefaultStateStore.md)
 
 ## Table of contents
 

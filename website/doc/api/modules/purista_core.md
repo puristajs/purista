@@ -1619,7 +1619,7 @@ ___
 
 ### puristaVersion
 
-• `Const` **puristaVersion**: ``"1.10.6"``
+• `Const` **puristaVersion**: ``"1.10.8"``
 
 #### Defined in
 
@@ -3345,7 +3345,7 @@ If you like to use your own events, the event name must be prefixed with `misc-`
 
 ## Store
 
-• **ConfigStoreBaseClass**\<`ConfigStoreConfigType`\>: `Object`
+• `Abstract` **ConfigStoreBaseClass**\<`ConfigStoreConfigType`\>: `Object`
 
 Base class for config store adapters.
 The actual store implementation must overwrite the protected methods:
@@ -3436,7 +3436,7 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 [DefaultStateStore/DefaultStateStore.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L13)
 
-• **SecretStoreBaseClass**\<`SecretStoreConfigType`\>: `Object`
+• `Abstract` **SecretStoreBaseClass**\<`SecretStoreConfigType`\>: `Object`
 
 Base class for secret store adapters
 The actual store implementation must overwrite the protected methods:
@@ -3457,7 +3457,7 @@ __DO NOT OVERWRITE__: the regular methods getSecret, setSecret or removeSecret
 
 [core/SecretStore/SecretStoreBaseClass.impl.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L20)
 
-• **StateStoreBaseClass**\<`StateStoreConfigType`\>: `Object`
+• `Abstract` **StateStoreBaseClass**\<`StateStoreConfigType`\>: `Object`
 
 Base class for config store implementations
 The actual store implementation must overwrite the protected methods:
@@ -3476,7 +3476,7 @@ __DO NOT OVERWRITE__: the regular methods getState, setState or removeState
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L19)
+[core/StateStore/StateStoreBaseClass.impl.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L18)
 
 • **ConfigStore**: `Object`
 
@@ -3530,46 +3530,52 @@ ___
 
 ### ConfigGetterFunction
 
-Ƭ **ConfigGetterFunction**: (...`configNames`: `string`[]) => `Promise`\<`Record`\<`string`, `unknown` \| `undefined`\>\>
+Ƭ **ConfigGetterFunction**: \<ConfigNames\>(...`configNames`: `ConfigNames`) => `Promise`\<[`ObjectWithKeysFromStringArray`](purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
 
 get a config value from the config store
 
 #### Type declaration
 
-▸ (`...configNames`): `Promise`\<`Record`\<`string`, `unknown` \| `undefined`\>\>
+▸ \<`ConfigNames`\>(`...configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
+
+##### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `ConfigNames` | extends `string`[] |
 
 ##### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...configNames` | `string`[] |
+| `...configNames` | `ConfigNames` |
 
 ##### Returns
 
-`Promise`\<`Record`\<`string`, `unknown` \| `undefined`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](purista_core.md#objectwithkeysfromstringarray)\<`ConfigNames`\>\>
 
 #### Defined in
 
-[core/ConfigStore/types/ConfigGetterFunction.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigGetterFunction.ts#L2)
+[core/ConfigStore/types/ConfigGetterFunction.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigGetterFunction.ts#L4)
 
 ___
 
 ### ConfigSetterFunction
 
-Ƭ **ConfigSetterFunction**: (`secretName`: `string`, `secretValue`: `unknown`) => `Promise`\<`void`\>
+Ƭ **ConfigSetterFunction**: (`configName`: `string`, `configValue`: `unknown`) => `Promise`\<`void`\>
 
 set a config value in the config store
 
 #### Type declaration
 
-▸ (`secretName`, `secretValue`): `Promise`\<`void`\>
+▸ (`configName`, `configValue`): `Promise`\<`void`\>
 
 ##### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `secretName` | `string` |
-| `secretValue` | `unknown` |
+| `configName` | `string` |
+| `configValue` | `unknown` |
 
 ##### Returns
 
@@ -3609,27 +3615,33 @@ ___
 
 ### SecretGetterFunction
 
-Ƭ **SecretGetterFunction**: (...`secretName`: `string`[]) => `Promise`\<`Record`\<`string`, `string` \| `undefined`\>\>
+Ƭ **SecretGetterFunction**: \<SecretNames\>(...`secretNames`: `SecretNames`) => `Promise`\<[`ObjectWithKeysFromStringArray`](purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `string` \| `undefined`\>\>
 
 get a secret from the secret store
 
 #### Type declaration
 
-▸ (`...secretName`): `Promise`\<`Record`\<`string`, `string` \| `undefined`\>\>
+▸ \<`SecretNames`\>(`...secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `string` \| `undefined`\>\>
+
+##### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `SecretNames` | extends `string`[] |
 
 ##### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...secretName` | `string`[] |
+| `...secretNames` | `SecretNames` |
 
 ##### Returns
 
-`Promise`\<`Record`\<`string`, `string` \| `undefined`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `string` \| `undefined`\>\>
 
 #### Defined in
 
-[core/SecretStore/types/SecretGetterFunction.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretGetterFunction.ts#L2)
+[core/SecretStore/types/SecretGetterFunction.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretGetterFunction.ts#L4)
 
 ___
 
@@ -3688,46 +3700,52 @@ ___
 
 ### StateGetterFunction
 
-Ƭ **StateGetterFunction**: (...`stateNames`: `string`[]) => `Promise`\<`Record`\<`string`, `unknown` \| `undefined`\>\>
+Ƭ **StateGetterFunction**: \<StateNames\>(...`stateNames`: `StateNames`) => `Promise`\<[`ObjectWithKeysFromStringArray`](purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
 
 get a state value from the state store
 
 #### Type declaration
 
-▸ (`...stateNames`): `Promise`\<`Record`\<`string`, `unknown` \| `undefined`\>\>
+▸ \<`StateNames`\>(`...stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
+
+##### Type parameters
+
+| Name | Type |
+| :------ | :------ |
+| `StateNames` | extends `string`[] |
 
 ##### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `...stateNames` | `string`[] |
+| `...stateNames` | `StateNames` |
 
 ##### Returns
 
-`Promise`\<`Record`\<`string`, `unknown` \| `undefined`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](purista_core.md#objectwithkeysfromstringarray)\<`StateNames`\>\>
 
 #### Defined in
 
-[core/StateStore/types/StateGetterFunction.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/types/StateGetterFunction.ts#L2)
+[core/StateStore/types/StateGetterFunction.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/types/StateGetterFunction.ts#L4)
 
 ___
 
 ### StateSetterFunction
 
-Ƭ **StateSetterFunction**: (`secretName`: `string`, `secretValue`: `unknown`) => `Promise`\<`void`\>
+Ƭ **StateSetterFunction**: (`stateName`: `string`, `stateValue`: `unknown`) => `Promise`\<`void`\>
 
 set a state value in the state store
 
 #### Type declaration
 
-▸ (`secretName`, `secretValue`): `Promise`\<`void`\>
+▸ (`stateName`, `stateValue`): `Promise`\<`void`\>
 
 ##### Parameters
 
 | Name | Type |
 | :------ | :------ |
-| `secretName` | `string` |
-| `secretValue` | `unknown` |
+| `stateName` | `string` |
+| `stateValue` | `unknown` |
 
 ##### Returns
 

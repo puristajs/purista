@@ -25,10 +25,6 @@ __DO NOT OVERWRITE__: the regular methods getSecret, setSecret or removeSecret
 
   ↳ [`DefaultSecretStore`](purista_core.DefaultSecretStore.md)
 
-## Implements
-
-- [`SecretStore`](../interfaces/purista_core.SecretStore.md)
-
 ## Table of contents
 
 ### Constructors
@@ -115,12 +111,6 @@ ___
 
 • **name**: `string`
 
-name of store
-
-#### Implementation of
-
-[SecretStore](../interfaces/purista_core.SecretStore.md).[name](../interfaces/purista_core.SecretStore.md#name)
-
 #### Defined in
 
 [core/SecretStore/SecretStoreBaseClass.impl.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L24)
@@ -131,19 +121,13 @@ name of store
 
 ▸ **destroy**(): `Promise`\<`void`\>
 
-disconnects and shuts down the secret store
-
 #### Returns
 
 `Promise`\<`void`\>
 
-#### Implementation of
-
-[SecretStore](../interfaces/purista_core.SecretStore.md).[destroy](../interfaces/purista_core.SecretStore.md#destroy)
-
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:148](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L148)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:136](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L136)
 
 ___
 
@@ -167,13 +151,9 @@ ___
 
 `Promise`\<[`ObjectWithKeysFromStringArray`](../modules/purista_core.md#objectwithkeysfromstringarray)\<`SecretNames`, `undefined` \| `string`\>\>
 
-#### Implementation of
-
-SecretStore.getSecret
-
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:52](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L52)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:48](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L48)
 
 ___
 
@@ -217,13 +197,9 @@ ___
 
 `Promise`\<`void`\>
 
-#### Implementation of
-
-SecretStore.removeSecret
-
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:112](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L112)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:104](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L104)
 
 ___
 
@@ -243,7 +219,7 @@ ___
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:106](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L106)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:102](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L102)
 
 ___
 
@@ -262,13 +238,9 @@ ___
 
 `Promise`\<`void`\>
 
-#### Implementation of
-
-SecretStore.setSecret
-
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:132](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L132)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:120](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L120)
 
 ___
 
@@ -289,4 +261,4 @@ ___
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:126](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L126)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:118](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L118)

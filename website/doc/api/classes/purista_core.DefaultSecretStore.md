@@ -204,7 +204,7 @@ disconnects and shuts down the secret store
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:148](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L148)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:136](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L136)
 
 ___
 
@@ -238,7 +238,7 @@ SecretStore.getSecret
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:52](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L52)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:48](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L48)
 
 ___
 
@@ -296,7 +296,7 @@ SecretStore.removeSecret
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:112](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L112)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:104](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L104)
 
 ___
 
@@ -349,7 +349,7 @@ SecretStore.setSecret
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:132](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L132)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:120](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L120)
 
 ___
 

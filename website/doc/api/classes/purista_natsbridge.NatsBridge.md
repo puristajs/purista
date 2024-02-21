@@ -287,7 +287,7 @@ Shut down event bridge as gracefully as possible
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:391](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L391)
+[natsbridge/src/NatsBridge.ts:388](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L388)
 
 ___
 
@@ -536,7 +536,7 @@ ___
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:321](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L321)
+[natsbridge/src/NatsBridge.ts:318](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L318)
 
 ___
 
@@ -563,7 +563,7 @@ Register a new subscription
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:362](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L362)
+[natsbridge/src/NatsBridge.ts:359](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L359)
 
 ___
 
@@ -668,7 +668,7 @@ Unregister a service command
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:351](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L351)
+[natsbridge/src/NatsBridge.ts:348](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L348)
 
 ___
 
@@ -692,7 +692,7 @@ ___
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:378](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L378)
+[natsbridge/src/NatsBridge.ts:375](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L375)
 
 ___
 

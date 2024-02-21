@@ -25,10 +25,6 @@ __DO NOT OVERWRITE__: the regular methods getConfig, setConfig or removeConfig
 
   ↳ [`DefaultConfigStore`](purista_core.DefaultConfigStore.md)
 
-## Implements
-
-- [`ConfigStore`](../interfaces/purista_core.ConfigStore.md)
-
 ## Table of contents
 
 ### Constructors
@@ -115,12 +111,6 @@ ___
 
 • **name**: `string`
 
-name of store
-
-#### Implementation of
-
-[ConfigStore](../interfaces/purista_core.ConfigStore.md).[name](../interfaces/purista_core.ConfigStore.md#name)
-
 #### Defined in
 
 [core/ConfigStore/ConfigStoreBaseClass.impl.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L24)
@@ -131,19 +121,13 @@ name of store
 
 ▸ **destroy**(): `Promise`\<`void`\>
 
-disconnects and shuts down the config store
-
 #### Returns
 
 `Promise`\<`void`\>
 
-#### Implementation of
-
-[ConfigStore](../interfaces/purista_core.ConfigStore.md).[destroy](../interfaces/purista_core.ConfigStore.md#destroy)
-
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:138](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L138)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:126](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L126)
 
 ___
 
@@ -173,13 +157,9 @@ For implementation overwrite protected `getConfigImpl`
 
 an object of { [configName]: value | undefined }
 
-#### Implementation of
-
-ConfigStore.getConfig
-
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:66](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L66)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:62](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L62)
 
 ___
 
@@ -231,13 +211,9 @@ For implementation overwrite protected `removeConfigImpl`
 
 `Promise`\<`void`\>
 
-#### Implementation of
-
-ConfigStore.removeConfig
-
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:97](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L97)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:89](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L89)
 
 ___
 
@@ -259,7 +235,7 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:83](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L83)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:79](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L79)
 
 ___
 
@@ -282,13 +258,9 @@ For implementation overwrite protected `setConfigImpl`
 
 `Promise`\<`void`\>
 
-#### Implementation of
-
-ConfigStore.setConfig
-
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:128](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L128)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:116](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L116)
 
 ___
 
@@ -311,4 +283,4 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:113](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L113)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:105](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L105)

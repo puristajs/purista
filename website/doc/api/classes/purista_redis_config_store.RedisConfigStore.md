@@ -188,8 +188,6 @@ ___
 
 • **name**: `string`
 
-name of store
-
 #### Inherited from
 
 [ConfigStoreBaseClass](purista_core.ConfigStoreBaseClass.md).[name](purista_core.ConfigStoreBaseClass.md#name)
@@ -203,8 +201,6 @@ core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:19
 ### destroy
 
 ▸ **destroy**(): `Promise`\<`void`\>
-
-disconnects and shuts down the config store
 
 #### Returns
 

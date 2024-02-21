@@ -147,8 +147,6 @@ ___
 
 • **name**: `string`
 
-name of store
-
 #### Inherited from
 
 [SecretStoreBaseClass](purista_core.SecretStoreBaseClass.md).[name](purista_core.SecretStoreBaseClass.md#name)
@@ -162,8 +160,6 @@ core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:19
 ### destroy
 
 ▸ **destroy**(): `Promise`\<`void`\>
-
-disconnects and shuts down the secret store
 
 #### Returns
 
