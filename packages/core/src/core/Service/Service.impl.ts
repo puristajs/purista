@@ -177,7 +177,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
    * @param infoType type of info message
    * @param target function name is need in messages like InfoServiceFunctionAdded
    */
-  async sendServiceInfo(infoType: InfoMessageType, target?: string, payload?: Record<string, unknown>) {
+  protected async sendServiceInfo(infoType: InfoMessageType, target?: string, payload?: Record<string, unknown>) {
     return this.startActiveSpan('purista.sendServiceInfo', {}, undefined, async (span) => {
       const info = createInfoMessage(
         infoType,
@@ -776,7 +776,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     })
   }
 
-  async registerCommand(commandDefinition: CommandDefinition): Promise<void> {
+  public async registerCommand(commandDefinition: CommandDefinition): Promise<void> {
     return this.startActiveSpan('purista.registerCommand', {}, undefined, async (span) => {
       this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register command')
 
@@ -1009,7 +1009,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     )
   }
 
-  async registerSubscription(subscriptionDefinition: SubscriptionDefinition): Promise<void> {
+  public async registerSubscription(subscriptionDefinition: SubscriptionDefinition): Promise<void> {
     return this.startActiveSpan('purista.registerSubscription', {}, undefined, async (span) => {
       this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register subscription')
 

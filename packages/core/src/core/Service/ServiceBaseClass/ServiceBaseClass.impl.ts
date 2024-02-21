@@ -27,19 +27,19 @@ import { ServiceInfoValidator } from '../ServiceInfoValidator.impl.js'
 export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
   readonly info: ServiceInfoType
 
-  eventBridge: EventBridge
+  protected eventBridge: EventBridge
 
-  logger: Logger
+  protected logger: Logger
 
   spanProcessor: SpanProcessor | undefined
 
   traceProvider: NodeTracerProvider
 
-  secretStore: SecretStore
-  configStore: ConfigStore
-  stateStore: StateStore
+  protected secretStore: SecretStore
+  protected configStore: ConfigStore
+  protected stateStore: StateStore
 
-  configSchema: Schema | undefined
+  protected configSchema: Schema | undefined
 
   constructor(options: {
     logger: Logger
