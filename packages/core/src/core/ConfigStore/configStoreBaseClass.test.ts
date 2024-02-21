@@ -1,10 +1,27 @@
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
+import type { ObjectWithKeysFromStringArray } from '../../helper/index.js'
 import { getLoggerMock } from '../../mocks/index.js'
 import { UnhandledError } from '../Error/index.js'
 import { StatusCode } from '../types/index.js'
 import { ConfigStoreBaseClass } from './ConfigStoreBaseClass.impl.js'
+
+class TestClass extends ConfigStoreBaseClass {
+  protected getConfigImpl<ConfigNames extends string[]>(
+    ..._configNames: ConfigNames
+  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
+    throw new Error('Not implemented')
+  }
+
+  protected setConfigImpl(_configName: string, _configValue: unknown): Promise<void> {
+    throw new Error('Not implemented')
+  }
+
+  protected removeConfigImpl(_configName: string): Promise<void> {
+    throw new Error('Not implemented')
+  }
+}
 
 describe('ConfigStoreBaseClass', () => {
   let sandbox: SinonSandbox
@@ -14,7 +31,7 @@ describe('ConfigStoreBaseClass', () => {
   beforeEach(() => {
     sandbox = createSandbox()
     logger = getLoggerMock(sandbox)
-    configStore = new ConfigStoreBaseClass('test', { logger: logger.mock })
+    configStore = new TestClass('test', { logger: logger.mock })
   })
 
   afterEach(() => {

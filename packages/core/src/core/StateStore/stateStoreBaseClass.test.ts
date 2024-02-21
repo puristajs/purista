@@ -1,10 +1,27 @@
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
+import type { ObjectWithKeysFromStringArray } from '../../helper/index.js'
 import { getLoggerMock } from '../../mocks/index.js'
 import { UnhandledError } from '../Error/index.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import { StateStoreBaseClass } from './StateStoreBaseClass.impl.js'
+
+class TestClass extends StateStoreBaseClass {
+  protected getStateImpl<StateNames extends string[]>(
+    ..._stateNames: StateNames
+  ): Promise<ObjectWithKeysFromStringArray<StateNames>> {
+    throw new Error('Not implemented')
+  }
+
+  protected setStateImpl(_stateName: string, _stateValue: unknown): Promise<void> {
+    throw new Error('Not implemented')
+  }
+
+  protected removeStateImpl(_stateName: string): Promise<void> {
+    throw new Error('Not implemented')
+  }
+}
 
 describe('StateStoreBaseClass', () => {
   let sandbox: SinonSandbox
@@ -14,7 +31,7 @@ describe('StateStoreBaseClass', () => {
   beforeEach(() => {
     sandbox = createSandbox()
     logger = getLoggerMock(sandbox)
-    stateStore = new StateStoreBaseClass('test', { logger: logger.mock })
+    stateStore = new TestClass('test', { logger: logger.mock })
   })
 
   afterEach(() => {

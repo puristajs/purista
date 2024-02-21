@@ -1,10 +1,27 @@
 import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
+import type { ObjectWithKeysFromStringArray } from '../../helper/index.js'
 import { getLoggerMock } from '../../mocks/index.js'
 import { UnhandledError } from '../Error/index.js'
 import { StatusCode } from '../types/index.js'
 import { SecretStoreBaseClass } from './SecretStoreBaseClass.impl.js'
+
+class TestClass extends SecretStoreBaseClass {
+  protected getSecretImpl<SecretNames extends string[]>(
+    ..._secretNames: SecretNames
+  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
+    throw new Error('Not implemented')
+  }
+
+  protected setSecretImpl(_secretName: string, _secretValue: string): Promise<void> {
+    throw new Error('Not implemented')
+  }
+
+  protected removeSecretImpl(_secretName: string): Promise<void> {
+    throw new Error('Not implemented')
+  }
+}
 
 describe('SecretStoreBaseClass', () => {
   let sandbox: SinonSandbox
@@ -14,7 +31,7 @@ describe('SecretStoreBaseClass', () => {
   beforeEach(() => {
     sandbox = createSandbox()
     logger = getLoggerMock(sandbox)
-    secretStore = new SecretStoreBaseClass('test', { logger: logger.mock })
+    secretStore = new TestClass('test', { logger: logger.mock })
   })
 
   afterEach(() => {
