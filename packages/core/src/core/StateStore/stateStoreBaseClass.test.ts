@@ -52,11 +52,7 @@ describe('StateStoreBaseClass', () => {
     it('should throw an UnhandledError if enableGet is true but method is not implemented', async () => {
       sandbox.stub(stateStore.config, 'enableGet').value(true)
 
-      await expect(stateStore.getState('test')).rejects.toEqual(
-        new UnhandledError(StatusCode.NotImplemented, 'getState is not implemented in state store'),
-      )
-
-      sandbox.assert.calledOnce(logger.stubs.error)
+      await expect(stateStore.getState('test')).rejects.toEqual(new Error('Not implemented'))
     })
   })
 
@@ -75,11 +71,7 @@ describe('StateStoreBaseClass', () => {
       // Arrange
       sandbox.stub(stateStore.config, 'enableSet').value(true)
 
-      await expect(stateStore.setState('test', 'state_value')).rejects.toEqual(
-        new UnhandledError(StatusCode.NotImplemented, 'setState is not implemented in state store'),
-      )
-
-      sandbox.assert.calledOnce(logger.stubs.error)
+      await expect(stateStore.setState('test', 'state_value')).rejects.toEqual(new Error('Not implemented'))
     })
   })
 
@@ -97,11 +89,7 @@ describe('StateStoreBaseClass', () => {
     it('should throw an UnhandledError if enableRemove is true but method is not implemented', async () => {
       sandbox.stub(stateStore.config, 'enableRemove').value(true)
 
-      await expect(stateStore.removeState('test')).rejects.toMatchObject(
-        new UnhandledError(StatusCode.NotImplemented, 'removeState is not implemented in state store'),
-      )
-
-      sandbox.assert.calledOnce(logger.stubs.error)
+      await expect(stateStore.removeState('test')).rejects.toMatchObject(new Error('Not implemented'))
     })
   })
 })

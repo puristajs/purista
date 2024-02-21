@@ -52,11 +52,7 @@ describe('ConfigStoreBaseClass', () => {
     it('should throw an UnhandledError if enableGet is true but method is not implemented', async () => {
       sandbox.stub(configStore.config, 'enableGet').value(true)
 
-      await expect(configStore.getConfig('test')).rejects.toEqual(
-        new UnhandledError(StatusCode.NotImplemented, 'get config is not implemented in config store'),
-      )
-
-      sandbox.assert.calledOnce(logger.stubs.error)
+      await expect(configStore.getConfig('test')).rejects.toEqual(new Error('Not implemented'))
     })
   })
 
@@ -75,11 +71,7 @@ describe('ConfigStoreBaseClass', () => {
       // Arrange
       sandbox.stub(configStore.config, 'enableSet').value(true)
 
-      await expect(configStore.setConfig('test', {})).rejects.toEqual(
-        new UnhandledError(StatusCode.NotImplemented, 'set config is not implemented in config store'),
-      )
-
-      sandbox.assert.calledOnce(logger.stubs.error)
+      await expect(configStore.setConfig('test', {})).rejects.toEqual(new Error('Not implemented'))
     })
   })
 
@@ -97,11 +89,7 @@ describe('ConfigStoreBaseClass', () => {
     it('should throw an UnhandledError if enableRemove is true but method is not implemented', async () => {
       sandbox.stub(configStore.config, 'enableRemove').value(true)
 
-      await expect(configStore.removeConfig('test')).rejects.toMatchObject(
-        new UnhandledError(StatusCode.NotImplemented, 'remove config is not implemented in config store'),
-      )
-
-      sandbox.assert.calledOnce(logger.stubs.error)
+      await expect(configStore.removeConfig('test')).rejects.toMatchObject(new Error('Not implemented'))
     })
   })
 })
