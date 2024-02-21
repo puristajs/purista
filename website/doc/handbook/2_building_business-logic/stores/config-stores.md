@@ -126,6 +126,7 @@ You can simply extend the `ConfigStoreBaseClass` with type parameter of your cus
 
 ```typescript
 import { 
+    ConfigStore,
     ConfigStoreBaseClass,
     UnhandledError, 
     StatusCode,
@@ -137,7 +138,7 @@ type CustomStoreConfig = {
   url: string
 }
 
-export class CustomStore extends ConfigStoreBaseClass<CustomStoreConfig> {
+export class CustomStore extends ConfigStoreBaseClass<CustomStoreConfig> implements ConfigStore {
 
   private client
 

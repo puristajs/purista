@@ -1,4 +1,4 @@
-import type { StoreBaseConfig } from '../core/index.js'
+import type { StateStore, StoreBaseConfig } from '../core/index.js'
 import { StateStoreBaseClass } from '../core/index.js'
 import type { ObjectWithKeysFromStringArray } from '../helper/index.js'
 import type { DefaultStateStoreConfig } from './types/index.js'
@@ -10,7 +10,7 @@ import type { DefaultStateStoreConfig } from './types/index.js'
  * @group Store
  *
  */
-export class DefaultStateStore extends StateStoreBaseClass<DefaultStateStoreConfig> {
+export class DefaultStateStore extends StateStoreBaseClass<DefaultStateStoreConfig> implements StateStore {
   private map = new Map<string, unknown>()
   constructor(config?: StoreBaseConfig<DefaultStateStoreConfig>) {
     super('DefaultStateStore', { ...config })

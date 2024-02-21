@@ -53,6 +53,7 @@ You can simply extend the `StateStoreBaseClass` with type parameter of your cust
 
 ```typescript
 import { 
+    StateStore,
     StateStoreBaseClass,
     UnhandledError,
     StatusCode,
@@ -64,7 +65,7 @@ type CustomStoreConfig = {
   url: string
 }
 
-export class CustomStore extends StateStoreBaseClass<CustomStoreConfig> {
+export class CustomStore extends StateStoreBaseClass<CustomStoreConfig> implements StateStore {
 
   private client
 

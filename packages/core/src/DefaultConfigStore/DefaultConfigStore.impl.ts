@@ -1,4 +1,4 @@
-import type { StoreBaseConfig } from '../core/index.js'
+import type { ConfigStore, StoreBaseConfig } from '../core/index.js'
 import { ConfigStoreBaseClass, StatusCode, UnhandledError } from '../core/index.js'
 import type { ObjectWithKeysFromStringArray } from '../helper/index.js'
 import type { DefaultConfigStoreConfig } from './types/index.js'
@@ -25,7 +25,7 @@ import type { DefaultConfigStoreConfig } from './types/index.js'
  *
  * @group Store
  */
-export class DefaultConfigStore extends ConfigStoreBaseClass<DefaultConfigStoreConfig> {
+export class DefaultConfigStore extends ConfigStoreBaseClass<DefaultConfigStoreConfig> implements ConfigStore {
   private map = new Map<string, unknown>()
   constructor(config?: StoreBaseConfig<DefaultConfigStoreConfig>) {
     super('DefaultConfigStore', { ...config })

@@ -82,6 +82,7 @@ You can simply extend the `SecretStoreBaseClass` with type parameter of your cus
 
 ```typescript
 import { 
+    SecretStore,
     SecretStoreBaseClass, 
     UnhandledError, 
     StatusCode, 
@@ -93,7 +94,7 @@ type CustomStoreConfig = {
   url: string
 }
 
-export class CustomStore extends SecretStoreBaseClass<CustomStoreConfig> {
+export class CustomStore extends SecretStoreBaseClass<CustomStoreConfig> implements SecretStore {
 
   private client
 
