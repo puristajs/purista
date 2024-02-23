@@ -40,10 +40,10 @@ jobs:
         uses: actions/configure-pages@v4
       - name: Install dependencies
         run: npm ci # or pnpm install / yarn install / bun install
-      - name: Build with Core
+      - name: Build purista core
         run: |
           npm run build -w packages/core
-      - name: Build packages
+      - name: Build purista packages
         run: |
           npm run build
       - name: Build documentation
