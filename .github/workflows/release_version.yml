@@ -45,9 +45,11 @@ jobs:
       #    npm run test:unit
       - name: Bump version
         run: |
+          npm version ${{ inputs.version }} --no-git-tag-version
           npm version ${{ inputs.version }} --no-git-tag-version --workspaces
-          git config --global user.name '${{ env.CI_COMMIT_AUTHOR }}'
-          git config --global user.email 'sebastianwessel@users.noreply.github.com'
+          git config user.name '${{ vars.CI_COMMIT_AUTHOR}}'
+          git config user.email 'sebastianwessel@users.noreply.github.com'
+          git config push.followTags true
           scripts/commitVersion.sh
           echo $(node -p -e "require('./package.json').version")
         id: bump_version
