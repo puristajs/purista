@@ -39,9 +39,10 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
       - name: Install dependencies
-        run: npm i # or pnpm install / yarn install / bun install
+        run: npm ci # or pnpm install / yarn install / bun install
       - name: Build with VitePress
         run: |
+          npm run build
           npm run build:doc
           # touch website/doc/.vitepress/dist/.nojekyll
       - name: Upload artifact
