@@ -42,7 +42,7 @@ jobs:
         run: cd website && npm ci # or pnpm install / yarn install / bun install
       - name: Build with VitePress
         run: |
-          npm run build:doc
+          cd website && npm run build:doc
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
