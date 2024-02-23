@@ -157,7 +157,7 @@ ___
 
 ### configSchema
 
-• **configSchema**: `undefined` \| `Schema`
+• `Protected` **configSchema**: `undefined` \| `Schema`
 
 #### Inherited from
 
@@ -171,7 +171,7 @@ ___
 
 ### configStore
 
-• **configStore**: [`ConfigStore`](../interfaces/purista_core.ConfigStore.md)
+• `Protected` **configStore**: [`ConfigStore`](../interfaces/purista_core.ConfigStore.md)
 
 #### Inherited from
 
@@ -185,7 +185,7 @@ ___
 
 ### eventBridge
 
-• **eventBridge**: [`EventBridge`](../interfaces/purista_core.EventBridge.md)
+• `Protected` **eventBridge**: [`EventBridge`](../interfaces/purista_core.EventBridge.md)
 
 #### Inherited from
 
@@ -213,7 +213,7 @@ ___
 
 ### logger
 
-• **logger**: [`Logger`](purista_core.Logger.md)
+• `Protected` **logger**: [`Logger`](purista_core.Logger.md)
 
 #### Inherited from
 
@@ -227,7 +227,7 @@ ___
 
 ### secretStore
 
-• **secretStore**: [`SecretStore`](../interfaces/purista_core.SecretStore.md)
+• `Protected` **secretStore**: [`SecretStore`](../interfaces/purista_core.SecretStore.md)
 
 #### Inherited from
 
@@ -255,7 +255,7 @@ ___
 
 ### stateStore
 
-• **stateStore**: [`StateStore`](../interfaces/purista_core.StateStore.md)
+• `Protected` **stateStore**: [`StateStore`](../interfaces/purista_core.StateStore.md)
 
 #### Inherited from
 

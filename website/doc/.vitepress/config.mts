@@ -8,7 +8,7 @@ const hostname: string = 'https://purista.dev'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  outDir: '../../docs',
+  outDir: '../dist',
   lang: 'en-US',
   head: [
       ['link', { rel: 'stylesheet', type: 'text/css', media: 'all', href: '/cookieconsent.css' }],
@@ -47,7 +47,7 @@ export default defineConfig({
           provider: 'local'
     },
     editLink: {
-          pattern: 'https://github.com/sebastianwessel/purista/website/edit/main/website/doc/:path',
+          pattern: 'https://github.com/sebastianwessel/purista/tree/master/website/doc/:path',
           text: 'Edit this page on GitHub'
         },
     outline: 'deep',

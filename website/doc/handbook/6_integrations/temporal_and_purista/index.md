@@ -14,7 +14,7 @@ With PURISTA, your application becomes a collection of independent, isolated fun
 
 However, every masterpiece needs a guiding hand, especially when it comes to managing time-based tasks or handling long-running processes. This is where Temporal steps onto the stage.
 
-Temporal is more than just software—it's a powerful tool that allows you to define, run, and observe your application's workflows as elegant lines of code.  
+Temporal is more than just software — it's a powerful tool that allows you to define, run, and observe your application's workflows as elegant lines of code.  
 Think of it as the conductor orchestrating a symphony of functions.
 
 By combining the simplicity of PURISTA with the sophistication of Temporal, you can create truly remarkable applications.  

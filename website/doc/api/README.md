@@ -4,6 +4,30 @@ PURISTA API / [Modules](modules.md)
 
 All notable changes to this project will be documented in this file.
 
+## [unreleased]
+
+### Bug Fixes
+
+- Esm imports
+- Warning on default stores
+
+### Documentation
+
+- Update temporal example
+- Update handbook links in doc index
+- Update api documentation
+
+### Miscellaneous Tasks
+
+- Mark example package private
+- Context store getter functions
+- Cleanup project config and settings
+- Update vscode settings
+- Update tsconfig.json files
+- Improve typing for custom stores
+- Improve store doc & types
+- Fix tests
+
 ## [1.10.8] - 2024-02-18
 
 ### Bug Fixes
@@ -25,6 +49,7 @@ All notable changes to this project will be documented in this file.
 - Improve cli install
 - Fix lint and improve tests
 - Update project settings
+- Bump versions to 1.10.8
 
 ## [1.10.7] - 2024-02-18
 

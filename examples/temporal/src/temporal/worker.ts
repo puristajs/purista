@@ -8,48 +8,16 @@ import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
 import type { EventBridge } from '@purista/core'
 import { initLogger } from '@purista/core'
 import { NatsBridge } from '@purista/natsbridge'
-import { Context } from '@temporalio/activity'
 import { makeWorkflowExporter, OpenTelemetryActivityInboundInterceptor } from '@temporalio/interceptors-opentelemetry'
 import { NativeConnection, Worker } from '@temporalio/worker'
 
-import jaegerExporterOptions from '../../config/jaegerExporterOptions.js'
-import natsBridgeConfig from '../../config/natsBridgeConfig.js'
-import temporalConfig from '../../config/temporalConfig.js'
+import jaegerExporterOptions from '../config/jaegerExporterOptions.js' // [!code ++]
+import natsBridgeConfig from '../config/natsBridgeConfig.js'
+import temporalConfig from '../config/temporalConfig.js'
 import * as activities from './activities/index.js'
+import { getInvoke } from './getInvoke.js'
 
-// a small get which returns the invoke function
-const getInvoke =
-  (eventBridge: EventBridge) =>
-  async <Output = unknown>(
-    serviceName: string,
-    serviceVersion: string,
-    serviceTarget: string,
-    payload: unknown,
-    parameter = {},
-  ): Promise<Output> => {
-    const ctx = Context.current()
-    return eventBridge.invoke<Output>({
-      sender: {
-        serviceName: ctx.info.workflowType,
-        serviceVersion: '1',
-        serviceTarget: ctx.info.activityType,
-        instanceId: eventBridge.instanceId,
-      },
-      receiver: {
-        serviceName,
-        serviceVersion,
-        serviceTarget,
-      },
-      payload: {
-        payload,
-        parameter,
-      },
-      contentEncoding: 'application/json',
-      contentType: 'utf-8',
-    })
-  }
-
-const getActivities = (eventBridge: EventBridge) => {
+const getPuristaBasedActivities = (eventBridge: EventBridge) => {
   const invoke = getInvoke(eventBridge)
 
   return {
@@ -60,7 +28,7 @@ const getActivities = (eventBridge: EventBridge) => {
   }
 }
 
-export type ActivitiesType = typeof activities & ReturnType<typeof getActivities>
+export type ActivitiesType = typeof activities & ReturnType<typeof getPuristaBasedActivities>
 
 async function run() {
   // setup OpenTelemetry
@@ -82,10 +50,7 @@ async function run() {
   //
   // Worker code uses `@temporalio/worker.NativeConnection`.
   // (But in your application code it's `@temporalio/client.Connection`.)
-  const connection = await NativeConnection.connect({
-    address: 'localhost:7233',
-    // TLS and gRPC metadata configuration goes here.
-  })
+  const connection = await NativeConnection.connect(temporalConfig.connect)
   // Step 2: Register Workflows and Activities with the Worker.
   const worker = await Worker.create({
     connection,
@@ -95,7 +60,7 @@ async function run() {
     workflowsPath: fileURLToPath(new URL('./workflows', import.meta.url)),
     activities: {
       ...activities,
-      ...getActivities(eventBridge),
+      ...getPuristaBasedActivities(eventBridge),
     },
     interceptors: {
       // example contains both workflow and interceptors

@@ -8,8 +8,9 @@ import { honoV1Service } from '@purista/hono-http-server'
 import { NatsBridge } from '@purista/natsbridge'
 import { compress } from 'hono/compress'
 
-import jaegerExporterOptions from '../config/jaegerExporterOptions.js'
-import natsBridgeConfig from '../config/natsBridgeConfig.js'
+import jaegerExporterOptions from './config/jaegerExporterOptions.js'
+import natsBridgeConfig from './config/natsBridgeConfig.js'
+import temporalConfig from './config/temporalConfig.js'
 import { accountV1Service } from './service/account/v1/accountV1Service.js'
 import { cardV1Service } from './service/card/v1/cardV1Service.js'
 import { emailV1Service } from './service/email/v1/emailV1Service.js'
@@ -29,7 +30,11 @@ export const main = async () => {
   await eventBridge.start()
 
   // start the services
-  const userService = userV1Service.getInstance(eventBridge, { logger, spanProcessor })
+  const userService = userV1Service.getInstance(eventBridge, {
+    logger,
+    spanProcessor,
+    serviceConfig: { ...temporalConfig },
+  })
   await userService.start()
   services.push(userService)
 
