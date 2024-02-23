@@ -41,6 +41,11 @@ export default defineConfig({
      return head
    },
 
+   ignoreDeadLinks: [
+    /^https?:\/\/localhost/,
+    /^https?:\/\/127.0.0.1/,
+  ],
+
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     search: {
