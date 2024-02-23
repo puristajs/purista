@@ -1,4 +1,4 @@
-import type { Infer, InferIn, Schema } from '@decs/typeschema'
+import type { Infer, InferIn, Schema } from '@typeschema/main'
 import type { SinonSandbox } from 'sinon'
 import type { ZodAny } from 'zod'
 
@@ -732,17 +732,19 @@ export class CommandDefinitionBuilder<
    * Creates and returns the CommandDefinition used as input for the service.
    * @returns CommandDefinition
    */
-  getDefinition(): CommandDefinition<
-    ServiceClassType,
-    CommandDefinitionMetadataBase,
-    MessagePayloadType,
-    MessageParamsType,
-    MessageResultType,
-    Infer<PayloadSchema>,
-    Infer<ParameterSchema>,
-    Infer<ResultSchema>,
-    Invokes,
-    EmitListType
+  async getDefinition(): Promise<
+    CommandDefinition<
+      ServiceClassType,
+      CommandDefinitionMetadataBase,
+      MessagePayloadType,
+      MessageParamsType,
+      MessageResultType,
+      Infer<PayloadSchema>,
+      Infer<ParameterSchema>,
+      Infer<ResultSchema>,
+      Invokes,
+      EmitListType
+    >
   > {
     if (!this.fn) {
       throw new Error('CommandDefinitionBuilder: missing function implementation')
@@ -785,9 +787,9 @@ export class CommandDefinitionBuilder<
           contentEncodingRequest: this.inputContentEncoding ?? 'utf-8',
           contentTypeResponse: this.outputContentType ?? 'application/json',
           contentEncodingResponse: this.outputContentEncoding ?? 'utf-8',
-          inputPayload: validationToSchema(inputPayloadSchema),
-          parameter: validationToSchema(inputParameterSchema),
-          outputPayload: validationToSchema(outputPayloadSchema),
+          inputPayload: await validationToSchema(inputPayloadSchema),
+          parameter: await validationToSchema(inputParameterSchema),
+          outputPayload: await validationToSchema(outputPayloadSchema),
           deprecated: this.deprecated,
         },
       },

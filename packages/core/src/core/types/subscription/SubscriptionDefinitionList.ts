@@ -8,7 +8,11 @@ import type { SubscriptionDefinition } from './SubscriptionDefinition.js'
  * export const userServiceCommands: SubscriptionDefinitionList<UserService> = [signUp.getDefinition()]
  * ```
  */
-export type SubscriptionDefinitionList<ServiceClassType extends ServiceClass> = SubscriptionDefinition<
+export type SubscriptionDefinitionList<ServiceClassType extends ServiceClass> = Promise<
+  SubscriptionDefinition<ServiceClassType, any, any, any, any, any, any, any, any, any>
+>[]
+
+export type SubscriptionDefinitionListResolved<ServiceClassType extends ServiceClass> = SubscriptionDefinition<
   ServiceClassType,
   any,
   any,

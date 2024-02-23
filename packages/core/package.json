@@ -36,10 +36,12 @@
   "devDependencies": {
     "@types/node": "^20.11.16",
     "sinon": "^17.0.1",
-    "tshy": "^1.11.1"
+    "tshy": "^1.11.1",
+    "@openapi-contrib/json-schema-to-openapi-schema": "3.0.1"
   },
   "dependencies": {
-    "@decs/typeschema": "^0.12.2",
+    "@typeschema/main": "^0.13.1",
+    "@typeschema/zod": "^0.13.1",
     "@opentelemetry/api": "^1.7.0",
     "@opentelemetry/resources": "^1.19.0",
     "@opentelemetry/sdk-trace-node": "^1.19.0",
@@ -50,11 +52,15 @@
     "zod": "^3.22.4"
   },
   "peerDependencies": {
+    "@openapi-contrib/json-schema-to-openapi-schema": "3.0.1",
     "@types/sinon": "^17.0.3",
     "sinon": "^17.x"
   },
   "peerDependenciesMeta": {
     "@types/sinon": {
+      "optional": true
+    },
+    "@openapi-contrib/json-schema-to-openapi-schema": {
       "optional": true
     },
     "sinon": {

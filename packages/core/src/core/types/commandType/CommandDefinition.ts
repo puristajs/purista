@@ -1,4 +1,4 @@
-import type { Schema } from '@decs/typeschema'
+import type { Schema } from '@typeschema/main'
 
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { FromInvokeToOtherType } from '../FromInvokeToOtherType.js'

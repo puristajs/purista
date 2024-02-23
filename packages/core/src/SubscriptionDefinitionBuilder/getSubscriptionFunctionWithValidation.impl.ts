@@ -1,6 +1,6 @@
-import type { Schema } from '@decs/typeschema'
-import { validate } from '@decs/typeschema'
 import { SpanStatusCode } from '@opentelemetry/api'
+import type { Schema } from '@typeschema/main'
+import { validate } from '@typeschema/main'
 
 import type { ServiceClass, SubscriptionBeforeGuardHook, SubscriptionFunction } from '../core/index.js'
 import { HandledError, StatusCode, UnhandledError } from '../core/index.js'

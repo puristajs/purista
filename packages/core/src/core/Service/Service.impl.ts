@@ -1,6 +1,6 @@
-import type { Infer, Schema } from '@decs/typeschema'
-import { validate } from '@decs/typeschema'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
+import type { Infer, Schema } from '@typeschema/main'
+import { validate } from '@typeschema/main'
 
 import { DefaultConfigStore } from '../../DefaultConfigStore/index.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/index.js'
@@ -24,6 +24,7 @@ import type {
   Command,
   CommandDefinition,
   CommandDefinitionList,
+  CommandDefinitionListResolved,
   CommandFunctionContext,
   ContextBase,
   CustomMessage,
@@ -39,6 +40,7 @@ import type {
   Subscription,
   SubscriptionDefinition,
   SubscriptionDefinitionList,
+  SubscriptionDefinitionListResolved,
   SubscriptionFunctionContext,
   TenantId,
   TraceId,
@@ -84,7 +86,12 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
 
   public commandDefinitionList: CommandDefinitionList<any>
   public subscriptionDefinitionList: SubscriptionDefinitionList<any>
+
+  public commandDefinitionListResolved: CommandDefinitionListResolved<any> = []
+  public subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<any> = []
   public config: ConfigType
+
+  public isStarted: boolean = false
 
   constructor(config: ServiceConstructorInput<ConfigType>) {
     super({
@@ -125,7 +132,14 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
             throw err
           }
         }
-        await this.initializeEventbridgeConnect(this.commandDefinitionList, this.subscriptionDefinitionList)
+
+        this.commandDefinitionListResolved = await Promise.all(this.commandDefinitionList)
+        this.subscriptionDefinitionListResolved = await Promise.all(this.subscriptionDefinitionList)
+
+        await this.initializeEventbridgeConnect(
+          this.commandDefinitionListResolved,
+          this.subscriptionDefinitionListResolved,
+        )
         await this.sendServiceInfo(EBMessageType.InfoServiceReady)
         this.logger.info(
           { ...span.spanContext(), puristaVersion },
@@ -137,15 +151,40 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
         this.emit(ServiceEventsNames.ServiceUnavailable, err)
         throw err
       }
+
+      this.isStarted = true
     })
+  }
+
+  /**
+   * The Definition lists provided by builders
+   * for commands and subscriptions are Promises
+   * This functions returns teh resolved values.
+   *
+   * The service needs to be started.
+   * Otherwise, this function will throw
+   *
+   * @returns
+   */
+  getDefinitionsResolved() {
+    if (!this.isStarted) {
+      throw new Error(
+        `service ${this.serviceInfo.serviceName} version ${this.serviceInfo.serviceVersion} needs to be started before using getDefinitionsResolved`,
+      )
+    }
+
+    return {
+      commands: this.commandDefinitionListResolved,
+      subscriptions: this.subscriptionDefinitionListResolved,
+    }
   }
 
   /**
    * Connect service to event bridge to receive commands and command responses
    */
   protected async initializeEventbridgeConnect(
-    commandDefinitionList: CommandDefinitionList<any>,
-    subscriptions: SubscriptionDefinition[],
+    commandDefinitionList: CommandDefinitionListResolved<any>,
+    subscriptions: SubscriptionDefinitionListResolved<any>,
   ) {
     return this.startActiveSpan('purista.initializeEventbridgeConnect', {}, undefined, async (span) => {
       const isEventBridgeReady = this.eventBridge.isHealthy()

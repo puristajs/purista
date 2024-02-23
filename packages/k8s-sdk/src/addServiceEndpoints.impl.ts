@@ -36,7 +36,8 @@ export const addServiceEndpoints = (
 
   const exposedServices = Array.isArray(services) ? services : [services]
   exposedServices.forEach((service) => {
-    service.commandDefinitionList.forEach((definition) => {
+    const { commands } = service.getDefinitionsResolved()
+    commands.forEach((definition) => {
       const metadata = definition.metadata as HttpExposedServiceMeta
       if (!isHttpExposedServiceMeta(metadata)) {
         logger.debug('...skip exposing function')
@@ -140,7 +141,7 @@ export const addServiceEndpoints = (
                   span.end()
 
                   c.status(StatusCode.NoContent)
-                  Object.values(header).forEach((val) => c.header(val[0] as string, val[1]))
+                  Object.values(header).forEach((val) => c.header(val[0], val[1]))
                   return c.body(null)
                 }
 

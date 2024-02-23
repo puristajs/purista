@@ -1,5 +1,5 @@
-import type { Schema } from '@decs/typeschema'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import type { Schema } from '@typeschema/main'
 
 import type { ConfigStore } from '../ConfigStore/index.js'
 import type { EventBridge } from '../EventBridge/index.js'

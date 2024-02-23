@@ -9,7 +9,11 @@ import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataB
  * export const userServiceCommands: CommandDefinitionList<UserService> = [signUp.getDefinition()]
  * ```
  */
-export type CommandDefinitionList<ServiceClassType extends ServiceClass> = CommandDefinition<
+export type CommandDefinitionList<ServiceClassType extends ServiceClass> = Promise<
+  CommandDefinition<ServiceClassType, CommandDefinitionMetadataBase, any, any, any, any, any, any, any, any>
+>[]
+
+export type CommandDefinitionListResolved<ServiceClassType extends ServiceClass> = CommandDefinition<
   ServiceClassType,
   CommandDefinitionMetadataBase,
   any,

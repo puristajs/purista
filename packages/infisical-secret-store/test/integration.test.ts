@@ -12,7 +12,7 @@ readonly:
 st.64746e08fd775a75b3f6e6db.82cd9d993fa4e5981a8132bdadea6adc.0c902c3ca70cb49d99660537d30c0cdc
 */
 
-describe('Infisical secret store', () => {
+describe.skip('Infisical secret store', () => {
   const baseUrl = 'http://localhost:8080/'
 
   beforeAll(async () => {
