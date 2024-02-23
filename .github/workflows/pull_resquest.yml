@@ -7,7 +7,6 @@ on:
 jobs:
   # Build job
   build:
-    environment: publish_version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -22,10 +21,12 @@ jobs:
           node-version: 20
           cache: npm # or pnpm / yarn
       - name: Install dependencies
-        run: npm ci # or pnpm install / yarn install / bun install
+        run: |
+          # rm package-lock.json # https://github.com/npm/cli/issues/4828
+          npm ci
       - name: Lint
         run: |
-          npm run test
+          npm run lint
       - name: Build purista core
         run: |
           npm run build -w packages/core
