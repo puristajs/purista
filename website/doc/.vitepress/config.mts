@@ -8,7 +8,7 @@ const hostname: string = 'https://purista.dev'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  outDir: '../../doc',
+  outDir: '../../docs',
   lang: 'en-US',
   head: [
       ['link', { rel: 'stylesheet', type: 'text/css', media: 'all', href: '/cookieconsent.css' }],
