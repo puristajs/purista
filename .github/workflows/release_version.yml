@@ -40,17 +40,17 @@ jobs:
       - name: Build purista packages
         run: |
           npm run build
-      #- name: Test
-      #  run: |
-      #    npm run test:unit
+      - name: Test
+        run: |
+          npm run test:unit
       - name: Bump version
         run: |
           npm version ${{ inputs.version }} --no-git-tag-version
           npm version ${{ inputs.version }} --no-git-tag-version --workspaces
           scripts/commitVersion.sh
-          git config user.name '${{ vars.CI_COMMIT_AUTHOR}}'
-          git config user.email 'sebastianwessel@users.noreply.github.com'
-          git config push.followTags true
+          git config --global user.name '${{ vars.CI_COMMIT_AUTHOR}}'
+          git config --global user.email 'sebastianwessel@users.noreply.github.com'
+          git config --global push.followTags true
           echo New version:
           echo $(node -p -e "require('./package.json').version")
         id: bump_version
@@ -62,10 +62,10 @@ jobs:
           npm publish --access public --dry-run --workspaces
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      #- name: Commit version
-      #  run: |
-      #    git push
-      # - name: Publish
-      #   run: npm publish --access public
-      #   env:
-      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Commit version
+        run: |
+          git push
+      - name: Publish
+        run: npm publish --access public --workspaces
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
