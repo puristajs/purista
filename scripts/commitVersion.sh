@@ -1,8 +1,6 @@
 NODE_VERSION=$(node -p -e "require('./package.json').version")
 echo $NODE_VERSION
 
-git-cliff --tag v$NODE_VERSION > CHANGELOG.md
-
 CONTENT="export const puristaVersion = '$NODE_VERSION'"
 
 for dir in ./packages/*/     # list directories in the form "/tmp/dirname/"

@@ -47,10 +47,11 @@ jobs:
         run: |
           npm version ${{ inputs.version }} --no-git-tag-version
           npm version ${{ inputs.version }} --no-git-tag-version --workspaces
+          scripts/commitVersion.sh
           git config user.name '${{ vars.CI_COMMIT_AUTHOR}}'
           git config user.email 'sebastianwessel@users.noreply.github.com'
           git config push.followTags true
-          scripts/commitVersion.sh
+          echo New version:
           echo $(node -p -e "require('./package.json').version")
         id: bump_version
       - name: Add Tag
@@ -58,7 +59,7 @@ jobs:
           git tag ${{ steps.bump_version }}
       - name: Dry run publish
         run: |
-          npm publish --access public --dry-run
+          npm publish --access public --dry-run --workspaces
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       #- name: Commit version
