@@ -1,11 +1,12 @@
 import { fail } from 'node:assert'
 
-import type { Infer, InferIn, Schema } from '@decs/typeschema'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
+import type { Infer, InferIn, Schema } from '@typeschema/main'
 
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
 import type {
   CommandDefinitionList,
+  CommandDefinitionListResolved,
   Complete,
   ConfigStore,
   EventBridge,
@@ -17,6 +18,7 @@ import type {
   ServiceInfoType,
   StateStore,
   SubscriptionDefinitionList,
+  SubscriptionDefinitionListResolved,
 } from '../core/index.js'
 import { initLogger, Service } from '../core/index.js'
 import { initDefaultConfigStore } from '../DefaultConfigStore/index.js'
@@ -42,6 +44,9 @@ export class ServiceBuilder<
 > {
   private commandDefinitionList: CommandDefinitionList<ServiceClassType> = []
   private subscriptionDefinitionList: SubscriptionDefinitionList<ServiceClassType> = []
+
+  private commandDefinitionListResolved: CommandDefinitionListResolved<ServiceClassType> = []
+  private subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<ServiceClassType> = []
 
   private configSchema?: Schema
   private defaultConfig?: Complete<ConfigType>
@@ -80,19 +85,6 @@ export class ServiceBuilder<
    * @returns The service builder
    */
   addCommandDefinition(...commands: CommandDefinitionList<ServiceClassType>) {
-    const existing = commands.filter((fn) =>
-      this.commandDefinitionList.some((definition) => definition.commandName === fn.commandName),
-    )
-
-    if (existing.length) {
-      // eslint-disable-next-line no-console
-      console.error(
-        `duplicate function definitions ${this.info.serviceName} version ${this.info.serviceVersion}`,
-        existing,
-      )
-      throw new Error('duplicate function definitions')
-    }
-
     this.commandDefinitionList.push(...commands)
     return this as ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType>
   }
@@ -103,21 +95,18 @@ export class ServiceBuilder<
    * @returns The service builder
    */
   addSubscriptionDefinition(...subscription: SubscriptionDefinitionList<ServiceClassType>) {
-    const existing = subscription.filter((fn) =>
-      this.subscriptionDefinitionList.some((definition) => definition.subscriptionName === fn.subscriptionName),
-    )
-
-    if (existing.length) {
-      // eslint-disable-next-line no-console
-      console.error(
-        `duplicate subscription definitions ${this.info.serviceName} version ${this.info.serviceVersion}`,
-        existing,
-      )
-      throw new Error('duplicate function definitions')
-    }
-
     this.subscriptionDefinitionList.push(...subscription)
     return this as ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType>
+  }
+
+  async resolveDefinitions() {
+    this.commandDefinitionListResolved = await Promise.all(this.commandDefinitionList)
+    this.subscriptionDefinitionListResolved = await Promise.all(this.subscriptionDefinitionList)
+
+    return {
+      commands: this.commandDefinitionListResolved,
+      subscriptions: this.subscriptionDefinitionListResolved,
+    }
   }
 
   /**
@@ -158,27 +147,27 @@ export class ServiceBuilder<
       ...options?.serviceConfig,
     } as ConfigType
 
-    const opt = options.serviceConfig as any | undefined
+    const opt = options.serviceConfig as any
     const hasLogLevel = opt?.logLevel
       ? ['info', 'error', 'warn', 'debug', 'trace', 'fatal'].includes(opt.logLevel)
       : false
 
-    const logger = options.logger || initLogger(hasLogLevel ? opt.logLevel : options.logLevel)
+    const logger = options.logger ?? initLogger(hasLogLevel ? opt.logLevel : options.logLevel)
 
     const secretStore: SecretStore =
-      options.secretStore ||
+      options.secretStore ??
       initDefaultSecretStore({
         logger,
       })
 
     const configStore: ConfigStore =
-      options.configStore ||
+      options.configStore ??
       initDefaultConfigStore({
         logger,
       })
 
     const stateStore: StateStore =
-      options.stateStore ||
+      options.stateStore ??
       initDefaultStateStore({
         logger,
       })
@@ -246,9 +235,17 @@ export class ServiceBuilder<
     return this.subscriptionDefinitionList
   }
 
-  validateCommandDefinitions() {
-    const commandDefinitions = this.getCommandDefinitions()
+  /**
+   * A simple test helper, which ensures, that there ar no duplicate names used.
+   */
+  async validateServiceConfig() {
+    const { subscriptions, commands } = await this.resolveDefinitions()
 
+    this.validateCommands(commands)
+    this.validateSubscriptions(subscriptions)
+  }
+
+  protected validateCommands(commandDefinitions: CommandDefinitionListResolved<any>) {
     const existingNames = new Set()
     const eventNames = new Set()
 
@@ -272,9 +269,7 @@ export class ServiceBuilder<
     })
   }
 
-  validateSubscriptionDefinitions() {
-    const subscriptionDefinitions = this.getSubscriptionDefinitions()
-
+  protected validateSubscriptions(subscriptionDefinitions: SubscriptionDefinitionListResolved<any>) {
     const existingNames = new Set()
     subscriptionDefinitions.forEach((definition) => {
       const name = definition.subscriptionName.toLowerCase().trim()
@@ -284,5 +279,21 @@ export class ServiceBuilder<
       }
       existingNames.add(name)
     })
+  }
+
+  /**
+   * @deprecated Use validateServiceConfig() instead
+   */
+  validateCommandDefinitions() {
+    // eslint-disable-next-line no-console
+    console.warn('deprecated: Use validateServiceConfig() instead')
+  }
+
+  /**
+   * @deprecated Use validateServiceConfig() instead
+   */
+  validateSubscriptionDefinitions() {
+    // eslint-disable-next-line no-console
+    console.warn('deprecated: Use validateServiceConfig() instead')
   }
 }

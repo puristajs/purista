@@ -272,7 +272,8 @@ export class HonoServiceClass<
    */
   registerService(...services: Service[]) {
     services.forEach((service) => {
-      service.commandDefinitionList.forEach((command) => {
+      const { commands } = service.getDefinitionsResolved()
+      commands.forEach((command) => {
         this.addEndpoint(command.metadata, { ...service.serviceInfo, serviceTarget: command.commandName })
       })
     })

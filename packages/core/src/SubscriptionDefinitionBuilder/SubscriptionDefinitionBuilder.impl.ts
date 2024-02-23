@@ -1,4 +1,4 @@
-import type { Infer, InferIn, Schema } from '@decs/typeschema'
+import type { Infer, InferIn, Schema } from '@typeschema/main'
 import type { SinonSandbox } from 'sinon'
 import type { ZodAny } from 'zod'
 
@@ -25,8 +25,7 @@ import {
 } from '../core/index.js'
 import type { NonEmptyString } from '../helper/index.js'
 import { getSubscriptionContextMock, getSubscriptionTransformContextMock } from '../mocks/index.js'
-import type { OpenApiZodAny } from '../zodOpenApi/index.js'
-import { generateSchema } from '../zodOpenApi/index.js'
+import { validationToSchema } from '../zodOpenApi/index.js'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl.js'
 
 /**
@@ -250,7 +249,7 @@ export class SubscriptionDefinitionBuilder<
     serviceVersion?: NonEmptyString<V>,
   ) {
     this.eventName = eventName
-    this.sender = this.sender || {}
+    this.sender = this.sender ?? {}
     this.sender.serviceVersion = serviceVersion
     return this
   }
@@ -506,8 +505,8 @@ export class SubscriptionDefinitionBuilder<
     inputContentType?: ContentType,
     inputContentEncoding?: string,
   ) {
-    this.inputContentType = inputContentType || this.inputContentType
-    this.inputContentEncoding = inputContentEncoding || this.inputContentEncoding
+    this.inputContentType = inputContentType ?? this.inputContentType
+    this.inputContentEncoding = inputContentEncoding ?? this.inputContentEncoding
 
     this.hooks.transformInput = {
       transformFunction,
@@ -566,8 +565,8 @@ export class SubscriptionDefinitionBuilder<
     outputContentType?: ContentType,
     outputContentEncoding?: string,
   ) {
-    this.outputContentEncoding = outputContentEncoding || this.outputContentEncoding
-    this.outputContentType = outputContentType || this.outputContentType
+    this.outputContentEncoding = outputContentEncoding ?? this.outputContentEncoding
+    this.outputContentType = outputContentType ?? this.outputContentType
 
     this.hooks.transformOutput = {
       transformFunction,
@@ -770,17 +769,19 @@ export class SubscriptionDefinitionBuilder<
    * Returns the final subscription definition which will be passed into the service class.
    * @returns SubscriptionDefinition
    */
-  getDefinition(): SubscriptionDefinition<
-    ServiceClassType,
-    SubscriptionDefinitionMetadataBase,
-    MessagePayloadType,
-    MessageParamsType,
-    MessageResultType,
-    Infer<PayloadSchema>,
-    Infer<ParameterSchema>,
-    Infer<ResultSchema>,
-    Invokes,
-    EmitListType
+  async getDefinition(): Promise<
+    SubscriptionDefinition<
+      ServiceClassType,
+      SubscriptionDefinitionMetadataBase,
+      MessagePayloadType,
+      MessageParamsType,
+      MessageResultType,
+      Infer<PayloadSchema>,
+      Infer<ParameterSchema>,
+      Infer<ResultSchema>,
+      Invokes,
+      EmitListType
+    >
   > {
     if (!this.fn) {
       throw new Error(`SubscriptionDefinitionBuilder: missing function implementation for ${this.subscriptionName}`)
@@ -821,13 +822,9 @@ export class SubscriptionDefinitionBuilder<
           contentEncodingRequest: this.inputContentEncoding,
           contentTypeResponse: this.outputContentType,
           contentEncodingResponse: this.outputContentEncoding,
-          inputPayload: inputPayloadSchema ? generateSchema(inputPayloadSchema as unknown as OpenApiZodAny) : undefined,
-          parameter: inputParameterSchema
-            ? generateSchema(inputParameterSchema as unknown as OpenApiZodAny)
-            : undefined,
-          outputPayload: outputPayloadSchema
-            ? generateSchema(outputPayloadSchema as unknown as OpenApiZodAny)
-            : undefined,
+          inputPayload: inputPayloadSchema ? await validationToSchema(inputPayloadSchema) : undefined,
+          parameter: inputParameterSchema ? await validationToSchema(inputParameterSchema) : undefined,
+          outputPayload: outputPayloadSchema ? await validationToSchema(outputPayloadSchema) : undefined,
         },
       },
       receiver: this.receiver,

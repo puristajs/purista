@@ -1,5 +1,5 @@
-import { validate } from '@decs/typeschema'
 import { SpanStatusCode } from '@opentelemetry/api'
+import { validate } from '@typeschema/main'
 
 import { HandledError, UnhandledError } from '../Error/index.js'
 import type { EBMessage, Logger, SubscriptionDefinition } from '../types/index.js'

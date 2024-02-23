@@ -1,10 +1,10 @@
-import type { Schema } from '@decs/typeschema'
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 import { SpanStatusCode } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
+import type { Schema } from '@typeschema/main'
 
 import { puristaVersion } from '../../../version.js'
 import type { ConfigStore } from '../../ConfigStore/index.js'

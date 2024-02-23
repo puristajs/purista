@@ -1,4 +1,4 @@
-import type { Schema } from '@decs/typeschema'
+import type { Schema } from '@typeschema/main'
 import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
 
