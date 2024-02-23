@@ -1,5 +1,7 @@
 name: Publish Package to npmjs
 on:
+  release:
+    types: [created]
   workflow_dispatch:
     inputs:
       version:
@@ -48,15 +50,14 @@ jobs:
           npm version ${{ inputs.version }} --no-git-tag-version --workspaces
           git config --global user.name '${{ env.CI_COMMIT_AUTHOR }}'
           git config --global user.email 'sebastianwessel@users.noreply.github.com'
-          git config --global push.followTags true
           scripts/commitVersion.sh
       - name: Dry run publish
         run: |
           npm publish --access public --dry-run
-      - name: Commit version
-        run: |
-          git push
-      - name: Publish
-        run: npm publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      #- name: Commit version
+      #  run: |
+      #    git push
+      # - name: Publish
+      #   run: npm publish --access public
+      #   env:
+      #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
