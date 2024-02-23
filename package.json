@@ -6,6 +6,7 @@
     "start": "npm run dev -w examples/fullexample",
     "build": "npm run build --workspaces --if-present",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
+    "lint:fix": "eslint . --ext .ts,.json  --cache .",
     "test": "npm run test:unit && npm run test:integration",
     "test:unit": "vitest -c vite.config.ts",
     "test:integration": "vitest -c vite.config.integration.ts",

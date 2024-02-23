@@ -1,0 +1,61 @@
+name: Publish Package to npmjs
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'version'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Not needed if lastUpdated is not enabled
+      # - uses: pnpm/action-setup@v2 # Uncomment this if you're using pnpm
+      # - uses: oven-sh/setup-bun@v1 # Uncomment this if you're using Bun
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm # or pnpm / yarn
+      - name: Install dependencies
+        run: npm ci # or pnpm install / yarn install / bun install
+      - name: Lint
+        run: |
+          npm run lint
+      - name: Build purista core
+        run: |
+          npm run build -w packages/core
+      - name: Build purista packages
+        run: |
+          npm run build
+      - name: Test
+        run: |
+          npm run test:unit
+      - name: Bump version
+        run: |
+          npm version ${{ inputs.version }} --no-git-tag-version --workspaces
+          git config --global user.name '${{ env.CI_COMMIT_AUTHOR }}'
+          git config --global user.email 'sebastianwessel@users.noreply.github.com'
+          git config --global push.followTags true
+          scripts/commitVersion.sh
+      - name: Dry run publish
+        run: |
+          npm publish --access public --dry-run
+      - name: Commit version
+        run: |
+          git push
+      - name: Publish
+        run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
