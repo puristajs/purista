@@ -24,6 +24,7 @@ describe('service User version 1 - command createUser', () => {
 
     const payload: UserV1CreateUserInputPayload = {
       name: 'John Doe',
+      email: 'john@example.com',
     }
 
     const parameter: UserV1CreateUserInputParameter = {}
@@ -32,6 +33,6 @@ describe('service User version 1 - command createUser', () => {
 
     const result = await createUser(context.mock, payload, parameter)
 
-    expect(result.workflowId).toBeDefined()
+    expect(result.userId).toBeDefined()
   })
 })
