@@ -26,3 +26,19 @@ const mySchema = extendApi(z.object({
 ```
 
 This schema not only includes raw validation and type information but also encompasses descriptions and example values. We leverage these values to enhance the OpenAPI documentation and other automated documentation processes. Moreover, new developers will find helpful explanations and examples directly within the source code.
+
+## Other libraries
+
+If you have the need to use other schema and validation libraries, you will need to install some additional dependencies.  
+Please have a look at the official documentation of [TypeSchema.com](https://typeschema.com/#coverage) to find the adapter package.
+
+In addition to the TypeSchema adapter, you might need additional packages as well, to convert the validation schema into [JSON Schema](https://json-schema.org).
+
+Internally, PURISTA is using OpenAPI 3.1/JSON Schema to share interfaces between services.  
+As an example, the HTTP server is using the input schema definitions of services, provided in as OpenAPI 3.1/JSON schema.
+
+As an example, to use [Yup](https://yup.dev) schema, you will need to add:
+
+- `yup` itself
+- `@typeschema/yup`
+- `@sodaru/yup-to-json-schema`
