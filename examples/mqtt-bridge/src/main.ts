@@ -26,7 +26,7 @@ export const main = async () => {
   const stateStore = new DefaultStateStore({ logger })
 
   // create and init a webserver
-  const httpServerService = httpServerV1Service.getInstance(eventBridge, {
+  const httpServerService = await httpServerV1Service.getInstance(eventBridge, {
     serviceConfig: httpServerConfig,
   })
 
@@ -41,10 +41,10 @@ export const main = async () => {
   // start the webserver
   await httpServerService.start()
 
-  const userService = userV1Service.getInstance(eventBridge, { logger, stateStore })
+  const userService = await userV1Service.getInstance(eventBridge, { logger, stateStore })
   await userService.start()
 
-  const emailService = emailV1Service.getInstance(eventBridge, { logger, stateStore })
+  const emailService = await emailV1Service.getInstance(eventBridge, { logger, stateStore })
   await emailService.start()
 
   logger.info('application ready')

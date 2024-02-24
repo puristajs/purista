@@ -35,7 +35,7 @@ const main = async () => {
   const stateStore = new DaprStateStore({ logger, stateStoreName: 'local-state-store' })
   const configStore = new DaprConfigStore({ logger, configStoreName: 'local-config-store' })
 
-  const userService = userV1Service.getInstance(eventBridge, {
+  const userService = await userV1Service.getInstance(eventBridge, {
     spanProcessor,
     logger,
     secretStore,

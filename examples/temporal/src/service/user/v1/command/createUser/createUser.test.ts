@@ -16,7 +16,9 @@ describe('service User version 1 - command createUser', () => {
   })
 
   test('does not throw', async () => {
-    const service = userV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
+    const service = await userV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+      logger: getLoggerMock(sandbox).mock,
+    })
 
     const createUser = safeBind(createUserCommandBuilder.getCommandFunction(), service)
 

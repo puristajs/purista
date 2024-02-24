@@ -112,7 +112,7 @@ const main = async () => {
   await eventBridge.start()
 
   // set up the service
-  const theService = theServiceV1Service.getInstance(eventBridge, {
+  const theService = await theServiceV1Service.getInstance(eventBridge, {
     spanProcessor,
     configStore,
     secretStore,
@@ -222,7 +222,7 @@ const main = async () => {
   await eventBridge.start()
 
   // set up the service
-  const theService = theServiceV1Service.getInstance(eventBridge, {
+  const theService = await theServiceV1Service.getInstance(eventBridge, {
     spanProcessor,
     configStore,
     secretStore,

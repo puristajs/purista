@@ -17,11 +17,11 @@ export const main = async () => {
   await eventBridge.start()
 
   // add your service
-  const pingService = pingV1Service.getInstance(eventBridge)
+  const pingService = await pingV1Service.getInstance(eventBridge)
   await pingService.start()
 
   // initiate the webserver service as second step
-  const honoService = honoV1Service.getInstance(eventBridge, {
+  const honoService = await honoV1Service.getInstance(eventBridge, {
     logger,
     serviceConfig: { services: [pingService], enableDynamicRoutes: true },
   })
@@ -55,7 +55,7 @@ export const main = async () => {
   logger.info('Wait 10 secs until a new service starts')
   await new Promise((resolve) => setTimeout(() => resolve(true), 10_000))
 
-  const delayedService = delayV1ServiceBuilder.getInstance(eventBridge, { logger })
+  const delayedService = await delayV1ServiceBuilder.getInstance(eventBridge, { logger })
   await delayedService.start()
 }
 

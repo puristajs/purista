@@ -17,7 +17,7 @@ State stores are provided to services during instance creation.
 ```typescript
 const stateStore = new DaprStateStore({ stateStoreName: 'local-state-store' })
 
-const myService = myV1Service.getInstance(eventBridge, {
+const myService = await myV1Service.getInstance(eventBridge, {
     stateStore,
   })
 ```

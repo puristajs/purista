@@ -30,7 +30,7 @@ export const main = async () => {
   await eventBridge.start()
 
   // start the services
-  const userService = userV1Service.getInstance(eventBridge, {
+  const userService = await userV1Service.getInstance(eventBridge, {
     logger,
     spanProcessor,
     serviceConfig: { ...temporalConfig },
@@ -38,15 +38,15 @@ export const main = async () => {
   await userService.start()
   services.push(userService)
 
-  const emailService = emailV1Service.getInstance(eventBridge, { logger, spanProcessor })
+  const emailService = await emailV1Service.getInstance(eventBridge, { logger, spanProcessor })
   await emailService.start()
   services.push(emailService)
 
-  const accountService = accountV1Service.getInstance(eventBridge, { logger, spanProcessor })
+  const accountService = await accountV1Service.getInstance(eventBridge, { logger, spanProcessor })
   await accountService.start()
   services.push(accountService)
 
-  const cardService = cardV1Service.getInstance(eventBridge, { logger, spanProcessor })
+  const cardService = await cardV1Service.getInstance(eventBridge, { logger, spanProcessor })
   await cardService.start()
   services.push(cardService)
 
@@ -54,7 +54,7 @@ export const main = async () => {
 
   const port = 3000
 
-  const honoService = honoV1Service.getInstance(eventBridge, {
+  const honoService = await honoV1Service.getInstance(eventBridge, {
     logger,
     spanProcessor,
     serviceConfig: { services },
@@ -73,7 +73,7 @@ export const main = async () => {
   })
 
   // add initiation and start of your services here
-  // const yourService = yourServiceBuilder.getInstance(eventBridge)
+  // const yourService = await yourServiceBuilder.getInstance(eventBridge)
   // await yourService.start()
   // services.push(yourService)
 

@@ -8,13 +8,13 @@ export const main = async () => {
   const eventBridge = new DefaultEventBridge()
   await eventBridge.start()
   // initiate the webserver service as second step
-  const httpServerService = httpServerV1Service.getInstance(eventBridge)
+  const httpServerService = await httpServerV1Service.getInstance(eventBridge)
 
   // start the webserver
   await httpServerService.start()
 
   // add your service
-  const pingService = pingV1Service.getInstance(eventBridge)
+  const pingService = await pingV1Service.getInstance(eventBridge)
   await pingService.start()
 }
 

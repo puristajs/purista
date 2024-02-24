@@ -53,7 +53,7 @@ describe('@purista/mqttbridge', () => {
 
     theServiceServiceBuilder.addSubscriptionDefinition(subscriptionBuilder.getDefinition())
 
-    service = theServiceServiceBuilder.getInstance(eventbridge, { logger: getLoggerMock(sandbox).mock })
+    service = await theServiceServiceBuilder.getInstance(eventbridge, { logger: getLoggerMock(sandbox).mock })
     await service.start()
   })
 

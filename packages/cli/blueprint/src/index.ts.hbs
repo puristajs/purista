@@ -56,7 +56,7 @@ export const main = async () => {
 
   const port = 3000
 
-  const honoService = honoV1Service.getInstance(eventBridge, { logger, serviceConfig: { services, enableDynamicRoutes: true } })
+  const honoService = await honoV1Service.getInstance(eventBridge, { logger, serviceConfig: { services, enableDynamicRoutes: true } })
   honoService.app.get('/api', swaggerUI({ url: '/api/openapi.json' }))
   honoService.app.get('*', serveStatic({ root: './public' }))
   honoService.openApi.addServer({ url: `http://localhost:${port}`, description: 'the local server' })
@@ -72,7 +72,7 @@ export const main = async () => {
 
 
   // add initiation and start of your services here
-  // const yourService = yourServiceBuilder.getInstance(eventBridge)
+  // const yourService = await yourServiceBuilder.getInstance(eventBridge)
   // await yourService.start()
   // services.push(yourService)
 

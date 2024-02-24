@@ -17,7 +17,7 @@ describe('service Ping version 1 - subscription log', () => {
 
   test('does not throw', async () => {
     // create a service instance to be bind to the subscription function
-    const service = pingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+    const service = await pingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
       logger: getLoggerMock(sandbox).mock,
     })
 

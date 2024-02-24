@@ -16,7 +16,7 @@ describe('service Account version 1 - command createAccount', () => {
   })
 
   test('does not throw', async () => {
-    const service = accountV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+    const service = await accountV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
       logger: getLoggerMock(sandbox).mock,
     })
 

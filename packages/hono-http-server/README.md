@@ -23,11 +23,11 @@ export const main = async () => {
   await eventBridge.start()
 
   // add your service
-  const pingService = pingV1Service.getInstance(eventBridge)
+  const pingService = await pingV1Service.getInstance(eventBridge)
   await pingService.start()
 
   // initiate the webserver service as second step
-  const honoService = honoV1Service.getInstance(eventBridge, { serviceConfig: { services: [pingService] } })
+  const honoService = await honoV1Service.getInstance(eventBridge, { serviceConfig: { services: [pingService] } })
 
   honoService.app.use('*', compress())
   honoService.app.get('/api', swaggerUI({ url: '/api/openapi.json' }))

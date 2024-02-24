@@ -40,7 +40,7 @@ describe('httpserver integration test', () => {
     eventBridge = new DefaultEventBridge({ logger: getLoggerMock().mock })
     await eventBridge.start()
 
-    server = httpServerV1Service.getInstance(eventBridge, config)
+    server = await httpServerV1Service.getInstance(eventBridge, config)
     await server.start()
     await new Promise((resolve) => setTimeout(resolve, 0))
   })
@@ -76,7 +76,7 @@ describe('httpserver integration test', () => {
   describe('with services', () => {
     beforeAll(async () => {
       // set up the service
-      const theService = theServiceV1Service.getInstance(eventBridge, { logger: getLoggerMock().mock })
+      const theService = await theServiceV1Service.getInstance(eventBridge, { logger: getLoggerMock().mock })
       await theService.start()
 
       await new Promise((resolve) => setTimeout(resolve, 5000))

@@ -41,7 +41,7 @@ Config stores are provided to the services during instance creation.
 ```typescript
 const configStore = new DaprConfigStore({ configStoreName: 'local-config-store' })
 
-const myService = myV1Service.getInstance(eventBridge, {
+const myService = await myV1Service.getInstance(eventBridge, {
     configStore,
   })
 ```

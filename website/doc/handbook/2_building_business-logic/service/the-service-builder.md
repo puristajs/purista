@@ -145,7 +145,7 @@ The service builder is able to create a new instance of a service.
 The most minimal version is, to call the `getInstance` method of the service builder and to provide a event bridge instance as first parameter.
 
 ```typescript
-const myService = myServiceV1Service.getInstance(eventBridge)
+const myService = await myServiceV1Service.getInstance(eventBridge)
 ```
 
 At this point, we've created a service instance, but the instance is not fully connected to the event bridge and has not announced the existence of the commands and subscriptions.
@@ -153,7 +153,7 @@ At this point, we've created a service instance, but the instance is not fully c
 We need to start the service, to get a fully working service instance:
 
 ```typescript
-const myService = myServiceV1Service.getInstance(eventBridge)
+const myService = await myServiceV1Service.getInstance(eventBridge)
 await myService.start() // [!code ++]
 ```
 

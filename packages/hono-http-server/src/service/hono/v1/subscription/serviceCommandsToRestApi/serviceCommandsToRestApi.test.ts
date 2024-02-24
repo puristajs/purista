@@ -23,7 +23,7 @@ describe('service Hono version 1 - subscription serviceCommandsToRestApi', () =>
 
   test('does not throw', async () => {
     // create a service instance to be bind to the subscription function
-    const service = honoV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+    const service = await honoV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
       logger: getLoggerMock(sandbox).mock,
     })
 

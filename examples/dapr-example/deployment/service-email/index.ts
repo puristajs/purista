@@ -39,7 +39,7 @@ const main = async () => {
     enableSet: true,
   })
 
-  const emailService = emailV1Service.getInstance(eventBridge, {
+  const emailService = await emailV1Service.getInstance(eventBridge, {
     spanProcessor,
     logger,
     secretStore,

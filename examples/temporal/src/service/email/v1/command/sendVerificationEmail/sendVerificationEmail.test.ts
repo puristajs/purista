@@ -16,7 +16,7 @@ describe('service Email version 1 - command sendVerificationEmail', () => {
   })
 
   test('does not throw', async () => {
-    const service = emailV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+    const service = await emailV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
       logger: getLoggerMock(sandbox).mock,
     })
 
