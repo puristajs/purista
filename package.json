@@ -7,7 +7,7 @@
     "build": "npm run build --workspaces --if-present",
     "lint": "eslint . --ext .ts,.json  --cache . --fix",
     "lint:fix": "eslint . --ext .ts,.json  --cache .",
-    "test": "npm run test:unit && npm run test:integration",
+    "test": "vitest -c vite.config.all.ts",
     "test:unit": "vitest -c vite.config.ts",
     "test:integration": "vitest -c vite.config.integration.ts",
     "update:doc": "npm run gitclean && typedoc && git add --all && git commit -S -am \"doc: update api documentation\" && git-cliff > CHANGELOG.md && git commit -am \"doc: update CHANGELOG\" && npm run build:doc -w website",

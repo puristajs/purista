@@ -5,6 +5,7 @@ export default defineConfig({
     isolate: true,
     globals: true,
     watch: false,
+    environment: 'node',
     hookTimeout: 30000,
     coverage: {
       enabled: false,
