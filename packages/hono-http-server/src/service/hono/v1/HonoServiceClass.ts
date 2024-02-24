@@ -272,8 +272,7 @@ export class HonoServiceClass<
    */
   registerService(...services: Service[]) {
     services.forEach((service) => {
-      const { commands } = service.getDefinitionsResolved()
-      commands.forEach((command) => {
+      service.commandDefinitionList.forEach((command) => {
         this.addEndpoint(command.metadata, { ...service.serviceInfo, serviceTarget: command.commandName })
       })
     })
@@ -302,11 +301,11 @@ export class HonoServiceClass<
     const method = expose.http.method.toLowerCase() as 'put' | 'post' | 'patch' | 'get' | 'delete'
     const path = posix.join(this.config.apiMountPath, `v${service.serviceVersion}`, expose.http.path)
 
-    const requestContentType = expose.contentTypeRequest || 'application/json'
-    const requestEncodingType = expose.contentEncodingRequest || 'utf-8'
+    const requestContentType = expose.contentTypeRequest ?? 'application/json'
+    const requestEncodingType = expose.contentEncodingRequest ?? 'utf-8'
 
-    const responseContentType = expose.contentTypeResponse || 'application/json'
-    const responseEncodingType = expose.contentEncodingResponse || 'utf-8'
+    const responseContentType = expose.contentTypeResponse ?? 'application/json'
+    const responseEncodingType = expose.contentEncodingResponse ?? 'utf-8'
 
     const protectHandler = safeBind(this.config.protectHandler, this)
 
@@ -368,8 +367,8 @@ export class HonoServiceClass<
               },
               principalId: c.get('principalId'),
               tenantId: c.get('tenantId'),
-              contentType: expose.contentTypeRequest || 'application/json',
-              contentEncoding: expose.contentEncodingRequest || 'utf-8',
+              contentType: expose.contentTypeRequest ?? 'application/json',
+              contentEncoding: expose.contentEncodingRequest ?? 'utf-8',
             },
             `${method}:${path}`,
           )

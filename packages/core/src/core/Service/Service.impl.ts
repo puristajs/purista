@@ -78,7 +78,7 @@ import { subscriptionTransformInput } from './subscriptionTransformInput.impl.js
  *
  * @group Service
  */
-export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass implements ServiceClass<ConfigType> {
+export class Service<ConfigType = unknown> extends ServiceBaseClass implements ServiceClass<ConfigType> {
   protected subscriptions = new Map<string, SubscriptionDefinition>()
   protected commands = new Map<string, CommandDefinition>()
 
@@ -94,9 +94,9 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
       info: config.info,
       eventBridge: config.eventBridge,
       spanProcessor: config.spanProcessor,
-      secretStore: config.secretStore || new DefaultSecretStore(),
-      configStore: config.configStore || new DefaultConfigStore(),
-      stateStore: config.stateStore || new DefaultStateStore(),
+      secretStore: config.secretStore ?? new DefaultSecretStore(),
+      configStore: config.configStore ?? new DefaultConfigStore(),
+      stateStore: config.stateStore ?? new DefaultStateStore(),
       configSchema: config.configSchema,
     })
 
@@ -156,7 +156,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
     subscriptions: SubscriptionDefinitionListResolved<any>,
   ) {
     return this.startActiveSpan('purista.initializeEventbridgeConnect', {}, undefined, async (span) => {
-      const isEventBridgeReady = this.eventBridge.isHealthy()
+      const isEventBridgeReady = await this.eventBridge.isHealthy()
 
       if (!isEventBridgeReady) {
         const err = new UnhandledError(StatusCode.ServiceUnavailable, 'eventbridge not healthy')
@@ -192,7 +192,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
         {
           serviceName: this.info.serviceName,
           serviceVersion: this.info.serviceVersion,
-          serviceTarget: target || '',
+          serviceTarget: target ?? '',
           instanceId: this.eventBridge.instanceId,
         },
         { payload },
@@ -599,7 +599,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
 
     const context = deserializeOtp(this.logger, message.otp)
 
-    return this.startActiveSpan(command?.commandName || 'purista.executeCommand', {}, context, async (span) => {
+    return this.startActiveSpan(command?.commandName ?? 'purista.executeCommand', {}, context, async (span) => {
       const traceId = message.traceId
 
       const logger = this.logger.getChildLogger({
@@ -676,7 +676,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           await this.startActiveSpan(command.commandName + '.afterGuardHooks', {}, undefined, async () => {
             const guardsPromises: Promise<void>[] = []
 
-            for (const [name, hook] of Object.entries(guards || {})) {
+            for (const [name, hook] of Object.entries(guards ?? {})) {
               const context: CommandFunctionContext = {
                 message,
                 emit: this.getEmitFunction(
@@ -899,7 +899,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
             await this.startActiveSpan(subscription.subscriptionName + '.afterGuardHooks', {}, undefined, async () => {
               const guardsPromises: Promise<void>[] = []
 
-              for (const [name, hook] of Object.entries(guards || {})) {
+              for (const [name, hook] of Object.entries(guards ?? {})) {
                 const context: SubscriptionFunctionContext = {
                   message,
                   emit: this.getEmitFunction(
@@ -976,8 +976,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
                 subSpan.addEvent(subscription.emitEventName as string)
                 const resultMsg: Omit<CustomMessage, 'id' | 'timestamp'> = {
                   messageType: EBMessageType.CustomMessage,
-                  contentType: subscription.metadata.expose.contentTypeResponse || 'application/json',
-                  contentEncoding: subscription.metadata.expose.contentEncodingResponse || 'utf-8',
+                  contentType: subscription.metadata.expose.contentTypeResponse ?? 'application/json',
+                  contentEncoding: subscription.metadata.expose.contentEncodingResponse ?? 'utf-8',
                   sender: {
                     serviceName: this.serviceInfo.serviceName,
                     serviceVersion: this.serviceInfo.serviceVersion,
