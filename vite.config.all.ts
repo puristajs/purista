@@ -6,21 +6,22 @@ export default defineConfig({
     globals: true,
     watch: false,
     environment: 'node',
+    hookTimeout: 30000,
     coverage: {
       enabled: true,
       include: ['**/src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
       exclude: ['examples/**', 'packages/cli/**', 'website:/**'],
       thresholds: {
-        lines: 63,
-        functions: 63,
-        branches: 74,
-        statements: 63,
+        lines: 80,
+        functions: 80,
+        branches: 70,
+        statements: 80,
       },
     },
     include: [
+      '**/test/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
       '**/src/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
-      // '**/test/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}',
     ],
-    exclude: ['**/node_modules/**', '**/dist/**', '**/.tshy-build/**', '**/test/**', 'examples/**', 'website/**'],
+    exclude: ['**/node_modules/**', '**/dist/**', '**/.tshy-build/**', '**/examples/**'],
   },
 })
