@@ -1,3 +1,4 @@
+import type { Service } from '@purista/core'
 import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock } from '@purista/core'
 import { createSandbox } from 'sinon'
 import type { StartedTestContainer } from 'testcontainers'
@@ -25,7 +26,7 @@ describe('@purista/amqpbridge', () => {
 
   theServiceServiceBuilder.addSubscriptionDefinition(subscriptionBuilder.getDefinition())
 
-  const service = await theServiceServiceBuilder.getInstance(eventbridge, { logger: getLoggerMock(sandbox).mock })
+  let service: Service
 
   beforeAll(async () => {
     container = await new GenericContainer('rabbitmq:alpine')
@@ -39,6 +40,7 @@ describe('@purista/amqpbridge', () => {
 
     await eventbridge.start()
 
+    service = await theServiceServiceBuilder.getInstance(eventbridge, { logger: getLoggerMock(sandbox).mock })
     await service.start()
   })
 
