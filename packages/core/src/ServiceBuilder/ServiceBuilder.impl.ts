@@ -281,11 +281,13 @@ export class ServiceBuilder<
   /**
    * A simple test helper, which ensures, that there ar no duplicate names used.
    */
-  async validateServiceConfig() {
+  async testServiceSetup() {
     const { subscriptions, commands } = await this.resolveDefinitions()
 
     this.validateCommands(commands)
     this.validateSubscriptions(subscriptions)
+
+    return true
   }
 
   protected validateCommands(commandDefinitions: CommandDefinitionListResolved<any>) {
