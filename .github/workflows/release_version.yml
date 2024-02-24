@@ -67,7 +67,7 @@ jobs:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Commit version
         run: |
-          git push
+          git push origin --tags --follow-tags
       - name: Publish
         run: npm publish --access public --workspaces
         env:
