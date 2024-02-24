@@ -11,21 +11,29 @@
     "plugin:vitest/recommended",
     "plugin:import-esm/recommended"
   ],
+  "overrides": [{
+    "files":["*.ts"],
+    "rules": {
+      "@typescript-eslint/prefer-nullish-coalescing": "error"
+    }
+  }
+
+  ],
   "parser":"@typescript-eslint/parser",
   "parserOptions":{
     "ecmaVersion":"latest",
     "sourceType":"module",
-    "extraFileExtensions":[".json"]
+    "project": "tsconfig.json"
   },
   "plugins":[
     "import-esm",
     "vitest",
-    "@typescript-eslint",
     "simple-import-sort",
     "import",
-    "json"
+    "json",
+    "@typescript-eslint"
   ],
-  "ignorePatterns":["**/dist"],
+  "ignorePatterns":["**/dist","website/doc/public/**"],
   "rules":{
     "simple-import-sort/imports":"error",
     "simple-import-sort/exports":"error",
