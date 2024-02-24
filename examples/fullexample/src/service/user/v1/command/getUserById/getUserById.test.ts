@@ -18,7 +18,9 @@ describe('service User version 1 - command getUserById', () => {
   })
 
   test('returns a user', async () => {
-    const service = userV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
+    const service = await userV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+      logger: getLoggerMock(sandbox).mock,
+    })
 
     const getUserById = safeBind(getUserByIdCommandBuilder.getCommandFunction(), service)
 
@@ -45,7 +47,9 @@ describe('service User version 1 - command getUserById', () => {
   })
 
   test('throws if user can not be found', async () => {
-    const service = userV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
+    const service = await userV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+      logger: getLoggerMock(sandbox).mock,
+    })
 
     const getUserById = safeBind(getUserByIdCommandBuilder.getCommandFunction(), service)
 

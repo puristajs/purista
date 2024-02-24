@@ -16,7 +16,9 @@ describe('service Ping version 1 - command paramTest', () => {
   })
 
   test('does not throw', async () => {
-    const service = pingV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
+    const service = await pingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+      logger: getLoggerMock(sandbox).mock,
+    })
 
     const paramTest = safeBind(paramTestCommandBuilder.getCommandFunction(), service)
 

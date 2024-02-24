@@ -45,7 +45,7 @@ const main = async() => {
     },
   }
 
-  const httpServerService = httpServerV1Service.getInstance(eventBridge, {
+  const httpServerService = await httpServerV1Service.getInstance(eventBridge, {
     serviceConfig: httpServerConfig,
   })
 

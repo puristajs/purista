@@ -22,7 +22,7 @@ describe('getHttpServer', () => {
     eventBridge = new DefaultEventBridge({ logger: getLoggerMock().mock })
 
     // set up the service
-    const theService = theServiceV1Service.getInstance(eventBridge, { logger: getLoggerMock().mock })
+    const theService = await theServiceV1Service.getInstance(eventBridge, { logger: getLoggerMock().mock })
     await theService.start()
 
     app = getHttpServer({

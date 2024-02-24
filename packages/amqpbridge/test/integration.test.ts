@@ -25,7 +25,7 @@ describe('@purista/amqpbridge', () => {
 
   theServiceServiceBuilder.addSubscriptionDefinition(subscriptionBuilder.getDefinition())
 
-  const service = theServiceServiceBuilder.getInstance(eventbridge, { logger: getLoggerMock(sandbox).mock })
+  const service = await theServiceServiceBuilder.getInstance(eventbridge, { logger: getLoggerMock(sandbox).mock })
 
   beforeAll(async () => {
     container = await new GenericContainer('rabbitmq:alpine')

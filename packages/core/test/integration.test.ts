@@ -176,7 +176,7 @@ describe('integration test', () => {
       const eventBridgeMock = getEventBridgeMock(sandbox)
       const serviceLogger = getLoggerMock(sandbox)
 
-      const service = serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
+      const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
 
       const commandOne = safeBind(commandOneDefinitionBuilder.getCommandFunction(), service)
 
@@ -203,7 +203,7 @@ describe('integration test', () => {
       const eventBridgeMock = getEventBridgeMock(sandbox)
       const serviceLogger = getLoggerMock(sandbox)
 
-      const service = serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
+      const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
 
       const transformInput = commandOneDefinitionBuilder.getTransformInputFunction()
       if (!transformInput) {
@@ -230,7 +230,7 @@ describe('integration test', () => {
       const eventBridgeMock = getEventBridgeMock(sandbox)
       const serviceLogger = getLoggerMock(sandbox)
 
-      const service = serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
+      const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
 
       const transformOutput = commandOneDefinitionBuilder.getTransformOutputFunction()
       if (!transformOutput) {
@@ -317,7 +317,7 @@ describe('integration test', () => {
       const eventBridgeMock = getEventBridgeMock(sandbox)
       const serviceLogger = getLoggerMock(sandbox)
 
-      const service = serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
+      const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
 
       const subscriptionOne = safeBind(subscriptionOneBuilder.getSubscriptionFunction(), service)
 
@@ -344,7 +344,7 @@ describe('integration test', () => {
       const eventBridgeMock = getEventBridgeMock(sandbox)
       const serviceLogger = getLoggerMock(sandbox)
 
-      const service = serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
+      const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
 
       const transformInput = subscriptionOneBuilder.getTransformInputFunction()
       if (!transformInput) {
@@ -380,7 +380,7 @@ describe('integration test', () => {
       const eventBridgeMock = getEventBridgeMock(sandbox)
       const serviceLogger = getLoggerMock(sandbox)
 
-      const service = serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
+      const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
 
       const transformOutput = subscriptionOneBuilder.getTransformOutputFunction()
       if (!transformOutput) {
@@ -445,10 +445,10 @@ describe('integration test', () => {
     const eventBridge = new DefaultEventBridge({ logger: logger.mock })
     await eventBridge.start()
 
-    const serviceOne = serviceOneBuilder.getInstance(eventBridge, { logger: getLoggerMock().mock })
+    const serviceOne = await serviceOneBuilder.getInstance(eventBridge, { logger: getLoggerMock().mock })
     await serviceOne.start()
 
-    const serviceTwo = serviceTwoBuilder.getInstance(eventBridge, { logger: getLoggerMock().mock })
+    const serviceTwo = await serviceTwoBuilder.getInstance(eventBridge, { logger: getLoggerMock().mock })
     await serviceTwo.start()
 
     const message = getCommandMessageMock({

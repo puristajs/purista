@@ -39,7 +39,7 @@ In the main `index.ts`, where we initiate the service instances, we need to prov
 ```typescript
 import temporalConfig from './config/temporalConfig.js'
 
-const userService = userV1Service.getInstance(eventBridge, {
+const userService = await userV1Service.getInstance(eventBridge, {
     serviceConfig: { ...temporalConfig },
   })
 ```

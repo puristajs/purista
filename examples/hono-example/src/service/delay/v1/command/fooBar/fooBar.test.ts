@@ -16,7 +16,7 @@ describe('service Delay version 1 - command fooBar', () => {
   })
 
   test('does not throw', async () => {
-    const service = delayV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+    const service = await delayV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
       logger: getLoggerMock(sandbox).mock,
     })
 

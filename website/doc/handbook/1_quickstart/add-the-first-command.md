@@ -203,7 +203,7 @@ describe('service User version 1 - command signUp', () => {
   })
 
   test('does not throw', async () => {
-    const service = userV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
+    const service = await userV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
 
     const signUp = signUpCommandBuilder.getCommandFunction().bind(service)
 

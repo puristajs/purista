@@ -14,10 +14,10 @@
  * await eventBridge.start()
  *
  * // add your service
- * const pingService = pingV1Service.getInstance(eventBridge)
+ * const pingService = await pingV1Service.getInstance(eventBridge)
  * await pingService.start()
  *
- * const honoService = honoV1Service.getInstance(eventBridge, {
+ * const honoService = await honoV1Service.getInstance(eventBridge, {
  *   serviceConfig: {
  *     services: [pingService]
  *   }

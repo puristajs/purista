@@ -21,7 +21,7 @@ describe('ServiceBuilder', () => {
     sandbox.reset()
   })
 
-  it('can set a service config schema and default config', () => {
+  it('can set a service config schema and default config', async () => {
     const service = new ServiceBuilder(serviceInfo)
 
     const configSchema = z.object({
@@ -38,13 +38,13 @@ describe('ServiceBuilder', () => {
     const eventBridge = getEventBridgeMock(sandbox)
     const logger = getLoggerMock(sandbox)
 
-    const serviceInstanceWithDefaultConfig = serviceWithDefaultConfig.getInstance(eventBridge.mock, {
+    const serviceInstanceWithDefaultConfig = await serviceWithDefaultConfig.getInstance(eventBridge.mock, {
       logger: logger.mock,
     })
 
     expect(serviceInstanceWithDefaultConfig.config.host).toEqual(defaultConfig.host)
 
-    const serviceInstanceWithCustomConfig = serviceWithDefaultConfig.getInstance(eventBridge.mock, {
+    const serviceInstanceWithCustomConfig = await serviceWithDefaultConfig.getInstance(eventBridge.mock, {
       logger: logger.mock,
       serviceConfig: { host: 'remote' },
     })
@@ -64,7 +64,7 @@ describe('ServiceBuilder', () => {
     )
   })
 
-  it('can use a custom service class', () => {
+  it('can use a custom service class', async () => {
     class CustomClass extends Service<{}> {
       customFunction() {
         return 'custom'
@@ -76,7 +76,7 @@ describe('ServiceBuilder', () => {
     const eventBridge = getEventBridgeMock(sandbox)
     const logger = getLoggerMock(sandbox)
 
-    const serviceInstance = service.getInstance(eventBridge.mock, { logger: logger.mock })
+    const serviceInstance = await service.getInstance(eventBridge.mock, { logger: logger.mock })
 
     expect(serviceInstance.customFunction()).toBe('custom')
     expect(serviceInstance).toBeInstanceOf(CustomClass)

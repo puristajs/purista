@@ -44,7 +44,7 @@ describe('httpserver integration test', () => {
     eventBridge = new DefaultEventBridge({ logger: getLoggerMock().mock })
     await eventBridge.start()
 
-    server = honoV1Service.getInstance(eventBridge, config)
+    server = await honoV1Service.getInstance(eventBridge, config)
     server.app.get('/api', swaggerUI({ url: '/api/openapi.json' }))
     server.setProtectMiddleware(async function (_c, next) {
       await next()
@@ -87,7 +87,7 @@ describe('httpserver integration test', () => {
   describe('with dynamic routes enabled', () => {
     beforeAll(async () => {
       // set up the service
-      const theService = theServiceV1Service.getInstance(eventBridge, { logger: getLoggerMock().mock })
+      const theService = await theServiceV1Service.getInstance(eventBridge, { logger: getLoggerMock().mock })
       await theService.start()
 
       await new Promise((resolve) => setTimeout(resolve, 5000))

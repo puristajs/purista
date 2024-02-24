@@ -62,7 +62,7 @@ const main = async () => {
   })
 
   // create your service instance
-  const userService = userV1Service.getInstance(eventBridge)
+  const userService = await userV1Service.getInstance(eventBridge)
   // start your service instance
   await userService.start()
 
@@ -97,7 +97,7 @@ const main = async () => {
   })
 
   // create your service instance
-  const userService = userV1Service.getInstance(eventBridge)
+  const userService = await userV1Service.getInstance(eventBridge)
   // start your service instance
   await userService.start()
 
@@ -134,7 +134,7 @@ const main = async () => {
   })
 
   // create your service instance
-  const userService = userV1Service.getInstance(eventBridge)
+  const userService = await userV1Service.getInstance(eventBridge)
   // start your service instance
   await userService.start()
 

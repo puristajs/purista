@@ -18,7 +18,7 @@ describe('service Email version 1 - subscription sendWelcomeEmail', () => {
 
   test('sends an email', async () => {
     // create a service instance to be bind to the subscription function
-    const service = emailV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+    const service = await emailV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
       logger: getLoggerMock(sandbox).mock,
     })
 

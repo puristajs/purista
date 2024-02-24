@@ -26,7 +26,7 @@ export const main = async (getProcessor: () => SpanProcessor) => {
   await eventBridge.start()
 
   // create and init a webserver
-  const httpServerService = httpServerV1Service.getInstance(eventBridge, {
+  const httpServerService = await httpServerV1Service.getInstance(eventBridge, {
     serviceConfig: httpServerConfig,
     spanProcessor,
   })
@@ -57,10 +57,20 @@ export const main = async (getProcessor: () => SpanProcessor) => {
     },
   })
 
-  const userService = userV1Service.getInstance(eventBridge, { spanProcessor, stateStore, configStore, secretStore })
+  const userService = await userV1Service.getInstance(eventBridge, {
+    spanProcessor,
+    stateStore,
+    configStore,
+    secretStore,
+  })
   await userService.start()
 
-  const emailService = emailV1Service.getInstance(eventBridge, { spanProcessor, stateStore, configStore, secretStore })
+  const emailService = await emailV1Service.getInstance(eventBridge, {
+    spanProcessor,
+    stateStore,
+    configStore,
+    secretStore,
+  })
   await emailService.start()
 
   logger.info('application ready')

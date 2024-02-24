@@ -16,7 +16,9 @@ describe('service Ping version 1 - command foo', () => {
   })
 
   test('does not throw', async () => {
-    const service = pingV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
+    const service = await pingV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+      logger: getLoggerMock(sandbox).mock,
+    })
 
     const foo = safeBind(fooCommandBuilder.getCommandFunction(), service)
 

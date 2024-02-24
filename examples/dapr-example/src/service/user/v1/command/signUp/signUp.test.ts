@@ -17,7 +17,9 @@ describe('service User version 1 - command signUp', () => {
   })
 
   test('can register a new user', async () => {
-    const service = userV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
+    const service = await userV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+      logger: getLoggerMock(sandbox).mock,
+    })
 
     const signUp = safeBind(signUpCommandBuilder.getCommandFunction(), service)
 
@@ -40,7 +42,9 @@ describe('service User version 1 - command signUp', () => {
   })
 
   test('throws when a user with same email exist', async () => {
-    const service = userV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
+    const service = await userV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+      logger: getLoggerMock(sandbox).mock,
+    })
 
     const signUp = safeBind(signUpCommandBuilder.getCommandFunction(), service)
 
