@@ -20,7 +20,7 @@ import type {
   SubscriptionDefinitionList,
   SubscriptionDefinitionListResolved,
 } from '../core/index.js'
-import { initLogger, Service } from '../core/index.js'
+import { initLogger, Service, StatusCode, UnhandledError } from '../core/index.js'
 import { initDefaultConfigStore } from '../DefaultConfigStore/index.js'
 import { initDefaultSecretStore } from '../DefaultSecretStore/index.js'
 import { initDefaultStateStore } from '../DefaultStateStore/index.js'
@@ -50,6 +50,8 @@ export class ServiceBuilder<
 
   private configSchema?: Schema
   private defaultConfig?: Complete<ConfigType>
+
+  private definitionsResolved: boolean = false
 
   instance?: ServiceClassType
   SClass: Newable<any, ConfigType> = Service
@@ -85,6 +87,12 @@ export class ServiceBuilder<
    * @returns The service builder
    */
   addCommandDefinition(...commands: CommandDefinitionList<ServiceClassType>) {
+    if (this.definitionsResolved) {
+      throw new UnhandledError(
+        StatusCode.InternalServerError,
+        'You can not add commands after resolveDefinitions is called.',
+      )
+    }
     this.commandDefinitionList.push(...commands)
     return this as ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType>
   }
@@ -95,14 +103,35 @@ export class ServiceBuilder<
    * @returns The service builder
    */
   addSubscriptionDefinition(...subscription: SubscriptionDefinitionList<ServiceClassType>) {
+    if (this.definitionsResolved) {
+      throw new UnhandledError(
+        StatusCode.InternalServerError,
+        'You can not add subscriptions after resolveDefinitions is called.',
+      )
+    }
     this.subscriptionDefinitionList.push(...subscription)
     return this as ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType>
   }
 
-  async resolveDefinitions() {
+  /**
+   *
+   * Resolves the command and subscription definitions
+   */
+  public async resolveDefinitions() {
+    if (this.definitionsResolved) {
+      return {
+        commands: this.commandDefinitionListResolved,
+        subscriptions: this.subscriptionDefinitionListResolved,
+      }
+    }
+
     this.commandDefinitionListResolved = await Promise.all(this.commandDefinitionList)
     this.subscriptionDefinitionListResolved = await Promise.all(this.subscriptionDefinitionList)
 
+    this.subscriptionDefinitionList = []
+    this.commandDefinitionList = []
+
+    this.definitionsResolved = true
     return {
       commands: this.commandDefinitionListResolved,
       subscriptions: this.subscriptionDefinitionListResolved,
@@ -172,18 +201,15 @@ export class ServiceBuilder<
         logger,
       })
 
-    const [commandDefinitionList, subscriptionDefinitionList] = await Promise.all([
-      Promise.all(this.commandDefinitionList),
-      Promise.all(this.subscriptionDefinitionList),
-    ])
+    const { commands, subscriptions } = await this.resolveDefinitions()
 
     const C = this.getCustomClass()
     this.instance = new C({
       logger,
       eventBridge,
       info: this.info,
-      commandDefinitionList,
-      subscriptionDefinitionList,
+      commandDefinitionList: commands,
+      subscriptionDefinitionList: subscriptions,
       config,
       spanProcessor: options.spanProcessor,
       secretStore,
@@ -230,14 +256,26 @@ export class ServiceBuilder<
    * @returns the definition of registered commands
    */
   getCommandDefinitions() {
-    return this.commandDefinitionList
+    if (!this.resolveDefinitions) {
+      throw new UnhandledError(
+        StatusCode.InternalServerError,
+        'Definitions not resolve. Please call resolveDefinitions() before using getCommandDefinitions',
+      )
+    }
+    return this.commandDefinitionListResolved
   }
 
   /**
    * @returns the definition of registered subscriptions
    */
   getSubscriptionDefinitions() {
-    return this.subscriptionDefinitionList
+    if (!this.resolveDefinitions) {
+      throw new UnhandledError(
+        StatusCode.InternalServerError,
+        'Definitions not resolve. Please call resolveDefinitions() before using getCommandDefinitions',
+      )
+    }
+    return this.subscriptionDefinitionListResolved
   }
 
   /**
