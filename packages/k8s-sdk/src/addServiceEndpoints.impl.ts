@@ -36,8 +36,7 @@ export const addServiceEndpoints = (
 
   const exposedServices = Array.isArray(services) ? services : [services]
   exposedServices.forEach((service) => {
-    const { commands } = service.getDefinitionsResolved()
-    commands.forEach((definition) => {
+    service.commandDefinitionList.forEach((definition) => {
       const metadata = definition.metadata as HttpExposedServiceMeta
       if (!isHttpExposedServiceMeta(metadata)) {
         logger.debug('...skip exposing function')
@@ -59,7 +58,7 @@ export const addServiceEndpoints = (
             { kind: SpanKind.SERVER },
             parentContext,
             async (span) => {
-              const hostname = process.env.HOSTNAME || 'unknown'
+              const hostname = process.env.HOSTNAME ?? 'unknown'
 
               span.setAttribute(SemanticAttributes.HTTP_URL, c.req.url || '')
               span.setAttribute(SemanticAttributes.HTTP_METHOD, c.req.method || '')
@@ -89,8 +88,8 @@ export const addServiceEndpoints = (
                   messageType: EBMessageType.Command,
                   correlationId: '',
                   timestamp: Date.now(),
-                  contentType: definition.metadata.expose.contentTypeResponse || 'application/json',
-                  contentEncoding: definition.metadata.expose.contentEncodingResponse || 'utf-8',
+                  contentType: definition.metadata.expose.contentTypeResponse ?? 'application/json',
+                  contentEncoding: definition.metadata.expose.contentEncodingResponse ?? 'utf-8',
                   otp: serializeOtp(),
                   receiver: {
                     serviceName: service.info.serviceName,
@@ -128,8 +127,8 @@ export const addServiceEndpoints = (
                 }
 
                 const header: Record<string, string> = {
-                  'content-type': `${metadata.expose.contentTypeResponse || 'application/json'}; charset=${
-                    metadata.expose.contentEncodingResponse || 'utf-8'
+                  'content-type': `${metadata.expose.contentTypeResponse ?? 'application/json'}; charset=${
+                    metadata.expose.contentEncodingResponse ?? 'utf-8'
                   }`,
                 }
 
@@ -170,8 +169,8 @@ export const addServiceEndpoints = (
                 span.recordException(err)
 
                 const header: Record<string, string> = {
-                  'content-type': `${metadata.expose.contentTypeResponse || 'application/json'}; charset=${
-                    metadata.expose.contentEncodingResponse || 'utf-8'
+                  'content-type': `${metadata.expose.contentTypeResponse ?? 'application/json'}; charset=${
+                    metadata.expose.contentEncodingResponse ?? 'utf-8'
                   }`,
                 }
 
