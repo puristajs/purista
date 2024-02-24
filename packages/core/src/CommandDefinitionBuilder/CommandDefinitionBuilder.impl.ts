@@ -764,6 +764,12 @@ export class CommandDefinitionBuilder<
       shared: true,
     }
 
+    const [inputPayload, parameter, outputPayload] = await Promise.all([
+      validationToSchema(inputPayloadSchema),
+      validationToSchema(inputParameterSchema),
+      validationToSchema(outputPayloadSchema),
+    ])
+
     const definition: Complete<
       CommandDefinition<
         ServiceClassType,
@@ -787,9 +793,9 @@ export class CommandDefinitionBuilder<
           contentEncodingRequest: this.inputContentEncoding ?? 'utf-8',
           contentTypeResponse: this.outputContentType ?? 'application/json',
           contentEncodingResponse: this.outputContentEncoding ?? 'utf-8',
-          inputPayload: await validationToSchema(inputPayloadSchema),
-          parameter: await validationToSchema(inputParameterSchema),
-          outputPayload: await validationToSchema(outputPayloadSchema),
+          inputPayload,
+          parameter,
+          outputPayload,
           deprecated: this.deprecated,
         },
       },
