@@ -17,6 +17,7 @@ jobs:
   build:
     environment: publish_version
     runs-on: ubuntu-latest
+    permissions: write-all
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -49,25 +50,45 @@ jobs:
         run: |
           npm version ${{ inputs.version }} --no-git-tag-version
           npm version ${{ inputs.version }} --no-git-tag-version --workspaces
-          scripts/commitVersion.sh
           git config --global user.name '${{ vars.CI_COMMIT_AUTHOR}}'
           git config --global user.email 'sebastianwessel@users.noreply.github.com'
           git config --global push.followTags true
+          ./scripts/commitVersion.sh
           echo New version:
-          echo $(node -p -e "require('./package.json').version")
+          new_version=$(node -p -e "require('./package.json').version")
+          new_branch=purista_v$new_version
+          git checkout -b $new_branch
+          git push origin -u $new_branch
+          echo "new_version=$new_version" >> $GITHUB_OUTPUT
+          echo "new_branch=$new_branch" >> $GITHUB_OUTPUT
         id: bump_version
-      - name: Add Tag
-        run: |
-          git tag ${{ steps.bump_version }}
       - name: Dry run publish
         run: |
           npm publish --access public --dry-run --workspaces
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Commit version
+      - name: Commit version bump
+        uses: planetscale/ghcommit-action@v0.1.6
+        with:
+          commit_message: 'chore: bump ${{ inputs.version }} version to v${{ steps.bump_version.outputs.new_version }}'
+          repo: ${{ github.repository }}
+          branch: ${{ steps.bump_version.outputs.new_branch }}
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Add Tag
         run: |
-          git push
-      - name: Publish
+          git restore .
+          git clean -f
+          git pull
+          git tag -a "v${{ steps.bump_version.outputs.new_version }}" -m "v${{ steps.bump_version.outputs.new_version }}"
+          git push origin --follow-tags
+      - name: create pull request
+        run: |
+          gh pr create -B master -H ${{ steps.bump_version.outputs.new_branch }} --title 'Merge ${{ steps.bump_version.outputs.new_branch }} into master' --body 'Created by Github action'
+          gh pr merge ${{ steps.bump_version.outputs.new_branch }} --rebase --auto
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Publish to NPM
         run: npm publish --access public --workspaces
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
