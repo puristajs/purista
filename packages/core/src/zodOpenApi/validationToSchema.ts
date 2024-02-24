@@ -14,16 +14,12 @@ export const validationToSchema = async <T extends Schema>(schema?: T): Promise<
     return generateSchema(schema)
   }
   try {
-    const { default: convertJsonToOpenApi } = await import('@openapi-contrib/json-schema-to-openapi-schema')
     const jsonSchema = await toJSONSchema(schema)
-
-    const openApiSchema = await (convertJsonToOpenApi as any)(jsonSchema)
-
-    return openApiSchema as unknown as SchemaObject
+    // nothing more needed as we use OpenAPI 3.1 which is valid JSON Schema
+    return jsonSchema as SchemaObject
   } catch (error) {
     console.error(error)
     console.error('Did you installed peer dependencies?')
-    console.error('requires: @openapi-contrib/json-schema-to-openapi-schema')
     console.error('requires: @typeschema/[YOUR_SCHEMA_LIB]')
   }
 }
