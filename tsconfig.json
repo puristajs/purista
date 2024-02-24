@@ -2,6 +2,7 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "Node 18",
   "compilerOptions": {
+    "strictNullChecks": true,
     "outDir": "dist",
     "strict": true,
     "module": "es2022",
@@ -30,5 +31,5 @@
   "exclude": [
     "node_modules",
     "dist"
-  ],
+  ]
 }

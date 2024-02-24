@@ -5,8 +5,8 @@
   "scripts": {
     "start": "npm run dev -w examples/fullexample",
     "build": "npm run build --workspaces --if-present",
-    "lint": "eslint . --ext .ts,.json  --cache . --fix",
-    "lint:fix": "eslint . --ext .ts,.json  --cache .",
+    "lint": "eslint . --cache . --fix",
+    "lint:fix": "eslint . --cache .",
     "test": "vitest -c vite.config.all.ts",
     "test:unit": "vitest -c vite.config.ts",
     "test:integration": "vitest -c vite.config.integration.ts",

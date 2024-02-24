@@ -5,6 +5,7 @@
     "declaration": true,
     "sourceMap": false,
     "declarationMap": true,
+    "strictNullChecks": true,
     "types": [
       "vitest/globals",
       "node"
