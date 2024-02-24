@@ -35,7 +35,7 @@ export default defineConfig({
      if(pageData.frontmatter.image) {
        head.push(['meta', { property: 'og:image', content: path.join(hostname,pageData.frontmatter.image) }])
      }else {
-       head.push(['meta', { property: 'og:image', content: 'https://purista.dev/preview.png' }])
+       head.push(['meta', { property: 'og:image', content: `https://ogpreview-ten.vercel.app/api/og?title=${encodeURIComponent(pageData.frontmatter.title)}&description=${encodeURIComponent(pageData.frontmatter.description)}` }])
      }
 
      return head
