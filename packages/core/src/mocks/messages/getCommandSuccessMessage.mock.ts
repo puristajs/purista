@@ -12,10 +12,10 @@ export const getCommandSuccessMessageMock = <PayloadType>(
   input?: Partial<CommandSuccessResponse<PayloadType>>,
   commandMessage?: Command,
 ): Readonly<CommandSuccessResponse<PayloadType>> => {
-  const cmdMessage: Readonly<Command<unknown, unknown>> = commandMessage || getCommandMessageMock()
+  const cmdMessage: Readonly<Command<unknown, unknown>> = commandMessage ?? getCommandMessageMock()
 
   const successResponse: Readonly<CommandSuccessResponse<PayloadType>> = Object.freeze({
-    ...createSuccessResponse(commandMessage?.receiver.instanceId || getNewInstanceId(), cmdMessage, payload),
+    ...createSuccessResponse(commandMessage?.receiver.instanceId ?? getNewInstanceId(), cmdMessage, payload),
     ...input,
   })
 

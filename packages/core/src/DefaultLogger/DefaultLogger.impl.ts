@@ -62,7 +62,7 @@ export class DefaultLogger extends Logger implements ILogger {
     const parameter: LoggerOptions = {
       ...options,
       name: undefined,
-      module: options.module || options.name || prefix.join('-'),
+      module: options.module ?? options.name ?? prefix.join('-'),
     }
 
     const child = this.log.child(parameter)

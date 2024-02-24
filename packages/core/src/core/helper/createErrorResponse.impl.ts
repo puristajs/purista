@@ -31,7 +31,7 @@ export const createErrorResponse = (
     errorTraceId = error.traceId
   }
 
-  const traceId = originalEBMessage.traceId || errorTraceId || getNewTraceId()
+  const traceId = originalEBMessage.traceId ?? errorTraceId ?? getNewTraceId()
 
   const errorResponse: Readonly<CommandErrorResponse> = Object.freeze({
     id: originalEBMessage.id,

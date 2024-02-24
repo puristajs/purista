@@ -20,7 +20,7 @@ export const signUpCommandBuilder = userV1ServiceBuilder
   .addOutputSchema(userV1SignUpOutputPayloadSchema)
   .exposeAsHttpEndpoint('POST', 'user/signup')
   .setCommandFunction(async function (context, payload, _parameter) {
-    const result: { users?: User[] } = await context.states.getState(StateStoreKey.Users)
+    const result = (await context.states.getState(StateStoreKey.Users)) as { [StateStoreKey.Users]: User[] | undefined }
 
     if (result.users?.some((user) => user.email === payload.email)) {
       throw new HandledError(StatusCode.BadRequest, 'the user already exists')
@@ -31,7 +31,7 @@ export const signUpCommandBuilder = userV1ServiceBuilder
       userId: randomUUID(),
     }
 
-    const users = result.users || []
+    const users = result.users ?? []
     users.push(user)
 
     await context.states.setState(StateStoreKey.Users, users)

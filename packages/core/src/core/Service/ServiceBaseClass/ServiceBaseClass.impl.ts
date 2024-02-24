@@ -110,8 +110,8 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
    */
   getTracer(name?: string, version?: string) {
     return this.traceProvider.getTracer(
-      name || this.serviceInfo.serviceName,
-      version || this.serviceInfo.serviceVersion,
+      name ?? this.serviceInfo.serviceName,
+      version ?? this.serviceInfo.serviceVersion,
     )
   }
 

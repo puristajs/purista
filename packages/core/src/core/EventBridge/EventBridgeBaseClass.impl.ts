@@ -30,19 +30,19 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
   constructor(name: string, config: EventBridgeConfig<ConfigType>) {
     super()
     this.name = name
-    const logger = config?.logger || initLogger(config?.logLevel)
+    const logger = config?.logger ?? initLogger(config?.logLevel)
     this.logger = logger.getChildLogger({ name })
 
-    this.instanceId = config.instanceId || getNewInstanceId()
+    this.instanceId = config.instanceId ?? getNewInstanceId()
     this.config = {
       logger: logger.getChildLogger({ name }),
       instanceId: this.instanceId,
-      defaultCommandTimeout: config.defaultCommandTimeout || 30000,
+      defaultCommandTimeout: config.defaultCommandTimeout ?? 30000,
       spanProcessor: undefined,
       ...config,
     }
 
-    this.defaultCommandTimeout = config.defaultCommandTimeout || 30000
+    this.defaultCommandTimeout = config.defaultCommandTimeout ?? 30000
 
     const resource = Resource.default().merge(
       new Resource({

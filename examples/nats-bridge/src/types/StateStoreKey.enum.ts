@@ -1,3 +1,3 @@
-export enum StateStoreKey {
-  Users = 'users',
-}
+export const StateStoreKey = {
+  Users: 'users',
+} as const

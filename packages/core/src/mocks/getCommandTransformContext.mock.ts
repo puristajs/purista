@@ -18,17 +18,17 @@ export const getCommandTransformContextMock = <MessagePayloadType = unknown, Mes
   const logger = getLoggerMock(sandbox)
   const stubs = {
     logger: logger.stubs,
-    wrapInSpan: sandbox?.stub() || stub(),
-    startActiveSpan: sandbox?.stub() || stub(),
-    getSecret: sandbox?.stub() || stub(),
-    setSecret: sandbox?.stub() || stub(),
-    removeSecret: sandbox?.stub() || stub(),
-    getConfig: sandbox?.stub() || stub(),
-    setConfig: sandbox?.stub() || stub(),
-    removeConfig: sandbox?.stub() || stub(),
-    getState: sandbox?.stub() || stub(),
-    setState: sandbox?.stub() || stub(),
-    removeState: sandbox?.stub() || stub(),
+    wrapInSpan: sandbox?.stub() ?? stub(),
+    startActiveSpan: sandbox?.stub() ?? stub(),
+    getSecret: sandbox?.stub() ?? stub(),
+    setSecret: sandbox?.stub() ?? stub(),
+    removeSecret: sandbox?.stub() ?? stub(),
+    getConfig: sandbox?.stub() ?? stub(),
+    setConfig: sandbox?.stub() ?? stub(),
+    removeConfig: sandbox?.stub() ?? stub(),
+    getState: sandbox?.stub() ?? stub(),
+    setState: sandbox?.stub() ?? stub(),
+    removeState: sandbox?.stub() ?? stub(),
   }
 
   const message = getCommandMessageMock({

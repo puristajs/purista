@@ -46,7 +46,7 @@ export const getCommandHandlerRestApi = function (
       { kind: SpanKind.CONSUMER },
       parentContext,
       async (span) => {
-        const hostname = process.env.HOSTNAME || 'unknown'
+        const hostname = process.env.HOSTNAME ?? 'unknown'
         span.setAttribute(SemanticAttributes.HTTP_URL, c.req.url || '')
         span.setAttribute(SemanticAttributes.HTTP_METHOD, c.req.method || '')
         span.setAttribute(SemanticAttributes.HTTP_HOST, hostname)
@@ -67,7 +67,7 @@ export const getCommandHandlerRestApi = function (
 
           let body: unknown
           if (c.req.method === 'POST' || c.req.method === 'PUT' || c.req.method === 'PATCH') {
-            const contentType = metadata.expose.contentTypeRequest || 'application/json'
+            const contentType = metadata.expose.contentTypeRequest ?? 'application/json'
 
             body = contentType.toLowerCase() === 'application/json' ? await c.req.json() : await c.req.text()
           }
@@ -79,8 +79,8 @@ export const getCommandHandlerRestApi = function (
             messageType: EBMessageType.Command,
             correlationId: '',
             timestamp: Date.now(),
-            contentType: metadata.expose.contentTypeResponse || 'application/json',
-            contentEncoding: metadata.expose.contentEncodingResponse || 'utf-8',
+            contentType: metadata.expose.contentTypeResponse ?? 'application/json',
+            contentEncoding: metadata.expose.contentEncodingResponse ?? 'utf-8',
             otp: serializeOtp(),
             receiver: {
               ...address,
@@ -131,7 +131,7 @@ export const getCommandHandlerRestApi = function (
               statusText: getErrorMessageForCode(status),
               headers: {
                 'content-type': `${metadata.expose.contentTypeResponse} || 'application/json'; charset=${
-                  metadata.expose.contentEncodingResponse || 'utf-8'
+                  metadata.expose.contentEncodingResponse ?? 'utf-8'
                 }`,
               },
             })
@@ -154,7 +154,7 @@ export const getCommandHandlerRestApi = function (
             statusText: getErrorMessageForCode(status),
             headers: {
               'content-type': `${metadata.expose.contentTypeResponse} || 'application/json'; charset=${
-                metadata.expose.contentEncodingResponse || 'utf-8'
+                metadata.expose.contentEncodingResponse ?? 'utf-8'
               }`,
             },
           })

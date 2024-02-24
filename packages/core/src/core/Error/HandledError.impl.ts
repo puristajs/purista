@@ -16,7 +16,7 @@ export class HandledError extends Error {
     public traceId?: TraceId,
   ) {
     /* Calling the constructor of the parent class (Error) and passing the message. */
-    super(message || getErrorMessageForCode(errorCode))
+    super(message ?? getErrorMessageForCode(errorCode))
     Error.captureStackTrace(this, this.constructor)
 
     Object.setPrototypeOf(this, HandledError.prototype)
@@ -52,7 +52,7 @@ export class HandledError extends Error {
       t = err.traceId
     }
 
-    const error = new HandledError(errorCode || StatusCode.InternalServerError, err.message, data, traceId || t)
+    const error = new HandledError(errorCode ?? StatusCode.InternalServerError, err.message, data, traceId ?? t)
     error.stack = err.stack
     error.cause = err.cause
     return error
@@ -67,7 +67,7 @@ export class HandledError extends Error {
       status: this.errorCode,
       message: this.message,
       data: this.data,
-      traceId: this.traceId || traceId,
+      traceId: this.traceId ?? traceId,
     })
 
     return errorResponse

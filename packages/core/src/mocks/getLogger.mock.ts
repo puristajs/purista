@@ -9,12 +9,12 @@ import type { Logger } from '../core/index.js'
  * @group Unit test helper
  */
 export const getLoggerMock = (sandbox?: SinonSandbox) => {
-  const info = sandbox?.stub() || stub()
-  const error = sandbox?.stub() || stub()
-  const warn = sandbox?.stub() || stub()
-  const debug = sandbox?.stub() || stub()
-  const trace = sandbox?.stub() || stub()
-  const fatal = sandbox?.stub() || stub()
+  const info = sandbox?.stub() ?? stub()
+  const error = sandbox?.stub() ?? stub()
+  const warn = sandbox?.stub() ?? stub()
+  const debug = sandbox?.stub() ?? stub()
+  const trace = sandbox?.stub() ?? stub()
+  const fatal = sandbox?.stub() ?? stub()
 
   const mock: Logger = {
     info,

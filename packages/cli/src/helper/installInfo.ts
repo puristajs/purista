@@ -67,8 +67,8 @@ const getServiceVersions = (startFolder: string, serviceName: string) => {
         service.version = parseInt(versionInfo[1])
         service.path = path.join(serviceName, path.basename(file))
 
-        service.builderFile = getBuilderFile(name) || ''
-        service.serviceFile = getServiceFile(name) || ''
+        service.builderFile = getBuilderFile(name) ?? ''
+        service.serviceFile = getServiceFile(name) ?? ''
       }
     } else {
       const infoName = path.basename(file)

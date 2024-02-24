@@ -22,7 +22,7 @@ export abstract class StateStoreBaseClass<StateStoreConfigType extends Record<st
   name: string
 
   constructor(name: string, config: StoreBaseConfig<StateStoreConfigType>) {
-    const logger = config?.logger || initLogger(config?.logLevel)
+    const logger = config?.logger ?? initLogger(config?.logLevel)
     this.logger = logger.getChildLogger({ name })
 
     this.name = name

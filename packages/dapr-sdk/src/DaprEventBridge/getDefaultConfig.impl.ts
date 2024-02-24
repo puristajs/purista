@@ -5,7 +5,7 @@ export const getDefaultConfig = () => {
 
   return {
     name: 'DaprEventBridge',
-    serverHost: process.env.SERVER_HOST || '127.0.0.1',
+    serverHost: process.env.SERVER_HOST ?? '127.0.0.1',
     serverPort,
     pathPrefix: 'purista',
     apiPrefix: 'api',

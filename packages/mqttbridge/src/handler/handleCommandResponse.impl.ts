@@ -38,7 +38,7 @@ export const handleCommandResponse: IncomingMessageFunction = async function (me
         return
       }
 
-      const correlationId = packet.properties?.correlationData?.toString() || message.correlationId
+      const correlationId = packet.properties?.correlationData?.toString() ?? message.correlationId
 
       const invocation = this.pendingInvocations.get(correlationId)
 

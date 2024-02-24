@@ -38,7 +38,7 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
     const serviceName = message.sender.serviceName
     const method = data.http.method
     const apiMountPath = this.config.apiMountPath
-    const url = posix.join(apiMountPath || '/api', `v${version}`, data.http.path)
+    const url = posix.join(apiMountPath ?? '/api', `v${version}`, data.http.path)
 
     data.http.path = url
 
@@ -46,8 +46,8 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
       data.http.openApi.operationId = convertToSnakeCase(`${serviceName}_v${version}_${data.http.openApi.operationId}`)
     }
 
-    const contentType = data.contentTypeResponse || 'application/json'
-    const contentEncoding = data.contentEncodingResponse || 'utf-8'
+    const contentType = data.contentTypeResponse ?? 'application/json'
+    const contentEncoding = data.contentEncodingResponse ?? 'utf-8'
 
     const getHandler = () => {
       return async (request: FastifyRequest, reply: FastifyReply, parameter: Record<string, unknown>) => {
