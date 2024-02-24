@@ -16,7 +16,7 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
   private client: HttpClient<DaprClientConfig>
 
   constructor(config?: StoreBaseConfig<DaprStateStoreConfig>) {
-    super(config?.stateStoreName || 'DaprStateStore', { ...config })
+    super(config?.stateStoreName ?? 'DaprStateStore', { ...config })
     const logger = this.logger
     const conf = {
       stateStoreName: 'stateStore',
@@ -55,7 +55,7 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
   ): Promise<ObjectWithKeysFromStringArray<StateNames>> {
     const fetchStatesFromStore = async (stateName: string) => {
       const path = join(
-        this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
+        this.config.clientConfig?.daprApiToken ?? DAPR_API_VERSION,
         'state',
         this.config.stateStoreName as string,
         stateName,
@@ -73,7 +73,7 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
     const returnValue: Record<string, string> = {}
 
     stateNames.forEach((value, index) => {
-      returnValue[value] = result[index] as string
+      returnValue[value] = result[index]
     })
 
     return returnValue as ObjectWithKeysFromStringArray<StateNames>
@@ -81,7 +81,7 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 
   protected async setStateImpl(stateName: string, stateValue: unknown) {
     const path = join(
-      this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
+      this.config.clientConfig?.daprApiToken ?? DAPR_API_VERSION,
       'state',
       this.config.stateStoreName as string,
     )
@@ -98,7 +98,7 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 
   protected async removeStateImpl(stateName: string) {
     const path = join(
-      this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
+      this.config.clientConfig?.daprApiToken ?? DAPR_API_VERSION,
       'state',
       this.config.stateStoreName as string,
       stateName,

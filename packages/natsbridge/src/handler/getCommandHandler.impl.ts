@@ -7,7 +7,6 @@ import type {
   CommandSuccessResponse,
   DefinitionEventBridgeConfig,
   EBMessageAddress,
-  InstanceId,
 } from '@purista/core'
 import {
   deserializeOtp,
@@ -83,7 +82,7 @@ export const getCommandHandler = (
                   ...result.sender,
                   instanceId: this.instanceId,
                 },
-                otp: result.otp || serializeOtp(),
+                otp: result.otp ?? serializeOtp(),
               }
 
               subSpan.setAttribute(PuristaSpanTag.SenderServiceName, responseMessage.sender.serviceName)
@@ -107,7 +106,7 @@ export const getCommandHandler = (
                   receiverServiceName: responseMessage.receiver.serviceName,
                   receiverServiceVersion: responseMessage.receiver.serviceVersion,
                   receiverServiceTarget: responseMessage.receiver.serviceTarget,
-                  receiverInstanceId: responseMessage.receiver.instanceId as InstanceId,
+                  receiverInstanceId: responseMessage.receiver.instanceId,
                 })
 
                 if (responseMessage.eventName) {
@@ -137,8 +136,8 @@ export const getCommandHandler = (
 
               // emit the message 2nd time as event
               if (
-                this.config.commandResponsePublishTwice === 'always' ||
-                (responseMessage.eventName && this.config.commandResponsePublishTwice === 'eventOnly') ||
+                (this.config.commandResponsePublishTwice === 'always' ||
+                  (responseMessage.eventName && this.config.commandResponsePublishTwice === 'eventOnly')) ??
                 (isCommandErrorResponse(responseMessage) && this.config.commandResponsePublishTwice === 'eventAndError')
               ) {
                 const eventTopic = getTopicName.bind(this)(responseMessage)

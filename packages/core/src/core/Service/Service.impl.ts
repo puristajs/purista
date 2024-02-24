@@ -670,7 +670,7 @@ export class Service<ConfigType = unknown> extends ServiceBaseClass implements S
           },
         )
 
-        if (Object.keys(command.hooks.afterGuard || {}).length) {
+        if (Object.keys(command.hooks.afterGuard ?? {}).length) {
           const guards = command.hooks.afterGuard
 
           await this.startActiveSpan(command.commandName + '.afterGuardHooks', {}, undefined, async () => {
@@ -893,7 +893,7 @@ export class Service<ConfigType = unknown> extends ServiceBaseClass implements S
             },
           )
 
-          if (Object.keys(subscription.hooks.afterGuard || {}).length) {
+          if (Object.keys(subscription.hooks.afterGuard ?? {}).length) {
             const guards = subscription.hooks.afterGuard
 
             await this.startActiveSpan(subscription.subscriptionName + '.afterGuardHooks', {}, undefined, async () => {

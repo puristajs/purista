@@ -21,12 +21,12 @@ import { puristaVersion } from './version.js'
 export const getHttpServer = (input: GetHttpServerConfig, name = 'K8sHttpHelperServer') => {
   const { healthFn, services, hostname, apiMountPath } = input
 
-  const hostnameWithFallback = hostname || process.env.HOSTNAME
+  const hostnameWithFallback = hostname ?? process.env.HOSTNAME
 
   const logger = input.logger.getChildLogger({ name, puristaVersion, hostname: hostnameWithFallback })
   const app = new Hono()
 
-  if (input.enableHttpCompression || input.enableHttpCompression === undefined) {
+  if (input.enableHttpCompression ?? input.enableHttpCompression === undefined) {
     app.use('*', compress())
   }
 

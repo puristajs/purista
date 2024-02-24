@@ -160,7 +160,7 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
       }
     }
 
-    const apiBasePath = posix.join(this.config.apiMountPath || 'api', '/v*')
+    const apiBasePath = posix.join(this.config.apiMountPath ?? 'api', '/v*')
 
     this.server?.all(apiBasePath, async (request, reply) => {
       const parentContext = propagation.extract(context.active(), request.headers)
@@ -172,7 +172,7 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
         addHeaders(span, reply)
 
         const match = (request.params as Record<string, string>)['*']
-        const path = posix.join(this.config.apiMountPath || 'api', `v${match}`)
+        const path = posix.join(this.config.apiMountPath ?? 'api', `v${match}`)
 
         const route = this.routes.find(request.method as Methods, path)
         const firstHandler = route.handlers[0]

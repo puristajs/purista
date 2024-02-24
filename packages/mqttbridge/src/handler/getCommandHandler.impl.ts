@@ -67,7 +67,7 @@ export const getCommandHandler = (
                   ...result.sender,
                   instanceId: this.instanceId,
                 },
-                otp: result.otp || serializeOtp(),
+                otp: result.otp ?? serializeOtp(),
               }
 
               subSpan.setAttribute(PuristaSpanTag.SenderServiceName, responseMessage.sender.serviceName)

@@ -135,7 +135,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
   async start() {
     await super.start()
     try {
-      this.connection = await amqplib.connect(this.config.url || getDefaultConfig().url, this.config.socketOptions)
+      this.connection = await amqplib.connect(this.config.url ?? getDefaultConfig().url, this.config.socketOptions)
     } catch (err) {
       this.emit(EventBridgeEventNames.EventbridgeConnectionError, err)
       this.logger.fatal({ err }, 'unable to connect to broker')
@@ -173,13 +173,13 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
     this.logger.debug('ensured: default exchange')
     await this.channel.assertExchange(
-      this.config.exchangeName || getDefaultConfig().exchangeName,
+      this.config.exchangeName ?? getDefaultConfig().exchangeName,
       'headers',
       this.config.exchangeOptions,
     )
     const responseQueue = await this.channel.assertQueue('', { exclusive: true, autoDelete: true, durable: false })
     this.replyQueueName = responseQueue.queue
-    await this.channel.bindQueue(this.replyQueueName, this.config.exchangeName || getDefaultConfig().exchangeName, '', {
+    await this.channel.bindQueue(this.replyQueueName, this.config.exchangeName ?? getDefaultConfig().exchangeName, '', {
       'x-match': 'all',
       replyTo: this.replyQueueName,
     })
@@ -337,7 +337,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
       const payload = await this.encodeContent(msg, contentType, contentEncoding)
 
-      await this.channel.publish(this.config.exchangeName || getDefaultConfig().exchangeName, '', payload, {
+      await this.channel.publish(this.config.exchangeName ?? getDefaultConfig().exchangeName, '', payload, {
         messageId: msg.id,
         timestamp: msg.timestamp,
         contentType,
@@ -446,7 +446,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
         const content = await this.encodeContent(command, 'application/json', 'utf-8')
 
-        this.channel.publish(this.config.exchangeName || getDefaultConfig().exchangeName, '', content, {
+        this.channel.publish(this.config.exchangeName ?? getDefaultConfig().exchangeName, '', content, {
           messageId: command.id,
           timestamp: command.timestamp,
           correlationId: command.correlationId,
@@ -483,7 +483,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
     const channel = await this.connection.createChannel()
 
-    const noAck = eventBridgeConfig.autoacknowledge === undefined ? true : eventBridgeConfig.autoacknowledge
+    const noAck = eventBridgeConfig.autoacknowledge ?? true
 
     channel.on('close', () => {
       this.healthy = false
@@ -498,7 +498,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
     })
 
     const queue = await channel.assertQueue(queueName, { durable: !!eventBridgeConfig.durable, autoDelete: true })
-    await channel.bindQueue(queue.queue, this.config.exchangeName || getDefaultConfig().exchangeName, '', {
+    await channel.bindQueue(queue.queue, this.config.exchangeName ?? getDefaultConfig().exchangeName, '', {
       'x-match': 'all',
       messageType: EBMessageType.Command,
       receiverServiceName: address.serviceName,
@@ -575,7 +575,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
                   const payload = await this.encodeContent(responseMessage, contentType, contentEncoding)
 
-                  this.channel?.publish(this.config.exchangeName || getDefaultConfig().exchangeName, '', payload, {
+                  this.channel?.publish(this.config.exchangeName ?? getDefaultConfig().exchangeName, '', payload, {
                     messageId: responseMessage.id,
                     timestamp: responseMessage.timestamp,
                     correlationId: msg.properties.correlationId,
@@ -686,7 +686,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
     })
 
     const queue = await channel.assertQueue(queueName, queueOptions)
-    await channel.bindQueue(queue.queue, this.config.exchangeName || getDefaultConfig().exchangeName, '', {
+    await channel.bindQueue(queue.queue, this.config.exchangeName ?? getDefaultConfig().exchangeName, '', {
       'x-match': 'all',
       messageType: subscription.messageType,
       senderServiceName: subscription.sender?.serviceName,

@@ -29,7 +29,7 @@ export const getQueryDefintion = (
       name,
       required,
       schema,
-      description: schema?.description || schema?.title,
+      description: schema?.description ?? schema?.title,
     }
   })
 }

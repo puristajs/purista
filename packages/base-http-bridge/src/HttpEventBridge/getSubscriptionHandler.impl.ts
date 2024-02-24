@@ -32,7 +32,7 @@ export const getSubscriptionHandler = function (
       { kind: SpanKind.CONSUMER },
       parentContext,
       async (span) => {
-        const hostname = process.env.HOSTNAME || 'unknown'
+        const hostname = process.env.HOSTNAME ?? 'unknown'
         span.setAttribute(SemanticAttributes.HTTP_URL, c.req.url || '')
         span.setAttribute(SemanticAttributes.HTTP_METHOD, c.req.method || '')
         span.setAttribute(SemanticAttributes.HTTP_HOST, hostname)

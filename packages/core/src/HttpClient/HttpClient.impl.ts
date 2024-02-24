@@ -42,7 +42,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
     const name = config.name ?? this.name
     this.name = name
 
-    const logger = config.logger?.getChildLogger({ name }) || initLogger(config.logLevel, { name })
+    const logger = config.logger?.getChildLogger({ name }) ?? initLogger(config.logLevel, { name })
 
     this.config = {
       logger,
@@ -137,7 +137,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
 
     const url = new URL(fullPath, this.baseUrl)
 
-    for (const [key, value] of Object.entries(options?.query || {})) {
+    for (const [key, value] of Object.entries(options?.query ?? {})) {
       url.searchParams.set(key, value)
     }
 

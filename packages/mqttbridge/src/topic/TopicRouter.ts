@@ -11,7 +11,7 @@ export class TopicRouter {
   counter = 1
 
   constructor(logger?: Logger) {
-    const log = logger || initLogger()
+    const log = logger ?? initLogger()
     this.logger = log.getChildLogger({ name: 'TopicRouter' })
   }
 

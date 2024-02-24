@@ -16,8 +16,8 @@ export const getUserByIdCommandBuilder = userV1ServiceBuilder
   .addOutputSchema(userV1GetUserByIdOutputPayloadSchema)
   .exposeAsHttpEndpoint('GET', 'user/:userId')
   .setCommandFunction(async function (context, _payload, parameter) {
-    const result: { users?: User[] } = await context.states.getState(StateStoreKey.Users)
-    const users = result.users || []
+    const result = (await context.states.getState(StateStoreKey.Users)) as { [StateStoreKey.Users]: User[] | undefined }
+    const users = result.users ?? []
 
     const user = users.find((user) => (user.userId = parameter.userId))
 

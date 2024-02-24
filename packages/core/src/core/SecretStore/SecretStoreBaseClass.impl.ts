@@ -26,7 +26,7 @@ export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<
   cache: SecretStoreCacheMap = new Map()
 
   constructor(name: string, config: StoreBaseConfig<SecretStoreConfigType>) {
-    const logger = config?.logger || initLogger(config?.logLevel)
+    const logger = config?.logger ?? initLogger(config?.logLevel)
     this.logger = logger.getChildLogger({ name })
 
     this.name = name

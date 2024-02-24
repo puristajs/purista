@@ -17,13 +17,13 @@ import { OPENAPI_DEFAULT_INFO } from '../../httpServerServiceConfig.js'
  * @returns A route definition for the openApi.json file
  */
 export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV1ConfigRaw>): RouteOptions {
-  const paths: Record<string, Record<string, unknown>> = this.config.openApi?.paths || {}
+  const paths: Record<string, Record<string, unknown>> = this.config.openApi?.paths ?? {}
 
   const p = (this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath) as string
   const url = posix.join(p, '/openapi.json')
 
   const info = { ...OPENAPI_DEFAULT_INFO, ...this.config.openApi?.info }
-  const servers = this.config.openApi?.servers || [
+  const servers = this.config.openApi?.servers ?? [
     { url: `${this.config.fastify?.https ? 'https' : 'http'}://${this.config.domain}:${this.config.port}` },
   ]
   const components = this.config.openApi?.components
@@ -135,7 +135,7 @@ export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV
           name,
           required,
           schema,
-          description: schema?.description || schema?.title,
+          description: schema?.description ?? schema?.title,
         }
       })
 
@@ -165,9 +165,9 @@ export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV
             name,
             required,
             schema,
-            description: schema?.description || schema?.title,
+            description: schema?.description ?? schema?.title,
           }
-        }) || []
+        }) ?? []
 
       let path = definition.path
       routeParams.forEach((pathParamName) => {
@@ -180,7 +180,7 @@ export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV
       if (['POST', 'PATCH', 'PUT'].includes(definition.method)) {
         requestBody = {
           content: {
-            [expose.contentTypeRequest || 'application/json']: {
+            [expose.contentTypeRequest ?? 'application/json']: {
               schema: expose.inputPayload,
             },
           },
@@ -289,7 +289,7 @@ export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV
       const traceIdParameter: ParameterObject = {
         in: 'header',
         required: false,
-        name: this.config.traceHeaderField || 'x-trace-id',
+        name: this.config.traceHeaderField ?? 'x-trace-id',
         schema: { type: 'string' },
         example: '022bcd32-0a7c-4635-90ce-7940d0b9793f',
         description: 'TraceID which can be used by business logic',
@@ -318,7 +318,7 @@ export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV
             [expose.outputPayload ? 200 : 204]: {
               description: definition.openApi?.description,
               content: {
-                [expose.contentTypeResponse || 'application/json']: {
+                [expose.contentTypeResponse ?? 'application/json']: {
                   schema: expose.outputPayload,
                 },
               },

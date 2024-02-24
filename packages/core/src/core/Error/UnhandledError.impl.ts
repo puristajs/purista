@@ -17,7 +17,7 @@ export class UnhandledError extends Error {
     public data?: unknown,
     public traceId?: TraceId,
   ) {
-    super(message || getErrorMessageForCode(errorCode))
+    super(message ?? getErrorMessageForCode(errorCode))
     Error.captureStackTrace(this, this.constructor)
 
     Object.setPrototypeOf(this, UnhandledError.prototype)
@@ -48,7 +48,7 @@ export class UnhandledError extends Error {
     if (err instanceof HandledError || err instanceof UnhandledError) {
       t = err.traceId
     }
-    const error = new UnhandledError(errorCode || StatusCode.InternalServerError, err.message, data, traceId || t)
+    const error = new UnhandledError(errorCode ?? StatusCode.InternalServerError, err.message, data, traceId ?? t)
     error.stack = err.stack
     error.cause = err.cause
     return error

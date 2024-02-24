@@ -787,11 +787,11 @@ export class SubscriptionDefinitionBuilder<
       throw new Error(`SubscriptionDefinitionBuilder: missing function implementation for ${this.subscriptionName}`)
     }
 
-    const inputPayloadSchema: Schema | undefined = this.hooks.transformInput?.transformInputSchema || this.inputSchema
+    const inputPayloadSchema: Schema | undefined = this.hooks.transformInput?.transformInputSchema ?? this.inputSchema
     const inputParameterSchema: Schema | undefined =
-      this.hooks.transformInput?.transformParameterSchema || this.parameterSchema
+      this.hooks.transformInput?.transformParameterSchema ?? this.parameterSchema
     const outputPayloadSchema: Schema | undefined =
-      this.hooks.transformOutput?.transformOutputSchema || this.outputSchema
+      this.hooks.transformOutput?.transformOutputSchema ?? this.outputSchema
 
     const eventBridgeConfig: Complete<DefinitionEventBridgeConfig> = {
       durable: this.durable,

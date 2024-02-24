@@ -74,7 +74,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
     const conf = {
       ...getDefaultMqttBridgeConfig(),
       ...config,
-      clientId: config?.clientId || config?.instanceId || getNewInstanceId(),
+      clientId: config?.clientId ?? config?.instanceId ?? getNewInstanceId(),
     }
     super('MqttBridge', conf)
   }

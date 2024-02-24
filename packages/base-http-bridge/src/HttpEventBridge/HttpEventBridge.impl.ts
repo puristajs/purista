@@ -80,7 +80,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
       ...config,
     }
 
-    super(conf.name || 'HttpEventBridge', conf)
+    super(conf.name ?? 'HttpEventBridge', conf)
 
     this.client = client
 

@@ -18,7 +18,7 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
   private client: HttpClient<DaprClientConfig>
 
   constructor(config?: StoreBaseConfig<DaprSecretStoreConfig>) {
-    super(config?.secretStoreName || 'DaprSecretStore', { ...config })
+    super(config?.secretStoreName ?? 'DaprSecretStore', { ...config })
     const logger = this.logger
     const conf = {
       secretStoreName: 'secretStore',
@@ -57,7 +57,7 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
   ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
     const fetchSecretFromStore = async (secretName: string) => {
       const path = join(
-        this.config.clientConfig?.daprApiToken || DAPR_API_VERSION,
+        this.config.clientConfig?.daprApiToken ?? DAPR_API_VERSION,
         'secrets',
         this.config.secretStoreName as string,
         secretName,

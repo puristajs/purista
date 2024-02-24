@@ -21,16 +21,16 @@ export const addPathToOpenApi = (
 
   const method = expose.http.method.toLowerCase() as 'put' | 'post' | 'patch' | 'get' | 'delete'
 
-  const requestContentType = expose.contentTypeRequest || 'application/json'
-  const _requestEncodingType = expose.contentEncodingRequest || 'utf-8'
+  const requestContentType = expose.contentTypeRequest ?? 'application/json'
+  const _requestEncodingType = expose.contentEncodingRequest ?? 'utf-8'
 
-  const responseContentType = expose.contentTypeResponse || 'application/json'
-  const responseEncodingType = expose.contentEncodingResponse || 'utf-8'
+  const responseContentType = expose.contentTypeResponse ?? 'application/json'
+  const responseEncodingType = expose.contentEncodingResponse ?? 'utf-8'
 
   const traceIdParameter: ParameterObject = {
     in: 'header',
     required: false,
-    name: config.traceHeaderField || 'x-trace-id',
+    name: config.traceHeaderField ?? 'x-trace-id',
     schema: { type: 'string' },
     example: '022bcd32-0a7c-4635-90ce-7940d0b9793f',
     description: 'TraceID which can be used by business logic',
@@ -44,13 +44,13 @@ export const addPathToOpenApi = (
     description: 'see: https://www.w3.org/TR/trace-context/#traceparent-header-field-values',
   }
 
-  const securitySchema = Object.keys(openApiBuilder.rootDoc.components?.securitySchemes || {}).map((name) => ({
+  const securitySchema = Object.keys(openApiBuilder.rootDoc.components?.securitySchemes ?? {}).map((name) => ({
     [name]: [],
   }))
 
   const okCode = expose.outputPayload?.type ? StatusCode.OK : StatusCode.NoContent
 
-  const errorCodes: Set<StatusCode> = new Set([...(expose.http.openApi?.additionalStatusCodes || [])])
+  const errorCodes: Set<StatusCode> = new Set([...(expose.http.openApi?.additionalStatusCodes ?? [])])
 
   if (expose.http.openApi?.isSecure) {
     errorCodes.add(StatusCode.Unauthorized)

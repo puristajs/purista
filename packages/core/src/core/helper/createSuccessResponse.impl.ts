@@ -24,7 +24,7 @@ export const createSuccessResponse = <T>(
   const successResponse: CommandSuccessResponse<T> = Object.freeze({
     id: originalEBMessage.id,
     correlationId: originalEBMessage.correlationId,
-    traceId: originalEBMessage.traceId || getNewTraceId(),
+    traceId: originalEBMessage.traceId ?? getNewTraceId(),
     principalId: originalEBMessage.principalId,
     tenantId: originalEBMessage.tenantId,
     contentType,

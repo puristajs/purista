@@ -18,7 +18,7 @@ export const getCommandErrorMessageMock = (
   input?: Partial<CommandErrorResponse>,
   commandMessage?: Command,
 ): Readonly<CommandErrorResponse> => {
-  const cmdMessage: Readonly<Command<unknown, unknown>> = commandMessage || getCommandMessageMock()
+  const cmdMessage: Readonly<Command<unknown, unknown>> = commandMessage ?? getCommandMessageMock()
 
   const successResponse: Readonly<CommandErrorResponse> = Object.freeze({
     ...createErrorResponse(getNewInstanceId(), cmdMessage, error?.errorCode, error),
