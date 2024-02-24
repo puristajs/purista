@@ -1,6 +1,6 @@
 ---
 title: Temporal
-description: Learn how to user combine your PURISTA application with Temporal.
+description: Learn how to combine your PURISTA application with Temporal.
 order: 601000
 ---
 
