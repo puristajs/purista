@@ -130,7 +130,7 @@ export class ServiceBuilder<
    * @param options - additional config like logger, stores and opentelemetry span processor
    * @returns The instance of the service class
    */
-  getInstance(
+  async getInstance(
     eventBridge: EventBridge,
     options: {
       logLevel?: LogLevelName
@@ -172,13 +172,18 @@ export class ServiceBuilder<
         logger,
       })
 
+    const [commandDefinitionList, subscriptionDefinitionList] = await Promise.all([
+      Promise.all(this.commandDefinitionList),
+      Promise.all(this.subscriptionDefinitionList),
+    ])
+
     const C = this.getCustomClass()
     this.instance = new C({
       logger,
       eventBridge,
       info: this.info,
-      commandDefinitionList: this.commandDefinitionList,
-      subscriptionDefinitionList: this.subscriptionDefinitionList,
+      commandDefinitionList,
+      subscriptionDefinitionList,
       config,
       spanProcessor: options.spanProcessor,
       secretStore,

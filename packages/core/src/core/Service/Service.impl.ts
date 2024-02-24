@@ -23,7 +23,6 @@ import type { StateDeleteFunction, StateGetterFunction, StateSetterFunction } fr
 import type {
   Command,
   CommandDefinition,
-  CommandDefinitionList,
   CommandDefinitionListResolved,
   CommandFunctionContext,
   ContextBase,
@@ -39,7 +38,6 @@ import type {
   ServiceConstructorInput,
   Subscription,
   SubscriptionDefinition,
-  SubscriptionDefinitionList,
   SubscriptionDefinitionListResolved,
   SubscriptionFunctionContext,
   TenantId,
@@ -84,11 +82,8 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
   protected subscriptions = new Map<string, SubscriptionDefinition>()
   protected commands = new Map<string, CommandDefinition>()
 
-  public commandDefinitionList: CommandDefinitionList<any>
-  public subscriptionDefinitionList: SubscriptionDefinitionList<any>
-
-  public commandDefinitionListResolved: CommandDefinitionListResolved<any> = []
-  public subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<any> = []
+  public commandDefinitionList: CommandDefinitionListResolved<any>
+  public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
   public config: ConfigType
 
   public isStarted: boolean = false
@@ -118,6 +113,9 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
    * It connects to the event bridge and subscribes to the topics that are in the subscription list.
    */
   async start() {
+    if (this.isStarted) {
+      throw new UnhandledError(StatusCode.InternalServerError, 'Service already started')
+    }
     return this.startActiveSpan('purista.start', {}, undefined, async (span) => {
       try {
         if (this.configSchema) {
@@ -133,13 +131,7 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
           }
         }
 
-        this.commandDefinitionListResolved = await Promise.all(this.commandDefinitionList)
-        this.subscriptionDefinitionListResolved = await Promise.all(this.subscriptionDefinitionList)
-
-        await this.initializeEventbridgeConnect(
-          this.commandDefinitionListResolved,
-          this.subscriptionDefinitionListResolved,
-        )
+        await this.initializeEventbridgeConnect(this.commandDefinitionList, this.subscriptionDefinitionList)
         await this.sendServiceInfo(EBMessageType.InfoServiceReady)
         this.logger.info(
           { ...span.spanContext(), puristaVersion },
@@ -154,29 +146,6 @@ export class Service<ConfigType = unknown | undefined> extends ServiceBaseClass 
 
       this.isStarted = true
     })
-  }
-
-  /**
-   * The Definition lists provided by builders
-   * for commands and subscriptions are Promises
-   * This functions returns teh resolved values.
-   *
-   * The service needs to be started.
-   * Otherwise, this function will throw
-   *
-   * @returns
-   */
-  getDefinitionsResolved() {
-    if (!this.isStarted) {
-      throw new Error(
-        `service ${this.serviceInfo.serviceName} version ${this.serviceInfo.serviceVersion} needs to be started before using getDefinitionsResolved`,
-      )
-    }
-
-    return {
-      commands: this.commandDefinitionListResolved,
-      subscriptions: this.subscriptionDefinitionListResolved,
-    }
   }
 
   /**
