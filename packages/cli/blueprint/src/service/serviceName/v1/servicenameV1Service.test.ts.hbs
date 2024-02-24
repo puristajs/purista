@@ -1,11 +1,7 @@
 import { {{camelCase name}}V{{version}}Service as service } from './{{camelCase name}}V{{version}}Service{{fileExt}}'
 
 describe('service {{camelCase name}} version {{version}}', () => {
-  it('has valid commands', () => {
-    expect(service.validateCommandDefinitions()).toBeUndefined()
-  })
-
-  it('has valid subscriptions', () => {
-    expect(service.validateSubscriptionDefinitions()).toBeUndefined()
+  it('has valid setup', async () => {
+    await expect(service.testServiceSetup()).resolves.toBeTruthy()
   })
 })
