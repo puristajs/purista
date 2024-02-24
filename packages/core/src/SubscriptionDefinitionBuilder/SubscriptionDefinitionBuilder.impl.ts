@@ -799,6 +799,12 @@ export class SubscriptionDefinitionBuilder<
       shared: this.shared,
     }
 
+    const [inputPayload, parameter, outputPayload] = await Promise.all([
+      validationToSchema(inputPayloadSchema),
+      validationToSchema(inputParameterSchema),
+      validationToSchema(outputPayloadSchema),
+    ])
+
     const subscription: Complete<
       SubscriptionDefinition<
         ServiceClassType,
@@ -822,9 +828,9 @@ export class SubscriptionDefinitionBuilder<
           contentEncodingRequest: this.inputContentEncoding,
           contentTypeResponse: this.outputContentType,
           contentEncodingResponse: this.outputContentEncoding,
-          inputPayload: inputPayloadSchema ? await validationToSchema(inputPayloadSchema) : undefined,
-          parameter: inputParameterSchema ? await validationToSchema(inputParameterSchema) : undefined,
-          outputPayload: outputPayloadSchema ? await validationToSchema(outputPayloadSchema) : undefined,
+          inputPayload,
+          parameter,
+          outputPayload,
         },
       },
       receiver: this.receiver,
