@@ -87,10 +87,13 @@ jobs:
       - name: create pull request
         run: |
           gh pr create -B master -H ${{ steps.bump_version.outputs.new_branch }} --title 'Merge ${{ steps.bump_version.outputs.new_branch }} into master' --body 'Created by Github action'
-          gh pr merge ${{ steps.bump_version.outputs.new_branch }} --rebase --auto
+          gh pr merge ${{ steps.bump_version.outputs.new_branch }} --rebase --admin
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish to NPM
         run: npm publish --access public --workspaces
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      - name: Create release
+        run: |
+          gh release create v${{ steps.bump_version.outputs.new_version }} -F CHANGELOG.md
