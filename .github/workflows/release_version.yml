@@ -63,6 +63,7 @@ jobs:
           git push origin -u $new_branch
           echo "new_version=$new_version" >> $GITHUB_OUTPUT
           echo "new_branch=$new_branch" >> $GITHUB_OUTPUT
+          npx git-cliff --tag $new_version > CHANGELOG.md
         id: bump_version
       - name: Dry run publish
         run: |
