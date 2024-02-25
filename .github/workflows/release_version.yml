@@ -83,7 +83,9 @@ jobs:
           git tag -a "v${{ steps.bump_version.outputs.new_version }}" -m "v${{ steps.bump_version.outputs.new_version }}"
           git push origin --follow-tags
       - name: create pull request
-        run: gh pr create -B master -H ${{ steps.bump_version.outputs.new_branch }} --title 'Merge ${{ steps.bump_version.outputs.new_branch }} into master' --body 'Created by Github action'
+        run: |
+          gh pr create -B master -H ${{ steps.bump_version.outputs.new_branch }} --title 'Merge ${{ steps.bump_version.outputs.new_branch }} into master' --body 'Created by Github action'
+          gh pr merge ${{ steps.bump_version.outputs.new_branch }} --auto
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish to NPM
