@@ -2,7 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.11.0] - 2024-02-25
+## [unreleased]
+
+### Breaking changes
+
+- Breaking change: make service methods and fields protected
+
+- Breaking change: make defintions async
+
+- Breaking change: make getInstance async
+
 
 ### Bug Fixes
 
@@ -20,6 +29,7 @@ All notable changes to this project will be documented in this file.
 - Update schema documentation
 - Add and improve doc
 - Fix typo
+- Update changelog.md
 
 ### Miscellaneous Tasks
 
@@ -69,6 +79,7 @@ All notable changes to this project will be documented in this file.
 - Update publish workflow
 - Cleanup workflow names
 - Include changelog in release workflow
+- Include breaking change in changelog
 
 ## [1.10.8] - 2024-02-18
 
@@ -91,6 +102,8 @@ All notable changes to this project will be documented in this file.
 - Improve cli install
 - Fix lint and improve tests
 - Update project settings
+- Chore bump packages
+
 - Bump versions to 1.10.8
 
 ## [1.10.7] - 2024-02-18
@@ -185,17 +198,30 @@ All notable changes to this project will be documented in this file.
 - Fix analytics
 - Update
 - Update
+- Doc update doc
+
 
 ### Miscellaneous Tasks
+
+- Chore update doc
 
 - Bump versions to 1.10.1
 
 ## [1.10.0] - 2024-02-11
 
+### Breaking changes
+
+- Breaking change: remove deprecated methods from builders
+
+- Breaking change: Mark @purista/httpserver deprecated
+
+
 ### Bug Fixes
 
 - Version bump for new packages
 - Hono based servers compress issue
+- Fixup esm support
+
 - UnhandledError.fromError returns UnhandledError
 - Minor code smells
 - Keep OT traceId and custom trace id separated
@@ -294,6 +320,11 @@ All notable changes to this project will be documented in this file.
 - Bump versions to 1.9.1
 
 ## [1.9.0] - 2023-11-18
+
+### Breaking changes
+
+- Breaking change: Add caching to Infisical secret store and enable per default cache
+
 
 ### Bug Fixes
 
@@ -426,6 +457,8 @@ All notable changes to this project will be documented in this file.
 - Cli package and add prettierrc file
 - Lint
 - Error handling
+- Fix lint
+
 
 ### Documentation
 
@@ -451,12 +484,67 @@ All notable changes to this project will be documented in this file.
 
 ## [1.7.2] - 2023-06-10
 
+### Breaking changes
+
+- Breaking change: remove nanoid package
+
+- Breaking change: unify naming of params to parameter
+
+- Breaking change: remove x-trace-id header in favor of W3C complaint traceparent
+
+- Breaking change: simplify DefaultEventBridge constructor
+
+- Breaking change: simplify ServiceBuilder getInstance method call
+
+- Breaking change: simplify HttpServerService constructor
+
+- Breaking change: simplify AmqpBridge constructor
+
+- Breaking change: refactor and improve subscriptions resolve #62 resolve #65
+
+- Breaking change: refactor set guards methods and remove deprecated methods  #83
+
+- Breaking change: remove deprecated FunctionDefinitionBuilder #66
+
+- Breaking change: Add content type and content encoding to messages #80
+
+- Breaking change: factor out schemas in definitions #84
+
+- Breaking change: improve service constructor #95
+
+- Breaking change: Remove sending of command timeout info message #94
+
+- Breaking change: move service info sending from service into event bridge #70
+
+- Breaking change: improve subscription builder method names
+
+- Breaking change: Require node 18 as it is current LTS
+
+- Breaking change: use hono package for http server
+
+- Breaking change: flat configs and improve config types
+
+- Breaking change: replace @anatine/zod-openapi with fork
+
+- Breaking change: remove inclusion of source maps in libs to reduce size
+
+- Breaking change: Add instanceId for receiver and remove root instanceId from message
+
+Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
+
+
 ### Bug Fixes
 
 - Lint
+- Fix package clash
+
 - Error logging
 - Remove cycling dependency
 - Remove cycling dependency
+- Fixup cli
+
+- Fixup cli
+
 - Export test
 - TraceId in payload of error responses
 - Missing receiver and sender in SubscriptionBuilder getDefinition
@@ -466,11 +554,29 @@ All notable changes to this project will be documented in this file.
 - Redis state store and add integration test
 - Issues and improve code and add inline documentation
 - Strip and check query parameter
+- Fixup node version
+
+- Fixup helper
+
 - Generate correlation id only once
 - Use loglevel from config
 - Typo
+- Fixup : mqtt bridge
+
+- Fixup remove hono-node-server
+
+- Fixup docs
+
+- Fixup doc config
+
+- Fixup improve MQTT
+
 - Add types to exports in package.json
+- Fixup convertToKebabCase version in dapr sdk
+
 - Use correct package in examples
+- Fixup config
+
 - Use function from core in generated code
 - Rebuild packages after version bump to reflect correct version
 - Version bump of state-store-redis
@@ -478,6 +584,10 @@ All notable changes to this project will be documented in this file.
 - Mqtt command handler
 - Disable durable for endpoint info subscription
 - Setting instance id in event bridge
+- Fixup
+
+Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
+
 - Cli init template outdated fixes #128
 - Cli init does not contain nats bridge #130
 - Core package requires Hono package fixes #129
@@ -660,6 +770,10 @@ All notable changes to this project will be documented in this file.
 - Remove async if not needed
 - Use @hono/node-server 1.0.0-rc.1 with native fetch
 - Log span context and traceId
+- Chore improve HttpClient
+
+Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
+
 - Add inline doc and cleanup code
 - Minor changes
 - Minor cleanup
@@ -675,6 +789,8 @@ All notable changes to this project will be documented in this file.
 - Update dependencies
 - NATS only without durable
 - Minor updates
+- Chore bump package versions
+
 - Cleanup
 - Do not run release build parallel
 - Bump versions to 1.7.0
@@ -691,6 +807,11 @@ All notable changes to this project will be documented in this file.
 - Unify logger name to be always logger
 
 ## [1.4.8] - 2022-10-09
+
+### Breaking changes
+
+- Breaking change: disableHttpSecurity defaults to true and meaning is inverted
+
 
 ### Bug Fixes
 
@@ -723,6 +844,10 @@ All notable changes to this project will be documented in this file.
 ### Bug Fixes
 
 - Package run command
+- Fix example test
+
+- Fix test
+
 
 ### Documentation
 
@@ -739,6 +864,11 @@ All notable changes to this project will be documented in this file.
 - Correct tag
 
 ## [1.4.4] - 2022-08-21
+
+### Breaking changes
+
+- Breaking change rename to AmqpBridge
+
 
 ### Bug Fixes
 
@@ -773,12 +903,16 @@ All notable changes to this project will be documented in this file.
 
 ### Miscellaneous Tasks
 
+- Chore improve hook and config
+
 - Add eslintignore
 - Bump versions to 1.4.3
 
 ## [1.4.2] - 2022-07-31
 
 ### Bug Fixes
+
+- Fixup
 
 - Make testhelper package private
 - Subscription builder typings
@@ -835,6 +969,8 @@ All notable changes to this project will be documented in this file.
 - Minor code cleanup
 - Update packages
 - Update test
+- Chore update examples and documentation
+
 - Bump versions to 1.4.0
 - Bump versions to 1.4.1
 - Update packages and config
@@ -842,6 +978,8 @@ All notable changes to this project will be documented in this file.
 - Bump versions to 1.4.2
 
 ### Refactor
+
+- Refactor hooks
 
 - Default eventbridge and add function context
 
@@ -884,6 +1022,8 @@ All notable changes to this project will be documented in this file.
 ### Bug Fixes
 
 - Function builder
+
+## [1.1.4] - 2022-05-15
 
 ## [1.1.3] - 2022-05-15
 
@@ -938,6 +1078,11 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.4] - 2022-05-11
 
+### Bug Fixes
+
+- Fix [BUG] set content type in FunctionDefinitionBuilder and default to application/json #22
+
+
 ### Documentation
 
 - Update documentation
@@ -951,6 +1096,8 @@ All notable changes to this project will be documented in this file.
 ### Bug Fixes
 
 - [BUG] openapi3-ts dependency missing #14
+- Fix #17 fix #16 : not working under windows os and routing issues:wrong 404 handling
+
 - Use copressionMiddleware as default last middleware
 
 ### Documentation
