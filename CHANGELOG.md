@@ -2,18 +2,24 @@
 
 All notable changes to this project will be documented in this file.
 
-## [unreleased]
+## [1.11.0] - 2024-02-25
 
 ### Bug Fixes
 
 - Esm imports
 - Warning on default stores
+- Pr workflow
 
 ### Documentation
 
 - Update temporal example
 - Update handbook links in doc index
 - Update api documentation
+- Update api documentation
+- Update temporal integration
+- Update schema documentation
+- Add and improve doc
+- Fix typo
 
 ### Miscellaneous Tasks
 
@@ -25,6 +31,44 @@ All notable changes to this project will be documented in this file.
 - Improve typing for custom stores
 - Improve store doc & types
 - Fix tests
+- Fixup store unit tests
+- Add github workflow for update website
+- Update project config
+- Update doc output folder
+- Update workflow
+- Update workflow
+- Update workflow
+- Update package.lock
+- Update workflow
+- Update workflow config
+- Update workflow
+- Remove docs and improve workflow
+- Update doc build output folder
+- Add publish package workflow
+- Set action environment
+- Test github action
+- Update workflows
+- Fix workflow
+- Fix workflow
+- Update workflows
+- Reduce code and dependencies
+- Cleanup code
+- Update code and doc to use await on getInstance
+- Improve code and fix test
+- Collect coverage from unit and integration tests
+- Minor improvements
+- Migrate and finalize example tests
+- Include examples in tests
+- Minor improvements and cleanups
+- Update lint config
+- Lint prefer using nullish coalescing operator
+- Fix publish workflow
+- Update publish workflow
+- Update publish workflow
+- Bump minor version to v1.11.0
+- Update publish workflow
+- Cleanup workflow names
+- Include changelog in release workflow
 
 ## [1.10.8] - 2024-02-18
 
