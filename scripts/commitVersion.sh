@@ -10,6 +10,6 @@ do
     echo $CONTENT > ./packages/${dir##*/}/src/version.ts
 done
 
-git add .
-git commit -am "chore: bump versions to $NODE_VERSION" -S
-git tag -a v$NODE_VERSION -m "v$NODE_VERSION"
+#git add .
+#git commit -am "chore: bump versions to $NODE_VERSION" -S
+#git tag -a v$NODE_VERSION -m "v$NODE_VERSION"
