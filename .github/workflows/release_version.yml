@@ -30,6 +30,8 @@ jobs:
         with:
           node-version: 20
           cache: npm # or pnpm / yarn
+          registry-url: 'https://registry.npmjs.org'
+          scope: '@purista'
       - name: Install dependencies
         run: |
           rm package-lock.json # https://github.com/npm/cli/issues/4828
@@ -88,10 +90,6 @@ jobs:
           gh pr merge ${{ steps.bump_version.outputs.new_branch }} --rebase --auto
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: actions/setup-node@v3
-        with:
-          node-version: '20.x'
-          registry-url: 'https://registry.npmjs.org'
       - name: Publish to NPM
         run: npm publish --access public --workspaces
         env:
