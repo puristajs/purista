@@ -56,27 +56,30 @@ jobs:
           ./scripts/commitVersion.sh
           echo New version:
           new_version=$(node -p -e "require('./package.json').version")
+          git checkout -b "purista_v$new_version"
           echo "new_version=$new_version" >> $GITHUB_OUTPUT
         id: bump_version
-      - name: Commit version bump
-        uses: planetscale/ghcommit-action@v0.1.6
-        with:
-          commit_message: 'chore: bump ${{ inputs.version }} version to v${{ steps.bump_version.outputs.new_version }}'
-          repo: ${{ github.repository }}
-          branch: ${{ github.head_ref || github.ref_name }}
-        env:
-          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-      - name: Add Tag
-        run: |
-          git tag -a "v${{ steps.bump_version.outputs.new_version }}" -m "v${{ steps.bump_version.outputs.new_version }}"
       - name: Dry run publish
         run: |
           npm publish --access public --dry-run --workspaces
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      - name: Push to origin
+      - name: Commit version bump
+        uses: planetscale/ghcommit-action@v0.1.6
+        with:
+          commit_message: 'chore: bump ${{ inputs.version }} version to v${{ steps.bump_version.outputs.new_version }}'
+          repo: ${{ github.repository }}
+          branch: 'purista_v${{ steps.bump_version.outputs.new_version }}'
+        env:
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      - name: Add Tag
         run: |
-          git push origin --tags --follow-tags
+          git tag -a "v${{ steps.bump_version.outputs.new_version }}" -m "v${{ steps.bump_version.outputs.new_version }}"
+          git push origin -u purista_v${{ steps.bump_version.outputs.new_version }}
+      - name: create pull request
+        run: gh pr create -B master -H purista_v${{ steps.bump_version.outputs.new_version }} --title 'Merge purista_v${{ steps.bump_version.outputs.new_version }} into master' --body 'Created by Github action'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish to NPM
         run: npm publish --access public --workspaces
         env:
