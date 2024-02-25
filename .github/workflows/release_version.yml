@@ -56,8 +56,11 @@ jobs:
           ./scripts/commitVersion.sh
           echo New version:
           new_version=$(node -p -e "require('./package.json').version")
-          git checkout -b "purista_v$new_version"
+          new_branch=purista_v$new_version
+          git checkout -b $new_branch
+          git push origin -u $new_branch
           echo "new_version=$new_version" >> $GITHUB_OUTPUT
+          echo "new_branch=$new_branch" >> $GITHUB_OUTPUT
         id: bump_version
       - name: Dry run publish
         run: |
@@ -69,15 +72,15 @@ jobs:
         with:
           commit_message: 'chore: bump ${{ inputs.version }} version to v${{ steps.bump_version.outputs.new_version }}'
           repo: ${{ github.repository }}
-          branch: 'purista_v${{ steps.bump_version.outputs.new_version }}'
+          branch: ${{ steps.bump_version.outputs.new_branch }}
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Add Tag
         run: |
           git tag -a "v${{ steps.bump_version.outputs.new_version }}" -m "v${{ steps.bump_version.outputs.new_version }}"
-          git push origin -u purista_v${{ steps.bump_version.outputs.new_version }}
+          git push origin --follow-tags
       - name: create pull request
-        run: gh pr create -B master -H purista_v${{ steps.bump_version.outputs.new_version }} --title 'Merge purista_v${{ steps.bump_version.outputs.new_version }} into master' --body 'Created by Github action'
+        run: gh pr create -B master -H ${{ steps.bump_version.outputs.new_branch }} --title 'Merge ${{ steps.bump_version.outputs.new_branch }} into master' --body 'Created by Github action'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Publish to NPM
