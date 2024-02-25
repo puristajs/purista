@@ -77,6 +77,8 @@ jobs:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
       - name: Add Tag
         run: |
+          git restore .
+          git clean -f
           git pull
           git tag -a "v${{ steps.bump_version.outputs.new_version }}" -m "v${{ steps.bump_version.outputs.new_version }}"
           git push origin --follow-tags
