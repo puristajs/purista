@@ -14,7 +14,7 @@ on:
 
 jobs:
   # Build job
-  build:
+  publishversion:
     environment: publish_version
     runs-on: ubuntu-latest
     permissions: write-all
