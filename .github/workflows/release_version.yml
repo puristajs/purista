@@ -88,7 +88,11 @@ jobs:
           gh pr merge ${{ steps.bump_version.outputs.new_branch }} --rebase --auto
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
       - name: Publish to NPM
         run: npm publish --access public --workspaces
         env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
