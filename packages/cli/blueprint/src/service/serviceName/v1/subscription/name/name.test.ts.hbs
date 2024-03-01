@@ -11,9 +11,9 @@ import { {{camelCase name}}SubscriptionBuilder } from './{{camelCase name}}Subsc
 import { {{properCase service.name}}V{{service.version}}{{properCase name}}InputPayload, {{properCase service.name}}V{{service.version}}{{properCase name}}InputParameter } from './types{{fileExt}}'
 
 describe('service {{properCase service.name}} version {{service.version}} - subscription {{camelCase name}}', () => {
-  let sandbox = createSandbox()
+  const sandbox = createSandbox()
   beforeEach(() => {
-    sandbox = createSandbox()
+    // add your before each here
   })
 
   afterEach(() => {
@@ -22,7 +22,7 @@ describe('service {{properCase service.name}} version {{service.version}} - subs
 
   test('does not throw', async () => {
     // create a service instance to be bind to the subscription function
-    const service = {{camelCase service.name}}V{{service.version}}Service.getInstance(getEventBridgeMock(sandbox).mock, {
+    const service = await {{camelCase service.name}}V{{service.version}}Service.getInstance(getEventBridgeMock(sandbox).mock, {
       logger: getLoggerMock(sandbox).mock
     })
 
