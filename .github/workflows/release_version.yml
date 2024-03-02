@@ -56,7 +56,7 @@ jobs:
           git config --global user.email 'sebastianwessel@users.noreply.github.com'
           git config --global push.followTags true
           ./scripts/commitVersion.sh
-          echo New version:
+          npm run build
           new_version=$(node -p -e "require('./package.json').version")
           new_branch=purista_v$new_version
           git checkout -b $new_branch
