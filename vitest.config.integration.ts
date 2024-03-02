@@ -8,7 +8,7 @@ export default defineConfig({
     environment: 'node',
     hookTimeout: 30000,
     coverage: {
-      enabled: false,
+      enabled: true,
       include: ['**/src/**/*.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
     },
     include: ['**/test/**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx}'],
