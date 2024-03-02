@@ -314,6 +314,21 @@ export class ServiceBuilder<
     })
   }
 
+  /**
+   * Returns the service definition.
+   * This inclues information about commands and subscriptions.
+   *
+   * @returns
+   */
+  async getFullServiceDefintion() {
+    const definitions = await this.resolveDefinitions()
+
+    return {
+      ...this.info,
+      ...definitions,
+    }
+  }
+
   protected validateSubscriptions(subscriptionDefinitions: SubscriptionDefinitionListResolved<any>) {
     const existingNames = new Set()
     subscriptionDefinitions.forEach((definition) => {
