@@ -137,11 +137,17 @@ export class SubscriptionDefinitionBuilder<
 
   private emitList: EmitListType = {} as EmitListType
 
+  private deprecated = false
+
   // eslint-disable-next-line no-useless-constructor
   constructor(
     private subscriptionName: Exclude<string, ''>,
     private subscriptionDescription: string,
-  ) {}
+
+    deprecated: boolean = false,
+  ) {
+    this.deprecated = deprecated
+  }
 
   canInvoke<
     Output extends Schema,
@@ -236,6 +242,15 @@ export class SubscriptionDefinitionBuilder<
       Invokes,
       EmitListType & Record<EventName, InferIn<typeof schema>>
     >
+  }
+
+  /**
+   * Mark this subscription as deprecated
+   * @returns SubscriptionDefinitionBuilder
+   */
+  markAsDeprecated() {
+    this.deprecated = true
+    return this
   }
 
   /**
@@ -833,6 +848,7 @@ export class SubscriptionDefinitionBuilder<
           outputPayload,
         },
       },
+      deprecated: this.deprecated,
       receiver: this.receiver,
       sender: this.sender,
       messageType: this.messageType,
