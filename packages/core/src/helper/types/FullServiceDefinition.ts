@@ -4,6 +4,7 @@ export type FullServiceDefinition = {
   [serviceName: string]: {
     [serviceVersion: string]: {
       description: string
+      deprecated: boolean
       commands: {
         [commandName: string]: CommandDefinition
       }

@@ -6,4 +6,5 @@ export type ServiceDefinitions = {
   serviceName: string
   serviceVersion: string
   serviceDescription: string
+  deprecated: boolean
 }

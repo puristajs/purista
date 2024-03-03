@@ -136,7 +136,10 @@ export class CommandDefinitionBuilder<
     private commandName: Exclude<string, ''>,
     private commandDescription: string,
     private eventName?: Exclude<string, ''>,
-  ) {}
+    deprecated: boolean = false,
+  ) {
+    this.deprecated = deprecated
+  }
 
   /**
    * Define a command which can be invoked by the current command
