@@ -53,6 +53,8 @@ export class ServiceBuilder<
 
   private definitionsResolved: boolean = false
 
+  private deprecated = false
+
   instance?: ServiceClassType
   SClass: Newable<any, ConfigType> = Service
 
@@ -74,10 +76,19 @@ export class ServiceBuilder<
    * "This function sets the default configuration for the service."
    *
    * @param config - ConfigType - The default configuration for the service.
-   * @returns The ServiceBuilder instance.
+   * @returns The ServiceBuilder instance
    */
   setDefaultConfig(config: Complete<ConfigType>): ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType> {
     this.defaultConfig = config
+    return this
+  }
+
+  /**
+   * Mark this service as deprecated
+   * @returns The ServiceBuilder instance
+   */
+  markAsDeprecated() {
+    this.deprecated = true
     return this
   }
 
@@ -235,7 +246,7 @@ export class ServiceBuilder<
     description: string,
     eventName?: NonEmptyString<N>,
   ): CommandDefinitionBuilder<ServiceClassType> {
-    return new CommandDefinitionBuilder<ServiceClassType>(commandName, description, eventName)
+    return new CommandDefinitionBuilder<ServiceClassType>(commandName, description, eventName, this.deprecated)
   }
 
   /**
@@ -249,7 +260,7 @@ export class ServiceBuilder<
     subscriptionName: NonEmptyString<T>,
     description: string,
   ): SubscriptionDefinitionBuilder<ServiceClassType> {
-    return new SubscriptionDefinitionBuilder<ServiceClassType>(subscriptionName, description)
+    return new SubscriptionDefinitionBuilder<ServiceClassType>(subscriptionName, description, this.deprecated)
   }
 
   /**
@@ -326,6 +337,7 @@ export class ServiceBuilder<
     return {
       ...this.info,
       ...definitions,
+      deprecated: this.deprecated,
     }
   }
 

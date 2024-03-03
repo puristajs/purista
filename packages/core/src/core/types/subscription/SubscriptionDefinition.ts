@@ -103,4 +103,5 @@ export type SubscriptionDefinition<
   }
   invokes: FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
   emitList: EmitListType
+  deprecated: boolean
 }

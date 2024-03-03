@@ -36,6 +36,7 @@ const mergeServiceDefintion = <T extends FullServiceDefinition>(
         description: defintionToAdd.serviceDescription,
         commands,
         subscriptions,
+        deprecated: defintionToAdd.deprecated,
       },
     }
   }
@@ -45,6 +46,7 @@ const mergeServiceDefintion = <T extends FullServiceDefinition>(
       description: defintionToAdd.serviceDescription,
       commands,
       subscriptions,
+      deprecated: defintionToAdd.deprecated,
     }
   }
 
@@ -53,6 +55,7 @@ const mergeServiceDefintion = <T extends FullServiceDefinition>(
     description: defintionToAdd.serviceDescription,
     commands,
     subscriptions,
+    deprecated: defintionToAdd.deprecated,
   }
 
   return ret as T
