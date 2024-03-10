@@ -30,7 +30,7 @@ Opentelemetry tags set by PURISTA framework
 
 #### Defined in
 
-[core/types/PuristaSpanTag.enum.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L6)
+[core/types/PuristaSpanTag.enum.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L6)
 
 ___
 
@@ -40,7 +40,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanTag.enum.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L5)
+[core/types/PuristaSpanTag.enum.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L5)
 
 ___
 
@@ -50,7 +50,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanTag.enum.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L12)
+[core/types/PuristaSpanTag.enum.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L12)
 
 ___
 
@@ -60,7 +60,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanTag.enum.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L14)
+[core/types/PuristaSpanTag.enum.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L14)
 
 ___
 
@@ -70,7 +70,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanTag.enum.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L13)
+[core/types/PuristaSpanTag.enum.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L13)
 
 ___
 
@@ -80,7 +80,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanTag.enum.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L8)
+[core/types/PuristaSpanTag.enum.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L8)
 
 ___
 
@@ -90,7 +90,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanTag.enum.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L10)
+[core/types/PuristaSpanTag.enum.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L10)
 
 ___
 
@@ -100,7 +100,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanTag.enum.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L9)
+[core/types/PuristaSpanTag.enum.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L9)
 
 ___
 
@@ -110,7 +110,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanTag.enum.ts:17](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L17)
+[core/types/PuristaSpanTag.enum.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L17)
 
 ___
 
@@ -120,7 +120,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanTag.enum.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L16)
+[core/types/PuristaSpanTag.enum.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L16)
 
 ___
 
@@ -130,4 +130,4 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanTag.enum.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L7)
+[core/types/PuristaSpanTag.enum.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L7)

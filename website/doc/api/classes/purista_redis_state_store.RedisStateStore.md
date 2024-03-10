@@ -114,7 +114,7 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 #### Defined in
 
-[redis-state-store/src/RedisStateStore.impl.ts:48](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L48)
+[redis-state-store/src/RedisStateStore.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L48)
 
 ## Properties
 
@@ -124,7 +124,7 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 #### Defined in
 
-[redis-state-store/src/RedisStateStore.impl.ts:46](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L46)
+[redis-state-store/src/RedisStateStore.impl.ts:46](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L46)
 
 ___
 
@@ -197,7 +197,7 @@ core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 #### Defined in
 
-[redis-state-store/src/RedisStateStore.impl.ts:107](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L107)
+[redis-state-store/src/RedisStateStore.impl.ts:107](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L107)
 
 ___
 
@@ -211,7 +211,7 @@ ___
 
 #### Defined in
 
-[redis-state-store/src/RedisStateStore.impl.ts:54](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L54)
+[redis-state-store/src/RedisStateStore.impl.ts:54](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L54)
 
 ___
 
@@ -271,7 +271,7 @@ ___
 
 #### Defined in
 
-[redis-state-store/src/RedisStateStore.impl.ts:61](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L61)
+[redis-state-store/src/RedisStateStore.impl.ts:61](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L61)
 
 ___
 
@@ -319,7 +319,7 @@ ___
 
 #### Defined in
 
-[redis-state-store/src/RedisStateStore.impl.ts:80](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L80)
+[redis-state-store/src/RedisStateStore.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L80)
 
 ___
 
@@ -369,4 +369,4 @@ ___
 
 #### Defined in
 
-[redis-state-store/src/RedisStateStore.impl.ts:92](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L92)
+[redis-state-store/src/RedisStateStore.impl.ts:92](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L92)

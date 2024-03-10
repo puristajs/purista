@@ -8,7 +8,7 @@ The examples are referenced in the handbook at [purista.dev](https://purista.dev
 
 To try out the examples and to play around, please:
 
-- clone this repository to your local machine `git clone git@github.com:sebastianwessel/purista.git`
+- clone this repository to your local machine `git clone git@github.com:puristajs/purista.git`
 - in the local repository, in the root folder run `npm i`
 - than, navigate to the example folders and follow the steps provided in the readme file for each example.
 

@@ -41,7 +41,7 @@ UnhandledError
 
 #### Defined in
 
-[core/SecretStore/types/SecretStore.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L18)
+[core/SecretStore/types/SecretStore.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L18)
 
 ___
 
@@ -53,7 +53,7 @@ name of store
 
 #### Defined in
 
-[core/SecretStore/types/SecretStore.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L11)
+[core/SecretStore/types/SecretStore.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L11)
 
 ___
 
@@ -73,7 +73,7 @@ UnhandledError
 
 #### Defined in
 
-[core/SecretStore/types/SecretStore.ts:25](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L25)
+[core/SecretStore/types/SecretStore.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L25)
 
 ___
 
@@ -97,7 +97,7 @@ UnhandledError
 
 #### Defined in
 
-[core/SecretStore/types/SecretStore.ts:33](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L33)
+[core/SecretStore/types/SecretStore.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L33)
 
 ## Methods
 
@@ -113,4 +113,4 @@ disconnects and shuts down the secret store
 
 #### Defined in
 
-[core/SecretStore/types/SecretStore.ts:38](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L38)
+[core/SecretStore/types/SecretStore.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L38)

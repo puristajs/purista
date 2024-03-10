@@ -87,7 +87,7 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 #### Defined in
 
-[DefaultConfigStore/DefaultConfigStore.impl.ts:30](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L30)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L30)
 
 ## Properties
 
@@ -101,7 +101,7 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L26)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L26)
 
 ___
 
@@ -127,7 +127,7 @@ ___
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L22)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L22)
 
 ___
 
@@ -141,7 +141,7 @@ ___
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L21)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L21)
 
 ___
 
@@ -151,7 +151,7 @@ ___
 
 #### Defined in
 
-[DefaultConfigStore/DefaultConfigStore.impl.ts:29](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L29)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L29)
 
 ___
 
@@ -171,7 +171,7 @@ name of store
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L24)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L24)
 
 ## Methods
 
@@ -195,7 +195,7 @@ disconnects and shuts down the config store
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:126](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L126)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:126](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L126)
 
 ___
 
@@ -235,7 +235,7 @@ ConfigStore.getConfig
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:62](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L62)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L62)
 
 ___
 
@@ -269,7 +269,7 @@ an object of { [configName]: value | undefined }
 
 #### Defined in
 
-[DefaultConfigStore/DefaultConfigStore.impl.ts:40](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L40)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L40)
 
 ___
 
@@ -301,7 +301,7 @@ ConfigStore.removeConfig
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:89](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L89)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:89](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L89)
 
 ___
 
@@ -327,7 +327,7 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[DefaultConfigStore/DefaultConfigStore.impl.ts:61](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L61)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:61](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L61)
 
 ___
 
@@ -360,7 +360,7 @@ ConfigStore.setConfig
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:116](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L116)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:116](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L116)
 
 ___
 
@@ -387,4 +387,4 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[DefaultConfigStore/DefaultConfigStore.impl.ts:57](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L57)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:57](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L57)

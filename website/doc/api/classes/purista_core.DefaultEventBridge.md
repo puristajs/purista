@@ -100,7 +100,7 @@ await eventBridge.start()
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:85](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L85)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:85](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L85)
 
 ## Properties
 
@@ -114,7 +114,7 @@ await eventBridge.start()
 
 #### Defined in
 
-[core/EventBridge/EventBridgeBaseClass.impl.ts:23](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L23)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L23)
 
 ___
 
@@ -134,7 +134,7 @@ The default time until when a command invocation automatically returns a time ou
 
 #### Defined in
 
-[core/EventBridge/EventBridgeBaseClass.impl.ts:29](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L29)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L29)
 
 ___
 
@@ -144,7 +144,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:82](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L82)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:82](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L82)
 
 ___
 
@@ -154,7 +154,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:83](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L83)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:83](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L83)
 
 ___
 
@@ -172,7 +172,7 @@ ___
 
 #### Defined in
 
-[core/EventBridge/EventBridgeBaseClass.impl.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L27)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L27)
 
 ___
 
@@ -186,7 +186,7 @@ ___
 
 #### Defined in
 
-[core/EventBridge/EventBridgeBaseClass.impl.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L20)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L20)
 
 ___
 
@@ -204,7 +204,7 @@ ___
 
 #### Defined in
 
-[core/EventBridge/EventBridgeBaseClass.impl.ts:25](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L25)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L25)
 
 ___
 
@@ -214,7 +214,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:77](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L77)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:77](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L77)
 
 ___
 
@@ -224,7 +224,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:65](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L65)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:65](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L65)
 
 ___
 
@@ -234,7 +234,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:78](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L78)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:78](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L78)
 
 ___
 
@@ -244,7 +244,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:72](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L72)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:72](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L72)
 
 ___
 
@@ -254,7 +254,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:80](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L80)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L80)
 
 ___
 
@@ -268,7 +268,7 @@ ___
 
 #### Defined in
 
-[core/EventBridge/EventBridgeBaseClass.impl.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L21)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L21)
 
 ___
 
@@ -278,7 +278,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:64](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L64)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:64](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L64)
 
 ## Methods
 
@@ -302,7 +302,7 @@ Shut down event bridge as gracefully as possible
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:385](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L385)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:385](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L385)
 
 ___
 
@@ -333,7 +333,7 @@ ___
 
 #### Defined in
 
-[core/types/GenericEventEmitter.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+[core/types/GenericEventEmitter.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L24)
 
 ___
 
@@ -359,7 +359,7 @@ Emit a new message to event bridge to be delivered to receiver
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:287](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L287)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:287](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L287)
 
 ___
 
@@ -381,7 +381,7 @@ Tracer
 
 #### Defined in
 
-[core/EventBridge/EventBridgeBaseClass.impl.ts:70](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L70)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:70](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L70)
 
 ___
 
@@ -414,7 +414,7 @@ Call a command of a service and return the result of this command
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:328](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L328)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:328](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L328)
 
 ___
 
@@ -434,7 +434,7 @@ Indicates if the eventbridge is running and works correctly
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:98](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L98)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:98](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L98)
 
 ___
 
@@ -454,7 +454,7 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:94](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L94)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:94](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L94)
 
 ___
 
@@ -485,7 +485,7 @@ ___
 
 #### Defined in
 
-[core/types/GenericEventEmitter.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+[core/types/GenericEventEmitter.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L20)
 
 ___
 
@@ -516,7 +516,7 @@ ___
 
 #### Defined in
 
-[core/types/GenericEventEmitter.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+[core/types/GenericEventEmitter.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L16)
 
 ___
 
@@ -546,7 +546,7 @@ the id of command function queue
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:242](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L242)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:242](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L242)
 
 ___
 
@@ -573,7 +573,7 @@ Register a new subscription
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:267](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L267)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:267](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L267)
 
 ___
 
@@ -591,7 +591,7 @@ ___
 
 #### Defined in
 
-[core/types/GenericEventEmitter.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L28)
+[core/types/GenericEventEmitter.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L28)
 
 ___
 
@@ -615,7 +615,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:102](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L102)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:102](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L102)
 
 ___
 
@@ -652,7 +652,7 @@ return value of fn
 
 #### Defined in
 
-[core/EventBridge/EventBridgeBaseClass.impl.ts:82](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L82)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:82](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L82)
 
 ___
 
@@ -678,7 +678,7 @@ Unregister a service command
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:262](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L262)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:262](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L262)
 
 ___
 
@@ -702,7 +702,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:277](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L277)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:277](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L277)
 
 ___
 
@@ -745,4 +745,4 @@ return value of fn
 
 #### Defined in
 
-[core/EventBridge/EventBridgeBaseClass.impl.ts:132](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L132)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:132](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L132)

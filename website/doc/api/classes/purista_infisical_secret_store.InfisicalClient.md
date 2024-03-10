@@ -86,7 +86,7 @@ The internal http client to connect to the Infisical server.
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L16)
+[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L16)
 
 ## Properties
 
@@ -185,7 +185,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L14)
+[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:14](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L14)
 
 ___
 
@@ -195,7 +195,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L12)
+[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:12](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L12)
 
 ___
 
@@ -233,7 +233,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L13)
+[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L13)
 
 ___
 
@@ -317,7 +317,7 @@ Encrypt the given key, value and optional comment
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:33](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L33)
+[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L33)
 
 ___
 
@@ -405,7 +405,7 @@ Get a single secret
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:93](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L93)
+[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:93](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L93)
 
 ___
 
@@ -421,7 +421,7 @@ Fetches the token data from the server for given access token
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:77](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L77)
+[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:77](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L77)
 
 ___
 
@@ -597,7 +597,7 @@ Remove a secret
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:168](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L168)
+[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:168](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L168)
 
 ___
 
@@ -647,7 +647,7 @@ It will first try to update and if the secret does not exist, it will create a n
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:133](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L133)
+[infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:133](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L133)
 
 ___
 

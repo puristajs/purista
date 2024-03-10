@@ -67,7 +67,7 @@ AmqpBridge bridge config
 
 #### Defined in
 
-[amqpbridge/src/types/AmqpBridgeConfig.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L11)
+[amqpbridge/src/types/AmqpBridgeConfig.ts:11](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/AmqpBridgeConfig.ts#L11)
 
 ___
 
@@ -77,7 +77,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/types/Encoder.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/types/Encoder.ts#L3)
+[amqpbridge/src/types/Encoder.ts:3](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/Encoder.ts#L3)
 
 ___
 
@@ -94,7 +94,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/types/EncoderFunctions.ts#L1)
+[amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/EncoderFunctions.ts#L1)
 
 ___
 
@@ -111,7 +111,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/types/EncryptFunctions.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/types/EncryptFunctions.ts#L1)
+[amqpbridge/src/types/EncryptFunctions.ts:1](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/EncryptFunctions.ts#L1)
 
 ___
 
@@ -121,7 +121,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/types/Encrypter.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/types/Encrypter.ts#L3)
+[amqpbridge/src/types/Encrypter.ts:3](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/Encrypter.ts#L3)
 
 ## Variables
 
@@ -131,7 +131,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/version.ts#L1)
+[amqpbridge/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/version.ts#L1)
 
 ## Functions
 
@@ -154,7 +154,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts#L9)
+[amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts#L9)
 
 ___
 
@@ -168,7 +168,7 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/getDefaultConfig.impl.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/getDefaultConfig.impl.ts#L5)
+[amqpbridge/src/getDefaultConfig.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/getDefaultConfig.impl.ts#L5)
 
 ___
 
@@ -188,4 +188,4 @@ ___
 
 #### Defined in
 
-[amqpbridge/src/serializeOtpForAmqpHeader.impl.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/amqpbridge/src/serializeOtpForAmqpHeader.impl.ts#L3)
+[amqpbridge/src/serializeOtpForAmqpHeader.impl.ts:3](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/serializeOtpForAmqpHeader.impl.ts#L3)

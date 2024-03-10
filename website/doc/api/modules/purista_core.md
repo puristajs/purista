@@ -277,7 +277,7 @@ HTTP authentication information
 
 #### Defined in
 
-[HttpClient/types/AuthCredentials.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/types/AuthCredentials.ts#L4)
+[HttpClient/types/AuthCredentials.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/AuthCredentials.ts#L4)
 
 ___
 
@@ -287,7 +287,7 @@ ___
 
 #### Defined in
 
-[core/types/BrokerHeaderCommandMsg.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/BrokerHeaderCommandMsg.ts#L5)
+[core/types/BrokerHeaderCommandMsg.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/BrokerHeaderCommandMsg.ts#L5)
 
 ___
 
@@ -297,7 +297,7 @@ ___
 
 #### Defined in
 
-[core/types/BrokerHeaderCommandResponseMsg.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/BrokerHeaderCommandResponseMsg.ts#L5)
+[core/types/BrokerHeaderCommandResponseMsg.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/BrokerHeaderCommandResponseMsg.ts#L5)
 
 ___
 
@@ -320,7 +320,7 @@ ___
 
 #### Defined in
 
-[core/types/BrokerHeaderCustomMsg.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/BrokerHeaderCustomMsg.ts#L6)
+[core/types/BrokerHeaderCustomMsg.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/BrokerHeaderCustomMsg.ts#L6)
 
 ___
 
@@ -347,7 +347,7 @@ Subscribers should not respond with command responses if they are "silent" subsc
 
 #### Defined in
 
-[core/types/commandType/Command.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/Command.ts#L18)
+[core/types/commandType/Command.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/Command.ts#L18)
 
 ___
 
@@ -369,7 +369,7 @@ export const userServiceCommands: CommandDefinitionList<UserService> = [signUp.g
 
 #### Defined in
 
-[core/types/commandType/CommandDefinitionList.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinitionList.ts#L12)
+[core/types/commandType/CommandDefinitionList.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinitionList.ts#L12)
 
 ___
 
@@ -393,7 +393,7 @@ ___
 
 #### Defined in
 
-[core/types/commandType/CommandDefinitionMetadataBase.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinitionMetadataBase.ts#L5)
+[core/types/commandType/CommandDefinitionMetadataBase.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinitionMetadataBase.ts#L5)
 
 ___
 
@@ -429,7 +429,7 @@ const z:Complete<A> = { one: undefined, two: undefined, three: 'will work'}
 
 #### Defined in
 
-[core/types/Complete.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Complete.ts#L21)
+[core/types/Complete.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Complete.ts#L21)
 
 ___
 
@@ -439,7 +439,7 @@ ___
 
 #### Defined in
 
-[core/HttpServer/types/CompressionMethod.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/HttpServer/types/CompressionMethod.ts#L1)
+[core/HttpServer/types/CompressionMethod.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/CompressionMethod.ts#L1)
 
 ___
 
@@ -449,7 +449,7 @@ ___
 
 #### Defined in
 
-[core/ConfigStore/types/ConfigStoreCacheMap.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStoreCacheMap.ts#L1)
+[core/ConfigStore/types/ConfigStoreCacheMap.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStoreCacheMap.ts#L1)
 
 ___
 
@@ -463,7 +463,7 @@ It is up to the implementation to extract the content type from the original mes
 
 #### Defined in
 
-[core/types/ContentType.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ContentType.ts#L6)
+[core/types/ContentType.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContentType.ts#L6)
 
 ___
 
@@ -496,7 +496,7 @@ Each context for command function, subscription function and all Hooks and trans
 
 #### Defined in
 
-[core/types/ContextBase.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L12)
+[core/types/ContextBase.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L12)
 
 ___
 
@@ -508,7 +508,7 @@ the correlation id links the command invocation message with the command respons
 
 #### Defined in
 
-[core/types/CorrelationId.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/CorrelationId.ts#L2)
+[core/types/CorrelationId.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/CorrelationId.ts#L2)
 
 ___
 
@@ -528,7 +528,7 @@ The producer does not expect a response from a consumer.
 
 #### Defined in
 
-[core/types/CustomMessage.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/CustomMessage.ts#L11)
+[core/types/CustomMessage.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/CustomMessage.ts#L11)
 
 ___
 
@@ -538,7 +538,7 @@ ___
 
 #### Defined in
 
-[DefaultConfigStore/types/DefaultConfigStoreConfig.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/types/DefaultConfigStoreConfig.ts#L1)
+[DefaultConfigStore/types/DefaultConfigStoreConfig.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/types/DefaultConfigStoreConfig.ts#L1)
 
 ___
 
@@ -557,7 +557,7 @@ The configuration for the DefaultEventBridge.
 
 #### Defined in
 
-[DefaultEventBridge/types/DefaultEventBridgeConfig.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/types/DefaultEventBridgeConfig.ts#L4)
+[DefaultEventBridge/types/DefaultEventBridgeConfig.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/DefaultEventBridgeConfig.ts#L4)
 
 ___
 
@@ -567,7 +567,7 @@ ___
 
 #### Defined in
 
-[DefaultSecretStore/types/DefaultSecretStoreConfig.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultSecretStore/types/DefaultSecretStoreConfig.ts#L1)
+[DefaultSecretStore/types/DefaultSecretStoreConfig.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/types/DefaultSecretStoreConfig.ts#L1)
 
 ___
 
@@ -577,7 +577,7 @@ ___
 
 #### Defined in
 
-[DefaultStateStore/types/DefaultStateStoreConfig.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/types/DefaultStateStoreConfig.ts#L1)
+[DefaultStateStore/types/DefaultStateStoreConfig.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultStateStore/types/DefaultStateStoreConfig.ts#L1)
 
 ___
 
@@ -599,7 +599,7 @@ It depends on the used event bridge implementation and underlaying message broke
 
 #### Defined in
 
-[core/types/DefinitionEventBridgeConfig.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConfig.ts#L6)
+[core/types/DefinitionEventBridgeConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/DefinitionEventBridgeConfig.ts#L6)
 
 ___
 
@@ -611,7 +611,7 @@ EBMessage is some message which is handled by the event bridge.
 
 #### Defined in
 
-[core/types/EBMessage.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessage.ts#L8)
+[core/types/EBMessage.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessage.ts#L8)
 
 ___
 
@@ -632,7 +632,7 @@ A event bridge message address describes the sender or receiver of a message.
 
 #### Defined in
 
-[core/types/EBMessageAddress.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageAddress.ts#L6)
+[core/types/EBMessageAddress.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageAddress.ts#L6)
 
 ___
 
@@ -660,7 +660,7 @@ Default fields which are part of any purista message
 
 #### Defined in
 
-[core/types/EBMessageBase.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageBase.ts#L12)
+[core/types/EBMessageBase.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageBase.ts#L12)
 
 ___
 
@@ -672,7 +672,7 @@ Unique id of the event bridge message
 
 #### Defined in
 
-[core/types/EBMessageId.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageId.ts#L4)
+[core/types/EBMessageId.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageId.ts#L4)
 
 ___
 
@@ -684,7 +684,7 @@ A event bridge message address describes the sender or receiver of a message.
 
 #### Defined in
 
-[core/types/EBMessageSenderAddress.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EBMessageSenderAddress.ts#L7)
+[core/types/EBMessageSenderAddress.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageSenderAddress.ts#L7)
 
 ___
 
@@ -731,7 +731,7 @@ await emit('my-custom-event-name', { the: 'payload' })
 
 #### Defined in
 
-[core/types/EmitCustomMessageFunction.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EmitCustomMessageFunction.ts#L12)
+[core/types/EmitCustomMessageFunction.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EmitCustomMessageFunction.ts#L12)
 
 ___
 
@@ -747,7 +747,7 @@ ___
 
 #### Defined in
 
-[core/types/EmitSchemaList.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/EmitSchemaList.ts#L3)
+[core/types/EmitSchemaList.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EmitSchemaList.ts#L3)
 
 ___
 
@@ -768,7 +768,7 @@ Error message payload
 
 #### Defined in
 
-[core/types/ErrorResponsePayload.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ErrorResponsePayload.ts#L7)
+[core/types/ErrorResponsePayload.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ErrorResponsePayload.ts#L7)
 
 ___
 
@@ -788,7 +788,7 @@ Events
 
 #### Defined in
 
-[core/EventBridge/types/EventBridgeEvents.ts:42](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L42)
+[core/EventBridge/types/EventBridgeEvents.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L42)
 
 ___
 
@@ -807,7 +807,7 @@ Every event bridge implementation must use this type for configuration.
 
 #### Defined in
 
-[core/EventBridge/types/EventBridgeConfig.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeConfig.ts#L10)
+[core/EventBridge/types/EventBridgeConfig.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeConfig.ts#L10)
 
 ___
 
@@ -827,7 +827,7 @@ Events
 
 #### Defined in
 
-[core/EventBridge/types/EventBridgeEvents.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L37)
+[core/EventBridge/types/EventBridgeEvents.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L37)
 
 ___
 
@@ -837,7 +837,7 @@ ___
 
 #### Defined in
 
-[core/EventBridge/types/EventBridgeEvents.ts:47](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L47)
+[core/EventBridge/types/EventBridgeEvents.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L47)
 
 ___
 
@@ -853,7 +853,7 @@ ___
 
 #### Defined in
 
-[core/types/GenericEventEmitter.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L5)
+[core/types/GenericEventEmitter.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L5)
 
 ___
 
@@ -863,7 +863,7 @@ ___
 
 #### Defined in
 
-[core/types/GenericEventEmitter.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L3)
+[core/types/GenericEventEmitter.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L3)
 
 ___
 
@@ -884,7 +884,7 @@ serviceName.ServiceVersion.FunctionName becomes type of SinonStub
 
 #### Defined in
 
-[core/types/FromEmitToOtherType.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/FromEmitToOtherType.ts#L6)
+[core/types/FromEmitToOtherType.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/FromEmitToOtherType.ts#L6)
 
 ___
 
@@ -905,7 +905,7 @@ serviceName.ServiceVersion.FunctionName becomes type of NewType
 
 #### Defined in
 
-[core/types/FromInvokeToOtherType.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/FromInvokeToOtherType.ts#L6)
+[core/types/FromInvokeToOtherType.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/FromInvokeToOtherType.ts#L6)
 
 ___
 
@@ -924,7 +924,7 @@ Requires as least a `baseUrl`
 
 #### Defined in
 
-[HttpClient/types/HttpClientConfig.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/types/HttpClientConfig.ts#L9)
+[HttpClient/types/HttpClientConfig.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/HttpClientConfig.ts#L9)
 
 ___
 
@@ -945,7 +945,7 @@ Options for a single request
 
 #### Defined in
 
-[HttpClient/types/HttpClientRequestOptions.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/types/HttpClientRequestOptions.ts#L4)
+[HttpClient/types/HttpClientRequestOptions.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/HttpClientRequestOptions.ts#L4)
 
 ___
 
@@ -961,7 +961,7 @@ ___
 
 #### Defined in
 
-[core/HttpServer/types/HttpExposedServiceMeta.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/HttpServer/types/HttpExposedServiceMeta.ts#L4)
+[core/HttpServer/types/HttpExposedServiceMeta.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/HttpExposedServiceMeta.ts#L4)
 
 ___
 
@@ -971,7 +971,7 @@ ___
 
 #### Defined in
 
-[core/types/infoType/InfoInvokeTimeout.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L22)
+[core/types/infoType/InfoInvokeTimeout.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L22)
 
 ___
 
@@ -997,7 +997,7 @@ ___
 
 #### Defined in
 
-[core/types/infoType/InfoInvokeTimeout.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L6)
+[core/types/infoType/InfoInvokeTimeout.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L6)
 
 ___
 
@@ -1007,7 +1007,7 @@ ___
 
 #### Defined in
 
-[core/types/infoType/InfoMessage.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/InfoMessage.ts#L11)
+[core/types/infoType/InfoMessage.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoMessage.ts#L11)
 
 ___
 
@@ -1017,7 +1017,7 @@ ___
 
 #### Defined in
 
-[core/types/infoType/InfoMessage.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/InfoMessage.ts#L21)
+[core/types/infoType/InfoMessage.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoMessage.ts#L21)
 
 ___
 
@@ -1027,7 +1027,7 @@ ___
 
 #### Defined in
 
-[core/types/infoType/InfoServiceBase.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceBase.ts#L4)
+[core/types/infoType/InfoServiceBase.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceBase.ts#L4)
 
 ___
 
@@ -1037,7 +1037,7 @@ ___
 
 #### Defined in
 
-[core/types/infoType/InfoServiceDrain.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceDrain.ts#L5)
+[core/types/infoType/InfoServiceDrain.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceDrain.ts#L5)
 
 ___
 
@@ -1047,7 +1047,7 @@ ___
 
 #### Defined in
 
-[core/types/infoType/InfoServiceFunctionAdded.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceFunctionAdded.ts#L5)
+[core/types/infoType/InfoServiceFunctionAdded.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceFunctionAdded.ts#L5)
 
 ___
 
@@ -1057,7 +1057,7 @@ ___
 
 #### Defined in
 
-[core/types/infoType/InfoServiceInit.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceInit.ts#L5)
+[core/types/infoType/InfoServiceInit.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceInit.ts#L5)
 
 ___
 
@@ -1067,7 +1067,7 @@ ___
 
 #### Defined in
 
-[core/types/infoType/InfoServiceNotReady.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceNotReady.ts#L5)
+[core/types/infoType/InfoServiceNotReady.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceNotReady.ts#L5)
 
 ___
 
@@ -1077,7 +1077,7 @@ ___
 
 #### Defined in
 
-[core/types/infoType/InfoServiceReady.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceReady.ts#L5)
+[core/types/infoType/InfoServiceReady.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceReady.ts#L5)
 
 ___
 
@@ -1087,7 +1087,7 @@ ___
 
 #### Defined in
 
-[core/types/infoType/InfoServiceShutdown.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceShutdown.ts#L5)
+[core/types/infoType/InfoServiceShutdown.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceShutdown.ts#L5)
 
 ___
 
@@ -1097,7 +1097,7 @@ ___
 
 #### Defined in
 
-[core/types/infoType/InfoSubscriptionError.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/InfoSubscriptionError.ts#L5)
+[core/types/infoType/InfoSubscriptionError.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoSubscriptionError.ts#L5)
 
 ___
 
@@ -1109,7 +1109,7 @@ the instance id of the event bridge
 
 #### Defined in
 
-[core/types/InstanceId.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/InstanceId.ts#L2)
+[core/types/InstanceId.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/InstanceId.ts#L2)
 
 ___
 
@@ -1162,7 +1162,7 @@ const result = await invoke<MyResultType>(address, inputPayload inputParameter )
 
 #### Defined in
 
-[core/types/InvokeFunction.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/InvokeFunction.ts#L22)
+[core/types/InvokeFunction.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/InvokeFunction.ts#L22)
 
 ___
 
@@ -1172,7 +1172,7 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L20)
+[core/types/Logger.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L20)
 
 ___
 
@@ -1182,7 +1182,7 @@ ___
 
 #### Defined in
 
-[core/types/LogLevelName.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/LogLevelName.ts#L1)
+[core/types/LogLevelName.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/LogLevelName.ts#L1)
 
 ___
 
@@ -1208,7 +1208,7 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L6)
+[core/types/Logger.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L6)
 
 ___
 
@@ -1228,7 +1228,7 @@ ___
 
 #### Defined in
 
-[mocks/getLogger.mock.ts:42](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/mocks/getLogger.mock.ts#L42)
+[mocks/getLogger.mock.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getLogger.mock.ts#L42)
 
 ___
 
@@ -1259,7 +1259,7 @@ ___
 
 #### Defined in
 
-[ServiceBuilder/ServiceBuilder.impl.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L28)
+[ServiceBuilder/ServiceBuilder.impl.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L28)
 
 ___
 
@@ -1275,7 +1275,7 @@ ___
 
 #### Defined in
 
-[helper/types/NonEmptyString.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/types/NonEmptyString.ts#L1)
+[helper/types/NonEmptyString.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/NonEmptyString.ts#L1)
 
 ___
 
@@ -1294,7 +1294,7 @@ Type helper which can create a typed record, based on given string array type.
 
 #### Defined in
 
-[helper/types/ObjectWithKeysFromStringArray.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/types/ObjectWithKeysFromStringArray.ts#L5)
+[helper/types/ObjectWithKeysFromStringArray.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ObjectWithKeysFromStringArray.ts#L5)
 
 ___
 
@@ -1311,7 +1311,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/types/PendingInvocations.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/types/PendingInvocations.ts#L3)
+[DefaultEventBridge/types/PendingInvocations.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/PendingInvocations.ts#L3)
 
 ___
 
@@ -1327,7 +1327,7 @@ ___
 
 #### Defined in
 
-[core/types/Prettify.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Prettify.ts#L1)
+[core/types/Prettify.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Prettify.ts#L1)
 
 ___
 
@@ -1339,7 +1339,7 @@ the principal id
 
 #### Defined in
 
-[core/types/PrincipalId.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PrincipalId.ts#L2)
+[core/types/PrincipalId.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PrincipalId.ts#L2)
 
 ___
 
@@ -1362,7 +1362,7 @@ ___
 
 #### Defined in
 
-[core/HttpServer/types/QueryParameter.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/HttpServer/types/QueryParameter.ts#L1)
+[core/HttpServer/types/QueryParameter.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/QueryParameter.ts#L1)
 
 ___
 
@@ -1372,7 +1372,7 @@ ___
 
 #### Defined in
 
-[core/SecretStore/types/SecretStoreCacheMap.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStoreCacheMap.ts#L1)
+[core/SecretStore/types/SecretStoreCacheMap.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStoreCacheMap.ts#L1)
 
 ___
 
@@ -1388,7 +1388,7 @@ There are three types:
 
 #### Defined in
 
-[core/types/ServiceEvents.ts:98](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L98)
+[core/types/ServiceEvents.ts:98](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L98)
 
 ___
 
@@ -1408,7 +1408,7 @@ General service information
 
 #### Defined in
 
-[core/types/infoType/ServiceInfoType.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/ServiceInfoType.ts#L4)
+[core/types/infoType/ServiceInfoType.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/ServiceInfoType.ts#L4)
 
 ___
 
@@ -1427,7 +1427,7 @@ Entry of thing you like to shutdown gracefully
 
 #### Defined in
 
-[helper/types/ShutdownEntry.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/types/ShutdownEntry.ts#L4)
+[helper/types/ShutdownEntry.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ShutdownEntry.ts#L4)
 
 ___
 
@@ -1445,7 +1445,7 @@ Basic configuration object which is used by any store
 
 #### Defined in
 
-[core/types/StoreBaseConfig.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StoreBaseConfig.ts#L8)
+[core/types/StoreBaseConfig.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StoreBaseConfig.ts#L8)
 
 ___
 
@@ -1467,7 +1467,7 @@ export const userServiceCommands: SubscriptionDefinitionList<UserService> = [sig
 
 #### Defined in
 
-[core/types/subscription/SubscriptionDefinitionList.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinitionList.ts#L11)
+[core/types/subscription/SubscriptionDefinitionList.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinitionList.ts#L11)
 
 ___
 
@@ -1490,7 +1490,7 @@ ___
 
 #### Defined in
 
-[core/types/subscription/SubscriptionDefinitionMetadataBase.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinitionMetadataBase.ts#L5)
+[core/types/subscription/SubscriptionDefinitionMetadataBase.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinitionMetadataBase.ts#L5)
 
 ___
 
@@ -1519,7 +1519,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/types/SubscriptionStorageEntry.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L3)
+[DefaultEventBridge/types/SubscriptionStorageEntry.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L3)
 
 ___
 
@@ -1531,7 +1531,7 @@ Supported HTTP-Methods for defining endpoints
 
 #### Defined in
 
-[core/HttpServer/types/SupportedHttpMethod.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/HttpServer/types/SupportedHttpMethod.ts#L2)
+[core/HttpServer/types/SupportedHttpMethod.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/SupportedHttpMethod.ts#L2)
 
 ___
 
@@ -1543,7 +1543,7 @@ the tenant id
 
 #### Defined in
 
-[core/types/TenantId.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/TenantId.ts#L2)
+[core/types/TenantId.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/TenantId.ts#L2)
 
 ___
 
@@ -1555,7 +1555,7 @@ The trace id which will be passed through all commands, invocations and subscrip
 
 #### Defined in
 
-[core/types/TraceId.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/TraceId.ts#L4)
+[core/types/TraceId.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/TraceId.ts#L4)
 
 ___
 
@@ -1577,7 +1577,7 @@ All keys of given object must start with the given prefix. Otherwise Typescript 
 
 #### Defined in
 
-[core/types/addPrefixToObject.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/addPrefixToObject.ts#L7)
+[core/types/addPrefixToObject.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/addPrefixToObject.ts#L7)
 
 ## Variables
 
@@ -1587,7 +1587,7 @@ All keys of given object must start with the given prefix. Otherwise Typescript 
 
 #### Defined in
 
-[core/HttpServer/MinContentSizeForCompression.const.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/HttpServer/MinContentSizeForCompression.const.ts#L1)
+[core/HttpServer/MinContentSizeForCompression.const.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/MinContentSizeForCompression.const.ts#L1)
 
 ___
 
@@ -1603,7 +1603,7 @@ ___
 
 #### Defined in
 
-[core/Service/ServiceInfoValidator.impl.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/ServiceInfoValidator.impl.ts#L5)
+[core/Service/ServiceInfoValidator.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceInfoValidator.impl.ts#L5)
 
 ___
 
@@ -1613,7 +1613,7 @@ ___
 
 #### Defined in
 
-[core/types/infoType/InfoMessage.ts:30](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/InfoMessage.ts#L30)
+[core/types/infoType/InfoMessage.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoMessage.ts#L30)
 
 ___
 
@@ -1623,7 +1623,7 @@ ___
 
 #### Defined in
 
-[version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/version.ts#L1)
+[version.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/version.ts#L1)
 
 ## Functions
 
@@ -1655,7 +1655,7 @@ a proxy which allows to chain like serviceName.serviceVersion.fnToInvoke(payload
 
 #### Defined in
 
-[core/helper/createInvokeFunctionProxy.impl.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/createInvokeFunctionProxy.impl.ts#L16)
+[core/helper/createInvokeFunctionProxy.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createInvokeFunctionProxy.impl.ts#L16)
 
 ___
 
@@ -1682,7 +1682,7 @@ ___
 
 #### Defined in
 
-[zodOpenApi/zodOpenApi.impl.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/zodOpenApi/zodOpenApi.impl.ts#L26)
+[zodOpenApi/zodOpenApi.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/zodOpenApi/zodOpenApi.impl.ts#L26)
 
 ___
 
@@ -1703,7 +1703,7 @@ ___
 
 #### Defined in
 
-[zodOpenApi/zodOpenApi.impl.ts:415](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/zodOpenApi/zodOpenApi.impl.ts#L415)
+[zodOpenApi/zodOpenApi.impl.ts:415](https://github.com/puristajs/purista/blob/master/packages/core/src/zodOpenApi/zodOpenApi.impl.ts#L415)
 
 ___
 
@@ -1741,7 +1741,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/getCommandFunctionWithValidation.impl.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/getCommandFunctionWithValidation.impl.ts#L8)
+[CommandDefinitionBuilder/getCommandFunctionWithValidation.impl.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/getCommandFunctionWithValidation.impl.ts#L8)
 
 ___
 
@@ -1755,7 +1755,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/getDefaultEventBridgeConfig.impl.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/getDefaultEventBridgeConfig.impl.ts#L4)
+[DefaultEventBridge/getDefaultEventBridgeConfig.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/getDefaultEventBridgeConfig.impl.ts#L4)
 
 ___
 
@@ -1769,7 +1769,7 @@ ___
 
 #### Defined in
 
-[DefaultLogger/getDefaultLogLevel.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultLogger/getDefaultLogLevel.ts#L4)
+[DefaultLogger/getDefaultLogLevel.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/getDefaultLogLevel.ts#L4)
 
 ___
 
@@ -1790,7 +1790,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/getNewSubscriptionStorageEntry.impl.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/getNewSubscriptionStorageEntry.impl.ts#L4)
+[DefaultEventBridge/getNewSubscriptionStorageEntry.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/getNewSubscriptionStorageEntry.impl.ts#L4)
 
 ___
 
@@ -1828,7 +1828,7 @@ ___
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts#L8)
+[SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts#L8)
 
 ___
 
@@ -1861,7 +1861,7 @@ ___
 
 #### Defined in
 
-[helper/getTimeoutPromise.impl.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/getTimeoutPromise.impl.ts#L9)
+[helper/getTimeoutPromise.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/getTimeoutPromise.impl.ts#L9)
 
 ___
 
@@ -1882,7 +1882,7 @@ ___
 
 #### Defined in
 
-[DefaultConfigStore/initDefaultConfigStore.impl.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/initDefaultConfigStore.impl.ts#L4)
+[DefaultConfigStore/initDefaultConfigStore.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/initDefaultConfigStore.impl.ts#L4)
 
 ___
 
@@ -1903,7 +1903,7 @@ ___
 
 #### Defined in
 
-[DefaultSecretStore/initDefaultSecretStore.impl.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultSecretStore/initDefaultSecretStore.impl.ts#L4)
+[DefaultSecretStore/initDefaultSecretStore.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/initDefaultSecretStore.impl.ts#L4)
 
 ___
 
@@ -1924,7 +1924,7 @@ ___
 
 #### Defined in
 
-[DefaultStateStore/initDefaultStateStore.impl.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/initDefaultStateStore.impl.ts#L4)
+[DefaultStateStore/initDefaultStateStore.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultStateStore/initDefaultStateStore.impl.ts#L4)
 
 ___
 
@@ -1947,7 +1947,7 @@ Create a new logger with the given minimum log level
 
 #### Defined in
 
-[DefaultLogger/initLogger.impl.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultLogger/initLogger.impl.ts#L14)
+[DefaultLogger/initLogger.impl.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/initLogger.impl.ts#L14)
 
 ___
 
@@ -1971,7 +1971,7 @@ true if message is type of custom message
 
 #### Defined in
 
-[core/types/isCustomMessage.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/isCustomMessage.impl.ts#L10)
+[core/types/isCustomMessage.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/isCustomMessage.impl.ts#L10)
 
 ___
 
@@ -1995,7 +1995,7 @@ boolean - true if input is type of HttpExposedServiceMeta
 
 #### Defined in
 
-[core/HttpServer/types/isHttpExposedServiceMeta.impl.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/HttpServer/types/isHttpExposedServiceMeta.impl.ts#L8)
+[core/HttpServer/types/isHttpExposedServiceMeta.impl.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/isHttpExposedServiceMeta.impl.ts#L8)
 
 ___
 
@@ -2015,7 +2015,7 @@ message is InfoMessage
 
 #### Defined in
 
-[core/types/infoType/isInfoMessage.impl.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/isInfoMessage.impl.ts#L5)
+[core/types/infoType/isInfoMessage.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/isInfoMessage.impl.ts#L5)
 
 ___
 
@@ -2035,7 +2035,7 @@ message is Object
 
 #### Defined in
 
-[core/types/infoType/isInfoServiceFunctionAdded.impl.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/infoType/isInfoServiceFunctionAdded.impl.ts#L5)
+[core/types/infoType/isInfoServiceFunctionAdded.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/isInfoServiceFunctionAdded.impl.ts#L5)
 
 ___
 
@@ -2057,7 +2057,7 @@ ___
 
 #### Defined in
 
-[DefaultEventBridge/isMessageMatchingSubscription.impl.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/isMessageMatchingSubscription.impl.ts#L5)
+[DefaultEventBridge/isMessageMatchingSubscription.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/isMessageMatchingSubscription.impl.ts#L5)
 
 ___
 
@@ -2104,7 +2104,7 @@ const functionWithThisSet = safeBind(fn, thisParam)
 
 #### Defined in
 
-[helper/safeBind.impl.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/safeBind.impl.ts#L19)
+[helper/safeBind.impl.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/safeBind.impl.ts#L19)
 
 ___
 
@@ -2127,7 +2127,7 @@ It only checks for "technically possible"
 
 #### Defined in
 
-[helper/throwIfNotValidMessage.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/throwIfNotValidMessage.impl.ts#L10)
+[helper/throwIfNotValidMessage.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/throwIfNotValidMessage.impl.ts#L10)
 
 ___
 
@@ -2153,7 +2153,7 @@ ___
 
 #### Defined in
 
-[zodOpenApi/validationToSchema.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/zodOpenApi/validationToSchema.ts#L7)
+[zodOpenApi/validationToSchema.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/zodOpenApi/validationToSchema.ts#L7)
 
 ## Command
 
@@ -2181,7 +2181,7 @@ A working schema definition needs at least a command name, a short description a
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:38](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L38)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L38)
 
 ### CommandAfterGuardHook
 
@@ -2223,7 +2223,7 @@ This guard is called after function successfully returns and after output valida
 
 #### Defined in
 
-[core/types/commandType/CommandAfterGuardHook.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandAfterGuardHook.ts#L10)
+[core/types/commandType/CommandAfterGuardHook.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandAfterGuardHook.ts#L10)
 
 ___
 
@@ -2266,7 +2266,7 @@ It should throw HandledError or return void.
 
 #### Defined in
 
-[core/types/commandType/CommandBeforeGuardHook.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandBeforeGuardHook.ts#L11)
+[core/types/commandType/CommandBeforeGuardHook.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandBeforeGuardHook.ts#L11)
 
 ___
 
@@ -2316,7 +2316,7 @@ The definition for a command provided by some service.
 
 #### Defined in
 
-[core/types/commandType/CommandDefinition.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L18)
+[core/types/commandType/CommandDefinition.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L18)
 
 ___
 
@@ -2328,7 +2328,7 @@ CommandErrorResponse is a response to a specific previously received command whi
 
 #### Defined in
 
-[core/types/commandType/CommandErrorResponse.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandErrorResponse.ts#L13)
+[core/types/commandType/CommandErrorResponse.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandErrorResponse.ts#L13)
 
 ___
 
@@ -2370,7 +2370,7 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 #### Defined in
 
-[core/types/commandType/CommandFunction.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandFunction.ts#L9)
+[core/types/commandType/CommandFunction.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunction.ts#L9)
 
 ___
 
@@ -2391,7 +2391,7 @@ The command function context which will be passed into command function.
 
 #### Defined in
 
-[core/types/commandType/CommandFunctionContext.ts:72](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L72)
+[core/types/commandType/CommandFunctionContext.ts:72](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L72)
 
 ___
 
@@ -2425,7 +2425,7 @@ Also, the methods:
 
 #### Defined in
 
-[core/types/commandType/CommandFunctionContext.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L16)
+[core/types/commandType/CommandFunctionContext.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L16)
 
 ___
 
@@ -2443,7 +2443,7 @@ CommandResponse is a response to a specific previously received command which ca
 
 #### Defined in
 
-[core/types/commandType/CommandResponse.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandResponse.ts#L9)
+[core/types/commandType/CommandResponse.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandResponse.ts#L9)
 
 ___
 
@@ -2462,7 +2462,7 @@ It indicates that the command was executed successfully and contains the result 
 
 #### Defined in
 
-[core/types/commandType/CommandSuccessResponse.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandSuccessResponse.ts#L13)
+[core/types/commandType/CommandSuccessResponse.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandSuccessResponse.ts#L13)
 
 ___
 
@@ -2479,7 +2479,7 @@ ___
 
 #### Defined in
 
-[core/types/commandType/CommandTransformFunctionContext.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandTransformFunctionContext.ts#L8)
+[core/types/commandType/CommandTransformFunctionContext.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandTransformFunctionContext.ts#L8)
 
 ___
 
@@ -2522,7 +2522,7 @@ The type of returned payload and parameter must match the command function input
 
 #### Defined in
 
-[core/types/commandType/CommandTransformInputHook.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandTransformInputHook.ts#L12)
+[core/types/commandType/CommandTransformInputHook.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandTransformInputHook.ts#L12)
 
 ___
 
@@ -2562,7 +2562,7 @@ This transform hook is executed after function output validation and AfterGuardH
 
 #### Defined in
 
-[core/types/commandType/CommandTransformOutputHook.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/CommandTransformOutputHook.ts#L13)
+[core/types/commandType/CommandTransformOutputHook.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandTransformOutputHook.ts#L13)
 
 ___
 
@@ -2586,7 +2586,7 @@ boolean
 
 #### Defined in
 
-[core/types/commandType/isCommand.impl.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/isCommand.impl.ts#L12)
+[core/types/commandType/isCommand.impl.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/isCommand.impl.ts#L12)
 
 ___
 
@@ -2610,7 +2610,7 @@ boolean
 
 #### Defined in
 
-[core/types/commandType/isCommandErrorResponse.impl.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/isCommandErrorResponse.impl.ts#L12)
+[core/types/commandType/isCommandErrorResponse.impl.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/isCommandErrorResponse.impl.ts#L12)
 
 ___
 
@@ -2634,7 +2634,7 @@ boolean
 
 #### Defined in
 
-[core/types/commandType/isCommandResponse.impl.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/isCommandResponse.impl.ts#L12)
+[core/types/commandType/isCommandResponse.impl.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/isCommandResponse.impl.ts#L12)
 
 ___
 
@@ -2658,7 +2658,7 @@ boolean
 
 #### Defined in
 
-[core/types/commandType/isCommandSuccessResponse.impl.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/commandType/isCommandSuccessResponse.impl.ts#L12)
+[core/types/commandType/isCommandSuccessResponse.impl.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/isCommandSuccessResponse.impl.ts#L12)
 
 ## Event bridge
 
@@ -2680,7 +2680,7 @@ await eventBridge.start()
 
 #### Defined in
 
-[DefaultEventBridge/DefaultEventBridge.impl.ts:63](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L63)
+[DefaultEventBridge/DefaultEventBridge.impl.ts:63](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L63)
 
 • **EventBridgeBaseClass**\<`ConfigType`\>: `Object`
 
@@ -2694,7 +2694,7 @@ The base class to be extended by event bridge implementations
 
 #### Defined in
 
-[core/EventBridge/EventBridgeBaseClass.impl.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L19)
+[core/EventBridge/EventBridgeBaseClass.impl.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L19)
 
 • **EventBridge**: `Object`
 
@@ -2703,7 +2703,7 @@ The event bridge must implement this interface.
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L19)
+[core/EventBridge/types/EventBridge.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L19)
 
 ### EventBridgeEventsBasic
 
@@ -2723,7 +2723,7 @@ Events which can be emitted by a event bridge
 
 #### Defined in
 
-[core/EventBridge/types/EventBridgeEvents.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L20)
+[core/EventBridge/types/EventBridgeEvents.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L20)
 
 ___
 
@@ -2743,7 +2743,7 @@ ___
 
 #### Defined in
 
-[core/helper/getCommandQueueName.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/getCommandQueueName.impl.ts#L10)
+[core/helper/getCommandQueueName.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getCommandQueueName.impl.ts#L10)
 
 ## Helper
 
@@ -2771,7 +2771,7 @@ https://github.com/30-seconds/30-seconds-of-code
 
 #### Defined in
 
-[helper/string/convertToCamelCase.impl.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/string/convertToCamelCase.impl.ts#L9)
+[helper/string/convertToCamelCase.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/string/convertToCamelCase.impl.ts#L9)
 
 ___
 
@@ -2799,7 +2799,7 @@ https://github.com/30-seconds/30-seconds-of-code
 
 #### Defined in
 
-[helper/string/convertToKebabCase.impl.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/string/convertToKebabCase.impl.ts#L9)
+[helper/string/convertToKebabCase.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/string/convertToKebabCase.impl.ts#L9)
 
 ___
 
@@ -2827,7 +2827,7 @@ https://github.com/30-seconds/30-seconds-of-code
 
 #### Defined in
 
-[helper/string/convertToPascalCase.impl.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/string/convertToPascalCase.impl.ts#L9)
+[helper/string/convertToPascalCase.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/string/convertToPascalCase.impl.ts#L9)
 
 ___
 
@@ -2855,7 +2855,7 @@ https://github.com/30-seconds/30-seconds-of-code
 
 #### Defined in
 
-[helper/string/convertToSnakeCase.impl.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/string/convertToSnakeCase.impl.ts#L9)
+[helper/string/convertToSnakeCase.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/string/convertToSnakeCase.impl.ts#L9)
 
 ___
 
@@ -2883,7 +2883,7 @@ CommandErrorResponse message object
 
 #### Defined in
 
-[core/helper/createErrorResponse.impl.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/createErrorResponse.impl.ts#L19)
+[core/helper/createErrorResponse.impl.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createErrorResponse.impl.ts#L19)
 
 ___
 
@@ -2909,7 +2909,7 @@ ___
 
 #### Defined in
 
-[core/helper/createInfoMessage.impl.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/createInfoMessage.impl.ts#L14)
+[core/helper/createInfoMessage.impl.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createInfoMessage.impl.ts#L14)
 
 ___
 
@@ -2940,7 +2940,7 @@ ___
 
 #### Defined in
 
-[core/helper/createSuccessResponse.impl.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/createSuccessResponse.impl.ts#L16)
+[core/helper/createSuccessResponse.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createSuccessResponse.impl.ts#L16)
 
 ___
 
@@ -2961,7 +2961,7 @@ ___
 
 #### Defined in
 
-[core/helper/serializeOtp.impl.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/serializeOtp.impl.ts#L26)
+[core/helper/serializeOtp.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/serializeOtp.impl.ts#L26)
 
 ___
 
@@ -2990,7 +2990,7 @@ Command error responses are not changed.
 
 #### Defined in
 
-[core/helper/getCleanedMessage.impl.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/getCleanedMessage.impl.ts#L16)
+[core/helper/getCleanedMessage.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getCleanedMessage.impl.ts#L16)
 
 ___
 
@@ -3010,7 +3010,7 @@ ___
 
 #### Defined in
 
-[core/helper/getErrorMessageForCode.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/getErrorMessageForCode.impl.ts#L10)
+[core/helper/getErrorMessageForCode.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getErrorMessageForCode.impl.ts#L10)
 
 ___
 
@@ -3028,7 +3028,7 @@ EBMessageId
 
 #### Defined in
 
-[core/helper/getNewCorrelationId.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/getNewCorrelationId.impl.ts#L10)
+[core/helper/getNewCorrelationId.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getNewCorrelationId.impl.ts#L10)
 
 ___
 
@@ -3046,7 +3046,7 @@ EBMessageId
 
 #### Defined in
 
-[core/helper/getNewEBMessageId.impl.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/getNewEBMessageId.impl.ts#L11)
+[core/helper/getNewEBMessageId.impl.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getNewEBMessageId.impl.ts#L11)
 
 ___
 
@@ -3060,7 +3060,7 @@ ___
 
 #### Defined in
 
-[core/helper/getNewInstanceId.impl.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/getNewInstanceId.impl.ts#L9)
+[core/helper/getNewInstanceId.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getNewInstanceId.impl.ts#L9)
 
 ___
 
@@ -3074,7 +3074,7 @@ ___
 
 #### Defined in
 
-[core/helper/getNewTraceId.impl.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/getNewTraceId.impl.ts#L9)
+[core/helper/getNewTraceId.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getNewTraceId.impl.ts#L9)
 
 ___
 
@@ -3094,7 +3094,7 @@ ___
 
 #### Defined in
 
-[core/helper/getSubscriptionQueueName.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/getSubscriptionQueueName.impl.ts#L10)
+[core/helper/getSubscriptionQueueName.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getSubscriptionQueueName.impl.ts#L10)
 
 ___
 
@@ -3108,7 +3108,7 @@ ___
 
 #### Defined in
 
-[core/helper/getUniqueId.impl.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/getUniqueId.impl.ts#L11)
+[core/helper/getUniqueId.impl.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getUniqueId.impl.ts#L11)
 
 ___
 
@@ -3163,7 +3163,7 @@ gracefulShutdown(logger, shutDownList)
 
 #### Defined in
 
-[helper/gracefulShutdown.impl.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/helper/gracefulShutdown.impl.ts#L37)
+[helper/gracefulShutdown.impl.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/gracefulShutdown.impl.ts#L37)
 
 ___
 
@@ -3179,7 +3179,7 @@ returns true if NODE_ENV is set to value starting with "develop"
 
 #### Defined in
 
-[core/helper/isDevelop.impl.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/isDevelop.impl.ts#L6)
+[core/helper/isDevelop.impl.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/isDevelop.impl.ts#L6)
 
 ___
 
@@ -3193,7 +3193,7 @@ ___
 
 #### Defined in
 
-[core/helper/serializeOtp.impl.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/helper/serializeOtp.impl.ts#L11)
+[core/helper/serializeOtp.impl.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/serializeOtp.impl.ts#L11)
 
 ## Service
 
@@ -3204,7 +3204,7 @@ Internal events are prefixed with `service-`
 
 #### Defined in
 
-[core/types/ServiceEvents.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L11)
+[core/types/ServiceEvents.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L11)
 
 • **Service**\<`ConfigType`\>: `Object`
 
@@ -3236,7 +3236,7 @@ class MyService extends Service {
 
 #### Defined in
 
-[core/Service/Service.impl.ts:81](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L81)
+[core/Service/Service.impl.ts:81](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L81)
 
 • **ServiceBuilder**\<`ConfigType`, `ConfigInputType`, `ServiceClassType`\>: `Object`
 
@@ -3255,7 +3255,7 @@ to create an instance of the service class.
 
 #### Defined in
 
-[ServiceBuilder/ServiceBuilder.impl.ts:38](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L38)
+[ServiceBuilder/ServiceBuilder.impl.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L38)
 
 • **ServiceClass**\<`ConfigType`\>: `Object`
 
@@ -3269,7 +3269,7 @@ The ServiceClass interface
 
 #### Defined in
 
-[core/types/ServiceClass.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L11)
+[core/types/ServiceClass.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L11)
 
 ### ServiceConstructorInput
 
@@ -3299,7 +3299,7 @@ The ServiceClass interface
 
 #### Defined in
 
-[core/types/ServiceConstructorInput.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L16)
+[core/types/ServiceConstructorInput.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L16)
 
 ___
 
@@ -3341,7 +3341,7 @@ If you like to use your own events, the event name must be prefixed with `misc-`
 
 #### Defined in
 
-[core/types/ServiceEvents.ts:54](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L54)
+[core/types/ServiceEvents.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L54)
 
 ## Store
 
@@ -3364,7 +3364,7 @@ __DO NOT OVERWRITE__: the regular methods getConfig, setConfig or removeConfig
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L20)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L20)
 
 • **DefaultConfigStore**: `Object`
 
@@ -3390,7 +3390,7 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 #### Defined in
 
-[DefaultConfigStore/DefaultConfigStore.impl.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L28)
+[DefaultConfigStore/DefaultConfigStore.impl.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L28)
 
 • **DefaultSecretStore**: `Object`
 
@@ -3425,7 +3425,7 @@ const store = new DefaultSecretStore({
 
 #### Defined in
 
-[DefaultSecretStore/DefaultSecretStore.impl.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L37)
+[DefaultSecretStore/DefaultSecretStore.impl.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L37)
 
 • **DefaultStateStore**: `Object`
 
@@ -3434,7 +3434,7 @@ Getters and setters will throw a UnhandledError with status `Not implemented`
 
 #### Defined in
 
-[DefaultStateStore/DefaultStateStore.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L13)
+[DefaultStateStore/DefaultStateStore.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultStateStore/DefaultStateStore.impl.ts#L13)
 
 • `Abstract` **SecretStoreBaseClass**\<`SecretStoreConfigType`\>: `Object`
 
@@ -3455,7 +3455,7 @@ __DO NOT OVERWRITE__: the regular methods getSecret, setSecret or removeSecret
 
 #### Defined in
 
-[core/SecretStore/SecretStoreBaseClass.impl.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L20)
+[core/SecretStore/SecretStoreBaseClass.impl.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L20)
 
 • `Abstract` **StateStoreBaseClass**\<`StateStoreConfigType`\>: `Object`
 
@@ -3476,7 +3476,7 @@ __DO NOT OVERWRITE__: the regular methods getState, setState or removeState
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L18)
+[core/StateStore/StateStoreBaseClass.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L18)
 
 • **ConfigStore**: `Object`
 
@@ -3484,7 +3484,7 @@ Interface definition for config store adapters
 
 #### Defined in
 
-[core/ConfigStore/types/ConfigStore.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L10)
+[core/ConfigStore/types/ConfigStore.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L10)
 
 • **SecretStore**: `Object`
 
@@ -3492,7 +3492,7 @@ Interface definition for a secret store implementation
 
 #### Defined in
 
-[core/SecretStore/types/SecretStore.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L9)
+[core/SecretStore/types/SecretStore.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L9)
 
 • **StateStore**: `Object`
 
@@ -3500,7 +3500,7 @@ Interface definition for state store implementations
 
 #### Defined in
 
-[core/StateStore/types/StateStore.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L10)
+[core/StateStore/types/StateStore.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L10)
 
 ### ConfigDeleteFunction
 
@@ -3524,7 +3524,7 @@ delete a config value from the config store
 
 #### Defined in
 
-[core/ConfigStore/types/ConfigDeleteFunction.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigDeleteFunction.ts#L2)
+[core/ConfigStore/types/ConfigDeleteFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigDeleteFunction.ts#L2)
 
 ___
 
@@ -3556,7 +3556,7 @@ get a config value from the config store
 
 #### Defined in
 
-[core/ConfigStore/types/ConfigGetterFunction.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigGetterFunction.ts#L4)
+[core/ConfigStore/types/ConfigGetterFunction.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigGetterFunction.ts#L4)
 
 ___
 
@@ -3583,7 +3583,7 @@ set a config value in the config store
 
 #### Defined in
 
-[core/ConfigStore/types/ConfigSetterFunction.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigSetterFunction.ts#L2)
+[core/ConfigStore/types/ConfigSetterFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigSetterFunction.ts#L2)
 
 ___
 
@@ -3609,7 +3609,7 @@ delete a secret from the secret store
 
 #### Defined in
 
-[core/SecretStore/types/SecretDeleteFunction.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretDeleteFunction.ts#L2)
+[core/SecretStore/types/SecretDeleteFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretDeleteFunction.ts#L2)
 
 ___
 
@@ -3641,7 +3641,7 @@ get a secret from the secret store
 
 #### Defined in
 
-[core/SecretStore/types/SecretGetterFunction.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretGetterFunction.ts#L4)
+[core/SecretStore/types/SecretGetterFunction.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretGetterFunction.ts#L4)
 
 ___
 
@@ -3668,7 +3668,7 @@ set a secret in the secret store
 
 #### Defined in
 
-[core/SecretStore/types/SecretSetterFunction.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/SecretStore/types/SecretSetterFunction.ts#L2)
+[core/SecretStore/types/SecretSetterFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretSetterFunction.ts#L2)
 
 ___
 
@@ -3694,7 +3694,7 @@ delete a state value from the state store
 
 #### Defined in
 
-[core/StateStore/types/StateDeleteFunction.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/types/StateDeleteFunction.ts#L2)
+[core/StateStore/types/StateDeleteFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateDeleteFunction.ts#L2)
 
 ___
 
@@ -3726,7 +3726,7 @@ get a state value from the state store
 
 #### Defined in
 
-[core/StateStore/types/StateGetterFunction.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/types/StateGetterFunction.ts#L4)
+[core/StateStore/types/StateGetterFunction.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateGetterFunction.ts#L4)
 
 ___
 
@@ -3753,7 +3753,7 @@ set a state value in the state store
 
 #### Defined in
 
-[core/StateStore/types/StateSetterFunction.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/types/StateSetterFunction.ts#L2)
+[core/StateStore/types/StateSetterFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateSetterFunction.ts#L2)
 
 ## Subscription
 
@@ -3780,7 +3780,7 @@ A working schema definition needs at least a subscription name, a short descript
 
 #### Defined in
 
-[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:40](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L40)
+[SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L40)
 
 ### Subscription
 
@@ -3822,7 +3822,7 @@ A subscription managed by the event bridge
 
 #### Defined in
 
-[core/types/subscription/Subscription.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L13)
+[core/types/subscription/Subscription.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L13)
 
 ___
 
@@ -3864,7 +3864,7 @@ This guard is called after function successfully returns and after output valida
 
 #### Defined in
 
-[core/types/subscription/SubscriptionAfterGuardHook.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionAfterGuardHook.ts#L10)
+[core/types/subscription/SubscriptionAfterGuardHook.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionAfterGuardHook.ts#L10)
 
 ___
 
@@ -3905,7 +3905,7 @@ It should throw HandledError or return void.
 
 #### Defined in
 
-[core/types/subscription/SubscriptionBeforeGuardHook.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionBeforeGuardHook.ts#L11)
+[core/types/subscription/SubscriptionBeforeGuardHook.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionBeforeGuardHook.ts#L11)
 
 ___
 
@@ -3969,7 +3969,7 @@ The definition for a subscription provided by some service.
 
 #### Defined in
 
-[core/types/subscription/SubscriptionDefinition.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L22)
+[core/types/subscription/SubscriptionDefinition.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L22)
 
 ___
 
@@ -4011,7 +4011,7 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 #### Defined in
 
-[core/types/subscription/SubscriptionFunction.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunction.ts#L8)
+[core/types/subscription/SubscriptionFunction.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunction.ts#L8)
 
 ___
 
@@ -4030,7 +4030,7 @@ The subscription function context which will be passed into subscription functio
 
 #### Defined in
 
-[core/types/subscription/SubscriptionFunctionContext.ts:66](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L66)
+[core/types/subscription/SubscriptionFunctionContext.ts:66](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L66)
 
 ___
 
@@ -4062,7 +4062,7 @@ Also, the methods:
 
 #### Defined in
 
-[core/types/subscription/SubscriptionFunctionContext.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L16)
+[core/types/subscription/SubscriptionFunctionContext.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L16)
 
 ___
 
@@ -4072,7 +4072,7 @@ ___
 
 #### Defined in
 
-[core/types/subscription/SubscriptionTransformFunctionContext.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionTransformFunctionContext.ts#L8)
+[core/types/subscription/SubscriptionTransformFunctionContext.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionTransformFunctionContext.ts#L8)
 
 ___
 
@@ -4109,7 +4109,7 @@ ___
 
 #### Defined in
 
-[core/types/subscription/SubscriptionTransformInputHook.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionTransformInputHook.ts#L6)
+[core/types/subscription/SubscriptionTransformInputHook.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionTransformInputHook.ts#L6)
 
 ___
 
@@ -4147,7 +4147,7 @@ This transform hook is executed after function output validation and AfterGuardH
 
 #### Defined in
 
-[core/types/subscription/SubscriptionTransformOutputHook.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionTransformOutputHook.ts#L8)
+[core/types/subscription/SubscriptionTransformOutputHook.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionTransformOutputHook.ts#L8)
 
 ## Unit test helper
 
@@ -4227,7 +4227,7 @@ A function that returns a mock object for command function context
 
 #### Defined in
 
-[mocks/getCommandContext.mock.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/mocks/getCommandContext.mock.ts#L19)
+[mocks/getCommandContext.mock.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getCommandContext.mock.ts#L19)
 
 ___
 
@@ -4271,7 +4271,7 @@ A function that returns a mocked command error response message
 
 #### Defined in
 
-[mocks/messages/getCommandErrorMessage.mock.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/mocks/messages/getCommandErrorMessage.mock.ts#L16)
+[mocks/messages/getCommandErrorMessage.mock.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCommandErrorMessage.mock.ts#L16)
 
 ___
 
@@ -4300,7 +4300,7 @@ A function that returns a mocked command message.
 
 #### Defined in
 
-[mocks/messages/getCommandMessage.mock.ts:15](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/mocks/messages/getCommandMessage.mock.ts#L15)
+[mocks/messages/getCommandMessage.mock.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCommandMessage.mock.ts#L15)
 
 ___
 
@@ -4350,7 +4350,7 @@ A function that returns a mocked command success response message.
 
 #### Defined in
 
-[mocks/messages/getCommandSuccessMessage.mock.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/mocks/messages/getCommandSuccessMessage.mock.ts#L10)
+[mocks/messages/getCommandSuccessMessage.mock.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCommandSuccessMessage.mock.ts#L10)
 
 ___
 
@@ -4420,7 +4420,7 @@ A function that returns a mock object for command transform function context
 
 #### Defined in
 
-[mocks/getCommandTransformContext.mock.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/mocks/getCommandTransformContext.mock.ts#L13)
+[mocks/getCommandTransformContext.mock.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getCommandTransformContext.mock.ts#L13)
 
 ___
 
@@ -4450,7 +4450,7 @@ A function that returns a mocked custom message.
 
 #### Defined in
 
-[mocks/messages/getCustomMessage.mock.ts:15](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/mocks/messages/getCustomMessage.mock.ts#L15)
+[mocks/messages/getCustomMessage.mock.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCustomMessage.mock.ts#L15)
 
 ___
 
@@ -4479,7 +4479,7 @@ EventBridge mocked
 
 #### Defined in
 
-[mocks/getEventBridge.mock.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/mocks/getEventBridge.mock.ts#L11)
+[mocks/getEventBridge.mock.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getEventBridge.mock.ts#L11)
 
 ___
 
@@ -4514,7 +4514,7 @@ logger mocked
 
 #### Defined in
 
-[mocks/getLogger.mock.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/mocks/getLogger.mock.ts#L11)
+[mocks/getLogger.mock.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getLogger.mock.ts#L11)
 
 ___
 
@@ -4591,7 +4591,7 @@ A function that returns a mock object for subscription function context
 
 #### Defined in
 
-[mocks/getSubscriptionContext.mock.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/mocks/getSubscriptionContext.mock.ts#L19)
+[mocks/getSubscriptionContext.mock.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionContext.mock.ts#L19)
 
 ___
 
@@ -4653,4 +4653,4 @@ A function that returns a mock object for subscription transform function contex
 
 #### Defined in
 
-[mocks/getSubscriptionTransformContext.mock.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/mocks/getSubscriptionTransformContext.mock.ts#L12)
+[mocks/getSubscriptionTransformContext.mock.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionTransformContext.mock.ts#L12)

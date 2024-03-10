@@ -31,4 +31,4 @@ https://github.com/anatine/zod-plugins/tree/main/packages/zod-openapi
 
 #### Defined in
 
-[zodOpenApi/zodOpenApi.impl.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/zodOpenApi/zodOpenApi.impl.ts#L13)
+[zodOpenApi/zodOpenApi.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/zodOpenApi/zodOpenApi.impl.ts#L13)

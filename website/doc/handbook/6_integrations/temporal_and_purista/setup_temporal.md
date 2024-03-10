@@ -10,7 +10,7 @@ First of all, you should setup Temporal.
 
 ## Temporal on local machine
 
-Please follow the offical guide: [Set up a local development environment for Temporal and TypeScript](https://learn.temporal.io/getting_started/typescript/dev_environment/) or use docker compose file from [PURISTA examples](https://github.com/sebastianwessel/purista/tree/master/examples/temporal).
+Please follow the offical guide: [Set up a local development environment for Temporal and TypeScript](https://learn.temporal.io/getting_started/typescript/dev_environment/) or use docker compose file from [PURISTA examples](https://github.com/puristajs/purista/tree/master/examples/temporal).
 
 ## Install dependencies
 

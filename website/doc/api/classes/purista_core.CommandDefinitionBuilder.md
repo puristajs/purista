@@ -123,7 +123,7 @@ A working schema definition needs at least a command name, a short description a
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:135](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L135)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:135](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L135)
 
 ## Properties
 
@@ -133,7 +133,7 @@ A working schema definition needs at least a command name, a short description a
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:72](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L72)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:72](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L72)
 
 ___
 
@@ -143,7 +143,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:137](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L137)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:137](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L137)
 
 ___
 
@@ -153,7 +153,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:136](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L136)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:136](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L136)
 
 ___
 
@@ -163,7 +163,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:61](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L61)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:61](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L61)
 
 ___
 
@@ -173,7 +173,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:71](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L71)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:71](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L71)
 
 ___
 
@@ -183,7 +183,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:79](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L79)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:79](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L79)
 
 ___
 
@@ -193,7 +193,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:65](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L65)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:65](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L65)
 
 ___
 
@@ -203,7 +203,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:138](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L138)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:138](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L138)
 
 ___
 
@@ -213,7 +213,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:123](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L123)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:123](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L123)
 
 ___
 
@@ -237,7 +237,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:81](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L81)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:81](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L81)
 
 ___
 
@@ -253,7 +253,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:49](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L49)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L49)
 
 ___
 
@@ -263,7 +263,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:52](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L52)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L52)
 
 ___
 
@@ -273,7 +273,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:51](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L51)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L51)
 
 ___
 
@@ -283,7 +283,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:50](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L50)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L50)
 
 ___
 
@@ -293,7 +293,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:74](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L74)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:74](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L74)
 
 ___
 
@@ -303,7 +303,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L67)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:67](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L67)
 
 ___
 
@@ -313,7 +313,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:69](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L69)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:69](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L69)
 
 ___
 
@@ -323,7 +323,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:55](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L55)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:55](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L55)
 
 ___
 
@@ -333,7 +333,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:54](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L54)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L54)
 
 ___
 
@@ -343,7 +343,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:53](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L53)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L53)
 
 ___
 
@@ -353,7 +353,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:56](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L56)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:56](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L56)
 
 ___
 
@@ -363,7 +363,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:57](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L57)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:57](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L57)
 
 ___
 
@@ -373,7 +373,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:63](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L63)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:63](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L63)
 
 ___
 
@@ -383,7 +383,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:59](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L59)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:59](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L59)
 
 ## Methods
 
@@ -415,7 +415,7 @@ addErrorStatusCodes(StatusCode.PaymentRequired, StatusCode.Conflict)
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:394](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L394)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:394](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L394)
 
 ___
 
@@ -446,7 +446,7 @@ addTags('User','Public')
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:376](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L376)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:376](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L376)
 
 ___
 
@@ -479,7 +479,7 @@ CommandDefinitionBuilder
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:290](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L290)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:290](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L290)
 
 ___
 
@@ -510,7 +510,7 @@ CommandDefinitionBuilder
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:322](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L322)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:322](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L322)
 
 ___
 
@@ -543,7 +543,7 @@ CommandDefinitionBuilder
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:265](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L265)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:265](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L265)
 
 ___
 
@@ -584,7 +584,7 @@ CommandDefinitionBuilder
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:359](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L359)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:359](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L359)
 
 ___
 
@@ -614,7 +614,7 @@ CommandDefinition
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:726](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L726)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:726](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L726)
 
 ___
 
@@ -644,7 +644,7 @@ Define which custom events the command can emit.
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:226](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L226)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:226](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L226)
 
 ___
 
@@ -682,7 +682,7 @@ Define a command which can be invoked by the current command
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:151](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L151)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:151](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L151)
 
 ___
 
@@ -706,7 +706,7 @@ CommandDefinitionBuilder
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:626](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L626)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:626](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L626)
 
 ___
 
@@ -730,7 +730,7 @@ CommandDefinitionBuilder
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:616](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L616)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:616](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L616)
 
 ___
 
@@ -763,7 +763,7 @@ CommandDefinitionBuilder
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:588](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L588)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:588](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L588)
 
 ___
 
@@ -783,7 +783,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:657](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L657)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:657](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L657)
 
 ___
 
@@ -854,7 +854,7 @@ a mocked command function context
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:932](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L932)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:932](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L932)
 
 ___
 
@@ -873,7 +873,7 @@ the function
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:872](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L872)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:872](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L872)
 
 ___
 
@@ -892,7 +892,7 @@ the function
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:905](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L905)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:905](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L905)
 
 ___
 
@@ -957,7 +957,7 @@ a mocked transform function context
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:949](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L949)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:949](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L949)
 
 ___
 
@@ -975,7 +975,7 @@ CommandDefinition
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:735](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L735)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:735](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L735)
 
 ___
 
@@ -993,7 +993,7 @@ the input transform function if defined
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:448](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L448)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:448](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L448)
 
 ___
 
@@ -1011,7 +1011,7 @@ the transform output function if defined
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:509](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L509)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:509](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L509)
 
 ___
 
@@ -1029,7 +1029,7 @@ CommandDefinitionBuilder
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:311](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L311)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:311](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L311)
 
 ___
 
@@ -1054,7 +1054,7 @@ CommandDefinitionBuilder
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:554](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L554)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:554](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L554)
 
 ___
 
@@ -1079,7 +1079,7 @@ CommandDefinitionBuilder
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:530](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L530)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:530](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L530)
 
 ___
 
@@ -1115,7 +1115,7 @@ async function (context, payload, parameter) {
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:820](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L820)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:820](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L820)
 
 ___
 
@@ -1139,7 +1139,7 @@ CommandDefinitionBuilder
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:652](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L652)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:652](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L652)
 
 ___
 
@@ -1169,7 +1169,7 @@ setSummary('Some function summary')
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:642](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L642)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:642](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L642)
 
 ___
 
@@ -1195,7 +1195,7 @@ ___
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:252](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L252)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:252](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L252)
 
 ___
 
@@ -1232,7 +1232,7 @@ CommandDefinitionBuilder
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:410](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L410)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:410](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L410)
 
 ___
 
@@ -1267,4 +1267,4 @@ CommandDefinitionBuilder
 
 #### Defined in
 
-[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:472](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L472)
+[CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts:472](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilder.impl.ts#L472)

@@ -77,7 +77,7 @@ const _serverInstance = serve({
 
 #### Defined in
 
-[packages/hono-http-server/src/types/BindingsBase.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/types/BindingsBase.ts#L1)
+[packages/hono-http-server/src/types/BindingsBase.ts:1](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/types/BindingsBase.ts#L1)
 
 ___
 
@@ -111,7 +111,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/types/EndpointProtectMiddleware.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/types/EndpointProtectMiddleware.ts#L7)
+[packages/hono-http-server/src/types/EndpointProtectMiddleware.ts:7](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/types/EndpointProtectMiddleware.ts#L7)
 
 ___
 
@@ -141,7 +141,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/types/HealthFunction.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/types/HealthFunction.ts#L3)
+[packages/hono-http-server/src/types/HealthFunction.ts:3](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/types/HealthFunction.ts#L3)
 
 ___
 
@@ -151,7 +151,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:75](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L75)
+[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:75](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L75)
 
 ___
 
@@ -171,7 +171,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/types/VariablesBase.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/types/VariablesBase.ts#L1)
+[packages/hono-http-server/src/types/VariablesBase.ts:1](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/types/VariablesBase.ts#L1)
 
 ## Variables
 
@@ -181,7 +181,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L6)
+[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L6)
 
 ___
 
@@ -191,7 +191,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L14)
+[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:14](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L14)
 
 ___
 
@@ -201,7 +201,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:25](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L25)
+[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:25](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L25)
 
 ___
 
@@ -219,7 +219,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L8)
+[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:8](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L8)
 
 ___
 
@@ -229,7 +229,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:45](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L45)
+[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:45](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L45)
 
 ___
 
@@ -239,7 +239,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L19)
+[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:19](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L19)
 
 ___
 
@@ -249,7 +249,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:50](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L50)
+[packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:50](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L50)
 
 ___
 
@@ -259,7 +259,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/service/hono/v1/honoV1Service.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoV1Service.ts#L16)
+[packages/hono-http-server/src/service/hono/v1/honoV1Service.ts:16](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoV1Service.ts#L16)
 
 ___
 
@@ -269,7 +269,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/version.ts#L1)
+[packages/hono-http-server/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/version.ts#L1)
 
 ## Functions
 
@@ -293,7 +293,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/helper/addPathToOpenApi.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/helper/addPathToOpenApi.ts#L14)
+[packages/hono-http-server/src/helper/addPathToOpenApi.ts:14](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/addPathToOpenApi.ts#L14)
 
 ___
 
@@ -313,7 +313,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/helper/getErrorName.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/helper/getErrorName.ts#L3)
+[packages/hono-http-server/src/helper/getErrorName.ts:3](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/getErrorName.ts#L3)
 
 ___
 
@@ -335,7 +335,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/helper/getErrorResponseSchema.ts:55](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/helper/getErrorResponseSchema.ts#L55)
+[packages/hono-http-server/src/helper/getErrorResponseSchema.ts:55](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/getErrorResponseSchema.ts#L55)
 
 ___
 
@@ -356,7 +356,7 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/helper/getParameterDefinition.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/helper/getParameterDefinition.ts#L6)
+[packages/hono-http-server/src/helper/getParameterDefinition.ts:6](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/getParameterDefinition.ts#L6)
 
 ___
 
@@ -377,4 +377,4 @@ ___
 
 #### Defined in
 
-[packages/hono-http-server/src/helper/getQueryDefintion.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/hono-http-server/src/helper/getQueryDefintion.ts#L5)
+[packages/hono-http-server/src/helper/getQueryDefintion.ts:5](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/getQueryDefintion.ts#L5)

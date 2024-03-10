@@ -66,7 +66,7 @@ DaprStateStore is an adapter which connects to the state store provided by the u
 
 #### Defined in
 
-[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L18)
+[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L18)
 
 ## Properties
 
@@ -76,7 +76,7 @@ DaprStateStore is an adapter which connects to the state store provided by the u
 
 #### Defined in
 
-[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L16)
+[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L16)
 
 ___
 
@@ -210,7 +210,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:53](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L53)
+[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:53](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L53)
 
 ___
 
@@ -258,7 +258,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:99](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L99)
+[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:99](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L99)
 
 ___
 
@@ -308,4 +308,4 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:82](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L82)
+[dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:82](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L82)

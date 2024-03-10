@@ -23,7 +23,7 @@ In the flowing example, it is expected:
 
 ::: info
 
-Here, we only focus on technical requirements and basic setup. The example can be found on [GitHub PURISTA examples](https://github.com/sebastianwessel/purista/tree/master/examples/kubernetes).
+Here, we only focus on technical requirements and basic setup. The example can be found on [GitHub PURISTA examples](https://github.com/puristajs/purista/tree/master/examples/kubernetes).
 :::
 
 ## Prepare your code

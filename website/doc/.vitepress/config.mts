@@ -53,7 +53,7 @@ export default defineConfig({
     },
     logo: '/purista_logo.png',
     editLink: {
-          pattern: 'https://github.com/sebastianwessel/purista/tree/master/website/doc/:path',
+          pattern: 'https://github.com/puristajs/purista/tree/master/website/doc/:path',
           text: 'Edit this page on GitHub'
         },
     outline: 'deep',
@@ -246,7 +246,7 @@ export default defineConfig({
     },
 
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/sebastianwessel/purista' },
+      { icon: 'github', link: 'https://github.com/puristajs/purista' },
       { icon: 'twitter', link: 'https://twitter.com/purista_js' },
       { icon: 'discord', link: 'https://discord.gg/9feaUm3H2v' }
     ],

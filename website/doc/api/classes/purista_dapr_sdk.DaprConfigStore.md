@@ -67,7 +67,7 @@ DaprConfigStore is an adapter which connects to the config store provided by the
 
 #### Defined in
 
-[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L19)
+[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L19)
 
 ## Properties
 
@@ -91,7 +91,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:17](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L17)
+[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L17)
 
 ___
 
@@ -235,7 +235,7 @@ an object of { [configName]: value | undefined }
 
 #### Defined in
 
-[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:54](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L54)
+[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:54](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L54)
 
 ___
 
@@ -289,7 +289,7 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:84](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L84)
+[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:84](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L84)
 
 ___
 
@@ -345,4 +345,4 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:80](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L80)
+[dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L80)

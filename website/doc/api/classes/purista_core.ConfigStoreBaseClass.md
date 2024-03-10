@@ -73,7 +73,7 @@ __DO NOT OVERWRITE__: the regular methods getConfig, setConfig or removeConfig
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L28)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L28)
 
 ## Properties
 
@@ -83,7 +83,7 @@ __DO NOT OVERWRITE__: the regular methods getConfig, setConfig or removeConfig
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L26)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L26)
 
 ___
 
@@ -93,7 +93,7 @@ ___
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L22)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L22)
 
 ___
 
@@ -103,7 +103,7 @@ ___
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L21)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L21)
 
 ___
 
@@ -113,7 +113,7 @@ ___
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L24)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L24)
 
 ## Methods
 
@@ -127,7 +127,7 @@ ___
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:126](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L126)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:126](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L126)
 
 ___
 
@@ -159,7 +159,7 @@ an object of { [configName]: value | undefined }
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:62](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L62)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L62)
 
 ___
 
@@ -189,7 +189,7 @@ an object of { [configName]: value | undefined }
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:49](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L49)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L49)
 
 ___
 
@@ -213,7 +213,7 @@ For implementation overwrite protected `removeConfigImpl`
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:89](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L89)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:89](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L89)
 
 ___
 
@@ -235,7 +235,7 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:79](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L79)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:79](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L79)
 
 ___
 
@@ -260,7 +260,7 @@ For implementation overwrite protected `setConfigImpl`
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:116](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L116)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:116](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L116)
 
 ___
 
@@ -283,4 +283,4 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[core/ConfigStore/ConfigStoreBaseClass.impl.ts:105](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L105)
+[core/ConfigStore/ConfigStoreBaseClass.impl.ts:105](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L105)

@@ -71,7 +71,7 @@ await eventBridge.start()
 
 #### Defined in
 
-[mqttbridge/src/types/IncomingMessageFunction.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/types/IncomingMessageFunction.ts#L6)
+[mqttbridge/src/types/IncomingMessageFunction.ts:6](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/types/IncomingMessageFunction.ts#L6)
 
 ___
 
@@ -83,7 +83,7 @@ the configuration for the MQTT event bridge
 
 #### Defined in
 
-[mqttbridge/src/types/MqttBridgeConfig.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/types/MqttBridgeConfig.ts#L8)
+[mqttbridge/src/types/MqttBridgeConfig.ts:8](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/types/MqttBridgeConfig.ts#L8)
 
 ## Variables
 
@@ -93,7 +93,7 @@ the configuration for the MQTT event bridge
 
 #### Defined in
 
-[mqttbridge/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/version.ts#L1)
+[mqttbridge/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/version.ts#L1)
 
 ## Functions
 
@@ -116,7 +116,7 @@ the configuration for the MQTT event bridge
 
 #### Defined in
 
-[mqttbridge/src/handler/getCommandHandler.impl.ts:29](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/handler/getCommandHandler.impl.ts#L29)
+[mqttbridge/src/handler/getCommandHandler.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/handler/getCommandHandler.impl.ts#L29)
 
 ___
 
@@ -136,7 +136,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/topic/getCommandResponseSubscriptionTopic.impl.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getCommandResponseSubscriptionTopic.impl.ts#L8)
+[mqttbridge/src/topic/getCommandResponseSubscriptionTopic.impl.ts:8](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/getCommandResponseSubscriptionTopic.impl.ts#L8)
 
 ___
 
@@ -157,7 +157,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/topic/getCommandSubscriptionTopic.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getCommandSubscriptionTopic.impl.ts#L10)
+[mqttbridge/src/topic/getCommandSubscriptionTopic.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/getCommandSubscriptionTopic.impl.ts#L10)
 
 ___
 
@@ -183,7 +183,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/getDefaultMqttBridgeConfig.impl.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/getDefaultMqttBridgeConfig.impl.ts#L5)
+[mqttbridge/src/getDefaultMqttBridgeConfig.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/getDefaultMqttBridgeConfig.impl.ts#L5)
 
 ___
 
@@ -204,7 +204,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/topic/getSharedTopicName.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getSharedTopicName.impl.ts#L7)
+[mqttbridge/src/topic/getSharedTopicName.impl.ts:7](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/getSharedTopicName.impl.ts#L7)
 
 ___
 
@@ -225,7 +225,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/handler/getSubscriptionHandler.impl.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/handler/getSubscriptionHandler.impl.ts#L18)
+[mqttbridge/src/handler/getSubscriptionHandler.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/handler/getSubscriptionHandler.impl.ts#L18)
 
 ___
 
@@ -246,7 +246,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/topic/getSubscriptionTopic.impl.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getSubscriptionTopic.impl.ts#L10)
+[mqttbridge/src/topic/getSubscriptionTopic.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/getSubscriptionTopic.impl.ts#L10)
 
 ___
 
@@ -284,7 +284,7 @@ the MQTT topic
 
 #### Defined in
 
-[mqttbridge/src/topic/getTopicName.impl.ts:31](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/getTopicName.impl.ts#L31)
+[mqttbridge/src/topic/getTopicName.impl.ts:31](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/getTopicName.impl.ts#L31)
 
 ___
 
@@ -306,7 +306,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/handler/handleCommandResponse.impl.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/handler/handleCommandResponse.impl.ts#L16)
+[mqttbridge/src/handler/handleCommandResponse.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/handler/handleCommandResponse.impl.ts#L16)
 
 ___
 
@@ -329,7 +329,7 @@ Checks if a given topic is matching against a subscription pattern
 
 #### Defined in
 
-[mqttbridge/src/topic/isMatchingTopic.impl.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/isMatchingTopic.impl.ts#L8)
+[mqttbridge/src/topic/isMatchingTopic.impl.ts:8](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/isMatchingTopic.impl.ts#L8)
 
 ___
 
@@ -353,4 +353,4 @@ rounded value in seconds
 
 #### Defined in
 
-[mqttbridge/src/msToSec.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/msToSec.impl.ts#L7)
+[mqttbridge/src/msToSec.impl.ts:7](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/msToSec.impl.ts#L7)

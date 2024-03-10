@@ -65,7 +65,7 @@ AWS Secret Manager store config
 
 #### Defined in
 
-[aws-secret-store/src/types.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/aws-secret-store/src/types.ts#L6)
+[aws-secret-store/src/types.ts:6](https://github.com/puristajs/purista/blob/master/packages/aws-secret-store/src/types.ts#L6)
 
 ## Variables
 
@@ -75,4 +75,4 @@ AWS Secret Manager store config
 
 #### Defined in
 
-[aws-secret-store/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/aws-secret-store/src/version.ts#L1)
+[aws-secret-store/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/aws-secret-store/src/version.ts#L1)

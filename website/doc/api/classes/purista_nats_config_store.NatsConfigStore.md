@@ -90,7 +90,7 @@ console.log(value) // outputs: undefined
 
 #### Defined in
 
-[nats-config-store/src/NatsConfigStore.impl.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L37)
+[nats-config-store/src/NatsConfigStore.impl.ts:37](https://github.com/puristajs/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L37)
 
 ## Properties
 
@@ -141,7 +141,7 @@ ___
 
 #### Defined in
 
-[nats-config-store/src/NatsConfigStore.impl.ts:32](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L32)
+[nats-config-store/src/NatsConfigStore.impl.ts:32](https://github.com/puristajs/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L32)
 
 ___
 
@@ -151,7 +151,7 @@ ___
 
 #### Defined in
 
-[nats-config-store/src/NatsConfigStore.impl.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L35)
+[nats-config-store/src/NatsConfigStore.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L35)
 
 ___
 
@@ -189,7 +189,7 @@ ___
 
 #### Defined in
 
-[nats-config-store/src/NatsConfigStore.impl.ts:34](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L34)
+[nats-config-store/src/NatsConfigStore.impl.ts:34](https://github.com/puristajs/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L34)
 
 ## Methods
 
@@ -207,7 +207,7 @@ ___
 
 #### Defined in
 
-[nats-config-store/src/NatsConfigStore.impl.ts:116](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L116)
+[nats-config-store/src/NatsConfigStore.impl.ts:116](https://github.com/puristajs/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L116)
 
 ___
 
@@ -277,7 +277,7 @@ an object of { [configName]: value | undefined }
 
 #### Defined in
 
-[nats-config-store/src/NatsConfigStore.impl.ts:73](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L73)
+[nats-config-store/src/NatsConfigStore.impl.ts:73](https://github.com/puristajs/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L73)
 
 ___
 
@@ -291,7 +291,7 @@ ___
 
 #### Defined in
 
-[nats-config-store/src/NatsConfigStore.impl.ts:45](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L45)
+[nats-config-store/src/NatsConfigStore.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L45)
 
 ___
 
@@ -345,7 +345,7 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[nats-config-store/src/NatsConfigStore.impl.ts:92](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L92)
+[nats-config-store/src/NatsConfigStore.impl.ts:92](https://github.com/puristajs/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L92)
 
 ___
 
@@ -401,4 +401,4 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[nats-config-store/src/NatsConfigStore.impl.ts:104](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L104)
+[nats-config-store/src/NatsConfigStore.impl.ts:104](https://github.com/puristajs/purista/blob/master/packages/nats-config-store/src/NatsConfigStore.impl.ts#L104)

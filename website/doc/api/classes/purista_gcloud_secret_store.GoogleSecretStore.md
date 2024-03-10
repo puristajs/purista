@@ -77,7 +77,7 @@ It will be removed/overwritten on next get request.
 
 #### Defined in
 
-[gcloud-secret-store/src/GoogleSecretStore.impl.ts:30](https://github.com/sebastianwessel/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L30)
+[gcloud-secret-store/src/GoogleSecretStore.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L30)
 
 ## Properties
 
@@ -101,7 +101,7 @@ ___
 
 #### Defined in
 
-[gcloud-secret-store/src/GoogleSecretStore.impl.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L28)
+[gcloud-secret-store/src/GoogleSecretStore.impl.ts:28](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L28)
 
 ___
 
@@ -235,7 +235,7 @@ ___
 
 #### Defined in
 
-[gcloud-secret-store/src/GoogleSecretStore.impl.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L35)
+[gcloud-secret-store/src/GoogleSecretStore.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L35)
 
 ___
 
@@ -283,7 +283,7 @@ ___
 
 #### Defined in
 
-[gcloud-secret-store/src/GoogleSecretStore.impl.ts:56](https://github.com/sebastianwessel/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L56)
+[gcloud-secret-store/src/GoogleSecretStore.impl.ts:56](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L56)
 
 ___
 
@@ -333,4 +333,4 @@ ___
 
 #### Defined in
 
-[gcloud-secret-store/src/GoogleSecretStore.impl.ts:60](https://github.com/sebastianwessel/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L60)
+[gcloud-secret-store/src/GoogleSecretStore.impl.ts:60](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L60)

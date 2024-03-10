@@ -37,7 +37,7 @@
 
 #### Defined in
 
-[core/types/Logger.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L37)
+[core/types/Logger.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L37)
 
 ___
 
@@ -57,7 +57,7 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L35)
+[core/types/Logger.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L35)
 
 ___
 
@@ -77,7 +77,7 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:34](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L34)
+[core/types/Logger.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L34)
 
 ___
 
@@ -97,7 +97,7 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:33](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L33)
+[core/types/Logger.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L33)
 
 ___
 
@@ -117,7 +117,7 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:38](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L38)
+[core/types/Logger.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L38)
 
 ___
 
@@ -137,4 +137,4 @@ ___
 
 #### Defined in
 
-[core/types/Logger.ts:36](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/Logger.ts#L36)
+[core/types/Logger.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L36)

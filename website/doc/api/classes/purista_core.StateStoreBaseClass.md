@@ -72,7 +72,7 @@ __DO NOT OVERWRITE__: the regular methods getState, setState or removeState
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L24)
+[core/StateStore/StateStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L24)
 
 ## Properties
 
@@ -82,7 +82,7 @@ __DO NOT OVERWRITE__: the regular methods getState, setState or removeState
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L20)
+[core/StateStore/StateStoreBaseClass.impl.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L20)
 
 ___
 
@@ -92,7 +92,7 @@ ___
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L19)
+[core/StateStore/StateStoreBaseClass.impl.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L19)
 
 ___
 
@@ -102,7 +102,7 @@ ___
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L22)
+[core/StateStore/StateStoreBaseClass.impl.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L22)
 
 ## Methods
 
@@ -116,7 +116,7 @@ ___
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:82](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L82)
+[core/StateStore/StateStoreBaseClass.impl.ts:82](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L82)
 
 ___
 
@@ -142,7 +142,7 @@ ___
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:43](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L43)
+[core/StateStore/StateStoreBaseClass.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L43)
 
 ___
 
@@ -168,7 +168,7 @@ ___
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:38](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L38)
+[core/StateStore/StateStoreBaseClass.impl.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L38)
 
 ___
 
@@ -188,7 +188,7 @@ ___
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:58](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L58)
+[core/StateStore/StateStoreBaseClass.impl.ts:58](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L58)
 
 ___
 
@@ -208,7 +208,7 @@ ___
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:56](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L56)
+[core/StateStore/StateStoreBaseClass.impl.ts:56](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L56)
 
 ___
 
@@ -229,7 +229,7 @@ ___
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:72](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L72)
+[core/StateStore/StateStoreBaseClass.impl.ts:72](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L72)
 
 ___
 
@@ -250,4 +250,4 @@ ___
 
 #### Defined in
 
-[core/StateStore/StateStoreBaseClass.impl.ts:69](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L69)
+[core/StateStore/StateStoreBaseClass.impl.ts:69](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L69)

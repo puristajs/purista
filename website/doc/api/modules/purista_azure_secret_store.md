@@ -66,7 +66,7 @@ Azure Key Vault store config
 
 #### Defined in
 
-[azure-secret-store/src/types.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/azure-secret-store/src/types.ts#L6)
+[azure-secret-store/src/types.ts:6](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/types.ts#L6)
 
 ## Variables
 
@@ -76,4 +76,4 @@ Azure Key Vault store config
 
 #### Defined in
 
-[azure-secret-store/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/azure-secret-store/src/version.ts#L1)
+[azure-secret-store/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/version.ts#L1)

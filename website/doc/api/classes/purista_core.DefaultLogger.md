@@ -56,7 +56,7 @@
 
 #### Defined in
 
-[DefaultLogger/DefaultLogger.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L7)
+[DefaultLogger/DefaultLogger.impl.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L7)
 
 ## Properties
 
@@ -66,7 +66,7 @@
 
 #### Defined in
 
-[DefaultLogger/DefaultLogger.impl.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L7)
+[DefaultLogger/DefaultLogger.impl.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L7)
 
 ## Methods
 
@@ -94,7 +94,7 @@
 
 #### Defined in
 
-[DefaultLogger/DefaultLogger.impl.ts:43](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L43)
+[DefaultLogger/DefaultLogger.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L43)
 
 ___
 
@@ -122,7 +122,7 @@ ___
 
 #### Defined in
 
-[DefaultLogger/DefaultLogger.impl.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L19)
+[DefaultLogger/DefaultLogger.impl.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L19)
 
 ___
 
@@ -150,7 +150,7 @@ ___
 
 #### Defined in
 
-[DefaultLogger/DefaultLogger.impl.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L11)
+[DefaultLogger/DefaultLogger.impl.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L11)
 
 ___
 
@@ -174,7 +174,7 @@ ___
 
 #### Defined in
 
-[DefaultLogger/DefaultLogger.impl.ts:59](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L59)
+[DefaultLogger/DefaultLogger.impl.ts:59](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L59)
 
 ___
 
@@ -202,7 +202,7 @@ ___
 
 #### Defined in
 
-[DefaultLogger/DefaultLogger.impl.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L35)
+[DefaultLogger/DefaultLogger.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L35)
 
 ___
 
@@ -230,7 +230,7 @@ ___
 
 #### Defined in
 
-[DefaultLogger/DefaultLogger.impl.ts:51](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L51)
+[DefaultLogger/DefaultLogger.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L51)
 
 ___
 
@@ -258,4 +258,4 @@ ___
 
 #### Defined in
 
-[DefaultLogger/DefaultLogger.impl.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L27)
+[DefaultLogger/DefaultLogger.impl.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L27)

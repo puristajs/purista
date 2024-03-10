@@ -149,7 +149,7 @@ The configuration object for creating the k8s http server
 
 #### Defined in
 
-[types.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/k8s-sdk/src/types.ts#L6)
+[types.ts:6](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/types.ts#L6)
 
 ## Variables
 
@@ -159,7 +159,7 @@ The configuration object for creating the k8s http server
 
 #### Defined in
 
-[version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/k8s-sdk/src/version.ts#L1)
+[version.ts:1](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/version.ts#L1)
 
 ## Functions
 
@@ -188,7 +188,7 @@ The configuration object for creating the k8s http server
 
 #### Defined in
 
-[addServiceEndpoints.impl.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/k8s-sdk/src/addServiceEndpoints.impl.ts#L27)
+[addServiceEndpoints.impl.ts:27](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/addServiceEndpoints.impl.ts#L27)
 
 ___
 
@@ -217,4 +217,4 @@ a object with server, router, start and destroy functions and name var
 
 #### Defined in
 
-[getHttpServer.impl.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/k8s-sdk/src/getHttpServer.impl.ts#L21)
+[getHttpServer.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/getHttpServer.impl.ts#L21)
