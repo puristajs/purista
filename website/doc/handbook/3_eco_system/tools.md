@@ -1,18 +1,20 @@
 ---
-title: Servers (HTTP & co)
-description: The PURISTA HTTP server
-order: 303000
+title: Tools
+description: Tools for PURISTA framework
+order: 304000
 ---
 
-# Servers
+# Tools
 
-## Official servers
+Here is a list of tools for PURISTA.
+
+## Official tools
 
 | name           | category                                                               | package   | documentation |
 |---             |---                                                                     |---        |---        |
-| Hono based server | HTTP server| [@purista/hono-http-server](../../api/modules/purista_hono_http_server.md) | [Handbook](../2_building_business-logic/exposing_endpoints/rest_api_http_endpoints.md) |
+| Kubernetes SDK | deployment | [@purista/k8s-sdk](../../api/modules/purista_k8s_sdk.md) | [Handbook](../5_deploy_and_scale/microservice_style/kubernetes.md) |
 
-## Community servers
+## Community tools
 
 | name           | category                                                               | package   | documentation |
 |---             |---                                                                     |---        |---        |
