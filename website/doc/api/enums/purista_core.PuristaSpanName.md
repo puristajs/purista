@@ -38,7 +38,7 @@ Opentelemetry span names used by PURISTA framework
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L20)
+[core/types/PuristaSpanName.enum.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L20)
 
 ___
 
@@ -48,7 +48,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L22)
+[core/types/PuristaSpanName.enum.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L22)
 
 ___
 
@@ -58,7 +58,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L21)
+[core/types/PuristaSpanName.enum.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L21)
 
 ___
 
@@ -68,7 +68,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L11)
+[core/types/PuristaSpanName.enum.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L11)
 
 ___
 
@@ -78,7 +78,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L7)
+[core/types/PuristaSpanName.enum.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L7)
 
 ___
 
@@ -88,7 +88,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L13)
+[core/types/PuristaSpanName.enum.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L13)
 
 ___
 
@@ -98,7 +98,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L12)
+[core/types/PuristaSpanName.enum.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L12)
 
 ___
 
@@ -108,7 +108,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L10)
+[core/types/PuristaSpanName.enum.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L10)
 
 ___
 
@@ -118,7 +118,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L5)
+[core/types/PuristaSpanName.enum.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L5)
 
 ___
 
@@ -128,7 +128,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L8)
+[core/types/PuristaSpanName.enum.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L8)
 
 ___
 
@@ -138,7 +138,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L6)
+[core/types/PuristaSpanName.enum.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L6)
 
 ___
 
@@ -148,7 +148,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L14)
+[core/types/PuristaSpanName.enum.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L14)
 
 ___
 
@@ -158,7 +158,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L28)
+[core/types/PuristaSpanName.enum.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L28)
 
 ___
 
@@ -168,7 +168,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L16)
+[core/types/PuristaSpanName.enum.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L16)
 
 ___
 
@@ -178,7 +178,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L18)
+[core/types/PuristaSpanName.enum.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L18)
 
 ___
 
@@ -188,7 +188,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:17](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L17)
+[core/types/PuristaSpanName.enum.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L17)
 
 ___
 
@@ -198,7 +198,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L24)
+[core/types/PuristaSpanName.enum.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L24)
 
 ___
 
@@ -208,7 +208,7 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L26)
+[core/types/PuristaSpanName.enum.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L26)
 
 ___
 
@@ -218,4 +218,4 @@ ___
 
 #### Defined in
 
-[core/types/PuristaSpanName.enum.ts:25](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L25)
+[core/types/PuristaSpanName.enum.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L25)

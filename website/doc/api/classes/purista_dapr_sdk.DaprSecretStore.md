@@ -71,7 +71,7 @@ Dapr currently provides only the possibility to fetch a secret. Creating a new s
 
 #### Defined in
 
-[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L20)
+[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:20](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L20)
 
 ## Properties
 
@@ -95,7 +95,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L18)
+[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L18)
 
 ___
 
@@ -231,7 +231,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:55](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L55)
+[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:55](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L55)
 
 ___
 
@@ -279,7 +279,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:93](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L93)
+[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:93](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L93)
 
 ___
 
@@ -328,4 +328,4 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:89](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L89)
+[dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:89](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L89)

@@ -104,7 +104,7 @@ await eventBridge.start()
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:73](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L73)
+[mqttbridge/src/MqttEventBridge.ts:73](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L73)
 
 ## Properties
 
@@ -114,7 +114,7 @@ await eventBridge.start()
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:69](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L69)
+[mqttbridge/src/MqttEventBridge.ts:69](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L69)
 
 ___
 
@@ -158,7 +158,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L67)
+[mqttbridge/src/MqttEventBridge.ts:67](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L67)
 
 ___
 
@@ -218,7 +218,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:70](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L70)
+[mqttbridge/src/MqttEventBridge.ts:70](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L70)
 
 ___
 
@@ -228,7 +228,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:68](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L68)
+[mqttbridge/src/MqttEventBridge.ts:68](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L68)
 
 ___
 
@@ -238,7 +238,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:71](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L71)
+[mqttbridge/src/MqttEventBridge.ts:71](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L71)
 
 ___
 
@@ -276,7 +276,7 @@ Shut down event bridge as gracefully as possible
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:383](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L383)
+[mqttbridge/src/MqttEventBridge.ts:383](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L383)
 
 ___
 
@@ -341,7 +341,7 @@ Emit a message to the eventbridge without awaiting a result
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:130](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L130)
+[mqttbridge/src/MqttEventBridge.ts:130](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L130)
 
 ___
 
@@ -396,7 +396,7 @@ Call a command of a service and return the result of this command
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:206](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L206)
+[mqttbridge/src/MqttEventBridge.ts:206](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L206)
 
 ___
 
@@ -416,7 +416,7 @@ Indicates if the eventbridge is running and works correctly
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:202](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L202)
+[mqttbridge/src/MqttEventBridge.ts:202](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L202)
 
 ___
 
@@ -436,7 +436,7 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:198](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L198)
+[mqttbridge/src/MqttEventBridge.ts:198](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L198)
 
 ___
 
@@ -525,7 +525,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:326](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L326)
+[mqttbridge/src/MqttEventBridge.ts:326](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L326)
 
 ___
 
@@ -552,7 +552,7 @@ Register a new subscription
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:355](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L355)
+[mqttbridge/src/MqttEventBridge.ts:355](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L355)
 
 ___
 
@@ -594,7 +594,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:82](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L82)
+[mqttbridge/src/MqttEventBridge.ts:82](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L82)
 
 ___
 
@@ -657,7 +657,7 @@ Unregister a service command
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:349](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L349)
+[mqttbridge/src/MqttEventBridge.ts:349](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L349)
 
 ___
 
@@ -681,7 +681,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/MqttEventBridge.ts:381](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L381)
+[mqttbridge/src/MqttEventBridge.ts:381](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L381)
 
 ___
 

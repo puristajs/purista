@@ -66,7 +66,7 @@ Google Secret Manager store config
 
 #### Defined in
 
-[gcloud-secret-store/src/types.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/gcloud-secret-store/src/types.ts#L6)
+[gcloud-secret-store/src/types.ts:6](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/types.ts#L6)
 
 ## Variables
 
@@ -76,4 +76,4 @@ Google Secret Manager store config
 
 #### Defined in
 
-[gcloud-secret-store/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/gcloud-secret-store/src/version.ts#L1)
+[gcloud-secret-store/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/version.ts#L1)

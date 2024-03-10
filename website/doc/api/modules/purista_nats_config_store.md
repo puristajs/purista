@@ -47,7 +47,7 @@ console.log(value) // outputs: undefined
 
 #### Defined in
 
-[nats-config-store/src/types/NatsConfigStoreConfig.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/types/NatsConfigStoreConfig.ts#L4)
+[nats-config-store/src/types/NatsConfigStoreConfig.ts:4](https://github.com/puristajs/purista/blob/master/packages/nats-config-store/src/types/NatsConfigStoreConfig.ts#L4)
 
 ## Variables
 
@@ -57,4 +57,4 @@ console.log(value) // outputs: undefined
 
 #### Defined in
 
-[nats-config-store/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/nats-config-store/src/version.ts#L1)
+[nats-config-store/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/nats-config-store/src/version.ts#L1)

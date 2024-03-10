@@ -75,7 +75,7 @@ It will extend the StoreBaseConfig.
 
 #### Defined in
 
-[redis-state-store/src/types.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/types.ts#L7)
+[redis-state-store/src/types.ts:7](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/types.ts#L7)
 
 ## Variables
 
@@ -85,4 +85,4 @@ It will extend the StoreBaseConfig.
 
 #### Defined in
 
-[redis-state-store/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/redis-state-store/src/version.ts#L1)
+[redis-state-store/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/version.ts#L1)

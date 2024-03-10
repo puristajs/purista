@@ -65,7 +65,7 @@ AWS System Manager config
 
 #### Defined in
 
-[aws-config-store/src/types.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/types.ts#L6)
+[aws-config-store/src/types.ts:6](https://github.com/puristajs/purista/blob/master/packages/aws-config-store/src/types.ts#L6)
 
 ## Variables
 
@@ -75,4 +75,4 @@ AWS System Manager config
 
 #### Defined in
 
-[aws-config-store/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/version.ts#L1)
+[aws-config-store/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/aws-config-store/src/version.ts#L1)
