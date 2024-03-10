@@ -2,26 +2,30 @@ import type { Infer, InferIn, Schema } from '@typeschema/main'
 import type { SinonSandbox } from 'sinon'
 import type { ZodAny } from 'zod'
 
-import {
-  type CommandAfterGuardHook,
-  type CommandBeforeGuardHook,
-  type CommandDefinition,
-  type CommandDefinitionMetadataBase,
-  type CommandFunction,
-  type CommandTransformInputHook,
-  type CommandTransformOutputHook,
-  type Complete,
-  type ContentType,
-  type DefinitionEventBridgeConfig,
-  type FromInvokeToOtherType,
-  type HttpExposedServiceMeta,
-  type QueryParameter,
-  type ServiceClass,
-  StatusCode,
-  type SupportedHttpMethod,
-  UnhandledError,
+import type {
+  CommandAfterGuardHook,
+  CommandBeforeGuardHook,
+  CommandDefinition,
+  CommandDefinitionMetadataBase,
+  CommandFunction,
+  CommandTransformInputHook,
+  CommandTransformOutputHook,
+  Complete,
+  ContentType,
+  DefinitionEventBridgeConfig,
+  FromEmitToOtherType,
+  FromInvokeToOtherType,
+  HttpExposedServiceMeta,
+  QueryParameter,
+  ServiceClass,
+  SupportedHttpMethod,
 } from '../core/index.js'
-import { type NonEmptyString } from '../helper/index.js'
+import { StatusCode, UnhandledError } from '../core/index.js'
+import {
+  convertEmitValidationsToSchema,
+  convertInvokeValidationsToSchema,
+  type NonEmptyString,
+} from '../helper/index.js'
 import { getCommandContextMock, getCommandTransformContextMock } from '../mocks/index.js'
 import { validationToSchema } from '../zodOpenApi/index.js'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
@@ -76,7 +80,7 @@ export class CommandDefinitionBuilder<
     { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }
   > = {} as FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
 
-  private emitList: EmitListType = {} as EmitListType
+  private emitList: FromEmitToOtherType<EmitListType, Schema> = {} as FromEmitToOtherType<EmitListType, Schema>
 
   private hooks: {
     transformInput?: {
@@ -767,10 +771,12 @@ export class CommandDefinitionBuilder<
       shared: true,
     }
 
-    const [inputPayload, parameter, outputPayload] = await Promise.all([
+    const [inputPayload, parameter, outputPayload, invokes, emitList] = await Promise.all([
       validationToSchema(inputPayloadSchema),
       validationToSchema(inputParameterSchema),
       validationToSchema(outputPayloadSchema),
+      convertInvokeValidationsToSchema(this.invokes),
+      convertEmitValidationsToSchema(this.emitList),
     ])
 
     const definition: Complete<
@@ -805,8 +811,8 @@ export class CommandDefinitionBuilder<
       eventName,
       call: this.getCommandFunction(),
       hooks: this.hooks,
-      invokes: this.invokes,
-      emitList: this.emitList,
+      invokes,
+      emitList,
     }
 
     return this.extendWithHttpMetadata(definition)

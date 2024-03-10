@@ -23,7 +23,7 @@ export const getSubscriptionContextMock = <Invokes = {}, EmitListType = {}>(
     Invokes,
     { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }
   >,
-  emitList?: EmitListType,
+  emitList?: FromEmitToOtherType<EmitListType, Schema>,
 ) => {
   const logger = getLoggerMock(sandbox)
 
