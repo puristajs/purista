@@ -5,7 +5,7 @@ import type { FullServiceDefinition } from './types/FullServiceDefinition.js'
 import type { ServiceDefinitions } from './types/ServiceDefinitions.js'
 
 /**
- * Merge service definitions onto one big object structure
+ * Merge service definitions into one big full service definition structure
  * @param existing
  * @param defintionToAdd
  * @returns

@@ -1,4 +1,5 @@
 import {
+  ClientBuilder,
   CommandDefinitionBuilder,
   convertToCamelCase,
   convertToKebabCase,
@@ -40,6 +41,7 @@ import {
   isInfoMessage,
   isInfoServiceFunctionAdded,
   puristaVersion,
+  schemaObjectToTsType,
   Service,
   ServiceBuilder,
   StatusCode,
@@ -104,4 +106,7 @@ it('exports core functions', () => {
   expect(getCommandMessageMock).toBeDefined()
   expect(getCommandSuccessMessageMock).toBeDefined()
   expect(getCustomMessageMessageMock).toBeDefined()
+
+  expect(ClientBuilder).toBeDefined()
+  expect(schemaObjectToTsType).toBeDefined()
 })

@@ -1,7 +1,9 @@
 import type { Schema } from '@typeschema/main'
+import type { SchemaObject } from 'openapi3-ts/oas31.js'
 
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { EBMessageType } from '../EBMessageType.enum.js'
+import type { FromEmitToOtherType } from '../FromEmitToOtherType.js'
 import type { FromInvokeToOtherType } from '../FromInvokeToOtherType.js'
 import type { InstanceId } from '../InstanceId.js'
 import type { PrincipalId } from '../PrincipalId.js'
@@ -101,7 +103,10 @@ export type SubscriptionDefinition<
       transformFunction: SubscriptionTransformOutputHook<ServiceClassType, FunctionResultType, FunctionParamsType, any>
     }
   }
-  invokes: FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
-  emitList: EmitListType
+  invokes: FromInvokeToOtherType<
+    Invokes,
+    { outputSchema?: SchemaObject; payloadSchema?: SchemaObject; parameterSchema?: SchemaObject }
+  >
+  emitList: FromEmitToOtherType<EmitListType, SchemaObject>
   deprecated: boolean
 }
