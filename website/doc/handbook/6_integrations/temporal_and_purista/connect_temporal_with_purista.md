@@ -97,8 +97,8 @@ export const getInvoke =
         payload,
         parameter,
       },
-      contentEncoding: 'application/json',
-      contentType: 'utf-8',
+      contentEncoding: 'utf-8',
+      contentType: 'application/json',
     })
   }
 
