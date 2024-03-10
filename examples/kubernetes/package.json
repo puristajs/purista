@@ -6,7 +6,7 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git@github.com:sebastianwessel/purista.git"
+    "url": "git@github.com:puristajs/purista.git"
   },
   "type": "module",
   "author": "Sebastian Wessel",

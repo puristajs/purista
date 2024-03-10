@@ -42,7 +42,7 @@ The default time until when a command invocation automatically returns a time ou
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L26)
+[core/EventBridge/types/EventBridge.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L26)
 
 ___
 
@@ -52,7 +52,7 @@ ___
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L22)
+[core/EventBridge/types/EventBridge.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L22)
 
 ___
 
@@ -62,7 +62,7 @@ ___
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L20)
+[core/EventBridge/types/EventBridge.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L20)
 
 ## Methods
 
@@ -78,7 +78,7 @@ Shut down event bridge as gracefully as possible
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:99](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L99)
+[core/EventBridge/types/EventBridge.ts:99](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L99)
 
 ___
 
@@ -100,7 +100,7 @@ Emit a message to the eventbridge without awaiting a result
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L37)
+[core/EventBridge/types/EventBridge.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L37)
 
 ___
 
@@ -129,7 +129,7 @@ Call a command of a service and return the result of this command
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:46](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L46)
+[core/EventBridge/types/EventBridge.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L46)
 
 ___
 
@@ -145,7 +145,7 @@ Indicates if the eventbridge is running and works correctly
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:94](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L94)
+[core/EventBridge/types/EventBridge.ts:94](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L94)
 
 ___
 
@@ -161,7 +161,7 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:89](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L89)
+[core/EventBridge/types/EventBridge.ts:89](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L89)
 
 ___
 
@@ -184,7 +184,7 @@ ___
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:53](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L53)
+[core/EventBridge/types/EventBridge.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L53)
 
 ___
 
@@ -207,7 +207,7 @@ Register a new subscription
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:75](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L75)
+[core/EventBridge/types/EventBridge.ts:75](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L75)
 
 ___
 
@@ -223,7 +223,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:31](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L31)
+[core/EventBridge/types/EventBridge.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L31)
 
 ___
 
@@ -245,7 +245,7 @@ Unregister a service command
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:68](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L68)
+[core/EventBridge/types/EventBridge.ts:68](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L68)
 
 ___
 
@@ -265,4 +265,4 @@ ___
 
 #### Defined in
 
-[core/EventBridge/types/EventBridge.ts:84](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L84)
+[core/EventBridge/types/EventBridge.ts:84](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L84)

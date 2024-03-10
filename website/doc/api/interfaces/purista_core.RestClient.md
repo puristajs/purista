@@ -51,7 +51,7 @@ If response content type is `application/json`, the JSON parsed result will be r
 
 #### Defined in
 
-[HttpClient/types/RestClient.ts:60](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/types/RestClient.ts#L60)
+[HttpClient/types/RestClient.ts:60](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/RestClient.ts#L60)
 
 ___
 
@@ -82,7 +82,7 @@ If response content type is `application/json`, the JSON parsed result will be r
 
 #### Defined in
 
-[HttpClient/types/RestClient.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/types/RestClient.ts#L21)
+[HttpClient/types/RestClient.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/RestClient.ts#L21)
 
 ___
 
@@ -114,7 +114,7 @@ If response content type is `application/json`, the JSON parsed result will be r
 
 #### Defined in
 
-[HttpClient/types/RestClient.ts:51](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/types/RestClient.ts#L51)
+[HttpClient/types/RestClient.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/RestClient.ts#L51)
 
 ___
 
@@ -146,7 +146,7 @@ If response content type is `application/json`, the JSON parsed result will be r
 
 #### Defined in
 
-[HttpClient/types/RestClient.ts:31](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/types/RestClient.ts#L31)
+[HttpClient/types/RestClient.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/RestClient.ts#L31)
 
 ___
 
@@ -178,7 +178,7 @@ If response content type is `application/json`, the JSON parsed result will be r
 
 #### Defined in
 
-[HttpClient/types/RestClient.ts:41](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/types/RestClient.ts#L41)
+[HttpClient/types/RestClient.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/RestClient.ts#L41)
 
 ___
 
@@ -200,4 +200,4 @@ Set the Auth-Bearer-Token for all following requests
 
 #### Defined in
 
-[HttpClient/types/RestClient.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/types/RestClient.ts#L12)
+[HttpClient/types/RestClient.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/RestClient.ts#L12)

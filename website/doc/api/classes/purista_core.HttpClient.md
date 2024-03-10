@@ -85,7 +85,7 @@ const result = await client.get('v1/orders')
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:41](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L41)
+[HttpClient/HttpClient.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L41)
 
 ## Properties
 
@@ -95,7 +95,7 @@ const result = await client.get('v1/orders')
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:40](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L40)
+[HttpClient/HttpClient.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L40)
 
 ___
 
@@ -105,7 +105,7 @@ ___
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L35)
+[HttpClient/HttpClient.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L35)
 
 ___
 
@@ -115,7 +115,7 @@ ___
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:31](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L31)
+[HttpClient/HttpClient.impl.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L31)
 
 ___
 
@@ -125,7 +125,7 @@ ___
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:30](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L30)
+[HttpClient/HttpClient.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L30)
 
 ___
 
@@ -135,7 +135,7 @@ ___
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:29](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L29)
+[HttpClient/HttpClient.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L29)
 
 ___
 
@@ -145,7 +145,7 @@ ___
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L37)
+[HttpClient/HttpClient.impl.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L37)
 
 ___
 
@@ -155,7 +155,7 @@ ___
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:33](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L33)
+[HttpClient/HttpClient.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L33)
 
 ___
 
@@ -165,7 +165,7 @@ ___
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:38](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L38)
+[HttpClient/HttpClient.impl.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L38)
 
 ## Methods
 
@@ -199,7 +199,7 @@ DELETE request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:319](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L319)
+[HttpClient/HttpClient.impl.ts:319](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L319)
 
 ___
 
@@ -228,7 +228,7 @@ UnhandledError
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:183](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L183)
+[HttpClient/HttpClient.impl.ts:183](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L183)
 
 ___
 
@@ -261,7 +261,7 @@ GET request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:279](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L279)
+[HttpClient/HttpClient.impl.ts:279](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L279)
 
 ___
 
@@ -279,7 +279,7 @@ Tracer
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:84](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L84)
+[HttpClient/HttpClient.impl.ts:84](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L84)
 
 ___
 
@@ -305,7 +305,7 @@ ___
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:131](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L131)
+[HttpClient/HttpClient.impl.ts:131](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L131)
 
 ___
 
@@ -339,7 +339,7 @@ PATCH request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:309](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L309)
+[HttpClient/HttpClient.impl.ts:309](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L309)
 
 ___
 
@@ -373,7 +373,7 @@ POST request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:289](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L289)
+[HttpClient/HttpClient.impl.ts:289](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L289)
 
 ___
 
@@ -407,7 +407,7 @@ PUT request
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:299](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L299)
+[HttpClient/HttpClient.impl.ts:299](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L299)
 
 ___
 
@@ -433,7 +433,7 @@ Set the bearer token for all following requests.
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:170](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L170)
+[HttpClient/HttpClient.impl.ts:170](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L170)
 
 ___
 
@@ -466,4 +466,4 @@ return value of fn
 
 #### Defined in
 
-[HttpClient/HttpClient.impl.ts:96](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L96)
+[HttpClient/HttpClient.impl.ts:96](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L96)

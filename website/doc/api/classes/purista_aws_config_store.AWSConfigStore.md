@@ -76,7 +76,7 @@ It will be removed/overwritten on next get request.
 
 #### Defined in
 
-[aws-config-store/src/AWSConfigStore.impl.ts:30](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L30)
+[aws-config-store/src/AWSConfigStore.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L30)
 
 ## Properties
 
@@ -100,7 +100,7 @@ ___
 
 #### Defined in
 
-[aws-config-store/src/AWSConfigStore.impl.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L28)
+[aws-config-store/src/AWSConfigStore.impl.ts:28](https://github.com/puristajs/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L28)
 
 ___
 
@@ -243,7 +243,7 @@ an object of { [configName]: value | undefined }
 
 #### Defined in
 
-[aws-config-store/src/AWSConfigStore.impl.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L35)
+[aws-config-store/src/AWSConfigStore.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L35)
 
 ___
 
@@ -297,7 +297,7 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[aws-config-store/src/AWSConfigStore.impl.ts:58](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L58)
+[aws-config-store/src/AWSConfigStore.impl.ts:58](https://github.com/puristajs/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L58)
 
 ___
 
@@ -353,4 +353,4 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[aws-config-store/src/AWSConfigStore.impl.ts:66](https://github.com/sebastianwessel/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L66)
+[aws-config-store/src/AWSConfigStore.impl.ts:66](https://github.com/puristajs/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L66)

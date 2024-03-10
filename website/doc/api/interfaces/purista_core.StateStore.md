@@ -41,7 +41,7 @@ UnhandledError
 
 #### Defined in
 
-[core/StateStore/types/StateStore.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L19)
+[core/StateStore/types/StateStore.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L19)
 
 ___
 
@@ -53,7 +53,7 @@ name of store
 
 #### Defined in
 
-[core/StateStore/types/StateStore.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L12)
+[core/StateStore/types/StateStore.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L12)
 
 ___
 
@@ -73,7 +73,7 @@ UnhandledError
 
 #### Defined in
 
-[core/StateStore/types/StateStore.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L26)
+[core/StateStore/types/StateStore.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L26)
 
 ___
 
@@ -97,7 +97,7 @@ UnhandledError
 
 #### Defined in
 
-[core/StateStore/types/StateStore.ts:34](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L34)
+[core/StateStore/types/StateStore.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L34)
 
 ## Methods
 
@@ -113,4 +113,4 @@ disconnects and shuts down the state store
 
 #### Defined in
 
-[core/StateStore/types/StateStore.ts:39](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L39)
+[core/StateStore/types/StateStore.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L39)

@@ -122,7 +122,7 @@ await eventBridge.start()
 
 #### Defined in
 
-[dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts:45](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts#L45)
+[dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts#L45)
 
 ## Properties
 
@@ -272,7 +272,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts:43](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts#L43)
+[dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts#L43)
 
 ___
 
@@ -623,7 +623,7 @@ Register a new subscription
 
 #### Defined in
 
-[dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts:97](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts#L97)
+[dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts:97](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts#L97)
 
 ___
 
@@ -665,7 +665,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 #### Defined in
 
-[dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts:80](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts#L80)
+[dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/DaprEventBridge.impl.ts#L80)
 
 ___
 

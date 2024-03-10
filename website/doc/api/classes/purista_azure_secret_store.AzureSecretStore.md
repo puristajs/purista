@@ -77,7 +77,7 @@ It will be removed/overwritten on next get request.
 
 #### Defined in
 
-[azure-secret-store/src/AzureSecretStore.impl.ts:29](https://github.com/sebastianwessel/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L29)
+[azure-secret-store/src/AzureSecretStore.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L29)
 
 ## Properties
 
@@ -101,7 +101,7 @@ ___
 
 #### Defined in
 
-[azure-secret-store/src/AzureSecretStore.impl.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L27)
+[azure-secret-store/src/AzureSecretStore.impl.ts:27](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L27)
 
 ___
 
@@ -235,7 +235,7 @@ ___
 
 #### Defined in
 
-[azure-secret-store/src/AzureSecretStore.impl.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L37)
+[azure-secret-store/src/AzureSecretStore.impl.ts:37](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L37)
 
 ___
 
@@ -283,7 +283,7 @@ ___
 
 #### Defined in
 
-[azure-secret-store/src/AzureSecretStore.impl.ts:56](https://github.com/sebastianwessel/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L56)
+[azure-secret-store/src/AzureSecretStore.impl.ts:56](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L56)
 
 ___
 
@@ -333,4 +333,4 @@ ___
 
 #### Defined in
 
-[azure-secret-store/src/AzureSecretStore.impl.ts:60](https://github.com/sebastianwessel/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L60)
+[azure-secret-store/src/AzureSecretStore.impl.ts:60](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L60)

@@ -105,7 +105,7 @@ import { NatsBridge } from '@purista/natsbridge'
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:76](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L76)
+[natsbridge/src/NatsBridge.ts:76](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L76)
 
 ## Properties
 
@@ -115,7 +115,7 @@ import { NatsBridge } from '@purista/natsbridge'
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:71](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L71)
+[natsbridge/src/NatsBridge.ts:71](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L71)
 
 ___
 
@@ -139,7 +139,7 @@ ___
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:65](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L65)
+[natsbridge/src/NatsBridge.ts:65](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L65)
 
 ___
 
@@ -187,7 +187,7 @@ ___
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L67)
+[natsbridge/src/NatsBridge.ts:67](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L67)
 
 ___
 
@@ -197,7 +197,7 @@ ___
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:69](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L69)
+[natsbridge/src/NatsBridge.ts:69](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L69)
 
 ___
 
@@ -239,7 +239,7 @@ ___
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:74](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L74)
+[natsbridge/src/NatsBridge.ts:74](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L74)
 
 ___
 
@@ -249,7 +249,7 @@ ___
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:72](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L72)
+[natsbridge/src/NatsBridge.ts:72](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L72)
 
 ___
 
@@ -287,7 +287,7 @@ Shut down event bridge as gracefully as possible
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:388](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L388)
+[natsbridge/src/NatsBridge.ts:388](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L388)
 
 ___
 
@@ -352,7 +352,7 @@ Emit a message to the eventbridge without awaiting a result
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:106](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L106)
+[natsbridge/src/NatsBridge.ts:106](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L106)
 
 ___
 
@@ -407,7 +407,7 @@ Call a command of a service and return the result of this command
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:177](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L177)
+[natsbridge/src/NatsBridge.ts:177](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L177)
 
 ___
 
@@ -427,7 +427,7 @@ Indicates if the eventbridge is running and works correctly
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:102](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L102)
+[natsbridge/src/NatsBridge.ts:102](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L102)
 
 ___
 
@@ -447,7 +447,7 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:98](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L98)
+[natsbridge/src/NatsBridge.ts:98](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L98)
 
 ___
 
@@ -536,7 +536,7 @@ ___
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:318](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L318)
+[natsbridge/src/NatsBridge.ts:318](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L318)
 
 ___
 
@@ -563,7 +563,7 @@ Register a new subscription
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:359](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L359)
+[natsbridge/src/NatsBridge.ts:359](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L359)
 
 ___
 
@@ -605,7 +605,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:85](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L85)
+[natsbridge/src/NatsBridge.ts:85](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L85)
 
 ___
 
@@ -668,7 +668,7 @@ Unregister a service command
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:348](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L348)
+[natsbridge/src/NatsBridge.ts:348](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L348)
 
 ___
 
@@ -692,7 +692,7 @@ ___
 
 #### Defined in
 
-[natsbridge/src/NatsBridge.ts:375](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L375)
+[natsbridge/src/NatsBridge.ts:375](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L375)
 
 ___
 

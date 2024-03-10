@@ -17,17 +17,17 @@ There are a lot of different message system out there. So the question is, which
 | [__Default__](./default_event_bridge.md)  | 🚫     | ✅ __complex__                        | 🚫        | stable   |
 | [__MQTT__](./mqtt.md)                     | ✅     | ✅ __complex__                        | ✅        | beta |
 | [__AMQP__](./amqp.md)        | ✅     | ✅ __complex__                        | ✅        | beta |
-| __KubeMQ__                | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/64)     |
+| __KubeMQ__                | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/puristajs/purista/issues/64)     |
 | [__NATS__](./nats.md)                     | ✅     | ✅ __complex__                        | 🚫       | beta |
 | [__Dapr__](./dapr.md)                     | ✅     | ☑️ _event only_                        | ✅        | beta |
-| __Knative__| ✅     | 🔎 under investigation   | 🔎        | [requested](https://github.com/sebastianwessel/purista/issues/113)|
-| __AWS EventBridge__  | ✅     | ☑️ _event only<br>(max 5 per event)_   | ✅        | [planned](https://github.com/sebastianwessel/purista/issues/99)|
+| __Knative__| ✅     | 🔎 under investigation   | 🔎        | [requested](https://github.com/puristajs/purista/issues/113)|
+| __AWS EventBridge__  | ✅     | ☑️ _event only<br>(max 5 per event)_   | ✅        | [planned](https://github.com/puristajs/purista/issues/99)|
 
 __(*)__ _- complex = based on events and/or additional properties like sender, receiver, type_
 __(*)__ _- event only = subscriptions can subscribe to event names only_
 
 You need a other message broker to be supported?
-Than you can [open an issue](https://github.com/sebastianwessel/purista/issues) or implement on your own.
+Than you can [open an issue](https://github.com/puristajs/purista/issues) or implement on your own.
 
 ### Push based
 

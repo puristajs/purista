@@ -22,7 +22,7 @@
 
 #### Defined in
 
-[core/EventBridge/types/EventBridgeEvents.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L5)
+[core/EventBridge/types/EventBridgeEvents.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L5)
 
 ___
 
@@ -32,7 +32,7 @@ ___
 
 #### Defined in
 
-[core/EventBridge/types/EventBridgeEvents.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L6)
+[core/EventBridge/types/EventBridgeEvents.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L6)
 
 ___
 
@@ -42,7 +42,7 @@ ___
 
 #### Defined in
 
-[core/EventBridge/types/EventBridgeEvents.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L8)
+[core/EventBridge/types/EventBridgeEvents.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L8)
 
 ___
 
@@ -52,7 +52,7 @@ ___
 
 #### Defined in
 
-[core/EventBridge/types/EventBridgeEvents.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L12)
+[core/EventBridge/types/EventBridgeEvents.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L12)
 
 ___
 
@@ -62,4 +62,4 @@ ___
 
 #### Defined in
 
-[core/EventBridge/types/EventBridgeEvents.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L10)
+[core/EventBridge/types/EventBridgeEvents.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L10)

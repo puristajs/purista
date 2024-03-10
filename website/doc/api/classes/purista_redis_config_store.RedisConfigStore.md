@@ -115,7 +115,7 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 #### Defined in
 
-[redis-config-store/src/RedisConfigStore.impl.ts:48](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L48)
+[redis-config-store/src/RedisConfigStore.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L48)
 
 ## Properties
 
@@ -139,7 +139,7 @@ ___
 
 #### Defined in
 
-[redis-config-store/src/RedisConfigStore.impl.ts:46](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L46)
+[redis-config-store/src/RedisConfigStore.impl.ts:46](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L46)
 
 ___
 
@@ -212,7 +212,7 @@ core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:19
 
 #### Defined in
 
-[redis-config-store/src/RedisConfigStore.impl.ts:103](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L103)
+[redis-config-store/src/RedisConfigStore.impl.ts:103](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L103)
 
 ___
 
@@ -226,7 +226,7 @@ ___
 
 #### Defined in
 
-[redis-config-store/src/RedisConfigStore.impl.ts:54](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L54)
+[redis-config-store/src/RedisConfigStore.impl.ts:54](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L54)
 
 ___
 
@@ -296,7 +296,7 @@ an object of { [configName]: value | undefined }
 
 #### Defined in
 
-[redis-config-store/src/RedisConfigStore.impl.ts:61](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L61)
+[redis-config-store/src/RedisConfigStore.impl.ts:61](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L61)
 
 ___
 
@@ -350,7 +350,7 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[redis-config-store/src/RedisConfigStore.impl.ts:80](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L80)
+[redis-config-store/src/RedisConfigStore.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L80)
 
 ___
 
@@ -406,4 +406,4 @@ This method must be overwritten by actual store implementation.
 
 #### Defined in
 
-[redis-config-store/src/RedisConfigStore.impl.ts:92](https://github.com/sebastianwessel/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L92)
+[redis-config-store/src/RedisConfigStore.impl.ts:92](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L92)

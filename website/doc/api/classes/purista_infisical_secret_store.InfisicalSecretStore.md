@@ -107,7 +107,7 @@ console.log(value) // outputs: undefined
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalSecretStore.impl.ts:42](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L42)
+[infisical-secret-store/src/InfisicalSecretStore.impl.ts:42](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L42)
 
 ## Properties
 
@@ -131,7 +131,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalSecretStore.impl.ts:40](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L40)
+[infisical-secret-store/src/InfisicalSecretStore.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L40)
 
 ___
 
@@ -275,7 +275,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalSecretStore.impl.ts:51](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L51)
+[infisical-secret-store/src/InfisicalSecretStore.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L51)
 
 ___
 
@@ -323,7 +323,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalSecretStore.impl.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L67)
+[infisical-secret-store/src/InfisicalSecretStore.impl.ts:67](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L67)
 
 ___
 
@@ -373,4 +373,4 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalSecretStore.impl.ts:77](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L77)
+[infisical-secret-store/src/InfisicalSecretStore.impl.ts:77](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L77)

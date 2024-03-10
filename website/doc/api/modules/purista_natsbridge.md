@@ -66,7 +66,7 @@ import { NatsBridge } from '@purista/natsbridge'
 
 #### Defined in
 
-[natsbridge/src/types/IncomingMessageFunction.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/types/IncomingMessageFunction.ts#L5)
+[natsbridge/src/types/IncomingMessageFunction.ts:5](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/types/IncomingMessageFunction.ts#L5)
 
 ___
 
@@ -78,7 +78,7 @@ the configuration for the NATS event bridge
 
 #### Defined in
 
-[natsbridge/src/types/NatsBridgeConfig.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/types/NatsBridgeConfig.ts#L6)
+[natsbridge/src/types/NatsBridgeConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/types/NatsBridgeConfig.ts#L6)
 
 ## Variables
 
@@ -88,7 +88,7 @@ the configuration for the NATS event bridge
 
 #### Defined in
 
-[natsbridge/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/version.ts#L1)
+[natsbridge/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/version.ts#L1)
 
 ## Functions
 
@@ -109,7 +109,7 @@ the configuration for the NATS event bridge
 
 #### Defined in
 
-[natsbridge/src/topic/getCommandSubscriptionTopic.impl.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/topic/getCommandSubscriptionTopic.impl.ts#L8)
+[natsbridge/src/topic/getCommandSubscriptionTopic.impl.ts:8](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/topic/getCommandSubscriptionTopic.impl.ts#L8)
 
 ___
 
@@ -131,7 +131,7 @@ ___
 
 #### Defined in
 
-[natsbridge/src/getDefaultNatsBridgeConfig.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/getDefaultNatsBridgeConfig.ts#L4)
+[natsbridge/src/getDefaultNatsBridgeConfig.ts:4](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/getDefaultNatsBridgeConfig.ts#L4)
 
 ___
 
@@ -152,7 +152,7 @@ ___
 
 #### Defined in
 
-[natsbridge/src/getQueueGroupName.impl.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/getQueueGroupName.impl.ts#L3)
+[natsbridge/src/getQueueGroupName.impl.ts:3](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/getQueueGroupName.impl.ts#L3)
 
 ___
 
@@ -173,7 +173,7 @@ ___
 
 #### Defined in
 
-[natsbridge/src/topic/getSubscriptionTopic.impl.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/topic/getSubscriptionTopic.impl.ts#L8)
+[natsbridge/src/topic/getSubscriptionTopic.impl.ts:8](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/topic/getSubscriptionTopic.impl.ts#L8)
 
 ___
 
@@ -200,4 +200,4 @@ the NATS topic
 
 #### Defined in
 
-[natsbridge/src/topic/getTopicName.impl.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/natsbridge/src/topic/getTopicName.impl.ts#L18)
+[natsbridge/src/topic/getTopicName.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/topic/getTopicName.impl.ts#L18)

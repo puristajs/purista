@@ -20,7 +20,7 @@
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/DaprPubSubStatus.enum.ts:17](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubStatus.enum.ts#L17)
+[dapr-sdk/src/types/pubsub/DaprPubSubStatus.enum.ts:17](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubStatus.enum.ts#L17)
 
 ___
 
@@ -30,7 +30,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/DaprPubSubStatus.enum.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubStatus.enum.ts#L16)
+[dapr-sdk/src/types/pubsub/DaprPubSubStatus.enum.ts:16](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubStatus.enum.ts#L16)
 
 ___
 
@@ -40,4 +40,4 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/DaprPubSubStatus.enum.ts:15](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubStatus.enum.ts#L15)
+[dapr-sdk/src/types/pubsub/DaprPubSubStatus.enum.ts:15](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubStatus.enum.ts#L15)
