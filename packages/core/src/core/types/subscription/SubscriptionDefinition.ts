@@ -1,5 +1,5 @@
 import type { Schema } from '@typeschema/main'
-import type { SchemaObject } from 'openapi3-ts/oas31.js'
+import type { SchemaObject } from 'openapi3-ts/oas31'
 
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { EBMessageType } from '../EBMessageType.enum.js'
