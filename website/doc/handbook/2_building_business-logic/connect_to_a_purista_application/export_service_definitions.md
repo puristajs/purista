@@ -11,7 +11,7 @@ The concept of builders stems from the desire to efficiently access and process 
 Exporting this information is a straightforward process.
 
 ```typescript
-import { writeFile } from 'node:fs/promise'
+import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { exportServiceDefinitions } from '@purista/core'
