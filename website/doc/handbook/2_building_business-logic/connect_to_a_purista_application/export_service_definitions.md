@@ -20,7 +20,7 @@ import { pingV1Service } from './service/ping/v1/index.js'
 import { fooV1Service } from './service/foo/v1/index.js'
 import { barV1Service } from './service/bar/v1/index.js'
 
-const export = async () => {
+const exportDefinitions = async () => {
 
   const serviceBuilders = [pingV1Service, fooV1Service, barV1Service]
 
