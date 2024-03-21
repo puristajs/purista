@@ -25,15 +25,15 @@ export default defineConfig({
      const head: HeadConfig[] = []
 
      head.push(['meta', { property: 'og:title', content: pageData.frontmatter.title }])
-     head.push(['meta', { property: 'og:url', content: path.join(hostname,page.replace('.md','.html')) }])
+     head.push(['meta', { property: 'og:url', content: new URL(page.replace('.md','.html'),hostname).toString() }])
      head.push(['meta', { property: 'og:description', content: pageData.frontmatter.description }])
      head.push(['meta', { property: 'og:type', content: 'website' }])
-     head.push(['meta', { property: 'twitter:card', content: 'summary' }])
+     head.push(['meta', { property: 'twitter:card', content: 'summary_large_image' }])
      head.push(['meta', { property: 'twitter:site', content: '@purista_js' }])
-     head.push(['meta', { property: 'twitter:creator', content: '@swessel78' }])
+     head.push(['meta', { property: 'twitter:creator', content: '@purista_js' }])
 
      if(pageData.frontmatter.image) {
-       head.push(['meta', { property: 'og:image', content: path.join(hostname,pageData.frontmatter.image) }])
+       head.push(['meta', { property: 'og:image', content: new URL(pageData.frontmatter.image,hostname).toString() }])
      }else {
        head.push(['meta', { property: 'og:image', content: `https://ogpreview-ten.vercel.app/api/og?title=${encodeURIComponent(pageData.frontmatter.title)}&description=${encodeURIComponent(pageData.frontmatter.description)}` }])
      }
