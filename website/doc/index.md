@@ -10,7 +10,7 @@ hero:
   text: "THE TYPESCRIPT BACKEND FRAMEWORK"
   tagline: IoT/EDGE - SERVER - CLOUD - SERVERLESS
   image:
-      src: /purista_cli_logo.png
+      src: /purista_logo.png
       alt: PURISTA
   actions:
     - theme: brand

@@ -51,6 +51,7 @@ export default defineConfig({
     search: {
           provider: 'local'
     },
+    logo: '/purista_logo.png',
     editLink: {
           pattern: 'https://github.com/sebastianwessel/purista/tree/master/website/doc/:path',
           text: 'Edit this page on GitHub'
