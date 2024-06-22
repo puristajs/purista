@@ -40,14 +40,14 @@
   },
   "devDependencies": {
     "@types/node": "^20.11.17",
-    "sinon": "^17.0.1",
+    "sinon": "^18.0.0",
     "tsx": "^4.7.0",
-    "typescript": "^5.3.3",
+    "typescript": "^5.5.2",
     "vitest": "^1.3.0"
   },
   "dependencies": {
     "@fastify/static": "^7.0.1",
-    "@opentelemetry/exporter-trace-otlp-http": "^0.48.0",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.52.1",
     "@opentelemetry/exporter-zipkin": "^1.19.0",
     "@opentelemetry/sdk-trace-node": "^1.19.0",
     "@purista/amqpbridge": "*",
@@ -56,7 +56,7 @@
     "@purista/redis-state-store": "*",
     "@uptrace/node": "^1.19.0",
     "pino-loki": "^2.2.1",
-    "pino-pretty": "^10.3.1",
-    "zod": "^3.22.4"
+    "pino-pretty": "^11.2.1",
+    "zod": "^3.23.8"
   }
 }
