@@ -5,7 +5,7 @@ import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/a
 import { Resource } from '@opentelemetry/resources'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { SemanticAttributes, SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
+import { SemanticAttributes, SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
 
 import type { Logger } from '../core/index.js'
 import { HandledError, initLogger, PuristaSpanTag, StatusCode, UnhandledError } from '../core/index.js'
@@ -62,7 +62,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
 
     const resource = Resource.default().merge(
       new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: this.name,
+        [SEMRESATTRS_SERVICE_NAME]: this.name,
       }),
     )
     this.traceProvider = new NodeTracerProvider({
@@ -207,7 +207,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
 
       try {
         const { url, headers } = this.getUrlAndHeader(path, options)
-        span.setAttribute(SemanticAttributes.HTTP_URL, url.toString())
+        span.setAttribute( SemanticAttributes.HTTP_URL, url.toString())
 
         const response = await fetch(url, {
           method,
