@@ -6,11 +6,11 @@ import type { HttpExposedServiceMeta } from './HttpExposedServiceMeta.js'
  * @returns boolean - true if input is type of HttpExposedServiceMeta
  */
 export const isHttpExposedServiceMeta = (input?: any): input is HttpExposedServiceMeta => {
-  if (!input || typeof input !== 'object') {
-    return false
-  }
-  if (!input.expose?.http) {
-    return false
-  }
-  return true
+	if (!input || typeof input !== 'object') {
+		return false
+	}
+	if (!input.expose?.http) {
+		return false
+	}
+	return true
 }

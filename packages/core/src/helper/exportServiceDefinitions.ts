@@ -11,54 +11,54 @@ import type { ServiceDefinitions } from './types/ServiceDefinitions.js'
  * @returns
  */
 const mergeServiceDefintion = <T extends FullServiceDefinition>(
-  existing: FullServiceDefinition,
-  defintionToAdd: ServiceDefinitions,
+	existing: FullServiceDefinition,
+	defintionToAdd: ServiceDefinitions,
 ): T => {
-  const commands = defintionToAdd.commands.reduce((current, definition) => {
-    return {
-      ...current,
-      [definition.commandName]: definition,
-    }
-  }, {})
+	const commands = defintionToAdd.commands.reduce((current, definition) => {
+		return {
+			...current,
+			[definition.commandName]: definition,
+		}
+	}, {})
 
-  const subscriptions = defintionToAdd.subscriptions.reduce((current, definition) => {
-    return {
-      ...current,
-      [definition.subscriptionName]: definition,
-    }
-  }, {})
+	const subscriptions = defintionToAdd.subscriptions.reduce((current, definition) => {
+		return {
+			...current,
+			[definition.subscriptionName]: definition,
+		}
+	}, {})
 
-  const ret = { ...existing }
+	const ret = { ...existing }
 
-  if (!ret[defintionToAdd.serviceName]) {
-    ret[defintionToAdd.serviceName] = {
-      [defintionToAdd.serviceVersion]: {
-        description: defintionToAdd.serviceDescription,
-        commands,
-        subscriptions,
-        deprecated: defintionToAdd.deprecated,
-      },
-    }
-  }
+	if (!ret[defintionToAdd.serviceName]) {
+		ret[defintionToAdd.serviceName] = {
+			[defintionToAdd.serviceVersion]: {
+				description: defintionToAdd.serviceDescription,
+				commands,
+				subscriptions,
+				deprecated: defintionToAdd.deprecated,
+			},
+		}
+	}
 
-  if (!ret[defintionToAdd.serviceName][defintionToAdd.serviceVersion]) {
-    ret[defintionToAdd.serviceName][defintionToAdd.serviceVersion] = {
-      description: defintionToAdd.serviceDescription,
-      commands,
-      subscriptions,
-      deprecated: defintionToAdd.deprecated,
-    }
-  }
+	if (!ret[defintionToAdd.serviceName][defintionToAdd.serviceVersion]) {
+		ret[defintionToAdd.serviceName][defintionToAdd.serviceVersion] = {
+			description: defintionToAdd.serviceDescription,
+			commands,
+			subscriptions,
+			deprecated: defintionToAdd.deprecated,
+		}
+	}
 
-  ret[defintionToAdd.serviceName][defintionToAdd.serviceVersion] = {
-    ...ret[defintionToAdd.serviceName][defintionToAdd.serviceVersion],
-    description: defintionToAdd.serviceDescription,
-    commands,
-    subscriptions,
-    deprecated: defintionToAdd.deprecated,
-  }
+	ret[defintionToAdd.serviceName][defintionToAdd.serviceVersion] = {
+		...ret[defintionToAdd.serviceName][defintionToAdd.serviceVersion],
+		description: defintionToAdd.serviceDescription,
+		commands,
+		subscriptions,
+		deprecated: defintionToAdd.deprecated,
+	}
 
-  return ret as T
+	return ret as T
 }
 
 /**
@@ -71,10 +71,10 @@ const mergeServiceDefintion = <T extends FullServiceDefinition>(
  * @returns
  */
 export const exportServiceDefinitions = async (serviceBuilders: ServiceBuilder[]): Promise<FullDefinition> => {
-  const serviceDefinitions = await Promise.all(serviceBuilders.map((builder) => builder.getFullServiceDefintion()))
+	const serviceDefinitions = await Promise.all(serviceBuilders.map(builder => builder.getFullServiceDefintion()))
 
-  return {
-    version: puristaVersion,
-    services: serviceDefinitions.reduce((def, current) => mergeServiceDefintion(def, current), {}),
-  }
+	return {
+		version: puristaVersion,
+		services: serviceDefinitions.reduce((def, current) => mergeServiceDefintion(def, current), {}),
+	}
 }

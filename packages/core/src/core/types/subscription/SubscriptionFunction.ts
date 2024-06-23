@@ -6,17 +6,17 @@ import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.
  * @group Subscription
  */
 export type SubscriptionFunction<
-  ServiceClassType extends ServiceClass,
-  MessagePayloadType = unknown,
-  MessageParamsType = undefined,
-  FunctionPayloadType = MessagePayloadType,
-  FunctionParamsType = MessageParamsType,
-  FunctionResultType = undefined,
-  Invokes = {},
-  EmitListType = {},
+	ServiceClassType extends ServiceClass,
+	MessagePayloadType = unknown,
+	MessageParamsType = undefined,
+	FunctionPayloadType = MessagePayloadType,
+	FunctionParamsType = MessageParamsType,
+	FunctionResultType = undefined,
+	Invokes = {},
+	EmitListType = {},
 > = (
-  this: ServiceClassType,
-  context: SubscriptionFunctionContext<Invokes, EmitListType>,
-  payload: Readonly<FunctionPayloadType>,
-  parameter: Readonly<FunctionParamsType>,
+	this: ServiceClassType,
+	context: SubscriptionFunctionContext<Invokes, EmitListType>,
+	payload: Readonly<FunctionPayloadType>,
+	parameter: Readonly<FunctionParamsType>,
 ) => Promise<FunctionResultType>

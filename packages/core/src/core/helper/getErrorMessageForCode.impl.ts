@@ -8,18 +8,18 @@ import { StatusCode } from '../types/index.js'
  * @group Helper
  */
 export const getErrorMessageForCode = (code: StatusCode): string => {
-  const entry = StatusCode[code]
+	const entry = StatusCode[code]
 
-  if (!entry) {
-    return 'Unknown Error'
-  }
+	if (!entry) {
+		return 'Unknown Error'
+	}
 
-  const capitalizeFirstLetter = (input: string) => {
-    return input.charAt(0).toUpperCase() + input.slice(1)
-  }
+	const capitalizeFirstLetter = (input: string) => {
+		return input.charAt(0).toUpperCase() + input.slice(1)
+	}
 
-  const transform = (input: string) =>
-    input.replace(/[A-Z]+(?![a-z])|[A-Z]/g, ($, ofs) => (ofs ? ' ' : '') + capitalizeFirstLetter($))
+	const transform = (input: string) =>
+		input.replace(/[A-Z]+(?![a-z])|[A-Z]/g, ($, ofs) => (ofs ? ' ' : '') + capitalizeFirstLetter($))
 
-  return transform(StatusCode[code])
+	return transform(StatusCode[code])
 }

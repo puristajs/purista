@@ -16,13 +16,13 @@ import type { Prettify } from '../Prettify.js'
  * Subscribers should not respond with command responses if they are "silent" subscribers/listeners.
  */
 export type Command<PayloadType = unknown, ParameterType = unknown> = Prettify<
-  {
-    messageType: EBMessageType.Command
-    correlationId: CorrelationId
-    receiver: EBMessageAddress
-    payload: {
-      parameter: ParameterType
-      payload: PayloadType
-    }
-  } & EBMessageBase
+	{
+		messageType: EBMessageType.Command
+		correlationId: CorrelationId
+		receiver: EBMessageAddress
+		payload: {
+			parameter: ParameterType
+			payload: PayloadType
+		}
+	} & EBMessageBase
 >

@@ -20,7 +20,7 @@ import type { EBMessageAddress } from './EBMessageAddress.js'
  * ```
  */
 export type InvokeFunction = <InvokeResponseType = unknown, PayloadType = unknown, ParameterType = unknown>(
-  address: EBMessageAddress,
-  payload: PayloadType,
-  parameter: ParameterType,
+	address: EBMessageAddress,
+	payload: PayloadType,
+	parameter: ParameterType,
 ) => Promise<InvokeResponseType>

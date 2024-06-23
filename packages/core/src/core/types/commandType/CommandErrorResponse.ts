@@ -11,17 +11,17 @@ import type { StatusCode } from '../StatusCode.enum.js'
  * @group Command
  */
 export type CommandErrorResponse = Prettify<
-  {
-    messageType: EBMessageType.CommandErrorResponse
-    contentType: 'application/json'
-    contentEncoding: 'utf-8'
-    isHandledError: boolean
-    correlationId: CorrelationId
-    receiver: EBMessageSenderAddress
-    payload: {
-      status: StatusCode
-      message: string
-      data?: unknown
-    }
-  } & EBMessageBase
+	{
+		messageType: EBMessageType.CommandErrorResponse
+		contentType: 'application/json'
+		contentEncoding: 'utf-8'
+		isHandledError: boolean
+		correlationId: CorrelationId
+		receiver: EBMessageSenderAddress
+		payload: {
+			status: StatusCode
+			message: string
+			data?: unknown
+		}
+	} & EBMessageBase
 >

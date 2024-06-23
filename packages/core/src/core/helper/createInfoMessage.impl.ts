@@ -12,20 +12,20 @@ import { getNewTraceId } from './getNewTraceId.impl.js'
  * @group Helper
  */
 export const createInfoMessage = (
-  messageType: InfoMessageType,
-  sender: EBMessageSenderAddress,
-  additional?: Partial<InfoMessage>,
+	messageType: InfoMessageType,
+	sender: EBMessageSenderAddress,
+	additional?: Partial<InfoMessage>,
 ): InfoMessage => {
-  const info: Readonly<InfoMessage> = Object.freeze({
-    messageType,
-    id: getNewEBMessageId(),
-    traceId: getNewTraceId(),
-    timestamp: Date.now(),
-    contentType: 'application/json',
-    contentEncoding: 'utf-8',
-    sender,
-    ...additional,
-  })
+	const info: Readonly<InfoMessage> = Object.freeze({
+		messageType,
+		id: getNewEBMessageId(),
+		traceId: getNewTraceId(),
+		timestamp: Date.now(),
+		contentType: 'application/json',
+		contentEncoding: 'utf-8',
+		sender,
+		...additional,
+	})
 
-  return info
+	return info
 }

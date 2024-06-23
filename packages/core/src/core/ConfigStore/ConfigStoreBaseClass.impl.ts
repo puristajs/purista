@@ -18,112 +18,112 @@ import type { ConfigStoreCacheMap } from './types/index.js'
  * @group Store
  */
 export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<string, unknown> = {}> {
-  logger: Logger
-  config: StoreBaseConfig<ConfigStoreConfigType>
+	logger: Logger
+	config: StoreBaseConfig<ConfigStoreConfigType>
 
-  name: string
+	name: string
 
-  cache: ConfigStoreCacheMap = new Map()
+	cache: ConfigStoreCacheMap = new Map()
 
-  constructor(name: string, config: StoreBaseConfig<ConfigStoreConfigType>) {
-    const logger = config?.logger ?? initLogger(config?.logLevel)
-    this.logger = logger.getChildLogger({ name })
+	constructor(name: string, config: StoreBaseConfig<ConfigStoreConfigType>) {
+		const logger = config?.logger ?? initLogger(config?.logLevel)
+		this.logger = logger.getChildLogger({ name })
 
-    this.name = name
+		this.name = name
 
-    this.config = {
-      enableGet: true,
-      enableSet: false,
-      enableRemove: false,
-      enableCache: false,
-      ...config,
-    }
-  }
+		this.config = {
+			enableGet: true,
+			enableSet: false,
+			enableRemove: false,
+			enableCache: false,
+			...config,
+		}
+	}
 
-  /**
-   * This method must be overwritten by actual store implementation.
-   *
-   * @param configNames list of config items
-   * @returns an object of { [configName]: value | undefined }
-   */
-  protected abstract getConfigImpl<ConfigNames extends string[]>(
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    ...configNames: ConfigNames
-  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>>
+	/**
+	 * This method must be overwritten by actual store implementation.
+	 *
+	 * @param configNames list of config items
+	 * @returns an object of { [configName]: value | undefined }
+	 */
+	protected abstract getConfigImpl<ConfigNames extends string[]>(
+		// eslint-disable-next-line @typescript-eslint/no-unused-vars
+		...configNames: ConfigNames
+	): Promise<ObjectWithKeysFromStringArray<ConfigNames>>
 
-  /**
-   * Returns the values for given config properties.
-   * This function **SHOULD NOT** be overwritten by store implementation.
-   * For implementation overwrite protected `getConfigImpl`
-   *
-   * @param configNames
-   * @returns an object of { [configName]: value | undefined }
-   */
-  async getConfig<ConfigNames extends string[]>(
-    ...configNames: ConfigNames
-  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
-    if (!this.config.enableGet) {
-      const err = new UnhandledError(StatusCode.Unauthorized, 'get config from store is disabled by config')
-      this.logger.error({ err }, err.message)
-      throw err
-    }
-    return this.getConfigImpl(...configNames)
-  }
+	/**
+	 * Returns the values for given config properties.
+	 * This function **SHOULD NOT** be overwritten by store implementation.
+	 * For implementation overwrite protected `getConfigImpl`
+	 *
+	 * @param configNames
+	 * @returns an object of { [configName]: value | undefined }
+	 */
+	async getConfig<ConfigNames extends string[]>(
+		...configNames: ConfigNames
+	): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
+		if (!this.config.enableGet) {
+			const err = new UnhandledError(StatusCode.Unauthorized, 'get config from store is disabled by config')
+			this.logger.error({ err }, err.message)
+			throw err
+		}
+		return this.getConfigImpl(...configNames)
+	}
 
-  /**
-   * This method must be overwritten by actual store implementation.
-   *
-   * @param configName
-   */
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  protected abstract removeConfigImpl(configName: string): Promise<void>
+	/**
+	 * This method must be overwritten by actual store implementation.
+	 *
+	 * @param configName
+	 */
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	protected abstract removeConfigImpl(configName: string): Promise<void>
 
-  /**
-   * Removes the config item given by config name.
-   * This function **SHOULD NOT** be overwritten by store implementation.
-   * For implementation overwrite protected `removeConfigImpl`
-   *
-   * @param configName
-   * @returns
-   */
-  async removeConfig(configName: string): Promise<void> {
-    if (!this.config.enableRemove) {
-      const err = new UnhandledError(StatusCode.Unauthorized, 'remove config from store is disabled by config')
-      this.logger.error({ err }, err.message)
-      throw err
-    }
+	/**
+	 * Removes the config item given by config name.
+	 * This function **SHOULD NOT** be overwritten by store implementation.
+	 * For implementation overwrite protected `removeConfigImpl`
+	 *
+	 * @param configName
+	 * @returns
+	 */
+	async removeConfig(configName: string): Promise<void> {
+		if (!this.config.enableRemove) {
+			const err = new UnhandledError(StatusCode.Unauthorized, 'remove config from store is disabled by config')
+			this.logger.error({ err }, err.message)
+			throw err
+		}
 
-    return this.removeConfigImpl(configName)
-  }
+		return this.removeConfigImpl(configName)
+	}
 
-  /**
-   * This method must be overwritten by actual store implementation.
-   *
-   * @param _configName
-   * @param _configValue
-   */
-  protected abstract setConfigImpl(_configName: string, _configValue: unknown): Promise<void>
+	/**
+	 * This method must be overwritten by actual store implementation.
+	 *
+	 * @param _configName
+	 * @param _configValue
+	 */
+	protected abstract setConfigImpl(_configName: string, _configValue: unknown): Promise<void>
 
-  /**
-   * Sets a config value
-   * This function **SHOULD NOT** be overwritten by store implementation.
-   * For implementation overwrite protected `setConfigImpl`
-   *
-   * @param configName
-   * @param configValue
-   * @returns
-   */
-  async setConfig(configName: string, configValue: unknown) {
-    if (!this.config.enableSet) {
-      const err = new UnhandledError(StatusCode.Unauthorized, 'set config at store is disabled by config')
-      this.logger.error({ err }, err.message)
-      throw err
-    }
+	/**
+	 * Sets a config value
+	 * This function **SHOULD NOT** be overwritten by store implementation.
+	 * For implementation overwrite protected `setConfigImpl`
+	 *
+	 * @param configName
+	 * @param configValue
+	 * @returns
+	 */
+	async setConfig(configName: string, configValue: unknown) {
+		if (!this.config.enableSet) {
+			const err = new UnhandledError(StatusCode.Unauthorized, 'set config at store is disabled by config')
+			this.logger.error({ err }, err.message)
+			throw err
+		}
 
-    return this.setConfigImpl(configName, configValue)
-  }
+		return this.setConfigImpl(configName, configValue)
+	}
 
-  async destroy() {
-    this.logger.info('stopped')
-  }
+	async destroy() {
+		this.logger.info('stopped')
+	}
 }

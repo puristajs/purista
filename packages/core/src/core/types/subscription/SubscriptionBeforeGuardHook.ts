@@ -9,14 +9,14 @@ import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.
  * @group Subscription
  */
 export type SubscriptionBeforeGuardHook<
-  ServiceClassType = ServiceClass,
-  FunctionPayloadType = unknown,
-  FunctionParamsType = unknown,
-  Invokes = {},
-  EmitListType = {},
+	ServiceClassType = ServiceClass,
+	FunctionPayloadType = unknown,
+	FunctionParamsType = unknown,
+	Invokes = {},
+	EmitListType = {},
 > = (
-  this: ServiceClassType,
-  context: SubscriptionFunctionContext<Invokes, EmitListType>,
-  payload: Readonly<FunctionPayloadType>,
-  parameter: Readonly<FunctionParamsType>,
+	this: ServiceClassType,
+	context: SubscriptionFunctionContext<Invokes, EmitListType>,
+	payload: Readonly<FunctionPayloadType>,
+	parameter: Readonly<FunctionParamsType>,
 ) => Promise<void>

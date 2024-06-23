@@ -14,31 +14,31 @@ import { isDevelop } from './isDevelop.impl.js'
  * @group Helper
  */
 export const getCleanedMessage = (
-  message: Readonly<EBMessage>,
-  stripeOutContent = !isDevelop(),
+	message: Readonly<EBMessage>,
+	stripeOutContent = !isDevelop(),
 ): Record<string, unknown> => {
-  // return full message if stripeOutContent is set to false
-  if (!stripeOutContent) {
-    return message
-  }
+	// return full message if stripeOutContent is set to false
+	if (!stripeOutContent) {
+		return message
+	}
 
-  const cleanedMessage: EBMessage = {
-    ...message,
-  }
+	const cleanedMessage: EBMessage = {
+		...message,
+	}
 
-  if (isCommand(cleanedMessage)) {
-    cleanedMessage.payload = {
-      ...cleanedMessage.payload,
-      parameter: {
-        all: '***removed from log***',
-      },
-      payload: '***removed from log***',
-    }
-  }
+	if (isCommand(cleanedMessage)) {
+		cleanedMessage.payload = {
+			...cleanedMessage.payload,
+			parameter: {
+				all: '***removed from log***',
+			},
+			payload: '***removed from log***',
+		}
+	}
 
-  if (isCommandSuccessResponse(cleanedMessage)) {
-    cleanedMessage.payload = '***removed from log***'
-  }
+	if (isCommandSuccessResponse(cleanedMessage)) {
+		cleanedMessage.payload = '***removed from log***'
+	}
 
-  return cleanedMessage
+	return cleanedMessage
 }

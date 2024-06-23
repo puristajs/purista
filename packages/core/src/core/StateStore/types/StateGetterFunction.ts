@@ -2,5 +2,5 @@ import type { ObjectWithKeysFromStringArray } from '../../../helper/types/Object
 
 /** get a state value from the state store @group Store */
 export type StateGetterFunction = <StateNames extends string[]>(
-  ...stateNames: StateNames
+	...stateNames: StateNames
 ) => Promise<ObjectWithKeysFromStringArray<StateNames>>

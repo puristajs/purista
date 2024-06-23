@@ -6,13 +6,13 @@ import type { SubscriptionTransformFunctionContext } from './SubscriptionTransfo
  * @group Subscription
  */
 export type SubscriptionTransformOutputHook<
-  ServiceClassType,
-  MessageResultType = unknown,
-  MessageParamsType = unknown,
-  ResponseOutput = unknown,
+	ServiceClassType,
+	MessageResultType = unknown,
+	MessageParamsType = unknown,
+	ResponseOutput = unknown,
 > = (
-  this: ServiceClassType,
-  context: SubscriptionTransformFunctionContext,
-  payload: Readonly<MessageResultType>,
-  parameter: Readonly<MessageParamsType>,
+	this: ServiceClassType,
+	context: SubscriptionTransformFunctionContext,
+	payload: Readonly<MessageResultType>,
+	parameter: Readonly<MessageParamsType>,
 ) => Promise<ResponseOutput>

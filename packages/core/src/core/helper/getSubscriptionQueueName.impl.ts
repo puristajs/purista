@@ -8,5 +8,5 @@ import type { EBMessageAddress } from '../types/index.js'
  * @group Helper
  */
 export const getSubscriptionQueueName = (address: EBMessageAddress): string => {
-  return `sq-${address.serviceName}-${address.serviceVersion}-${address.serviceTarget}`.toLocaleLowerCase()
+	return `sq-${address.serviceName}-${address.serviceVersion}-${address.serviceTarget}`.toLocaleLowerCase()
 }

@@ -10,9 +10,9 @@ import type { CommandErrorResponse } from './CommandErrorResponse.js'
  * @returns boolean
  */
 export const isCommandErrorResponse = (message: EBMessage | unknown): message is CommandErrorResponse => {
-  if (typeof message !== 'object' || message === null) {
-    return false
-  }
-  const m = message as CommandErrorResponse
-  return m.messageType === EBMessageType.CommandErrorResponse
+	if (typeof message !== 'object' || message === null) {
+		return false
+	}
+	const m = message as CommandErrorResponse
+	return m.messageType === EBMessageType.CommandErrorResponse
 }

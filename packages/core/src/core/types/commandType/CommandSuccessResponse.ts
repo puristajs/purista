@@ -11,10 +11,10 @@ import type { Prettify } from '../Prettify.js'
  * @group Command
  */
 export type CommandSuccessResponse<PayloadType = unknown> = Prettify<
-  {
-    messageType: EBMessageType.CommandSuccessResponse
-    correlationId: CorrelationId
-    receiver: EBMessageSenderAddress
-    payload: PayloadType // result payload
-  } & EBMessageBase
+	{
+		messageType: EBMessageType.CommandSuccessResponse
+		correlationId: CorrelationId
+		receiver: EBMessageSenderAddress
+		payload: PayloadType // result payload
+	} & EBMessageBase
 >

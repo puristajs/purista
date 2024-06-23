@@ -4,7 +4,7 @@
  * @group Helper
  */
 export const isDevelop = (): boolean => {
-  const nodeEnv = process.env.NODE_ENV
+	const nodeEnv = process.env.NODE_ENV
 
-  return nodeEnv ? nodeEnv.toLowerCase().startsWith('develop') : false
+	return nodeEnv ? nodeEnv.toLowerCase().startsWith('develop') : false
 }
