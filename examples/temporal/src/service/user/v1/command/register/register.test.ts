@@ -8,7 +8,7 @@ import type { UserV1RegisterInputParameter, UserV1RegisterInputPayload } from '.
 
 vi.mock('@temporalio/client', async (importOriginal) => {
   return {
-    ...((await importOriginal()) as {}),
+    ...(await importOriginal<Record<string,unknown>>()),
     Connection: {
       connect: () => {},
     },
