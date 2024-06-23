@@ -27,7 +27,7 @@ import { initDefaultStateStore } from '../DefaultStateStore/index.js'
 import type { NonEmptyString } from '../helper/index.js'
 import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/index.js'
 
-export type Newable<T, ConfigType> = { new (config: ServiceConstructorInput<ConfigType>): T }
+export type Newable<T, ConfigType, Resources> = new (config: ServiceConstructorInput<ConfigType, Resources>) => T
 
 /**
  * This class is used to build a service.
@@ -40,7 +40,8 @@ export type Newable<T, ConfigType> = { new (config: ServiceConstructorInput<Conf
 export class ServiceBuilder<
   ConfigType = Record<string, unknown>,
   ConfigInputType = Record<string, unknown>,
-  ServiceClassType extends ServiceClass = Service<ConfigType>,
+  Resources extends {} = {},
+  ServiceClassType extends ServiceClass = Service<ConfigType, Resources>,
 > {
   private commandDefinitionList: CommandDefinitionList<ServiceClassType> = []
   private subscriptionDefinitionList: SubscriptionDefinitionList<ServiceClassType> = []
@@ -56,7 +57,7 @@ export class ServiceBuilder<
   private deprecated = false
 
   instance?: ServiceClassType
-  SClass: Newable<any, ConfigType> = Service
+  SClass: Newable<any, ConfigType, Resources> = Service
 
   // eslint-disable-next-line no-useless-constructor
   constructor(public info: ServiceInfoType) {}
@@ -69,7 +70,7 @@ export class ServiceBuilder<
    */
   setConfigSchema<T extends Schema>(schema: T) {
     this.configSchema = schema
-    return this as unknown as ServiceBuilder<Infer<T>, InferIn<T>, Service<Infer<T>>>
+    return this as unknown as ServiceBuilder<Infer<T>, InferIn<T>, Resources, Service<Infer<T>, Resources>>
   }
 
   /**
@@ -78,7 +79,7 @@ export class ServiceBuilder<
    * @param config - ConfigType - The default configuration for the service.
    * @returns The ServiceBuilder instance
    */
-  setDefaultConfig(config: Complete<ConfigType>): ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType> {
+  setDefaultConfig(config: Complete<ConfigType>): this {
     this.defaultConfig = config
     return this
   }
@@ -105,7 +106,7 @@ export class ServiceBuilder<
       )
     }
     this.commandDefinitionList.push(...commands)
-    return this as ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType>
+    return this as ServiceBuilder<ConfigType, ConfigInputType, Resources, ServiceClassType>
   }
 
   /**
@@ -121,7 +122,7 @@ export class ServiceBuilder<
       )
     }
     this.subscriptionDefinitionList.push(...subscription)
-    return this as ServiceBuilder<ConfigType, ConfigInputType, ServiceClassType>
+    return this as ServiceBuilder<ConfigType, ConfigInputType, Resources, ServiceClassType>
   }
 
   /**
@@ -150,13 +151,35 @@ export class ServiceBuilder<
   }
 
   /**
+   * Define the ressources of the service.
+   * Resources are available within commands and subscriptions.
+   *
+   * @example
+   * ```ts
+   * serviceBuilder.defineResources<'db',MySQL>()
+   * ```
+   *
+   * @returns The builder with defined types for ressources
+   */
+  defineRessource<ResourceName extends string,ResourcesType>() {
+
+    return this as unknown as  ServiceBuilder<
+        ConfigType,
+        ConfigInputType,
+        Resources & { [K in ResourceName]: ResourcesType },
+        ServiceClass
+      >
+  }
+
+
+  /**
    * It sets the class type of the service.
    * @param customClass - A class which extends the Service class
    * @returns The builder itself, but with the type of the service class changed.
    */
-  setCustomClass<T extends ServiceClass<ConfigType>>(customClass: Newable<T, ConfigType>) {
-    this.SClass = customClass as Newable<T, ConfigType>
-    return this as unknown as ServiceBuilder<ConfigType, ConfigInputType, T>
+  setCustomClass<T extends ServiceClass<ConfigType>>(customClass: Newable<T, ConfigType, Resources>) {
+    this.SClass = customClass
+    return this as unknown as ServiceBuilder<ConfigType, ConfigInputType, Resources, T>
   }
 
   getCustomClass() {
@@ -180,7 +203,8 @@ export class ServiceBuilder<
       secretStore?: SecretStore
       configStore?: ConfigStore
       stateStore?: StateStore
-    } = {},
+      ressources?: Resources
+    },
   ) {
     const config = {
       ...this.defaultConfig,
@@ -227,6 +251,7 @@ export class ServiceBuilder<
       configStore,
       stateStore,
       configSchema: this.configSchema,
+      ressources: options.ressources,
     })
 
     return this.instance as ServiceClassType
@@ -245,8 +270,8 @@ export class ServiceBuilder<
     commandName: NonEmptyString<T>,
     description: string,
     eventName?: NonEmptyString<N>,
-  ): CommandDefinitionBuilder<ServiceClassType> {
-    return new CommandDefinitionBuilder<ServiceClassType>(commandName, description, eventName, this.deprecated)
+  ): CommandDefinitionBuilder<ServiceClassType, Resources> {
+    return new CommandDefinitionBuilder<ServiceClassType, Resources>(commandName, description, eventName, this.deprecated)
   }
 
   /**
@@ -259,8 +284,8 @@ export class ServiceBuilder<
   getSubscriptionBuilder<T extends string>(
     subscriptionName: NonEmptyString<T>,
     description: string,
-  ): SubscriptionDefinitionBuilder<ServiceClassType> {
-    return new SubscriptionDefinitionBuilder<ServiceClassType>(subscriptionName, description, this.deprecated)
+  ): SubscriptionDefinitionBuilder<ServiceClassType, Resources> {
+    return new SubscriptionDefinitionBuilder<ServiceClassType, Resources>(subscriptionName, description, this.deprecated)
   }
 
   /**

@@ -42,6 +42,7 @@ import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunction
  */
 export class SubscriptionDefinitionBuilder<
   ServiceClassType extends ServiceClass = ServiceClass,
+  Ressources extends {} = {},
   MessagePayloadType = unknown,
   MessageParamsType = undefined,
   MessageResultType = void,
@@ -203,6 +204,7 @@ export class SubscriptionDefinitionBuilder<
 
     return this as SubscriptionDefinitionBuilder<
       ServiceClassType,
+      Ressources,
       MessagePayloadType,
       MessageParamsType,
       MessageResultType,
@@ -237,6 +239,7 @@ export class SubscriptionDefinitionBuilder<
 
     return this as SubscriptionDefinitionBuilder<
       ServiceClassType,
+      Ressources,
       MessagePayloadType,
       MessageParamsType,
       MessageResultType,
@@ -436,6 +439,7 @@ export class SubscriptionDefinitionBuilder<
     this.inputSchema = inputSchema as unknown as PayloadSchema
     return this as unknown as SubscriptionDefinitionBuilder<
       ServiceClassType,
+      Ressources,
       InferIn<T>,
       MessageParamsType,
       MessageResultType,
@@ -468,6 +472,7 @@ export class SubscriptionDefinitionBuilder<
     this.outputSchema = outputSchema as unknown as ResultSchema
     return this as unknown as SubscriptionDefinitionBuilder<
       ServiceClassType,
+      Ressources,
       MessagePayloadType,
       MessageParamsType,
       T,
@@ -489,6 +494,7 @@ export class SubscriptionDefinitionBuilder<
     this.parameterSchema = parameterSchema as unknown as ParameterSchema
     return this as unknown as SubscriptionDefinitionBuilder<
       ServiceClassType,
+      Ressources,
       MessagePayloadType,
       InferIn<T>,
       MessageResultType,
@@ -534,6 +540,7 @@ export class SubscriptionDefinitionBuilder<
     }
     return this as unknown as SubscriptionDefinitionBuilder<
       ServiceClassType,
+      Ressources,
       InferIn<typeof transformInputSchema>,
       InferIn<typeof transformParameterSchema>,
       MessageResultType,
@@ -593,6 +600,7 @@ export class SubscriptionDefinitionBuilder<
     }
     return this as unknown as SubscriptionDefinitionBuilder<
       ServiceClassType,
+      Ressources,
       MessagePayloadType,
       MessageParamsType,
       Infer<typeof transformOutputSchema>,
@@ -689,6 +697,7 @@ export class SubscriptionDefinitionBuilder<
     >,
   ): SubscriptionDefinitionBuilder<
     ServiceClassType,
+    Ressources,
     MessagePayloadType,
     MessageParamsType,
     MessageResultType,
@@ -711,6 +720,7 @@ export class SubscriptionDefinitionBuilder<
 
     return this as unknown as SubscriptionDefinitionBuilder<
       ServiceClassType,
+      Ressources,
       MessagePayloadType,
       MessageParamsType,
       MessageResultType,

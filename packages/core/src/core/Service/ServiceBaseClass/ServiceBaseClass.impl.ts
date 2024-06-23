@@ -1,9 +1,10 @@
-import type { Context, Span, SpanOptions } from '@opentelemetry/api'
-import { SpanStatusCode } from '@opentelemetry/api'
+import type { Context,  SpanOptions,Span } from '@opentelemetry/api'
+
+import { SpanStatusCode  } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
+import { SEMRESATTRS_SERVICE_NAME,SEMRESATTRS_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
 import type { Schema } from '@typeschema/main'
 
 import { puristaVersion } from '../../../version.js'
@@ -74,8 +75,8 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
 
     const resource = Resource.default().merge(
       new Resource({
-        [SemanticResourceAttributes.SERVICE_NAME]: this.info.serviceName,
-        [SemanticResourceAttributes.SERVICE_VERSION]: this.info.serviceVersion,
+        [SEMRESATTRS_SERVICE_NAME]: this.info.serviceName,
+        [SEMRESATTRS_SERVICE_VERSION]: this.info.serviceVersion,
       }),
     )
     this.traceProvider = new NodeTracerProvider({
