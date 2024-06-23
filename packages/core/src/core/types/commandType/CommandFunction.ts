@@ -15,11 +15,12 @@ export type CommandFunction<
   FunctionResultType = unknown,
   Invokes = {},
   EmitListType = {},
+  Ressources = {},
 > = (
   /** the service class */
   this: ServiceClassType,
   /** the command function contest */
-  context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType>,
+  context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Ressources>,
   /** the transformed and validated payload */
   payload: Readonly<FunctionPayloadType>,
   /** the transformed and validated parameter object */

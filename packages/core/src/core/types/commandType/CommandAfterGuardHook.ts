@@ -16,9 +16,10 @@ export type CommandAfterGuardHook<
   FunctionParamsType = unknown,
   Invokes = {},
   EmitListType = {},
+  Ressources = {},
 > = (
   this: ServiceClassType,
-  context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType>,
+  context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Ressources>,
   result: Readonly<FunctionResultType>,
   input: Readonly<FunctionPayloadType>,
   parameter: Readonly<FunctionParamsType>,

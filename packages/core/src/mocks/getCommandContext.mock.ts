@@ -21,6 +21,7 @@ export const getCommandContextMock = <
   MessageParamsType = unknown,
   Invokes = {},
   EmitListType = {},
+  Ressources = {},
 >(
   payload: MessagePayloadType,
   parameter: MessageParamsType,
@@ -55,6 +56,23 @@ export const getCommandContextMock = <
         console.error(err)
       }),
     }
+  }
+
+  const resourceMocks: Record<string, SinonStub> = {}
+
+  const getResourceProxy = <TFaux>(): TFaux => {
+    return new Proxy(() => {}, {
+      get(obj: Record<string, any>, name) {
+        if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
+          return undefined
+        }
+        if (!resourceMocks[name]) {
+          resourceMocks[name] = sandbox?.stub() ?? stub()
+          resourceMocks[name].throws(`Resource ${name} not mocked`)
+        }
+        return resourceMocks[name]
+      },
+    }) as TFaux
   }
 
   const invokeMocks: Record<string, Record<string, Record<string, SinonStub>>> = {}
@@ -138,6 +156,7 @@ export const getCommandContextMock = <
     setState: sandbox?.stub() ?? stub(),
     removeState: sandbox?.stub() ?? stub(),
     service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
+    resource: getResourceProxy<Ressources>(),
   }
 
   const message = getCommandMessageMock({
@@ -147,7 +166,7 @@ export const getCommandContextMock = <
     },
   })
 
-  const mock: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType> = {
+  const mock: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Ressources> = {
     logger: logger.mock,
     message,
     emit: async <K extends keyof EmitListType, Payload = EmitListType[K]>(eventName: K, payload: Payload) => {
@@ -172,6 +191,7 @@ export const getCommandContextMock = <
       setState: stubs.setState.rejects(new Error('setState is not stubbed')),
       removeState: stubs.removeState.rejects(new Error('removeState is not stubbed')),
     },
+    resource: getResourceProxy<Ressources>(),
   }
 
   return {

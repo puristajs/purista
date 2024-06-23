@@ -1,4 +1,5 @@
-import type { Context, Span, SpanOptions, Tracer } from '@opentelemetry/api'
+import type { Context,  SpanOptions,Span } from '@opentelemetry/api'
+import type {  Tracer } from '@opentelemetry/sdk-trace-node'
 
 import type { CommandDefinition } from './commandType/index.js'
 import type { SubscriptionDefinition } from './subscription/index.js'
@@ -8,8 +9,9 @@ import type { SubscriptionDefinition } from './subscription/index.js'
  *
  * @group Service
  */
-export interface ServiceClass<ConfigType = unknown | undefined> {
+export interface ServiceClass<ConfigType = unknown, Ressources = {}> {
   config: ConfigType
+  ressources: Ressources
 
   /**
    * Stop and destroy the current service

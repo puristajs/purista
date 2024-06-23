@@ -78,7 +78,9 @@ import { subscriptionTransformInput } from './subscriptionTransformInput.impl.js
  *
  * @group Service
  */
-export class Service<ConfigType = unknown> extends ServiceBaseClass implements ServiceClass<ConfigType> {
+export class Service<ConfigType = unknown, Ressources extends {} = {}>
+  extends ServiceBaseClass
+  implements ServiceClass<ConfigType, Ressources> {
   protected subscriptions = new Map<string, SubscriptionDefinition>()
   protected commands = new Map<string, CommandDefinition>()
 
@@ -86,9 +88,11 @@ export class Service<ConfigType = unknown> extends ServiceBaseClass implements S
   public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
   public config: ConfigType
 
+  public ressources: Ressources
+
   public isStarted: boolean = false
 
-  constructor(config: ServiceConstructorInput<ConfigType>) {
+  constructor(config: ServiceConstructorInput<ConfigType, Ressources>) {
     super({
       logger: config.logger,
       info: config.info,
@@ -101,6 +105,7 @@ export class Service<ConfigType = unknown> extends ServiceBaseClass implements S
     })
 
     this.config = config.config
+    this.ressources = config.ressources ?? ({} as Ressources)
     this.commandDefinitionList = config.commandDefinitionList
     this.subscriptionDefinitionList = config.subscriptionDefinitionList
   }
@@ -664,6 +669,7 @@ export class Service<ConfigType = unknown> extends ServiceBaseClass implements S
                   command.invokes,
                 ),
               ),
+              resource:this.ressources
             }
             const call = command.call.bind(this, context)
             return await call(payload, parameter)
@@ -703,6 +709,7 @@ export class Service<ConfigType = unknown> extends ServiceBaseClass implements S
                     command.invokes,
                   ),
                 ),
+                resource: this.ressources
               }
 
               const guardPromise = this.wrapInSpan('afterGuardHook.' + name, {}, async (_subSpan) => {
@@ -761,7 +768,7 @@ export class Service<ConfigType = unknown> extends ServiceBaseClass implements S
           })
 
           return await this.startActiveSpan('sendErrorResponse', {}, undefined, async () =>
-            createErrorResponse(this.eventBridge.instanceId, message, (error as HandledError).errorCode, error),
+            createErrorResponse(this.eventBridge.instanceId, message, error.errorCode, error),
           )
         }
 
