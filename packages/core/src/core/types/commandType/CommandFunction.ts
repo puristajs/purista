@@ -7,22 +7,22 @@ import type { CommandFunctionContext } from './CommandFunctionContext.js'
  * @group Command
  */
 export type CommandFunction<
-  ServiceClassType extends ServiceClass,
-  MessagePayloadType = unknown,
-  MessageParamsType = unknown,
-  FunctionPayloadType = MessagePayloadType,
-  FunctionParamsType = MessageParamsType,
-  FunctionResultType = unknown,
-  Invokes = {},
-  EmitListType = {},
-  Ressources = {},
+	ServiceClassType extends ServiceClass,
+	MessagePayloadType = unknown,
+	MessageParamsType = unknown,
+	FunctionPayloadType = MessagePayloadType,
+	FunctionParamsType = MessageParamsType,
+	FunctionResultType = unknown,
+	Invokes = {},
+	EmitListType = {},
+	Ressources = {},
 > = (
-  /** the service class */
-  this: ServiceClassType,
-  /** the command function contest */
-  context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Ressources>,
-  /** the transformed and validated payload */
-  payload: Readonly<FunctionPayloadType>,
-  /** the transformed and validated parameter object */
-  parameter: Readonly<FunctionParamsType>,
+	/** the service class */
+	this: ServiceClassType,
+	/** the command function contest */
+	context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Ressources>,
+	/** the transformed and validated payload */
+	payload: Readonly<FunctionPayloadType>,
+	/** the transformed and validated parameter object */
+	parameter: Readonly<FunctionParamsType>,
 ) => Promise<FunctionResultType>

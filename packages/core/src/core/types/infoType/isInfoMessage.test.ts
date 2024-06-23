@@ -5,18 +5,18 @@ import { EBMessageType } from '../EBMessageType.enum.js'
 import { isInfoMessage } from './isInfoMessage.impl.js'
 
 describe('isInfoMessage', () => {
-  it('returns true if it is a info message', () => {
-    const message = createInfoMessage(EBMessageType.InfoServiceFunctionAdded, {
-      serviceName: 'serviceName',
-      serviceVersion: '1',
-      serviceTarget: '',
-      instanceId: 'a',
-    })
-    expect(isInfoMessage(message as EBMessage)).toBeTruthy()
-  })
+	it('returns true if it is a info message', () => {
+		const message = createInfoMessage(EBMessageType.InfoServiceFunctionAdded, {
+			serviceName: 'serviceName',
+			serviceVersion: '1',
+			serviceTarget: '',
+			instanceId: 'a',
+		})
+		expect(isInfoMessage(message as EBMessage)).toBeTruthy()
+	})
 
-  it('returns false if it is not a info message', () => {
-    const message = getCustomMessageMessageMock('123', {})
-    expect(isInfoMessage(message as EBMessage)).toBeFalsy()
-  })
+	it('returns false if it is not a info message', () => {
+		const message = getCustomMessageMessageMock('123', {})
+		expect(isInfoMessage(message as EBMessage)).toBeFalsy()
+	})
 })

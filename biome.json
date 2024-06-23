@@ -9,8 +9,35 @@
 			"recommended": true,
       "complexity":{
         "useArrowFunction": {
-          "level": "warn",
+          "level": "off",
           "fix": "none"
+        },
+        "useLiteralKeys": {
+          "level":"warn",
+          "fix":"safe"
+        },
+        "noForEach": {
+          "level":"off"
+        },
+        "noBannedTypes": {
+          "level":"warn",
+          "fix":"safe"
+        }
+      },
+      "suspicious": {
+        "noExplicitAny": {
+          "level":"warn"
+        }
+      },
+      "performance": {
+        "noAccumulatingSpread": {
+          "level":"warn"
+        }
+      },
+      "style":{
+        "noUnusedTemplateLiteral": {
+          "level": "warn",
+          "fix":"safe"
         }
       }
 		},
@@ -35,7 +62,10 @@
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
       "semicolons": "asNeeded",
-      "trailingCommas": "all"
+      "trailingCommas": "all",
+      "lineWidth":120,
+      "indentWidth":2,
+      "indentStyle":"tab"
     }
   },
   "json": {

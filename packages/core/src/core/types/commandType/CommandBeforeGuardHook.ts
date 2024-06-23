@@ -9,17 +9,17 @@ import type { CommandFunctionContext } from './CommandFunctionContext.js'
  * @group Command
  */
 export type CommandBeforeGuardHook<
-  ServiceClassType = ServiceClass,
-  MessagePayloadType = unknown,
-  MessageParamsType = unknown,
-  FunctionPayloadType = MessagePayloadType,
-  FunctionParamsType = MessageParamsType,
-  Invokes = {},
-  EmitListType = {},
-  Ressources = {},
+	ServiceClassType = ServiceClass,
+	MessagePayloadType = unknown,
+	MessageParamsType = unknown,
+	FunctionPayloadType = MessagePayloadType,
+	FunctionParamsType = MessageParamsType,
+	Invokes = {},
+	EmitListType = {},
+	Ressources = {},
 > = (
-  this: ServiceClassType,
-  context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Ressources>,
-  payload: Readonly<FunctionPayloadType>,
-  parameter: Readonly<FunctionParamsType>,
+	this: ServiceClassType,
+	context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Ressources>,
+	payload: Readonly<FunctionPayloadType>,
+	parameter: Readonly<FunctionParamsType>,
 ) => Promise<void>

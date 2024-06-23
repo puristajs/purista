@@ -1,21 +1,12 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "outDir": "./dist",
-    "declaration": true,
-    "sourceMap": false,
-    "declarationMap": true,
-    "types": [
-      "vitest/globals",
-      "node"
-    ],
-  },
-  "include": [
-    "./src/**/*",
-    "./test/*",
-  ],
-  "exclude": [
-    "./**/*.d.ts",
-    "./dist/*"
-  ],
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"outDir": "./dist",
+		"declaration": true,
+		"sourceMap": false,
+		"declarationMap": true,
+		"types": ["vitest/globals", "node"]
+	},
+	"include": ["./src/**/*", "./test/*"],
+	"exclude": ["./**/*.d.ts", "./dist/*"]
 }

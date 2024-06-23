@@ -1,10 +1,10 @@
 import {
-  type Command,
-  type CommandErrorResponse,
-  createErrorResponse,
-  getNewInstanceId,
-  type HandledError,
-  type UnhandledError,
+	type Command,
+	type CommandErrorResponse,
+	type HandledError,
+	type UnhandledError,
+	createErrorResponse,
+	getNewInstanceId,
 } from '../../core/index.js'
 import { getCommandMessageMock } from './getCommandMessage.mock.js'
 
@@ -14,15 +14,15 @@ import { getCommandMessageMock } from './getCommandMessage.mock.js'
  * @group Unit test helper
  */
 export const getCommandErrorMessageMock = (
-  error?: HandledError | UnhandledError,
-  input?: Partial<CommandErrorResponse>,
-  commandMessage?: Command,
+	error?: HandledError | UnhandledError,
+	input?: Partial<CommandErrorResponse>,
+	commandMessage?: Command,
 ): Readonly<CommandErrorResponse> => {
-  const cmdMessage: Readonly<Command<unknown, unknown>> = commandMessage ?? getCommandMessageMock()
+	const cmdMessage: Readonly<Command<unknown, unknown>> = commandMessage ?? getCommandMessageMock()
 
-  const successResponse: Readonly<CommandErrorResponse> = Object.freeze({
-    ...createErrorResponse(getNewInstanceId(), cmdMessage, error?.errorCode, error),
-    ...input,
-  })
-  return successResponse
+	const successResponse: Readonly<CommandErrorResponse> = Object.freeze({
+		...createErrorResponse(getNewInstanceId(), cmdMessage, error?.errorCode, error),
+		...input,
+	})
+	return successResponse
 }

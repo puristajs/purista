@@ -7,19 +7,19 @@ import { ZodType } from 'zod'
 import { generateSchema } from './zodOpenApi.impl.js'
 
 export const validationToSchema = async <T extends Schema>(schema?: T): Promise<SchemaObject | undefined> => {
-  if (!schema) {
-    return
-  }
-  if (schema as any instanceof ZodType) {
-    return generateSchema(schema)
-  }
-  try {
-    const jsonSchema = await toJSONSchema(schema)
-    // nothing more needed as we use OpenAPI 3.1 which is valid JSON Schema
-    return jsonSchema as SchemaObject
-  } catch (error) {
-    console.error(error)
-    console.error('Did you installed peer dependencies?')
-    console.error('requires: @typeschema/[YOUR_SCHEMA_LIB]')
-  }
+	if (!schema) {
+		return
+	}
+	if ((schema as any) instanceof ZodType) {
+		return generateSchema(schema)
+	}
+	try {
+		const jsonSchema = await toJSONSchema(schema)
+		// nothing more needed as we use OpenAPI 3.1 which is valid JSON Schema
+		return jsonSchema as SchemaObject
+	} catch (error) {
+		console.error(error)
+		console.error('Did you installed peer dependencies?')
+		console.error('requires: @typeschema/[YOUR_SCHEMA_LIB]')
+	}
 }

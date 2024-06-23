@@ -9,10 +9,10 @@ import type { Logger } from '../types/index.js'
  * @group Helper
  */
 export const serializeOtp = () => {
-  const serializedContext = {}
+	const serializedContext = {}
 
-  propagation.inject(context.active(), serializedContext)
-  return JSON.stringify(serializedContext)
+	propagation.inject(context.active(), serializedContext)
+	return JSON.stringify(serializedContext)
 }
 
 /**
@@ -24,15 +24,15 @@ export const serializeOtp = () => {
  * @group Helper
  */
 export const deserializeOtp = (logger: Logger, otp?: string) => {
-  try {
-    let header = {}
+	try {
+		let header = {}
 
-    if (otp) {
-      header = JSON.parse(otp)
-    }
+		if (otp) {
+			header = JSON.parse(otp)
+		}
 
-    return propagation.extract(context.active(), header)
-  } catch (err) {
-    logger.error({ err }, 'unable to deserialize otp entry in message')
-  }
+		return propagation.extract(context.active(), header)
+	} catch (err) {
+		logger.error({ err }, 'unable to deserialize otp entry in message')
+	}
 }

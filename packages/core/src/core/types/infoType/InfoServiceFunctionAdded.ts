@@ -3,7 +3,7 @@ import type { Prettify } from '../Prettify.js'
 import type { InfoServiceBase } from './InfoServiceBase.js'
 
 export type InfoServiceFunctionAdded = Prettify<
-  {
-    messageType: EBMessageType.InfoServiceFunctionAdded
-  } & InfoServiceBase
+	{
+		messageType: EBMessageType.InfoServiceFunctionAdded
+	} & InfoServiceBase
 >

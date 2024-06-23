@@ -18,85 +18,85 @@ import type { CommandTransformOutputHook } from './CommandTransformOutputHook.js
  * @group Command
  */
 export type CommandDefinition<
-  ServiceClassType extends ServiceClass = ServiceClass,
-  MetadataType = CommandDefinitionMetadataBase,
-  MessagePayloadType = unknown,
-  MessageParamsType = unknown,
-  MessageResultType = unknown,
-  FunctionPayloadType = MessagePayloadType,
-  FunctionParamsType = MessageParamsType,
-  FunctionResultType = unknown,
-  Invokes = {},
-  EmitListType = {},
+	ServiceClassType extends ServiceClass = ServiceClass,
+	MetadataType = CommandDefinitionMetadataBase,
+	MessagePayloadType = unknown,
+	MessageParamsType = unknown,
+	MessageResultType = unknown,
+	FunctionPayloadType = MessagePayloadType,
+	FunctionParamsType = MessageParamsType,
+	FunctionResultType = unknown,
+	Invokes = {},
+	EmitListType = {},
 > = {
-  /** the name of the command */
-  commandName: string
-  /** the description of the command */
-  commandDescription: string
-  /** the metadata of the command */
-  metadata: MetadataType
-  /** config information for event bridge */
-  eventBridgeConfig: DefinitionEventBridgeConfig
-  /** the command function */
-  call: CommandFunction<
-    ServiceClassType,
-    MessagePayloadType,
-    MessageParamsType,
-    FunctionPayloadType,
-    FunctionParamsType,
-    FunctionResultType,
-    Invokes,
-    EmitListType
-  >
-  /** the eventName for the command response */
-  eventName?: string
-  /** hooks of command */
-  hooks: {
-    transformInput?: {
-      transformInputSchema: Schema
-      transformParameterSchema: Schema
-      transformFunction: CommandTransformInputHook<ServiceClassType, MessagePayloadType, MessageParamsType>
-    }
-    beforeGuard?: Record<
-      string,
-      CommandBeforeGuardHook<
-        ServiceClassType,
-        MessagePayloadType,
-        MessageParamsType,
-        FunctionPayloadType,
-        FunctionParamsType,
-        Invokes,
-        EmitListType
-      >
-    >
-    afterGuard?: Record<
-      string,
-      CommandAfterGuardHook<
-        ServiceClassType,
-        MessagePayloadType,
-        MessageParamsType,
-        FunctionResultType,
-        FunctionPayloadType,
-        FunctionParamsType,
-        Invokes,
-        EmitListType
-      >
-    >
-    transformOutput?: {
-      transformOutputSchema: Schema
-      transformFunction: CommandTransformOutputHook<
-        ServiceClassType,
-        MessagePayloadType,
-        MessageParamsType,
-        MessageResultType,
-        FunctionResultType,
-        FunctionParamsType
-      >
-    }
-  }
-  invokes: FromInvokeToOtherType<
-    Invokes,
-    { outputSchema?: SchemaObject; payloadSchema?: SchemaObject; parameterSchema?: SchemaObject }
-  >
-  emitList: FromEmitToOtherType<EmitListType, SchemaObject>
+	/** the name of the command */
+	commandName: string
+	/** the description of the command */
+	commandDescription: string
+	/** the metadata of the command */
+	metadata: MetadataType
+	/** config information for event bridge */
+	eventBridgeConfig: DefinitionEventBridgeConfig
+	/** the command function */
+	call: CommandFunction<
+		ServiceClassType,
+		MessagePayloadType,
+		MessageParamsType,
+		FunctionPayloadType,
+		FunctionParamsType,
+		FunctionResultType,
+		Invokes,
+		EmitListType
+	>
+	/** the eventName for the command response */
+	eventName?: string
+	/** hooks of command */
+	hooks: {
+		transformInput?: {
+			transformInputSchema: Schema
+			transformParameterSchema: Schema
+			transformFunction: CommandTransformInputHook<ServiceClassType, MessagePayloadType, MessageParamsType>
+		}
+		beforeGuard?: Record<
+			string,
+			CommandBeforeGuardHook<
+				ServiceClassType,
+				MessagePayloadType,
+				MessageParamsType,
+				FunctionPayloadType,
+				FunctionParamsType,
+				Invokes,
+				EmitListType
+			>
+		>
+		afterGuard?: Record<
+			string,
+			CommandAfterGuardHook<
+				ServiceClassType,
+				MessagePayloadType,
+				MessageParamsType,
+				FunctionResultType,
+				FunctionPayloadType,
+				FunctionParamsType,
+				Invokes,
+				EmitListType
+			>
+		>
+		transformOutput?: {
+			transformOutputSchema: Schema
+			transformFunction: CommandTransformOutputHook<
+				ServiceClassType,
+				MessagePayloadType,
+				MessageParamsType,
+				MessageResultType,
+				FunctionResultType,
+				FunctionParamsType
+			>
+		}
+	}
+	invokes: FromInvokeToOtherType<
+		Invokes,
+		{ outputSchema?: SchemaObject; payloadSchema?: SchemaObject; parameterSchema?: SchemaObject }
+	>
+	emitList: FromEmitToOtherType<EmitListType, SchemaObject>
 }

@@ -1,413 +1,393 @@
 {
-  "version": "1.11.0",
-  "services": {
-    "Ping": {
-      "1": {
-        "description": "Example ping service",
-        "commands": {
-          "ping": {
-            "commandName": "ping",
-            "commandDescription": "the ping command exposed as http endpoint",
-            "eventBridgeConfig": {
-              "durable": false,
-              "autoacknowledge": true,
-              "shared": true
-            },
-            "metadata": {
-              "expose": {
-                "contentTypeRequest": "application/json",
-                "contentEncodingRequest": "utf-8",
-                "contentTypeResponse": "application/json",
-                "contentEncodingResponse": "utf-8",
-                "inputPayload": {
-                  "type": "object",
-                  "properties": {
-                    "ping": {
-                      "type": "string",
-                      "title": "Ping input"
-                    }
-                  },
-                  "required": [
-                    "ping"
-                  ],
-                  "title": "ping input payload schema"
-                },
-                "parameter": {
-                  "type": "object",
-                  "properties": {
-                    "query": {
-                      "type": "string",
-                      "title": "a query parameter"
-                    }
-                  },
-                  "required": [
-                    "query"
-                  ],
-                  "title": "ping input parameter schema"
-                },
-                "outputPayload": {
-                  "type": "object",
-                  "properties": {
-                    "pong": {
-                      "type": "string",
-                      "title": "Pong output"
-                    }
-                  },
-                  "required": [
-                    "pong"
-                  ],
-                  "title": "ping output payload schema"
-                },
-                "deprecated": false,
-                "http": {
-                  "method": "POST",
-                  "path": "ping",
-                  "openApi": {
-                    "description": "the ping command exposed as http endpoint",
-                    "summary": "ping",
-                    "isSecure": false,
-                    "query": [
-                      {
-                        "name": "query",
-                        "required": false
-                      }
-                    ],
-                    "tags": [],
-                    "additionalStatusCodes": [],
-                    "operationId": "ping"
-                  }
-                }
-              }
-            },
-            "eventName": "pinged",
-            "hooks": {
-              "beforeGuard": {},
-              "afterGuard": {}
-            },
-            "invokes": {},
-            "emitList": {}
-          },
-          "foo": {
-            "commandName": "foo",
-            "commandDescription": "Calls foo command",
-            "eventBridgeConfig": {
-              "durable": false,
-              "autoacknowledge": true,
-              "shared": true
-            },
-            "metadata": {
-              "expose": {
-                "contentTypeRequest": "application/json",
-                "contentEncodingRequest": "utf-8",
-                "contentTypeResponse": "application/json",
-                "contentEncodingResponse": "utf-8",
-                "inputPayload": {},
-                "parameter": {
-                  "type": "object",
-                  "properties": {},
-                  "title": "foo input parameter schema"
-                },
-                "outputPayload": {
-                  "type": "object",
-                  "properties": {
-                    "foo": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "foo"
-                  ],
-                  "title": "foo output payload schema"
-                },
-                "deprecated": false,
-                "http": {
-                  "method": "GET",
-                  "path": "foo",
-                  "openApi": {
-                    "description": "Calls foo command",
-                    "summary": "foo",
-                    "isSecure": true,
-                    "query": [],
-                    "tags": [],
-                    "additionalStatusCodes": [],
-                    "operationId": "foo"
-                  }
-                }
-              }
-            },
-            "hooks": {
-              "beforeGuard": {},
-              "afterGuard": {}
-            },
-            "invokes": {},
-            "emitList": {}
-          },
-          "paramTest": {
-            "commandName": "paramTest",
-            "commandDescription": "Show how to use path parmater and query params",
-            "eventBridgeConfig": {
-              "durable": false,
-              "autoacknowledge": true,
-              "shared": true
-            },
-            "metadata": {
-              "expose": {
-                "contentTypeRequest": "application/json",
-                "contentEncodingRequest": "utf-8",
-                "contentTypeResponse": "application/json",
-                "contentEncodingResponse": "utf-8",
-                "inputPayload": {
-                  "title": "paramTest input payload schema"
-                },
-                "parameter": {
-                  "type": "object",
-                  "properties": {
-                    "optionalQuery": {
-                      "type": "string",
-                      "example": "optional"
-                    },
-                    "requiredQuery": {
-                      "type": "string",
-                      "example": "required"
-                    },
-                    "requiredParam": {
-                      "type": "string",
-                      "example": "required_id"
-                    },
-                    "optionalParam": {
-                      "type": "string",
-                      "example": "optionalParam"
-                    }
-                  },
-                  "required": [
-                    "requiredQuery",
-                    "requiredParam"
-                  ],
-                  "title": "paramTest input parameter schema"
-                },
-                "outputPayload": {
-                  "type": "object",
-                  "properties": {
-                    "parameter": {
-                      "type": "object",
-                      "properties": {
-                        "optionalQuery": {
-                          "type": "string",
-                          "example": "optional"
-                        },
-                        "requiredQuery": {
-                          "type": "string",
-                          "example": "required"
-                        },
-                        "requiredParam": {
-                          "type": "string",
-                          "example": "required_id"
-                        },
-                        "optionalParam": {
-                          "type": "string",
-                          "example": "optionalParam"
-                        }
-                      },
-                      "required": [
-                        "requiredQuery",
-                        "requiredParam"
-                      ]
-                    }
-                  },
-                  "required": [
-                    "parameter"
-                  ],
-                  "title": "paramTest output payload schema"
-                },
-                "deprecated": false,
-                "http": {
-                  "method": "GET",
-                  "path": "param/:requiredParam/:optionalParam?",
-                  "openApi": {
-                    "description": "Show how to use path parmater and query params",
-                    "summary": "paramTest",
-                    "isSecure": false,
-                    "query": [
-                      {
-                        "name": "optionalQuery",
-                        "required": false
-                      },
-                      {
-                        "name": "requiredQuery",
-                        "required": true
-                      }
-                    ],
-                    "tags": [],
-                    "additionalStatusCodes": [],
-                    "operationId": "paramTest"
-                  }
-                }
-              }
-            },
-            "hooks": {
-              "beforeGuard": {},
-              "afterGuard": {}
-            },
-            "invokes": {},
-            "emitList": {}
-          },
-          "delete": {
-            "commandName": "delete",
-            "commandDescription": "provide a dummy command",
-            "eventBridgeConfig": {
-              "durable": false,
-              "autoacknowledge": true,
-              "shared": true
-            },
-            "metadata": {
-              "expose": {
-                "contentTypeRequest": "application/json",
-                "contentEncodingRequest": "utf-8",
-                "contentTypeResponse": "application/json",
-                "contentEncodingResponse": "utf-8",
-                "inputPayload": {
-                  "nullable": true,
-                  "title": "delete input payload schema"
-                },
-                "parameter": {
-                  "type": "object",
-                  "properties": {},
-                  "title": "delete input parameter schema"
-                },
-                "outputPayload": {
-                  "title": "put output payload schema"
-                },
-                "deprecated": false,
-                "http": {
-                  "method": "DELETE",
-                  "path": "delete",
-                  "openApi": {
-                    "description": "provide a dummy command",
-                    "summary": "delete",
-                    "isSecure": true,
-                    "query": [],
-                    "tags": [],
-                    "additionalStatusCodes": [],
-                    "operationId": "delete"
-                  }
-                }
-              }
-            },
-            "hooks": {
-              "beforeGuard": {},
-              "afterGuard": {}
-            },
-            "invokes": {},
-            "emitList": {}
-          }
-        },
-        "subscriptions": {
-          "log": {
-            "subscriptionName": "log",
-            "subscriptionDescription": "logs the ping events",
-            "eventBridgeConfig": {
-              "durable": true,
-              "autoacknowledge": false,
-              "shared": true
-            },
-            "metadata": {
-              "expose": {
-                "contentTypeRequest": "application/json",
-                "contentEncodingRequest": "utf-8",
-                "inputPayload": {
-                  "type": "object",
-                  "properties": {
-                    "pong": {
-                      "type": "string",
-                      "title": "Pong"
-                    }
-                  },
-                  "required": [
-                    "pong"
-                  ],
-                  "title": "pong payload schema"
-                }
-              }
-            },
-            "sender": {},
-            "eventName": "pinged",
-            "hooks": {
-              "beforeGuard": {},
-              "afterGuard": {}
-            },
-            "invokes": {},
-            "emitList": {}
-          }
-        }
-      }
-    },
-    "Delay": {
-      "1": {
-        "description": "Example to show a service which starts after webserver and registers commands",
-        "commands": {
-          "fooBar": {
-            "commandName": "fooBar",
-            "commandDescription": "Example for an exposed command",
-            "eventBridgeConfig": {
-              "durable": false,
-              "autoacknowledge": true,
-              "shared": true
-            },
-            "metadata": {
-              "expose": {
-                "contentTypeRequest": "application/json",
-                "contentEncodingRequest": "utf-8",
-                "contentTypeResponse": "application/json",
-                "contentEncodingResponse": "utf-8",
-                "inputPayload": {
-                  "nullable": true,
-                  "title": "fooBar input payload schema"
-                },
-                "parameter": {
-                  "type": "object",
-                  "properties": {
-                    "p": {
-                      "type": "string"
-                    },
-                    "q": {
-                      "type": "string"
-                    }
-                  },
-                  "required": [
-                    "p"
-                  ],
-                  "title": "fooBar input parameter schema"
-                },
-                "outputPayload": {
-                  "nullable": true,
-                  "title": "fooBar output payload schema"
-                },
-                "deprecated": false,
-                "http": {
-                  "method": "GET",
-                  "path": "foo-bar/:p/:q?",
-                  "openApi": {
-                    "description": "Example for an exposed command",
-                    "summary": "fooBar",
-                    "isSecure": false,
-                    "query": [],
-                    "tags": [],
-                    "additionalStatusCodes": [],
-                    "operationId": "fooBar"
-                  }
-                }
-              }
-            },
-            "hooks": {
-              "beforeGuard": {},
-              "afterGuard": {}
-            },
-            "invokes": {},
-            "emitList": {}
-          }
-        },
-        "subscriptions": {}
-      }
-    }
-  }
+	"version": "1.11.0",
+	"services": {
+		"Ping": {
+			"1": {
+				"description": "Example ping service",
+				"commands": {
+					"ping": {
+						"commandName": "ping",
+						"commandDescription": "the ping command exposed as http endpoint",
+						"eventBridgeConfig": {
+							"durable": false,
+							"autoacknowledge": true,
+							"shared": true
+						},
+						"metadata": {
+							"expose": {
+								"contentTypeRequest": "application/json",
+								"contentEncodingRequest": "utf-8",
+								"contentTypeResponse": "application/json",
+								"contentEncodingResponse": "utf-8",
+								"inputPayload": {
+									"type": "object",
+									"properties": {
+										"ping": {
+											"type": "string",
+											"title": "Ping input"
+										}
+									},
+									"required": ["ping"],
+									"title": "ping input payload schema"
+								},
+								"parameter": {
+									"type": "object",
+									"properties": {
+										"query": {
+											"type": "string",
+											"title": "a query parameter"
+										}
+									},
+									"required": ["query"],
+									"title": "ping input parameter schema"
+								},
+								"outputPayload": {
+									"type": "object",
+									"properties": {
+										"pong": {
+											"type": "string",
+											"title": "Pong output"
+										}
+									},
+									"required": ["pong"],
+									"title": "ping output payload schema"
+								},
+								"deprecated": false,
+								"http": {
+									"method": "POST",
+									"path": "ping",
+									"openApi": {
+										"description": "the ping command exposed as http endpoint",
+										"summary": "ping",
+										"isSecure": false,
+										"query": [
+											{
+												"name": "query",
+												"required": false
+											}
+										],
+										"tags": [],
+										"additionalStatusCodes": [],
+										"operationId": "ping"
+									}
+								}
+							}
+						},
+						"eventName": "pinged",
+						"hooks": {
+							"beforeGuard": {},
+							"afterGuard": {}
+						},
+						"invokes": {},
+						"emitList": {}
+					},
+					"foo": {
+						"commandName": "foo",
+						"commandDescription": "Calls foo command",
+						"eventBridgeConfig": {
+							"durable": false,
+							"autoacknowledge": true,
+							"shared": true
+						},
+						"metadata": {
+							"expose": {
+								"contentTypeRequest": "application/json",
+								"contentEncodingRequest": "utf-8",
+								"contentTypeResponse": "application/json",
+								"contentEncodingResponse": "utf-8",
+								"inputPayload": {},
+								"parameter": {
+									"type": "object",
+									"properties": {},
+									"title": "foo input parameter schema"
+								},
+								"outputPayload": {
+									"type": "object",
+									"properties": {
+										"foo": {
+											"type": "string"
+										}
+									},
+									"required": ["foo"],
+									"title": "foo output payload schema"
+								},
+								"deprecated": false,
+								"http": {
+									"method": "GET",
+									"path": "foo",
+									"openApi": {
+										"description": "Calls foo command",
+										"summary": "foo",
+										"isSecure": true,
+										"query": [],
+										"tags": [],
+										"additionalStatusCodes": [],
+										"operationId": "foo"
+									}
+								}
+							}
+						},
+						"hooks": {
+							"beforeGuard": {},
+							"afterGuard": {}
+						},
+						"invokes": {},
+						"emitList": {}
+					},
+					"paramTest": {
+						"commandName": "paramTest",
+						"commandDescription": "Show how to use path parmater and query params",
+						"eventBridgeConfig": {
+							"durable": false,
+							"autoacknowledge": true,
+							"shared": true
+						},
+						"metadata": {
+							"expose": {
+								"contentTypeRequest": "application/json",
+								"contentEncodingRequest": "utf-8",
+								"contentTypeResponse": "application/json",
+								"contentEncodingResponse": "utf-8",
+								"inputPayload": {
+									"title": "paramTest input payload schema"
+								},
+								"parameter": {
+									"type": "object",
+									"properties": {
+										"optionalQuery": {
+											"type": "string",
+											"example": "optional"
+										},
+										"requiredQuery": {
+											"type": "string",
+											"example": "required"
+										},
+										"requiredParam": {
+											"type": "string",
+											"example": "required_id"
+										},
+										"optionalParam": {
+											"type": "string",
+											"example": "optionalParam"
+										}
+									},
+									"required": ["requiredQuery", "requiredParam"],
+									"title": "paramTest input parameter schema"
+								},
+								"outputPayload": {
+									"type": "object",
+									"properties": {
+										"parameter": {
+											"type": "object",
+											"properties": {
+												"optionalQuery": {
+													"type": "string",
+													"example": "optional"
+												},
+												"requiredQuery": {
+													"type": "string",
+													"example": "required"
+												},
+												"requiredParam": {
+													"type": "string",
+													"example": "required_id"
+												},
+												"optionalParam": {
+													"type": "string",
+													"example": "optionalParam"
+												}
+											},
+											"required": ["requiredQuery", "requiredParam"]
+										}
+									},
+									"required": ["parameter"],
+									"title": "paramTest output payload schema"
+								},
+								"deprecated": false,
+								"http": {
+									"method": "GET",
+									"path": "param/:requiredParam/:optionalParam?",
+									"openApi": {
+										"description": "Show how to use path parmater and query params",
+										"summary": "paramTest",
+										"isSecure": false,
+										"query": [
+											{
+												"name": "optionalQuery",
+												"required": false
+											},
+											{
+												"name": "requiredQuery",
+												"required": true
+											}
+										],
+										"tags": [],
+										"additionalStatusCodes": [],
+										"operationId": "paramTest"
+									}
+								}
+							}
+						},
+						"hooks": {
+							"beforeGuard": {},
+							"afterGuard": {}
+						},
+						"invokes": {},
+						"emitList": {}
+					},
+					"delete": {
+						"commandName": "delete",
+						"commandDescription": "provide a dummy command",
+						"eventBridgeConfig": {
+							"durable": false,
+							"autoacknowledge": true,
+							"shared": true
+						},
+						"metadata": {
+							"expose": {
+								"contentTypeRequest": "application/json",
+								"contentEncodingRequest": "utf-8",
+								"contentTypeResponse": "application/json",
+								"contentEncodingResponse": "utf-8",
+								"inputPayload": {
+									"nullable": true,
+									"title": "delete input payload schema"
+								},
+								"parameter": {
+									"type": "object",
+									"properties": {},
+									"title": "delete input parameter schema"
+								},
+								"outputPayload": {
+									"title": "put output payload schema"
+								},
+								"deprecated": false,
+								"http": {
+									"method": "DELETE",
+									"path": "delete",
+									"openApi": {
+										"description": "provide a dummy command",
+										"summary": "delete",
+										"isSecure": true,
+										"query": [],
+										"tags": [],
+										"additionalStatusCodes": [],
+										"operationId": "delete"
+									}
+								}
+							}
+						},
+						"hooks": {
+							"beforeGuard": {},
+							"afterGuard": {}
+						},
+						"invokes": {},
+						"emitList": {}
+					}
+				},
+				"subscriptions": {
+					"log": {
+						"subscriptionName": "log",
+						"subscriptionDescription": "logs the ping events",
+						"eventBridgeConfig": {
+							"durable": true,
+							"autoacknowledge": false,
+							"shared": true
+						},
+						"metadata": {
+							"expose": {
+								"contentTypeRequest": "application/json",
+								"contentEncodingRequest": "utf-8",
+								"inputPayload": {
+									"type": "object",
+									"properties": {
+										"pong": {
+											"type": "string",
+											"title": "Pong"
+										}
+									},
+									"required": ["pong"],
+									"title": "pong payload schema"
+								}
+							}
+						},
+						"sender": {},
+						"eventName": "pinged",
+						"hooks": {
+							"beforeGuard": {},
+							"afterGuard": {}
+						},
+						"invokes": {},
+						"emitList": {}
+					}
+				}
+			}
+		},
+		"Delay": {
+			"1": {
+				"description": "Example to show a service which starts after webserver and registers commands",
+				"commands": {
+					"fooBar": {
+						"commandName": "fooBar",
+						"commandDescription": "Example for an exposed command",
+						"eventBridgeConfig": {
+							"durable": false,
+							"autoacknowledge": true,
+							"shared": true
+						},
+						"metadata": {
+							"expose": {
+								"contentTypeRequest": "application/json",
+								"contentEncodingRequest": "utf-8",
+								"contentTypeResponse": "application/json",
+								"contentEncodingResponse": "utf-8",
+								"inputPayload": {
+									"nullable": true,
+									"title": "fooBar input payload schema"
+								},
+								"parameter": {
+									"type": "object",
+									"properties": {
+										"p": {
+											"type": "string"
+										},
+										"q": {
+											"type": "string"
+										}
+									},
+									"required": ["p"],
+									"title": "fooBar input parameter schema"
+								},
+								"outputPayload": {
+									"nullable": true,
+									"title": "fooBar output payload schema"
+								},
+								"deprecated": false,
+								"http": {
+									"method": "GET",
+									"path": "foo-bar/:p/:q?",
+									"openApi": {
+										"description": "Example for an exposed command",
+										"summary": "fooBar",
+										"isSecure": false,
+										"query": [],
+										"tags": [],
+										"additionalStatusCodes": [],
+										"operationId": "fooBar"
+									}
+								}
+							}
+						},
+						"hooks": {
+							"beforeGuard": {},
+							"afterGuard": {}
+						},
+						"invokes": {},
+						"emitList": {}
+					}
+				},
+				"subscriptions": {}
+			}
+		}
+	}
 }

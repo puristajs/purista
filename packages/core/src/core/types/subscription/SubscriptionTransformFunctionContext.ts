@@ -6,8 +6,8 @@ import type { Prettify } from '../Prettify.js'
  * @group Subscription
  */
 export type SubscriptionTransformFunctionContext = Prettify<
-  ContextBase & {
-    /** the original received message */
-    message: Readonly<EBMessage>
-  }
+	ContextBase & {
+		/** the original received message */
+		message: Readonly<EBMessage>
+	}
 >

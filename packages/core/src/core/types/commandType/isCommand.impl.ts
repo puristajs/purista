@@ -10,5 +10,5 @@ import type { Command } from './Command.js'
  * @returns boolean
  */
 export const isCommand = (message: EBMessage): message is Command => {
-  return message.messageType === EBMessageType.Command
+	return message.messageType === EBMessageType.Command
 }

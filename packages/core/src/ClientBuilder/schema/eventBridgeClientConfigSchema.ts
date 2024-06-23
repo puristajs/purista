@@ -1,5 +1,5 @@
 import { z } from 'zod'
 
 export const eventBridgeClientConfigSchema = z.object({
-  clientName: z.string().default('EventBridgeClient'),
+	clientName: z.string().default('EventBridgeClient'),
 })

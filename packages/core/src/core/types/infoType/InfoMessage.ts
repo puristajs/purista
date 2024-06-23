@@ -9,31 +9,31 @@ import type { InfoServiceShutdown } from './InfoServiceShutdown.js'
 import type { InfoSubscriptionError } from './InfoSubscriptionError.js'
 
 export type InfoMessage =
-  | InfoServiceDrain
-  | InfoServiceFunctionAdded
-  | InfoServiceInit
-  | InfoServiceNotReady
-  | InfoServiceReady
-  | InfoServiceShutdown
-  | InfoInvokeTimeout
-  | InfoSubscriptionError
+	| InfoServiceDrain
+	| InfoServiceFunctionAdded
+	| InfoServiceInit
+	| InfoServiceNotReady
+	| InfoServiceReady
+	| InfoServiceShutdown
+	| InfoInvokeTimeout
+	| InfoSubscriptionError
 
 export type InfoMessageType =
-  | EBMessageType.InfoServiceDrain
-  | EBMessageType.InfoServiceFunctionAdded
-  | EBMessageType.InfoServiceInit
-  | EBMessageType.InfoServiceNotReady
-  | EBMessageType.InfoServiceReady
-  | EBMessageType.InfoServiceShutdown
-  | EBMessageType.InfoInvokeTimeout
-  | EBMessageType.InfoSubscriptionError
+	| EBMessageType.InfoServiceDrain
+	| EBMessageType.InfoServiceFunctionAdded
+	| EBMessageType.InfoServiceInit
+	| EBMessageType.InfoServiceNotReady
+	| EBMessageType.InfoServiceReady
+	| EBMessageType.InfoServiceShutdown
+	| EBMessageType.InfoInvokeTimeout
+	| EBMessageType.InfoSubscriptionError
 export const infoMessageTypes = [
-  EBMessageType.InfoServiceDrain,
-  EBMessageType.InfoServiceFunctionAdded,
-  EBMessageType.InfoServiceInit,
-  EBMessageType.InfoServiceNotReady,
-  EBMessageType.InfoServiceReady,
-  EBMessageType.InfoServiceShutdown,
-  EBMessageType.InfoInvokeTimeout,
-  EBMessageType.InfoSubscriptionError,
+	EBMessageType.InfoServiceDrain,
+	EBMessageType.InfoServiceFunctionAdded,
+	EBMessageType.InfoServiceInit,
+	EBMessageType.InfoServiceNotReady,
+	EBMessageType.InfoServiceReady,
+	EBMessageType.InfoServiceShutdown,
+	EBMessageType.InfoInvokeTimeout,
+	EBMessageType.InfoSubscriptionError,
 ]

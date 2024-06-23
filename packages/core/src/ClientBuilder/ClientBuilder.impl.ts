@@ -1,6 +1,6 @@
 import type { WriteStream } from 'node:fs'
 import { createWriteStream } from 'node:fs'
-import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import { rimraf } from 'rimraf'
@@ -25,317 +25,316 @@ export const CONFIG_FILE_NAME = 'purista.client.json'
  * ClientBuilder to generate clients, based on service definitions.
  */
 export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
-  public config: ConfigFull
+	public config: ConfigFull
 
-  /**
-   * The root file from where the relative paths are resolved.
-   * Defaults to current users directory
-   */
-  public rootPath = process.cwd()
+	/**
+	 * The root file from where the relative paths are resolved.
+	 * Defaults to current users directory
+	 */
+	public rootPath = process.cwd()
 
-  constructor(config?: Partial<Config>) {
-    super()
-    this.config = configFullSchema.parse({
-      version: puristaVersion,
-      definitionPath: './definitions',
-      outputPath: './dist',
-      buildAs: 'both',
-      ...config,
-      httpClient: {
-        clientName: 'HttpClient',
-        ...config?.httpClient,
-      },
-      eventBridgeClient: {
-        clientName: 'EventBridgeClient',
-        ...config?.eventBridgeClient,
-      },
-      package: {
-        name: 'my-custom-client-package',
-        description: 'The client library package for a PURISTA based application',
-        private: true,
-        ...config?.package,
-      },
-    })
-  }
+	constructor(config?: Partial<Config>) {
+		super()
+		this.config = configFullSchema.parse({
+			version: puristaVersion,
+			definitionPath: './definitions',
+			outputPath: './dist',
+			buildAs: 'both',
+			...config,
+			httpClient: {
+				clientName: 'HttpClient',
+				...config?.httpClient,
+			},
+			eventBridgeClient: {
+				clientName: 'EventBridgeClient',
+				...config?.eventBridgeClient,
+			},
+			package: {
+				name: 'my-custom-client-package',
+				description: 'The client library package for a PURISTA based application',
+				private: true,
+				...config?.package,
+			},
+		})
+	}
 
-  /**
-   * Loads the config fom JSON file.
-   * If no path is provided, it will try to load the config from purista.client.json in rootPath directory
-   * @param path
-   */
-  async loadConfig(path?: string) {
-    const p = path ?? join(this.rootPath, CONFIG_FILE_NAME)
-    const content = await readFile(p)
-    const parsedContent = JSON.parse(content.toString('utf-8'))
-    const config = configSchema.parse(parsedContent)
+	/**
+	 * Loads the config fom JSON file.
+	 * If no path is provided, it will try to load the config from purista.client.json in rootPath directory
+	 * @param path
+	 */
+	async loadConfig(path?: string) {
+		const p = path ?? join(this.rootPath, CONFIG_FILE_NAME)
+		const content = await readFile(p)
+		const parsedContent = JSON.parse(content.toString('utf-8'))
+		const config = configSchema.parse(parsedContent)
 
-    this.config = configFullSchema.parse({
-      ...config,
-      httpClient: {
-        buildAs: 'esm',
-        clientName: 'HttpClient',
-        ...config?.httpClient,
-      },
-      eventBridgeClient: {
-        ...config?.eventBridgeClient,
-      },
-    })
-  }
+		this.config = configFullSchema.parse({
+			...config,
+			httpClient: {
+				buildAs: 'esm',
+				clientName: 'HttpClient',
+				...config?.httpClient,
+			},
+			eventBridgeClient: {
+				...config?.eventBridgeClient,
+			},
+		})
+	}
 
-  /**
-   * Writes the config to a config file.
-   * Defaults to purista.client.json in rootPath directory
-   *
-   * @param path
-   */
-  async writeConfig(path?: string) {
-    const p = path ?? join(this.rootPath, CONFIG_FILE_NAME)
-    await writeFile(p, JSON.stringify(this.config, null, 2))
-  }
+	/**
+	 * Writes the config to a config file.
+	 * Defaults to purista.client.json in rootPath directory
+	 *
+	 * @param path
+	 */
+	async writeConfig(path?: string) {
+		const p = path ?? join(this.rootPath, CONFIG_FILE_NAME)
+		await writeFile(p, JSON.stringify(this.config, null, 2))
+	}
 
-  /**
-   * Resolves the definitions folder path from config with rootPath
-   * @returns path of definitions folder
-   */
-  getDefinitionPath() {
-    return join(this.rootPath, this.config.definitionPath)
-  }
+	/**
+	 * Resolves the definitions folder path from config with rootPath
+	 * @returns path of definitions folder
+	 */
+	getDefinitionPath() {
+		return join(this.rootPath, this.config.definitionPath)
+	}
 
-  /**
-   * Resolves the output folder path from config with rootPath
-   * @returns path of output folder
-   */
-  getOutputPath() {
-    return join(this.rootPath, this.config.outputPath)
-  }
+	/**
+	 * Resolves the output folder path from config with rootPath
+	 * @returns path of output folder
+	 */
+	getOutputPath() {
+		return join(this.rootPath, this.config.outputPath)
+	}
 
-  /**
-   * Deletes the content of the output folder.
-   * Should be called before generating the client
-   * @returns
-   */
-  async cleanDistFolder() {
-    await rimraf(this.getOutputPath())
-    await mkdir(this.getOutputPath())
-    await mkdir(join(this.getOutputPath(), 'src'))
-  }
+	/**
+	 * Deletes the content of the output folder.
+	 * Should be called before generating the client
+	 * @returns
+	 */
+	async cleanDistFolder() {
+		await rimraf(this.getOutputPath())
+		await mkdir(this.getOutputPath())
+		await mkdir(join(this.getOutputPath(), 'src'))
+	}
 
-  /**
-   * Creates a index.ts file which exports the client(s) and types.
-   * Is used in generated package.json
-   */
-  async createIndex() {
-    const ext = this.config.buildAs !== 'commonjs' ? '.js' : ''
+	/**
+	 * Creates a index.ts file which exports the client(s) and types.
+	 * Is used in generated package.json
+	 */
+	async createIndex() {
+		const ext = this.config.buildAs !== 'commonjs' ? '.js' : ''
 
-    const writer = getWriter()
+		const writer = getWriter()
 
-    const path = join(this.getOutputPath(), 'src')
+		const path = join(this.getOutputPath(), 'src')
 
-    const files = await readdir(path)
-    for (const file of files) {
-      if (!file.endsWith('.ts')) {
-        continue
-      }
-      writer.writeLine(`export * from './${file.replace('.ts', ext)}'`)
-    }
+		const files = await readdir(path)
+		for (const file of files) {
+			if (!file.endsWith('.ts')) {
+				continue
+			}
+			writer.writeLine(`export * from './${file.replace('.ts', ext)}'`)
+		}
 
-    await writeFile(join(path, 'index.ts'), writer.toString())
-  }
+		await writeFile(join(path, 'index.ts'), writer.toString())
+	}
 
-  /**
-   * Creates a package.json file in the output folder.
-   * Exports the files which are build by tsc based on generated client files
-   */
-  async createPackageJson() {
-    const hasEsm = this.config.buildAs !== 'commonjs'
-    const hasCommonJs = this.config.buildAs !== 'esm'
+	/**
+	 * Creates a package.json file in the output folder.
+	 * Exports the files which are build by tsc based on generated client files
+	 */
+	async createPackageJson() {
+		const hasEsm = this.config.buildAs !== 'commonjs'
+		const hasCommonJs = this.config.buildAs !== 'esm'
 
-    const packageJson: Record<string, any> = {
-      name: 'my-client',
-      description: 'The client library package for a PURISTA based application',
-      private: true,
-      type: hasEsm ? 'module' : 'commonjs',
-      exports: {
-        './package.json': './package.json',
-        '.': {},
-      },
-      devDependencies: {
-        '@purista/core': 'latest',
-      },
-      ...this.config.package,
-    }
+		const packageJson: Record<string, any> = {
+			name: 'my-client',
+			description: 'The client library package for a PURISTA based application',
+			private: true,
+			type: hasEsm ? 'module' : 'commonjs',
+			exports: {
+				'./package.json': './package.json',
+				'.': {},
+			},
+			devDependencies: {
+				'@purista/core': 'latest',
+			},
+			...this.config.package,
+		}
 
-    if (hasCommonJs) {
-      packageJson.main = './dist/commonjs/index.js'
-      packageJson.types = './dist/commonjs/index.d.ts'
-      packageJson.exports['.'] = {
-        ...packageJson.exports['.'],
-        require: {
-          types: './dist/commonjs/index.d.ts',
-          default: './dist/commonjs/index.js',
-        },
-      }
-    }
+		if (hasCommonJs) {
+			packageJson.main = './dist/commonjs/index.js'
+			packageJson.types = './dist/commonjs/index.d.ts'
+			packageJson.exports['.'] = {
+				...packageJson.exports['.'],
+				require: {
+					types: './dist/commonjs/index.d.ts',
+					default: './dist/commonjs/index.js',
+				},
+			}
+		}
 
-    if (hasEsm) {
-      packageJson.exports['.'] = {
-        ...packageJson.exports['.'],
-        import: {
-          types: './dist/esm/index.d.ts',
-          default: './dist/esm/index.js',
-        },
-      }
-    }
+		if (hasEsm) {
+			packageJson.exports['.'] = {
+				...packageJson.exports['.'],
+				import: {
+					types: './dist/esm/index.d.ts',
+					default: './dist/esm/index.js',
+				},
+			}
+		}
 
-    await writeFile(join(this.getOutputPath(), 'package.json'), JSON.stringify(packageJson, null, 2))
-  }
+		await writeFile(join(this.getOutputPath(), 'package.json'), JSON.stringify(packageJson, null, 2))
+	}
 
-  /**
-   * Runs the tsc against the generated ts source files.
-   * Depending on settings, it will generate ESM and/or commonJS files
-   */
-  build() {
-    const hasEsm = this.config.buildAs !== 'commonjs'
-    const hasCommonJs = this.config.buildAs !== 'esm'
+	/**
+	 * Runs the tsc against the generated ts source files.
+	 * Depending on settings, it will generate ESM and/or commonJS files
+	 */
+	build() {
+		const hasEsm = this.config.buildAs !== 'commonjs'
+		const hasCommonJs = this.config.buildAs !== 'esm'
 
-    if (hasEsm) {
-      const esmOptions: ts.CompilerOptions = {
-        declaration: true,
-        outDir: join(this.getOutputPath(), 'dist', 'esm'),
-        target: ts.ScriptTarget.ES2022,
-        module: ts.ModuleKind.NodeNext,
-        skipLibCheck: true,
-        moduleResolution: ts.ModuleResolutionKind.NodeNext,
-      }
+		if (hasEsm) {
+			const esmOptions: ts.CompilerOptions = {
+				declaration: true,
+				outDir: join(this.getOutputPath(), 'dist', 'esm'),
+				target: ts.ScriptTarget.ES2022,
+				module: ts.ModuleKind.NodeNext,
+				skipLibCheck: true,
+				moduleResolution: ts.ModuleResolutionKind.NodeNext,
+			}
 
-      this.compile([join(this.getOutputPath(), 'src', 'index.ts')], esmOptions, 'ESM')
-    }
+			this.compile([join(this.getOutputPath(), 'src', 'index.ts')], esmOptions, 'ESM')
+		}
 
-    if (hasCommonJs) {
-      const commonJsOptions: ts.CompilerOptions = {
-        declaration: true,
-        outDir: join(this.getOutputPath(), 'dist', 'commonjs'),
-        skipLibCheck: true,
-        target: ts.ScriptTarget.ES2015,
-        module: ts.ModuleKind.CommonJS,
-      }
+		if (hasCommonJs) {
+			const commonJsOptions: ts.CompilerOptions = {
+				declaration: true,
+				outDir: join(this.getOutputPath(), 'dist', 'commonjs'),
+				skipLibCheck: true,
+				target: ts.ScriptTarget.ES2015,
+				module: ts.ModuleKind.CommonJS,
+			}
 
-      this.compile([join(this.getOutputPath(), 'src', 'index.ts')], commonJsOptions, 'CommonJs')
-    }
-  }
+			this.compile([join(this.getOutputPath(), 'src', 'index.ts')], commonJsOptions, 'CommonJs')
+		}
+	}
 
-  /**
-   * Internal helper for compiling typescript files
-   * @param fileNames
-   * @param options
-   * @param type
-   */
-  private compile(fileNames: string[], options: ts.CompilerOptions, type: string) {
-    const program = ts.createProgram(fileNames, options)
+	/**
+	 * Internal helper for compiling typescript files
+	 * @param fileNames
+	 * @param options
+	 * @param type
+	 */
+	private compile(fileNames: string[], options: ts.CompilerOptions, type: string) {
+		const program = ts.createProgram(fileNames, options)
 
-    const emitResult = program.emit()
+		const emitResult = program.emit()
 
-    const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
+		const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
 
-    allDiagnostics.forEach((diagnostic) => {
-      if (diagnostic.file) {
-        const { line, character } = ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start!)
-        const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
-        this.emit('warn', `${type} build: ${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`)
-      } else {
-        this.emit('warn', `${type} build: ` + ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n'))
-      }
-    })
+		allDiagnostics.forEach(diagnostic => {
+			if (diagnostic.file && diagnostic.start) {
+				const { line, character } = ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start)
+				const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
+				this.emit('warn', `${type} build: ${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`)
+			} else {
+				this.emit('warn', `${type} build: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`)
+			}
+		})
 
-    const exitCode = emitResult.emitSkipped ? 1 : 0
-    if (exitCode) {
-      this.emit('error', `${type} build: process exiting with code '${exitCode}'.`)
-      throw new Error(`${type} build: process exiting with code '${exitCode}'.`)
-    } else {
-      this.emit('success', `${type} build done`)
-    }
-  }
+		const exitCode = emitResult.emitSkipped ? 1 : 0
+		if (exitCode) {
+			this.emit('error', `${type} build: process exiting with code '${exitCode}'.`)
+			throw new Error(`${type} build: process exiting with code '${exitCode}'.`)
+		}
+		this.emit('success', `${type} build done`)
+	}
 
-  /**
-   * Loads the definitions from JSON files
-   * @param path
-   * @returns
-   */
-  async loadDefinitionFiles(path?: string): Promise<FullServiceDefinition> {
-    this.emit('start', 'Start reading definitions')
+	/**
+	 * Loads the definitions from JSON files
+	 * @param path
+	 * @returns
+	 */
+	async loadDefinitionFiles(path?: string): Promise<FullServiceDefinition> {
+		this.emit('start', 'Start reading definitions')
 
-    const services: FullServiceDefinition = {}
+		const services: FullServiceDefinition = {}
 
-    const p = path ?? this.getDefinitionPath()
+		const p = path ?? this.getDefinitionPath()
 
-    const files = await readdir(p)
-    for (const file of files) {
-      if (!file.endsWith('.json')) {
-        continue
-      }
-      try {
-        const content = await readFile(join(p, file), { encoding: 'utf8' })
+		const files = await readdir(p)
+		for (const file of files) {
+			if (!file.endsWith('.json')) {
+				continue
+			}
+			try {
+				const content = await readFile(join(p, file), { encoding: 'utf8' })
 
-        const json: FullDefinition = JSON.parse(content)
+				const json: FullDefinition = JSON.parse(content)
 
-        if (json.services) {
-          mergeIntoServiceDefintion(services, json.services)
-          this.emit('success', file)
-        }
-      } catch (error) {
-        this.emit('error', error as Error)
-      }
-    }
+				if (json.services) {
+					mergeIntoServiceDefintion(services, json.services)
+					this.emit('success', file)
+				}
+			} catch (error) {
+				this.emit('error', error as Error)
+			}
+		}
 
-    return services
-  }
+		return services
+	}
 
-  /**
-   * Generates the zero-dependency HTTP client source files
-   * @param serviceDefinition
-   */
-  async generateHttpClient(serviceDefinition: FullServiceDefinition) {
-    const ext = this.config.buildAs !== 'commonjs' ? '.js' : ''
+	/**
+	 * Generates the zero-dependency HTTP client source files
+	 * @param serviceDefinition
+	 */
+	async generateHttpClient(serviceDefinition: FullServiceDefinition) {
+		const ext = this.config.buildAs !== 'commonjs' ? '.js' : ''
 
-    const clientStream = createWriteStream(join(this.getOutputPath(), 'src', 'http_client.ts'))
-    const typeStream = createWriteStream(join(this.getOutputPath(), 'src', 'types_http_client.ts'))
+		const clientStream = createWriteStream(join(this.getOutputPath(), 'src', 'http_client.ts'))
+		const typeStream = createWriteStream(join(this.getOutputPath(), 'src', 'types_http_client.ts'))
 
-    typeStream.write(this.getHttpClientConfigTypeString())
+		typeStream.write(this.getHttpClientConfigTypeString())
 
-    const clientWriter = getWriter()
+		const clientWriter = getWriter()
 
-    clientWriter
-      .writeLine(`import * as ClientType from './types_http_client${ext}'`)
-      .blankLine()
-      .writeLine(`export class ${this.config.httpClient.clientName} {`)
-      .blankLine()
-      .writeLine(
-        "public __config__: Omit<ClientType.HttpClientOptions, 'baseUrl' | 'traceIdHeaderName'> & {baseUrl: string, traceIdHeaderName: string}",
-      )
-      .blankLine()
-      .withIndentationLevel(1, () => {
-        clientWriter.write('constructor(config?: ClientType.HttpClientOptions)').block(() => {
-          clientWriter
-            .write('this.__config__ = ')
-            .block(() => {
-              clientWriter.writeLine(`baseUrl: 'http://localhost:3000/api',`)
-              clientWriter.writeLine('defaultTimeout: 30000,')
-              clientWriter.writeLine('isKeepAlive: true,')
-              clientWriter.writeLine("traceIdHeaderName: 'x-trace-id',")
-              clientWriter
-                .write('defaultHeaders: ')
-                .inlineBlock(() => {
-                  clientWriter.writeLine("'Content-Type': 'application/json; utf-8',")
-                })
-                .write(',')
-              clientWriter.writeLine('...config,')
-            })
-            .blankLine()
-        })
-      })
+		clientWriter
+			.writeLine(`import * as ClientType from './types_http_client${ext}'`)
+			.blankLine()
+			.writeLine(`export class ${this.config.httpClient.clientName} {`)
+			.blankLine()
+			.writeLine(
+				"public __config__: Omit<ClientType.HttpClientOptions, 'baseUrl' | 'traceIdHeaderName'> & {baseUrl: string, traceIdHeaderName: string}",
+			)
+			.blankLine()
+			.withIndentationLevel(1, () => {
+				clientWriter.write('constructor(config?: ClientType.HttpClientOptions)').block(() => {
+					clientWriter
+						.write('this.__config__ = ')
+						.block(() => {
+							clientWriter.writeLine(`baseUrl: 'http://localhost:3000/api',`)
+							clientWriter.writeLine('defaultTimeout: 30000,')
+							clientWriter.writeLine('isKeepAlive: true,')
+							clientWriter.writeLine("traceIdHeaderName: 'x-trace-id',")
+							clientWriter
+								.write('defaultHeaders: ')
+								.inlineBlock(() => {
+									clientWriter.writeLine("'Content-Type': 'application/json; utf-8',")
+								})
+								.write(',')
+							clientWriter.writeLine('...config,')
+						})
+						.blankLine()
+				})
+			})
 
-    clientStream.write(clientWriter.toString())
-    clientStream.write(`
+		clientStream.write(clientWriter.toString())
+		clientStream.write(`
   /**
    * Helper to create the url and HTTP headers
    * @param path 
@@ -453,328 +452,326 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
   }
     `)
 
-    await this.generateHttpClientSource(clientStream, typeStream, serviceDefinition)
+		await this.generateHttpClientSource(clientStream, typeStream, serviceDefinition)
 
-    clientStream.write(`}`)
+		clientStream.write('}')
 
-    clientStream.write(this.getHttpErrorClassString())
+		clientStream.write(this.getHttpErrorClassString())
 
-    await Promise.all([
-      new Promise((resolve, _reject) => clientStream.end(() => resolve(undefined))),
-      new Promise((resolve, _reject) => typeStream.end(() => resolve(undefined))),
-    ])
-  }
+		await Promise.all([
+			new Promise((resolve, _reject) => clientStream.end(() => resolve(undefined))),
+			new Promise((resolve, _reject) => typeStream.end(() => resolve(undefined))),
+		])
+	}
 
-  /**
-   * Helper function which generates the getters
-   * @param clientStream
-   * @param typeStream
-   * @param serviceDefinitions
-   */
-  private async generateHttpClientSource(
-    clientStream: WriteStream,
-    typeStream: WriteStream,
-    serviceDefinitions: FullServiceDefinition,
-  ) {
-    Object.entries(serviceDefinitions).forEach(([serviceName, serviceDefinition]) => {
-      const writer = getWriter()
-      writer.newLine().withIndentationLevel(1, () => {
-        writer
-          .writeLine(`/** Service ${serviceName} */`)
-          .write(`get ${convertToCamelCase(serviceName)}()`)
-          .block(() => {
-            const s = Object.entries(serviceDefinition).reduce(
-              (input, [serviceVersion, def]) => {
-                const commands = Object.values(def.commands).filter((cmdDef) =>
-                  isHttpExposedServiceMeta(cmdDef.metadata),
-                )
+	/**
+	 * Helper function which generates the getters
+	 * @param clientStream
+	 * @param typeStream
+	 * @param serviceDefinitions
+	 */
+	private async generateHttpClientSource(
+		clientStream: WriteStream,
+		typeStream: WriteStream,
+		serviceDefinitions: FullServiceDefinition,
+	) {
+		Object.entries(serviceDefinitions).forEach(([serviceName, serviceDefinition]) => {
+			const writer = getWriter()
+			writer.newLine().withIndentationLevel(1, () => {
+				writer
+					.writeLine(`/** Service ${serviceName} */`)
+					.write(`get ${convertToCamelCase(serviceName)}()`)
+					.block(() => {
+						const s = Object.entries(serviceDefinition).reduce(
+							(input, [serviceVersion, def]) => {
+								const commands = Object.values(def.commands).filter(cmdDef => isHttpExposedServiceMeta(cmdDef.metadata))
 
-                if (!commands.length) {
-                  return input
-                }
+								if (!commands.length) {
+									return input
+								}
 
-                return {
-                  ...input,
-                  [serviceVersion]: commands.reduce((ret: string[], httpDef) => {
-                    const meta = httpDef.metadata as unknown as HttpExposedServiceMeta
-                    const { functionString, typeString } = metaToFunctionHttp(
-                      serviceName,
-                      serviceVersion,
-                      httpDef.commandName,
-                      meta,
-                    )
-                    typeStream.write(typeString)
-                    return [
-                      ...ret,
-                      `/** ${httpDef.commandDescription}  */`,
-                      `${httpDef.commandName}: ${functionString},`,
-                    ]
-                  }, [] as string[]),
-                }
-              },
-              {} as { [key: string]: string[] },
-            )
+								return {
+									...input,
+									[serviceVersion]: commands.reduce((ret: string[], httpDef) => {
+										const meta = httpDef.metadata as unknown as HttpExposedServiceMeta
+										const { functionString, typeString } = metaToFunctionHttp(
+											serviceName,
+											serviceVersion,
+											httpDef.commandName,
+											meta,
+										)
+										typeStream.write(typeString)
+										return [
+											...ret,
+											`/** ${httpDef.commandDescription}  */`,
+											`${httpDef.commandName}: ${functionString},`,
+										]
+									}, [] as string[]),
+								}
+							},
+							{} as { [key: string]: string[] },
+						)
 
-            writer.write('return').block(() => {
-              Object.entries(s).forEach(([serviceVersion, def]) => {
-                this.emit('info', `${serviceName} version ${serviceVersion}`)
-                writer.write(`'v${serviceVersion}':`).block(() => {
-                  def.forEach((line) => writer.writeLine(line))
-                })
-              })
-            })
-          })
-          .newLine()
-      })
+						writer.write('return').block(() => {
+							Object.entries(s).forEach(([serviceVersion, def]) => {
+								this.emit('info', `${serviceName} version ${serviceVersion}`)
+								writer.write(`'v${serviceVersion}':`).block(() => {
+									def.forEach(line => writer.writeLine(line))
+								})
+							})
+						})
+					})
+					.newLine()
+			})
 
-      clientStream.write(writer.toString())
-    })
-  }
+			clientStream.write(writer.toString())
+		})
+	}
 
-  /**
-   * Generates the correlating type file
-   * @returns
-   */
-  private getHttpClientConfigTypeString() {
-    const writer = getWriter()
+	/**
+	 * Generates the correlating type file
+	 * @returns
+	 */
+	private getHttpClientConfigTypeString() {
+		const writer = getWriter()
 
-    writer.write('export type HttpClientOptions = ').block(() => {
-      writer.writeLine('/**')
-      writer.writeLine('* the base url to be used')
-      writer.writeLine('* @example')
-      writer.writeLine('* ```typescript')
-      writer.writeLine('* const config = {')
-      writer.writeLine("*   baseUrl: 'http://localhost/api`")
-      writer.writeLine('* }')
-      writer.writeLine('* // each request will be below http://localhost/api')
-      writer.writeLine("* // get('v1/orders') will call http://localhost/api/v1/orders")
-      writer.writeLine('* ```')
-      writer.writeLine('* */')
-      writer.writeLine('baseUrl?: string')
+		writer.write('export type HttpClientOptions = ').block(() => {
+			writer.writeLine('/**')
+			writer.writeLine('* the base url to be used')
+			writer.writeLine('* @example')
+			writer.writeLine('* ```typescript')
+			writer.writeLine('* const config = {')
+			writer.writeLine("*   baseUrl: 'http://localhost/api`")
+			writer.writeLine('* }')
+			writer.writeLine('* // each request will be below http://localhost/api')
+			writer.writeLine("* // get('v1/orders') will call http://localhost/api/v1/orders")
+			writer.writeLine('* ```')
+			writer.writeLine('* */')
+			writer.writeLine('baseUrl?: string')
 
-      writer.writeLine('/**')
-      writer.writeLine('* If set to false, the HTTP client will not reuse the same connection for multiple requests.')
-      writer.writeLine('* @default true')
-      writer.writeLine('*/')
-      writer.writeLine('isKeepAlive?: boolean')
+			writer.writeLine('/**')
+			writer.writeLine('* If set to false, the HTTP client will not reuse the same connection for multiple requests.')
+			writer.writeLine('* @default true')
+			writer.writeLine('*/')
+			writer.writeLine('isKeepAlive?: boolean')
 
-      writer.writeLine('/**')
-      writer.writeLine('* The header name for custom trace id')
-      writer.writeLine('* @default x-trace-id')
-      writer.writeLine('*/')
-      writer.writeLine('traceIdHeaderName?: string')
+			writer.writeLine('/**')
+			writer.writeLine('* The header name for custom trace id')
+			writer.writeLine('* @default x-trace-id')
+			writer.writeLine('*/')
+			writer.writeLine('traceIdHeaderName?: string')
 
-      writer.writeLine('/**')
-      writer.writeLine('* Add your default headers here')
-      writer.writeLine('* These headers will be part of every request.')
-      writer.writeLine('* They can be overwritten per request option')
-      writer.writeLine('* */')
-      writer.writeLine('defaultHeaders?: Record<string, string>')
+			writer.writeLine('/**')
+			writer.writeLine('* Add your default headers here')
+			writer.writeLine('* These headers will be part of every request.')
+			writer.writeLine('* They can be overwritten per request option')
+			writer.writeLine('* */')
+			writer.writeLine('defaultHeaders?: Record<string, string>')
 
-      writer.writeLine('/**')
-      writer.writeLine('* set global timeout for requests in ms')
-      writer.writeLine('* @default 30000')
-      writer.writeLine('*/')
-      writer.writeLine('defaultTimeout?: number')
+			writer.writeLine('/**')
+			writer.writeLine('* set global timeout for requests in ms')
+			writer.writeLine('* @default 30000')
+			writer.writeLine('*/')
+			writer.writeLine('defaultTimeout?: number')
 
-      writer.writeLine('/**')
-      writer.writeLine('* Basic-Auth information')
-      writer.writeLine('*/')
-      writer.write('basicAuth?: ').block(() => {
-        writer.writeLine('/** Basic-Auth username */')
-        writer.writeLine('username: string')
-        writer.writeLine('/** Basic-Auth password */')
-        writer.writeLine('password: string')
-      })
+			writer.writeLine('/**')
+			writer.writeLine('* Basic-Auth information')
+			writer.writeLine('*/')
+			writer.write('basicAuth?: ').block(() => {
+				writer.writeLine('/** Basic-Auth username */')
+				writer.writeLine('username: string')
+				writer.writeLine('/** Basic-Auth password */')
+				writer.writeLine('password: string')
+			})
 
-      writer.writeLine('/** Auth-Bearer token */')
-      writer.writeLine('bearerToken?: string')
-    })
+			writer.writeLine('/** Auth-Bearer token */')
+			writer.writeLine('bearerToken?: string')
+		})
 
-    writer.blankLine()
-    writer.write('export type HttpClientRequestOptions = ').block(() => {
-      writer
-        .writeLine('/**')
-        .writeLine('* additional headers')
-        .writeLine('*/')
-        .writeLine('headers?: Record<string, string>')
-        .writeLine('/**')
-        .writeLine('* query/search string parameter')
-        .writeLine('*/')
-        .writeLine('query?: Record<string, string>')
-        .writeLine('/**')
-        .writeLine('* url hash')
-        .writeLine('* @example: http://example.com/index.html#hash')
-        .writeLine('*/')
-        .writeLine('hash?: string')
-        .writeLine('/**')
-        .writeLine('* Timeout for the request in ms')
-        .writeLine('* @default 30000')
-        .writeLine('*/')
-        .writeLine('timeout?: number')
-    })
+		writer.blankLine()
+		writer.write('export type HttpClientRequestOptions = ').block(() => {
+			writer
+				.writeLine('/**')
+				.writeLine('* additional headers')
+				.writeLine('*/')
+				.writeLine('headers?: Record<string, string>')
+				.writeLine('/**')
+				.writeLine('* query/search string parameter')
+				.writeLine('*/')
+				.writeLine('query?: Record<string, string>')
+				.writeLine('/**')
+				.writeLine('* url hash')
+				.writeLine('* @example: http://example.com/index.html#hash')
+				.writeLine('*/')
+				.writeLine('hash?: string')
+				.writeLine('/**')
+				.writeLine('* Timeout for the request in ms')
+				.writeLine('* @default 30000')
+				.writeLine('*/')
+				.writeLine('timeout?: number')
+		})
 
-    return writer.toString()
-  }
+		return writer.toString()
+	}
 
-  /**
-   * Returns the source of HttpError class as string.
-   * @returns
-   */
-  private getHttpErrorClassString() {
-    const writer = getWriter()
+	/**
+	 * Returns the source of HttpError class as string.
+	 * @returns
+	 */
+	private getHttpErrorClassString() {
+		const writer = getWriter()
 
-    writer.write('export class HttpError extends Error ').block(() => {
-      writer
-        .write(
-          'constructor(public errorCode: number, public method: string, public url: string, message: string, public data?: unknown, public traceId?: string)',
-        )
-        .block(() => {
-          writer
-            .writeLine('super(message)')
-            .writeLine('Error.captureStackTrace(this, this.constructor)')
-            .writeLine('Object.setPrototypeOf(this, HttpError.prototype)')
-            .writeLine('this.name = this.constructor.name')
-        })
-        .blankLine()
-        .write('getErrorResponse(traceId?: string) ')
-        .block(() => {
-          writer
-            .write('const errorResponse = Object.freeze(')
-            .block(() => {
-              writer
-                .writeLine('status: this.errorCode,')
-                .writeLine('message: this.message,')
-                .writeLine('data: this.data,')
-                .writeLine('traceId: this.traceId ?? traceId,')
-                .writeLine('url: this.url,')
-            })
-            .writeLine(')')
-            .writeLine('return errorResponse')
-        })
-        .blankLine()
-        .write('toString()')
-        .block(() => {
-          writer.writeLine('return JSON.stringify(this.getErrorResponse())')
-        })
-        .blankLine()
-        .write('toJSON()')
-        .block(() => {
-          writer.writeLine('return { stack: this.stack, name: this.name, ...this.getErrorResponse() }')
-        })
-    })
+		writer.write('export class HttpError extends Error ').block(() => {
+			writer
+				.write(
+					'constructor(public errorCode: number, public method: string, public url: string, message: string, public data?: unknown, public traceId?: string)',
+				)
+				.block(() => {
+					writer
+						.writeLine('super(message)')
+						.writeLine('Error.captureStackTrace(this, this.constructor)')
+						.writeLine('Object.setPrototypeOf(this, HttpError.prototype)')
+						.writeLine('this.name = this.constructor.name')
+				})
+				.blankLine()
+				.write('getErrorResponse(traceId?: string) ')
+				.block(() => {
+					writer
+						.write('const errorResponse = Object.freeze(')
+						.block(() => {
+							writer
+								.writeLine('status: this.errorCode,')
+								.writeLine('message: this.message,')
+								.writeLine('data: this.data,')
+								.writeLine('traceId: this.traceId ?? traceId,')
+								.writeLine('url: this.url,')
+						})
+						.writeLine(')')
+						.writeLine('return errorResponse')
+				})
+				.blankLine()
+				.write('toString()')
+				.block(() => {
+					writer.writeLine('return JSON.stringify(this.getErrorResponse())')
+				})
+				.blankLine()
+				.write('toJSON()')
+				.block(() => {
+					writer.writeLine('return { stack: this.stack, name: this.name, ...this.getErrorResponse() }')
+				})
+		})
 
-    return writer.toString()
-  }
+		return writer.toString()
+	}
 
-  /**
-   * Generates the zero-dependency HTTP client source files
-   * @param serviceDefinition
-   */
-  async generateHEventBridgeClient(serviceDefinition: FullServiceDefinition) {
-    const ext = this.config.buildAs !== 'commonjs' ? '.js' : ''
+	/**
+	 * Generates the zero-dependency HTTP client source files
+	 * @param serviceDefinition
+	 */
+	async generateHEventBridgeClient(serviceDefinition: FullServiceDefinition) {
+		const ext = this.config.buildAs !== 'commonjs' ? '.js' : ''
 
-    const clientStream = createWriteStream(join(this.getOutputPath(), 'src', 'eventbridge_client.ts'))
-    const typeStream = createWriteStream(join(this.getOutputPath(), 'src', 'types_eventbridge_client.ts'))
+		const clientStream = createWriteStream(join(this.getOutputPath(), 'src', 'eventbridge_client.ts'))
+		const typeStream = createWriteStream(join(this.getOutputPath(), 'src', 'types_eventbridge_client.ts'))
 
-    const clientWriter = getWriter()
+		const clientWriter = getWriter()
 
-    clientWriter
-      .writeLine(`import type { EventBridge } from '@purista/core'`)
-      .blankLine()
-      .writeLine(`import * as ClientType from './types_eventbridge_client${ext}'`)
-      .blankLine()
-      .writeLine(`export class ${this.config.eventBridgeClient.clientName} {`)
-      .blankLine()
-      .withIndentationLevel(1, () => {
-        clientWriter.write(`constructor(public __eventBridge__: EventBridge)`).block(() => {})
-      })
+		clientWriter
+			.writeLine(`import type { EventBridge } from '@purista/core'`)
+			.blankLine()
+			.writeLine(`import * as ClientType from './types_eventbridge_client${ext}'`)
+			.blankLine()
+			.writeLine(`export class ${this.config.eventBridgeClient.clientName} {`)
+			.blankLine()
+			.withIndentationLevel(1, () => {
+				clientWriter.write('constructor(public __eventBridge__: EventBridge)').block(() => {})
+			})
 
-    clientStream.write(clientWriter.toString())
+		clientStream.write(clientWriter.toString())
 
-    const typeWriter = getWriter()
+		const typeWriter = getWriter()
 
-    typeWriter.write(`export type InvokeOptions = `).block(() => {
-      typeWriter.write('traceId?: string,')
-      typeWriter.write('principalId?: string,')
-      typeWriter.write('tenantId?: string,')
-    })
+		typeWriter.write('export type InvokeOptions = ').block(() => {
+			typeWriter.write('traceId?: string,')
+			typeWriter.write('principalId?: string,')
+			typeWriter.write('tenantId?: string,')
+		})
 
-    typeStream.write(typeWriter.toString())
+		typeStream.write(typeWriter.toString())
 
-    await this.generateEventBridgeClientSource(clientStream, typeStream, serviceDefinition)
+		await this.generateEventBridgeClientSource(clientStream, typeStream, serviceDefinition)
 
-    clientStream.write(`}`)
+		clientStream.write('}')
 
-    await Promise.all([
-      new Promise((resolve, _reject) => clientStream.end(() => resolve(undefined))),
-      new Promise((resolve, _reject) => typeStream.end(() => resolve(undefined))),
-    ])
-  }
+		await Promise.all([
+			new Promise((resolve, _reject) => clientStream.end(() => resolve(undefined))),
+			new Promise((resolve, _reject) => typeStream.end(() => resolve(undefined))),
+		])
+	}
 
-  private generateEventBridgeClientSource(
-    clientStream: WriteStream,
-    typeStream: WriteStream,
-    serviceDefinitions: FullServiceDefinition,
-  ) {
-    Object.entries(serviceDefinitions).forEach(([serviceName, serviceDefinition]) => {
-      const writer = getWriter()
-      writer.newLine().withIndentationLevel(1, () => {
-        writer
-          .writeLine(`/** Service ${serviceName} */`)
-          .write(`get ${convertToCamelCase(serviceName)}()`)
-          .block(() => {
-            const s = Object.entries(serviceDefinition).reduce(
-              (input, [serviceVersion, def]) => {
-                const commands = Object.values(def.commands)
+	private generateEventBridgeClientSource(
+		clientStream: WriteStream,
+		typeStream: WriteStream,
+		serviceDefinitions: FullServiceDefinition,
+	) {
+		Object.entries(serviceDefinitions).forEach(([serviceName, serviceDefinition]) => {
+			const writer = getWriter()
+			writer.newLine().withIndentationLevel(1, () => {
+				writer
+					.writeLine(`/** Service ${serviceName} */`)
+					.write(`get ${convertToCamelCase(serviceName)}()`)
+					.block(() => {
+						const s = Object.entries(serviceDefinition).reduce(
+							(input, [serviceVersion, def]) => {
+								const commands = Object.values(def.commands)
 
-                if (!commands.length) {
-                  return input
-                }
+								if (!commands.length) {
+									return input
+								}
 
-                return {
-                  ...input,
-                  [serviceVersion]: commands.reduce((ret: string[], httpDef) => {
-                    const meta = httpDef.metadata as unknown as HttpExposedServiceMeta
-                    const { functionString, typeString } = metaToFunctionBridge(
-                      serviceName,
-                      serviceVersion,
-                      httpDef.commandName,
-                      meta,
-                      this.config.eventBridgeClient.clientName,
-                    )
-                    typeStream.write(typeString)
-                    return [
-                      ...ret,
-                      `/** ${httpDef.commandDescription}  */`,
-                      `${httpDef.commandName}: ${functionString},`,
-                    ]
-                  }, [] as string[]),
-                }
-              },
-              {} as { [key: string]: string[] },
-            )
+								return {
+									...input,
+									[serviceVersion]: commands.reduce((ret: string[], httpDef) => {
+										const meta = httpDef.metadata as unknown as HttpExposedServiceMeta
+										const { functionString, typeString } = metaToFunctionBridge(
+											serviceName,
+											serviceVersion,
+											httpDef.commandName,
+											meta,
+											this.config.eventBridgeClient.clientName,
+										)
+										typeStream.write(typeString)
+										return [
+											...ret,
+											`/** ${httpDef.commandDescription}  */`,
+											`${httpDef.commandName}: ${functionString},`,
+										]
+									}, [] as string[]),
+								}
+							},
+							{} as { [key: string]: string[] },
+						)
 
-            writer.write('return').block(() => {
-              Object.entries(s).forEach(([serviceVersion, def]) => {
-                this.emit('info', `${serviceName} version ${serviceVersion}`)
-                writer.write(`'v${serviceVersion}':`).block(() => {
-                  def.forEach((line) => writer.writeLine(line))
-                })
-              })
-            })
-          })
-          .newLine()
-      })
+						writer.write('return').block(() => {
+							Object.entries(s).forEach(([serviceVersion, def]) => {
+								this.emit('info', `${serviceName} version ${serviceVersion}`)
+								writer.write(`'v${serviceVersion}':`).block(() => {
+									def.forEach(line => writer.writeLine(line))
+								})
+							})
+						})
+					})
+					.newLine()
+			})
 
-      clientStream.write(writer.toString())
-    })
-  }
+			clientStream.write(writer.toString())
+		})
+	}
 
-  /**
-   * Destroys the builder and cleans the event listeners
-   */
-  destroy() {
-    this.removeAllListeners()
-  }
+	/**
+	 * Destroys the builder and cleans the event listeners
+	 */
+	destroy() {
+		this.removeAllListeners()
+	}
 }
