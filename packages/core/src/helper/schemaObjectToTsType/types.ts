@@ -1,4 +1,4 @@
-import type { OpenAPIV3 } from 'openapi-types'
+import type OpenAPIV3 from 'openapi3-ts/oas31'
 
 /** Context passed to all submodules */
 export interface GlobalContext {

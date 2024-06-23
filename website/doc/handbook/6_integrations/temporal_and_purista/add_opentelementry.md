@@ -39,7 +39,7 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http' // [
 import { Resource } from '@opentelemetry/resources' // [!code ++]
 import { NodeSDK } from '@opentelemetry/sdk-node' // [!code ++]
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node' // [!code ++]
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions' // [!code ++]
+import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions' // [!code ++]
 import { Context } from '@temporalio/activity'
 import { makeWorkflowExporter, OpenTelemetryActivityInboundInterceptor } from '@temporalio/interceptors-opentelemetry' // [!code ++]
 import { NativeConnection, Worker } from '@temporalio/worker'
@@ -68,7 +68,7 @@ export type ActivitiesType = typeof activities & ReturnType<typeof getPuristaBas
 async function run() {
   // setup OpenTelemetry
   const resource = new Resource({ // [!code ++]
-    [SemanticResourceAttributes.SERVICE_NAME]: 'temporal-worker', // [!code ++]
+    [SEMRESATTRS_SERVICE_NAME]: 'temporal-worker', // [!code ++]
   }) // [!code ++]
   const exporter = new OTLPTraceExporter(jaegerExporterOptions) // [!code ++]
   const otel = new NodeSDK({ traceExporter: exporter, resource }) // [!code ++]
