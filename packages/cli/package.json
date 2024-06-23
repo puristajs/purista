@@ -25,7 +25,7 @@
     "start": "./dist/index.js",
     "dev": "tsx src/index.ts",
     "build": "rimraf dist && tsc --project ./tsconfig.json && chmod 755 dist/index.js",
-    "lint": "eslint . --ext .ts,.json  --cache . --fix",
+    "lint": "npx @biomejs/biome check --write",
     "test": "vitest"
   },
   "tshy": {
@@ -39,10 +39,10 @@
   },
   "devDependencies": {
     "@types/minimist": "^1.2.5",
-    "@types/node": "^20.11.17",
-    "rimraf": "^5.0.5",
-    "tshy": "^1.11.1",
-    "tsx": "^4.7.1"
+    "@types/node": "^20.14.8",
+    "rimraf": "^5.0.7",
+    "tshy": "^1.15.1",
+    "tsx": "^4.15.7"
   },
   "dependencies": {
     "camelcase": "^8.0.0",
