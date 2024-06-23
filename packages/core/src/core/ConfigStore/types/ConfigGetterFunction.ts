@@ -2,5 +2,5 @@ import type { ObjectWithKeysFromStringArray } from '../../../helper/types/Object
 
 /** get a config value from the config store @group Store */
 export type ConfigGetterFunction = <ConfigNames extends string[]>(
-  ...configNames: ConfigNames
+	...configNames: ConfigNames
 ) => Promise<ObjectWithKeysFromStringArray<ConfigNames>>

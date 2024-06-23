@@ -3,108 +3,108 @@ import { EBMessageType } from '../types/index.js'
 import { getCleanedMessage } from './getCleanedMessage.impl.js'
 
 describe('prevent sensitive data to be logged in production', () => {
-  it('returns the original message', () => {
-    const message: Command = {
-      sender: {
-        serviceName: 'SenderService',
-        serviceVersion: '1.1.1',
-        serviceTarget: 'senderServiceTarget',
-        instanceId: 'SenderServiceInstance',
-      },
+	it('returns the original message', () => {
+		const message: Command = {
+			sender: {
+				serviceName: 'SenderService',
+				serviceVersion: '1.1.1',
+				serviceTarget: 'senderServiceTarget',
+				instanceId: 'SenderServiceInstance',
+			},
 
-      receiver: {
-        serviceName: 'ReceiverService',
-        serviceVersion: '2.2.2',
-        serviceTarget: 'receiverServiceTarget',
-        instanceId: 'ReceiverServiceInstance',
-      },
-      contentType: 'application/json',
-      contentEncoding: 'utf-8',
-      messageType: EBMessageType.Command,
-      id: 'messageTestId',
-      traceId: 'messageTraceId',
-      timestamp: Date.now(),
-      correlationId: 'messageCorrelationId',
-      principalId: 'messagePrincipalId',
-      tenantId: 'messageTenantId',
-      payload: {
-        payload: { content: 'content' },
-        parameter: { param: 1 },
-      },
-    }
+			receiver: {
+				serviceName: 'ReceiverService',
+				serviceVersion: '2.2.2',
+				serviceTarget: 'receiverServiceTarget',
+				instanceId: 'ReceiverServiceInstance',
+			},
+			contentType: 'application/json',
+			contentEncoding: 'utf-8',
+			messageType: EBMessageType.Command,
+			id: 'messageTestId',
+			traceId: 'messageTraceId',
+			timestamp: Date.now(),
+			correlationId: 'messageCorrelationId',
+			principalId: 'messagePrincipalId',
+			tenantId: 'messageTenantId',
+			payload: {
+				payload: { content: 'content' },
+				parameter: { param: 1 },
+			},
+		}
 
-    const result = getCleanedMessage(message, false) as Command
+		const result = getCleanedMessage(message, false) as Command
 
-    expect(result).toBe(message)
-  })
+		expect(result).toBe(message)
+	})
 
-  it('removes payload and parameter from command message', () => {
-    const message: Command = {
-      sender: {
-        serviceName: 'SenderService',
-        serviceVersion: '1.1.1',
-        serviceTarget: 'senderServiceTarget',
-        instanceId: 'SenderServiceInstance',
-      },
+	it('removes payload and parameter from command message', () => {
+		const message: Command = {
+			sender: {
+				serviceName: 'SenderService',
+				serviceVersion: '1.1.1',
+				serviceTarget: 'senderServiceTarget',
+				instanceId: 'SenderServiceInstance',
+			},
 
-      receiver: {
-        serviceName: 'ReceiverService',
-        serviceVersion: '2.2.2',
-        serviceTarget: 'receiverServiceTarget',
-        instanceId: 'ReceiverServiceInstance',
-      },
-      contentType: 'application/json',
-      contentEncoding: 'utf-8',
-      messageType: EBMessageType.Command,
-      id: 'messageTestId',
-      traceId: 'messageTraceId',
-      timestamp: Date.now(),
-      correlationId: 'messageCorrelationId',
-      principalId: 'messagePrincipalId',
-      tenantId: 'messageTenantId',
-      payload: {
-        payload: { content: 'content' },
-        parameter: { param: 1 },
-      },
-    }
+			receiver: {
+				serviceName: 'ReceiverService',
+				serviceVersion: '2.2.2',
+				serviceTarget: 'receiverServiceTarget',
+				instanceId: 'ReceiverServiceInstance',
+			},
+			contentType: 'application/json',
+			contentEncoding: 'utf-8',
+			messageType: EBMessageType.Command,
+			id: 'messageTestId',
+			traceId: 'messageTraceId',
+			timestamp: Date.now(),
+			correlationId: 'messageCorrelationId',
+			principalId: 'messagePrincipalId',
+			tenantId: 'messageTenantId',
+			payload: {
+				payload: { content: 'content' },
+				parameter: { param: 1 },
+			},
+		}
 
-    const result = getCleanedMessage(message, true) as Command<string, { all: string }>
+		const result = getCleanedMessage(message, true) as Command<string, { all: string }>
 
-    expect(result).not.toStrictEqual(message)
-    expect(result.payload.payload).toBe('***removed from log***')
-    expect(result.payload.parameter.all).toBe('***removed from log***')
-  })
+		expect(result).not.toStrictEqual(message)
+		expect(result.payload.payload).toBe('***removed from log***')
+		expect(result.payload.parameter.all).toBe('***removed from log***')
+	})
 
-  it('removes response from command success message', () => {
-    const message: CommandSuccessResponse = {
-      sender: {
-        serviceName: 'SenderService',
-        serviceVersion: '1.1.1',
-        serviceTarget: 'senderServiceTarget',
-        instanceId: 'SenderServiceInstance',
-      },
+	it('removes response from command success message', () => {
+		const message: CommandSuccessResponse = {
+			sender: {
+				serviceName: 'SenderService',
+				serviceVersion: '1.1.1',
+				serviceTarget: 'senderServiceTarget',
+				instanceId: 'SenderServiceInstance',
+			},
 
-      receiver: {
-        serviceName: 'ReceiverService',
-        serviceVersion: '2.2.2',
-        serviceTarget: 'receiverServiceTarget',
-        instanceId: 'ReceiverServiceInstance',
-      },
-      contentType: 'application/json',
-      contentEncoding: 'utf-8',
-      messageType: EBMessageType.CommandSuccessResponse,
-      id: 'messageTestId',
-      traceId: 'messageTraceId',
-      timestamp: Date.now(),
-      correlationId: 'messageCorrelationId',
-      principalId: 'messagePrincipalId',
-      tenantId: 'messageTenantId',
-      payload: { content: 'content' },
-    }
+			receiver: {
+				serviceName: 'ReceiverService',
+				serviceVersion: '2.2.2',
+				serviceTarget: 'receiverServiceTarget',
+				instanceId: 'ReceiverServiceInstance',
+			},
+			contentType: 'application/json',
+			contentEncoding: 'utf-8',
+			messageType: EBMessageType.CommandSuccessResponse,
+			id: 'messageTestId',
+			traceId: 'messageTraceId',
+			timestamp: Date.now(),
+			correlationId: 'messageCorrelationId',
+			principalId: 'messagePrincipalId',
+			tenantId: 'messageTenantId',
+			payload: { content: 'content' },
+		}
 
-    const result = getCleanedMessage(message, true) as CommandSuccessResponse
+		const result = getCleanedMessage(message, true) as CommandSuccessResponse
 
-    expect(result).not.toStrictEqual(message)
-    expect(result.payload).toBe('***removed from log***')
-  })
+		expect(result).not.toStrictEqual(message)
+		expect(result.payload).toBe('***removed from log***')
+	})
 })

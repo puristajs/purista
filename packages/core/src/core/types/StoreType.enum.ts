@@ -1,5 +1,5 @@
 export enum StoreType {
-  StateStore = 'StateStore',
-  ConfigStore = 'ConfigStore',
-  SecretStore = 'SecretStore',
+	StateStore = 'StateStore',
+	ConfigStore = 'ConfigStore',
+	SecretStore = 'SecretStore',
 }

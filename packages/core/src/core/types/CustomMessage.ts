@@ -9,14 +9,14 @@ import type { Prettify } from './Prettify.js'
  * The producer does not expect a response from a consumer.
  */
 export type CustomMessage<Payload = unknown> = Prettify<
-  {
-    /** Message type musst be EBMessageType.CustomMessage */
-    messageType: EBMessageType.CustomMessage
-    /** the event name assigned to this custom message */
-    eventName: string
-    /** an optional receiver */
-    receiver?: EBMessageAddress
-    /** the message payload */
-    payload?: Payload
-  } & EBMessageBase
+	{
+		/** Message type musst be EBMessageType.CustomMessage */
+		messageType: EBMessageType.CustomMessage
+		/** the event name assigned to this custom message */
+		eventName: string
+		/** an optional receiver */
+		receiver?: EBMessageAddress
+		/** the message payload */
+		payload?: Payload
+	} & EBMessageBase
 >

@@ -8,5 +8,5 @@ import { EBMessageType } from './EBMessageType.enum.js'
  * @returns true if message is type of custom message
  */
 export const isCustomMessage = (message: EBMessage): message is CustomMessage => {
-  return message.messageType === EBMessageType.CustomMessage
+	return message.messageType === EBMessageType.CustomMessage
 }

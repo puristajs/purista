@@ -1,10 +1,10 @@
 {
-  "version": "1.11.0",
-  "definitionPath": "./definitions",
-  "outputPath": "./tmp/dist",
-  "httpClient": {
-    "buildAs": "both",
-    "clientName": "HttpClient"
-  },
-  "eventBridgeClient": {}
+	"version": "1.11.0",
+	"definitionPath": "./definitions",
+	"outputPath": "./tmp/dist",
+	"httpClient": {
+		"buildAs": "both",
+		"clientName": "HttpClient"
+	},
+	"eventBridgeClient": {}
 }

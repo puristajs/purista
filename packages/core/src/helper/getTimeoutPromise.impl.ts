@@ -7,14 +7,14 @@ import { StatusCode, UnhandledError } from '../core/index.js'
  * @returns
  */
 export const getTimeoutPromise = <T>(fn: Promise<T>, ttl = 30000): Promise<T> => {
-  let timeout: ReturnType<typeof setTimeout>
-  const ttlPromise = new Promise<never>((_resolve, reject) => {
-    timeout = setTimeout(() => {
-      const err = new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out')
-      clearTimeout(timeout)
-      reject(err)
-    }, ttl)
-  })
+	let timeout: ReturnType<typeof setTimeout>
+	const ttlPromise = new Promise<never>((_resolve, reject) => {
+		timeout = setTimeout(() => {
+			const err = new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out')
+			clearTimeout(timeout)
+			reject(err)
+		}, ttl)
+	})
 
-  return Promise.race([fn, ttlPromise])
+	return Promise.race([fn, ttlPromise])
 }

@@ -3,5 +3,5 @@
  *
  */
 export type ObjectWithKeysFromStringArray<T extends ReadonlyArray<string>, Value = unknown | undefined> = {
-  [K in T extends ReadonlyArray<infer U> ? U : never]: Value
+	[K in T extends ReadonlyArray<infer U> ? U : never]: Value
 }

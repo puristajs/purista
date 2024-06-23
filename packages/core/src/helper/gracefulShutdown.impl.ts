@@ -35,43 +35,43 @@ import type { ShutdownEntry } from './types/index.js'
  * @group Helper
  */
 export const gracefulShutdown = (logger: Logger, list: ShutdownEntry[], timeoutMs = 30000) => {
-  process.once('SIGTERM', async () => shutDown('SIGTERM'))
-  process.once('SIGINT', async () => shutDown('SIGINT'))
-  process.once('SIGQUIT', async () => shutDown('SIGQUIT'))
+	process.once('SIGTERM', async () => shutDown('SIGTERM'))
+	process.once('SIGINT', async () => shutDown('SIGINT'))
+	process.once('SIGQUIT', async () => shutDown('SIGQUIT'))
 
-  const shutDown = async (signal = 'SIGTERM') => {
-    logger.info(`start graceful shut down because of kill signal (${signal})`)
+	const shutDown = async (signal = 'SIGTERM') => {
+		logger.info(`start graceful shut down because of kill signal (${signal})`)
 
-    const timer = setTimeout(() => {
-      logger.error(`shutdown timeout - force kill`)
-      process.exit(1)
-    }, timeoutMs)
+		const timer = setTimeout(() => {
+			logger.error('shutdown timeout - force kill')
+			process.exit(1)
+		}, timeoutMs)
 
-    let hasError = false
+		let hasError = false
 
-    for (const entry of list) {
-      try {
-        await entry.destroy()
-        await new Promise((resolve) =>
-          setTimeout(() => {
-            resolve(undefined)
-          }, 0),
-        )
-        logger.info(`${entry.name} shutdown successfully`)
-      } catch (err) {
-        logger.error({ err }, `error on shutdown ${entry.name}`)
-        hasError = true
-      }
-    }
+		for (const entry of list) {
+			try {
+				await entry.destroy()
+				await new Promise(resolve =>
+					setTimeout(() => {
+						resolve(undefined)
+					}, 0),
+				)
+				logger.info(`${entry.name} shutdown successfully`)
+			} catch (err) {
+				logger.error({ err }, `error on shutdown ${entry.name}`)
+				hasError = true
+			}
+		}
 
-    clearTimeout(timer)
+		clearTimeout(timer)
 
-    if (hasError) {
-      logger.info('shut down finished with errors')
-      process.exit(1)
-    }
+		if (hasError) {
+			logger.info('shut down finished with errors')
+			process.exit(1)
+		}
 
-    logger.info('graceful shut down finished successfully')
-    process.kill(process.pid, signal)
-  }
+		logger.info('graceful shut down finished successfully')
+		process.kill(process.pid, signal)
+	}
 }

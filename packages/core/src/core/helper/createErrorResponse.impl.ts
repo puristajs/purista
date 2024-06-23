@@ -17,50 +17,50 @@ import { serializeOtp } from './serializeOtp.impl.js'
  * @group Helper
  */
 export const createErrorResponse = (
-  instanceId: InstanceId,
-  originalEBMessage: Readonly<Command>,
-  statusCode = StatusCode.InternalServerError,
-  error?: unknown | string | Error | HandledError | UnhandledError,
+	instanceId: InstanceId,
+	originalEBMessage: Readonly<Command>,
+	statusCode = StatusCode.InternalServerError,
+	error?: unknown | string | Error | HandledError | UnhandledError,
 ): Readonly<Omit<CommandErrorResponse, 'instanceId'>> => {
-  const message = getErrorMessageForCode(statusCode)
-  const status = statusCode
-  const isHandledError = error instanceof HandledError
+	const message = getErrorMessageForCode(statusCode)
+	const status = statusCode
+	const isHandledError = error instanceof HandledError
 
-  let errorTraceId: TraceId | undefined
-  if (error instanceof HandledError || error instanceof UnhandledError) {
-    errorTraceId = error.traceId
-  }
+	let errorTraceId: TraceId | undefined
+	if (error instanceof HandledError || error instanceof UnhandledError) {
+		errorTraceId = error.traceId
+	}
 
-  const traceId = originalEBMessage.traceId ?? errorTraceId ?? getNewTraceId()
+	const traceId = originalEBMessage.traceId ?? errorTraceId ?? getNewTraceId()
 
-  const errorResponse: Readonly<CommandErrorResponse> = Object.freeze({
-    id: originalEBMessage.id,
-    isHandledError,
-    traceId,
-    principalId: originalEBMessage.principalId,
-    tenantId: originalEBMessage.tenantId,
-    contentType: 'application/json',
-    contentEncoding: 'utf-8',
-    correlationId: originalEBMessage.correlationId,
-    timestamp: Date.now(),
-    messageType: EBMessageType.CommandErrorResponse,
-    sender: {
-      ...originalEBMessage.receiver,
-      instanceId,
-    },
-    receiver: {
-      ...originalEBMessage.sender,
-    },
-    payload:
-      error instanceof HandledError
-        ? error.getErrorResponse(traceId)
-        : {
-            status,
-            message,
-            traceId,
-          },
-    otp: serializeOtp(),
-  })
+	const errorResponse: Readonly<CommandErrorResponse> = Object.freeze({
+		id: originalEBMessage.id,
+		isHandledError,
+		traceId,
+		principalId: originalEBMessage.principalId,
+		tenantId: originalEBMessage.tenantId,
+		contentType: 'application/json',
+		contentEncoding: 'utf-8',
+		correlationId: originalEBMessage.correlationId,
+		timestamp: Date.now(),
+		messageType: EBMessageType.CommandErrorResponse,
+		sender: {
+			...originalEBMessage.receiver,
+			instanceId,
+		},
+		receiver: {
+			...originalEBMessage.sender,
+		},
+		payload:
+			error instanceof HandledError
+				? error.getErrorResponse(traceId)
+				: {
+						status,
+						message,
+						traceId,
+					},
+		otp: serializeOtp(),
+	})
 
-  return errorResponse
+	return errorResponse
 }

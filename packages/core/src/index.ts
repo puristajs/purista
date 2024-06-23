@@ -32,12 +32,12 @@ export * from './zodOpenApi/index.js'
 export * from './ClientBuilder/index.js'
 
 declare global {
-  interface FetchEvent extends Event {
-    readonly request: Request
-    respondWith(response: Promise<Response> | Response): Promise<Response>
-  }
-  interface ExecutionContext {
-    waitUntil(promise: Promise<any>): void
-    passThroughOnException(): void
-  }
+	interface FetchEvent extends Event {
+		readonly request: Request
+		respondWith(response: Promise<Response> | Response): Promise<Response>
+	}
+	interface ExecutionContext {
+		waitUntil(promise: Promise<any>): void
+		passThroughOnException(): void
+	}
 }

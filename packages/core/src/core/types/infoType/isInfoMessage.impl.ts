@@ -3,5 +3,5 @@ import type { InfoMessage } from './InfoMessage.js'
 import { infoMessageTypes } from './InfoMessage.js'
 
 export const isInfoMessage = (message: EBMessage): message is InfoMessage => {
-  return infoMessageTypes.includes(message.messageType)
+	return infoMessageTypes.includes(message.messageType)
 }

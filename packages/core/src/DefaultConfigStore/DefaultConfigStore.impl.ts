@@ -26,39 +26,39 @@ import type { DefaultConfigStoreConfig } from './types/index.js'
  * @group Store
  */
 export class DefaultConfigStore extends ConfigStoreBaseClass<DefaultConfigStoreConfig> implements ConfigStore {
-  private map = new Map<string, unknown>()
-  constructor(config?: StoreBaseConfig<DefaultConfigStoreConfig>) {
-    super('DefaultConfigStore', { ...config })
-    if (config?.config) {
-      this.map = new Map(Object.entries(config.config))
-    }
-    this.logger.warn(
-      'Using the DefaultConfigStore is not secure! It should only be used for test or development purpose.',
-    )
-  }
+	private map = new Map<string, unknown>()
+	constructor(config?: StoreBaseConfig<DefaultConfigStoreConfig>) {
+		super('DefaultConfigStore', { ...config })
+		if (config?.config) {
+			this.map = new Map(Object.entries(config.config))
+		}
+		this.logger.warn(
+			'Using the DefaultConfigStore is not secure! It should only be used for test or development purpose.',
+		)
+	}
 
-  protected async getConfigImpl<ConfigNames extends string[]>(
-    ...configNames: ConfigNames
-  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
-    if (!this.config.enableGet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'get config from store is disabled by config')
-    }
+	protected async getConfigImpl<ConfigNames extends string[]>(
+		...configNames: ConfigNames
+	): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
+		if (!this.config.enableGet) {
+			throw new UnhandledError(StatusCode.Unauthorized, 'get config from store is disabled by config')
+		}
 
-    const result = configNames.reduce((prev, current) => {
-      return {
-        ...prev,
-        [current]: this.map.get(current),
-      }
-    }, {}) as ObjectWithKeysFromStringArray<ConfigNames>
+		const result = configNames.reduce((prev, current) => {
+			return {
+				...prev,
+				[current]: this.map.get(current),
+			}
+		}, {}) as ObjectWithKeysFromStringArray<ConfigNames>
 
-    return result
-  }
+		return result
+	}
 
-  protected async setConfigImpl(configName: string, configValue: unknown) {
-    this.map.set(configName, configValue)
-  }
+	protected async setConfigImpl(configName: string, configValue: unknown) {
+		this.map.set(configName, configValue)
+	}
 
-  protected async removeConfigImpl(configName: string) {
-    this.map.delete(configName)
-  }
+	protected async removeConfigImpl(configName: string) {
+		this.map.delete(configName)
+	}
 }
