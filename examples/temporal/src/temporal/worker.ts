@@ -4,7 +4,7 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { Resource } from '@opentelemetry/resources'
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node'
-import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions'
+import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
 import type { EventBridge } from '@purista/core'
 import { initLogger } from '@purista/core'
 import { NatsBridge } from '@purista/natsbridge'
@@ -33,11 +33,11 @@ export type ActivitiesType = typeof activities & ReturnType<typeof getPuristaBas
 async function run() {
   // setup OpenTelemetry
   const resource = new Resource({
-    [SemanticResourceAttributes.SERVICE_NAME]: 'temporal-worker',
+    [SEMRESATTRS_SERVICE_NAME]: 'temporal-worker',
   })
   const exporter = new OTLPTraceExporter(jaegerExporterOptions)
   const otel = new NodeSDK({ traceExporter: exporter, resource })
-  await otel.start()
+  otel.start()
 
   const spanProcessor = new SimpleSpanProcessor(exporter)
   const logger = initLogger('debug')
