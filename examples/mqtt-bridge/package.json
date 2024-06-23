@@ -19,19 +19,19 @@
     "start": "tsx src/index.ts | pino-pretty",
     "mqtt:up": "docker start purista-mqtt ||  docker run -p 1883:1883 -p 9001:9001 -d -v ./mosquitto.conf:/mosquitto/config/mosquitto.conf --name purista-mqtt eclipse-mosquitto",
     "mqtt:down": "docker container stop $(docker container ls -q --filter name=purista-mqtt)",
-    "lint": "eslint . --ext .ts,.json  --cache . --fix",
+    "lint": "npx @biomejs/biome check --write",
     "test": "vitest"
   },
   "devDependencies": {
-    "@types/node": "^20.11.17",
+    "@types/node": "^20.14.8",
     "pino-pretty": "^11.2.1",
     "sinon": "^18.0.0",
-    "tsx": "^4.7.0",
+    "tsx": "^4.15.7",
     "typescript": "^5.5.2",
-    "vitest": "^1.3.0"
+    "vitest": "^1.6.0"
   },
   "dependencies": {
-    "@fastify/static": "^7.0.1",
+    "@fastify/static": "^7.0.4",
     "@purista/core": "*",
     "@purista/httpserver": "*",
     "@purista/mqttbridge": "*",

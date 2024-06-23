@@ -34,7 +34,7 @@
     "node": ">=18.15"
   },
   "scripts": {
-    "lint": "eslint . --ext .ts,.json  --cache . --fix",
+    "lint": "npx @biomejs/biome check --write",
     "test": "vitest",
     "build": "rimraf dist && tshy",
     "env:up": "docker compose -f docker-compose.yml up -d",
@@ -50,15 +50,15 @@
     }
   },
   "devDependencies": {
-    "@types/node": "^20.11.17",
+    "@types/node": "^20.14.8",
     "@types/sinon": "^17.0.3",
     "sinon": "^18.0.0",
-    "testcontainers": "^10.6.0",
-    "tshy": "^1.11.1",
-    "vitest": "^1.3.0"
+    "testcontainers": "^10.10.0",
+    "tshy": "^1.15.1",
+    "vitest": "^1.6.0"
   },
   "dependencies": {
-    "@aws-sdk/client-ssm": "^3.515.0",
+    "@aws-sdk/client-ssm": "^3.600.0",
     "@purista/core": "*"
   },
   "peerDependenciesMeta": {},

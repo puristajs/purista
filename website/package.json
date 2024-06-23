@@ -14,16 +14,16 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "vanilla-cookieconsent": "^3.0.0-rc.17"
+    "vanilla-cookieconsent": "^3.0.1"
   },
   "devDependencies": {
-    "@types/node": "^20.10.5",
-    "date-fns": "^3.0.6",
+    "@types/node": "^20.14.8",
+    "date-fns": "^3.6.0",
     "feed": "^4.2.2",
     "gray-matter": "^4.0.3",
     "typescript": "^5.5.2",
-    "vitepress": "^1.0.0-rc.32",
-    "vitepress-sidebar": "^1.18.5",
-    "vue": "^3.3.13"
+    "vitepress": "^1.2.3",
+    "vitepress-sidebar": "^1.23.2",
+    "vue": "^3.4.30"
   }
 }

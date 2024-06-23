@@ -6,14 +6,20 @@
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": true,
+      "complexity":{
+        "useArrowFunction": {
+          "level": "warn",
+          "fix": "none"
+        }
+      }
 		},
-    "ignore":["**/lib/*","cookieconsent.js","package-lock.json","dist","*.d.ts","coverage","docs"]
+    "ignore":["**/lib/**/*","cookieconsent.js","cookieconsent-config2.js","package-lock.json","**/dist/**/*","*.d.ts","**/coverage/**/*","docs/**/*","**/.tshy-build/**/*"]
 	},
   "formatter": {
     "enabled": true,
     "formatWithErrors": false,
-    "ignore": ["**/lib/*","cookieconsent.js","package-lock.json","dist","*.d.ts","coverage","docs"],
+    "ignore": ["**/lib/**/*","cookieconsent.js","cookieconsent-config2.js","package-lock.json","**/dist/**/*","*.d.ts","**/coverage/**/*","docs/**/*","**/.tshy-build/**/*"],
     "attributePosition": "auto",
     "indentStyle": "tab",
     "indentWidth": 2,
