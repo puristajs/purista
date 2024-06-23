@@ -8,7 +8,7 @@ import type { EmailV1ConfirmEmailInputParameter, EmailV1ConfirmEmailInputPayload
 
 vi.mock('@temporalio/client', async (importOriginal) => {
   return {
-    ...((await importOriginal()) as {}),
+    ...(await importOriginal<Record<string,unknown>>()),
     Connection: {
       connect: () => {},
     },
