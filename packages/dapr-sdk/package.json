@@ -39,7 +39,7 @@
     "node": ">=18.15"
   },
   "scripts": {
-    "lint": "eslint . --ext .ts,.json  --cache . --fix",
+    "lint": "npx @biomejs/biome check --write",
     "test": "vitest",
     "build": "rimraf dist && tshy"
   },
@@ -53,17 +53,17 @@
     }
   },
   "devDependencies": {
-    "@hono/node-server": "^1.8.0",
-    "@types/node": "^20.11.17",
+    "@hono/node-server": "^1.11.4",
+    "@types/node": "^20.14.8",
     "@types/sinon": "^17.0.3",
-    "hono": "^4.0.4",
+    "hono": "^4.4.7",
     "sinon": "^18.0.0",
-    "tshy": "^1.11.1",
-    "vitest": "^1.3.0"
+    "tshy": "^1.15.1",
+    "vitest": "^1.6.0"
   },
   "dependencies": {
     "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/semantic-conventions": "^1.19.0",
+    "@opentelemetry/semantic-conventions": "^1.25.1",
     "@purista/base-http-bridge": "*",
     "@purista/core": "*"
   },
