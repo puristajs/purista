@@ -65,14 +65,13 @@ function getPost(file: string, postDir: string): Post {
 }
 
 function formatDate(date: string | Date): Post['date'] {
-  if (!(date instanceof Date))
-    date = new Date(date)
-
-  date.setUTCHours(12)
+  let d:Date = date instanceof Date ? date:new Date(date)
+  
+  d.setUTCHours(12)
 
   return {
-    time: +date,
-    string: date.toLocaleDateString('en-US', {
+    time: +d,
+    string: d.toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric',
