@@ -58,7 +58,7 @@ const getServiceVersions = (startFolder: string, serviceName: string) => {
 		serviceFile: '',
 	}
 
-	files.forEach(file => {
+	for (const file of files) {
 		const name = path.join(startFolder, file)
 
 		if (fs.statSync(name).isDirectory()) {
@@ -76,7 +76,7 @@ const getServiceVersions = (startFolder: string, serviceName: string) => {
 				service.serviceInfoFile = infoName
 			}
 		}
-	})
+	}
 
 	if (service.version > 0) {
 		installInfo.services.push(service)
@@ -85,14 +85,14 @@ const getServiceVersions = (startFolder: string, serviceName: string) => {
 
 export const collectServices = (startFolder: string) => {
 	const files = fs.readdirSync(startFolder)
-	files.forEach(file => {
+	for (const file of files) {
 		const name = path.join(startFolder, file)
 		if (fs.statSync(name).isDirectory()) {
 			getServiceVersions(name, path.parse(file).name)
 		} else {
 			// allFilesList.push(name) // push filename into the array
 		}
-	})
+	}
 
 	installInfo.services.sort((a, b) => {
 		if (b.name < a.name) {

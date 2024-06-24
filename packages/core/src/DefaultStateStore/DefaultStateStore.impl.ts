@@ -26,9 +26,9 @@ export class DefaultStateStore extends StateStoreBaseClass<DefaultStateStoreConf
 		...stateNames: StateNames
 	): Promise<ObjectWithKeysFromStringArray<StateNames>> {
 		const result: Record<string, unknown> = {}
-		stateNames.forEach(name => {
+		for (const name of stateNames) {
 			result[name] = this.map.get(name)
-		})
+		}
 		return result as ObjectWithKeysFromStringArray<StateNames>
 	}
 

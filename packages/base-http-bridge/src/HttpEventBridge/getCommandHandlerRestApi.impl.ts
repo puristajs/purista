@@ -62,12 +62,12 @@ export const getCommandHandlerRestApi = function (
 					// allow only defined parameters
 					if (metadata.expose.http.openApi?.query) {
 						const parsedQueries = parse(c.req.url || '')
-						metadata.expose.http.openApi.query.forEach(qp => {
+						for (const qp of metadata.expose.http.openApi.query) {
 							queryParams[qp.name] = parsedQueries[qp.name]
 							if (qp.required && !parsedQueries[qp.name]) {
 								throw new HandledError(StatusCode.BadRequest, `query parameter ${qp.name} is required`)
 							}
-						})
+						}
 					}
 
 					let body: unknown

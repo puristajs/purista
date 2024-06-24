@@ -68,11 +68,11 @@ export class DaprConfigStore extends ConfigStoreBaseClass<DaprConfigStoreConfig>
 
 		const returnValue: Record<string, unknown> = {}
 
-		result.forEach(response => {
-			response.forEach(entry => {
+		for (const response of result) {
+			for (const entry of response) {
 				returnValue[entry.key] = entry.value
-			})
-		})
+			}
+		}
 
 		return returnValue as ObjectWithKeysFromStringArray<ConfigNames>
 	}

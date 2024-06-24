@@ -237,7 +237,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 
 		const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
 
-		allDiagnostics.forEach(diagnostic => {
+		for (const diagnostic of allDiagnostics) {
 			if (diagnostic.file && diagnostic.start) {
 				const { line, character } = ts.getLineAndCharacterOfPosition(diagnostic.file, diagnostic.start)
 				const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')
@@ -245,7 +245,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 			} else {
 				this.emit('warn', `${type} build: ${ts.flattenDiagnosticMessageText(diagnostic.messageText, '\n')}`)
 			}
-		})
+		}
 
 		const exitCode = emitResult.emitSkipped ? 1 : 0
 		if (exitCode) {
@@ -753,12 +753,14 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 						)
 
 						writer.write('return').block(() => {
-							Object.entries(s).forEach(([serviceVersion, def]) => {
+							for (const [serviceVersion, def] of Object.entries(s)) {
 								this.emit('info', `${serviceName} version ${serviceVersion}`)
 								writer.write(`'v${serviceVersion}':`).block(() => {
-									def.forEach(line => writer.writeLine(line))
+									for (const line of def) {
+										writer.writeLine(line)
+									}
 								})
-							})
+							}
 						})
 					})
 					.newLine()
