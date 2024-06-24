@@ -9,5 +9,5 @@ export const theServiceV1PatchInputPayloadSchema = extendApi(z.any(), { title: '
 
 // define the output payload
 export const theServiceV1PatchOutputPayloadSchema = extendApi(z.any(), {
-  title: 'patch output payload schema',
+	title: 'patch output payload schema',
 })

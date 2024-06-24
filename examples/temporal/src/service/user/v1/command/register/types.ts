@@ -1,9 +1,9 @@
 import type { z } from 'zod'
 
 import type {
-  userV1RegisterInputParameterSchema,
-  userV1RegisterInputPayloadSchema,
-  userV1RegisterOutputPayloadSchema,
+	userV1RegisterInputParameterSchema,
+	userV1RegisterInputPayloadSchema,
+	userV1RegisterOutputPayloadSchema,
 } from './schema.js'
 
 export type UserV1RegisterInputParameter = z.input<typeof userV1RegisterInputParameterSchema>

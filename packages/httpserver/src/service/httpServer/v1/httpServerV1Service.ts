@@ -10,12 +10,12 @@ import { serviceCommandsToRestApiSubscriptionBuilder } from './subscription/serv
 const commandDefinitions: CommandDefinitionList<any> = []
 
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = [
-  serviceCommandsToRestApiSubscriptionBuilder.getDefinition(),
+	serviceCommandsToRestApiSubscriptionBuilder.getDefinition(),
 ]
 
 /**
  * @deprecated Since version 1.10.0. Use {@purista/hono-http-server} instead.
  */
 export const httpServerV1Service = httpServerV1ServiceBuilder
-  .addCommandDefinition(...commandDefinitions)
-  .addSubscriptionDefinition(...subscriptionDefinitions)
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)

@@ -128,7 +128,7 @@ main()
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts#L3)
+[packages/httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts:3](https://github.com/puristajs/purista/blob/master/packages/httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts#L3)
 
 ___
 
@@ -138,7 +138,7 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts:94](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts#L94)
+[packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts:94](https://github.com/puristajs/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts#L94)
 
 ___
 
@@ -148,7 +148,7 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/types.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/types.ts#L5)
+[packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/types.ts:5](https://github.com/puristajs/purista/blob/master/packages/httpserver/src/service/httpServer/v1/subscription/serviceCommandsToRestApi/types.ts#L5)
 
 ## Variables
 
@@ -158,7 +158,7 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts#L12)
+[packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts:12](https://github.com/puristajs/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts#L12)
 
 ___
 
@@ -172,7 +172,7 @@ Since version 1.10.0. Use {@purista/hono-http-server} instead.
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts#L19)
+[packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts:19](https://github.com/puristajs/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerV1Service.ts#L19)
 
 ___
 
@@ -182,7 +182,7 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts#L19)
+[packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts:19](https://github.com/puristajs/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerV1ServiceBuilder.ts#L19)
 
 ___
 
@@ -192,4 +192,4 @@ ___
 
 #### Defined in
 
-[packages/httpserver/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/httpserver/src/version.ts#L1)
+[packages/httpserver/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/httpserver/src/version.ts#L1)

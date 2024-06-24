@@ -8,5 +8,5 @@ import type { EBMessageAddress } from '../types/index.js'
  * @group Event bridge
  */
 export const getCommandQueueName = (address: EBMessageAddress): string => {
-  return `cq-${address.serviceName}-${address.serviceVersion}-${address.serviceTarget}`.toLocaleLowerCase()
+	return `cq-${address.serviceName}-${address.serviceVersion}-${address.serviceTarget}`.toLocaleLowerCase()
 }

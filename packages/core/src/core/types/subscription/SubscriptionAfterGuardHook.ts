@@ -1,3 +1,4 @@
+import type { EmptyObject } from '../EmptyObject.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.js'
 
@@ -8,16 +9,16 @@ import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.
  * @group Subscription
  */
 export type SubscriptionAfterGuardHook<
-  ServiceClassType = ServiceClass,
-  FunctionResultType = unknown,
-  FunctionPayloadOutputType = unknown,
-  FunctionParameterType = unknown,
-  Invokes = {},
-  EmitListType = {},
+	ServiceClassType = ServiceClass,
+	FunctionResultType = unknown,
+	FunctionPayloadOutputType = unknown,
+	FunctionParameterType = unknown,
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
 > = (
-  this: ServiceClassType,
-  context: SubscriptionFunctionContext<Invokes, EmitListType>,
-  result: Readonly<FunctionResultType>,
-  payload: Readonly<FunctionPayloadOutputType>,
-  parameter: Readonly<FunctionParameterType>,
+	this: ServiceClassType,
+	context: SubscriptionFunctionContext<Invokes, EmitListType>,
+	result: Readonly<FunctionResultType>,
+	payload: Readonly<FunctionPayloadOutputType>,
+	parameter: Readonly<FunctionParameterType>,
 ) => Promise<void>

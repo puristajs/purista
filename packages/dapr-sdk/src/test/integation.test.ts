@@ -5,26 +5,26 @@ import { createSandbox } from 'sinon'
 import { DaprEventBridge } from '../DaprEventBridge/index.js'
 
 describe('DaprEventbridge', () => {
-  let bridge: DaprEventBridge
-  const sandbox = createSandbox()
-  const logger = getLoggerMock(sandbox)
+	let bridge: DaprEventBridge
+	const sandbox = createSandbox()
+	const logger = getLoggerMock(sandbox)
 
-  beforeAll(async () => {
-    bridge = new DaprEventBridge({
-      logger: logger.mock,
-      serve,
-    })
-  })
+	beforeAll(async () => {
+		bridge = new DaprEventBridge({
+			logger: logger.mock,
+			serve,
+		})
+	})
 
-  afterAll(async () => {
-    await bridge.destroy()
-  })
+	afterAll(async () => {
+		await bridge.destroy()
+	})
 
-  afterEach(() => {
-    sandbox.reset()
-  })
+	afterEach(() => {
+		sandbox.reset()
+	})
 
-  it('works', async () => {
-    await bridge.start()
-  })
+	it('works', async () => {
+		await bridge.start()
+	})
 })

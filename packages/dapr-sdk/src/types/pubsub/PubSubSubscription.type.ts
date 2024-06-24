@@ -17,6 +17,6 @@ import type { PubSubSubscriptionTopicType } from './PubSubSubscriptionTopic.type
  * This defines the pubsubName object
  */
 export type PubSubSubscriptionType = {
-  // Key of the topic
-  [key: string]: PubSubSubscriptionTopicType
+	// Key of the topic
+	[key: string]: PubSubSubscriptionTopicType
 }

@@ -25,7 +25,7 @@ To learn more about Dapr, visit the official site __[dapr.io](https://dapr.io/)_
 Similar to Kubernetes deployments, a http server must be provided by your service instance.
 The `@purista/dapr-sdk` package provides an event bridge which working as HTTP server. In addition, adapters for config, state and secrets stores are available.
 
-You can find an example in the [PURISTA repository](https://github.com/sebastianwessel/purista/tree/master/examples/dapr-example).
+You can find an example in the [PURISTA repository](https://github.com/puristajs/purista/tree/master/examples/dapr-example).
 This example also contains the usage of the Dapr config store, secret store and state store.
 
 ### Kubernetes deployment file

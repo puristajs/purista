@@ -76,7 +76,7 @@ It will be removed/overwritten on next get request.
 
 #### Defined in
 
-[aws-secret-store/src/AWSSecretStore.impl.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L35)
+[aws-secret-store/src/AWSSecretStore.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L35)
 
 ## Properties
 
@@ -100,7 +100,7 @@ ___
 
 #### Defined in
 
-[aws-secret-store/src/AWSSecretStore.impl.ts:33](https://github.com/sebastianwessel/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L33)
+[aws-secret-store/src/AWSSecretStore.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L33)
 
 ___
 
@@ -233,7 +233,7 @@ ___
 
 #### Defined in
 
-[aws-secret-store/src/AWSSecretStore.impl.ts:40](https://github.com/sebastianwessel/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L40)
+[aws-secret-store/src/AWSSecretStore.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L40)
 
 ___
 
@@ -281,7 +281,7 @@ ___
 
 #### Defined in
 
-[aws-secret-store/src/AWSSecretStore.impl.ts:64](https://github.com/sebastianwessel/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L64)
+[aws-secret-store/src/AWSSecretStore.impl.ts:64](https://github.com/puristajs/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L64)
 
 ___
 
@@ -331,4 +331,4 @@ ___
 
 #### Defined in
 
-[aws-secret-store/src/AWSSecretStore.impl.ts:72](https://github.com/sebastianwessel/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L72)
+[aws-secret-store/src/AWSSecretStore.impl.ts:72](https://github.com/puristajs/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L72)

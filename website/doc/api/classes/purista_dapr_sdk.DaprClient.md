@@ -375,7 +375,7 @@ url path of endpoint
 
 #### Defined in
 
-[dapr-sdk/src/DaprClient/DaprClient.impl.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L28)
+[dapr-sdk/src/DaprClient/DaprClient.impl.ts:28](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L28)
 
 ___
 
@@ -404,7 +404,7 @@ url path of endpoint
 
 #### Defined in
 
-[dapr-sdk/src/DaprClient/DaprClient.impl.ts:23](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L23)
+[dapr-sdk/src/DaprClient/DaprClient.impl.ts:23](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L23)
 
 ___
 
@@ -434,7 +434,7 @@ url path of endpoint
 
 #### Defined in
 
-[dapr-sdk/src/DaprClient/DaprClient.impl.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L18)
+[dapr-sdk/src/DaprClient/DaprClient.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L18)
 
 ___
 
@@ -534,7 +534,7 @@ Invoke a command
 
 #### Defined in
 
-[dapr-sdk/src/DaprClient/DaprClient.impl.ts:33](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L33)
+[dapr-sdk/src/DaprClient/DaprClient.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L33)
 
 ___
 
@@ -556,7 +556,7 @@ boolean
 
 #### Defined in
 
-[dapr-sdk/src/DaprClient/DaprClient.impl.ts:63](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L63)
+[dapr-sdk/src/DaprClient/DaprClient.impl.ts:63](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L63)
 
 ___
 
@@ -685,7 +685,7 @@ Send a EBMessage as event to the underlaying message infrastructure.
 
 #### Defined in
 
-[dapr-sdk/src/DaprClient/DaprClient.impl.ts:48](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L48)
+[dapr-sdk/src/DaprClient/DaprClient.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L48)
 
 ___
 

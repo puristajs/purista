@@ -47,7 +47,7 @@ console.log(value) // outputs: undefined
 
 #### Defined in
 
-[nats-state-store/src/types/NatsStateStoreConfig.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/types/NatsStateStoreConfig.ts#L4)
+[nats-state-store/src/types/NatsStateStoreConfig.ts:4](https://github.com/puristajs/purista/blob/master/packages/nats-state-store/src/types/NatsStateStoreConfig.ts#L4)
 
 ## Variables
 
@@ -57,4 +57,4 @@ console.log(value) // outputs: undefined
 
 #### Defined in
 
-[nats-state-store/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/version.ts#L1)
+[nats-state-store/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/nats-state-store/src/version.ts#L1)

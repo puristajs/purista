@@ -57,7 +57,7 @@ async function run() {
 }
 
 run().catch((err) => {
-  // eslint-disable-next-line no-console
+  // biome-ignore lint/nursery/noConsole: no logger available
   console.error(err)
   process.exit(1)
 })
@@ -97,8 +97,8 @@ export const getInvoke =
         payload,
         parameter,
       },
-      contentEncoding: 'application/json',
-      contentType: 'utf-8',
+      contentEncoding: 'utf-8',
+      contentType: 'application/json',
     })
   }
 
@@ -159,7 +159,7 @@ async function run() {
 }
 
 run().catch((err) => {
-  // eslint-disable-next-line no-console
+  // biome-ignore lint/nursery/noConsole: no logger available
   console.error(err)
   process.exit(1)
 })

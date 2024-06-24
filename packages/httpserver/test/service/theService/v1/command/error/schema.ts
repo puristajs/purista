@@ -9,5 +9,5 @@ export const theServiceV1ErrorInputPayloadSchema = extendApi(z.undefined(), { ti
 
 // define the output payload
 export const theServiceV1ErrorOutputPayloadSchema = extendApi(z.object({ error: z.boolean() }), {
-  title: 'error output payload schema',
+	title: 'error output payload schema',
 })

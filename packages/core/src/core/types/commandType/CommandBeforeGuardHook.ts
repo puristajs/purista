@@ -1,3 +1,4 @@
+import type { EmptyObject } from '../EmptyObject.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { CommandFunctionContext } from './CommandFunctionContext.js'
 
@@ -9,16 +10,17 @@ import type { CommandFunctionContext } from './CommandFunctionContext.js'
  * @group Command
  */
 export type CommandBeforeGuardHook<
-  ServiceClassType = ServiceClass,
-  MessagePayloadType = unknown,
-  MessageParamsType = unknown,
-  FunctionPayloadType = MessagePayloadType,
-  FunctionParamsType = MessageParamsType,
-  Invokes = {},
-  EmitListType = {},
+	ServiceClassType = ServiceClass,
+	MessagePayloadType = unknown,
+	MessageParamsType = unknown,
+	FunctionPayloadType = MessagePayloadType,
+	FunctionParamsType = MessageParamsType,
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
+	Ressources = EmptyObject,
 > = (
-  this: ServiceClassType,
-  context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType>,
-  payload: Readonly<FunctionPayloadType>,
-  parameter: Readonly<FunctionParamsType>,
+	this: ServiceClassType,
+	context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Ressources>,
+	payload: Readonly<FunctionPayloadType>,
+	parameter: Readonly<FunctionParamsType>,
 ) => Promise<void>

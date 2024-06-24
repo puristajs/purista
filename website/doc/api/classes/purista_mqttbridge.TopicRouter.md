@@ -40,7 +40,7 @@
 
 #### Defined in
 
-[mqttbridge/src/topic/TopicRouter.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L13)
+[mqttbridge/src/topic/TopicRouter.ts:13](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L13)
 
 ## Properties
 
@@ -50,7 +50,7 @@
 
 #### Defined in
 
-[mqttbridge/src/topic/TopicRouter.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L11)
+[mqttbridge/src/topic/TopicRouter.ts:11](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L11)
 
 ___
 
@@ -60,7 +60,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/topic/TopicRouter.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L9)
+[mqttbridge/src/topic/TopicRouter.ts:9](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L9)
 
 ___
 
@@ -70,7 +70,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/topic/TopicRouter.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L8)
+[mqttbridge/src/topic/TopicRouter.ts:8](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L8)
 
 ## Methods
 
@@ -91,7 +91,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/topic/TopicRouter.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L18)
+[mqttbridge/src/topic/TopicRouter.ts:18](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L18)
 
 ___
 
@@ -112,7 +112,7 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/topic/TopicRouter.ts:32](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L32)
+[mqttbridge/src/topic/TopicRouter.ts:32](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L32)
 
 ___
 
@@ -132,4 +132,4 @@ ___
 
 #### Defined in
 
-[mqttbridge/src/topic/TopicRouter.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L26)
+[mqttbridge/src/topic/TopicRouter.ts:26](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L26)

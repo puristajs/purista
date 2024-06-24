@@ -10,8 +10,8 @@ import type { EmitSchemaList } from './EmitSchemaList.js'
  * ```
  */
 export type EmitCustomMessageFunction<EmitList> = <K extends keyof EmitSchemaList<EmitList>>(
-  eventName: K,
-  payload: EmitList[K],
-  contentType?: ContentType,
-  contentEncoding?: string,
+	eventName: K,
+	payload: EmitList[K],
+	contentType?: ContentType,
+	contentEncoding?: string,
 ) => Promise<void>

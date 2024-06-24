@@ -35,32 +35,33 @@ import type { DefaultSecretStoreConfig } from './types/index.js'
  *
  */
 export class DefaultSecretStore extends SecretStoreBaseClass<DefaultSecretStoreConfig> implements SecretStore {
-  private map = new Map<string, string>()
-  constructor(config?: StoreBaseConfig<DefaultSecretStoreConfig>) {
-    super('DefaultSecretStore', { ...config })
-    if (config?.config) {
-      this.map = new Map(Object.entries(config.config))
-    }
-    this.logger.warn(
-      'Using the DefaultSecretStore is not secure! It should only be used for test or development purpose.',
-    )
-  }
+	private map = new Map<string, string>()
+	constructor(config?: StoreBaseConfig<DefaultSecretStoreConfig>) {
+		super('DefaultSecretStore', { ...config })
+		if (config?.config) {
+			this.map = new Map(Object.entries(config.config))
+		}
+		this.logger.warn(
+			'Using the DefaultSecretStore is not secure! It should only be used for test or development purpose.',
+		)
+	}
 
-  protected async getSecretImpl<SecretNames extends string[]>(
-    ...secretNames: SecretNames
-  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
-    const result: Record<string, string | undefined> = {}
-    secretNames.forEach((name) => {
-      result[name] = this.map.get(name)
-    })
-    return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
-  }
+	protected async getSecretImpl<SecretNames extends string[]>(
+		...secretNames: SecretNames
+	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
+		const result: Record<string, string | undefined> = {}
+		for (const name of secretNames) {
+			result[name] = this.map.get(name)
+		}
 
-  protected async setSecretImpl(secretName: string, secretValue: string) {
-    this.map.set(secretName, secretValue)
-  }
+		return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
+	}
 
-  protected async removeSecretImpl(secretName: string) {
-    this.map.delete(secretName)
-  }
+	protected async setSecretImpl(secretName: string, secretValue: string) {
+		this.map.set(secretName, secretValue)
+	}
+
+	protected async removeSecretImpl(secretName: string) {
+		this.map.delete(secretName)
+	}
 }

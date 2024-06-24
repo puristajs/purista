@@ -4,17 +4,17 @@ import type { SubscriptionTransformFunctionContext } from './SubscriptionTransfo
  * @group Subscription
  */
 export type SubscriptionTransformInputHook<
-  ServiceClassType,
-  PayloadOutput = unknown,
-  ParamsOutput = unknown,
-  PayloadInput = unknown,
-  ParamsInput = unknown,
+	ServiceClassType,
+	PayloadOutput = unknown,
+	ParamsOutput = unknown,
+	PayloadInput = unknown,
+	ParamsInput = unknown,
 > = (
-  this: ServiceClassType,
-  context: SubscriptionTransformFunctionContext,
-  payload: Readonly<PayloadInput>,
-  parameter: Readonly<ParamsInput>,
+	this: ServiceClassType,
+	context: SubscriptionTransformFunctionContext,
+	payload: Readonly<PayloadInput>,
+	parameter: Readonly<ParamsInput>,
 ) => Promise<{
-  payload: Readonly<PayloadOutput>
-  parameter: Readonly<ParamsOutput>
+	payload: Readonly<PayloadOutput>
+	parameter: Readonly<ParamsOutput>
 }>

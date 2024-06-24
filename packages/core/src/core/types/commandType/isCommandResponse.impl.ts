@@ -10,8 +10,8 @@ import type { CommandResponse } from './CommandResponse.js'
  * @returns boolean
  */
 export const isCommandResponse = (message: EBMessage): message is CommandResponse => {
-  return (
-    message.messageType === EBMessageType.CommandSuccessResponse ||
-    message.messageType === EBMessageType.CommandErrorResponse
-  )
+	return (
+		message.messageType === EBMessageType.CommandSuccessResponse ||
+		message.messageType === EBMessageType.CommandErrorResponse
+	)
 }

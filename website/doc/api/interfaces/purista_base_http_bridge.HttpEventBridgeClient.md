@@ -52,7 +52,7 @@ url path of endpoint
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L22)
+[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:22](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L22)
 
 ___
 
@@ -86,7 +86,7 @@ url path of endpoint
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L14)
+[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:14](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L14)
 
 ___
 
@@ -122,7 +122,7 @@ url path of endpoint
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:31](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L31)
+[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:31](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L31)
 
 ___
 
@@ -184,7 +184,7 @@ Invoke a command
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:40](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L40)
+[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:40](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L40)
 
 ___
 
@@ -208,7 +208,7 @@ boolean
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:54](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L54)
+[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:54](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L54)
 
 ___
 
@@ -241,4 +241,4 @@ Send a EBMessage as event to the underlaying message infrastructure.
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:48](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L48)
+[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:48](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L48)

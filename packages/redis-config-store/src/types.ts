@@ -5,9 +5,9 @@ import type { RedisClientOptions, RedisFunctions, RedisModules, RedisScripts } f
  * It will extend the StoreBaseConfig.
  */
 export type RedisStoreConfig<
-  M extends RedisModules = RedisModules,
-  F extends RedisFunctions = RedisFunctions,
-  S extends RedisScripts = RedisScripts,
+	M extends RedisModules = RedisModules,
+	F extends RedisFunctions = RedisFunctions,
+	S extends RedisScripts = RedisScripts,
 > = {
-  config?: RedisClientOptions<M, F, S>
+	config?: RedisClientOptions<M, F, S>
 }

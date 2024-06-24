@@ -10,9 +10,9 @@ import { serviceCommandsToRestApiSubscriptionBuilder } from './subscription/serv
 const commandDefinitions: CommandDefinitionList<any> = []
 
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = [
-  serviceCommandsToRestApiSubscriptionBuilder.getDefinition(),
+	serviceCommandsToRestApiSubscriptionBuilder.getDefinition(),
 ]
 
 export const honoV1Service = honoV1ServiceBuilder
-  .addCommandDefinition(...commandDefinitions)
-  .addSubscriptionDefinition(...subscriptionDefinitions)
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)

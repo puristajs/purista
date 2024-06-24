@@ -48,7 +48,7 @@
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L4)
+[base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts:4](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts#L4)
 
 ___
 
@@ -79,7 +79,7 @@ ___
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/types/RouterFunction.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/RouterFunction.ts#L6)
+[base-http-bridge/src/HttpEventBridge/types/RouterFunction.ts:6](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/RouterFunction.ts#L6)
 
 ## Variables
 
@@ -89,7 +89,7 @@ ___
 
 #### Defined in
 
-[base-http-bridge/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/version.ts#L1)
+[base-http-bridge/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/version.ts#L1)
 
 ## Functions
 
@@ -120,4 +120,4 @@ ___
 
 #### Defined in
 
-[base-http-bridge/src/HttpEventBridge/getDefaultHttpEventBridgeConfig.impl.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/getDefaultHttpEventBridgeConfig.impl.ts#L5)
+[base-http-bridge/src/HttpEventBridge/getDefaultHttpEventBridgeConfig.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/getDefaultHttpEventBridgeConfig.impl.ts#L5)

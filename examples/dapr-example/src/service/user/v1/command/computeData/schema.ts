@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 // define the input parameters
 export const userV1ComputeDataInputParameterSchema = extendApi(z.object({}), {
-  title: 'compute data input parameter schema',
+	title: 'compute data input parameter schema',
 })
 
 // define the input payload

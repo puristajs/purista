@@ -40,3 +40,4 @@ There are currently 3 builders available.
 - [Service Builder](service/the-service-builder.md)
 - [Command Builder](command/the-command-builder.md)
 - [Subscription Builder](subscription/the-subscription-builder.md)
+- [Client Builder](connect_to_a_purista_application/index.md)

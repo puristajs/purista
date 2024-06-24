@@ -89,7 +89,7 @@ console.log(value) // outputs: undefined
 
 #### Defined in
 
-[nats-state-store/src/NatsStateStore.impl.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L37)
+[nats-state-store/src/NatsStateStore.impl.ts:37](https://github.com/puristajs/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L37)
 
 ## Properties
 
@@ -126,7 +126,7 @@ ___
 
 #### Defined in
 
-[nats-state-store/src/NatsStateStore.impl.ts:32](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L32)
+[nats-state-store/src/NatsStateStore.impl.ts:32](https://github.com/puristajs/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L32)
 
 ___
 
@@ -136,7 +136,7 @@ ___
 
 #### Defined in
 
-[nats-state-store/src/NatsStateStore.impl.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L35)
+[nats-state-store/src/NatsStateStore.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L35)
 
 ___
 
@@ -174,7 +174,7 @@ ___
 
 #### Defined in
 
-[nats-state-store/src/NatsStateStore.impl.ts:34](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L34)
+[nats-state-store/src/NatsStateStore.impl.ts:34](https://github.com/puristajs/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L34)
 
 ## Methods
 
@@ -192,7 +192,7 @@ ___
 
 #### Defined in
 
-[nats-state-store/src/NatsStateStore.impl.ts:116](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L116)
+[nats-state-store/src/NatsStateStore.impl.ts:116](https://github.com/puristajs/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L116)
 
 ___
 
@@ -252,7 +252,7 @@ ___
 
 #### Defined in
 
-[nats-state-store/src/NatsStateStore.impl.ts:73](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L73)
+[nats-state-store/src/NatsStateStore.impl.ts:73](https://github.com/puristajs/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L73)
 
 ___
 
@@ -266,7 +266,7 @@ ___
 
 #### Defined in
 
-[nats-state-store/src/NatsStateStore.impl.ts:45](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L45)
+[nats-state-store/src/NatsStateStore.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L45)
 
 ___
 
@@ -314,7 +314,7 @@ ___
 
 #### Defined in
 
-[nats-state-store/src/NatsStateStore.impl.ts:92](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L92)
+[nats-state-store/src/NatsStateStore.impl.ts:92](https://github.com/puristajs/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L92)
 
 ___
 
@@ -364,4 +364,4 @@ ___
 
 #### Defined in
 
-[nats-state-store/src/NatsStateStore.impl.ts:104](https://github.com/sebastianwessel/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L104)
+[nats-state-store/src/NatsStateStore.impl.ts:104](https://github.com/puristajs/purista/blob/master/packages/nats-state-store/src/NatsStateStore.impl.ts#L104)

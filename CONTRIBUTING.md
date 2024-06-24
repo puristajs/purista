@@ -6,7 +6,7 @@ If you have a question that needs an answer, create an issue, and label it as a 
 You can also join our Discord channel for questions and help: [Discord Channel](https://discord.gg/9feaUm3H2v)
 
 Issues for bugs or feature requests
-If you encounter any bugs in the code, or want to request a new feature or enhancement, please [create an issue to report it](https://github.com/sebastianwessel/purista/issues).  
+If you encounter any bugs in the code, or want to request a new feature or enhancement, please [create an issue to report it](https://github.com/puristajs/purista/issues).  
 Kindly add a label to indicate what type of issue it is.
 
 # Contribute Code

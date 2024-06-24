@@ -17,9 +17,9 @@ limitations under the License.
  * DaprPubSubRuleType defines a rule set
  */
 export type DaprPubSubRuleType = {
-  // Match rule (e.g. event.type == "hello")
-  match: string
+	// Match rule (e.g. event.type == "hello")
+	match: string
 
-  // The path to send the event towards if it matches
-  path: string
+	// The path to send the event towards if it matches
+	path: string
 }

@@ -85,7 +85,7 @@ The codes are based on HTTP status codes
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:11](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L11)
+[core/types/StatusCode.enum.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L11)
 
 ___
 
@@ -95,7 +95,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:17](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L17)
+[core/types/StatusCode.enum.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L17)
 
 ___
 
@@ -105,7 +105,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:63](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L63)
+[core/types/StatusCode.enum.ts:63](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L63)
 
 ___
 
@@ -115,7 +115,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:30](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L30)
+[core/types/StatusCode.enum.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L30)
 
 ___
 
@@ -125,7 +125,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:70](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L70)
+[core/types/StatusCode.enum.ts:70](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L70)
 
 ___
 
@@ -135,7 +135,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:39](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L39)
+[core/types/StatusCode.enum.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L39)
 
 ___
 
@@ -145,7 +145,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:10](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L10)
+[core/types/StatusCode.enum.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L10)
 
 ___
 
@@ -155,7 +155,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:47](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L47)
+[core/types/StatusCode.enum.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L47)
 
 ___
 
@@ -165,7 +165,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:33](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L33)
+[core/types/StatusCode.enum.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L33)
 
 ___
 
@@ -175,7 +175,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:65](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L65)
+[core/types/StatusCode.enum.ts:65](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L65)
 
 ___
 
@@ -185,7 +185,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:40](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L40)
+[core/types/StatusCode.enum.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L40)
 
 ___
 
@@ -195,7 +195,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:66](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L66)
+[core/types/StatusCode.enum.ts:66](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L66)
 
 ___
 
@@ -205,7 +205,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:18](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L18)
+[core/types/StatusCode.enum.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L18)
 
 ___
 
@@ -215,7 +215,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:48](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L48)
+[core/types/StatusCode.enum.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L48)
 
 ___
 
@@ -225,7 +225,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L6)
+[core/types/StatusCode.enum.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L6)
 
 ___
 
@@ -235,7 +235,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:8](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L8)
+[core/types/StatusCode.enum.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L8)
 
 ___
 
@@ -245,7 +245,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:7](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L7)
+[core/types/StatusCode.enum.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L7)
 
 ___
 
@@ -255,7 +255,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:68](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L68)
+[core/types/StatusCode.enum.ts:68](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L68)
 
 ___
 
@@ -265,7 +265,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:61](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L61)
+[core/types/StatusCode.enum.ts:61](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L61)
 
 ___
 
@@ -275,7 +275,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:59](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L59)
+[core/types/StatusCode.enum.ts:59](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L59)
 
 ___
 
@@ -285,7 +285,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:41](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L41)
+[core/types/StatusCode.enum.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L41)
 
 ___
 
@@ -295,7 +295,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:51](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L51)
+[core/types/StatusCode.enum.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L51)
 
 ___
 
@@ -305,7 +305,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:56](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L56)
+[core/types/StatusCode.enum.ts:56](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L56)
 
 ___
 
@@ -315,7 +315,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:69](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L69)
+[core/types/StatusCode.enum.ts:69](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L69)
 
 ___
 
@@ -325,7 +325,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:35](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L35)
+[core/types/StatusCode.enum.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L35)
 
 ___
 
@@ -335,7 +335,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:49](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L49)
+[core/types/StatusCode.enum.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L49)
 
 ___
 
@@ -345,7 +345,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L16)
+[core/types/StatusCode.enum.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L16)
 
 ___
 
@@ -355,7 +355,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:72](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L72)
+[core/types/StatusCode.enum.ts:72](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L72)
 
 ___
 
@@ -365,7 +365,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:13](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L13)
+[core/types/StatusCode.enum.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L13)
 
 ___
 
@@ -375,7 +375,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:12](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L12)
+[core/types/StatusCode.enum.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L12)
 
 ___
 
@@ -385,7 +385,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:36](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L36)
+[core/types/StatusCode.enum.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L36)
 
 ___
 
@@ -395,7 +395,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:71](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L71)
+[core/types/StatusCode.enum.ts:71](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L71)
 
 ___
 
@@ -405,7 +405,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:34](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L34)
+[core/types/StatusCode.enum.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L34)
 
 ___
 
@@ -415,7 +415,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:62](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L62)
+[core/types/StatusCode.enum.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L62)
 
 ___
 
@@ -425,7 +425,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:9](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L9)
+[core/types/StatusCode.enum.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L9)
 
 ___
 
@@ -435,7 +435,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:15](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L15)
+[core/types/StatusCode.enum.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L15)
 
 ___
 
@@ -445,7 +445,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:43](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L43)
+[core/types/StatusCode.enum.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L43)
 
 ___
 
@@ -455,7 +455,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:32](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L32)
+[core/types/StatusCode.enum.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L32)
 
 ___
 
@@ -465,7 +465,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:42](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L42)
+[core/types/StatusCode.enum.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L42)
 
 ___
 
@@ -475,7 +475,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:53](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L53)
+[core/types/StatusCode.enum.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L53)
 
 ___
 
@@ -485,7 +485,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:37](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L37)
+[core/types/StatusCode.enum.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L37)
 
 ___
 
@@ -495,7 +495,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:46](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L46)
+[core/types/StatusCode.enum.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L46)
 
 ___
 
@@ -505,7 +505,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:21](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L21)
+[core/types/StatusCode.enum.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L21)
 
 ___
 
@@ -515,7 +515,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L20)
+[core/types/StatusCode.enum.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L20)
 
 ___
 
@@ -525,7 +525,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L19)
+[core/types/StatusCode.enum.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L19)
 
 ___
 
@@ -535,7 +535,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L24)
+[core/types/StatusCode.enum.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L24)
 
 ___
 
@@ -545,7 +545,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:29](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L29)
+[core/types/StatusCode.enum.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L29)
 
 ___
 
@@ -555,7 +555,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:23](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L23)
+[core/types/StatusCode.enum.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L23)
 
 ___
 
@@ -565,7 +565,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:27](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L27)
+[core/types/StatusCode.enum.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L27)
 
 ___
 
@@ -575,7 +575,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:28](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L28)
+[core/types/StatusCode.enum.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L28)
 
 ___
 
@@ -585,7 +585,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:25](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L25)
+[core/types/StatusCode.enum.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L25)
 
 ___
 
@@ -595,7 +595,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:55](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L55)
+[core/types/StatusCode.enum.ts:55](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L55)
 
 ___
 
@@ -605,7 +605,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:38](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L38)
+[core/types/StatusCode.enum.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L38)
 
 ___
 
@@ -615,7 +615,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L14)
+[core/types/StatusCode.enum.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L14)
 
 ___
 
@@ -625,7 +625,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:57](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L57)
+[core/types/StatusCode.enum.ts:57](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L57)
 
 ___
 
@@ -635,7 +635,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:64](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L64)
+[core/types/StatusCode.enum.ts:64](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L64)
 
 ___
 
@@ -645,7 +645,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:60](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L60)
+[core/types/StatusCode.enum.ts:60](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L60)
 
 ___
 
@@ -655,7 +655,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:54](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L54)
+[core/types/StatusCode.enum.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L54)
 
 ___
 
@@ -665,7 +665,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:44](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L44)
+[core/types/StatusCode.enum.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L44)
 
 ___
 
@@ -675,7 +675,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:31](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L31)
+[core/types/StatusCode.enum.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L31)
 
 ___
 
@@ -685,7 +685,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:58](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L58)
+[core/types/StatusCode.enum.ts:58](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L58)
 
 ___
 
@@ -695,7 +695,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:50](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L50)
+[core/types/StatusCode.enum.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L50)
 
 ___
 
@@ -705,7 +705,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:45](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L45)
+[core/types/StatusCode.enum.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L45)
 
 ___
 
@@ -715,7 +715,7 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:52](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L52)
+[core/types/StatusCode.enum.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L52)
 
 ___
 
@@ -725,4 +725,4 @@ ___
 
 #### Defined in
 
-[core/types/StatusCode.enum.ts:67](https://github.com/sebastianwessel/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L67)
+[core/types/StatusCode.enum.ts:67](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L67)

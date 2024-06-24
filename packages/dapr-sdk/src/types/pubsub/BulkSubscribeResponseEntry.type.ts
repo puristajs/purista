@@ -17,9 +17,9 @@ import type DaprPubSubStatusEnum from './DaprPubSubStatus.enum.js'
  * BulkSubscribeResponseEntry is the response entry for a bulk subscribe request
  **/
 export type BulkSubscribeResponseEntry = {
-  // The id of the bulk subscribe entry
-  entryId: string
+	// The id of the bulk subscribe entry
+	entryId: string
 
-  // The response status of the bulk subscribe entry
-  status: DaprPubSubStatusEnum
+	// The response status of the bulk subscribe entry
+	status: DaprPubSubStatusEnum
 }

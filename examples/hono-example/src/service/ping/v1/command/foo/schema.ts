@@ -9,8 +9,8 @@ export const pingV1FooInputPayloadSchema = z.undefined()
 
 // define the output payload
 export const pingV1FooOutputPayloadSchema = extendApi(
-  z.object({
-    foo: z.string(),
-  }),
-  { title: 'foo output payload schema' },
+	z.object({
+		foo: z.string(),
+	}),
+	{ title: 'foo output payload schema' },
 )

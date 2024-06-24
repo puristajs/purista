@@ -65,7 +65,7 @@ console.log(value) // outputs: undefined
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/types/ClientConfig.ts:5](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/ClientConfig.ts#L5)
+[infisical-secret-store/src/InfisicalClient/types/ClientConfig.ts:5](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/ClientConfig.ts#L5)
 
 ___
 
@@ -84,7 +84,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/types/DecryptInput.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/DecryptInput.ts#L1)
+[infisical-secret-store/src/InfisicalClient/types/DecryptInput.ts:1](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/DecryptInput.ts#L1)
 
 ___
 
@@ -101,7 +101,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/types/EncryptInput.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/EncryptInput.ts#L1)
+[infisical-secret-store/src/InfisicalClient/types/EncryptInput.ts:1](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/EncryptInput.ts#L1)
 
 ___
 
@@ -111,7 +111,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/types/ClientConfig.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/ClientConfig.ts#L3)
+[infisical-secret-store/src/InfisicalClient/types/ClientConfig.ts:3](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/ClientConfig.ts#L3)
 
 ___
 
@@ -121,7 +121,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/types.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/types.ts#L3)
+[infisical-secret-store/src/types.ts:3](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/types.ts#L3)
 
 ___
 
@@ -139,7 +139,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/types/Scope.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/Scope.ts#L1)
+[infisical-secret-store/src/InfisicalClient/types/Scope.ts:1](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/Scope.ts#L1)
 
 ___
 
@@ -171,7 +171,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/types/Secret.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/Secret.ts#L1)
+[infisical-secret-store/src/InfisicalClient/types/Secret.ts:1](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/Secret.ts#L1)
 
 ___
 
@@ -205,7 +205,7 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/InfisicalClient/types/TokenData.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/TokenData.ts#L3)
+[infisical-secret-store/src/InfisicalClient/types/TokenData.ts:3](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/TokenData.ts#L3)
 
 ## Variables
 
@@ -215,4 +215,4 @@ ___
 
 #### Defined in
 
-[infisical-secret-store/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/infisical-secret-store/src/version.ts#L1)
+[infisical-secret-store/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/version.ts#L1)

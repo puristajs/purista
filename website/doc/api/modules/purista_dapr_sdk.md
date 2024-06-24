@@ -104,7 +104,7 @@ BulkSubscribeConfig defines the configuration for a bulk subscription
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/BulkSubscribeConfig.type.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeConfig.type.ts#L19)
+[dapr-sdk/src/types/pubsub/BulkSubscribeConfig.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeConfig.type.ts#L19)
 
 ___
 
@@ -125,7 +125,7 @@ BulkSubscribeOptions enlists the options for bulk subscribe
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts#L20)
+[dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts:20](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeOptions.type.ts#L20)
 
 ___
 
@@ -143,7 +143,7 @@ BulkSubscribeResponse is the response for a bulk subscribe request
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/BulkSubscribeResponse.type.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeResponse.type.ts#L19)
+[dapr-sdk/src/types/pubsub/BulkSubscribeResponse.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeResponse.type.ts#L19)
 
 ___
 
@@ -162,7 +162,7 @@ BulkSubscribeResponseEntry is the response entry for a bulk subscribe request
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/BulkSubscribeResponseEntry.type.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeResponseEntry.type.ts#L19)
+[dapr-sdk/src/types/pubsub/BulkSubscribeResponseEntry.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeResponseEntry.type.ts#L19)
 
 ___
 
@@ -184,7 +184,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L1)
+[dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:1](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L1)
 
 ___
 
@@ -203,7 +203,7 @@ Dapr config store configuration
 
 #### Defined in
 
-[dapr-sdk/src/DaprConfigStore/types/DaprConfigStoreConfig.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/types/DaprConfigStoreConfig.ts#L6)
+[dapr-sdk/src/DaprConfigStore/types/DaprConfigStoreConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/types/DaprConfigStoreConfig.ts#L6)
 
 ___
 
@@ -213,7 +213,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprEventBridge/types/DaprEventBridgeConfig.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/types/DaprEventBridgeConfig.ts#L6)
+[dapr-sdk/src/DaprEventBridge/types/DaprEventBridgeConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/types/DaprEventBridgeConfig.ts#L6)
 
 ___
 
@@ -232,7 +232,7 @@ DaprPubSubRouteType Defines the rules for a route
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/DaprPubSubRouteType.type.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubRouteType.type.ts#L20)
+[dapr-sdk/src/types/pubsub/DaprPubSubRouteType.type.ts:20](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubRouteType.type.ts#L20)
 
 ___
 
@@ -251,7 +251,7 @@ DaprPubSubRuleType defines a rule set
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/DaprPubSubRuleType.type.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubRuleType.type.ts#L19)
+[dapr-sdk/src/types/pubsub/DaprPubSubRuleType.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubRuleType.type.ts#L19)
 
 ___
 
@@ -275,7 +275,7 @@ DaprPubSubType is the Type used by the Dapr API to interface with its PubSub com
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/DaprPubSub.type.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSub.type.ts#L22)
+[dapr-sdk/src/types/pubsub/DaprPubSub.type.ts:22](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSub.type.ts#L22)
 
 ___
 
@@ -296,7 +296,7 @@ Dapr secret store configuration
 
 #### Defined in
 
-[dapr-sdk/src/DaprSecretStore/types/DaprSecretStoreConfig.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/types/DaprSecretStoreConfig.ts#L6)
+[dapr-sdk/src/DaprSecretStore/types/DaprSecretStoreConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/types/DaprSecretStoreConfig.ts#L6)
 
 ___
 
@@ -315,7 +315,7 @@ Dapr state store configuration
 
 #### Defined in
 
-[dapr-sdk/src/DaprStateStore/types/DaprStateStoreConfig.ts:6](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/types/DaprStateStoreConfig.ts#L6)
+[dapr-sdk/src/DaprStateStore/types/DaprStateStoreConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/types/DaprStateStoreConfig.ts#L6)
 
 ___
 
@@ -329,7 +329,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/KeyValue.type.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/KeyValue.type.ts#L14)
+[dapr-sdk/src/types/pubsub/KeyValue.type.ts:14](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/KeyValue.type.ts#L14)
 
 ___
 
@@ -347,7 +347,7 @@ Response from a bulk publish API request.
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/PubSubBulkPublishApiResponse.type.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishApiResponse.type.ts#L22)
+[dapr-sdk/src/types/pubsub/PubSubBulkPublishApiResponse.type.ts:22](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishApiResponse.type.ts#L22)
 
 ___
 
@@ -368,7 +368,7 @@ PubSubBulkPublishEntry defines an entry in a bulk publish request.
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts#L19)
+[dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts#L19)
 
 ___
 
@@ -380,7 +380,7 @@ PubSubBulkPublishMessage is a message in a bulk publish request.
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts:26](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts#L26)
+[dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts:26](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts#L26)
 
 ___
 
@@ -398,7 +398,7 @@ PubSubBulkPublishResponse defines the response from a bulk publish request.
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/PubSubBulkPublishResponse.type.ts:24](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishResponse.type.ts#L24)
+[dapr-sdk/src/types/pubsub/PubSubBulkPublishResponse.type.ts:24](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishResponse.type.ts#L24)
 
 ___
 
@@ -415,7 +415,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/PubSubPublishOptions.type.ts:16](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubPublishOptions.type.ts#L16)
+[dapr-sdk/src/types/pubsub/PubSubPublishOptions.type.ts:16](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubPublishOptions.type.ts#L16)
 
 ___
 
@@ -433,7 +433,7 @@ PubSubPublishResponseType defines the response from a publish.
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/PubSubPublishResponse.type.ts:17](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubPublishResponse.type.ts#L17)
+[dapr-sdk/src/types/pubsub/PubSubPublishResponse.type.ts:17](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubPublishResponse.type.ts#L17)
 
 ___
 
@@ -456,7 +456,7 @@ PubSubSubscriptionOptionsType defines the options we can pass while subscribing
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts:22](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts#L22)
+[dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts:22](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionOptions.type.ts#L22)
 
 ___
 
@@ -475,7 +475,7 @@ This defines the routeName object
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoute.type.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoute.type.ts#L19)
+[dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoute.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoute.type.ts#L19)
 
 ___
 
@@ -491,7 +491,7 @@ This defines the routes object
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoutes.type.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoutes.type.ts#L19)
+[dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoutes.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoutes.type.ts#L19)
 
 ___
 
@@ -510,7 +510,7 @@ This defines the topicName object
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/PubSubSubscriptionTopic.type.ts:20](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionTopic.type.ts#L20)
+[dapr-sdk/src/types/pubsub/PubSubSubscriptionTopic.type.ts:20](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionTopic.type.ts#L20)
 
 ___
 
@@ -526,7 +526,7 @@ This defines the pubsubName object
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/PubSubSubscription.type.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscription.type.ts#L19)
+[dapr-sdk/src/types/pubsub/PubSubSubscription.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscription.type.ts#L19)
 
 ___
 
@@ -542,7 +542,7 @@ This defines the entire object containing pubsubNames
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/PubSubSubscriptions.type.ts:19](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptions.type.ts#L19)
+[dapr-sdk/src/types/pubsub/PubSubSubscriptions.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptions.type.ts#L19)
 
 ___
 
@@ -567,7 +567,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/types/pubsub/DaprPubSubCallback.type.ts:14](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubCallback.type.ts#L14)
+[dapr-sdk/src/types/pubsub/DaprPubSubCallback.type.ts:14](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubCallback.type.ts#L14)
 
 ## Variables
 
@@ -577,7 +577,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/types/constants.ts:4](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/constants.ts#L4)
+[dapr-sdk/src/types/constants.ts:4](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/constants.ts#L4)
 
 ___
 
@@ -587,7 +587,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/types/constants.ts:2](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/constants.ts#L2)
+[dapr-sdk/src/types/constants.ts:2](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/constants.ts#L2)
 
 ___
 
@@ -597,7 +597,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/types/constants.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/types/constants.ts#L1)
+[dapr-sdk/src/types/constants.ts:1](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/constants.ts#L1)
 
 ___
 
@@ -607,7 +607,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/version.ts:1](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/version.ts#L1)
+[dapr-sdk/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/version.ts#L1)
 
 ## Functions
 
@@ -628,7 +628,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprEventBridge/routes/config.impl.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/routes/config.impl.ts#L3)
+[dapr-sdk/src/DaprEventBridge/routes/config.impl.ts:3](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/routes/config.impl.ts#L3)
 
 ___
 
@@ -652,7 +652,7 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprClient/getDefaultClientConfig.impl.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprClient/getDefaultClientConfig.impl.ts#L3)
+[dapr-sdk/src/DaprClient/getDefaultClientConfig.impl.ts:3](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/getDefaultClientConfig.impl.ts#L3)
 
 ___
 
@@ -685,4 +685,4 @@ ___
 
 #### Defined in
 
-[dapr-sdk/src/DaprEventBridge/getDefaultConfig.impl.ts:3](https://github.com/sebastianwessel/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/getDefaultConfig.impl.ts#L3)
+[dapr-sdk/src/DaprEventBridge/getDefaultConfig.impl.ts:3](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprEventBridge/getDefaultConfig.impl.ts#L3)

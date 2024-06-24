@@ -9,11 +9,11 @@ export const theServiceV1FooInputPayloadSchema = extendApi(z.any(), { title: 'pi
 
 // define the output payload
 export const theServiceV1FooOutputPayloadSchema = extendApi(
-  z.object({
-    payload: z.any(),
-    parameter: z.any(),
-  }),
-  {
-    title: 'ping output payload schema',
-  },
+	z.object({
+		payload: z.any(),
+		parameter: z.any(),
+	}),
+	{
+		title: 'ping output payload schema',
+	},
 )

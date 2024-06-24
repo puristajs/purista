@@ -1,3 +1,3 @@
 export const zipkinExporterOptions = {
-  url: `http://localhost:9411/api/v2/spans`,
+	url: 'http://localhost:9411/api/v2/spans',
 }

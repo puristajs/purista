@@ -1,3 +1,4 @@
+import type { EmptyObject } from '../EmptyObject.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.js'
 /**
@@ -6,17 +7,17 @@ import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.
  * @group Subscription
  */
 export type SubscriptionFunction<
-  ServiceClassType extends ServiceClass,
-  MessagePayloadType = unknown,
-  MessageParamsType = undefined,
-  FunctionPayloadType = MessagePayloadType,
-  FunctionParamsType = MessageParamsType,
-  FunctionResultType = undefined,
-  Invokes = {},
-  EmitListType = {},
+	ServiceClassType extends ServiceClass,
+	MessagePayloadType = unknown,
+	MessageParamsType = undefined,
+	FunctionPayloadType = MessagePayloadType,
+	FunctionParamsType = MessageParamsType,
+	FunctionResultType = undefined,
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
 > = (
-  this: ServiceClassType,
-  context: SubscriptionFunctionContext<Invokes, EmitListType>,
-  payload: Readonly<FunctionPayloadType>,
-  parameter: Readonly<FunctionParamsType>,
+	this: ServiceClassType,
+	context: SubscriptionFunctionContext<Invokes, EmitListType>,
+	payload: Readonly<FunctionPayloadType>,
+	parameter: Readonly<FunctionParamsType>,
 ) => Promise<FunctionResultType>

@@ -14,10 +14,10 @@ limitations under the License.
 import type { KeyValueType } from './KeyValue.type.js'
 
 type PubSubBulkPublishMessageExplicit = {
-  entryID?: string
-  event: object | string
-  metadata?: KeyValueType
-  contentType?: string
+	entryID?: string
+	event: object | string
+	metadata?: KeyValueType
+	contentType?: string
 }
 
 /**

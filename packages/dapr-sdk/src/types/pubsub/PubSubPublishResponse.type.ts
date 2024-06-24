@@ -15,6 +15,6 @@ limitations under the License.
  * PubSubPublishResponseType defines the response from a publish.
  */
 export type PubSubPublishResponseType = {
-  // error contains the error if the publish failed.
-  error?: Error
+	// error contains the error if the publish failed.
+	error?: Error
 }

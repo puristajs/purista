@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 // define the input parameters
 export const theServiceV1DeleteInputParameterSchema = extendApi(z.object({}), {
-  title: 'delete input parameter schema',
+	title: 'delete input parameter schema',
 })
 
 // define the input payload
@@ -11,5 +11,5 @@ export const theServiceV1DeleteInputPayloadSchema = extendApi(z.any(), { title: 
 
 // define the output payload
 export const theServiceV1DeleteOutputPayloadSchema = extendApi(z.void(), {
-  title: 'put output payload schema',
+	title: 'put output payload schema',
 })

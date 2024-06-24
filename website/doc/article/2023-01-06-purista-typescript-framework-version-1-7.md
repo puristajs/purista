@@ -52,5 +52,5 @@ Fixed minor bugs: We have addressed several minor bugs reported by the community
 
 To help you get started with the new features and improvements in PURISTA v1.7, we have provided comprehensive examples, documentation, and a handbook. These resources offer step-by-step guidance, code samples, and best practices to assist you in leveraging the full potential of the framework.
 
-Remember to refer to the official PURISTA documentation at [purista.dev](https://purista.dev) and the examples provided at the GitHub repository [github.com/sebastianwessel/purista](https://github.com/sebastianwessel/purista).
+Remember to refer to the official PURISTA documentation at [purista.dev](https://purista.dev) and the examples provided at the GitHub repository [github.com/puristajs/purista](https://github.com/puristajs/purista).
 </PostDetail>

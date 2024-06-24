@@ -1,5 +1,5 @@
-import type { Command, CommandResponse } from './commandType/index.js'
 import type { CustomMessage } from './CustomMessage.js'
+import type { Command, CommandResponse } from './commandType/index.js'
 import type { InfoMessage } from './infoType/index.js'
 
 /**

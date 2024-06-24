@@ -6,34 +6,34 @@ import { sendVerificationEmailCommandBuilder } from './sendVerificationEmailComm
 import type { EmailV1SendVerificationEmailInputParameter, EmailV1SendVerificationEmailInputPayload } from './types.js'
 
 describe('service Email version 1 - command sendVerificationEmail', () => {
-  let sandbox = createSandbox()
-  beforeEach(() => {
-    sandbox = createSandbox()
-  })
+	let sandbox = createSandbox()
+	beforeEach(() => {
+		sandbox = createSandbox()
+	})
 
-  afterEach(() => {
-    sandbox.restore()
-  })
+	afterEach(() => {
+		sandbox.restore()
+	})
 
-  test('does not throw', async () => {
-    const service = await emailV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
-      logger: getLoggerMock(sandbox).mock,
-    })
+	test('does not throw', async () => {
+		const service = await emailV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+			logger: getLoggerMock(sandbox).mock,
+		})
 
-    const sendVerificationEmail = safeBind(sendVerificationEmailCommandBuilder.getCommandFunction(), service)
+		const sendVerificationEmail = safeBind(sendVerificationEmailCommandBuilder.getCommandFunction(), service)
 
-    const payload: EmailV1SendVerificationEmailInputPayload = {
-      email: 'john@example.com',
-    }
+		const payload: EmailV1SendVerificationEmailInputPayload = {
+			email: 'john@example.com',
+		}
 
-    const parameter: EmailV1SendVerificationEmailInputParameter = {}
+		const parameter: EmailV1SendVerificationEmailInputParameter = {}
 
-    const context = sendVerificationEmailCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+		const context = sendVerificationEmailCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
 
-    context.stubs.setState.resolves()
+		context.stubs.setState.resolves()
 
-    const result = await sendVerificationEmail(context.mock, payload, parameter)
+		const result = await sendVerificationEmail(context.mock, payload, parameter)
 
-    expect(result).toBeUndefined()
-  })
+		expect(result).toBeUndefined()
+	})
 })

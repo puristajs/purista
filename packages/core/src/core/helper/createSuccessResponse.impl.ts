@@ -14,33 +14,33 @@ import { getNewTraceId } from './getNewTraceId.impl.js'
  * @group Helper
  */
 export const createSuccessResponse = <T>(
-  instanceId: InstanceId,
-  originalEBMessage: Readonly<Command>,
-  payload: T,
-  eventName?: string,
-  contentType = 'application/json',
-  contentEncoding = 'utf-8',
+	instanceId: InstanceId,
+	originalEBMessage: Readonly<Command>,
+	payload: T,
+	eventName?: string,
+	contentType = 'application/json',
+	contentEncoding = 'utf-8',
 ): Readonly<CommandSuccessResponse<T>> => {
-  const successResponse: CommandSuccessResponse<T> = Object.freeze({
-    id: originalEBMessage.id,
-    correlationId: originalEBMessage.correlationId,
-    traceId: originalEBMessage.traceId ?? getNewTraceId(),
-    principalId: originalEBMessage.principalId,
-    tenantId: originalEBMessage.tenantId,
-    contentType,
-    contentEncoding,
-    timestamp: Date.now(),
-    eventName,
-    messageType: EBMessageType.CommandSuccessResponse,
-    sender: {
-      ...originalEBMessage.receiver,
-      instanceId,
-    },
-    receiver: {
-      ...originalEBMessage.sender,
-    },
-    payload,
-  })
+	const successResponse: CommandSuccessResponse<T> = Object.freeze({
+		id: originalEBMessage.id,
+		correlationId: originalEBMessage.correlationId,
+		traceId: originalEBMessage.traceId ?? getNewTraceId(),
+		principalId: originalEBMessage.principalId,
+		tenantId: originalEBMessage.tenantId,
+		contentType,
+		contentEncoding,
+		timestamp: Date.now(),
+		eventName,
+		messageType: EBMessageType.CommandSuccessResponse,
+		sender: {
+			...originalEBMessage.receiver,
+			instanceId,
+		},
+		receiver: {
+			...originalEBMessage.sender,
+		},
+		payload,
+	})
 
-  return successResponse
+	return successResponse
 }

@@ -1,11 +1,9 @@
 {
-  "extends": "../../tsconfig.json",
-  
-  "compilerOptions": {
-    "outDir": "./build"
-  },
-  "files": [
-    "src/index.ts",
-    "fastify.d.ts"
-  ],
+	"extends": "../../tsconfig.json",
+
+	"compilerOptions": {
+		"outDir": "./build",
+		"types": ["vitest/globals", "node"]
+	},
+	"files": ["src/index.ts", "fastify.d.ts"]
 }

@@ -20,14 +20,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{dapr_port_email}}/v1.0/metadata",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{dapr_port_email}}",
-									"path": [
-										"v1.0",
-										"metadata"
-									]
+									"path": ["v1.0", "metadata"]
 								}
 							},
 							"response": []
@@ -40,15 +35,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{dapr_port_email}}/v1.0-alpha1/configuration/local-config-store",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{dapr_port_email}}",
-									"path": [
-										"v1.0-alpha1",
-										"configuration",
-										"local-config-store"
-									]
+									"path": ["v1.0-alpha1", "configuration", "local-config-store"]
 								}
 							},
 							"response": []
@@ -61,16 +50,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{dapr_port_email}}/v1.0/state/local-state-store/bulk",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{dapr_port_email}}",
-									"path": [
-										"v1.0",
-										"state",
-										"local-state-store",
-										"bulk"
-									]
+									"path": ["v1.0", "state", "local-state-store", "bulk"]
 								}
 							},
 							"response": []
@@ -83,16 +65,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{dapr_port_email}}/v1.0/secrets/local-secret-store/bulk",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{dapr_port_email}}",
-									"path": [
-										"v1.0",
-										"secrets",
-										"local-secret-store",
-										"bulk"
-									]
+									"path": ["v1.0", "secrets", "local-secret-store", "bulk"]
 								}
 							},
 							"response": []
@@ -120,16 +95,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{dapr_port_email}}/v1.0/publish/{{pubsub_name}}/{{eventname}}",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{dapr_port_email}}",
-									"path": [
-										"v1.0",
-										"publish",
-										"{{pubsub_name}}",
-										"{{eventname}}"
-									]
+									"path": ["v1.0", "publish", "{{pubsub_name}}", "{{eventname}}"]
 								}
 							},
 							"response": []
@@ -151,19 +119,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{dapr_port_email}}/v1.0/invoke/email-v1/method/purista/command/ping",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{dapr_port_email}}",
-									"path": [
-										"v1.0",
-										"invoke",
-										"email-v1",
-										"method",
-										"purista",
-										"command",
-										"ping"
-									]
+									"path": ["v1.0", "invoke", "email-v1", "method", "purista", "command", "ping"]
 								}
 							},
 							"response": []
@@ -190,15 +148,9 @@
 								"url": {
 									"raw": "http://{{app_host}}:{{app_port_email}}/purista/command/ping",
 									"protocol": "http",
-									"host": [
-										"{{app_host}}"
-									],
+									"host": ["{{app_host}}"],
 									"port": "{{app_port_email}}",
-									"path": [
-										"purista",
-										"command",
-										"ping"
-									]
+									"path": ["purista", "command", "ping"]
 								}
 							},
 							"response": []
@@ -223,14 +175,9 @@
 								"url": {
 									"raw": "http://{{app_host}}:{{app_port_email}}/dapr/subscribe",
 									"protocol": "http",
-									"host": [
-										"{{app_host}}"
-									],
+									"host": ["{{app_host}}"],
 									"port": "{{app_port_email}}",
-									"path": [
-										"dapr",
-										"subscribe"
-									]
+									"path": ["dapr", "subscribe"]
 								}
 							},
 							"response": []
@@ -253,14 +200,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0/metadata",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{dapr_port_user}}",
-									"path": [
-										"v1.0",
-										"metadata"
-									]
+									"path": ["v1.0", "metadata"]
 								}
 							},
 							"response": []
@@ -279,15 +221,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0-alpha1/configuration/local-config-store",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{dapr_port_user}}",
-									"path": [
-										"v1.0-alpha1",
-										"configuration",
-										"local-config-store"
-									]
+									"path": ["v1.0-alpha1", "configuration", "local-config-store"]
 								}
 							},
 							"response": []
@@ -300,16 +236,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0/state/local-state-store/bulk",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{dapr_port_user}}",
-									"path": [
-										"v1.0",
-										"state",
-										"local-state-store",
-										"bulk"
-									]
+									"path": ["v1.0", "state", "local-state-store", "bulk"]
 								}
 							},
 							"response": []
@@ -322,16 +251,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0/secrets/local-secret-store/bulk",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{dapr_port_user}}",
-									"path": [
-										"v1.0",
-										"secrets",
-										"local-secret-store",
-										"bulk"
-									]
+									"path": ["v1.0", "secrets", "local-secret-store", "bulk"]
 								}
 							},
 							"response": []
@@ -353,16 +275,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0/publish/{{pubsub_name}}/{{eventname}}",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{dapr_port_user}}",
-									"path": [
-										"v1.0",
-										"publish",
-										"{{pubsub_name}}",
-										"{{eventname}}"
-									]
+									"path": ["v1.0", "publish", "{{pubsub_name}}", "{{eventname}}"]
 								}
 							},
 							"response": []
@@ -384,19 +299,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0/invoke/user-v1/method/purista/command/compute-data",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{dapr_port_user}}",
-									"path": [
-										"v1.0",
-										"invoke",
-										"user-v1",
-										"method",
-										"purista",
-										"command",
-										"compute-data"
-									]
+									"path": ["v1.0", "invoke", "user-v1", "method", "purista", "command", "compute-data"]
 								}
 							},
 							"response": []
@@ -418,19 +323,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{dapr_port_user}}/v1.0/invoke/user-v1/method/purista/command/sign-up",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{dapr_port_user}}",
-									"path": [
-										"v1.0",
-										"invoke",
-										"user-v1",
-										"method",
-										"purista",
-										"command",
-										"sign-up"
-									]
+									"path": ["v1.0", "invoke", "user-v1", "method", "purista", "command", "sign-up"]
 								}
 							},
 							"response": []
@@ -460,14 +355,9 @@
 								"url": {
 									"raw": "http://{{app_host}}:{{app_port_user}}/dapr/subscribe",
 									"protocol": "http",
-									"host": [
-										"{{app_host}}"
-									],
+									"host": ["{{app_host}}"],
 									"port": "{{app_port_user}}",
-									"path": [
-										"dapr",
-										"subscribe"
-									]
+									"path": ["dapr", "subscribe"]
 								}
 							},
 							"response": []
@@ -489,15 +379,9 @@
 								"url": {
 									"raw": "http://{{dapr_host}}:{{app_port_user}}/api/v1/ping",
 									"protocol": "http",
-									"host": [
-										"{{dapr_host}}"
-									],
+									"host": ["{{dapr_host}}"],
 									"port": "{{app_port_user}}",
-									"path": [
-										"api",
-										"v1",
-										"ping"
-									]
+									"path": ["api", "v1", "ping"]
 								}
 							},
 							"response": []
@@ -538,16 +422,9 @@
 								"url": {
 									"raw": "http://{{app_host}}:{{app_port_user}}/api/v1/user/signup",
 									"protocol": "http",
-									"host": [
-										"{{app_host}}"
-									],
+									"host": ["{{app_host}}"],
 									"port": "{{app_port_user}}",
-									"path": [
-										"api",
-										"v1",
-										"user",
-										"signup"
-									]
+									"path": ["api", "v1", "user", "signup"]
 								}
 							},
 							"response": []
@@ -572,15 +449,9 @@
 								"url": {
 									"raw": "http://{{app_host}}:{{app_port_user}}/api/v1/user",
 									"protocol": "http",
-									"host": [
-										"{{app_host}}"
-									],
+									"host": ["{{app_host}}"],
 									"port": "{{app_port_user}}",
-									"path": [
-										"api",
-										"v1",
-										"user"
-									]
+									"path": ["api", "v1", "user"]
 								}
 							},
 							"response": []
@@ -605,16 +476,9 @@
 								"url": {
 									"raw": "http://{{app_host}}:{{app_port_user}}/api/v1/user/{{userId}}",
 									"protocol": "http",
-									"host": [
-										"{{app_host}}"
-									],
+									"host": ["{{app_host}}"],
 									"port": "{{app_port_user}}",
-									"path": [
-										"api",
-										"v1",
-										"user",
-										"{{userId}}"
-									]
+									"path": ["api", "v1", "user", "{{userId}}"]
 								}
 							},
 							"response": []

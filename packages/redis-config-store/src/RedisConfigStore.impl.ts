@@ -39,70 +39,70 @@ import type { RedisStoreConfig } from './types.js'
  *
  */
 export class RedisConfigStore<
-  M extends RedisModules = RedisModules,
-  F extends RedisFunctions = RedisFunctions,
-  S extends RedisScripts = RedisScripts,
+	M extends RedisModules = RedisModules,
+	F extends RedisFunctions = RedisFunctions,
+	S extends RedisScripts = RedisScripts,
 > extends ConfigStoreBaseClass<RedisStoreConfig<M, F, S>> {
-  public client: RedisClientType<M, F, S>
+	public client: RedisClientType<M, F, S>
 
-  constructor(config?: StoreBaseConfig<RedisStoreConfig<M, F, S>>) {
-    super('RedisConfigStore', { ...config })
-    this.client = createClient(this.config.config)
-    this.client.on('error', (err) => this.logger.error({ err }, 'Redis Client Error'))
-  }
+	constructor(config?: StoreBaseConfig<RedisStoreConfig<M, F, S>>) {
+		super('RedisConfigStore', { ...config })
+		this.client = createClient(this.config.config)
+		this.client.on('error', err => this.logger.error({ err }, 'Redis Client Error'))
+	}
 
-  protected async getClient() {
-    if (this.client.isOpen) {
-      return this.client
-    }
-    return this.client.connect()
-  }
+	protected async getClient() {
+		if (this.client.isOpen) {
+			return this.client
+		}
+		return this.client.connect()
+	}
 
-  protected async getConfigImpl<ConfigNames extends string[]>(
-    ...configNames: ConfigNames
-  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
-    const client = await this.getClient()
+	protected async getConfigImpl<ConfigNames extends string[]>(
+		...configNames: ConfigNames
+	): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
+		const client = await this.getClient()
 
-    const result: Record<string, unknown> = {}
-    for await (const name of configNames) {
-      try {
-        const value = await client.get(name)
-        result[name] = value ? JSON.parse(value) : undefined
-      } catch (err) {
-        const msg = `error in config store getting value ${name}`
-        this.logger.error({ err }, msg)
-        throw new UnhandledError(StatusCode.InternalServerError, msg)
-      }
-    }
-    return result as ObjectWithKeysFromStringArray<ConfigNames>
-  }
+		const result: Record<string, unknown> = {}
+		for await (const name of configNames) {
+			try {
+				const value = await client.get(name)
+				result[name] = value ? JSON.parse(value) : undefined
+			} catch (err) {
+				const msg = `error in config store getting value ${name}`
+				this.logger.error({ err }, msg)
+				throw new UnhandledError(StatusCode.InternalServerError, msg)
+			}
+		}
+		return result as ObjectWithKeysFromStringArray<ConfigNames>
+	}
 
-  protected async removeConfigImpl(configName: string) {
-    const client = await this.getClient()
+	protected async removeConfigImpl(configName: string) {
+		const client = await this.getClient()
 
-    try {
-      await client.del(configName)
-    } catch (err) {
-      const msg = `error in config store removing value ${configName}`
-      this.logger.error({ err }, msg)
-      throw new UnhandledError(StatusCode.InternalServerError, msg)
-    }
-  }
+		try {
+			await client.del(configName)
+		} catch (err) {
+			const msg = `error in config store removing value ${configName}`
+			this.logger.error({ err }, msg)
+			throw new UnhandledError(StatusCode.InternalServerError, msg)
+		}
+	}
 
-  protected async setConfigImpl(configName: string, configValue: unknown) {
-    const client = await this.getClient()
-    try {
-      await client.set(configName, JSON.stringify(configValue))
-    } catch (err) {
-      const msg = `error in config store setting value ${configName}`
-      this.logger.error({ err }, msg)
-      throw new UnhandledError(StatusCode.InternalServerError, msg)
-    }
-  }
+	protected async setConfigImpl(configName: string, configValue: unknown) {
+		const client = await this.getClient()
+		try {
+			await client.set(configName, JSON.stringify(configValue))
+		} catch (err) {
+			const msg = `error in config store setting value ${configName}`
+			this.logger.error({ err }, msg)
+			throw new UnhandledError(StatusCode.InternalServerError, msg)
+		}
+	}
 
-  async destroy() {
-    if (this.client.isOpen) {
-      await this.client.disconnect()
-    }
-  }
+	async destroy() {
+		if (this.client.isOpen) {
+			await this.client.disconnect()
+		}
+	}
 }

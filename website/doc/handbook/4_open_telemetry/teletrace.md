@@ -11,7 +11,7 @@ __GitHub Repo: [Teletrace](https://github.com/teletrace/teletrace)__
 
 See it in action and try out!
 You will need docker and docker-compose installed at your machine.
-At the [PURISTA repository](https://github.com/sebastianwessel/purista) in `examples/fullexample` you will find a running example:
+At the [PURISTA repository](https://github.com/puristajs/purista) in `examples/fullexample` you will find a running example:
 
 Start the required docker containers:
 

@@ -2,5 +2,5 @@ import type { ObjectWithKeysFromStringArray } from '../../../helper/types/Object
 
 /** get a secret from the secret store @group Store */
 export type SecretGetterFunction = <SecretNames extends string[]>(
-  ...secretNames: SecretNames
+	...secretNames: SecretNames
 ) => Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>>

@@ -3,8 +3,8 @@ import { z } from 'zod'
 
 // define the input payload
 export const pingV1LogInputPayloadSchema = extendApi(
-  z.object({
-    pong: extendApi(z.string(), { title: 'Pong' }),
-  }),
-  { title: 'pong payload schema' },
+	z.object({
+		pong: extendApi(z.string(), { title: 'Pong' }),
+	}),
+	{ title: 'pong payload schema' },
 )

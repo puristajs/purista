@@ -9,18 +9,18 @@ import type { SubscriptionDefinition } from './SubscriptionDefinition.js'
  * ```
  */
 export type SubscriptionDefinitionList<ServiceClassType extends ServiceClass> = Promise<
-  SubscriptionDefinition<ServiceClassType, any, any, any, any, any, any, any, any, any>
+	SubscriptionDefinition<ServiceClassType, any, any, any, any, any, any, any, any, any>
 >[]
 
 export type SubscriptionDefinitionListResolved<ServiceClassType extends ServiceClass> = SubscriptionDefinition<
-  ServiceClassType,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any,
-  any
+	ServiceClassType,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any,
+	any
 >[]
