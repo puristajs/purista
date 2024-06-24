@@ -37,50 +37,50 @@ console.log(value) // outputs: undefined
 ```
  */
 export class InfisicalSecretStore extends SecretStoreBaseClass<InfisicalSecretConfig> {
-  public client: InfisicalClient
+	public client: InfisicalClient
 
-  constructor(config: StoreBaseConfig<InfisicalSecretConfig>) {
-    super('InfisicalSecretStore', { enableCache: true, ...config })
+	constructor(config: StoreBaseConfig<InfisicalSecretConfig>) {
+		super('InfisicalSecretStore', { enableCache: true, ...config })
 
-    this.client = new InfisicalClient({
-      name: 'InfisicalClient',
-      ...config,
-    })
-  }
+		this.client = new InfisicalClient({
+			name: 'InfisicalClient',
+			...config,
+		})
+	}
 
-  protected async getSecretImpl<SecretNames extends string[]>(
-    ...secretNames: SecretNames
-  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
-    const result: Record<string, string | undefined> = {}
-    for (const name of secretNames) {
-      try {
-        result[name] = await this.client.getSecret(name)
-      } catch (err) {
-        const msg = `error in secret store getting value ${name}`
-        this.logger.error({ err }, msg)
-        throw new UnhandledError(StatusCode.InternalServerError, msg)
-      }
-    }
-    return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
-  }
+	protected async getSecretImpl<SecretNames extends string[]>(
+		...secretNames: SecretNames
+	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
+		const result: Record<string, string | undefined> = {}
+		for (const name of secretNames) {
+			try {
+				result[name] = await this.client.getSecret(name)
+			} catch (err) {
+				const msg = `error in secret store getting value ${name}`
+				this.logger.error({ err }, msg)
+				throw new UnhandledError(StatusCode.InternalServerError, msg)
+			}
+		}
+		return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
+	}
 
-  protected async removeSecretImpl(secretName: string) {
-    try {
-      await this.client.removeSecret(secretName)
-    } catch (err) {
-      const msg = `error in secret store removing value ${secretName}`
-      this.logger.error({ err }, msg)
-      throw new UnhandledError(StatusCode.InternalServerError, msg)
-    }
-  }
+	protected async removeSecretImpl(secretName: string) {
+		try {
+			await this.client.removeSecret(secretName)
+		} catch (err) {
+			const msg = `error in secret store removing value ${secretName}`
+			this.logger.error({ err }, msg)
+			throw new UnhandledError(StatusCode.InternalServerError, msg)
+		}
+	}
 
-  protected async setSecretImpl(secretName: string, secretValue: string) {
-    try {
-      await this.client.setSecret(secretName, secretValue)
-    } catch (err) {
-      const msg = `error in secret store setting value ${secretName}`
-      this.logger.error({ err }, msg)
-      throw new UnhandledError(StatusCode.InternalServerError, msg)
-    }
-  }
+	protected async setSecretImpl(secretName: string, secretValue: string) {
+		try {
+			await this.client.setSecret(secretName, secretValue)
+		} catch (err) {
+			const msg = `error in secret store setting value ${secretName}`
+			this.logger.error({ err }, msg)
+			throw new UnhandledError(StatusCode.InternalServerError, msg)
+		}
+	}
 }

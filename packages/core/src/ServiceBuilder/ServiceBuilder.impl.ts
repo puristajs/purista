@@ -13,6 +13,7 @@ import type {
 	CommandDefinitionListResolved,
 	Complete,
 	ConfigStore,
+	EmptyObject,
 	EventBridge,
 	LogLevelName,
 	Logger,
@@ -27,7 +28,9 @@ import type {
 import { Service, StatusCode, UnhandledError, initLogger } from '../core/index.js'
 import type { NonEmptyString } from '../helper/index.js'
 
-export type Newable<T, ConfigType, Resources> = new (config: ServiceConstructorInput<ConfigType, Resources>) => T
+export type Newable<T, ConfigType extends {}, Resources extends {}> = new (
+	config: ServiceConstructorInput<ConfigType, Resources>,
+) => T
 
 /**
  * This class is used to build a service.
@@ -38,9 +41,9 @@ export type Newable<T, ConfigType, Resources> = new (config: ServiceConstructorI
  * @group Service
  */
 export class ServiceBuilder<
-	ConfigType = Record<string, unknown>,
+	ConfigType extends {} = Record<string, unknown>,
 	ConfigInputType = Record<string, unknown>,
-	Resources extends {} = {},
+	Resources extends {} = EmptyObject,
 	ServiceClassType extends ServiceClass = Service<ConfigType, Resources>,
 > {
 	private commandDefinitionList: CommandDefinitionList<ServiceClassType> = []
@@ -337,7 +340,7 @@ export class ServiceBuilder<
 		const existingNames = new Set()
 		const eventNames = new Set()
 
-		commandDefinitions.forEach(definition => {
+		for (const definition of commandDefinitions) {
 			const name = definition.commandName.toLowerCase().trim()
 			const eventName = definition.eventName
 
@@ -354,7 +357,7 @@ export class ServiceBuilder<
 				}
 				eventNames.add(eventName)
 			}
-		})
+		}
 	}
 
 	/**
@@ -375,29 +378,29 @@ export class ServiceBuilder<
 
 	protected validateSubscriptions(subscriptionDefinitions: SubscriptionDefinitionListResolved<any>) {
 		const existingNames = new Set()
-		subscriptionDefinitions.forEach(definition => {
+		for (const definition of subscriptionDefinitions) {
 			const name = definition.subscriptionName.toLowerCase().trim()
 
 			if (existingNames.has(name)) {
 				fail(`duplicate subscription name ${name}`)
 			}
 			existingNames.add(name)
-		})
+		}
 	}
 
 	/**
-	 * @deprecated Use validateServiceConfig() instead
+	 * @deprecated Use testServiceSetup() instead
 	 */
 	validateCommandDefinitions() {
-		// eslint-disable-next-line no-console
-		console.warn('deprecated: Use validateServiceConfig() instead')
+		// biome-ignore lint/nursery/noConsole: no logger available
+		console.warn('deprecated: Use testServiceSetup() instead')
 	}
 
 	/**
-	 * @deprecated Use validateServiceConfig() instead
+	 * @deprecated Use testServiceSetup() instead
 	 */
 	validateSubscriptionDefinitions() {
-		// eslint-disable-next-line no-console
-		console.warn('deprecated: Use validateServiceConfig() instead')
+		// biome-ignore lint/nursery/noConsole: no logger available
+		console.warn('deprecated: Use testServiceSetup() instead')
 	}
 }

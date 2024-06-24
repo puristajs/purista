@@ -1,4 +1,4 @@
 export enum MainOption {
-  InitProject = 'init',
-  AddSomething = 'add',
+	InitProject = 'init',
+	AddSomething = 'add',
 }

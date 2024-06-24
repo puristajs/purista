@@ -1,66 +1,68 @@
 {
-  "name": "@purista/aws-secret-store",
-  "version": "1.11.0",
-  "description": "State store adapter for AWS Secrets Manager",
-  "homepage": "https://purista.dev",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:puristajs/purista.git"
-  },
-  "author": "Sebastian Wessel",
-  "license": "ISC",
-  "type": "module",
-  "main": "./dist/commonjs/index.js",
-  "exports": {
-    "./package.json": "./package.json",
-    ".": {
-      "import": {
-        "types": "./dist/esm/index.d.ts",
-        "default": "./dist/esm/index.js"
-      },
-      "require": {
-        "types": "./dist/commonjs/index.d.ts",
-        "default": "./dist/commonjs/index.js"
-      }
-    }
-  },
-  "files": [
-    "dist/**/*"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "engines": {
-    "node": ">=18.15"
-  },
-  "scripts": {
-    "lint": "npx @biomejs/biome check --write",
-    "test": "vitest",
-    "build": "rimraf dist && tshy",
-    "env:up": "docker compose -f docker-compose.yml up -d",
-    "env:down": "docker compose -f docker-compose.yml down"
-  },
-  "tshy": {
-    "exclude": [
-      "src/**/*.test.ts"
-    ],
-    "exports": {
-      "./package.json": "./package.json",
-      ".": "./src/index.ts"
-    }
-  },
-  "devDependencies": {
-    "@types/node": "^20.14.8",
-    "@types/sinon": "^17.0.3",
-    "sinon": "^18.0.0",
-    "testcontainers": "^10.10.0",
-    "tshy": "^1.15.1",
-    "vitest": "^1.6.0"
-  },
-  "dependencies": {
-    "@aws-sdk/client-secrets-manager": "^3.600.0",
-    "@purista/core": "*"
-  },
-  "peerDependenciesMeta": {},
-  "types": "./dist/commonjs/index.d.ts"
+	"name": "@purista/aws-secret-store",
+	"version": "1.11.0",
+	"description": "State store adapter for AWS Secrets Manager",
+	"homepage": "https://purista.dev",
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:puristajs/purista.git"
+	},
+	"author": "Sebastian Wessel",
+	"license": "ISC",
+	"type": "module",
+	"main": "./dist/commonjs/index.js",
+	"exports": {
+		"./package.json": "./package.json",
+		".": {
+			"import": {
+				"source": "./src/index.ts",
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"source": "./src/index.ts",
+				"types": "./dist/commonjs/index.d.ts",
+				"default": "./dist/commonjs/index.js"
+			}
+		}
+	},
+	"files": [
+		"dist/**/*"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"engines": {
+		"node": ">=18.15"
+	},
+	"scripts": {
+		"lint": "npx @biomejs/biome check --write",
+		"test": "vitest",
+		"build": "rimraf dist && tshy",
+		"env:up": "docker compose -f docker-compose.yml up -d",
+		"env:down": "docker compose -f docker-compose.yml down"
+	},
+	"tshy": {
+		"exclude": [
+			"src/**/*.test.ts"
+		],
+		"exports": {
+			"./package.json": "./package.json",
+			".": "./src/index.ts"
+		}
+	},
+	"devDependencies": {
+		"@types/node": "^20.14.8",
+		"@types/sinon": "^17.0.3",
+		"sinon": "^18.0.0",
+		"testcontainers": "^10.10.0",
+		"tshy": "^1.15.1",
+		"vitest": "^1.6.0"
+	},
+	"dependencies": {
+		"@aws-sdk/client-secrets-manager": "^3.600.0",
+		"@purista/core": "*"
+	},
+	"peerDependenciesMeta": {},
+	"types": "./dist/commonjs/index.d.ts"
 }

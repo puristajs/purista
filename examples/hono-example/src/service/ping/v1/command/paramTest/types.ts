@@ -1,9 +1,9 @@
 import type { z } from 'zod'
 
 import type {
-  pingV1ParamTestInputParameterSchema,
-  pingV1ParamTestInputPayloadSchema,
-  pingV1ParamTestOutputPayloadSchema,
+	pingV1ParamTestInputParameterSchema,
+	pingV1ParamTestInputPayloadSchema,
+	pingV1ParamTestOutputPayloadSchema,
 } from './schema.js'
 
 export type PingV1ParamTestInputParameter = z.input<typeof pingV1ParamTestInputParameterSchema>

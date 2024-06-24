@@ -12,86 +12,81 @@ const AMQP_PORT = 5672
 const EXAMPLE_EVENT = 'exampleEvent'
 
 describe('@purista/amqpbridge', () => {
-  let container: StartedTestContainer
+	let container: StartedTestContainer
 
-  const sandbox = createSandbox()
-  const subscriptionStub = sandbox.stub().resolves()
-  const logger = getLoggerMock(sandbox)
-  const eventbridge = new AmqpBridge({ logger: logger.mock })
-  const subscriptionBuilder = theServiceV1Service
-    .getSubscriptionBuilder('sendWelcomeEmail', 'send a welcome mail to new registered users')
-    .subscribeToEvent(EXAMPLE_EVENT)
-    .addPayloadSchema(z.any())
-    .setSubscriptionFunction(subscriptionStub)
+	const sandbox = createSandbox()
+	const subscriptionStub = sandbox.stub().resolves()
+	const logger = getLoggerMock(sandbox)
+	const eventbridge = new AmqpBridge({ logger: logger.mock })
+	const subscriptionBuilder = theServiceV1Service
+		.getSubscriptionBuilder('sendWelcomeEmail', 'send a welcome mail to new registered users')
+		.subscribeToEvent(EXAMPLE_EVENT)
+		.addPayloadSchema(z.any())
+		.setSubscriptionFunction(subscriptionStub)
 
-  theServiceServiceBuilder.addSubscriptionDefinition(subscriptionBuilder.getDefinition())
+	theServiceServiceBuilder.addSubscriptionDefinition(subscriptionBuilder.getDefinition())
 
-  let service: Service
+	let service: Service
 
-  beforeAll(async () => {
-    container = await new GenericContainer('rabbitmq:alpine')
-      .withLogConsumer((_stream) => {
-        // stream.on('data', (line) => console.debug(line))
-        // eslint-disable-next-line no-console
-        // stream.on('err', (line) => console.error(line))
-      })
-      .withExposedPorts({ host: AMQP_PORT, container: AMQP_PORT })
-      .start()
+	beforeAll(async () => {
+		container = await new GenericContainer('rabbitmq:alpine')
+			.withExposedPorts({ host: AMQP_PORT, container: AMQP_PORT })
+			.start()
 
-    await eventbridge.start()
+		await eventbridge.start()
 
-    service = await theServiceServiceBuilder.getInstance(eventbridge, { logger: getLoggerMock(sandbox).mock })
-    await service.start()
-  })
+		service = await theServiceServiceBuilder.getInstance(eventbridge, { logger: getLoggerMock(sandbox).mock })
+		await service.start()
+	})
 
-  afterAll(async () => {
-    await service?.destroy()
-    await eventbridge.destroy()
-    await container.stop()
-  })
+	afterAll(async () => {
+		await service?.destroy()
+		await eventbridge.destroy()
+		await container.stop()
+	})
 
-  afterEach(() => {
-    sandbox.resetHistory()
-  })
+	afterEach(() => {
+		sandbox.resetHistory()
+	})
 
-  it('can invoke ping command', async () => {
-    const command = getCommandMessageMock({
-      receiver: {
-        serviceName: service.info.serviceName,
-        serviceVersion: service.info.serviceVersion,
-        serviceTarget: 'ping',
-        instanceId: 'a',
-      },
-      sender: {
-        serviceName: service.info.serviceName,
-        serviceVersion: service.info.serviceVersion,
-        serviceTarget: 'some',
-        instanceId: 'a',
-      },
-      payload: {
-        payload: undefined,
-        parameter: {
-          required: 'yes',
-        },
-      },
-    })
-    const result = await eventbridge.invoke(command)
+	it('can invoke ping command', async () => {
+		const command = getCommandMessageMock({
+			receiver: {
+				serviceName: service.info.serviceName,
+				serviceVersion: service.info.serviceVersion,
+				serviceTarget: 'ping',
+				instanceId: 'a',
+			},
+			sender: {
+				serviceName: service.info.serviceName,
+				serviceVersion: service.info.serviceVersion,
+				serviceTarget: 'some',
+				instanceId: 'a',
+			},
+			payload: {
+				payload: undefined,
+				parameter: {
+					required: 'yes',
+				},
+			},
+		})
+		const result = await eventbridge.invoke(command)
 
-    expect(result).toEqual({
-      ping: true,
-    })
+		expect(result).toEqual({
+			ping: true,
+		})
 
-    expect(true).toBeTruthy()
-  })
+		expect(true).toBeTruthy()
+	})
 
-  it('receives subscriptions', async () => {
-    const payload = { example: 'payload' }
-    const commandResponse = getCommandSuccessMessageMock(payload, { eventName: EXAMPLE_EVENT })
+	it('receives subscriptions', async () => {
+		const payload = { example: 'payload' }
+		const commandResponse = getCommandSuccessMessageMock(payload, { eventName: EXAMPLE_EVENT })
 
-    await eventbridge.emitMessage(commandResponse)
+		await eventbridge.emitMessage(commandResponse)
 
-    await new Promise((resolve) => setTimeout(resolve, 3000))
+		await new Promise(resolve => setTimeout(resolve, 3000))
 
-    expect(subscriptionStub.called).toBeTruthy()
-  })
+		expect(subscriptionStub.called).toBeTruthy()
+	})
 })

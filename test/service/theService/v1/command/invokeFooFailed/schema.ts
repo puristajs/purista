@@ -3,7 +3,7 @@ import { z } from 'zod'
 
 // define the input parameters
 export const theServiceV1InvokeFooInputParameterSchema = extendApi(z.any(), {
-  title: 'ping input parameter schema',
+	title: 'ping input parameter schema',
 })
 
 // define the input payload
@@ -11,11 +11,11 @@ export const theServiceV1InvokeFooInputPayloadSchema = extendApi(z.any(), { titl
 
 // define the output payload
 export const theServiceV1InvokeFooOutputPayloadSchema = extendApi(
-  z.object({
-    payload: z.any(),
-    parameter: z.any(),
-  }),
-  {
-    title: 'ping output payload schema',
-  },
+	z.object({
+		payload: z.any(),
+		parameter: z.any(),
+	}),
+	{
+		title: 'ping output payload schema',
+	},
 )

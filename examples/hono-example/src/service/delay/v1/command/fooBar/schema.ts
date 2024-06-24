@@ -3,11 +3,11 @@ import { z } from 'zod'
 
 // define the input parameters
 export const delayV1FooBarInputParameterSchema = extendApi(
-  z.object({
-    p: z.string(),
-    q: z.string().optional(),
-  }),
-  { title: 'fooBar input parameter schema' },
+	z.object({
+		p: z.string(),
+		q: z.string().optional(),
+	}),
+	{ title: 'fooBar input parameter schema' },
 )
 
 // define the input payload

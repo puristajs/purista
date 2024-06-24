@@ -1,25 +1,25 @@
 {
-    "id": "123-abc",
-    "timestamp": 1680274981573,
-    "messageType": "command",
-    "correlationId": "123",
-    "traceId": "123",
-    "instanceId": "123",
-    "principalId": "mocked-principal-id",
-    "contentType": "application/json",
-    "contentEncoding": "utf-8",
-    "sender": {
-      "serviceName": "",
-      "serviceVersion": "1",
-      "serviceTarget": ""
-    },
-    "receiver": {
-      "serviceName": "User",
-      "serviceVersion": "1",
-      "serviceTarget": "ping"
-    },
-    "payload": {
-      "payload": "PING",
-      "parameter": {}
-    }
-  }
+	"id": "123-abc",
+	"timestamp": 1680274981573,
+	"messageType": "command",
+	"correlationId": "123",
+	"traceId": "123",
+	"instanceId": "123",
+	"principalId": "mocked-principal-id",
+	"contentType": "application/json",
+	"contentEncoding": "utf-8",
+	"sender": {
+		"serviceName": "",
+		"serviceVersion": "1",
+		"serviceTarget": ""
+	},
+	"receiver": {
+		"serviceName": "User",
+		"serviceVersion": "1",
+		"serviceTarget": "ping"
+	},
+	"payload": {
+		"payload": "PING",
+		"parameter": {}
+	}
+}

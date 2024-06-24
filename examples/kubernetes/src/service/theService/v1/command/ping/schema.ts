@@ -9,5 +9,5 @@ export const theServiceV1PingInputPayloadSchema = extendApi(z.undefined(), { tit
 
 // define the output payload
 export const theServiceV1PingOutputPayloadSchema = extendApi(z.object({ ping: z.boolean() }), {
-  title: 'ping output payload schema',
+	title: 'ping output payload schema',
 })

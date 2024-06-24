@@ -1,69 +1,71 @@
 {
-  "name": "@purista/natsbridge",
-  "version": "1.11.0",
-  "description": "NATS eventbridge for PURISTA backend framework",
-  "homepage": "https://purista.dev",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:puristajs/purista.git"
-  },
-  "author": "Sebastian Wessel",
-  "license": "ISC",
-  "type": "module",
-  "main": "./dist/commonjs/index.js",
-  "exports": {
-    "./package.json": "./package.json",
-    ".": {
-      "import": {
-        "types": "./dist/esm/index.d.ts",
-        "default": "./dist/esm/index.js"
-      },
-      "require": {
-        "types": "./dist/commonjs/index.d.ts",
-        "default": "./dist/commonjs/index.js"
-      }
-    }
-  },
-  "files": [
-    "dist/**/*"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "engines": {
-    "node": ">=18.15"
-  },
-  "scripts": {
-    "lint": "npx @biomejs/biome check --write",
-    "test": "vitest",
-    "build": "rimraf dist && tshy"
-  },
-  "tshy": {
-    "exclude": [
-      "src/**/*.test.ts"
-    ],
-    "exports": {
-      "./package.json": "./package.json",
-      ".": "./src/index.ts"
-    }
-  },
-  "devDependencies": {
-    "@testcontainers/nats": "^10.10.0",
-    "@types/node": "^20.14.8",
-    "@types/sinon": "^17.0.3",
-    "@types/ws": "^8.5.10",
-    "sinon": "^18.0.0",
-    "tshy": "^1.15.1",
-    "vitest": "^1.6.0"
-  },
-  "dependencies": {
-    "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/resources": "^1.25.1",
-    "@opentelemetry/sdk-trace-node": "^1.25.1",
-    "@opentelemetry/semantic-conventions": "^1.25.1",
-    "@purista/core": "*",
-    "nats": "^2.27.0"
-  },
-  "peerDependenciesMeta": {},
-  "types": "./dist/commonjs/index.d.ts"
+	"name": "@purista/natsbridge",
+	"version": "1.11.0",
+	"description": "NATS eventbridge for PURISTA backend framework",
+	"homepage": "https://purista.dev",
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:puristajs/purista.git"
+	},
+	"author": "Sebastian Wessel",
+	"license": "ISC",
+	"type": "module",
+	"main": "./dist/commonjs/index.js",
+	"exports": {
+		"./package.json": "./package.json",
+		".": {
+			"import": {
+				"source": "./src/index.ts",
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"source": "./src/index.ts",
+				"types": "./dist/commonjs/index.d.ts",
+				"default": "./dist/commonjs/index.js"
+			}
+		}
+	},
+	"files": [
+		"dist/**/*"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"engines": {
+		"node": ">=18.15"
+	},
+	"scripts": {
+		"lint": "npx @biomejs/biome check --write",
+		"test": "vitest",
+		"build": "rimraf dist && tshy"
+	},
+	"tshy": {
+		"exclude": [
+			"src/**/*.test.ts"
+		],
+		"exports": {
+			"./package.json": "./package.json",
+			".": "./src/index.ts"
+		}
+	},
+	"devDependencies": {
+		"@testcontainers/nats": "^10.10.0",
+		"@types/node": "^20.14.8",
+		"@types/sinon": "^17.0.3",
+		"@types/ws": "^8.5.10",
+		"sinon": "^18.0.0",
+		"tshy": "^1.15.1",
+		"vitest": "^1.6.0"
+	},
+	"dependencies": {
+		"@opentelemetry/api": "^1.9.0",
+		"@opentelemetry/resources": "^1.25.1",
+		"@opentelemetry/sdk-trace-node": "^1.25.1",
+		"@opentelemetry/semantic-conventions": "^1.25.1",
+		"@purista/core": "*",
+		"nats": "^2.27.0"
+	},
+	"peerDependenciesMeta": {},
+	"types": "./dist/commonjs/index.d.ts"
 }

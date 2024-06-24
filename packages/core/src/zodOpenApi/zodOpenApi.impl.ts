@@ -31,6 +31,7 @@ export function extendApi<T extends OpenApiZodAny>(schema: T, SchemaObject: Sche
 function iterateZodObject({ zodRef, useOutput }: ParsingArgs<OpenApiZodAnyObject>) {
 	return Object.keys(zodRef.shape).reduce(
 		(carry, key) => ({
+			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
 			...carry,
 			[key]: generateSchema(zodRef.shape[key], useOutput),
 		}),
@@ -90,7 +91,7 @@ function parseString({ zodRef, schemas }: ParsingArgs<z.ZodString>): SchemaObjec
 		type: 'string',
 	}
 	const { checks = [] } = zodRef._def
-	checks.forEach(item => {
+	for (const item of checks) {
 		switch (item.kind) {
 			case 'email':
 				baseSchema.format = 'email'
@@ -121,7 +122,7 @@ function parseString({ zodRef, schemas }: ParsingArgs<z.ZodString>): SchemaObjec
 				baseSchema.pattern = item.regex.source
 				break
 		}
-	})
+	}
 	return merge(baseSchema, zodRef.description ? { description: zodRef.description } : {}, ...schemas)
 }
 
@@ -431,7 +432,7 @@ export function generateSchema(zodRef: OpenApiZodAny, useOutput?: boolean): Sche
 
 		return catchAllParser({ zodRef, schemas })
 	} catch (err) {
-		// eslint-disable-next-line no-console
+		// biome-ignore lint/nursery/noConsole: no logger available
 		console.error(err)
 		return catchAllParser({ zodRef, schemas })
 	}

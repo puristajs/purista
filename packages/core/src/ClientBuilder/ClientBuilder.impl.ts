@@ -475,7 +475,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 		typeStream: WriteStream,
 		serviceDefinitions: FullServiceDefinition,
 	) {
-		Object.entries(serviceDefinitions).forEach(([serviceName, serviceDefinition]) => {
+		for (const [serviceName, serviceDefinition] of Object.entries(serviceDefinitions)) {
 			const writer = getWriter()
 			writer.newLine().withIndentationLevel(1, () => {
 				writer
@@ -491,6 +491,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 								}
 
 								return {
+									// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
 									...input,
 									[serviceVersion]: commands.reduce((ret: string[], httpDef) => {
 										const meta = httpDef.metadata as unknown as HttpExposedServiceMeta
@@ -501,11 +502,9 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 											meta,
 										)
 										typeStream.write(typeString)
-										return [
-											...ret,
-											`/** ${httpDef.commandDescription}  */`,
-											`${httpDef.commandName}: ${functionString},`,
-										]
+										const final = ret
+										final.push(`/** ${httpDef.commandDescription}  */`, `${httpDef.commandName}: ${functionString},`)
+										return final
 									}, [] as string[]),
 								}
 							},
@@ -513,19 +512,21 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 						)
 
 						writer.write('return').block(() => {
-							Object.entries(s).forEach(([serviceVersion, def]) => {
+							for (const [serviceVersion, def] of Object.entries(s)) {
 								this.emit('info', `${serviceName} version ${serviceVersion}`)
 								writer.write(`'v${serviceVersion}':`).block(() => {
-									def.forEach(line => writer.writeLine(line))
+									for (const line of def) {
+										writer.writeLine(line)
+									}
 								})
-							})
+							}
 						})
 					})
 					.newLine()
 			})
 
 			clientStream.write(writer.toString())
-		})
+		}
 	}
 
 	/**
@@ -714,7 +715,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 		typeStream: WriteStream,
 		serviceDefinitions: FullServiceDefinition,
 	) {
-		Object.entries(serviceDefinitions).forEach(([serviceName, serviceDefinition]) => {
+		for (const [serviceName, serviceDefinition] of Object.entries(serviceDefinitions)) {
 			const writer = getWriter()
 			writer.newLine().withIndentationLevel(1, () => {
 				writer
@@ -730,6 +731,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 								}
 
 								return {
+									// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
 									...input,
 									[serviceVersion]: commands.reduce((ret: string[], httpDef) => {
 										const meta = httpDef.metadata as unknown as HttpExposedServiceMeta
@@ -741,11 +743,9 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 											this.config.eventBridgeClient.clientName,
 										)
 										typeStream.write(typeString)
-										return [
-											...ret,
-											`/** ${httpDef.commandDescription}  */`,
-											`${httpDef.commandName}: ${functionString},`,
-										]
+										const final = ret
+										final.push(`/** ${httpDef.commandDescription}  */`, `${httpDef.commandName}: ${functionString},`)
+										return final
 									}, [] as string[]),
 								}
 							},
@@ -765,7 +765,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 			})
 
 			clientStream.write(writer.toString())
-		})
+		}
 	}
 
 	/**

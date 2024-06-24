@@ -1,3 +1,3 @@
 export enum StateStoreKey {
-  Users = 'users',
+	Users = 'users',
 }

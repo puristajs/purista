@@ -13,6 +13,7 @@ import type {
 	Complete,
 	ContentType,
 	DefinitionEventBridgeConfig,
+	EmptyObject,
 	FromEmitToOtherType,
 	FromInvokeToOtherType,
 	HttpExposedServiceMeta,
@@ -41,15 +42,15 @@ import { getCommandFunctionWithValidation } from './getCommandFunctionWithValida
  */
 export class CommandDefinitionBuilder<
 	ServiceClassType extends ServiceClass,
-	Ressources extends {} = {},
+	Ressources extends {} = EmptyObject,
 	MessagePayloadType = unknown,
-	MessageParamsType = {},
+	MessageParamsType = EmptyObject,
 	MessageResultType = void,
 	PayloadSchema extends Schema = ZodAny,
 	ParameterSchema extends Schema = ZodAny,
 	ResultSchema extends Schema = ZodAny,
-	Invokes = {},
-	EmitListType = {},
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
 > {
 	private httpMetadata?: HttpExposedServiceMeta<Infer<ParameterSchema>>
 	private inputSchema?: PayloadSchema

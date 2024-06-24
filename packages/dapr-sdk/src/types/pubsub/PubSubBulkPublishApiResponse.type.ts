@@ -12,13 +12,13 @@ limitations under the License.
 */
 
 type PubSubBulkPublishApiResponseStatus = {
-  entryID: string
-  error: string
+	entryID: string
+	error: string
 }
 
 /**
  * Response from a bulk publish API request.
  */
 export type PubSubBulkPublishApiResponse = {
-  failedEntries: PubSubBulkPublishApiResponseStatus[]
+	failedEntries: PubSubBulkPublishApiResponseStatus[]
 }

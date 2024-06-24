@@ -3,6 +3,7 @@ import type { SchemaObject } from 'openapi3-ts/oas31'
 
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { EBMessageType } from '../EBMessageType.enum.js'
+import type { EmptyObject } from '../EmptyObject.js'
 import type { FromEmitToOtherType } from '../FromEmitToOtherType.js'
 import type { FromInvokeToOtherType } from '../FromInvokeToOtherType.js'
 import type { InstanceId } from '../InstanceId.js'
@@ -30,8 +31,8 @@ export type SubscriptionDefinition<
 	FunctionPayloadType = MessagePayloadType,
 	FunctionParamsType = MessageParamsType,
 	FunctionResultType = MessageResultType,
-	Invokes = {},
-	EmitListType = {},
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
 > = {
 	/** the name of the subscription */
 	subscriptionName: string

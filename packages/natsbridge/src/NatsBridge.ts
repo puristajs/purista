@@ -1,39 +1,39 @@
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import type {
-  BrokerHeaderCommandMsg,
-  BrokerHeaderCustomMsg,
-  Command,
-  CommandDefinitionMetadataBase,
-  CommandErrorResponse,
-  CommandResponse,
-  CommandSuccessResponse,
-  CustomMessage,
-  DefinitionEventBridgeConfig,
-  EBMessage,
-  EBMessageAddress,
-  EventBridge,
-  EventBridgeConfig,
-  Subscription,
+	BrokerHeaderCommandMsg,
+	BrokerHeaderCustomMsg,
+	Command,
+	CommandDefinitionMetadataBase,
+	CommandErrorResponse,
+	CommandResponse,
+	CommandSuccessResponse,
+	CustomMessage,
+	DefinitionEventBridgeConfig,
+	EBMessage,
+	EBMessageAddress,
+	EventBridge,
+	EventBridgeConfig,
+	Subscription,
 } from '@purista/core'
 import {
-  createInfoMessage,
-  deserializeOtp,
-  EBMessageType,
-  EventBridgeBaseClass,
-  EventBridgeEventNames,
-  getNewCorrelationId,
-  getNewEBMessageId,
-  HandledError,
-  isCommandResponse,
-  isCommandSuccessResponse,
-  PuristaSpanName,
-  PuristaSpanTag,
-  serializeOtp,
-  StatusCode,
-  UnhandledError,
+	EBMessageType,
+	EventBridgeBaseClass,
+	EventBridgeEventNames,
+	HandledError,
+	PuristaSpanName,
+	PuristaSpanTag,
+	StatusCode,
+	UnhandledError,
+	createInfoMessage,
+	deserializeOtp,
+	getNewCorrelationId,
+	getNewEBMessageId,
+	isCommandResponse,
+	isCommandSuccessResponse,
+	serializeOtp,
 } from '@purista/core'
 import type { JetStreamManager, MsgHdrs, NatsConnection, Subscription as NatsSubscription } from 'nats'
-import { connect, headers as getNewHeaders, JSONCodec } from 'nats'
+import { JSONCodec, connect, headers as getNewHeaders } from 'nats'
 
 import { deserializeOtpFromNats } from './deserializeOtpFromNats.impl.js'
 import { getDefaultNatsBridgeConfig } from './getDefaultNatsBridgeConfig.js'
@@ -62,333 +62,337 @@ import { NatsBridge } from '@purista/natsbridge'
 ```
  */
 export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implements EventBridge {
-  public connection: NatsConnection | undefined
+	public connection: NatsConnection | undefined
 
-  public isJetStreamEnabled = false
+	public isJetStreamEnabled = false
 
-  public jsm: JetStreamManager | undefined
+	public jsm: JetStreamManager | undefined
 
-  commands = new Map<string, NatsSubscription>()
-  subscriptions = new Map<string, NatsSubscription>()
+	commands = new Map<string, NatsSubscription>()
+	subscriptions = new Map<string, NatsSubscription>()
 
-  sc = JSONCodec()
+	sc = JSONCodec()
 
-  constructor(config?: EventBridgeConfig<Partial<NatsBridgeConfig>>) {
-    const conf = {
-      ...getDefaultNatsBridgeConfig(),
-      ...config,
-    }
+	constructor(config?: EventBridgeConfig<Partial<NatsBridgeConfig>>) {
+		const conf = {
+			...getDefaultNatsBridgeConfig(),
+			...config,
+		}
 
-    super('NatsBridge', conf)
-  }
+		super('NatsBridge', conf)
+	}
 
-  async start() {
-    const conf = { ...this.config, name: this.instanceId }
-    this.connection = await connect(conf)
+	async start() {
+		const conf = { ...this.config, name: this.instanceId }
+		this.connection = await connect(conf)
 
-    this.isJetStreamEnabled = !!this.connection.info?.jetstream
+		this.isJetStreamEnabled = !!this.connection.info?.jetstream
 
-    if (this.isJetStreamEnabled) {
-      this.jsm = await this.connection.jetstreamManager()
-    }
+		if (this.isJetStreamEnabled) {
+			this.jsm = await this.connection.jetstreamManager()
+		}
 
-    this.emit(EventBridgeEventNames.EventbridgeConnected)
-  }
+		this.emit(EventBridgeEventNames.EventbridgeConnected)
+	}
 
-  async isReady() {
-    return !this.connection?.isClosed() && !this.connection?.isDraining()
-  }
+	async isReady() {
+		return !this.connection?.isClosed() && !this.connection?.isDraining()
+	}
 
-  async isHealthy() {
-    return !this.connection?.isClosed() && !this.connection?.isDraining()
-  }
+	async isHealthy() {
+		return !this.connection?.isClosed() && !this.connection?.isDraining()
+	}
 
-  async emitMessage<T extends EBMessage>(
-    message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>,
-    contentType = 'application/json',
-    contentEncoding = 'utf-8',
-  ): Promise<Readonly<EBMessage>> {
-    if (!this.connection) {
-      throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
-    }
+	async emitMessage<T extends EBMessage>(
+		message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>,
+		contentType = 'application/json',
+		contentEncoding = 'utf-8',
+	): Promise<Readonly<EBMessage>> {
+		if (!this.connection) {
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
+		}
 
-    const context = deserializeOtp(this.logger, message.otp)
+		const context = deserializeOtp(this.logger, message.otp)
 
-    const name = isCommandResponse(message as EBMessage)
-      ? PuristaSpanName.EventBridgeCommandResponseSent
-      : PuristaSpanName.EventBridgeEmitMessage
+		const name = isCommandResponse(message as EBMessage)
+			? PuristaSpanName.EventBridgeCommandResponseSent
+			: PuristaSpanName.EventBridgeEmitMessage
 
-    return this.startActiveSpan(name, { kind: SpanKind.PRODUCER }, context, async (span) => {
-      const msg = Object.freeze({
-        ...message,
-        sender: {
-          ...message.sender,
-          instanceId: this.instanceId,
-        },
-        id: getNewEBMessageId(),
-        timestamp: Date.now(),
-        traceId: message.traceId,
-        otp: serializeOtp(),
-        contentType,
-        contentEncoding,
-      }) as EBMessage
+		return this.startActiveSpan(name, { kind: SpanKind.PRODUCER }, context, async span => {
+			const msg = Object.freeze({
+				...message,
+				sender: {
+					...message.sender,
+					instanceId: this.instanceId,
+				},
+				id: getNewEBMessageId(),
+				timestamp: Date.now(),
+				traceId: message.traceId,
+				otp: serializeOtp(),
+				contentType,
+				contentEncoding,
+			}) as EBMessage
 
-      span.setAttribute(PuristaSpanTag.SenderServiceName, msg.sender.serviceName)
-      span.setAttribute(PuristaSpanTag.SenderServiceVersion, msg.sender.serviceVersion)
-      span.setAttribute(PuristaSpanTag.SenderServiceTarget, msg.sender.serviceTarget)
+			span.setAttribute(PuristaSpanTag.SenderServiceName, msg.sender.serviceName)
+			span.setAttribute(PuristaSpanTag.SenderServiceVersion, msg.sender.serviceVersion)
+			span.setAttribute(PuristaSpanTag.SenderServiceTarget, msg.sender.serviceTarget)
 
-      if (msg.eventName) {
-        span.addEvent(msg.eventName)
-      }
+			if (msg.eventName) {
+				span.addEvent(msg.eventName)
+			}
 
-      let headers: MsgHdrs | undefined
-      if (this.connection?.info?.headers) {
-        headers = getNewHeaders()
-        const userProperties: BrokerHeaderCustomMsg = serializeOtpToNats({
-          messageType: msg.messageType,
-          senderServiceName: msg.sender.serviceName,
-          senderServiceVersion: msg.sender.serviceVersion,
-          senderServiceTarget: msg.sender.serviceTarget,
-          senderInstanceId: msg.sender.instanceId,
-        })
+			let headers: MsgHdrs | undefined
+			if (this.connection?.info?.headers) {
+				headers = getNewHeaders()
+				const userProperties: BrokerHeaderCustomMsg = serializeOtpToNats({
+					messageType: msg.messageType,
+					senderServiceName: msg.sender.serviceName,
+					senderServiceVersion: msg.sender.serviceVersion,
+					senderServiceTarget: msg.sender.serviceTarget,
+					senderInstanceId: msg.sender.instanceId,
+				})
 
-        if (msg.eventName) {
-          userProperties.eventName = msg.eventName
-        }
+				if (msg.eventName) {
+					userProperties.eventName = msg.eventName
+				}
 
-        if (msg.principalId) {
-          userProperties.principalId = msg.principalId
-        }
+				if (msg.principalId) {
+					userProperties.principalId = msg.principalId
+				}
 
-        if (msg.tenantId) {
-          userProperties.tenantId = msg.tenantId
-        }
+				if (msg.tenantId) {
+					userProperties.tenantId = msg.tenantId
+				}
 
-        Object.entries(userProperties).forEach((value) => headers?.set(value[0], value[1]))
-      }
-      const topic = getTopicName.bind(this)(msg)
+				for (const value of Object.entries(userProperties)) {
+					headers?.set(value[0], value[1])
+				}
+			}
+			const topic = getTopicName.bind(this)(msg)
 
-      this.connection?.publish(topic, this.sc.encode(msg), { headers })
+			this.connection?.publish(topic, this.sc.encode(msg), { headers })
 
-      return msg as Readonly<T>
-    })
-  }
+			return msg as Readonly<T>
+		})
+	}
 
-  async invoke<T>(
-    input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
-    commandTimeout: number = this.defaultCommandTimeout,
-  ): Promise<T> {
-    if (!this.connection) {
-      throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
-    }
+	async invoke<T>(
+		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
+		commandTimeout: number = this.defaultCommandTimeout,
+	): Promise<T> {
+		if (!this.connection) {
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
+		}
 
-    const context = deserializeOtp(this.logger, input.otp)
-    return this.startActiveSpan(
-      PuristaSpanName.EventBridgeInvokeCommand,
-      { kind: SpanKind.PRODUCER },
-      context,
-      async (span) => {
-        const correlationId = getNewCorrelationId()
+		const context = deserializeOtp(this.logger, input.otp)
+		return this.startActiveSpan(
+			PuristaSpanName.EventBridgeInvokeCommand,
+			{ kind: SpanKind.PRODUCER },
+			context,
+			async span => {
+				const correlationId = getNewCorrelationId()
 
-        if (!this.connection) {
-          throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
-        }
+				if (!this.connection) {
+					throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
+				}
 
-        const command: Command = Object.freeze({
-          ...input,
-          sender: {
-            ...input.sender,
-            instanceId: this.instanceId,
-          },
-          id: getNewEBMessageId(),
-          correlationId,
-          timestamp: Date.now(),
-          messageType: EBMessageType.Command,
-          traceId: input.traceId,
-          otp: serializeOtp(),
-        })
+				const command: Command = Object.freeze({
+					...input,
+					sender: {
+						...input.sender,
+						instanceId: this.instanceId,
+					},
+					id: getNewEBMessageId(),
+					correlationId,
+					timestamp: Date.now(),
+					messageType: EBMessageType.Command,
+					traceId: input.traceId,
+					otp: serializeOtp(),
+				})
 
-        const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: command.traceId })
+				const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: command.traceId })
 
-        span.setAttribute(PuristaSpanTag.SenderServiceName, command.sender.serviceName)
-        span.setAttribute(PuristaSpanTag.SenderServiceVersion, command.sender.serviceVersion)
-        span.setAttribute(PuristaSpanTag.SenderServiceTarget, command.sender.serviceTarget)
-        span.setAttribute(PuristaSpanTag.ReceiverServiceName, command.receiver.serviceName)
-        span.setAttribute(PuristaSpanTag.ReceiverServiceVersion, command.receiver.serviceVersion)
-        span.setAttribute(PuristaSpanTag.ReceiverServiceTarget, command.receiver.serviceTarget)
+				span.setAttribute(PuristaSpanTag.SenderServiceName, command.sender.serviceName)
+				span.setAttribute(PuristaSpanTag.SenderServiceVersion, command.sender.serviceVersion)
+				span.setAttribute(PuristaSpanTag.SenderServiceTarget, command.sender.serviceTarget)
+				span.setAttribute(PuristaSpanTag.ReceiverServiceName, command.receiver.serviceName)
+				span.setAttribute(PuristaSpanTag.ReceiverServiceVersion, command.receiver.serviceVersion)
+				span.setAttribute(PuristaSpanTag.ReceiverServiceTarget, command.receiver.serviceTarget)
 
-        let headers: MsgHdrs | undefined
-        if (this.connection?.info?.headers) {
-          headers = getNewHeaders()
-          const userProperties: BrokerHeaderCommandMsg = serializeOtpToNats({
-            messageType: command.messageType,
-            senderServiceName: command.sender.serviceName,
-            senderServiceVersion: command.sender.serviceVersion,
-            senderServiceTarget: command.sender.serviceTarget,
-            senderInstanceId: command.sender.instanceId,
-            receiverServiceName: command.receiver.serviceName,
-            receiverServiceVersion: command.receiver.serviceVersion,
-            receiverServiceTarget: command.receiver.serviceTarget,
-          })
+				let headers: MsgHdrs | undefined
+				if (this.connection?.info?.headers) {
+					headers = getNewHeaders()
+					const userProperties: BrokerHeaderCommandMsg = serializeOtpToNats({
+						messageType: command.messageType,
+						senderServiceName: command.sender.serviceName,
+						senderServiceVersion: command.sender.serviceVersion,
+						senderServiceTarget: command.sender.serviceTarget,
+						senderInstanceId: command.sender.instanceId,
+						receiverServiceName: command.receiver.serviceName,
+						receiverServiceVersion: command.receiver.serviceVersion,
+						receiverServiceTarget: command.receiver.serviceTarget,
+					})
 
-          if (command.eventName) {
-            userProperties.eventName = command.eventName
-          }
+					if (command.eventName) {
+						userProperties.eventName = command.eventName
+					}
 
-          if (command.receiver.instanceId) {
-            userProperties.receiverInstanceId = command.receiver.instanceId
-          }
+					if (command.receiver.instanceId) {
+						userProperties.receiverInstanceId = command.receiver.instanceId
+					}
 
-          if (command.principalId) {
-            userProperties.principalId = command.principalId
-          }
+					if (command.principalId) {
+						userProperties.principalId = command.principalId
+					}
 
-          if (command.tenantId) {
-            userProperties.tenantId = command.tenantId
-          }
+					if (command.tenantId) {
+						userProperties.tenantId = command.tenantId
+					}
 
-          Object.entries(userProperties).forEach((value) => headers?.set(value[0], value[1]))
-        }
+					for (const value of Object.entries(userProperties)) {
+						headers?.set(value[0], value[1])
+					}
+				}
 
-        const topic = getTopicName.bind(this)(command)
+				const topic = getTopicName.bind(this)(command)
 
-        const data = this.sc.encode(command)
+				const data = this.sc.encode(command)
 
-        try {
-          const msg = await this.connection.request(topic, data, {
-            timeout: commandTimeout,
-          })
+				try {
+					const msg = await this.connection.request(topic, data, {
+						timeout: commandTimeout,
+					})
 
-          const response: CommandResponse = this.sc.decode(msg.data) as CommandResponse
-          const returnContext = deserializeOtpFromNats(this.logger, response, msg.headers)
-          return this.startActiveSpan(
-            PuristaSpanName.EventBridgeCommandResponseReceived,
-            { kind: SpanKind.CONSUMER },
-            returnContext,
-            async (returnSpan) => {
-              const responseLog = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: response.traceId })
+					const response: CommandResponse = this.sc.decode(msg.data) as CommandResponse
+					const returnContext = deserializeOtpFromNats(this.logger, response, msg.headers)
+					return this.startActiveSpan(
+						PuristaSpanName.EventBridgeCommandResponseReceived,
+						{ kind: SpanKind.CONSUMER },
+						returnContext,
+						async returnSpan => {
+							const responseLog = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: response.traceId })
 
-              if (response.eventName) {
-                returnSpan.addEvent(response.eventName)
-              }
+							if (response.eventName) {
+								returnSpan.addEvent(response.eventName)
+							}
 
-              if (!isCommandResponse(response)) {
-                const err = new UnhandledError(
-                  StatusCode.InternalServerError,
-                  'the received message is not a command response',
-                )
-                responseLog.error({ err }, err.message)
-                returnSpan.setStatus({
-                  code: SpanStatusCode.ERROR,
-                  message: err.message,
-                })
-                returnSpan.recordException(err)
-                this.emit(EventBridgeEventNames.EventbridgeError, err)
-                throw err
-              }
+							if (!isCommandResponse(response)) {
+								const err = new UnhandledError(
+									StatusCode.InternalServerError,
+									'the received message is not a command response',
+								)
+								responseLog.error({ err }, err.message)
+								returnSpan.setStatus({
+									code: SpanStatusCode.ERROR,
+									message: err.message,
+								})
+								returnSpan.recordException(err)
+								this.emit(EventBridgeEventNames.EventbridgeError, err)
+								throw err
+							}
 
-              if (isCommandSuccessResponse(response)) {
-                return response.payload as T
-              }
-              const error = response.isHandledError
-                ? HandledError.fromMessage(response)
-                : UnhandledError.fromMessage(response)
+							if (isCommandSuccessResponse(response)) {
+								return response.payload as T
+							}
+							const error = response.isHandledError
+								? HandledError.fromMessage(response)
+								: UnhandledError.fromMessage(response)
 
-              returnSpan.setStatus({
-                code: SpanStatusCode.ERROR,
-                message: error.message,
-              })
-              returnSpan.recordException(error)
-              responseLog.error({ err: error }, error.message)
-              throw error
-            },
-          )
-        } catch (error) {
-          if (error instanceof HandledError || error instanceof UnhandledError) {
-            throw error
-          }
-          const err = UnhandledError.fromError(error)
-          log.error({ err })
-          throw err
-        }
-      },
-    )
-  }
+							returnSpan.setStatus({
+								code: SpanStatusCode.ERROR,
+								message: error.message,
+							})
+							returnSpan.recordException(error)
+							responseLog.error({ err: error }, error.message)
+							throw error
+						},
+					)
+				} catch (error) {
+					if (error instanceof HandledError || error instanceof UnhandledError) {
+						throw error
+					}
+					const err = UnhandledError.fromError(error)
+					log.error({ err })
+					throw err
+				}
+			},
+		)
+	}
 
-  async registerCommand(
-    address: EBMessageAddress,
-    cb: (message: Command) => Promise<CommandSuccessResponse | CommandErrorResponse>,
-    metadata: CommandDefinitionMetadataBase,
-    eventBridgeConfig: DefinitionEventBridgeConfig,
-  ): Promise<string> {
-    if (!this.connection) {
-      throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
-    }
+	async registerCommand(
+		address: EBMessageAddress,
+		cb: (message: Command) => Promise<CommandSuccessResponse | CommandErrorResponse>,
+		metadata: CommandDefinitionMetadataBase,
+		eventBridgeConfig: DefinitionEventBridgeConfig,
+	): Promise<string> {
+		if (!this.connection) {
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
+		}
 
-    const topic = getCommandSubscriptionTopic.bind(this)(address)
+		const topic = getCommandSubscriptionTopic.bind(this)(address)
 
-    const callback = getCommandHandler(address, cb, metadata, eventBridgeConfig).bind(this)
-    const queue = getQueueGroupName(this.config.topicPrefix, address)
-    const subscription = this.connection.subscribe(topic, { callback, queue })
+		const callback = getCommandHandler(address, cb, metadata, eventBridgeConfig).bind(this)
+		const queue = getQueueGroupName(this.config.topicPrefix, address)
+		const subscription = this.connection.subscribe(topic, { callback, queue })
 
-    this.commands.set(`${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`, subscription)
+		this.commands.set(`${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`, subscription)
 
-    const info = createInfoMessage(
-      EBMessageType.InfoServiceFunctionAdded,
-      { ...address, instanceId: this.instanceId },
-      {
-        payload: metadata,
-      },
-    )
-    await this.emitMessage(info)
+		const info = createInfoMessage(
+			EBMessageType.InfoServiceFunctionAdded,
+			{ ...address, instanceId: this.instanceId },
+			{
+				payload: metadata,
+			},
+		)
+		await this.emitMessage(info)
 
-    return topic
-  }
+		return topic
+	}
 
-  async unregisterCommand(address: EBMessageAddress): Promise<void> {
-    if (!this.connection) {
-      throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
-    }
+	async unregisterCommand(address: EBMessageAddress): Promise<void> {
+		if (!this.connection) {
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
+		}
 
-    const subscription = this.commands.get(`${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`)
+		const subscription = this.commands.get(`${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`)
 
-    subscription?.unsubscribe()
-    await subscription?.drain()
-  }
+		subscription?.unsubscribe()
+		await subscription?.drain()
+	}
 
-  async registerSubscription(
-    subscription: Subscription,
-    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
-  ): Promise<string> {
-    const topic = getSubscriptionTopic.bind(this)(subscription)
+	async registerSubscription(
+		subscription: Subscription,
+		cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
+	): Promise<string> {
+		const topic = getSubscriptionTopic.bind(this)(subscription)
 
-    const queueName = getQueueGroupName(this.config.topicPrefix, subscription.subscriber)
-    const queue = subscription.eventBridgeConfig.shared ? queueName : undefined
-    this.connection?.subscribe(topic, {
-      callback: getSubscriptionHandler(subscription, cb).bind(this),
-      queue,
-    })
+		const queueName = getQueueGroupName(this.config.topicPrefix, subscription.subscriber)
+		const queue = subscription.eventBridgeConfig.shared ? queueName : undefined
+		this.connection?.subscribe(topic, {
+			callback: getSubscriptionHandler(subscription, cb).bind(this),
+			queue,
+		})
 
-    return topic
-  }
+		return topic
+	}
 
-  async unregisterSubscription(address: EBMessageAddress): Promise<void> {
-    if (!this.connection) {
-      throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
-    }
+	async unregisterSubscription(address: EBMessageAddress): Promise<void> {
+		if (!this.connection) {
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
+		}
 
-    const subscription = this.subscriptions.get(
-      `${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`,
-    )
+		const subscription = this.subscriptions.get(
+			`${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`,
+		)
 
-    subscription?.unsubscribe()
-    await subscription?.drain()
-  }
+		subscription?.unsubscribe()
+		await subscription?.drain()
+	}
 
-  async destroy() {
-    await this.connection?.drain()
-    await this.connection?.close()
-    this.emit(EventBridgeEventNames.EventbridgeDisconnected)
-    await super.destroy()
-  }
+	async destroy() {
+		await this.connection?.drain()
+		await this.connection?.close()
+		this.emit(EventBridgeEventNames.EventbridgeDisconnected)
+		await super.destroy()
+	}
 }

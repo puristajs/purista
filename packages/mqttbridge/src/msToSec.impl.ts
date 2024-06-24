@@ -5,8 +5,8 @@
  * @returns rounded value in seconds
  */
 export const msToSec = (ms: number) => {
-  if (ms === 0) {
-    return 0
-  }
-  return Math.round(ms / 1000)
+	if (ms === 0) {
+		return 0
+	}
+	return Math.round(ms / 1000)
 }

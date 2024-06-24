@@ -1,7 +1,7 @@
 import { initLogger } from '../../DefaultLogger/index.js'
 import type { ObjectWithKeysFromStringArray } from '../../helper/index.js'
 import { UnhandledError } from '../Error/index.js'
-import type { Logger, Prettify, StoreBaseConfig } from '../types/index.js'
+import type { EmptyObject, Logger, Prettify, StoreBaseConfig } from '../types/index.js'
 import { StatusCode } from '../types/index.js'
 import type { SecretStoreCacheMap } from './types/index.js'
 
@@ -17,7 +17,7 @@ import type { SecretStoreCacheMap } from './types/index.js'
  *
  * @group Store
  */
-export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<string, unknown> = {}> {
+export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<string, unknown> = EmptyObject> {
 	logger: Logger
 	config: Prettify<StoreBaseConfig<SecretStoreConfigType>>
 
@@ -65,7 +65,7 @@ export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<
 		const result: Record<string, string | undefined> = {}
 		const toFetch: string[] = []
 
-		secretNames.forEach(secret => {
+		for (const secret of secretNames) {
 			const cachedValue = this.cache.get(secret)
 			result[secret] = undefined
 			if (cachedValue) {
@@ -79,7 +79,7 @@ export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<
 					result[secret] = cachedValue.value
 				}
 			}
-		})
+		}
 
 		if (!toFetch.length) {
 			return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
@@ -87,14 +87,14 @@ export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<
 
 		const freshSecrets = await this.getSecretImpl(...toFetch)
 
-		toFetch.forEach(secret => {
+		for (const secret of toFetch) {
 			const value = freshSecrets[secret]
 			if (value !== undefined) {
 				this.cache.set(secret, { value, createdAt: Date.now() })
 			} else {
 				this.cache.delete(secret)
 			}
-		})
+		}
 
 		return { ...result, ...freshSecrets } as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
 	}

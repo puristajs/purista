@@ -5,6 +5,7 @@ import { stub } from 'sinon'
 import type {
 	EBMessage,
 	EBMessageAddress,
+	EmptyObject,
 	FromEmitToOtherType,
 	FromInvokeToOtherType,
 	SubscriptionFunctionContext,
@@ -16,7 +17,7 @@ import { getLoggerMock } from './getLogger.mock.js'
  *
  * @group Unit test helper
  * */
-export const getSubscriptionContextMock = <Invokes = {}, EmitListType = {}>(
+export const getSubscriptionContextMock = <Invokes = EmptyObject, EmitListType = EmptyObject>(
 	message: EBMessage,
 	sandbox?: SinonSandbox,
 	_invokes?: FromInvokeToOtherType<
@@ -44,8 +45,8 @@ export const getSubscriptionContextMock = <Invokes = {}, EmitListType = {}>(
 			updateName: sandbox?.stub() ?? stub(),
 			end: sandbox?.stub() ?? stub(),
 			isRecording: () => true,
-			recordException: (sandbox?.stub() ?? stub()).callsFake((err: any) => {
-				// eslint-disable-next-line no-console
+			recordException: (sandbox?.stub() ?? stub()).callsFake((err: unknown) => {
+				// biome-ignore lint/nursery/noConsole: no logger available
 				console.error(err)
 			}),
 		}
@@ -111,6 +112,7 @@ export const getSubscriptionContextMock = <Invokes = {}, EmitListType = {}>(
 
 	const eventList = Object.keys(emitList ?? {}).reduce((prev, current) => {
 		return {
+			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
 			...prev,
 			[current]: sandbox?.stub() ?? stub().resolves(),
 		}

@@ -46,6 +46,7 @@ export class DefaultConfigStore extends ConfigStoreBaseClass<DefaultConfigStoreC
 
 		const result = configNames.reduce((prev, current) => {
 			return {
+				// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
 				...prev,
 				[current]: this.map.get(current),
 			}

@@ -18,9 +18,9 @@ import type { DaprPubSubRuleType } from './DaprPubSubRuleType.type.js'
  * DaprPubSubRouteType Defines the rules for a route
  */
 export type DaprPubSubRouteType = {
-  // The rule
-  rules?: DaprPubSubRuleType[]
+	// The rule
+	rules?: DaprPubSubRuleType[]
 
-  // The default path to use if no rule was matched
-  default?: string
+	// The default path to use if no rule was matched
+	default?: string
 }

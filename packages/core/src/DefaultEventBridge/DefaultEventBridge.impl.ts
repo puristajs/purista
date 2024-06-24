@@ -111,7 +111,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 				async span => {
 					try {
 						let isAtLeastDeliveredOnce = false
-						this.subscriptions.forEach(subscription => {
+						for (const [_, subscription] of this.subscriptions) {
 							if (isMessageMatchingSubscription(this.logger, message, subscription)) {
 								isAtLeastDeliveredOnce = true
 								this.runningSubscriptionCount++
@@ -125,7 +125,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 									.catch(err => this.logger.error({ err }))
 									.finally(() => this.runningSubscriptionCount--)
 							}
-						})
+						}
 
 						if (isCommand(message)) {
 							const mapEntry = this.serviceFunctions.get(getCommandQueueName(message.receiver))
@@ -409,7 +409,9 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
 		this.emit(EventBridgeEventNames.EventbridgeDisconnected)
 
-		this.pendingInvocations.forEach(value => value.reject(new UnhandledError(StatusCode.ServiceUnavailable)))
+		for (const [_, value] of this.pendingInvocations) {
+			value.reject(new UnhandledError(StatusCode.ServiceUnavailable))
+		}
 		this.pendingInvocations.clear()
 		this.removeAllListeners()
 		this.writeStream.end().removeAllListeners()

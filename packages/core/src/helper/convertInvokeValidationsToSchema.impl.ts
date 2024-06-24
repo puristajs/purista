@@ -45,15 +45,9 @@ export const convertInvokeValidationsToSchema = async <T extends InputType>(
 			for (const [command, schemas] of Object.entries(commands)) {
 				result[serviceName][serviceVersion][command] = { ...result[serviceName][serviceVersion][command] }
 				const [outputSchema, payloadSchema, parameterSchema] = await Promise.all([
-					schemas.outputSchema
-						? validationToSchema(schemas.outputSchema)
-						: new Promise<undefined>(resolve => resolve(undefined)),
-					schemas.payloadSchema
-						? validationToSchema(schemas.payloadSchema)
-						: new Promise<undefined>(resolve => resolve(undefined)),
-					schemas.parameterSchema
-						? validationToSchema(schemas.parameterSchema)
-						: new Promise<undefined>(resolve => resolve(undefined)),
+					schemas.outputSchema ? schemas.outputSchema : new Promise<undefined>(resolve => resolve(undefined)),
+					schemas.payloadSchema ? schemas.payloadSchema : new Promise<undefined>(resolve => resolve(undefined)),
+					schemas.parameterSchema ? schemas.parameterSchema : new Promise<undefined>(resolve => resolve(undefined)),
 				])
 
 				result[serviceName][serviceVersion][command] = {

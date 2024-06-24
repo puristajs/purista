@@ -2,7 +2,7 @@ import { SpanStatusCode } from '@opentelemetry/api'
 import type { Schema } from '@typeschema/main'
 import { validate } from '@typeschema/main'
 
-import type { ServiceClass, SubscriptionBeforeGuardHook, SubscriptionFunction } from '../core/index.js'
+import type { EmptyObject, ServiceClass, SubscriptionBeforeGuardHook, SubscriptionFunction } from '../core/index.js'
 import { HandledError, StatusCode, UnhandledError } from '../core/index.js'
 
 export const getSubscriptionFunctionWithValidation = function <
@@ -13,8 +13,8 @@ export const getSubscriptionFunctionWithValidation = function <
 	FunctionPayloadType = MessagePayloadType,
 	FunctionParamsType = MessageParamsType,
 	FunctionResultType = MessageResultType,
-	Invokes = {},
-	EmitListType = {},
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
 >(
 	fn: SubscriptionFunction<
 		ServiceClassType,

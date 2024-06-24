@@ -1,7 +1,7 @@
 import { initLogger } from '../../DefaultLogger/index.js'
 import type { ObjectWithKeysFromStringArray } from '../../helper/index.js'
 import { UnhandledError } from '../Error/index.js'
-import type { Logger, StoreBaseConfig } from '../types/index.js'
+import type { EmptyObject, Logger, StoreBaseConfig } from '../types/index.js'
 import { StatusCode } from '../types/index.js'
 import type { ConfigStoreCacheMap } from './types/index.js'
 
@@ -17,7 +17,7 @@ import type { ConfigStoreCacheMap } from './types/index.js'
  *
  * @group Store
  */
-export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<string, unknown> = {}> {
+export abstract class ConfigStoreBaseClass<ConfigStoreConfigType extends Record<string, unknown> = EmptyObject> {
 	logger: Logger
 	config: StoreBaseConfig<ConfigStoreConfigType>
 

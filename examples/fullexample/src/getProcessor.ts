@@ -12,31 +12,31 @@ import { zipkinExporterOptions } from './config/zipkinConfig.js'
  * @returns OpenTelemetry exporter instance
  */
 export const getJaegerExporter = () => {
-  const exporter = new OTLPTraceExporter(jaegerExporterOptions)
+	const exporter = new OTLPTraceExporter(jaegerExporterOptions)
 
-  return new SimpleSpanProcessor(exporter)
+	return new SimpleSpanProcessor(exporter)
 }
 
 export const getTeletraceExporter = () => {
-  const exporter = new OTLPTraceExporter(teletraceExporterOptions)
+	const exporter = new OTLPTraceExporter(teletraceExporterOptions)
 
-  return new SimpleSpanProcessor(exporter)
+	return new SimpleSpanProcessor(exporter)
 }
 
 export const getZipkinExporter = () => {
-  const exporter = new ZipkinExporter(zipkinExporterOptions)
+	const exporter = new ZipkinExporter(zipkinExporterOptions)
 
-  return new SimpleSpanProcessor(exporter)
+	return new SimpleSpanProcessor(exporter)
 }
 
 export const getConsoleSpanExporter = () => {
-  const exporter = new ConsoleSpanExporter()
+	const exporter = new ConsoleSpanExporter()
 
-  return new SimpleSpanProcessor(exporter)
+	return new SimpleSpanProcessor(exporter)
 }
 
 export const uptraceTraceExporter = () => {
-  const exporter = new OTLPTraceExporter(uptraceConfig)
+	const exporter = new OTLPTraceExporter(uptraceConfig)
 
-  return new SimpleSpanProcessor(exporter)
+	return new SimpleSpanProcessor(exporter)
 }

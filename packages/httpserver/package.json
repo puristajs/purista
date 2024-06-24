@@ -1,74 +1,76 @@
 {
-  "name": "@purista/httpserver",
-  "version": "1.11.0",
-  "description": "Simple http server service based on fastify for PURISTA backend framework",
-  "homepage": "https://purista.dev",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:puristajs/purista.git"
-  },
-  "author": "Sebastian Wessel",
-  "license": "ISC",
-  "type": "module",
-  "main": "./dist/commonjs/index.js",
-  "exports": {
-    "./package.json": "./package.json",
-    ".": {
-      "import": {
-        "types": "./dist/esm/index.d.ts",
-        "default": "./dist/esm/index.js"
-      },
-      "require": {
-        "types": "./dist/commonjs/index.d.ts",
-        "default": "./dist/commonjs/index.js"
-      }
-    }
-  },
-  "files": [
-    "dist/**/*"
-  ],
-  "publishConfig": {
-    "access": "public"
-  },
-  "engines": {
-    "node": ">=18.15"
-  },
-  "scripts": {
-    "lint": "npx @biomejs/biome check --write",
-    "test": "vitest",
-    "build": "rimraf dist && tshy"
-  },
-  "tshy": {
-    "exclude": [
-      "src/**/*.test.ts"
-    ],
-    "exports": {
-      "./package.json": "./package.json",
-      ".": "./src/index.ts"
-    }
-  },
-  "devDependencies": {
-    "@types/node": "^20.14.8",
-    "@types/qs": "^6.9.15",
-    "@types/sinon": "^17.0.3",
-    "@types/swagger-ui-dist": "^3.30.5",
-    "sinon": "^18.0.0",
-    "tshy": "^1.15.1",
-    "vitest": "^1.6.0"
-  },
-  "dependencies": {
-    "@fastify/compress": "^7.0.3",
-    "@fastify/cors": "^9.0.1",
-    "@fastify/helmet": "^11.1.1",
-    "@fastify/static": "^7.0.4",
-    "@opentelemetry/api": "^1.9.0",
-    "@opentelemetry/semantic-conventions": "^1.25.1",
-    "@purista/core": "*",
-    "fastify": "^4.28.0",
-    "openapi3-ts": "4.3.3",
-    "swagger-ui-dist": "^5.17.14",
-    "trouter": "^4.0.0"
-  },
-  "peerDependenciesMeta": {},
-  "types": "./dist/commonjs/index.d.ts"
+	"name": "@purista/httpserver",
+	"version": "1.11.0",
+	"description": "Simple http server service based on fastify for PURISTA backend framework",
+	"homepage": "https://purista.dev",
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:puristajs/purista.git"
+	},
+	"author": "Sebastian Wessel",
+	"license": "ISC",
+	"type": "module",
+	"main": "./dist/commonjs/index.js",
+	"exports": {
+		"./package.json": "./package.json",
+		".": {
+			"import": {
+				"source": "./src/index.ts",
+				"types": "./dist/esm/index.d.ts",
+				"default": "./dist/esm/index.js"
+			},
+			"require": {
+				"source": "./src/index.ts",
+				"types": "./dist/commonjs/index.d.ts",
+				"default": "./dist/commonjs/index.js"
+			}
+		}
+	},
+	"files": [
+		"dist/**/*"
+	],
+	"publishConfig": {
+		"access": "public"
+	},
+	"engines": {
+		"node": ">=18.15"
+	},
+	"scripts": {
+		"lint": "npx @biomejs/biome check --write",
+		"test": "vitest",
+		"build": "rimraf dist && tshy"
+	},
+	"tshy": {
+		"exclude": [
+			"src/**/*.test.ts"
+		],
+		"exports": {
+			"./package.json": "./package.json",
+			".": "./src/index.ts"
+		}
+	},
+	"devDependencies": {
+		"@types/node": "^20.14.8",
+		"@types/qs": "^6.9.15",
+		"@types/sinon": "^17.0.3",
+		"@types/swagger-ui-dist": "^3.30.5",
+		"sinon": "^18.0.0",
+		"tshy": "^1.15.1",
+		"vitest": "^1.6.0"
+	},
+	"dependencies": {
+		"@fastify/compress": "^7.0.3",
+		"@fastify/cors": "^9.0.1",
+		"@fastify/helmet": "^11.1.1",
+		"@fastify/static": "^7.0.4",
+		"@opentelemetry/api": "^1.9.0",
+		"@opentelemetry/semantic-conventions": "^1.25.1",
+		"@purista/core": "*",
+		"fastify": "^4.28.0",
+		"openapi3-ts": "4.3.3",
+		"swagger-ui-dist": "^5.17.14",
+		"trouter": "^4.0.0"
+	},
+	"peerDependenciesMeta": {},
+	"types": "./dist/commonjs/index.d.ts"
 }

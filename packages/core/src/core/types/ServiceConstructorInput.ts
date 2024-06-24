@@ -13,7 +13,7 @@ import type { SubscriptionDefinitionListResolved } from './subscription/index.js
 /**
  * @group Service
  */
-export type ServiceConstructorInput<ConfigType, Ressources> = {
+export type ServiceConstructorInput<ConfigType extends {}, Ressources extends {}> = {
 	/** A logger instance */
 	logger: Logger
 	/** The service info with name, version and description of service */

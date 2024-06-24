@@ -4,10 +4,10 @@ import { deserializeOtp } from '@purista/core'
 import type { UserProperties } from 'mqtt-packet'
 
 export const deserializeOtpFromMqtt = (logger: Logger, message: EBMessage, userProperties: UserProperties = {}) => {
-  // try to use mqtt user property first
-  if (userProperties['traceparent']) {
-    return propagation.extract(context.active(), userProperties)
-  }
+	// try to use mqtt user property first
+	if (userProperties.traceparent) {
+		return propagation.extract(context.active(), userProperties)
+	}
 
-  return deserializeOtp(logger, message.otp)
+	return deserializeOtp(logger, message.otp)
 }

@@ -9,12 +9,12 @@ import { userV1ServiceBuilder } from './userV1ServiceBuilder.js'
 // other service config should be done in ./userServiceBuilder.ts file
 
 const commandDefinitions: CommandDefinitionList<any> = [
-  createUserCommandBuilder.getDefinition(),
-  registerCommandBuilder.getDefinition(),
+	createUserCommandBuilder.getDefinition(),
+	registerCommandBuilder.getDefinition(),
 ]
 
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = []
 
 export const userV1Service = userV1ServiceBuilder
-  .addCommandDefinition(...commandDefinitions)
-  .addSubscriptionDefinition(...subscriptionDefinitions)
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)

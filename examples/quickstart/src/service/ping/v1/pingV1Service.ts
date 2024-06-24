@@ -13,5 +13,5 @@ const commandDefinitions: CommandDefinitionList<any> = [pingCommandBuilder.getDe
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = [logSubscriptionBuilder.getDefinition()]
 
 export const pingV1Service = pingV1ServiceBuilder
-  .addCommandDefinition(...commandDefinitions)
-  .addSubscriptionDefinition(...subscriptionDefinitions)
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)

@@ -1,11 +1,11 @@
 import type { RouterFunction } from '@purista/base-http-bridge'
 
 export const configRoute: RouterFunction = async function (c) {
-  const payload = {
-    entities: [],
-  }
+	const payload = {
+		entities: [],
+	}
 
-  this.logger.debug('config requested')
+	this.logger.debug('config requested')
 
-  return c.json(payload)
+	return c.json(payload)
 }

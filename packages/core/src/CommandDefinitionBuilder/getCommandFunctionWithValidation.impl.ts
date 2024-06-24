@@ -2,7 +2,7 @@ import { SpanStatusCode } from '@opentelemetry/api'
 import type { Schema } from '@typeschema/main'
 import { validate } from '@typeschema/main'
 
-import type { CommandBeforeGuardHook, CommandFunction, ServiceClass } from '../core/index.js'
+import type { CommandBeforeGuardHook, CommandFunction, EmptyObject, ServiceClass } from '../core/index.js'
 import { HandledError, StatusCode, UnhandledError } from '../core/index.js'
 
 export const getCommandFunctionWithValidation = function <
@@ -13,9 +13,9 @@ export const getCommandFunctionWithValidation = function <
 	FunctionPayloadType = MessagePayloadType,
 	FunctionParamsType = MessageParamsType,
 	FunctionResultType = MessageResultType,
-	Invokes = {},
-	EmitListType = {},
-	Ressources = {},
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
+	Ressources = EmptyObject,
 >(
 	fn: CommandFunction<
 		ServiceClassType,

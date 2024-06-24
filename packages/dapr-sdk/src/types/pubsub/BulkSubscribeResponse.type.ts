@@ -17,6 +17,6 @@ import type { BulkSubscribeResponseEntry } from './BulkSubscribeResponseEntry.ty
  * BulkSubscribeResponse is the response for a bulk subscribe request
  **/
 export type BulkSubscribeResponse = {
-  // An array of bulk subscribe response entries
-  statuses: BulkSubscribeResponseEntry[]
+	// An array of bulk subscribe response entries
+	statuses: BulkSubscribeResponseEntry[]
 }
