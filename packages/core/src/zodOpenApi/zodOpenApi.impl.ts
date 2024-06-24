@@ -131,7 +131,7 @@ function parseNumber({ zodRef, schemas }: ParsingArgs<z.ZodNumber>): SchemaObjec
 		type: 'number',
 	}
 	const { checks = [] } = zodRef._def
-	checks.forEach(item => {
+	for (const item of checks) {
 		switch (item.kind) {
 			case 'max':
 				baseSchema.maximum = item.value
@@ -152,7 +152,7 @@ function parseNumber({ zodRef, schemas }: ParsingArgs<z.ZodNumber>): SchemaObjec
 			case 'multipleOf':
 				baseSchema.multipleOf = item.value
 		}
-	})
+	}
 	return merge(baseSchema, zodRef.description ? { description: zodRef.description } : {}, ...schemas)
 }
 

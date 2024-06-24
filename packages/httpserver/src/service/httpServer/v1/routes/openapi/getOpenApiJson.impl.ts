@@ -276,18 +276,20 @@ export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV
 				}
 			}
 
+			const addStatusCodes = (code: StatusCode) => {
+				errorResponses[code] = {
+					description: getErrorName(code),
+					content: {
+						'application/json': {
+							schema: getErrorResponseSchema(code, getErrorName(code)),
+						},
+					},
+				}
+			}
+
 			definition.openApi?.additionalStatusCodes
 				?.filter(code => !Object.keys(errorResponses).includes(code.toString()))
-				.forEach(code => {
-					errorResponses[code] = {
-						description: getErrorName(code),
-						content: {
-							'application/json': {
-								schema: getErrorResponseSchema(code, getErrorName(code)),
-							},
-						},
-					}
-				})
+				.forEach(addStatusCodes)
 
 			const traceIdParameter: ParameterObject = {
 				in: 'header',
