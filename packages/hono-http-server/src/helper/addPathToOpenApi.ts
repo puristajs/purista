@@ -62,9 +62,9 @@ export const addPathToOpenApi = (
 
 	const errArray = Array.from(errorCodes).sort((a, b) => a - b)
 
-	errArray.forEach(code => {
+	for (const code of errArray) {
 		openApiBuilder.addSchema(`error_${code}_schema`, getErrorResponseSchema(code, getErrorName(code)))
-	})
+	}
 
 	const errResponses = errArray.reduce((prev, code) => {
 		return {

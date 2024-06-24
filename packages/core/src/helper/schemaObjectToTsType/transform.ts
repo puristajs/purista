@@ -156,9 +156,9 @@ export function transformSchemaObject(
 					// tuple type support
 					isTupleType = true
 					const result: string[] = []
-					schemaObject.items.forEach(item => {
+					for (const item of schemaObject.items) {
 						result.push(transformSchemaObject(item, { ...ctx, indentLv }, path))
-					})
+					}
 					itemType = `[${result.join(',')}]`
 				} else {
 					itemType = transformSchemaObject(schemaObject.items, { ...ctx, indentLv }, path)

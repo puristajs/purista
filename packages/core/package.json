@@ -10,9 +10,7 @@
 	"author": "Sebastian Wessel",
 	"license": "ISC",
 	"type": "module",
-	"files": [
-		"dist"
-	],
+	"files": ["dist"],
 	"publishConfig": {
 		"access": "public"
 	},
@@ -26,9 +24,7 @@
 		"test:integration": "vitest -c ../../vitest.config.integration.ts"
 	},
 	"tshy": {
-		"exclude": [
-			"src/**/*.test.ts"
-		],
+		"exclude": ["src/**/*.test.ts"],
 		"exports": {
 			"./package.json": "./package.json",
 			".": "./src/index.ts"
