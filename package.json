@@ -8,6 +8,7 @@
 		"lint": "npx @biomejs/biome check",
 		"lint:fix": "npx @biomejs/biome check --write",
 		"test": "vitest",
+		"test:unit": "vitest -c ./vitest.config.unit.ts",
 		"update:doc": "npm run gitclean && typedoc && git add --all && git commit -S -am \"doc: update api documentation\" && git-cliff > CHANGELOG.md && git commit -am \"doc: update CHANGELOG\" && npm run build:doc -w website",
 		"release:major": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version major --no-git-tag-version --workspaces && npm run commit:major && npm publish --workspaces",
 		"release:minor": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version minor --no-git-tag-version --workspaces && npm run commit:minor && npm publish --workspaces",
