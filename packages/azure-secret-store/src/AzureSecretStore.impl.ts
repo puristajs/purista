@@ -1,11 +1,11 @@
 import { DefaultAzureCredential } from '@azure/identity'
 import { SecretClient } from '@azure/keyvault-secrets'
 import {
-  type ObjectWithKeysFromStringArray,
-  SecretStoreBaseClass,
-  StatusCode,
-  type StoreBaseConfig,
-  UnhandledError,
+	type ObjectWithKeysFromStringArray,
+	SecretStoreBaseClass,
+	StatusCode,
+	type StoreBaseConfig,
+	UnhandledError,
 } from '@purista/core'
 
 import type { AzureSecretStoreConfig } from './types.js'
@@ -24,40 +24,40 @@ import type { AzureSecretStoreConfig } from './types.js'
  * It will be removed/overwritten on next get request.
  */
 export class AzureSecretStore extends SecretStoreBaseClass<AzureSecretStoreConfig> {
-  client: SecretClient
+	client: SecretClient
 
-  constructor(config: StoreBaseConfig<AzureSecretStoreConfig>) {
-    super('AzureSecretStore', { enableCache: true, ...config })
+	constructor(config: StoreBaseConfig<AzureSecretStoreConfig>) {
+		super('AzureSecretStore', { enableCache: true, ...config })
 
-    const credential = new DefaultAzureCredential()
+		const credential = new DefaultAzureCredential()
 
-    this.client = new SecretClient(this.config.vaultUrl, credential, this.config.options)
-  }
+		this.client = new SecretClient(this.config.vaultUrl, credential, this.config.options)
+	}
 
-  protected async getSecretImpl<SecretNames extends string[]>(
-    ...secretNames: SecretNames
-  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
-    const result: Record<string, string | undefined> = {}
+	protected async getSecretImpl<SecretNames extends string[]>(
+		...secretNames: SecretNames
+	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
+		const result: Record<string, string | undefined> = {}
 
-    for (const name of secretNames) {
-      try {
-        const response = await this.client.getSecret(name)
-        result[name] = response?.value
-      } catch (err) {
-        result[name] = undefined
-        this.logger.error({ err })
-        throw UnhandledError.fromError(err, StatusCode.InternalServerError)
-      }
-    }
+		for (const name of secretNames) {
+			try {
+				const response = await this.client.getSecret(name)
+				result[name] = response?.value
+			} catch (err) {
+				result[name] = undefined
+				this.logger.error({ err })
+				throw UnhandledError.fromError(err, StatusCode.InternalServerError)
+			}
+		}
 
-    return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
-  }
+		return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
+	}
 
-  protected async removeSecretImpl(secretName: string) {
-    await this.client.beginDeleteSecret(secretName)
-  }
+	protected async removeSecretImpl(secretName: string) {
+		await this.client.beginDeleteSecret(secretName)
+	}
 
-  protected async setSecretImpl(secretName: string, secretValue: string) {
-    await this.client.setSecret(secretName, secretValue)
-  }
+	protected async setSecretImpl(secretName: string, secretValue: string) {
+		await this.client.setSecret(secretName, secretValue)
+	}
 }

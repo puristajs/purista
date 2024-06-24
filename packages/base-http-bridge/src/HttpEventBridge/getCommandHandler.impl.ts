@@ -1,23 +1,28 @@
 // file deepcode ignore ServerLeak: <please specify a reason of ignoring this>
 
-import { context, propagation, SpanKind } from '@opentelemetry/api'
-import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
+import { SpanKind, context, propagation } from '@opentelemetry/api'
+import {
+	SEMATTRS_HTTP_HOST,
+	SEMATTRS_HTTP_METHOD,
+	SEMATTRS_HTTP_STATUS_CODE,
+	SEMATTRS_HTTP_URL,
+} from '@opentelemetry/semantic-conventions'
 import type {
-  Command,
-  CommandErrorResponse,
-  CommandSuccessResponse,
-  DefinitionEventBridgeConfig,
-  EBMessageAddress,
-  HttpExposedServiceMeta,
+	Command,
+	CommandErrorResponse,
+	CommandSuccessResponse,
+	DefinitionEventBridgeConfig,
+	EBMessageAddress,
+	HttpExposedServiceMeta,
 } from '@purista/core'
 import {
-  getTimeoutPromise,
-  HandledError,
-  PuristaSpanName,
-  serializeOtp,
-  StatusCode,
-  throwIfNotValidMessage,
-  UnhandledError,
+	HandledError,
+	PuristaSpanName,
+	StatusCode,
+	UnhandledError,
+	getTimeoutPromise,
+	serializeOtp,
+	throwIfNotValidMessage,
 } from '@purista/core'
 import { HTTP } from 'cloudevents'
 
@@ -25,95 +30,96 @@ import type { HttpEventBridge } from './HttpEventBridge.impl.js'
 import type { HttpEventBridgeConfig, RouterFunction } from './types/index.js'
 
 export const getCommandHandler = function (
-  this: HttpEventBridge<HttpEventBridgeConfig>,
-  address: EBMessageAddress,
-  cb: (
-    message: Command,
-  ) => Promise<
-    Readonly<Omit<CommandSuccessResponse, 'instanceId'>> | Readonly<Omit<CommandErrorResponse, 'instanceId'>>
-  >,
-  _metadata: HttpExposedServiceMeta,
-  _eventBridgeConfig: DefinitionEventBridgeConfig,
-  wrappedInCloudEvent = false,
+	this: HttpEventBridge<HttpEventBridgeConfig>,
+	address: EBMessageAddress,
+	cb: (
+		message: Command,
+	) => Promise<
+		Readonly<Omit<CommandSuccessResponse, 'instanceId'>> | Readonly<Omit<CommandErrorResponse, 'instanceId'>>
+	>,
+	_metadata: HttpExposedServiceMeta,
+	_eventBridgeConfig: DefinitionEventBridgeConfig,
+	wrappedInCloudEvent = false,
 ): RouterFunction {
-  const handler: RouterFunction = async (c) => {
-    const parentContext = propagation.extract(context.active(), c.req.raw.headers)
+	const handler: RouterFunction = async c => {
+		const parentContext = propagation.extract(context.active(), c.req.raw.headers)
 
-    this.logger.info({ headers: c.req.raw.headers }, 'command handler headers')
+		this.logger.info({ headers: c.req.raw.headers }, 'command handler headers')
 
-    return await this.startActiveSpan(
-      PuristaSpanName.EventBridgeCommandReceived,
-      { kind: SpanKind.CONSUMER },
-      parentContext,
-      async (span) => {
-        const hostname = process.env.HOSTNAME ?? 'unknown'
-        span.setAttribute(SemanticAttributes.HTTP_URL, c.req.url || '')
-        span.setAttribute(SemanticAttributes.HTTP_METHOD, c.req.method || '')
-        span.setAttribute(SemanticAttributes.HTTP_HOST, hostname)
+		return await this.startActiveSpan(
+			PuristaSpanName.EventBridgeCommandReceived,
+			{ kind: SpanKind.CONSUMER },
+			parentContext,
+			async span => {
+				const hostname = process.env.HOSTNAME ?? 'unknown'
+				span.setAttribute(SEMATTRS_HTTP_URL, c.req.url || '')
+				span.setAttribute(SEMATTRS_HTTP_METHOD, c.req.method || '')
+				span.setAttribute(SEMATTRS_HTTP_HOST, hostname)
 
-        try {
-          if (c.req.method !== 'POST') {
-            throw new UnhandledError(StatusCode.MethodNotAllowed, 'Unsupported method ' + c.req.method)
-          }
+				try {
+					if (c.req.method !== 'POST') {
+						throw new UnhandledError(StatusCode.MethodNotAllowed, `Unsupported method ${c.req.method}`)
+					}
 
-          let message: Command
+					let message: Command
 
-          if (wrappedInCloudEvent) {
-            const body = await c.req.text()
-            const headers = [...c.req.raw.headers.entries()].reduce((prev: Record<string, string>, val) => {
-              return { ...prev, [val[0]]: val[1] }
-            }, {})
+					if (wrappedInCloudEvent) {
+						const body = await c.req.text()
+						const headers = [...c.req.raw.headers.entries()].reduce((prev: Record<string, string>, val) => {
+							// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+							return { ...prev, [val[0]]: val[1] }
+						}, {})
 
-            const event = HTTP.toEvent<Command>({ headers, body })
-            if (Array.isArray(event)) {
-              throw new UnhandledError(
-                StatusCode.NotImplemented,
-                'Support of multiple events per command call is not supported',
-              )
-            }
-            message = event.data as Command
-          } else {
-            try {
-              message = await c.req.json()
-            } catch (error) {
-              throw new HandledError(StatusCode.BadRequest, 'payload must be a parsable json')
-            }
-          }
+						const event = HTTP.toEvent<Command>({ headers, body })
+						if (Array.isArray(event)) {
+							throw new UnhandledError(
+								StatusCode.NotImplemented,
+								'Support of multiple events per command call is not supported',
+							)
+						}
+						message = event.data as Command
+					} else {
+						try {
+							message = await c.req.json()
+						} catch (error) {
+							throw new HandledError(StatusCode.BadRequest, 'payload must be a parsable json')
+						}
+					}
 
-          throwIfNotValidMessage(message)
+					throwIfNotValidMessage(message)
 
-          message.otp = serializeOtp()
+					message.otp = serializeOtp()
 
-          const msg = await getTimeoutPromise(cb(message), this.config.defaultCommandTimeout)
+					const msg = await getTimeoutPromise(cb(message), this.config.defaultCommandTimeout)
 
-          if (msg.eventName) {
-            await this.emitMessage(msg)
-          }
+					if (msg.eventName) {
+						await this.emitMessage(msg)
+					}
 
-          // empty response
-          if (msg.payload === undefined || msg.payload === '') {
-            const status = StatusCode.NoContent
+					// empty response
+					if (msg.payload === undefined || msg.payload === '') {
+						const status = StatusCode.NoContent
 
-            span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, status)
+						span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, status)
 
-            c.status(status)
-            return c.body(null)
-          }
+						c.status(status)
+						return c.body(null)
+					}
 
-          const payload = typeof msg.payload === 'string' ? msg.payload : JSON.stringify(msg)
+					const payload = typeof msg.payload === 'string' ? msg.payload : JSON.stringify(msg)
 
-          const status = StatusCode.OK
-          return c.json(payload, status as any)
-        } catch (error) {
-          const err = error instanceof UnhandledError ? error : UnhandledError.fromError(error)
-          span.recordException(err)
-          this.logger.error({ err }, err.message)
+					const status = StatusCode.OK
+					return c.json(payload, status as any)
+				} catch (error) {
+					const err = error instanceof UnhandledError ? error : UnhandledError.fromError(error)
+					span.recordException(err)
+					this.logger.error({ err }, err.message)
 
-          return c.json(err.getErrorResponse(), err.errorCode as any)
-        }
-      },
-    )
-  }
+					return c.json(err.getErrorResponse(), err.errorCode as any)
+				}
+			},
+		)
+	}
 
-  return handler
+	return handler
 }

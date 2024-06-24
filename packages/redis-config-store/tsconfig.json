@@ -1,22 +1,14 @@
 {
-  "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "strictNullChecks": true,
-    "outDir": "./dist",
-    "declaration": true,
-    "sourceMap": false,
-    "declarationMap": true,
-    "types": [
-      "vitest/globals",
-      "node"
-    ]
-  },
-  "exclude": [
-    "./**/*.d.ts"
-  ],
-  
-  "include": [
-    "./src/**/*",
-    "./test/*",
-  ],
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"strictNullChecks": true,
+		"outDir": "./dist",
+		"declaration": true,
+		"sourceMap": false,
+		"declarationMap": true,
+		"types": ["vitest/globals", "node"]
+	},
+	"exclude": ["./**/*.d.ts"],
+
+	"include": ["./src/**/*", "./test/*"]
 }

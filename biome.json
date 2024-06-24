@@ -3,74 +3,97 @@
 	"organizeImports": {
 		"enabled": true
 	},
+	"files": {
+		"ignore": [
+			"**/lib/**/*",
+			"cookieconsent.js",
+			"cookieconsent-config2.js",
+			"package-lock.json",
+			"**/dist/**/*",
+			"*.d.ts",
+			"**/coverage/**/*",
+			"docs/**/*",
+			"**/.tshy/**/*",
+			"**/.tshy-build/**/*",
+			"**/.vitepress/cache/**",
+			"**/doc/public/**/*",
+			"examples/fullexample/signoz/**",
+			"examples/fullexample/grafana/**",
+			"examples/fullexample/jaeger/**",
+			"examples/fullexample/teletrace/**",
+			"examples/fullexample/uptrace/**",
+			"examples/fullexample/zipkin/**"
+		]
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {
 			"recommended": true,
-      "complexity":{
-        "useArrowFunction": {
-          "level": "off",
-          "fix": "none"
-        },
-        "useLiteralKeys": {
-          "level":"warn",
-          "fix":"safe"
-        },
-        "noForEach": {
-          "level":"off"
-        },
-        "noBannedTypes": {
-          "level":"warn",
-          "fix":"safe"
-        }
-      },
-      "suspicious": {
-        "noExplicitAny": {
-          "level":"warn"
-        }
-      },
-      "performance": {
-        "noAccumulatingSpread": {
-          "level":"warn"
-        }
-      },
-      "style":{
-        "noUnusedTemplateLiteral": {
-          "level": "warn",
-          "fix":"safe"
-        }
-      }
-		},
-    "ignore":["**/lib/**/*","cookieconsent.js","cookieconsent-config2.js","package-lock.json","**/dist/**/*","*.d.ts","**/coverage/**/*","docs/**/*","**/.tshy-build/**/*"]
+			"complexity": {
+				"useArrowFunction": {
+					"level": "off",
+					"fix": "none"
+				},
+				"useLiteralKeys": {
+					"level": "warn",
+					"fix": "safe"
+				},
+				"noForEach": {
+					"level": "warn"
+				},
+				"noBannedTypes": {
+					"level": "warn",
+					"fix": "safe"
+				}
+			},
+			"suspicious": {
+				"noExplicitAny": {
+					"level": "off"
+				}
+			},
+			"performance": {
+				"noAccumulatingSpread": {
+					"level": "warn"
+				}
+			},
+			"style": {
+				"noUnusedTemplateLiteral": {
+					"level": "warn",
+					"fix": "safe"
+				}
+			},
+			"nursery": {
+				"noConsole": "error"
+			}
+		}
 	},
-  "formatter": {
-    "enabled": true,
-    "formatWithErrors": false,
-    "ignore": ["**/lib/**/*","cookieconsent.js","cookieconsent-config2.js","package-lock.json","**/dist/**/*","*.d.ts","**/coverage/**/*","docs/**/*","**/.tshy-build/**/*"],
-    "attributePosition": "auto",
-    "indentStyle": "tab",
-    "indentWidth": 2,
-    "lineWidth": 120,
-    "lineEnding": "lf"
-  },
-  "javascript": {
-    "formatter": {
-      "quoteStyle":"single",
-      "arrowParentheses":"asNeeded",
-      "bracketSameLine": false,
-      "bracketSpacing": true,
-      "jsxQuoteStyle": "double",
-      "quoteProperties": "asNeeded",
-      "semicolons": "asNeeded",
-      "trailingCommas": "all",
-      "lineWidth":120,
-      "indentWidth":2,
-      "indentStyle":"tab"
-    }
-  },
-  "json": {
-    "formatter": {
-      "trailingCommas": "none"
-    }
-  }
+	"formatter": {
+		"enabled": true,
+		"formatWithErrors": false,
+		"attributePosition": "auto",
+		"indentStyle": "tab",
+		"indentWidth": 2,
+		"lineWidth": 120,
+		"lineEnding": "lf"
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "single",
+			"arrowParentheses": "asNeeded",
+			"bracketSameLine": false,
+			"bracketSpacing": true,
+			"jsxQuoteStyle": "double",
+			"quoteProperties": "asNeeded",
+			"semicolons": "asNeeded",
+			"trailingCommas": "all",
+			"lineWidth": 120,
+			"indentWidth": 2,
+			"indentStyle": "tab"
+		}
+	},
+	"json": {
+		"formatter": {
+			"trailingCommas": "none"
+		}
+	}
 }

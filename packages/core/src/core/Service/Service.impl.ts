@@ -2,6 +2,7 @@ import { SpanStatusCode, trace } from '@opentelemetry/api'
 import type { Infer, Schema } from '@typeschema/main'
 import { validate } from '@typeschema/main'
 
+import { z } from 'zod'
 import { DefaultConfigStore } from '../../DefaultConfigStore/index.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/index.js'
 import { DefaultStateStore } from '../../DefaultStateStore/index.js'
@@ -31,6 +32,7 @@ import type {
 	EBMessageAddress,
 	EBMessageSenderAddress,
 	EmitSchemaList,
+	EmptyObject,
 	InfoMessageType,
 	Logger,
 	PrincipalId,
@@ -78,7 +80,7 @@ import { subscriptionTransformInput } from './subscriptionTransformInput.impl.js
  *
  * @group Service
  */
-export class Service<ConfigType = unknown, Ressources extends {} = {}>
+export class Service<ConfigType extends {} = EmptyObject, Ressources extends {} = EmptyObject>
 	extends ServiceBaseClass
 	implements ServiceClass<ConfigType, Ressources>
 {
@@ -349,7 +351,7 @@ export class Service<ConfigType = unknown, Ressources extends {} = {}>
 		return invokeCommand.bind(this)
 	}
 
-	protected getEmitFunction<EmitList = {}>(
+	protected getEmitFunction<EmitList = EmptyObject>(
 		serviceTarget: string,
 		traceId?: TraceId,
 		principalId?: PrincipalId,

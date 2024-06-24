@@ -1,9 +1,9 @@
 import type { z } from 'zod'
 
 import type {
-  theServiceV1ErrorInputParameterSchema,
-  theServiceV1ErrorInputPayloadSchema,
-  theServiceV1ErrorOutputPayloadSchema,
+	theServiceV1ErrorInputParameterSchema,
+	theServiceV1ErrorInputPayloadSchema,
+	theServiceV1ErrorOutputPayloadSchema,
 } from './schema.js'
 
 export type TheServiceV1ErrorInputParameter = z.input<typeof theServiceV1ErrorInputParameterSchema>

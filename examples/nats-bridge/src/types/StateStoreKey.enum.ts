@@ -1,3 +1,3 @@
 export const StateStoreKey = {
-  Users: 'users',
+	Users: 'users',
 } as const

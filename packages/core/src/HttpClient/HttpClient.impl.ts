@@ -5,9 +5,14 @@ import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/a
 import { Resource } from '@opentelemetry/resources'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { SEMRESATTRS_SERVICE_NAME, SemanticAttributes } from '@opentelemetry/semantic-conventions'
+import {
+	SEMATTRS_HTTP_METHOD,
+	SEMATTRS_HTTP_STATUS_CODE,
+	SEMATTRS_HTTP_URL,
+	SEMRESATTRS_SERVICE_NAME,
+} from '@opentelemetry/semantic-conventions'
 
-import type { Logger } from '../core/index.js'
+import type { EmptyObject, Logger } from '../core/index.js'
 import { HandledError, PuristaSpanTag, StatusCode, UnhandledError, initLogger } from '../core/index.js'
 import { puristaVersion } from '../version.js'
 import type { AuthCredentials, HttpClientConfig, HttpClientRequestOptions, RestClient } from './types/index.js'
@@ -25,7 +30,7 @@ import type { AuthCredentials, HttpClientConfig, HttpClientRequestOptions, RestC
  * const result = await client.get('v1/orders')
  * ```
  */
-export class HttpClient<CustomConfig extends Record<string, unknown> = {}> implements RestClient {
+export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObject> implements RestClient {
 	public name = 'HttpClient'
 	public logger: Logger
 	public config: HttpClientConfig<CustomConfig>
@@ -201,13 +206,13 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
 		}
 
 		return this.startActiveSpan(`${this.name}.${method}`, { kind: SpanKind.CLIENT }, context.active(), async span => {
-			span.setAttribute(SemanticAttributes.HTTP_METHOD, method)
+			span.setAttribute(SEMATTRS_HTTP_METHOD, method)
 
 			const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: this.config.traceId })
 
 			try {
 				const { url, headers } = this.getUrlAndHeader(path, options)
-				span.setAttribute(SemanticAttributes.HTTP_URL, url.toString())
+				span.setAttribute(SEMATTRS_HTTP_URL, url.toString())
 
 				const response = await fetch(url, {
 					method,
@@ -218,7 +223,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = {}> imple
 					body,
 				})
 
-				span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, response.status)
+				span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, response.status)
 
 				if (!response.ok) {
 					let body = ''

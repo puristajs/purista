@@ -1,9 +1,9 @@
 import type { z } from 'zod'
 
 import type {
-  emailV1ConfirmEmailInputParameterSchema,
-  emailV1ConfirmEmailInputPayloadSchema,
-  emailV1ConfirmEmailOutputPayloadSchema,
+	emailV1ConfirmEmailInputParameterSchema,
+	emailV1ConfirmEmailInputPayloadSchema,
+	emailV1ConfirmEmailOutputPayloadSchema,
 } from './schema.js'
 
 export type EmailV1ConfirmEmailInputParameter = z.input<typeof emailV1ConfirmEmailInputParameterSchema>

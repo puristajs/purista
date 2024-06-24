@@ -14,14 +14,14 @@ limitations under the License.
 import type { KeyValueType } from './KeyValue.type.js'
 
 export type PubSubPublishOptions = {
-  /**
-   * The content type of the message.
-   * This is optional and will be inferred from the payload if not provided.
-   */
-  contentType?: string
+	/**
+	 * The content type of the message.
+	 * This is optional and will be inferred from the payload if not provided.
+	 */
+	contentType?: string
 
-  /**
-   * Metadata to be passed to the publish operation.
-   */
-  metadata?: KeyValueType
+	/**
+	 * Metadata to be passed to the publish operation.
+	 */
+	metadata?: KeyValueType
 }

@@ -50,9 +50,10 @@ export class DefaultSecretStore extends SecretStoreBaseClass<DefaultSecretStoreC
 		...secretNames: SecretNames
 	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
 		const result: Record<string, string | undefined> = {}
-		secretNames.forEach(name => {
+		for (const name of secretNames) {
 			result[name] = this.map.get(name)
-		})
+		}
+
 		return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
 	}
 

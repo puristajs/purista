@@ -3,11 +3,11 @@ import { z } from 'zod'
 
 // define the input parameters
 export const theServiceV1PingInputParameterSchema = extendApi(
-  z.object({
-    param: z.string().optional(),
-    required: z.string(),
-  }),
-  { title: 'ping input parameter schema' },
+	z.object({
+		param: z.string().optional(),
+		required: z.string(),
+	}),
+	{ title: 'ping input parameter schema' },
 )
 
 // define the input payload
@@ -15,5 +15,5 @@ export const theServiceV1PingInputPayloadSchema = extendApi(z.undefined(), { tit
 
 // define the output payload
 export const theServiceV1PingOutputPayloadSchema = extendApi(z.object({ ping: z.boolean() }), {
-  title: 'ping output payload schema',
+	title: 'ping output payload schema',
 })

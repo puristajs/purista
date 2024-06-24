@@ -12,5 +12,5 @@ const commandDefinitions: CommandDefinitionList<any> = [createAccountCommandBuil
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = []
 
 export const accountV1Service = accountV1ServiceBuilder
-  .addCommandDefinition(...commandDefinitions)
-  .addSubscriptionDefinition(...subscriptionDefinitions)
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)

@@ -1,7 +1,7 @@
 import { createSandbox } from 'sinon'
 
 import { theServiceV1Service } from '../../../test/service/theService/v1/index.js'
-import { DefaultEventBridge, EBMessageType } from '../src/index.js'
+import { DefaultEventBridge, EBMessageType, type Service } from '../src/index.js'
 
 describe('command invoke test', () => {
 	const sandbox = createSandbox()
@@ -17,7 +17,7 @@ describe('command invoke test', () => {
 
 	afterAll(async () => {
 		await eventBridge.destroy()
-		service.destroy()
+		await service.destroy()
 		sandbox.restore()
 	})
 

@@ -1,10 +1,10 @@
 import {
-  DeleteParameterCommand,
-  GetParameterCommand,
-  ParameterNotFound,
-  ParameterType,
-  PutParameterCommand,
-  SSMClient,
+	DeleteParameterCommand,
+	GetParameterCommand,
+	ParameterNotFound,
+	ParameterType,
+	PutParameterCommand,
+	SSMClient,
 } from '@aws-sdk/client-ssm'
 import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
 import { ConfigStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
@@ -25,52 +25,52 @@ import type { AWSConfigStoreConfig } from './types.js'
  * It will be removed/overwritten on next get request.
  */
 export class AWSConfigStore extends ConfigStoreBaseClass<AWSConfigStoreConfig> {
-  client: SSMClient
+	client: SSMClient
 
-  constructor(config: StoreBaseConfig<AWSConfigStoreConfig>) {
-    super('AWSConfigStore', { enableCache: true, ...config })
-    this.client = new SSMClient(this.config.client)
-  }
+	constructor(config: StoreBaseConfig<AWSConfigStoreConfig>) {
+		super('AWSConfigStore', { enableCache: true, ...config })
+		this.client = new SSMClient(this.config.client)
+	}
 
-  protected async getConfigImpl<ConfigNames extends string[]>(
-    ...configNames: ConfigNames
-  ): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
-    const result: Record<string, string | undefined> = {}
+	protected async getConfigImpl<ConfigNames extends string[]>(
+		...configNames: ConfigNames
+	): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
+		const result: Record<string, string | undefined> = {}
 
-    for (const name of configNames) {
-      try {
-        const command = new GetParameterCommand({
-          Name: name,
-        })
-        const res = await this.client.send(command)
-        result[name] = res.Parameter?.Value
-      } catch (err) {
-        if (!(err instanceof ParameterNotFound)) {
-          throw UnhandledError.fromError(err, StatusCode.InternalServerError)
-        }
-        result[name] = undefined
-      }
-    }
+		for (const name of configNames) {
+			try {
+				const command = new GetParameterCommand({
+					Name: name,
+				})
+				const res = await this.client.send(command)
+				result[name] = res.Parameter?.Value
+			} catch (err) {
+				if (!(err instanceof ParameterNotFound)) {
+					throw UnhandledError.fromError(err, StatusCode.InternalServerError)
+				}
+				result[name] = undefined
+			}
+		}
 
-    return result as ObjectWithKeysFromStringArray<ConfigNames>
-  }
+		return result as ObjectWithKeysFromStringArray<ConfigNames>
+	}
 
-  protected async removeConfigImpl(configName: string) {
-    const command = new DeleteParameterCommand({
-      Name: configName,
-    })
+	protected async removeConfigImpl(configName: string) {
+		const command = new DeleteParameterCommand({
+			Name: configName,
+		})
 
-    await this.client.send(command)
-  }
+		await this.client.send(command)
+	}
 
-  protected async setConfigImpl(configName: string, configValue: string) {
-    const command = new PutParameterCommand({
-      Name: configName,
-      Value: configValue,
-      Type: ParameterType.STRING,
-      Overwrite: true,
-    })
+	protected async setConfigImpl(configName: string, configValue: string) {
+		const command = new PutParameterCommand({
+			Name: configName,
+			Value: configValue,
+			Type: ParameterType.STRING,
+			Overwrite: true,
+		})
 
-    await this.client.send(command)
-  }
+		await this.client.send(command)
+	}
 }

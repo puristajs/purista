@@ -20,21 +20,21 @@ import type { KeyValueType } from './KeyValue.type.js'
  * PubSubSubscriptionOptionsType defines the options we can pass while subscribing
  */
 export type PubSubSubscriptionOptionsType = {
-  // Metadata
-  metadata?: KeyValueType
+	// Metadata
+	metadata?: KeyValueType
 
-  // The deadletter topic path
-  deadLetterTopic?: string
+	// The deadletter topic path
+	deadLetterTopic?: string
 
-  // The deadletter callback to call
-  deadLetterCallback?: TypeDaprPubSubCallback
+	// The deadletter callback to call
+	deadLetterCallback?: TypeDaprPubSubCallback
 
-  // The default callback
-  callback?: TypeDaprPubSubCallback
+	// The default callback
+	callback?: TypeDaprPubSubCallback
 
-  // The route creation for a single route or DaprPubSubRouteType
-  route?: string | DaprPubSubRouteType
+	// The route creation for a single route or DaprPubSubRouteType
+	route?: string | DaprPubSubRouteType
 
-  // The settings for bulk subscribe
-  bulkSubscribe?: BulkSubscribeConfig
+	// The settings for bulk subscribe
+	bulkSubscribe?: BulkSubscribeConfig
 }

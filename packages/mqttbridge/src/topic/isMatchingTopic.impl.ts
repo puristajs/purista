@@ -6,33 +6,33 @@
  * @returns
  */
 export const isMatchingTopic = (input: string, pattern: string) => {
-  const inputArray = input.split('/')
-  const inLength = inputArray.length
-  const patternArray = pattern.split('/')
-  const paLength = patternArray.length
+	const inputArray = input.split('/')
+	const inLength = inputArray.length
+	const patternArray = pattern.split('/')
+	const paLength = patternArray.length
 
-  if (paLength > inLength) {
-    return false
-  }
+	if (paLength > inLength) {
+		return false
+	}
 
-  if (inLength > paLength && patternArray[paLength - 1] !== '#') {
-    return false
-  }
+	if (inLength > paLength && patternArray[paLength - 1] !== '#') {
+		return false
+	}
 
-  for (const index in patternArray) {
-    const part = patternArray[index]
-    const checkPart = inputArray[index]
+	for (const index in patternArray) {
+		const part = patternArray[index]
+		const checkPart = inputArray[index]
 
-    if (part === '#') {
-      return true
-    }
-    if (part === '+') {
-      continue
-    }
-    if (checkPart !== part) {
-      return false
-    }
-  }
+		if (part === '#') {
+			return true
+		}
+		if (part === '+') {
+			continue
+		}
+		if (checkPart !== part) {
+			return false
+		}
+	}
 
-  return true
+	return true
 }

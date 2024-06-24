@@ -21,7 +21,7 @@
 	},
 	"scripts": {
 		"lint": "npx @biomejs/biome check --write",
-		"test": "vitest",
+		"test": "vitest -c ../../vitest.config.ts",
 		"build": "rimraf dist && tshy",
 		"test:integration": "vitest -c ../../vitest.config.integration.ts"
 	},
@@ -38,19 +38,19 @@
 		"@sodaru/yup-to-json-schema": "^2.0.1",
 		"@types/node": "^20.14.8",
 		"@typeschema/yup": "^0.13.3",
+		"code-block-writer": "^13.0.1",
+		"rimraf": "^5.0.7",
 		"sinon": "^18.0.0",
 		"tshy": "^1.15.1",
-		"rimraf": "^5.0.7",
-		"code-block-writer": "^13.0.1",
-		"yup": "^1.4.0",
-		"vitest": "^1.6.0"
+		"vitest": "^1.6.0",
+		"yup": "^1.4.0"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.0",
+		"@opentelemetry/auto-instrumentations-node": "^0.47.1",
 		"@opentelemetry/resources": "^1.25.1",
 		"@opentelemetry/sdk-trace-node": "^1.25.1",
 		"@opentelemetry/semantic-conventions": "^1.25.1",
-		"@opentelemetry/auto-instrumentations-node": "^0.47.1",
 		"@typeschema/main": "^0.13.10",
 		"@typeschema/zod": "^0.13.3",
 		"openapi3-ts": "^4.3.3",
@@ -61,9 +61,9 @@
 	},
 	"peerDependencies": {
 		"@types/sinon": "^17.0.3",
-		"sinon": "^17.x",
+		"code-block-writer": "^13.x",
 		"rimraf": "^5.x",
-		"code-block-writer": "^13.x"
+		"sinon": "^17.x"
 	},
 	"peerDependenciesMeta": {
 		"@types/sinon": {

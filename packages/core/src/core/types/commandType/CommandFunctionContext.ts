@@ -1,5 +1,6 @@
 import type { ContextBase } from '../ContextBase.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
+import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeFunction } from '../InvokeFunction.js'
 import type { Prettify } from '../Prettify.js'
 import type { Command } from './Command.js'
@@ -16,9 +17,9 @@ import type { Command } from './Command.js'
 export type CommandFunctionContextEnhancements<
 	MessagePayloadType = unknown,
 	MessageParamsType = unknown,
-	Invokes = {},
-	EmitListType = {},
-	Ressources = {},
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
+	Ressources = EmptyObject,
 > = {
 	/** the original message */
 	message: Readonly<Command<MessagePayloadType, MessageParamsType>>
@@ -77,9 +78,9 @@ export type CommandFunctionContextEnhancements<
 export type CommandFunctionContext<
 	MessagePayloadType = unknown,
 	MessageParamsType = unknown,
-	Invokes = {},
-	EmitListType = {},
-	Ressources = {},
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
+	Ressources = EmptyObject,
 > = Prettify<
 	ContextBase &
 		CommandFunctionContextEnhancements<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Ressources>

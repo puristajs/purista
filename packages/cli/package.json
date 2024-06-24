@@ -1,59 +1,54 @@
 {
-  "name": "@purista/cli",
-  "version": "1.11.0",
-  "description": "cli helper for PURISTA backend framework",
-  "homepage": "https://purista.dev",
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:puristajs/purista.git"
-  },
-  "author": "Sebastian Wessel",
-  "license": "ISC",
-  "preferGlobal": "true",
-  "main": "dist/index.js",
-  "type": "module",
-  "bin": {
-    "purista": "./dist/index.js"
-  },
-  "publishConfig": {
-    "access": "public"
-  },
-  "engines": {
-    "node": ">=18.15"
-  },
-  "scripts": {
-    "start": "./dist/index.js",
-    "dev": "tsx src/index.ts",
-    "build": "rimraf dist && tsc --project ./tsconfig.json && chmod 755 dist/index.js",
-    "lint": "npx @biomejs/biome check --write",
-    "test": "vitest"
-  },
-  "tshy": {
-    "exclude": [
-      "src/**/*.test.ts"
-    ],
-    "exports": {
-      "./package.json": "./package.json",
-      ".": "./src/index.ts"
-    }
-  },
-  "devDependencies": {
-    "@types/minimist": "^1.2.5",
-    "@types/node": "^20.14.8",
-    "rimraf": "^5.0.7",
-    "tshy": "^1.15.1",
-    "tsx": "^4.15.7"
-  },
-  "dependencies": {
-    "camelcase": "^8.0.0",
-    "minimist": "^1.2.8",
-    "plop": "^4.0.1",
-    "ts-morph": "^22.0.0",
-    "zod": "^3.23.8"
-  },
-  "peerDependenciesMeta": {},
-  "files": [
-    "blueprint/**/*",
-    "dist/**/*"
-  ]
+	"name": "@purista/cli",
+	"version": "1.11.0",
+	"description": "cli helper for PURISTA backend framework",
+	"homepage": "https://purista.dev",
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:puristajs/purista.git"
+	},
+	"author": "Sebastian Wessel",
+	"license": "ISC",
+	"preferGlobal": "true",
+	"main": "dist/index.js",
+	"type": "module",
+	"bin": {
+		"purista": "./dist/index.js"
+	},
+	"publishConfig": {
+		"access": "public"
+	},
+	"engines": {
+		"node": ">=18.15"
+	},
+	"scripts": {
+		"start": "./dist/index.js",
+		"dev": "tsx src/index.ts",
+		"build": "rimraf dist && tsc --project ./tsconfig.json && chmod 755 dist/index.js",
+		"lint": "npx @biomejs/biome check --write",
+		"test": "vitest"
+	},
+	"tshy": {
+		"exclude": ["src/**/*.test.ts"],
+		"exports": {
+			"./package.json": "./package.json",
+			".": "./src/index.ts"
+		}
+	},
+	"devDependencies": {
+		"@types/minimist": "^1.2.5",
+		"@types/node": "^20.14.8",
+		"rimraf": "^5.0.7",
+		"tshy": "^1.15.1",
+		"tsx": "^4.15.7"
+	},
+	"dependencies": {
+		"camelcase": "^8.0.0",
+		"minimist": "^1.2.8",
+		"plop": "^4.0.1",
+		"ts-morph": "^22.0.0",
+		"zod": "^3.23.8"
+	},
+	"peerDependenciesMeta": {},
+	"files": ["blueprint/**/*", "dist/**/*"]
 }

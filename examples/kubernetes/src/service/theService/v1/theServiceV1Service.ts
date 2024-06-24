@@ -12,5 +12,5 @@ const commandDefinitions: CommandDefinitionList<any> = [pingCommandBuilder.getDe
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = []
 
 export const theServiceV1Service = theServiceServiceBuilder
-  .addCommandDefinition(...commandDefinitions)
-  .addSubscriptionDefinition(...subscriptionDefinitions)
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)

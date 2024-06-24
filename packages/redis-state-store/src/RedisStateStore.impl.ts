@@ -39,74 +39,74 @@ import type { RedisStoreConfig } from './types.js'
  *
  */
 export class RedisStateStore<
-  M extends RedisModules = RedisModules,
-  F extends RedisFunctions = RedisFunctions,
-  S extends RedisScripts = RedisScripts,
+	M extends RedisModules = RedisModules,
+	F extends RedisFunctions = RedisFunctions,
+	S extends RedisScripts = RedisScripts,
 > extends StateStoreBaseClass<RedisStoreConfig<M, F, S>> {
-  public client: RedisClientType<M, F, S>
+	public client: RedisClientType<M, F, S>
 
-  constructor(config?: StoreBaseConfig<RedisStoreConfig<M, F, S>>) {
-    super('RedisStateStore', { ...config })
-    this.client = createClient(this.config.config)
-    this.client.on('error', (err) => this.logger.error({ err }, 'Redis Client Error'))
-  }
+	constructor(config?: StoreBaseConfig<RedisStoreConfig<M, F, S>>) {
+		super('RedisStateStore', { ...config })
+		this.client = createClient(this.config.config)
+		this.client.on('error', err => this.logger.error({ err }, 'Redis Client Error'))
+	}
 
-  protected async getClient() {
-    if (this.client.isOpen) {
-      return this.client
-    }
-    return this.client.connect()
-  }
+	protected async getClient() {
+		if (this.client.isOpen) {
+			return this.client
+		}
+		return this.client.connect()
+	}
 
-  protected async getStateImpl<StateNames extends string[]>(
-    ...stateNames: StateNames
-  ): Promise<ObjectWithKeysFromStringArray<StateNames>> {
-    const client = await this.getClient()
+	protected async getStateImpl<StateNames extends string[]>(
+		...stateNames: StateNames
+	): Promise<ObjectWithKeysFromStringArray<StateNames>> {
+		const client = await this.getClient()
 
-    const result: Record<string, unknown> = {}
-    for await (const name of stateNames) {
-      try {
-        const value = await client.get(name)
-        result[name] = value ? JSON.parse(value) : undefined
-      } catch (err) {
-        const msg = `error in state store getting value ${name}`
-        this.logger.error({ err }, msg)
-        throw new UnhandledError(StatusCode.InternalServerError, msg)
-      }
-    }
-    return result as ObjectWithKeysFromStringArray<StateNames>
-  }
+		const result: Record<string, unknown> = {}
+		for await (const name of stateNames) {
+			try {
+				const value = await client.get(name)
+				result[name] = value ? JSON.parse(value) : undefined
+			} catch (err) {
+				const msg = `error in state store getting value ${name}`
+				this.logger.error({ err }, msg)
+				throw new UnhandledError(StatusCode.InternalServerError, msg)
+			}
+		}
+		return result as ObjectWithKeysFromStringArray<StateNames>
+	}
 
-  protected async removeStateImpl(stateName: string) {
-    const client = await this.getClient()
+	protected async removeStateImpl(stateName: string) {
+		const client = await this.getClient()
 
-    try {
-      await client.del(stateName)
-    } catch (err) {
-      const msg = `error in state store removing value ${stateName}`
-      this.logger.error({ err }, msg)
-      throw new UnhandledError(StatusCode.InternalServerError, msg)
-    }
-  }
+		try {
+			await client.del(stateName)
+		} catch (err) {
+			const msg = `error in state store removing value ${stateName}`
+			this.logger.error({ err }, msg)
+			throw new UnhandledError(StatusCode.InternalServerError, msg)
+		}
+	}
 
-  protected async setStateImpl(stateName: string, stateValue: unknown) {
-    if (!this.config.enableSet) {
-      throw new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
-    }
+	protected async setStateImpl(stateName: string, stateValue: unknown) {
+		if (!this.config.enableSet) {
+			throw new UnhandledError(StatusCode.Unauthorized, 'set state at store is disabled by config')
+		}
 
-    const client = await this.getClient()
-    try {
-      await client.set(stateName, JSON.stringify(stateValue))
-    } catch (err) {
-      const msg = `error in state store setting value ${stateName}`
-      this.logger.error({ err }, msg)
-      throw new UnhandledError(StatusCode.InternalServerError, msg)
-    }
-  }
+		const client = await this.getClient()
+		try {
+			await client.set(stateName, JSON.stringify(stateValue))
+		} catch (err) {
+			const msg = `error in state store setting value ${stateName}`
+			this.logger.error({ err }, msg)
+			throw new UnhandledError(StatusCode.InternalServerError, msg)
+		}
+	}
 
-  async destroy() {
-    if (this.client.isOpen) {
-      await this.client.disconnect()
-    }
-  }
+	async destroy() {
+		if (this.client.isOpen) {
+			await this.client.disconnect()
+		}
+	}
 }

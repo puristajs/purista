@@ -12,14 +12,14 @@ import { logSubscriptionBuilder } from './subscription/log/index.js'
 // other service config should be done in ./pingServiceBuilder.ts file
 
 const commandDefinitions: CommandDefinitionList<any> = [
-  pingCommandBuilder.getDefinition(),
-  fooCommandBuilder.getDefinition(),
-  paramTestCommandBuilder.getDefinition(),
-  deleteCommandBuilder.getDefinition(),
+	pingCommandBuilder.getDefinition(),
+	fooCommandBuilder.getDefinition(),
+	paramTestCommandBuilder.getDefinition(),
+	deleteCommandBuilder.getDefinition(),
 ]
 
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = [logSubscriptionBuilder.getDefinition()]
 
 export const pingV1Service = pingV1ServiceBuilder
-  .addCommandDefinition(...commandDefinitions)
-  .addSubscriptionDefinition(...subscriptionDefinitions)
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)

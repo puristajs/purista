@@ -30,3 +30,5 @@ __snapshots__
 
 .tshy-build
 .tshy
+
+gcloud-credentials.json

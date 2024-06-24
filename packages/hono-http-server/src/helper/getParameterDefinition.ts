@@ -4,38 +4,41 @@ import { isReferenceObject } from 'openapi3-ts/oas31'
 const findPathParamsRegex = /:[^:/]+/gm
 
 export const getParameterDefinition = (path: string, parameterschema?: SchemaObject): ParameterObject[] => {
-  const routeParams: string[] = []
-  let m: RegExpExecArray | null
+	const routeParams: string[] = []
+	let m: RegExpExecArray | null
 
-  while ((m = findPathParamsRegex.exec(path)) !== null) {
-    if (m.index === findPathParamsRegex.lastIndex) {
-      findPathParamsRegex.lastIndex++
-    }
+	while (true) {
+		m = findPathParamsRegex.exec(path)
+		if (m === null) {
+			break
+		}
+		if (m.index === findPathParamsRegex.lastIndex) {
+			findPathParamsRegex.lastIndex++
+		}
+		routeParams.push(...m.map(name => name))
+	}
 
-    routeParams.push(...m.map((name) => name))
-  }
+	return routeParams.map(pathParamName => {
+		const name = pathParamName.replace('?', '').replace(':', '')
+		const required = !pathParamName.endsWith('?')
 
-  return routeParams.map((pathParamName) => {
-    const name = pathParamName.replace('?', '').replace(':', '')
-    const required = !pathParamName.endsWith('?')
+		const schema = parameterschema?.properties?.[name]
 
-    const schema = parameterschema?.properties?.[name]
+		if (!!schema && isReferenceObject(schema)) {
+			return {
+				in: 'path',
+				name,
+				required,
+				...schema,
+			}
+		}
 
-    if (!!schema && isReferenceObject(schema)) {
-      return {
-        in: 'path',
-        name,
-        required,
-        ...schema,
-      }
-    }
-
-    return {
-      in: 'path',
-      name,
-      required,
-      schema,
-      description: schema?.description ?? schema?.title,
-    }
-  })
+		return {
+			in: 'path',
+			name,
+			required,
+			schema,
+			description: schema?.description ?? schema?.title,
+		}
+	})
 }

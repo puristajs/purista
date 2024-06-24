@@ -2,6 +2,7 @@ import type { Schema } from '@typeschema/main'
 import type { SchemaObject } from 'openapi3-ts/oas31'
 
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
+import type { EmptyObject } from '../EmptyObject.js'
 import type { FromEmitToOtherType } from '../FromEmitToOtherType.js'
 import type { FromInvokeToOtherType } from '../FromInvokeToOtherType.js'
 import type { ServiceClass } from '../ServiceClass.js'
@@ -26,8 +27,8 @@ export type CommandDefinition<
 	FunctionPayloadType = MessagePayloadType,
 	FunctionParamsType = MessageParamsType,
 	FunctionResultType = unknown,
-	Invokes = {},
-	EmitListType = {},
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
 > = {
 	/** the name of the command */
 	commandName: string

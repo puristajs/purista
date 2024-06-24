@@ -12,5 +12,5 @@ const commandDefinitions: CommandDefinitionList<any> = []
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = [sendWelcomeEmailSubscriptionBuilder.getDefinition()]
 
 export const emailV1Service = emailV1ServiceBuilder
-  .addCommandDefinition(...commandDefinitions)
-  .addSubscriptionDefinition(...subscriptionDefinitions)
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)

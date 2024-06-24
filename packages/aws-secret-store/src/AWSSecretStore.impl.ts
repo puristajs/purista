@@ -1,17 +1,17 @@
 import {
-  CreateSecretCommand,
-  DeleteSecretCommand,
-  GetSecretValueCommand,
-  ResourceNotFoundException,
-  SecretsManagerClient,
-  UpdateSecretCommand,
+	CreateSecretCommand,
+	DeleteSecretCommand,
+	GetSecretValueCommand,
+	ResourceNotFoundException,
+	SecretsManagerClient,
+	UpdateSecretCommand,
 } from '@aws-sdk/client-secrets-manager'
 import {
-  type ObjectWithKeysFromStringArray,
-  SecretStoreBaseClass,
-  StatusCode,
-  type StoreBaseConfig,
-  UnhandledError,
+	type ObjectWithKeysFromStringArray,
+	SecretStoreBaseClass,
+	StatusCode,
+	type StoreBaseConfig,
+	UnhandledError,
 } from '@purista/core'
 
 import type { AWSSecretStoreConfig } from './types.js'
@@ -30,69 +30,68 @@ import type { AWSSecretStoreConfig } from './types.js'
  * It will be removed/overwritten on next get request.
  */
 export class AWSSecretStore extends SecretStoreBaseClass<AWSSecretStoreConfig> {
-  client: SecretsManagerClient
+	client: SecretsManagerClient
 
-  constructor(config: StoreBaseConfig<AWSSecretStoreConfig>) {
-    super('AWSSecretStore', { enableCache: true, ...config })
-    this.client = new SecretsManagerClient(this.config.client)
-  }
+	constructor(config: StoreBaseConfig<AWSSecretStoreConfig>) {
+		super('AWSSecretStore', { enableCache: true, ...config })
+		this.client = new SecretsManagerClient(this.config.client)
+	}
 
-  protected async getSecretImpl<SecretNames extends string[]>(
-    ...secretNames: SecretNames
-  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
-    const result: Record<string, string | undefined> = {}
+	protected async getSecretImpl<SecretNames extends string[]>(
+		...secretNames: SecretNames
+	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
+		const result: Record<string, string | undefined> = {}
 
-    for (const name of secretNames) {
-      try {
-        const command = new GetSecretValueCommand({
-          SecretId: name,
-        })
-        const res = await this.client.send(command)
-        result[name] = res.SecretString
-      } catch (err) {
-        if (!(err instanceof ResourceNotFoundException)) {
-          throw UnhandledError.fromError(err, StatusCode.InternalServerError)
-        } else {
-          result[name] = undefined
-        }
-      }
-    }
+		for (const name of secretNames) {
+			try {
+				const command = new GetSecretValueCommand({
+					SecretId: name,
+				})
+				const res = await this.client.send(command)
+				result[name] = res.SecretString
+			} catch (err) {
+				if (!(err instanceof ResourceNotFoundException)) {
+					throw UnhandledError.fromError(err, StatusCode.InternalServerError)
+				}
+				result[name] = undefined
+			}
+		}
 
-    return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
-  }
+		return result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
+	}
 
-  protected async removeSecretImpl(secretName: string) {
-    const command = new DeleteSecretCommand({
-      SecretId: secretName,
-    })
+	protected async removeSecretImpl(secretName: string) {
+		const command = new DeleteSecretCommand({
+			SecretId: secretName,
+		})
 
-    await this.client.send(command)
-  }
+		await this.client.send(command)
+	}
 
-  protected async setSecretImpl(secretName: string, secretValue: string) {
-    try {
-      const command = new UpdateSecretCommand({
-        SecretId: secretName,
-        SecretString: secretValue,
-      })
+	protected async setSecretImpl(secretName: string, secretValue: string) {
+		try {
+			const command = new UpdateSecretCommand({
+				SecretId: secretName,
+				SecretString: secretValue,
+			})
 
-      await this.client.send(command)
-    } catch (err) {
-      if (err instanceof ResourceNotFoundException) {
-        const createCommand = new CreateSecretCommand({
-          Name: secretName,
-          SecretString: secretValue,
-        })
+			await this.client.send(command)
+		} catch (err) {
+			if (err instanceof ResourceNotFoundException) {
+				const createCommand = new CreateSecretCommand({
+					Name: secretName,
+					SecretString: secretValue,
+				})
 
-        await this.client.send(createCommand)
+				await this.client.send(createCommand)
 
-        const command = new UpdateSecretCommand({
-          SecretId: secretName,
-          SecretString: secretValue,
-        })
+				const command = new UpdateSecretCommand({
+					SecretId: secretName,
+					SecretString: secretValue,
+				})
 
-        await this.client.send(command)
-      }
-    }
-  }
+				await this.client.send(command)
+			}
+		}
+	}
 }
