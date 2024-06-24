@@ -12,5 +12,5 @@ const commandDefinitions: CommandDefinitionList<any> = [fooBarCommandBuilder.get
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = []
 
 export const delayV1Service = delayV1ServiceBuilder
-  .addCommandDefinition(...commandDefinitions)
-  .addSubscriptionDefinition(...subscriptionDefinitions)
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)

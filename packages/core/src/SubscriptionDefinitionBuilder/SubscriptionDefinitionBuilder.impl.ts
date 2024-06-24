@@ -8,6 +8,7 @@ import type {
 	DefinitionEventBridgeConfig,
 	EBMessage,
 	EBMessageType,
+	EmptyObject,
 	FromEmitToOtherType,
 	FromInvokeToOtherType,
 	InstanceId,
@@ -42,15 +43,15 @@ import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunction
  */
 export class SubscriptionDefinitionBuilder<
 	ServiceClassType extends ServiceClass = ServiceClass,
-	Ressources extends {} = {},
+	Ressources extends {} = EmptyObject,
 	MessagePayloadType = unknown,
 	MessageParamsType = undefined,
 	MessageResultType = void,
 	PayloadSchema extends Schema = ZodAny,
 	ParameterSchema extends Schema = ZodAny,
 	ResultSchema extends Schema = ZodAny,
-	Invokes = {},
-	EmitListType = {},
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
 > {
 	private messageType: EBMessageType | undefined
 

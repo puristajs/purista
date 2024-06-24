@@ -12,9 +12,9 @@ limitations under the License.
 */
 
 export enum DaprPubSubStatusEnum {
-  SUCCESS = 'SUCCESS', // Message is processed successfully
-  RETRY = 'RETRY', // Message to be retried by Dapr
-  DROP = 'DROP', // Warning is logged and message is dropped
+	SUCCESS = 'SUCCESS', // Message is processed successfully
+	RETRY = 'RETRY', // Message to be retried by Dapr
+	DROP = 'DROP', // Warning is logged and message is dropped
 }
 
 export default DaprPubSubStatusEnum

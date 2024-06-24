@@ -1,3 +1,4 @@
+import type { EmptyObject } from '../EmptyObject.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { CommandFunctionContext } from './CommandFunctionContext.js'
 
@@ -13,9 +14,9 @@ export type CommandFunction<
 	FunctionPayloadType = MessagePayloadType,
 	FunctionParamsType = MessageParamsType,
 	FunctionResultType = unknown,
-	Invokes = {},
-	EmitListType = {},
-	Ressources = {},
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
+	Ressources = EmptyObject,
 > = (
 	/** the service class */
 	this: ServiceClassType,

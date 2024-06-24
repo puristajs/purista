@@ -11,14 +11,14 @@ import { theServiceServiceBuilder } from './theServiceServiceBuilder.js'
 // other service config should be done in ./theServiceServiceBuilder.ts file
 
 const commandDefinitions: CommandDefinitionList<any> = [
-  pingCommandBuilder.getDefinition(),
-  fooCommandBuilder.getDefinition(),
-  invokeFooCommandBuilder.getDefinition(),
-  invokeFooFailedCommandBuilder.getDefinition(),
+	pingCommandBuilder.getDefinition(),
+	fooCommandBuilder.getDefinition(),
+	invokeFooCommandBuilder.getDefinition(),
+	invokeFooFailedCommandBuilder.getDefinition(),
 ]
 
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = []
 
 export const theServiceV1Service = theServiceServiceBuilder
-  .addCommandDefinition(...commandDefinitions)
-  .addSubscriptionDefinition(...subscriptionDefinitions)
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)

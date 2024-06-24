@@ -17,8 +17,8 @@ import type { KeyValueType } from './KeyValue.type.js'
  * PubSubBulkPublishEntry defines an entry in a bulk publish request.
  */
 export type PubSubBulkPublishEntry = {
-  entryID: string
-  event: object | string
-  metadata: KeyValueType
-  contentType: string
+	entryID: string
+	event: object | string
+	metadata: KeyValueType
+	contentType: string
 }

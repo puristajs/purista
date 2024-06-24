@@ -1,39 +1,39 @@
 {
-  "name": "@purista/hono-example",
-  "version": "1.11.0",
-  "description": "purista backend framework",
-  "homepage": "https://purista.dev",
-  "private": true,
-  "repository": {
-    "type": "git",
-    "url": "git@github.com:puristajs/purista.git"
-  },
-  "author": "Sebastian Wessel",
-  "license": "ISC",
-  "main": "src/index.ts",
-  "type": "module",
-  "engines": {
-    "node": ">=18.15"
-  },
-  "scripts": {
-    "start": "tsx src/index.ts | pino-pretty",
-    "dev": "tsx watch src/index.ts | pino-pretty",
-    "lint": "npx @biomejs/biome check --write",
-    "test": "vitest"
-  },
-  "devDependencies": {
-    "@types/node": "^20.14.8",
-    "pino-pretty": "^11.2.1",
-    "sinon": "^18.0.0",
-    "tsx": "^4.15.7",
-    "typescript": "^5.5.2",
-    "vitest": "^1.6.0"
-  },
-  "dependencies": {
-    "@hono/node-server": "^1.11.4",
-    "@hono/swagger-ui": "^0.3.0",
-    "@purista/core": "*",
-    "@purista/hono-http-server": "^1.9.0",
-    "zod": "3.23.8"
-  }
+	"name": "@purista/hono-example",
+	"version": "1.11.0",
+	"description": "purista backend framework",
+	"homepage": "https://purista.dev",
+	"private": true,
+	"repository": {
+		"type": "git",
+		"url": "git@github.com:puristajs/purista.git"
+	},
+	"author": "Sebastian Wessel",
+	"license": "ISC",
+	"main": "src/index.ts",
+	"type": "module",
+	"engines": {
+		"node": ">=18.15"
+	},
+	"scripts": {
+		"start": "tsx src/index.ts | pino-pretty",
+		"dev": "tsx watch src/index.ts | pino-pretty",
+		"lint": "npx @biomejs/biome check --write",
+		"test": "vitest"
+	},
+	"devDependencies": {
+		"@types/node": "^20.14.8",
+		"pino-pretty": "^11.2.1",
+		"sinon": "^18.0.0",
+		"tsx": "^4.15.7",
+		"typescript": "^5.5.2",
+		"vitest": "^1.6.0"
+	},
+	"dependencies": {
+		"@hono/node-server": "^1.11.4",
+		"@hono/swagger-ui": "^0.3.0",
+		"@purista/core": "*",
+		"@purista/hono-http-server": "^1.9.0",
+		"zod": "3.23.8"
+	}
 }

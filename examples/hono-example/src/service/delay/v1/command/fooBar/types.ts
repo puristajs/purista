@@ -1,9 +1,9 @@
 import type { z } from 'zod'
 
 import type {
-  delayV1FooBarInputParameterSchema,
-  delayV1FooBarInputPayloadSchema,
-  delayV1FooBarOutputPayloadSchema,
+	delayV1FooBarInputParameterSchema,
+	delayV1FooBarInputPayloadSchema,
+	delayV1FooBarOutputPayloadSchema,
 } from './schema.js'
 
 export type DelayV1FooBarInputParameter = z.input<typeof delayV1FooBarInputParameterSchema>

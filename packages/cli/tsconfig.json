@@ -1,17 +1,17 @@
 {
-  "compilerOptions": {
-    // Required
-    "module": "ESNext",
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "moduleResolution": "node",
-    // Not required
-    "strict": true,
-    "baseUrl": "./",
-    "paths": {
-      "plop": ["../../src/plop.d.ts"]
-    },
-    "outDir": "./dist"
-  },
-  "include": ["./src","./blueprint"]
+	"compilerOptions": {
+		// Required
+		"module": "ESNext",
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"moduleResolution": "node",
+		// Not required
+		"strict": true,
+		"baseUrl": "./",
+		"paths": {
+			"plop": ["../../src/plop.d.ts"]
+		},
+		"outDir": "./dist"
+	},
+	"include": ["./src", "./blueprint"]
 }

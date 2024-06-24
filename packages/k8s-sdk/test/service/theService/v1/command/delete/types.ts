@@ -1,9 +1,9 @@
 import type { z } from 'zod'
 
 import type {
-  theServiceV1DeleteInputParameterSchema,
-  theServiceV1DeleteInputPayloadSchema,
-  theServiceV1DeleteOutputPayloadSchema,
+	theServiceV1DeleteInputParameterSchema,
+	theServiceV1DeleteInputPayloadSchema,
+	theServiceV1DeleteOutputPayloadSchema,
 } from './schema.js'
 
 export type TheServiceV1DeleteInputParameter = z.input<typeof theServiceV1DeleteInputParameterSchema>

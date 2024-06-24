@@ -17,9 +17,9 @@ import type { TypeDaprPubSubCallback } from './DaprPubSubCallback.type.js'
  * This defines the routeName object
  */
 export type PubSubSubscriptionTopicRouteType = {
-  // Our event handlers
-  eventHandlers: TypeDaprPubSubCallback[]
+	// Our event handlers
+	eventHandlers: TypeDaprPubSubCallback[]
 
-  // The path on the server (e.g. POST /my-path)
-  path: string
+	// The path on the server (e.g. POST /my-path)
+	path: string
 }

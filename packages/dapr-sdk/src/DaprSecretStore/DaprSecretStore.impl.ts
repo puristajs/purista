@@ -15,82 +15,82 @@ import type { DaprSecretStoreConfig } from './types/index.js'
  * Dapr currently provides only the possibility to fetch a secret. Creating a new secret, changing an existing secret or removal of secrets is not supported.
  */
 export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig> {
-  private client: HttpClient<DaprClientConfig>
+	private client: HttpClient<DaprClientConfig>
 
-  constructor(config?: StoreBaseConfig<DaprSecretStoreConfig>) {
-    super(config?.secretStoreName ?? 'DaprSecretStore', { ...config })
-    const logger = this.logger
-    const conf = {
-      secretStoreName: 'secretStore',
-      logger,
-      ...config,
-      clientConfig: {
-        ...getDefaultClientConfig(),
-        ...config?.clientConfig,
-      },
-    }
+	constructor(config?: StoreBaseConfig<DaprSecretStoreConfig>) {
+		super(config?.secretStoreName ?? 'DaprSecretStore', { ...config })
+		const logger = this.logger
+		const conf = {
+			secretStoreName: 'secretStore',
+			logger,
+			...config,
+			clientConfig: {
+				...getDefaultClientConfig(),
+				...config?.clientConfig,
+			},
+		}
 
-    let baseUrl = `${conf.clientConfig.daprHost}:${conf.clientConfig.daprPort}`
-    if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
-      baseUrl = `http://${baseUrl}`
-    }
+		let baseUrl = `${conf.clientConfig.daprHost}:${conf.clientConfig.daprPort}`
+		if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+			baseUrl = `http://${baseUrl}`
+		}
 
-    const defaultHeaders: Record<string, string> = {
-      'content-type': 'application/json; charset=utf-8',
-    }
+		const defaultHeaders: Record<string, string> = {
+			'content-type': 'application/json; charset=utf-8',
+		}
 
-    if (conf.clientConfig.daprApiToken) {
-      defaultHeaders['dapr-api-token'] = conf.clientConfig.daprApiToken
-      defaultHeaders['user-agent'] = `purista-dapr-client/v${puristaVersion} http/1`
-    }
+		if (conf.clientConfig.daprApiToken) {
+			defaultHeaders['dapr-api-token'] = conf.clientConfig.daprApiToken
+			defaultHeaders['user-agent'] = `purista-dapr-client/v${puristaVersion} http/1`
+		}
 
-    this.client = new HttpClient<DaprClientConfig>({
-      logger,
-      baseUrl,
-      defaultHeaders,
-      ...conf.clientConfig,
-    })
-  }
+		this.client = new HttpClient<DaprClientConfig>({
+			logger,
+			baseUrl,
+			defaultHeaders,
+			...conf.clientConfig,
+		})
+	}
 
-  protected async getSecretImpl<SecretNames extends string[]>(
-    ...secretNames: SecretNames
-  ): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
-    const fetchSecretFromStore = async (secretName: string) => {
-      const path = join(
-        this.config.clientConfig?.daprApiToken ?? DAPR_API_VERSION,
-        'secrets',
-        this.config.secretStoreName as string,
-        secretName,
-      )
+	protected async getSecretImpl<SecretNames extends string[]>(
+		...secretNames: SecretNames
+	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
+		const fetchSecretFromStore = async (secretName: string) => {
+			const path = join(
+				this.config.clientConfig?.daprApiToken ?? DAPR_API_VERSION,
+				'secrets',
+				this.config.secretStoreName as string,
+				secretName,
+			)
 
-      const query: Record<string, string> = {}
+			const query: Record<string, string> = {}
 
-      if (this.config.metadata?.namespace) {
-        query['metadata.namespace'] = this.config.metadata?.namespace
-      }
+			if (this.config.metadata?.namespace) {
+				query['metadata.namespace'] = this.config.metadata?.namespace
+			}
 
-      return this.client.get<Record<string, string>>(path, { query })
-    }
+			return this.client.get<Record<string, string>>(path, { query })
+		}
 
-    const result = await Promise.all(secretNames.map((secretName) => fetchSecretFromStore(secretName)))
+		const result = await Promise.all(secretNames.map(secretName => fetchSecretFromStore(secretName)))
 
-    let returnValue: Record<string, string> = {}
+		let returnValue: Record<string, string> = {}
 
-    secretNames.forEach((value, index) => {
-      returnValue = {
-        ...result[index],
-        ...returnValue,
-      }
-    })
+		secretNames.forEach((value, index) => {
+			returnValue = {
+				...result[index],
+				...returnValue,
+			}
+		})
 
-    return returnValue as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
-  }
+		return returnValue as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
+	}
 
-  protected async setSecretImpl(_secretName: string) {
-    throw new UnhandledError(StatusCode.NotImplemented, 'setting or changing of secrets is not available')
-  }
+	protected async setSecretImpl(_secretName: string) {
+		throw new UnhandledError(StatusCode.NotImplemented, 'setting or changing of secrets is not available')
+	}
 
-  protected async removeSecretImpl(_secretName: string) {
-    throw new UnhandledError(StatusCode.NotImplemented, 'removing of secrets is not available')
-  }
+	protected async removeSecretImpl(_secretName: string) {
+		throw new UnhandledError(StatusCode.NotImplemented, 'removing of secrets is not available')
+	}
 }

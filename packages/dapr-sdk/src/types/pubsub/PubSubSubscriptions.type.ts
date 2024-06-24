@@ -17,6 +17,6 @@ import type { PubSubSubscriptionType } from './PubSubSubscription.type.js'
  * This defines the entire object containing pubsubNames
  */
 export type PubSubSubscriptionsType = {
-  // The key of a pubsubName
-  [key: string]: PubSubSubscriptionType
+	// The key of a pubsubName
+	[key: string]: PubSubSubscriptionType
 }

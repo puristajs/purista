@@ -17,12 +17,12 @@ limitations under the License.
  * BulkSubscribeConfig defines the configuration for a bulk subscription
  **/
 export type BulkSubscribeConfig = {
-  // Flag to enable/disable bulk subscribe
-  enabled: boolean
+	// Flag to enable/disable bulk subscribe
+	enabled: boolean
 
-  // Max number of messages to be sent in a single bulk request
-  maxMessagesCount?: number
+	// Max number of messages to be sent in a single bulk request
+	maxMessagesCount?: number
 
-  // Max duration to wait for messages to be sent in a single bulk request
-  maxAwaitDurationMs?: number
+	// Max duration to wait for messages to be sent in a single bulk request
+	maxAwaitDurationMs?: number
 }

@@ -1,6 +1,7 @@
 import type { ContextBase } from '../ContextBase.js'
 import type { EBMessage } from '../EBMessage.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
+import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeFunction } from '../InvokeFunction.js'
 import type { Prettify } from '../Prettify.js'
 
@@ -13,7 +14,7 @@ import type { Prettify } from '../Prettify.js'
  *
  * @group Subscription
  */
-export type SubscriptionFunctionContextEnhancements<Invokes = {}, EmitListType = {}> = {
+export type SubscriptionFunctionContextEnhancements<Invokes = EmptyObject, EmitListType = EmptyObject> = {
 	/** the original message */
 	message: Readonly<EBMessage>
 	/** emit a custom message */
@@ -63,6 +64,6 @@ export type SubscriptionFunctionContextEnhancements<Invokes = {}, EmitListType =
  *
  * @group Subscription
  */
-export type SubscriptionFunctionContext<Invokes = {}, EmitListType = {}> = Prettify<
+export type SubscriptionFunctionContext<Invokes = EmptyObject, EmitListType = EmptyObject> = Prettify<
 	ContextBase & SubscriptionFunctionContextEnhancements<Invokes, EmitListType>
 >

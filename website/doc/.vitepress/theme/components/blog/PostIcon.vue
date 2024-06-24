@@ -2,7 +2,7 @@
 import type { Post } from '../../composables/posts.data.js'
 
 const props = defineProps<{
-    post: Post
+	post: Post
 }>()
 
 const category: string = props.post.data.category ? props.post.data.category : 'Article'

@@ -38,7 +38,9 @@ export const metaToFunctionHttp = (
 	}[] = [...pathParams]
 
 	if (queries) {
-		queries.forEach(query => params.push(query))
+		for (const query of queries) {
+			params.push(query)
+		}
 	}
 
 	let fnParamString = ''
@@ -52,9 +54,9 @@ export const metaToFunctionHttp = (
 			.blankLine()
 			.write(`export type ${typeNamePrefix}ParameterType = `)
 			.block(() => {
-				params.forEach(param => {
+				for (const param of params) {
 					typeWriter.writeLine(`${param.name}${param.required ? '' : '?'}: string,`)
-				})
+				}
 			})
 	}
 
@@ -94,11 +96,12 @@ export const metaToFunctionHttp = (
 	}
 
 	const writeOptions = () => {
-		queries?.forEach(query =>
+		for (const query of queries ?? []) {
 			codeWriter.writeLine(
 				`if(parameter${query.required ? '' : '?'}.${query.name}) { options.query['${query.name}'] = parameter.${query.name}}`,
-			),
-		)
+			)
+		}
+
 		codeWriter
 			.blankLine()
 			.write('options.headers = ')

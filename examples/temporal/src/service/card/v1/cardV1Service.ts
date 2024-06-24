@@ -11,5 +11,5 @@ const commandDefinitions: CommandDefinitionList<any> = []
 const subscriptionDefinitions: SubscriptionDefinitionList<any> = []
 
 export const cardV1Service = cardV1ServiceBuilder
-  .addCommandDefinition(...commandDefinitions)
-  .addSubscriptionDefinition(...subscriptionDefinitions)
+	.addCommandDefinition(...commandDefinitions)
+	.addSubscriptionDefinition(...subscriptionDefinitions)

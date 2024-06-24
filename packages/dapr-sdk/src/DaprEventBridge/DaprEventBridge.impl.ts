@@ -1,6 +1,6 @@
-import { getDefaultHttpEventBridgeConfig, HttpEventBridge } from '@purista/base-http-bridge'
+import { HttpEventBridge, getDefaultHttpEventBridgeConfig } from '@purista/base-http-bridge'
 import type { CustomMessage, EBMessage, EventBridge, EventBridgeConfig, Subscription } from '@purista/core'
-import { EventBridgeEventNames, initLogger, safeBind, StatusCode, UnhandledError } from '@purista/core'
+import { EventBridgeEventNames, StatusCode, UnhandledError, initLogger, safeBind } from '@purista/core'
 
 import { DaprClient } from '../DaprClient/index.js'
 import type { DaprPubSubType } from '../types/index.js'
@@ -40,76 +40,76 @@ import type { DaprEventBridgeConfig } from './types/index.js'
  *
  */
 export class DaprEventBridge extends HttpEventBridge<DaprEventBridgeConfig> implements EventBridge {
-  private pubSubSubscriptions: DaprPubSubType[] = []
+	private pubSubSubscriptions: DaprPubSubType[] = []
 
-  constructor(config: EventBridgeConfig<DaprEventBridgeConfig>) {
-    const conf = {
-      ...getDefaultHttpEventBridgeConfig(),
-      ...getDefaultConfig(),
-      ...config,
-    }
+	constructor(config: EventBridgeConfig<DaprEventBridgeConfig>) {
+		const conf = {
+			...getDefaultHttpEventBridgeConfig(),
+			...getDefaultConfig(),
+			...config,
+		}
 
-    const logger = conf.logger ?? initLogger(config.logLevel, { name: conf.name || 'DaprEventBridge' })
+		const logger = conf.logger ?? initLogger(config.logLevel, { name: conf.name || 'DaprEventBridge' })
 
-    const clientConfig = conf.clientConfig
+		const clientConfig = conf.clientConfig
 
-    let baseUrl = `${clientConfig.daprHost}:${clientConfig.daprPort}`
-    if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
-      baseUrl = `http://${baseUrl}`
-    }
+		let baseUrl = `${clientConfig.daprHost}:${clientConfig.daprPort}`
+		if (!baseUrl.startsWith('http://') && !baseUrl.startsWith('https://')) {
+			baseUrl = `http://${baseUrl}`
+		}
 
-    const defaultHeaders: Record<string, string> = {
-      'content-type': 'application/json; charset=utf-8',
-    }
+		const defaultHeaders: Record<string, string> = {
+			'content-type': 'application/json; charset=utf-8',
+		}
 
-    if (clientConfig.daprApiToken) {
-      defaultHeaders['dapr-api-token'] = clientConfig.daprApiToken
-      defaultHeaders['user-agent'] = `purista-dapr-client/v${puristaVersion} http/1`
-    }
+		if (clientConfig.daprApiToken) {
+			defaultHeaders['dapr-api-token'] = clientConfig.daprApiToken
+			defaultHeaders['user-agent'] = `purista-dapr-client/v${puristaVersion} http/1`
+		}
 
-    const client = new DaprClient({
-      logger,
-      baseUrl,
-      defaultHeaders,
-      ...conf,
-    })
+		const client = new DaprClient({
+			logger,
+			baseUrl,
+			defaultHeaders,
+			...conf,
+		})
 
-    super(conf, client)
-  }
+		super(conf, client)
+	}
 
-  async start() {
-    this.app.get('/dapr/subscribe', async (c) => {
-      return c.json(this.pubSubSubscriptions)
-    })
+	async start() {
+		this.app.get('/dapr/subscribe', async c => {
+			return c.json(this.pubSubSubscriptions)
+		})
 
-    /* actors currently not supported/used
+		/* actors currently not supported/used
     this.app.delete('/actors/:actorTypeName/:actorId')
     this.app.put('/actors/:actorTypeName/:actorId/method/:methodName')
     this.app.put('/actors/:actorTypeName/:actorId/method/timer/:timerName')
     this.app.put('/actors/:actorTypeName/:actorId/method/remind/:reminderName')
     */
 
-    this.app.get('/dapr/config', safeBind(configRoute, this))
+		this.app.get('/dapr/config', safeBind(configRoute, this))
 
-    await super.start()
-  }
+		await super.start()
+	}
 
-  async registerSubscription(
-    subscription: Subscription,
-    cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
-  ): Promise<string> {
-    if (!subscription.eventName) {
-      const err = new UnhandledError(StatusCode.InternalServerError, 'only subscriptions by event name are supported')
-      this.emit(EventBridgeEventNames.EventbridgeError, err)
-      throw err
-    }
-    const path = await super.registerSubscription(subscription, cb)
-    this.pubSubSubscriptions.push({
-      pubsubname: this.config.clientConfig?.pubSubName as string,
-      topic: subscription.eventName,
-      route: path,
-    })
+	async registerSubscription(
+		subscription: Subscription,
+		cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
+	): Promise<string> {
+		if (!subscription.eventName) {
+			const err = new UnhandledError(StatusCode.InternalServerError, 'only subscriptions by event name are supported')
+			this.emit(EventBridgeEventNames.EventbridgeError, err)
+			throw err
+		}
+		const path = await super.registerSubscription(subscription, cb)
+		this.pubSubSubscriptions.push({
+			pubsubname: this.config.clientConfig?.pubSubName as string,
+			topic: subscription.eventName,
+			route: path,
+		})
 
-    return path
-  }
+		return path
+	}
 }

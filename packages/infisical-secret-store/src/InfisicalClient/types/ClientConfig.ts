@@ -1,8 +1,8 @@
-import type { HttpClientConfig, Prettify } from '@purista/core'
+import type { EmptyObject, HttpClientConfig, Prettify } from '@purista/core'
 
-export type HttpClientConfigCustom = {}
+export type HttpClientConfigCustom = EmptyObject
 
 export type ClientConfig = Prettify<
-  Required<Pick<HttpClientConfig<HttpClientConfigCustom>, 'bearerToken'>> &
-    Omit<HttpClientConfig<HttpClientConfigCustom>, 'bearerToken'>
+	Required<Pick<HttpClientConfig<HttpClientConfigCustom>, 'bearerToken'>> &
+		Omit<HttpClientConfig<HttpClientConfigCustom>, 'bearerToken'>
 >

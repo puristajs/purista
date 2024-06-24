@@ -5,12 +5,12 @@ import { generalAccountServiceInfo } from '../generalAccountServiceInfo.js'
 import { accountServiceV1ConfigSchema } from './accountServiceConfig.js'
 
 export const accountServiceInfo = {
-  serviceVersion: '1',
-  ...generalAccountServiceInfo,
+	serviceVersion: '1',
+	...generalAccountServiceInfo,
 } as const satisfies ServiceInfoType
 
 // create a service builder instance and assign service config schema and default config.
 
 export const accountV1ServiceBuilder = new ServiceBuilder(accountServiceInfo)
-  .setConfigSchema(accountServiceV1ConfigSchema)
-  .setDefaultConfig({})
+	.setConfigSchema(accountServiceV1ConfigSchema)
+	.setDefaultConfig({})

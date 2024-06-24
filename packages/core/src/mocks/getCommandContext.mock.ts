@@ -5,6 +5,7 @@ import { stub } from 'sinon'
 import type {
 	CommandFunctionContext,
 	EBMessageAddress,
+	EmptyObject,
 	FromEmitToOtherType,
 	FromInvokeToOtherType,
 } from '../core/index.js'
@@ -19,9 +20,9 @@ import { getCommandMessageMock } from './messages/index.js'
 export const getCommandContextMock = <
 	MessagePayloadType = unknown,
 	MessageParamsType = unknown,
-	Invokes = {},
-	EmitListType = {},
-	Ressources = {},
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
+	Ressources = EmptyObject,
 >(
 	payload: MessagePayloadType,
 	parameter: MessageParamsType,
@@ -52,7 +53,7 @@ export const getCommandContextMock = <
 			end: sandbox?.stub() ?? stub(),
 			isRecording: () => true,
 			recordException: (sandbox?.stub() ?? stub()).callsFake((err: any) => {
-				// eslint-disable-next-line no-console
+				// biome-ignore lint/nursery/noConsole: no logger available
 				console.error(err)
 			}),
 		}
@@ -135,6 +136,7 @@ export const getCommandContextMock = <
 
 	const eventList = Object.keys(emitList ?? {}).reduce((prev, current) => {
 		return {
+			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
 			...prev,
 			[current]: sandbox?.stub() ?? stub().resolves(),
 		}

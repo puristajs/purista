@@ -6,16 +6,16 @@ export const pingV1PingInputParameterSchema = extendApi(z.object({}), { title: '
 
 // define the input payload
 export const pingV1PingInputPayloadSchema = extendApi(
-  z.object({
-    ping: extendApi(z.string(), { title: 'Ping input' }),
-  }),
-  { title: 'ping input payload schema' },
+	z.object({
+		ping: extendApi(z.string(), { title: 'Ping input' }),
+	}),
+	{ title: 'ping input payload schema' },
 )
 
 // define the output payload
 export const pingV1PingOutputPayloadSchema = extendApi(
-  z.object({
-    pong: extendApi(z.string(), { title: 'Pong output' }),
-  }),
-  { title: 'ping output payload schema' },
+	z.object({
+		pong: extendApi(z.string(), { title: 'Pong output' }),
+	}),
+	{ title: 'ping output payload schema' },
 )

@@ -6,19 +6,19 @@ import type { MqttBridge } from '../MqttEventBridge.js'
 
 type GetCommandResponseSubscriptionTopicFn = (this: MqttBridge) => string
 export const getCommandResponseSubscriptionTopic: GetCommandResponseSubscriptionTopicFn = function () {
-  return join(
-    this.config.topicPrefix,
-    '+',
-    '+',
-    '+',
-    '+',
-    '+',
-    '+',
-    '+',
-    '+',
-    convertToSnakeCase(this.instanceId as string),
-    '+',
-    '+',
-    '+',
-  )
+	return join(
+		this.config.topicPrefix,
+		'+',
+		'+',
+		'+',
+		'+',
+		'+',
+		'+',
+		'+',
+		'+',
+		convertToSnakeCase(this.instanceId as string),
+		'+',
+		'+',
+		'+',
+	)
 }

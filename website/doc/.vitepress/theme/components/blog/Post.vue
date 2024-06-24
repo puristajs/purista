@@ -3,11 +3,11 @@ import { useData } from 'vitepress'
 import type { Post } from '../../composables/posts.data.js'
 
 const props = defineProps<{
-  post: Post
+	post: Post
 }>()
 const { site } = useData()
 const getImgUrl = (title: string, description: string) =>
-  `https://ogpreview-ten.vercel.app/api/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}`
+	`https://ogpreview-ten.vercel.app/api/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}`
 </script>
 
 <template>

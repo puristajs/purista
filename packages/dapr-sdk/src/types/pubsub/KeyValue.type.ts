@@ -12,5 +12,5 @@ limitations under the License.
 */
 
 export type KeyValueType = {
-  [key: string]: unknown
+	[key: string]: unknown
 }

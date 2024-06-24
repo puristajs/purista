@@ -12,82 +12,82 @@ import { emailV1Service } from './service/email/v1/index.js'
 import { userV1Service } from './service/user/v1/index.js'
 
 export const main = async (getProcessor: () => SpanProcessor) => {
-  // initialize the logging
-  const logger = initLogger()
+	// initialize the logging
+	const logger = initLogger()
 
-  logger.info('application starts')
+	logger.info('application starts')
 
-  const spanProcessor = getProcessor()
+	const spanProcessor = getProcessor()
 
-  // create and init our eventbridge
-  const eventBridge = new AmqpBridge({
-    spanProcessor,
-  })
-  await eventBridge.start()
+	// create and init our eventbridge
+	const eventBridge = new AmqpBridge({
+		spanProcessor,
+	})
+	await eventBridge.start()
 
-  // create and init a webserver
-  const httpServerService = await httpServerV1Service.getInstance(eventBridge, {
-    serviceConfig: httpServerConfig,
-    spanProcessor,
-  })
+	// create and init a webserver
+	const httpServerService = await httpServerV1Service.getInstance(eventBridge, {
+		serviceConfig: httpServerConfig,
+		spanProcessor,
+	})
 
-  const defaultPublicPath = resolve(__dirname, '..', 'public')
+	const defaultPublicPath = resolve(__dirname, '..', 'public')
 
-  // static file handler
-  httpServerService.server?.register(fastifyStatic, {
-    root: defaultPublicPath,
-    decorateReply: false,
-  })
+	// static file handler
+	httpServerService.server?.register(fastifyStatic, {
+		root: defaultPublicPath,
+		decorateReply: false,
+	})
 
-  // start the webserver
-  await httpServerService.start()
+	// start the webserver
+	await httpServerService.start()
 
-  // create a state store
-  const stateStore = new RedisStateStore({ config: { url: 'redis://localhost:6379' } })
-  // create config store
-  const configStore = new DefaultConfigStore({
-    config: {
-      emailProviderUrl: 'https://example.com',
-    },
-  })
-  // create secret store
-  const secretStore = new DefaultSecretStore({
-    config: {
-      emailProviderAuthToken: 'some-secret-token',
-    },
-  })
+	// create a state store
+	const stateStore = new RedisStateStore({ config: { url: 'redis://localhost:6379' } })
+	// create config store
+	const configStore = new DefaultConfigStore({
+		config: {
+			emailProviderUrl: 'https://example.com',
+		},
+	})
+	// create secret store
+	const secretStore = new DefaultSecretStore({
+		config: {
+			emailProviderAuthToken: 'some-secret-token',
+		},
+	})
 
-  const userService = await userV1Service.getInstance(eventBridge, {
-    spanProcessor,
-    stateStore,
-    configStore,
-    secretStore,
-  })
-  await userService.start()
+	const userService = await userV1Service.getInstance(eventBridge, {
+		spanProcessor,
+		stateStore,
+		configStore,
+		secretStore,
+	})
+	await userService.start()
 
-  const emailService = await emailV1Service.getInstance(eventBridge, {
-    spanProcessor,
-    stateStore,
-    configStore,
-    secretStore,
-  })
-  await emailService.start()
+	const emailService = await emailV1Service.getInstance(eventBridge, {
+		spanProcessor,
+		stateStore,
+		configStore,
+		secretStore,
+	})
+	await emailService.start()
 
-  logger.info('application ready')
-  logger.info(`open in browser: http://localhost:${httpServerConfig.port}`)
+	logger.info('application ready')
+	logger.info(`open in browser: http://localhost:${httpServerConfig.port}`)
 
-  gracefulShutdown(logger, [
-    // begin with the event bridge to no longer accept incoming messages
-    eventBridge,
-    userService,
-    emailService,
-    httpServerService,
-    secretStore,
-    stateStore,
-    configStore,
-    {
-      name: 'OTSpanProcessor',
-      destroy: () => spanProcessor.shutdown(),
-    },
-  ])
+	gracefulShutdown(logger, [
+		// begin with the event bridge to no longer accept incoming messages
+		eventBridge,
+		userService,
+		emailService,
+		httpServerService,
+		secretStore,
+		stateStore,
+		configStore,
+		{
+			name: 'OTSpanProcessor',
+			destroy: () => spanProcessor.shutdown(),
+		},
+	])
 }

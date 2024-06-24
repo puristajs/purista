@@ -1,19 +1,24 @@
 import { posix } from 'node:path'
 
-import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
-import { SemanticAttributes } from '@opentelemetry/semantic-conventions'
+import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
+import {
+	SEMATTRS_HTTP_HOST,
+	SEMATTRS_HTTP_METHOD,
+	SEMATTRS_HTTP_STATUS_CODE,
+	SEMATTRS_HTTP_URL,
+} from '@opentelemetry/semantic-conventions'
 import type { Command, HttpExposedServiceMeta, Logger, Service } from '@purista/core'
 import {
-  EBMessageType,
-  HandledError,
-  isCommandErrorResponse,
-  isHttpExposedServiceMeta,
-  PuristaSpanName,
-  serializeOtp,
-  StatusCode,
-  UnhandledError,
+	EBMessageType,
+	HandledError,
+	PuristaSpanName,
+	StatusCode,
+	UnhandledError,
+	isCommandErrorResponse,
+	isHttpExposedServiceMeta,
+	serializeOtp,
 } from '@purista/core'
-import type { Context as HonoContext, Hono } from 'hono'
+import type { Hono, Context as HonoContext } from 'hono'
 import type { StatusCode as HonoStatusCode } from 'hono/utils/http-status'
 
 /**
@@ -25,185 +30,188 @@ import type { StatusCode as HonoStatusCode } from 'hono/utils/http-status'
  * @returns
  */
 export const addServiceEndpoints = (
-  services: Service | Service[] | undefined,
-  app: Hono,
-  logger: Logger,
-  apiMountPath = '/api',
+	services: Service | Service[] | undefined,
+	app: Hono,
+	logger: Logger,
+	apiMountPath = '/api',
 ) => {
-  if (!services) {
-    return
-  }
+	if (!services) {
+		return
+	}
 
-  const exposedServices = Array.isArray(services) ? services : [services]
-  exposedServices.forEach((service) => {
-    service.commandDefinitionList.forEach((definition) => {
-      const metadata = definition.metadata as HttpExposedServiceMeta
-      if (!isHttpExposedServiceMeta(metadata)) {
-        logger.debug('...skip exposing function')
-        return
-      }
+	const exposedServices = Array.isArray(services) ? services : [services]
+	for (const service of exposedServices) {
+		for (const definition of service.commandDefinitionList) {
+			const metadata = definition.metadata as HttpExposedServiceMeta
+			if (!isHttpExposedServiceMeta(metadata)) {
+				logger.debug('...skip exposing function')
+				return
+			}
 
-      const data = metadata.expose
-      const serviceVersion = service.info.serviceVersion
-      const method = metadata.expose.http.method
-      const url = posix.join(apiMountPath || '/api', `v${serviceVersion}`, data.http.path)
+			const data = metadata.expose
+			const serviceVersion = service.info.serviceVersion
+			const method = metadata.expose.http.method
+			const url = posix.join(apiMountPath || '/api', `v${serviceVersion}`, data.http.path)
 
-      const handler = async (c: HonoContext) => {
-        const parentContext = propagation.extract(context.active(), c.req.raw.headers)
+			const handler = async (c: HonoContext) => {
+				const parentContext = propagation.extract(context.active(), c.req.raw.headers)
 
-        return await service
-          .getTracer('PURISTA_k8s_http_server')
-          .startActiveSpan(
-            PuristaSpanName.KubernetesHttpRequest,
-            { kind: SpanKind.SERVER },
-            parentContext,
-            async (span) => {
-              const hostname = process.env.HOSTNAME ?? 'unknown'
+				return await service
+					.getTracer('PURISTA_k8s_http_server')
+					.startActiveSpan(
+						PuristaSpanName.KubernetesHttpRequest,
+						{ kind: SpanKind.SERVER },
+						parentContext,
+						async span => {
+							const hostname = process.env.HOSTNAME ?? 'unknown'
 
-              span.setAttribute(SemanticAttributes.HTTP_URL, c.req.url || '')
-              span.setAttribute(SemanticAttributes.HTTP_METHOD, c.req.method || '')
-              span.setAttribute(SemanticAttributes.HTTP_HOST, hostname)
+							span.setAttribute(SEMATTRS_HTTP_URL, c.req.url || '')
+							span.setAttribute(SEMATTRS_HTTP_METHOD, c.req.method || '')
+							span.setAttribute(SEMATTRS_HTTP_HOST, hostname)
 
-              try {
-                const queryParams: Record<string, string | undefined> = {}
+							try {
+								const queryParams: Record<string, string | undefined> = {}
 
-                // allow only defined parameters
-                if (metadata.expose.http.openApi?.query) {
-                  const parsedQueries = c.req.query()
-                  metadata.expose.http.openApi.query.forEach((qp) => {
-                    queryParams[qp.name] = parsedQueries[qp.name]
-                    if (qp.required && !parsedQueries[qp.name]) {
-                      throw new HandledError(StatusCode.BadRequest, `query parameter ${qp.name} is required`)
-                    }
-                  })
-                }
+								// allow only defined parameters
+								if (metadata.expose.http.openApi?.query) {
+									const parsedQueries = c.req.query()
+									for (const qp of metadata.expose.http.openApi.query) {
+										queryParams[qp.name] = parsedQueries[qp.name]
+										if (qp.required && !parsedQueries[qp.name]) {
+											throw new HandledError(StatusCode.BadRequest, `query parameter ${qp.name} is required`)
+										}
+									}
+								}
 
-                let body
-                if (c.req.method === 'POST' || c.req.method === 'PUT' || c.req.method === 'PATCH') {
-                  body = await c.req.json()
-                }
+								let body: unknown
+								if (c.req.method === 'POST' || c.req.method === 'PUT' || c.req.method === 'PATCH') {
+									body = await c.req.json()
+								}
 
-                const command: Command = {
-                  id: '',
-                  messageType: EBMessageType.Command,
-                  correlationId: '',
-                  timestamp: Date.now(),
-                  contentType: definition.metadata.expose.contentTypeResponse ?? 'application/json',
-                  contentEncoding: definition.metadata.expose.contentEncodingResponse ?? 'utf-8',
-                  otp: serializeOtp(),
-                  receiver: {
-                    serviceName: service.info.serviceName,
-                    serviceVersion: service.info.serviceVersion,
-                    serviceTarget: definition.commandName,
-                  },
-                  sender: {
-                    serviceName: '',
-                    serviceVersion: '',
-                    serviceTarget: '',
-                    instanceId: '',
-                  },
-                  payload: {
-                    payload: body,
-                    parameter: {
-                      ...queryParams,
-                      parameter: c.req.param(),
-                    },
-                  },
-                }
+								const command: Command = {
+									id: '',
+									messageType: EBMessageType.Command,
+									correlationId: '',
+									timestamp: Date.now(),
+									contentType: definition.metadata.expose.contentTypeResponse ?? 'application/json',
+									contentEncoding: definition.metadata.expose.contentEncodingResponse ?? 'utf-8',
+									otp: serializeOtp(),
+									receiver: {
+										serviceName: service.info.serviceName,
+										serviceVersion: service.info.serviceVersion,
+										serviceTarget: definition.commandName,
+									},
+									sender: {
+										serviceName: '',
+										serviceVersion: '',
+										serviceTarget: '',
+										instanceId: '',
+									},
+									payload: {
+										payload: body,
+										parameter: {
+											...queryParams,
+											parameter: c.req.param(),
+										},
+									},
+								}
 
-                const result = await service.executeCommand(command)
+								const result = await service.executeCommand(command)
 
-                if (isCommandErrorResponse(result)) {
-                  span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, result.payload.status)
+								if (isCommandErrorResponse(result)) {
+									span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, result.payload.status)
 
-                  span.setStatus({
-                    code: SpanStatusCode.ERROR,
-                    message: result.payload.message,
-                  })
+									span.setStatus({
+										code: SpanStatusCode.ERROR,
+										message: result.payload.message,
+									})
 
-                  const response = c.json(result.payload, result.payload.status as any)
-                  span.end()
-                  return response
-                }
+									const response = c.json(result.payload, result.payload.status as HonoStatusCode)
+									span.end()
+									return response
+								}
 
-                const header: Record<string, string> = {
-                  'content-type': `${metadata.expose.contentTypeResponse ?? 'application/json'}; charset=${
-                    metadata.expose.contentEncodingResponse ?? 'utf-8'
-                  }`,
-                }
+								const header: Record<string, string> = {
+									'content-type': `${metadata.expose.contentTypeResponse ?? 'application/json'}; charset=${
+										metadata.expose.contentEncodingResponse ?? 'utf-8'
+									}`,
+								}
 
-                propagation.inject(context.active(), header)
+								propagation.inject(context.active(), header)
 
-                // empty response
-                if (result.payload === undefined || result.payload === '') {
-                  span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.NoContent)
-                  span.end()
+								// empty response
+								if (result.payload === undefined || result.payload === '') {
+									span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, StatusCode.NoContent)
+									span.end()
 
-                  c.status(StatusCode.NoContent)
-                  Object.values(header).forEach((val) => c.header(val[0], val[1]))
-                  return c.body(null)
-                }
+									c.status(StatusCode.NoContent)
 
-                span.setAttribute(SemanticAttributes.HTTP_STATUS_CODE, StatusCode.OK)
+									for (const val of Object.entries(header)) {
+										c.header(val[0], val[1])
+									}
+									return c.body(null)
+								}
 
-                const response =
-                  result.contentType !== 'application/json'
-                    ? c.text(result.payload as string, StatusCode.OK, header)
-                    : c.json(result.payload, StatusCode.OK, header)
+								span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, StatusCode.OK)
 
-                span.end()
-                return response
-              } catch (error) {
-                const err =
-                  error instanceof HandledError || error instanceof UnhandledError
-                    ? error
-                    : UnhandledError.fromError(error)
+								const response =
+									result.contentType !== 'application/json'
+										? c.text(result.payload as string, StatusCode.OK, header)
+										: c.json(result.payload, StatusCode.OK, header)
 
-                logger.error({ err, ...span.spanContext() }, err.message)
+								span.end()
+								return response
+							} catch (error) {
+								const err =
+									error instanceof HandledError || error instanceof UnhandledError
+										? error
+										: UnhandledError.fromError(error)
 
-                span.setStatus({
-                  code: SpanStatusCode.ERROR,
-                  message: err.message,
-                })
+								logger.error({ err, ...span.spanContext() }, err.message)
 
-                span.recordException(err)
+								span.setStatus({
+									code: SpanStatusCode.ERROR,
+									message: err.message,
+								})
 
-                const header: Record<string, string> = {
-                  'content-type': `${metadata.expose.contentTypeResponse ?? 'application/json'}; charset=${
-                    metadata.expose.contentEncodingResponse ?? 'utf-8'
-                  }`,
-                }
+								span.recordException(err)
 
-                propagation.inject(context.active(), header)
+								const header: Record<string, string> = {
+									'content-type': `${metadata.expose.contentTypeResponse ?? 'application/json'}; charset=${
+										metadata.expose.contentEncodingResponse ?? 'utf-8'
+									}`,
+								}
 
-                const response = c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode, header)
-                span.end()
-                return response
-              }
-            },
-          )
-      }
+								propagation.inject(context.active(), header)
 
-      logger.debug({ method, url }, `adding ${url}`)
-      switch (method) {
-        case 'GET':
-          app.get(url, handler)
-          break
-        case 'POST':
-          app.post(url, handler)
-          break
-        case 'PATCH':
-          app.patch(url, handler)
-          break
-        case 'PUT':
-          app.put(url, handler)
-          break
-        case 'DELETE':
-          app.delete(url, handler)
-          break
-        default:
-          break
-      }
-    })
-  })
+								const response = c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode, header)
+								span.end()
+								return response
+							}
+						},
+					)
+			}
+
+			logger.debug({ method, url }, `adding ${url}`)
+			switch (method) {
+				case 'GET':
+					app.get(url, handler)
+					break
+				case 'POST':
+					app.post(url, handler)
+					break
+				case 'PATCH':
+					app.patch(url, handler)
+					break
+				case 'PUT':
+					app.put(url, handler)
+					break
+				case 'DELETE':
+					app.delete(url, handler)
+					break
+				default:
+					break
+			}
+		}
+	}
 }

@@ -65,7 +65,7 @@ describe('ServiceBuilder', () => {
 	})
 
 	it('can use a custom service class', async () => {
-		class CustomClass extends Service<{}> {
+		class CustomClass extends Service {
 			customFunction() {
 				return 'custom'
 			}
@@ -87,7 +87,7 @@ describe('ServiceBuilder', () => {
 
 		const eventBridge = getEventBridgeMock(sandbox)
 		const logger = getLoggerMock(sandbox)
-		const serviceInstance = await service.getInstance(eventBridge.mock, {
+		const _serviceInstance = await service.getInstance(eventBridge.mock, {
 			logger: logger.mock,
 			ressources: { x: () => {} },
 		})

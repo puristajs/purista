@@ -12,17 +12,17 @@ export const jestDependencies: string[] = ['@swc/jest', '@types/jest', 'jest']
 export const vitestDependencies: string[] = ['vitest']
 
 export const eslintDependencies: string[] = [
-  '@typescript-eslint/eslint-plugin',
-  '@typescript-eslint/parser',
-  'eslint',
-  'eslint-config-prettier',
-  'eslint-config-standard',
-  'eslint-plugin-import',
-  'eslint-plugin-json',
-  'eslint-plugin-node',
-  'eslint-plugin-prettier',
-  'eslint-plugin-simple-import-sort',
-  'prettier',
+	'@typescript-eslint/eslint-plugin',
+	'@typescript-eslint/parser',
+	'eslint',
+	'eslint-config-prettier',
+	'eslint-config-standard',
+	'eslint-plugin-import',
+	'eslint-plugin-json',
+	'eslint-plugin-node',
+	'eslint-plugin-prettier',
+	'eslint-plugin-simple-import-sort',
+	'prettier',
 ]
 
 export const biomeDependencies: string[] = ['biome']

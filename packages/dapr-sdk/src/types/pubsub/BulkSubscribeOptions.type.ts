@@ -18,15 +18,15 @@ import type { KeyValueType } from './KeyValue.type.js'
  * BulkSubscribeOptions enlists the options for bulk subscribe
  **/
 export type BulkSubscribeOptions = {
-  // The route creation for a single route or DaprPubSubRouteType
-  route?: string | DaprPubSubRouteType
+	// The route creation for a single route or DaprPubSubRouteType
+	route?: string | DaprPubSubRouteType
 
-  // Metadata for the subscription
-  metadata?: KeyValueType
+	// Metadata for the subscription
+	metadata?: KeyValueType
 
-  // Max number of messages to be sent in a single bulk request
-  maxMessagesCount?: number
+	// Max number of messages to be sent in a single bulk request
+	maxMessagesCount?: number
 
-  // Max duration to wait for messages to be sent in a single bulk request
-  maxAwaitDurationMs?: number
+	// Max duration to wait for messages to be sent in a single bulk request
+	maxAwaitDurationMs?: number
 }

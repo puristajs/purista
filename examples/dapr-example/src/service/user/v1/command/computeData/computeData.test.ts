@@ -6,30 +6,30 @@ import { computeDataCommandBuilder } from './computeDataCommandBuilder.js'
 import type { UserV1ComputeDataInputParameter, UserV1ComputeDataInputPayload } from './types.js'
 
 describe('service User version 1 - command computeData', () => {
-  let sandbox = createSandbox()
-  beforeEach(() => {
-    sandbox = createSandbox()
-  })
+	let sandbox = createSandbox()
+	beforeEach(() => {
+		sandbox = createSandbox()
+	})
 
-  afterEach(() => {
-    sandbox.restore()
-  })
+	afterEach(() => {
+		sandbox.restore()
+	})
 
-  test('does not throw', async () => {
-    const service = await userV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
-      logger: getLoggerMock(sandbox).mock,
-    })
+	test('does not throw', async () => {
+		const service = await userV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+			logger: getLoggerMock(sandbox).mock,
+		})
 
-    const computeData = safeBind(computeDataCommandBuilder.getCommandFunction(), service)
+		const computeData = safeBind(computeDataCommandBuilder.getCommandFunction(), service)
 
-    const payload: UserV1ComputeDataInputPayload = 'example value'
+		const payload: UserV1ComputeDataInputPayload = 'example value'
 
-    const parameter: UserV1ComputeDataInputParameter = {}
+		const parameter: UserV1ComputeDataInputParameter = {}
 
-    const context = computeDataCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+		const context = computeDataCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
 
-    const result = await computeData(context.mock, payload, parameter)
+		const result = await computeData(context.mock, payload, parameter)
 
-    expect(result).toStrictEqual({ invoked: 'example value' })
-  })
+		expect(result).toStrictEqual({ invoked: 'example value' })
+	})
 })

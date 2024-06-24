@@ -1,7 +1,7 @@
 import { initLogger } from '../../DefaultLogger/index.js'
 import type { ObjectWithKeysFromStringArray } from '../../helper/index.js'
 import { UnhandledError } from '../Error/index.js'
-import type { Logger, StoreBaseConfig } from '../types/index.js'
+import type { EmptyObject, Logger, StoreBaseConfig } from '../types/index.js'
 import { StatusCode } from '../types/index.js'
 
 /**
@@ -15,7 +15,7 @@ import { StatusCode } from '../types/index.js'
  * __DO NOT OVERWRITE__: the regular methods getState, setState or removeState
  * @group Store
  */
-export abstract class StateStoreBaseClass<StateStoreConfigType extends Record<string, unknown> = {}> {
+export abstract class StateStoreBaseClass<StateStoreConfigType extends Record<string, unknown> = EmptyObject> {
 	logger: Logger
 	config: StoreBaseConfig<StateStoreConfigType>
 

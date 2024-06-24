@@ -4,8 +4,8 @@ import type { SecretsManagerClientConfigType } from '@aws-sdk/client-secrets-man
  * AWS Secret Manager store config
  */
 export type AWSSecretStoreConfig = {
-  /**
-   * AWS client options
-   */
-  client: SecretsManagerClientConfigType
+	/**
+	 * AWS client options
+	 */
+	client: SecretsManagerClientConfigType
 }
