@@ -33,6 +33,7 @@ export type SubscriptionDefinition<
 	FunctionResultType = MessageResultType,
 	Invokes = EmptyObject,
 	EmitListType = EmptyObject,
+	Resources = EmptyObject,
 > = {
 	/** the name of the subscription */
 	subscriptionName: string
@@ -51,7 +52,8 @@ export type SubscriptionDefinition<
 		FunctionParamsType,
 		FunctionResultType,
 		Invokes,
-		EmitListType
+		EmitListType,
+		Resources
 	>
 	/** filter for messages produced by given sender */
 	sender?: {
@@ -86,7 +88,14 @@ export type SubscriptionDefinition<
 		}
 		beforeGuard?: Record<
 			string,
-			SubscriptionBeforeGuardHook<ServiceClassType, FunctionPayloadType, FunctionParamsType, Invokes, EmitListType>
+			SubscriptionBeforeGuardHook<
+				ServiceClassType,
+				FunctionPayloadType,
+				FunctionParamsType,
+				Invokes,
+				EmitListType,
+				Resources
+			>
 		>
 		afterGuard?: Record<
 			string,
@@ -96,7 +105,8 @@ export type SubscriptionDefinition<
 				FunctionPayloadType,
 				FunctionParamsType,
 				Invokes,
-				EmitListType
+				EmitListType,
+				Resources
 			>
 		>
 		transformOutput?: {

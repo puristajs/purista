@@ -17,6 +17,7 @@ import type {
 	EventBridge,
 	LogLevelName,
 	Logger,
+	Prettify,
 	SecretStore,
 	ServiceClass,
 	ServiceConstructorInput,
@@ -26,7 +27,7 @@ import type {
 	SubscriptionDefinitionListResolved,
 } from '../core/index.js'
 import { Service, StatusCode, UnhandledError, initLogger } from '../core/index.js'
-import type { NonEmptyString } from '../helper/index.js'
+import type { InstanceOrType, NonEmptyString } from '../helper/index.js'
 
 export type Newable<T, ConfigType extends {}, Resources extends {}> = new (
 	config: ServiceConstructorInput<ConfigType, Resources>,
@@ -73,7 +74,7 @@ export class ServiceBuilder<
 	 */
 	setConfigSchema<T extends Schema>(schema: T) {
 		this.configSchema = schema
-		return this as unknown as ServiceBuilder<Infer<T>, InferIn<T>, Resources, Service<Infer<T>, Resources>>
+		return this as unknown as ServiceBuilder<Infer<T>, InferIn<T>, Resources, Service<Infer<T>>>
 	}
 
 	/**
@@ -154,22 +155,22 @@ export class ServiceBuilder<
 	}
 
 	/**
-	 * Define the ressources of the service.
+	 * Define the resources of the service.
 	 * Resources are available within commands and subscriptions.
 	 *
 	 * @example
 	 * ```ts
-	 * serviceBuilder.defineResources<'db',MySQL>()
+	 * serviceBuilder.defineResources<'db',MySQL>('db',MySQL)
 	 * ```
 	 *
-	 * @returns The builder with defined types for ressources
+	 * @returns The builder with defined types for resources
 	 */
-	defineRessource<ResourceName extends string, ResourcesType>() {
+	defineResource<ResourceName extends string, ResourcesType>(name: ResourceName, resource: ResourcesType) {
 		return this as unknown as ServiceBuilder<
 			ConfigType,
 			ConfigInputType,
-			Resources & { [K in ResourceName]: ResourcesType },
-			ServiceClass
+			Resources & { [K in ResourceName]: InstanceOrType<ResourcesType> },
+			ServiceClassType
 		>
 	}
 
@@ -178,7 +179,7 @@ export class ServiceBuilder<
 	 * @param customClass - A class which extends the Service class
 	 * @returns The builder itself, but with the type of the service class changed.
 	 */
-	setCustomClass<T extends ServiceClass<ConfigType>>(customClass: Newable<T, ConfigType, Resources>) {
+	setCustomClass<T extends ServiceClass<ConfigType, Resources>>(customClass: Newable<T, ConfigType, Resources>) {
 		this.SClass = customClass
 		return this as unknown as ServiceBuilder<ConfigType, ConfigInputType, Resources, T>
 	}
@@ -196,16 +197,18 @@ export class ServiceBuilder<
 	 */
 	async getInstance(
 		eventBridge: EventBridge,
-		options: {
-			logLevel?: LogLevelName
-			serviceConfig?: Partial<ConfigInputType>
-			logger?: Logger
-			spanProcessor?: SpanProcessor
-			secretStore?: SecretStore
-			configStore?: ConfigStore
-			stateStore?: StateStore
-			ressources?: Resources
-		},
+		options: Prettify<
+			{
+				logLevel?: LogLevelName
+				serviceConfig?: Partial<ConfigInputType>
+				logger?: Logger
+				spanProcessor?: SpanProcessor
+				secretStore?: SecretStore
+				configStore?: ConfigStore
+				stateStore?: StateStore
+				//resources?: Resources
+			} & (keyof Resources extends never ? { resources?: Resources } : { resources: Resources })
+		>,
 	) {
 		const config = {
 			...this.defaultConfig,
@@ -252,7 +255,7 @@ export class ServiceBuilder<
 			configStore,
 			stateStore,
 			configSchema: this.configSchema,
-			ressources: options.ressources,
+			resources: options.resources,
 		})
 
 		return this.instance as ServiceClassType

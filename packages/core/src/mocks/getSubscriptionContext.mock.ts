@@ -17,7 +17,7 @@ import { getLoggerMock } from './getLogger.mock.js'
  *
  * @group Unit test helper
  * */
-export const getSubscriptionContextMock = <Invokes = EmptyObject, EmitListType = EmptyObject>(
+export const getSubscriptionContextMock = <Invokes = EmptyObject, EmitListType = EmptyObject, Resources = EmptyObject>(
 	message: EBMessage,
 	sandbox?: SinonSandbox,
 	_invokes?: FromInvokeToOtherType<
@@ -110,6 +110,23 @@ export const getSubscriptionContextMock = <Invokes = EmptyObject, EmitListType =
 		}) as TFaux
 	}
 
+	const resourceMocks: Record<string, SinonStub> = {}
+
+	const getResourceProxy = <TFaux>(): TFaux => {
+		return new Proxy(() => {}, {
+			get(obj: Record<string, any>, name) {
+				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
+					return undefined
+				}
+				if (!resourceMocks[name]) {
+					resourceMocks[name] = sandbox?.stub() ?? stub()
+					resourceMocks[name].throws(`Resource ${name} not mocked`)
+				}
+				return resourceMocks[name]
+			},
+		}) as TFaux
+	}
+
 	const eventList = Object.keys(emitList ?? {}).reduce((prev, current) => {
 		return {
 			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
@@ -134,9 +151,10 @@ export const getSubscriptionContextMock = <Invokes = EmptyObject, EmitListType =
 		setState: sandbox?.stub() ?? stub(),
 		removeState: sandbox?.stub() ?? stub(),
 		service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
+		resource: getResourceProxy<Resources>(),
 	}
 
-	const mock: SubscriptionFunctionContext<Invokes> = {
+	const mock: SubscriptionFunctionContext<Invokes, EmitListType, Resources> = {
 		logger: logger.mock,
 		message,
 		emit: async <K extends keyof EmitListType, Payload = EmitListType[K]>(eventName: K, payload: Payload) => {
@@ -161,6 +179,7 @@ export const getSubscriptionContextMock = <Invokes = EmptyObject, EmitListType =
 			setState: stubs.setState.rejects(new Error('setState is not stubbed')),
 			removeState: stubs.removeState.rejects(new Error('removeState is not stubbed')),
 		},
+		resource: getResourceProxy<Resources>(),
 	}
 
 	return {

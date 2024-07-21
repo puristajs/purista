@@ -42,7 +42,7 @@ import { getCommandFunctionWithValidation } from './getCommandFunctionWithValida
  */
 export class CommandDefinitionBuilder<
 	ServiceClassType extends ServiceClass,
-	Ressources extends {} = EmptyObject,
+	Resources extends {} = EmptyObject,
 	MessagePayloadType = unknown,
 	MessageParamsType = EmptyObject,
 	MessageResultType = void,
@@ -135,7 +135,7 @@ export class CommandDefinitionBuilder<
 		InferIn<ResultSchema>,
 		Invokes,
 		EmitListType,
-		Ressources
+		Resources
 	>
 
 	// eslint-disable-next-line no-useless-constructor
@@ -208,7 +208,7 @@ export class CommandDefinitionBuilder<
 
 		return this as CommandDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			MessagePayloadType,
 			MessageParamsType,
 			MessageResultType,
@@ -243,7 +243,7 @@ export class CommandDefinitionBuilder<
 
 		return this as CommandDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			MessagePayloadType,
 			MessageParamsType,
 			MessageResultType,
@@ -280,7 +280,7 @@ export class CommandDefinitionBuilder<
 		this.inputSchema = inputSchema as unknown as PayloadSchema
 		return this as unknown as CommandDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			InferIn<T>,
 			MessageParamsType,
 			MessageResultType,
@@ -306,7 +306,7 @@ export class CommandDefinitionBuilder<
 		this.outputSchema = outputSchema as unknown as ResultSchema
 		return this as unknown as CommandDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			MessagePayloadType,
 			MessageParamsType,
 			Infer<T>,
@@ -337,7 +337,7 @@ export class CommandDefinitionBuilder<
 		this.parameterSchema = parameterSchema as unknown as ParameterSchema
 		return this as unknown as CommandDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			MessagePayloadType,
 			InferIn<T>,
 			MessageResultType,
@@ -445,7 +445,7 @@ export class CommandDefinitionBuilder<
 		}
 		return this as unknown as CommandDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			InferIn<TransFormPayloadSchema>,
 			InferIn<TransFormParameterSchema>,
 			MessageResultType,
@@ -507,7 +507,7 @@ export class CommandDefinitionBuilder<
 		}
 		return this as unknown as CommandDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			MessagePayloadType,
 			MessageParamsType,
 			Infer<Output>,
@@ -854,11 +854,11 @@ export class CommandDefinitionBuilder<
 			InferIn<ResultSchema>,
 			Invokes,
 			EmitListType,
-			Ressources
+			Resources
 		>,
 	): CommandDefinitionBuilder<
 		ServiceClassType,
-		Ressources,
+		Resources,
 		MessagePayloadType,
 		MessageParamsType,
 		MessageResultType,
@@ -877,12 +877,12 @@ export class CommandDefinitionBuilder<
 			InferIn<ResultSchema>,
 			Invokes,
 			EmitListType,
-			Ressources
+			Resources
 		>
 
 		return this as unknown as CommandDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			MessagePayloadType,
 			MessageParamsType,
 			MessageResultType,
@@ -940,7 +940,7 @@ export class CommandDefinitionBuilder<
 		InferIn<ResultSchema>,
 		Invokes,
 		EmitListType,
-		Ressources
+		Resources
 	> {
 		if (!this.fn) {
 			throw new UnhandledError(StatusCode.NotImplemented, `No function implementation for ${this.commandName}`, {
@@ -960,7 +960,7 @@ export class CommandDefinitionBuilder<
 	 * @returns a mocked command function context
 	 */
 	getCommandContextMock(payload: MessagePayloadType, parameter: MessageParamsType, sandbox?: SinonSandbox) {
-		return getCommandContextMock<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Ressources>(
+		return getCommandContextMock<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Resources>(
 			payload,
 			parameter,
 			sandbox,

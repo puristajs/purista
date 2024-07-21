@@ -80,9 +80,9 @@ import { subscriptionTransformInput } from './subscriptionTransformInput.impl.js
  *
  * @group Service
  */
-export class Service<ConfigType extends {} = EmptyObject, Ressources extends {} = EmptyObject>
+export class Service<ConfigType extends {} = EmptyObject, Resources extends {} = EmptyObject>
 	extends ServiceBaseClass
-	implements ServiceClass<ConfigType, Ressources>
+	implements ServiceClass<ConfigType, Resources>
 {
 	protected subscriptions = new Map<string, SubscriptionDefinition>()
 	protected commands = new Map<string, CommandDefinition>()
@@ -91,11 +91,11 @@ export class Service<ConfigType extends {} = EmptyObject, Ressources extends {} 
 	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
 	public config: ConfigType
 
-	public ressources: Ressources
+	public resources: Resources
 
 	public isStarted = false
 
-	constructor(config: ServiceConstructorInput<ConfigType, Ressources>) {
+	constructor(config: ServiceConstructorInput<ConfigType, Resources>) {
 		super({
 			logger: config.logger,
 			info: config.info,
@@ -108,7 +108,7 @@ export class Service<ConfigType extends {} = EmptyObject, Ressources extends {} 
 		})
 
 		this.config = config.config
-		this.ressources = config.ressources ?? ({} as Ressources)
+		this.resources = config.resources ?? ({} as Resources)
 		this.commandDefinitionList = config.commandDefinitionList
 		this.subscriptionDefinitionList = config.subscriptionDefinitionList
 	}
@@ -672,7 +672,7 @@ export class Service<ConfigType extends {} = EmptyObject, Ressources extends {} 
 									command.invokes,
 								),
 							),
-							resource: this.ressources,
+							resource: this.resources,
 						}
 						const call = command.call.bind(this, context)
 						return await call(payload, parameter)
@@ -712,7 +712,7 @@ export class Service<ConfigType extends {} = EmptyObject, Ressources extends {} 
 										command.invokes,
 									),
 								),
-								resource: this.ressources,
+								resource: this.resources,
 							}
 
 							const guardPromise = this.wrapInSpan(`afterGuardHook.${name}`, {}, async _subSpan => {
@@ -897,6 +897,7 @@ export class Service<ConfigType extends {} = EmptyObject, Ressources extends {} 
 										subscription.invokes,
 									),
 								),
+								resource: this.resources,
 							}
 							const call2 = subscription.call.bind(this, context)
 							return await call2(payload, parameter)
@@ -934,6 +935,7 @@ export class Service<ConfigType extends {} = EmptyObject, Ressources extends {} 
 											message.tenantId,
 										),
 									),
+									resource: this.resources,
 								}
 
 								const guardPromise = this.wrapInSpan(`afterGuardHook.${name}`, {}, async _subSpan => {

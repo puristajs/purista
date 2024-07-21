@@ -15,7 +15,7 @@ export const getCommandFunctionWithValidation = function <
 	FunctionResultType = MessageResultType,
 	Invokes = EmptyObject,
 	EmitListType = EmptyObject,
-	Ressources = EmptyObject,
+	Resources = EmptyObject,
 >(
 	fn: CommandFunction<
 		ServiceClassType,
@@ -26,7 +26,7 @@ export const getCommandFunctionWithValidation = function <
 		FunctionResultType,
 		Invokes,
 		EmitListType,
-		Ressources
+		Resources
 	>,
 	inputPayloadSchema: Schema | undefined,
 	inputParameterSchema: Schema | undefined,
@@ -41,7 +41,7 @@ export const getCommandFunctionWithValidation = function <
 			FunctionParamsType,
 			Invokes,
 			EmitListType,
-			Ressources
+			Resources
 		>
 	> = {},
 ): CommandFunction<
@@ -53,7 +53,7 @@ export const getCommandFunctionWithValidation = function <
 	FunctionResultType,
 	Invokes,
 	EmitListType,
-	Ressources
+	Resources
 > {
 	const wrapped: CommandFunction<
 		ServiceClassType,
@@ -64,7 +64,7 @@ export const getCommandFunctionWithValidation = function <
 		FunctionResultType,
 		Invokes,
 		EmitListType,
-		Ressources
+		Resources
 	> = async function (context, payload, parameter): Promise<FunctionResultType> {
 		const { logger, startActiveSpan, wrapInSpan } = context
 		let safePayload = payload as unknown as FunctionPayloadType

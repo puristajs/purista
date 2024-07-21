@@ -14,7 +14,11 @@ import type { Prettify } from '../Prettify.js'
  *
  * @group Subscription
  */
-export type SubscriptionFunctionContextEnhancements<Invokes = EmptyObject, EmitListType = EmptyObject> = {
+export type SubscriptionFunctionContextEnhancements<
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
+	Resources = EmptyObject,
+> = {
 	/** the original message */
 	message: Readonly<EBMessage>
 	/** emit a custom message */
@@ -57,6 +61,10 @@ export type SubscriptionFunctionContextEnhancements<Invokes = EmptyObject, EmitL
 	 * ```
 	 */
 	service: Invokes
+	/**
+	 * Provides resources defined in service builder and set via config during service creation
+	 */
+	resource: Resources
 }
 
 /**
@@ -64,6 +72,8 @@ export type SubscriptionFunctionContextEnhancements<Invokes = EmptyObject, EmitL
  *
  * @group Subscription
  */
-export type SubscriptionFunctionContext<Invokes = EmptyObject, EmitListType = EmptyObject> = Prettify<
-	ContextBase & SubscriptionFunctionContextEnhancements<Invokes, EmitListType>
->
+export type SubscriptionFunctionContext<
+	Invokes = EmptyObject,
+	EmitListType = EmptyObject,
+	Resources = EmptyObject,
+> = Prettify<ContextBase & SubscriptionFunctionContextEnhancements<Invokes, EmitListType, Resources>>

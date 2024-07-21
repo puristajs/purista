@@ -43,7 +43,7 @@ import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunction
  */
 export class SubscriptionDefinitionBuilder<
 	ServiceClassType extends ServiceClass = ServiceClass,
-	Ressources extends {} = EmptyObject,
+	Resources extends {} = EmptyObject,
 	MessagePayloadType = unknown,
 	MessageParamsType = undefined,
 	MessageResultType = void,
@@ -71,7 +71,14 @@ export class SubscriptionDefinitionBuilder<
 		}
 		beforeGuard: Record<
 			string,
-			SubscriptionBeforeGuardHook<ServiceClassType, Infer<PayloadSchema>, Infer<ParameterSchema>, Invokes, EmitListType>
+			SubscriptionBeforeGuardHook<
+				ServiceClassType,
+				Infer<PayloadSchema>,
+				Infer<ParameterSchema>,
+				Invokes,
+				EmitListType,
+				Resources
+			>
 		>
 		afterGuard: Record<
 			string,
@@ -81,7 +88,8 @@ export class SubscriptionDefinitionBuilder<
 				Infer<PayloadSchema>,
 				Infer<ParameterSchema>,
 				Invokes,
-				EmitListType
+				EmitListType,
+				Resources
 			>
 		>
 		transformOutput?: {
@@ -122,7 +130,8 @@ export class SubscriptionDefinitionBuilder<
 		Infer<ParameterSchema>,
 		InferIn<ResultSchema>,
 		Invokes,
-		EmitListType
+		EmitListType,
+		Resources
 	>
 
 	private eventName?: string
@@ -205,7 +214,7 @@ export class SubscriptionDefinitionBuilder<
 
 		return this as SubscriptionDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			MessagePayloadType,
 			MessageParamsType,
 			MessageResultType,
@@ -240,7 +249,7 @@ export class SubscriptionDefinitionBuilder<
 
 		return this as SubscriptionDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			MessagePayloadType,
 			MessageParamsType,
 			MessageResultType,
@@ -440,7 +449,7 @@ export class SubscriptionDefinitionBuilder<
 		this.inputSchema = inputSchema as unknown as PayloadSchema
 		return this as unknown as SubscriptionDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			InferIn<T>,
 			MessageParamsType,
 			MessageResultType,
@@ -473,7 +482,7 @@ export class SubscriptionDefinitionBuilder<
 		this.outputSchema = outputSchema as unknown as ResultSchema
 		return this as unknown as SubscriptionDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			MessagePayloadType,
 			MessageParamsType,
 			T,
@@ -495,7 +504,7 @@ export class SubscriptionDefinitionBuilder<
 		this.parameterSchema = parameterSchema as unknown as ParameterSchema
 		return this as unknown as SubscriptionDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			MessagePayloadType,
 			InferIn<T>,
 			MessageResultType,
@@ -541,7 +550,7 @@ export class SubscriptionDefinitionBuilder<
 		}
 		return this as unknown as SubscriptionDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			InferIn<typeof transformInputSchema>,
 			InferIn<typeof transformParameterSchema>,
 			MessageResultType,
@@ -601,7 +610,7 @@ export class SubscriptionDefinitionBuilder<
 		}
 		return this as unknown as SubscriptionDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			MessagePayloadType,
 			MessageParamsType,
 			Infer<typeof transformOutputSchema>,
@@ -639,7 +648,14 @@ export class SubscriptionDefinitionBuilder<
 	setBeforeGuardHooks(
 		beforeGuards: Record<
 			string,
-			SubscriptionBeforeGuardHook<ServiceClassType, Infer<PayloadSchema>, Infer<ParameterSchema>, Invokes, EmitListType>
+			SubscriptionBeforeGuardHook<
+				ServiceClassType,
+				Infer<PayloadSchema>,
+				Infer<ParameterSchema>,
+				Invokes,
+				EmitListType,
+				Resources
+			>
 		>,
 	) {
 		this.hooks.beforeGuard = { ...this.hooks.beforeGuard, ...beforeGuards }
@@ -661,7 +677,8 @@ export class SubscriptionDefinitionBuilder<
 				Infer<PayloadSchema>,
 				Infer<ParameterSchema>,
 				Invokes,
-				EmitListType
+				EmitListType,
+				Resources
 			>
 		>,
 	) {
@@ -694,11 +711,12 @@ export class SubscriptionDefinitionBuilder<
 			Infer<ParameterSchema>,
 			Infer<ResultSchema>,
 			Invokes,
-			EmitListType
+			EmitListType,
+			Resources
 		>,
 	): SubscriptionDefinitionBuilder<
 		ServiceClassType,
-		Ressources,
+		Resources,
 		MessagePayloadType,
 		MessageParamsType,
 		MessageResultType,
@@ -716,12 +734,13 @@ export class SubscriptionDefinitionBuilder<
 			Infer<ParameterSchema>,
 			Infer<ResultSchema>,
 			Invokes,
-			EmitListType
+			EmitListType,
+			Resources
 		>
 
 		return this as unknown as SubscriptionDefinitionBuilder<
 			ServiceClassType,
-			Ressources,
+			Resources,
 			MessagePayloadType,
 			MessageParamsType,
 			MessageResultType,
@@ -754,7 +773,8 @@ export class SubscriptionDefinitionBuilder<
 			InferIn<ParameterSchema>,
 			Infer<ResultSchema>,
 			Invokes,
-			EmitListType
+			EmitListType,
+			Resources
 		> = getSubscriptionFunctionWithValidation<
 			ServiceClassType,
 			MessagePayloadType,
@@ -764,7 +784,8 @@ export class SubscriptionDefinitionBuilder<
 			InferIn<ParameterSchema>,
 			Infer<ResultSchema>,
 			Invokes,
-			EmitListType
+			EmitListType,
+			Resources
 		>(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard)
 
 		return f
@@ -791,7 +812,8 @@ export class SubscriptionDefinitionBuilder<
 			InferIn<ParameterSchema>,
 			Infer<ResultSchema>,
 			Invokes,
-			EmitListType
+			EmitListType,
+			Resources
 		>
 	}
 
@@ -810,7 +832,8 @@ export class SubscriptionDefinitionBuilder<
 			Infer<ParameterSchema>,
 			Infer<ResultSchema>,
 			Invokes,
-			EmitListType
+			EmitListType,
+			Resources
 		>
 	> {
 		if (!this.fn) {
@@ -848,7 +871,8 @@ export class SubscriptionDefinitionBuilder<
 				Infer<ParameterSchema>,
 				Infer<ResultSchema>,
 				Invokes,
-				EmitListType
+				EmitListType,
+				Resources
 			>
 		> = {
 			subscriptionName: this.subscriptionName,
@@ -890,7 +914,7 @@ export class SubscriptionDefinitionBuilder<
 	 * @returns a mocked command function context
 	 */
 	getSubscriptionContextMock(message: EBMessage, sandbox?: SinonSandbox) {
-		return getSubscriptionContextMock<Invokes, EmitListType>(message, sandbox, this.invokes, this.emitList)
+		return getSubscriptionContextMock<Invokes, EmitListType, Resources>(message, sandbox, this.invokes, this.emitList)
 	}
 
 	/**

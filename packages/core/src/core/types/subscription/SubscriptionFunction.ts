@@ -15,9 +15,10 @@ export type SubscriptionFunction<
 	FunctionResultType = undefined,
 	Invokes = EmptyObject,
 	EmitListType = EmptyObject,
+	Resources = EmptyObject,
 > = (
 	this: ServiceClassType,
-	context: SubscriptionFunctionContext<Invokes, EmitListType>,
+	context: SubscriptionFunctionContext<Invokes, EmitListType, Resources>,
 	payload: Readonly<FunctionPayloadType>,
 	parameter: Readonly<FunctionParamsType>,
 ) => Promise<FunctionResultType>

@@ -22,7 +22,7 @@ export const getCommandContextMock = <
 	MessageParamsType = unknown,
 	Invokes = EmptyObject,
 	EmitListType = EmptyObject,
-	Ressources = EmptyObject,
+	Resources = EmptyObject,
 >(
 	payload: MessagePayloadType,
 	parameter: MessageParamsType,
@@ -158,7 +158,7 @@ export const getCommandContextMock = <
 		setState: sandbox?.stub() ?? stub(),
 		removeState: sandbox?.stub() ?? stub(),
 		service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
-		resource: getResourceProxy<Ressources>(),
+		resource: getResourceProxy<Resources>(),
 	}
 
 	const message = getCommandMessageMock({
@@ -168,7 +168,7 @@ export const getCommandContextMock = <
 		},
 	})
 
-	const mock: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Ressources> = {
+	const mock: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Resources> = {
 		logger: logger.mock,
 		message,
 		emit: async <K extends keyof EmitListType, Payload = EmitListType[K]>(eventName: K, payload: Payload) => {
@@ -193,7 +193,7 @@ export const getCommandContextMock = <
 			setState: stubs.setState.rejects(new Error('setState is not stubbed')),
 			removeState: stubs.removeState.rejects(new Error('removeState is not stubbed')),
 		},
-		resource: getResourceProxy<Ressources>(),
+		resource: getResourceProxy<Resources>(),
 	}
 
 	return {

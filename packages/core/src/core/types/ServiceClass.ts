@@ -10,9 +10,9 @@ import type { SubscriptionDefinition } from './subscription/index.js'
  *
  * @group Service
  */
-export interface ServiceClass<ConfigType = unknown, Ressources = EmptyObject> {
+export interface ServiceClass<ConfigType = unknown, Resources = EmptyObject> {
 	config: ConfigType
-	ressources: Ressources
+	resources: Resources
 
 	/**
 	 * Stop and destroy the current service

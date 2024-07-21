@@ -15,9 +15,10 @@ export type SubscriptionBeforeGuardHook<
 	FunctionParamsType = unknown,
 	Invokes = EmptyObject,
 	EmitListType = EmptyObject,
+	Resources = EmptyObject,
 > = (
 	this: ServiceClassType,
-	context: SubscriptionFunctionContext<Invokes, EmitListType>,
+	context: SubscriptionFunctionContext<Invokes, EmitListType, Resources>,
 	payload: Readonly<FunctionPayloadType>,
 	parameter: Readonly<FunctionParamsType>,
 ) => Promise<void>
