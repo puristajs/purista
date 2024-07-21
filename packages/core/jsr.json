@@ -1,0 +1,27 @@
+{
+	"$schema": "https://jsr.io/schema/config-file.v1.json",
+	"name": "@purista/core",
+	"version": "1.11.0",
+	"description": "purista backend framework",
+	"keywords": ["purista", "framework", "typescript", "javascript"],
+	"exports": "./dist/esm/index.js",
+	"publish": {
+		"include": ["dist/**/*.js", "dist/**/*.d.ts", "README.md", "package.json"],
+		"exclude": [
+			"src",
+			".github",
+			".vscode",
+			".zed",
+			"!dist",
+			"!dist/**/*.js",
+			"!dist/**/*.d.ts",
+			".tshy",
+			".tshy-build",
+			"vendor",
+			"docs",
+			"typedoc.json",
+			"..eslintcache",
+			".npmignore"
+		]
+	}
+}
