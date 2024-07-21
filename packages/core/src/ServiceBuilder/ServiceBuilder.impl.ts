@@ -74,7 +74,7 @@ export class ServiceBuilder<
 	 */
 	setConfigSchema<T extends Schema>(schema: T) {
 		this.configSchema = schema
-		return this as unknown as ServiceBuilder<Infer<T>, InferIn<T>, Resources, Service<Infer<T>>>
+		return this as unknown as ServiceBuilder<Infer<T>, InferIn<T>, Resources, Service<Infer<T>, Resources>>
 	}
 
 	/**
