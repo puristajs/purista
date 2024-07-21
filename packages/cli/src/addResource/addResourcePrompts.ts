@@ -7,20 +7,20 @@ import type { Prompts } from 'node-plop'
 import { getEventNames } from '../helper/getEventNames.js'
 import { collectServices, installInfo } from '../helper/installInfo.js'
 
-export const addRessourcePrompts: Prompts = [
+export const addResourcePrompts: Prompts = [
 	{
 		type: 'list',
 		message: 'What do you want to do?',
 		name: 'intention',
 		choices: [
-			{ value: 'add', name: 'add ressource' },
+			{ value: 'add', name: 'add resource' },
 			{ value: 'init', name: 'init PURISTA' },
 		],
 	},
 	{
 		type: 'list',
 		message: 'What do you want to do?',
-		name: 'ressource',
+		name: 'resource',
 		choices: [
 			{ value: 'service', name: 'add new service' },
 			{ value: 'command', name: 'add a command to existing service' },
@@ -30,7 +30,7 @@ export const addRessourcePrompts: Prompts = [
 	{
 		type: 'input',
 		message(answers) {
-			switch (answers.ressource) {
+			switch (answers.resource) {
 				case 'service':
 					return 'What is the name (or domain) of your new service (something like: user or account)'
 				case 'command':
@@ -52,7 +52,7 @@ export const addRessourcePrompts: Prompts = [
 	{
 		type: 'input',
 		message(answers) {
-			switch (answers.ressource) {
+			switch (answers.resource) {
 				case 'service':
 					return `What is the matter of service "${answers.name}"`
 				case 'command':
@@ -68,7 +68,7 @@ export const addRessourcePrompts: Prompts = [
 		type: 'list',
 		message: 'Select a event to subscribe',
 		name: 'subscriptionEventList',
-		when: (answers: Record<string, unknown>) => answers.ressource === 'subscription' && getEventNames().length > 0,
+		when: (answers: Record<string, unknown>) => answers.resource === 'subscription' && getEventNames().length > 0,
 		choices: _answers => {
 			return [...getEventNames(), { name: 'Add a new event', value: '' }]
 		},
@@ -81,14 +81,14 @@ export const addRessourcePrompts: Prompts = [
 			return answers.subscriptionEventList !== '' ? answers.subscriptionEventList : ''
 		},
 		when: (answers: Record<string, unknown>) =>
-			answers.ressource === 'subscription' &&
+			answers.resource === 'subscription' &&
 			(getEventNames().length === 0 || (answers.subscriptionEventList as string)?.trim() === ''),
 	},
 	{
 		type: 'input',
 		message: 'Name of response event',
 		name: 'commandEventName',
-		when: (answers: Record<string, unknown>) => answers.ressource === 'command',
+		when: (answers: Record<string, unknown>) => answers.resource === 'command',
 	},
 	{
 		type: 'input',
@@ -103,13 +103,13 @@ export const addRessourcePrompts: Prompts = [
 			return version > 0 || 'version must be a a positiv int value larger than 0'
 		},
 		name: 'version',
-		when: (answers: Record<string, unknown>) => answers.ressource === 'service',
+		when: (answers: Record<string, unknown>) => answers.resource === 'service',
 	},
 	{
 		type: 'list',
 		message: 'select a service',
 		name: 'service',
-		when: (answers: Record<string, unknown>) => answers.ressource !== 'service',
+		when: (answers: Record<string, unknown>) => answers.resource !== 'service',
 		async choices(_answers) {
 			const servicePath = path.join(process.cwd(), 'src', 'service')
 			collectServices(servicePath)

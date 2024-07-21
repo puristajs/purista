@@ -31,7 +31,7 @@ Collecting metrics will become necessary at a certain point of growing.
 
 Metrics should also be categorized into two big topics.
 
-There are technical and functional metric values. Examples are things like time and ressource consumptions, counting failures and success, response times and so on.
+There are technical and functional metric values. Examples are things like time and resource consumptions, counting failures and success, response times and so on.
 
 On the other side you will have business related metrics.This includes more customer and user centric values. As an example you can think of things like active user count, daily active users, average order amount of users.
 

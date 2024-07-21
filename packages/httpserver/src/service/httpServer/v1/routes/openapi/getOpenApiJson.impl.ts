@@ -259,7 +259,7 @@ export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV
 					description: getErrorName(404),
 					content: {
 						'application/json': {
-							schema: getErrorResponseSchema(404, 'ressource for given id does not exist'),
+							schema: getErrorResponseSchema(404, 'resource for given id does not exist'),
 						},
 					},
 				}

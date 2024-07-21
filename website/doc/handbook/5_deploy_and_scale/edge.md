@@ -8,14 +8,14 @@ order: 502000
 
 When it comes to scale, it mostly does not mean the same as for servers or cloud.
 In a server or cloud environment, you have "one big thing", which you need to scale somehow.
-You can simply add more powerful hardware or more instance on more hardware. Especially in cloud environments, you "simply" add more ressources & instances.
+You can simply add more powerful hardware or more instance on more hardware. Especially in cloud environments, you "simply" add more resources & instances.
 
 If you're looking into some IoT or edge scenario, scaling means something different.
-The ressources of a single edge device is fixed and cant simply be upgraded.
-You might have hundereds or thousend devices with fixed ressources providing raw data.
+The resources of a single edge device is fixed and cant simply be upgraded.
+You might have hundereds or thousend devices with fixed resources providing raw data.
 
 One option is, to collect the raw data of all your devices, send them to your server/cloud.
-This works, but wastes a lot of ressources for data transmition and handling on the server side. While leaving ressources on the edge device unused.
+This works, but wastes a lot of resources for data transmition and handling on the server side. While leaving resources on the edge device unused.
 A better approach is, to prepare the data on every edge device for further processing. This prepeared data is most likely much smaller than raw data and reduces the amount of computation on the server side.
 Also things like unstable data connection, caching and so on will become important at some point.
 

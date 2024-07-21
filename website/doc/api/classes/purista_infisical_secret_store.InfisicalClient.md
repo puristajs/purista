@@ -68,7 +68,7 @@ The internal http client to connect to the Infisical server.
 | `conf.bearerToken` | `string` | Auth-Bearer token |
 | `conf.defaultHeaders?` | `Record`\<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
 | `conf.defaultTimeout?` | `number` | set global timeout for requests in ms **`Default`** ```ts 30000 ``` |
-| `conf.enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own ressource. |
+| `conf.enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own resource. |
 | `conf.isKeepAlive?` | `boolean` | If set to false, the HTTP client will not reuse the same connection for multiple requests. Default is true. |
 | `conf.logLevel?` | [`LogLevelName`](../modules/purista_core.md#loglevelname) | the loglevel if no logger instance is given |
 | `conf.logger?` | [`Logger`](purista_core.Logger.md) | A logger instance |
@@ -133,7 +133,7 @@ ___
 | `bearerToken?` | `string` | Auth-Bearer token |
 | `defaultHeaders?` | `Record`\<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
 | `defaultTimeout?` | `number` | set global timeout for requests in ms **`Default`** ```ts 30000 ``` |
-| `enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own ressource. |
+| `enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own resource. |
 | `isKeepAlive?` | `boolean` | If set to false, the HTTP client will not reuse the same connection for multiple requests. Default is true. |
 | `logLevel?` | [`LogLevelName`](../modules/purista_core.md#loglevelname) | the loglevel if no logger instance is given |
 | `logger?` | [`Logger`](purista_core.Logger.md) | A logger instance |

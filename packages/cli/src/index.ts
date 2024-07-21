@@ -20,7 +20,7 @@ const main = () => {
 		configPath = path.join(__dirname, 'installation', 'plopfile.js')
 	}
 	if (process.argv[2] === 'add') {
-		configPath = path.join(__dirname, 'addRessource', 'plopfile.js')
+		configPath = path.join(__dirname, 'addResource', 'plopfile.js')
 	}
 
 	if (process.argv[2] === 'version') {

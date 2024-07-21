@@ -76,7 +76,7 @@ This client is responsible for the communication to the sidecar service.
 | `config.defaultHeaders?` | `Record`\<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
 | `config.defaultTimeout?` | `number` | set global timeout for requests in ms **`Default`** ```ts 30000 ``` |
 | `config.enableHttpCompression?` | `boolean` | enable HTTP compression in web server **`Default`** ```ts true ``` |
-| `config.enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own ressource. |
+| `config.enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own resource. |
 | `config.enableRestApiExpose?` | `boolean` | expose commands as regular REST endpoints when they are configured as endpoints **`Default`** ```ts true ``` |
 | `config.instanceId?` | `string` | The instance id of the event bridge. If not set, a id will generated each time a instance is created. Use this if there is a need to always have the same instance id. |
 | `config.isKeepAlive?` | `boolean` | If set to false, the HTTP client will not reuse the same connection for multiple requests. Default is true. |
@@ -153,7 +153,7 @@ ___
 | `defaultHeaders?` | `Record`\<`string`, `string`\> | Add your default headers here These headers will be part of every request. They can be overwritten per request option |
 | `defaultTimeout?` | `number` | set global timeout for requests in ms **`Default`** ```ts 30000 ``` |
 | `enableHttpCompression?` | `boolean` | enable HTTP compression in web server **`Default`** ```ts true ``` |
-| `enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own ressource. |
+| `enableOpentelemetry?` | `boolean` | enable Opentelemetry tracing. The client will be handled as own resource. |
 | `enableRestApiExpose?` | `boolean` | expose commands as regular REST endpoints when they are configured as endpoints **`Default`** ```ts true ``` |
 | `instanceId?` | `string` | The instance id of the event bridge. If not set, a id will generated each time a instance is created. Use this if there is a need to always have the same instance id. |
 | `isKeepAlive?` | `boolean` | If set to false, the HTTP client will not reuse the same connection for multiple requests. Default is true. |

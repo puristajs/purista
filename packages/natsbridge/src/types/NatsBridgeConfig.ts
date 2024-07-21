@@ -27,7 +27,7 @@ export type NatsBridgeConfig = Prettify<
 		 *
 		 * If set to `always`, every command response is published.
 		 * Because there might not be a consumer for every message, the broker will store the messages until the `defaultMessageExpiryInterval` is reached.
-		 * This might result in a high ressource consumption of the broker.
+		 * This might result in a high resource consumption of the broker.
 		 *
 		 * If set to `eventOnly`, only success responses which have a event name set, are published twice.
 		 * There, we expect, that an event has at least one consumer subscription and the broker does not unnecessarily stores messages for a long time.

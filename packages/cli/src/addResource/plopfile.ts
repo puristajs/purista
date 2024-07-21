@@ -3,7 +3,7 @@ import type { NodePlopAPI } from 'plop'
 import { loadPackageJson } from '../helper/loadPackageJson.js'
 import { registerHandlebarHelpers } from '../helper/registerHandlebarHelpers.js'
 import { addCommandActions } from './addCommandActions.js'
-import { addRessourcePrompts } from './addRessourcePrompts.js'
+import { addResourcePrompts } from './addResourcePrompts.js'
 import { addServiceActions } from './addServiceActions.js'
 import { addSubscriptionActions } from './addSubscriptionActions.js'
 import { addVersionActions } from './addVersionActions.js'
@@ -17,8 +17,8 @@ export default function (plop: NodePlopAPI) {
 	plop.setWelcomeMessage('Welcome to PURISTA cli')
 
 	plop.setGenerator('rootMenu', {
-		description: 'Add a ressource to current PURISTA project',
-		prompts: addRessourcePrompts,
+		description: 'Add a resource to current PURISTA project',
+		prompts: addResourcePrompts,
 		actions: function (answers: any) {
 			const actions: any[] = []
 
@@ -29,7 +29,7 @@ export default function (plop: NodePlopAPI) {
 			answers.indexExt = isEsm ? '/index.js' : ''
 			answers.isEsm = isEsm
 
-			switch (answers.ressource) {
+			switch (answers.resource) {
 				case 'service':
 					actions.push(...(addServiceActions as []))
 					break
