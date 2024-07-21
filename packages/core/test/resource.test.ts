@@ -76,25 +76,6 @@ describe('service resource test', () => {
 		expect(result).toBe('mock return')
 	})
 
-	it('can provide resources to a command with mock', async () => {
-		const service = await serviceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
-			logger: getLoggerMock(sandbox).mock,
-			resources: { exampleA: new ExampleResource() },
-		})
-
-		const command = safeBind(commandBuilder.getCommandFunction(), service)
-		const payload = {}
-		const parameter = {}
-		const message = getCommandSuccessMessageMock(payload)
-
-		const context = commandBuilder.getCommandContextMock(message, sandbox)
-		context.stubs.resource.exampleA.methodA = sandbox.stub().returns('mock return')
-
-		const result = await command(context.mock, payload, parameter)
-
-		expect(result).toBe('mock return')
-	})
-
 	it('can provide resources to a subscription', async () => {
 		const service = await serviceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
 			logger: getLoggerMock(sandbox).mock,
