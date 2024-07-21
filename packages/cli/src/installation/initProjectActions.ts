@@ -227,8 +227,20 @@ export const initProjectActions: Actions = [
 		return 'needed packages installed'
 	},
 	answers => {
+		console.log('')
+		console.log('🎉 SUCCESS - PURISTA project ready 🎉')
+		console.log('Enjoy building awesome applications with PURISTA 🚀')
+		console.log('')
 		if (answers.eventBridge === 'DaprEventBridge') {
+			console.log('🚨 As you are using the Dapr event bridge you might need to install additional packages!')
+			console.log('🚨 You also need to setup the config for your runtime environment.')
+			console.log('🚨 see https://purista.dev/handbook/3._event-bridge/5_dapr.html')
 		}
+		console.log('')
+		console.log('Now it is time to add your first service!')
+		console.log('')
+		console.log('➡️  purista add service')
+		console.log('')
 		return '📖 Learn more about PURISTA at https://purista.dev'
 	},
 ]

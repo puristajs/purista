@@ -59,7 +59,12 @@ fetch('https://registry.npmjs.org/@purista/cli/latest', { signal: controller.sig
 			.json()
 			.then((value: Record<string, string>) => {
 				if (value.version !== puristaVersion) {
+					console.error('🚨 BE AWARE!')
+					console.error(`Looks like your CLI version is outdated. Your version is ${puristaVersion}`)
+					console.error(`Latest version is ${value.version} - Please upgrade before you proceed!`)
+					console.error('')
 				} else {
+					console.log(`👍 You use latest CLI version ${value.version}`)
 				}
 			})
 			.catch(console.error)
