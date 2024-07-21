@@ -38,15 +38,15 @@
 	"devDependencies": {
 		"@types/minimist": "^1.2.5",
 		"@types/node": "^20.14.8",
-		"rimraf": "^5.0.7",
-		"tshy": "^1.15.1",
+		"rimraf": "^6.0.1",
+		"tshy": "^3.0.2",
 		"tsx": "^4.15.7"
 	},
 	"dependencies": {
 		"camelcase": "^8.0.0",
 		"minimist": "^1.2.8",
 		"plop": "^4.0.1",
-		"ts-morph": "^22.0.0",
+		"ts-morph": "^23.0.0",
 		"zod": "^3.23.8"
 	},
 	"peerDependenciesMeta": {},

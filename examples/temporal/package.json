@@ -19,7 +19,7 @@
 	},
 	"dependencies": {
 		"@hono/node-server": "^1.11.4",
-		"@hono/swagger-ui": "^0.3.0",
+		"@hono/swagger-ui": "^0.4.0",
 		"@opentelemetry/exporter-trace-otlp-http": "^0.52.1",
 		"@opentelemetry/sdk-trace-node": "^1.25.1",
 		"@purista/core": "*",
@@ -33,12 +33,12 @@
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
-		"tsx": "^4.15.7",
-		"typescript": "^5.5.2",
+		"tsx": "^4.16.2",
+		"typescript": "^5.5.3",
 		"@types/node": "^20.14.8",
 		"@types/sinon": "^17.0.3",
 		"pino-pretty": "^11.2.1",
 		"sinon": "^18.0.0",
-		"vitest": "^1.6.0"
+		"vitest": "^2.0.3"
 	}
 }

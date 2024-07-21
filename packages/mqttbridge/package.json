@@ -50,8 +50,8 @@
 		"@types/sinon": "^17.0.3",
 		"@types/ws": "^8.5.10",
 		"sinon": "^18.0.0",
-		"tshy": "^1.15.1",
-		"vitest": "^1.6.0"
+		"tshy": "^3.0.2",
+		"vitest": "^2.0.3"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.0",

@@ -52,8 +52,8 @@
 		"@types/sinon": "^17.0.3",
 		"sinon": "^18.0.0",
 		"testcontainers": "^10.10.0",
-		"tshy": "^1.15.1",
-		"vitest": "^1.6.0"
+		"tshy": "^3.0.2",
+		"vitest": "^2.0.3"
 	},
 	"dependencies": {
 		"@aws-sdk/client-ssm": "^3.600.0",
