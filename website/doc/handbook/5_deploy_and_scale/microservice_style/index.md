@@ -41,7 +41,7 @@ In case, you are using the `@purista/httpserver` package, keep in mind, that the
 ::: warning Cons
 
 - much more complex orchestration to handle and will probably need some additional layer like [kubernetes.io](https://kubernetes.io) or [dapr.io](https://dapr.io)
-- needs knowledge, time, and ressources to be configured correctly
+- needs knowledge, time, and resources to be configured correctly
 - instances of services are running 24/7
 - will in most cases need third-party applications to handle logs (collecting and merging logs from all instances)
 - monitoring and alerting become much more complex and might need third-party solutions

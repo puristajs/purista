@@ -7,7 +7,7 @@ export const initProjectPrompts: Prompts = [
 		message: 'What do you want to do?',
 		name: 'intention',
 		choices: [
-			{ value: 'add', name: 'add ressource' },
+			{ value: 'add', name: 'add resource' },
 			{ value: 'init', name: 'init PURISTA' },
 		],
 	},

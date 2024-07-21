@@ -154,7 +154,7 @@ main()
 
 :::
 
-## Ressources
+## Resources
 
 - [Dapr.io](https://dapr.io) (official website)
 
