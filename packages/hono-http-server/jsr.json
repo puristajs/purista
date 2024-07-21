@@ -1,0 +1,27 @@
+{
+	"$schema": "https://jsr.io/schema/config-file.v1.json",
+	"name": "@purista/hono-http-server",
+	"version": "1.11.0",
+	"description": "A http server service based on Hono for PURISTA backend framework",
+	"keywords": ["purista", "http", "server", "hono", "typescript", "javascript"],
+	"exports": "./dist/esm/index.js",
+	"publish": {
+		"include": ["dist/**/*.js", "dist/**/*.d.ts", "README.md", "package.json"],
+		"exclude": [
+			"src",
+			".github",
+			".vscode",
+			".zed",
+			"!dist",
+			"!dist/**/*.js",
+			"!dist/**/*.d.ts",
+			".tshy",
+			".tshy-build",
+			"vendor",
+			"docs",
+			"typedoc.json",
+			"..eslintcache",
+			".npmignore"
+		]
+	}
+}
