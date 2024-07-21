@@ -60,7 +60,8 @@
 	"peerDependenciesMeta": {},
 	"peerDependencies": {
 		"@hono/node-server": "^1.8.0",
-		"@hono/swagger-ui": "^0.3.0"
+		"@hono/swagger-ui": "^0.3.0",
+		"@scalar/hono-api-reference": "^0.5.112"
 	},
 	"types": "./dist/commonjs/index.d.ts",
 	"module": "./dist/esm/index.js"

@@ -4,7 +4,7 @@
 	"type": "module",
 	"scripts": {
 		"start": "npm run dev -w examples/fullexample",
-		"build": "npm run build --workspaces --if-present",
+		"build": "npm run build --workspaces --if-present && npm run lint:fix",
 		"lint": "npx @biomejs/biome check",
 		"lint:fix": "npx @biomejs/biome check --write",
 		"test": "vitest",
@@ -29,7 +29,7 @@
 	},
 	"workspaces": ["./packages/*", "./examples/*", "website"],
 	"devDependencies": {
-		"@biomejs/biome": "^1.8.2",
+		"@biomejs/biome": "^1.8.3",
 		"@types/node": "^20.14.8",
 		"@types/sinon": "^17.0.3",
 		"@vitest/coverage-v8": "^2.0.3",
