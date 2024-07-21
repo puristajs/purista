@@ -19,7 +19,7 @@ export type CommandFunctionContextEnhancements<
 	MessageParamsType = unknown,
 	Invokes = EmptyObject,
 	EmitListType = EmptyObject,
-	Ressources = EmptyObject,
+	Resources = EmptyObject,
 > = {
 	/** the original message */
 	message: Readonly<Command<MessagePayloadType, MessageParamsType>>
@@ -65,9 +65,9 @@ export type CommandFunctionContextEnhancements<
 	 */
 	service: Invokes
 	/**
-	 * Provides ressources defined in service builder and set via config during service creation
+	 * Provides resources defined in service builder and set via config during service creation
 	 */
-	resource: Ressources
+	resource: Resources
 }
 
 /**
@@ -80,8 +80,8 @@ export type CommandFunctionContext<
 	MessageParamsType = unknown,
 	Invokes = EmptyObject,
 	EmitListType = EmptyObject,
-	Ressources = EmptyObject,
+	Resources = EmptyObject,
 > = Prettify<
 	ContextBase &
-		CommandFunctionContextEnhancements<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Ressources>
+		CommandFunctionContextEnhancements<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Resources>
 >

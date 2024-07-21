@@ -82,14 +82,14 @@ describe('ServiceBuilder', () => {
 		expect(serviceInstance).toBeInstanceOf(CustomClass)
 	})
 
-	it('can add ressources', async () => {
-		const service = new ServiceBuilder(serviceInfo).defineRessource<'x', () => void>()
+	it('can add resources', async () => {
+		const service = new ServiceBuilder(serviceInfo).defineResource<'x', () => void>()
 
 		const eventBridge = getEventBridgeMock(sandbox)
 		const logger = getLoggerMock(sandbox)
 		const _serviceInstance = await service.getInstance(eventBridge.mock, {
 			logger: logger.mock,
-			ressources: { x: () => {} },
+			resources: { x: () => {} },
 		})
 	})
 })

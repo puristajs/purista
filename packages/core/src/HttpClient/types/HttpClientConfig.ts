@@ -66,7 +66,7 @@ export type HttpClientConfig<CustomConfig extends Record<string, unknown>> = Pre
 		spanProcessor?: SpanProcessor
 		/**
 		 * enable Opentelemetry tracing.
-		 * The client will be handled as own ressource.
+		 * The client will be handled as own resource.
 		 */
 		enableOpentelemetry?: boolean
 		/** Custom trace Id */
