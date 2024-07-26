@@ -8,15 +8,27 @@ order: 101000
 
 In this short quickstart example, we will setup a new project, based on PURISTA.
 
-Create a new project folder and navigate into the new folder.
+Run the following command, and you will be guided through the installation:
 
-```bash
-mkdir my-project
-cd my-project
+::: code-group
+
+```bash [npm]
+npm create purista@latest
 ```
 
-If you have already installed the PURISTA CLI globally you can simply run `purista init`.  
-Otherwise, you can do `npx @purista/cli init`.
+```bash [bun]
+bun create purista@latest
+```
+
+```bash [yarn]
+yarn create purista@latest
+```
+
+```bash [pnpm]
+pnpm create purista@latest
+```
+
+:::
 
 Please follow the steps in the installation process.
 It is recommended to install the PURISTA CLI globally.

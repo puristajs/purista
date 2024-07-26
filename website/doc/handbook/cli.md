@@ -15,9 +15,25 @@ Open your terminal and go to your project folder where you like to install PURIS
 
 In the project folder, simply execute:
 
-```bash
-npx @purista/cli init
+::: code-group
+
+```bash [npm]
+npm create purista@latest
 ```
+
+```bash [bun]
+bun create purista@latest
+```
+
+```bash [yarn]
+yarn create purista@latest
+```
+
+```bash [pnpm]
+pnpm create purista@latest
+```
+
+:::
 
 It might take a short time for `npx` to download the needed data to its temporary folder and start the CLI tool.  
 The CLI tool will guide you through all the necessary steps.  
@@ -27,9 +43,25 @@ __It is highly recommended to choose global CLI install during setup__.
 
 You can also manually install the PURISTA CLI via:
 
-```bash
+::: code-group
+
+```bash [npm]
 npm install -g @purista/cli
 ```
+
+```bash [bun]
+bun add --global @purista/cli
+```
+
+```bash [yarn]
+yarn global add @purista/cli
+```
+
+```bash [pnpm]
+pnpm add -g @purista/cli
+```
+
+:::
 
 If you have installed the CLI globally, you can add service, commands and subscriptions to your project.  
 In your project root simply run:
