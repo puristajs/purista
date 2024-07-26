@@ -30,10 +30,10 @@
 	"workspaces": ["./packages/*", "./examples/*", "website"],
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
-		"@types/node": "^20.14.8",
+		"@types/node": "^20.14.12",
 		"@types/sinon": "^17.0.3",
-		"@vitest/coverage-v8": "^2.0.3",
-		"@vitest/ui": "^2.0.3",
+		"@vitest/coverage-v8": "^2.0.4",
+		"@vitest/ui": "^2.0.4",
 		"git-cliff": "^2.3.0",
 		"npm-check-updates": "^16.14.20",
 		"rimraf": "^6.0.1",
@@ -42,9 +42,9 @@
 		"ts-node": "^10.9.2",
 		"tsx": "^4.16.2",
 		"typedoc": "^0.26.4",
-		"typedoc-plugin-markdown": "^4.2.1",
-		"typescript": "^5.5.3",
-		"vitest": "^2.0.3"
+		"typedoc-plugin-markdown": "^4.2.3",
+		"typescript": "^5.5.4",
+		"vitest": "^2.0.4"
 	},
 	"packageManager": "npm@9.6.2",
 	"dependencies": {

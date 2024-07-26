@@ -25,20 +25,20 @@
 		"@purista/core": "*",
 		"@purista/hono-http-server": "*",
 		"@purista/natsbridge": "*",
-		"@temporalio/activity": "^1.10.1",
-		"@temporalio/client": "^1.10.1",
-		"@temporalio/interceptors-opentelemetry": "^1.10.1",
-		"@temporalio/worker": "^1.10.1",
-		"@temporalio/workflow": "^1.10.1",
+		"@temporalio/activity": "^1.10.3",
+		"@temporalio/client": "^1.10.3",
+		"@temporalio/interceptors-opentelemetry": "^1.10.3",
+		"@temporalio/worker": "^1.10.3",
+		"@temporalio/workflow": "^1.10.3",
 		"zod": "^3.23.8"
 	},
 	"devDependencies": {
 		"tsx": "^4.16.2",
-		"typescript": "^5.5.3",
-		"@types/node": "^20.14.8",
+		"typescript": "^5.5.4",
+		"@types/node": "^20.14.12",
 		"@types/sinon": "^17.0.3",
-		"pino-pretty": "^11.2.1",
+		"pino-pretty": "^11.2.2",
 		"sinon": "^18.0.0",
-		"vitest": "^2.0.3"
+		"vitest": "^2.0.4"
 	}
 }
