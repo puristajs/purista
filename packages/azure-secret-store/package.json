@@ -46,13 +46,13 @@
 		}
 	},
 	"devDependencies": {
-		"@types/node": "^20.14.8",
+		"@types/node": "^20.14.12",
 		"@types/sinon": "^17.0.3",
 		"dotenv": "^16.4.5",
 		"sinon": "^18.0.0",
 		"testcontainers": "^10.10.0",
 		"tshy": "^3.0.2",
-		"vitest": "^2.0.3"
+		"vitest": "^2.0.4"
 	},
 	"dependencies": {
 		"@azure/identity": "^4.3.0",

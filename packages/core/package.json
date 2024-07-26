@@ -32,13 +32,13 @@
 	},
 	"devDependencies": {
 		"@sodaru/yup-to-json-schema": "^2.0.1",
-		"@types/node": "^20.14.8",
+		"@types/node": "^20.14.12",
 		"@typeschema/yup": "^0.13.3",
-		"code-block-writer": "^13.0.1",
+		"code-block-writer": "^13.0.2",
 		"rimraf": "^6.0.1",
 		"sinon": "^18.0.0",
 		"tshy": "^3.0.2",
-		"vitest": "^2.0.3",
+		"vitest": "^2.0.4",
 		"yup": "^1.4.0"
 	},
 	"dependencies": {
