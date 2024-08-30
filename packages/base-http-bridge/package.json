@@ -22,22 +22,24 @@
 		"build": "rimraf dist && tshy"
 	},
 	"tshy": {
-		"exclude": ["src/**/*.test.ts"],
+		"exclude": [
+			"src/**/*.test.ts"
+		],
 		"exports": {
 			"./package.json": "./package.json",
 			".": "./src/index.ts"
 		}
 	},
 	"devDependencies": {
-		"@types/node": "^20.14.12",
+		"@types/node": "^22.5.1",
 		"@types/sinon": "^17.0.3",
 		"sinon": "^18.0.0",
 		"tshy": "^3.0.2",
-		"vitest": "^2.0.4"
+		"vitest": "^2.0.5"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.0",
-		"@opentelemetry/semantic-conventions": "^1.25.1",
+		"@opentelemetry/semantic-conventions": "^1.27.0",
 		"@purista/core": "*",
 		"cloudevents": "^8.0.2",
 		"hono": "^4.4.7"

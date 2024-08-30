@@ -24,7 +24,9 @@
 			}
 		}
 	},
-	"files": ["dist/**/*"],
+	"files": [
+		"dist/**/*"
+	],
 	"publishConfig": {
 		"access": "public"
 	},
@@ -37,7 +39,9 @@
 		"build": "rimraf dist && tshy"
 	},
 	"tshy": {
-		"exclude": ["src/**/*.test.ts"],
+		"exclude": [
+			"src/**/*.test.ts"
+		],
 		"exports": {
 			"./package.json": "./package.json",
 			".": "./src/index.ts"
@@ -45,18 +49,18 @@
 	},
 	"devDependencies": {
 		"@types/amqplib": "^0.10.5",
-		"@types/node": "^20.14.12",
+		"@types/node": "^22.5.1",
 		"@types/sinon": "^17.0.3",
 		"sinon": "^18.0.0",
 		"tshy": "^3.0.2",
-		"vitest": "^2.0.4"
+		"vitest": "^2.0.5"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.0",
-		"@opentelemetry/resources": "^1.25.1",
-		"@opentelemetry/sdk-trace-node": "^1.25.1",
-		"@opentelemetry/semantic-conventions": "^1.25.1",
-		"@opentelemetry/instrumentation-amqplib": "^0.39.0",
+		"@opentelemetry/resources": "^1.26.0",
+		"@opentelemetry/sdk-trace-node": "^1.26.0",
+		"@opentelemetry/semantic-conventions": "^1.27.0",
+		"@opentelemetry/instrumentation-amqplib": "^0.41.0",
 		"@purista/core": "*",
 		"amqplib": "^0.10.4"
 	},

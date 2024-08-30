@@ -24,7 +24,9 @@
 			}
 		}
 	},
-	"files": ["dist/**/*"],
+	"files": [
+		"dist/**/*"
+	],
 	"publishConfig": {
 		"access": "public"
 	},
@@ -37,19 +39,21 @@
 		"build": "rimraf dist && tshy"
 	},
 	"tshy": {
-		"exclude": ["src/**/*.test.ts"],
+		"exclude": [
+			"src/**/*.test.ts"
+		],
 		"exports": {
 			"./package.json": "./package.json",
 			".": "./src/index.ts"
 		}
 	},
 	"devDependencies": {
-		"@testcontainers/nats": "^10.10.0",
-		"@types/node": "^20.14.12",
+		"@testcontainers/nats": "^10.12.0",
+		"@types/node": "^22.5.1",
 		"@types/sinon": "^17.0.3",
 		"sinon": "^18.0.0",
 		"tshy": "^3.0.2",
-		"vitest": "^2.0.4"
+		"vitest": "^2.0.5"
 	},
 	"dependencies": {
 		"@purista/core": "*",
