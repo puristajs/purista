@@ -21,16 +21,16 @@
 		"test": "vitest"
 	},
 	"devDependencies": {
-		"@types/node": "^20.14.12",
+		"@types/node": "^22.5.1",
 		"pino-pretty": "^11.2.2",
 		"sinon": "^18.0.0",
-		"tsx": "^4.16.2",
+		"tsx": "^4.19.0",
 		"typescript": "^5.5.4",
-		"vitest": "^2.0.4"
+		"vitest": "^2.0.5"
 	},
 	"dependencies": {
-		"@hono/node-server": "^1.11.4",
-		"@opentelemetry/exporter-trace-otlp-http": "^0.52.1",
+		"@hono/node-server": "^1.12.2",
+		"@opentelemetry/exporter-trace-otlp-http": "^0.53.0",
 		"@purista/amqpbridge": "*",
 		"@purista/core": "*",
 		"@purista/k8s-sdk": "*",

@@ -24,7 +24,9 @@
 			}
 		}
 	},
-	"files": ["dist/**/*"],
+	"files": [
+		"dist/**/*"
+	],
 	"publishConfig": {
 		"access": "public"
 	},
@@ -39,20 +41,22 @@
 		"env:down": "docker compose -f docker-compose.yml down"
 	},
 	"tshy": {
-		"exclude": ["src/**/*.test.ts"],
+		"exclude": [
+			"src/**/*.test.ts"
+		],
 		"exports": {
 			"./package.json": "./package.json",
 			".": "./src/index.ts"
 		}
 	},
 	"devDependencies": {
-		"@types/node": "^20.14.12",
+		"@types/node": "^22.5.1",
 		"@types/sinon": "^17.0.3",
 		"dotenv": "^16.4.5",
 		"sinon": "^18.0.0",
-		"testcontainers": "^10.10.0",
+		"testcontainers": "^10.12.0",
 		"tshy": "^3.0.2",
-		"vitest": "^2.0.4"
+		"vitest": "^2.0.5"
 	},
 	"dependencies": {
 		"@azure/identity": "^4.3.0",
