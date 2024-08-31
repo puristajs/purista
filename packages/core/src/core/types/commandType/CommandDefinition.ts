@@ -29,6 +29,7 @@ export type CommandDefinition<
 	FunctionResultType = unknown,
 	Invokes = EmptyObject,
 	EmitListType = EmptyObject,
+	Resources = EmptyObject,
 > = {
 	/** the name of the command */
 	commandName: string
@@ -47,7 +48,8 @@ export type CommandDefinition<
 		FunctionParamsType,
 		FunctionResultType,
 		Invokes,
-		EmitListType
+		EmitListType,
+		Resources
 	>
 	/** the eventName for the command response */
 	eventName?: string
@@ -67,7 +69,8 @@ export type CommandDefinition<
 				FunctionPayloadType,
 				FunctionParamsType,
 				Invokes,
-				EmitListType
+				EmitListType,
+				Resources
 			>
 		>
 		afterGuard?: Record<
@@ -80,7 +83,8 @@ export type CommandDefinition<
 				FunctionPayloadType,
 				FunctionParamsType,
 				Invokes,
-				EmitListType
+				EmitListType,
+				Resources
 			>
 		>
 		transformOutput?: {
