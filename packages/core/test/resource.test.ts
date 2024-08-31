@@ -39,23 +39,19 @@ describe('service resource test', () => {
 		.setConfigSchema(serviceOneSchema)
 		.defineResource('exampleA', ExampleResource)
 
-	const commandBuilder = serviceBuilder.getCommandBuilder(
-		'exampleCommand',
-		'This is an example command using a resource',
-	)
-	commandBuilder.setCommandFunction(async function (ctx) {
-		const _conf = this.config.optionOne
-		return ctx.resource.exampleA.methodA()
-	})
+	const commandBuilder = serviceBuilder
+		.getCommandBuilder('exampleCommand', 'This is an example command using a resource')
+		.setCommandFunction(async function (ctx) {
+			const _conf = this.config.optionOne
+			return ctx.resource.exampleA.methodA()
+		})
 
-	const subscriptionBuilder = serviceBuilder.getSubscriptionBuilder(
-		'exampleSubscription',
-		'This is an example command using a resource',
-	)
-	subscriptionBuilder.setSubscriptionFunction(async function (ctx) {
-		const _conf = this.config.optionOne
-		return ctx.resource.exampleA.methodA()
-	})
+	const subscriptionBuilder = serviceBuilder
+		.getSubscriptionBuilder('exampleSubscription', 'This is an example command using a resource')
+		.setSubscriptionFunction(async function (ctx) {
+			const _conf = this.config.optionOne
+			return ctx.resource.exampleA.methodA()
+		})
 
 	it('can provide resources to a command', async () => {
 		const service = await serviceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
@@ -66,10 +62,9 @@ describe('service resource test', () => {
 		const command = safeBind(commandBuilder.getCommandFunction(), service)
 		const payload = {}
 		const parameter = {}
-		const message = getCommandSuccessMessageMock(payload)
 
-		const context = commandBuilder.getCommandContextMock(message, sandbox)
-		//context.stubs.resource.exampleA.methodA = sandbox.stub().returns('mock return')
+		const context = commandBuilder.getCommandContextMock(payload, parameter, sandbox)
+		context.stubs.resource.exampleA.methodA = sandbox.stub().returns('mock return')
 
 		const result = await command(context.mock, payload, parameter)
 
