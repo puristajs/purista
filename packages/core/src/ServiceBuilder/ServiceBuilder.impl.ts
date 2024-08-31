@@ -21,11 +21,11 @@ import type {
 	Prettify,
 	SecretStore,
 	ServiceBuilderTypes,
-	ServiceClass,
 	ServiceClassTypes,
 	ServiceConstructorInput,
 	ServiceInfoType,
 	SetNewTypeValue,
+	SetNewTypeValues,
 	StateStore,
 	SubscriptionDefinitionList,
 	SubscriptionDefinitionListResolved,
@@ -72,11 +72,15 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	setConfigSchema<T extends Schema>(schema: T) {
 		this.configSchema = schema
 		return this as unknown as ServiceBuilder<
-			ServiceBuilderTypes<
-				Infer<T> extends Record<string, any> ? Infer<T> : NeverObject,
-				InferIn<T> extends Record<string, any> ? InferIn<T> : NeverObject,
-				S['Resources'],
-				Service<ServiceClassTypes<Infer<T> extends Record<string, any> ? Infer<T> : EmptyObject, S['Resources']>>
+			SetNewTypeValues<
+				S,
+				{
+					ConfigType: Infer<T> extends Record<string, any> ? Infer<T> : NeverObject
+					ConfigInputType: InferIn<T> extends Record<string, any> ? InferIn<T> : NeverObject
+					ServiceClassType: Service<
+						ServiceClassTypes<Infer<T> extends Record<string, any> ? Infer<T> : EmptyObject, S['Resources']>
+					>
+				}
 			>
 		>
 	}
