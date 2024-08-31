@@ -1,5 +1,5 @@
 ---
-title: Unit Test the Service
+title: Unit Test
 description: How to unit test a PURISTA service
 order: 201030
 ---
