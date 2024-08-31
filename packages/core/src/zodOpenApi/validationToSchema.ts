@@ -10,7 +10,7 @@ export const validationToSchema = async <T extends Schema>(schema?: T): Promise<
 	if (!schema) {
 		return
 	}
-	if ((schema as any) instanceof ZodType) {
+	if (schema instanceof ZodType) {
 		return generateSchema(schema)
 	}
 	try {
