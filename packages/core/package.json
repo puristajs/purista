@@ -48,6 +48,7 @@
 		"@opentelemetry/resources": "^1.26.0",
 		"@opentelemetry/sdk-trace-node": "^1.26.0",
 		"@opentelemetry/semantic-conventions": "^1.27.0",
+		"@typeschema/json": "^0.14.0",
 		"@typeschema/main": "^0.14.0",
 		"@typeschema/zod": "^0.14.0",
 		"openapi3-ts": "^4.4.0",
