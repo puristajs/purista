@@ -74,7 +74,12 @@ export class ServiceBuilder<
 	 */
 	setConfigSchema<T extends Schema>(schema: T) {
 		this.configSchema = schema
-		return this as unknown as ServiceBuilder<Infer<T>, InferIn<T>, Resources, Service<Infer<T>, Resources>>
+		return this as unknown as ServiceBuilder<
+			Infer<T> extends EmptyObject ? Infer<T> : Record<string, never>,
+			InferIn<T>,
+			Resources,
+			Service<Infer<T> extends EmptyObject ? Infer<T> : Record<string, never>, Resources>
+		>
 	}
 
 	/**
