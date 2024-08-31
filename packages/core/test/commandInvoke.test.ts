@@ -1,13 +1,13 @@
 import { createSandbox } from 'sinon'
 
 import { theServiceV1Service } from '../../../test/service/theService/v1/index.js'
-import { DefaultEventBridge, EBMessageType, type Service } from '../src/index.js'
+import { type Command, type CommandErrorResponse, DefaultEventBridge, EBMessageType } from '../src/index.js'
 
 describe('command invoke test', () => {
 	const sandbox = createSandbox()
 	const eventBridge = new DefaultEventBridge({})
 
-	let service: any
+	let service: Awaited<ReturnType<typeof theServiceV1Service.getInstance>>
 
 	beforeAll(async () => {
 		await eventBridge.start()
@@ -27,6 +27,8 @@ describe('command invoke test', () => {
 
 		const result = await service.executeCommand({
 			receiver: {
+				serviceName: 'theService',
+				serviceVersion: 'v1',
 				serviceTarget: 'invokeFoo',
 			},
 			correlationId: '1',
@@ -34,7 +36,7 @@ describe('command invoke test', () => {
 				payload,
 				parameter,
 			},
-		})
+		} as Readonly<Command>)
 
 		expect(result.payload).toStrictEqual({
 			payload,
@@ -46,7 +48,7 @@ describe('command invoke test', () => {
 		const payload = 'the payload'
 		const parameter = 'the parameter'
 
-		const result = await service.executeCommand({
+		const result = (await service.executeCommand({
 			receiver: {
 				serviceTarget: 'invokeFooFailed',
 			},
@@ -55,7 +57,7 @@ describe('command invoke test', () => {
 				payload,
 				parameter,
 			},
-		})
+		} as Readonly<Command>)) as CommandErrorResponse
 
 		expect(result.isHandledError).toBeFalsy()
 		expect(result.messageType).toStrictEqual(EBMessageType.CommandErrorResponse)

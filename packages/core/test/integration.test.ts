@@ -1,5 +1,6 @@
 import { fail } from 'node:assert'
 import { createSandbox } from 'sinon'
+import { vi } from 'vitest'
 import { z } from 'zod'
 
 import type { ServiceInfoType } from '../src/index.js'
@@ -61,23 +62,24 @@ describe('integration test', () => {
 	type CommandOnePayload = z.input<typeof commandOnePayloadSchema>
 	type CommandTwoPayload = z.input<typeof commandTwoPayloadSchema>
 
-	const serviceOneBuilder = new ServiceBuilder(serviceOneInfo)
-
 	const serviceOneSchema = z.object({
 		optionOne: z.string(),
 	})
 
-	serviceOneBuilder.setConfigSchema(serviceOneSchema).setDefaultConfig({ optionOne: 'option one' })
-
-	const serviceTwoBuilder = new ServiceBuilder(serviceTwoInfo)
+	const serviceOneBuilder = new ServiceBuilder(serviceOneInfo)
+		.setConfigSchema(serviceOneSchema)
+		.setDefaultConfig({ optionOne: 'option one' })
 
 	const serviceTwoSchema = z.object({
 		optionTwo: z.string(),
 	})
 
-	serviceTwoBuilder.setConfigSchema(serviceTwoSchema).setDefaultConfig({ optionTwo: 'option two' })
+	const serviceTwoBuilder = new ServiceBuilder(serviceTwoInfo)
+		.setConfigSchema(serviceTwoSchema)
+		.setDefaultConfig({ optionTwo: 'option two' })
 
 	afterAll(() => {
+		vi.restoreAllMocks()
 		sandbox.restore()
 	})
 
@@ -439,7 +441,7 @@ describe('integration test', () => {
 	})
 
 	it('works with default event bridge', async () => {
-		// jest.useFakeTimers()
+		vi.useFakeTimers()
 
 		const logger = getLoggerMock(sandbox)
 		const eventBridge = new DefaultEventBridge({ logger: logger.mock })
@@ -475,7 +477,7 @@ describe('integration test', () => {
 		await serviceTwo.destroy()
 		await eventBridge.destroy()
 
-		// jest.runAllTimers()
+		vi.runAllTimers()
 
 		expect(result).toBe('{"output":{"commandOne":"RECEIVED:ONE","commandTwo":"INPUT"}}')
 		expect(logger.stubs.fatal.called).toBeFalsy()
