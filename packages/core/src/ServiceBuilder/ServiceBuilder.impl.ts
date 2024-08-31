@@ -90,6 +90,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	 *
 	 * @param config - ConfigType - The default configuration for the service.
 	 * @returns The ServiceBuilder instance
+	 * @deprecated Use default value options in schema instead
 	 */
 	setDefaultConfig(config: Complete<S['ConfigType']>): this {
 		this.defaultConfig = config
