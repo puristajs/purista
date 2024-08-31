@@ -3,7 +3,6 @@ import { exec } from 'node:child_process'
 export const installDependencies = async (cmd: string) => {
 	const child = exec(cmd, err => {
 		if (err) {
-			// biome-ignore lint/nursery/noConsole: no logger available
 			console.error(err)
 			throw err
 		}
