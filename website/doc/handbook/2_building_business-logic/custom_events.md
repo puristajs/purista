@@ -8,21 +8,19 @@ order: 204000
 
 To be able to build real world systems, you will need to send events, which will be consumed by subscriptions or third party providers. The sender does/should not need to know, who is consuming this information.
 
+To define a custom event, an event name and a event schema must be set. The command and subscription builders provide the `canEmit` method, which should be used.
+
 Emitting custom events is quite easy. The function context and the subscription context containing a helper function `emit`.
-This async `emit` function has two parameters. The event name and the optional payload to be sent.
+This async `emit` function has two parameters. The event name and the optional payload to be sent.  
+The event name and type is automatically inherited by the definition done with `canEmit`.
 
 Example:
 
 ```typescript
 
+.canEmit('MyEventName', z.object({ some: z.string() }))
 .setCommandFunction(async function ({ emit }, payload, _param) {
   await emit('MyEventName', { some: 'Payload' })
-}
-
-// you can also set an explicit type for payload
-
-.setCommandFunction(async function ({ emit }, payload, _param) {
-  await emit<number>('MyEventName', 1)
 }
 
 ```
