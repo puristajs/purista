@@ -1,5 +1,5 @@
 ---
-title: Add a Service Configuration
+title: Add Configuration
 description: How to add a custom service config to your PURISTA service
 order: 201020
 ---

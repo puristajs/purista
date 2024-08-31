@@ -264,7 +264,7 @@ export default defineConfig({
 	buildEnd: async (config: SiteConfig) => {
 		const feed = new Feed({
 			title: 'PURISTA Blog',
-			description: 'Offical news, updates and announcements for PURISTA typescript backend framework',
+			description: 'Official news, updates and announcements for PURISTA typescript backend framework',
 			id: hostname,
 			link: hostname,
 			language: 'en',
