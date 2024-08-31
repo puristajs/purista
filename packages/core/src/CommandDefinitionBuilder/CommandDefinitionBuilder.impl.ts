@@ -1,6 +1,6 @@
 import type { Infer, InferIn, Schema } from '@typeschema/main'
 import type { SinonSandbox } from 'sinon'
-import type { ZodAny } from 'zod'
+import type { ZodUnknown } from 'zod'
 
 import type {
 	CommandAfterGuardHook,
@@ -46,9 +46,9 @@ export class CommandDefinitionBuilder<
 	MessagePayloadType = unknown,
 	MessageParamsType = EmptyObject,
 	MessageResultType = void,
-	PayloadSchema extends Schema = ZodAny,
-	ParameterSchema extends Schema = ZodAny,
-	ResultSchema extends Schema = ZodAny,
+	PayloadSchema extends Schema = ZodUnknown,
+	ParameterSchema extends Schema = ZodUnknown,
+	ResultSchema extends Schema = ZodUnknown,
 	Invokes = EmptyObject,
 	EmitListType = EmptyObject,
 > {
@@ -99,7 +99,8 @@ export class CommandDefinitionBuilder<
 				Infer<PayloadSchema>,
 				Infer<ParameterSchema>,
 				Invokes,
-				EmitListType
+				EmitListType,
+				Resources
 			>
 		>
 		afterGuard: Record<
@@ -112,7 +113,8 @@ export class CommandDefinitionBuilder<
 				Infer<PayloadSchema>,
 				Infer<ParameterSchema>,
 				Invokes,
-				EmitListType
+				EmitListType,
+				Resources
 			>
 		>
 		transformOutput?: {
@@ -554,7 +556,8 @@ export class CommandDefinitionBuilder<
 				Infer<PayloadSchema>,
 				Infer<ParameterSchema>,
 				Invokes,
-				EmitListType
+				EmitListType,
+				Resources
 			>
 		>,
 	) {
@@ -579,7 +582,8 @@ export class CommandDefinitionBuilder<
 				Infer<PayloadSchema>,
 				Infer<ParameterSchema>,
 				Invokes,
-				EmitListType
+				EmitListType,
+				Resources
 			>
 		>,
 	) {
@@ -683,7 +687,8 @@ export class CommandDefinitionBuilder<
 				Infer<ParameterSchema>,
 				Infer<ResultSchema>,
 				Invokes,
-				EmitListType
+				EmitListType,
+				Resources
 			>
 		>,
 	) {
@@ -702,7 +707,8 @@ export class CommandDefinitionBuilder<
 				Infer<ParameterSchema>,
 				Infer<ResultSchema>,
 				Invokes,
-				EmitListType
+				EmitListType,
+				Resources
 			>
 		> = {
 			...definition,
@@ -760,7 +766,8 @@ export class CommandDefinitionBuilder<
 			Infer<ParameterSchema>,
 			Infer<ResultSchema>,
 			Invokes,
-			EmitListType
+			EmitListType,
+			Resources
 		>
 	> {
 		if (!this.fn) {
@@ -800,7 +807,8 @@ export class CommandDefinitionBuilder<
 				Infer<ParameterSchema>,
 				Infer<ResultSchema>,
 				Invokes,
-				EmitListType
+				EmitListType,
+				Resources
 			>
 		> = {
 			commandName: this.commandName,
@@ -921,7 +929,8 @@ export class CommandDefinitionBuilder<
 			InferIn<ParameterSchema>,
 			Infer<ResultSchema>,
 			Invokes,
-			EmitListType
+			EmitListType,
+			Resources
 		>
 	}
 
