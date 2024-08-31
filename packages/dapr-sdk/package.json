@@ -29,9 +29,7 @@
 			}
 		}
 	},
-	"files": [
-		"dist/**/*"
-	],
+	"files": ["dist/**/*"],
 	"publishConfig": {
 		"access": "public"
 	},
@@ -44,9 +42,7 @@
 		"build": "rimraf dist && tshy"
 	},
 	"tshy": {
-		"exclude": [
-			"src/**/*.test.ts"
-		],
+		"exclude": ["src/**/*.test.ts"],
 		"exports": {
 			"./package.json": "./package.json",
 			".": "./src/index.ts"

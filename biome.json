@@ -95,5 +95,17 @@
 		"formatter": {
 			"trailingCommas": "none"
 		}
-	}
+	},
+	"overrides": [
+		{
+			"include": ["packages/cli/**"],
+			"linter": {
+				"rules": {
+					"nursery": {
+						"noConsole": "off"
+					}
+				}
+			}
+		}
+	]
 }

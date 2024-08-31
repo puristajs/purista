@@ -10,9 +10,7 @@
 	"author": "Sebastian Wessel",
 	"license": "ISC",
 	"type": "module",
-	"files": [
-		"dist"
-	],
+	"files": ["dist"],
 	"publishConfig": {
 		"access": "public"
 	},
@@ -26,15 +24,14 @@
 		"test:integration": "vitest -c ../../vitest.config.integration.ts"
 	},
 	"tshy": {
-		"exclude": [
-			"src/**/*.test.ts"
-		],
+		"exclude": ["src/**/*.test.ts"],
 		"exports": {
 			"./package.json": "./package.json",
 			".": "./src/index.ts"
 		}
 	},
 	"devDependencies": {
+		"@sinclair/typebox": "^0.33.7",
 		"@sodaru/yup-to-json-schema": "^2.0.1",
 		"@types/node": "^22.5.1",
 		"@typeschema/yup": "^0.14.0",
