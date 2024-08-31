@@ -2,7 +2,6 @@ import { SpanStatusCode, trace } from '@opentelemetry/api'
 import type { Infer, Schema } from '@typeschema/main'
 import { validate } from '@typeschema/main'
 
-import { z } from 'zod'
 import { DefaultConfigStore } from '../../DefaultConfigStore/index.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/index.js'
 import { DefaultStateStore } from '../../DefaultStateStore/index.js'
@@ -37,6 +36,7 @@ import type {
 	Logger,
 	PrincipalId,
 	ServiceClass,
+	ServiceClassTypes,
 	ServiceConstructorInput,
 	Subscription,
 	SubscriptionDefinition,
@@ -80,22 +80,22 @@ import { subscriptionTransformInput } from './subscriptionTransformInput.impl.js
  *
  * @group Service
  */
-export class Service<ConfigType extends {} = EmptyObject, Resources extends {} = EmptyObject>
+export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	extends ServiceBaseClass
-	implements ServiceClass<ConfigType, Resources>
+	implements ServiceClass<S>
 {
 	protected subscriptions = new Map<string, SubscriptionDefinition>()
 	protected commands = new Map<string, CommandDefinition>()
 
 	public commandDefinitionList: CommandDefinitionListResolved<any>
 	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
-	public config: ConfigType
+	public config: S['ConfigType']
 
-	public resources: Resources
+	public resources: S['Resources']
 
 	public isStarted = false
 
-	constructor(config: ServiceConstructorInput<ConfigType, Resources>) {
+	constructor(config: ServiceConstructorInput<S>) {
 		super({
 			logger: config.logger,
 			info: config.info,
@@ -108,7 +108,7 @@ export class Service<ConfigType extends {} = EmptyObject, Resources extends {} =
 		})
 
 		this.config = config.config
-		this.resources = config.resources ?? ({} as Resources)
+		this.resources = config.resources ?? {}
 		this.commandDefinitionList = config.commandDefinitionList
 		this.subscriptionDefinitionList = config.subscriptionDefinitionList
 	}
@@ -430,7 +430,7 @@ export class Service<ConfigType extends {} = EmptyObject, Resources extends {} =
 	}
 
 	public getContextFunctions(logger: Logger): ContextBase {
-		const getSecretFunction = async function (this: Service<ConfigType>, ...secretNames: string[]) {
+		const getSecretFunction = async function (this: Service<S>, ...secretNames: string[]) {
 			return this.wrapInSpan(PuristaSpanName.SecretStoreGetValue, {}, async span => {
 				try {
 					span.setAttributes({
@@ -446,7 +446,7 @@ export class Service<ConfigType extends {} = EmptyObject, Resources extends {} =
 		}
 		const getSecret: SecretGetterFunction = getSecretFunction.bind(this)
 
-		const setSecretFunction = async function (this: Service<ConfigType>, secretName: string, value: string) {
+		const setSecretFunction = async function (this: Service<S>, secretName: string, value: string) {
 			return this.wrapInSpan(PuristaSpanName.SecretStoreGetValue, {}, async span => {
 				try {
 					span.setAttributes({
@@ -462,7 +462,7 @@ export class Service<ConfigType extends {} = EmptyObject, Resources extends {} =
 		}
 		const setSecret: SecretSetterFunction = setSecretFunction.bind(this)
 
-		const removeSecretFunction = async function (this: Service<ConfigType>, secretName: string) {
+		const removeSecretFunction = async function (this: Service<S>, secretName: string) {
 			return this.wrapInSpan(PuristaSpanName.SecretStoreGetValue, {}, async span => {
 				try {
 					span.setAttributes({
@@ -478,7 +478,7 @@ export class Service<ConfigType extends {} = EmptyObject, Resources extends {} =
 		}
 		const removeSecret: SecretDeleteFunction = removeSecretFunction.bind(this)
 
-		const getConfigFunction = async function (this: Service<ConfigType>, ...configNames: string[]) {
+		const getConfigFunction = async function (this: Service<S>, ...configNames: string[]) {
 			return this.wrapInSpan(PuristaSpanName.ConfigStoreGetValue, {}, async span => {
 				try {
 					span.setAttributes({
@@ -494,7 +494,7 @@ export class Service<ConfigType extends {} = EmptyObject, Resources extends {} =
 		}
 		const getConfig: ConfigGetterFunction = getConfigFunction.bind(this)
 
-		const setConfigFunction = async function (this: Service<ConfigType>, configName: string, value: unknown) {
+		const setConfigFunction = async function (this: Service<S>, configName: string, value: unknown) {
 			return this.wrapInSpan(PuristaSpanName.ConfigStoreGetValue, {}, async span => {
 				try {
 					span.setAttributes({
@@ -510,7 +510,7 @@ export class Service<ConfigType extends {} = EmptyObject, Resources extends {} =
 		}
 		const setConfig: ConfigSetterFunction = setConfigFunction.bind(this)
 
-		const removeConfigFunction = async function (this: Service<ConfigType>, configName: string) {
+		const removeConfigFunction = async function (this: Service<S>, configName: string) {
 			return this.wrapInSpan(PuristaSpanName.ConfigStoreGetValue, {}, async span => {
 				try {
 					span.setAttributes({
@@ -526,7 +526,7 @@ export class Service<ConfigType extends {} = EmptyObject, Resources extends {} =
 		}
 		const removeConfig: ConfigDeleteFunction = removeConfigFunction.bind(this)
 
-		const getStateFunction = async function (this: Service<ConfigType>, ...stateNames: string[]) {
+		const getStateFunction = async function (this: Service<S>, ...stateNames: string[]) {
 			return this.wrapInSpan(PuristaSpanName.StateStoreGetValue, {}, async span => {
 				try {
 					span.setAttributes({
@@ -542,7 +542,7 @@ export class Service<ConfigType extends {} = EmptyObject, Resources extends {} =
 		}
 		const getState: StateGetterFunction = getStateFunction.bind(this)
 
-		const setStateFunction = async function (this: Service<ConfigType>, stateName: string, value: unknown) {
+		const setStateFunction = async function (this: Service<S>, stateName: string, value: unknown) {
 			return this.wrapInSpan(PuristaSpanName.StateStoreGetValue, {}, async span => {
 				try {
 					span.setAttributes({
@@ -558,7 +558,7 @@ export class Service<ConfigType extends {} = EmptyObject, Resources extends {} =
 		}
 		const setState: StateSetterFunction = setStateFunction.bind(this)
 
-		const removeStateFunction = async function (this: Service<ConfigType>, stateName: string) {
+		const removeStateFunction = async function (this: Service<S>, stateName: string) {
 			return this.wrapInSpan(PuristaSpanName.StateStoreGetValue, {}, async span => {
 				try {
 					span.setAttributes({

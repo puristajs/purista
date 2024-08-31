@@ -17,11 +17,15 @@ import type {
 	EventBridge,
 	LogLevelName,
 	Logger,
+	NeverObject,
 	Prettify,
 	SecretStore,
+	ServiceBuilderTypes,
 	ServiceClass,
+	ServiceClassTypes,
 	ServiceConstructorInput,
 	ServiceInfoType,
+	SetNewTypeValue,
 	StateStore,
 	SubscriptionDefinitionList,
 	SubscriptionDefinitionListResolved,
@@ -29,9 +33,7 @@ import type {
 import { Service, StatusCode, UnhandledError, initLogger } from '../core/index.js'
 import type { InstanceOrType, NonEmptyString } from '../helper/index.js'
 
-export type Newable<T, ConfigType extends {}, Resources extends {}> = new (
-	config: ServiceConstructorInput<ConfigType, Resources>,
-) => T
+export type Newable<T extends Service, S extends ServiceClassTypes> = new (config: ServiceConstructorInput<S>) => T
 
 /**
  * This class is used to build a service.
@@ -41,27 +43,22 @@ export type Newable<T, ConfigType extends {}, Resources extends {}> = new (
  *
  * @group Service
  */
-export class ServiceBuilder<
-	ConfigType extends {} = Record<string, unknown>,
-	ConfigInputType = Record<string, unknown>,
-	Resources extends {} = EmptyObject,
-	ServiceClassType extends ServiceClass = Service<ConfigType, Resources>,
-> {
-	private commandDefinitionList: CommandDefinitionList<ServiceClassType> = []
-	private subscriptionDefinitionList: SubscriptionDefinitionList<ServiceClassType> = []
+export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes> {
+	private commandDefinitionList: CommandDefinitionList<S['ServiceClassType']> = []
+	private subscriptionDefinitionList: SubscriptionDefinitionList<S['ServiceClassType']> = []
 
-	private commandDefinitionListResolved: CommandDefinitionListResolved<ServiceClassType> = []
-	private subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<ServiceClassType> = []
+	private commandDefinitionListResolved: CommandDefinitionListResolved<S['ServiceClassType']> = []
+	private subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<S['ServiceClassType']> = []
 
 	private configSchema?: Schema
-	private defaultConfig?: Complete<ConfigType>
+	private defaultConfig?: Complete<S['ConfigType']>
 
 	private definitionsResolved = false
 
 	private deprecated = false
 
-	instance?: ServiceClassType
-	SClass: Newable<any, ConfigType, Resources> = Service
+	instance?: S['ServiceClassType']
+	SClass: Newable<any, ServiceClassTypes<S['ConfigType'], S['Resources']>> = Service
 
 	// eslint-disable-next-line no-useless-constructor
 	constructor(public info: ServiceInfoType) {}
@@ -75,10 +72,12 @@ export class ServiceBuilder<
 	setConfigSchema<T extends Schema>(schema: T) {
 		this.configSchema = schema
 		return this as unknown as ServiceBuilder<
-			Infer<T> extends EmptyObject ? Infer<T> : Record<string, never>,
-			InferIn<T>,
-			Resources,
-			Service<Infer<T> extends EmptyObject ? Infer<T> : Record<string, never>, Resources>
+			ServiceBuilderTypes<
+				Infer<T> extends Record<string, any> ? Infer<T> : NeverObject,
+				InferIn<T> extends Record<string, any> ? InferIn<T> : NeverObject,
+				S['Resources'],
+				Service<ServiceClassTypes<Infer<T> extends Record<string, any> ? Infer<T> : EmptyObject, S['Resources']>>
+			>
 		>
 	}
 
@@ -88,7 +87,7 @@ export class ServiceBuilder<
 	 * @param config - ConfigType - The default configuration for the service.
 	 * @returns The ServiceBuilder instance
 	 */
-	setDefaultConfig(config: Complete<ConfigType>): this {
+	setDefaultConfig(config: Complete<S['ConfigType']>): this {
 		this.defaultConfig = config
 		return this
 	}
@@ -107,7 +106,7 @@ export class ServiceBuilder<
 	 * @param commands - CommandDefinitionList
 	 * @returns The service builder
 	 */
-	addCommandDefinition(...commands: CommandDefinitionList<ServiceClassType>) {
+	addCommandDefinition(...commands: CommandDefinitionList<S['ServiceClassType']>) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
 				StatusCode.InternalServerError,
@@ -115,7 +114,7 @@ export class ServiceBuilder<
 			)
 		}
 		this.commandDefinitionList.push(...commands)
-		return this as ServiceBuilder<ConfigType, ConfigInputType, Resources, ServiceClassType>
+		return this
 	}
 
 	/**
@@ -123,7 +122,7 @@ export class ServiceBuilder<
 	 * @param subscription - SubscriptionDefinitionList
 	 * @returns The service builder
 	 */
-	addSubscriptionDefinition(...subscription: SubscriptionDefinitionList<ServiceClassType>) {
+	addSubscriptionDefinition(...subscription: SubscriptionDefinitionList<S['ServiceClassType']>) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
 				StatusCode.InternalServerError,
@@ -131,7 +130,7 @@ export class ServiceBuilder<
 			)
 		}
 		this.subscriptionDefinitionList.push(...subscription)
-		return this as ServiceBuilder<ConfigType, ConfigInputType, Resources, ServiceClassType>
+		return this
 	}
 
 	/**
@@ -172,10 +171,7 @@ export class ServiceBuilder<
 	 */
 	defineResource<ResourceName extends string, ResourcesType>(name: ResourceName, resource: ResourcesType) {
 		return this as unknown as ServiceBuilder<
-			ConfigType,
-			ConfigInputType,
-			Resources & { [K in ResourceName]: InstanceOrType<ResourcesType> },
-			ServiceClassType
+			SetNewTypeValue<S, 'Resources', S['Resources'] & { [K in ResourceName]: InstanceOrType<ResourcesType> }>
 		>
 	}
 
@@ -184,9 +180,11 @@ export class ServiceBuilder<
 	 * @param customClass - A class which extends the Service class
 	 * @returns The builder itself, but with the type of the service class changed.
 	 */
-	setCustomClass<T extends ServiceClass<ConfigType, Resources>>(customClass: Newable<T, ConfigType, Resources>) {
+	setCustomClass<T extends Service<ServiceClassTypes<S['ConfigType'], S['Resources']>>>(
+		customClass: Newable<T, ServiceClassTypes<S['ConfigType'], S['Resources']>>,
+	) {
 		this.SClass = customClass
-		return this as unknown as ServiceBuilder<ConfigType, ConfigInputType, Resources, T>
+		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'ServiceClassType', T>>
 	}
 
 	getCustomClass() {
@@ -205,20 +203,19 @@ export class ServiceBuilder<
 		options: Prettify<
 			{
 				logLevel?: LogLevelName
-				serviceConfig?: Partial<ConfigInputType>
+				serviceConfig?: Partial<S['ConfigInputType']>
 				logger?: Logger
 				spanProcessor?: SpanProcessor
 				secretStore?: SecretStore
 				configStore?: ConfigStore
 				stateStore?: StateStore
-				//resources?: Resources
-			} & (keyof Resources extends never ? { resources?: Resources } : { resources: Resources })
+			} & (keyof S['Resources'] extends NeverObject ? { resources?: never } : { resources: S['Resources'] })
 		>,
 	) {
 		const config = {
 			...this.defaultConfig,
 			...options?.serviceConfig,
-		} as ConfigType
+		} as S['ConfigType']
 
 		const opt = options.serviceConfig as any
 		const hasLogLevel = opt?.logLevel
@@ -263,7 +260,7 @@ export class ServiceBuilder<
 			resources: options.resources,
 		})
 
-		return this.instance as ServiceClassType
+		return this.instance as S['ServiceClassType']
 	}
 
 	/**
@@ -279,8 +276,8 @@ export class ServiceBuilder<
 		commandName: NonEmptyString<T>,
 		description: string,
 		eventName?: NonEmptyString<N>,
-	): CommandDefinitionBuilder<ServiceClassType, Resources> {
-		return new CommandDefinitionBuilder<ServiceClassType, Resources>(
+	): CommandDefinitionBuilder<S['ServiceClassType'], S['Resources']> {
+		return new CommandDefinitionBuilder<S['ServiceClassType'], S['Resources']>(
 			commandName,
 			description,
 			eventName,
@@ -298,8 +295,8 @@ export class ServiceBuilder<
 	getSubscriptionBuilder<T extends string>(
 		subscriptionName: NonEmptyString<T>,
 		description: string,
-	): SubscriptionDefinitionBuilder<ServiceClassType, Resources> {
-		return new SubscriptionDefinitionBuilder<ServiceClassType, Resources>(
+	): SubscriptionDefinitionBuilder<S['ServiceClassType'], S['Resources']> {
+		return new SubscriptionDefinitionBuilder<S['ServiceClassType'], S['Resources']>(
 			subscriptionName,
 			description,
 			this.deprecated,
