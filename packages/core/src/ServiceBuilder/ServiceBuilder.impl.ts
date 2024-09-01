@@ -9,6 +9,7 @@ import { initDefaultSecretStore } from '../DefaultSecretStore/index.js'
 import { initDefaultStateStore } from '../DefaultStateStore/index.js'
 import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/index.js'
 import type {
+	CommandDefinitionBuilderTypes,
 	CommandDefinitionList,
 	CommandDefinitionListResolved,
 	Complete,
@@ -281,8 +282,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		commandName: NonEmptyString<T>,
 		description: string,
 		eventName?: NonEmptyString<N>,
-	): CommandDefinitionBuilder<S['ServiceClassType'], S['Resources']> {
-		return new CommandDefinitionBuilder<S['ServiceClassType'], S['Resources']>(
+	): CommandDefinitionBuilder<S['ServiceClassType'], CommandDefinitionBuilderTypes<S['Resources']>> {
+		return new CommandDefinitionBuilder<S['ServiceClassType'], CommandDefinitionBuilderTypes<S['Resources']>>(
 			commandName,
 			description,
 			eventName,
