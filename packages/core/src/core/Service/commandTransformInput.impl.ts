@@ -6,14 +6,14 @@ import type { Command, CommandDefinition, Logger } from '../types/index.js'
 import { StatusCode } from '../types/index.js'
 import type { Service } from './Service.impl.js'
 
-export const commandTransformInput = async <PayloadType = unknown, ParameterType = unknown>(
-	serviceInstance: Service,
+export const commandTransformInput = async <S extends Service>(
+	serviceInstance: S,
 	logger: Logger,
-	command: CommandDefinition,
-	message: Readonly<Command<PayloadType, ParameterType>>,
-): Promise<{ payload: Readonly<unknown>; parameter: Readonly<unknown> }> => {
+	command: CommandDefinition<S, any, any, any, any, any, any, any, any, any, any, any, any, any>,
+	message: Readonly<Command<unknown, unknown>>,
+) => {
 	if (!command.hooks.transformInput) {
-		return message.payload as { payload: Readonly<unknown>; parameter: Readonly<unknown> }
+		return message.payload as Readonly<typeof message.payload>
 	}
 
 	const transformInput = command.hooks.transformInput
@@ -28,7 +28,7 @@ export const commandTransformInput = async <PayloadType = unknown, ParameterType
 			async subSpan => {
 				const validationResult = await validate(transformInput.transformParameterSchema, message.payload.parameter)
 				if (validationResult.success) {
-					return validationResult.data as Readonly<typeof validationResult.data>
+					return validationResult.data
 				}
 				const err = new HandledError(StatusCode.BadRequest, undefined, validationResult.issues)
 				subSpan.recordException(err)
@@ -48,7 +48,7 @@ export const commandTransformInput = async <PayloadType = unknown, ParameterType
 			async subSpan => {
 				const validationResult = await validate(transformInput.transformInputSchema, message.payload.payload)
 				if (validationResult.success) {
-					return validationResult.data as Readonly<typeof validationResult.data>
+					return validationResult.data
 				}
 				const err = new HandledError(StatusCode.BadRequest, undefined, validationResult.issues)
 				subSpan.recordException(err)
@@ -64,7 +64,10 @@ export const commandTransformInput = async <PayloadType = unknown, ParameterType
 
 		return await serviceInstance.wrapInSpan(`${command.commandName}.transformFunction`, {}, async subSpan => {
 			try {
-				return await transform(payloadInput, parameterInput)
+				return await transform(
+					payloadInput as Readonly<typeof payloadInput>,
+					parameterInput as Readonly<typeof parameterInput>,
+				)
 			} catch (error) {
 				const err = error as Error
 				subSpan.recordException(err)

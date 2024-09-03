@@ -3,13 +3,13 @@ import { fail } from 'node:assert'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import type { Infer, InferIn, Schema } from '@typeschema/main'
 
+import type { CommandDefinitionBuilderTypes } from '../CommandDefinitionBuilder/CommandDefinitionBuilderTypes.js'
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
 import { initDefaultConfigStore } from '../DefaultConfigStore/index.js'
 import { initDefaultSecretStore } from '../DefaultSecretStore/index.js'
 import { initDefaultStateStore } from '../DefaultStateStore/index.js'
 import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/index.js'
 import type {
-	CommandDefinitionBuilderTypes,
 	CommandDefinitionList,
 	CommandDefinitionListResolved,
 	Complete,

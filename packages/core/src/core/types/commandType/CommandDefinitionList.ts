@@ -1,4 +1,4 @@
-import type { ServiceClass } from '../ServiceClass.js'
+import type { Service } from '../../Service/index.js'
 import type { CommandDefinition } from './CommandDefinition.js'
 import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase.js'
 
@@ -9,13 +9,12 @@ import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataB
  * export const userServiceCommands: CommandDefinitionList<UserService> = [signUp.getDefinition()]
  * ```
  */
-export type CommandDefinitionList<ServiceClassType extends ServiceClass> = Promise<
-	CommandDefinition<ServiceClassType, CommandDefinitionMetadataBase, any, any, any, any, any, any, any, any>
+export type CommandDefinitionList<S extends Service> = Promise<
+	CommandDefinition<S, any, any, any, any, any, any, any, any, any, any, any, any, CommandDefinitionMetadataBase>
 >[]
 
-export type CommandDefinitionListResolved<ServiceClassType extends ServiceClass> = CommandDefinition<
-	ServiceClassType,
-	CommandDefinitionMetadataBase,
+export type CommandDefinitionListResolved<S extends Service> = CommandDefinition<
+	S,
 	any,
 	any,
 	any,
@@ -23,5 +22,10 @@ export type CommandDefinitionListResolved<ServiceClassType extends ServiceClass>
 	any,
 	any,
 	any,
-	any
+	any,
+	any,
+	any,
+	any,
+	any,
+	CommandDefinitionMetadataBase
 >[]

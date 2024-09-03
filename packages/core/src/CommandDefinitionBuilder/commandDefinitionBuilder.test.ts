@@ -282,11 +282,11 @@ describe('CommandDefinitionBuilder', () => {
 	})
 
 	it('works with without schema', async () => {
-		const b = new CommandDefinitionBuilder('testCommand', 'a unit test command')
-
-		b.setCommandFunction(async (context, payload, parameter) => {
-			return { payload, parameter }
-		})
+		const b = new CommandDefinitionBuilder('testCommand', 'a unit test command').setCommandFunction(
+			async (_context, payload, parameter) => {
+				return { payload, parameter }
+			},
+		)
 
 		const fn = b.getCommandFunction()
 

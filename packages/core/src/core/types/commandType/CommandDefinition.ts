@@ -1,11 +1,10 @@
 import type { Schema } from '@typeschema/main'
 import type { SchemaObject } from 'openapi3-ts/oas31'
 
+import type { InvokeList, Service } from '../../index.js'
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
-import type { EmptyObject } from '../EmptyObject.js'
 import type { FromEmitToOtherType } from '../FromEmitToOtherType.js'
 import type { FromInvokeToOtherType } from '../FromInvokeToOtherType.js'
-import type { ServiceClass } from '../ServiceClass.js'
 import type { CommandAfterGuardHook } from './CommandAfterGuardHook.js'
 import type { CommandBeforeGuardHook } from './CommandBeforeGuardHook.js'
 import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase.js'
@@ -19,17 +18,20 @@ import type { CommandTransformOutputHook } from './CommandTransformOutputHook.js
  * @group Command
  */
 export type CommandDefinition<
-	ServiceClassType extends ServiceClass = ServiceClass,
-	MetadataType = CommandDefinitionMetadataBase,
-	MessagePayloadType = unknown,
-	MessageParamsType = unknown,
-	MessageResultType = unknown,
-	FunctionPayloadType = MessagePayloadType,
-	FunctionParamsType = MessageParamsType,
-	FunctionResultType = unknown,
-	Invokes = EmptyObject,
-	EmitListType = EmptyObject,
-	Resources = EmptyObject,
+	S extends Service,
+	MessagePayloadType,
+	MessageParamsType,
+	TransformInputPayload,
+	TransformInputParams,
+	FunctionPayloadType,
+	FunctionParamsType,
+	FunctionOutputType,
+	FinalFunctionOutputType,
+	TransformOutputHookOutput,
+	Resources extends Record<string, any>,
+	Invokes extends InvokeList,
+	EmitList extends Record<string, Schema>,
+	MetadataType extends CommandDefinitionMetadataBase = CommandDefinitionMetadataBase,
 > = {
 	/** the name of the command */
 	commandName: string
@@ -41,15 +43,15 @@ export type CommandDefinition<
 	eventBridgeConfig: DefinitionEventBridgeConfig
 	/** the command function */
 	call: CommandFunction<
-		ServiceClassType,
+		S,
 		MessagePayloadType,
 		MessageParamsType,
 		FunctionPayloadType,
 		FunctionParamsType,
-		FunctionResultType,
+		FunctionOutputType,
+		Resources,
 		Invokes,
-		EmitListType,
-		Resources
+		EmitList
 	>
 	/** the eventName for the command response */
 	eventName?: string
@@ -58,44 +60,52 @@ export type CommandDefinition<
 		transformInput?: {
 			transformInputSchema: Schema
 			transformParameterSchema: Schema
-			transformFunction: CommandTransformInputHook<ServiceClassType, MessagePayloadType, MessageParamsType>
+			transformFunction: CommandTransformInputHook<
+				S,
+				MessagePayloadType,
+				MessageParamsType,
+				TransformInputPayload,
+				TransformInputParams,
+				FunctionPayloadType,
+				FunctionParamsType
+			>
 		}
 		beforeGuard?: Record<
 			string,
 			CommandBeforeGuardHook<
-				ServiceClassType,
+				S,
 				MessagePayloadType,
 				MessageParamsType,
 				FunctionPayloadType,
 				FunctionParamsType,
+				Resources,
 				Invokes,
-				EmitListType,
-				Resources
+				EmitList
 			>
 		>
 		afterGuard?: Record<
 			string,
 			CommandAfterGuardHook<
-				ServiceClassType,
+				S,
 				MessagePayloadType,
 				MessageParamsType,
-				FunctionResultType,
 				FunctionPayloadType,
 				FunctionParamsType,
+				FunctionOutputType,
+				Resources,
 				Invokes,
-				EmitListType,
-				Resources
+				EmitList
 			>
 		>
 		transformOutput?: {
 			transformOutputSchema: Schema
 			transformFunction: CommandTransformOutputHook<
-				ServiceClassType,
+				S,
 				MessagePayloadType,
 				MessageParamsType,
-				MessageResultType,
-				FunctionResultType,
-				FunctionParamsType
+				FinalFunctionOutputType,
+				FunctionParamsType,
+				TransformOutputHookOutput
 			>
 		}
 	}
@@ -103,5 +113,5 @@ export type CommandDefinition<
 		Invokes,
 		{ outputSchema?: SchemaObject; payloadSchema?: SchemaObject; parameterSchema?: SchemaObject }
 	>
-	emitList: FromEmitToOtherType<EmitListType, SchemaObject>
+	emitList: FromEmitToOtherType<EmitList, SchemaObject>
 }

@@ -5,9 +5,9 @@ import { stub } from 'sinon'
 import type {
 	CommandFunctionContext,
 	EBMessageAddress,
-	EmptyObject,
 	FromEmitToOtherType,
 	FromInvokeToOtherType,
+	InvokeList,
 } from '../core/index.js'
 import { getLoggerMock } from './getLogger.mock.js'
 import { getCommandMessageMock } from './messages/index.js'
@@ -18,22 +18,20 @@ import { getCommandMessageMock } from './messages/index.js'
  * @group Unit test helper
  * */
 export const getCommandContextMock = <
-	MessagePayloadType = unknown,
-	MessageParamsType = unknown,
-	Invokes = EmptyObject,
-	EmitListType = EmptyObject,
-	Resources = EmptyObject,
->(
-	payload: MessagePayloadType,
-	parameter: MessageParamsType,
-	sandbox?: SinonSandbox,
-	_invokes?: FromInvokeToOtherType<
-		Invokes,
-		{ outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }
-	>,
-	emitList?: FromEmitToOtherType<EmitListType, Schema>,
-) => {
-	const logger = getLoggerMock(sandbox)
+	MessagePayloadType,
+	MessageParamsType,
+	Resources extends Record<string, any>,
+	Invokes extends InvokeList,
+	EmitList extends Record<string, Schema>,
+>(input: {
+	payload: MessagePayloadType
+	parameter: MessageParamsType
+	sandbox?: SinonSandbox
+	invokes: FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
+	emitList: FromEmitToOtherType<EmitList, Schema>
+	resources?: Partial<Resources>
+}) => {
+	const logger = getLoggerMock(input.sandbox)
 
 	const getMockSpan = () => {
 		return {
@@ -45,14 +43,14 @@ export const getCommandContextMock = <
 					traceFlags: 0,
 				}
 			},
-			setAttribute: sandbox?.stub() ?? stub(),
-			setAttributes: sandbox?.stub() ?? stub(),
-			addEvent: sandbox?.stub() ?? stub(),
-			setStatus: sandbox?.stub() ?? stub(),
-			updateName: sandbox?.stub() ?? stub(),
-			end: sandbox?.stub() ?? stub(),
+			setAttribute: input.sandbox?.stub() ?? stub(),
+			setAttributes: input.sandbox?.stub() ?? stub(),
+			addEvent: input.sandbox?.stub() ?? stub(),
+			setStatus: input.sandbox?.stub() ?? stub(),
+			updateName: input.sandbox?.stub() ?? stub(),
+			end: input.sandbox?.stub() ?? stub(),
 			isRecording: () => true,
-			recordException: (sandbox?.stub() ?? stub()).callsFake((err: any) => {
+			recordException: (input.sandbox?.stub() ?? stub()).callsFake((err: any) => {
 				// biome-ignore lint/nursery/noConsole: no logger available
 				console.error(err)
 			}),
@@ -67,8 +65,11 @@ export const getCommandContextMock = <
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
 					return undefined
 				}
+				if (input.resources?.[name]) {
+					return input.resources[name]
+				}
 				if (!resourceMocks[name]) {
-					resourceMocks[name] = sandbox?.stub() ?? stub()
+					resourceMocks[name] = input.sandbox?.stub() ?? stub()
 					resourceMocks[name].throws(`Resource ${name} not mocked`)
 				}
 				return resourceMocks[name]
@@ -120,7 +121,7 @@ export const getCommandContextMock = <
 						serviceTarget: name,
 					}
 					if (!invokeMocks[na.serviceName][na.serviceVersion][na.serviceTarget]) {
-						invokeMocks[na.serviceName][na.serviceVersion][na.serviceTarget] = sandbox?.stub() ?? stub()
+						invokeMocks[na.serviceName][na.serviceVersion][na.serviceTarget] = input.sandbox?.stub() ?? stub()
 
 						invokeMocks[na.serviceName][na.serviceVersion][na.serviceTarget].rejects(
 							new Error(
@@ -134,47 +135,46 @@ export const getCommandContextMock = <
 		}) as TFaux
 	}
 
-	const eventList = Object.keys(emitList ?? {}).reduce((prev, current) => {
+	const eventList = Object.keys(input.emitList ?? {}).reduce((prev, current) => {
 		return {
 			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
 			...prev,
-			[current]: sandbox?.stub() ?? stub().resolves(),
+			[current]: input.sandbox?.stub() ?? stub().resolves(),
 		}
-	}, {}) as FromEmitToOtherType<EmitListType, SinonStub>
+	}, {}) as FromEmitToOtherType<EmitList, SinonStub>
 
 	const stubs = {
 		logger: logger.stubs,
 		emit: eventList,
-		invoke: sandbox?.stub() ?? stub(),
-		wrapInSpan: sandbox?.stub() ?? stub(),
-		startActiveSpan: sandbox?.stub() ?? stub(),
-		getSecret: sandbox?.stub() ?? stub(),
-		setSecret: sandbox?.stub() ?? stub(),
-		removeSecret: sandbox?.stub() ?? stub(),
-		getConfig: sandbox?.stub() ?? stub(),
-		setConfig: sandbox?.stub() ?? stub(),
-		removeConfig: sandbox?.stub() ?? stub(),
-		getState: sandbox?.stub() ?? stub(),
-		setState: sandbox?.stub() ?? stub(),
-		removeState: sandbox?.stub() ?? stub(),
+		invoke: input.sandbox?.stub() ?? stub(),
+		wrapInSpan: input.sandbox?.stub() ?? stub(),
+		startActiveSpan: input.sandbox?.stub() ?? stub(),
+		getSecret: input.sandbox?.stub() ?? stub(),
+		setSecret: input.sandbox?.stub() ?? stub(),
+		removeSecret: input.sandbox?.stub() ?? stub(),
+		getConfig: input.sandbox?.stub() ?? stub(),
+		setConfig: input.sandbox?.stub() ?? stub(),
+		removeConfig: input.sandbox?.stub() ?? stub(),
+		getState: input.sandbox?.stub() ?? stub(),
+		setState: input.sandbox?.stub() ?? stub(),
+		removeState: input.sandbox?.stub() ?? stub(),
 		service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
 		resource: getResourceProxy<Resources>(),
 	}
 
 	const message = getCommandMessageMock({
 		payload: {
-			payload,
-			parameter,
+			payload: input.payload,
+			parameter: input.parameter,
 		},
 	})
 
-	const mock: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Resources> = {
+	const mock: CommandFunctionContext<MessagePayloadType, MessageParamsType, Resources, Invokes, EmitList> = {
 		logger: logger.mock,
 		message,
-		emit: async <K extends keyof EmitListType, Payload = EmitListType[K]>(eventName: K, payload: Payload) => {
+		emit: async <K extends keyof EmitList, Payload = EmitList[K]>(eventName: K, payload: Payload) => {
 			return eventList[eventName](eventName, payload)
 		},
-		invoke: stubs.invoke.rejects(new Error('Invoke is not stubbed')),
 		wrapInSpan: stubs.wrapInSpan.callsFake((_name, _opts, fn) => fn(getMockSpan())),
 		startActiveSpan: stubs.startActiveSpan.callsFake((_name, _opts, _context, fn) => fn(getMockSpan())),
 		service: getInvokeProxy<Invokes>(),

@@ -85,10 +85,13 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	implements ServiceClass<S>
 {
 	protected subscriptions = new Map<string, SubscriptionDefinition>()
-	protected commands = new Map<string, CommandDefinition>()
+	protected commands = new Map<
+		string,
+		CommandDefinition<Service, any, any, any, any, any, any, any, any, any, any, any, any>
+	>()
 
-	public commandDefinitionList: CommandDefinitionListResolved<any>
-	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
+	public commandDefinitionList: CommandDefinitionListResolved<Service>
+	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<Service>
 	public config: S['ConfigType']
 
 	public resources: S['Resources']
@@ -230,10 +233,10 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			instanceId: this.eventBridge.instanceId,
 		}
 
-		const invokeCommand = async (
+		const invokeCommand = async <Payload, Parameter extends EmptyObject>(
 			receiver: EBMessageAddress,
-			invokePayload: unknown,
-			invokeparameter: unknown,
+			invokePayload: Payload,
+			invokeparameter: Parameter,
 			contentType = 'application/json',
 			contentEncoding = 'utf-8',
 		): Promise<any> => {
@@ -267,7 +270,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 
 						throw err
 					}
-					payload = res.data
+					payload = res.data as Payload
 				}
 
 				const parameterSchema =
@@ -291,7 +294,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						throw err
 					}
 
-					parameter = res.data
+					parameter = res.data as Parameter
 				}
 
 				const msg: Readonly<Omit<Command, 'correlationId' | 'id' | 'timestamp'>> = Object.freeze({
@@ -641,7 +644,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			try {
 				const { payload, parameter } = await commandTransformInput(this, logger, command, message)
 
-				let result: unknown = await this.startActiveSpan(
+				let result = await this.startActiveSpan(
 					`${command.commandName}.functionExecution`,
 					{},
 					undefined,
@@ -654,13 +657,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 								message.principalId,
 								message.tenantId,
 								command.emitList,
-							),
-							invoke: this.getInvokeFunction(
-								command.commandName,
-								traceId,
-								message.principalId,
-								message.tenantId,
-								command.invokes,
 							),
 							...this.getContextFunctions(logger),
 							service: createInvokeFunctionProxy(
@@ -675,7 +671,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 							resource: this.resources,
 						}
 						const call = command.call.bind(this, context)
-						return await call(payload, parameter)
+						return (await call(payload as Readonly<typeof payload>, parameter as Readonly<typeof parameter>)) as unknown
 					},
 				)
 
@@ -695,13 +691,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 									message.tenantId,
 									command.emitList,
 								),
-								invoke: this.getInvokeFunction(
-									command.commandName,
-									traceId,
-									message.principalId,
-									message.tenantId,
-									command.invokes,
-								),
 								...this.getContextFunctions(logger),
 								service: createInvokeFunctionProxy(
 									this.getInvokeFunction(
@@ -716,7 +705,12 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 							}
 
 							const guardPromise = this.wrapInSpan(`afterGuardHook.${name}`, {}, async _subSpan => {
-								return hook.bind(this)(context, result as Readonly<unknown>, payload, parameter)
+								return hook.bind(this)(
+									context,
+									result as Readonly<typeof result>,
+									payload as Readonly<typeof payload>,
+									parameter as Readonly<typeof parameter>,
+								)
 							})
 							guardsPromises.push(guardPromise)
 						}
@@ -732,7 +726,10 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 							message,
 							...this.getContextFunctions(logger),
 						})
-						const resultTransformed = await afterTransform(result as Readonly<unknown>, parameter)
+						const resultTransformed = await afterTransform(
+							result as Readonly<typeof result>,
+							parameter as Readonly<typeof parameter>,
+						)
 
 						const validationResult = await validate(transformOutput.transformOutputSchema, resultTransformed)
 						if (!validationResult.success) {
@@ -746,7 +743,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 							})
 							throw err
 						}
-						result = validationResult.data
+						result = validationResult.data as unknown
 					})
 				}
 
@@ -794,7 +791,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		})
 	}
 
-	public async registerCommand(commandDefinition: CommandDefinition): Promise<void> {
+	public async registerCommand(
+		commandDefinition: CommandDefinition<Service, any, any, any, any, any, any, any, any, any, any, any, any>,
+	): Promise<void> {
 		return this.startActiveSpan('purista.registerCommand', {}, undefined, async span => {
 			this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register command')
 
@@ -880,13 +879,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 									message.tenantId,
 									subscription.emitList,
 								),
-								invoke: this.getInvokeFunction(
-									subscriptionName,
-									traceId,
-									message.principalId,
-									message.tenantId,
-									subscription.invokes,
-								),
 								...this.getContextFunctions(logger),
 								service: createInvokeFunctionProxy(
 									this.getInvokeFunction(
@@ -919,12 +911,6 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 										message.principalId,
 										message.tenantId,
 										subscription.emitList,
-									),
-									invoke: this.getInvokeFunction(
-										subscription.subscriptionName,
-										traceId,
-										message.principalId,
-										message.tenantId,
 									),
 									...this.getContextFunctions(logger),
 									service: createInvokeFunctionProxy(

@@ -1,8 +1,8 @@
+import type { Schema } from '@typeschema/main'
 import type { ContextBase } from '../ContextBase.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
-import type { EmptyObject } from '../EmptyObject.js'
-import type { InvokeFunction } from '../InvokeFunction.js'
 import type { Prettify } from '../Prettify.js'
+import type { EmptyObject, InvokeList } from '../index.js'
 import type { Command } from './Command.js'
 
 /**
@@ -17,37 +17,14 @@ import type { Command } from './Command.js'
 export type CommandFunctionContextEnhancements<
 	MessagePayloadType = unknown,
 	MessageParamsType = unknown,
-	Invokes = EmptyObject,
-	EmitListType = EmptyObject,
-	Resources = EmptyObject,
+	Resources extends Record<string, any> = EmptyObject,
+	Invokes extends InvokeList = EmptyObject,
+	EmitList extends Record<string, Schema> = EmptyObject,
 > = {
 	/** the original message */
 	message: Readonly<Command<MessagePayloadType, MessageParamsType>>
 	/** emit a custom message */
-	emit: EmitCustomMessageFunction<EmitListType>
-	/**
-	 * @deprecated Please use service instead and define the invocations with canInvoke in command builder.
-	 *
-	 *
-	 * Invokes a command and returns the result.
-	 * It is recommended to validate the result against a schema which only contains the data you actually need.
-	 *
-	 * @example
-	 * ```typescript
-	 *
-	 * const address: EBMessageAddress = {
-	 *   serviceName: 'name-of-service-to-invoke',
-	 *   serviceVersion: '1',
-	 *   serviceTarget: 'command-name-to-invoke',
-	 * }
-	 *
-	 * const inputPayload = { my: 'input' }
-	 * const inputParameter = { search: 'for_me' }
-	 *
-	 * const result = await invoke<MyResultType>(address, inputPayload inputParameter )
-	 * ```
-	 */
-	invoke: InvokeFunction
+	emit: EmitCustomMessageFunction<EmitList>
 	/**
 	 * Invokes a command and returns the result.
 	 * It is recommended to validate the result against a schema which only contains the data you actually need.
@@ -78,10 +55,9 @@ export type CommandFunctionContextEnhancements<
 export type CommandFunctionContext<
 	MessagePayloadType = unknown,
 	MessageParamsType = unknown,
-	Invokes = EmptyObject,
-	EmitListType = EmptyObject,
-	Resources = EmptyObject,
+	Resources extends Record<string, any> = EmptyObject,
+	Invokes extends InvokeList = EmptyObject,
+	EmitList extends Record<string, Schema> = EmptyObject,
 > = Prettify<
-	ContextBase &
-		CommandFunctionContextEnhancements<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Resources>
+	ContextBase & CommandFunctionContextEnhancements<MessagePayloadType, MessageParamsType, Resources, Invokes, EmitList>
 >

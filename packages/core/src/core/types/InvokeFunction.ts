@@ -1,4 +1,5 @@
 import type { EBMessageAddress } from './EBMessageAddress.js'
+import type { EmptyObject } from './EmptyObject.js'
 
 /**
  * Invokes a command and returns the result.
@@ -19,7 +20,11 @@ import type { EBMessageAddress } from './EBMessageAddress.js'
  * const result = await invoke<MyResultType>(address, inputPayload inputParameter )
  * ```
  */
-export type InvokeFunction = <InvokeResponseType = unknown, PayloadType = unknown, ParameterType = unknown>(
+export type InvokeFunction = <
+	InvokeResponseType = unknown,
+	PayloadType = unknown,
+	ParameterType extends EmptyObject = EmptyObject,
+>(
 	address: EBMessageAddress,
 	payload: PayloadType,
 	parameter: ParameterType,

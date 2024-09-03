@@ -1,7 +1,6 @@
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 import type { Tracer } from '@opentelemetry/sdk-trace-node'
 
-import type { EmptyObject } from './EmptyObject.js'
 import type { ServiceClassTypes } from './ServiceClassTypes.js'
 import type { CommandDefinition } from './commandType/index.js'
 import type { SubscriptionDefinition } from './subscription/index.js'
@@ -61,7 +60,9 @@ export interface ServiceClass<S extends ServiceClassTypes = ServiceClassTypes> {
 	 * Registers a new command for the service
 	 * @param commandDefinition the service command definition
 	 */
-	registerCommand(commandDefinition: CommandDefinition): Promise<void>
+	registerCommand(
+		commandDefinition: CommandDefinition<any, any, any, any, any, any, any, any, any, any, any, any, any>,
+	): Promise<void>
 
 	/**
 	 * Registers a new subscription for the service
