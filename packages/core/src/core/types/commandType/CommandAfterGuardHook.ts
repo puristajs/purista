@@ -1,4 +1,6 @@
+import type { Schema } from '@typeschema/main'
 import type { EmptyObject } from '../EmptyObject.js'
+import type { InvokeList } from '../InvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { CommandFunctionContext } from './CommandFunctionContext.js'
 
@@ -9,19 +11,19 @@ import type { CommandFunctionContext } from './CommandFunctionContext.js'
  * @group Command
  */
 export type CommandAfterGuardHook<
-	ServiceClassType = ServiceClass,
+	S extends ServiceClass = ServiceClass,
 	MessagePayloadType = unknown,
 	MessageParamsType = unknown,
-	FunctionResultType = unknown,
 	FunctionPayloadType = unknown,
 	FunctionParamsType = unknown,
-	Invokes = EmptyObject,
-	EmitListType = EmptyObject,
-	Resources = EmptyObject,
+	FunctionOutputType = unknown,
+	Resources extends Record<string, any> = EmptyObject,
+	Invokes extends InvokeList = EmptyObject,
+	EmitList extends Record<string, Schema> = EmptyObject,
 > = (
-	this: ServiceClassType,
-	context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Invokes, EmitListType, Resources>,
-	result: Readonly<FunctionResultType>,
-	input: Readonly<FunctionPayloadType>,
-	parameter: Readonly<FunctionParamsType>,
+	this: S,
+	context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Resources, Invokes, EmitList>,
+	result: Readonly<FunctionOutputType>,
+	originalPayload: Readonly<FunctionPayloadType>,
+	originalParameter: Readonly<FunctionParamsType>,
 ) => Promise<void>

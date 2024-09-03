@@ -2,7 +2,6 @@ import type { ContextBase } from '../ContextBase.js'
 import type { EBMessage } from '../EBMessage.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
 import type { EmptyObject } from '../EmptyObject.js'
-import type { InvokeFunction } from '../InvokeFunction.js'
 import type { Prettify } from '../Prettify.js'
 
 /**
@@ -23,28 +22,6 @@ export type SubscriptionFunctionContextEnhancements<
 	message: Readonly<EBMessage>
 	/** emit a custom message */
 	emit: EmitCustomMessageFunction<EmitListType>
-	/**
-	 * @deprecated Please use service instead and define the invocations with canInvoke in subscription builder.
-	 *
-	 * Invokes a command and returns the result.
-	 * It is recommended to validate the result against a schema which only contains the data you actually need.
-	 *
-	 * @example
-	 * ```typescript
-	 *
-	 * const address: EBMessageAddress = {
-	 *   serviceName: 'name-of-service-to-invoke',
-	 *   serviceVersion: '1',
-	 *   serviceTarget: 'command-name-to-invoke',
-	 * }
-	 *
-	 * const inputPayload = { my: 'input' }
-	 * const inputParameter = { search: 'for_me' }
-	 *
-	 * const result = await invoke<MyResultType>(address, inputPayload inputParameter )
-	 * ```
-	 */
-	invoke: InvokeFunction
 	/**
 	 * Invokes a command and returns the result.
 	 * It is recommended to validate the result against a schema which only contains the data you actually need.

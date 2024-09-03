@@ -11,6 +11,7 @@ import type {
 	CommandDefinitionMetadataBase,
 	EBMessageAddress,
 	EmptyObject,
+	ServiceClassTypes,
 	ServiceConstructorInput,
 } from '@purista/core'
 import { HandledError, Service, StatusCode, UnhandledError, isHttpExposedServiceMeta, safeBind } from '@purista/core'
@@ -62,7 +63,7 @@ import type { HonoServiceV1Config } from './honoServiceConfig.js'
 export class HonoServiceClass<
 	Bindings extends BindingsBase = BindingsBase,
 	Variables extends VariablesBase = VariablesBase,
-> extends Service<HonoServiceV1Config> {
+> extends Service<ServiceClassTypes<HonoServiceV1Config>> {
 	/**
 	 * The Hono instance
 	 */
@@ -77,7 +78,7 @@ export class HonoServiceClass<
 
 	private isAvailable = false
 
-	constructor(config: ServiceConstructorInput<HonoServiceV1Config, EmptyObject>) {
+	constructor(config: ServiceConstructorInput<ServiceClassTypes<HonoServiceV1Config, EmptyObject>>) {
 		super(config)
 		this.openApi = new OpenApiBuilder(this.config.openApi)
 

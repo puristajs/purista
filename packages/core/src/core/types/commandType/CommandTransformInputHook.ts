@@ -1,3 +1,4 @@
+import type { Service } from '../../index.js'
 import type { CommandTransformFunctionContext } from './CommandTransformFunctionContext.js'
 
 /**
@@ -10,21 +11,23 @@ import type { CommandTransformFunctionContext } from './CommandTransformFunction
  * @group Command
  */
 export type CommandTransformInputHook<
-	ServiceClassType,
-	FunctionPayloadOutput = unknown,
-	FunctionParamsOutput = unknown,
-	MessagePayloadInput = unknown,
-	MessageParamsInput = unknown,
+	S extends Service,
+	MessagePayloadType,
+	MessageParamsType,
+	TransformInputPayload,
+	TransformInputParams,
+	FunctionPayloadType,
+	FunctionParamsType,
 > = (
 	/** the service instance */
-	this: ServiceClassType,
+	this: S,
 	/** the transform function context */
-	context: CommandTransformFunctionContext<MessagePayloadInput, MessageParamsInput>,
+	context: CommandTransformFunctionContext<MessagePayloadType, MessageParamsType>,
 	/** the payload validated against the transform payload schema */
-	payload: Readonly<MessagePayloadInput>,
+	payload: Readonly<TransformInputPayload>,
 	/** the payload validated against the transform parameter schema */
-	parameter: Readonly<MessageParamsInput>,
+	parameter: Readonly<TransformInputParams>,
 ) => Promise<{
-	payload: Readonly<FunctionPayloadOutput>
-	parameter: Readonly<FunctionParamsOutput>
+	payload: FunctionPayloadType
+	parameter: FunctionParamsType
 }>

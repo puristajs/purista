@@ -11,7 +11,13 @@ import {
 	SEMATTRS_HTTP_STATUS_CODE,
 	SEMATTRS_HTTP_URL,
 } from '@opentelemetry/semantic-conventions'
-import type { Command, EmptyObject, HttpExposedServiceMeta, ServiceConstructorInput } from '@purista/core'
+import type {
+	Command,
+	EmptyObject,
+	HttpExposedServiceMeta,
+	ServiceClassTypes,
+	ServiceConstructorInput,
+} from '@purista/core'
 import { HandledError, Service, StatusCode, UnhandledError, safeBind } from '@purista/core'
 import type { FastifyInstance, HTTPMethods } from 'fastify'
 import fastify from 'fastify'
@@ -29,7 +35,9 @@ import type { BeforeResponseHook } from './types/index.js'
  * A simple http server based on fastify.
  *
  */
-export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> extends Service<ConfigType> {
+export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> extends Service<
+	ServiceClassTypes<ConfigType>
+> {
 	server?: FastifyInstance
 
 	routeDefinitions: HttpExposedServiceMeta<Record<string, unknown>>[] = []
@@ -38,7 +46,7 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
 
 	beforeResponse = new Trouter<BeforeResponseHook>()
 
-	constructor(config: ServiceConstructorInput<ConfigType, EmptyObject>) {
+	constructor(config: ServiceConstructorInput<ServiceClassTypes<ConfigType, EmptyObject>>) {
 		super(config)
 
 		this.server = fastify({

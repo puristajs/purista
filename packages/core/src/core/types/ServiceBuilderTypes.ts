@@ -1,6 +1,5 @@
 import type { Service } from '../Service/Service.impl.js'
 import type { EmptyObject } from './EmptyObject.js'
-import { NeverObject } from './NeverObject.js'
 import type { ServiceClass } from './ServiceClass.js'
 import type { ServiceClassTypes } from './ServiceClassTypes.js'
 

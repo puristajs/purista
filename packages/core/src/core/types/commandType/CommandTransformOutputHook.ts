@@ -1,3 +1,4 @@
+import type { Service } from '../../index.js'
 import type { CommandTransformFunctionContext } from './CommandTransformFunctionContext.js'
 
 /**
@@ -6,20 +7,20 @@ import type { CommandTransformFunctionContext } from './CommandTransformFunction
  * @group Command
  *
  * @param context the Context
- * @param commandFunctionOutput The output result output of command function
- * @param commandFunctionInputParameter The parameter input given to command function
+ * @param input The output result output of command function
+ * @param params The parameter input given to command function
  * @returns The transformed message payload
  */
 export type CommandTransformOutputHook<
-	ServiceClassType,
+	S extends Service,
 	MessagePayloadType,
 	MessageParamsType,
-	MessageResultType,
-	FunctionResultType,
+	FinalFunctionOutputType,
 	FunctionParamsType,
+	TransformOutputHookOutput,
 > = (
-	this: ServiceClassType,
+	this: S,
 	context: CommandTransformFunctionContext<MessagePayloadType, MessageParamsType>,
-	commandFunctionOutput: Readonly<FunctionResultType>,
-	commandFunctionInputParameter: Readonly<FunctionParamsType>,
-) => Promise<MessageResultType>
+	input: Readonly<FinalFunctionOutputType>,
+	params: Readonly<FunctionParamsType>,
+) => Promise<TransformOutputHookOutput>

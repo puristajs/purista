@@ -160,7 +160,6 @@ export const getSubscriptionContextMock = <Invokes = EmptyObject, EmitListType =
 		emit: async <K extends keyof EmitListType, Payload = EmitListType[K]>(eventName: K, payload: Payload) => {
 			return eventList[eventName](eventName, payload)
 		},
-		invoke: stubs.invoke.rejects(new Error('Invoke is not stubbed')),
 		wrapInSpan: stubs.wrapInSpan.callsFake((_name, _opts, fn) => fn(getMockSpan())),
 		startActiveSpan: stubs.startActiveSpan.callsFake((_name, _opts, _context, fn) => fn(getMockSpan())),
 		service: getInvokeProxy<Invokes>(),

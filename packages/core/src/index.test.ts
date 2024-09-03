@@ -24,7 +24,6 @@ import {
 	getCleanedMessage,
 	getCommandContextMock,
 	getCommandErrorMessageMock,
-	getCommandFunctionWithValidation,
 	getCommandMessageMock,
 	getCommandSuccessMessageMock,
 	getCustomMessageMessageMock,
@@ -88,7 +87,6 @@ it('exports core functions', () => {
 	// helper
 	expect(ServiceBuilder).toBeDefined()
 	expect(CommandDefinitionBuilder).toBeDefined()
-	expect(getCommandFunctionWithValidation).toBeDefined()
 	expect(getSubscriptionFunctionWithValidation).toBeDefined()
 	expect(SubscriptionDefinitionBuilder).toBeDefined()
 	expect(convertToCamelCase).toBeDefined()
