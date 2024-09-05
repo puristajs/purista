@@ -20,16 +20,22 @@ import { getCommandMessageMock } from './messages/index.js'
 export const getCommandContextMock = <
 	MessagePayloadType,
 	MessageParamsType,
+	FunctionPayloadType,
+	FunctionParamsType,
 	Resources extends Record<string, any>,
 	Invokes extends InvokeList,
 	EmitList extends Record<string, Schema>,
 >(input: {
-	payload: MessagePayloadType
-	parameter: MessageParamsType
+	payload: FunctionPayloadType
+	parameter: FunctionParamsType
 	sandbox?: SinonSandbox
 	invokes: FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
 	emitList: FromEmitToOtherType<EmitList, Schema>
 	resources?: Partial<Resources>
+	message?: {
+		payload: MessagePayloadType
+		parameter: MessageParamsType
+	}
 }) => {
 	const logger = getLoggerMock(input.sandbox)
 
@@ -162,12 +168,16 @@ export const getCommandContextMock = <
 		resource: getResourceProxy<Resources>(),
 	}
 
-	const message = getCommandMessageMock({
-		payload: {
-			payload: input.payload,
-			parameter: input.parameter,
-		},
-	})
+	const message = getCommandMessageMock<MessagePayloadType, MessageParamsType>(
+		input.message
+			? { payload: input.message }
+			: {
+					payload: {
+						payload: input.payload as any,
+						parameter: input.parameter as any,
+					},
+				},
+	)
 
 	const mock: CommandFunctionContext<MessagePayloadType, MessageParamsType, Resources, Invokes, EmitList> = {
 		logger: logger.mock,

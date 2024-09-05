@@ -646,9 +646,9 @@ export class SubscriptionDefinitionBuilder<
 			string,
 			SubscriptionAfterGuardHook<
 				S,
+				Infer<C['OutputSchema']>,
 				Infer<C['PayloadSchema']>,
 				Infer<C['ParamsSchema']>,
-				Infer<C['OutputSchema']>,
 				C['Resources'],
 				C['Invokes'],
 				C['EmitList']

@@ -12,7 +12,7 @@ import {
  *
  * @group Unit test helper
  * */
-export const getCommandMessageMock = <Payload = unknown, Parameter = unknown>(
+export const getCommandMessageMock = <Payload, Parameter>(
 	input?: Partial<Command<Payload, Parameter>> & {
 		payload?: {
 			payload?: Payload
