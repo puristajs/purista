@@ -1,5 +1,7 @@
+import type { Schema } from '@typeschema/main'
+import type { Service } from '../../Service/index.js'
 import type { EmptyObject } from '../EmptyObject.js'
-import type { ServiceClass } from '../ServiceClass.js'
+import type { InvokeList } from '../InvokeList.js'
 import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.js'
 
 /**
@@ -10,15 +12,15 @@ import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.
  * @group Subscription
  */
 export type SubscriptionBeforeGuardHook<
-	ServiceClassType = ServiceClass,
+	S extends Service = Service,
 	FunctionPayloadType = unknown,
 	FunctionParamsType = unknown,
-	Invokes = EmptyObject,
-	EmitListType = EmptyObject,
-	Resources = EmptyObject,
+	Resources extends Record<string, any> = EmptyObject,
+	Invokes extends InvokeList = EmptyObject,
+	EmitList extends Record<string, Schema> = EmptyObject,
 > = (
-	this: ServiceClassType,
-	context: SubscriptionFunctionContext<Invokes, EmitListType, Resources>,
+	this: S,
+	context: SubscriptionFunctionContext<Resources, Invokes, EmitList>,
 	payload: Readonly<FunctionPayloadType>,
 	parameter: Readonly<FunctionParamsType>,
 ) => Promise<void>

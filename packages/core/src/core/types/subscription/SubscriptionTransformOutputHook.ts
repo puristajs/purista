@@ -1,3 +1,4 @@
+import type { Service } from '../../Service/index.js'
 import type { SubscriptionTransformFunctionContext } from './SubscriptionTransformFunctionContext.js'
 
 /**
@@ -6,13 +7,13 @@ import type { SubscriptionTransformFunctionContext } from './SubscriptionTransfo
  * @group Subscription
  */
 export type SubscriptionTransformOutputHook<
-	ServiceClassType,
-	MessageResultType = unknown,
-	MessageParamsType = unknown,
-	ResponseOutput = unknown,
+	S extends Service,
+	FinalFunctionOutputType,
+	FunctionParamsType,
+	TransformOutputHookOutput,
 > = (
-	this: ServiceClassType,
+	this: S,
 	context: SubscriptionTransformFunctionContext,
-	payload: Readonly<MessageResultType>,
-	parameter: Readonly<MessageParamsType>,
-) => Promise<ResponseOutput>
+	payload: Readonly<FinalFunctionOutputType>,
+	parameter: Readonly<FunctionParamsType>,
+) => Promise<TransformOutputHookOutput>

@@ -9,7 +9,7 @@ export type FullServiceDefinition<S extends Service = Service> = {
 				[commandName: string]: CommandDefinition<S, any, any, any, any, any, any, any, any, any, any, any, any>
 			}
 			subscriptions: {
-				[subscriptionName: string]: SubscriptionDefinition
+				[subscriptionName: string]: SubscriptionDefinition<S, any, any, any, any, any, any, any, any, any, any>
 			}
 		}
 	}

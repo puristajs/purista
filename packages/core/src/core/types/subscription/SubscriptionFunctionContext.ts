@@ -1,7 +1,9 @@
+import type { Schema } from '@typeschema/main'
 import type { ContextBase } from '../ContextBase.js'
 import type { EBMessage } from '../EBMessage.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
 import type { EmptyObject } from '../EmptyObject.js'
+import type { InvokeList } from '../InvokeList.js'
 import type { Prettify } from '../Prettify.js'
 
 /**
@@ -14,14 +16,14 @@ import type { Prettify } from '../Prettify.js'
  * @group Subscription
  */
 export type SubscriptionFunctionContextEnhancements<
-	Invokes = EmptyObject,
-	EmitListType = EmptyObject,
-	Resources = EmptyObject,
+	Resources extends Record<string, any> = EmptyObject,
+	Invokes extends InvokeList = EmptyObject,
+	EmitList extends Record<string, Schema> = EmptyObject,
 > = {
 	/** the original message */
 	message: Readonly<EBMessage>
 	/** emit a custom message */
-	emit: EmitCustomMessageFunction<EmitListType>
+	emit: EmitCustomMessageFunction<EmitList>
 	/**
 	 * Invokes a command and returns the result.
 	 * It is recommended to validate the result against a schema which only contains the data you actually need.
@@ -50,7 +52,7 @@ export type SubscriptionFunctionContextEnhancements<
  * @group Subscription
  */
 export type SubscriptionFunctionContext<
-	Invokes = EmptyObject,
-	EmitListType = EmptyObject,
-	Resources = EmptyObject,
-> = Prettify<ContextBase & SubscriptionFunctionContextEnhancements<Invokes, EmitListType, Resources>>
+	Resources extends Record<string, any> = EmptyObject,
+	Invokes extends InvokeList = EmptyObject,
+	EmitList extends Record<string, Schema> = EmptyObject,
+> = Prettify<ContextBase & SubscriptionFunctionContextEnhancements<Resources, Invokes, EmitList>>

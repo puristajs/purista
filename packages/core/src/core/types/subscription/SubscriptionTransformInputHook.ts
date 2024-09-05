@@ -1,20 +1,21 @@
+import type { Service } from '../../Service/Service.impl.js'
 import type { SubscriptionTransformFunctionContext } from './SubscriptionTransformFunctionContext.js'
 
 /**
  * @group Subscription
  */
 export type SubscriptionTransformInputHook<
-	ServiceClassType,
-	PayloadOutput = unknown,
-	ParamsOutput = unknown,
-	PayloadInput = unknown,
-	ParamsInput = unknown,
+	S extends Service,
+	TransformInputPayload,
+	TransformInputParams,
+	FunctionPayloadType,
+	FunctionParamsType,
 > = (
-	this: ServiceClassType,
+	this: S,
 	context: SubscriptionTransformFunctionContext,
-	payload: Readonly<PayloadInput>,
-	parameter: Readonly<ParamsInput>,
+	payload: Readonly<TransformInputPayload>,
+	parameter: Readonly<TransformInputParams>,
 ) => Promise<{
-	payload: Readonly<PayloadOutput>
-	parameter: Readonly<ParamsOutput>
+	payload: Readonly<FunctionPayloadType>
+	parameter: Readonly<FunctionParamsType>
 }>
