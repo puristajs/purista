@@ -19,7 +19,7 @@
 	},
 	"scripts": {
 		"lint": "npx @biomejs/biome check --write",
-		"test": "vitest -c ../../vitest.config.ts",
+		"test": "tsc --noEmit && vitest -c ../../vitest.config.ts",
 		"build": "rimraf dist && tshy",
 		"test:integration": "vitest -c ../../vitest.config.integration.ts"
 	},
