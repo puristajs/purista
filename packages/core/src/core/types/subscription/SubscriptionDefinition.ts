@@ -1,14 +1,14 @@
 import type { Schema } from '@typeschema/main'
 import type { SchemaObject } from 'openapi3-ts/oas31'
 
+import type { Service } from '../../Service/index.js'
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { EBMessageType } from '../EBMessageType.enum.js'
-import type { EmptyObject } from '../EmptyObject.js'
 import type { FromEmitToOtherType } from '../FromEmitToOtherType.js'
 import type { FromInvokeToOtherType } from '../FromInvokeToOtherType.js'
 import type { InstanceId } from '../InstanceId.js'
+import type { InvokeList } from '../InvokeList.js'
 import type { PrincipalId } from '../PrincipalId.js'
-import type { ServiceClass } from '../ServiceClass.js'
 import type { TenantId } from '../TenantId.js'
 import type { SubscriptionAfterGuardHook } from './SubscriptionAfterGuardHook.js'
 import type { SubscriptionBeforeGuardHook } from './SubscriptionBeforeGuardHook.js'
@@ -23,17 +23,18 @@ import type { SubscriptionTransformOutputHook } from './SubscriptionTransformOut
  * @group Subscription
  */
 export type SubscriptionDefinition<
-	ServiceClassType extends ServiceClass = ServiceClass,
-	MetadataType = SubscriptionDefinitionMetadataBase,
-	MessagePayloadType = unknown,
-	MessageParamsType = unknown,
-	MessageResultType = unknown,
-	FunctionPayloadType = MessagePayloadType,
-	FunctionParamsType = MessageParamsType,
-	FunctionResultType = MessageResultType,
-	Invokes = EmptyObject,
-	EmitListType = EmptyObject,
-	Resources = EmptyObject,
+	S extends Service,
+	TransformInputPayload,
+	TransformInputParams,
+	FunctionPayloadType,
+	FunctionParamsType,
+	FunctionOutputType,
+	FinalFunctionOutputType,
+	TransformOutputHookOutput,
+	Resources extends Record<string, any>,
+	Invokes extends InvokeList,
+	EmitList extends Record<string, Schema>,
+	MetadataType extends SubscriptionDefinitionMetadataBase = SubscriptionDefinitionMetadataBase,
 > = {
 	/** the name of the subscription */
 	subscriptionName: string
@@ -45,15 +46,13 @@ export type SubscriptionDefinition<
 	eventBridgeConfig: DefinitionEventBridgeConfig
 	/** the subscription function */
 	call: SubscriptionFunction<
-		ServiceClassType,
-		MessagePayloadType,
-		MessageParamsType,
+		S,
 		FunctionPayloadType,
 		FunctionParamsType,
-		FunctionResultType,
+		FunctionOutputType,
+		Resources,
 		Invokes,
-		EmitListType,
-		Resources
+		EmitList
 	>
 	/** filter for messages produced by given sender */
 	sender?: {
@@ -84,40 +83,44 @@ export type SubscriptionDefinition<
 		transformInput?: {
 			transformInputSchema: Schema
 			transformParameterSchema: Schema
-			transformFunction: SubscriptionTransformInputHook<ServiceClassType, MessagePayloadType, MessageParamsType>
+			transformFunction: SubscriptionTransformInputHook<
+				S,
+				TransformInputPayload,
+				TransformInputParams,
+				FunctionPayloadType,
+				FunctionParamsType
+			>
 		}
 		beforeGuard?: Record<
 			string,
-			SubscriptionBeforeGuardHook<
-				ServiceClassType,
-				FunctionPayloadType,
-				FunctionParamsType,
-				Invokes,
-				EmitListType,
-				Resources
-			>
+			SubscriptionBeforeGuardHook<S, FunctionPayloadType, FunctionParamsType, Resources, Invokes, EmitList>
 		>
 		afterGuard?: Record<
 			string,
 			SubscriptionAfterGuardHook<
-				ServiceClassType,
-				FunctionResultType,
+				S,
 				FunctionPayloadType,
 				FunctionParamsType,
+				FunctionOutputType,
+				Resources,
 				Invokes,
-				EmitListType,
-				Resources
+				EmitList
 			>
 		>
 		transformOutput?: {
 			transformOutputSchema: Schema
-			transformFunction: SubscriptionTransformOutputHook<ServiceClassType, FunctionResultType, FunctionParamsType, any>
+			transformFunction: SubscriptionTransformOutputHook<
+				S,
+				FinalFunctionOutputType,
+				FunctionParamsType,
+				TransformOutputHookOutput
+			>
 		}
 	}
 	invokes: FromInvokeToOtherType<
 		Invokes,
 		{ outputSchema?: SchemaObject; payloadSchema?: SchemaObject; parameterSchema?: SchemaObject }
 	>
-	emitList: FromEmitToOtherType<EmitListType, SchemaObject>
+	emitList: FromEmitToOtherType<EmitList, SchemaObject>
 	deprecated: boolean
 }

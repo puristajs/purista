@@ -1,6 +1,5 @@
 import type { Infer, InferIn, Schema } from '@typeschema/main'
 import type { SinonSandbox } from 'sinon'
-import type { ZodUnknown } from 'zod'
 
 import type {
 	Complete,
@@ -8,12 +7,9 @@ import type {
 	DefinitionEventBridgeConfig,
 	EBMessage,
 	EBMessageType,
-	EmptyObject,
-	FromEmitToOtherType,
-	FromInvokeToOtherType,
 	InstanceId,
 	PrincipalId,
-	ServiceClass,
+	Service,
 	SubscriptionAfterGuardHook,
 	SubscriptionBeforeGuardHook,
 	SubscriptionDefinition,
@@ -31,6 +27,7 @@ import {
 } from '../helper/index.js'
 import { getSubscriptionContextMock, getSubscriptionTransformContextMock } from '../mocks/index.js'
 import { validationToSchema } from '../zodOpenApi/index.js'
+import type { SubscriptionDefinitionBuilderTypes } from './SubscriptionDefinitionBuilderTypes.js'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl.js'
 
 /**
@@ -42,64 +39,30 @@ import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunction
  * @group Subscription
  */
 export class SubscriptionDefinitionBuilder<
-	ServiceClassType extends ServiceClass = ServiceClass,
-	Resources extends {} = EmptyObject,
-	MessagePayloadType = unknown,
-	MessageParamsType = undefined,
-	MessageResultType = void,
-	PayloadSchema extends Schema = ZodUnknown,
-	ParameterSchema extends Schema = ZodUnknown,
-	ResultSchema extends Schema = ZodUnknown,
-	Invokes = EmptyObject,
-	EmitListType = EmptyObject,
+	S extends Service = Service,
+	C extends SubscriptionDefinitionBuilderTypes = SubscriptionDefinitionBuilderTypes,
 > {
 	private messageType: EBMessageType | undefined
 
-	private inputSchema?: PayloadSchema
+	private inputSchema?: Schema
 	private inputContentType: ContentType | undefined
 	private inputContentEncoding: string | undefined
-	private outputSchema?: ResultSchema
+	private outputSchema?: Schema
 	private outputContentType: ContentType | undefined
 	private outputContentEncoding: string | undefined
-	private parameterSchema?: ParameterSchema
+	private parameterSchema?: Schema
 
 	private hooks: {
 		transformInput?: {
 			transformInputSchema: Schema
 			transformParameterSchema: Schema
-			transformFunction: SubscriptionTransformInputHook<ServiceClassType, any, any, any, any>
+			transformFunction: SubscriptionTransformInputHook<S, any, any, any, any>
 		}
-		beforeGuard: Record<
-			string,
-			SubscriptionBeforeGuardHook<
-				ServiceClassType,
-				Infer<PayloadSchema>,
-				Infer<ParameterSchema>,
-				Invokes,
-				EmitListType,
-				Resources
-			>
-		>
-		afterGuard: Record<
-			string,
-			SubscriptionAfterGuardHook<
-				ServiceClassType,
-				Infer<ResultSchema>,
-				Infer<PayloadSchema>,
-				Infer<ParameterSchema>,
-				Invokes,
-				EmitListType,
-				Resources
-			>
-		>
+		beforeGuard: Record<string, SubscriptionBeforeGuardHook<S, any, any, C['Resources'], any, any>>
+		afterGuard: Record<string, SubscriptionAfterGuardHook<S, any, any, any, C['Resources'], any, any>>
 		transformOutput?: {
 			transformOutputSchema: Schema
-			transformFunction: SubscriptionTransformOutputHook<
-				ServiceClassType,
-				Infer<ResultSchema>,
-				Infer<ParameterSchema>,
-				any
-			>
+			transformFunction: SubscriptionTransformOutputHook<S, any, any, any>
 		}
 	} = {
 		transformInput: undefined,
@@ -122,17 +85,7 @@ export class SubscriptionDefinitionBuilder<
 		instanceId?: InstanceId
 	}
 
-	private fn?: SubscriptionFunction<
-		ServiceClassType,
-		MessagePayloadType,
-		MessageParamsType,
-		Infer<PayloadSchema>,
-		Infer<ParameterSchema>,
-		InferIn<ResultSchema>,
-		Invokes,
-		EmitListType,
-		Resources
-	>
+	private fn?: SubscriptionFunction<S, any, any, any, any, any, any>
 
 	private eventName?: string
 	private emitEventName?: string
@@ -145,16 +98,12 @@ export class SubscriptionDefinitionBuilder<
 	private shared = true
 	private autoacknowledge = false
 
-	private invokes: FromInvokeToOtherType<
-		Invokes,
-		{ outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }
-	> = {} as FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
+	private invokes: C['Invokes'] = {}
 
-	private emitList: FromEmitToOtherType<EmitListType, Schema> = {} as FromEmitToOtherType<EmitListType, Schema>
+	private emitList: C['EmitList'] = {}
 
 	private deprecated = false
 
-	// eslint-disable-next-line no-useless-constructor
 	constructor(
 		private subscriptionName: Exclude<string, ''>,
 		private subscriptionDescription: string,
@@ -164,6 +113,16 @@ export class SubscriptionDefinitionBuilder<
 		this.deprecated = deprecated
 	}
 
+	/**
+	 * Define a command which can be invoked by the current subscription
+	 * @param serviceName
+	 * @param serviceVersion
+	 * @param serviceTarget
+	 * @param outputSchema
+	 * @param payloadSchema
+	 * @param parameterSchema
+	 * @returns
+	 */
 	canInvoke<
 		Output extends Schema,
 		Payload extends Schema,
@@ -198,7 +157,7 @@ export class SubscriptionDefinitionBuilder<
 					[serviceTarget]: { outputSchema, payloadSchema, parameterSchema },
 				},
 			},
-		} as Invokes &
+		} as unknown as C['Invokes'] &
 			Record<
 				SName,
 				Record<
@@ -212,29 +171,31 @@ export class SubscriptionDefinitionBuilder<
 			...f,
 		}
 
-		return this as SubscriptionDefinitionBuilder<
-			ServiceClassType,
-			Resources,
-			MessagePayloadType,
-			MessageParamsType,
-			MessageResultType,
-			PayloadSchema,
-			ParameterSchema,
-			ResultSchema,
-			Invokes &
-				Record<
-					SName,
+		return this as unknown as SubscriptionDefinitionBuilder<
+			S,
+			SubscriptionDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'] &
 					Record<
-						Version,
-						Record<Fname, (payload: InferIn<Payload>, parameter: InferIn<Parameter>) => Promise<Infer<Output>>>
-					>
-				>,
-			EmitListType
+						SName,
+						Record<
+							Version,
+							Record<Fname, (payload: InferIn<Payload>, parameter: InferIn<Parameter>) => Promise<Infer<Output>>>
+						>
+					>,
+				C['EmitList']
+			>
 		>
 	}
 
 	/**
-	 * Define which custom events the command can emit.
+	 * Define which custom events the subscription can emit.
 	 *
 	 * @param eventName The custom event name
 	 * @param schema the payload schema
@@ -247,17 +208,19 @@ export class SubscriptionDefinitionBuilder<
 
 		this.emitList = { ...this.emitList, [eventName]: schema }
 
-		return this as SubscriptionDefinitionBuilder<
-			ServiceClassType,
-			Resources,
-			MessagePayloadType,
-			MessageParamsType,
-			MessageResultType,
-			PayloadSchema,
-			ParameterSchema,
-			ResultSchema,
-			Invokes,
-			EmitListType & Record<EventName, InferIn<typeof schema>>
+		return this as unknown as SubscriptionDefinitionBuilder<
+			S,
+			SubscriptionDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['EmitList'] & Record<EventName, InferIn<typeof schema>>
+			>
 		>
 	}
 
@@ -438,8 +401,8 @@ export class SubscriptionDefinitionBuilder<
 	 * @param inputContentEncoding optional the content encoding
 	 * @returns SubscriptionDefinitionBuilder
 	 */
-	addPayloadSchema<T extends Schema>(
-		inputSchema: T,
+	addPayloadSchema<PayloadSchema extends Schema>(
+		inputSchema: PayloadSchema,
 		inputContentType = 'application/json',
 		inputContentEncoding = 'utf-8',
 	) {
@@ -448,16 +411,18 @@ export class SubscriptionDefinitionBuilder<
 
 		this.inputSchema = inputSchema as unknown as PayloadSchema
 		return this as unknown as SubscriptionDefinitionBuilder<
-			ServiceClassType,
-			Resources,
-			InferIn<T>,
-			MessageParamsType,
-			MessageResultType,
-			T,
-			ParameterSchema,
-			ResultSchema,
-			Invokes,
-			EmitListType
+			S,
+			SubscriptionDefinitionBuilderTypes<
+				PayloadSchema,
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['EmitList']
+			>
 		>
 	}
 
@@ -470,27 +435,29 @@ export class SubscriptionDefinitionBuilder<
 	 * @param outputContentEncoding optional the content encoding
 	 * @returns SubscriptionDefinitionBuilder
 	 */
-	addOutputSchema<T extends Schema>(
+	addOutputSchema<OutputSchema extends Schema>(
 		eventName: string,
-		outputSchema: T,
+		outputSchema: OutputSchema,
 		outputContentType = 'application/json',
 		outputContentEncoding = 'utf-8',
 	) {
 		this.emitEventName = eventName
 		this.outputContentEncoding = outputContentEncoding
 		this.outputContentType = outputContentType
-		this.outputSchema = outputSchema as unknown as ResultSchema
+		this.outputSchema = outputSchema
 		return this as unknown as SubscriptionDefinitionBuilder<
-			ServiceClassType,
-			Resources,
-			MessagePayloadType,
-			MessageParamsType,
-			T,
-			PayloadSchema,
-			ParameterSchema,
-			T,
-			Invokes,
-			EmitListType
+			S,
+			SubscriptionDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				OutputSchema,
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['EmitList']
+			>
 		>
 	}
 
@@ -500,19 +467,21 @@ export class SubscriptionDefinitionBuilder<
 	 * @param parameterSchema the validation schema for output parameter
 	 * @returns SubscriptionDefinitionBuilder
 	 */
-	addParameterSchema<T extends Schema>(parameterSchema: T) {
-		this.parameterSchema = parameterSchema as unknown as ParameterSchema
+	addParameterSchema<ParamsSchema extends Schema>(parameterSchema: ParamsSchema) {
+		this.parameterSchema = parameterSchema
 		return this as unknown as SubscriptionDefinitionBuilder<
-			ServiceClassType,
-			Resources,
-			MessagePayloadType,
-			InferIn<T>,
-			MessageResultType,
-			PayloadSchema,
-			T,
-			ResultSchema,
-			Invokes,
-			EmitListType
+			S,
+			SubscriptionDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				ParamsSchema,
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['EmitList']
+			>
 		>
 	}
 
@@ -527,15 +496,15 @@ export class SubscriptionDefinitionBuilder<
 	 * @param inputContentEncoding optional the content encoding
 	 * @returns SubscriptionDefinitionBuilder
 	 */
-	setTransformInput<TransFormPayloadSchema extends Schema, TransFormParameterSchema extends Schema>(
-		transformInputSchema: TransFormPayloadSchema,
-		transformParameterSchema: TransFormParameterSchema,
+	setTransformInput<TransformInputPayloadSchema extends Schema, TransformInputParamsSchema extends Schema>(
+		transformInputSchema: TransformInputPayloadSchema,
+		transformParameterSchema: TransformInputParamsSchema,
 		transformFunction: SubscriptionTransformInputHook<
-			ServiceClassType,
-			InferIn<PayloadSchema>,
-			InferIn<ParameterSchema>,
-			InferIn<TransFormPayloadSchema>,
-			InferIn<TransFormParameterSchema>
+			S,
+			Infer<TransformInputPayloadSchema>,
+			Infer<TransformInputParamsSchema>,
+			InferIn<C['PayloadSchema']>,
+			InferIn<C['ParamsSchema']>
 		>,
 		inputContentType?: ContentType,
 		inputContentEncoding?: string,
@@ -549,16 +518,18 @@ export class SubscriptionDefinitionBuilder<
 			transformParameterSchema,
 		}
 		return this as unknown as SubscriptionDefinitionBuilder<
-			ServiceClassType,
-			Resources,
-			InferIn<typeof transformInputSchema>,
-			InferIn<typeof transformParameterSchema>,
-			MessageResultType,
-			PayloadSchema,
-			ParameterSchema,
-			ResultSchema,
-			Invokes,
-			EmitListType
+			S,
+			SubscriptionDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				TransformInputPayloadSchema,
+				TransformInputParamsSchema,
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['EmitList']
+			>
 		>
 	}
 
@@ -572,11 +543,11 @@ export class SubscriptionDefinitionBuilder<
 		}
 
 		return this.hooks.transformInput.transformFunction as SubscriptionTransformInputHook<
-			ServiceClassType,
-			InferIn<PayloadSchema>,
-			InferIn<ParameterSchema>,
-			MessagePayloadType,
-			MessageParamsType
+			S,
+			Infer<C['TransformInputPayloadSchema']>,
+			Infer<C['TransformInputParamsSchema']>,
+			InferIn<C['PayloadSchema']>,
+			InferIn<C['ParamsSchema']>
 		>
 	}
 
@@ -590,13 +561,13 @@ export class SubscriptionDefinitionBuilder<
 	 * @param outputContentEncoding optional the content encoding
 	 * @returns SubscriptionDefinitionBuilder
 	 */
-	setTransformOutput<Output extends Schema>(
-		transformOutputSchema: Output,
+	setTransformOutput<TransformOutputSchema extends Schema>(
+		transformOutputSchema: TransformOutputSchema,
 		transformFunction: SubscriptionTransformOutputHook<
-			ServiceClassType,
-			Infer<ResultSchema>,
-			Infer<ParameterSchema>,
-			InferIn<Output>
+			S,
+			Infer<C['OutputSchema']>,
+			Infer<C['ParamsSchema']>,
+			InferIn<TransformOutputSchema>
 		>,
 		outputContentType?: ContentType,
 		outputContentEncoding?: string,
@@ -609,16 +580,18 @@ export class SubscriptionDefinitionBuilder<
 			transformOutputSchema,
 		}
 		return this as unknown as SubscriptionDefinitionBuilder<
-			ServiceClassType,
-			Resources,
-			MessagePayloadType,
-			MessageParamsType,
-			Infer<typeof transformOutputSchema>,
-			PayloadSchema,
-			ParameterSchema,
-			ResultSchema,
-			Invokes,
-			EmitListType
+			S,
+			SubscriptionDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				TransformOutputSchema,
+				C['Resources'],
+				C['Invokes'],
+				C['EmitList']
+			>
 		>
 	}
 
@@ -632,10 +605,10 @@ export class SubscriptionDefinitionBuilder<
 		}
 
 		return this.hooks.transformOutput.transformFunction as SubscriptionTransformOutputHook<
-			ServiceClassType,
-			Infer<ResultSchema>,
-			Infer<ParameterSchema>,
-			Infer<ResultSchema>
+			S,
+			Infer<C['OutputSchema']>,
+			Infer<C['ParamsSchema']>,
+			InferIn<C['TransformOutputSchema']>
 		>
 	}
 
@@ -649,12 +622,12 @@ export class SubscriptionDefinitionBuilder<
 		beforeGuards: Record<
 			string,
 			SubscriptionBeforeGuardHook<
-				ServiceClassType,
-				Infer<PayloadSchema>,
-				Infer<ParameterSchema>,
-				Invokes,
-				EmitListType,
-				Resources
+				S,
+				Infer<C['PayloadSchema']>,
+				Infer<C['ParamsSchema']>,
+				C['Resources'],
+				C['Invokes'],
+				C['EmitList']
 			>
 		>,
 	) {
@@ -672,13 +645,13 @@ export class SubscriptionDefinitionBuilder<
 		afterGuards: Record<
 			string,
 			SubscriptionAfterGuardHook<
-				ServiceClassType,
-				Infer<ResultSchema>,
-				Infer<PayloadSchema>,
-				Infer<ParameterSchema>,
-				Invokes,
-				EmitListType,
-				Resources
+				S,
+				Infer<C['PayloadSchema']>,
+				Infer<C['ParamsSchema']>,
+				Infer<C['OutputSchema']>,
+				C['Resources'],
+				C['Invokes'],
+				C['EmitList']
 			>
 		>,
 	) {
@@ -704,52 +677,18 @@ export class SubscriptionDefinitionBuilder<
 	 */
 	public setSubscriptionFunction(
 		fn: SubscriptionFunction<
-			ServiceClassType,
-			MessagePayloadType,
-			MessageParamsType,
-			Infer<PayloadSchema>,
-			Infer<ParameterSchema>,
-			Infer<ResultSchema>,
-			Invokes,
-			EmitListType,
-			Resources
+			S,
+			Infer<C['PayloadSchema']>,
+			Infer<C['ParamsSchema']>,
+			InferIn<C['OutputSchema']>,
+			C['Resources'],
+			C['Invokes'],
+			C['EmitList']
 		>,
-	): SubscriptionDefinitionBuilder<
-		ServiceClassType,
-		Resources,
-		MessagePayloadType,
-		MessageParamsType,
-		MessageResultType,
-		PayloadSchema,
-		ParameterSchema,
-		ResultSchema,
-		Invokes,
-		EmitListType
-	> {
-		this.fn = fn as unknown as SubscriptionFunction<
-			ServiceClassType,
-			MessagePayloadType,
-			MessageParamsType,
-			Infer<PayloadSchema>,
-			Infer<ParameterSchema>,
-			Infer<ResultSchema>,
-			Invokes,
-			EmitListType,
-			Resources
-		>
+	) {
+		this.fn = fn
 
-		return this as unknown as SubscriptionDefinitionBuilder<
-			ServiceClassType,
-			Resources,
-			MessagePayloadType,
-			MessageParamsType,
-			MessageResultType,
-			PayloadSchema,
-			ParameterSchema,
-			ResultSchema,
-			Invokes,
-			EmitListType
-		>
+		return this
 	}
 
 	/**
@@ -765,30 +704,21 @@ export class SubscriptionDefinitionBuilder<
 			})
 		}
 
-		const f: SubscriptionFunction<
-			ServiceClassType,
-			MessagePayloadType,
-			MessageParamsType,
-			InferIn<PayloadSchema>,
-			InferIn<ParameterSchema>,
-			Infer<ResultSchema>,
-			Invokes,
-			EmitListType,
-			Resources
-		> = getSubscriptionFunctionWithValidation<
-			ServiceClassType,
-			MessagePayloadType,
-			MessageParamsType,
-			MessageResultType,
-			InferIn<PayloadSchema>,
-			InferIn<ParameterSchema>,
-			Infer<ResultSchema>,
-			Invokes,
-			EmitListType,
-			Resources
-		>(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, this.hooks.beforeGuard)
-
-		return f
+		return getSubscriptionFunctionWithValidation<S>(
+			this.fn,
+			this.inputSchema,
+			this.parameterSchema,
+			this.outputSchema,
+			this.hooks.beforeGuard,
+		) as SubscriptionFunction<
+			S,
+			InferIn<C['PayloadSchema']>,
+			InferIn<C['ParamsSchema']>,
+			InferIn<C['OutputSchema']>,
+			C['Resources'],
+			C['Invokes'],
+			C['EmitList']
+		>
 	}
 
 	/**
@@ -805,15 +735,13 @@ export class SubscriptionDefinitionBuilder<
 		}
 
 		this.fn as SubscriptionFunction<
-			ServiceClassType,
-			MessagePayloadType,
-			MessageParamsType,
-			InferIn<PayloadSchema>,
-			InferIn<ParameterSchema>,
-			Infer<ResultSchema>,
-			Invokes,
-			EmitListType,
-			Resources
+			S,
+			Infer<C['PayloadSchema']>,
+			Infer<C['ParamsSchema']>,
+			InferIn<C['OutputSchema']>,
+			C['Resources'],
+			C['Invokes'],
+			C['EmitList']
 		>
 	}
 
@@ -821,21 +749,7 @@ export class SubscriptionDefinitionBuilder<
 	 * Returns the final subscription definition which will be passed into the service class.
 	 * @returns SubscriptionDefinition
 	 */
-	async getDefinition(): Promise<
-		SubscriptionDefinition<
-			ServiceClassType,
-			SubscriptionDefinitionMetadataBase,
-			MessagePayloadType,
-			MessageParamsType,
-			MessageResultType,
-			Infer<PayloadSchema>,
-			Infer<ParameterSchema>,
-			Infer<ResultSchema>,
-			Invokes,
-			EmitListType,
-			Resources
-		>
-	> {
+	async getDefinition() {
 		if (!this.fn) {
 			throw new Error(`SubscriptionDefinitionBuilder: missing function implementation for ${this.subscriptionName}`)
 		}
@@ -862,17 +776,18 @@ export class SubscriptionDefinitionBuilder<
 
 		const subscription: Complete<
 			SubscriptionDefinition<
-				ServiceClassType,
-				SubscriptionDefinitionMetadataBase,
-				MessagePayloadType,
-				MessageParamsType,
-				MessageResultType,
-				Infer<PayloadSchema>,
-				Infer<ParameterSchema>,
-				Infer<ResultSchema>,
-				Invokes,
-				EmitListType,
-				Resources
+				S,
+				Infer<C['TransformInputPayloadSchema']>,
+				Infer<C['TransformInputParamsSchema']>,
+				Infer<C['PayloadSchema']>,
+				Infer<C['ParamsSchema']>,
+				InferIn<C['OutputSchema']>,
+				Infer<C['OutputSchema']>,
+				InferIn<C['TransformOutputSchema']>,
+				C['Resources'],
+				C['Invokes'],
+				C['EmitList'],
+				SubscriptionDefinitionMetadataBase
 			>
 		> = {
 			subscriptionName: this.subscriptionName,
@@ -913,8 +828,14 @@ export class SubscriptionDefinitionBuilder<
 	 * @param sandbox Sinon sandbox
 	 * @returns a mocked command function context
 	 */
-	getSubscriptionContextMock(message: EBMessage, sandbox?: SinonSandbox) {
-		return getSubscriptionContextMock<Invokes, EmitListType, Resources>(message, sandbox, this.invokes, this.emitList)
+	getSubscriptionContextMock(message: EBMessage, sandbox?: SinonSandbox, resources?: Partial<C['Resources']>) {
+		return getSubscriptionContextMock<C['Resources'], C['Invokes'], C['EmitList']>({
+			message,
+			sandbox,
+			resources,
+			invokes: this.invokes,
+			emitList: this.emitList,
+		})
 	}
 
 	/**

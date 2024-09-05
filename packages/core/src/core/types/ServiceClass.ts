@@ -68,5 +68,7 @@ export interface ServiceClass<S extends ServiceClassTypes = ServiceClassTypes> {
 	 * Registers a new subscription for the service
 	 * @param subscriptionDefinition the subscription definition
 	 */
-	registerSubscription(subscriptionDefinition: SubscriptionDefinition): Promise<void>
+	registerSubscription(
+		subscriptionDefinition: SubscriptionDefinition<any, any, any, any, any, any, any, any, any, any, any>,
+	): Promise<void>
 }

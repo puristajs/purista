@@ -8,7 +8,10 @@ import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
 import { initDefaultConfigStore } from '../DefaultConfigStore/index.js'
 import { initDefaultSecretStore } from '../DefaultSecretStore/index.js'
 import { initDefaultStateStore } from '../DefaultStateStore/index.js'
-import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/index.js'
+import {
+	SubscriptionDefinitionBuilder,
+	type SubscriptionDefinitionBuilderTypes,
+} from '../SubscriptionDefinitionBuilder/index.js'
 import type {
 	CommandDefinitionList,
 	CommandDefinitionListResolved,
@@ -16,6 +19,7 @@ import type {
 	ConfigStore,
 	EmptyObject,
 	EventBridge,
+	InvokeList,
 	LogLevelName,
 	Logger,
 	NeverObject,
@@ -282,13 +286,21 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		commandName: NonEmptyString<T>,
 		description: string,
 		eventName?: NonEmptyString<N>,
-	): CommandDefinitionBuilder<S['ServiceClassType'], CommandDefinitionBuilderTypes<S['Resources']>> {
-		return new CommandDefinitionBuilder<S['ServiceClassType'], CommandDefinitionBuilderTypes<S['Resources']>>(
-			commandName,
-			description,
-			eventName,
-			this.deprecated,
-		)
+	) {
+		return new CommandDefinitionBuilder<
+			S['ServiceClassType'],
+			CommandDefinitionBuilderTypes<
+				Schema,
+				Schema,
+				Schema,
+				Schema,
+				Schema,
+				Schema,
+				S['Resources'],
+				InvokeList,
+				Record<string, Schema>
+			>
+		>(commandName, description, eventName, this.deprecated)
 	}
 
 	/**
@@ -301,12 +313,14 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	getSubscriptionBuilder<T extends string>(
 		subscriptionName: NonEmptyString<T>,
 		description: string,
-	): SubscriptionDefinitionBuilder<S['ServiceClassType'], S['Resources']> {
-		return new SubscriptionDefinitionBuilder<S['ServiceClassType'], S['Resources']>(
-			subscriptionName,
-			description,
-			this.deprecated,
-		)
+	): SubscriptionDefinitionBuilder<
+		S['ServiceClassType'],
+		SubscriptionDefinitionBuilderTypes<any, any, any, any, any, any, S['Resources']>
+	> {
+		return new SubscriptionDefinitionBuilder<
+			S['ServiceClassType'],
+			SubscriptionDefinitionBuilderTypes<any, any, any, any, any, any, S['Resources']>
+		>(subscriptionName, description, this.deprecated)
 	}
 
 	/**

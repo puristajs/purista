@@ -9,7 +9,7 @@ import type { Service } from './Service.impl.js'
 export const subscriptionTransformInput = async <S extends Service = Service>(
 	serviceInstance: S,
 	logger: Logger,
-	subscription: SubscriptionDefinition<S>,
+	subscription: SubscriptionDefinition<S, any, any, any, any, any, any, any, any, any, any, any>,
 	message: Readonly<EBMessage>,
 ) => {
 	let msgPayload: { payload: unknown; parameter: unknown }

@@ -2,75 +2,38 @@ import { SpanStatusCode } from '@opentelemetry/api'
 import type { Schema } from '@typeschema/main'
 import { validate } from '@typeschema/main'
 
-import type { EmptyObject, ServiceClass, SubscriptionBeforeGuardHook, SubscriptionFunction } from '../core/index.js'
+import type {
+	Service,
+	SubscriptionBeforeGuardHook,
+	SubscriptionFunction,
+	SubscriptionFunctionContext,
+} from '../core/index.js'
 import { HandledError, StatusCode, UnhandledError } from '../core/index.js'
 
-export const getSubscriptionFunctionWithValidation = function <
-	ServiceClassType extends ServiceClass,
-	MessagePayloadType = unknown,
-	MessageParamsType = unknown,
-	MessageResultType = unknown,
-	FunctionPayloadType = MessagePayloadType,
-	FunctionParamsType = MessageParamsType,
-	FunctionResultType = MessageResultType,
-	Invokes = EmptyObject,
-	EmitListType = EmptyObject,
-	Resources = EmptyObject,
->(
-	fn: SubscriptionFunction<
-		ServiceClassType,
-		MessagePayloadType,
-		MessageParamsType,
-		FunctionPayloadType,
-		FunctionParamsType,
-		FunctionResultType,
-		Invokes,
-		EmitListType,
-		Resources
-	>,
+export const getSubscriptionFunctionWithValidation = function <S extends Service>(
+	fn: SubscriptionFunction<S, any, any, any, any, any, any>,
 	inputPayloadSchema: Schema | undefined,
 	inputParameterSchema: Schema | undefined,
 	outputPayloadSchema: Schema | undefined,
-	beforeGuards: Record<
-		string,
-		SubscriptionBeforeGuardHook<
-			ServiceClassType,
-			FunctionPayloadType,
-			FunctionParamsType,
-			Invokes,
-			EmitListType,
-			Resources
-		>
-	> = {},
-): SubscriptionFunction<
-	ServiceClassType,
-	MessagePayloadType,
-	MessageParamsType,
-	FunctionPayloadType,
-	FunctionParamsType,
-	FunctionResultType,
-	Invokes,
-	EmitListType,
-	Resources
-> {
-	const wrapped: SubscriptionFunction<
-		ServiceClassType,
-		MessagePayloadType,
-		MessageParamsType,
-		FunctionPayloadType,
-		FunctionParamsType,
-		FunctionResultType,
-		Invokes,
-		EmitListType,
-		Resources
-	> = async function (context, payload, parameter): Promise<FunctionResultType> {
+	beforeGuards: Record<string, SubscriptionBeforeGuardHook<S, any, any, any, any, any>> = {},
+) {
+	const wrapped = async function (
+		this: S,
+		context: SubscriptionFunctionContext,
+		payload: unknown,
+		parameter: unknown,
+	): Promise<unknown> {
 		const { logger, startActiveSpan, wrapInSpan } = context
-		let safePayload = payload as unknown as FunctionPayloadType
-		if (inputPayloadSchema) {
-			safePayload = await startActiveSpan('validatePayload', {}, undefined, async span => {
+
+		const getPayloadValue = async (): Promise<any> => {
+			if (!inputPayloadSchema) {
+				return payload
+			}
+
+			return await startActiveSpan('validatePayload', {}, undefined, async span => {
 				const validationResult = await validate(inputPayloadSchema, payload)
 				if (validationResult.success) {
-					return validationResult.data as FunctionPayloadType
+					return validationResult.data
 				}
 				const err = new HandledError(
 					StatusCode.BadRequest,
@@ -87,12 +50,15 @@ export const getSubscriptionFunctionWithValidation = function <
 			})
 		}
 
-		let safeParams = parameter as unknown as FunctionParamsType
-		if (inputParameterSchema) {
-			safeParams = await startActiveSpan('validateParameter', {}, undefined, async span => {
+		const getParameterValue = async (): Promise<any> => {
+			if (!inputParameterSchema) {
+				return parameter
+			}
+
+			return startActiveSpan('validateParameter', {}, undefined, async span => {
 				const validationResult = await validate(inputParameterSchema, parameter)
 				if (validationResult.success) {
-					return validationResult.data as FunctionParamsType
+					return validationResult.data
 				}
 
 				const err = new HandledError(
@@ -109,6 +75,8 @@ export const getSubscriptionFunctionWithValidation = function <
 				throw err
 			})
 		}
+
+		const [safePayload, safeParams] = await Promise.all([getPayloadValue(), getParameterValue()])
 
 		if (Object.keys(beforeGuards).length) {
 			await startActiveSpan('beforeGuardHooks', {}, undefined, async () => {
@@ -137,7 +105,7 @@ export const getSubscriptionFunctionWithValidation = function <
 		return await startActiveSpan('outputValidation', {}, undefined, async span => {
 			const validationResult = await validate(outputPayloadSchema, output)
 			if (validationResult.success) {
-				return validationResult.data as FunctionResultType
+				return validationResult.data
 			}
 
 			const err = new UnhandledError(StatusCode.InternalServerError, 'output validation failed')

@@ -5,9 +5,9 @@ import { stub } from 'sinon'
 import type {
 	EBMessage,
 	EBMessageAddress,
-	EmptyObject,
 	FromEmitToOtherType,
 	FromInvokeToOtherType,
+	InvokeList,
 	SubscriptionFunctionContext,
 } from '../core/index.js'
 import { getLoggerMock } from './getLogger.mock.js'
@@ -17,16 +17,18 @@ import { getLoggerMock } from './getLogger.mock.js'
  *
  * @group Unit test helper
  * */
-export const getSubscriptionContextMock = <Invokes = EmptyObject, EmitListType = EmptyObject, Resources = EmptyObject>(
-	message: EBMessage,
-	sandbox?: SinonSandbox,
-	_invokes?: FromInvokeToOtherType<
-		Invokes,
-		{ outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }
-	>,
-	emitList?: FromEmitToOtherType<EmitListType, Schema>,
-) => {
-	const logger = getLoggerMock(sandbox)
+export const getSubscriptionContextMock = <
+	Resources extends Record<string, any>,
+	Invokes extends InvokeList,
+	EmitList extends Record<string, Schema>,
+>(input: {
+	message: EBMessage
+	sandbox?: SinonSandbox
+	invokes: FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
+	emitList: FromEmitToOtherType<EmitList, Schema>
+	resources?: Partial<Resources>
+}) => {
+	const logger = getLoggerMock(input.sandbox)
 
 	const getMockSpan = () => {
 		return {
@@ -38,14 +40,14 @@ export const getSubscriptionContextMock = <Invokes = EmptyObject, EmitListType =
 					traceFlags: 0,
 				}
 			},
-			setAttribute: sandbox?.stub() ?? stub(),
-			setAttributes: sandbox?.stub() ?? stub(),
-			addEvent: sandbox?.stub() ?? stub(),
-			setStatus: sandbox?.stub() ?? stub(),
-			updateName: sandbox?.stub() ?? stub(),
-			end: sandbox?.stub() ?? stub(),
+			setAttribute: input.sandbox?.stub() ?? stub(),
+			setAttributes: input.sandbox?.stub() ?? stub(),
+			addEvent: input.sandbox?.stub() ?? stub(),
+			setStatus: input.sandbox?.stub() ?? stub(),
+			updateName: input.sandbox?.stub() ?? stub(),
+			end: input.sandbox?.stub() ?? stub(),
 			isRecording: () => true,
-			recordException: (sandbox?.stub() ?? stub()).callsFake((err: unknown) => {
+			recordException: (input.sandbox?.stub() ?? stub()).callsFake((err: unknown) => {
 				// biome-ignore lint/nursery/noConsole: no logger available
 				console.error(err)
 			}),
@@ -96,7 +98,7 @@ export const getSubscriptionContextMock = <Invokes = EmptyObject, EmitListType =
 						serviceTarget: name,
 					}
 					if (!invokeMocks[na.serviceName][na.serviceVersion][na.serviceTarget]) {
-						invokeMocks[na.serviceName][na.serviceVersion][na.serviceTarget] = sandbox?.stub() ?? stub()
+						invokeMocks[na.serviceName][na.serviceVersion][na.serviceTarget] = input.sandbox?.stub() ?? stub()
 
 						invokeMocks[na.serviceName][na.serviceVersion][na.serviceTarget].rejects(
 							new Error(
@@ -119,7 +121,7 @@ export const getSubscriptionContextMock = <Invokes = EmptyObject, EmitListType =
 					return undefined
 				}
 				if (!resourceMocks[name]) {
-					resourceMocks[name] = sandbox?.stub() ?? stub()
+					resourceMocks[name] = input.sandbox?.stub() ?? stub()
 					resourceMocks[name].throws(`Resource ${name} not mocked`)
 				}
 				return resourceMocks[name]
@@ -127,37 +129,37 @@ export const getSubscriptionContextMock = <Invokes = EmptyObject, EmitListType =
 		}) as TFaux
 	}
 
-	const eventList = Object.keys(emitList ?? {}).reduce((prev, current) => {
+	const eventList = Object.keys(input.emitList ?? {}).reduce((prev, current) => {
 		return {
 			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
 			...prev,
-			[current]: sandbox?.stub() ?? stub().resolves(),
+			[current]: input.sandbox?.stub() ?? stub().resolves(),
 		}
-	}, {}) as FromEmitToOtherType<EmitListType, SinonStub>
+	}, {}) as FromEmitToOtherType<EmitList, SinonStub>
 
 	const stubs = {
 		logger: logger.stubs,
 		emit: eventList,
-		invoke: sandbox?.stub() ?? stub(),
-		wrapInSpan: sandbox?.stub() ?? stub(),
-		startActiveSpan: sandbox?.stub() ?? stub(),
-		getSecret: sandbox?.stub() ?? stub(),
-		setSecret: sandbox?.stub() ?? stub(),
-		removeSecret: sandbox?.stub() ?? stub(),
-		getConfig: sandbox?.stub() ?? stub(),
-		setConfig: sandbox?.stub() ?? stub(),
-		removeConfig: sandbox?.stub() ?? stub(),
-		getState: sandbox?.stub() ?? stub(),
-		setState: sandbox?.stub() ?? stub(),
-		removeState: sandbox?.stub() ?? stub(),
+		invoke: input.sandbox?.stub() ?? stub(),
+		wrapInSpan: input.sandbox?.stub() ?? stub(),
+		startActiveSpan: input.sandbox?.stub() ?? stub(),
+		getSecret: input.sandbox?.stub() ?? stub(),
+		setSecret: input.sandbox?.stub() ?? stub(),
+		removeSecret: input.sandbox?.stub() ?? stub(),
+		getConfig: input.sandbox?.stub() ?? stub(),
+		setConfig: input.sandbox?.stub() ?? stub(),
+		removeConfig: input.sandbox?.stub() ?? stub(),
+		getState: input.sandbox?.stub() ?? stub(),
+		setState: input.sandbox?.stub() ?? stub(),
+		removeState: input.sandbox?.stub() ?? stub(),
 		service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
 		resource: getResourceProxy<Resources>(),
 	}
 
-	const mock: SubscriptionFunctionContext<Invokes, EmitListType, Resources> = {
+	const mock: SubscriptionFunctionContext<Resources, Invokes, EmitList> = {
 		logger: logger.mock,
-		message,
-		emit: async <K extends keyof EmitListType, Payload = EmitListType[K]>(eventName: K, payload: Payload) => {
+		message: input.message,
+		emit: async <K extends keyof EmitList, Payload = EmitList[K]>(eventName: K, payload: Payload) => {
 			return eventList[eventName](eventName, payload)
 		},
 		wrapInSpan: stubs.wrapInSpan.callsFake((_name, _opts, fn) => fn(getMockSpan())),
