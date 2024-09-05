@@ -552,6 +552,25 @@ export class CommandDefinitionBuilder<
 	}
 
 	/**
+	 * Get the before guard hook for this command.
+	 *
+	 * @param name The name of the before guard to retrieve.
+	 * @returns The before guard hook, or undefined if not found.
+	 */
+	getBeforeGuardHook(name: keyof typeof this.hooks.beforeGuard) {
+		this.hooks.beforeGuard[name] as CommandBeforeGuardHook<
+			S,
+			GetMessagePayloadType<C['PayloadSchema'], C['TransformInputPayloadSchema']>,
+			GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
+			Infer<C['PayloadSchema']>,
+			Infer<C['ParamsSchema']>,
+			C['Resources'],
+			C['Invokes'],
+			C['EmitList']
+		>
+	}
+
+	/**
 	 * Set one or more after guard hook(s).
 	 * If there are multiple after guard hooks, they are executed in parallel
 	 * @param afterGuard  Object of key = name of guard, value = function
@@ -575,6 +594,25 @@ export class CommandDefinitionBuilder<
 	) {
 		this.hooks.afterGuard = { ...this.hooks.afterGuard, ...afterGuards }
 		return this
+	}
+
+	/**
+	 * Returns the after guard hook corresponding to the provided name.
+	 * @param name - The name of the hook.
+	 * @return The after guard hook, or undefined if not found.
+	 */
+	getAfterGuardHook(name: keyof typeof this.hooks.afterGuard) {
+		this.hooks.afterGuard[name] as CommandAfterGuardHook<
+			S,
+			GetMessagePayloadType<C['PayloadSchema'], C['TransformInputPayloadSchema']>,
+			GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
+			Infer<C['PayloadSchema']>,
+			Infer<C['ParamsSchema']>,
+			Infer<C['OutputSchema']>,
+			C['Resources'],
+			C['Invokes'],
+			C['EmitList']
+		>
 	}
 
 	/**
@@ -865,24 +903,26 @@ export class CommandDefinitionBuilder<
 
 	/**
 	 * Get the function implementation including input and output validation.
-	 * Also, before and after hooks are triggered during execution.
+	 * Also, before hooks are triggered during execution.
+	 * Before guards can be optional overwritten by optional input parameter.
 	 *
+	 *
+	 * @param input Overwrite beforeGuards
 	 * @returns the function
 	 */
-	getCommandFunction() {
+	getCommandFunction<T = typeof this.hooks.beforeGuard>(input?: {
+		beforeGuards?: Partial<T>
+	}) {
 		if (!this.fn) {
 			throw new UnhandledError(StatusCode.NotImplemented, `No function implementation for ${this.commandName}`, {
 				commandName: this.commandName,
 			})
 		}
 
-		return getCommandFunctionWithValidation<S>(
-			this.fn,
-			this.inputSchema,
-			this.parameterSchema,
-			this.outputSchema,
-			this.hooks.beforeGuard,
-		) as CommandFunction<
+		return getCommandFunctionWithValidation<S>(this.fn, this.inputSchema, this.parameterSchema, this.outputSchema, {
+			...this.hooks.beforeGuard,
+			...input?.beforeGuards,
+		}) as CommandFunction<
 			S,
 			GetMessagePayloadType<C['PayloadSchema'], C['TransformInputPayloadSchema']>,
 			GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
