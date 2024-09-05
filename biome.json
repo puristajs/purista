@@ -46,6 +46,9 @@
 					"fix": "safe"
 				}
 			},
+			"correctness": {
+				"noUnusedImports": "error"
+			},
 			"suspicious": {
 				"noExplicitAny": {
 					"level": "off"
