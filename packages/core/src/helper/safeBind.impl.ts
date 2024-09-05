@@ -1,9 +1,3 @@
-type SafeThisParameterType<T> = T extends (this: unknown, ...args: any[]) => any
-	? never
-	: T extends (this: infer U, ...args: any[]) => any
-		? U
-		: never
-
 /**
  * Bind `this` argument like regular `.bind(thisArg)`, but keeps the typescript types in result
  *
@@ -16,9 +10,9 @@ type SafeThisParameterType<T> = T extends (this: unknown, ...args: any[]) => any
  * @param thisArg
  * @returns
  */
-export function safeBind<T extends (...args: any) => any>(
+export function safeBind<T extends (...args: any[]) => any, U>(
 	fn: T,
-	thisArg: SafeThisParameterType<T>,
+	thisArg: U,
 ): (...args: Parameters<T>) => ReturnType<T> {
 	return fn.bind(thisArg)
 }

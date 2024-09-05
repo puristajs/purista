@@ -933,19 +933,34 @@ export class CommandDefinitionBuilder<
 	getCommandContextMock<
 		MessagePayloadType = GetMessagePayloadType<C['PayloadSchema'], C['TransformInputPayloadSchema']>,
 		MessageParamsType = GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
+		FunctionPayloadType = InferIn<C['PayloadSchema']>,
+		FunctionParamsType = InferIn<C['ParamsSchema']>,
 	>(
-		payload: MessagePayloadType,
-		parameter: MessageParamsType,
+		payload: FunctionPayloadType,
+		parameter: FunctionParamsType,
 		sandbox?: SinonSandbox,
 		resources?: Partial<C['Resources']>,
+		message?: {
+			payload: MessagePayloadType
+			parameter: MessageParamsType
+		},
 	) {
-		return getCommandContextMock<MessagePayloadType, MessageParamsType, C['Resources'], C['Invokes'], C['EmitList']>({
+		return getCommandContextMock<
+			MessagePayloadType,
+			MessageParamsType,
+			FunctionPayloadType,
+			FunctionParamsType,
+			C['Resources'],
+			C['Invokes'],
+			C['EmitList']
+		>({
 			payload,
 			parameter,
 			sandbox,
 			resources,
 			invokes: this.invokes,
 			emitList: this.emitList,
+			message,
 		})
 	}
 

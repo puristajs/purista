@@ -30,7 +30,7 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
 
 	protected eventBridge: EventBridge
 
-	protected logger: Logger
+	public logger: Logger
 
 	spanProcessor: SpanProcessor | undefined
 

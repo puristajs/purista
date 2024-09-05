@@ -33,6 +33,7 @@ import type {
 	EmitSchemaList,
 	EmptyObject,
 	InfoMessageType,
+	InvokeList,
 	Logger,
 	PrincipalId,
 	ServiceClass,
@@ -84,14 +85,17 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	extends ServiceBaseClass
 	implements ServiceClass<S>
 {
-	protected subscriptions = new Map<string, SubscriptionDefinition>()
+	protected subscriptions = new Map<
+		string,
+		SubscriptionDefinition<any, any, any, any, any, any, any, any, S['Resources'], any, any, any>
+	>()
 	protected commands = new Map<
 		string,
-		CommandDefinition<Service, any, any, any, any, any, any, any, any, any, any, any, any>
+		CommandDefinition<any, any, any, any, any, any, any, any, any, any, S['Resources'], any, any, any>
 	>()
 
-	public commandDefinitionList: CommandDefinitionListResolved<Service>
-	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<Service>
+	public commandDefinitionList: CommandDefinitionListResolved<any>
+	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
 	public config: S['ConfigType']
 
 	public resources: S['Resources']
@@ -216,15 +220,12 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		})
 	}
 
-	protected getInvokeFunction(
+	protected getInvokeFunction<Invokes extends InvokeList>(
 		serviceTarget: string,
 		traceId?: TraceId,
 		principalId?: PrincipalId,
 		tenantId?: TenantId,
-		invokes?: Record<
-			string,
-			Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
-		>,
+		invokes?: Invokes,
 	) {
 		const sender: EBMessageSenderAddress = {
 			serviceName: this.info.serviceName,
@@ -354,7 +355,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		return invokeCommand.bind(this)
 	}
 
-	protected getEmitFunction<EmitList = EmptyObject>(
+	protected getEmitFunction<EmitList extends Record<string, Schema> = EmptyObject>(
 		serviceTarget: string,
 		traceId?: TraceId,
 		principalId?: PrincipalId,
@@ -792,7 +793,22 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	}
 
 	public async registerCommand(
-		commandDefinition: CommandDefinition<Service, any, any, any, any, any, any, any, any, any, any, any, any>,
+		commandDefinition: CommandDefinition<
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			S['Resources'],
+			any,
+			any,
+			any
+		>,
 	): Promise<void> {
 		return this.startActiveSpan('purista.registerCommand', {}, undefined, async span => {
 			this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register command')
@@ -1015,7 +1031,22 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		)
 	}
 
-	public async registerSubscription(subscriptionDefinition: SubscriptionDefinition): Promise<void> {
+	public async registerSubscription(
+		subscriptionDefinition: SubscriptionDefinition<
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			S['Resources'],
+			any,
+			any,
+			any
+		>,
+	): Promise<void> {
 		return this.startActiveSpan('purista.registerSubscription', {}, undefined, async span => {
 			this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register subscription')
 
