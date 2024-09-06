@@ -11,6 +11,4 @@ export const userServiceInfo = {
 
 // create a service builder instance and assign service config schema and default config.
 
-export const userV1ServiceBuilder = new ServiceBuilder(userServiceInfo)
-	.setConfigSchema(userServiceV1ConfigSchema)
-	.setDefaultConfig({})
+export const userV1ServiceBuilder = new ServiceBuilder(userServiceInfo).setConfigSchema(userServiceV1ConfigSchema)

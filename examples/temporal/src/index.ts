@@ -23,7 +23,7 @@ export const main = async () => {
 
 	const spanProcessor = new SimpleSpanProcessor(exporter)
 
-	const services: Service[] = []
+	const services: Service<any>[] = []
 
 	// initiate the event bridge as first step
 	const eventBridge = new NatsBridge({ ...natsBridgeConfig, logger, spanProcessor })
