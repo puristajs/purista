@@ -1,7 +1,7 @@
 import { fail } from 'node:assert'
 
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
-import type { Infer, InferIn, Schema } from '@typeschema/main'
+import { type Infer, type InferIn, type Schema, validate } from '@typeschema/main'
 
 import type { CommandDefinitionBuilderTypes } from '../CommandDefinitionBuilder/CommandDefinitionBuilderTypes.js'
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
@@ -40,6 +40,18 @@ import type { InstanceOrType, NonEmptyString } from '../helper/index.js'
 
 export type Newable<T extends Service, S extends ServiceClassTypes> = new (config: ServiceConstructorInput<S>) => T
 
+type InstanceConfigType<S extends ServiceBuilderTypes> = Prettify<
+	{
+		logLevel?: LogLevelName
+		serviceConfig?: S['ConfigInputType']
+		logger?: Logger
+		spanProcessor?: SpanProcessor
+		secretStore?: SecretStore
+		configStore?: ConfigStore
+		stateStore?: StateStore
+	} & (keyof S['Resources'] extends NeverObject ? { resources?: never } : { resources: S['Resources'] })
+>
+
 /**
  * This class is used to build a service.
  * The `ServiceBuilder` class is used to build a service. It has a few methods that are used to add
@@ -62,8 +74,9 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 
 	private deprecated = false
 
-	instance?: S['ServiceClassType']
-	SClass: Newable<any, ServiceClassTypes<S['ConfigType'], S['Resources']>> = Service
+	private requiresResources = false
+
+	SClass: Newable<S['ServiceClassType'], ServiceClassTypes<S['ConfigType'], S['Resources']>> = Service
 
 	// eslint-disable-next-line no-useless-constructor
 	constructor(public info: ServiceInfoType) {}
@@ -180,6 +193,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	 * @returns The builder with defined types for resources
 	 */
 	defineResource<ResourceName extends string, ResourcesType>(name: ResourceName, resource: ResourcesType) {
+		this.requiresResources = true
 		return this as unknown as ServiceBuilder<
 			SetNewTypeValue<S, 'Resources', S['Resources'] & { [K in ResourceName]: InstanceOrType<ResourcesType> }>
 		>
@@ -208,46 +222,52 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	 * @param options - additional config like logger, stores and opentelemetry span processor
 	 * @returns The instance of the service class
 	 */
-	async getInstance(
-		eventBridge: EventBridge,
-		options: Prettify<
-			{
-				logLevel?: LogLevelName
-				serviceConfig?: Partial<S['ConfigInputType']>
-				logger?: Logger
-				spanProcessor?: SpanProcessor
-				secretStore?: SecretStore
-				configStore?: ConfigStore
-				stateStore?: StateStore
-			} & (keyof S['Resources'] extends NeverObject ? { resources?: never } : { resources: S['Resources'] })
-		>,
-	) {
-		const config = {
+	async getInstance(eventBridge: EventBridge, options?: InstanceConfigType<S>) {
+		const logger = options?.logger ?? initLogger(options?.logLevel)
+
+		const cfg: S['ConfigInputType'] = {
 			...this.defaultConfig,
 			...options?.serviceConfig,
-		} as S['ConfigType']
+		}
 
-		const opt = options.serviceConfig as any
-		const hasLogLevel = opt?.logLevel
-			? ['info', 'error', 'warn', 'debug', 'trace', 'fatal'].includes(opt.logLevel)
-			: false
+		let config: S['ConfigType'] = cfg as S['ConfigType']
+		if (this.configSchema) {
+			const validationResult = await validate(this.configSchema, cfg)
+			if (!validationResult.success) {
+				const err = new UnhandledError(
+					StatusCode.InternalServerError,
+					'The given service configuration is invalid',
+					validationResult.issues,
+				)
+				logger.error({ err }, err.message)
+				throw err
+			}
+			config = validationResult.data as S['ConfigType']
+		}
 
-		const logger = options.logger ?? initLogger(hasLogLevel ? opt.logLevel : options.logLevel)
+		if (this.requiresResources && !options?.resources) {
+			const err = new UnhandledError(
+				StatusCode.InternalServerError,
+				'This services requires resources to be set in getInstance options',
+			)
+			logger.error({ err }, err.message)
+			throw err
+		}
 
 		const secretStore: SecretStore =
-			options.secretStore ??
+			options?.secretStore ??
 			initDefaultSecretStore({
 				logger,
 			})
 
 		const configStore: ConfigStore =
-			options.configStore ??
+			options?.configStore ??
 			initDefaultConfigStore({
 				logger,
 			})
 
 		const stateStore: StateStore =
-			options.stateStore ??
+			options?.stateStore ??
 			initDefaultStateStore({
 				logger,
 			})
@@ -255,22 +275,21 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		const { commands, subscriptions } = await this.resolveDefinitions()
 
 		const C = this.getCustomClass()
-		this.instance = new C({
+
+		return new C({
 			logger,
 			eventBridge,
 			info: this.info,
 			commandDefinitionList: commands,
 			subscriptionDefinitionList: subscriptions,
 			config,
-			spanProcessor: options.spanProcessor,
+			spanProcessor: options?.spanProcessor,
 			secretStore,
 			configStore,
 			stateStore,
 			configSchema: this.configSchema,
-			resources: options.resources,
+			resources: options?.resources,
 		})
-
-		return this.instance as S['ServiceClassType']
 	}
 
 	/**
