@@ -56,6 +56,7 @@ describe('service resource test', () => {
 	it('can provide resources to a command', async () => {
 		const service = await serviceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
 			logger: getLoggerMock(sandbox).mock,
+			serviceConfig: { optionOne: 'hello' },
 			resources: { exampleA: new ExampleResource() },
 		})
 
@@ -74,6 +75,7 @@ describe('service resource test', () => {
 	it('can provide resources to a subscription', async () => {
 		const service = await serviceBuilder.getInstance(getEventBridgeMock(sandbox).mock, {
 			logger: getLoggerMock(sandbox).mock,
+			serviceConfig: { optionOne: 'hello' },
 			resources: { exampleA: new ExampleResource() },
 		})
 

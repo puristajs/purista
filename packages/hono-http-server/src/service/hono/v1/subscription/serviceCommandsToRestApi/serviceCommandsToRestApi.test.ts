@@ -1,10 +1,4 @@
-import {
-	getCommandSuccessMessageMock,
-	getEventBridgeMock,
-	getLoggerMock,
-	getSubscriptionContextMock,
-	safeBind,
-} from '@purista/core'
+import { getCommandSuccessMessageMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { honoV1Service } from '../../honoV1Service.js'
@@ -43,7 +37,7 @@ describe('service Hono version 1 - subscription serviceCommandsToRestApi', () =>
 		const message = getCommandSuccessMessageMock(payload)
 
 		// create a subscription context for the subscription function
-		const context = getSubscriptionContextMock(message, sandbox)
+		const context = serviceCommandsToRestApiSubscriptionBuilder.getSubscriptionContextMock(message, sandbox)
 
 		// execute the subscription function
 		const result = await serviceCommandsToRestApi(context.mock, payload, parameter)
