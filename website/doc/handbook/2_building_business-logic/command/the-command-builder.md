@@ -137,6 +137,16 @@ It is highly recommended to use `context.logger` instead of `this.logger`, to en
 
 Please see the [logging article](../logging.md)
 
+#### Resource
+
+Resources, which are defined in the resource builder (see [Define Resources](../service/define-resources.md))
+
+```typescript
+commandBuilder.setCommandFunction(async function ({ resource }) {
+  return resource.myDB.query('SELECT * FROM my_db')
+})
+```
+
 #### Stores
 
 Also, you can access config, secret and state store via the context, if they are provided during service instantiation.  

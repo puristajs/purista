@@ -15,7 +15,7 @@ purista add service [serviceName]
 ```
 
 This will generate all necessary files and structures for you.
-In most cases, you only might want to add/change the service config.
+In most cases, you only might want to add/change the service config or define resources for commands and subscriptions.
 
 Adding commands and subscriptions can also be done via CLI, and does not require manual changes in the service files.
 
@@ -46,7 +46,7 @@ Use `as const satisfies ServiceInfoType = {...}` instead of `export const myServ
 :::
 
 ::: warning ⚠️ Avoid cycling dependencies
-The basic service definition (name, version, config) and adding the commands and subscriptions should be done in seperate files, to prevent cycling dependencies.
+The basic service definition (name, version, config) and adding the commands and subscriptions should be done in separate files, to prevent cycling dependencies.
 The command and subscription builders are generated from the basic service builder, to propagate config & custom classes correctly.
 :::
 
