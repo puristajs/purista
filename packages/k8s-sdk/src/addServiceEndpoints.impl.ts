@@ -1,12 +1,10 @@
 import { posix } from 'node:path'
 
 import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
-import {
-	SEMATTRS_HTTP_HOST,
-	SEMATTRS_HTTP_METHOD,
-	SEMATTRS_HTTP_STATUS_CODE,
-	SEMATTRS_HTTP_URL,
-} from '@opentelemetry/semantic-conventions'
+import { ATTR_URL_FULL } from '@opentelemetry/semantic-conventions'
+
+import { ATTR_HTTP_HOST, ATTR_HTTP_METHOD, ATTR_HTTP_STATUS_CODE } from '@opentelemetry/semantic-conventions/incubating'
+
 import type { Command, HttpExposedServiceMeta, Logger, Service } from '@purista/core'
 import {
 	EBMessageType,
@@ -65,9 +63,9 @@ export const addServiceEndpoints = (
 						async span => {
 							const hostname = process.env.HOSTNAME ?? 'unknown'
 
-							span.setAttribute(SEMATTRS_HTTP_URL, c.req.url || '')
-							span.setAttribute(SEMATTRS_HTTP_METHOD, c.req.method || '')
-							span.setAttribute(SEMATTRS_HTTP_HOST, hostname)
+							span.setAttribute(ATTR_URL_FULL, c.req.url || '')
+							span.setAttribute(ATTR_HTTP_METHOD, c.req.method || '')
+							span.setAttribute(ATTR_HTTP_HOST, hostname)
 
 							try {
 								const queryParams: Record<string, string | undefined> = {}
@@ -119,7 +117,7 @@ export const addServiceEndpoints = (
 								const result = await service.executeCommand(command)
 
 								if (isCommandErrorResponse(result)) {
-									span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, result.payload.status)
+									span.setAttribute(ATTR_HTTP_STATUS_CODE, result.payload.status)
 
 									span.setStatus({
 										code: SpanStatusCode.ERROR,
@@ -141,7 +139,7 @@ export const addServiceEndpoints = (
 
 								// empty response
 								if (result.payload === undefined || result.payload === '') {
-									span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, StatusCode.NoContent)
+									span.setAttribute(ATTR_HTTP_STATUS_CODE, StatusCode.NoContent)
 									span.end()
 
 									c.status(StatusCode.NoContent)
@@ -152,7 +150,7 @@ export const addServiceEndpoints = (
 									return c.body(null)
 								}
 
-								span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, StatusCode.OK)
+								span.setAttribute(ATTR_HTTP_STATUS_CODE, StatusCode.OK)
 
 								const response =
 									result.contentType !== 'application/json'

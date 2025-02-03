@@ -4,7 +4,7 @@ import { SpanStatusCode } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
 import type { Schema } from '@typeschema/main'
 
 import { puristaVersion } from '../../../version.js'
@@ -75,8 +75,8 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
 
 		const resource = Resource.default().merge(
 			new Resource({
-				[SEMRESATTRS_SERVICE_NAME]: this.info.serviceName,
-				[SEMRESATTRS_SERVICE_VERSION]: this.info.serviceVersion,
+				[ATTR_SERVICE_NAME]: this.info.serviceName,
+				[ATTR_SERVICE_VERSION]: this.info.serviceVersion,
 			}),
 		)
 		this.traceProvider = new NodeTracerProvider({

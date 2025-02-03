@@ -48,7 +48,7 @@ export const getSubscriptionContextMock = <
 			end: input.sandbox?.stub() ?? stub(),
 			isRecording: () => true,
 			recordException: (input.sandbox?.stub() ?? stub()).callsFake((err: unknown) => {
-				// biome-ignore lint/nursery/noConsole: no logger available
+				// biome-ignore lint/suspicious/noConsole: no logger available
 				console.error(err)
 			}),
 		}

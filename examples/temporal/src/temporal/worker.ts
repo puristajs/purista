@@ -4,7 +4,7 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { Resource } from '@opentelemetry/resources'
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node'
-import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
 import type { EventBridge } from '@purista/core'
 import { initLogger } from '@purista/core'
 import { NatsBridge } from '@purista/natsbridge'
@@ -33,7 +33,7 @@ export type ActivitiesType = typeof activities & ReturnType<typeof getPuristaBas
 async function run() {
 	// setup OpenTelemetry
 	const resource = new Resource({
-		[SEMRESATTRS_SERVICE_NAME]: 'temporal-worker',
+		[ATTR_SERVICE_NAME]: 'temporal-worker',
 	})
 	const exporter = new OTLPTraceExporter(jaegerExporterOptions)
 	const otel = new NodeSDK({ traceExporter: exporter, resource })
@@ -84,7 +84,7 @@ async function run() {
 }
 
 run().catch(err => {
-	// biome-ignore lint/nursery/noConsole: no logger available
+	// biome-ignore lint/suspicious/noConsole: no logger available
 	console.error(err)
 	process.exit(1)
 })

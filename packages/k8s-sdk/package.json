@@ -47,9 +47,9 @@
 		"@hono/node-server": "^1.12.2",
 		"@types/node": "^22.5.1",
 		"@types/sinon": "^17.0.3",
-		"sinon": "^18.0.0",
+		"sinon": "^19.0.2",
 		"tshy": "^3.0.2",
-		"vitest": "^2.0.5"
+		"vitest": "^3.0.4"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.0",

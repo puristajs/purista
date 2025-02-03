@@ -57,7 +57,6 @@ async function run() {
 }
 
 run().catch((err) => {
-  // biome-ignore lint/nursery/noConsole: no logger available
   console.error(err)
   process.exit(1)
 })
@@ -159,7 +158,6 @@ async function run() {
 }
 
 run().catch((err) => {
-  // biome-ignore lint/nursery/noConsole: no logger available
   console.error(err)
   process.exit(1)
 })

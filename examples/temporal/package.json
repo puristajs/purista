@@ -19,8 +19,8 @@
 	},
 	"dependencies": {
 		"@hono/node-server": "^1.12.2",
-		"@hono/swagger-ui": "^0.4.0",
-		"@opentelemetry/exporter-trace-otlp-http": "^0.53.0",
+		"@hono/swagger-ui": "^0.5.0",
+		"@opentelemetry/exporter-trace-otlp-http": "^0.57.1",
 		"@opentelemetry/sdk-trace-node": "^1.26.0",
 		"@purista/core": "*",
 		"@purista/hono-http-server": "*",
@@ -30,15 +30,15 @@
 		"@temporalio/interceptors-opentelemetry": "^1.10.3",
 		"@temporalio/worker": "^1.10.3",
 		"@temporalio/workflow": "^1.10.3",
-		"zod": "^3.23.8"
+		"zod": "^3.24.1"
 	},
 	"devDependencies": {
 		"tsx": "^4.19.0",
 		"typescript": "^5.5.4",
 		"@types/node": "^22.5.1",
 		"@types/sinon": "^17.0.3",
-		"pino-pretty": "^11.2.2",
-		"sinon": "^18.0.0",
-		"vitest": "^2.0.5"
+		"pino-pretty": "^13.0.0",
+		"sinon": "^19.0.2",
+		"vitest": "^3.0.4"
 	}
 }
