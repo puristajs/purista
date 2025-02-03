@@ -1,7 +1,7 @@
 import { posix } from 'node:path'
 
 import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
-import { SEMATTRS_HTTP_STATUS_CODE } from '@opentelemetry/semantic-conventions'
+import { ATTR_HTTP_RESPONSE_STATUS_CODE } from '@opentelemetry/semantic-conventions'
 import {
 	EBMessageType,
 	HandledError,
@@ -117,11 +117,11 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 
 						reply.header('content-type', `${contentType}; charset=${contentEncoding}`)
 						if (response === undefined || response === '') {
-							span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, StatusCode.NoContent)
+							span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.NoContent)
 							reply.statusCode = StatusCode.NoContent
 						}
 
-						span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, StatusCode.OK)
+						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.OK)
 
 						reply.send(response)
 					} catch (err) {
@@ -139,7 +139,7 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 							code: SpanStatusCode.ERROR,
 							message: (err as Error).message,
 						})
-						span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, unhandledError.errorCode)
+						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, unhandledError.errorCode)
 
 						logger.error({ err, ...span.spanContext() }, 'unhandled error')
 

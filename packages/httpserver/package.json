@@ -48,19 +48,19 @@
 		"@types/qs": "^6.9.15",
 		"@types/sinon": "^17.0.3",
 		"@types/swagger-ui-dist": "^3.30.5",
-		"sinon": "^18.0.0",
+		"sinon": "^19.0.2",
 		"tshy": "^3.0.2",
-		"vitest": "^2.0.5"
+		"vitest": "^3.0.4"
 	},
 	"dependencies": {
-		"@fastify/compress": "^7.0.3",
-		"@fastify/cors": "^9.0.1",
-		"@fastify/helmet": "^11.1.1",
-		"@fastify/static": "^7.0.4",
+		"@fastify/compress": "^8.0.1",
+		"@fastify/cors": "^10.0.1",
+		"@fastify/helmet": "^13.0.0",
+		"@fastify/static": "^8.0.3",
 		"@opentelemetry/api": "^1.9.0",
 		"@opentelemetry/semantic-conventions": "^1.27.0",
 		"@purista/core": "*",
-		"fastify": "^4.28.0",
+		"fastify": "^5.1.0",
 		"openapi3-ts": "4.4.0",
 		"swagger-ui-dist": "^5.17.14",
 		"trouter": "^4.0.0"

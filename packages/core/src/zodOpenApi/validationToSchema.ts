@@ -18,11 +18,11 @@ export const validationToSchema = async <T extends Schema>(schema?: T): Promise<
 		// nothing more needed as we use OpenAPI 3.1 which is valid JSON Schema
 		return jsonSchema as SchemaObject
 	} catch (error) {
-		// biome-ignore lint/nursery/noConsole: Required
+		// biome-ignore lint/suspicious/noConsole: Required
 		console.error(error)
-		// biome-ignore lint/nursery/noConsole: Required
+		// biome-ignore lint/suspicious/noConsole: Required
 		console.error('Did you installed peer dependencies?')
-		// biome-ignore lint/nursery/noConsole: Required
+		// biome-ignore lint/suspicious/noConsole: Required
 		console.error('requires: @typeschema/[YOUR_SCHEMA_LIB]')
 	}
 }

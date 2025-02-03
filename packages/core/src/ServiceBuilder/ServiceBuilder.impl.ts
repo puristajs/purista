@@ -436,7 +436,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	 * @deprecated Use testServiceSetup() instead
 	 */
 	validateCommandDefinitions() {
-		// biome-ignore lint/nursery/noConsole: no logger available
+		// biome-ignore lint/suspicious/noConsole: no logger available
 		console.warn('deprecated: Use testServiceSetup() instead')
 	}
 
@@ -444,7 +444,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	 * @deprecated Use testServiceSetup() instead
 	 */
 	validateSubscriptionDefinitions() {
-		// biome-ignore lint/nursery/noConsole: no logger available
+		// biome-ignore lint/suspicious/noConsole: no logger available
 		console.warn('deprecated: Use testServiceSetup() instead')
 	}
 }

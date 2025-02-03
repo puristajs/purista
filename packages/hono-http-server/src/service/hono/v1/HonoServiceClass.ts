@@ -1,11 +1,10 @@
 import { posix } from 'node:path'
 
 import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
-import {
-	SEMATTRS_HTTP_METHOD,
-	SEMATTRS_HTTP_ROUTE,
-	SEMATTRS_HTTP_STATUS_CODE,
-} from '@opentelemetry/semantic-conventions'
+import { ATTR_HTTP_ROUTE } from '@opentelemetry/semantic-conventions'
+
+import { ATTR_HTTP_METHOD, ATTR_HTTP_STATUS_CODE } from '@opentelemetry/semantic-conventions/incubating'
+
 import type {
 	Command,
 	CommandDefinitionMetadataBase,
@@ -167,8 +166,8 @@ export class HonoServiceClass<
 			this.app.get(this.config.healthPath, async c => {
 				const con = propagation.extract(context.active(), c.req.raw.headers)
 				return await this.startActiveSpan('healthHandler', { kind: SpanKind.SERVER }, con, async span => {
-					span.setAttribute(SEMATTRS_HTTP_ROUTE, this.config.healthPath)
-					span.setAttribute(SEMATTRS_HTTP_METHOD, 'GET')
+					span.setAttribute(ATTR_HTTP_ROUTE, this.config.healthPath)
+					span.setAttribute(ATTR_HTTP_METHOD, 'GET')
 					const isEventBridgeReady = await this.eventBridge.isHealthy()
 
 					const traceId = c.req.header(this.config.traceHeaderField)
@@ -176,13 +175,13 @@ export class HonoServiceClass<
 
 					if (!isEventBridgeReady) {
 						const err = new HandledError(StatusCode.InternalServerError, 'event bridge not ready')
-						span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, err.errorCode)
+						span.setAttribute(ATTR_HTTP_STATUS_CODE, err.errorCode)
 						return c.json(err.getErrorResponse(), StatusCode.InternalServerError)
 					}
 
 					if (!this.isAvailable) {
 						const err = new HandledError(StatusCode.ServiceUnavailable, 'server not available')
-						span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, err.errorCode)
+						span.setAttribute(ATTR_HTTP_STATUS_CODE, err.errorCode)
 						return c.json(err.getErrorResponse(), StatusCode.ServiceUnavailable)
 					}
 
@@ -193,7 +192,7 @@ export class HonoServiceClass<
 							message: 'OK',
 						})
 						const okErr = new HandledError(StatusCode.OK)
-						span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, okErr.errorCode)
+						span.setAttribute(ATTR_HTTP_STATUS_CODE, okErr.errorCode)
 						return c.json(okErr.getErrorResponse(), okErr.errorCode as HonoStatusCode)
 					} catch (err) {
 						span.recordException(err as Error)
@@ -201,7 +200,7 @@ export class HonoServiceClass<
 							code: SpanStatusCode.ERROR,
 							message: (err as Error).message,
 						})
-						span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, StatusCode.InternalServerError)
+						span.setAttribute(ATTR_HTTP_STATUS_CODE, StatusCode.InternalServerError)
 						return c.json(HandledError.fromError(err).getErrorResponse(), StatusCode.InternalServerError)
 					}
 				})
@@ -220,9 +219,9 @@ export class HonoServiceClass<
 			const con = propagation.extract(context.active(), c.req.raw.headers)
 
 			return await this.startActiveSpan('notFoundHandler', { kind: SpanKind.SERVER }, con, async span => {
-				span.setAttribute(SEMATTRS_HTTP_ROUTE, c.req.path)
-				span.setAttribute(SEMATTRS_HTTP_METHOD, c.req.method.toUpperCase())
-				span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, StatusCode.NotFound)
+				span.setAttribute(ATTR_HTTP_ROUTE, c.req.path)
+				span.setAttribute(ATTR_HTTP_METHOD, c.req.method.toUpperCase())
+				span.setAttribute(ATTR_HTTP_STATUS_CODE, StatusCode.NotFound)
 
 				const err = new HandledError(StatusCode.NotFound, 'Route not found', {
 					method: c.req.method,
@@ -243,8 +242,8 @@ export class HonoServiceClass<
 			const con = propagation.extract(context.active(), c.req.raw.headers)
 
 			return await this.startActiveSpan('errorHandler', { kind: SpanKind.SERVER }, con, async span => {
-				span.setAttribute(SEMATTRS_HTTP_ROUTE, c.req.path)
-				span.setAttribute(SEMATTRS_HTTP_METHOD, c.req.method.toUpperCase())
+				span.setAttribute(ATTR_HTTP_ROUTE, c.req.path)
+				span.setAttribute(ATTR_HTTP_METHOD, c.req.method.toUpperCase())
 				span.recordException(err)
 				span.setStatus({
 					code: SpanStatusCode.ERROR,
@@ -252,18 +251,18 @@ export class HonoServiceClass<
 				})
 
 				if (err instanceof HandledError) {
-					span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, err.errorCode)
+					span.setAttribute(ATTR_HTTP_STATUS_CODE, err.errorCode)
 					return c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode)
 				}
 
 				this.logger.error({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, 'General error handler')
 
 				if (err instanceof HTTPException) {
-					span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, err.status)
+					span.setAttribute(ATTR_HTTP_STATUS_CODE, err.status)
 					return c.json(HandledError.fromError(err, err.status as StatusCode).getErrorResponse(), err.status)
 				}
 
-				span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, StatusCode.InternalServerError)
+				span.setAttribute(ATTR_HTTP_STATUS_CODE, StatusCode.InternalServerError)
 				return c.json(new UnhandledError().getErrorResponse(), StatusCode.InternalServerError)
 			})
 		})
@@ -327,8 +326,8 @@ export class HonoServiceClass<
 
 			return this.startActiveSpan('handler', { kind: SpanKind.SERVER }, parentContext, async span => {
 				try {
-					span.setAttribute(SEMATTRS_HTTP_ROUTE, path)
-					span.setAttribute(SEMATTRS_HTTP_METHOD, method.toUpperCase())
+					span.setAttribute(ATTR_HTTP_ROUTE, path)
+					span.setAttribute(ATTR_HTTP_METHOD, method.toUpperCase())
 
 					let payload: unknown
 
@@ -391,14 +390,14 @@ export class HonoServiceClass<
 					})
 
 					if (result === undefined || result === null || result === '') {
-						span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, StatusCode.NoContent)
+						span.setAttribute(ATTR_HTTP_STATUS_CODE, StatusCode.NoContent)
 						if (responseContentType.toLowerCase() !== 'application/json') {
 							return c.text('', StatusCode.NoContent)
 						}
 						return c.json(undefined, StatusCode.NoContent)
 					}
 
-					span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, StatusCode.OK)
+					span.setAttribute(ATTR_HTTP_STATUS_CODE, StatusCode.OK)
 
 					if (responseContentType.toLowerCase() !== 'application/json') {
 						return c.text(result.toString(), StatusCode.OK)
@@ -415,13 +414,13 @@ export class HonoServiceClass<
 					if (err instanceof HandledError) {
 						this.logger.debug({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, err.message)
 
-						span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, err.errorCode)
+						span.setAttribute(ATTR_HTTP_STATUS_CODE, err.errorCode)
 						return c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode)
 					}
 
 					const unhandledError = UnhandledError.fromError(err)
 					unhandledError.errorCode = StatusCode.InternalServerError
-					span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, unhandledError.errorCode)
+					span.setAttribute(ATTR_HTTP_STATUS_CODE, unhandledError.errorCode)
 
 					this.logger.error({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, 'unhandled error')
 					return c.json(unhandledError.getErrorResponse(), unhandledError.errorCode)

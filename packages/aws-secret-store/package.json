@@ -48,10 +48,10 @@
 	"devDependencies": {
 		"@types/node": "^22.5.1",
 		"@types/sinon": "^17.0.3",
-		"sinon": "^18.0.0",
+		"sinon": "^19.0.2",
 		"testcontainers": "^10.12.0",
 		"tshy": "^3.0.2",
-		"vitest": "^2.0.5"
+		"vitest": "^3.0.4"
 	},
 	"dependencies": {
 		"@aws-sdk/client-secrets-manager": "^3.620.0",

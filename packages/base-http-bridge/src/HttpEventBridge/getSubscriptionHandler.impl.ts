@@ -1,12 +1,10 @@
 // file deepcode ignore ServerLeak: <please specify a reason of ignoring this>
 
 import { SpanKind, context, propagation } from '@opentelemetry/api'
-import {
-	SEMATTRS_HTTP_HOST,
-	SEMATTRS_HTTP_METHOD,
-	SEMATTRS_HTTP_STATUS_CODE,
-	SEMATTRS_HTTP_URL,
-} from '@opentelemetry/semantic-conventions'
+import { ATTR_URL_FULL } from '@opentelemetry/semantic-conventions'
+
+import { ATTR_HTTP_HOST, ATTR_HTTP_METHOD, ATTR_HTTP_STATUS_CODE } from '@opentelemetry/semantic-conventions/incubating'
+
 import type { CustomMessage, EBMessage, Subscription } from '@purista/core'
 import {
 	HandledError,
@@ -38,9 +36,9 @@ export const getSubscriptionHandler = function (
 			parentContext,
 			async span => {
 				const hostname = process.env.HOSTNAME ?? 'unknown'
-				span.setAttribute(SEMATTRS_HTTP_URL, c.req.url || '')
-				span.setAttribute(SEMATTRS_HTTP_METHOD, c.req.method || '')
-				span.setAttribute(SEMATTRS_HTTP_HOST, hostname)
+				span.setAttribute(ATTR_URL_FULL, c.req.url || '')
+				span.setAttribute(ATTR_HTTP_METHOD, c.req.method || '')
+				span.setAttribute(ATTR_HTTP_HOST, hostname)
 
 				try {
 					if (c.req.method !== 'POST') {
@@ -77,7 +75,7 @@ export const getSubscriptionHandler = function (
 
 					message.otp = serializeOtp()
 
-					span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, StatusCode.NoContent)
+					span.setAttribute(ATTR_HTTP_STATUS_CODE, StatusCode.NoContent)
 
 					const msg = await getTimeoutPromise(cb(message), this.config.defaultCommandTimeout)
 

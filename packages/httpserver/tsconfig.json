@@ -8,5 +8,6 @@
 		"types": ["vitest/globals", "node"]
 	},
 	"exclude": ["./**/*.d.ts"],
-	"include": ["./src/**/*", "./test/*", "fastify.d.ts"]
+	"include": ["./src/**/*", "./test/*"],
+	"files": ["src/index.ts", "fastify.d.ts"]
 }

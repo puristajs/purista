@@ -432,7 +432,7 @@ export function generateSchema(zodRef: OpenApiZodAny, useOutput?: boolean): Sche
 
 		return catchAllParser({ zodRef, schemas })
 	} catch (err) {
-		// biome-ignore lint/nursery/noConsole: no logger available
+		// biome-ignore lint/suspicious/noConsole: no logger available
 		console.error(err)
 		return catchAllParser({ zodRef, schemas })
 	}

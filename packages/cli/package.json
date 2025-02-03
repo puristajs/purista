@@ -46,8 +46,8 @@
 		"camelcase": "^8.0.0",
 		"minimist": "^1.2.8",
 		"plop": "^4.0.1",
-		"ts-morph": "^23.0.0",
-		"zod": "^3.23.8"
+		"ts-morph": "^25.0.0",
+		"zod": "^3.24.1"
 	},
 	"peerDependenciesMeta": {},
 	"files": ["blueprint/**/*", "dist/**/*"]

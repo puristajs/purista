@@ -39,7 +39,7 @@ import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http' // [
 import { Resource } from '@opentelemetry/resources' // [!code ++]
 import { NodeSDK } from '@opentelemetry/sdk-node' // [!code ++]
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node' // [!code ++]
-import { SEMRESATTRS_SERVICE_NAME } from '@opentelemetry/semantic-conventions' // [!code ++]
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions' // [!code ++]
 import { Context } from '@temporalio/activity'
 import { makeWorkflowExporter, OpenTelemetryActivityInboundInterceptor } from '@temporalio/interceptors-opentelemetry' // [!code ++]
 import { NativeConnection, Worker } from '@temporalio/worker'
@@ -68,7 +68,7 @@ export type ActivitiesType = typeof activities & ReturnType<typeof getPuristaBas
 async function run() {
   // setup OpenTelemetry
   const resource = new Resource({ // [!code ++]
-    [SEMRESATTRS_SERVICE_NAME]: 'temporal-worker', // [!code ++]
+    [ATTR_SERVICE_NAME]: 'temporal-worker', // [!code ++]
   }) // [!code ++]
   const exporter = new OTLPTraceExporter(jaegerExporterOptions) // [!code ++]
   const otel = new NodeSDK({ traceExporter: exporter, resource }) // [!code ++]
@@ -112,7 +112,6 @@ async function run() {
 }
 
 run().catch((err) => {
-  // biome-ignore lint/nursery/noConsole: no logger available
   console.error(err)
   process.exit(1)
 })

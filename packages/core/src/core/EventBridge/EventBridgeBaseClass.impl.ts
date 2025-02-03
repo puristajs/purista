@@ -2,7 +2,7 @@ import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 import { SpanStatusCode } from '@opentelemetry/api'
 import { Resource } from '@opentelemetry/resources'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { SEMRESATTRS_SERVICE_NAME, SEMRESATTRS_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
+import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
 
 import { initLogger } from '../../DefaultLogger/index.js'
 import { puristaVersion } from '../../version.js'
@@ -46,8 +46,8 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
 
 		const resource = Resource.default().merge(
 			new Resource({
-				[SEMRESATTRS_SERVICE_NAME]: name,
-				[SEMRESATTRS_SERVICE_VERSION]: puristaVersion,
+				[ATTR_SERVICE_NAME]: name,
+				[ATTR_SERVICE_VERSION]: puristaVersion,
 			}),
 		)
 

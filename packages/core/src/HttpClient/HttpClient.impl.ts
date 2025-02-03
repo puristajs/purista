@@ -5,12 +5,9 @@ import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/a
 import { Resource } from '@opentelemetry/resources'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import {
-	SEMATTRS_HTTP_METHOD,
-	SEMATTRS_HTTP_STATUS_CODE,
-	SEMATTRS_HTTP_URL,
-	SEMRESATTRS_SERVICE_NAME,
-} from '@opentelemetry/semantic-conventions'
+import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
+
+import { ATTR_HTTP_METHOD, ATTR_HTTP_STATUS_CODE, ATTR_URL_FULL } from '@opentelemetry/semantic-conventions/incubating'
 
 import type { EmptyObject, Logger } from '../core/index.js'
 import { HandledError, PuristaSpanTag, StatusCode, UnhandledError, initLogger } from '../core/index.js'
@@ -67,7 +64,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 
 		const resource = Resource.default().merge(
 			new Resource({
-				[SEMRESATTRS_SERVICE_NAME]: this.name,
+				[ATTR_SERVICE_NAME]: this.name,
 			}),
 		)
 		this.traceProvider = new NodeTracerProvider({
@@ -206,13 +203,13 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 		}
 
 		return this.startActiveSpan(`${this.name}.${method}`, { kind: SpanKind.CLIENT }, context.active(), async span => {
-			span.setAttribute(SEMATTRS_HTTP_METHOD, method)
+			span.setAttribute(ATTR_HTTP_METHOD, method)
 
 			const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: this.config.traceId })
 
 			try {
 				const { url, headers } = this.getUrlAndHeader(path, options)
-				span.setAttribute(SEMATTRS_HTTP_URL, url.toString())
+				span.setAttribute(ATTR_URL_FULL, url.toString())
 
 				const response = await fetch(url, {
 					method,
@@ -223,7 +220,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 					body,
 				})
 
-				span.setAttribute(SEMATTRS_HTTP_STATUS_CODE, response.status)
+				span.setAttribute(ATTR_HTTP_STATUS_CODE, response.status)
 
 				if (!response.ok) {
 					let body = ''
