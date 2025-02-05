@@ -33,6 +33,13 @@ describe('service User version 1 - command register', () => {
 	test('does not throw', async () => {
 		const service = await userV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
 			logger: getLoggerMock(sandbox).mock,
+			serviceConfig: {
+				taskQueue: 'example',
+				namespace: 'example',
+				connect: {
+					address: 'example.com',
+				},
+			},
 		})
 
 		const register = safeBind(registerCommandBuilder.getCommandFunction(), service)
@@ -44,7 +51,7 @@ describe('service User version 1 - command register', () => {
 
 		const parameter: UserV1RegisterInputParameter = {}
 
-		const context = registerCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+		const context = registerCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 
 		context.stubs.getState.resolves({})
 		context.stubs.setState.resolves()

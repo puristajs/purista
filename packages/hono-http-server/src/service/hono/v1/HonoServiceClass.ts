@@ -18,7 +18,7 @@ import type { Handler } from 'hono'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
 import { PatternRouter } from 'hono/router/pattern-router'
-import type { StatusCode as HonoStatusCode } from 'hono/utils/http-status'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { OpenApiBuilder } from 'openapi3-ts/oas31'
 
 import { addPathToOpenApi } from '../../../helper/index.js'
@@ -193,7 +193,7 @@ export class HonoServiceClass<
 						})
 						const okErr = new HandledError(StatusCode.OK)
 						span.setAttribute(ATTR_HTTP_STATUS_CODE, okErr.errorCode)
-						return c.json(okErr.getErrorResponse(), okErr.errorCode as HonoStatusCode)
+						return c.json(okErr.getErrorResponse(), okErr.errorCode as ContentfulStatusCode)
 					} catch (err) {
 						span.recordException(err as Error)
 						span.setStatus({
@@ -252,7 +252,7 @@ export class HonoServiceClass<
 
 				if (err instanceof HandledError) {
 					span.setAttribute(ATTR_HTTP_STATUS_CODE, err.errorCode)
-					return c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode)
+					return c.json(err.getErrorResponse(), err.errorCode as ContentfulStatusCode)
 				}
 
 				this.logger.error({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, 'General error handler')
@@ -361,7 +361,7 @@ export class HonoServiceClass<
 						} catch (error) {
 							const err = HandledError.fromError(error, StatusCode.BadRequest)
 							this.logger.error({ err, contentType, path: c.req.path, method }, 'Failed to decode body')
-							return c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode)
+							return c.json(err.getErrorResponse(), err.errorCode as ContentfulStatusCode)
 						}
 					}
 
@@ -392,9 +392,9 @@ export class HonoServiceClass<
 					if (result === undefined || result === null || result === '') {
 						span.setAttribute(ATTR_HTTP_STATUS_CODE, StatusCode.NoContent)
 						if (responseContentType.toLowerCase() !== 'application/json') {
-							return c.text('', StatusCode.NoContent)
+							return c.body(null, StatusCode.NoContent)
 						}
-						return c.json(undefined, StatusCode.NoContent)
+						return c.body(null, StatusCode.NoContent)
 					}
 
 					span.setAttribute(ATTR_HTTP_STATUS_CODE, StatusCode.OK)
@@ -415,7 +415,7 @@ export class HonoServiceClass<
 						this.logger.debug({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, err.message)
 
 						span.setAttribute(ATTR_HTTP_STATUS_CODE, err.errorCode)
-						return c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode)
+						return c.json(err.getErrorResponse(), err.errorCode as ContentfulStatusCode)
 					}
 
 					const unhandledError = UnhandledError.fromError(err)

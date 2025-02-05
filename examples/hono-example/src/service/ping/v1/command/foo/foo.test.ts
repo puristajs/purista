@@ -26,7 +26,7 @@ describe('service Ping version 1 - command foo', () => {
 
 		const parameter: PingV1FooInputParameter = {}
 
-		const context = fooCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+		const context = fooCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 
 		const result = await foo(context.mock, payload, parameter)
 

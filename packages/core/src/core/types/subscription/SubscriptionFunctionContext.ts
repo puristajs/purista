@@ -43,7 +43,7 @@ export type SubscriptionFunctionContextEnhancements<
 	/**
 	 * Provides resources defined in service builder and set via config during service creation
 	 */
-	resource: Resources
+	resources: Resources
 }
 
 /**

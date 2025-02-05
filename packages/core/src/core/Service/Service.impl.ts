@@ -669,7 +669,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 									command.invokes,
 								),
 							),
-							resource: this.resources,
+							resources: this.resources,
 						}
 						const call = command.call.bind(this, context)
 						return (await call(payload as Readonly<typeof payload>, parameter as Readonly<typeof parameter>)) as unknown
@@ -702,7 +702,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 										command.invokes,
 									),
 								),
-								resource: this.resources,
+								resources: this.resources,
 							}
 
 							const guardPromise = this.wrapInSpan(`afterGuardHook.${name}`, {}, async _subSpan => {
@@ -726,6 +726,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						const afterTransform = transformOutput.transformFunction.bind(this, {
 							message,
 							...this.getContextFunctions(logger),
+							resources: this.resources,
 						})
 						const resultTransformed = await afterTransform(
 							result as Readonly<typeof result>,
@@ -762,7 +763,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				span.recordException(error as Error)
 
 				if (error instanceof HandledError) {
-					this.emit(ServiceEventsNames.CommandHandledError, { commandName: command.commandName, error, traceId })
+					this.emit(ServiceEventsNames.CommandHandledError, {
+						commandName: command.commandName,
+						error,
+						traceId,
+					})
 					span.setStatus({
 						code: SpanStatusCode.ERROR,
 						message: error.message,
@@ -773,7 +778,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					)
 				}
 
-				this.emit(ServiceEventsNames.CommandUnhandledError, { commandName: command.commandName, error, traceId })
+				this.emit(ServiceEventsNames.CommandUnhandledError, {
+					commandName: command.commandName,
+					error,
+					traceId,
+				})
 
 				logger.error(
 					{ err: error, message: getCleanedMessage(message), ...span.spanContext() },
@@ -905,7 +914,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 										subscription.invokes,
 									),
 								),
-								resource: this.resources,
+								resources: this.resources,
 							}
 							const call2 = subscription.call.bind(this, context)
 							return await call2(payload, parameter)
@@ -937,7 +946,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 											message.tenantId,
 										),
 									),
-									resource: this.resources,
+									resources: this.resources,
 								}
 
 								const guardPromise = this.wrapInSpan(`afterGuardHook.${name}`, {}, async _subSpan => {
@@ -960,6 +969,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 								const afterTransform = transformOutput.transformFunction.bind(this, {
 									message,
 									...this.getContextFunctions(logger),
+									resources: this.resources,
 								})
 								const resultTransformed = await afterTransform(result as Readonly<unknown>, parameter)
 
@@ -1010,12 +1020,20 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				} catch (err) {
 					logger.error({ err }, 'Error in subscription execution')
 					if (err instanceof HandledError) {
-						this.emit(ServiceEventsNames.SubscriptionHandledError, { subscriptionName, error: err, traceId })
+						this.emit(ServiceEventsNames.SubscriptionHandledError, {
+							subscriptionName,
+							error: err,
+							traceId,
+						})
 						// handled errors prevent that the message is re-delivered for retry
 						return
 					}
 					if (err instanceof UnhandledError) {
-						this.emit(ServiceEventsNames.SubscriptionUnhandledError, { subscriptionName, error: err, traceId })
+						this.emit(ServiceEventsNames.SubscriptionUnhandledError, {
+							subscriptionName,
+							error: err,
+							traceId,
+						})
 					}
 					span.recordException(err as Error)
 

@@ -43,13 +43,15 @@ export type Newable<T extends Service, S extends ServiceClassTypes> = new (confi
 type InstanceConfigType<S extends ServiceBuilderTypes> = Prettify<
 	{
 		logLevel?: LogLevelName
-		serviceConfig?: S['ConfigInputType']
 		logger?: Logger
 		spanProcessor?: SpanProcessor
 		secretStore?: SecretStore
 		configStore?: ConfigStore
 		stateStore?: StateStore
-	} & (keyof S['Resources'] extends NeverObject ? { resources?: never } : { resources: S['Resources'] })
+	} & (keyof S['Resources'] extends NeverObject ? { resources?: never } : { resources: S['Resources'] }) &
+		(keyof S['ConfigInputType'] extends NeverObject
+			? { serviceConfig?: never }
+			: { serviceConfig: S['ConfigInputType'] })
 >
 
 /**
@@ -108,7 +110,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	 *
 	 * @param config - ConfigType - The default configuration for the service.
 	 * @returns The ServiceBuilder instance
-	 * @deprecated Use default value options in schema instead
+	 * @deprecated Use a default value in the config validation schema instead
 	 */
 	setDefaultConfig(config: Complete<S['ConfigType']>): this {
 		this.defaultConfig = config
@@ -187,12 +189,12 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	 *
 	 * @example
 	 * ```ts
-	 * serviceBuilder.defineResources<'db',MySQL>('db',MySQL)
+	 * serviceBuilder.defineResources<'resource_name',ResourceType>()
 	 * ```
 	 *
 	 * @returns The builder with defined types for resources
 	 */
-	defineResource<ResourceName extends string, ResourcesType>(name: ResourceName, resource: ResourcesType) {
+	defineResource<ResourceName extends string, ResourcesType>() {
 		this.requiresResources = true
 		return this as unknown as ServiceBuilder<
 			SetNewTypeValue<S, 'Resources', S['Resources'] & { [K in ResourceName]: InstanceOrType<ResourcesType> }>

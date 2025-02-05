@@ -412,7 +412,8 @@ export class CommandDefinitionBuilder<
 			Infer<TransformInputPayloadSchema>,
 			Infer<TransformInputParamsSchema>,
 			InferIn<C['PayloadSchema']>,
-			InferIn<C['ParamsSchema']>
+			InferIn<C['ParamsSchema']>,
+			C['Resources']
 		>,
 		inputContentType?: ContentType,
 		inputContentEncoding?: string,
@@ -457,7 +458,8 @@ export class CommandDefinitionBuilder<
 			Infer<C['TransformInputPayloadSchema']>,
 			Infer<C['TransformInputParamsSchema']>,
 			InferIn<C['PayloadSchema']>,
-			InferIn<C['ParamsSchema']>
+			InferIn<C['ParamsSchema']>,
+			C['Resources']
 		>
 	}
 
@@ -479,7 +481,8 @@ export class CommandDefinitionBuilder<
 			GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
 			Infer<C['OutputSchema']>,
 			Infer<C['ParamsSchema']>,
-			InferIn<TransformOutputSchema>
+			InferIn<TransformOutputSchema>,
+			C['Resources']
 		>,
 
 		outputContentType?: ContentType,
@@ -522,7 +525,8 @@ export class CommandDefinitionBuilder<
 			GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
 			Infer<C['OutputSchema']>,
 			Infer<C['ParamsSchema']>,
-			InferIn<C['TransformOutputSchema']>
+			InferIn<C['TransformOutputSchema']>,
+			C['Resources']
 		>
 	}
 
@@ -962,29 +966,25 @@ export class CommandDefinitionBuilder<
 	}
 
 	/**
-	 * Returns a mocked command function context, which can be used in unit tests.
 	 *
-	 * @param payload
-	 * @param parameter
-	 * @param sandbox Sinon sandbox
-	 * @param resources if provided, the provided resource will be used instead of a stub
-	 * @returns a mocked command function context
+	 * @param input
+	 * @returns a mocked command context
 	 */
 	getCommandContextMock<
 		MessagePayloadType = GetMessagePayloadType<C['PayloadSchema'], C['TransformInputPayloadSchema']>,
 		MessageParamsType = GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
 		FunctionPayloadType = InferIn<C['PayloadSchema']>,
 		FunctionParamsType = InferIn<C['ParamsSchema']>,
-	>(
-		payload: FunctionPayloadType,
-		parameter: FunctionParamsType,
-		sandbox?: SinonSandbox,
-		resources?: Partial<C['Resources']>,
+	>(input: {
+		payload: FunctionPayloadType
+		parameter: FunctionParamsType
+		resources?: Partial<C['Resources']>
+		sandbox?: SinonSandbox
 		message?: {
 			payload: MessagePayloadType
 			parameter: MessageParamsType
-		},
-	) {
+		}
+	}) {
 		return getCommandContextMock<
 			MessagePayloadType,
 			MessageParamsType,
@@ -994,28 +994,24 @@ export class CommandDefinitionBuilder<
 			C['Invokes'],
 			C['EmitList']
 		>({
-			payload,
-			parameter,
-			sandbox,
-			resources,
+			...input,
 			invokes: this.invokes,
 			emitList: this.emitList,
-			message,
 		})
 	}
 
 	/**
 	 * Returns a mocked transform function context, which can be used in unit tests.
 	 *
-	 * @param message
-	 * @param sandbox Sinon sandbox
+	 * @param input
 	 * @returns a mocked transform function context
 	 */
-	getCommandTransformContextMock(
-		payload: GetMessagePayloadType<C['PayloadSchema'], C['TransformInputPayloadSchema']>,
-		parameter: GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
-		sandbox?: SinonSandbox,
-	) {
-		return getCommandTransformContextMock(payload, parameter, sandbox)
+	getCommandTransformContextMock(input: {
+		payload: GetMessagePayloadType<C['PayloadSchema'], C['TransformInputPayloadSchema']>
+		parameter: GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>
+		resources?: Partial<C['Resources']>
+		sandbox?: SinonSandbox
+	}) {
+		return getCommandTransformContextMock<typeof input.payload, typeof input.parameter, C['Resources']>(input)
 	}
 }

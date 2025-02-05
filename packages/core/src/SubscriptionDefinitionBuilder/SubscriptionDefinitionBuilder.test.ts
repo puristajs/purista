@@ -169,7 +169,7 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionContextMock(msg, sandbox)
+		const context = builder.getSubscriptionContextMock({ message: msg, sandbox })
 		context.stubs.service.OtherService[2].testSubscription.callsFake(async (payload, parameter) => {
 			return {
 				result: {
@@ -209,7 +209,7 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionTransformContextMock(msg, sandbox)
+		const context = builder.getSubscriptionTransformContextMock({ message: msg, sandbox })
 
 		const result = await transformFunction(context.mock, JSON.stringify(payload), JSON.stringify(parameter))
 
@@ -233,7 +233,7 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionTransformContextMock(msg, sandbox)
+		const context = builder.getSubscriptionTransformContextMock({ message: msg, sandbox })
 
 		const result = await transformFunction(
 			context.mock,
@@ -274,7 +274,7 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		const context = b.getSubscriptionContextMock(msg, sandbox)
+		const context = b.getSubscriptionContextMock({ message: msg, sandbox })
 
 		const result = await theFunction(context.mock, 'y', 'x')
 

@@ -26,7 +26,7 @@ describe('service Account version 1 - command createAccount', () => {
 
 		const parameter: AccountV1CreateAccountInputParameter = {}
 
-		const context = createAccountCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+		const context = createAccountCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 
 		const result = await createAccount(context.mock, payload, parameter)
 

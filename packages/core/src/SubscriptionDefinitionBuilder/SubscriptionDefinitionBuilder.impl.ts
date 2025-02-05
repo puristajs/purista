@@ -828,11 +828,13 @@ export class SubscriptionDefinitionBuilder<
 	 * @param sandbox Sinon sandbox
 	 * @returns a mocked command function context
 	 */
-	getSubscriptionContextMock(message: EBMessage, sandbox?: SinonSandbox, resources?: Partial<C['Resources']>) {
+	getSubscriptionContextMock(input: {
+		message: EBMessage
+		resources?: Partial<C['Resources']>
+		sandbox?: SinonSandbox
+	}) {
 		return getSubscriptionContextMock<C['Resources'], C['Invokes'], C['EmitList']>({
-			message,
-			sandbox,
-			resources,
+			...input,
 			invokes: this.invokes,
 			emitList: this.emitList,
 		})
@@ -842,10 +844,15 @@ export class SubscriptionDefinitionBuilder<
 	 * Returns a mocked transform function context, which can be used in unit tests.
 	 *
 	 * @param message
+	 * @param resources Resources to be used in the mock
 	 * @param sandbox Sinon sandbox
 	 * @returns a mocked transform function context
 	 */
-	getSubscriptionTransformContextMock(message: EBMessage, sandbox?: SinonSandbox) {
-		return getSubscriptionTransformContextMock(message, sandbox)
+	getSubscriptionTransformContextMock(input: {
+		message: EBMessage
+		resources?: C['Resources']
+		sandbox?: SinonSandbox
+	}) {
+		return getSubscriptionTransformContextMock(input)
 	}
 }

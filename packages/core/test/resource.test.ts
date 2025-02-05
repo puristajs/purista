@@ -37,20 +37,20 @@ describe('service resource test', () => {
 
 	const serviceBuilder = new ServiceBuilder(serviceOneInfo)
 		.setConfigSchema(serviceOneSchema)
-		.defineResource('exampleA', ExampleResource)
+		.defineResource<'exampleA', ExampleResource>()
 
 	const commandBuilder = serviceBuilder
 		.getCommandBuilder('exampleCommand', 'This is an example command using a resource')
 		.setCommandFunction(async function (ctx) {
 			const _conf = this.config.optionOne
-			return ctx.resource.exampleA.methodA()
+			return ctx.resources.exampleA.methodA()
 		})
 
 	const subscriptionBuilder = serviceBuilder
 		.getSubscriptionBuilder('exampleSubscription', 'This is an example command using a resource')
 		.setSubscriptionFunction(async function (ctx) {
 			const _conf = this.config.optionOne
-			return ctx.resource.exampleA.methodA()
+			return ctx.resources.exampleA.methodA()
 		})
 
 	it('can provide resources to a command', async () => {
@@ -64,8 +64,12 @@ describe('service resource test', () => {
 		const payload = {}
 		const parameter = {}
 
-		const context = commandBuilder.getCommandContextMock(payload, parameter, sandbox)
-		context.stubs.resource.exampleA.methodA = sandbox.stub().returns('mock return')
+		const context = commandBuilder.getCommandContextMock({
+			payload,
+			parameter,
+			resources: { exampleA: { methodA: sandbox.stub().returns('mock return') } },
+			sandbox,
+		})
 
 		const result = await command(context.mock, payload, parameter)
 
@@ -84,8 +88,12 @@ describe('service resource test', () => {
 		const parameter = {}
 		const message = getCommandSuccessMessageMock(payload)
 
-		const context = subscriptionBuilder.getSubscriptionContextMock(message, sandbox)
-		context.stubs.resource.exampleA.methodA = sandbox.stub().returns('mock return')
+		const context = subscriptionBuilder.getSubscriptionContextMock({
+			message,
+			resources: { exampleA: new ExampleResource() },
+			sandbox,
+		})
+		context.stubs.resources.exampleA.methodA = sandbox.stub().returns('mock return')
 
 		const result = await subscription(context.mock, payload, parameter)
 

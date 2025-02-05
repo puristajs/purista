@@ -44,7 +44,7 @@ describe('service Ping version 1 - command foo', () => {
     const parameter: PingV1FooInputParameter = {}
 
     // get a mocked command context
-    const context = fooCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+    const context = fooCommandBuilder.getCommandContextMock({payload, parameter, sandbox})
 
     // execute the command including the validations and hooks
     const result = await foo(context.mock, payload, parameter)
@@ -65,7 +65,7 @@ The `stubs` entry contains [Sinon stubs](https://sinonjs.org/releases/latest/stu
 As an example, a command might invoke other services and we need to mock the returned data.
 
 ```typescript
-const context = fooCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+const context = fooCommandBuilder.getCommandContextMock({payload, parameter, sandbox})
 
 context.stubs.service.OtherService[1].otherCommand.resolves('mock data')
 ```
@@ -79,7 +79,7 @@ PURISTA provides the `getCommandContextMock` in the command builder, which allow
 Only services defined with `canInvoke` are available in the context mock.
 
 ```typescript
-const context = fooCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+const context = fooCommandBuilder.getCommandContextMock({payload, parameter, sandbox})
 
 // type/autocomplete is done magically
 context.stubs.service.OtherServiceName[1].otherCommandName.resolves({ resultValue: 'the mocked value })

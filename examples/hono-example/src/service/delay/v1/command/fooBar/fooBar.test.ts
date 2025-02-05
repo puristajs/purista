@@ -28,7 +28,7 @@ describe('service Delay version 1 - command fooBar', () => {
 			p: 'the_p',
 		}
 
-		const context = fooBarCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+		const context = fooBarCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 
 		const result = await fooBar(context.mock, payload, parameter)
 

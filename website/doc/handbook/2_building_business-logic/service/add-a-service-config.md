@@ -40,7 +40,7 @@ export type UserServiceV1Config = z.input<typeof userServiceV1ConfigSchema>
 
 As you can see, in the example a string option entry `myOption` is added. This field is marked as optional. Because of this, in the generated type `UserServiceV1Config`, the `myOption` is also optional.
 
-Now, in the builder file `userV1ServiceBuilder.ts` in the same directory, typescript will complain on `.setDefaultConfig({})`.
+Now, in the builder file `userV1ServiceBuilder.ts` in the same directory, typescript will complain on ``.
 Setting the default configuration, requires to set all root fields of the default configuration. The optional flag, only relates to the input, when you create a service instance and provide a service configuration.
 
 ::: tip

@@ -1,4 +1,4 @@
-import type { Service } from '../../index.js'
+import type { EmptyObject, Service } from '../../index.js'
 import type { CommandTransformFunctionContext } from './CommandTransformFunctionContext.js'
 
 /**
@@ -18,9 +18,10 @@ export type CommandTransformOutputHook<
 	FinalFunctionOutputType,
 	FunctionParamsType,
 	TransformOutputHookOutput,
+	Resources extends Record<string, any> = EmptyObject,
 > = (
 	this: S,
-	context: CommandTransformFunctionContext<MessagePayloadType, MessageParamsType>,
+	context: CommandTransformFunctionContext<MessagePayloadType, MessageParamsType, Resources>,
 	input: Readonly<FinalFunctionOutputType>,
 	params: Readonly<FunctionParamsType>,
 ) => Promise<TransformOutputHookOutput>

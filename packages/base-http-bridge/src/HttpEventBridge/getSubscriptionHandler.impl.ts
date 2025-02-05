@@ -16,7 +16,7 @@ import {
 	throwIfNotValidMessage,
 } from '@purista/core'
 import { HTTP } from 'cloudevents'
-import type { StatusCode as HonoStatusCode } from 'hono/utils/http-status'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 import type { HttpEventBridge } from './HttpEventBridge.impl.js'
 import type { HttpEventBridgeConfig, RouterFunction } from './types/index.js'
@@ -83,12 +83,12 @@ export const getSubscriptionHandler = function (
 						await this.emitMessage(msg)
 					}
 
-					return c.json(undefined, StatusCode.NoContent)
+					return c.body(null, StatusCode.NoContent)
 				} catch (error) {
 					const err = error instanceof UnhandledError ? error : UnhandledError.fromError(error)
 					span.recordException(err)
 					this.logger.error({ err }, err.message)
-					return c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode)
+					return c.json(err.getErrorResponse(), err.errorCode as ContentfulStatusCode)
 				}
 			},
 		)

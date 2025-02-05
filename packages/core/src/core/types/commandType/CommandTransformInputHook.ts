@@ -1,4 +1,4 @@
-import type { Service } from '../../index.js'
+import type { EmptyObject, Service } from '../../index.js'
 import type { CommandTransformFunctionContext } from './CommandTransformFunctionContext.js'
 
 /**
@@ -18,11 +18,12 @@ export type CommandTransformInputHook<
 	TransformInputParams,
 	FunctionPayloadType,
 	FunctionParamsType,
+	Resources extends Record<string, any> = EmptyObject,
 > = (
 	/** the service instance */
 	this: S,
 	/** the transform function context */
-	context: CommandTransformFunctionContext<MessagePayloadType, MessageParamsType>,
+	context: CommandTransformFunctionContext<MessagePayloadType, MessageParamsType, Resources>,
 	/** the payload validated against the transform payload schema */
 	payload: Readonly<TransformInputPayload>,
 	/** the payload validated against the transform parameter schema */

@@ -28,7 +28,7 @@ describe('service Ping version 1 - command ping', () => {
 			query: 'myQuery',
 		}
 
-		const context = pingCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+		const context = pingCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 
 		const result = await ping(context.mock, payload, parameter)
 

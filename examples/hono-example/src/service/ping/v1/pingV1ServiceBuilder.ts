@@ -11,6 +11,4 @@ export const pingServiceInfo = {
 
 // create a service builder instance and assign service config schema and default config.
 
-export const pingV1ServiceBuilder = new ServiceBuilder(pingServiceInfo)
-	.setConfigSchema(pingServiceV1ConfigSchema)
-	.setDefaultConfig({})
+export const pingV1ServiceBuilder = new ServiceBuilder(pingServiceInfo).setConfigSchema(pingServiceV1ConfigSchema)

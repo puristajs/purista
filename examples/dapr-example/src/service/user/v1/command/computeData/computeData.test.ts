@@ -26,7 +26,7 @@ describe('service User version 1 - command computeData', () => {
 
 		const parameter: UserV1ComputeDataInputParameter = {}
 
-		const context = computeDataCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+		const context = computeDataCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 
 		const result = await computeData(context.mock, payload, parameter)
 

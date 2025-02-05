@@ -177,7 +177,10 @@ describe('CommandDefinitionBuilder', () => {
 
 	it('can build a command with schemas', async () => {
 		const commandFunction = safeBind(builder.getCommandFunction(), service)
-		const context = builder.getCommandContextMock(JSON.stringify(payload), JSON.stringify(parameter))
+		const context = builder.getCommandContextMock({
+			payload: JSON.stringify(payload),
+			parameter: JSON.stringify(parameter),
+		})
 		context.stubs.service.OtherService[2].testCommand.callsFake(async (payload, parameter) => {
 			return {
 				result: {
@@ -202,7 +205,10 @@ describe('CommandDefinitionBuilder', () => {
 
 	it('executes the plain function without hooks and schema validation', async () => {
 		const commandFunction = safeBind(builder.getCommandFunctionPlain(), service)
-		const context = builder.getCommandContextMock(JSON.stringify(payload), JSON.stringify(parameter))
+		const context = builder.getCommandContextMock({
+			payload: JSON.stringify(payload),
+			parameter: JSON.stringify(parameter),
+		})
 		context.stubs.service.OtherService[2].testCommand.callsFake(async (payload, parameter) => {
 			return {
 				result: {
@@ -241,7 +247,11 @@ describe('CommandDefinitionBuilder', () => {
 
 		const transformFunction = safeBind(fn, service)
 
-		const context = builder.getCommandTransformContextMock(JSON.stringify(payload), JSON.stringify(parameter), sandbox)
+		const context = builder.getCommandTransformContextMock({
+			payload: JSON.stringify(payload),
+			parameter: JSON.stringify(parameter),
+			sandbox,
+		})
 
 		const result = await transformFunction(context.mock, JSON.stringify(payload), JSON.stringify(parameter))
 
@@ -258,7 +268,11 @@ describe('CommandDefinitionBuilder', () => {
 
 		const transformFunction = safeBind(fn, service)
 
-		const context = builder.getCommandTransformContextMock(JSON.stringify(payload), JSON.stringify(parameter), sandbox)
+		const context = builder.getCommandTransformContextMock({
+			payload: JSON.stringify(payload),
+			parameter: JSON.stringify(parameter),
+			sandbox,
+		})
 
 		const result = await transformFunction(
 			context.mock,
@@ -292,7 +306,7 @@ describe('CommandDefinitionBuilder', () => {
 
 		const theFunction = safeBind(fn, service)
 
-		const context = b.getCommandContextMock('', {}, sandbox)
+		const context = b.getCommandContextMock({ payload: '', parameter: {}, sandbox })
 
 		const result = await theFunction(context.mock, 'y', 'x')
 

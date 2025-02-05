@@ -11,6 +11,4 @@ export const emailServiceInfo = {
 
 // create a service builder instance and assign service config schema and default config.
 
-export const emailV1ServiceBuilder = new ServiceBuilder(emailServiceInfo)
-	.setConfigSchema(emailServiceV1ConfigSchema)
-	.setDefaultConfig({})
+export const emailV1ServiceBuilder = new ServiceBuilder(emailServiceInfo).setConfigSchema(emailServiceV1ConfigSchema)

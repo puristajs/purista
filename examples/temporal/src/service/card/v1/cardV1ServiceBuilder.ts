@@ -11,6 +11,4 @@ export const cardServiceInfo = {
 
 // create a service builder instance and assign service config schema and default config.
 
-export const cardV1ServiceBuilder = new ServiceBuilder(cardServiceInfo)
-	.setConfigSchema(cardServiceV1ConfigSchema)
-	.setDefaultConfig({})
+export const cardV1ServiceBuilder = new ServiceBuilder(cardServiceInfo).setConfigSchema(cardServiceV1ConfigSchema)

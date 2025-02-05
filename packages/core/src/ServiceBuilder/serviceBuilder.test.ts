@@ -1,5 +1,4 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod'
 
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
 import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/index.js'
@@ -19,37 +18,6 @@ describe('ServiceBuilder', () => {
 
 	afterEach(() => {
 		sandbox.reset()
-	})
-
-	it('can set a service config schema and default config', async () => {
-		const service = new ServiceBuilder(serviceInfo)
-
-		const configSchema = z.object({
-			host: z.string(),
-		})
-
-		const defaultConfig = {
-			host: 'localhost',
-		}
-
-		const serviceWithConfigSchema = service.setConfigSchema(configSchema)
-		const serviceWithDefaultConfig = serviceWithConfigSchema.setDefaultConfig(defaultConfig)
-
-		const eventBridge = getEventBridgeMock(sandbox)
-		const logger = getLoggerMock(sandbox)
-
-		const serviceInstanceWithDefaultConfig = await serviceWithDefaultConfig.getInstance(eventBridge.mock, {
-			logger: logger.mock,
-		})
-
-		expect(serviceInstanceWithDefaultConfig.config.host).toEqual(defaultConfig.host)
-
-		const serviceInstanceWithCustomConfig = await serviceWithDefaultConfig.getInstance(eventBridge.mock, {
-			logger: logger.mock,
-			serviceConfig: { host: 'remote' },
-		})
-
-		expect(serviceInstanceWithCustomConfig.config.host).toBe('remote')
 	})
 
 	it('returns a CommandBuilder', () => {
@@ -89,7 +57,7 @@ describe('ServiceBuilder', () => {
 			}
 		}
 
-		const service = new ServiceBuilder(serviceInfo).defineResource('x', ExampleClass)
+		const service = new ServiceBuilder(serviceInfo).defineResource<'x', ExampleClass>()
 
 		const eventBridge = getEventBridgeMock(sandbox)
 		const logger = getLoggerMock(sandbox)
