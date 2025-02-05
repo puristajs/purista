@@ -29,7 +29,7 @@ describe('service Ping version 1 - command paramTest', () => {
 			requiredParam: 'required_id',
 		}
 
-		const context = paramTestCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+		const context = paramTestCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 
 		const result = await paramTest(context.mock, payload, parameter)
 

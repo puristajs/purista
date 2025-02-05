@@ -28,7 +28,7 @@ describe('service User version 1 - command getAllUsers', () => {
 
 		const parameter: UserV1GetAllUsersInputParameter = {}
 
-		const context = getAllUsersCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+		const context = getAllUsersCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 
 		const userMock: User = {
 			email: 'email@example.com',

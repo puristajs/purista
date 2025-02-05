@@ -33,6 +33,7 @@ export const subscriptionTransformInput = async <S extends Service = Service>(
 			const transform = transformInput.transformFunction.bind(serviceInstance, {
 				message,
 				...serviceInstance.getContextFunctions(logger),
+				resources: serviceInstance.resources,
 			})
 			const parameterInput = await serviceInstance.wrapInSpan(
 				`${subscription.subscriptionName}.validateParameter`,

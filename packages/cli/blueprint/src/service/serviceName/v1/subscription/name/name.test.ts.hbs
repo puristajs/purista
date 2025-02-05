@@ -39,7 +39,7 @@ describe('service {{properCase service.name}} version {{service.version}} - subs
     const message = getCommandSuccessMessageMock(payload)
 
     // create a subscription context for the subscription function
-    const context = {{camelCase name}}SubscriptionBuilder.getSubscriptionContextMock(message, sandbox)
+    const context = {{camelCase name}}SubscriptionBuilder.getSubscriptionContextMock({message, sandbox})
 
     // execute the subscription function
     const result = await {{camelCase name}}(context.mock, payload, parameter)

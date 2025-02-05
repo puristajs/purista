@@ -63,25 +63,25 @@ export const getCommandContextMock = <
 		}
 	}
 
-	const resourceMocks: Record<string, SinonStub> = {}
+	const providedResources: Partial<Resources> = input.resources ?? ({} as Partial<Resources>)
 
-	const getResourceProxy = <TFaux>(): TFaux => {
-		return new Proxy(() => {}, {
+	const resourcesProxy = new Proxy(
+		{},
+		{
 			get(obj: Record<string, any>, name) {
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
-					return undefined
+					throw new Error('Invalid property access on resources proxy')
 				}
-				if (input.resources?.[name]) {
-					return input.resources[name]
+				if (Object.hasOwn(providedResources, name)) {
+					return providedResources[name]
 				}
-				if (!resourceMocks[name]) {
-					resourceMocks[name] = input.sandbox?.stub() ?? stub()
-					resourceMocks[name].throws(`Resource ${name} not mocked`)
+				if (!Object.hasOwn(stubs.resource, name)) {
+					throw new Error(`Resource ${name} not set or stubbed`)
 				}
-				return resourceMocks[name]
+				return stubs.resource[name]
 			},
-		}) as TFaux
-	}
+		},
+	) as Resources
 
 	const invokeMocks: Record<string, Record<string, Record<string, SinonStub>>> = {}
 
@@ -165,7 +165,7 @@ export const getCommandContextMock = <
 		setState: input.sandbox?.stub() ?? stub(),
 		removeState: input.sandbox?.stub() ?? stub(),
 		service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
-		resource: getResourceProxy<Resources>(),
+		resource: {} as Partial<Resources>,
 	}
 
 	const message = getCommandMessageMock<MessagePayloadType, MessageParamsType>(
@@ -203,7 +203,7 @@ export const getCommandContextMock = <
 			setState: stubs.setState.rejects(new Error('setState is not stubbed')),
 			removeState: stubs.removeState.rejects(new Error('removeState is not stubbed')),
 		},
-		resource: getResourceProxy<Resources>(),
+		resources: resourcesProxy,
 	}
 
 	return {

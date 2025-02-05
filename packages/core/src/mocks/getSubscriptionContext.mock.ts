@@ -153,7 +153,7 @@ export const getSubscriptionContextMock = <
 		setState: input.sandbox?.stub() ?? stub(),
 		removeState: input.sandbox?.stub() ?? stub(),
 		service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
-		resource: getResourceProxy<Resources>(),
+		resources: getResourceProxy<Resources>(),
 	}
 
 	const mock: SubscriptionFunctionContext<Resources, Invokes, EmitList> = {
@@ -180,7 +180,7 @@ export const getSubscriptionContextMock = <
 			setState: stubs.setState.rejects(new Error('setState is not stubbed')),
 			removeState: stubs.removeState.rejects(new Error('removeState is not stubbed')),
 		},
-		resource: getResourceProxy<Resources>(),
+		resources: getResourceProxy<Resources>(),
 	}
 
 	return {

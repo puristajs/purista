@@ -44,7 +44,7 @@ export type CommandFunctionContextEnhancements<
 	/**
 	 * Provides resources defined in service builder and set via config during service creation
 	 */
-	resource: Resources
+	resources: Resources
 }
 
 /**

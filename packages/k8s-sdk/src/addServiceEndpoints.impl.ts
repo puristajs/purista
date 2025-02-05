@@ -17,7 +17,7 @@ import {
 	serializeOtp,
 } from '@purista/core'
 import type { Hono, Context as HonoContext } from 'hono'
-import type { StatusCode as HonoStatusCode } from 'hono/utils/http-status'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 /**
  *
@@ -124,7 +124,7 @@ export const addServiceEndpoints = (
 										message: result.payload.message,
 									})
 
-									const response = c.json(result.payload, result.payload.status as HonoStatusCode)
+									const response = c.json(result.payload, result.payload.status as ContentfulStatusCode)
 									span.end()
 									return response
 								}
@@ -182,7 +182,7 @@ export const addServiceEndpoints = (
 
 								propagation.inject(context.active(), header)
 
-								const response = c.json(err.getErrorResponse(), err.errorCode as HonoStatusCode, header)
+								const response = c.json(err.getErrorResponse(), err.errorCode as ContentfulStatusCode, header)
 								span.end()
 								return response
 							}

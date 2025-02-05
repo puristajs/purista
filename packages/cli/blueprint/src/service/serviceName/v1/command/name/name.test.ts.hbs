@@ -24,7 +24,7 @@ describe('service {{properCase service.name}} version {{service.version}} - comm
 
     const parameter: {{properCase service.name}}V{{service.version}}{{properCase name}}InputParameter = {}
 
-    const context = {{camelCase name}}CommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+    const context = {{camelCase name}}CommandBuilder.getCommandContextMock({payload, parameter, sandbox})
 
     const result = await {{camelCase name}}(context.mock, payload, parameter)
 

@@ -11,6 +11,4 @@ export const delayServiceInfo: ServiceInfoType = {
 
 // create a service builder instance and assign service config schema and default config.
 
-export const delayV1ServiceBuilder = new ServiceBuilder(delayServiceInfo)
-	.setConfigSchema(delayServiceV1ConfigSchema)
-	.setDefaultConfig({})
+export const delayV1ServiceBuilder = new ServiceBuilder(delayServiceInfo).setConfigSchema(delayServiceV1ConfigSchema)

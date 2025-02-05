@@ -42,7 +42,7 @@ describe('service Email version 1 - subscription sendWelcomeEmail', () => {
 		const message = getCommandSuccessMessageMock(payload)
 
 		// create a subscription context for the subscription function
-		const context = sendWelcomeEmailSubscriptionBuilder.getSubscriptionContextMock(message, sandbox)
+		const context = sendWelcomeEmailSubscriptionBuilder.getSubscriptionContextMock({ message, sandbox })
 
 		context.stubs.service.User['1'].getUserById.resolves(userMock)
 		context.stubs.getConfig.resolves({ emailProviderUrl: 'https://example.com' })

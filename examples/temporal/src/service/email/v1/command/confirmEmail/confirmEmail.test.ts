@@ -47,7 +47,7 @@ describe('service Email version 1 - command confirmEmail', () => {
 
 		const parameter: EmailV1ConfirmEmailInputParameter = {}
 
-		const context = confirmEmailCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+		const context = confirmEmailCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 
 		context.stubs.getState.resolves({ 'john@example.com': 'john@example.com' })
 

@@ -5,13 +5,7 @@ import { z } from 'zod'
 
 import type { ServiceInfoType } from '../src/index.js'
 import { DefaultEventBridge, EBMessageType, ServiceBuilder, StatusCode, safeBind } from '../src/index.js'
-import {
-	getCommandMessageMock,
-	getCommandTransformContextMock,
-	getEventBridgeMock,
-	getLoggerMock,
-	getSubscriptionTransformContextMock,
-} from '../src/mocks/index.js'
+import { getCommandMessageMock, getEventBridgeMock, getLoggerMock } from '../src/mocks/index.js'
 
 describe('integration test', () => {
 	const sandbox = createSandbox()
@@ -63,20 +57,26 @@ describe('integration test', () => {
 	type CommandTwoPayload = z.input<typeof commandTwoPayloadSchema>
 
 	const serviceOneSchema = z.object({
-		optionOne: z.string(),
+		optionOne: z.string().default('option one'),
 	})
 
-	const serviceOneBuilder = new ServiceBuilder(serviceOneInfo)
-		.setConfigSchema(serviceOneSchema)
-		.setDefaultConfig({ optionOne: 'option one' })
+	const serviceOneBuilder = new ServiceBuilder(serviceOneInfo).setConfigSchema(serviceOneSchema).defineResource<
+		'resourceOne',
+		{
+			getResourceData: () => string
+		}
+	>()
 
 	const serviceTwoSchema = z.object({
-		optionTwo: z.string(),
+		optionTwo: z.string().default('option two'),
 	})
 
-	const serviceTwoBuilder = new ServiceBuilder(serviceTwoInfo)
-		.setConfigSchema(serviceTwoSchema)
-		.setDefaultConfig({ optionTwo: 'option two' })
+	const serviceTwoBuilder = new ServiceBuilder(serviceTwoInfo).setConfigSchema(serviceTwoSchema).defineResource<
+		'resourceTwo',
+		{
+			getResourceData: () => string
+		}
+	>()
 
 	afterAll(() => {
 		vi.restoreAllMocks()
@@ -90,12 +90,14 @@ describe('integration test', () => {
 			.addPayloadSchema(commandOnePayloadSchema)
 			.addParameterSchema(commandParameterSchema)
 			.addOutputSchema(commandOneOutputSchema)
-			.setTransformInput(z.string(), commandParameterSchema, async function (context, payload, parameter) {
+			.setTransformInput(z.string(), commandParameterSchema, async (context, payload, parameter) => {
 				const parsed = JSON.parse(payload)
 
 				await context.startActiveSpan('activeSpan', {}, undefined, async () => {
 					context.logger.debug('activeSpan')
 				})
+
+				expect(context.resources.resourceOne.getResourceData()).toBe('resourceOneData')
 
 				await context.wrapInSpan('wrapInSpan', {}, async () => {
 					context.logger.debug('wrapInSpan')
@@ -111,6 +113,8 @@ describe('integration test', () => {
 					context.logger.debug('activeSpan')
 				})
 
+				expect(context.resources.resourceOne.getResourceData()).toBe('resourceOneData')
+
 				await context.wrapInSpan('wrapInSpan', {}, async () => {
 					context.logger.debug('wrapInSpan')
 				})
@@ -118,12 +122,14 @@ describe('integration test', () => {
 				return JSON.stringify(payload)
 			})
 			.setBeforeGuardHooks({
-				first: async (_context, payload, parameter) => {
+				first: async (context, payload, parameter) => {
+					expect(context.resources.resourceOne.getResourceData()).toBe('resourceOneData')
 					beforeCommandGuardHookStub(payload, parameter)
 				},
 			})
 			.setAfterGuardHooks({
-				some: async (_context, result, payload, parameter) => {
+				some: async (context, result, payload, parameter) => {
+					expect(context.resources.resourceOne.getResourceData()).toBe('resourceOneData')
 					afterCommandGuardHookStub(result, result, payload, parameter)
 				},
 			})
@@ -148,6 +154,8 @@ describe('integration test', () => {
 				const invokePayload: CommandTwoPayload = {
 					input: 'input',
 				}
+
+				expect(context.resources.resourceOne.getResourceData()).toBe('resourceOneData')
 
 				context.logger.debug('call commandTwo')
 
@@ -178,7 +186,13 @@ describe('integration test', () => {
 			const eventBridgeMock = getEventBridgeMock(sandbox)
 			const serviceLogger = getLoggerMock(sandbox)
 
-			const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
+			const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, {
+				logger: serviceLogger.mock,
+				resources: {
+					resourceOne: { getResourceData: () => 'resourceOneData' },
+				},
+				serviceConfig: {},
+			})
 
 			const commandOne = safeBind(commandOneDefinitionBuilder.getCommandFunction(), service)
 
@@ -190,9 +204,18 @@ describe('integration test', () => {
 
 			const invokePayload = 'input for command two'
 
-			const contextMock = commandOneDefinitionBuilder.getCommandContextMock(messagePayload, messageParameter, sandbox)
+			const contextMock = commandOneDefinitionBuilder.getCommandContextMock({
+				payload: messagePayload,
+				parameter: messageParameter,
+				resources: {
+					resourceOne: { getResourceData: () => 'resourceOneData' },
+				},
+				sandbox,
+			})
 
-			contextMock.stubs.service.ServiceTwo['1'].commandTwo.resolves({ output: invokePayload.toUpperCase() })
+			contextMock.stubs.service.ServiceTwo['1'].commandTwo.resolves({
+				output: invokePayload.toUpperCase(),
+			})
 
 			const result = await commandOne(contextMock.mock, payload, parameter)
 
@@ -205,7 +228,13 @@ describe('integration test', () => {
 			const eventBridgeMock = getEventBridgeMock(sandbox)
 			const serviceLogger = getLoggerMock(sandbox)
 
-			const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
+			const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, {
+				logger: serviceLogger.mock,
+				resources: {
+					resourceOne: { getResourceData: () => 'resourceOneData' },
+				},
+				serviceConfig: {},
+			})
 
 			const transformInput = commandOneDefinitionBuilder.getTransformInputFunction()
 			if (!transformInput) {
@@ -218,7 +247,14 @@ describe('integration test', () => {
 			const messagePayload = JSON.stringify(payload)
 			const messageParameter = parameter
 
-			const contextMock = getCommandTransformContextMock(messagePayload, messageParameter, sandbox)
+			const contextMock = commandOneDefinitionBuilder.getCommandTransformContextMock({
+				payload: messagePayload,
+				parameter: messageParameter,
+				resources: {
+					resourceOne: { getResourceData: () => 'resourceOneData' },
+				},
+				sandbox,
+			})
 
 			const result = await safeBind(transformInput, service)(contextMock.mock, messagePayload, messageParameter)
 
@@ -232,7 +268,13 @@ describe('integration test', () => {
 			const eventBridgeMock = getEventBridgeMock(sandbox)
 			const serviceLogger = getLoggerMock(sandbox)
 
-			const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
+			const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, {
+				logger: serviceLogger.mock,
+				resources: {
+					resourceOne: { getResourceData: () => 'resourceOneData' },
+				},
+				serviceConfig: {},
+			})
 
 			const transformOutput = commandOneDefinitionBuilder.getTransformOutputFunction()
 			if (!transformOutput) {
@@ -245,7 +287,14 @@ describe('integration test', () => {
 			const messagePayload = JSON.stringify(payload)
 			const messageParameter = parameter
 
-			const contextMock = getCommandTransformContextMock(messagePayload, messageParameter, sandbox)
+			const contextMock = commandOneDefinitionBuilder.getCommandTransformContextMock({
+				payload: messagePayload,
+				parameter: messageParameter,
+				resources: {
+					resourceOne: { getResourceData: () => 'resourceOneData' },
+				},
+				sandbox,
+			})
 
 			const functionResult = {
 				output: {
@@ -319,7 +368,13 @@ describe('integration test', () => {
 			const eventBridgeMock = getEventBridgeMock(sandbox)
 			const serviceLogger = getLoggerMock(sandbox)
 
-			const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
+			const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, {
+				logger: serviceLogger.mock,
+				resources: {
+					resourceOne: { getResourceData: () => 'resourceOneData' },
+				},
+				serviceConfig: {},
+			})
 
 			const subscriptionOne = safeBind(subscriptionOneBuilder.getSubscriptionFunction(), service)
 
@@ -334,7 +389,7 @@ describe('integration test', () => {
 				},
 			})
 
-			const contextMock = subscriptionOneBuilder.getSubscriptionContextMock(message, sandbox)
+			const contextMock = subscriptionOneBuilder.getSubscriptionContextMock({ message, sandbox })
 
 			const result = await subscriptionOne(contextMock.mock, payload, parameter)
 
@@ -346,7 +401,13 @@ describe('integration test', () => {
 			const eventBridgeMock = getEventBridgeMock(sandbox)
 			const serviceLogger = getLoggerMock(sandbox)
 
-			const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
+			const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, {
+				logger: serviceLogger.mock,
+				resources: {
+					resourceOne: { getResourceData: () => 'resourceOneData' },
+				},
+				serviceConfig: {},
+			})
 
 			const transformInput = subscriptionOneBuilder.getTransformInputFunction()
 			if (!transformInput) {
@@ -364,7 +425,13 @@ describe('integration test', () => {
 				},
 			})
 
-			const contextMock = getSubscriptionTransformContextMock(message, sandbox)
+			const contextMock = subscriptionOneBuilder.getSubscriptionTransformContextMock({
+				message,
+				resources: {
+					resourceOne: { getResourceData: () => 'resourceOneData' },
+				},
+				sandbox,
+			})
 
 			const result = await safeBind(transformInput, service)(
 				contextMock.mock,
@@ -382,7 +449,13 @@ describe('integration test', () => {
 			const eventBridgeMock = getEventBridgeMock(sandbox)
 			const serviceLogger = getLoggerMock(sandbox)
 
-			const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, { logger: serviceLogger.mock })
+			const service = await serviceOneBuilder.getInstance(eventBridgeMock.mock, {
+				logger: serviceLogger.mock,
+				resources: {
+					resourceOne: { getResourceData: () => 'resourceOneData' },
+				},
+				serviceConfig: {},
+			})
 
 			const transformOutput = subscriptionOneBuilder.getTransformOutputFunction()
 			if (!transformOutput) {
@@ -400,7 +473,13 @@ describe('integration test', () => {
 				},
 			})
 
-			const contextMock = getSubscriptionTransformContextMock(message, sandbox)
+			const contextMock = subscriptionOneBuilder.getSubscriptionTransformContextMock({
+				message,
+				resources: {
+					resourceOne: { getResourceData: () => 'resourceOneData' },
+				},
+				sandbox,
+			})
 
 			const functionResult = {
 				result: 'SUBSCRIPTION:MY INPUT',
@@ -447,10 +526,22 @@ describe('integration test', () => {
 		const eventBridge = new DefaultEventBridge({ logger: logger.mock })
 		await eventBridge.start()
 
-		const serviceOne = await serviceOneBuilder.getInstance(eventBridge, { logger: getLoggerMock().mock })
+		const serviceOne = await serviceOneBuilder.getInstance(eventBridge, {
+			logger: getLoggerMock().mock,
+			resources: {
+				resourceOne: { getResourceData: () => 'resourceOneData' },
+			},
+			serviceConfig: {},
+		})
 		await serviceOne.start()
 
-		const serviceTwo = await serviceTwoBuilder.getInstance(eventBridge, { logger: getLoggerMock().mock })
+		const serviceTwo = await serviceTwoBuilder.getInstance(eventBridge, {
+			logger: getLoggerMock().mock,
+			resources: {
+				resourceTwo: { getResourceData: () => 'resourceTwoData' },
+			},
+			serviceConfig: {},
+		})
 		await serviceTwo.start()
 
 		const message = getCommandMessageMock({

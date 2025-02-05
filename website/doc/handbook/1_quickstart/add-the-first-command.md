@@ -211,7 +211,7 @@ describe('service User version 1 - command signUp', () => {
 
     const parameter: UserV1SignUpInputParameter = {}
 
-    const context = signUpCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+    const context = signUpCommandBuilder.getCommandContextMock({payload, parameter, sandbox})
 
     const result = await signUp(context.mock, payload, parameter)
 

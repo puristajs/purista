@@ -19,6 +19,10 @@ describe('service HttpServer version 1 - subscription serviceCommandsToRestApi',
 		// create a service instance to be bind to the subscription function
 		const service = await httpServerV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
 			logger: getLoggerMock(sandbox).mock,
+			serviceConfig: {
+				port: 3000,
+				host: 'localhost',
+			},
 		})
 
 		// get the subscription function and bind to service instance to work properly
@@ -37,7 +41,7 @@ describe('service HttpServer version 1 - subscription serviceCommandsToRestApi',
 		const message = getCommandSuccessMessageMock(payload)
 
 		// create a subscription context for the subscription function
-		const context = serviceCommandsToRestApiSubscriptionBuilder.getSubscriptionContextMock(message, sandbox)
+		const context = serviceCommandsToRestApiSubscriptionBuilder.getSubscriptionContextMock({ message, sandbox })
 
 		// execute the subscription function
 		const result = await serviceCommandsToRestApi(context.mock, payload, parameter)

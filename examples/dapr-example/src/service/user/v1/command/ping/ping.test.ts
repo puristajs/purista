@@ -26,7 +26,7 @@ describe('service User version 1 - command ping', () => {
 
 		const parameter: UserV1PingInputParameter = {}
 
-		const context = pingCommandBuilder.getCommandContextMock(payload, parameter, sandbox)
+		const context = pingCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 
 		context.stubs.service.User[1].computeData.resolves('invoke response')
 

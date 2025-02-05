@@ -21,6 +21,7 @@ export const commandTransformInput = async <S extends Service>(
 		const transform = transformInput.transformFunction.bind(serviceInstance, {
 			message,
 			...serviceInstance.getContextFunctions(logger),
+			resources: serviceInstance.resources,
 		})
 		const parameterInput = await serviceInstance.wrapInSpan(
 			`${command.commandName}.validateParameter`,

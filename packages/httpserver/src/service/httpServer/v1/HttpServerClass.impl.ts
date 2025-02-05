@@ -60,40 +60,33 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
 			.decorateRequest('tenantId', undefined)
 			.setNotFoundHandler(async (request, reply) => {
 				const parentContext = propagation.extract(context.active(), request.headers)
-				await new Promise((resolve) =>
-					api.context.with(parentContext, async () => resolve(undefined))
-				)
+				await new Promise(resolve => api.context.with(parentContext, async () => resolve(undefined)))
 
-				await this.startActiveSpan(
-					'notFoundHandler',
-					{ kind: SpanKind.SERVER },
-					api.context.active(),
-					async (span) => {
-						addSpanTags(span, request)
-						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.NotFound)
-						span.setStatus({
-							code: SpanStatusCode.ERROR,
-							message: 'notFoundHandler',
-						})
+				await this.startActiveSpan('notFoundHandler', { kind: SpanKind.SERVER }, api.context.active(), async span => {
+					addSpanTags(span, request)
+					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.NotFound)
+					span.setStatus({
+						code: SpanStatusCode.ERROR,
+						message: 'notFoundHandler',
+					})
 
-						addHeaders(span, reply)
-						const err = new HandledError(StatusCode.NotFound, 'Route not found', {
-							method: request.method,
-							route: request.url,
-						})
+					addHeaders(span, reply)
+					const err = new HandledError(StatusCode.NotFound, 'Route not found', {
+						method: request.method,
+						route: request.url,
+					})
 
-						this.logger.error({ err, ...span.spanContext() }, 'Not found handler')
+					this.logger.error({ err, ...span.spanContext() }, 'Not found handler')
 
-						if (reply.sent) {
-							reply.status(StatusCode.NotFound)
-							reply.send(err.getErrorResponse())
-						}
+					if (reply.sent) {
+						reply.status(StatusCode.NotFound)
+						reply.send(err.getErrorResponse())
 					}
-				)
+				})
 			})
 			.setErrorHandler(async (err, request, reply) => {
 				const con = propagation.extract(context.active(), request.headers)
-				await this.startActiveSpan('errorHandler', { kind: SpanKind.SERVER }, con, async (span) => {
+				await this.startActiveSpan('errorHandler', { kind: SpanKind.SERVER }, con, async span => {
 					addSpanTags(span, request)
 					span.recordException(err)
 					span.setStatus({
@@ -123,28 +116,21 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
 
 		this.server.addHook('onError', async (request, reply, err) => {
 			const parentContext = propagation.extract(context.active(), request.headers)
-			await new Promise((resolve) =>
-				api.context.with(parentContext, async () => resolve(undefined))
-			)
+			await new Promise(resolve => api.context.with(parentContext, async () => resolve(undefined)))
 
-			await this.startActiveSpan(
-				'errorHook',
-				{ kind: SpanKind.SERVER },
-				api.context.active(),
-				async (span) => {
-					span.setAttribute(ATTR_URL_FULL, request.url)
-					span.setAttribute(ATTR_HTTP_REQUEST_METHOD, request.method)
-					span.setAttribute(ATTR_SERVER_ADDRESS, request.hostname)
+			await this.startActiveSpan('errorHook', { kind: SpanKind.SERVER }, api.context.active(), async span => {
+				span.setAttribute(ATTR_URL_FULL, request.url)
+				span.setAttribute(ATTR_HTTP_REQUEST_METHOD, request.method)
+				span.setAttribute(ATTR_SERVER_ADDRESS, request.hostname)
 
-					span.recordException(err)
-					span.setStatus({
-						code: SpanStatusCode.ERROR,
-						message: err.message,
-					})
+				span.recordException(err)
+				span.setStatus({
+					code: SpanStatusCode.ERROR,
+					message: err.message,
+				})
 
-					this.logger.error({ err, ...span.spanContext() }, 'onError hook: General error handler')
-				}
-			)
+				this.logger.error({ err, ...span.spanContext() }, 'onError hook: General error handler')
+			})
 
 			if (!reply.sent) {
 				reply.status(StatusCode.InternalServerError)
@@ -193,48 +179,39 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
 
 		this.server?.all(apiBasePath, async (request, reply) => {
 			const parentContext = propagation.extract(context.active(), request.headers)
-			await new Promise((resolve) =>
-				api.context.with(parentContext, async () => resolve(undefined))
-			)
+			await new Promise(resolve => api.context.with(parentContext, async () => resolve(undefined)))
 
-			await this.startActiveSpan(
-				request.url,
-				{ kind: SpanKind.SERVER },
-				api.context.active(),
-				async (span) => {
-					addSpanTags(span, request)
+			await this.startActiveSpan(request.url, { kind: SpanKind.SERVER }, api.context.active(), async span => {
+				addSpanTags(span, request)
 
-					addHeaders(span, reply)
+				addHeaders(span, reply)
 
-					const match = (request.params as Record<string, string>)['*']
-					const path = posix.join(this.config.apiMountPath ?? 'api', `v${match}`)
+				const match = (request.params as Record<string, string>)['*']
+				const path = posix.join(this.config.apiMountPath ?? 'api', `v${match}`)
 
-					const route = this.routes.find(request.method as Methods, path)
-					const firstHandler = route.handlers[0]
-					if (!firstHandler) {
-						this.logger.debug({ method: request.method, url: request.url }, 'Route not found')
-						const err = new HandledError(StatusCode.NotFound)
-						span.recordException(err)
-						span.setStatus({
-							code: SpanStatusCode.ERROR,
-							message: err.message,
-						})
-						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.NotFound)
-						reply.code(StatusCode.NotFound)
-						return err.getErrorResponse()
-					}
-
-					await firstHandler(request, reply, route.params)
+				const route = this.routes.find(request.method as Methods, path)
+				const firstHandler = route.handlers[0]
+				if (!firstHandler) {
+					this.logger.debug({ method: request.method, url: request.url }, 'Route not found')
+					const err = new HandledError(StatusCode.NotFound)
+					span.recordException(err)
+					span.setStatus({
+						code: SpanStatusCode.ERROR,
+						message: err.message,
+					})
+					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.NotFound)
+					reply.code(StatusCode.NotFound)
+					return err.getErrorResponse()
 				}
-			)
+
+				await firstHandler(request, reply, route.params)
+			})
 		})
 
 		if (this.config.openApi?.enabled) {
 			const apiUrl = this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath
 			if (!apiUrl) {
-				throw new Error(
-					'Configuration error! When openApi is enabled you need to set openApi.path or apiMountPath'
-				)
+				throw new Error('Configuration error! When openApi is enabled you need to set openApi.path or apiMountPath')
 			}
 			const prefix = posix.join(apiUrl, '/assets')
 
@@ -258,13 +235,13 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
 		})
 		this.logger.info(
 			{ domain: this.config.domain, port: this.config.port },
-			`http server listen on ${this.config.domain} ${this.config.port}`
+			`http server listen on ${this.config.domain} ${this.config.port}`,
 		)
 	}
 
 	async invoke<T>(
 		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'sender'>,
-		endpoint: string
+		endpoint: string,
 	): Promise<T> {
 		return this.eventBridge.invoke<T>({
 			sender: {
