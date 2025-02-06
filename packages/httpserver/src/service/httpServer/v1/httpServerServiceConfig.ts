@@ -57,15 +57,17 @@ export const ServerObjectSchema = z.object({
 	variables: z.any().optional(),
 })
 export const httpServerServiceV1ConfigSchema = z.object({
-	fastify: z.any(), //
-	logLevel: z.enum(['info', 'error', 'warn', 'debug', 'trace', 'fatal']).optional(),
-	port: z.number().int().min(1),
+	fastify: z.any().default({
+		ignoreTrailingSlash: true,
+	}), //
+	logLevel: z.enum(['info', 'error', 'warn', 'debug', 'trace', 'fatal']).optional().default('warn'),
+	port: z.number().int().min(1).default(9090),
 	host: z.string().optional().default('0.0.0.0'),
 	domain: z.string().optional().default('localhost'),
 	uploadDir: z.string().optional(),
 	cookieSecret: z.string().optional(),
-	apiMountPath: z.string().optional(),
-	enableHelmet: z.boolean().optional().default(false),
+	apiMountPath: z.string().optional().default('/api'),
+	enableHelmet: z.boolean().optional().default(true),
 	enableHealthz: z.boolean().optional().default(true),
 	healthzFunction: z.function().args(z.any(), z.any()).returns(z.promise(z.void())).optional(),
 	helmetOptions: FastifyHelmetOptionsSchema.optional(),
@@ -77,7 +79,7 @@ export const httpServerServiceV1ConfigSchema = z.object({
 	openApi: z
 		.object({
 			enabled: z.boolean().optional().default(true),
-			path: z.string().optional().default('/api'),
+			path: z.string().optional().default(OPENAPI_DEFAULT_MOUNT_PATH),
 			info: InfoObjectSchema,
 			servers: z.array(ServerObjectSchema).optional(),
 			components: z.any().optional(),
