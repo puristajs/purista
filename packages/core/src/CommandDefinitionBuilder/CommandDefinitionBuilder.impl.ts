@@ -669,11 +669,22 @@ export class CommandDefinitionBuilder<
 
 	/**
 	 * enable or disable security for this endpoint
-	 * @param enabled Defaults to tre if not set meaning "disable security"
+	 * @param enabled Defaults to true if not set meaning "disable security"
 	 * @returns CommandDefinitionBuilder
+	 * @deprecated use makeEndpointPublic() instead
 	 */
 	disableHttpSecurity(disabled = true) {
 		this.isSecure = !disabled
+		return this
+	}
+
+	/**
+	 * Mark the endpoint to be public available.
+	 * No security check like bearer token or basic auth is required to access the endpoint.
+	 * @returns CommandDefinitionBuilder
+	 */
+	makeEndpointPublic() {
+		this.isSecure = false
 		return this
 	}
 
