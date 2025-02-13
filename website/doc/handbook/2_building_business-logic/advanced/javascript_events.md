@@ -1,6 +1,6 @@
 ---
 title: JavaScript Events
-description: Use plain JavaScript events for trackig, metrics and observability
+description: Use plain JavaScript events for tracking, metrics and observability
 order: 209910
 ---
 

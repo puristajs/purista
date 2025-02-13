@@ -83,7 +83,6 @@ export const userServiceInfo = {
 
 export const userV1ServiceBuilder = new ServiceBuilder(userServiceInfo)
   .setConfigSchema(userServiceV1ConfigSchema)
-  .setDefaultConfig({ myOption: 'something' })
   .setCustomClass(CustomUserClass) // [!code ++]
 ```
 

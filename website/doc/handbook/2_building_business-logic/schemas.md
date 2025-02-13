@@ -20,9 +20,17 @@ For example:
 ```typescript
 import { extendApi } from '@purista/core'
 
-const mySchema = extendApi(z.object({
-  example: extendApi(z.string(), {title: 'An example property', example: 'example value' } ),
-}), { title: 'Some description', example: { value: 'example' } })
+const mySchema = extendApi(
+  z.object({
+    example: extendApi(z.string(), {
+        title: 'An example property',
+        example: 'example value' 
+      }),
+    }), 
+  {
+    title: 'Some description',
+    example: { value: 'example' } 
+  })
 ```
 
 This schema not only includes raw validation and type information but also encompasses descriptions and example values. We leverage these values to enhance the OpenAPI documentation and other automated documentation processes. Moreover, new developers will find helpful explanations and examples directly within the source code.

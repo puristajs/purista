@@ -171,7 +171,7 @@ const myCommandBuilder = myServiceBuilder
   .addParameterSchema(myServiceV1MyCommandInputParameterSchema)
   .addOutputSchema(myServiceV1MyCommandOutputSchema)
   .exposeAsHttpEndpoint('GET', 'ping')
-  .disableHttpSecurity() // [!code ++]
+  .makeEndpointPublic() // [!code ++]
   .addQueryParameters(
       { 
         name: 'param',
@@ -186,9 +186,6 @@ const myCommandBuilder = myServiceBuilder
     // implement your logic here
   })
 ```
-
-The `disableHttpSecurity` also has an optional flag, which might be helpfull during development.  
-There is also the opposite method `enableHttpSecurity` available.
 
 ## OpenApi information
 

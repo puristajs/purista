@@ -32,31 +32,17 @@ Example:
 
 ```typescript
 export const userServiceV1ConfigSchema = z.object({
-  myOption: z.string().optional()
+  myOption: z.string().optional().default('something')
 })
 
 export type UserServiceV1Config = z.input<typeof userServiceV1ConfigSchema>
 ```
 
-As you can see, in the example a string option entry `myOption` is added. This field is marked as optional. Because of this, in the generated type `UserServiceV1Config`, the `myOption` is also optional.
-
-Now, in the builder file `userV1ServiceBuilder.ts` in the same directory, typescript will complain on ``.
-Setting the default configuration, requires to set all root fields of the default configuration. The optional flag, only relates to the input, when you create a service instance and provide a service configuration.
-
-::: tip
-PURISTA follows the pattern, to always have default values, which can be overwritten, but only when there is a actual need for it.
-:::
-
-Because of this, you need to change it in the builder file `userV1ServiceBuilder.ts`.
-
 ```typescript
 export const userV1ServiceBuilder = new ServiceBuilder(userServiceInfo)
   .setConfigSchema(userServiceV1ConfigSchema)
-  .setDefaultConfig({
-    myOption: 'something'
-  })
 ```
 
-::: warning Be aware
-PURISTA does not deep merge configurations! If you have nested configurations, you should be aware of.
-:::
+As you can see, in the example an optional string entry `myOption` is added. This field is marked as optional. Because of this, in the generated type `UserServiceV1Config`, the `myOption` is also optional.
+
+The schema also contains a default value for `myOption`. If no value is provided during configuration, the default value will be used.
