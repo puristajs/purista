@@ -35,7 +35,7 @@ pnpm create purista@latest
 
 :::
 
-It might take a short time for `npx` to download the needed data to its temporary folder and start the CLI tool.  
+It might take a short time to download the needed data to its temporary folder and start the CLI tool.  
 The CLI tool will guide you through all the necessary steps.  
 If you are installing in an existing project, no files will be overwritten, and it might be, that you need to do some manual steps.
 

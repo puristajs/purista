@@ -13,11 +13,11 @@ A typical example is, to provide a database connection pool which can be used by
 Defining a resource needs to be done in the service builder:
 
 ```ts
-import { Db } from 'my-db'
+import type { DbType } from 'my-db'
 
 const serviceBuilder = new ServiceBuilder(serviceOneInfo)
     .setConfigSchema(serviceOneSchema)
-    .defineResource('myDB', Db)
+    .defineResource<'resourceNameDB',DbType>()
 ```
 
 This adds a new entry `myDB` with type of `Db` to the resource entry of the command & subscription context.
@@ -29,17 +29,19 @@ In the `defineResource` function, no instance of a resource is provided. Actual 
 When a new service instance is created, it requires to get an instance of the resource.
 
 ```ts
-import { Db } from 'my-db'
+import { MyDb } from 'my-db'
 const service = await serviceBuilder.getInstance(eventbridge, {
   logger,
-  resources: { myDB: new MyDb() },
+  resources: { resourceNameDB: new MyDb() },
 })
 ```
 
 The instance can be access via the context of commands and subscriptions.
 
 ```ts
-commandBuilder.setCommandFunction(async function ({ resource }) {
-  return resource.myDB.query('SELECT * FROM my_db')
+commandBuilder.setCommandFunction(async function ({ resources }) {
+  return resources.resourceNameDB.query('SELECT * FROM my_db')
 })
 ```
+
+Defining a resource is Typescript type only. There is no runtime validation.

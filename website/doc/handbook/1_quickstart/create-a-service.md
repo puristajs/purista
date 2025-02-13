@@ -64,3 +64,6 @@ Version number of this service (1)
 Now, all files should be generated.
 
 ## Start the service
+
+In PURISTA, services are defined by using service builders. Based on the service builder, an instance of the service can be created. This instance needs to be started. By starting the service, the service will connect to the eventbridge and start listening for events.
+
