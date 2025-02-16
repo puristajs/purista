@@ -74,4 +74,8 @@ export const honoServiceV1ConfigSchema = z.object({
 		.optional(),
 })
 
+/** Config which will be sent through the schema validation, which will set missing defaults */
+export type HonoServiceV1ConfigPartial = z.input<typeof honoServiceV1ConfigSchema>
+
+/** The full config with all required fields to be set */
 export type HonoServiceV1Config = z.output<typeof honoServiceV1ConfigSchema>
