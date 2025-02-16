@@ -6,10 +6,7 @@
 		"moduleResolution": "node",
 		"strict": true,
 		"baseUrl": "./",
-		"paths": {
-			"plop": ["../../src/plop.d.ts"]
-		},
 		"outDir": "./dist"
 	},
-	"include": ["./src", "./blueprint"]
+	"include": ["./src"]
 }
