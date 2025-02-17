@@ -73,6 +73,7 @@ main()
 ```
  * 
  * @module
+ * @deprecated please migrate to @purista/hono-http-server
  */
 export * from './service/httpServer/v1/index.js'
 export * from './service/ServiceEvent.enum.js'
