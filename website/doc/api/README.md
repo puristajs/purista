@@ -871,7 +871,7 @@ All notable changes to this project will be documented in this file.
 - Update config and update generated docs
 - Update doc
 - Update building documentation
-- Add costum events page dummy
+- Add custom events page dummy
 
 ### Features
 
