@@ -1,6 +1,6 @@
-import { camelCase, pascalCase } from 'change-case'
 import CodeBlockWriter from 'code-block-writer'
 import type { Options } from 'code-block-writer'
+import { camelCase, pascalCase } from '../../change-case.js'
 
 /**
  * Generate the service config file, which contains the configuration schema and type for the service

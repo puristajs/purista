@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { camelCase } from 'change-case'
 import type { Options } from 'code-block-writer'
+import { camelCase } from './change-case.js'
 import { addDefinitionToBuilder } from './content/manipulation/addDefinitionToBuilder.js'
 import { getSubscriptionBuilderFileContent } from './content/subscription/getSubscriptionBuilderFileContent.js'
 import { getSubscriptionSchemaFileContent } from './content/subscription/getSubscriptionSchemaFileContent.js'

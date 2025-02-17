@@ -6,7 +6,10 @@
 		"moduleResolution": "node",
 		"strict": true,
 		"baseUrl": "./",
-		"outDir": "./dist"
+		"outDir": "./dist",
+		"declaration": true,
+		"sourceMap": false,
+		"declarationMap": true
 	},
 	"include": ["./src"]
 }

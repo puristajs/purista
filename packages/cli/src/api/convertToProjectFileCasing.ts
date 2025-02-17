@@ -1,4 +1,4 @@
-import { camelCase, kebabCase, pascalCase, pascalSnakeCase, snakeCase } from 'change-case'
+import { camelCase, kebabCase, pascalCase, pascalSnakeCase, snakeCase } from './change-case.js'
 import type { PuristaConfig } from './loadPuristaConfig.js'
 
 export const convertToProjectFileCasing = (input: string, puristaProjectConfig: PuristaConfig) => {

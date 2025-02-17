@@ -1,7 +1,7 @@
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { camelCase } from 'change-case'
 import type { Options } from 'code-block-writer'
+import { camelCase } from './change-case.js'
 import { getCommandBuilderFileContent } from './content/command/getCommandBuilderFileContent.js'
 import { getCommandSchemaFileContent } from './content/command/getCommandSchemaFileContent.js'
 import { getCommandTestFileContent } from './content/command/getCommandTestFileContent.js'

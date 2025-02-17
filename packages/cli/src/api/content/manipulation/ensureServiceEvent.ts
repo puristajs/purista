@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 
-import { pascalCase } from 'change-case'
 import { Project } from 'ts-morph'
+import { pascalCase } from '../../change-case.js'
 import { convertToProjectEventCasing } from '../../convertToProjectEventCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 import type { PuristaProjectInfo } from '../../scanPuristaProject.js'

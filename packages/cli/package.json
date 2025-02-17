@@ -10,10 +10,10 @@
 	"author": "Sebastian Wessel",
 	"license": "ISC",
 	"preferGlobal": "true",
-	"main": "dist/index.js",
+	"main": "./dist/commonjs/api/index.js",
 	"type": "module",
 	"bin": {
-		"purista": "./dist/index.js"
+		"purista": "./dist/commonjs/bin.js"
 	},
 	"publishConfig": {
 		"access": "public"
@@ -24,14 +24,12 @@
 	"scripts": {
 		"start": "./dist/bin.js",
 		"dev": "tsx src/bin.ts",
-		"build": "rimraf dist && tsc --project ./tsconfig.json && chmod 755 dist/bin.js",
+		"build": "rimraf dist && tshy && chmod 755 dist/commonjs/bin.js",
 		"lint": "npx @biomejs/biome check --write",
 		"test": "vitest"
 	},
 	"tshy": {
-		"exclude": [
-			"src/**/*.test.ts"
-		],
+		"exclude": ["src/**/*.test.ts"],
 		"exports": {
 			"./package.json": "./package.json",
 			".": "./src/api/index.ts"
@@ -40,6 +38,7 @@
 	"devDependencies": {
 		"@types/minimist": "^1.2.5",
 		"@types/node": "^22.5.1",
+		"esbuild": "^0.25.0",
 		"rimraf": "^6.0.1",
 		"tshy": "^3.0.2",
 		"tsx": "^4.15.7",
@@ -49,14 +48,26 @@
 		"@inquirer/confirm": "^5.1.5",
 		"@inquirer/input": "^4.1.5",
 		"@inquirer/select": "^4.0.8",
-		"change-case": "^5.4.4",
 		"code-block-writer": "^13.0.3",
 		"commander": "^13.1.0",
 		"ts-morph": "^25.0.1",
 		"zod": "^3.24.2"
 	},
 	"peerDependenciesMeta": {},
-	"files": [
-		"dist/**/*"
-	]
+	"files": ["dist"],
+	"exports": {
+		"./package.json": "./package.json",
+		".": {
+			"import": {
+				"types": "./dist/esm/api/index.d.ts",
+				"default": "./dist/esm/api/index.js"
+			},
+			"require": {
+				"types": "./dist/commonjs/api/index.d.ts",
+				"default": "./dist/commonjs/api/index.js"
+			}
+		}
+	},
+	"types": "./dist/commonjs/api/index.d.ts",
+	"module": "./dist/esm/api/index.js"
 }
