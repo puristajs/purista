@@ -1,6 +1,6 @@
 import { readdir } from 'node:fs/promises'
 import { join, sep } from 'node:path'
-import { camelCase } from 'change-case'
+import { camelCase } from './change-case.js'
 
 import { getEventNames } from './getEventNames.js'
 import type { PuristaConfig } from './loadPuristaConfig.js'

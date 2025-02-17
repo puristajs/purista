@@ -1,7 +1,7 @@
-import { camelCase, pascalCase } from 'change-case'
 import CodeBlockWriter from 'code-block-writer'
 import type { Options } from 'code-block-writer'
-import type { PuristaConfig } from 'src/api/loadPuristaConfig.js'
+import { camelCase, pascalCase } from '../../change-case.js'
+import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
 export const getSubscriptionTypeFileContent = (input: {
 	serviceName: string

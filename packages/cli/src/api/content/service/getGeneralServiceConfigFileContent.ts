@@ -1,6 +1,6 @@
-import { pascalCase } from 'change-case'
 import CodeBlockWriter from 'code-block-writer'
 import type { Options } from 'code-block-writer'
+import { pascalCase } from '../../change-case.js'
 
 /**
  * Generate the general service configuration file content.

@@ -8,7 +8,7 @@ import {
 	pathCase,
 	snakeCase,
 	trainCase,
-} from 'change-case'
+} from './change-case.js'
 import type { PuristaConfig } from './loadPuristaConfig.js'
 
 export const convertToProjectEventCasing = (input: string, puristaProjectConfig: PuristaConfig) => {

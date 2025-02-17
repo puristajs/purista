@@ -1,8 +1,8 @@
-import { camelCase, pascalCase } from 'change-case'
 import CodeBlockWriter from 'code-block-writer'
 import type { Options } from 'code-block-writer'
-import { convertToProjectEventCasing } from '../../convertToProjectEventCasing'
-import { convertToProjectFileCasing } from '../../convertToProjectFileCasing'
+import { camelCase, pascalCase } from '../../change-case.js'
+import { convertToProjectEventCasing } from '../../convertToProjectEventCasing.js'
+import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 import type { PuristaProjectInfo } from '../../scanPuristaProject.js'
 

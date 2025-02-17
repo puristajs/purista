@@ -1,8 +1,8 @@
-import { camelCase, capitalCase, pascalCase } from 'change-case'
 import CodeBlockWriter from 'code-block-writer'
 import type { Options } from 'code-block-writer'
-import { convertToProjectFileCasing } from 'src/api/convertToProjectFileCasing'
-import type { PuristaConfig } from 'src/api/loadPuristaConfig.js'
+import { camelCase, capitalCase, pascalCase } from '../../change-case.js'
+import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
+import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
 export const getCommandTestFileContent = (input: {
 	serviceName: string
