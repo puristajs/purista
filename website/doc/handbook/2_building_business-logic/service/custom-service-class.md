@@ -6,13 +6,17 @@ order: 201040
 
 # Custom service class
 
-In general, a service itself should not contain any logic. Its role should be limited to serving as a logical container, providing functionality defined and handled by PURISTA.
+In general, a service should not contain any business logic. Its role should be limited to acting as a logical container, providing functionality that is defined and managed by PURISTA.
 
-The primary reason for this is that command and subscription functions become tightly coupled to the service and the states of an actual service instance. This not only increases complexity and complicates unit testing but also makes it challenging to deploy single functions as Function as a Service (FaaS) and to scale operations.
+The primary reason for this separation is to prevent command and subscription functions from becoming tightly coupled to the service and its state. Tight coupling increases complexity, makes unit testing more difficult, and complicates the deployment of individual functions as Function as a Service (FaaS). It also reduces the flexibility to scale operations efficiently.
 
-However, there may be exceptional cases where it is sensible to have a custom class. One such example is when your service needs to function as an adapter or gateway to a third-party solution, and there is no straightforward solution at the infrastructure level.
+::: warning **Prefer Resources Over Custom Classes**  
+Whenever possible, consider using [resources](define-resources.md) instead of custom classes. Resources offer better decoupling, a higher level of abstraction, and improved scalability.  
+:::
 
-In such cases, you acknowledge and accept that your service runs as a continuous instance 24/7 and cannot be deployed as a FaaS.
+However, there may be rare cases where using a custom class is justified. One such example is when your service needs to act as an adapter or gateway to a third-party solution, and there is no viable infrastructure-level alternative.
+
+In such cases, you should be aware that your service will run as a continuously active instance, operating 24/7, and cannot be deployed as a FaaS.
 
 Example:
 
@@ -47,7 +51,7 @@ export class CustomUserClass extends Service<UserServiceV1Config> {
         contentType: 'application/json',
         contentEncoding: 'utf-8',
         sender,
-        eventName: 'myCustomEven',
+        eventName: 'myCustomEvent',
         payload: data,
       })
       await this.eventBridge.emitMessage(message)

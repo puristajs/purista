@@ -76,3 +76,17 @@ This error object will contain in the data object:
 - response (string or JSON parse result)
 
 Error responses are automatically logged and the error is added to the OpenTelemetry trace.
+
+## OpenTelemetry
+
+It is easy to include the client's HTTP requests in the OpenTelemetry trace. The only requirement is to pass the `spanProcessor` from your OpenTelemetry setup to the `HttpClient` constructor.
+
+```ts
+const client = new HttpClient({
+  spanProcessor: this.spanProcessor, // [!code ++]
+  baseUrl: 'http://example.com',
+  defaultHeaders: {
+    'content-type': 'application/json; charset=utf-8',
+  },
+})
+```

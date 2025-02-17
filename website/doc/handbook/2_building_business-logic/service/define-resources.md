@@ -16,8 +16,8 @@ Defining a resource needs to be done in the service builder:
 import type { DbType } from 'my-db'
 
 const serviceBuilder = new ServiceBuilder(serviceOneInfo)
-    .setConfigSchema(serviceOneSchema)
-    .defineResource<'resourceNameDB',DbType>()
+  .setConfigSchema(serviceOneSchema)
+  .defineResource<'resourceNameDB',DbType>()
 ```
 
 This adds a new entry `myDB` with type of `Db` to the resource entry of the command & subscription context.
@@ -45,3 +45,19 @@ commandBuilder.setCommandFunction(async function ({ resources }) {
 ```
 
 Defining a resource is Typescript type only. There is no runtime validation.
+
+## Testing
+
+As the resources are defined as TypeScript types, developers benefit from well-defined interfaces. During testing, the actual resource can easily be replaced with a mock implementation.
+
+```ts
+import { createSandbox } from 'sinon'
+
+const sandbox: SinonSandbox = createSandbox()
+const myStub = sandbox.stub().resolves({...})
+
+const service = await serviceBuilder.getInstance(eventbridge, {
+  logger,
+  resources: { resourceNameDB: myStub },
+})
+```

@@ -11,7 +11,7 @@ The service builder is a powerfull tool, to define a service. The builder helps 
 To create a new service, please use the CLI command.
 
 ```bash
-purista add service [serviceName]
+purista add service
 ```
 
 This will generate all necessary files and structures for you.

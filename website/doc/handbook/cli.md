@@ -6,12 +6,9 @@ order: 30
 
 # CLI
 
-The easiest and fastest way to start with PURISTA is the usage of the PURISTA CLI tool.  
+## Create a new project
 
-<div style="overflow:hidden;margin-left:auto;margin-right:auto;border-radius:10px;width:100%;max-width:800px;position:relative"><div style="width:100%;padding-bottom:75%"></div><iframe width="800" height="600" title="A quick intro how to start using the typescript framework PURISTA." src="https://snappify.com/embed/9309a984-a36b-4302-9335-990254c9d313?responsive" allow="clipboard-write" allowfullscreen="" style="background:#eee;position:absolute;left:0;top:0;width:100%" frameborder="0"></iframe></div>
-
-You can use the CLI tool to create a new PURISTA project or to add PURISTA to an existing project.  
-Open your terminal and go to your project folder where you like to install PURISTA.
+The easiest and fastest way to start with PURISTA is the usage of your package managers `create` command.  
 
 In the project folder, simply execute:
 
@@ -35,13 +32,15 @@ pnpm create purista@latest
 
 :::
 
-It might take a short time to download the needed data to its temporary folder and start the CLI tool.  
 The CLI tool will guide you through all the necessary steps.  
-If you are installing in an existing project, no files will be overwritten, and it might be, that you need to do some manual steps.
 
-__It is highly recommended to choose global CLI install during setup__.
+## PURISTA CLI
 
-You can also manually install the PURISTA CLI via:
+PURISTA provides a command line interface (CLI) that allows you to create new services, and add commands or subscriptions to existing services.  
+
+__It is highly recommended to install the CLI global__.
+
+You can manually install the PURISTA CLI via:
 
 ::: code-group
 
@@ -67,5 +66,91 @@ If you have installed the CLI globally, you can add service, commands and subscr
 In your project root simply run:
 
 ```bash
-purista add [service|command|subscription] [name]
+purista add [service|command|subscription]
+```
+
+## PURISTA config file
+
+Since version 1.12.0, the PURISTA CLI expects to find a `purista.json` file in the root of your project. This file contains basic information about your project. Especially the settings for file and event casing conventions are important.
+
+### Schema
+
+This configuration file follows the [JSON Schema](https://json-schema.org/) specification.
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": { ... }
+}
+```
+
+### Configuration Options
+
+#### `$schema`
+
+- __**__Type:__**__ `string`
+- __**__Description:__**__ A field for the [JSON schema](https://json-schema.org/) specification.
+
+#### `runtime`
+
+- __**__Type:__**__ `string`
+- __**__Allowed Values:__**__ `node`, `bun`
+- __**__Default:__**__ `node`
+- __**__Description:__**__ Specifies the runtime environment for the project.
+
+#### `eventBridge`
+
+- __**__Type:__**__ `string`
+- __**__Allowed Values:__**__ `default`, `amqp`, `nats`, `mqtt`, `dapr`
+- __**__Default:__**__ `default`
+- __**__Description:__**__ Defines the event bridge used in the project.
+
+#### `fileConvention`
+
+- __**__Type:__**__ `string`
+- __**__Allowed Values:__**__ `camel`, `snake`, `kebab`, `pascal`, `pascalSnake`
+- __**__Default:__**__ `camel`
+- __**__Description:__**__ Determines the file naming convention used in the project.
+
+#### `eventConvention`
+
+- __**__Type:__**__ `string`
+- __**__Allowed Values:__**__ `camel`, `snake`, `kebab`, `pascal`, `pascalSnake`, `constantCase`, `dotCase`, `pathCase`, `trainCase`
+- __**__Default:__**__ `camel`
+- __**__Description:__**__ Determines the naming convention for events in the project.
+
+#### `linter`
+
+- __**__Type:__**__ `string`
+- __**__Allowed Values:__**__ `biome`, `eslint`, `none`
+- __**__Default:__**__ `none`
+- __**__Description:__**__ Specifies the linter used in the project.
+
+#### `formatter`
+
+- __**__Type:__**__ `string`
+- __**__Allowed Values:__**__ `biome`, `prettier`, `none`
+- __**__Default:__**__ `none`
+- __**__Description:__**__ Specifies the formatter used in the project.
+
+#### `servicePath`
+
+- __**__Type:__**__ `string`
+- __**__Default:__**__ `src/service`
+- __**__Description:__**__ Defines the relative path where services are located in the project.
+
+### Example `purista.json` Configuration
+
+```json
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "runtime": "node",
+  "eventBridge": "nats",
+  "fileConvention": "kebab",
+  "eventConvention": "dotCase",
+  "linter": "eslint",
+  "formatter": "prettier",
+  "servicePath": "src/services"
+}
 ```

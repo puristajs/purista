@@ -1053,7 +1053,7 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 - Update config and update generated docs
 - Update doc
 - Update building documentation
-- Add costum events page dummy
+- Add custom events page dummy
 
 ### Features
 
