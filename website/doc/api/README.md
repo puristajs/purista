@@ -11,16 +11,29 @@ All notable changes to this project will be documented in this file.
 ### Breaking changes
 
 - Breaking change: make service methods and fields protected
-
 - Breaking change: make defintions async
-
 - Breaking change: make getInstance async
+- Breaking change: if no schema is set use unknown instead of any type
+- Breaking change: refactor Service and ServiceBuilder type handling
+- Breaking change: deprecate setDefaultConfig in ServiceBuilder
+- Breaking change: refactor Command and CommandBuilder type handling
+- Breaking change: refactor subscripton definition types
+- Breaking change: deprecate disableHttpSecurity in favor of makeEndpointPublic
 
 ### Bug Fixes
 
 - Esm imports
 - Warning on default stores
 - Pr workflow
+- Open graph in website
+- CLI test file generation
+- Schema in hono server example
+- Integration test in k8s package
+- Add missing next() call in default protectHandler #178
+- Lint and improve code
+- Type
+- Openapi generation for different validation schema types
+- Fixup Command and CommandBuilder type handling
 
 ### Documentation
 
@@ -33,6 +46,35 @@ All notable changes to this project will be documented in this file.
 - Add and improve doc
 - Fix typo
 - Update changelog.md
+- Update changelog
+- Update logo and icons
+- Fix temporal example
+- Improve documentation
+- Improve example
+- Fix import in example
+- Update installation documentation
+- Fix typo
+- Fix custom event example and improve doc
+- Add doc
+- Update documentation
+- Update doc
+- Update doc for client-builder
+- Add v2 blog post
+- Update api documentation
+- Update CHANGELOG
+
+### Features
+
+- Add export of service definitions
+- Allow services and subscriptions to be marked as deprecated
+- Add definition export and client builder
+- Add provides ressource to service builder #168
+- Publish purists packages on jsr.io #179
+- Add getter for command function hooks
+- Add resources and improve code
+- Re-write PURISTA CLI
+- Add type for hono service input config
+- Add public json schema for purista.json config file
 
 ### Miscellaneous Tasks
 
@@ -83,6 +125,53 @@ All notable changes to this project will be documented in this file.
 - Cleanup workflow names
 - Include changelog in release workflow
 - Include breaking change in changelog
+- Improve build workflow
+- Cleanup vitest configs and include integration tests in coverage
+- Update git url to puristajs
+- Minor fix root package name
+- Fix import
+- Bump dependency versions and replace eslint with biome
+- Fix dependencies and improve setup
+- Improve types
+- Code cleanup
+- Prepare ressource definition feature
+- Improve code
+- Cleanup and improve code and project setup
+- Separate unit tests
+- Bump packages
+- Fix typo
+- Update package.json files
+- Fix
+- Update script
+- Use scalar as swagger ui in example
+- Fix linter
+- Bump dependencies
+- Bump dependency versions
+- Update project settings
+- Add dependency
+- Fix lint
+- Add ressource type to command definition
+- Fix lint
+- Improve test code
+- Improve type handling
+- Cleanup and fix type refactoring
+- Update lint config
+- Add typecheck to unit tests
+- Improve examples
+- Improve service instance getter
+- Improve tests
+- Update ts config
+- Minor updates and improvements
+- Migrate from defaultConfig to schema defaults
+- Bump dependencies
+- Bump dependencies
+- Mark the fastify http service as deprecated
+- Bump dependencies
+- Cleanup cli and fix build
+- Add example for client builder
+- Minor fix for client-builder
+- Update package lock
+- Cleanup opentelemetry semantic-conventions
 
 ## [1.10.8] - 2024-02-18
 
@@ -106,7 +195,6 @@ All notable changes to this project will be documented in this file.
 - Fix lint and improve tests
 - Update project settings
 - Chore bump packages
-
 - Bump versions to 1.10.8
 
 ## [1.10.7] - 2024-02-18
@@ -206,7 +294,6 @@ All notable changes to this project will be documented in this file.
 ### Miscellaneous Tasks
 
 - Chore update doc
-
 - Bump versions to 1.10.1
 
 ## [1.10.0] - 2024-02-11
@@ -214,7 +301,6 @@ All notable changes to this project will be documented in this file.
 ### Breaking changes
 
 - Breaking change: remove deprecated methods from builders
-
 - Breaking change: Mark @purista/httpserver deprecated
 
 ### Bug Fixes
@@ -222,7 +308,6 @@ All notable changes to this project will be documented in this file.
 - Version bump for new packages
 - Hono based servers compress issue
 - Fixup esm support
-
 - UnhandledError.fromError returns UnhandledError
 - Minor code smells
 - Keep OT traceId and custom trace id separated
@@ -486,47 +571,26 @@ All notable changes to this project will be documented in this file.
 ### Breaking changes
 
 - Breaking change: remove nanoid package
-
 - Breaking change: unify naming of params to parameter
-
 - Breaking change: remove x-trace-id header in favor of W3C complaint traceparent
-
 - Breaking change: simplify DefaultEventBridge constructor
-
 - Breaking change: simplify ServiceBuilder getInstance method call
-
 - Breaking change: simplify HttpServerService constructor
-
 - Breaking change: simplify AmqpBridge constructor
-
 - Breaking change: refactor and improve subscriptions resolve #62 resolve #65
-
 - Breaking change: refactor set guards methods and remove deprecated methods  #83
-
 - Breaking change: remove deprecated FunctionDefinitionBuilder #66
-
 - Breaking change: Add content type and content encoding to messages #80
-
 - Breaking change: factor out schemas in definitions #84
-
 - Breaking change: improve service constructor #95
-
 - Breaking change: Remove sending of command timeout info message #94
-
 - Breaking change: move service info sending from service into event bridge #70
-
 - Breaking change: improve subscription builder method names
-
 - Breaking change: Require node 18 as it is current LTS
-
 - Breaking change: use hono package for http server
-
 - Breaking change: flat configs and improve config types
-
 - Breaking change: replace @anatine/zod-openapi with fork
-
 - Breaking change: remove inclusion of source maps in libs to reduce size
-
 - Breaking change: Add instanceId for receiver and remove root instanceId from message
 
 Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
@@ -535,14 +599,11 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 
 - Lint
 - Fix package clash
-
 - Error logging
 - Remove cycling dependency
 - Remove cycling dependency
 - Fixup cli
-
 - Fixup cli
-
 - Export test
 - TraceId in payload of error responses
 - Missing receiver and sender in SubscriptionBuilder getDefinition
@@ -553,28 +614,19 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 - Issues and improve code and add inline documentation
 - Strip and check query parameter
 - Fixup node version
-
 - Fixup helper
-
 - Generate correlation id only once
 - Use loglevel from config
 - Typo
 - Fixup : mqtt bridge
-
 - Fixup remove hono-node-server
-
 - Fixup docs
-
 - Fixup doc config
-
 - Fixup improve MQTT
-
 - Add types to exports in package.json
 - Fixup convertToKebabCase version in dapr sdk
-
 - Use correct package in examples
 - Fixup config
-
 - Use function from core in generated code
 - Rebuild packages after version bump to reflect correct version
 - Version bump of state-store-redis
@@ -585,7 +637,6 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 - Fixup
 
 Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
-
 - Cli init template outdated fixes #128
 - Cli init does not contain nats bridge #130
 - Core package requires Hono package fixes #129
@@ -771,7 +822,6 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 - Chore improve HttpClient
 
 Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
-
 - Add inline doc and cleanup code
 - Minor changes
 - Minor cleanup
@@ -788,7 +838,6 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 - NATS only without durable
 - Minor updates
 - Chore bump package versions
-
 - Cleanup
 - Do not run release build parallel
 - Bump versions to 1.7.0
@@ -842,7 +891,6 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 
 - Package run command
 - Fix example test
-
 - Fix test
 
 ### Documentation
@@ -899,7 +947,6 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 ### Miscellaneous Tasks
 
 - Chore improve hook and config
-
 - Add eslintignore
 - Bump versions to 1.4.3
 
@@ -908,7 +955,6 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 ### Bug Fixes
 
 - Fixup
-
 - Make testhelper package private
 - Subscription builder typings
 - CreateTestCommandResponseMsg helper return type
@@ -965,7 +1011,6 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 - Update packages
 - Update test
 - Chore update examples and documentation
-
 - Bump versions to 1.4.0
 - Bump versions to 1.4.1
 - Update packages and config
@@ -975,7 +1020,6 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 ### Refactor
 
 - Refactor hooks
-
 - Default eventbridge and add function context
 
 ## [1.3.1] - 2022-06-23
@@ -1048,7 +1092,7 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 - Update config and update generated docs
 - Update doc
 - Update building documentation
-- Add custom events page dummy
+- Add costum events page dummy
 
 ### Features
 
@@ -1091,7 +1135,6 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 
 - [BUG] openapi3-ts dependency missing #14
 - Fix #17 fix #16 : not working under windows os and routing issues:wrong 404 handling
-
 - Use copressionMiddleware as default last middleware
 
 ### Documentation

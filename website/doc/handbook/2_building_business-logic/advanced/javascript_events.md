@@ -33,7 +33,7 @@ Some function "outside" your service can listen to these events, and process the
 
 There are three types:
 
-- technical events relating to the service itself are prefixed with `service-` (see [ServiceEventsNames](../../../api/enums/purista_core.ServiceEventsNames.md))
+- technical events relating to the service itself are prefixed with `service-` (see [ServiceEventsNames](../../../api/@purista/core/enumerations/ServiceEventsNames.md))
 - response messages, which have an event name assigned, are prefixed with `custom-`
 - additional events can be introduced by developers, and they must be prefixed with `misc-`
 
