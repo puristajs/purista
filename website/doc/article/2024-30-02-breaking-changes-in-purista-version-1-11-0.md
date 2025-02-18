@@ -1,9 +1,9 @@
 ---
 title: PURISTA 1.11
 longTitle: Version 1.11
-description: Version 1.11 of the PURISTA framework introduces various new features and enhancements, aimed at improving performance and developer experience
-date: 2024-30-02
-order: 20243002
+description: Version 1.11 of the PURISTA framework introduces various new features and enhancements, aimed at improving performance and developer experience 
+date: 2024-02-30
+order: 20240230
 ---
 <PostDetail>
 

@@ -1,9 +1,9 @@
 ---
 title: Version 1.10
 longTitle: Version 1.10
-description: PURISTA TypeScript Cloud Framework v1.10 - Cloud tools
-date: 2024-30-01
-order: 20243001
+description: PURISTA TypeScript Cloud Framework v1.10 - Cloud tools 
+date: 2024-01-30
+order: 20240130
 image: /graphic/v1-10-0.jpeg
 ---
 <PostDetail>
