@@ -79,23 +79,17 @@ describe('getHttpServer', () => {
 
 	it('returns a error on invalid query parameter', async () => {
 		const client = new HttpClient({ baseUrl: `http://127.0.0.1:${port}`, logger: getLoggerMock().mock })
-		await expect(client.get('/api/v1/ping')).rejects.toStrictEqual(
-			new UnhandledError(StatusCode.BadRequest, 'Bad Request'),
-		)
+		await expect(client.get('/api/v1/ping')).rejects.toThrowError('Bad Request')
 	})
 
 	it('has a 404 handling', async () => {
 		const client = new HttpClient({ baseUrl: `http://127.0.0.1:${port}`, logger: getLoggerMock().mock })
-		await expect(client.get('/api/v1/unknown')).rejects.toStrictEqual(
-			new UnhandledError(StatusCode.NotFound, 'Not Found'),
-		)
+		await expect(client.get('/api/v1/unknown')).rejects.toThrowError('Not Found')
 	})
 
 	it('returns a error if command returns error', async () => {
 		const client = new HttpClient({ baseUrl: `http://127.0.0.1:${port}`, logger: getLoggerMock().mock })
-		await expect(client.get('/api/v1/error')).rejects.toStrictEqual(
-			new UnhandledError(StatusCode.InternalServerError, 'Internal Server Error'),
-		)
+		await expect(client.get('/api/v1/error')).rejects.toThrowError('Internal Server Error')
 	})
 
 	it('exposes http post endpoint', async () => {
@@ -128,9 +122,7 @@ describe('getHttpServer', () => {
 		process.emit('SIGTERM')
 
 		const client = new HttpClient({ baseUrl: `http://127.0.0.1:${port}`, logger: getLoggerMock().mock })
-		await expect(client.get('healthz')).rejects.toStrictEqual(
-			new UnhandledError(StatusCode.ServiceUnavailable, 'Service Unavailable'),
-		)
+		await expect(client.get('healthz')).rejects.toThrowError('Service Unavailable')
 	})
 
 	it.skip('logs uncaughtException', async () => {

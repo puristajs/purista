@@ -20,7 +20,7 @@ describe('@purista/redis-state-store', () => {
 	})
 
 	afterAll(async () => {
-		await container.stop()
+		await container?.stop()
 	})
 
 	it('set, get and remove values', async () => {

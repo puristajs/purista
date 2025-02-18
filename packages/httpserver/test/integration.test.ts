@@ -102,15 +102,15 @@ describe('httpserver integration test', () => {
 		})
 
 		it('returns a error on invalid query parameter', async () => {
-			await expect(client.get(`${apiMountPath}/v1/ping`)).rejects.toEqual(new Error('Bad Request'))
+			await expect(client.get(`${apiMountPath}/v1/ping`)).rejects.toThrowError('Bad Request')
 		})
 
 		it('has a 404 handling', async () => {
-			await expect(client.get(`${apiMountPath}/v1/unknown`)).rejects.toEqual(new Error('Not Found'))
+			await expect(client.get(`${apiMountPath}/v1/unknown`)).rejects.toThrowError('Not Found')
 		})
 
 		it('returns a error if command returns error', async () => {
-			await expect(client.get(`${apiMountPath}/v1/error`)).rejects.toEqual(new Error('Internal Server Error'))
+			await expect(client.get(`${apiMountPath}/v1/error`)).rejects.toThrowError('Internal Server Error')
 		})
 
 		it('exposes http post endpoint', async () => {

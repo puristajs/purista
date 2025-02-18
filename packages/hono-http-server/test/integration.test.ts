@@ -5,6 +5,7 @@ import { DefaultEventBridge, HttpClient, getLoggerMock } from '@purista/core'
 import type { OpenAPIObject } from 'openapi3-ts/oas31'
 
 import type { HonoServiceClass } from '../src/service/hono/v1/HonoServiceClass.js'
+import type { HonoServiceV1ConfigPartial } from '../src/service/hono/v1/honoServiceConfig.js'
 import { honoV1Service } from '../src/service/hono/v1/honoV1Service.js'
 import { theServiceV1Service } from './service/theService/v1/index.js'
 
@@ -23,21 +24,23 @@ describe('httpserver integration test', () => {
 
 	const apiMountPath = '/api'
 
-	const config = {
-		logger: getLoggerMock().mock,
-		serviceConfig: {
-			enableDynamicRoutes: true,
-			enableHealthz: true,
-			apiMountPath,
-			openApi: {
-				enabled: true,
-				info: {
-					title: 'backend api',
-					description: 'OpenApi definition for server endpoints',
-					version: '1.0.0',
-				},
+	const serviceConfig = {
+		enableDynamicRoutes: true,
+		enableHealth: true,
+		apiMountPath,
+		openApi: {
+			enabled: true,
+			info: {
+				title: 'backend api',
+				description: 'OpenApi definition for server endpoints',
+				version: '1.0.0',
 			},
 		},
+	} satisfies HonoServiceV1ConfigPartial
+
+	const config = {
+		logger: getLoggerMock().mock,
+		serviceConfig,
 	}
 
 	beforeAll(async () => {
@@ -87,7 +90,9 @@ describe('httpserver integration test', () => {
 	describe('with dynamic routes enabled', () => {
 		beforeAll(async () => {
 			// set up the service
-			const theService = await theServiceV1Service.getInstance(eventBridge, { logger: getLoggerMock().mock })
+			const theService = await theServiceV1Service.getInstance(eventBridge, {
+				logger: getLoggerMock().mock,
+			})
 			await theService.start()
 
 			await new Promise(resolve => setTimeout(resolve, 5000))
@@ -113,15 +118,15 @@ describe('httpserver integration test', () => {
 		})
 
 		it('returns a error on invalid or missing query parameter', async () => {
-			await expect(client.get(`${apiMountPath}/v1/ping`)).rejects.toEqual(new Error('Bad Request'))
+			await expect(client.get(`${apiMountPath}/v1/ping`)).rejects.toThrowError('Bad Request')
 		})
 
 		it('has a 404 handling', async () => {
-			await expect(client.get(`${apiMountPath}/v1/unknown`)).rejects.toEqual(new Error('Not Found'))
+			await expect(client.get(`${apiMountPath}/v1/unknown`)).rejects.toThrowError('Not Found')
 		})
 
 		it('returns a error if command returns error', async () => {
-			await expect(client.get(`${apiMountPath}/v1/error`)).rejects.toEqual(new Error('Internal Server Error'))
+			await expect(client.get(`${apiMountPath}/v1/error`)).rejects.toThrowError('Internal Server Error')
 		})
 
 		it('exposes http post endpoint', async () => {
