@@ -1,0 +1,40 @@
+{
+	"version": "1.0.0",
+	"type": "module",
+	"engines": {
+		"node": ">=18"
+	},
+	"scripts": {
+		"add:service": "purista add service",
+		"add:command": "purista add command",
+		"add:subscription": "purista add subscription",
+		"lint": "bunx @biomejs/biome check",
+		"lint:fix": "bunx @biomejs/biome check --write",
+		"start": "tsx src/index.ts",
+		"build": "tsc",
+		"dev": "tsx watch src/index.ts",
+		"test": "tsc --noEmit && vitest",
+		"export": "tsx src/export.ts",
+		"client:file": "tsx src/generateClientFromFile.ts",
+		"client:code": "tsx src/generateClientFromCode.ts"
+	},
+	"dependencies": {
+		"@purista/core": "*",
+		"@hono/node-server": "latest",
+		"@scalar/hono-api-reference": "latest",
+		"@purista/hono-http-server": "*"
+	},
+	"devDependencies": {
+		"@purista/cli": "*",
+		"@types/node": "latest",
+		"@types/sinon": "latest",
+		"@types/jest": "latest",
+		"typescript": "latest",
+		"sinon": "latest",
+		"@biomejs/biome": "latest",
+		"tsx": "latest",
+		"vitest": "latest"
+	},
+	"trustedDependencies": ["@biomejs/biome"],
+	"name": "client-builder"
+}

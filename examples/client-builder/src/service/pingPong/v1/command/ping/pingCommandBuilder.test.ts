@@ -1,0 +1,35 @@
+import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
+import { createSandbox } from 'sinon'
+
+import { pingPongV1Service } from '../../pingPongV1Service.js'
+import { pingCommandBuilder } from './pingCommandBuilder.js'
+import type { PingPongV1PingInputParameter, PingPongV1PingInputPayload } from './types.js'
+
+describe('service Ping Pong version 1 - command ping', () => {
+	let sandbox = createSandbox()
+	beforeEach(() => {
+		sandbox = createSandbox()
+	})
+
+	afterEach(() => {
+		sandbox.restore()
+	})
+
+	test('does not throw', async () => {
+		const service = await pingPongV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
+			logger: getLoggerMock(sandbox).mock,
+		})
+
+		const ping = safeBind(pingCommandBuilder.getCommandFunction(), service)
+
+		const payload: PingPongV1PingInputPayload = undefined
+
+		const parameter: PingPongV1PingInputParameter = {}
+
+		const context = pingCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
+
+		const result = await ping(context.mock, payload, parameter)
+
+		expect(result).toBe('PING!')
+	})
+})
