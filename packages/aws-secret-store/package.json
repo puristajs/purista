@@ -1,6 +1,6 @@
 {
 	"name": "@purista/aws-secret-store",
-	"version": "1.11.0",
+	"version": "2.0.0",
 	"description": "State store adapter for AWS Secrets Manager",
 	"homepage": "https://purista.dev",
 	"repository": {
