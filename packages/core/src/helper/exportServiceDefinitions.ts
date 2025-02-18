@@ -10,7 +10,7 @@ import type { ServiceDefinitions } from './types/ServiceDefinitions.js'
  * @param defintionToAdd
  * @returns
  */
-const mergeServiceDefintion = <T extends FullServiceDefinition>(
+export const mergeServiceDefintion = <T extends FullServiceDefinition>(
 	existing: FullServiceDefinition,
 	defintionToAdd: ServiceDefinitions,
 ): T => {

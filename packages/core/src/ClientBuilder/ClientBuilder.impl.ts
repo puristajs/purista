@@ -6,10 +6,11 @@ import { join } from 'node:path'
 import { rimraf } from 'rimraf'
 import ts from 'typescript'
 
+import type { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 import type { HttpExposedServiceMeta } from '../core/index.js'
 import { GenericEventEmitter, isHttpExposedServiceMeta } from '../core/index.js'
 import type { FullDefinition, FullServiceDefinition } from '../helper/index.js'
-import { convertToCamelCase } from '../helper/index.js'
+import { convertToCamelCase, mergeServiceDefintion } from '../helper/index.js'
 import { puristaVersion } from '../version.js'
 import { getWriter } from './getWriter.impl.js'
 import { mergeIntoServiceDefintion } from './mergeIntoServiceDefintion.impl.js'
@@ -80,6 +81,20 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 				...config?.eventBridgeClient,
 			},
 		})
+	}
+
+	/**
+	 * Gets the definitions from the provided service builders
+	 */
+	async getDefinitionsFromServiceBuilders(serviceBuilders: ServiceBuilder[]) {
+		const services: FullServiceDefinition = {}
+
+		for (const builder of serviceBuilders) {
+			const definition = await builder.getFullServiceDefintion()
+			mergeServiceDefintion(services, definition)
+		}
+
+		return services
 	}
 
 	/**
