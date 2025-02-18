@@ -53,10 +53,8 @@ export const honoServiceV1ConfigSchema = z.object({
 	apiMountPath: z.string().optional().default(DEFAULT_API_MOUNT_PATH),
 	enableHealth: z.boolean().optional().default(true),
 	healthPath: z.string().optional().default('/healthz'),
-	healthFunction: z.any().default(function () {}),
-	protectHandler: z.any().default(async function (_c: any, next: any) {
-		await next()
-	}),
+	healthFunction: z.any().optional(),
+	protectHandler: z.any().optional(),
 	services: z.array(z.instanceof(Service)).optional().default([]),
 	traceHeaderField: z.string().default('x-trace-id'),
 	openApi: z

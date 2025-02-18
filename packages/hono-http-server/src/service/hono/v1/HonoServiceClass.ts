@@ -83,6 +83,13 @@ export class HonoServiceClass<
 		super(config)
 		this.openApi = new OpenApiBuilder(this.config.openApi)
 
+		this.config.healthFunction = this.config.healthFunction ?? async function () {}
+		this.config.protectHandler =
+			this.config.protectHandler ??
+			async function (c: any, n: () => Promise<void>) {
+				return n()
+			}
+
 		if (this.config.enableDynamicRoutes) {
 			this.app = new Hono<{ Bindings: Bindings; Variables: Variables }>({ router: new PatternRouter() })
 		} else {
@@ -148,10 +155,6 @@ export class HonoServiceClass<
 				},
 			})
 
-			const fn = this.config.healthFunction
-
-			const healthFn = safeBind(fn, this)
-
 			this.app.use('*', async (c, next) => {
 				if (!this.isAvailable) {
 					throw new HandledError(StatusCode.ServiceUnavailable, 'server not available')
@@ -188,7 +191,7 @@ export class HonoServiceClass<
 					}
 
 					try {
-						await healthFn()
+						await this.config.healthFunction()
 						span.setStatus({
 							code: SpanStatusCode.OK,
 							message: 'OK',
@@ -319,8 +322,6 @@ export class HonoServiceClass<
 		const responseContentType = expose.contentTypeResponse ?? 'application/json'
 		const responseEncodingType = expose.contentEncodingResponse ?? 'utf-8'
 
-		const protectHandler = safeBind(this.config.protectHandler, this)
-
 		addPathToOpenApi(this.openApi, metadata, path, this.config)
 
 		const handler: Handler = async c => {
@@ -420,7 +421,7 @@ export class HonoServiceClass<
 						return c.json(err.getErrorResponse(), err.errorCode as ContentfulStatusCode)
 					}
 
-					const unhandledError = UnhandledError.fromError(err)
+					const unhandledError = new UnhandledError()
 					unhandledError.errorCode = StatusCode.InternalServerError
 					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, unhandledError.errorCode)
 
@@ -431,7 +432,8 @@ export class HonoServiceClass<
 		}
 
 		if (expose.http.openApi?.isSecure && this.config.protectHandler) {
-			this.app[method](path, protectHandler, handler)
+			const protectHandler = safeBind(this.config.protectHandler, this.app)
+			this.app[method](path, this.config.protectHandler, handler)
 		} else {
 			this.app[method](path, handler)
 		}

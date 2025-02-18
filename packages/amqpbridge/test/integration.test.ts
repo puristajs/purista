@@ -42,7 +42,7 @@ describe('@purista/amqpbridge', () => {
 	afterAll(async () => {
 		await service?.destroy()
 		await eventbridge.destroy()
-		await container.stop()
+		await container?.stop()
 	})
 
 	afterEach(() => {
