@@ -4,6 +4,7 @@
 	"engines": {
 		"node": ">=18"
 	},
+	"private": true,
 	"scripts": {
 		"add:service": "purista add service",
 		"add:command": "purista add command",
