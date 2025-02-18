@@ -6,9 +6,9 @@ order: 210010
 
 # Exporting Service Definitions
 
-The concept of builders stems from the desire to efficiently access and process information about services, commands, subscriptions, events, endpoints, and more, in a manner conducive to sharing and automation. Hence, PURISTA offers the capability to export information from service builders as easily serializable JSON objects. These objects can be saved, shared, and processed as needed.
+The concept of builders arises from the need to efficiently access and process information about services, commands, subscriptions, events, endpoints, and more, in a way that facilitates sharing and automation. Therefore, PURISTA offers the capability to export information from service builders as easily serializable JSON objects. These objects can be saved, shared, and processed as needed.
 
-Exporting this information is a straightforward process.
+Exporting this information is straightforward.
 
 ```typescript
 import { writeFile } from 'node:fs/promises'
@@ -28,12 +28,14 @@ const exportDefinitions = async () => {
 
   await writeFile(join(process.cwd(), 'defintions.json'), JSON.stringify(definitions, null ,2))
 }
+
+exportDefinitions()
 ```
 
-This small script exports the full service definitions of the provided service builders.  
-It includes information about each command and each subscription, including the shape of inputs, outputs, custom events.  
+This small script exports the complete service definitions of the provided service builders.
+It includes information about each command and subscription, including the structure of inputs, outputs, and custom events.
 
-The shape of the data looks like this:
+The data structure looks like this:
 
 ```typescript
 const definitions = {
