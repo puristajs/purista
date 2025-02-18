@@ -1,0 +1,109 @@
+{
+	"version": "1.11.0",
+	"services": {
+		"PingPong": {
+			"1": {
+				"description": "an example service",
+				"commands": {
+					"ping": {
+						"commandName": "ping",
+						"commandDescription": "send a ping",
+						"eventBridgeConfig": {
+							"durable": false,
+							"autoacknowledge": true,
+							"shared": true
+						},
+						"metadata": {
+							"expose": {
+								"contentTypeRequest": "application/json",
+								"contentEncodingRequest": "utf-8",
+								"contentTypeResponse": "application/json",
+								"contentEncodingResponse": "utf-8",
+								"inputPayload": {
+									"title": "input payload schema"
+								},
+								"parameter": {
+									"type": "object",
+									"properties": {},
+									"title": "input parameter schema"
+								},
+								"outputPayload": {
+									"type": "string",
+									"title": "output payload schema"
+								},
+								"deprecated": false,
+								"http": {
+									"method": "GET",
+									"path": "ping",
+									"openApi": {
+										"description": "send a ping",
+										"summary": "ping",
+										"isSecure": false,
+										"query": [],
+										"tags": [],
+										"additionalStatusCodes": [],
+										"operationId": "ping"
+									}
+								}
+							}
+						},
+						"eventName": "pinged",
+						"hooks": {
+							"beforeGuard": {},
+							"afterGuard": {}
+						},
+						"invokes": {},
+						"emitList": {}
+					},
+					"pong": {
+						"commandName": "pong",
+						"commandDescription": "a pong",
+						"eventBridgeConfig": {
+							"durable": false,
+							"autoacknowledge": true,
+							"shared": true
+						},
+						"metadata": {
+							"expose": {
+								"contentTypeRequest": "application/json",
+								"contentEncodingRequest": "utf-8",
+								"contentTypeResponse": "application/json",
+								"contentEncodingResponse": "utf-8",
+								"inputPayload": {
+									"type": "object",
+									"properties": {
+										"pongMessage": {
+											"type": "string",
+											"title": "The pong message"
+										}
+									},
+									"required": ["pongMessage"],
+									"title": "input payload schema"
+								},
+								"parameter": {
+									"type": "object",
+									"properties": {},
+									"title": "input parameter schema"
+								},
+								"outputPayload": {
+									"type": "string",
+									"title": "output payload schema"
+								},
+								"deprecated": false
+							}
+						},
+						"eventName": "ponged",
+						"hooks": {
+							"beforeGuard": {},
+							"afterGuard": {}
+						},
+						"invokes": {},
+						"emitList": {}
+					}
+				},
+				"subscriptions": {},
+				"deprecated": false
+			}
+		}
+	}
+}
