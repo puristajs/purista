@@ -10,6 +10,8 @@ PURISTA provides the client builder, which allows you to create a zero dependenc
 
 The generated client will map the http exposed service commands, similar to the `service` in the context of commands and subscriptions.
 
+The client builder requires the service definitions as input - see [Export Service Definitions](./export_service_definitions.md).
+
 ```typescript
 const client = new HttpClient()
 
@@ -24,7 +26,7 @@ The client builder is very modular to give you the full control.
 ```typescript
 const config = config = {
   version: '1.11.0', // PURISTA version
-  definitionPath: './definitions', // path of definitions
+  definitionPath: './definitions', // path of *.json files with definitions
   outputPath: './dist', // output folder
   httpClient: {
     buildAs: 'both', // 'esm' | 'commonjs' | 'both'
@@ -72,7 +74,7 @@ clientBuilder.destroy()
 
 ### Config file
 
-Instead of using a hardcoded config or the need to implement config persistance, the client builder comes with some handy functions.  
+Instead of using a hardcoded config, or the need to implement config persistence, the client builder comes with some handy functions.  
 The config file is a simple json file.
 
 ```json
@@ -118,7 +120,7 @@ Here you can provide a custom folder.
 
 #### Load the config file
 
-You can load a json config file with `.loadConfig`.  
+You can load a json config file with `.loadConfig()`.  
 Per default, the function will try to load the config from `purista.client.json` in the current users folder.  
 
 The method as an optional parameter, where you can provide a custom file location.
@@ -207,22 +209,23 @@ generate()
 
 :::
 
-Add your definitions in the `./definitions` subfolder.  
+Add your definitions as JSON files in the `./definitions` subfolder.  
 
 ::: tip
 In a monorepo, you can directly use the definitions via imports.
 
 ```typescript
-import { pingV1Service } from './service/ping/v1/index.js' // [!code ++]
-import { fooV1Service } from './service/foo/v1/index.js' // [!code ++]
-import { barV1Service } from './service/bar/v1/index.js' // [!code ++]
+import { pingV1Service } from './backend/src/service/ping/v1/index.js' // [!code ++]
+import { fooV1Service } from './backend/src/service/foo/v1/index.js' // [!code ++]
+import { barV1Service } from './backend/src/service/bar/v1/index.js' // [!code ++]
 // ....
 // load the definitions from exported json files // [!code --]
 const defnitions = await clientBuilder.loadDefinitionFiles() // [!code --]
 
 // use definitions from imported service builders // [!code ++]
 const serviceBuilders = [pingV1Service, fooV1Service, barV1Service] // [!code ++]
-const definitions = await exportServiceDefinitions(serviceBuilders) // [!code ++]
+const defnitions = await clientBuilder.getDefinitionsFromServiceBuilders(serviceBuilders)
+ // [!code ++]
 // ....
 ```
 
