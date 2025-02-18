@@ -5,7 +5,7 @@ import helmet from '@fastify/helmet'
 import fastifyStatic from '@fastify/static'
 import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
 import * as api from '@opentelemetry/api'
-import { ATTR_SERVER_ADDRESS } from '@opentelemetry/semantic-conventions/incubating'
+import { ATTR_SERVER_ADDRESS } from '@opentelemetry/semantic-conventions'
 
 import {
 	ATTR_HTTP_REQUEST_METHOD,
