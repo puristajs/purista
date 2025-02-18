@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "A field for the [JSON schema](https://json-schema.org/) specification"
+    },
+    "runtime": {
+      "type": "string",
+      "enum": ["node", "bun"],
+      "default": "node",
+      "description": "The runtime used in the project"
+    },
+    "eventBridge": {
+      "type": "string",
+      "enum": ["default", "amqp", "nats", "mqtt", "dapr"],
+      "default": "default",
+      "description": "The event bridge used in the project"
+    },
+    "fileConvention": {
+      "type": "string",
+      "enum": ["camel", "snake", "kebab", "pascal", "pascalSnake"],
+      "default": "camel",
+      "description": "The file naming convention used in the project"
+    },
+    "eventConvention": {
+      "type": "string",
+      "enum": [
+        "camel",
+        "snake",
+        "kebab",
+        "pascal",
+        "pascalSnake",
+        "constantCase",
+        "dotCase",
+        "pathCase",
+        "trainCase"
+      ],
+      "default": "camel",
+      "description": "The event naming convention used in the project"
+    },
+    "linter": {
+      "type": "string",
+      "enum": ["biome", "eslint", "none"],
+      "default": "none",
+      "description": "The linter used in the project"
+    },
+    "formatter": {
+      "type": "string",
+      "enum": ["biome", "prettier", "none"],
+      "default": "none",
+      "description": "The formatter used in the project"
+    },
+    "servicePath": {
+      "type": "string",
+      "default": "src/service",
+      "description": "The path where services are located relative to the project root"
+    }
+  }
+}
