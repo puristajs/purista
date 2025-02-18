@@ -1,5 +1,5 @@
-import { pingCommandBuilder } from './command/ping/pingCommandBuilder.ts'
-import { pongCommandBuilder } from './command/pong/pongCommandBuilder.ts'
+import { pingCommandBuilder } from './command/ping/pingCommandBuilder.js'
+import { pongCommandBuilder } from './command/pong/pongCommandBuilder.js'
 import { pingPongV1ServiceBuilder } from './pingPongV1ServiceBuilder.js'
 
 const commandDefinitions: Parameters<(typeof pingPongV1ServiceBuilder)['addCommandDefinition']>[0][] = [
