@@ -33,8 +33,8 @@ The NATS event bridge uses the unified configuration schema as all event bridges
 
 ::: info API documentation
 
-- [General event bridge config](../../../api/modules/purista_core.html#eventbridgeconfig)
-- [NATS bridge config](../../../api/modules/purista_natsbridge.html#natsbridgeconfig)
+- [General event bridge config](../../../api/@purista/core/README.md)
+- [NATS bridge config](../../../api/@purista/natsbridge/README.md)
 :::
 
 ## Usage example

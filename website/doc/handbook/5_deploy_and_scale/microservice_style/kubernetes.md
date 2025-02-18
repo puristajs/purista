@@ -33,10 +33,10 @@ Therefore, we use a small HTTP server here.
 
 We also want to handle shutdown signals properly.
 
-It can be done by using [@purista/k8s-sdk](../../../api/modules/purista_k8s_sdk.md).
+It can be done by using [@purista/k8s-sdk](../../../api/@purista/k8s-sdk/README.md).
 
 ::: info
-The [@purista/k8s-sdk](../../../api/modules/purista_k8s_sdk.md) package is using [Hono](https://hono.dev) to provide a modern, flexible and lightweight http server.
+The [@purista/k8s-sdk](../../../api/@purista/k8s-sdk/README.md) package is using [Hono](https://hono.dev) to provide a modern, flexible and lightweight http server.
 Because of this, the webserver is able to use the benefits of different runtime environments like [Bun](https://bun.sh).
 See [Hono](https://hono.dev)
 :::

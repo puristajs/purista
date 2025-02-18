@@ -43,8 +43,8 @@ The AMQP event bridge uses the unified configuration schema as all event bridges
 
 ::: info API documentation
 
-- [General event bridge config](../../../api/modules/purista_core.html#eventbridgeconfig)
-- [AMQP bridge config](../../../api/modules/purista_amqpbridge.html#amqpbridgeconfig)
+- [General event bridge config](../../../api/@purista/core/classes/EventBridgeBaseClass.md)
+- [AMQP bridge config](../../../api/@purista/amqpbridge/README.md)
 :::
 
 ## Usage example

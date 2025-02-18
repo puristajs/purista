@@ -10,7 +10,7 @@ order: 303000
 
 | name           | category                                                               | package   | documentation |
 |---             |---                                                                     |---        |---        |
-| Hono based server | HTTP server| [@purista/hono-http-server](../../api/modules/purista_hono_http_server.md) | [Handbook](../2_building_business-logic/exposing_endpoints/rest_api_http_endpoints.md) |
+| Hono based server | HTTP server| [@purista/hono-http-server](../../api/@purista/hono-http-server/README.md) | [Handbook](../2_building_business-logic/exposing_endpoints/rest_api_http_endpoints.md) |
 
 ## Community servers
 

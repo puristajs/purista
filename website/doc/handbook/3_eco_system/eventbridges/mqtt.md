@@ -34,8 +34,8 @@ The MQTT event bridge uses the unified configuration schema as all event bridges
 
 ::: info API documentation
 
-- [General event bridge config](../../../api/modules/purista_core.html#eventbridgeconfig)
-- [MQTT bridge config](../../../api/modules/purista_mqttbridge.html#mqttbridgeconfig)
+- [General event bridge config](../../../api/@purista/core/README.md)
+- [MQTT bridge config](../../../api/@purista/mqttbridge/README.md)
 :::
 
 ## Usage example
