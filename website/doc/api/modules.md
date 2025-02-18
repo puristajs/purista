@@ -1,3 +1,0 @@
-[PURISTA API](README.md) / Modules
-
-# PURISTA API
