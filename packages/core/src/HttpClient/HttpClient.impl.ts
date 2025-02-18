@@ -5,9 +5,12 @@ import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/a
 import { Resource } from '@opentelemetry/resources'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
-import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
-
-import { ATTR_HTTP_METHOD, ATTR_HTTP_STATUS_CODE, ATTR_URL_FULL } from '@opentelemetry/semantic-conventions/incubating'
+import {
+	ATTR_HTTP_REQUEST_METHOD,
+	ATTR_HTTP_RESPONSE_STATUS_CODE,
+	ATTR_SERVICE_NAME,
+	ATTR_URL_FULL,
+} from '@opentelemetry/semantic-conventions'
 
 import type { EmptyObject, Logger } from '../core/index.js'
 import { HandledError, PuristaSpanTag, StatusCode, UnhandledError, initLogger } from '../core/index.js'
@@ -203,7 +206,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 		}
 
 		return this.startActiveSpan(`${this.name}.${method}`, { kind: SpanKind.CLIENT }, context.active(), async span => {
-			span.setAttribute(ATTR_HTTP_METHOD, method)
+			span.setAttribute(ATTR_HTTP_REQUEST_METHOD, method)
 
 			const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: this.config.traceId })
 
@@ -220,7 +223,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 					body,
 				})
 
-				span.setAttribute(ATTR_HTTP_STATUS_CODE, response.status)
+				span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, response.status)
 
 				if (!response.ok) {
 					let body = ''

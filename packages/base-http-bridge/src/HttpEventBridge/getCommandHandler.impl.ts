@@ -1,9 +1,12 @@
 // file deepcode ignore ServerLeak: <please specify a reason of ignoring this>
 
 import { SpanKind, context, propagation } from '@opentelemetry/api'
-import { ATTR_URL_FULL } from '@opentelemetry/semantic-conventions'
-
-import { ATTR_HTTP_HOST, ATTR_HTTP_METHOD, ATTR_HTTP_STATUS_CODE } from '@opentelemetry/semantic-conventions/incubating'
+import {
+	ATTR_HTTP_REQUEST_METHOD,
+	ATTR_HTTP_RESPONSE_STATUS_CODE,
+	ATTR_SERVER_ADDRESS,
+	ATTR_URL_FULL,
+} from '@opentelemetry/semantic-conventions'
 
 import type {
 	Command,
@@ -51,8 +54,8 @@ export const getCommandHandler = function (
 			async span => {
 				const hostname = process.env.HOSTNAME ?? 'unknown'
 				span.setAttribute(ATTR_URL_FULL, c.req.url || '')
-				span.setAttribute(ATTR_HTTP_METHOD, c.req.method || '')
-				span.setAttribute(ATTR_HTTP_HOST, hostname)
+				span.setAttribute(ATTR_HTTP_REQUEST_METHOD, c.req.method || '')
+				span.setAttribute(ATTR_SERVER_ADDRESS, hostname)
 
 				try {
 					if (c.req.method !== 'POST') {
@@ -98,7 +101,7 @@ export const getCommandHandler = function (
 					if (msg.payload === undefined || msg.payload === '') {
 						const status = StatusCode.NoContent
 
-						span.setAttribute(ATTR_HTTP_STATUS_CODE, status)
+						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, status)
 
 						c.status(status)
 						return c.body(null)
