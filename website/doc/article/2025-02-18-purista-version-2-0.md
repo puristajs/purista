@@ -1,8 +1,8 @@
 ---
 title: Version 2.0
 description: PURISTA 2.0 – A Major Update with New Features and Improvements.
-date: 2024-02-18
-order: 20240218
+date: 2025-02-18
+order: 20250218
 image: /graphic/purista_2_0_cover.jpg
 ---
 <PostDetail>
