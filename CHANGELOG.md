@@ -57,6 +57,8 @@ All notable changes to this project will be documented in this file.
 - Update doc for client-builder
 - Add v2 blog post
 - Update api documentation
+- Update CHANGELOG
+- Fix links to api documentation
 
 ### Features
 

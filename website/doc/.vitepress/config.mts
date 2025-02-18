@@ -25,22 +25,30 @@ export default defineConfig({
 	transformHead: ({ pageData, page }) => {
 		const head: HeadConfig[] = []
 
-		head.push(['meta', { property: 'og:title', content: pageData.frontmatter.title }])
+		head.push(['meta', { property: 'og:title', content: pageData.frontmatter.title ?? 'PURISTA' }])
 		head.push(['meta', { property: 'og:url', content: new URL(page.replace('.md', '.html'), hostname).toString() }])
-		head.push(['meta', { property: 'og:description', content: pageData.frontmatter.description }])
+		head.push([
+			'meta',
+			{
+				property: 'og:description',
+				content:
+					pageData.frontmatter.description ??
+					'The typescript/javascript framework for building nodejs backend services and api in modern, modular and scalable way',
+			},
+		])
 		head.push(['meta', { property: 'og:type', content: 'website' }])
 		head.push(['meta', { property: 'twitter:card', content: 'summary_large_image' }])
 		head.push(['meta', { property: 'twitter:site', content: '@purista_js' }])
 		head.push(['meta', { property: 'twitter:creator', content: '@purista_js' }])
 
-		if (pageData.frontmatter.image) {
+		if (pageData.frontmatter.image?.length) {
 			head.push(['meta', { property: 'og:image', content: new URL(pageData.frontmatter.image, hostname).toString() }])
 		} else {
 			head.push([
 				'meta',
 				{
 					property: 'og:image',
-					content: `https://ogpreview-ten.vercel.app/api/og?title=${encodeURIComponent(pageData.frontmatter.title)}&description=${encodeURIComponent(pageData.frontmatter.description)}`,
+					content: `https://ogpreview-ten.vercel.app/api/og?title=${encodeURIComponent(pageData.frontmatter.title ?? 'PURISTA')}&description=${encodeURIComponent(pageData.frontmatter.description ?? 'The typescript/javascript framework for building nodejs backend services and api in modern, modular and scalable way')}`,
 				},
 			])
 		}
