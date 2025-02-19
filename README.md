@@ -34,12 +34,12 @@ It is built from the ground up in typescript and highly focuses on schema, and a
 Create a new project folder and simply run:
 
 ```bash
-npx @purista/cli init
+npm create purista@latest
 ```
 
 The CLI tool will guide you through all the steps.
 
-After successful init, simply start adding your business logic by adding your first service.
+After successful init, install the PURISTA CLI globally, and simply start adding your business logic by adding your first service.
 
 ```bash
 purista add service
