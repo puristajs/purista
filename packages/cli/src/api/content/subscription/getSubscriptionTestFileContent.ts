@@ -73,7 +73,7 @@ export const getSubscriptionTestFileContent = (input: {
 					writer.writeLine(`const payload: ${typePrefix}InputPayload = undefined`)
 					writer.blankLine()
 					writer.writeLine(
-						`const context = ${subscriptionBuilderName}.getSubscriptionContextMock({ payload, undefined, sandbox })`,
+						`const context = ${subscriptionBuilderName}.getSubscriptionContextMock({ payload, undefined, sandbox, resources: { ...service.resources } })`,
 					)
 					writer.blankLine()
 					writer.writeLine(`const result = await ${camelCase(input.subscriptionName)}(context.mock, payload)`)

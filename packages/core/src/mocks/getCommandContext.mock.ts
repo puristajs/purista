@@ -75,10 +75,10 @@ export const getCommandContextMock = <
 				if (Object.hasOwn(providedResources, name)) {
 					return providedResources[name]
 				}
-				if (!Object.hasOwn(stubs.resource, name)) {
+				if (!Object.hasOwn(stubs.resources, name)) {
 					throw new Error(`Resource ${name} not set or stubbed`)
 				}
-				return stubs.resource[name]
+				return stubs.resources[name]
 			},
 		},
 	) as Resources
@@ -165,7 +165,7 @@ export const getCommandContextMock = <
 		setState: input.sandbox?.stub() ?? stub(),
 		removeState: input.sandbox?.stub() ?? stub(),
 		service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
-		resource: {} as Partial<Resources>,
+		resources: {} as Partial<Resources>,
 	}
 
 	const message = getCommandMessageMock<MessagePayloadType, MessageParamsType>(

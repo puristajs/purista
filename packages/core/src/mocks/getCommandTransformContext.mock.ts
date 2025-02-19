@@ -25,7 +25,6 @@ export const getCommandTransformContextMock = <
 	sandbox?: SinonSandbox
 }) => {
 	const logger = getLoggerMock(input.sandbox)
-	const providedResources: Partial<Resources> = input.resources ?? ({} as Partial<Resources>)
 
 	const stubs = {
 		logger: logger.stubs,
@@ -40,8 +39,10 @@ export const getCommandTransformContextMock = <
 		getState: input.sandbox?.stub() ?? stub(),
 		setState: input.sandbox?.stub() ?? stub(),
 		removeState: input.sandbox?.stub() ?? stub(),
-		resource: {} as Partial<Resources>,
+		resources: {} as Partial<Resources>,
 	}
+
+	const providedResources: Partial<Resources> = input.resources ?? ({} as Partial<Resources>)
 
 	const resourcesProxy = new Proxy(
 		{},
@@ -53,10 +54,10 @@ export const getCommandTransformContextMock = <
 				if (Object.hasOwn(providedResources, name)) {
 					return providedResources[name]
 				}
-				if (!Object.hasOwn(stubs.resource, name)) {
+				if (!Object.hasOwn(stubs.resources, name)) {
 					throw new Error(`Resource ${name} not set or stubbed`)
 				}
-				return stubs.resource[name]
+				return stubs.resources[name]
 			},
 		},
 	) as Resources
