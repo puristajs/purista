@@ -112,22 +112,25 @@ export const getSubscriptionContextMock = <
 		}) as TFaux
 	}
 
-	const resourceMocks: Record<string, SinonStub> = {}
+	const providedResources: Partial<Resources> = input.resources ?? ({} as Partial<Resources>)
 
-	const getResourceProxy = <TFaux>(): TFaux => {
-		return new Proxy(() => {}, {
+	const resourcesProxy = new Proxy(
+		{},
+		{
 			get(obj: Record<string, any>, name) {
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
-					return undefined
+					throw new Error('Invalid property access on resources proxy')
 				}
-				if (!resourceMocks[name]) {
-					resourceMocks[name] = input.sandbox?.stub() ?? stub()
-					resourceMocks[name].throws(`Resource ${name} not mocked`)
+				if (Object.hasOwn(providedResources, name)) {
+					return providedResources[name]
 				}
-				return resourceMocks[name]
+				if (!Object.hasOwn(stubs.resources, name)) {
+					throw new Error(`Resource ${name} not set or stubbed`)
+				}
+				return stubs.resources[name]
 			},
-		}) as TFaux
-	}
+		},
+	) as Resources
 
 	const eventList = Object.keys(input.emitList ?? {}).reduce((prev, current) => {
 		return {
@@ -153,7 +156,7 @@ export const getSubscriptionContextMock = <
 		setState: input.sandbox?.stub() ?? stub(),
 		removeState: input.sandbox?.stub() ?? stub(),
 		service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
-		resources: getResourceProxy<Resources>(),
+		resources: {} as Partial<Resources>,
 	}
 
 	const mock: SubscriptionFunctionContext<Resources, Invokes, EmitList> = {
@@ -180,7 +183,7 @@ export const getSubscriptionContextMock = <
 			setState: stubs.setState.rejects(new Error('setState is not stubbed')),
 			removeState: stubs.removeState.rejects(new Error('removeState is not stubbed')),
 		},
-		resources: getResourceProxy<Resources>(),
+		resources: resourcesProxy,
 	}
 
 	return {

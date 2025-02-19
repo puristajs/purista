@@ -72,7 +72,7 @@ export const getCommandTestFileContent = (input: {
 					writer.writeLine(`const parameter: ${typePrefix}InputParameter = {}`)
 					writer.blankLine()
 					writer.writeLine(
-						`const context = ${commandBuilderName}.getCommandContextMock({ payload, parameter, sandbox })`,
+						`const context = ${commandBuilderName}.getCommandContextMock({ payload, parameter, sandbox, resources: { ...service.resources } })`,
 					)
 					writer.blankLine()
 					writer.writeLine(`const result = await ${camelCase(input.commandName)}(context.mock, payload, parameter)`)

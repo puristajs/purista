@@ -15,7 +15,6 @@ export const getSubscriptionTransformContextMock = <Resources extends Record<str
 	sandbox?: SinonSandbox
 }) => {
 	const logger = getLoggerMock(input.sandbox)
-	const providedResources: Partial<Resources> = input.resources ?? ({} as Partial<Resources>)
 
 	const stubs = {
 		logger: logger.stubs,
@@ -32,6 +31,8 @@ export const getSubscriptionTransformContextMock = <Resources extends Record<str
 		removeState: input.sandbox?.stub() ?? stub(),
 		resources: {} as Partial<Resources>,
 	}
+
+	const providedResources: Partial<Resources> = input.resources ?? ({} as Partial<Resources>)
 
 	const resourcesProxy = new Proxy(
 		{},
