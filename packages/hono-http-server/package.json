@@ -59,7 +59,7 @@
 	},
 	"peerDependenciesMeta": {},
 	"optionalDependencies": {
-		"@hono/node-server": "^1.8.0"
+		"@hono/node-server": "^1.13.8"
 	},
 	"types": "./dist/commonjs/index.d.ts",
 	"module": "./dist/esm/index.js"
