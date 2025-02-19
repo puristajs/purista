@@ -1,6 +1,6 @@
 {
 	"name": "@purista/mqtt-example",
-	"version": "2.0.0",
+	"version": "2.0.1",
 	"description": "purista backend framework",
 	"homepage": "https://purista.dev",
 	"private": true,
