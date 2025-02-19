@@ -55,26 +55,6 @@
 		"zod": "^3.24.1",
 		"zod-to-json-schema": "^3.24.1"
 	},
-	"peerDependencies": {
-		"@types/sinon": "^17.0.3",
-		"code-block-writer": "^13.x",
-		"rimraf": "^5.x",
-		"sinon": "^17.x"
-	},
-	"peerDependenciesMeta": {
-		"@types/sinon": {
-			"optional": true
-		},
-		"sinon": {
-			"optional": true
-		},
-		"rimraf": {
-			"optional": true
-		},
-		"code-block-writer": {
-			"optional": true
-		}
-	},
 	"exports": {
 		"./package.json": "./package.json",
 		".": {
