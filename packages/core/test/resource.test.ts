@@ -90,15 +90,12 @@ describe('service resource test', () => {
 
 		const context = subscriptionBuilder.getSubscriptionContextMock({
 			message,
-			resources: { exampleA: new ExampleResource() },
+			resources: { ...service.resources },
 			sandbox,
 		})
-		context.stubs.resources.exampleA = {
-			methodA: sandbox.stub().returns('mock return'),
-		}
 
 		const result = await subscription(context.mock, payload, parameter)
 
-		expect(result).toBe('mock return')
+		expect(result).toBe('works')
 	})
 })
