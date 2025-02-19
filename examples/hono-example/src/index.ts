@@ -44,7 +44,7 @@ export const main = async () => {
 	honoService
 		.setHonoTypes<{ Variables: { customVar: string } }>()
 		.setHealthFunction(async function () {
-			this.logger.info('custom health check')
+			logger.info('custom health check')
 		})
 		.setProtectMiddleware(async function (c, next) {
 			const auth = basicAuth({ username: 'user', password: 'password' })

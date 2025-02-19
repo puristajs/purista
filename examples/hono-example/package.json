@@ -33,7 +33,7 @@
 		"@hono/node-server": "^1.12.2",
 		"@scalar/hono-api-reference": "^0.5.119",
 		"@purista/core": "*",
-		"@purista/hono-http-server": "^1.9.0",
+		"@purista/hono-http-server": "*",
 		"zod": "^3.24.1"
 	}
 }

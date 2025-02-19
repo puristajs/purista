@@ -93,7 +93,9 @@ describe('service resource test', () => {
 			resources: { exampleA: new ExampleResource() },
 			sandbox,
 		})
-		context.stubs.resources.exampleA.methodA = sandbox.stub().returns('mock return')
+		context.stubs.resources.exampleA = {
+			methodA: sandbox.stub().returns('mock return'),
+		}
 
 		const result = await subscription(context.mock, payload, parameter)
 
