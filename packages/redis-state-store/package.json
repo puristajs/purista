@@ -1,6 +1,6 @@
 {
 	"name": "@purista/redis-state-store",
-	"version": "2.0.1",
+	"version": "2.0.3",
 	"description": "State store with redis as database",
 	"homepage": "https://purista.dev",
 	"repository": {
