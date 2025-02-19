@@ -1,4 +1,4 @@
-**@purista/nats-state-store v1.11.0**
+**@purista/nats-state-store v2.0.0**
 
 ***
 

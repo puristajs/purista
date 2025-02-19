@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Bug Fixes
+
+- Handling of resources in mock context
+- Example
+- Package config
+- Test
+
+## [2.0.0] - 2025-02-18
+
 ### Breaking changes
 
 - Breaking change: make service methods and fields protected
@@ -30,6 +39,7 @@ All notable changes to this project will be documented in this file.
 - Type
 - Openapi generation for different validation schema types
 - Fixup Command and CommandBuilder type handling
+- Imports
 
 ### Documentation
 
@@ -60,6 +70,7 @@ All notable changes to this project will be documented in this file.
 - Update CHANGELOG
 - Fix links to api documentation
 - Update doc
+- Fix docu
 
 ### Features
 
@@ -170,6 +181,8 @@ All notable changes to this project will be documented in this file.
 - Minor fix for client-builder
 - Update package lock
 - Cleanup opentelemetry semantic-conventions
+- Improve code and tests
+- Bump to version 2.0
 
 ## [1.10.8] - 2024-02-18
 

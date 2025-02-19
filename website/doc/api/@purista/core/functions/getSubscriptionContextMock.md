@@ -1,4 +1,4 @@
-[**@purista/core v1.11.0**](../README.md)
+[**@purista/core v2.0.0**](../README.md)
 
 ***
 
@@ -297,7 +297,7 @@ wrap given function in an opentelemetry span
 
 #### stubs.resources
 
-> **stubs.resources**: `Resources`
+> **stubs.resources**: `Partial`\<`Resources`\>
 
 #### stubs.service
 

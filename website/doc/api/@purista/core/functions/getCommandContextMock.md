@@ -1,4 +1,4 @@
-[**@purista/core v1.11.0**](../README.md)
+[**@purista/core v2.0.0**](../README.md)
 
 ***
 
@@ -319,9 +319,9 @@ wrap given function in an opentelemetry span
 
 > **stubs.removeState**: `SinonStub`\<`any`[], `any`\>
 
-#### stubs.resource
+#### stubs.resources
 
-> **stubs.resource**: `Partial`\<`Resources`\>
+> **stubs.resources**: `Partial`\<`Resources`\>
 
 #### stubs.service
 
