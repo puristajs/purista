@@ -1,6 +1,6 @@
 {
 	"name": "@purista/full-example",
-	"version": "2.0.1",
+	"version": "2.0.3",
 	"description": "purista backend framework",
 	"homepage": "https://purista.dev",
 	"private": true,

@@ -1,6 +1,6 @@
 {
 	"name": "@purista/gcloud-secret-store",
-	"version": "2.0.1",
+	"version": "2.0.3",
 	"description": "State store adapter for Google Cloud Secret Manager",
 	"homepage": "https://purista.dev",
 	"repository": {
