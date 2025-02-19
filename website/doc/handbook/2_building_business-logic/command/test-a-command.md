@@ -44,7 +44,12 @@ describe('service Ping version 1 - command foo', () => {
     const parameter: PingV1FooInputParameter = {}
 
     // get a mocked command context
-    const context = fooCommandBuilder.getCommandContextMock({payload, parameter, sandbox})
+    const context = fooCommandBuilder.getCommandContextMock({
+      payload,
+      parameter,
+      sandbox,
+      ...resources: service.resources
+    })
 
     // execute the command including the validations and hooks
     const result = await foo(context.mock, payload, parameter)
@@ -53,7 +58,6 @@ describe('service Ping version 1 - command foo', () => {
   })
 })
 ```
-
 
 The intersting part is the mocked command context.  
 The `getCommandContextMock`method of the command builder returns an object, which has two entries.
@@ -69,7 +73,6 @@ const context = fooCommandBuilder.getCommandContextMock({payload, parameter, san
 
 context.stubs.service.OtherService[1].otherCommand.resolves('mock data')
 ```
-
 
 ## Testing
 

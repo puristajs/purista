@@ -1,4 +1,4 @@
-**@purista/natsbridge v1.11.0**
+**@purista/natsbridge v2.0.0**
 
 ***
 

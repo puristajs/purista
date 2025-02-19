@@ -1,4 +1,4 @@
-[**@purista/base-http-bridge v1.11.0**](README.md)
+[**@purista/base-http-bridge v2.0.0**](README.md)
 
 ***
 

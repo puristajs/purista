@@ -1,4 +1,4 @@
-[**@purista/hono-http-server v1.11.0**](README.md)
+[**@purista/hono-http-server v2.0.0**](README.md)
 
 ***
 

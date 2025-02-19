@@ -1,4 +1,4 @@
-[**@purista/k8s-sdk v1.11.0**](../README.md)
+[**@purista/k8s-sdk v2.0.0**](../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Variable: puristaVersion
 
-> `const` **puristaVersion**: `"1.11.0"` = `'1.11.0'`
+> `const` **puristaVersion**: `"2.0.0"` = `'2.0.0'`
 
 Defined in: [version.ts:1](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/version.ts#L1)

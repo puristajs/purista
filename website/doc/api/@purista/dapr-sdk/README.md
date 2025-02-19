@@ -1,4 +1,4 @@
-**@purista/dapr-sdk v1.11.0**
+**@purista/dapr-sdk v2.0.0**
 
 ***
 

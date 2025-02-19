@@ -1,4 +1,4 @@
-[**@purista/nats-config-store v1.11.0**](README.md)
+[**@purista/nats-config-store v2.0.0**](README.md)
 
 ***
 

@@ -6,7 +6,7 @@ title: PURISTA - The typescript backend framework for IoT, edge, cloud and serve
 description: PURISTA is a typescript based nodejs framework to built typescript backends for iot, edge, server, cloud and serverless.
 
 hero:
-  name: "PURISTA"
+  name: "PURISTA 2.0"
   text: "THE TYPESCRIPT BACKEND FRAMEWORK"
   tagline: IoT/EDGE - SERVER - CLOUD - SERVERLESS
   image:
