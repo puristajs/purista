@@ -1,0 +1,33 @@
+import{_ as a,c as e,o as n,ag as t}from"./chunks/framework.U_AETC1W.js";const u=JSON.parse('{"title":"Project Setup","description":"Add the first subscription to your PURISTA service","frontmatter":{"title":"Project Setup","description":"Add the first subscription to your PURISTA service","order":101000},"headers":[],"relativePath":"handbook/1_quickstart/setup-the-purista-project.md","filePath":"handbook/1_quickstart/setup-the-purista-project.md","lastUpdated":1739824136000}'),p={name:"handbook/1_quickstart/setup-the-purista-project.md"};function i(l,s,r,c,o,d){return n(),e("div",null,s[0]||(s[0]=[t(`<h1 id="setup-a-purista-project" tabindex="-1">Setup a PURISTA project <a class="header-anchor" href="#setup-a-purista-project" aria-label="Permalink to &quot;Setup a PURISTA project&quot;">​</a></h1><p>In this short quickstart example, we will setup a new project, based on PURISTA.</p><h2 id="create-a-new-project" tabindex="-1">Create a new project <a class="header-anchor" href="#create-a-new-project" aria-label="Permalink to &quot;Create a new project&quot;">​</a></h2><p>Run the following command, and you will be guided through the installation:</p><div class="vp-code-group vp-adaptive-theme"><div class="tabs"><input type="radio" name="group-BY8F3" id="tab-Gg73gx-" checked><label data-title="npm" for="tab-Gg73gx-">npm</label><input type="radio" name="group-BY8F3" id="tab-UwbY7FV"><label data-title="bun" for="tab-UwbY7FV">bun</label><input type="radio" name="group-BY8F3" id="tab-txFCVrw"><label data-title="yarn" for="tab-txFCVrw">yarn</label><input type="radio" name="group-BY8F3" id="tab-U-6rCML"><label data-title="pnpm" for="tab-U-6rCML">pnpm</label></div><div class="blocks"><div class="language-bash vp-adaptive-theme active"><button title="Copy Code" class="copy"></button><span class="lang">bash</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">npm</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> create</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> purista@latest</span></span></code></pre></div><div class="language-bash vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">bash</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">bun</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> create</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> purista@latest</span></span></code></pre></div><div class="language-bash vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">bash</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">yarn</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> create</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> purista@latest</span></span></code></pre></div><div class="language-bash vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">bash</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span style="--shiki-light:#6F42C1;--shiki-dark:#B392F0;">pnpm</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> create</span><span style="--shiki-light:#032F62;--shiki-dark:#9ECBFF;"> purista@latest</span></span></code></pre></div></div></div><p>Please follow the steps in the installation process. It is recommended to install the PURISTA CLI globally.</p><h2 id="project-structure" tabindex="-1">Project structure <a class="header-anchor" href="#project-structure" aria-label="Permalink to &quot;Project structure&quot;">​</a></h2><p>The created project will have a pre-defined folder structure and expects this structure to work properly.</p><p>Here is an example of the folder structure:</p><div class="language-text vp-adaptive-theme"><button title="Copy Code" class="copy"></button><span class="lang">text</span><pre class="shiki shiki-themes github-light github-dark vp-code" tabindex="0"><code><span class="line"><span>|-config/</span></span>
+<span class="line"><span>|-script/</span></span>
+<span class="line"><span>|-src/</span></span>
+<span class="line"><span>| |- service/</span></span>
+<span class="line"><span>| |   |- ServiceEvent.enum.ts</span></span>
+<span class="line"><span>| |   |- [serviceName]/</span></span>
+<span class="line"><span>| |       |- [serviceName]ServiceInfo.ts</span></span>
+<span class="line"><span>| |       |- v[0-9]/</span></span>
+<span class="line"><span>| |           |- [serviceName]ServiceBuilder.ts</span></span>
+<span class="line"><span>| |           |- [serviceName]ServiceBuilder.test.ts</span></span>
+<span class="line"><span>| |           |- [serviceName]ServiceConfig.ts</span></span>
+<span class="line"><span>| |           |- [serviceName]Service.ts</span></span>
+<span class="line"><span>| |           |- command/</span></span>
+<span class="line"><span>| |           |   |- [commandName]CommandBuilder.ts</span></span>
+<span class="line"><span>| |           |   |- [commandName].test.ts</span></span>
+<span class="line"><span>| |           |   |- schema.ts</span></span>
+<span class="line"><span>| |           |   |- types.ts</span></span>
+<span class="line"><span>| |           |- subscription/</span></span>
+<span class="line"><span>| |               |- [subscriptionName]SubscriptionBuilder.ts</span></span>
+<span class="line"><span>| |               |- [subscriptionName].test.ts</span></span>
+<span class="line"><span>| |               |- schema.ts</span></span>
+<span class="line"><span>| |               |- types.ts</span></span>
+<span class="line"><span>| |- store/</span></span>
+<span class="line"><span>| |   |- config/</span></span>
+<span class="line"><span>| |   |- state/</span></span>
+<span class="line"><span>| |   |- secret/</span></span>
+<span class="line"><span>| |- eventbridge/</span></span>
+<span class="line"><span>|- package.json</span></span>
+<span class="line"><span>|- package-lock.json / bun.lockb</span></span>
+<span class="line"><span>|- tsconfig.json</span></span>
+<span class="line"><span>|- .gitignore</span></span>
+<span class="line"><span>|- readme.md</span></span>
+<span class="line"><span>|- jest.config.js</span></span></code></pre></div>`,10)]))}const b=a(p,[["render",i]]);export{u as __pageData,b as default};
