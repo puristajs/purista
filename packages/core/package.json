@@ -33,10 +33,9 @@
 	"devDependencies": {
 		"@sodaru/yup-to-json-schema": "^2.0.1",
 		"@types/node": "^22.5.1",
+		"@types/sinon": "^17.0.3",
 		"@typeschema/yup": "^0.14.0",
-		"code-block-writer": "^13.0.2",
 		"rimraf": "^6.0.1",
-		"sinon": "^19.0.2",
 		"tshy": "^3.0.2",
 		"vitest": "^3.0.4",
 		"yup": "^1.4.0"
@@ -51,9 +50,11 @@
 		"@typeschema/zod": "^0.14.0",
 		"openapi3-ts": "^4.4.0",
 		"pino": "^9.2.0",
+		"code-block-writer": "^13.0.2",
 		"ts-deepmerge": "^7.0.0",
 		"zod": "^3.24.1",
-		"zod-to-json-schema": "^3.24.1"
+		"zod-to-json-schema": "^3.24.1",
+		"sinon": "^19.0.2"
 	},
 	"exports": {
 		"./package.json": "./package.json",
