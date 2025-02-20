@@ -4,12 +4,51 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Breaking changes
+
+- Breaking change: avoid typescript package to be required dependency
+
+### Bug Fixes
+
+- Move required packages to deps instead of dev deps
+- Cli imports when adding commands or subscriptions
+
+### Documentation
+
+- Update api documentation
+
+### Miscellaneous Tasks
+
+- Update readme
+- Use core node function instead of rimraf
+- Update packages
+- Bump version to v2.0.4
+- Bump version to v2.0.5
+
+## [2.0.3] - 2025-02-19
+
+### Miscellaneous Tasks
+
+- Update deps and remove peer deps
+- Bum to version 2.0.3
+
+## [2.0.1] - 2025-02-19
+
 ### Bug Fixes
 
 - Handling of resources in mock context
 - Example
 - Package config
 - Test
+
+### Documentation
+
+- Update doc
+
+### Miscellaneous Tasks
+
+- Patch version
+- Bump version
 
 ## [2.0.0] - 2025-02-18
 
