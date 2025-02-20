@@ -16,7 +16,7 @@ export const addDefinitionToBuilder = (input: {
 
 	sourceFile.addImportDeclaration({
 		namedImports: [input.importDefinition],
-		moduleSpecifier: input.importFile,
+		moduleSpecifier: input.importFile.replace('ts', '.js'),
 	})
 
 	const arrayDeclaration = sourceFile.getVariableDeclaration(input.arrayName)
