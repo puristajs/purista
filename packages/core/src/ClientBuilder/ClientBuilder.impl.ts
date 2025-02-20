@@ -3,8 +3,7 @@ import { createWriteStream } from 'node:fs'
 import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import ts from 'typescript'
-
+import type TS from 'typescript'
 import type { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 import type { HttpExposedServiceMeta } from '../core/index.js'
 import { GenericEventEmitter, isHttpExposedServiceMeta } from '../core/index.js'
@@ -20,6 +19,19 @@ import type { ClientBuilderEvents } from './types/ClientBuilderEvents.js'
 import type { Config, ConfigFull } from './types/Config.js'
 
 export const CONFIG_FILE_NAME = 'purista.client.json'
+
+let ts: typeof import('typescript') | undefined
+
+async function loadTypeScript() {
+	if (!ts) {
+		try {
+			ts = await import('typescript')
+		} catch (error) {
+			throw new Error('TypeScript is required for this operation. Please install it using `npm install typescript`.')
+		}
+	}
+	return ts
+}
 
 /**
  * ClientBuilder to generate clients, based on service definitions.
@@ -208,12 +220,17 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	 * Runs the tsc against the generated ts source files.
 	 * Depending on settings, it will generate ESM and/or commonJS files
 	 */
-	build() {
+	async build() {
 		const hasEsm = this.config.buildAs !== 'commonjs'
 		const hasCommonJs = this.config.buildAs !== 'esm'
 
+		await loadTypeScript()
+		if (!ts) {
+			throw new Error('TypeScript is required for this operation. Please install it using `npm install typescript`.')
+		}
+
 		if (hasEsm) {
-			const esmOptions: ts.CompilerOptions = {
+			const esmOptions: TS.CompilerOptions = {
 				declaration: true,
 				outDir: join(this.getOutputPath(), 'dist', 'esm'),
 				target: ts.ScriptTarget.ES2022,
@@ -222,11 +239,11 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 				moduleResolution: ts.ModuleResolutionKind.NodeNext,
 			}
 
-			this.compile([join(this.getOutputPath(), 'src', 'index.ts')], esmOptions, 'ESM')
+			await this.compile([join(this.getOutputPath(), 'src', 'index.ts')], esmOptions, 'ESM')
 		}
 
 		if (hasCommonJs) {
-			const commonJsOptions: ts.CompilerOptions = {
+			const commonJsOptions: TS.CompilerOptions = {
 				declaration: true,
 				outDir: join(this.getOutputPath(), 'dist', 'commonjs'),
 				skipLibCheck: true,
@@ -234,7 +251,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 				module: ts.ModuleKind.CommonJS,
 			}
 
-			this.compile([join(this.getOutputPath(), 'src', 'index.ts')], commonJsOptions, 'CommonJs')
+			await this.compile([join(this.getOutputPath(), 'src', 'index.ts')], commonJsOptions, 'CommonJs')
 		}
 	}
 
@@ -244,7 +261,12 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	 * @param options
 	 * @param type
 	 */
-	private compile(fileNames: string[], options: ts.CompilerOptions, type: string) {
+	private async compile(fileNames: string[], options: TS.CompilerOptions, type: string) {
+		await loadTypeScript()
+		if (!ts) {
+			throw new Error('TypeScript is required for this operation. Please install it using `npm install typescript`.')
+		}
+
 		const program = ts.createProgram(fileNames, options)
 
 		const emitResult = program.emit()
