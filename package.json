@@ -24,7 +24,7 @@
 		"vitepress": "npm run preview -w website",
 		"check:cycling": "npx madge --circular --exclude '\\.d\\.ts$' --extensions ts ./packages",
 		"sign": "git rebase --exec \"git commit --amend --no-edit -n -S\" -i",
-		"deps:check": "ncu -ws --root",
+		"deps:check": "check-dependency-version-consistency && ncu -ws --root",
 		"deps:update": "ncu -ws --root -u"
 	},
 	"workspaces": ["./packages/*", "./examples/*", "website"],
@@ -33,6 +33,7 @@
 		"@types/node": "^22.5.1",
 		"@types/sinon": "^17.0.3",
 		"@vitest/coverage-v8": "^3.0.4",
+		"check-dependency-version-consistency": "^5.0.0",
 		"git-cliff": "^2.3.0",
 		"npm-check-updates": "^17.1.0",
 		"rimraf": "^6.0.1",
