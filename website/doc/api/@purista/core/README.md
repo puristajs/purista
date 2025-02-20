@@ -1,4 +1,4 @@
-**@purista/core v2.0.0**
+**@purista/core v2.0.5**
 
 ***
 

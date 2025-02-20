@@ -1,4 +1,4 @@
-[**@purista/azure-secret-store v2.0.0**](../README.md)
+[**@purista/azure-secret-store v2.0.5**](../README.md)
 
 ***
 
