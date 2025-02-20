@@ -45,16 +45,15 @@
 		"@opentelemetry/resources": "^1.26.0",
 		"@opentelemetry/sdk-trace-node": "^1.26.0",
 		"@opentelemetry/semantic-conventions": "^1.27.0",
-		"@typeschema/json": "^0.14.0",
 		"@typeschema/main": "^0.14.0",
 		"@typeschema/zod": "^0.14.0",
+		"code-block-writer": "^13.0.2",
 		"openapi3-ts": "^4.4.0",
 		"pino": "^9.2.0",
-		"code-block-writer": "^13.0.2",
+		"sinon": "^19.0.2",
 		"ts-deepmerge": "^7.0.0",
 		"zod": "^3.24.1",
-		"zod-to-json-schema": "^3.24.1",
-		"sinon": "^19.0.2"
+		"zod-to-json-schema": "^3.24.1"
 	},
 	"exports": {
 		"./package.json": "./package.json",
