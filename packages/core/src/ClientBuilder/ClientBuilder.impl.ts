@@ -1,9 +1,8 @@
 import type { WriteStream } from 'node:fs'
 import { createWriteStream } from 'node:fs'
-import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-import { rimraf } from 'rimraf'
 import ts from 'typescript'
 
 import type { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
@@ -130,7 +129,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	 * @returns
 	 */
 	async cleanDistFolder() {
-		await rimraf(this.getOutputPath())
+		await rm(this.getOutputPath(), { force: true, recursive: true })
 		await mkdir(this.getOutputPath())
 		await mkdir(join(this.getOutputPath(), 'src'))
 	}

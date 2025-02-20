@@ -1,8 +1,6 @@
-import { mkdir, readFile } from 'node:fs/promises'
+import { mkdir, readFile, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-
-import { rimraf } from 'rimraf'
 
 import { ClientBuilder } from '../src/index.js'
 
@@ -13,13 +11,13 @@ describe('client-builder', () => {
 	let clientBuilder: ClientBuilder
 
 	beforeEach(async () => {
-		await rimraf(outputPath)
+		await rm(outputPath, { force: true, recursive: true })
 		await mkdir(outputPath)
 		clientBuilder = new ClientBuilder()
 	})
 
 	afterEach(async () => {
-		await rimraf(outputPath)
+		await rm(outputPath, { force: true, recursive: true })
 		await mkdir(outputPath)
 		clientBuilder.destroy()
 	})
