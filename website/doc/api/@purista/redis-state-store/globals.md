@@ -1,4 +1,4 @@
-[**@purista/redis-state-store v2.0.0**](README.md)
+[**@purista/redis-state-store v2.0.5**](README.md)
 
 ***
 

@@ -1,4 +1,4 @@
-[**@purista/core v2.0.0**](../README.md)
+[**@purista/core v2.0.5**](../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: ClientBuilder
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L28)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L39)
 
 ClientBuilder to generate clients, based on service definitions.
 
@@ -20,7 +20,7 @@ ClientBuilder to generate clients, based on service definitions.
 
 > **new ClientBuilder**(`config`?): [`ClientBuilder`](ClientBuilder.md)
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L37)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L48)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:37](https://g
 
 > **config**: `object`
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L29)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L40)
 
 #### buildAs
 
@@ -98,7 +98,7 @@ Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:29](https://g
 
 > **rootPath**: `string`
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L35)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L46)
 
 The root file from where the relative paths are resolved.
 Defaults to current users directory
@@ -107,16 +107,16 @@ Defaults to current users directory
 
 ### build()
 
-> **build**(): `void`
+> **build**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:212](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L212)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:223](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L223)
 
 Runs the tsc against the generated ts source files.
 Depending on settings, it will generate ESM and/or commonJS files
 
 #### Returns
 
-`void`
+`Promise`\<`void`\>
 
 ***
 
@@ -124,7 +124,7 @@ Depending on settings, it will generate ESM and/or commonJS files
 
 > **cleanDistFolder**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:132](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L132)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:143](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L143)
 
 Deletes the content of the output folder.
 Should be called before generating the client
@@ -139,7 +139,7 @@ Should be called before generating the client
 
 > **createIndex**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:142](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L142)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:153](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L153)
 
 Creates a index.ts file which exports the client(s) and types.
 Is used in generated package.json
@@ -154,7 +154,7 @@ Is used in generated package.json
 
 > **createPackageJson**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:164](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L164)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:175](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L175)
 
 Creates a package.json file in the output folder.
 Exports the files which are build by tsc based on generated client files
@@ -169,7 +169,7 @@ Exports the files which are build by tsc based on generated client files
 
 > **destroy**(): `void`
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:791](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L791)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:812](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L812)
 
 Destroys the builder and cleans the event listeners
 
@@ -213,7 +213,7 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:24](https://git
 
 > **generateHEventBridgeClient**(`serviceDefinition`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:687](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L687)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:708](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L708)
 
 Generates the zero-dependency HTTP client source files
 
@@ -233,7 +233,7 @@ Generates the zero-dependency HTTP client source files
 
 > **generateHttpClient**(`serviceDefinition`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:311](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L311)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:332](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L332)
 
 Generates the zero-dependency HTTP client source files
 
@@ -253,7 +253,7 @@ Generates the zero-dependency HTTP client source files
 
 > **getDefinitionPath**(): `string`
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:115](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L115)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:126](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L126)
 
 Resolves the definitions folder path from config with rootPath
 
@@ -269,7 +269,7 @@ path of definitions folder
 
 > **getDefinitionsFromServiceBuilders**(`serviceBuilders`): `Promise`\<[`FullServiceDefinition`](../type-aliases/FullServiceDefinition.md)\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:89](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L89)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:100](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L100)
 
 Gets the definitions from the provided service builders
 
@@ -289,7 +289,7 @@ Gets the definitions from the provided service builders
 
 > **getOutputPath**(): `string`
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:123](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L123)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:134](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L134)
 
 Resolves the output folder path from config with rootPath
 
@@ -305,7 +305,7 @@ path of output folder
 
 > **loadConfig**(`path`?): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:67](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L67)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:78](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L78)
 
 Loads the config fom JSON file.
 If no path is provided, it will try to load the config from purista.client.json in rootPath directory
@@ -326,7 +326,7 @@ If no path is provided, it will try to load the config from purista.client.json 
 
 > **loadDefinitionFiles**(`path`?): `Promise`\<[`FullServiceDefinition`](../type-aliases/FullServiceDefinition.md)\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:278](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L278)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:299](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L299)
 
 Loads the definitions from JSON files
 
@@ -422,7 +422,7 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:28](https://git
 
 > **writeConfig**(`path`?): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:106](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L106)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:117](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L117)
 
 Writes the config to a config file.
 Defaults to purista.client.json in rootPath directory

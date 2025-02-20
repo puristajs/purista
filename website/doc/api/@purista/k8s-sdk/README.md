@@ -1,4 +1,4 @@
-**@purista/k8s-sdk v2.0.0**
+**@purista/k8s-sdk v2.0.5**
 
 ***
 
