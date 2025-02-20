@@ -32,7 +32,7 @@ const generate = async () => {
 		await clientBuilder.createPackageJson()
 
 		// compile the source files
-		clientBuilder.build()
+		await clientBuilder.build()
 	} catch (error) {
 		// biome-ignore lint/suspicious/noConsole: <explanation>
 		console.error(error)
