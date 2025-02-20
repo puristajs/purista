@@ -1,6 +1,6 @@
 {
 	"name": "@purista/httpserver",
-	"version": "2.0.4",
+	"version": "2.0.5",
 	"description": "Simple http server service based on fastify for PURISTA backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {

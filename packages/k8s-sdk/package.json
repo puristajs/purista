@@ -1,6 +1,6 @@
 {
 	"name": "@purista/k8s-sdk",
-	"version": "2.0.4",
+	"version": "2.0.5",
 	"description": "SDK and helper to run PURISTA services in Kubernetes",
 	"homepage": "https://purista.dev",
 	"repository": {
