@@ -1,7 +1,7 @@
 import type { Schema } from '@typeschema/main'
-import type { Service } from '../../Service/Service.impl.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
+import type { ServiceClass } from '../ServiceClass.js'
 import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.js'
 /**
  * CommandFunction is a function which will be triggered when a matching event bridge message is received by the service
@@ -9,7 +9,7 @@ import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.
  * @group Subscription
  */
 export type SubscriptionFunction<
-	ServiceClassType extends Service,
+	ServiceClassType extends ServiceClass,
 	FunctionPayloadType = unknown,
 	FunctionParamsType = unknown,
 	FunctionOutputType = unknown,

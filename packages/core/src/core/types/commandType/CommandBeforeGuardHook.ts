@@ -1,8 +1,8 @@
 import type { Schema } from '@typeschema/main'
-import type { Service } from '../../Service/Service.impl.js'
 import type { EmptyObject } from '../../types/EmptyObject.js'
 import type { InvokeList } from '../../types/InvokeList.js'
 
+import type { ServiceClass } from '../ServiceClass.js'
 import type { CommandFunctionContext } from './CommandFunctionContext.js'
 
 /**
@@ -13,7 +13,7 @@ import type { CommandFunctionContext } from './CommandFunctionContext.js'
  * @group Command
  */
 export type CommandBeforeGuardHook<
-	S extends Service = Service,
+	S extends ServiceClass = ServiceClass,
 	MessagePayloadType = unknown,
 	MessageParamsType = unknown,
 	FunctionPayloadType = unknown,

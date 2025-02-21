@@ -1,11 +1,11 @@
-import type { Service } from '../../Service/Service.impl.js'
+import type { ServiceClass } from '../ServiceClass.js'
 import type { SubscriptionTransformFunctionContext } from './SubscriptionTransformFunctionContext.js'
 
 /**
  * @group Subscription
  */
 export type SubscriptionTransformInputHook<
-	S extends Service,
+	S extends ServiceClass,
 	TransformInputPayload,
 	TransformInputParams,
 	FunctionPayloadType,

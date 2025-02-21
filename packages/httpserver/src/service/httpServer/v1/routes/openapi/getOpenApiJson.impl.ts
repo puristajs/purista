@@ -4,10 +4,8 @@ import { StatusCode } from '@purista/core'
 import type { RouteHandlerMethod, RouteOptions } from 'fastify'
 import type { OpenAPIObject, ParameterObject, RequestBodyObject, SchemaObject } from 'openapi3-ts/oas31'
 import { isReferenceObject } from 'openapi3-ts/oas31'
-
-import type { HttpServerClass } from '../../HttpServerClass.impl.js'
-import type { HttpServerServiceV1ConfigRaw } from '../../httpServerServiceConfig.js'
 import { OPENAPI_DEFAULT_INFO } from '../../httpServerServiceConfig.js'
+import type { IHttpService } from '../../types/IHttpService.js'
 
 /**
  * It creates a route handler that returns the OpenAPI JSON for all routes that are exposed via the
@@ -16,7 +14,7 @@ import { OPENAPI_DEFAULT_INFO } from '../../httpServerServiceConfig.js'
  * available. Defaults to `/api`
  * @returns A route definition for the openApi.json file
  */
-export const getOpenApiJson = function (this: HttpServerClass<HttpServerServiceV1ConfigRaw>): RouteOptions {
+export const getOpenApiJson = function (this: IHttpService): RouteOptions {
 	const paths: Record<string, Record<string, unknown>> = this.config.openApi?.paths ?? {}
 
 	const p = (this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath) as string
