@@ -1,4 +1,10 @@
-import type { CustomMessage, EBMessage, EBMessageType, InstanceId, PrincipalId, TenantId } from '../../core/index.js'
+import type { CustomMessage } from '../../core/types/CustomMessage.js'
+import type { EBMessage } from '../../core/types/EBMessage.js'
+import type { EBMessageType } from '../../core/types/EBMessageType.enum.js'
+import type { InstanceId } from '../../core/types/InstanceId.js'
+import type { PrincipalId } from '../../core/types/PrincipalId.js'
+
+import type { TenantId } from '../../core/types/TenantId.js'
 
 export type SubscriptionStorageEntry = {
 	isMatchingMessageType(input: EBMessageType): boolean

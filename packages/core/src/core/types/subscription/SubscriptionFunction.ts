@@ -1,5 +1,5 @@
 import type { Schema } from '@typeschema/main'
-import type { Service } from '../../Service/index.js'
+import type { Service } from '../../Service/Service.impl.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.js'

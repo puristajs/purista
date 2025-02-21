@@ -1,5 +1,5 @@
 import type { EBMessageAddress } from '../types/EBMessageAddress.js'
-import type { InvokeFunction } from '../types/index.js'
+import type { InvokeFunction } from '../types/InvokeFunction.js'
 
 const noop = () => {
 	// noop

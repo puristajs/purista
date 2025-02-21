@@ -3,7 +3,9 @@ import { HttpClient, StatusCode, UnhandledError } from '@purista/core'
 import { SECRET_TYPE } from './constants.js'
 import { decrypt } from './decrypt.impl.js'
 import { encrypt } from './encrypt.impl.js'
-import type { ClientConfig, HttpClientConfigCustom, Secret, TokenData } from './types/index.js'
+import type { ClientConfig, HttpClientConfigCustom } from './types/ClientConfig.js'
+import type { Secret } from './types/Secret.js'
+import type { TokenData } from './types/TokenData.js'
 
 /**
  * The internal http client to connect to the Infisical server.

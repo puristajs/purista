@@ -2,14 +2,12 @@ import type { Schema } from '@typeschema/main'
 import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
 
-import type {
-	EBMessage,
-	EBMessageAddress,
-	FromEmitToOtherType,
-	FromInvokeToOtherType,
-	InvokeList,
-	SubscriptionFunctionContext,
-} from '../core/index.js'
+import type { EBMessage } from '../core/types/EBMessage.js'
+import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
+import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
+import type { FromInvokeToOtherType } from '../core/types/FromInvokeToOtherType.js'
+import type { InvokeList } from '../core/types/InvokeList.js'
+import type { SubscriptionFunctionContext } from '../core/types/subscription/SubscriptionFunctionContext.js'
 import { getLoggerMock } from './getLogger.mock.js'
 
 /**

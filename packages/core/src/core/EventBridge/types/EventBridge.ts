@@ -1,14 +1,12 @@
-import type {
-	Command,
-	CommandDefinitionMetadataBase,
-	CommandErrorResponse,
-	CommandSuccessResponse,
-	CustomMessage,
-	DefinitionEventBridgeConfig,
-	EBMessage,
-	EBMessageAddress,
-	Subscription,
-} from '../../index.js'
+import type { CustomMessage } from '../../types/CustomMessage.js'
+import type { DefinitionEventBridgeConfig } from '../../types/DefinitionEventBridgeConfig.js'
+import type { EBMessage } from '../../types/EBMessage.js'
+import type { EBMessageAddress } from '../../types/EBMessageAddress.js'
+import type { Command } from '../../types/commandType/Command.js'
+import type { CommandDefinitionMetadataBase } from '../../types/commandType/CommandDefinitionMetadataBase.js'
+import type { CommandErrorResponse } from '../../types/commandType/CommandErrorResponse.js'
+import type { CommandSuccessResponse } from '../../types/commandType/CommandSuccessResponse.js'
+import type { Subscription } from '../../types/subscription/Subscription.js'
 
 /**
  * Event bridge interface

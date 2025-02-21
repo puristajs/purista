@@ -1,4 +1,4 @@
-import type { CommandDefinitionMetadataBase } from '../core/index.js'
+import type { CommandDefinitionMetadataBase } from '../core/types/commandType/CommandDefinitionMetadataBase.js'
 import { schemaObjectToTsType } from '../helper/schemaObjectToTsType/transform.js'
 import { convertToPascalCase } from '../helper/string/convertToPascalCase.impl.js'
 import { getWriter } from './getWriter.impl.js'

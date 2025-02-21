@@ -41,9 +41,13 @@ import { deserializeOtpFromAmqpHeader } from './deserializeOtpFromAmqpHeader.imp
 import { getCommandQueueName } from './getCommandQueueName.impl.js'
 import { getDefaultConfig } from './getDefaultConfig.impl.js'
 import { getSubscriptionQueueName } from './getSubscriptionQueueName.impl.js'
-import { jsonEncoder, plainEncrypter } from './payloadHandling/index.js'
+import { jsonEncoder } from './payloadHandling/jsonEncoder.js'
+import { plainEncrypter } from './payloadHandling/plainEncrypter.js'
+
 import { serializeOtpForAmqpHeader } from './serializeOtpForAmqpHeader.impl.js'
-import type { AmqpBridgeConfig, Encoder, Encrypter } from './types/index.js'
+import type { AmqpBridgeConfig } from './types/AmqpBridgeConfig.js'
+import type { Encoder } from './types/Encoder.js'
+import type { Encrypter } from './types/Encrypter.js'
 
 /**
  * The AMQP event bridge connects to a AMQP broker.

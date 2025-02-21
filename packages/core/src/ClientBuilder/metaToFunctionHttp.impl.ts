@@ -1,4 +1,4 @@
-import type { HttpExposedServiceMeta } from '../core/index.js'
+import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
 import { schemaObjectToTsType } from '../helper/schemaObjectToTsType/transform.js'
 import { convertToPascalCase } from '../helper/string/convertToPascalCase.impl.js'
 import { getWriter } from './getWriter.impl.js'

@@ -12,10 +12,20 @@ import {
 	ATTR_URL_FULL,
 } from '@opentelemetry/semantic-conventions'
 
-import type { EmptyObject, Logger } from '../core/index.js'
-import { HandledError, PuristaSpanTag, StatusCode, UnhandledError, initLogger } from '../core/index.js'
+import type { EmptyObject } from '../core/types/EmptyObject.js'
+import type { Logger } from '../core/types/Logger.js'
+
+import { HandledError } from '../core/Error/HandledError.impl.js'
+import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
+import { PuristaSpanTag } from '../core/types/PuristaSpanTag.enum.js'
+import { StatusCode } from '../core/types/StatusCode.enum.js'
+
+import { initLogger } from '../DefaultLogger/initLogger.impl.js'
 import { puristaVersion } from '../version.js'
-import type { AuthCredentials, HttpClientConfig, HttpClientRequestOptions, RestClient } from './types/index.js'
+import type { AuthCredentials } from './types/AuthCredentials.js'
+import type { HttpClientConfig } from './types/HttpClientConfig.js'
+import type { HttpClientRequestOptions } from './types/HttpClientRequestOptions.js'
+import type { RestClient } from './types/RestClient.js'
 
 /**
  * A HTTP client which will provide simple methods for GET, POST, PATCH, PUT and DELETE.

@@ -27,11 +27,11 @@ import {
 } from '@purista/core'
 import { HTTP } from 'cloudevents'
 
-import type { HttpEventBridge } from './HttpEventBridge.impl.js'
-import type { HttpEventBridgeConfig, RouterFunction } from './types/index.js'
+import type { IHttpEventBridge } from './types/IHttpEventBridge.js'
+import type { RouterFunction } from './types/RouterFunction.js'
 
 export const getCommandHandler = function (
-	this: HttpEventBridge<HttpEventBridgeConfig>,
+	this: IHttpEventBridge,
 	address: EBMessageAddress,
 	cb: (
 		message: Command,

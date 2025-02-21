@@ -1,4 +1,4 @@
-import { StatusCode } from '../types/index.js'
+import { StatusCode } from '../types/StatusCode.enum.js'
 
 /**
  *

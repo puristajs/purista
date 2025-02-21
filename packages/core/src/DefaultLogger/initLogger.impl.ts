@@ -1,7 +1,8 @@
 import type { LoggerOptions } from 'pino'
 import { pino } from 'pino'
 
-import type { LogLevelName, Logger } from '../core/types/index.js'
+import type { LogLevelName } from '../core/types/LogLevelName.js'
+import type { Logger } from '../core/types/Logger.js'
 import { puristaVersion } from '../version.js'
 import { DefaultLogger } from './DefaultLogger.impl.js'
 import { getDefaultLogLevel } from './getDefaultLogLevel.js'

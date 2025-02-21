@@ -1,4 +1,6 @@
-import type { CommandDefinition, Service, SubscriptionDefinition } from '../../core/index.js'
+import type { Service } from '../../core/Service/Service.impl.js'
+import type { CommandDefinition } from '../../core/types/commandType/CommandDefinition.js'
+import type { SubscriptionDefinition } from '../../core/types/subscription/SubscriptionDefinition.js'
 
 export type FullServiceDefinition<S extends Service = Service> = {
 	[serviceName: string]: {

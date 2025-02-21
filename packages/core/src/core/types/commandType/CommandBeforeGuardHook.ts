@@ -1,5 +1,7 @@
 import type { Schema } from '@typeschema/main'
-import type { EmptyObject, InvokeList, Service } from '../../index.js'
+import type { Service } from '../../Service/Service.impl.js'
+import type { EmptyObject } from '../../types/EmptyObject.js'
+import type { InvokeList } from '../../types/InvokeList.js'
 
 import type { CommandFunctionContext } from './CommandFunctionContext.js'
 

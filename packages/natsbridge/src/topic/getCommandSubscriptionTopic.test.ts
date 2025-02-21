@@ -1,7 +1,7 @@
 import { getLoggerMock, safeBind } from '@purista/core'
 
-import type { NatsBridge } from '../NatsBridge.js'
 import { getDefaultNatsBridgeConfig } from '../getDefaultNatsBridgeConfig.js'
+import type { INatsBridge } from '../types/INatsBridge.js'
 import { getCommandSubscriptionTopic } from './getCommandSubscriptionTopic.impl.js'
 
 describe('getCommandSubscriptionTopic', () => {
@@ -11,7 +11,7 @@ describe('getCommandSubscriptionTopic', () => {
 			config: {
 				...getDefaultNatsBridgeConfig(),
 			},
-		} as any as NatsBridge
+		} as any as INatsBridge
 
 		const topic = safeBind(
 			getCommandSubscriptionTopic,

@@ -12,8 +12,8 @@ import {
 
 import { deserializeOtpFromMqtt } from '../deserializeOtpFromMqtt.impl.js'
 import { serializeOtpToMqtt } from '../serializeOtpToMqtt.impl.js'
-import { getTopicName } from '../topic/index.js'
-import type { IncomingMessageFunction } from '../types/index.js'
+import { getTopicName } from '../topic/getTopicName.impl.js'
+import type { IncomingMessageFunction } from '../types/IncomingMessageFunction.js'
 
 export const getSubscriptionHandler = (
 	_subscription: Subscription,

@@ -3,7 +3,7 @@ import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 import type { KV, NatsConnection } from 'nats'
 import { JSONCodec, connect } from 'nats'
 
-import type { NatsStateStoreConfig } from './types/index.js'
+import type { NatsStateStoreConfig } from './types/NatsStateStoreConfig.js'
 
 /**
 A state store for using NATS (with JetStream) as storage.  

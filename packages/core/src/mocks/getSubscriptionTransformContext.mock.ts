@@ -1,7 +1,10 @@
 import type { SinonSandbox } from 'sinon'
 import { stub } from 'sinon'
 
-import type { EBMessage, EmptyObject, SubscriptionTransformFunctionContext } from '../core/index.js'
+import type { EBMessage } from '../core/types/EBMessage.js'
+import type { EmptyObject } from '../core/types/EmptyObject.js'
+import type { SubscriptionTransformFunctionContext } from '../core/types/subscription/SubscriptionTransformFunctionContext.js'
+
 import { getLoggerMock } from './getLogger.mock.js'
 
 /**

@@ -1,4 +1,4 @@
-import type { DaprClientConfig } from '../../DaprClient/index.js'
+import type { DaprClientConfig } from '../../DaprClient/types/DaprClientConfig.js'
 
 /**
  * Dapr secret store configuration

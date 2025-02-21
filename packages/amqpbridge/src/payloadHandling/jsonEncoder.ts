@@ -1,4 +1,4 @@
-import type { Encoder } from '../types/index.js'
+import type { Encoder } from '../types/Encoder.js'
 
 /**
  * The JSON encoder.

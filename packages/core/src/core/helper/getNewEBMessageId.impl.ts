@@ -1,4 +1,4 @@
-import type { EBMessageId } from '../types/index.js'
+import type { EBMessageId } from '../types/EBMessageId.js'
 import { getUniqueId } from './getUniqueId.impl.js'
 
 /**

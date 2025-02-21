@@ -1,4 +1,5 @@
-import { MqttBridge, puristaVersion } from './index.js'
+import { MqttBridge } from './MqttEventBridge.js'
+import { puristaVersion } from './version.js'
 
 describe('exports version', () => {
 	it('has a version', () => {

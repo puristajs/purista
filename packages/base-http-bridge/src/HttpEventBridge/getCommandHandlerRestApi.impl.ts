@@ -30,11 +30,11 @@ import {
 } from '@purista/core'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
-import type { HttpEventBridge } from './HttpEventBridge.impl.js'
-import type { HttpEventBridgeConfig, RouterFunction } from './types/index.js'
+import type { IHttpEventBridge } from './types/IHttpEventBridge.js'
+import type { RouterFunction } from './types/RouterFunction.js'
 
 export const getCommandHandlerRestApi = function (
-	this: HttpEventBridge<HttpEventBridgeConfig>,
+	this: IHttpEventBridge,
 	address: EBMessageAddress,
 	cb: (
 		message: Command,

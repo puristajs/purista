@@ -1,6 +1,6 @@
 import type { Complete, EventBridgeConfig } from '@purista/core'
 
-import type { HttpEventBridgeConfig } from './types/index.js'
+import type { HttpEventBridgeConfig } from './types/HttpEventBridgeConfig.js'
 
 export const getDefaultHttpEventBridgeConfig = (): EventBridgeConfig<Omit<HttpEventBridgeConfig, 'serve'>> => {
 	const config: Complete<Omit<HttpEventBridgeConfig, 'serve'>> = {

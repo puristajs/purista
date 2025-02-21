@@ -2,12 +2,12 @@ import { HttpEventBridge, getDefaultHttpEventBridgeConfig } from '@purista/base-
 import type { CustomMessage, EBMessage, EventBridge, EventBridgeConfig, Subscription } from '@purista/core'
 import { EventBridgeEventNames, StatusCode, UnhandledError, initLogger, safeBind } from '@purista/core'
 
-import { DaprClient } from '../DaprClient/index.js'
-import type { DaprPubSubType } from '../types/index.js'
+import { DaprClient } from '../DaprClient/DaprClient.impl.js'
+import type { DaprPubSubType } from '../types/pubsub/DaprPubSub.type.js'
 import { puristaVersion } from '../version.js'
 import { getDefaultConfig } from './getDefaultConfig.impl.js'
-import { configRoute } from './routes/index.js'
-import type { DaprEventBridgeConfig } from './types/index.js'
+import { configRoute } from './routes/config.impl.js'
+import type { DaprEventBridgeConfig } from './types/DaprEventBridgeConfig.js'
 
 /**
  * The DaprEventBridge connects to the Dapr sidecar container.

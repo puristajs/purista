@@ -28,10 +28,10 @@ import type { Methods } from 'trouter'
 import { Trouter } from 'trouter'
 
 import type { HttpServerServiceV1ConfigRaw } from './httpServerServiceConfig.js'
-import { OPEN_API_ROUTE_FUNCTIONS } from './routes/index.js'
+import { OPEN_API_ROUTE_FUNCTIONS } from './routes/openapi/index.js'
+import { addHeaders } from './subscription/serviceCommandsToRestApi/helper/addHeaders.impl.js'
 import { addSpanTags } from './subscription/serviceCommandsToRestApi/helper/addSpanTags.js'
-import { addHeaders } from './subscription/serviceCommandsToRestApi/helper/index.js'
-import type { BeforeResponseHook } from './types/index.js'
+import type { BeforeResponseHook } from './types/BeforeResponseHook.js'
 
 /**
  * A simple http server based on fastify.

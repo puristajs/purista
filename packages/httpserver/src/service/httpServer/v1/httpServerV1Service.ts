@@ -1,7 +1,7 @@
 import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
 
 import { httpServerV1ServiceBuilder } from './httpServerV1ServiceBuilder.js'
-import { serviceCommandsToRestApiSubscriptionBuilder } from './subscription/serviceCommandsToRestApi/index.js'
+import { serviceCommandsToRestApiSubscriptionBuilder } from './subscription/serviceCommandsToRestApi/serviceCommandsToRestApiSubscriptionBuilder.js'
 
 // bring service config definition, command definitions and subscription definitions together in the service
 // add only definitions and no further service config here

@@ -1,9 +1,16 @@
 import { SpanStatusCode } from '@opentelemetry/api'
 import { validate } from '@typeschema/main'
 
-import { HandledError, UnhandledError } from '../Error/index.js'
-import type { EBMessage, Logger, SubscriptionDefinition } from '../types/index.js'
-import { StatusCode, isCommand } from '../types/index.js'
+import { HandledError } from '../Error/HandledError.impl.js'
+import { UnhandledError } from '../Error/UnhandledError.impl.js'
+
+import type { EBMessage } from '../types/EBMessage.js'
+import type { Logger } from '../types/Logger.js'
+import type { SubscriptionDefinition } from '../types/subscription/SubscriptionDefinition.js'
+
+import { StatusCode } from '../types/StatusCode.enum.js'
+import { isCommand } from '../types/commandType/isCommand.impl.js'
+
 import type { Service } from './Service.impl.js'
 
 export const subscriptionTransformInput = async <S extends Service = Service>(

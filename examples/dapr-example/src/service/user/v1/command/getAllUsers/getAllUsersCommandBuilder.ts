@@ -1,5 +1,5 @@
-import type { User } from '../../../../../types/index.js'
-import { StateStoreKey } from '../../../../../types/index.js'
+import { StateStoreKey } from '../../../../../types/StateStoreKey.enum.js'
+import type { User } from '../../../../../types/User.js'
 import { userV1ServiceBuilder } from '../../userV1ServiceBuilder.js'
 import {
 	userV1GetAllUsersInputParameterSchema,

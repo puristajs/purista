@@ -3,11 +3,11 @@ import { join } from 'node:path'
 import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
 import { HttpClient, StateStoreBaseClass } from '@purista/core'
 
-import type { DaprClientConfig } from '../DaprClient/index.js'
-import { getDefaultClientConfig } from '../DaprClient/index.js'
-import { DAPR_API_VERSION } from '../types/index.js'
+import { getDefaultClientConfig } from '../DaprClient/getDefaultClientConfig.impl.js'
+import type { DaprClientConfig } from '../DaprClient/types/DaprClientConfig.js'
+import { DAPR_API_VERSION } from '../types/constants.js'
 import { puristaVersion } from '../version.js'
-import type { DaprStateStoreConfig } from './types/index.js'
+import type { DaprStateStoreConfig } from './types/DaprStateStoreConfig.js'
 
 /**
  * DaprStateStore is an adapter which connects to the state store provided by the underlaying Dapr infrastructure

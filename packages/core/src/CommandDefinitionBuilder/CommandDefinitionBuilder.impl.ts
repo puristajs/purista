@@ -1,34 +1,34 @@
 import type { Infer, InferIn, Schema } from '@typeschema/main'
 import type { SinonSandbox } from 'sinon'
 
-import type {
-	CommandAfterGuardHook,
-	CommandBeforeGuardHook,
-	CommandDefinition,
-	CommandDefinitionMetadataBase,
-	CommandFunction,
-	CommandTransformInputHook,
-	CommandTransformOutputHook,
-	Complete,
-	ContentType,
-	DefinitionEventBridgeConfig,
-	GetMessageParamsType,
-	GetMessagePayloadType,
-	HttpExposedServiceMeta,
-	InferTypeOrEmptyObject,
-	InvokeList,
-	QueryParameter,
-	Service,
-	SupportedHttpMethod,
-} from '../core/index.js'
-import { StatusCode, UnhandledError } from '../core/index.js'
-import {
-	type NonEmptyString,
-	convertEmitValidationsToSchema,
-	convertInvokeValidationsToSchema,
-} from '../helper/index.js'
-import { getCommandContextMock, getCommandTransformContextMock } from '../mocks/index.js'
-import { validationToSchema } from '../zodOpenApi/index.js'
+import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
+import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
+import type { QueryParameter } from '../core/HttpServer/types/QueryParameter.js'
+import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
+import type { Service } from '../core/Service/Service.impl.js'
+import type { Complete } from '../core/types/Complete.js'
+import type { ContentType } from '../core/types/ContentType.js'
+import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventBridgeConfig.js'
+import type { GetMessageParamsType } from '../core/types/GetMessageParamsType.js'
+import type { GetMessagePayloadType } from '../core/types/GetMessagePayloadType.js'
+import type { InferTypeOrEmptyObject } from '../core/types/InferTypeOrEmptyObject.js'
+import type { InvokeList } from '../core/types/InvokeList.js'
+import { StatusCode } from '../core/types/StatusCode.enum.js'
+import type { CommandAfterGuardHook } from '../core/types/commandType/CommandAfterGuardHook.js'
+import type { CommandBeforeGuardHook } from '../core/types/commandType/CommandBeforeGuardHook.js'
+import type { CommandDefinition } from '../core/types/commandType/CommandDefinition.js'
+import type { CommandDefinitionMetadataBase } from '../core/types/commandType/CommandDefinitionMetadataBase.js'
+import type { CommandFunction } from '../core/types/commandType/CommandFunction.js'
+import type { CommandTransformOutputHook } from '../core/types/commandType/CommandTransformOutputHook.js'
+
+import { convertEmitValidationsToSchema } from '../helper/convertEmitValidationsToSchema.impl.js'
+import { convertInvokeValidationsToSchema } from '../helper/convertInvokeValidationsToSchema.impl.js'
+import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
+import { getCommandContextMock } from '../mocks/getCommandContext.mock.js'
+import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
+
+import type { CommandTransformInputHook } from '../core/types/commandType/CommandTransformInputHook.js'
+import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { CommandDefinitionBuilderTypes } from './CommandDefinitionBuilderTypes.js'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
 

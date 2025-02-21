@@ -1,11 +1,9 @@
-import {
-	type Command,
-	type CommandErrorResponse,
-	type HandledError,
-	type UnhandledError,
-	createErrorResponse,
-	getNewInstanceId,
-} from '../../core/index.js'
+import type { HandledError } from '../../core/Error/HandledError.impl.js'
+import type { UnhandledError } from '../../core/Error/UnhandledError.impl.js'
+import { createErrorResponse } from '../../core/helper/createErrorResponse.impl.js'
+import { getNewInstanceId } from '../../core/helper/getNewInstanceId.impl.js'
+import type { Command } from '../../core/types/commandType/Command.js'
+import type { CommandErrorResponse } from '../../core/types/commandType/CommandErrorResponse.js'
 import { getCommandMessageMock } from './getCommandMessage.mock.js'
 
 /**

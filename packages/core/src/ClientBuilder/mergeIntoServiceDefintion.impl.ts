@@ -1,4 +1,4 @@
-import type { FullServiceDefinition } from '../helper/index.js'
+import type { FullServiceDefinition } from '../helper/types/FullServiceDefinition.js'
 
 export const mergeIntoServiceDefintion = (current: FullServiceDefinition, add: FullServiceDefinition) => {
 	for (const [serviceName, value] of Object.entries(add)) {

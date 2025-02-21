@@ -1,4 +1,6 @@
-import type { EmptyObject, Service } from '../../index.js'
+import type { Service } from '../../Service/Service.impl.js'
+import type { EmptyObject } from '../../types/EmptyObject.js'
+
 import type { CommandTransformFunctionContext } from './CommandTransformFunctionContext.js'
 
 /**

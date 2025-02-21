@@ -2,10 +2,9 @@ import { join } from 'node:path/posix'
 
 import type { Command, EBMessage } from '@purista/core'
 import { convertToSnakeCase } from '@purista/core'
+import type { IMqttBridge } from '../types/IMqttBridge.js'
 
-import type { MqttBridge } from '../MqttEventBridge.js'
-
-type GetTopicNameFn = (this: MqttBridge, message: EBMessage) => string
+type GetTopicNameFn = (this: IMqttBridge, message: EBMessage) => string
 
 /**
  * Calculates the MQTT topic name for a message which should be sent.

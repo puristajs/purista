@@ -45,7 +45,8 @@ import { getCommandHandlerRestApi } from './getCommandHandlerRestApi.impl.js'
 import { getDefaultHttpEventBridgeConfig } from './getDefaultHttpEventBridgeConfig.impl.js'
 import { getSubscriptionHandler } from './getSubscriptionHandler.impl.js'
 import { healthzRoute } from './healthzRoute.impl.js'
-import type { HttpEventBridgeClient, HttpEventBridgeConfig } from './types/index.js'
+import type { HttpEventBridgeClient } from './types/HttpEventBridgeClient.js'
+import type { HttpEventBridgeConfig } from './types/HttpEventBridgeConfig.js'
 
 /**
  * The HTTP event bridge is a generic event bridge.

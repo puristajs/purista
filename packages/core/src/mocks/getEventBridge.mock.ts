@@ -1,7 +1,7 @@
 import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
 
-import type { EventBridge } from '../core/index.js'
+import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
 
 /**
  * Mocks the eventBridge and stubs the methods

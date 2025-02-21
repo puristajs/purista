@@ -1,10 +1,11 @@
 import type { Schema } from '@typeschema/main'
 import type { SchemaObject } from 'openapi3-ts/oas31'
 
-import type { InvokeList, Service } from '../../index.js'
+import type { Service } from '../../Service/Service.impl.js'
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { FromEmitToOtherType } from '../FromEmitToOtherType.js'
 import type { FromInvokeToOtherType } from '../FromInvokeToOtherType.js'
+import type { InvokeList } from '../InvokeList.js'
 import type { CommandAfterGuardHook } from './CommandAfterGuardHook.js'
 import type { CommandBeforeGuardHook } from './CommandBeforeGuardHook.js'
 import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase.js'

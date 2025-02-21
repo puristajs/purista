@@ -1,4 +1,4 @@
-import type { Logger } from '../core/index.js'
+import type { Logger } from '../core/types/Logger.js'
 import { DefaultSecretStore } from './DefaultSecretStore.impl.js'
 
 export const initDefaultSecretStore = (options: { logger: Logger }): DefaultSecretStore => {

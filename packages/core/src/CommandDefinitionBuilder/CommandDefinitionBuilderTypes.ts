@@ -1,5 +1,6 @@
 import type { Schema } from '@typeschema/main'
-import type { EmptyObject, InvokeList } from '../core/index.js'
+import type { EmptyObject } from '../core/types/EmptyObject.js'
+import type { InvokeList } from '../core/types/InvokeList.js'
 
 export type CommandDefinitionBuilderTypes<
 	PayloadSchema extends Schema = Schema,

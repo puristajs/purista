@@ -1,4 +1,4 @@
-import type { EBMessageAddress } from '../types/index.js'
+import type { EBMessageAddress } from '../types/EBMessageAddress.js'
 
 /**
  *

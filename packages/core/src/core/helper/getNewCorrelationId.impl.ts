@@ -1,4 +1,4 @@
-import type { CorrelationId } from '../types/index.js'
+import type { CorrelationId } from '../types/CorrelationId.js'
 import { getUniqueId } from './getUniqueId.impl.js'
 
 /**

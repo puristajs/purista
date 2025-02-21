@@ -3,40 +3,46 @@ import { fail } from 'node:assert'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { type Infer, type InferIn, type Schema, validate } from '@typeschema/main'
 
+import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/CommandDefinitionBuilder.impl.js'
 import type { CommandDefinitionBuilderTypes } from '../CommandDefinitionBuilder/CommandDefinitionBuilderTypes.js'
-import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
-import { initDefaultConfigStore } from '../DefaultConfigStore/index.js'
-import { initDefaultSecretStore } from '../DefaultSecretStore/index.js'
-import { initDefaultStateStore } from '../DefaultStateStore/index.js'
-import {
-	SubscriptionDefinitionBuilder,
-	type SubscriptionDefinitionBuilderTypes,
-} from '../SubscriptionDefinitionBuilder/index.js'
+import { initDefaultConfigStore } from '../DefaultConfigStore/initDefaultConfigStore.impl.js'
+import { initLogger } from '../DefaultLogger/initLogger.impl.js'
+import { initDefaultSecretStore } from '../DefaultSecretStore/initDefaultSecretStore.impl.js'
+import { initDefaultStateStore } from '../DefaultStateStore/initDefaultStateStore.impl.js'
+import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.js'
+import type { SubscriptionDefinitionBuilderTypes } from '../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.js'
+import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
+import { Service } from '../core/Service/Service.impl.js'
 import type {
 	CommandDefinitionList,
 	CommandDefinitionListResolved,
-	Complete,
-	ConfigStore,
-	EmptyObject,
-	EventBridge,
-	InvokeList,
-	LogLevelName,
-	Logger,
-	NeverObject,
-	Prettify,
-	SecretStore,
-	ServiceBuilderTypes,
-	ServiceClassTypes,
-	ServiceConstructorInput,
-	ServiceInfoType,
-	SetNewTypeValue,
-	SetNewTypeValues,
-	StateStore,
+} from '../core/types/commandType/CommandDefinitionList.js'
+
+import type { ConfigStore } from '../core/ConfigStore/types/ConfigStore.js'
+import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
+import type { SecretStore } from '../core/SecretStore/types/SecretStore.js'
+import type { StateStore } from '../core/StateStore/types/StateStore.js'
+import type { Complete } from '../core/types/Complete.js'
+import type { EmptyObject } from '../core/types/EmptyObject.js'
+import type { InvokeList } from '../core/types/InvokeList.js'
+import type { LogLevelName } from '../core/types/LogLevelName.js'
+import type { Logger } from '../core/types/Logger.js'
+import type { NeverObject } from '../core/types/NeverObject.js'
+import type { Prettify } from '../core/types/Prettify.js'
+import type { ServiceBuilderTypes } from '../core/types/ServiceBuilderTypes.js'
+import type { ServiceClassTypes } from '../core/types/ServiceClassTypes.js'
+import type { ServiceConstructorInput } from '../core/types/ServiceConstructorInput.js'
+import type { SetNewTypeValue, SetNewTypeValues } from '../core/types/SetNewTypeValue.js'
+import type { ServiceInfoType } from '../core/types/infoType/ServiceInfoType.js'
+import type {
 	SubscriptionDefinitionList,
 	SubscriptionDefinitionListResolved,
-} from '../core/index.js'
-import { Service, StatusCode, UnhandledError, initLogger } from '../core/index.js'
-import type { InstanceOrType, NonEmptyString } from '../helper/index.js'
+} from '../core/types/subscription/SubscriptionDefinitionList.js'
+
+import { StatusCode } from '../core/types/StatusCode.enum.js'
+
+import type { InstanceOrType } from '../helper/types/InstanceOrType.js'
+import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 
 export type Newable<T extends Service, S extends ServiceClassTypes> = new (config: ServiceConstructorInput<S>) => T
 
