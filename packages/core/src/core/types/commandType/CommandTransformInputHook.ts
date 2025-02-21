@@ -1,5 +1,5 @@
-import type { Service } from '../../Service/Service.impl.js'
 import type { EmptyObject } from '../../types/EmptyObject.js'
+import type { ServiceClass } from '../ServiceClass.js'
 
 import type { CommandTransformFunctionContext } from './CommandTransformFunctionContext.js'
 
@@ -13,7 +13,7 @@ import type { CommandTransformFunctionContext } from './CommandTransformFunction
  * @group Command
  */
 export type CommandTransformInputHook<
-	S extends Service,
+	S extends ServiceClass,
 	MessagePayloadType,
 	MessageParamsType,
 	TransformInputPayload,

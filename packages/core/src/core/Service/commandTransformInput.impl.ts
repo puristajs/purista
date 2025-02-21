@@ -8,10 +8,10 @@ import type { Logger } from '../types/Logger.js'
 import type { Command } from '../types/commandType/Command.js'
 import type { CommandDefinition } from '../types/commandType/CommandDefinition.js'
 
+import type { ServiceClass } from '../types/ServiceClass.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
-import type { Service } from './Service.impl.js'
 
-export const commandTransformInput = async <S extends Service>(
+export const commandTransformInput = async <S extends ServiceClass>(
 	serviceInstance: S,
 	logger: Logger,
 	command: CommandDefinition<S, any, any, any, any, any, any, any, any, any, any, any, any, any>,

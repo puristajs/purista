@@ -1,7 +1,6 @@
 import type { Schema } from '@typeschema/main'
 import type { SchemaObject } from 'openapi3-ts/oas31'
 
-import type { Service } from '../../Service/Service.impl.js'
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { EBMessageType } from '../EBMessageType.enum.js'
 import type { FromEmitToOtherType } from '../FromEmitToOtherType.js'
@@ -9,6 +8,7 @@ import type { FromInvokeToOtherType } from '../FromInvokeToOtherType.js'
 import type { InstanceId } from '../InstanceId.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { PrincipalId } from '../PrincipalId.js'
+import type { ServiceClass } from '../ServiceClass.js'
 import type { TenantId } from '../TenantId.js'
 import type { SubscriptionAfterGuardHook } from './SubscriptionAfterGuardHook.js'
 import type { SubscriptionBeforeGuardHook } from './SubscriptionBeforeGuardHook.js'
@@ -23,7 +23,7 @@ import type { SubscriptionTransformOutputHook } from './SubscriptionTransformOut
  * @group Subscription
  */
 export type SubscriptionDefinition<
-	S extends Service,
+	S extends ServiceClass,
 	TransformInputPayload,
 	TransformInputParams,
 	FunctionPayloadType,

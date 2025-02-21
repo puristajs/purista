@@ -8,12 +8,11 @@ import type { EBMessage } from '../types/EBMessage.js'
 import type { Logger } from '../types/Logger.js'
 import type { SubscriptionDefinition } from '../types/subscription/SubscriptionDefinition.js'
 
+import type { ServiceClass } from '../types/ServiceClass.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import { isCommand } from '../types/commandType/isCommand.impl.js'
 
-import type { Service } from './Service.impl.js'
-
-export const subscriptionTransformInput = async <S extends Service = Service>(
+export const subscriptionTransformInput = async <S extends ServiceClass = ServiceClass>(
 	serviceInstance: S,
 	logger: Logger,
 	subscription: SubscriptionDefinition<S, any, any, any, any, any, any, any, any, any, any, any>,

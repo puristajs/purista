@@ -1,9 +1,9 @@
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 import type { Tracer } from '@opentelemetry/sdk-trace-node'
 
+import type { ContextBase } from './ContextBase.js'
+import type { Logger } from './Logger.js'
 import type { ServiceClassTypes } from './ServiceClassTypes.js'
-import type { CommandDefinition } from './commandType/CommandDefinition.js'
-import type { SubscriptionDefinition } from './subscription/SubscriptionDefinition.js'
 
 /**
  * The ServiceClass interface
@@ -60,15 +60,20 @@ export interface ServiceClass<S extends ServiceClassTypes = ServiceClassTypes> {
 	 * Registers a new command for the service
 	 * @param commandDefinition the service command definition
 	 */
+	/* commented out to prevent cycling deps
 	registerCommand(
 		commandDefinition: CommandDefinition<any, any, any, any, any, any, any, any, any, any, any, any, any>,
 	): Promise<void>
-
+*/
 	/**
 	 * Registers a new subscription for the service
 	 * @param subscriptionDefinition the subscription definition
 	 */
+	/* commented out to prevent cycling deps
 	registerSubscription(
 		subscriptionDefinition: SubscriptionDefinition<any, any, any, any, any, any, any, any, any, any, any>,
 	): Promise<void>
+  */
+
+	getContextFunctions(logger: Logger): ContextBase
 }

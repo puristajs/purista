@@ -1,12 +1,10 @@
 import { posix } from 'node:path'
 
 import type { RouteHandlerMethod, RouteOptions } from 'fastify'
-
-import type { HttpServerClass } from '../../HttpServerClass.impl.js'
-import type { HttpServerServiceV1ConfigRaw } from '../../httpServerServiceConfig.js'
+import type { IHttpService } from '../../types/IHttpService.js'
 import { getJsInit } from './getJsInit.impl.js'
 
-export const getOpenApiDocuJsInit = function (this: HttpServerClass<HttpServerServiceV1ConfigRaw>): RouteOptions {
+export const getOpenApiDocuJsInit = function (this: IHttpService): RouteOptions {
 	const path = (this.config.openApi?.path ? this.config.openApi.path : this.config.apiMountPath) as string
 	const url = posix.join(path, '/initializer.js')
 
