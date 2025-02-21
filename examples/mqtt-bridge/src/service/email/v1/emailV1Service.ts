@@ -1,7 +1,7 @@
 import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
 
 import { emailV1ServiceBuilder } from './emailV1ServiceBuilder.js'
-import { sendWelcomeEmailSubscriptionBuilder } from './subscription/sendWelcomeEmail/index.js'
+import { sendWelcomeEmailSubscriptionBuilder } from './subscription/sendWelcomeEmail/sendWelcomeEmailSubscriptionBuilder.js'
 
 // bring service config definition, command definitions and subscription definitions together in the service
 // add only definitions and no further service config here

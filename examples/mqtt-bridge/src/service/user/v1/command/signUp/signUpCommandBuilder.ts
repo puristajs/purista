@@ -2,8 +2,8 @@ import { randomUUID } from 'node:crypto'
 
 import { HandledError, StatusCode } from '@purista/core'
 
-import type { User } from '../../../../../types/index.js'
-import { StateStoreKey } from '../../../../../types/index.js'
+import { StateStoreKey } from '../../../../../types/StateStoreKey.enum.js'
+import type { User } from '../../../../../types/User.js'
 import { ServiceEvent } from '../../../../ServiceEvent.enum.js'
 import { userV1ServiceBuilder } from '../../userV1ServiceBuilder.js'
 import {

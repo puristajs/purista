@@ -1,6 +1,6 @@
 import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
 
-import { pingCommandBuilder } from './command/ping/index.js'
+import { pingCommandBuilder } from './command/ping/pingCommandBuilder.js'
 import { theServiceServiceBuilder } from './theServiceServiceBuilder.js'
 
 // bring service config definition, command definitions and subscription definitions together in the service

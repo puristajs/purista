@@ -8,8 +8,8 @@ import { httpServerV1Service } from '@purista/httpserver'
 import { RedisStateStore } from '@purista/redis-state-store'
 
 import httpServerConfig from './config/httpServerConfig.js'
-import { emailV1Service } from './service/email/v1/index.js'
-import { userV1Service } from './service/user/v1/index.js'
+import { emailV1Service } from './service/email/v1/emailV1Service.js'
+import { userV1Service } from './service/user/v1/userV1Service.js'
 
 export const main = async (getProcessor: () => SpanProcessor) => {
 	// initialize the logging

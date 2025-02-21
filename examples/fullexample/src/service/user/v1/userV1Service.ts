@@ -1,8 +1,8 @@
 import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
 
-import { getAllUsersCommandBuilder } from './command/getAllUsers/index.js'
-import { getUserByIdCommandBuilder } from './command/getUserById/index.js'
-import { signUpCommandBuilder } from './command/signUp/index.js'
+import { getAllUsersCommandBuilder } from './command/getAllUsers/getAllUsersCommandBuilder.js'
+import { getUserByIdCommandBuilder } from './command/getUserById/getUserByIdCommandBuilder.js'
+import { signUpCommandBuilder } from './command/signUp/signUpCommandBuilder.js'
 import { userV1ServiceBuilder } from './userV1ServiceBuilder.js'
 
 // bring service config definition, command definitions and subscription definitions together in the service

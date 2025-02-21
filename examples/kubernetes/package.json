@@ -18,7 +18,7 @@
 	"scripts": {
 		"start": "tsx src/index.ts | pino-pretty",
 		"lint": "npx @biomejs/biome check --write",
-		"test": "vitest"
+		"test": "tsc --noEmit && vitest"
 	},
 	"devDependencies": {
 		"@types/node": "^22.5.1",
