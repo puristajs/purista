@@ -12,7 +12,7 @@
 		"start": "tsx src/index.ts | pino-pretty",
 		"dev": "tsx watch src/index.ts | pino-pretty",
 		"dev:worker": "tsx watch src/temporal/worker.ts workflow.watch",
-		"test": "vitest",
+		"test": "tsc --noEmit && vitest",
 		"lint": "eslint --ext .ts,.js,.json --cache .",
 		"lint:fix": "eslint . --ext .ts,.js,.json --fix",
 		"purista": "purista add"

@@ -36,7 +36,7 @@
 		"zipkin:up": "DOCKER_TAG=develop docker compose -f zipkin/docker-compose.yaml up --detach",
 		"zipkin:down": "docker compose -f zipkin/docker-compose.yaml down",
 		"lint": "npx @biomejs/biome check --write",
-		"test": "vitest"
+		"test": "tsc --noEmit && vitest"
 	},
 	"devDependencies": {
 		"@types/node": "^22.5.1",

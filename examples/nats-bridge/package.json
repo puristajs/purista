@@ -20,7 +20,7 @@
 		"nats:up": "docker start purista-nats ||  docker run -p 4222:4222 --name purista-nats nats:alpine -js",
 		"nats:down": "docker container stop $(docker container ls -q --filter name=purista-nats)",
 		"lint": "npx @biomejs/biome check --write",
-		"test": "vitest"
+		"test": "tsc --noEmit && vitest"
 	},
 	"devDependencies": {
 		"@types/node": "^22.5.1",
