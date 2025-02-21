@@ -1,4 +1,4 @@
-import type { Service } from '../../Service/index.js'
+import type { Service } from '../../Service/Service.impl.js'
 import type { SubscriptionDefinition } from './SubscriptionDefinition.js'
 
 /**

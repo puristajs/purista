@@ -1,9 +1,14 @@
 import { SpanStatusCode } from '@opentelemetry/api'
 import { validate } from '@typeschema/main'
 
-import { HandledError, UnhandledError } from '../Error/index.js'
-import type { Command, CommandDefinition, Logger } from '../types/index.js'
-import { StatusCode } from '../types/index.js'
+import { HandledError } from '../Error/HandledError.impl.js'
+import { UnhandledError } from '../Error/UnhandledError.impl.js'
+
+import type { Logger } from '../types/Logger.js'
+import type { Command } from '../types/commandType/Command.js'
+import type { CommandDefinition } from '../types/commandType/CommandDefinition.js'
+
+import { StatusCode } from '../types/StatusCode.enum.js'
 import type { Service } from './Service.impl.js'
 
 export const commandTransformInput = async <S extends Service>(

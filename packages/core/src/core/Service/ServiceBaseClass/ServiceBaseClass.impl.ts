@@ -8,12 +8,17 @@ import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic
 import type { Schema } from '@typeschema/main'
 
 import { puristaVersion } from '../../../version.js'
-import type { ConfigStore } from '../../ConfigStore/index.js'
-import type { EventBridge } from '../../EventBridge/index.js'
-import type { SecretStore } from '../../SecretStore/index.js'
-import type { StateStore } from '../../StateStore/index.js'
-import type { Logger, ServiceEvents, ServiceInfoType } from '../../types/index.js'
-import { GenericEventEmitter, PuristaSpanTag } from '../../types/index.js'
+import type { ConfigStore } from '../../ConfigStore/types/ConfigStore.js'
+import type { EventBridge } from '../../EventBridge/types/EventBridge.js'
+import type { SecretStore } from '../../SecretStore/types/SecretStore.js'
+import type { StateStore } from '../../StateStore/types/StateStore.js'
+import type { Logger } from '../../types/Logger.js'
+import type { ServiceEvents } from '../../types/ServiceEvents.js'
+import type { ServiceInfoType } from '../../types/infoType/ServiceInfoType.js'
+
+import { GenericEventEmitter } from '../../types/GenericEventEmitter.js'
+import { PuristaSpanTag } from '../../types/PuristaSpanTag.enum.js'
+
 import { ServiceInfoValidator } from '../ServiceInfoValidator.impl.js'
 
 /**

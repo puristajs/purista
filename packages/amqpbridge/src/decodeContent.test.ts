@@ -2,7 +2,8 @@ import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
 import { decodeContent } from './decodeContent.impl.js'
-import type { Encoder, Encrypter } from './types/index.js'
+import type { Encoder } from './types/Encoder.js'
+import type { Encrypter } from './types/Encrypter.js'
 
 describe('decodeContent', () => {
 	const sandbox: SinonSandbox = createSandbox()

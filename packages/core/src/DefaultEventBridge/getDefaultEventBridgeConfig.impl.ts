@@ -1,5 +1,5 @@
-import type { Complete } from '../core/index.js'
-import type { DefaultEventBridgeConfig } from './types/index.js'
+import type { Complete } from '../core/types/Complete.js'
+import type { DefaultEventBridgeConfig } from './types/DefaultEventBridgeConfig.js'
 
 export const getDefaultEventBridgeConfig = (): Complete<DefaultEventBridgeConfig> => {
 	const defaultConfig: Complete<DefaultEventBridgeConfig> = {

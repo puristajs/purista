@@ -1,8 +1,10 @@
 import type { Schema } from '@typeschema/main'
 import type { ContextBase } from '../ContextBase.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
+import type { EmptyObject } from '../EmptyObject.js'
+import type { InvokeList } from '../InvokeList.js'
 import type { Prettify } from '../Prettify.js'
-import type { EmptyObject, InvokeList } from '../index.js'
+
 import type { Command } from './Command.js'
 
 /**

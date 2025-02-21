@@ -2,15 +2,13 @@ import type { Schema } from '@typeschema/main'
 import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
 
-import type {
-	CommandFunctionContext,
-	EBMessageAddress,
-	FromEmitToOtherType,
-	FromInvokeToOtherType,
-	InvokeList,
-} from '../core/index.js'
+import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
+import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
+import type { FromInvokeToOtherType } from '../core/types/FromInvokeToOtherType.js'
+import type { InvokeList } from '../core/types/InvokeList.js'
+import type { CommandFunctionContext } from '../core/types/commandType/CommandFunctionContext.js'
 import { getLoggerMock } from './getLogger.mock.js'
-import { getCommandMessageMock } from './messages/index.js'
+import { getCommandMessageMock } from './messages/getCommandMessage.mock.js'
 
 /**
  * A function that returns a mock object for command function context

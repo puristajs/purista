@@ -1,5 +1,5 @@
 import type { Msg, NatsError } from 'nats'
 
-import type { NatsBridge } from '../NatsBridge.js'
+import type { INatsBridge } from './INatsBridge.js'
 
-export type IncomingMessageFunction = (this: NatsBridge, error: NatsError | null, msg: Msg) => Promise<void>
+export type IncomingMessageFunction = (this: INatsBridge, error: NatsError | null, msg: Msg) => Promise<void>

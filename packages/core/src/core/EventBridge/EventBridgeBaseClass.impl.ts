@@ -4,12 +4,16 @@ import { Resource } from '@opentelemetry/resources'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
 
-import { initLogger } from '../../DefaultLogger/index.js'
+import { initLogger } from '../../DefaultLogger/initLogger.impl.js'
 import { puristaVersion } from '../../version.js'
-import { getNewInstanceId } from '../helper/index.js'
-import type { Complete, InstanceId, Logger } from '../types/index.js'
-import { GenericEventEmitter, PuristaSpanTag } from '../types/index.js'
-import type { EventBridgeConfig, EventBridgeEvents } from './types/index.js'
+import { getNewInstanceId } from '../helper/getNewInstanceId.impl.js'
+import type { Complete } from '../types/Complete.js'
+import { GenericEventEmitter } from '../types/GenericEventEmitter.js'
+import type { InstanceId } from '../types/InstanceId.js'
+import type { Logger } from '../types/Logger.js'
+import { PuristaSpanTag } from '../types/PuristaSpanTag.enum.js'
+import type { EventBridgeConfig } from './types/EventBridgeConfig.js'
+import type { EventBridgeEvents } from './types/EventBridgeEvents.js'
 
 /**
  * The base class to be extended by event bridge implementations

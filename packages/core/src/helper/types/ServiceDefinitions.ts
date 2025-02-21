@@ -1,4 +1,5 @@
-import type { CommandDefinitionListResolved, SubscriptionDefinitionListResolved } from '../../core/index.js'
+import type { CommandDefinitionListResolved } from '../../core/types/commandType/CommandDefinitionList.js'
+import type { SubscriptionDefinitionListResolved } from '../../core/types/subscription/SubscriptionDefinitionList.js'
 
 export type ServiceDefinitions = {
 	commands: CommandDefinitionListResolved<any>

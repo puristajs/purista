@@ -1,4 +1,4 @@
-import type { Service } from '../../Service/index.js'
+import type { Service } from '../../Service/Service.impl.js'
 import type { CommandDefinition } from './CommandDefinition.js'
 import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase.js'
 

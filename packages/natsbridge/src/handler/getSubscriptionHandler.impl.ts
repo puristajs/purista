@@ -11,16 +11,16 @@ import {
 } from '@purista/core'
 import type { JsMsg, Msg, NatsError } from 'nats'
 
-import type { NatsBridge } from '../NatsBridge.js'
 import { deserializeOtpFromNats } from '../deserializeOtpFromNats.impl.js'
 import { serializeOtpToNats } from '../serializeOtpToNats.impl.js'
-import { getTopicName } from '../topic/index.js'
+import { getTopicName } from '../topic/getTopicName.impl.js'
+import type { INatsBridge } from '../types/INatsBridge.js'
 
 export const getSubscriptionHandler = (
 	subscription: Subscription,
 	cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
 ) => {
-	const handler = async function (this: NatsBridge, error: NatsError | null, msg: Msg | JsMsg) {
+	const handler = async function (this: INatsBridge, error: NatsError | null, msg: Msg | JsMsg) {
 		if (error) {
 			const err = UnhandledError.fromError(error)
 			this.logger.error({ err, address: subscription.receiver }, `error in subscription: ${err.message}`)

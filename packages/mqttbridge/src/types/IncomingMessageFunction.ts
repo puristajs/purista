@@ -1,6 +1,5 @@
 import type { EBMessage } from '@purista/core'
 import type { IPublishPacket } from 'mqtt'
+import type { IMqttBridge } from './IMqttBridge.js'
 
-import type { MqttBridge } from '../MqttEventBridge.js'
-
-export type IncomingMessageFunction = (this: MqttBridge, payload: EBMessage, packet: IPublishPacket) => Promise<void>
+export type IncomingMessageFunction = (this: IMqttBridge, payload: EBMessage, packet: IPublishPacket) => Promise<void>

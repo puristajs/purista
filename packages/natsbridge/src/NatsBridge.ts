@@ -38,10 +38,15 @@ import { JSONCodec, connect, headers as getNewHeaders } from 'nats'
 import { deserializeOtpFromNats } from './deserializeOtpFromNats.impl.js'
 import { getDefaultNatsBridgeConfig } from './getDefaultNatsBridgeConfig.js'
 import { getQueueGroupName } from './getQueueGroupName.impl.js'
-import { getCommandHandler, getSubscriptionHandler } from './handler/index.js'
+import { getCommandHandler } from './handler/getCommandHandler.impl.js'
+import { getSubscriptionHandler } from './handler/getSubscriptionHandler.impl.js'
+
 import { serializeOtpToNats } from './serializeOtpToNats.impl.js'
-import { getCommandSubscriptionTopic, getSubscriptionTopic, getTopicName } from './topic/index.js'
-import type { NatsBridgeConfig } from './types/index.js'
+import { getCommandSubscriptionTopic } from './topic/getCommandSubscriptionTopic.impl.js'
+import { getSubscriptionTopic } from './topic/getSubscriptionTopic.impl.js'
+import { getTopicName } from './topic/getTopicName.impl.js'
+
+import type { NatsBridgeConfig } from './types/NatsBridgeConfig.js'
 
 /**
 The event bridge supports brokers with and without JetStream enabled.

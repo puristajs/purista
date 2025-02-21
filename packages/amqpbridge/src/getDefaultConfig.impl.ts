@@ -1,6 +1,6 @@
 import type { Complete } from '@purista/core'
 
-import type { AmqpBridgeConfig } from './types/index.js'
+import type { AmqpBridgeConfig } from './types/AmqpBridgeConfig.js'
 
 export const getDefaultConfig = (): Complete<AmqpBridgeConfig> & { exchangeName: string; url: string } => {
 	return {

@@ -1,6 +1,8 @@
 import type { CustomMessage } from './CustomMessage.js'
-import type { Command, CommandResponse } from './commandType/index.js'
-import type { InfoMessage } from './infoType/index.js'
+import type { Command } from './commandType/Command.js'
+import type { CommandResponse } from './commandType/CommandResponse.js'
+
+import type { InfoMessage } from './infoType/InfoMessage.js'
 
 /**
  * EBMessage is some message which is handled by the event bridge.

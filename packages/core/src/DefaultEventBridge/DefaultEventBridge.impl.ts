@@ -2,48 +2,48 @@ import { Stream } from 'node:stream'
 
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 
-import type {
-	Command,
-	CommandDefinitionMetadataBase,
-	CommandErrorResponse,
-	CommandSuccessResponse,
-	CustomMessage,
-	EBMessage,
-	EBMessageAddress,
-	EBMessageId,
-	EventBridge,
-	EventBridgeConfig,
-	Subscription,
-} from '../core/index.js'
-import {
-	EBMessageType,
-	EventBridgeBaseClass,
-	EventBridgeEventNames,
-	HandledError,
-	PuristaSpanName,
-	PuristaSpanTag,
-	StatusCode,
-	UnhandledError,
-	createErrorResponse,
-	createInfoMessage,
-	deserializeOtp,
-	getCleanedMessage,
-	getCommandQueueName,
-	getNewCorrelationId,
-	getNewEBMessageId,
-	getSubscriptionQueueName,
-	isCommand,
-	isCommandErrorResponse,
-	isCommandResponse,
-	isCommandSuccessResponse,
-	isInfoMessage,
-	serializeOtp,
-} from '../core/index.js'
+import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
+import type { EventBridgeConfig } from '../core/EventBridge/types/EventBridgeConfig.js'
+import type { CustomMessage } from '../core/types/CustomMessage.js'
+import type { EBMessage } from '../core/types/EBMessage.js'
+import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
+import type { EBMessageId } from '../core/types/EBMessageId.js'
+import type { Command } from '../core/types/commandType/Command.js'
+import type { CommandDefinitionMetadataBase } from '../core/types/commandType/CommandDefinitionMetadataBase.js'
+import type { CommandErrorResponse } from '../core/types/commandType/CommandErrorResponse.js'
+import type { CommandSuccessResponse } from '../core/types/commandType/CommandSuccessResponse.js'
+import type { Subscription } from '../core/types/subscription/Subscription.js'
+
+import { HandledError } from '../core/Error/HandledError.impl.js'
+import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
+import { EventBridgeBaseClass } from '../core/EventBridge/EventBridgeBaseClass.impl.js'
+import { EventBridgeEventNames } from '../core/EventBridge/types/EventBridgeEvents.js'
+import { createErrorResponse } from '../core/helper/createErrorResponse.impl.js'
+import { createInfoMessage } from '../core/helper/createInfoMessage.impl.js'
+import { getCleanedMessage } from '../core/helper/getCleanedMessage.impl.js'
+import { getCommandQueueName } from '../core/helper/getCommandQueueName.impl.js'
+import { getNewCorrelationId } from '../core/helper/getNewCorrelationId.impl.js'
+import { getNewEBMessageId } from '../core/helper/getNewEBMessageId.impl.js'
+import { getSubscriptionQueueName } from '../core/helper/getSubscriptionQueueName.impl.js'
+import { deserializeOtp, serializeOtp } from '../core/helper/serializeOtp.impl.js'
+import { EBMessageType } from '../core/types/EBMessageType.enum.js'
+import { PuristaSpanName } from '../core/types/PuristaSpanName.enum.js'
+import { PuristaSpanTag } from '../core/types/PuristaSpanTag.enum.js'
+import { StatusCode } from '../core/types/StatusCode.enum.js'
+import { isCommand } from '../core/types/commandType/isCommand.impl.js'
+import { isCommandErrorResponse } from '../core/types/commandType/isCommandErrorResponse.impl.js'
+import { isCommandResponse } from '../core/types/commandType/isCommandResponse.impl.js'
+import { isCommandSuccessResponse } from '../core/types/commandType/isCommandSuccessResponse.impl.js'
+import { isInfoMessage } from '../core/types/infoType/isInfoMessage.impl.js'
+
 import { puristaVersion } from '../version.js'
 import { getDefaultEventBridgeConfig } from './getDefaultEventBridgeConfig.impl.js'
 import { getNewSubscriptionStorageEntry } from './getNewSubscriptionStorageEntry.impl.js'
 import { isMessageMatchingSubscription } from './isMessageMatchingSubscription.impl.js'
-import type { DefaultEventBridgeConfig, PendigInvocation, SubscriptionStorageEntry } from './types/index.js'
+import type { DefaultEventBridgeConfig } from './types/DefaultEventBridgeConfig.js'
+import type { PendigInvocation } from './types/PendingInvocations.js'
+import type { SubscriptionStorageEntry } from './types/SubscriptionStorageEntry.js'
+
 /**
  * Simple implementation of some simple in-memory event bridge.
  * Does not support threads and does not need any external databases.

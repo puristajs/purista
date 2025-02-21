@@ -24,8 +24,8 @@ import { headers as getNewHeaders } from 'nats'
 
 import { deserializeOtpFromNats } from '../deserializeOtpFromNats.impl.js'
 import { serializeOtpToNats } from '../serializeOtpToNats.impl.js'
-import { getTopicName } from '../topic/index.js'
-import type { IncomingMessageFunction } from '../types/index.js'
+import { getTopicName } from '../topic/getTopicName.impl.js'
+import type { IncomingMessageFunction } from '../types/IncomingMessageFunction.js'
 
 export const getCommandHandler = (
 	address: EBMessageAddress,

@@ -21,11 +21,11 @@ import {
 import { HTTP } from 'cloudevents'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
-import type { HttpEventBridge } from './HttpEventBridge.impl.js'
-import type { HttpEventBridgeConfig, RouterFunction } from './types/index.js'
+import type { IHttpEventBridge } from './types/IHttpEventBridge.js'
+import type { RouterFunction } from './types/RouterFunction.js'
 
 export const getSubscriptionHandler = function (
-	this: HttpEventBridge<HttpEventBridgeConfig>,
+	this: IHttpEventBridge,
 	subscription: Subscription,
 	cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
 	wrappedInCloudEvent = false,

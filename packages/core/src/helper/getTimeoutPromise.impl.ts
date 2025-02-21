@@ -1,4 +1,5 @@
-import { StatusCode, UnhandledError } from '../core/index.js'
+import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
+import { StatusCode } from '../core/types/StatusCode.enum.js'
 
 /**
  *

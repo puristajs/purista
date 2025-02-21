@@ -14,7 +14,7 @@ import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { Methods } from 'trouter'
 
 import { httpServerV1ServiceBuilder } from '../../httpServerV1ServiceBuilder.js'
-import { addHeaders } from './helper/index.js'
+import { addHeaders } from './helper/addHeaders.impl.js'
 
 export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBuilder
 	.getSubscriptionBuilder(

@@ -1,5 +1,5 @@
-import { isDevelop } from '../core/helper/index.js'
-import type { LogLevelName } from '../core/types/index.js'
+import { isDevelop } from '../core/helper/isDevelop.impl.js'
+import type { LogLevelName } from '../core/types/LogLevelName.js'
 
 export const getDefaultLogLevel = (): LogLevelName => {
 	return isDevelop() ? 'debug' : 'info'

@@ -1,15 +1,15 @@
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import type { Schema } from '@typeschema/main'
 
-import type { ConfigStore } from '../ConfigStore/index.js'
-import type { EventBridge } from '../EventBridge/index.js'
-import type { SecretStore } from '../SecretStore/index.js'
-import type { StateStore } from '../StateStore/index.js'
+import type { ConfigStore } from '../ConfigStore/types/ConfigStore.js'
+import type { EventBridge } from '../EventBridge/types/EventBridge.js'
+import type { SecretStore } from '../SecretStore/types/SecretStore.js'
+import type { StateStore } from '../StateStore/types/StateStore.js'
 import type { Logger } from './Logger.js'
 import type { ServiceClassTypes } from './ServiceClassTypes.js'
-import type { CommandDefinitionListResolved } from './commandType/index.js'
-import type { ServiceInfoType } from './infoType/index.js'
-import type { SubscriptionDefinitionListResolved } from './subscription/index.js'
+import type { CommandDefinitionListResolved } from './commandType/CommandDefinitionList.js'
+import type { ServiceInfoType } from './infoType/ServiceInfoType.js'
+import type { SubscriptionDefinitionListResolved } from './subscription/SubscriptionDefinitionList.js'
 
 /**
  * @group Service

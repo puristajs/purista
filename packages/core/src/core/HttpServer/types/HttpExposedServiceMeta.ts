@@ -1,4 +1,8 @@
-import type { CommandDefinitionMetadataBase, EmptyObject, Prettify, StatusCode } from '../../index.js'
+import type { EmptyObject } from '../../types/EmptyObject.js'
+import type { Prettify } from '../../types/Prettify.js'
+import type { StatusCode } from '../../types/StatusCode.enum.js'
+import type { CommandDefinitionMetadataBase } from '../../types/commandType/CommandDefinitionMetadataBase.js'
+
 import type { QueryParameter } from './QueryParameter.js'
 
 export type HttpExposedServiceMeta<ParameterType = EmptyObject> = Prettify<

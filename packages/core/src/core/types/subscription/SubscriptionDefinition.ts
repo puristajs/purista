@@ -1,7 +1,7 @@
 import type { Schema } from '@typeschema/main'
 import type { SchemaObject } from 'openapi3-ts/oas31'
 
-import type { Service } from '../../Service/index.js'
+import type { Service } from '../../Service/Service.impl.js'
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { EBMessageType } from '../EBMessageType.enum.js'
 import type { FromEmitToOtherType } from '../FromEmitToOtherType.js'

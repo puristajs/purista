@@ -1,7 +1,8 @@
-import type { SecretStore, StoreBaseConfig } from '../core/index.js'
-import { SecretStoreBaseClass } from '../core/index.js'
-import type { ObjectWithKeysFromStringArray } from '../helper/index.js'
-import type { DefaultSecretStoreConfig } from './types/index.js'
+import { SecretStoreBaseClass } from '../core/SecretStore/SecretStoreBaseClass.impl.js'
+import type { SecretStore } from '../core/SecretStore/types/SecretStore.js'
+import type { StoreBaseConfig } from '../core/types/StoreBaseConfig.js'
+import type { ObjectWithKeysFromStringArray } from '../helper/types/ObjectWithKeysFromStringArray.js'
+import type { DefaultSecretStoreConfig } from './types/DefaultSecretStoreConfig.js'
 
 /**
  * The DefaultSecretStore is a placeholder which offers all needed methods.

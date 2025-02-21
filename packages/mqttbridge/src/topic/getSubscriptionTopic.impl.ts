@@ -2,10 +2,9 @@ import { join } from 'node:path/posix'
 
 import type { Subscription } from '@purista/core'
 import { convertToSnakeCase } from '@purista/core'
+import type { IMqttBridge } from '../types/IMqttBridge.js'
 
-import type { MqttBridge } from '../MqttEventBridge.js'
-
-type GetSubscriptionTopicFn = (this: MqttBridge, subscription: Subscription) => string
+type GetSubscriptionTopicFn = (this: IMqttBridge, subscription: Subscription) => string
 
 export const getSubscriptionTopic: GetSubscriptionTopicFn = function (subscription) {
 	return join(

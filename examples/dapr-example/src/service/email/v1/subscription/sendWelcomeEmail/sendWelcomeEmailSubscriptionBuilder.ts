@@ -3,7 +3,7 @@ import {
 	userV1GetUserByIdInputParameterSchema,
 	userV1GetUserByIdInputPayloadSchema,
 	userV1GetUserByIdOutputPayloadSchema,
-} from '../../../../user/v1/command/getUserById/index.js'
+} from '../../../../user/v1/command/getUserById/schema.js'
 import { emailV1ServiceBuilder } from '../../emailV1ServiceBuilder.js'
 import { emailV1SendWelcomeEmailInputPayloadSchema, emailV1SendWelcomeEmailOutputPayloadSchema } from './schema.js'
 

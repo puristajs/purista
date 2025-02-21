@@ -1,4 +1,4 @@
-import type { ServiceBuilder } from '../ServiceBuilder/index.js'
+import type { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 import { puristaVersion } from '../version.js'
 import type { FullDefinition } from './types/FullDefinition.js'
 import type { FullServiceDefinition } from './types/FullServiceDefinition.js'

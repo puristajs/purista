@@ -1,7 +1,10 @@
-import type { ConfigStore, StoreBaseConfig } from '../core/index.js'
-import { ConfigStoreBaseClass, StatusCode, UnhandledError } from '../core/index.js'
-import type { ObjectWithKeysFromStringArray } from '../helper/index.js'
-import type { DefaultConfigStoreConfig } from './types/index.js'
+import { ConfigStoreBaseClass } from '../core/ConfigStore/ConfigStoreBaseClass.impl.js'
+import type { ConfigStore } from '../core/ConfigStore/types/ConfigStore.js'
+import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
+import { StatusCode } from '../core/types/StatusCode.enum.js'
+import type { StoreBaseConfig } from '../core/types/StoreBaseConfig.js'
+import type { ObjectWithKeysFromStringArray } from '../helper/types/ObjectWithKeysFromStringArray.js'
+import type { DefaultConfigStoreConfig } from './types/DefaultConfigStoreConfig.js'
 
 /**
  * The DefaultConfigStore is a placeholder which offers all needed methods.

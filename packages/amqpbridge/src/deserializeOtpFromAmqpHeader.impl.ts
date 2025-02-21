@@ -4,7 +4,8 @@ import { deserializeOtp } from '@purista/core'
 import type { ConsumeMessage } from 'amqplib'
 
 import { decodeContent } from './decodeContent.impl.js'
-import type { Encoder, Encrypter } from './types/index.js'
+import type { Encoder } from './types/Encoder.js'
+import type { Encrypter } from './types/Encrypter.js'
 
 export const deserializeOtpFromAmqpHeader = async (
 	logger: Logger,

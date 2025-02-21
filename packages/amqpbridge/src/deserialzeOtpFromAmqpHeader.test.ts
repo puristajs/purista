@@ -4,7 +4,8 @@ import type { SinonSandbox } from 'sinon'
 import { createSandbox } from 'sinon'
 
 import { deserializeOtpFromAmqpHeader } from './deserializeOtpFromAmqpHeader.impl.js'
-import { jsonEncoder, plainEncrypter } from './payloadHandling/index.js'
+import { jsonEncoder } from './payloadHandling/jsonEncoder.js'
+import { plainEncrypter } from './payloadHandling/plainEncrypter.js'
 
 describe('deserializeOtpFromAmqpHeader', () => {
 	let sandbox: SinonSandbox

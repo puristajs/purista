@@ -11,7 +11,7 @@ import {
 } from '@purista/core'
 
 import { deserializeOtpFromMqtt } from '../deserializeOtpFromMqtt.impl.js'
-import type { IncomingMessageFunction } from '../types/index.js'
+import type { IncomingMessageFunction } from '../types/IncomingMessageFunction.js'
 
 export const handleCommandResponse: IncomingMessageFunction = async function (message, packet) {
 	const context = deserializeOtpFromMqtt(this.logger, message, packet.properties?.userProperties)

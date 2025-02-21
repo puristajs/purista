@@ -23,8 +23,12 @@ import { PatternRouter } from 'hono/router/pattern-router'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { OpenApiBuilder } from 'openapi3-ts/oas31'
 
-import { addPathToOpenApi } from '../../../helper/index.js'
-import type { BindingsBase, EndpointProtectMiddleware, HealthFunction, VariablesBase } from '../../../types/index.js'
+import { addPathToOpenApi } from '../../../helper/addPathToOpenApi.js'
+import type { BindingsBase } from '../../../types/BindingsBase.js'
+import type { HealthFunction } from '../../../types/HealthFunction.js'
+import type { VariablesBase } from '../../../types/VariablesBase.js'
+
+import type { EndpointProtectMiddleware } from '../../../types/EndpointProtectMiddleware.js'
 import type { HonoServiceV1Config } from './honoServiceConfig.js'
 
 /**

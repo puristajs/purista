@@ -3,13 +3,12 @@ import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import type { Options } from 'code-block-writer'
+import { getGeneralServiceConfigFileContent } from './content/service/getGeneralServiceConfigFileContent.js'
+import { getServiceBuilderFileContent } from './content/service/getServiceBuilderFileContent.js'
+import { getServiceConfigFileContent } from './content/service/getServiceConfigFileContent.js'
 import { getServiceFileContent } from './content/service/getServiceFileContent.js'
-import {
-	getGeneralServiceConfigFileContent,
-	getServiceBuilderFileContent,
-	getServiceConfigFileContent,
-	getServiceTestFileContent,
-} from './content/service/index.js'
+import { getServiceTestFileContent } from './content/service/getServiceTestFileContent.js'
+
 import { convertToProjectFileCasing } from './convertToProjectFileCasing.js'
 import type { PuristaConfig } from './loadPuristaConfig.js'
 import type { PuristaProjectInfo } from './scanPuristaProject.js'
