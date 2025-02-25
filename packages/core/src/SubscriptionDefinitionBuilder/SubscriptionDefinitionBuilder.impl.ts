@@ -23,9 +23,6 @@ import { StatusCode } from '../core/types/StatusCode.enum.js'
 
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 
-import { convertEmitValidationsToSchema } from '../helper/convertEmitValidationsToSchema.impl.js'
-import { convertInvokeValidationsToSchema } from '../helper/convertInvokeValidationsToSchema.impl.js'
-
 import { getSubscriptionContextMock } from '../mocks/getSubscriptionContext.mock.js'
 import { getSubscriptionTransformContextMock } from '../mocks/getSubscriptionTransformContext.mock.js'
 
@@ -769,12 +766,10 @@ export class SubscriptionDefinitionBuilder<
 			shared: this.shared,
 		}
 
-		const [inputPayload, parameter, outputPayload, invokes, emitList] = await Promise.all([
+		const [inputPayload, parameter, outputPayload] = await Promise.all([
 			validationToSchema(inputPayloadSchema),
 			validationToSchema(inputParameterSchema),
 			validationToSchema(outputPayloadSchema),
-			convertInvokeValidationsToSchema(this.invokes),
-			convertEmitValidationsToSchema(this.emitList),
 		])
 
 		const subscription: Complete<
@@ -817,8 +812,8 @@ export class SubscriptionDefinitionBuilder<
 			tenantId: this.tenantId,
 			call: this.getSubscriptionFunction(),
 			hooks: this.hooks,
-			invokes,
-			emitList,
+			invokes: this.invokes,
+			emitList: this.emitList,
 		}
 
 		return subscription

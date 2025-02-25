@@ -20,9 +20,6 @@ import type { CommandDefinition } from '../core/types/commandType/CommandDefinit
 import type { CommandDefinitionMetadataBase } from '../core/types/commandType/CommandDefinitionMetadataBase.js'
 import type { CommandFunction } from '../core/types/commandType/CommandFunction.js'
 import type { CommandTransformOutputHook } from '../core/types/commandType/CommandTransformOutputHook.js'
-
-import { convertEmitValidationsToSchema } from '../helper/convertEmitValidationsToSchema.impl.js'
-import { convertInvokeValidationsToSchema } from '../helper/convertInvokeValidationsToSchema.impl.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getCommandContextMock } from '../mocks/getCommandContext.mock.js'
 import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
@@ -832,12 +829,10 @@ export class CommandDefinitionBuilder<
 			shared: true,
 		}
 
-		const [inputPayload, parameter, outputPayload, invokes, emitList] = await Promise.all([
+		const [inputPayload, parameter, outputPayload] = await Promise.all([
 			validationToSchema(inputPayloadSchema),
 			validationToSchema(inputParameterSchema),
 			validationToSchema(outputPayloadSchema),
-			convertInvokeValidationsToSchema(this.invokes),
-			convertEmitValidationsToSchema(this.emitList),
 		])
 
 		const definition: Complete<
@@ -875,8 +870,8 @@ export class CommandDefinitionBuilder<
 			eventName,
 			call: this.getCommandFunction() as any,
 			hooks: this.hooks,
-			invokes,
-			emitList,
+			invokes: this.invokes,
+			emitList: this.emitList,
 		}
 
 		return this.extendWithHttpMetadata(definition)
