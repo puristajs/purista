@@ -1,10 +1,7 @@
 import type { Schema } from '@typeschema/main'
-import type { SchemaObject } from 'openapi3-ts/oas31'
 
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { EBMessageType } from '../EBMessageType.enum.js'
-import type { FromEmitToOtherType } from '../FromEmitToOtherType.js'
-import type { FromInvokeToOtherType } from '../FromInvokeToOtherType.js'
 import type { InstanceId } from '../InstanceId.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { PrincipalId } from '../PrincipalId.js'
@@ -117,10 +114,7 @@ export type SubscriptionDefinition<
 			>
 		}
 	}
-	invokes: FromInvokeToOtherType<
-		Invokes,
-		{ outputSchema?: SchemaObject; payloadSchema?: SchemaObject; parameterSchema?: SchemaObject }
-	>
-	emitList: FromEmitToOtherType<EmitList, SchemaObject>
+	invokes: Invokes
+	emitList: EmitList
 	deprecated: boolean
 }

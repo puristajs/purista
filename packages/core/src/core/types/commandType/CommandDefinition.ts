@@ -1,9 +1,6 @@
 import type { Schema } from '@typeschema/main'
-import type { SchemaObject } from 'openapi3-ts/oas31'
 
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
-import type { FromEmitToOtherType } from '../FromEmitToOtherType.js'
-import type { FromInvokeToOtherType } from '../FromInvokeToOtherType.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { CommandAfterGuardHook } from './CommandAfterGuardHook.js'
@@ -110,9 +107,6 @@ export type CommandDefinition<
 			>
 		}
 	}
-	invokes: FromInvokeToOtherType<
-		Invokes,
-		{ outputSchema?: SchemaObject; payloadSchema?: SchemaObject; parameterSchema?: SchemaObject }
-	>
-	emitList: FromEmitToOtherType<EmitList, SchemaObject>
+	invokes: Invokes
+	emitList: EmitList
 }
