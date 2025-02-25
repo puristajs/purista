@@ -109,7 +109,7 @@ A log level for new logger if logger is not set
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:16
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:18
 
 #### cacheTtl?
 
@@ -183,7 +183,7 @@ Defined in: [nats-state-store/src/NatsStateStore.impl.ts:35](https://github.com/
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:15
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 #### Inherited from
 
@@ -195,7 +195,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:15
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:19
 
 #### Inherited from
 
@@ -231,7 +231,7 @@ Defined in: [nats-state-store/src/NatsStateStore.impl.ts:116](https://github.com
 
 > **getState**\<`StateNames`\>(...`stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:20
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:22
 
 #### Type Parameters
 
@@ -295,7 +295,7 @@ Defined in: [nats-state-store/src/NatsStateStore.impl.ts:45](https://github.com/
 
 > **removeState**(`stateName`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:22
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:24
 
 #### Parameters
 
@@ -339,7 +339,7 @@ Defined in: [nats-state-store/src/NatsStateStore.impl.ts:92](https://github.com/
 
 > **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:24
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:26
 
 #### Parameters
 

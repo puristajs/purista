@@ -12,4 +12,4 @@ Defined in: [packages/core/src/core/types/subscription/SubscriptionDefinitionLis
 
 ## Type Parameters
 
-• **ServiceClassType** *extends* [`Service`](../classes/Service.md)
+• **ServiceClassType** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)

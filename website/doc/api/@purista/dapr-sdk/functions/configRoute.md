@@ -14,7 +14,7 @@ Defined in: [dapr-sdk/src/DaprEventBridge/routes/config.impl.ts:3](https://githu
 
 ### this
 
-[`HttpEventBridge`](../../base-http-bridge/classes/HttpEventBridge.md)
+`IHttpEventBridge`
 
 ### c
 

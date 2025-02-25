@@ -46,6 +46,26 @@ Stop and destroy the current service
 
 ***
 
+### getContextFunctions()
+
+> **getContextFunctions**(`logger`): [`ContextBase`](../type-aliases/ContextBase.md)
+
+Defined in: [packages/core/src/core/types/ServiceClass.ts:78](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L78)
+
+Registers a new subscription for the service
+
+#### Parameters
+
+##### logger
+
+[`Logger`](../classes/Logger.md)
+
+#### Returns
+
+[`ContextBase`](../type-aliases/ContextBase.md)
+
+***
+
 ### getTracer()
 
 > **getTracer**(): `Tracer`
@@ -57,50 +77,6 @@ get the opentelemetry tracer of the service
 #### Returns
 
 `Tracer`
-
-***
-
-### registerCommand()
-
-> **registerCommand**(`commandDefinition`): `Promise`\<`void`\>
-
-Defined in: [packages/core/src/core/types/ServiceClass.ts:63](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L63)
-
-Registers a new command for the service
-
-#### Parameters
-
-##### commandDefinition
-
-[`CommandDefinition`](../type-aliases/CommandDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`\>
-
-the service command definition
-
-#### Returns
-
-`Promise`\<`void`\>
-
-***
-
-### registerSubscription()
-
-> **registerSubscription**(`subscriptionDefinition`): `Promise`\<`void`\>
-
-Defined in: [packages/core/src/core/types/ServiceClass.ts:71](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClass.ts#L71)
-
-Registers a new subscription for the service
-
-#### Parameters
-
-##### subscriptionDefinition
-
-[`SubscriptionDefinition`](../type-aliases/SubscriptionDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`\>
-
-the subscription definition
-
-#### Returns
-
-`Promise`\<`void`\>
 
 ***
 

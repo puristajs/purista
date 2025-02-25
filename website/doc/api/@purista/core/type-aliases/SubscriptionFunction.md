@@ -14,7 +14,7 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 ## Type Parameters
 
-• **ServiceClassType** *extends* [`Service`](../classes/Service.md)
+• **ServiceClassType** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
 
 • **FunctionPayloadType** = `unknown`
 

@@ -8,7 +8,7 @@
 
 > **getSubscriptionTransformContextMock**\<`Resources`\>(`input`): `object`
 
-Defined in: [packages/core/src/mocks/getSubscriptionTransformContext.mock.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionTransformContext.mock.ts#L12)
+Defined in: [packages/core/src/mocks/getSubscriptionTransformContext.mock.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionTransformContext.mock.ts#L15)
 
 A function that returns a mock object for subscription transform function context
 

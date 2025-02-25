@@ -12,4 +12,4 @@ Defined in: [packages/core/src/core/types/commandType/CommandDefinitionList.ts:1
 
 ## Type Parameters
 
-• **S** *extends* [`Service`](../classes/Service.md)
+• **S** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)

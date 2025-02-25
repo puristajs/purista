@@ -6,7 +6,7 @@
 
 # Class: UnhandledError
 
-Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L13)
+Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L15)
 
 A unhandled error will be thrown if some error response is returned during invoking a service function
 or when the invocation timed out.
@@ -24,7 +24,7 @@ Unhandled error are automatically converted into "500 Internal Server Error" to 
 
 > **new UnhandledError**(`errorCode`, `message`?, `data`?, `traceId`?): [`UnhandledError`](UnhandledError.md)
 
-Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L14)
+Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L16)
 
 #### Parameters
 
@@ -58,7 +58,7 @@ Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:14](https://git
 
 > `optional` **data**: `unknown`
 
-Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L17)
+Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L19)
 
 ***
 
@@ -66,7 +66,7 @@ Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:17](https://git
 
 > **errorCode**: [`StatusCode`](../enumerations/StatusCode.md) = `StatusCode.InternalServerError`
 
-Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L15)
+Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L17)
 
 ***
 
@@ -74,7 +74,7 @@ Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:15](https://git
 
 > `optional` **traceId**: `string`
 
-Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L18)
+Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L20)
 
 ## Methods
 
@@ -82,7 +82,7 @@ Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:18](https://git
 
 > **getErrorResponse**(): `Readonly`\<[`ErrorResponsePayload`](../type-aliases/ErrorResponsePayload.md)\>
 
-Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:69](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L69)
+Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:71](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L71)
 
 Returns error response object
 
@@ -98,7 +98,7 @@ ErrorResponsePayload
 
 > **intoHandledError**(): [`HandledError`](HandledError.md)
 
-Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:61](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L61)
+Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:63](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L63)
 
 Create a handled error from unhandled error
 
@@ -114,7 +114,7 @@ HandledError
 
 > **toJSON**(): `object`
 
-Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:88](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L88)
+Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:90](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L90)
 
 #### Returns
 
@@ -158,7 +158,7 @@ the trace if of the request
 
 > **toString**(): `string`
 
-Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:84](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L84)
+Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:86](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L86)
 
 Returns stringified error response object
 
@@ -174,7 +174,7 @@ ErrorResponse as string
 
 > `static` **fromError**(`err`, `errorCode`?, `data`?, `traceId`?): [`HandledError`](HandledError.md)
 
-Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L46)
+Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L48)
 
 Creates a UnhandledError from an input
 
@@ -216,7 +216,7 @@ UnhandledError
 
 > `static` **fromMessage**(`message`): [`UnhandledError`](UnhandledError.md)
 
-Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L33)
+Defined in: [packages/core/src/core/Error/UnhandledError.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/UnhandledError.impl.ts#L35)
 
 Create a error object from EBMessage error message
 

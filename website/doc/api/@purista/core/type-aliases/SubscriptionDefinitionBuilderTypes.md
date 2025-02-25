@@ -8,7 +8,7 @@
 
 > **SubscriptionDefinitionBuilderTypes**\<`PayloadSchema`, `ParamsSchema`, `OutputSchema`, `TransformInputPayloadSchema`, `TransformInputParamsSchema`, `TransformOutputSchema`, `Resources`, `Invokes`, `EmitList`\>: `object`
 
-Defined in: [packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L4)
+Defined in: [packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.ts#L5)
 
 ## Type Parameters
 

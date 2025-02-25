@@ -8,7 +8,7 @@
 
 > **FullServiceDefinition**\<`S`\>: `object`
 
-Defined in: [packages/core/src/helper/types/FullServiceDefinition.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/FullServiceDefinition.ts#L3)
+Defined in: [packages/core/src/helper/types/FullServiceDefinition.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/FullServiceDefinition.ts#L5)
 
 ## Type Parameters
 

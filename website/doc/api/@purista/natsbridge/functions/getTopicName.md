@@ -18,7 +18,7 @@ purista/message_type/instance_id/sender_name/sender_version/sender_target/eventn
 
 ### this
 
-[`NatsBridge`](../classes/NatsBridge.md)
+[`INatsBridge`](../type-aliases/INatsBridge.md)
 
 ### message
 

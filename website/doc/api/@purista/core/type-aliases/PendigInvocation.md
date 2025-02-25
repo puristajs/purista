@@ -8,7 +8,7 @@
 
 > **PendigInvocation**: `object`
 
-Defined in: [packages/core/src/DefaultEventBridge/types/PendingInvocations.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/PendingInvocations.ts#L3)
+Defined in: [packages/core/src/DefaultEventBridge/types/PendingInvocations.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/PendingInvocations.ts#L4)
 
 ## Type declaration
 

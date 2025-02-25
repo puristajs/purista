@@ -8,7 +8,7 @@
 
 > **CommandFunctionContextEnhancements**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `EmitList`\>: `object`
 
-Defined in: [packages/core/src/core/types/commandType/CommandFunctionContext.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L17)
+Defined in: [packages/core/src/core/types/commandType/CommandFunctionContext.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L19)
 
 It provides the original command message with types for payload and parameter.
 Also, the methods:

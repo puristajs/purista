@@ -238,7 +238,7 @@ false
 
 > **app**: `Hono`
 
-Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:24
+Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:25
 
 #### Inherited from
 
@@ -250,7 +250,7 @@ Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.
 
 > **client**: [`HttpEventBridgeClient`](../../base-http-bridge/interfaces/HttpEventBridgeClient.md)
 
-Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:27
+Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:28
 
 #### Inherited from
 
@@ -262,7 +262,7 @@ Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.
 
 > **config**: [`Complete`](../../core/type-aliases/Complete.md)\<\{ `apiPrefix`: `string`; `clientConfig`: [`DaprClientConfig`](../type-aliases/DaprClientConfig.md); `commandPayloadAsCloudEvent`: `boolean`; `defaultCommandTimeout`: `number`; `enableHttpCompression`: `boolean`; `enableRestApiExpose`: `boolean`; `instanceId`: `string`; `logger`: [`Logger`](../../core/classes/Logger.md); `logLevel`: [`LogLevelName`](../../core/type-aliases/LogLevelName.md); `name`: `string`; `pathPrefix`: `string`; `serve`: (`options`) => `Server`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`\> \| `Http2Server`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`, *typeof* `Http2ServerRequest`, *typeof* `Http2ServerResponse`\> \| `Http2SecureServer`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`, *typeof* `Http2ServerRequest`, *typeof* `Http2ServerResponse`\>; `serverHost`: `string`; `serverPort`: `number`; `spanProcessor`: `SpanProcessor`; `subscriptionPayloadAsCloudEvent`: `boolean`; \}\>
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:14
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:17
 
 #### Inherited from
 
@@ -274,7 +274,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 > **defaultCommandTimeout**: `number`
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:17
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:20
 
 The default time until when a command invocation automatically returns a time out error
 
@@ -292,7 +292,7 @@ The default time until when a command invocation automatically returns a time ou
 
 > **instanceId**: `string`
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:16
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:19
 
 #### Implementation of
 
@@ -308,7 +308,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 > **isShuttingDown**: `boolean`
 
-Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:25
+Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:26
 
 #### Inherited from
 
@@ -320,7 +320,7 @@ Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.
 
 > **isStarted**: `boolean`
 
-Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:26
+Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:27
 
 #### Inherited from
 
@@ -332,7 +332,7 @@ Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:12
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:15
 
 #### Inherited from
 
@@ -344,7 +344,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:15
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:18
 
 #### Implementation of
 
@@ -360,7 +360,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 > **server**: `undefined` \| `Server`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`\> \| `Http2Server`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`, *typeof* `Http2ServerRequest`, *typeof* `Http2ServerResponse`\> \| `Http2SecureServer`\<*typeof* `IncomingMessage`, *typeof* `ServerResponse`, *typeof* `Http2ServerRequest`, *typeof* `Http2ServerResponse`\>
 
-Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:23
+Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:24
 
 #### Inherited from
 
@@ -372,7 +372,7 @@ Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:13
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:16
 
 #### Inherited from
 
@@ -384,7 +384,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:41
+Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:42
 
 Shut down event bridge as gracefully as possible
 
@@ -436,7 +436,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:13
 
 > **emitMessage**\<`T`\>(`message`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
-Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:30
+Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:31
 
 Emit a message to the eventbridge without awaiting a result
 
@@ -470,7 +470,7 @@ the message
 
 > **getTracer**(): `Tracer`
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:27
 
 Returns open telemetry tracer of this service
 
@@ -490,7 +490,7 @@ Tracer
 
 > **invoke**\<`T`\>(`input`, `ttl`?): `Promise`\<`T`\>
 
-Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:31
+Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:32
 
 Call a command of a service and return the result of this command
 
@@ -530,7 +530,7 @@ the time to live (timeout) of the invocation
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:37
+Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:38
 
 Indicates if the eventbridge is running and works correctly
 
@@ -552,7 +552,7 @@ Indicates if the eventbridge is running and works correctly
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:36
+Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:37
 
 Indicates if the eventbridge has been started and is connected to underlaying message broker
 
@@ -634,7 +634,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:11
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:32
+Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:33
 
 #### Parameters
 
@@ -752,7 +752,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:33
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:36
 
 Start a child span for opentelemetry tracking
 
@@ -802,7 +802,7 @@ return value of fn
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:33
+Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:34
 
 Unregister a service command
 
@@ -832,7 +832,7 @@ The address (service name, version and command name) of the command to be de-reg
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:35
+Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.d.ts:36
 
 #### Parameters
 
@@ -858,7 +858,7 @@ Defined in: base-http-bridge/dist/commonjs/HttpEventBridge/HttpEventBridge.impl.
 
 > **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context`?): `Promise`\<`F`\>
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:49
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:52
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!

@@ -8,7 +8,7 @@
 
 > **EventBridgeEventsBasic**: `object`
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L20)
+Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L21)
 
 Events which can be emitted by a event bridge
 

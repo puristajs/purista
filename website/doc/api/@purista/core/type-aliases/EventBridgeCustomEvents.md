@@ -8,7 +8,7 @@
 
 > **EventBridgeCustomEvents**: `object`
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L37)
+Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L38)
 
 ## Index Signature
 

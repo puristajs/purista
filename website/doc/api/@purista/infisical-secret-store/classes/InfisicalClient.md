@@ -6,7 +6,7 @@
 
 # Class: InfisicalClient
 
-Defined in: [infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:11](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L11)
+Defined in: [infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L13)
 
 The internal http client to connect to the Infisical server.
 
@@ -20,7 +20,7 @@ The internal http client to connect to the Infisical server.
 
 > **new InfisicalClient**(`conf`): [`InfisicalClient`](InfisicalClient.md)
 
-Defined in: [infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L16)
+Defined in: [infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L18)
 
 #### Parameters
 
@@ -144,7 +144,7 @@ Custom trace Id
 
 > `protected` **auth**: [`AuthCredentials`](../../core/type-aliases/AuthCredentials.md)
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:27
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:31
 
 #### Inherited from
 
@@ -156,7 +156,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:27
 
 > **baseUrl**: `URL`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:24
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:28
 
 #### Inherited from
 
@@ -168,7 +168,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:24
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:22
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:26
 
 #### baseUrl
 
@@ -284,7 +284,7 @@ Custom trace Id
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:21
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:25
 
 #### Inherited from
 
@@ -296,7 +296,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:21
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:20
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:24
 
 #### Inherited from
 
@@ -308,7 +308,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:20
 
 > **spanProcessor**: `undefined` \| `SpanProcessor`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:25
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:29
 
 #### Inherited from
 
@@ -320,7 +320,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:25
 
 > **timeout**: `number`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:23
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:27
 
 #### Inherited from
 
@@ -332,7 +332,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:23
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:26
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:30
 
 #### Inherited from
 
@@ -344,7 +344,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:26
 
 > **delete**\<`T`\>(`path`, `options`?, `payload`?): `Promise`\<`T`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:97
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:101
 
 DELETE request
 
@@ -380,7 +380,7 @@ DELETE request
 
 > `protected` **execute**(`method`, `path`, `options`?, `payload`?): `Promise`\<`any`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:62
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:66
 
 Helper method
 
@@ -420,7 +420,7 @@ UnhandledError
 
 > **get**\<`T`\>(`path`, `options`?): `Promise`\<`T`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:69
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:73
 
 GET request
 
@@ -452,7 +452,7 @@ GET request
 
 > **getSecret**(`name`): `Promise`\<`undefined` \| `string`\>
 
-Defined in: [infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:93](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L93)
+Defined in: [infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:95](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L95)
 
 Get a single secret
 
@@ -472,7 +472,7 @@ Get a single secret
 
 > **getServiceTokenData**(): `Promise`\<[`TokenData`](../type-aliases/TokenData.md)\>
 
-Defined in: [infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:77](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L77)
+Defined in: [infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:79](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L79)
 
 Fetches the token data from the server for given access token
 
@@ -486,7 +486,7 @@ Fetches the token data from the server for given access token
 
 > **getTracer**(): `Tracer`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:34
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:38
 
 Returns open telemetry tracer of this service
 
@@ -506,7 +506,7 @@ Tracer
 
 > `protected` **getUrlAndHeader**(`path`, `options`?): `object`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:44
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:48
 
 #### Parameters
 
@@ -540,7 +540,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:44
 
 > **patch**\<`T`\>(`path`, `payload`, `options`?): `Promise`\<`T`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:90
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:94
 
 PATCH request
 
@@ -576,7 +576,7 @@ PATCH request
 
 > **post**\<`T`\>(`path`, `payload`, `options`?): `Promise`\<`T`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:76
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:80
 
 POST request
 
@@ -612,7 +612,7 @@ POST request
 
 > **put**\<`T`\>(`path`, `payload`, `options`?): `Promise`\<`T`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:83
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:87
 
 PUT request
 
@@ -648,7 +648,7 @@ PUT request
 
 > **removeSecret**(`name`): `Promise`\<`void`\>
 
-Defined in: [infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:168](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L168)
+Defined in: [infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:170](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L170)
 
 Remove a secret
 
@@ -668,7 +668,7 @@ Remove a secret
 
 > **setBearerToken**(`token`): `void`
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:52
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:56
 
 Set the bearer token for all following requests.
 
@@ -694,7 +694,7 @@ the bearer token
 
 > **setSecret**(`name`, `value`): `Promise`\<`void`\>
 
-Defined in: [infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:133](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L133)
+Defined in: [infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:135](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts#L135)
 
 Set a secret.
 It will first try to update and if the secret does not exist, it will create a new one
@@ -719,7 +719,7 @@ It will first try to update and if the secret does not exist, it will create a n
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:43
+Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:47
 
 Start a child span for opentelemetry tracking
 

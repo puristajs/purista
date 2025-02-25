@@ -29,6 +29,7 @@ import { NatsBridge } from '@purista/natsbridge'
 
 ## Type Aliases
 
+- [INatsBridge](type-aliases/INatsBridge.md)
 - [IncomingMessageFunction](type-aliases/IncomingMessageFunction.md)
 - [NatsBridgeConfig](type-aliases/NatsBridgeConfig.md)
 

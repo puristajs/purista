@@ -8,7 +8,7 @@
 
 > **createInfoMessage**(`messageType`, `sender`, `additional`?): [`InfoMessage`](../type-aliases/InfoMessage.md)
 
-Defined in: [packages/core/src/core/helper/createInfoMessage.impl.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createInfoMessage.impl.ts#L14)
+Defined in: [packages/core/src/core/helper/createInfoMessage.impl.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createInfoMessage.impl.ts#L15)
 
 ## Parameters
 

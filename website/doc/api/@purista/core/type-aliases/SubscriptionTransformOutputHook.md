@@ -14,7 +14,7 @@ This transform hook is executed after function output validation and AfterGuardH
 
 ## Type Parameters
 
-• **S** *extends* [`Service`](../classes/Service.md)
+• **S** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
 
 • **FinalFunctionOutputType**
 

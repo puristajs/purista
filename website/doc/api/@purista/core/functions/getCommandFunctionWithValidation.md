@@ -8,7 +8,7 @@
 
 > **getCommandFunctionWithValidation**\<`S`\>(`fn`, `inputPayloadSchema`, `inputParameterSchema`, `outputPayloadSchema`, `beforeGuards`): (`this`, `context`, `payload`, `parameter`) => `Promise`\<`unknown`\>
 
-Defined in: [packages/core/src/CommandDefinitionBuilder/getCommandFunctionWithValidation.impl.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/getCommandFunctionWithValidation.impl.ts#L7)
+Defined in: [packages/core/src/CommandDefinitionBuilder/getCommandFunctionWithValidation.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/getCommandFunctionWithValidation.impl.ts#L13)
 
 ## Type Parameters
 

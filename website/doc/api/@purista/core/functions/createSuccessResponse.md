@@ -8,7 +8,7 @@
 
 > **createSuccessResponse**\<`T`\>(`instanceId`, `originalEBMessage`, `payload`, `eventName`?, `contentType`?, `contentEncoding`?): `Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `T`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
 
-Defined in: [packages/core/src/core/helper/createSuccessResponse.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createSuccessResponse.impl.ts#L16)
+Defined in: [packages/core/src/core/helper/createSuccessResponse.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createSuccessResponse.impl.ts#L18)
 
 ## Type Parameters
 

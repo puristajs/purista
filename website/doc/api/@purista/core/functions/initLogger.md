@@ -8,7 +8,7 @@
 
 > **initLogger**(`level`, `opt`?): [`Logger`](../classes/Logger.md)
 
-Defined in: [packages/core/src/DefaultLogger/initLogger.impl.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/initLogger.impl.ts#L14)
+Defined in: [packages/core/src/DefaultLogger/initLogger.impl.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/initLogger.impl.ts#L15)
 
 Create a new logger with the given minimum log level
 

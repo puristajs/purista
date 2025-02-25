@@ -18,4 +18,4 @@ export const userServiceCommands: SubscriptionDefinitionList<UserService> = [sig
 
 ## Type Parameters
 
-• **ServiceClassType** *extends* [`Service`](../classes/Service.md)
+• **ServiceClassType** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)

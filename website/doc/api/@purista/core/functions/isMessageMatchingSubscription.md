@@ -8,7 +8,7 @@
 
 > **isMessageMatchingSubscription**(`_log`, `message`, `subscription`): `boolean`
 
-Defined in: [packages/core/src/DefaultEventBridge/isMessageMatchingSubscription.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/isMessageMatchingSubscription.impl.ts#L5)
+Defined in: [packages/core/src/DefaultEventBridge/isMessageMatchingSubscription.impl.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/isMessageMatchingSubscription.impl.ts#L11)
 
 ## Parameters
 
