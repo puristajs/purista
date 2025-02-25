@@ -8,13 +8,13 @@
 
 > **IncomingMessageFunction**: (`this`, `payload`, `packet`) => `Promise`\<`void`\>
 
-Defined in: [mqttbridge/src/types/IncomingMessageFunction.ts:6](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/types/IncomingMessageFunction.ts#L6)
+Defined in: [mqttbridge/src/types/IncomingMessageFunction.ts:5](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/types/IncomingMessageFunction.ts#L5)
 
 ## Parameters
 
 ### this
 
-[`MqttBridge`](../classes/MqttBridge.md)
+[`IMqttBridge`](IMqttBridge.md)
 
 ### payload
 

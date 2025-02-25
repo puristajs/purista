@@ -6,7 +6,7 @@
 
 # Class: DefaultConfigStore
 
-Defined in: [packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L28)
+Defined in: [packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L31)
 
 The DefaultConfigStore is a placeholder which offers all needed methods.
 Getters and setters will throw a UnhandledError with status `Unauthorized`, when a disabled operation is called.
@@ -42,7 +42,7 @@ console.log(await store.getConfig('initialValue') // outputs: { initialValue: 'i
 
 > **new DefaultConfigStore**(`config`?): [`DefaultConfigStore`](DefaultConfigStore.md)
 
-Defined in: [packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L30)
+Defined in: [packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L33)
 
 #### Parameters
 
@@ -104,7 +104,7 @@ A log level for new logger if logger is not set
 
 > **cache**: [`ConfigStoreCacheMap`](../type-aliases/ConfigStoreCacheMap.md)
 
-Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L26)
+Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L28)
 
 #### Inherited from
 
@@ -116,7 +116,7 @@ Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:26]
 
 > **config**: `object`
 
-Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L22)
+Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L24)
 
 #### Index Signature
 
@@ -174,7 +174,7 @@ A log level for new logger if logger is not set
 
 > **logger**: [`Logger`](Logger.md)
 
-Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L21)
+Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L23)
 
 #### Inherited from
 
@@ -186,7 +186,7 @@ Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:21]
 
 > **name**: `string`
 
-Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L24)
+Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L26)
 
 name of store
 
@@ -204,7 +204,7 @@ name of store
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:126](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L126)
+Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:128](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L128)
 
 disconnects and shuts down the config store
 
@@ -226,7 +226,7 @@ disconnects and shuts down the config store
 
 > **getConfig**\<`ConfigNames`\>(...`configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../type-aliases/ObjectWithKeysFromStringArray.md)\<`ConfigNames`\>\>
 
-Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L62)
+Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:64](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L64)
 
 get a config value
 
@@ -270,7 +270,7 @@ UnhandledError
 
 > `protected` **getConfigImpl**\<`ConfigNames`\>(...`configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../type-aliases/ObjectWithKeysFromStringArray.md)\<`ConfigNames`\>\>
 
-Defined in: [packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L40)
+Defined in: [packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L43)
 
 This method must be overwritten by actual store implementation.
 
@@ -302,7 +302,7 @@ an object of { [configName]: value | undefined }
 
 > **removeConfig**(`configName`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:89](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L89)
+Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:91](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L91)
 
 delete a config value
 
@@ -338,7 +338,7 @@ UnhandledError
 
 > `protected` **removeConfigImpl**(`configName`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L62)
+Defined in: [packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:65](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L65)
 
 This method must be overwritten by actual store implementation.
 
@@ -362,7 +362,7 @@ This method must be overwritten by actual store implementation.
 
 > **setConfig**(`configName`, `configValue`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:116](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L116)
+Defined in: [packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts:118](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/ConfigStoreBaseClass.impl.ts#L118)
 
 set a config value
 
@@ -406,7 +406,7 @@ UnhandledError
 
 > `protected` **setConfigImpl**(`configName`, `configValue`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:58](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L58)
+Defined in: [packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts:61](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/DefaultConfigStore.impl.ts#L61)
 
 This method must be overwritten by actual store implementation.
 

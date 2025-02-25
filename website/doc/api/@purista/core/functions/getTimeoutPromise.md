@@ -8,7 +8,7 @@
 
 > **getTimeoutPromise**\<`T`\>(`fn`, `ttl`): `Promise`\<`T`\>
 
-Defined in: [packages/core/src/helper/getTimeoutPromise.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/getTimeoutPromise.impl.ts#L9)
+Defined in: [packages/core/src/helper/getTimeoutPromise.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/getTimeoutPromise.impl.ts#L10)
 
 ## Type Parameters
 

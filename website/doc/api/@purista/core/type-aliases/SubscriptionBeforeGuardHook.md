@@ -16,7 +16,7 @@ It should throw HandledError or return void.
 
 ## Type Parameters
 
-• **S** *extends* [`Service`](../classes/Service.md) = [`Service`](../classes/Service.md)
+• **S** *extends* [`ServiceClass`](../interfaces/ServiceClass.md) = [`ServiceClass`](../interfaces/ServiceClass.md)
 
 • **FunctionPayloadType** = `unknown`
 

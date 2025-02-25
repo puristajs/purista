@@ -8,7 +8,7 @@
 
 > **getSubscriptionContextMock**\<`Resources`, `Invokes`, `EmitList`\>(`input`): `object`
 
-Defined in: [packages/core/src/mocks/getSubscriptionContext.mock.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionContext.mock.ts#L20)
+Defined in: [packages/core/src/mocks/getSubscriptionContext.mock.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionContext.mock.ts#L18)
 
 A function that returns a mock object for subscription function context
 

@@ -8,7 +8,7 @@
 
 > **getNewSubscriptionStorageEntry**(`subscription`, `cb`): [`SubscriptionStorageEntry`](../type-aliases/SubscriptionStorageEntry.md)
 
-Defined in: [packages/core/src/DefaultEventBridge/getNewSubscriptionStorageEntry.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/getNewSubscriptionStorageEntry.impl.ts#L4)
+Defined in: [packages/core/src/DefaultEventBridge/getNewSubscriptionStorageEntry.impl.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/getNewSubscriptionStorageEntry.impl.ts#L8)
 
 ## Parameters
 

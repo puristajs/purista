@@ -100,7 +100,7 @@ A OpenTelemetry span processor
 
 > **config**: [`Complete`](../type-aliases/Complete.md)\<\{ `defaultCommandTimeout`: `number`; `emitMessagesAsEventBridgeEvents`: `boolean`; `instanceId`: `string`; `logger`: [`Logger`](Logger.md); `logLevel`: [`LogLevelName`](../type-aliases/LogLevelName.md); `logWarnOnMessagesWithoutReceiver`: `boolean`; `spanProcessor`: `SpanProcessor`; \}\>
 
-Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L23)
+Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L27)
 
 #### Inherited from
 
@@ -112,7 +112,7 @@ Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:23]
 
 > **defaultCommandTimeout**: `number`
 
-Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L29)
+Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L33)
 
 The default time until when a command invocation automatically returns a time out error
 
@@ -146,7 +146,7 @@ Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:83]
 
 > **instanceId**: `string`
 
-Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L27)
+Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L31)
 
 #### Implementation of
 
@@ -162,7 +162,7 @@ Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:27]
 
 > **logger**: [`Logger`](Logger.md)
 
-Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L20)
+Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L24)
 
 #### Inherited from
 
@@ -174,7 +174,7 @@ Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:20]
 
 > **name**: `string`
 
-Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L25)
+Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L29)
 
 #### Implementation of
 
@@ -230,7 +230,7 @@ Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:80]
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L21)
+Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L25)
 
 #### Inherited from
 
@@ -310,7 +310,7 @@ Emit a new message to event bridge to be delivered to receiver
 
 ##### message
 
-`Omit`\<[`EBMessage`](../type-aliases/EBMessage.md), `"correlationId"` \| `"id"` \| `"timestamp"`\>
+`Omit`\<[`EBMessage`](../type-aliases/EBMessage.md), `"id"` \| `"timestamp"` \| `"correlationId"`\>
 
 EBMessage
 
@@ -328,7 +328,7 @@ EBMessage
 
 > **getTracer**(): `Tracer`
 
-Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:70](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L70)
+Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:74](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L74)
 
 Returns open telemetry tracer of this service
 
@@ -360,7 +360,7 @@ Call a command of a service and return the result of this command
 
 ##### input
 
-`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`Command`](../enumerations/EBMessageType.md#command); `otp`: `string`; `payload`: \{ `parameter`: `unknown`; `payload`: `unknown`; \}; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"messageType"` \| `"correlationId"` \| `"id"` \| `"timestamp"`\>
+`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`Command`](../enumerations/EBMessageType.md#command); `otp`: `string`; `payload`: \{ `parameter`: `unknown`; `payload`: `unknown`; \}; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"messageType"` \| `"id"` \| `"timestamp"` \| `"correlationId"`\>
 
 a partial command message
 
@@ -588,7 +588,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:82](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L82)
+Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:86](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L86)
 
 Start a child span for opentelemetry tracking
 
@@ -686,7 +686,7 @@ Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:277
 
 > **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context`?): `Promise`\<`F`\>
 
-Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:132](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L132)
+Defined in: [packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts:136](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L136)
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!

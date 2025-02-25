@@ -8,7 +8,7 @@
 
 > **getCommandSuccessMessageMock**\<`PayloadType`\>(`payload`, `input`?, `commandMessage`?): `Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `PayloadType`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
 
-Defined in: [packages/core/src/mocks/messages/getCommandSuccessMessage.mock.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCommandSuccessMessage.mock.ts#L10)
+Defined in: [packages/core/src/mocks/messages/getCommandSuccessMessage.mock.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCommandSuccessMessage.mock.ts#L14)
 
 A function that returns a mocked command success response message.
 

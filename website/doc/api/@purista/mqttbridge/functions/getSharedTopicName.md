@@ -14,7 +14,7 @@ Defined in: [mqttbridge/src/topic/getSharedTopicName.impl.ts:7](https://github.c
 
 ### this
 
-[`MqttBridge`](../classes/MqttBridge.md)
+[`IMqttBridge`](../type-aliases/IMqttBridge.md)
 
 ### topic
 

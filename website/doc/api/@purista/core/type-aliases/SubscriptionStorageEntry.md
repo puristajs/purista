@@ -8,7 +8,7 @@
 
 > **SubscriptionStorageEntry**: `object`
 
-Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L3)
+Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L9)
 
 ## Type declaration
 

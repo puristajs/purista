@@ -8,7 +8,7 @@
 
 > **deserializeOtpFromAmqpHeader**(`logger`, `message`, `encrypter`, `encoder`): `Promise`\<`undefined` \| `Context`\>
 
-Defined in: [amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts#L9)
+Defined in: [amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts#L10)
 
 ## Parameters
 

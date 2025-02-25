@@ -8,7 +8,7 @@
 
 > **ContextBase**: `object`
 
-Defined in: [packages/core/src/core/types/ContextBase.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L12)
+Defined in: [packages/core/src/core/types/ContextBase.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L20)
 
 The ContextBase provides is a basic type.
 Each context for command function, subscription function and all Hooks and transformers will have at least the properties of this type.

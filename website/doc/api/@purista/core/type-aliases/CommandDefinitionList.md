@@ -18,4 +18,4 @@ export const userServiceCommands: CommandDefinitionList<UserService> = [signUp.g
 
 ## Type Parameters
 
-• **S** *extends* [`Service`](../classes/Service.md)
+• **S** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)

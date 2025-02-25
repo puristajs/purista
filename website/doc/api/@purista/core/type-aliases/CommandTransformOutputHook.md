@@ -8,13 +8,13 @@
 
 > **CommandTransformOutputHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FinalFunctionOutputType`, `FunctionParamsType`, `TransformOutputHookOutput`, `Resources`\>: (`this`, `context`, `input`, `params`) => `Promise`\<`TransformOutputHookOutput`\>
 
-Defined in: [packages/core/src/core/types/commandType/CommandTransformOutputHook.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandTransformOutputHook.ts#L14)
+Defined in: [packages/core/src/core/types/commandType/CommandTransformOutputHook.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandTransformOutputHook.ts#L15)
 
 This transform hook is executed after function output validation and AfterGuardHooks.
 
 ## Type Parameters
 
-• **S** *extends* [`Service`](../classes/Service.md)
+• **S** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
 
 • **MessagePayloadType**
 

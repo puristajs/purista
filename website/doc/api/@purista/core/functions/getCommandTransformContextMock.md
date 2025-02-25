@@ -8,7 +8,7 @@
 
 > **getCommandTransformContextMock**\<`MessagePayloadType`, `MessageParamsType`, `Resources`\>(`input`): `object`
 
-Defined in: [packages/core/src/mocks/getCommandTransformContext.mock.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getCommandTransformContext.mock.ts#L17)
+Defined in: [packages/core/src/mocks/getCommandTransformContext.mock.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getCommandTransformContext.mock.ts#L19)
 
 A function that returns a mock object for command transform function context
 

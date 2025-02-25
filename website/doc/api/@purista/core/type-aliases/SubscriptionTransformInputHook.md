@@ -12,7 +12,7 @@ Defined in: [packages/core/src/core/types/subscription/SubscriptionTransformInpu
 
 ## Type Parameters
 
-• **S** *extends* [`Service`](../classes/Service.md)
+• **S** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
 
 • **TransformInputPayload**
 

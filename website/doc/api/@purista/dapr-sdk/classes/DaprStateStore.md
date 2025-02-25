@@ -94,7 +94,7 @@ The name of the state store
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:16
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:18
 
 #### cacheTtl?
 
@@ -160,7 +160,7 @@ The name of the state store
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:15
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 #### Inherited from
 
@@ -172,7 +172,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:15
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:19
 
 #### Inherited from
 
@@ -184,7 +184,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:17
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:25
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:27
 
 #### Returns
 
@@ -200,7 +200,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:25
 
 > **getState**\<`StateNames`\>(...`stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:20
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:22
 
 #### Type Parameters
 
@@ -252,7 +252,7 @@ Defined in: [dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:53](https://gith
 
 > **removeState**(`stateName`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:22
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:24
 
 #### Parameters
 
@@ -296,7 +296,7 @@ Defined in: [dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:99](https://gith
 
 > **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:24
+Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:26
 
 #### Parameters
 

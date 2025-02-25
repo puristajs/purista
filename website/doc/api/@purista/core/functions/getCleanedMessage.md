@@ -8,7 +8,7 @@
 
 > **getCleanedMessage**(`message`, `stripeOutContent`): `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/core/src/core/helper/getCleanedMessage.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getCleanedMessage.impl.ts#L16)
+Defined in: [packages/core/src/core/helper/getCleanedMessage.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getCleanedMessage.impl.ts#L17)
 
 Helper function for logging.
 Returns a message object, where fields which might contain sensitive data, are overwritten with string values.

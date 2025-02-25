@@ -8,7 +8,7 @@
 
 > **throwIfNotValidMessage**(`input`): `void`
 
-Defined in: [packages/core/src/helper/throwIfNotValidMessage.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/throwIfNotValidMessage.impl.ts#L10)
+Defined in: [packages/core/src/helper/throwIfNotValidMessage.impl.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/throwIfNotValidMessage.impl.ts#L12)
 
 Validates if the given input might be valid event bridge message
 It only checks for "technically possible"

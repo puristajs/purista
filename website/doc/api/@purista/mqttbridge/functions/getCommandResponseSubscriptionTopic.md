@@ -14,7 +14,7 @@ Defined in: [mqttbridge/src/topic/getCommandResponseSubscriptionTopic.impl.ts:8]
 
 ### this
 
-[`MqttBridge`](../classes/MqttBridge.md)
+[`IMqttBridge`](../type-aliases/IMqttBridge.md)
 
 ## Returns
 

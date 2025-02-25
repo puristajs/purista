@@ -14,7 +14,7 @@ Defined in: [mqttbridge/src/handler/handleCommandResponse.impl.ts:16](https://gi
 
 ### this
 
-[`MqttBridge`](../classes/MqttBridge.md)
+[`IMqttBridge`](../type-aliases/IMqttBridge.md)
 
 ### payload
 

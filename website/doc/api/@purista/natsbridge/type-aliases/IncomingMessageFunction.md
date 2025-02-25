@@ -14,7 +14,7 @@ Defined in: [natsbridge/src/types/IncomingMessageFunction.ts:5](https://github.c
 
 ### this
 
-[`NatsBridge`](../classes/NatsBridge.md)
+[`INatsBridge`](INatsBridge.md)
 
 ### error
 

@@ -6,7 +6,7 @@
 
 # Class: HandledError
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L11)
+Defined in: [packages/core/src/core/Error/HandledError.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L13)
 
 A handled error is an error which is handled or thrown by business logic.
 It is wanted to expose it the outside world.
@@ -22,7 +22,7 @@ Scenarios are input validation failures or "404 Not Found" errors which should b
 
 > **new HandledError**(`errorCode`, `message`?, `data`?, `traceId`?): [`HandledError`](HandledError.md)
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L12)
+Defined in: [packages/core/src/core/Error/HandledError.impl.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L14)
 
 #### Parameters
 
@@ -56,7 +56,7 @@ Defined in: [packages/core/src/core/Error/HandledError.impl.ts:12](https://githu
 
 > `optional` **data**: `unknown`
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L15)
+Defined in: [packages/core/src/core/Error/HandledError.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L17)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [packages/core/src/core/Error/HandledError.impl.ts:15](https://githu
 
 > **errorCode**: [`StatusCode`](../enumerations/StatusCode.md)
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L13)
+Defined in: [packages/core/src/core/Error/HandledError.impl.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L15)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [packages/core/src/core/Error/HandledError.impl.ts:13](https://githu
 
 > `optional` **traceId**: `string`
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L16)
+Defined in: [packages/core/src/core/Error/HandledError.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L18)
 
 ## Methods
 
@@ -80,7 +80,7 @@ Defined in: [packages/core/src/core/Error/HandledError.impl.ts:16](https://githu
 
 > **getErrorResponse**(`traceId`?): `Readonly`\<[`ErrorResponsePayload`](../type-aliases/ErrorResponsePayload.md)\>
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:65](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L65)
+Defined in: [packages/core/src/core/Error/HandledError.impl.ts:67](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L67)
 
 Returns error response object
 
@@ -102,7 +102,7 @@ ErrorResponsePayload
 
 > **toJSON**(): `object`
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:84](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L84)
+Defined in: [packages/core/src/core/Error/HandledError.impl.ts:86](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L86)
 
 #### Returns
 
@@ -146,7 +146,7 @@ the trace if of the request
 
 > **toString**(): `string`
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L80)
+Defined in: [packages/core/src/core/Error/HandledError.impl.ts:82](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L82)
 
 Returns stringified error response object
 
@@ -162,7 +162,7 @@ ErrorResponse as string
 
 > `static` **fromError**(`err`, `errorCode`?, `data`?, `traceId`?): [`HandledError`](HandledError.md)
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L45)
+Defined in: [packages/core/src/core/Error/HandledError.impl.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L47)
 
 Creates a HandledError from an input.
 If the input error is a HandledError it will be returned without modifications.
@@ -205,7 +205,7 @@ HandledError
 
 > `static` **fromMessage**(`message`): [`HandledError`](HandledError.md)
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L31)
+Defined in: [packages/core/src/core/Error/HandledError.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L33)
 
 Create a error object from EBMessage error message
 

@@ -14,7 +14,7 @@ The definition for a subscription provided by some service.
 
 ## Type Parameters
 
-• **S** *extends* [`Service`](../classes/Service.md)
+• **S** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
 
 • **TransformInputPayload**
 

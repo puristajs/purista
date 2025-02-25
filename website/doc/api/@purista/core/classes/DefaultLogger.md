@@ -6,7 +6,7 @@
 
 # Class: DefaultLogger
 
-Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L6)
+Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L4)
 
 ## Extends
 
@@ -22,7 +22,7 @@ Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:6](https://gi
 
 > **new DefaultLogger**(`log`): [`DefaultLogger`](DefaultLogger.md)
 
-Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L7)
+Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L5)
 
 #### Parameters
 
@@ -44,7 +44,7 @@ Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:7](https://gi
 
 > **debug**(...`args`): `void`
 
-Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L43)
+Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L41)
 
 #### Parameters
 
@@ -70,7 +70,7 @@ Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:43](https://g
 
 > **error**(...`args`): `void`
 
-Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L19)
+Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L17)
 
 #### Parameters
 
@@ -96,7 +96,7 @@ Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:19](https://g
 
 > **fatal**(...`args`): `void`
 
-Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L11)
+Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L9)
 
 #### Parameters
 
@@ -122,7 +122,7 @@ Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:11](https://g
 
 > **getChildLogger**(`options`): [`Logger`](Logger.md)
 
-Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:59](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L59)
+Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:57](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L57)
 
 #### Parameters
 
@@ -144,7 +144,7 @@ Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:59](https://g
 
 > **info**(...`args`): `void`
 
-Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L35)
+Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L33)
 
 #### Parameters
 
@@ -170,7 +170,7 @@ Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:35](https://g
 
 > **trace**(...`args`): `void`
 
-Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L51)
+Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L49)
 
 #### Parameters
 
@@ -196,7 +196,7 @@ Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:51](https://g
 
 > **warn**(...`args`): `void`
 
-Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L27)
+Defined in: [packages/core/src/DefaultLogger/DefaultLogger.impl.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/DefaultLogger.impl.ts#L25)
 
 #### Parameters
 

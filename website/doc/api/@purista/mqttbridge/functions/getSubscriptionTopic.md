@@ -8,13 +8,13 @@
 
 > **getSubscriptionTopic**(`this`, `subscription`): `string`
 
-Defined in: [mqttbridge/src/topic/getSubscriptionTopic.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/getSubscriptionTopic.impl.ts#L10)
+Defined in: [mqttbridge/src/topic/getSubscriptionTopic.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/getSubscriptionTopic.impl.ts#L9)
 
 ## Parameters
 
 ### this
 
-[`MqttBridge`](../classes/MqttBridge.md)
+[`IMqttBridge`](../type-aliases/IMqttBridge.md)
 
 ### subscription
 

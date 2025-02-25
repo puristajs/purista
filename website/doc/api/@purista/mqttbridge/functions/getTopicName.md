@@ -8,7 +8,7 @@
 
 > **getTopicName**(`this`, `message`): `string`
 
-Defined in: [mqttbridge/src/topic/getTopicName.impl.ts:31](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/getTopicName.impl.ts#L31)
+Defined in: [mqttbridge/src/topic/getTopicName.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/getTopicName.impl.ts#L30)
 
 Calculates the MQTT topic name for a message which should be sent.
 Something like:
@@ -29,7 +29,7 @@ receiver_target
 
 ### this
 
-[`MqttBridge`](../classes/MqttBridge.md)
+[`IMqttBridge`](../type-aliases/IMqttBridge.md)
 
 ### message
 

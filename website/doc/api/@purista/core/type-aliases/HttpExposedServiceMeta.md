@@ -8,7 +8,7 @@
 
 > **HttpExposedServiceMeta**\<`ParameterType`\>: [`Prettify`](Prettify.md)\<[`CommandDefinitionMetadataBase`](CommandDefinitionMetadataBase.md) & `object`\>
 
-Defined in: [packages/core/src/core/HttpServer/types/HttpExposedServiceMeta.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/HttpExposedServiceMeta.ts#L4)
+Defined in: [packages/core/src/core/HttpServer/types/HttpExposedServiceMeta.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/HttpExposedServiceMeta.ts#L8)
 
 ## Type Parameters
 

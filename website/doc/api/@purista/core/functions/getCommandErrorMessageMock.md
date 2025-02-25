@@ -8,7 +8,7 @@
 
 > **getCommandErrorMessageMock**(`error`?, `input`?, `commandMessage`?): `Readonly`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../enumerations/EBMessageType.md#commanderrorresponse); `otp`: `string`; `payload`: \{ `data`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../enumerations/StatusCode.md); \}; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
 
-Defined in: [packages/core/src/mocks/messages/getCommandErrorMessage.mock.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCommandErrorMessage.mock.ts#L16)
+Defined in: [packages/core/src/mocks/messages/getCommandErrorMessage.mock.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCommandErrorMessage.mock.ts#L14)
 
 A function that returns a mocked command error response message
 

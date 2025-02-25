@@ -8,7 +8,7 @@
 
 > **CommandFunctionContext**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `EmitList`\>: [`Prettify`](Prettify.md)\<[`ContextBase`](ContextBase.md) & [`CommandFunctionContextEnhancements`](CommandFunctionContextEnhancements.md)\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `EmitList`\>\>
 
-Defined in: [packages/core/src/core/types/commandType/CommandFunctionContext.ts:55](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L55)
+Defined in: [packages/core/src/core/types/commandType/CommandFunctionContext.ts:57](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L57)
 
 The command function context which will be passed into command function.
 

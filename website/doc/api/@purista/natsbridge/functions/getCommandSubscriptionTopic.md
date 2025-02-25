@@ -8,13 +8,13 @@
 
 > **getCommandSubscriptionTopic**(`this`, `address`): `string`
 
-Defined in: [natsbridge/src/topic/getCommandSubscriptionTopic.impl.ts:8](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/topic/getCommandSubscriptionTopic.impl.ts#L8)
+Defined in: [natsbridge/src/topic/getCommandSubscriptionTopic.impl.ts:7](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/topic/getCommandSubscriptionTopic.impl.ts#L7)
 
 ## Parameters
 
 ### this
 
-[`NatsBridge`](../classes/NatsBridge.md)
+[`INatsBridge`](../type-aliases/INatsBridge.md)
 
 ### address
 

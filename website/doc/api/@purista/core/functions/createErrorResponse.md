@@ -8,7 +8,7 @@
 
 > **createErrorResponse**(`instanceId`, `originalEBMessage`, `statusCode`, `error`?): `Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../enumerations/EBMessageType.md#commanderrorresponse); `otp`: `string`; `payload`: \{ `data`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../enumerations/StatusCode.md); \}; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"instanceId"`\>\>
 
-Defined in: [packages/core/src/core/helper/createErrorResponse.impl.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createErrorResponse.impl.ts#L19)
+Defined in: [packages/core/src/core/helper/createErrorResponse.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createErrorResponse.impl.ts#L24)
 
 Creates a error response object based on original command
 Toggles sender and receiver

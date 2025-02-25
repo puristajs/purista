@@ -108,7 +108,7 @@ https://[KEY_VAULT_NAME].vault.azure.net
 
 > **cache**: [`SecretStoreCacheMap`](../../core/type-aliases/SecretStoreCacheMap.md)
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
 
 #### Inherited from
 
@@ -128,7 +128,7 @@ Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:27](https://github.
 
 > **config**: `object`
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:18
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:21
 
 #### cacheTtl?
 
@@ -198,7 +198,7 @@ https://[KEY_VAULT_NAME].vault.azure.net
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:17
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:20
 
 #### Inherited from
 
@@ -210,7 +210,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:1
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:19
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -222,7 +222,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:1
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:31
 
 #### Returns
 
@@ -238,7 +238,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 > **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:23
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
 
 #### Type Parameters
 
@@ -290,7 +290,7 @@ Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:37](https://github.
 
 > **removeSecret**(`secretName`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:25
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:28
 
 #### Parameters
 
@@ -334,7 +334,7 @@ Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:56](https://github.
 
 > **setSecret**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:27
+Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:30
 
 #### Parameters
 

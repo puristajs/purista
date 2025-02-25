@@ -8,7 +8,7 @@
 
 > **Newable**\<`T`, `S`\>: (`config`) => `T`
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L41)
+Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L47)
 
 ## Type Parameters
 

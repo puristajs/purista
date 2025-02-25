@@ -28,6 +28,7 @@ await eventBridge.start()
 
 ## Type Aliases
 
+- [IMqttBridge](type-aliases/IMqttBridge.md)
 - [IncomingMessageFunction](type-aliases/IncomingMessageFunction.md)
 - [MqttBridgeConfig](type-aliases/MqttBridgeConfig.md)
 

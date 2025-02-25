@@ -8,4 +8,4 @@
 
 > `const` **CONFIG\_FILE\_NAME**: `"purista.client.json"` = `'purista.client.json'`
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L21)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L25)

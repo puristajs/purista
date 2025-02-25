@@ -8,7 +8,7 @@
 
 > **ServiceDefinitions**: `object`
 
-Defined in: [packages/core/src/helper/types/ServiceDefinitions.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L3)
+Defined in: [packages/core/src/helper/types/ServiceDefinitions.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ServiceDefinitions.ts#L4)
 
 ## Type declaration
 
