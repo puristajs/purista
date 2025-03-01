@@ -21,7 +21,7 @@ export type HttpClientConfig<CustomConfig extends Record<string, unknown>> = Pre
 		 * // get('v1/orders') will call http://localhost/api/v1/orders
 		 * ```
 		 * */
-		baseUrl: string
+		baseUrl?: string
 		/**
 		 * A logger instance
 		 */

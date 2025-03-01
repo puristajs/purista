@@ -47,7 +47,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 
 	public timeout: number
 
-	public baseUrl: URL
+	public baseUrl: URL | undefined = undefined
 
 	spanProcessor: SpanProcessor | undefined
 	traceProvider: NodeTracerProvider
@@ -66,7 +66,9 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 			...config,
 		}
 
-		this.baseUrl = new URL(this.config.baseUrl)
+		if (this.config.baseUrl) {
+			this.baseUrl = new URL(this.config.baseUrl)
+		}
 
 		this.auth = {
 			basicAuth: this.config.basicAuth,
@@ -144,7 +146,7 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 	}
 
 	protected getUrlAndHeader(path: string, options?: HttpClientRequestOptions) {
-		let fullPath = join(this.baseUrl.pathname, path)
+		let fullPath = this.baseUrl ? join(this.baseUrl.pathname, path) : path
 
 		if (options?.hash) {
 			fullPath += `#${options.hash}`
