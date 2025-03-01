@@ -1,7 +1,7 @@
-export enum ServiceEvent {
+export const ServiceEvent = {
 	/**
 	 * Emitted by theService v1 command ping:
 	 * provide a dummy command
 	 */
-	Pinged = 'pinged',
-}
+	Pinged: 'pinged',
+} as const

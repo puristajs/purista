@@ -1,1 +1,1 @@
-export enum ServiceEvent {}
+export const ServiceEvent = {} as const
