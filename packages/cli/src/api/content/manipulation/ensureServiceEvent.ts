@@ -1,13 +1,12 @@
 import { join } from 'node:path'
-
-import { Project } from 'ts-morph'
+import { ObjectLiteralExpression, Project, type PropertyAssignment, type SourceFile, SyntaxKind } from 'ts-morph'
 import { pascalCase } from '../../change-case.js'
 import { convertToProjectEventCasing } from '../../convertToProjectEventCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 import type { PuristaProjectInfo } from '../../scanPuristaProject.js'
 
 /**
- * Adds a new event to the global service event enum
+ * Adds a new event to the global service event enum or an object if the enum does not exist.
  */
 export const ensureServiceEvent = async (input: {
 	projectRootPath?: string
@@ -21,31 +20,50 @@ export const ensureServiceEvent = async (input: {
 	}
 
 	const projectRootPath = input.projectRootPath ?? process.cwd()
-
 	const tsConfigFilePath = join(projectRootPath, 'tsconfig.json')
-	const project = new Project({
-		tsConfigFilePath,
-	})
+	const project = new Project({ tsConfigFilePath })
 
 	const enumFile = join(input.puristaProjectConfig.servicePath, input.puristaProject.eventEnumFileName)
-
 	const sourceFile = project.addSourceFileAtPathIfExists(enumFile)
 
 	if (!sourceFile) {
 		throw new Error(`${enumFile} could not be found`)
 	}
 
-	const serviceEventEnum = sourceFile.getEnum('ServiceEvent')
+	const enumName = pascalCase(input.eventName)
+	const enumValue = convertToProjectEventCasing(input.eventName, input.puristaProjectConfig)
 
-	if (!serviceEventEnum) {
-		throw new Error('enum ServiceEvent could not be found')
+	// Try adding to enum first
+	const result = addToEnum(sourceFile, enumName, enumValue, input.description)
+	if (result) {
+		await sourceFile.save()
+		return result
 	}
 
-	const enumValue = convertToProjectEventCasing(input.eventName, input.puristaProjectConfig)
-	const enumName = pascalCase(input.eventName)
+	// If no enum exists, try adding to object
+	const objectResult = addToObject(sourceFile, enumName, enumValue, input.description)
+	if (objectResult) {
+		await sourceFile.save()
+		return objectResult
+	}
+
+	throw new Error('Neither enum nor object ServiceEvent found')
+}
+
+/**
+ * Adds a new entry to the `ServiceEvent` enum if it exists.
+ */
+const addToEnum = (
+	sourceFile: SourceFile,
+	enumName: string,
+	enumValue: string,
+	description?: string,
+): string | undefined => {
+	const serviceEventEnum = sourceFile.getEnum('ServiceEvent')
+
+	if (!serviceEventEnum) return undefined
 
 	const existingEntries = serviceEventEnum.getMembers()
-
 	const alreadyExist = existingEntries.find(member => member.getName() === enumName || member.getValue() === enumValue)
 
 	if (alreadyExist) {
@@ -53,10 +71,55 @@ export const ensureServiceEvent = async (input: {
 	}
 
 	const member = serviceEventEnum.addMember({ name: enumName, value: enumValue })
-	if (input.description) {
-		member.addJsDoc(input.description)
+	if (description) {
+		member.addJsDoc(description)
 	}
 
-	await sourceFile.save()
+	return enumName
+}
+
+/**
+ * Adds a new entry to the `ServiceEvent` object if it exists.
+ */
+const addToObject = (
+	sourceFile: SourceFile,
+	enumName: string,
+	enumValue: string,
+	description?: string,
+): string | undefined => {
+	// Find ALL variable declarations
+	const allVariableDeclarations = sourceFile.getVariableDeclarations()
+
+	// Search manually for the correct variable (handles `export const ServiceEvent = {} as const;`)
+	const serviceEventVar = allVariableDeclarations.find(decl => decl.getName() === 'ServiceEvent')
+
+	if (!serviceEventVar) return undefined
+
+	let initializer = serviceEventVar.getInitializer()
+
+	// If the initializer is wrapped in `as const`, unwrap it
+	if (initializer?.isKind(SyntaxKind.AsExpression)) {
+		initializer = initializer.getFirstChildByKind(SyntaxKind.ObjectLiteralExpression)
+	}
+
+	if (!(initializer instanceof ObjectLiteralExpression)) return undefined
+
+	const existingProperty = initializer.getProperty(enumName) as PropertyAssignment | undefined
+	if (existingProperty) {
+		return existingProperty.getName()
+	}
+
+	// Add new property to the object
+	const newProperty = initializer.addPropertyAssignment({
+		name: enumName,
+		initializer: JSON.stringify(enumValue),
+	})
+
+	// Add JSDoc comment manually if provided
+	if (description) {
+		const insertPos = newProperty.getStart()
+		sourceFile.insertText(insertPos, `/** ${description} */\n`)
+	}
+
 	return enumName
 }
