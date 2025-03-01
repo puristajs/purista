@@ -46,7 +46,7 @@
 		}
 	},
 	"devDependencies": {
-		"@types/node": "^22.5.1",
+		"@types/node": "^22.13.8",
 		"@types/sinon": "^17.0.3",
 		"sinon": "^19.0.2",
 		"tshy": "^3.0.2",
