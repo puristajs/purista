@@ -21,11 +21,11 @@
 		"test": "tsc --noEmit && vitest"
 	},
 	"devDependencies": {
-		"@types/node": "^22.5.1",
+		"@types/node": "^22.13.8",
 		"pino-pretty": "^13.0.0",
 		"sinon": "^19.0.2",
 		"tsx": "^4.19.0",
-		"typescript": "^5.5.4",
+		"typescript": "^5.8.2",
 		"vitest": "^3.0.4"
 	},
 	"dependencies": {

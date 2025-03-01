@@ -17,11 +17,11 @@
 		"vanilla-cookieconsent": "^3.0.1"
 	},
 	"devDependencies": {
-		"@types/node": "^22.5.1",
+		"@types/node": "^22.13.8",
 		"date-fns": "^4.1.0",
 		"feed": "^4.2.2",
 		"gray-matter": "^4.0.3",
-		"typescript": "^5.5.4",
+		"typescript": "^5.8.2",
 		"vitepress": "^2.0.0-alpha.3",
 		"vitepress-sidebar": "^1.23.2",
 		"vue": "^3.4.34"

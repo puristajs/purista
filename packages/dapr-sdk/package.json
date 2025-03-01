@@ -50,7 +50,7 @@
 	},
 	"devDependencies": {
 		"@hono/node-server": "^1.13.8",
-		"@types/node": "^22.5.1",
+		"@types/node": "^22.13.8",
 		"@types/sinon": "^17.0.3",
 		"hono": "^4.4.7",
 		"sinon": "^19.0.2",
