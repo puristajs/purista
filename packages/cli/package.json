@@ -1,6 +1,6 @@
 {
 	"name": "@purista/cli",
-	"version": "2.0.6",
+	"version": "2.1.0",
 	"description": "cli helper for PURISTA backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -37,13 +37,13 @@
 	},
 	"devDependencies": {
 		"@types/minimist": "^1.2.5",
-		"@types/node": "^22.13.8",
+		"@types/node": "^22.13.9",
 		"@types/sinon": "^17.0.3",
 		"esbuild": "^0.25.0",
 		"rimraf": "^6.0.1",
 		"tshy": "^3.0.2",
 		"tsx": "^4.15.7",
-		"type-fest": "^4.34.1"
+		"type-fest": "^4.37.0"
 	},
 	"dependencies": {
 		"@inquirer/confirm": "^5.1.5",

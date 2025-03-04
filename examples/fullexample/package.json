@@ -1,6 +1,6 @@
 {
 	"name": "@purista/full-example",
-	"version": "2.0.6",
+	"version": "2.1.0",
 	"description": "purista backend framework",
 	"homepage": "https://purista.dev",
 	"private": true,
@@ -39,7 +39,7 @@
 		"test": "tsc --noEmit && vitest"
 	},
 	"devDependencies": {
-		"@types/node": "^22.13.8",
+		"@types/node": "^22.13.9",
 		"sinon": "^19.0.2",
 		"tsx": "^4.19.0",
 		"typescript": "^5.8.2",

@@ -1,6 +1,6 @@
 {
 	"name": "@purista/amqpbridge",
-	"version": "2.0.6",
+	"version": "2.1.0",
 	"description": "AMQP eventbridge for PURISTA backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -44,8 +44,8 @@
 		}
 	},
 	"devDependencies": {
-		"@types/amqplib": "^0.10.5",
-		"@types/node": "^22.13.8",
+		"@types/amqplib": "^0.10.7",
+		"@types/node": "^22.13.9",
 		"@types/sinon": "^17.0.3",
 		"sinon": "^19.0.2",
 		"tshy": "^3.0.2",

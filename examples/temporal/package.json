@@ -1,7 +1,7 @@
 {
 	"name": "@purista/temporal-example",
 	"private": true,
-	"version": "2.0.6",
+	"version": "2.1.0",
 	"description": "PURISTA blueprint project",
 	"engines": {
 		"node": ">=18"
@@ -19,7 +19,7 @@
 	},
 	"dependencies": {
 		"@hono/node-server": "^1.13.8",
-		"@hono/swagger-ui": "^0.5.0",
+		"@hono/swagger-ui": "^0.5.1",
 		"@opentelemetry/exporter-trace-otlp-http": "^0.57.1",
 		"@opentelemetry/sdk-trace-node": "^1.26.0",
 		"@purista/core": "*",
@@ -35,7 +35,7 @@
 	"devDependencies": {
 		"tsx": "^4.19.0",
 		"typescript": "^5.8.2",
-		"@types/node": "^22.13.8",
+		"@types/node": "^22.13.9",
 		"@types/sinon": "^17.0.3",
 		"pino-pretty": "^13.0.0",
 		"sinon": "^19.0.2",
