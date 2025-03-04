@@ -1,4 +1,4 @@
-[**@purista/core v2.0.5**](../README.md)
+[**@purista/core v2.0.6**](../README.md)
 
 ***
 
@@ -12,7 +12,7 @@ Defined in: [packages/core/src/zodOpenApi/validationToSchema.ts:9](https://githu
 
 ## Type Parameters
 
-• **T** *extends* `SchemaObject` \| `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+• **T** *extends* `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>
 
 ## Parameters
 

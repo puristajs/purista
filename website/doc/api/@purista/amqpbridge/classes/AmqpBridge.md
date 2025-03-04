@@ -1,4 +1,4 @@
-[**@purista/amqpbridge v2.0.5**](../README.md)
+[**@purista/amqpbridge v2.0.6**](../README.md)
 
 ***
 
@@ -181,7 +181,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 ### connection?
 
-> `protected` `optional` **connection**: `Connection`
+> `protected` `optional` **connection**: `ChannelModel`
 
 Defined in: [amqpbridge/src/AmqpBridge.impl.ts:72](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L72)
 
@@ -345,7 +345,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 > `protected` **decodeContent**\<`T`\>(`input`, `contentType`, `contentEncoding`): `Promise`\<`T`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:825](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L825)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:831](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L831)
 
 Decode buffer into given type
 
@@ -383,7 +383,7 @@ the encoding type of buffer content
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:840](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L840)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:846](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L846)
 
 Shut down event bridge as gracefully as possible
 
@@ -473,7 +473,7 @@ the message
 
 > `protected` **encodeContent**\<`T`\>(`input`, `contentType`, `contentEncoding`): `Promise`\<`Buffer`\<`ArrayBufferLike`\>\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:804](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L804)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:810](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L810)
 
 Encode given payload to buffer
 
@@ -657,7 +657,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:11
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:476](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L476)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:478](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L478)
 
 Register a service function and ensure that there is a queue for all incoming command requests.
 
@@ -699,7 +699,7 @@ the id of command function queue
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:658](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L658)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:662](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L662)
 
 Register a new subscription
 
@@ -819,7 +819,7 @@ return value of fn
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:639](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L639)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:641](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L641)
 
 Unregister a service command
 
@@ -845,7 +845,7 @@ The address (service name, version and command name) of the command to be de-reg
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:778](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L778)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:782](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L782)
 
 #### Parameters
 

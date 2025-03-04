@@ -1,4 +1,4 @@
-[**@purista/httpserver v2.0.5**](../README.md)
+[**@purista/httpserver v2.0.6**](../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Variable: ~~puristaVersion~~
 
-> `const` **puristaVersion**: `"2.0.5"` = `'2.0.5'`
+> `const` **puristaVersion**: `"2.0.6"` = `'2.0.6'`
 
 Defined in: [packages/httpserver/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/httpserver/src/version.ts#L1)

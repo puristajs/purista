@@ -1,4 +1,4 @@
-**@purista/gcloud-secret-store v2.0.5**
+**@purista/gcloud-secret-store v2.0.6**
 
 ***
 

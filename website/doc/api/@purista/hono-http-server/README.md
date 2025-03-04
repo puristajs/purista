@@ -1,4 +1,4 @@
-**@purista/hono-http-server v2.0.5**
+**@purista/hono-http-server v2.0.6**
 
 ***
 

@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.0.5**](../README.md)
+[**@purista/dapr-sdk v2.0.6**](../README.md)
 
 ***
 
@@ -44,7 +44,7 @@ needs to `enableRestApiExpose` set to `true`
 /api
 ```
 
-###### baseUrl
+###### baseUrl?
 
 `string`
 
@@ -296,7 +296,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:31
 
 ### baseUrl
 
-> **baseUrl**: `URL`
+> **baseUrl**: `undefined` \| `URL`
 
 Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:28
 
@@ -325,9 +325,9 @@ needs to `enableRestApiExpose` set to `true`
 /api
 ```
 
-#### baseUrl
+#### baseUrl?
 
-> **baseUrl**: `string`
+> `optional` **baseUrl**: `string`
 
 the base url to be used
 

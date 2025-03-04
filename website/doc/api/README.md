@@ -8,6 +8,20 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Documentation
+
+- Update api documentation
+
+### Miscellaneous Tasks
+
+- Remove unused @typeschema/json pkg
+- Align dependency versions
+- Reduce cycling deps and cleanup code
+- Cleanup and migrate examples
+- Remove cycling deps
+
+## [2.0.5] - 2025-02-20
+
 ### Breaking changes
 
 - Breaking change: avoid typescript package to be required dependency
@@ -20,6 +34,8 @@ All notable changes to this project will be documented in this file.
 ### Documentation
 
 - Update api documentation
+- Update CHANGELOG
+- Update doc
 
 ### Miscellaneous Tasks
 

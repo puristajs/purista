@@ -1,4 +1,4 @@
-[**@purista/azure-secret-store v2.0.5**](../README.md)
+[**@purista/azure-secret-store v2.0.6**](../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Variable: puristaVersion
 
-> `const` **puristaVersion**: `"2.0.5"` = `'2.0.5'`
+> `const` **puristaVersion**: `"2.0.6"` = `'2.0.6'`
 
 Defined in: [azure-secret-store/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/version.ts#L1)

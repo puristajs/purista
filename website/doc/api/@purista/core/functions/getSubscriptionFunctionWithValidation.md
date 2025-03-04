@@ -1,4 +1,4 @@
-[**@purista/core v2.0.5**](../README.md)
+[**@purista/core v2.0.6**](../README.md)
 
 ***
 
@@ -22,15 +22,15 @@ Defined in: [packages/core/src/SubscriptionDefinitionBuilder/getSubscriptionFunc
 
 ### inputPayloadSchema
 
-`undefined` | `SchemaObject` | `Schema`\<`any`, `any`, `any`, `""`\> | `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+`undefined` | `Schema`\<`any`, `any`, `any`, `""`\> | `ZodType`\<`any`, `ZodTypeDef`, `any`\>
 
 ### inputParameterSchema
 
-`undefined` | `SchemaObject` | `Schema`\<`any`, `any`, `any`, `""`\> | `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+`undefined` | `Schema`\<`any`, `any`, `any`, `""`\> | `ZodType`\<`any`, `ZodTypeDef`, `any`\>
 
 ### outputPayloadSchema
 
-`undefined` | `SchemaObject` | `Schema`\<`any`, `any`, `any`, `""`\> | `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+`undefined` | `Schema`\<`any`, `any`, `any`, `""`\> | `ZodType`\<`any`, `ZodTypeDef`, `any`\>
 
 ### beforeGuards
 

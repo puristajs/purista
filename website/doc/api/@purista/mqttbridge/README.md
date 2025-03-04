@@ -1,4 +1,4 @@
-**@purista/mqttbridge v2.0.5**
+**@purista/mqttbridge v2.0.6**
 
 ***
 

@@ -1,4 +1,4 @@
-**@purista/nats-config-store v2.0.5**
+**@purista/nats-config-store v2.0.6**
 
 ***
 

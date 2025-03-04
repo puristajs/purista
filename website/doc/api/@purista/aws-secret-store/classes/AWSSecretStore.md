@@ -1,4 +1,4 @@
-[**@purista/aws-secret-store v2.0.5**](../README.md)
+[**@purista/aws-secret-store v2.0.6**](../README.md)
 
 ***
 

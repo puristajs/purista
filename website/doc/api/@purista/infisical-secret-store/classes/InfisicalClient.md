@@ -1,4 +1,4 @@
-[**@purista/infisical-secret-store v2.0.5**](../README.md)
+[**@purista/infisical-secret-store v2.0.6**](../README.md)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [infisical-secret-store/src/InfisicalClient/InfisicalClient.impl.ts:
 
 ##### conf
 
-###### baseUrl
+###### baseUrl?
 
 `string`
 
@@ -154,7 +154,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:31
 
 ### baseUrl
 
-> **baseUrl**: `URL`
+> **baseUrl**: `undefined` \| `URL`
 
 Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:28
 
@@ -170,9 +170,9 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:28
 
 Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:26
 
-#### baseUrl
+#### baseUrl?
 
-> **baseUrl**: `string`
+> `optional` **baseUrl**: `string`
 
 the base url to be used
 
