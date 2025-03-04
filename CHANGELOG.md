@@ -4,9 +4,39 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Bug Fixes
+
+- Memory leak in DefaultEventBridge
+
+### Documentation
+
+- Update doc
+- Update release article
+- Update api documentation
+
+### Features
+
+- Make baseURL in HttpClient optional
+- Cli add support to add events to ServiceEvents when it is object
+
+### Miscellaneous Tasks
+
+- Update dependencies
+- Migrate ServiceEvent enums to objects
+- Improve example
+- Fix type and add error logging
+
+## [2.0.6] - 2025-02-25
+
+### Bug Fixes
+
+- Do not convert invoke and emit schema into json schema
+
 ### Documentation
 
 - Update api documentation
+- Update CHANGELOG
+- Update website
 
 ### Miscellaneous Tasks
 
@@ -15,6 +45,8 @@ All notable changes to this project will be documented in this file.
 - Reduce cycling deps and cleanup code
 - Cleanup and migrate examples
 - Remove cycling deps
+- Patch version
+- Bump deps
 
 ## [2.0.5] - 2025-02-20
 
