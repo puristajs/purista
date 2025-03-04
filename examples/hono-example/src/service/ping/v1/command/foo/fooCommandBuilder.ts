@@ -8,6 +8,7 @@ export const fooCommandBuilder = pingV1ServiceBuilder
 	.addOutputSchema(pingV1FooOutputPayloadSchema)
 	.exposeAsHttpEndpoint('GET', 'foo')
 	.enableHttpSecurity()
+	.makeEndpointPublic()
 	.setCommandFunction(async function (_context, _payload, _parameter) {
 		// add your business logic here
 		return {
