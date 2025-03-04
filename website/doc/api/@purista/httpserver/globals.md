@@ -1,4 +1,4 @@
-[**@purista/httpserver v2.0.5**](README.md)
+[**@purista/httpserver v2.0.6**](README.md)
 
 ***
 
@@ -86,10 +86,6 @@ main()
 
 please migrate to @purista/hono-http-server
 
-## Enumerations
-
-- [~~ServiceEvent~~](enumerations/ServiceEvent.md)
-
 ## Type Aliases
 
 - [~~BeforeResponseHook~~](type-aliases/BeforeResponseHook.md)
@@ -102,3 +98,4 @@ please migrate to @purista/hono-http-server
 - [~~httpServerV1Service~~](variables/httpServerV1Service.md)
 - [~~httpServerV1ServiceBuilder~~](variables/httpServerV1ServiceBuilder.md)
 - [~~puristaVersion~~](variables/puristaVersion.md)
+- [~~ServiceEvent~~](variables/ServiceEvent.md)

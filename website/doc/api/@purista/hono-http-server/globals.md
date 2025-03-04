@@ -1,4 +1,4 @@
-[**@purista/hono-http-server v2.0.5**](README.md)
+[**@purista/hono-http-server v2.0.6**](README.md)
 
 ***
 
@@ -39,10 +39,6 @@ const _serverInstance = serve({
 
 ```
 
-## Enumerations
-
-- [ServiceEvent](enumerations/ServiceEvent.md)
-
 ## Type Aliases
 
 - [BindingsBase](type-aliases/BindingsBase.md)
@@ -62,6 +58,7 @@ const _serverInstance = serve({
 - [OPENAPI\_DEFAULT\_INFO](variables/OPENAPI_DEFAULT_INFO.md)
 - [puristaVersion](variables/puristaVersion.md)
 - [ServerObjectSchema](variables/ServerObjectSchema.md)
+- [ServiceEvent](variables/ServiceEvent.md)
 - [TagObjectSchema](variables/TagObjectSchema.md)
 
 ## Functions

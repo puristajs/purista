@@ -1,4 +1,4 @@
-[**@purista/core v2.0.5**](../README.md)
+[**@purista/core v2.0.6**](../README.md)
 
 ***
 
@@ -250,7 +250,7 @@ Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:64]
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:385](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L385)
+Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:391](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L391)
 
 Shut down event bridge as gracefully as possible
 
@@ -302,7 +302,7 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:24](https://git
 
 > **emitMessage**(`message`): `Promise`\<`Readonly`\<[`EBMessage`](../type-aliases/EBMessage.md)\>\>
 
-Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:287](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L287)
+Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:291](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L291)
 
 Emit a new message to event bridge to be delivered to receiver
 
@@ -348,7 +348,7 @@ Tracer
 
 > **invoke**\<`T`\>(`input`, `commandTimeout`): `Promise`\<`T`\>
 
-Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:328](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L328)
+Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:332](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L332)
 
 Call a command of a service and return the result of this command
 
@@ -518,7 +518,7 @@ the id of command function queue
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:267](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L267)
+Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:269](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L269)
 
 Register a new subscription
 
@@ -664,7 +664,7 @@ The address (service name, version and command name) of the command to be de-reg
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:277](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L277)
+Defined in: [packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts:279](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L279)
 
 #### Parameters
 

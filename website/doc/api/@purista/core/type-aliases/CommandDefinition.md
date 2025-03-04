@@ -1,4 +1,4 @@
-[**@purista/core v2.0.5**](../README.md)
+[**@purista/core v2.0.6**](../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **CommandDefinition**\<`S`, `MessagePayloadType`, `MessageParamsType`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `FinalFunctionOutputType`, `TransformOutputHookOutput`, `Resources`, `Invokes`, `EmitList`, `MetadataType`\>: `object`
 
-Defined in: [packages/core/src/core/types/commandType/CommandDefinition.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L21)
+Defined in: [packages/core/src/core/types/commandType/CommandDefinition.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L18)
 
 The definition for a command provided by some service.
 
@@ -64,7 +64,7 @@ the name of the command
 
 ### emitList
 
-> **emitList**: [`FromEmitToOtherType`](FromEmitToOtherType.md)\<`EmitList`, `SchemaObject`\>
+> **emitList**: `EmitList`
 
 ### eventBridgeConfig
 
@@ -122,7 +122,7 @@ hooks of command
 
 ### invokes
 
-> **invokes**: [`FromInvokeToOtherType`](FromInvokeToOtherType.md)\<`Invokes`, \{ `outputSchema`: `SchemaObject`; `parameterSchema`: `SchemaObject`; `payloadSchema`: `SchemaObject`; \}\>
+> **invokes**: `Invokes`
 
 ### metadata
 

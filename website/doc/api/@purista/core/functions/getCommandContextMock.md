@@ -1,4 +1,4 @@
-[**@purista/core v2.0.5**](../README.md)
+[**@purista/core v2.0.6**](../README.md)
 
 ***
 
@@ -26,7 +26,7 @@ A function that returns a mock object for command function context
 
 • **Invokes** *extends* [`InvokeList`](../type-aliases/InvokeList.md)
 
-• **EmitList** *extends* `Record`\<`string`, `SchemaObject` \| `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>\>
+• **EmitList** *extends* `Record`\<`string`, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>\>
 
 ## Parameters
 
@@ -34,11 +34,11 @@ A function that returns a mock object for command function context
 
 #### emitList
 
-[`FromEmitToOtherType`](../type-aliases/FromEmitToOtherType.md)\<`EmitList`, `SchemaObject` \| `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>\>
+[`FromEmitToOtherType`](../type-aliases/FromEmitToOtherType.md)\<`EmitList`, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>\>
 
 #### invokes
 
-[`FromInvokeToOtherType`](../type-aliases/FromInvokeToOtherType.md)\<`Invokes`, \{ `outputSchema`: `SchemaObject` \| `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>; `parameterSchema`: `SchemaObject` \| `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>; `payloadSchema`: `SchemaObject` \| `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>; \}\>
+[`FromInvokeToOtherType`](../type-aliases/FromInvokeToOtherType.md)\<`Invokes`, \{ `outputSchema`: `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>; `parameterSchema`: `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>; `payloadSchema`: `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>; \}\>
 
 #### message?
 

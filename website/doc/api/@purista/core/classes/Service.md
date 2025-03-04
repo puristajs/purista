@@ -1,4 +1,4 @@
-[**@purista/core v2.0.5**](../README.md)
+[**@purista/core v2.0.6**](../README.md)
 
 ***
 
@@ -94,7 +94,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:104](https://github.
 
 ### configSchema
 
-> `protected` **configSchema**: `undefined` \| `SchemaObject` \| `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+> `protected` **configSchema**: `undefined` \| `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>
 
 Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L48)
 
@@ -396,7 +396,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:363](https://github.
 
 #### Type Parameters
 
-• **EmitList** *extends* `Record`\<`string`, `SchemaObject` \| `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>\> = [`EmptyObject`](../type-aliases/EmptyObject.md)
+• **EmitList** *extends* `Record`\<`string`, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>\> = [`EmptyObject`](../type-aliases/EmptyObject.md)
 
 #### Parameters
 

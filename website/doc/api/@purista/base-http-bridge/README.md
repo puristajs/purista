@@ -1,4 +1,4 @@
-**@purista/base-http-bridge v2.0.5**
+**@purista/base-http-bridge v2.0.6**
 
 ***
 

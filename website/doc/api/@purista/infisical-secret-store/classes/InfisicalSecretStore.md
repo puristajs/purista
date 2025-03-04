@@ -1,4 +1,4 @@
-[**@purista/infisical-secret-store v2.0.5**](../README.md)
+[**@purista/infisical-secret-store v2.0.6**](../README.md)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [infisical-secret-store/src/InfisicalSecretStore.impl.ts:42](https:/
 
 ##### config
 
-###### baseUrl
+###### baseUrl?
 
 `string`
 
@@ -228,9 +228,9 @@ Defined in: [infisical-secret-store/src/InfisicalSecretStore.impl.ts:40](https:/
 
 Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:21
 
-#### baseUrl
+#### baseUrl?
 
-> **baseUrl**: `string`
+> `optional` **baseUrl**: `string`
 
 the base url to be used
 

@@ -1,4 +1,4 @@
-**@purista/aws-config-store v2.0.5**
+**@purista/aws-config-store v2.0.6**
 
 ***
 

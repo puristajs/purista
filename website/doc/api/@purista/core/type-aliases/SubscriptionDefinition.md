@@ -1,4 +1,4 @@
-[**@purista/core v2.0.5**](../README.md)
+[**@purista/core v2.0.6**](../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **SubscriptionDefinition**\<`S`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `FinalFunctionOutputType`, `TransformOutputHookOutput`, `Resources`, `Invokes`, `EmitList`, `MetadataType`\>: `object`
 
-Defined in: [packages/core/src/core/types/subscription/SubscriptionDefinition.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L25)
+Defined in: [packages/core/src/core/types/subscription/SubscriptionDefinition.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L22)
 
 The definition for a subscription provided by some service.
 
@@ -58,7 +58,7 @@ event name to be used for custom message if the subscription functions returns v
 
 ### emitList
 
-> **emitList**: [`FromEmitToOtherType`](FromEmitToOtherType.md)\<`EmitList`, `SchemaObject`\>
+> **emitList**: `EmitList`
 
 ### eventBridgeConfig
 
@@ -116,7 +116,7 @@ hooks of subscription
 
 ### invokes
 
-> **invokes**: [`FromInvokeToOtherType`](FromInvokeToOtherType.md)\<`Invokes`, \{ `outputSchema`: `SchemaObject`; `parameterSchema`: `SchemaObject`; `payloadSchema`: `SchemaObject`; \}\>
+> **invokes**: `Invokes`
 
 ### messageType?
 

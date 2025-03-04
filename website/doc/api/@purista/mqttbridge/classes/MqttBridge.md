@@ -1,4 +1,4 @@
-[**@purista/mqttbridge v2.0.5**](../README.md)
+[**@purista/mqttbridge v2.0.6**](../README.md)
 
 ***
 
@@ -290,7 +290,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:386](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L386)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:388](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L388)
 
 Shut down event bridge as gracefully as possible
 
@@ -532,7 +532,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:11
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:329](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L329)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:331](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L331)
 
 #### Parameters
 
@@ -570,7 +570,7 @@ the function to be called if a matching command arrives
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:358](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L358)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:360](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L360)
 
 Register a new subscription
 
@@ -690,7 +690,7 @@ return value of fn
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:352](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L352)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:354](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L354)
 
 Unregister a service command
 
@@ -716,7 +716,7 @@ The address (service name, version and command name) of the command to be de-reg
 
 > **unregisterSubscription**(`_address`): `Promise`\<`void`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:384](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L384)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:386](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L386)
 
 #### Parameters
 
