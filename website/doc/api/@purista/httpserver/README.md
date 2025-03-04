@@ -1,4 +1,4 @@
-**@purista/httpserver v2.0.6**
+**@purista/httpserver v2.1.0**
 
 ***
 

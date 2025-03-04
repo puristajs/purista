@@ -1,4 +1,4 @@
-**@purista/amqpbridge v2.0.6**
+**@purista/amqpbridge v2.1.0**
 
 ***
 

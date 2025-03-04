@@ -1,4 +1,4 @@
-[**@purista/httpserver v2.0.6**](../README.md)
+[**@purista/httpserver v2.1.0**](../README.md)
 
 ***
 

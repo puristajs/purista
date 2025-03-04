@@ -1,4 +1,4 @@
-**@purista/infisical-secret-store v2.0.6**
+**@purista/infisical-secret-store v2.1.0**
 
 ***
 

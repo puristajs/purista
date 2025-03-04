@@ -1,4 +1,4 @@
-**@purista/redis-config-store v2.0.6**
+**@purista/redis-config-store v2.1.0**
 
 ***
 

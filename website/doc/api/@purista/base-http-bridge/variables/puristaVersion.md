@@ -1,4 +1,4 @@
-[**@purista/base-http-bridge v2.0.6**](../README.md)
+[**@purista/base-http-bridge v2.1.0**](../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Variable: puristaVersion
 
-> `const` **puristaVersion**: `"2.0.6"` = `'2.0.6'`
+> `const` **puristaVersion**: `"2.1.0"` = `'2.1.0'`
 
 Defined in: [base-http-bridge/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/version.ts#L1)

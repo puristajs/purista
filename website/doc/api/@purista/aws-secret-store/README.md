@@ -1,4 +1,4 @@
-**@purista/aws-secret-store v2.0.6**
+**@purista/aws-secret-store v2.1.0**
 
 ***
 

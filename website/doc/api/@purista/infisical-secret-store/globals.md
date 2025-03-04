@@ -1,4 +1,4 @@
-[**@purista/infisical-secret-store v2.0.6**](README.md)
+[**@purista/infisical-secret-store v2.1.0**](README.md)
 
 ***
 

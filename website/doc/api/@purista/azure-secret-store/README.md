@@ -1,4 +1,4 @@
-**@purista/azure-secret-store v2.0.6**
+**@purista/azure-secret-store v2.1.0**
 
 ***
 
