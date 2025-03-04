@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Documentation
+
+- Correct wording and spelling
+- Update api documentation
+
+## [2.1.0] - 2025-03-04
+
 ### Bug Fixes
 
 - Memory leak in DefaultEventBridge
@@ -13,6 +20,8 @@ All notable changes to this project will be documented in this file.
 - Update doc
 - Update release article
 - Update api documentation
+- Update CHANGELOG
+- Update website
 
 ### Features
 
@@ -25,6 +34,7 @@ All notable changes to this project will be documented in this file.
 - Migrate ServiceEvent enums to objects
 - Improve example
 - Fix type and add error logging
+- Bump version to 2.1.0
 
 ## [2.0.6] - 2025-02-25
 
