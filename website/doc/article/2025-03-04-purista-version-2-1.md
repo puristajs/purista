@@ -13,19 +13,19 @@ In version 2.1, we have made several improvements and bug fixes to enhance the f
 
 ### HttpClient
 
-The `baseUrl` parameter in HttpClient is now optional. Previously, it was mandatory, as the main use case was to an external API with multiple endpoints. Making the parameter optional allows a simpler usage, when it is used only for a single request.
+The `baseUrl` parameter in HttpClient is now optional. Previously, it was mandatory, as the primary use case was interacting with an external API with multiple endpoints. Making this parameter optional allows for simpler usage when making a single request.
 
 ### Service Event Handling
 
-The service event enum was a Typescript enum, which is now deprecated. It is replaced by a new object-based approach. This change allows to useage of Nodes.js with `--experimental-strip-types` flag, to run typescript natively. See **[Running TypeScript Natively](https://nodejs.org/en/learn/typescript/run-natively)**.
+The service event enum was previously a TypeScript `enum`, which is now deprecated. It has been replaced with a new object-based approach. This change enables the use of Node.js with the `--experimental-strip-types` flag to run TypeScript natively. See **[Running TypeScript Natively](https://nodejs.org/en/learn/typescript/run-natively)**.
 
-**Previously:**
+**Previous approach:**
 
 ```ts
 export enum ServiceEvent {
   /**
-   * Emitted by ping v1 command ping:
-   * the ping command exposed as http endpoint
+   * Emitted by the ping v1 command:
+   * the ping command is exposed as an HTTP endpoint.
    */
   Pinged = 'pinged',
 }
@@ -34,19 +34,19 @@ export enum ServiceEvent {
 **New approach:**
 
 ```ts
-export const ServiceEvent {
+export const ServiceEvent = {
   /**
-   * Emitted by ping v1 command ping:
-   * the ping command exposed as http endpoint
+   * Emitted by the ping v1 command:
+   * the ping command is exposed as an HTTP endpoint.
    */
   Pinged: 'pinged',
 } as const
 ```
 
-The CLI is able to handle both approaches. It is recommend to migrate to the new approach for better compatibility with future versions of PURISTA. The PURISTA template is already updated to use the new approach.
+The CLI supports both approaches. However, migrating to the new approach is recommended for better compatibility with future versions of PURISTA. The PURISTA template has already been updated to use this new approach.
 
-## Bugfixes
+## Bug Fixes
 
-There was a memory leak in the `DefaultEventBridge` service that has been fixed. This issue caused the application to consume more memory over time, leading to potential crashes or performance degradation. The fix involves ensuring proper cleanup of resources and adds additional logging in case of unexpected behavior.
+A memory leak in the `DefaultEventBridge` service has been fixed. This issue caused the application to consume increasing amounts of memory over time, potentially leading to crashes or performance degradation. The fix ensures proper resource cleanup and adds additional logging to detect unexpected behavior.
 
 </PostDetail>
