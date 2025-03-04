@@ -24,7 +24,7 @@ export const main = async () => {
 	// initiate the webserver service as second step
 	const honoService = await honoV1Service.getInstance(eventBridge, {
 		logger,
-		serviceConfig: { services: [pingService], enableDynamicRoutes: true },
+		serviceConfig: { services: [pingService], enableDynamicRoutes: true, openApi: { enabled: true, info: {} } },
 	})
 
 	honoService.app.use('*', compress())
