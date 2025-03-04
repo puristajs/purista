@@ -261,7 +261,9 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
 	async unregisterCommand(address: EBMessageAddress): Promise<void> {
 		const queueName = getCommandQueueName(address)
-		this.serviceFunctions.delete(queueName)
+		if (!this.serviceFunctions.delete(queueName)) {
+			this.logger.error({ queueName, address }, 'Failed to clean unregister service command')
+		}
 	}
 
 	async registerSubscription(
@@ -276,7 +278,9 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
 	async unregisterSubscription(address: EBMessageAddress): Promise<void> {
 		const queueName = getSubscriptionQueueName(address)
-		this.subscriptions.delete(queueName)
+		if (!this.subscriptions.delete(queueName)) {
+			this.logger.error({ queueName, address }, 'Failed to clean unregister service subscription')
+		}
 	}
 
 	/**
@@ -342,14 +346,16 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 					instanceId: this.instanceId,
 				},
 				id: getNewEBMessageId(),
-				correlationId: getNewCorrelationId(),
+				correlationId,
 				timestamp: Date.now(),
 				messageType: EBMessageType.Command,
 				traceId: input.traceId,
 			})
 
 			const removeFromPending = () => {
-				this.pendingInvocations.delete(correlationId)
+				if (this.pendingInvocations.delete(correlationId)) {
+					this.logger.error({ correlationId }, 'Failed to remove from pending invocations')
+				}
 			}
 
 			const executionPromise = new Promise<T>((resolve, reject) => {
@@ -371,7 +377,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 					reject(err)
 				}
 
-				this.pendingInvocations.set(command.correlationId, {
+				this.pendingInvocations.set(correlationId, {
 					resolve: resolveFn,
 					reject: rejectFn,
 				})
