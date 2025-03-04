@@ -1,6 +1,6 @@
 {
 	"name": "@purista/dapr-sdk",
-	"version": "2.0.6",
+	"version": "2.1.0",
 	"description": "SDK and helper to run PURISTA services in Dapr",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -50,7 +50,7 @@
 	},
 	"devDependencies": {
 		"@hono/node-server": "^1.13.8",
-		"@types/node": "^22.13.8",
+		"@types/node": "^22.13.9",
 		"@types/sinon": "^17.0.3",
 		"hono": "^4.4.7",
 		"sinon": "^19.0.2",

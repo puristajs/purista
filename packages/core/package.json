@@ -1,6 +1,6 @@
 {
 	"name": "@purista/core",
-	"version": "2.0.6",
+	"version": "2.1.0",
 	"description": "purista backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -32,7 +32,7 @@
 	},
 	"devDependencies": {
 		"@sodaru/yup-to-json-schema": "^2.0.1",
-		"@types/node": "^22.13.8",
+		"@types/node": "^22.13.9",
 		"@types/sinon": "^17.0.3",
 		"@typeschema/yup": "^0.14.0",
 		"rimraf": "^6.0.1",
