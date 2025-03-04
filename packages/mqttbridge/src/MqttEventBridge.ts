@@ -235,7 +235,9 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 				const log = this.logger.getChildLogger({ ...span.spanContext(), customTraceId: command.traceId })
 
 				const removeFromPending = () => {
-					this.pendingInvocations.delete(correlationId)
+					if (!this.pendingInvocations.delete(correlationId)) {
+						this.logger.error({ correlationId }, 'Failed to remove from pending invocations')
+					}
 				}
 
 				const executionPromise = new Promise<T>((resolve, reject) => {

@@ -34,7 +34,7 @@ import {
 	isInfoMessage,
 	serializeOtp,
 } from '@purista/core'
-import type { Channel, Connection } from 'amqplib'
+import type { Channel, ChannelModel } from 'amqplib'
 import amqplib from 'amqplib'
 
 import { deserializeOtpFromAmqpHeader } from './deserializeOtpFromAmqpHeader.impl.js'
@@ -69,7 +69,7 @@ import type { Encrypter } from './types/Encrypter.js'
  * @group Event bridge
  */
 export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implements EventBridge {
-	protected connection?: Connection
+	protected connection?: ChannelModel
 	protected channel?: Channel
 
 	protected healthy = false
@@ -393,7 +393,9 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 				})
 
 				const removeFromPending = () => {
-					this.pendingInvocations.delete(correlationId)
+					if (!this.pendingInvocations.delete(correlationId)) {
+						this.logger.error({ correlationId }, 'Failed to remove from pending invocations')
+					}
 				}
 
 				const executionPromise = new Promise<T>((resolve, reject) => {
@@ -644,7 +646,9 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 				return
 			}
 			await entry.channel.close()
-			this.serviceFunctions.delete(queueName)
+			if (!this.serviceFunctions.delete(queueName)) {
+				this.logger.error({ queueName, address }, 'Failed to clean unregister service command')
+			}
 		} catch (error) {
 			const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to unregister service function', {
 				error,
@@ -783,7 +787,9 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 				return
 			}
 			await entry.channel.close()
-			this.subscriptions.delete(queueName)
+			if (!this.subscriptions.delete(queueName)) {
+				this.logger.error({ queueName, address }, 'Failed to clean unregister subscription function')
+			}
 		} catch (error) {
 			const err = new UnhandledError(StatusCode.InternalServerError, 'Failed to unregister subscription', {
 				error,
