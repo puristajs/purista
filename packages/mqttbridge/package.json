@@ -44,20 +44,20 @@
 		}
 	},
 	"devDependencies": {
-		"@types/node": "^22.13.9",
-		"@types/sinon": "^17.0.3",
-		"@types/ws": "^8.5.12",
+		"@types/node": "^22.13.14",
+		"@types/sinon": "^17.0.4",
+		"@types/ws": "^8.18.0",
 		"sinon": "^20.0.0",
 		"tshy": "^3.0.2",
-		"vitest": "^3.0.4"
+		"vitest": "^3.1.1"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.0",
-		"@opentelemetry/resources": "^1.26.0",
-		"@opentelemetry/sdk-trace-node": "^1.26.0",
-		"@opentelemetry/semantic-conventions": "^1.27.0",
+		"@opentelemetry/resources": "^2.0.0",
+		"@opentelemetry/sdk-trace-node": "^2.0.0",
+		"@opentelemetry/semantic-conventions": "^1.30.0",
 		"@purista/core": "*",
-		"mqtt": "^5.9.0"
+		"mqtt": "^5.10.4"
 	},
 	"peerDependenciesMeta": {},
 	"types": "./dist/commonjs/index.d.ts",
