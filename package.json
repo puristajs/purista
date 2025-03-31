@@ -26,7 +26,7 @@
 		"sign": "git rebase --exec \"git commit --amend --no-edit -n -S\" -i",
 		"deps:check": "check-dependency-version-consistency && ncu -ws --root",
 		"deps:update": "ncu -ws --root -u",
-		"clean": "rimraf -g **/dist"
+		"clean": "rimraf -g **/dist && rimraf -g **/coverage && rimraf -g **/.tshy && rimraf -g **/.tshy-build && rimraf -g **/**/node_modules"
 	},
 	"workspaces": ["./packages/*", "./examples/*", "website"],
 	"devDependencies": {
