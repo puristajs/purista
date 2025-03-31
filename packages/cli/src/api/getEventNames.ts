@@ -1,6 +1,6 @@
 import { join } from 'node:path'
 
-import { Project, SyntaxKind } from 'ts-morph'
+import { type AsExpression, Project, SyntaxKind } from 'ts-morph'
 import type { PuristaConfig } from './loadPuristaConfig.js'
 
 export let eventNames: { name: string; value: string }[]
@@ -42,7 +42,13 @@ export const getEventNames = (
 		const varDecl = sourceFile.getVariableDeclaration('ServiceEvent')
 		if (varDecl) {
 			const initializer = varDecl.getInitializer()
-			const objLiteral = initializer?.asKind(SyntaxKind.ObjectLiteralExpression)
+
+			// Handle "as const"
+			const actualInit = initializer?.asKind(SyntaxKind.AsExpression)
+				? (initializer as AsExpression).getExpression()
+				: initializer
+
+			const objLiteral = actualInit?.asKind(SyntaxKind.ObjectLiteralExpression)
 			if (objLiteral) {
 				const properties = objLiteral.getProperties()
 				eventNames = properties
@@ -52,8 +58,8 @@ export const getEventNames = (
 							if (!assignment) {
 								return null
 							}
-							const nameNode = assignment.getNameNode()
-							const name = nameNode.getText().replace(/^["'`]|["'`]$/g, '')
+							const nameNode = assignment?.getNameNode()
+							const name = nameNode?.getText().replace(/^["'`]|["'`]$/g, '')
 							const value = assignment
 								.getInitializer()
 								?.getText()

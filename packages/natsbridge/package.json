@@ -1,6 +1,6 @@
 {
 	"name": "@purista/natsbridge",
-	"version": "2.1.1",
+	"version": "2.1.2",
 	"description": "NATS eventbridge for PURISTA backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {
