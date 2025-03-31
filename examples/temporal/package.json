@@ -1,7 +1,7 @@
 {
 	"name": "@purista/temporal-example",
 	"private": true,
-	"version": "2.1.3",
+	"version": "2.1.4",
 	"description": "PURISTA blueprint project",
 	"engines": {
 		"node": ">=18"

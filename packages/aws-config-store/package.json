@@ -1,6 +1,6 @@
 {
 	"name": "@purista/aws-config-store",
-	"version": "2.1.3",
+	"version": "2.1.4",
 	"description": "State store adapter for AWS System Manager",
 	"homepage": "https://purista.dev",
 	"repository": {
