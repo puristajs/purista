@@ -25,7 +25,12 @@ export const getSubscriptionTestFileContent = (input: {
 
 	const typePrefix = pascalCase(`${input.serviceName} v${input.serviceVersion} ${input.subscriptionName}`)
 
-	writer.writeLine(`import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'`)
+	const testLib = input.puristaConfig.runtime === 'bun' ? 'bun:test' : 'vitest'
+
+	writer.writeLine(`import { afterEach, beforeEach, describe, expect, test } from '${testLib}'`)
+	writer.writeLine(
+		`import { getCommandSuccessMessageMock, getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'`,
+	)
 	writer.writeLine(`import { createSandbox } from 'sinon'`)
 	writer.blankLine()
 	writer.writeLine(`import { ${serviceName} } from '../../${serviceFileName}.js'`)
@@ -72,11 +77,16 @@ export const getSubscriptionTestFileContent = (input: {
 					writer.blankLine()
 					writer.writeLine(`const payload: ${typePrefix}InputPayload = undefined`)
 					writer.blankLine()
+					writer.blankLine()
+					writer.writeLine('const message = getCommandSuccessMessageMock(payload)')
+					writer.blankLine()
 					writer.writeLine(
-						`const context = ${subscriptionBuilderName}.getSubscriptionContextMock({ payload, undefined, sandbox, resources: { ...service.resources } })`,
+						`const context = ${subscriptionBuilderName}.getSubscriptionContextMock({ message, sandbox, resources: { ...service.resources } })`,
 					)
 					writer.blankLine()
-					writer.writeLine(`const result = await ${camelCase(input.subscriptionName)}(context.mock, payload)`)
+					writer.writeLine(
+						`const result = await ${camelCase(input.subscriptionName)}(context.mock, payload, service.resources)`,
+					)
 					writer.blankLine()
 					writer.writeLine('expect(result).toBe(undefined)')
 				})

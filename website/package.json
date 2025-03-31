@@ -1,6 +1,6 @@
 {
 	"name": "@purista/website",
-	"version": "2.1.2",
+	"version": "2.1.3",
 	"private": true,
 	"description": "PURISTA website source code based on vitepress",
 	"main": "index.js",
