@@ -1,6 +1,6 @@
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 import { SpanStatusCode } from '@opentelemetry/api'
-import { Resource } from '@opentelemetry/resources'
+import { defaultResource, resourceFromAttributes } from '@opentelemetry/resources'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
 
@@ -48,8 +48,8 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
 
 		this.defaultCommandTimeout = config.defaultCommandTimeout ?? 30000
 
-		const resource = Resource.default().merge(
-			new Resource({
+		const resource = defaultResource().merge(
+			resourceFromAttributes({
 				[ATTR_SERVICE_NAME]: name,
 				[ATTR_SERVICE_VERSION]: puristaVersion,
 			}),
@@ -57,11 +57,8 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
 
 		this.traceProvider = new NodeTracerProvider({
 			resource,
+			spanProcessors: config.spanProcessor ? [config.spanProcessor] : undefined,
 		})
-
-		if (config?.spanProcessor) {
-			this.traceProvider.addSpanProcessor(config?.spanProcessor)
-		}
 
 		this.traceProvider.register()
 	}
