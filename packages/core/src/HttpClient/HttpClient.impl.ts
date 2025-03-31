@@ -2,7 +2,6 @@ import { join } from 'node:path'
 
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
-import { Resource } from '@opentelemetry/resources'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import {
@@ -20,6 +19,7 @@ import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { PuristaSpanTag } from '../core/types/PuristaSpanTag.enum.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 
+import { defaultResource, resourceFromAttributes } from '@opentelemetry/resources'
 import { initLogger } from '../DefaultLogger/initLogger.impl.js'
 import { puristaVersion } from '../version.js'
 import type { AuthCredentials } from './types/AuthCredentials.js'
@@ -77,18 +77,15 @@ export class HttpClient<CustomConfig extends Record<string, unknown> = EmptyObje
 		this.timeout = this.config.defaultTimeout ?? 30000
 		this.logger = logger
 
-		const resource = Resource.default().merge(
-			new Resource({
+		const resource = defaultResource().merge(
+			resourceFromAttributes({
 				[ATTR_SERVICE_NAME]: this.name,
 			}),
 		)
 		this.traceProvider = new NodeTracerProvider({
 			resource,
+			spanProcessors: config.spanProcessor ? [config.spanProcessor] : undefined,
 		})
-
-		if (config.spanProcessor) {
-			this.traceProvider.addSpanProcessor(config.spanProcessor)
-		}
 
 		this.traceProvider.register()
 	}

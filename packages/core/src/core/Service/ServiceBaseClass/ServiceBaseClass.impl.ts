@@ -1,7 +1,6 @@
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 
 import { SpanStatusCode } from '@opentelemetry/api'
-import { Resource } from '@opentelemetry/resources'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
@@ -19,6 +18,7 @@ import type { ServiceInfoType } from '../../types/infoType/ServiceInfoType.js'
 import { GenericEventEmitter } from '../../types/GenericEventEmitter.js'
 import { PuristaSpanTag } from '../../types/PuristaSpanTag.enum.js'
 
+import { defaultResource, resourceFromAttributes } from '@opentelemetry/resources'
 import { ServiceInfoValidator } from '../ServiceInfoValidator.impl.js'
 
 /**
@@ -78,19 +78,17 @@ export class ServiceBaseClass extends GenericEventEmitter<ServiceEvents> {
 		})
 		this.logger.debug({ ...this.info }, `creating ${this.info.serviceName} ${this.info.serviceVersion}`)
 
-		const resource = Resource.default().merge(
-			new Resource({
+		const resource = defaultResource().merge(
+			resourceFromAttributes({
 				[ATTR_SERVICE_NAME]: this.info.serviceName,
 				[ATTR_SERVICE_VERSION]: this.info.serviceVersion,
 			}),
 		)
+
 		this.traceProvider = new NodeTracerProvider({
 			resource,
+			spanProcessors: options.spanProcessor ? [options.spanProcessor] : undefined,
 		})
-
-		if (options.spanProcessor) {
-			this.traceProvider.addSpanProcessor(options.spanProcessor)
-		}
 
 		this.traceProvider.register()
 		this.spanProcessor = options.spanProcessor

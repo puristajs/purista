@@ -1,5 +1,5 @@
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
-import type { Tracer } from '@opentelemetry/sdk-trace-node'
+import type { Tracer } from '@opentelemetry/api'
 
 import type { ContextBase } from './ContextBase.js'
 import type { Logger } from './Logger.js'
