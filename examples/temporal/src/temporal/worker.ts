@@ -1,7 +1,7 @@
 import { fileURLToPath } from 'node:url'
 
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
-import { Resource } from '@opentelemetry/resources'
+import { resourceFromAttributes } from '@opentelemetry/resources'
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
@@ -32,14 +32,15 @@ export type ActivitiesType = typeof activities & ReturnType<typeof getPuristaBas
 
 async function run() {
 	// setup OpenTelemetry
-	const resource = new Resource({
+	const resource = resourceFromAttributes({
 		[ATTR_SERVICE_NAME]: 'temporal-worker',
 	})
 	const exporter = new OTLPTraceExporter(jaegerExporterOptions)
+	const spanProcessor = new SimpleSpanProcessor(exporter)
+
 	const otel = new NodeSDK({ traceExporter: exporter, resource })
 	otel.start()
 
-	const spanProcessor = new SimpleSpanProcessor(exporter)
 	const logger = initLogger('debug')
 
 	// inject eventBride and logger
