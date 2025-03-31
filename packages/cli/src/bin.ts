@@ -175,7 +175,7 @@ const main = async () => {
 			}
 
 			// handle creation of a new subscription
-			if (data.component === 'subscription') {
+			if (data.component === 'subscription' && puristaProject.eventNames.length) {
 				data.eventToSubscribe = await select({
 					loop: true,
 					message: 'What event do you want to subscribe?',
