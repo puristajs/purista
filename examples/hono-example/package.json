@@ -1,6 +1,6 @@
 {
 	"name": "@purista/hono-example",
-	"version": "2.1.1",
+	"version": "2.1.2",
 	"description": "purista backend framework",
 	"homepage": "https://purista.dev",
 	"private": true,
