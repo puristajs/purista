@@ -22,6 +22,10 @@ export const getCommandTestFileContent = (input: {
 
 	const typePrefix = pascalCase(`${input.serviceName} v${input.serviceVersion} ${input.commandName}`)
 
+	const testLib = input.puristaConfig.runtime === 'bun' ? 'bun:test' : 'vitest'
+
+	writer.writeLine(`import { afterEach, beforeEach, describe, expect, test } from '${testLib}'`)
+
 	writer.writeLine(`import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'`)
 	writer.writeLine(`import { createSandbox } from 'sinon'`)
 	writer.blankLine()

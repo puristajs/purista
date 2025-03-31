@@ -21,13 +21,16 @@ export const getServiceTestFileContent = (input: {
 	)
 	const serviceName = camelCase(`${input.serviceName} v${input.serviceVersion} service`)
 
+	const testLib = input.puristaConfig.runtime === 'bun' ? 'bun:test' : 'vitest'
+
+	writer.writeLine(`import { describe, test } from '${testLib}'`)
 	writer.writeLine(`import { ${serviceName} as service } from './${serviceFileName}.js'`)
 	writer.newLine()
 	writer
 		.write(`describe('service ${input.serviceName} version ${input.serviceVersion}', () =>`)
 		.block(() => {
 			writer
-				.write(`it('has valid configuration', () =>`)
+				.write(`test('has valid configuration', () =>`)
 				.block(() => {
 					writer.writeLine('service.testServiceSetup()')
 				})
