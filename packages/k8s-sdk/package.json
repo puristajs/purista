@@ -1,6 +1,6 @@
 {
 	"name": "@purista/k8s-sdk",
-	"version": "2.1.0",
+	"version": "2.1.1",
 	"description": "SDK and helper to run PURISTA services in Kubernetes",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -47,7 +47,7 @@
 		"@hono/node-server": "^1.13.8",
 		"@types/node": "^22.13.9",
 		"@types/sinon": "^17.0.3",
-		"sinon": "^19.0.2",
+		"sinon": "^20.0.0",
 		"tshy": "^3.0.2",
 		"vitest": "^3.0.4"
 	},

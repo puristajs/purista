@@ -1,7 +1,7 @@
 {
 	"name": "@purista/temporal-example",
 	"private": true,
-	"version": "2.1.0",
+	"version": "2.1.1",
 	"description": "PURISTA blueprint project",
 	"engines": {
 		"node": ">=18"
@@ -38,7 +38,7 @@
 		"@types/node": "^22.13.9",
 		"@types/sinon": "^17.0.3",
 		"pino-pretty": "^13.0.0",
-		"sinon": "^19.0.2",
+		"sinon": "^20.0.0",
 		"vitest": "^3.0.4"
 	}
 }

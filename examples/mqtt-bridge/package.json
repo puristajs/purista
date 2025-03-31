@@ -1,6 +1,6 @@
 {
 	"name": "@purista/mqtt-example",
-	"version": "2.1.0",
+	"version": "2.1.1",
 	"description": "purista backend framework",
 	"homepage": "https://purista.dev",
 	"private": true,
@@ -25,7 +25,7 @@
 	"devDependencies": {
 		"@types/node": "^22.13.9",
 		"pino-pretty": "^13.0.0",
-		"sinon": "^19.0.2",
+		"sinon": "^20.0.0",
 		"tsx": "^4.19.0",
 		"typescript": "^5.8.2",
 		"vitest": "^3.0.4"
