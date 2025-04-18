@@ -60,7 +60,7 @@
 		"@opentelemetry/api": "^1.9.0",
 		"@opentelemetry/semantic-conventions": "^1.30.0",
 		"@purista/core": "*",
-		"fastify": "^5.2.2",
+		"fastify": "^5.3.1",
 		"openapi3-ts": "^4.4.0",
 		"swagger-ui-dist": "^5.20.2",
 		"trouter": "^4.0.0"
