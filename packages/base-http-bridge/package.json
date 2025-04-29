@@ -29,18 +29,18 @@
 		}
 	},
 	"devDependencies": {
-		"@types/node": "^22.13.14",
+		"@types/node": "^22.15.3",
 		"@types/sinon": "^17.0.4",
 		"sinon": "^20.0.0",
 		"tshy": "^3.0.2",
-		"vitest": "^3.1.1"
+		"vitest": "^3.1.2"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.0",
-		"@opentelemetry/semantic-conventions": "^1.30.0",
+		"@opentelemetry/semantic-conventions": "^1.32.0",
 		"@purista/core": "*",
-		"cloudevents": "^8.0.2",
-		"hono": "^4.7.5"
+		"cloudevents": "^9.0.0",
+		"hono": "^4.7.8"
 	},
 	"peerDependenciesMeta": {},
 	"exports": {

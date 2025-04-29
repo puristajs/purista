@@ -21,19 +21,19 @@
 		"test": "tsc --noEmit && vitest"
 	},
 	"devDependencies": {
-		"@types/node": "^22.13.14",
+		"@types/node": "^22.15.3",
 		"pino-pretty": "^13.0.0",
 		"sinon": "^20.0.0",
-		"tsx": "^4.19.3",
-		"typescript": "^5.8.2",
-		"vitest": "^3.1.1"
+		"tsx": "^4.19.4",
+		"typescript": "^5.8.3",
+		"vitest": "^3.1.2"
 	},
 	"dependencies": {
-		"@hono/node-server": "^1.14.0",
+		"@hono/node-server": "^1.14.1",
 		"@opentelemetry/exporter-trace-otlp-http": "^0.200.0",
 		"@purista/amqpbridge": "*",
 		"@purista/core": "*",
 		"@purista/k8s-sdk": "*",
-		"zod": "^3.24.2"
+		"zod": "^3.24.3"
 	}
 }
