@@ -54,7 +54,7 @@
 		"vitest": "^3.1.2"
 	},
 	"dependencies": {
-		"@aws-sdk/client-ssm": "^3.798.0",
+		"@aws-sdk/client-ssm": "^3.799.0",
 		"@purista/core": "*"
 	},
 	"peerDependenciesMeta": {},

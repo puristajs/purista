@@ -54,7 +54,7 @@
 		"vitest": "^3.1.2"
 	},
 	"dependencies": {
-		"@aws-sdk/client-secrets-manager": "^3.798.0",
+		"@aws-sdk/client-secrets-manager": "^3.799.0",
 		"@purista/core": "*"
 	},
 	"peerDependenciesMeta": {},
