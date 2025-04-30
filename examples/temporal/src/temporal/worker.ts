@@ -35,7 +35,7 @@ async function run() {
 	const resource = resourceFromAttributes({
 		[ATTR_SERVICE_NAME]: 'temporal-worker',
 	})
-	const exporter = new OTLPTraceExporter(jaegerExporterOptions)
+	const exporter = new OTLPTraceExporter(jaegerExporterOptions) as any
 	const spanProcessor = new SimpleSpanProcessor(exporter)
 
 	const otel = new NodeSDK({ traceExporter: exporter, resource })

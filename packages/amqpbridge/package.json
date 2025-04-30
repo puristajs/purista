@@ -1,6 +1,6 @@
 {
 	"name": "@purista/amqpbridge",
-	"version": "2.1.4",
+	"version": "2.1.5",
 	"description": "AMQP eventbridge for PURISTA backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {
@@ -45,17 +45,17 @@
 	},
 	"devDependencies": {
 		"@types/amqplib": "^0.10.7",
-		"@types/node": "^22.13.14",
+		"@types/node": "^22.15.3",
 		"@types/sinon": "^17.0.4",
 		"sinon": "^20.0.0",
 		"tshy": "^3.0.2",
-		"vitest": "^3.1.1"
+		"vitest": "^3.1.2"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.0",
 		"@opentelemetry/resources": "^2.0.0",
 		"@opentelemetry/sdk-trace-node": "^2.0.0",
-		"@opentelemetry/semantic-conventions": "^1.30.0",
+		"@opentelemetry/semantic-conventions": "^1.32.0",
 		"@opentelemetry/instrumentation-amqplib": "^0.47.0",
 		"@purista/core": "*",
 		"amqplib": "^0.10.7"

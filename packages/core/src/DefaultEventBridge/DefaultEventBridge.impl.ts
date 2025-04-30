@@ -111,7 +111,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 				async span => {
 					try {
 						let isAtLeastDeliveredOnce = false
-						for (const [_, subscription] of this.subscriptions) {
+						for (const [_, subscription] of Array.from(this.subscriptions)) {
 							if (isMessageMatchingSubscription(this.logger, message, subscription)) {
 								isAtLeastDeliveredOnce = true
 								this.runningSubscriptionCount++
@@ -353,7 +353,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 			})
 
 			const removeFromPending = () => {
-				if (this.pendingInvocations.delete(correlationId)) {
+				if (!this.pendingInvocations.delete(correlationId)) {
 					this.logger.error({ correlationId }, 'Failed to remove from pending invocations')
 				}
 			}
@@ -415,7 +415,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
 		this.emit(EventBridgeEventNames.EventbridgeDisconnected)
 
-		for (const [_, value] of this.pendingInvocations) {
+		for (const [_, value] of Array.from(this.pendingInvocations)) {
 			value.reject(new UnhandledError(StatusCode.ServiceUnavailable))
 		}
 		this.pendingInvocations.clear()

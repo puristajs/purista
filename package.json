@@ -1,5 +1,5 @@
 {
-	"version": "2.1.4",
+	"version": "2.1.5",
 	"private": true,
 	"type": "module",
 	"scripts": {
@@ -31,23 +31,23 @@
 	"workspaces": ["./packages/*", "./examples/*", "website"],
 	"devDependencies": {
 		"@biomejs/biome": "^1.9.4",
-		"@types/node": "^22.13.14",
+		"@types/node": "^22.15.3",
 		"@types/sinon": "^17.0.4",
-		"@vitest/coverage-v8": "^3.1.1",
+		"@vitest/coverage-v8": "^3.1.2",
 		"check-dependency-version-consistency": "^5.0.0",
 		"git-cliff": "^2.8.0",
-		"npm-check-updates": "^17.1.16",
+		"npm-check-updates": "^18.0.1",
 		"rimraf": "^6.0.1",
 		"sinon": "^20.0.0",
-		"testcontainers": "^10.23.0",
+		"testcontainers": "^10.24.2",
 		"ts-node": "^10.9.2",
-		"tsx": "^4.19.3",
-		"typedoc": "^0.28.1",
-		"typedoc-plugin-markdown": "^4.6.0",
-		"typescript": "^5.8.2",
-		"vitest": "^3.1.1"
+		"tsx": "^4.19.4",
+		"typedoc": "^0.28.3",
+		"typedoc-plugin-markdown": "^4.6.3",
+		"typescript": "^5.8.3",
+		"vitest": "^3.1.2"
 	},
-	"packageManager": "npm@11.2.0",
+	"packageManager": "npm@11.3.0",
 	"dependencies": {
 		"npm": "^11.2.0"
 	}

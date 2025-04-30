@@ -1,7 +1,7 @@
 {
 	"name": "@purista/temporal-example",
 	"private": true,
-	"version": "2.1.4",
+	"version": "2.1.5",
 	"description": "PURISTA blueprint project",
 	"engines": {
 		"node": ">=18"
@@ -18,7 +18,7 @@
 		"purista": "purista add"
 	},
 	"dependencies": {
-		"@hono/node-server": "^1.14.0",
+		"@hono/node-server": "^1.14.1",
 		"@hono/swagger-ui": "^0.5.1",
 		"@opentelemetry/exporter-trace-otlp-http": "^0.200.0",
 		"@opentelemetry/sdk-trace-node": "^2.0.0",
@@ -30,15 +30,15 @@
 		"@temporalio/interceptors-opentelemetry": "^1.11.7",
 		"@temporalio/worker": "^1.11.7",
 		"@temporalio/workflow": "^1.11.7",
-		"zod": "^3.24.2"
+		"zod": "^3.24.3"
 	},
 	"devDependencies": {
-		"tsx": "^4.19.3",
-		"typescript": "^5.8.2",
-		"@types/node": "^22.13.14",
+		"tsx": "^4.19.4",
+		"typescript": "^5.8.3",
+		"@types/node": "^22.15.3",
 		"@types/sinon": "^17.0.4",
 		"pino-pretty": "^13.0.0",
 		"sinon": "^20.0.0",
-		"vitest": "^3.1.1"
+		"vitest": "^3.1.2"
 	}
 }
