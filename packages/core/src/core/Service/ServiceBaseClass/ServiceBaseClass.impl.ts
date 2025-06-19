@@ -1,24 +1,21 @@
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 
 import { SpanStatusCode } from '@opentelemetry/api'
+import { defaultResource, resourceFromAttributes } from '@opentelemetry/resources'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
 import type { Schema } from '@typeschema/main'
-
 import { puristaVersion } from '../../../version.js'
 import type { ConfigStore } from '../../ConfigStore/types/ConfigStore.js'
 import type { EventBridge } from '../../EventBridge/types/EventBridge.js'
 import type { SecretStore } from '../../SecretStore/types/SecretStore.js'
 import type { StateStore } from '../../StateStore/types/StateStore.js'
-import type { Logger } from '../../types/Logger.js'
-import type { ServiceEvents } from '../../types/ServiceEvents.js'
-import type { ServiceInfoType } from '../../types/infoType/ServiceInfoType.js'
-
 import { GenericEventEmitter } from '../../types/GenericEventEmitter.js'
+import type { ServiceInfoType } from '../../types/infoType/ServiceInfoType.js'
+import type { Logger } from '../../types/Logger.js'
 import { PuristaSpanTag } from '../../types/PuristaSpanTag.enum.js'
-
-import { defaultResource, resourceFromAttributes } from '@opentelemetry/resources'
+import type { ServiceEvents } from '../../types/ServiceEvents.js'
 import { ServiceInfoValidator } from '../ServiceInfoValidator.impl.js'
 
 /**

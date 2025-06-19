@@ -1,10 +1,7 @@
 <script setup lang="ts">
-import { useData } from 'vitepress'
 import usePosts from '../../composables/usePosts.js'
 
-const { site } = useData()
-
-const { currentPost: post, path, prevPost, nextPost } = usePosts()
+const { currentPost: post } = usePosts()
 </script>
 
 <template>

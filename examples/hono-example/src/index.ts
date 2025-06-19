@@ -1,9 +1,8 @@
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
-import { apiReference } from '@scalar/hono-api-reference'
-
 import { DefaultEventBridge, initLogger } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
+import { apiReference } from '@scalar/hono-api-reference'
 import { basicAuth } from 'hono/basic-auth'
 import { compress } from 'hono/compress'
 

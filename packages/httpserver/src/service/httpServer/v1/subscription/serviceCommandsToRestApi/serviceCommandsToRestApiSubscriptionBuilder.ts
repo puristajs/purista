@@ -1,14 +1,14 @@
 import { posix } from 'node:path'
 
-import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { ATTR_HTTP_RESPONSE_STATUS_CODE } from '@opentelemetry/semantic-conventions'
 import {
+	convertToSnakeCase,
 	EBMessageType,
 	HandledError,
+	isHttpExposedServiceMeta,
 	StatusCode,
 	UnhandledError,
-	convertToSnakeCase,
-	isHttpExposedServiceMeta,
 } from '@purista/core'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { Methods } from 'trouter'

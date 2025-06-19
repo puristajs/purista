@@ -1,24 +1,23 @@
 import { posix } from 'node:path'
 
-import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
-import { ATTR_URL_FULL } from '@opentelemetry/semantic-conventions'
-
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
 	ATTR_HTTP_REQUEST_METHOD,
 	ATTR_HTTP_RESPONSE_STATUS_CODE,
 	ATTR_SERVER_ADDRESS,
+	ATTR_URL_FULL,
 } from '@opentelemetry/semantic-conventions'
 
 import type { Command, HttpExposedServiceMeta, Logger, Service } from '@purista/core'
 import {
 	EBMessageType,
 	HandledError,
-	PuristaSpanName,
-	StatusCode,
-	UnhandledError,
 	isCommandErrorResponse,
 	isHttpExposedServiceMeta,
+	PuristaSpanName,
+	StatusCode,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 import type { Hono, Context as HonoContext } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'

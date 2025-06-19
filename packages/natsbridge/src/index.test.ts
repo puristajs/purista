@@ -1,10 +1,10 @@
 import {
-	NatsBridge,
 	getCommandSubscriptionTopic,
 	getDefaultNatsBridgeConfig,
 	getQueueGroupName,
 	getSubscriptionTopic,
 	getTopicName,
+	NatsBridge,
 	puristaVersion,
 } from './index.js'
 

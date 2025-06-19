@@ -8,7 +8,7 @@ import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
 import type { EventBridge } from '@purista/core'
 import { initLogger } from '@purista/core'
 import { NatsBridge } from '@purista/natsbridge'
-import { OpenTelemetryActivityInboundInterceptor, makeWorkflowExporter } from '@temporalio/interceptors-opentelemetry'
+import { makeWorkflowExporter, OpenTelemetryActivityInboundInterceptor } from '@temporalio/interceptors-opentelemetry'
 import { NativeConnection, Worker } from '@temporalio/worker'
 
 import jaegerExporterOptions from '../config/jaegerExporterOptions.js' // [!code ++]

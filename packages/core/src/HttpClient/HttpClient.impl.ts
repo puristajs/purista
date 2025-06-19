@@ -1,7 +1,8 @@
 import { join } from 'node:path'
 
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
-import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
+import { defaultResource, resourceFromAttributes } from '@opentelemetry/resources'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import {
@@ -10,16 +11,12 @@ import {
 	ATTR_SERVICE_NAME,
 	ATTR_URL_FULL,
 } from '@opentelemetry/semantic-conventions'
-
-import type { EmptyObject } from '../core/types/EmptyObject.js'
-import type { Logger } from '../core/types/Logger.js'
-
 import { HandledError } from '../core/Error/HandledError.impl.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
+import type { EmptyObject } from '../core/types/EmptyObject.js'
+import type { Logger } from '../core/types/Logger.js'
 import { PuristaSpanTag } from '../core/types/PuristaSpanTag.enum.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
-
-import { defaultResource, resourceFromAttributes } from '@opentelemetry/resources'
 import { initLogger } from '../DefaultLogger/initLogger.impl.js'
 import { puristaVersion } from '../version.js'
 import type { AuthCredentials } from './types/AuthCredentials.js'

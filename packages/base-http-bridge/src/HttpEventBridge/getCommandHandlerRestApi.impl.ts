@@ -1,7 +1,7 @@
 import type { ParsedUrlQuery } from 'node:querystring'
 import { parse } from 'node:querystring'
 
-import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
 	ATTR_HTTP_REQUEST_METHOD,
 	ATTR_HTTP_RESPONSE_STATUS_CODE,
@@ -19,14 +19,14 @@ import type {
 } from '@purista/core'
 import {
 	EBMessageType,
-	HandledError,
-	PuristaSpanName,
-	StatusCode,
-	UnhandledError,
 	getErrorMessageForCode,
 	getTimeoutPromise,
+	HandledError,
 	isCommandErrorResponse,
+	PuristaSpanName,
+	StatusCode,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 

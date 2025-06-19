@@ -29,7 +29,9 @@
 		"test": "vitest"
 	},
 	"tshy": {
-		"exclude": ["src/**/*.test.ts"],
+		"exclude": [
+			"src/**/*.test.ts"
+		],
 		"exports": {
 			"./package.json": "./package.json",
 			".": "./src/api/index.ts"
@@ -37,26 +39,28 @@
 	},
 	"devDependencies": {
 		"@types/minimist": "^1.2.5",
-		"@types/node": "^22.15.3",
+		"@types/node": "^24.0.3",
 		"@types/sinon": "^17.0.4",
-		"esbuild": "^0.25.3",
+		"esbuild": "^0.25.5",
 		"rimraf": "^6.0.1",
 		"tshy": "^3.0.2",
-		"tsx": "^4.19.4",
-		"type-fest": "^4.40.1"
+		"tsx": "^4.20.3",
+		"type-fest": "^4.41.0"
 	},
 	"dependencies": {
-		"@inquirer/confirm": "^5.1.9",
-		"@inquirer/input": "^4.1.9",
-		"@inquirer/select": "^4.2.0",
+		"@inquirer/confirm": "^5.1.12",
+		"@inquirer/input": "^4.1.12",
+		"@inquirer/select": "^4.2.3",
 		"code-block-writer": "^13.0.3",
-		"commander": "^13.1.0",
-		"sinon": "^20.0.0",
-		"ts-morph": "^25.0.1",
-		"zod": "^3.24.3"
+		"commander": "^14.0.0",
+		"sinon": "^21.0.0",
+		"ts-morph": "^26.0.0",
+		"zod": "^3.25.67"
 	},
 	"peerDependenciesMeta": {},
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"exports": {
 		"./package.json": "./package.json",
 		".": {

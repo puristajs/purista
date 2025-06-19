@@ -1,7 +1,7 @@
 import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
 import { ConfigStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 import type { KV, NatsConnection } from 'nats'
-import { JSONCodec, connect } from 'nats'
+import { connect, JSONCodec } from 'nats'
 
 import type { NatsConfigStoreConfig } from './types/NatsConfigStoreConfig.js'
 

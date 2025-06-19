@@ -1,7 +1,7 @@
 import { serve } from '@hono/node-server'
 import { swaggerUI } from '@hono/swagger-ui'
 import type { EventBridge } from '@purista/core'
-import { DefaultEventBridge, HttpClient, getLoggerMock } from '@purista/core'
+import { DefaultEventBridge, getLoggerMock, HttpClient } from '@purista/core'
 import type { OpenAPIObject } from 'openapi3-ts/oas31'
 
 import type { HonoServiceClass } from '../src/service/hono/v1/HonoServiceClass.js'

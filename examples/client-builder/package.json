@@ -36,6 +36,8 @@
 		"tsx": "latest",
 		"vitest": "latest"
 	},
-	"trustedDependencies": ["@biomejs/biome"],
+	"trustedDependencies": [
+		"@biomejs/biome"
+	],
 	"name": "client-builder"
 }

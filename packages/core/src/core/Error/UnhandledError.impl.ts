@@ -1,8 +1,8 @@
 import { getErrorMessageForCode } from '../helper/getErrorMessageForCode.impl.js'
+import type { CommandErrorResponse } from '../types/commandType/CommandErrorResponse.js'
 import type { ErrorResponsePayload } from '../types/ErrorResponsePayload.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import type { TraceId } from '../types/TraceId.js'
-import type { CommandErrorResponse } from '../types/commandType/CommandErrorResponse.js'
 import { HandledError } from './HandledError.impl.js'
 
 /**

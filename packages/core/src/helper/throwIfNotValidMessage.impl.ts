@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { EBMessageType } from '../core/types/EBMessageType.enum.js'

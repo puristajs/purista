@@ -1,5 +1,5 @@
 import type { EventBridge, Service } from '@purista/core'
-import { DefaultEventBridge, HttpClient, getLoggerMock } from '@purista/core'
+import { DefaultEventBridge, getLoggerMock, HttpClient } from '@purista/core'
 import type { OpenAPIObject } from 'openapi3-ts/oas31'
 
 import { httpServerV1Service } from '../src/index.js'
