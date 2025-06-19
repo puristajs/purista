@@ -2,16 +2,14 @@
 import type { Schema } from '@typeschema/main'
 import { toJSONSchema } from '@typeschema/main'
 import type { SchemaObject } from 'openapi3-ts/oas31'
-import { ZodType } from 'zod/v4'
-
-import { generateSchema } from './zodOpenApi.impl.js'
+import { ZodType, z } from 'zod/v4'
 
 export const validationToSchema = async <T extends Schema>(schema?: T): Promise<SchemaObject | undefined> => {
 	if (!schema) {
 		return
 	}
 	if (schema instanceof ZodType) {
-		return generateSchema(schema)
+		return z.toJSONSchema(schema) as SchemaObject
 	}
 	try {
 		const jsonSchema = await toJSONSchema(schema)
