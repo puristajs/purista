@@ -66,4 +66,25 @@ describe('ServiceBuilder', () => {
 			resources: { x: new ExampleClass() },
 		})
 	})
+
+	it('throws when definitions are not resolved', () => {
+		const service = new ServiceBuilder(serviceInfo)
+
+		expect(() => {
+			service.getCommandDefinitions()
+		}).toThrow('Definitions not resolve. Please call resolveDefinitions() before using getCommandDefinitions')
+
+		expect(() => {
+			service.getSubscriptionDefinitions()
+		}).toThrow('Definitions not resolve. Please call resolveDefinitions() before using getCommandDefinitions')
+	})
+
+	it('returns definitions after resolving', async () => {
+		const service = new ServiceBuilder(serviceInfo)
+
+		await service.resolveDefinitions()
+
+		expect(service.getCommandDefinitions()).toEqual([])
+		expect(service.getSubscriptionDefinitions()).toEqual([])
+	})
 })
