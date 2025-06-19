@@ -1,10 +1,10 @@
 import { createSandbox } from 'sinon'
 
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
-import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/index.js'
 import type { ServiceInfoType } from '../core/index.js'
 import { Service } from '../core/index.js'
 import { getEventBridgeMock, getLoggerMock } from '../mocks/index.js'
+import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/index.js'
 import { ServiceBuilder } from './ServiceBuilder.impl.js'
 
 describe('ServiceBuilder', () => {

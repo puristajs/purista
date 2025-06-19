@@ -1,7 +1,7 @@
 import { fail } from 'node:assert'
 import { createSandbox } from 'sinon'
 import { vi } from 'vitest'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import type { ServiceInfoType } from '../src/index.js'
 import { DefaultEventBridge, EBMessageType, ServiceBuilder, StatusCode, safeBind } from '../src/index.js'
@@ -389,7 +389,10 @@ describe('integration test', () => {
 				},
 			})
 
-			const contextMock = subscriptionOneBuilder.getSubscriptionContextMock({ message, sandbox })
+			const contextMock = subscriptionOneBuilder.getSubscriptionContextMock({
+				message,
+				sandbox,
+			})
 
 			const result = await subscriptionOne(contextMock.mock, payload, parameter)
 

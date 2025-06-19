@@ -1,5 +1,5 @@
-import CodeBlockWriter from 'code-block-writer'
 import type { Options } from 'code-block-writer'
+import CodeBlockWriter from 'code-block-writer'
 import { pascalCase } from '../../change-case.js'
 
 /**

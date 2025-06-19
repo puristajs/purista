@@ -1,6 +1,6 @@
 // file deepcode ignore ServerLeak: <please specify a reason of ignoring this>
 
-import { SpanKind, context, propagation } from '@opentelemetry/api'
+import { context, propagation, SpanKind } from '@opentelemetry/api'
 import {
 	ATTR_HTTP_REQUEST_METHOD,
 	ATTR_HTTP_RESPONSE_STATUS_CODE,
@@ -10,13 +10,13 @@ import {
 
 import type { CustomMessage, EBMessage, Subscription } from '@purista/core'
 import {
+	getTimeoutPromise,
 	HandledError,
 	PuristaSpanName,
 	StatusCode,
-	UnhandledError,
-	getTimeoutPromise,
 	serializeOtp,
 	throwIfNotValidMessage,
+	UnhandledError,
 } from '@purista/core'
 import { HTTP } from 'cloudevents'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'

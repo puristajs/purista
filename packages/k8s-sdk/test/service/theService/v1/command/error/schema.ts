@@ -1,11 +1,15 @@
 import { extendApi } from '@purista/core'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 // define the input parameters
-export const theServiceV1ErrorInputParameterSchema = extendApi(z.object({}), { title: 'error input parameter schema' })
+export const theServiceV1ErrorInputParameterSchema = extendApi(z.object({}), {
+	title: 'error input parameter schema',
+})
 
 // define the input payload
-export const theServiceV1ErrorInputPayloadSchema = extendApi(z.undefined(), { title: 'error input payload schema' })
+export const theServiceV1ErrorInputPayloadSchema = extendApi(z.undefined(), {
+	title: 'error input payload schema',
+})
 
 // define the output payload
 export const theServiceV1ErrorOutputPayloadSchema = extendApi(z.object({ error: z.boolean() }), {

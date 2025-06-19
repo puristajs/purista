@@ -1,7 +1,7 @@
 import { assert, spy, stub } from 'sinon'
 
 import type { Subscription } from '../core/index.js'
-import { EBMessageType, createInfoMessage } from '../core/index.js'
+import { createInfoMessage, EBMessageType } from '../core/index.js'
 import { getCustomMessageMessageMock, getLoggerMock } from '../mocks/index.js'
 import { DefaultEventBridge } from './DefaultEventBridge.impl.js'
 

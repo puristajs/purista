@@ -1,4 +1,4 @@
-import { RedisStateStore, puristaVersion } from './index.js'
+import { puristaVersion, RedisStateStore } from './index.js'
 
 describe('exports redis-state-store', () => {
 	it('has a version', () => {

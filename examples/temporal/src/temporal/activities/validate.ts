@@ -1,5 +1,5 @@
 import { StatusCode, UnhandledError } from '@purista/core'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 export async function validate<T extends z.Schema>(data: unknown): Promise<z.infer<T>> {
 	const onboardingWorkflowInputSchema = z.object({

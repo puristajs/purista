@@ -8,23 +8,22 @@ import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttp
 import type { Service } from '../core/Service/Service.impl.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
+import type { CommandAfterGuardHook } from '../core/types/commandType/CommandAfterGuardHook.js'
+import type { CommandBeforeGuardHook } from '../core/types/commandType/CommandBeforeGuardHook.js'
+import type { CommandDefinition } from '../core/types/commandType/CommandDefinition.js'
+import type { CommandDefinitionMetadataBase } from '../core/types/commandType/CommandDefinitionMetadataBase.js'
+import type { CommandFunction } from '../core/types/commandType/CommandFunction.js'
+import type { CommandTransformInputHook } from '../core/types/commandType/CommandTransformInputHook.js'
+import type { CommandTransformOutputHook } from '../core/types/commandType/CommandTransformOutputHook.js'
 import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventBridgeConfig.js'
 import type { GetMessageParamsType } from '../core/types/GetMessageParamsType.js'
 import type { GetMessagePayloadType } from '../core/types/GetMessagePayloadType.js'
 import type { InferTypeOrEmptyObject } from '../core/types/InferTypeOrEmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
-import type { CommandAfterGuardHook } from '../core/types/commandType/CommandAfterGuardHook.js'
-import type { CommandBeforeGuardHook } from '../core/types/commandType/CommandBeforeGuardHook.js'
-import type { CommandDefinition } from '../core/types/commandType/CommandDefinition.js'
-import type { CommandDefinitionMetadataBase } from '../core/types/commandType/CommandDefinitionMetadataBase.js'
-import type { CommandFunction } from '../core/types/commandType/CommandFunction.js'
-import type { CommandTransformOutputHook } from '../core/types/commandType/CommandTransformOutputHook.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getCommandContextMock } from '../mocks/getCommandContext.mock.js'
 import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
-
-import type { CommandTransformInputHook } from '../core/types/commandType/CommandTransformInputHook.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { CommandDefinitionBuilderTypes } from './CommandDefinitionBuilderTypes.js'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
@@ -920,9 +919,7 @@ export class CommandDefinitionBuilder<
 	 * @param input Overwrite beforeGuards
 	 * @returns the function
 	 */
-	getCommandFunction<T = typeof this.hooks.beforeGuard>(input?: {
-		beforeGuards?: Partial<T>
-	}) {
+	getCommandFunction<T = typeof this.hooks.beforeGuard>(input?: { beforeGuards?: Partial<T> }) {
 		if (!this.fn) {
 			throw new UnhandledError(StatusCode.NotImplemented, `No function implementation for ${this.commandName}`, {
 				commandName: this.commandName,

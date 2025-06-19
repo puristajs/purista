@@ -1,5 +1,5 @@
-import CodeBlockWriter from 'code-block-writer'
 import type { Options } from 'code-block-writer'
+import CodeBlockWriter from 'code-block-writer'
 import { camelCase, capitalCase, pascalCase } from '../../change-case.js'
 import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'

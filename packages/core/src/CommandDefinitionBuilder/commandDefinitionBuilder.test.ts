@@ -1,5 +1,5 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { Service } from '../core/index.js'
 import { safeBind } from '../helper/index.js'
@@ -9,7 +9,11 @@ import { CommandDefinitionBuilder } from './CommandDefinitionBuilder.impl.js'
 describe('CommandDefinitionBuilder', () => {
 	const sandbox = createSandbox()
 	const service = new Service({
-		info: { serviceName: 'TestService', serviceVersion: '1', serviceDescription: 'A service' },
+		info: {
+			serviceName: 'TestService',
+			serviceVersion: '1',
+			serviceDescription: 'A service',
+		},
 		commandDefinitionList: [],
 		subscriptionDefinitionList: [],
 		logger: getLoggerMock(sandbox).mock,
@@ -17,7 +21,11 @@ describe('CommandDefinitionBuilder', () => {
 		config: {},
 	})
 
-	const functionPayloadSchema = z.object({ foo: z.string(), bar: z.number(), def: z.string().default('default_value') })
+	const functionPayloadSchema = z.object({
+		foo: z.string(),
+		bar: z.number(),
+		def: z.string().default('default_value'),
+	})
 	const functionParameterSchema = z.object({
 		paramOne: z.string(),
 		paramTwo: z.number(),
@@ -25,8 +33,17 @@ describe('CommandDefinitionBuilder', () => {
 	})
 	const functionOutputSchema = z.object({
 		result: z.object({
-			payload: z.object({ foo: z.string(), bar: z.number(), other: z.string(), def: z.string() }),
-			parameter: z.object({ paramOne: z.string(), paramTwo: z.number(), def: z.string() }),
+			payload: z.object({
+				foo: z.string(),
+				bar: z.number(),
+				other: z.string(),
+				def: z.string(),
+			}),
+			parameter: z.object({
+				paramOne: z.string(),
+				paramTwo: z.number(),
+				def: z.string(),
+			}),
 		}),
 	})
 	const transformPayloudSchema = z.string()
@@ -278,7 +295,11 @@ describe('CommandDefinitionBuilder', () => {
 			context.mock,
 			{
 				result: {
-					payload: { ...payload, other: 'added by invoke', def: 'default_value' },
+					payload: {
+						...payload,
+						other: 'added by invoke',
+						def: 'default_value',
+					},
 					parameter: { ...parameter, def: 'default_param' },
 				},
 			},
@@ -288,7 +309,11 @@ describe('CommandDefinitionBuilder', () => {
 		expect(result).toStrictEqual(
 			JSON.stringify({
 				result: {
-					payload: { ...payload, other: 'added by invoke', def: 'default_value' },
+					payload: {
+						...payload,
+						other: 'added by invoke',
+						def: 'default_value',
+					},
 					parameter: { ...parameter, def: 'default_param' },
 				},
 			}),
@@ -306,7 +331,11 @@ describe('CommandDefinitionBuilder', () => {
 
 		const theFunction = safeBind(fn, service)
 
-		const context = b.getCommandContextMock({ payload: '', parameter: {}, sandbox })
+		const context = b.getCommandContextMock({
+			payload: '',
+			parameter: {},
+			sandbox,
+		})
 
 		const result = await theFunction(context.mock, 'y', 'x')
 

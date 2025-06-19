@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 // define the input payload
 export const emailV1SendWelcomeEmailInputPayloadSchema = z.object({
