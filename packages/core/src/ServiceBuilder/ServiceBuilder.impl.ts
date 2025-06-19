@@ -415,8 +415,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	 *
 	 * @returns
 	 */
-        async getFullServiceDefinition() {
-                const definitions = await this.resolveDefinitions()
+	async getFullServiceDefinition() {
+		const definitions = await this.resolveDefinitions()
 
 		return {
 			...this.info,

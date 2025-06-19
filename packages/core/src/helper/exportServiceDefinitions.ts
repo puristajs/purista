@@ -11,54 +11,54 @@ import type { ServiceDefinitions } from './types/ServiceDefinitions.js'
  * @returns
  */
 export const mergeServiceDefinition = <T extends FullServiceDefinition>(
-       existing: FullServiceDefinition,
-       definitionToAdd: ServiceDefinitions,
+	existing: FullServiceDefinition,
+	definitionToAdd: ServiceDefinitions,
 ): T => {
-       const commands = definitionToAdd.commands.reduce((current, definition) => {
-               return {
-                       // biome-ignore lint/performance/noAccumulatingSpread: <explanation>
-                       ...current,
-                       [definition.commandName]: definition,
-               }
-       }, {})
+	const commands = definitionToAdd.commands.reduce((current, definition) => {
+		return {
+			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+			...current,
+			[definition.commandName]: definition,
+		}
+	}, {})
 
-       const subscriptions = definitionToAdd.subscriptions.reduce((current, definition) => {
-               return {
-                       // biome-ignore lint/performance/noAccumulatingSpread: <explanation>
-                       ...current,
-                       [definition.subscriptionName]: definition,
-               }
-       }, {})
+	const subscriptions = definitionToAdd.subscriptions.reduce((current, definition) => {
+		return {
+			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+			...current,
+			[definition.subscriptionName]: definition,
+		}
+	}, {})
 
 	const ret = { ...existing }
 
-       if (!ret[definitionToAdd.serviceName]) {
-               ret[definitionToAdd.serviceName] = {
-                       [definitionToAdd.serviceVersion]: {
-                               description: definitionToAdd.serviceDescription,
-                               commands,
-                               subscriptions,
-                               deprecated: definitionToAdd.deprecated,
-                       },
-               }
-       }
+	if (!ret[definitionToAdd.serviceName]) {
+		ret[definitionToAdd.serviceName] = {
+			[definitionToAdd.serviceVersion]: {
+				description: definitionToAdd.serviceDescription,
+				commands,
+				subscriptions,
+				deprecated: definitionToAdd.deprecated,
+			},
+		}
+	}
 
-       if (!ret[definitionToAdd.serviceName][definitionToAdd.serviceVersion]) {
-               ret[definitionToAdd.serviceName][definitionToAdd.serviceVersion] = {
-                       description: definitionToAdd.serviceDescription,
-                       commands,
-                       subscriptions,
-                       deprecated: definitionToAdd.deprecated,
-               }
-       }
+	if (!ret[definitionToAdd.serviceName][definitionToAdd.serviceVersion]) {
+		ret[definitionToAdd.serviceName][definitionToAdd.serviceVersion] = {
+			description: definitionToAdd.serviceDescription,
+			commands,
+			subscriptions,
+			deprecated: definitionToAdd.deprecated,
+		}
+	}
 
-       ret[definitionToAdd.serviceName][definitionToAdd.serviceVersion] = {
-               ...ret[definitionToAdd.serviceName][definitionToAdd.serviceVersion],
-               description: definitionToAdd.serviceDescription,
-               commands,
-               subscriptions,
-               deprecated: definitionToAdd.deprecated,
-       }
+	ret[definitionToAdd.serviceName][definitionToAdd.serviceVersion] = {
+		...ret[definitionToAdd.serviceName][definitionToAdd.serviceVersion],
+		description: definitionToAdd.serviceDescription,
+		commands,
+		subscriptions,
+		deprecated: definitionToAdd.deprecated,
+	}
 
 	return ret as T
 }
@@ -73,10 +73,10 @@ export const mergeServiceDefinition = <T extends FullServiceDefinition>(
  * @returns
  */
 export const exportServiceDefinitions = async (serviceBuilders: ServiceBuilder[]): Promise<FullDefinition> => {
-       const serviceDefinitions = await Promise.all(serviceBuilders.map(builder => builder.getFullServiceDefinition()))
+	const serviceDefinitions = await Promise.all(serviceBuilders.map(builder => builder.getFullServiceDefinition()))
 
-       return {
-               version: puristaVersion,
-               services: serviceDefinitions.reduce((def, current) => mergeServiceDefinition(def, current), {}),
-       }
+	return {
+		version: puristaVersion,
+		services: serviceDefinitions.reduce((def, current) => mergeServiceDefinition(def, current), {}),
+	}
 }

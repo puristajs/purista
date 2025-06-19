@@ -105,8 +105,8 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 		const services: FullServiceDefinition = {}
 
 		for (const builder of serviceBuilders) {
-                       const definition = await builder.getFullServiceDefinition()
-                       mergeServiceDefinition(services, definition)
+			const definition = await builder.getFullServiceDefinition()
+			mergeServiceDefinition(services, definition)
 		}
 
 		return services
