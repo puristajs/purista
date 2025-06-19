@@ -351,7 +351,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	 * @returns the definition of registered commands
 	 */
 	getCommandDefinitions() {
-		if (!this.resolveDefinitions) {
+		if (!this.definitionsResolved) {
 			throw new UnhandledError(
 				StatusCode.InternalServerError,
 				'Definitions not resolve. Please call resolveDefinitions() before using getCommandDefinitions',
@@ -364,7 +364,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	 * @returns the definition of registered subscriptions
 	 */
 	getSubscriptionDefinitions() {
-		if (!this.resolveDefinitions) {
+		if (!this.definitionsResolved) {
 			throw new UnhandledError(
 				StatusCode.InternalServerError,
 				'Definitions not resolve. Please call resolveDefinitions() before using getCommandDefinitions',
