@@ -6,10 +6,10 @@ import {
 	DefaultConfigStore,
 	DefaultSecretStore,
 	DefaultStateStore,
-	UnhandledError,
 	getNewInstanceId,
 	gracefulShutdown,
 	initLogger,
+	UnhandledError,
 } from '@purista/core'
 import { getHttpServer } from '@purista/k8s-sdk'
 

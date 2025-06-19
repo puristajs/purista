@@ -1,5 +1,5 @@
-import CodeBlockWriter from 'code-block-writer'
 import type { Options } from 'code-block-writer'
+import CodeBlockWriter from 'code-block-writer'
 import { camelCase } from '../../change-case.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
@@ -17,7 +17,7 @@ export const getSubscriptionSchemaFileContent = (input: {
 	const schemaPrefix = camelCase(`${input.serviceName} v${input.serviceVersion} ${input.subscriptionName}`)
 
 	writer.writeLine(`import { extendApi } from '@purista/core'`)
-	writer.writeLine(`import { z } from 'zod'`)
+	writer.writeLine(`import { z } from 'zod/v4'`)
 	writer.blankLine()
 	writer.writeLine(
 		`export const ${schemaPrefix}InputPayloadSchema = extendApi(z.any(), { title: 'input payload schema' })`,

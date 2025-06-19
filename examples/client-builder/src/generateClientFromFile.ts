@@ -1,6 +1,7 @@
 /**
  * Example on how to generate a client from JSON definition files
  */
+/** biome-ignore-all lint/suspicious/noConsole: is ok as it is a CLI tool example */
 import { ClientBuilder } from '@purista/core'
 
 const generate = async () => {
@@ -34,7 +35,7 @@ const generate = async () => {
 		// compile the source files
 		await clientBuilder.build()
 	} catch (error) {
-		// biome-ignore lint/suspicious/noConsole: <explanation>
+		// biome-ignore lint/suspicious/noConsole: used as CLI tool
 		console.error(error)
 	} finally {
 		// cleanup the builder and remove event listeners

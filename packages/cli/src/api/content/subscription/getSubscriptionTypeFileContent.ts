@@ -1,5 +1,5 @@
-import CodeBlockWriter from 'code-block-writer'
 import type { Options } from 'code-block-writer'
+import CodeBlockWriter from 'code-block-writer'
 import { camelCase, pascalCase } from '../../change-case.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
@@ -17,7 +17,7 @@ export const getSubscriptionTypeFileContent = (input: {
 	const schemaPrefix = camelCase(`${input.serviceName} v${input.serviceVersion} ${input.subscriptionName}`)
 	const typePrefix = pascalCase(schemaPrefix)
 
-	writer.writeLine(`import type { z } from 'zod'`)
+	writer.writeLine(`import type { z } from 'zod/v4'`)
 	writer.blankLine()
 	writer
 		.write('import type ')

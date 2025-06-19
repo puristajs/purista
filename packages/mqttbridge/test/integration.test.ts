@@ -5,7 +5,7 @@ import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock } fr
 import { createSandbox } from 'sinon'
 import type { StartedTestContainer } from 'testcontainers'
 import { GenericContainer } from 'testcontainers'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1/index.js'
 import { MqttBridge } from '../src/index.js'
@@ -48,7 +48,9 @@ describe('@purista/mqttbridge', () => {
 
 		theServiceServiceBuilder.addSubscriptionDefinition(subscriptionBuilder.getDefinition())
 
-		service = await theServiceServiceBuilder.getInstance(eventbridge, { logger: getLoggerMock(sandbox).mock })
+		service = await theServiceServiceBuilder.getInstance(eventbridge, {
+			logger: getLoggerMock(sandbox).mock,
+		})
 		await service.start()
 	})
 
@@ -93,7 +95,9 @@ describe('@purista/mqttbridge', () => {
 
 	it('receives subscriptions', async () => {
 		const payload = { example: 'payload' }
-		const commandResponse = getCommandSuccessMessageMock(payload, { eventName: EXAMPLE_EVENT })
+		const commandResponse = getCommandSuccessMessageMock(payload, {
+			eventName: EXAMPLE_EVENT,
+		})
 
 		await eventbridge.emitMessage(commandResponse)
 

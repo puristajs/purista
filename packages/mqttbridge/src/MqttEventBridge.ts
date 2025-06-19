@@ -17,20 +17,20 @@ import type {
 	Subscription,
 } from '@purista/core'
 import {
+	createInfoMessage,
+	deserializeOtp,
 	EBMessageType,
 	EventBridgeBaseClass,
 	EventBridgeEventNames,
-	PuristaSpanName,
-	PuristaSpanTag,
-	StatusCode,
-	UnhandledError,
-	createInfoMessage,
-	deserializeOtp,
 	getNewCorrelationId,
 	getNewEBMessageId,
 	getNewInstanceId,
 	isCommandResponse,
+	PuristaSpanName,
+	PuristaSpanTag,
+	StatusCode,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 import type { IClientSubscribeOptions, IPublishPacket, MqttClient } from 'mqtt'
 import { connectAsync } from 'mqtt'
@@ -41,13 +41,12 @@ import { getSubscriptionHandler } from './handler/getSubscriptionHandler.impl.js
 import { handleCommandResponse } from './handler/handleCommandResponse.impl.js'
 import { msToSec } from './msToSec.impl.js'
 import { serializeOtpToMqtt } from './serializeOtpToMqtt.impl.js'
-import { TopicRouter } from './topic/TopicRouter.js'
-
 import { getCommandResponseSubscriptionTopic } from './topic/getCommandResponseSubscriptionTopic.impl.js'
 import { getCommandSubscriptionTopic } from './topic/getCommandSubscriptionTopic.impl.js'
 import { getSharedTopicName } from './topic/getSharedTopicName.impl.js'
 import { getSubscriptionTopic } from './topic/getSubscriptionTopic.impl.js'
 import { getTopicName } from './topic/getTopicName.impl.js'
+import { TopicRouter } from './topic/TopicRouter.js'
 import type { MqttBridgeConfig } from './types/MqttBridgeConfig.js'
 
 /**

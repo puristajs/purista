@@ -1,11 +1,11 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 import {
-	ServiceBuilder,
-	type ServiceInfoType,
 	getCommandSuccessMessageMock,
 	getEventBridgeMock,
 	getLoggerMock,
+	ServiceBuilder,
+	type ServiceInfoType,
 	safeBind,
 } from '../src/index.js'
 
@@ -67,7 +67,9 @@ describe('service resource test', () => {
 		const context = commandBuilder.getCommandContextMock({
 			payload,
 			parameter,
-			resources: { exampleA: { methodA: sandbox.stub().returns('mock return') } },
+			resources: {
+				exampleA: { methodA: sandbox.stub().returns('mock return') },
+			},
 			sandbox,
 		})
 

@@ -1,7 +1,6 @@
+import { StateStoreBaseClass } from '../core/StateStore/StateStoreBaseClass.impl.js'
 import type { StateStore } from '../core/StateStore/types/StateStore.js'
 import type { StoreBaseConfig } from '../core/types/StoreBaseConfig.js'
-
-import { StateStoreBaseClass } from '../core/StateStore/StateStoreBaseClass.impl.js'
 import type { ObjectWithKeysFromStringArray } from '../helper/types/ObjectWithKeysFromStringArray.js'
 import type { DefaultStateStoreConfig } from './types/DefaultStateStoreConfig.js'
 

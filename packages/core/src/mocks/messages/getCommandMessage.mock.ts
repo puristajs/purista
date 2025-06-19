@@ -2,8 +2,8 @@ import { getNewCorrelationId } from '../../core/helper/getNewCorrelationId.impl.
 import { getNewEBMessageId } from '../../core/helper/getNewEBMessageId.impl.js'
 import { getNewInstanceId } from '../../core/helper/getNewInstanceId.impl.js'
 import { getNewTraceId } from '../../core/helper/getNewTraceId.impl.js'
-import { EBMessageType } from '../../core/types/EBMessageType.enum.js'
 import type { Command } from '../../core/types/commandType/Command.js'
+import { EBMessageType } from '../../core/types/EBMessageType.enum.js'
 
 /**
  * A function that returns a mocked command message.

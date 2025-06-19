@@ -1,7 +1,9 @@
 import { extendApi } from '@purista/core'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
-export const pingPongV1PongInputParameterSchema = extendApi(z.object({}), { title: 'input parameter schema' })
+export const pingPongV1PongInputParameterSchema = extendApi(z.object({}), {
+	title: 'input parameter schema',
+})
 
 export const pingPongV1PongInputPayloadSchema = extendApi(
 	z.object({
@@ -10,4 +12,6 @@ export const pingPongV1PongInputPayloadSchema = extendApi(
 	{ title: 'input payload schema' },
 )
 
-export const pingPongV1PongOutputPayloadSchema = extendApi(z.string(), { title: 'output payload schema' })
+export const pingPongV1PongOutputPayloadSchema = extendApi(z.string(), {
+	title: 'output payload schema',
+})
