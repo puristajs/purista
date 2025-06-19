@@ -4,10 +4,10 @@ import DefaultTheme from 'vitepress/theme'
 import { h } from 'vue'
 import './style.css'
 
-import { ExternalLink } from './components/ExternalLink.js'
 import Post from './components/blog/Post.vue'
 import PostDetail from './components/blog/PostDetail.vue'
 import Posts from './components/blog/Posts.vue'
+import { ExternalLink } from './components/ExternalLink.js'
 
 export default {
 	extends: DefaultTheme,

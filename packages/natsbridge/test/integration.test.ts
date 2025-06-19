@@ -3,7 +3,7 @@ import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock } fr
 import type { StartedNatsContainer } from '@testcontainers/nats'
 import { NatsContainer } from '@testcontainers/nats'
 import { createSandbox } from 'sinon'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1/index.js'
 import { NatsBridge } from '../src/index.js'
@@ -21,7 +21,10 @@ describe('@purista/natsbridge', () => {
 	beforeAll(async () => {
 		container = await new NatsContainer('nats:alpine').start()
 
-		eventbridge = new NatsBridge({ logger: logger.mock, ...container.getConnectionOptions() })
+		eventbridge = new NatsBridge({
+			logger: logger.mock,
+			...container.getConnectionOptions(),
+		})
 		await eventbridge.start()
 
 		const subscriptionBuilder = theServiceV1Service
@@ -32,7 +35,9 @@ describe('@purista/natsbridge', () => {
 
 		theServiceServiceBuilder.addSubscriptionDefinition(subscriptionBuilder.getDefinition())
 
-		service = await theServiceServiceBuilder.getInstance(eventbridge, { logger: getLoggerMock(sandbox).mock })
+		service = await theServiceServiceBuilder.getInstance(eventbridge, {
+			logger: getLoggerMock(sandbox).mock,
+		})
 		await service.start()
 	})
 
@@ -77,7 +82,9 @@ describe('@purista/natsbridge', () => {
 
 	it('receives subscriptions', async () => {
 		const payload = { example: 'payload' }
-		const commandResponse = getCommandSuccessMessageMock(payload, { eventName: EXAMPLE_EVENT })
+		const commandResponse = getCommandSuccessMessageMock(payload, {
+			eventName: EXAMPLE_EVENT,
+		})
 
 		await eventbridge.emitMessage(commandResponse)
 

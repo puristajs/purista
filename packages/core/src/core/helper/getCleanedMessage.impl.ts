@@ -1,6 +1,6 @@
-import type { EBMessage } from '../types/EBMessage.js'
 import { isCommand } from '../types/commandType/isCommand.impl.js'
 import { isCommandSuccessResponse } from '../types/commandType/isCommandSuccessResponse.impl.js'
+import type { EBMessage } from '../types/EBMessage.js'
 import { isDevelop } from './isDevelop.impl.js'
 
 /**

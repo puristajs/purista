@@ -1,5 +1,5 @@
 import * as yup from 'yup'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { validationToSchema } from './validationToSchema.js'
 

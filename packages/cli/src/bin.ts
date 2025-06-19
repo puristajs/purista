@@ -11,7 +11,7 @@ import { addPuristaSubscription } from './api/addPuristaSubscription.js'
 import { camelCase, capitalCase } from './api/change-case.js'
 import { ensureServiceEvent } from './api/content/manipulation/ensureServiceEvent.js'
 import { getFormatConfig } from './api/getFormatConfig.js'
-import { type PuristaConfig, loadPuristaConfig, puristaConfigSchema } from './api/loadPuristaConfig.js'
+import { loadPuristaConfig, type PuristaConfig, puristaConfigSchema } from './api/loadPuristaConfig.js'
 import { scanPuristaProject } from './api/scanPuristaProject.js'
 import { puristaVersion } from './version.js'
 

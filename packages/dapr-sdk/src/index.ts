@@ -27,10 +27,11 @@
  *
  * @module
  */
-export * from './types/index.js'
+
 export * from './DaprClient/index.js'
+export * from './DaprConfigStore/index.js'
 export * from './DaprEventBridge/index.js'
 export * from './DaprSecretStore/index.js'
-export * from './DaprConfigStore/index.js'
 export * from './DaprStateStore/index.js'
+export * from './types/index.js'
 export * from './version.js'

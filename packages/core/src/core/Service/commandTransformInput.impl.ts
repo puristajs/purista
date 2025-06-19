@@ -3,10 +3,9 @@ import { validate } from '@typeschema/main'
 
 import { HandledError } from '../Error/HandledError.impl.js'
 import { UnhandledError } from '../Error/UnhandledError.impl.js'
-
-import type { Logger } from '../types/Logger.js'
 import type { Command } from '../types/commandType/Command.js'
 import type { CommandDefinition } from '../types/commandType/CommandDefinition.js'
+import type { Logger } from '../types/Logger.js'
 
 import type { ServiceClass } from '../types/ServiceClass.js'
 import { StatusCode } from '../types/StatusCode.enum.js'

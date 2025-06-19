@@ -1,5 +1,5 @@
 import type { EBMessageAddress } from '@purista/core'
-import { EBMessageType, convertToSnakeCase } from '@purista/core'
+import { convertToSnakeCase, EBMessageType } from '@purista/core'
 import type { INatsBridge } from '../types/INatsBridge.js'
 
 type GetCommandTopicFn = (this: INatsBridge, address: EBMessageAddress) => string

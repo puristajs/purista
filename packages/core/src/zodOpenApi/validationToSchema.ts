@@ -2,7 +2,7 @@
 import type { Schema } from '@typeschema/main'
 import { toJSONSchema } from '@typeschema/main'
 import type { SchemaObject } from 'openapi3-ts/oas31'
-import { ZodType } from 'zod'
+import { ZodType } from 'zod/v4'
 
 import { generateSchema } from './zodOpenApi.impl.js'
 

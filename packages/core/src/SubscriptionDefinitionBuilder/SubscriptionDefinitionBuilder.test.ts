@@ -1,5 +1,5 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { Service } from '../core/index.js'
 import { safeBind } from '../helper/index.js'
@@ -9,7 +9,11 @@ import { SubscriptionDefinitionBuilder } from './SubscriptionDefinitionBuilder.i
 describe('SubscriptionDefinitionBuilder', () => {
 	const sandbox = createSandbox()
 	const service = new Service({
-		info: { serviceName: 'TestService', serviceVersion: '1', serviceDescription: 'A service' },
+		info: {
+			serviceName: 'TestService',
+			serviceVersion: '1',
+			serviceDescription: 'A service',
+		},
 		commandDefinitionList: [],
 		subscriptionDefinitionList: [],
 		logger: getLoggerMock(sandbox).mock,
@@ -17,7 +21,11 @@ describe('SubscriptionDefinitionBuilder', () => {
 		config: {},
 	})
 
-	const functionPayloadSchema = z.object({ foo: z.string(), bar: z.number(), def: z.string().default('default_value') })
+	const functionPayloadSchema = z.object({
+		foo: z.string(),
+		bar: z.number(),
+		def: z.string().default('default_value'),
+	})
 	const functionParameterSchema = z.object({
 		paramOne: z.string(),
 		paramTwo: z.number(),
@@ -25,8 +33,17 @@ describe('SubscriptionDefinitionBuilder', () => {
 	})
 	const functionOutputSchema = z.object({
 		result: z.object({
-			payload: z.object({ foo: z.string(), bar: z.number(), other: z.string(), def: z.string() }),
-			parameter: z.object({ paramOne: z.string(), paramTwo: z.number(), def: z.string() }),
+			payload: z.object({
+				foo: z.string(),
+				bar: z.number(),
+				other: z.string(),
+				def: z.string(),
+			}),
+			parameter: z.object({
+				paramOne: z.string(),
+				paramTwo: z.number(),
+				def: z.string(),
+			}),
 		}),
 	})
 	const transformPayloadSchema = z.string()
@@ -169,7 +186,10 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionContextMock({ message: msg, sandbox })
+		const context = builder.getSubscriptionContextMock({
+			message: msg,
+			sandbox,
+		})
 		context.stubs.service.OtherService[2].testSubscription.callsFake(async (payload, parameter) => {
 			return {
 				result: {
@@ -209,7 +229,10 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionTransformContextMock({ message: msg, sandbox })
+		const context = builder.getSubscriptionTransformContextMock({
+			message: msg,
+			sandbox,
+		})
 
 		const result = await transformFunction(context.mock, JSON.stringify(payload), JSON.stringify(parameter))
 
@@ -233,13 +256,20 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionTransformContextMock({ message: msg, sandbox })
+		const context = builder.getSubscriptionTransformContextMock({
+			message: msg,
+			sandbox,
+		})
 
 		const result = await transformFunction(
 			context.mock,
 			{
 				result: {
-					payload: { ...payload, other: 'added by invoke', def: 'default_value' },
+					payload: {
+						...payload,
+						other: 'added by invoke',
+						def: 'default_value',
+					},
 					parameter: { ...parameter, def: 'default_param' },
 				},
 			},
@@ -249,7 +279,11 @@ describe('SubscriptionDefinitionBuilder', () => {
 		expect(result).toStrictEqual(
 			JSON.stringify({
 				result: {
-					payload: { ...payload, other: 'added by invoke', def: 'default_value' },
+					payload: {
+						...payload,
+						other: 'added by invoke',
+						def: 'default_value',
+					},
 					parameter: { ...parameter, def: 'default_param' },
 				},
 			}),

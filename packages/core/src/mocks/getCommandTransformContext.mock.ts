@@ -1,8 +1,7 @@
 import type { SinonSandbox } from 'sinon'
 import { stub } from 'sinon'
-
-import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { CommandTransformFunctionContext } from '../core/types/commandType/CommandTransformFunctionContext.js'
+import type { EmptyObject } from '../core/types/EmptyObject.js'
 
 import { getLoggerMock } from './getLogger.mock.js'
 import { getCommandMessageMock } from './messages/getCommandMessage.mock.js'

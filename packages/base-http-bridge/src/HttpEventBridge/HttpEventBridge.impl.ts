@@ -2,7 +2,7 @@
 import { Server } from 'node:http'
 import type { Http2SecureServer, Http2Server } from 'node:http2'
 
-import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import type {
 	Command,
 	CommandErrorResponse,
@@ -18,22 +18,22 @@ import type {
 	Subscription,
 } from '@purista/core'
 import {
+	deserializeOtp,
 	EBMessageType,
 	EventBridgeBaseClass,
 	EventBridgeEventNames,
-	HandledError,
-	PuristaSpanName,
-	PuristaSpanTag,
-	StatusCode,
-	UnhandledError,
-	deserializeOtp,
 	getErrorMessageForCode,
 	getNewCorrelationId,
 	getNewEBMessageId,
+	HandledError,
 	isCommandErrorResponse,
 	isHttpExposedServiceMeta,
 	isInfoMessage,
+	PuristaSpanName,
+	PuristaSpanTag,
+	StatusCode,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 import { Hono } from 'hono'
 import { compress } from 'hono/compress'
@@ -111,7 +111,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 			this.app.use('*', compress())
 		}
 
-		this.app.use('*', async (c, next) => {
+		this.app.use('*', async (_c, next) => {
 			if (this.isShuttingDown) {
 				const err = { message: 'shut down in progress', status: StatusCode.ServiceUnavailable }
 				return new Response(JSON.stringify(err), {

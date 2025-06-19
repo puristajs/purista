@@ -1,10 +1,9 @@
-import type { EBMessage } from '../core/types/EBMessage.js'
-import type { Logger } from '../core/types/Logger.js'
-
 import { isCommand } from '../core/types/commandType/isCommand.impl.js'
 import { isCommandResponse } from '../core/types/commandType/isCommandResponse.impl.js'
+import type { EBMessage } from '../core/types/EBMessage.js'
 import { isInfoMessage } from '../core/types/infoType/isInfoMessage.impl.js'
 import { isCustomMessage } from '../core/types/isCustomMessage.impl.js'
+import type { Logger } from '../core/types/Logger.js'
 
 import type { SubscriptionStorageEntry } from './types/SubscriptionStorageEntry.js'
 

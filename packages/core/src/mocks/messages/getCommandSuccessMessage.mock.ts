@@ -1,8 +1,7 @@
-import type { Command } from '../../core/types/commandType/Command.js'
-import type { CommandSuccessResponse } from '../../core/types/commandType/CommandSuccessResponse.js'
-
 import { createSuccessResponse } from '../../core/helper/createSuccessResponse.impl.js'
 import { getNewInstanceId } from '../../core/helper/getNewInstanceId.impl.js'
+import type { Command } from '../../core/types/commandType/Command.js'
+import type { CommandSuccessResponse } from '../../core/types/commandType/CommandSuccessResponse.js'
 
 import { getCommandMessageMock } from './getCommandMessage.mock.js'
 

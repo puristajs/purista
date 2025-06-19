@@ -1,6 +1,6 @@
 // file deepcode ignore ServerLeak: <please specify a reason of ignoring this>
 
-import { SpanKind, context, propagation } from '@opentelemetry/api'
+import { context, propagation, SpanKind } from '@opentelemetry/api'
 import {
 	ATTR_HTTP_REQUEST_METHOD,
 	ATTR_HTTP_RESPONSE_STATUS_CODE,
@@ -10,13 +10,13 @@ import {
 
 import type { CustomMessage, EBMessage, Subscription } from '@purista/core'
 import {
+	getTimeoutPromise,
 	HandledError,
 	PuristaSpanName,
 	StatusCode,
-	UnhandledError,
-	getTimeoutPromise,
 	serializeOtp,
 	throwIfNotValidMessage,
+	UnhandledError,
 } from '@purista/core'
 import { HTTP } from 'cloudevents'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
@@ -26,7 +26,7 @@ import type { RouterFunction } from './types/RouterFunction.js'
 
 export const getSubscriptionHandler = function (
 	this: IHttpEventBridge,
-	subscription: Subscription,
+	_subscription: Subscription,
 	cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
 	wrappedInCloudEvent = false,
 ): RouterFunction {
@@ -49,7 +49,7 @@ export const getSubscriptionHandler = function (
 					}
 
 					const headers = [...c.req.raw.headers.entries()].reduce((prev: Record<string, string>, val) => {
-						// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+						// biome-ignore lint/performance/noAccumulatingSpread: is ok here
 						return { ...prev, [val[0]]: val[1] }
 					}, {})
 
@@ -70,7 +70,7 @@ export const getSubscriptionHandler = function (
 						try {
 							message = await c.req.json()
 						} catch (error) {
-							throw new HandledError(StatusCode.BadRequest, 'payload must be a parsable json')
+							throw HandledError.fromError(error, StatusCode.BadRequest, 'payload must be a parsable json')
 						}
 					}
 

@@ -5,11 +5,7 @@ import { honoV1Service } from '@purista/hono-http-server'
 import { apiReference } from '@scalar/hono-api-reference'
 import httpConfig from './config/http.js'
 
-export const getHttpServer = async (input: {
-	eventBridge: EventBridge
-	logger: Logger
-	services: Service[]
-}) => {
+export const getHttpServer = async (input: { eventBridge: EventBridge; logger: Logger; services: Service[] }) => {
 	const honoService = await honoV1Service.getInstance(input.eventBridge, {
 		logger: input.logger,
 		serviceConfig: { ...httpConfig.serviceConfig, services: input.services },

@@ -24,7 +24,9 @@
 			}
 		}
 	},
-	"files": ["dist/**/*"],
+	"files": [
+		"dist/**/*"
+	],
 	"publishConfig": {
 		"access": "public"
 	},
@@ -39,22 +41,24 @@
 		"env:down": "docker compose -f docker-compose.yml down"
 	},
 	"tshy": {
-		"exclude": ["src/**/*.test.ts"],
+		"exclude": [
+			"src/**/*.test.ts"
+		],
 		"exports": {
 			"./package.json": "./package.json",
 			".": "./src/index.ts"
 		}
 	},
 	"devDependencies": {
-		"@types/node": "^22.15.3",
+		"@types/node": "^24.0.3",
 		"@types/sinon": "^17.0.4",
-		"sinon": "^20.0.0",
-		"testcontainers": "^10.24.2",
+		"sinon": "^21.0.0",
+		"testcontainers": "^11.0.3",
 		"tshy": "^3.0.2",
-		"vitest": "^3.1.2"
+		"vitest": "^3.2.4"
 	},
 	"dependencies": {
-		"@aws-sdk/client-secrets-manager": "^3.799.0",
+		"@aws-sdk/client-secrets-manager": "^3.830.0",
 		"@purista/core": "*"
 	},
 	"peerDependenciesMeta": {},

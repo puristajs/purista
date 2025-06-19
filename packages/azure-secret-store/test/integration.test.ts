@@ -20,7 +20,7 @@ describe.skip('Azure Secret Manager secret store', () => {
 
 		// temporary workaround as assumed-identity-nodejs does not work by setting AZURE_POD_IDENTITY_AUTHORITY_HOST
 		stub(DefaultAzureCredential.prototype, 'getToken').resolves({
-			expiresOnTimestamp: new Date().getTime() + 30000,
+			expiresOnTimestamp: Date.now() + 30000,
 			token: 'noop',
 		})
 
