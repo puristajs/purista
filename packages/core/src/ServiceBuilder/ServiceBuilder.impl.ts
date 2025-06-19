@@ -411,12 +411,12 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 
 	/**
 	 * Returns the service definition.
-	 * This inclues information about commands and subscriptions.
+	 * This includes information about commands and subscriptions.
 	 *
 	 * @returns
 	 */
-	async getFullServiceDefintion() {
-		const definitions = await this.resolveDefinitions()
+        async getFullServiceDefinition() {
+                const definitions = await this.resolveDefinitions()
 
 		return {
 			...this.info,

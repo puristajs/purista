@@ -7,7 +7,7 @@ import type TS from 'typescript'
 import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
 import { isHttpExposedServiceMeta } from '../core/HttpServer/types/isHttpExposedServiceMeta.impl.js'
 import { GenericEventEmitter } from '../core/types/GenericEventEmitter.js'
-import { mergeServiceDefintion } from '../helper/exportServiceDefinitions.js'
+import { mergeServiceDefinition } from '../helper/exportServiceDefinitions.js'
 import { convertToCamelCase } from '../helper/string/convertToCamelCase.impl.js'
 import type { FullDefinition } from '../helper/types/FullDefinition.js'
 import type { FullServiceDefinition } from '../helper/types/FullServiceDefinition.js'
@@ -105,8 +105,8 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 		const services: FullServiceDefinition = {}
 
 		for (const builder of serviceBuilders) {
-			const definition = await builder.getFullServiceDefintion()
-			mergeServiceDefintion(services, definition)
+                       const definition = await builder.getFullServiceDefinition()
+                       mergeServiceDefinition(services, definition)
 		}
 
 		return services
