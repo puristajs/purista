@@ -30,24 +30,24 @@
 	},
 	"workspaces": ["./packages/*", "./examples/*", "website"],
 	"devDependencies": {
-		"@biomejs/biome": "^1.9.4",
-		"@types/node": "^22.15.3",
+		"@biomejs/biome": "^2.0.0",
+		"@types/node": "^24.0.3",
 		"@types/sinon": "^17.0.4",
-		"@vitest/coverage-v8": "^3.1.2",
+		"@vitest/coverage-v8": "^3.2.4",
 		"check-dependency-version-consistency": "^5.0.0",
-		"git-cliff": "^2.8.0",
+		"git-cliff": "^2.9.1",
 		"npm-check-updates": "^18.0.1",
 		"rimraf": "^6.0.1",
-		"sinon": "^20.0.0",
-		"testcontainers": "^10.24.2",
+		"sinon": "^21.0.0",
+		"testcontainers": "^11.0.3",
 		"ts-node": "^10.9.2",
-		"tsx": "^4.19.4",
-		"typedoc": "^0.28.3",
-		"typedoc-plugin-markdown": "^4.6.3",
+		"tsx": "^4.20.3",
+		"typedoc": "^0.28.5",
+		"typedoc-plugin-markdown": "^4.6.4",
 		"typescript": "^5.8.3",
-		"vitest": "^3.1.2"
+		"vitest": "^3.2.4"
 	},
-	"packageManager": "npm@11.3.0",
+	"packageManager": "npm@11.4.2",
 	"dependencies": {
 		"npm": "^11.2.0"
 	}

@@ -44,15 +44,15 @@
 		}
 	},
 	"devDependencies": {
-		"@types/node": "^22.15.3",
+		"@types/node": "^24.0.3",
 		"@types/sinon": "^17.0.4",
-		"sinon": "^20.0.0",
+		"sinon": "^21.0.0",
 		"tshy": "^3.0.2",
-		"vitest": "^3.1.2"
+		"vitest": "^3.2.4"
 	},
 	"dependencies": {
 		"@purista/core": "*",
-		"@redis/client": "^1.6.0"
+		"@redis/client": "^5.5.6"
 	},
 	"peerDependenciesMeta": {},
 	"types": "./dist/commonjs/index.d.ts",
