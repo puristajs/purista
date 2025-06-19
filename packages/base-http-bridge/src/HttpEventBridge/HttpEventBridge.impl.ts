@@ -111,7 +111,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 			this.app.use('*', compress())
 		}
 
-		this.app.use('*', async (c, next) => {
+		this.app.use('*', async (_c, next) => {
 			if (this.isShuttingDown) {
 				const err = { message: 'shut down in progress', status: StatusCode.ServiceUnavailable }
 				return new Response(JSON.stringify(err), {

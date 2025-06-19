@@ -1,12 +1,10 @@
-import { useData, useRoute } from 'vitepress'
+import { useRoute } from 'vitepress'
 import type { Ref } from 'vue'
 import { computed, ref } from 'vue'
 import type { Post } from './posts.data.js'
 import { data } from './posts.data.js'
 
 export default () => {
-	const { site } = useData()
-
 	const allPosts: Ref<Post[]> = ref(data)
 
 	const route = useRoute()

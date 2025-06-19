@@ -26,7 +26,7 @@ import type { RouterFunction } from './types/RouterFunction.js'
 
 export const getSubscriptionHandler = function (
 	this: IHttpEventBridge,
-	subscription: Subscription,
+	_subscription: Subscription,
 	cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
 	wrappedInCloudEvent = false,
 ): RouterFunction {
@@ -49,7 +49,7 @@ export const getSubscriptionHandler = function (
 					}
 
 					const headers = [...c.req.raw.headers.entries()].reduce((prev: Record<string, string>, val) => {
-						// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+						// biome-ignore lint/performance/noAccumulatingSpread: is ok here
 						return { ...prev, [val[0]]: val[1] }
 					}, {})
 
@@ -70,7 +70,7 @@ export const getSubscriptionHandler = function (
 						try {
 							message = await c.req.json()
 						} catch (error) {
-							throw new HandledError(StatusCode.BadRequest, 'payload must be a parsable json')
+							throw HandledError.fromError(error, StatusCode.BadRequest, 'payload must be a parsable json')
 						}
 					}
 

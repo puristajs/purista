@@ -28,7 +28,11 @@
 		"deps:update": "ncu -ws --root -u",
 		"clean": "rimraf -g **/dist && rimraf -g **/coverage && rimraf -g **/.tshy && rimraf -g **/.tshy-build && rimraf -g **/**/node_modules"
 	},
-	"workspaces": ["./packages/*", "./examples/*", "website"],
+	"workspaces": [
+		"./packages/*",
+		"./examples/*",
+		"website"
+	],
 	"devDependencies": {
 		"@biomejs/biome": "^2.0.0",
 		"@types/node": "^24.0.3",

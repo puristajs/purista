@@ -32,7 +32,7 @@ import type { RouterFunction } from './types/RouterFunction.js'
 
 export const getCommandHandler = function (
 	this: IHttpEventBridge,
-	address: EBMessageAddress,
+	_address: EBMessageAddress,
 	cb: (
 		message: Command,
 	) => Promise<
@@ -67,7 +67,7 @@ export const getCommandHandler = function (
 					if (wrappedInCloudEvent) {
 						const body = await c.req.text()
 						const headers = [...c.req.raw.headers.entries()].reduce((prev: Record<string, string>, val) => {
-							// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+							// biome-ignore lint/performance/noAccumulatingSpread: ok here
 							return { ...prev, [val[0]]: val[1] }
 						}, {})
 
@@ -83,7 +83,7 @@ export const getCommandHandler = function (
 						try {
 							message = await c.req.json()
 						} catch (error) {
-							throw new HandledError(StatusCode.BadRequest, 'payload must be a parsable json')
+							throw HandledError.fromError(error, StatusCode.BadRequest, 'payload must be a parsable json')
 						}
 					}
 
