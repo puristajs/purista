@@ -7,9 +7,16 @@ import { DefaultLogger } from './DefaultLogger.impl.js'
 import { getDefaultLogLevel } from './getDefaultLogLevel.js'
 
 /**
- * Create a new logger with the given minimum log level
- * @param {LogLevelName | undefined} minLevel - The minimum level of log messages to display.
- * @param {LoggerOptions}
+ * Create a new logger instance using pino.
+ *
+ * @param minLevel - The minimum log level to use.
+ * @param opt - Optional pino configuration.
+ *
+ * @example
+ * ```ts
+ * const logger = initLogger('debug')
+ * logger.info('logger ready')
+ * ```
  */
 export const initLogger = (level: LogLevelName = getDefaultLogLevel(), opt?: LoggerOptions): Logger => {
 	return new DefaultLogger(

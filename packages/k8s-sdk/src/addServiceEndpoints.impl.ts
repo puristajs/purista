@@ -23,17 +23,26 @@ import type { Hono, Context as HonoContext } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 /**
+ * Add HTTP endpoints for all commands that expose HTTP metadata.
  *
- * @param services instance of the service to add
- * @param router the TRouter instance
- * @param logger the logger used for logging the addition
- * @param apiMountPath @default /api
- * @returns
+ * This helper registers the routes on the provided Hono application and
+ * connects them with the corresponding service commands.
+ *
+ * @param services - Instance or array of services whose commands should be exposed.
+ * @param app - The Hono application instance.
+ * @param logger - Logger used for debug output.
+ * @param apiMountPath - Base path for all generated endpoints. Defaults to `/api`.
+ *
+ * @example
+ * ```ts
+ * const app = new Hono()
+ * addServiceEndpoints(myService, app, logger)
+ * ```
  */
 export const addServiceEndpoints = (
-	services: Service | Service[] | undefined,
-	app: Hono,
-	logger: Logger,
+        services: Service | Service[] | undefined,
+        app: Hono,
+        logger: Logger,
 	apiMountPath = '/api',
 ) => {
 	if (!services) {
