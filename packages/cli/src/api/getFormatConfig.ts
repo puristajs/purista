@@ -25,10 +25,10 @@ export const getFormatConfig = async (projectPath: string) => {
 			...biomeConfig.javascript?.formatter,
 		}
 
-		codeWriterOptions.indentNumberOfSpaces = format.indentWidth || codeWriterOptions.indentNumberOfSpaces
-		if (format.indentStyle) {
-			codeWriterOptions.useTabs = biomeConfig.formatter.indentStyle === 'tab'
-		}
+                codeWriterOptions.indentNumberOfSpaces = format.indentWidth || codeWriterOptions.indentNumberOfSpaces
+                if (format.indentStyle) {
+                        codeWriterOptions.useTabs = format.indentStyle === 'tab'
+                }
 
 		codeWriterOptions.useSingleQuote = format.quoteStyle === 'double' ? false : codeWriterOptions.useSingleQuote
 
