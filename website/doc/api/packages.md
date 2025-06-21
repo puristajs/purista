@@ -25,3 +25,4 @@
 - [@purista/natsbridge - v2.1.0](@purista/natsbridge/README.md)
 - [@purista/redis-config-store - v2.1.0](@purista/redis-config-store/README.md)
 - [@purista/redis-state-store - v2.1.0](@purista/redis-state-store/README.md)
+- [@purista/vault-secret-store - v2.1.5](@purista/vault-secret-store/README.md)

@@ -35,7 +35,7 @@ Here you can see a list of all available stores.
 | [AWS Secrets Manager](https://aws.amazon.com/secrets-manager)             | [@purista/aws-secret-store](../../api/@purista/aws-secret-store/README.md)       |
 | [Azure Key Vault](https://azure.microsoft.com/en-us/products/key-vault)   | [@purista/azure-secret-store](../../api/@purista/azure-secret-store/README.md)      |
 | [Google Cloud Secret Manager](https://cloud.google.com/secret-manager)    | [@purista/gcloud-secret-store](../../api/@purista/gcloud-secret-store/README.md)     |
-| [HashiCorp Vault](https://www.vaultproject.io)                            | [planned](https://github.com/puristajs/purista/issues/109)      |
+| [HashiCorp Vault](https://www.vaultproject.io)                            | [@purista/vault-secret-store](../../api/@purista/vault-secret-store/README.md) |
 | [Dapr](https://dapr.io)       | [@purista/dapr-sdk](../5_deploy_and_scale/microservice_style/dapr.md) |
 | [Infisical](https://infisical.com)       | [@purista/infisical-secret-store](../../api/@purista/infisical-secret-store/README.md)|
 
