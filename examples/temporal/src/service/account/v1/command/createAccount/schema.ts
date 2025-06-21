@@ -1,5 +1,5 @@
 import { extendApi } from '@purista/core'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 // define the input parameters
 export const accountV1CreateAccountInputParameterSchema = extendApi(z.object({}), {

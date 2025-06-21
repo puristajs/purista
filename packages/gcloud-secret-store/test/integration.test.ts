@@ -1,9 +1,7 @@
 import { randomUUID } from 'node:crypto'
-
-import { getLoggerMock } from '@purista/core'
-
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getLoggerMock } from '@purista/core'
 import { GoogleSecretStore } from '../src/GoogleSecretStore.impl.js'
 
 describe('Google Secret Manager secret store', () => {

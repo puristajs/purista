@@ -1,5 +1,5 @@
 import { extendApi } from '@purista/core'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 // define the input parameters
 export const theServiceV1InvokeFooInputParameterSchema = extendApi(z.any(), {
@@ -7,7 +7,9 @@ export const theServiceV1InvokeFooInputParameterSchema = extendApi(z.any(), {
 })
 
 // define the input payload
-export const theServiceV1InvokeFooInputPayloadSchema = extendApi(z.any(), { title: 'ping input payload schema' })
+export const theServiceV1InvokeFooInputPayloadSchema = extendApi(z.any(), {
+	title: 'ping input payload schema',
+})
 
 // define the output payload
 export const theServiceV1InvokeFooOutputPayloadSchema = extendApi(

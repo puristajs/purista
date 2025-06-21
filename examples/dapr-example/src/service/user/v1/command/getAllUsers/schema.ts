@@ -1,5 +1,5 @@
 import { extendApi } from '@purista/core'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 // define the input parameters
 export const userV1GetAllUsersInputParameterSchema = extendApi(z.object({}), {
@@ -10,8 +10,14 @@ export const userV1GetAllUsersInputParameterSchema = extendApi(z.object({}), {
 export const userV1GetAllUsersInputPayloadSchema = z.undefined()
 
 export const userV1GetAllUsersUserEntrySchema = z.object({
-	userId: extendApi(z.string().uuid(), { title: 'the user id', example: 'a5fef052-911c-472c-ac25-e2da327f0af5' }),
-	email: extendApi(z.string().email(), { title: 'the email of the user to register', example: 'user@email.com' }),
+	userId: extendApi(z.string().uuid(), {
+		title: 'the user id',
+		example: 'a5fef052-911c-472c-ac25-e2da327f0af5',
+	}),
+	email: extendApi(z.string().email(), {
+		title: 'the email of the user to register',
+		example: 'user@email.com',
+	}),
 	name: extendApi(z.string().min(3), {
 		title: 'the name of the user to register',
 		example: 'User',

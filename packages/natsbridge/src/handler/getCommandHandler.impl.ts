@@ -9,15 +9,15 @@ import type {
 	EBMessageAddress,
 } from '@purista/core'
 import {
+	deserializeOtp,
 	EventBridgeEventNames,
+	isCommand,
+	isCommandErrorResponse,
 	PuristaSpanName,
 	PuristaSpanTag,
 	StatusCode,
-	UnhandledError,
-	deserializeOtp,
-	isCommand,
-	isCommandErrorResponse,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 import type { MsgHdrs } from 'nats'
 import { headers as getNewHeaders } from 'nats'

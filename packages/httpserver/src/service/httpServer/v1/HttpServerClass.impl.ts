@@ -3,13 +3,12 @@ import { posix } from 'node:path'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import fastifyStatic from '@fastify/static'
-import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
 import * as api from '@opentelemetry/api'
-import { ATTR_SERVER_ADDRESS } from '@opentelemetry/semantic-conventions'
-
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
 	ATTR_HTTP_REQUEST_METHOD,
 	ATTR_HTTP_RESPONSE_STATUS_CODE,
+	ATTR_SERVER_ADDRESS,
 	ATTR_URL_FULL,
 } from '@opentelemetry/semantic-conventions'
 
@@ -20,7 +19,7 @@ import type {
 	ServiceClassTypes,
 	ServiceConstructorInput,
 } from '@purista/core'
-import { HandledError, Service, StatusCode, UnhandledError, safeBind } from '@purista/core'
+import { HandledError, Service, StatusCode, safeBind, UnhandledError } from '@purista/core'
 import type { FastifyInstance, HTTPMethods } from 'fastify'
 import fastify from 'fastify'
 import * as swaggerUi from 'swagger-ui-dist'

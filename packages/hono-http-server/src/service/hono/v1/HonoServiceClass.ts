@@ -1,6 +1,6 @@
 import { posix } from 'node:path'
 
-import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
 	ATTR_HTTP_REQUEST_METHOD,
 	ATTR_HTTP_RESPONSE_STATUS_CODE,
@@ -15,7 +15,7 @@ import type {
 	ServiceClassTypes,
 	ServiceConstructorInput,
 } from '@purista/core'
-import { HandledError, Service, StatusCode, UnhandledError, isHttpExposedServiceMeta, safeBind } from '@purista/core'
+import { HandledError, isHttpExposedServiceMeta, Service, StatusCode, safeBind, UnhandledError } from '@purista/core'
 import type { Handler } from 'hono'
 import { Hono } from 'hono'
 import { HTTPException } from 'hono/http-exception'
@@ -25,10 +25,9 @@ import { OpenApiBuilder } from 'openapi3-ts/oas31'
 
 import { addPathToOpenApi } from '../../../helper/addPathToOpenApi.js'
 import type { BindingsBase } from '../../../types/BindingsBase.js'
+import type { EndpointProtectMiddleware } from '../../../types/EndpointProtectMiddleware.js'
 import type { HealthFunction } from '../../../types/HealthFunction.js'
 import type { VariablesBase } from '../../../types/VariablesBase.js'
-
-import type { EndpointProtectMiddleware } from '../../../types/EndpointProtectMiddleware.js'
 import type { HonoServiceV1Config } from './honoServiceConfig.js'
 
 /**

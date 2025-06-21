@@ -1,4 +1,4 @@
-import { type Schema as ValidationSchema, toJSONSchema } from '@typeschema/main'
+import { toJSONSchema, type Schema as ValidationSchema } from '@typeschema/main'
 import type { SchemaObject } from 'openapi3-ts/oas31'
 
 import type { FromInvokeToOtherType } from '../core/types/FromInvokeToOtherType.js'

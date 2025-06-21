@@ -13,7 +13,7 @@ Defined in: [packages/core/src/helper/exportServiceDefinitions.ts:75](https://gi
 Exports the service definitions.
 Includes the information about commands and subscriptions.
 
-The output can be saves as JSON string in a file.
+The output can be saved as JSON string in a file.
 
 ## Parameters
 

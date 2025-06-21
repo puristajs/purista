@@ -15,24 +15,24 @@ import type {
 	Subscription,
 } from '@purista/core'
 import {
+	createInfoMessage,
+	deserializeOtp,
 	EBMessageType,
 	EventBridgeBaseClass,
 	EventBridgeEventNames,
-	HandledError,
-	PuristaSpanName,
-	PuristaSpanTag,
-	StatusCode,
-	UnhandledError,
-	createInfoMessage,
-	deserializeOtp,
 	getCleanedMessage,
 	getNewCorrelationId,
 	getNewEBMessageId,
+	HandledError,
 	isCommandErrorResponse,
 	isCommandResponse,
 	isCommandSuccessResponse,
 	isInfoMessage,
+	PuristaSpanName,
+	PuristaSpanTag,
+	StatusCode,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 import type { Channel, ChannelModel } from 'amqplib'
 import amqplib from 'amqplib'

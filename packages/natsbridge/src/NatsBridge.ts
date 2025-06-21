@@ -16,24 +16,24 @@ import type {
 	Subscription,
 } from '@purista/core'
 import {
+	createInfoMessage,
+	deserializeOtp,
 	EBMessageType,
 	EventBridgeBaseClass,
 	EventBridgeEventNames,
+	getNewCorrelationId,
+	getNewEBMessageId,
 	HandledError,
+	isCommandResponse,
+	isCommandSuccessResponse,
 	PuristaSpanName,
 	PuristaSpanTag,
 	StatusCode,
-	UnhandledError,
-	createInfoMessage,
-	deserializeOtp,
-	getNewCorrelationId,
-	getNewEBMessageId,
-	isCommandResponse,
-	isCommandSuccessResponse,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 import type { JetStreamManager, MsgHdrs, NatsConnection, Subscription as NatsSubscription } from 'nats'
-import { JSONCodec, connect, headers as getNewHeaders } from 'nats'
+import { connect, headers as getNewHeaders, JSONCodec } from 'nats'
 
 import { deserializeOtpFromNats } from './deserializeOtpFromNats.impl.js'
 import { getDefaultNatsBridgeConfig } from './getDefaultNatsBridgeConfig.js'

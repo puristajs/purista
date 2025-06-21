@@ -1,7 +1,7 @@
 import { writeFileSync } from 'node:fs'
 import path from 'node:path'
 import { Feed } from 'feed'
-import { type HeadConfig, type SiteConfig, createContentLoader, defineConfig } from 'vitepress'
+import { createContentLoader, defineConfig, type HeadConfig, type SiteConfig } from 'vitepress'
 import { generateSidebar } from 'vitepress-sidebar'
 
 const hostname: string = 'https://purista.dev'
