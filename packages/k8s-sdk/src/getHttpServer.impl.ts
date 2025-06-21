@@ -8,15 +8,20 @@ import type { GetHttpServerConfig } from './types.js'
 import { puristaVersion } from './version.js'
 
 /**
- * Create a Hono web server.
- * It adds per default the /healthz endpoint
- * If services is set in options, all commands, which have defined http endpoints, will also be added as endpoints
+ * Create a Hono based web server.
  *
- * The returned server is not started. You need to do it manually.
- 
+ * The server exposes a `/healthz` endpoint and, if configured, adds all HTTP
+ * enabled command routes from the given services.
+ * The returned `Hono` instance is not started automatically.
  *
- * @param input the config
- * @returns a object with server, router, start and destroy functions and name var
+ * @param input - Server configuration.
+ * @returns The configured `Hono` application instance.
+ *
+ * @example
+ * ```ts
+ * const app = getHttpServer({ logger, services: [svc], healthFn: async () => true })
+ * serve({ fetch: app.fetch, port: 3000 })
+ * ```
  */
 export const getHttpServer = (input: GetHttpServerConfig, name = 'K8sHttpHelperServer') => {
 	const { healthFn, services, hostname, apiMountPath } = input
