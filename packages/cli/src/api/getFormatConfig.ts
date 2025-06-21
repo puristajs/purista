@@ -27,7 +27,7 @@ export const getFormatConfig = async (projectPath: string) => {
 
 		codeWriterOptions.indentNumberOfSpaces = format.indentWidth || codeWriterOptions.indentNumberOfSpaces
 		if (format.indentStyle) {
-			codeWriterOptions.useTabs = biomeConfig.formatter.indentStyle === 'tab'
+			codeWriterOptions.useTabs = format.indentStyle === 'tab'
 		}
 
 		codeWriterOptions.useSingleQuote = format.quoteStyle === 'double' ? false : codeWriterOptions.useSingleQuote
