@@ -8,7 +8,7 @@ order: 400000
 
 PURISTA has build in support for [OpenTelemetry](https://opentelemetry.io/) and it is deeply integrated into the framework.
 
-This means, there is a industrial standard way of tracking and metrics out of the box. This not only allows you to use nice third party applications for analysing and alerting.
+This means, there is a industrial standard way of tracking and metrics out of the box. This not only allows you to use nice third party applications for analyzing and alerting.
 It means also a huge benefit, when it comes to integration. This enables you, to trace and collect metrics across your whole setup and not to be restricted only to the PURISTA part.
 
 ## Tracing
@@ -41,6 +41,6 @@ For handling the technical metric values, PURISTA tries to provide simple, first
 
 ### Business metric values
 
-When it comes to business metrics, things become quite challenging, because this highly depends on your business, your metrics you like to collect and the third party solution you like to use to analyse business metrics.
+When it comes to business metrics, things become quite challenging, because this highly depends on your business, your metrics you like to collect and the third party solution you like to use to analyze business metrics.
 This means, there can't be a out-of-the-box soulition for you needs.
 But PURISTA can help you, to quickly aggregate values you need, because of its core concept.

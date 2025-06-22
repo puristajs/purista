@@ -31,7 +31,7 @@ A simplified schema of how the `DefaultEventBridge` works:
 ::: warning Cons
 
 - does not scale
-- no persistance of messages
+- no persistence of messages
 - no retry mechanism for messages
 :::
 

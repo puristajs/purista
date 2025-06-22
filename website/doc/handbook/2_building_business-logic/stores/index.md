@@ -1,6 +1,6 @@
 ---
 title: Stores
-description: Config stores, state stores and secret stores in PURISTA typescript framwork
+description: Config stores, state stores and secret stores in PURISTA typescript framework
 order: 206000
 ---
 

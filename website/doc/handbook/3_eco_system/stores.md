@@ -1,6 +1,6 @@
 ---
 title: Stores
-description: Use the right event bridge for PURISTA typescript framwork
+description: Use the right event bridge for PURISTA typescript framework
 order: 302000
 ---
 

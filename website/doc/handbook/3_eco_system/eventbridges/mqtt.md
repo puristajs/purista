@@ -17,7 +17,7 @@ PURISTA provides the `@purista/mqttbridge`
 ::: tip Pros
 
 - allows scaling
-- fault tollerant
+- fault tolerant
 - MQTT is a mature protocol and widely used (IoT/edge)
 :::
 

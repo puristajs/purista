@@ -14,7 +14,7 @@ There is a need to define services, attach functions and subscriptions. And each
 One simple option would be, to have some code generators. This is a solid concept, and very often used in frameworks. But it has some disadvantages. You get some bootstrap code, and align, extent, and change the generated code. You will also need some more or less fixed folder structure, which reduces the freedom of developers.
 
 While code generation in general is a great tool, they are not the best choice for our needs here.
-PURISTA tries to be decoupled from the underlaying system and infrastructure. So, we might need a way to convert our settings into a specific architecture, for a specific infrastructure or cloud provider. This conversion might be on the fly. So we will need to access and interpret the setup programmatically. Also, we want to avoid manual configurations and manual steps as much as possible. They are time-consuming and error-prone.
+PURISTA tries to be decoupled from the underlying system and infrastructure. So, we might need a way to convert our settings into a specific architecture, for a specific infrastructure or cloud provider. This conversion might be on the fly. So we will need to access and interpret the setup programmatically. Also, we want to avoid manual configurations and manual steps as much as possible. They are time-consuming and error-prone.
 
 ## Cascading
 
