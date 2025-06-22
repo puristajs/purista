@@ -121,7 +121,7 @@ A command function
 #### Message
 
 The command function context will contain the original message.  
-This is usefull, if you like to access message information like `principalId`or `tenantId`.
+This is useful, if you like to access message information like `principalId`or `tenantId`.
 
 #### Logger
 

@@ -1,6 +1,6 @@
 ---
 title: REST API client
-description: Export the service defintions to share them and to use them for building connectors or visualizations
+description: Export the service definitions to share them and to use them for building connectors or visualizations
 order: 210020
 ---
 
@@ -37,7 +37,7 @@ const config = config = {
 const clientBuilder = new ClientBuilder(config)
 
 // generate the source files
-await clientBuilder.generateHttpClient(defnitions)
+await clientBuilder.generateHttpClient(definitions)
 
 // cleanup the builder and remove event listeners
 clientBuilder.destroy()
@@ -66,7 +66,7 @@ clientBuilder.on('success', (...args) => console.info(...args)) // [!code ++]
 clientBuilder.on('start', (...args) => console.log(...args)) // [!code ++]
 
 // generate the source files
-await clientBuilder.generateHttpClient(defnitions)
+await clientBuilder.generateHttpClient(definitions)
 
 // cleanup the builder and remove event listeners
 clientBuilder.destroy()
@@ -162,13 +162,13 @@ const generate = async ()=> {
 
   try {
     // load the definitions from exported json files
-    const defnitions = await clientBuilder.loadDefinitionFiles()
+    const definitions = await clientBuilder.loadDefinitionFiles()
 
     // clear the output folder
     await clientBuilder.cleanDistFolder()
 
     // generate the source files
-    await clientBuilder.generateHttpClient(defnitions)
+    await clientBuilder.generateHttpClient(definitions)
 
     // add a index.ts with exports to the source files
     await clientBuilder.createIndex()
@@ -220,11 +220,11 @@ import { fooV1Service } from './backend/src/service/foo/v1/index.js' // [!code +
 import { barV1Service } from './backend/src/service/bar/v1/index.js' // [!code ++]
 // ....
 // load the definitions from exported json files // [!code --]
-const defnitions = await clientBuilder.loadDefinitionFiles() // [!code --]
+const definitions = await clientBuilder.loadDefinitionFiles() // [!code --]
 
 // use definitions from imported service builders // [!code ++]
 const serviceBuilders = [pingV1Service, fooV1Service, barV1Service] // [!code ++]
-const defnitions = await clientBuilder.getDefinitionsFromServiceBuilders(serviceBuilders)
+const definitions = await clientBuilder.getDefinitionsFromServiceBuilders(serviceBuilders)
  // [!code ++]
 // ....
 ```

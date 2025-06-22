@@ -1,6 +1,6 @@
 ---
 title: Export service definitions
-description: Export the service defintions to share them and to use them for building connectors or visualizations
+description: Export the service definitions to share them and to use them for building connectors or visualizations
 order: 210010
 ---
 
@@ -26,7 +26,7 @@ const exportDefinitions = async () => {
 
   const definitions = await exportServiceDefinitions(serviceBuilders)
 
-  await writeFile(join(process.cwd(), 'defintions.json'), JSON.stringify(definitions, null ,2))
+  await writeFile(join(process.cwd(), 'definitions.json'), JSON.stringify(definitions, null ,2))
 }
 
 exportDefinitions()

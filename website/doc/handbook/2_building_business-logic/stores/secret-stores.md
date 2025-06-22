@@ -1,6 +1,6 @@
 ---
 title: Secret Stores
-description: Secret stores in PURISTA typescript framwork
+description: Secret stores in PURISTA typescript framework
 order: 206020
 ---
 

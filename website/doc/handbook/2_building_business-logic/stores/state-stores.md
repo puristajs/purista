@@ -1,6 +1,6 @@
 ---
 title: State Stores
-description: State stores in PURISTA typescript framwork
+description: State stores in PURISTA typescript framework
 order: 206030
 ---
 

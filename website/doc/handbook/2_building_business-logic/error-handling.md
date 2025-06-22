@@ -19,7 +19,7 @@ PURISTA has deeply integrated support for [OpenTelemetry](https://opentelemetry.
 This provides an industrial standard way to keep track of errors and issues.
 See [Logging](./logging.md) and [Tracing](../4_open_telemetry/) section.
 
-Errors are automatically added to the OpeneTelemetry trace.
+Errors are automatically added to the OpenTelemetry trace.
 
 There are two error types provided by PURISTA - `HandledError` and `UnhandledError`.
 Both types are logged automatically as soon as they get thrown.
@@ -204,9 +204,9 @@ If a subscription throws some error - other than a `HandledError`, it is automat
 
 In general, there are three different options available, to track errors in PURISTA.
 
-### Open Telemetry and logging
+### OpenTelemetry and logging
 
-The default and recommended way to track errors in a PURISTA based application is, to use the OpeneTelementry possibilities.
+The default and recommended way to track errors in a PURISTA based application is, to use the OpenTelemetry possibilities.
 
 ### Tracking of javascript events
 
