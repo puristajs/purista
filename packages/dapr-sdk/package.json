@@ -52,7 +52,7 @@
 		"@hono/node-server": "^1.14.1",
 		"@types/node": "^22.15.3",
 		"@types/sinon": "^17.0.4",
-		"hono": "^4.7.8",
+		"hono": "^4.9.7",
 		"sinon": "^20.0.0",
 		"tshy": "^3.0.2",
 		"vitest": "^3.1.2"
