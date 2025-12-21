@@ -48,12 +48,12 @@
 		}
 	},
 	"devDependencies": {
-		"@testcontainers/nats": "^11.0.3",
-		"@types/node": "^24.0.3",
-		"@types/sinon": "^17.0.4",
-		"sinon": "^21.0.0",
-		"tshy": "^3.0.2",
-		"vitest": "^3.2.4"
+		"@testcontainers/nats": "^11.10.0",
+		"@types/node": "^25.0.3",
+		"@types/sinon": "^21.0.0",
+		"sinon": "^21.0.1",
+		"tshy": "^3.1.0",
+		"vitest": "^4.0.16"
 	},
 	"dependencies": {
 		"@purista/core": "*",

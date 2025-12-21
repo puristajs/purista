@@ -34,24 +34,24 @@
 		"website"
 	],
 	"devDependencies": {
-		"@biomejs/biome": "^2.0.0",
-		"@types/node": "^24.0.3",
-		"@types/sinon": "^17.0.4",
-		"@vitest/coverage-v8": "^3.2.4",
-		"check-dependency-version-consistency": "^5.0.0",
-		"git-cliff": "^2.9.1",
-		"npm-check-updates": "^18.0.1",
-		"rimraf": "^6.0.1",
-		"sinon": "^21.0.0",
-		"testcontainers": "^11.0.3",
+		"@biomejs/biome": "^2.3.10",
+		"@types/node": "^25.0.3",
+		"@types/sinon": "^21.0.0",
+		"@vitest/coverage-v8": "^4.0.16",
+		"check-dependency-version-consistency": "^5.0.1",
+		"git-cliff": "^2.11.0",
+		"npm-check-updates": "^19.2.0",
+		"rimraf": "^6.1.2",
+		"sinon": "^21.0.1",
+		"testcontainers": "^11.10.0",
 		"ts-node": "^10.9.2",
-		"tsx": "^4.20.3",
-		"typedoc": "^0.28.5",
-		"typedoc-plugin-markdown": "^4.6.4",
-		"typescript": "^5.8.3",
-		"vitest": "^3.2.4"
+		"tsx": "^4.21.0",
+		"typedoc": "^0.28.15",
+		"typedoc-plugin-markdown": "^4.9.0",
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.16"
 	},
-	"packageManager": "npm@11.4.2",
+	"packageManager": "npm@11.7.0",
 	"dependencies": {
 		"npm": "^11.2.0"
 	}
