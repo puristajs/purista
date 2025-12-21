@@ -5,7 +5,7 @@ import { defaultResource, resourceFromAttributes } from '@opentelemetry/resource
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { NodeTracerProvider } from '@opentelemetry/sdk-trace-node'
 import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic-conventions'
-import type { Schema } from '@typeschema/main'
+import type { Schema } from '../../../schema/index.js'
 import { puristaVersion } from '../../../version.js'
 import type { ConfigStore } from '../../ConfigStore/types/ConfigStore.js'
 import type { EventBridge } from '../../EventBridge/types/EventBridge.js'

@@ -87,10 +87,11 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
 				const con = propagation.extract(context.active(), request.headers)
 				await this.startActiveSpan('errorHandler', { kind: SpanKind.SERVER }, con, async span => {
 					addSpanTags(span, request)
-					span.recordException(err)
+					const exception = err instanceof Error ? err : new Error(String(err))
+					span.recordException(exception)
 					span.setStatus({
 						code: SpanStatusCode.ERROR,
-						message: err.message,
+						message: exception.message,
 					})
 
 					addHeaders(span, reply)

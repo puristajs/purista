@@ -1,5 +1,5 @@
 import { SpanStatusCode } from '@opentelemetry/api'
-import { validate } from '@typeschema/main'
+import { validate } from '../../schema/index.js'
 
 import { HandledError } from '../Error/HandledError.impl.js'
 import { UnhandledError } from '../Error/UnhandledError.impl.js'

@@ -1,25 +1,32 @@
-import type { Service } from '@purista/core'
-import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock } from '@purista/core'
+import type { Service, ServiceInfoType } from '@purista/core'
+import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock, ServiceBuilder } from '@purista/core'
 import type { StartedNatsContainer } from '@testcontainers/nats'
 import { NatsContainer } from '@testcontainers/nats'
 import { createSandbox } from 'sinon'
 import { z } from 'zod/v4'
 
-import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1/index.js'
 import { NatsBridge } from '../src/index.js'
 
 const EXAMPLE_EVENT = 'exampleEvent'
+const natsTestsEnabled = ['1', 'true'].includes(process.env.PURISTA_NATSBRIDGE_TESTS ?? '')
+const describeWithNats = natsTestsEnabled ? describe : describe.skip
+const serviceInfo = {
+	serviceName: 'TheService',
+	serviceVersion: '1',
+	serviceDescription: 'test service',
+} as const satisfies ServiceInfoType
 
-describe('@purista/natsbridge', () => {
+describeWithNats('@purista/natsbridge', () => {
 	let container: StartedNatsContainer
 	let eventbridge: NatsBridge
 	const sandbox = createSandbox()
 	const subscriptionStub = sandbox.stub().resolves()
 	const logger = getLoggerMock(sandbox)
 	let service: Service
+	const serviceConfigSchema = z.object({}).default({})
 
 	beforeAll(async () => {
-		container = await new NatsContainer('nats:alpine').start()
+		container = await new NatsContainer('nats:alpine').withStartupTimeout(30000).start()
 
 		eventbridge = new NatsBridge({
 			logger: logger.mock,
@@ -27,23 +34,37 @@ describe('@purista/natsbridge', () => {
 		})
 		await eventbridge.start()
 
-		const subscriptionBuilder = theServiceV1Service
+		const serviceBuilder = new ServiceBuilder(serviceInfo).setConfigSchema(serviceConfigSchema)
+		const pingCommandBuilder = serviceBuilder
+			.getCommandBuilder('ping', 'provide a dummy command')
+			.addPayloadSchema(z.any().optional())
+			.addParameterSchema(z.object({ required: z.string() }))
+			.addOutputSchema(z.object({ ping: z.boolean() }))
+			.setCommandFunction(async function () {
+				return {
+					ping: true,
+				}
+			})
+
+		serviceBuilder.addCommandDefinition(pingCommandBuilder.getDefinition())
+
+		const subscriptionBuilder = serviceBuilder
 			.getSubscriptionBuilder('sendWelcomeEmail', 'send a welcome mail to new registered users')
 			.subscribeToEvent(EXAMPLE_EVENT)
 			.addPayloadSchema(z.any())
 			.setSubscriptionFunction(subscriptionStub)
 
-		theServiceServiceBuilder.addSubscriptionDefinition(subscriptionBuilder.getDefinition())
+		serviceBuilder.addSubscriptionDefinition(subscriptionBuilder.getDefinition())
 
-		service = await theServiceServiceBuilder.getInstance(eventbridge, {
+		service = await serviceBuilder.getInstance(eventbridge, {
 			logger: getLoggerMock(sandbox).mock,
 		})
 		await service.start()
-	})
+	}, 30000)
 
 	afterAll(async () => {
-		await service.destroy()
-		await eventbridge.destroy()
+		await service?.destroy()
+		await eventbridge?.destroy()
 		await container?.stop()
 	})
 

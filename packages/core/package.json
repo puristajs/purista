@@ -35,10 +35,8 @@
 		}
 	},
 	"devDependencies": {
-		"@sodaru/yup-to-json-schema": "^2.0.1",
 		"@types/node": "^25.0.3",
 		"@types/sinon": "^21.0.0",
-		"@typeschema/yup": "^0.14.0",
 		"rimraf": "^6.1.2",
 		"tshy": "^3.1.0",
 		"vitest": "^4.0.16",
@@ -49,14 +47,14 @@
 		"@opentelemetry/resources": "^2.2.0",
 		"@opentelemetry/sdk-trace-node": "^2.2.0",
 		"@opentelemetry/semantic-conventions": "^1.38.0",
-		"@typeschema/main": "^0.14.1",
-		"@typeschema/zod": "^0.14.0",
+		"@sodaru/yup-to-json-schema": "^2.0.1",
+		"@standard-schema/spec": "^1.1.0",
 		"code-block-writer": "^13.0.3",
 		"openapi3-ts": "^4.5.0",
 		"pino": "^10.1.0",
 		"sinon": "^21.0.1",
 		"ts-deepmerge": "^7.0.3",
-		"zod": "^3.25.76",
+		"zod": "^4.2.1",
 		"zod-to-json-schema": "^3.25.0"
 	},
 	"exports": {

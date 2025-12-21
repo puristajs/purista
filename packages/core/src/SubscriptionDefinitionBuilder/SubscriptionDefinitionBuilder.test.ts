@@ -57,7 +57,8 @@ describe('SubscriptionDefinitionBuilder', () => {
 		.addPayloadSchema(functionPayloadSchema)
 		.addParameterSchema(functionParameterSchema)
 		.addOutputSchema('subscriptionEndEmitted', functionOutputSchema)
-		.setTransformInput(transformPayloadSchema, transformParameterSchema, async (_context, payload, parameter) => {
+		.setTransformInput(transformPayloadSchema, transformParameterSchema, async function (context, payload, parameter) {
+			void context
 			expect(typeof payload).toBe('string')
 			expect(typeof parameter).toBe('string')
 
@@ -75,7 +76,9 @@ describe('SubscriptionDefinitionBuilder', () => {
 				parameter: param,
 			}
 		})
-		.setTransformOutput(transformOutputSchema, async (_context, payload, _parameter) => {
+		.setTransformOutput(transformOutputSchema, async function (context, payload, parameter) {
+			void context
+			void parameter
 			const p: Readonly<{
 				result: {
 					payload: {
@@ -94,7 +97,8 @@ describe('SubscriptionDefinitionBuilder', () => {
 			return JSON.stringify(p)
 		})
 		.setBeforeGuardHooks({
-			beforeOne: async (_context, payload, parameter) => {
+			beforeOne: async function (context, payload, parameter) {
+				void context
 				const pay: {
 					foo: string
 					bar: number
@@ -110,7 +114,8 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 		.setAfterGuardHooks({
-			afterOne: async (_context, fnOutputPayload, input, parameter) => {
+			afterOne: async function (context, fnOutputPayload, input, parameter) {
+				void context
 				const pay: {
 					foo: string
 					bar: number
@@ -151,7 +156,7 @@ describe('SubscriptionDefinitionBuilder', () => {
 			functionParameterSchema,
 		)
 		.canEmit('some', z.object({ example: z.string() }))
-		.setSubscriptionFunction(async (context, payload, parameter) => {
+		.setSubscriptionFunction(async function (context, payload, parameter) {
 			const result = await context.service.OtherService[2].testSubscription(payload, parameter)
 
 			context.emit('some', { example: 'test' })
@@ -293,7 +298,8 @@ describe('SubscriptionDefinitionBuilder', () => {
 	it('works with without schema', async () => {
 		const b = new SubscriptionDefinitionBuilder('testCommand', 'a unit test command')
 
-		b.setSubscriptionFunction(async (context, payload, parameter) => {
+		b.setSubscriptionFunction(async function (context, payload, parameter) {
+			void context
 			return { payload, parameter }
 		})
 

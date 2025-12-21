@@ -14,6 +14,10 @@ export const pingCommandBuilder = pingPongV1ServiceBuilder
 	.addOutputSchema(pingPongV1PingOutputPayloadSchema)
 	.exposeAsHttpEndpoint('GET', 'ping')
 	.makeEndpointPublic()
-	.setCommandFunction(async function (_context, _payload, _parameter) {
+	// biome-ignore lint/complexity/useArrowFunction: service command functions rely on dynamic `this` binding.
+	.setCommandFunction(async function (context, payload, parameter) {
+		void context
+		void payload
+		void parameter
 		return 'PING!'
 	})

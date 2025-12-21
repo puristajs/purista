@@ -32,6 +32,7 @@ export const getCommandHandler = (
 	_metadata: CommandDefinitionMetadataBase,
 	_eventBridgeConfig: DefinitionEventBridgeConfig,
 ) => {
+	void address
 	const handleCommand: IncomingMessageFunction = async function (command: EBMessage, packet) {
 		const context = deserializeOtpFromMqtt(this.logger, command, packet.properties?.userProperties)
 		return this.startActiveSpan(

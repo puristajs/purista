@@ -9,6 +9,16 @@ let TEST_DIR = join(process.cwd(), 'tmp-test')
 beforeEach(() => {
 	//rmSync(TEST_DIR, { recursive: true, force: true }) // Clean up previous runs
 	TEST_DIR = mkdtempSync('purista-cli-integration')
+	writeFileSync(
+		join(TEST_DIR, 'tsconfig.json'),
+		JSON.stringify({
+			compilerOptions: {
+				target: 'ES2022',
+				module: 'ES2022',
+			},
+			include: ['**/*.ts'],
+		}),
+	)
 })
 
 afterEach(() => {
@@ -31,6 +41,7 @@ describe('ensureServiceEvent - Integration Test', () => {
 		// Call the function to add a new event
 		await ensureServiceEvent({
 			eventName: 'OrderPlaced',
+			projectRootPath: TEST_DIR,
 			puristaProjectConfig: { servicePath: TEST_DIR, eventConvention: 'dotCase' } as any,
 			puristaProject: { eventEnumFileName: 'events.ts' } as any,
 		})
@@ -57,6 +68,7 @@ describe('ensureServiceEvent - Integration Test', () => {
 		// Call the function to add a new event
 		await ensureServiceEvent({
 			eventName: 'OrderPlaced',
+			projectRootPath: TEST_DIR,
 			puristaProjectConfig: { servicePath: TEST_DIR, eventConvention: 'dotCase' } as any,
 			puristaProject: { eventEnumFileName: 'events.ts' } as any,
 			description: 'Triggered when an order is placed',
@@ -86,6 +98,7 @@ describe('ensureServiceEvent - Integration Test', () => {
 		// Call the function to add the same event
 		await ensureServiceEvent({
 			eventName: 'OrderPlaced',
+			projectRootPath: TEST_DIR,
 			puristaProjectConfig: { servicePath: TEST_DIR, eventConvention: 'dotCase' } as any,
 			puristaProject: { eventEnumFileName: 'events.ts' } as any,
 		})
@@ -112,6 +125,7 @@ describe('ensureServiceEvent - Integration Test', () => {
 		await expect(
 			ensureServiceEvent({
 				eventName: 'NewEvent',
+				projectRootPath: TEST_DIR,
 				puristaProjectConfig: { servicePath: TEST_DIR, eventConvention: 'dotCase' } as any,
 				puristaProject: { eventEnumFileName: 'events.ts' } as any,
 			}),

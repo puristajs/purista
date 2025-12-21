@@ -35,6 +35,6 @@
 		"@purista/core": "*",
 		"@purista/httpserver": "*",
 		"@purista/mqttbridge": "*",
-		"zod": "^3.25.76"
+		"zod": "^4.2.1"
 	}
 }

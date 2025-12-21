@@ -1,10 +1,9 @@
 import { SpanStatusCode, trace } from '@opentelemetry/api'
-import type { Infer, Schema } from '@typeschema/main'
-import { validate } from '@typeschema/main'
-
 import { DefaultConfigStore } from '../../DefaultConfigStore/DefaultConfigStore.impl.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/DefaultSecretStore.impl.js'
 import { DefaultStateStore } from '../../DefaultStateStore/DefaultStateStore.impl.js'
+import type { Infer, Schema } from '../../schema/index.js'
+import { validate } from '../../schema/index.js'
 import { puristaVersion } from '../../version.js'
 import type { ConfigDeleteFunction } from '../ConfigStore/types/ConfigDeleteFunction.js'
 import type { ConfigGetterFunction } from '../ConfigStore/types/ConfigGetterFunction.js'

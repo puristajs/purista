@@ -68,7 +68,7 @@ export const addPathToOpenApi = (
 
 	const errResponses = errArray.reduce((prev, code) => {
 		return {
-			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction
 			...prev,
 			[`${code}`]: {
 				description: getErrorName(code),

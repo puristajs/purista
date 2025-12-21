@@ -1,13 +1,12 @@
-import type { Schema } from '@typeschema/main'
 import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
-
 import type { EBMessage } from '../core/types/EBMessage.js'
 import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
 import type { FromInvokeToOtherType } from '../core/types/FromInvokeToOtherType.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
 import type { SubscriptionFunctionContext } from '../core/types/subscription/SubscriptionFunctionContext.js'
+import type { Schema } from '../schema/index.js'
 import { getLoggerMock } from './getLogger.mock.js'
 
 /**
@@ -115,7 +114,8 @@ export const getSubscriptionContextMock = <
 	const resourcesProxy = new Proxy(
 		{},
 		{
-			get(obj: Record<string, any>, name) {
+			get(target: Record<string, any>, name) {
+				void target
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
 					throw new Error('Invalid property access on resources proxy')
 				}
@@ -132,7 +132,7 @@ export const getSubscriptionContextMock = <
 
 	const eventList = Object.keys(input.emitList ?? {}).reduce((prev, current) => {
 		return {
-			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction in test helper
 			...prev,
 			[current]: input.sandbox?.stub() ?? stub().resolves(),
 		}
@@ -163,8 +163,17 @@ export const getSubscriptionContextMock = <
 		emit: async <K extends keyof EmitList, Payload = EmitList[K]>(eventName: K, payload: Payload) => {
 			return eventList[eventName](eventName, payload)
 		},
-		wrapInSpan: stubs.wrapInSpan.callsFake((_name, _opts, fn) => fn(getMockSpan())),
-		startActiveSpan: stubs.startActiveSpan.callsFake((_name, _opts, _context, fn) => fn(getMockSpan())),
+		wrapInSpan: stubs.wrapInSpan.callsFake((name, opts, fn) => {
+			void name
+			void opts
+			return fn(getMockSpan())
+		}),
+		startActiveSpan: stubs.startActiveSpan.callsFake((name, opts, context, fn) => {
+			void name
+			void opts
+			void context
+			return fn(getMockSpan())
+		}),
 		service: getInvokeProxy<Invokes>(),
 		secrets: {
 			getSecret: stubs.getSecret.rejects(new Error('getSecret is not stubbed')),

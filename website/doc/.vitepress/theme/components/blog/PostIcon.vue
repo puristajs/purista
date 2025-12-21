@@ -5,6 +5,7 @@ const props = defineProps<{
 	post: Post
 }>()
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const category: string = props.post.data.category ? props.post.data.category : 'Article'
 </script>
 

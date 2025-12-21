@@ -90,6 +90,7 @@ export class HonoServiceClass<
 		this.config.protectHandler =
 			this.config.protectHandler ??
 			async function (c: any, n: () => Promise<void>) {
+				void c
 				return n()
 			}
 

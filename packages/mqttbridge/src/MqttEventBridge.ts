@@ -64,8 +64,6 @@ import type { MqttBridgeConfig } from './types/MqttBridgeConfig.js'
  * @group Event bridge
  */
 export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implements EventBridge {
-	private healthy = false
-	private ready = false
 	public client: MqttClient | undefined
 	public pendingInvocations = new Map<EBMessageId, PendigInvocation>()
 	private router = new TopicRouter()
@@ -382,7 +380,9 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		return topic
 	}
 
-	async unregisterSubscription(_address: EBMessageAddress): Promise<void> {}
+	async unregisterSubscription(address: EBMessageAddress): Promise<void> {
+		void address
+	}
 
 	async destroy() {
 		this.client?.end(true)

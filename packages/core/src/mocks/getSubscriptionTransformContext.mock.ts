@@ -40,7 +40,8 @@ export const getSubscriptionTransformContextMock = <Resources extends Record<str
 	const resourcesProxy = new Proxy(
 		{},
 		{
-			get(obj: Record<string, any>, name) {
+			get(target: Record<string, any>, name) {
+				void target
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
 					throw new Error('Invalid property access on resources proxy')
 				}
@@ -58,8 +59,17 @@ export const getSubscriptionTransformContextMock = <Resources extends Record<str
 	const mock: SubscriptionTransformFunctionContext = {
 		logger: logger.mock,
 		message: input.message,
-		wrapInSpan: stubs.wrapInSpan.callsFake((_name, _opts, fn) => fn()),
-		startActiveSpan: stubs.startActiveSpan.callsFake((_name, _opts, _context, fn) => fn()),
+		wrapInSpan: stubs.wrapInSpan.callsFake((name, opts, fn) => {
+			void name
+			void opts
+			return fn()
+		}),
+		startActiveSpan: stubs.startActiveSpan.callsFake((name, opts, context, fn) => {
+			void name
+			void opts
+			void context
+			return fn()
+		}),
 		secrets: {
 			getSecret: stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: stubs.setSecret.rejects(new Error('setSecret is not stubbed')),

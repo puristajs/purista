@@ -55,7 +55,7 @@
 		"commander": "^14.0.2",
 		"sinon": "^21.0.1",
 		"ts-morph": "^27.0.2",
-		"zod": "^3.25.76"
+		"zod": "^4.2.1"
 	},
 	"peerDependenciesMeta": {},
 	"files": [

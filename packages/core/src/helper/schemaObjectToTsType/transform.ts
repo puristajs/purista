@@ -65,7 +65,7 @@ export function transformSchemaObject(
 
 	// $ref
 	if ('$ref' in schemaObject) {
-		return schemaObject.$ref
+		return schemaObject.$ref as string
 	}
 
 	// const (valid for any type)
@@ -114,7 +114,7 @@ export function transformSchemaObject(
 	}
 
 	// oneOf (no discriminator)
-	if ('oneOf' in schemaObject && !schemaObject.oneOf?.some(t => '$ref' in t && ctx.discriminators[t.$ref])) {
+	if ('oneOf' in schemaObject && !schemaObject.oneOf?.some(t => '$ref' in t && t.$ref && ctx.discriminators[t.$ref])) {
 		const maybeTypes = schemaObject.oneOf?.map(item => transformSchemaObject(item, ctx, path)) ?? []
 		if (maybeTypes.some(t => typeof t === 'string' && t.includes('{'))) {
 			return tsOneOf(...maybeTypes)
@@ -249,7 +249,7 @@ export function transformSchemaObject(
 			continue
 		}
 		const discriminatorRef: ReferenceObject | undefined = (schemaObject as any)[k].find(
-			(t: SchemaObject | ReferenceObject) => '$ref' in t && ctx.discriminators[t.$ref],
+			(t: SchemaObject | ReferenceObject) => '$ref' in t && t.$ref && ctx.discriminators[t.$ref],
 		)
 		if (discriminatorRef) {
 			const discriminator = ctx.discriminators[discriminatorRef.$ref]
@@ -276,7 +276,7 @@ export function transformSchemaObject(
 		const output: string[] = []
 		for (const item of items) {
 			const itemType = transformSchemaObject(item, { ...ctx, indentLv }, path)
-			if ('$ref' in item && ctx.discriminators[item.$ref]) {
+			if ('$ref' in item && item.$ref && ctx.discriminators[item.$ref]) {
 				output.push(tsOmit(itemType, [ctx.discriminators[item.$ref].propertyName]))
 				continue
 			}

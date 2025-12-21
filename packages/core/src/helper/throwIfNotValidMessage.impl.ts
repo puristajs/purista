@@ -34,7 +34,7 @@ export const throwIfNotValidMessage = (input: unknown) => {
 
 	try {
 		ebMessageSchema.parse(input)
-	} catch (error) {
+	} catch {
 		throw new UnhandledError(
 			StatusCode.BadRequest,
 			'Input is no valid PURISTA event bridge message - see https://purista.dev',

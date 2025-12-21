@@ -87,7 +87,7 @@ const main = async () => {
 					loop: true,
 					message: 'What do you want to add?',
 					choices: ['service', 'command', 'subscription'],
-					default: 0,
+					default: 'service',
 				}))
 
 			data.name =

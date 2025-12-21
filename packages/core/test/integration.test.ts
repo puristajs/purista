@@ -16,6 +16,10 @@ describe('integration test', () => {
 	const beforeSubscriptionGuardHookStub = sandbox.stub()
 	const afterSubscriptionGuardHookStub = sandbox.stub()
 
+	afterEach(() => {
+		vi.useRealTimers()
+	})
+
 	const serviceOneInfo = {
 		serviceName: 'ServiceOne',
 		serviceVersion: '1',
@@ -90,7 +94,7 @@ describe('integration test', () => {
 			.addPayloadSchema(commandOnePayloadSchema)
 			.addParameterSchema(commandParameterSchema)
 			.addOutputSchema(commandOneOutputSchema)
-			.setTransformInput(z.string(), commandParameterSchema, async (context, payload, parameter) => {
+			.setTransformInput(z.string(), commandParameterSchema, async function (context, payload, parameter) {
 				const parsed = JSON.parse(payload)
 
 				await context.startActiveSpan('activeSpan', {}, undefined, async () => {
@@ -108,7 +112,8 @@ describe('integration test', () => {
 					parameter,
 				}
 			})
-			.setTransformOutput(z.string(), async (context, payload, _parameter) => {
+			.setTransformOutput(z.string(), async function (context, payload, parameter) {
+				void parameter
 				await context.startActiveSpan('activeSpan', {}, undefined, async () => {
 					context.logger.debug('activeSpan')
 				})
@@ -122,13 +127,13 @@ describe('integration test', () => {
 				return JSON.stringify(payload)
 			})
 			.setBeforeGuardHooks({
-				first: async (context, payload, parameter) => {
+				first: async function (context, payload, parameter) {
 					expect(context.resources.resourceOne.getResourceData()).toBe('resourceOneData')
 					beforeCommandGuardHookStub(payload, parameter)
 				},
 			})
 			.setAfterGuardHooks({
-				some: async (context, result, payload, parameter) => {
+				some: async function (context, result, payload, parameter) {
 					expect(context.resources.resourceOne.getResourceData()).toBe('resourceOneData')
 					afterCommandGuardHookStub(result, result, payload, parameter)
 				},
@@ -150,7 +155,7 @@ describe('integration test', () => {
 				commandTwoPayloadSchema,
 				commandParameterSchema,
 			)
-			.setCommandFunction(async (context, payload, parameter) => {
+			.setCommandFunction(async function (context, payload, parameter) {
 				const invokePayload: CommandTwoPayload = {
 					input: 'input',
 				}
@@ -319,16 +324,18 @@ describe('integration test', () => {
 			.addParameterSchema(commandParameterSchema)
 			.addOutputSchema('subscriptionOneConsumed', subscriptionOneSchema)
 			.setBeforeGuardHooks({
-				one: async (_context, payload, parameter) => {
+				one: async function (context, payload, parameter) {
+					void context
 					beforeSubscriptionGuardHookStub(payload, parameter)
 				},
 			})
 			.setAfterGuardHooks({
-				two: async (_context, result, payload, parameter) => {
+				two: async function (context, result, payload, parameter) {
+					void context
 					afterSubscriptionGuardHookStub(result, result, payload, parameter)
 				},
 			})
-			.setTransformInput(z.string(), commandParameterSchema, async (context, payload, parameter) => {
+			.setTransformInput(z.string(), commandParameterSchema, async function (context, payload, parameter) {
 				const response = JSON.parse(payload) as CommandOnePayload
 
 				await context.startActiveSpan('activeSpan', {}, undefined, async () => {
@@ -344,7 +351,8 @@ describe('integration test', () => {
 					parameter,
 				}
 			})
-			.setTransformOutput(z.string(), async (context, payload, _parameter) => {
+			.setTransformOutput(z.string(), async function (context, payload, parameter) {
+				void parameter
 				await context.startActiveSpan('activeSpan', {}, undefined, async () => {
 					context.logger.debug('activeSpan')
 				})
@@ -355,7 +363,8 @@ describe('integration test', () => {
 
 				return JSON.stringify(payload)
 			})
-			.setSubscriptionFunction(async (context, payload, _parameter) => {
+			.setSubscriptionFunction(async function (context, payload, parameter) {
+				void parameter
 				context.logger.debug('subscription one')
 				return {
 					result: `SUBSCRIPTION:${payload.input.toUpperCase()}`,
@@ -501,7 +510,9 @@ describe('integration test', () => {
 			.addPayloadSchema(commandTwoPayloadSchema)
 			.addParameterSchema(commandParameterSchema)
 			.addOutputSchema(commandTwoOutputSchema)
-			.setCommandFunction(async (_context, payload, _parameter) => {
+			.setCommandFunction(async function (context, payload, parameter) {
+				void context
+				void parameter
 				return {
 					output: payload.input.toUpperCase(),
 				}
@@ -516,7 +527,11 @@ describe('integration test', () => {
 			.getSubscriptionBuilder('subscriptionTwo', 'subscription two at service two')
 			.subscribeToEvent('subscriptionOneConsumed', '1')
 			.addPayloadSchema(z.string())
-			.setSubscriptionFunction(async (_context, _payload, _parameter) => {})
+			.setSubscriptionFunction(async function (context, payload, parameter) {
+				void context
+				void payload
+				void parameter
+			})
 
 		serviceTwoBuilder.addSubscriptionDefinition(subscriptionTwoDefinitionBuilder.getDefinition())
 		expect(true).toBeTruthy()

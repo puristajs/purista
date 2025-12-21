@@ -1,15 +1,12 @@
 /* eslint-disable no-console */
-import type { Schema } from '@typeschema/main'
-import { toJSONSchema } from '@typeschema/main'
+
 import type { SchemaObject } from 'openapi3-ts/oas31'
-import { ZodType, z } from 'zod/v4'
+import type { Schema } from '../schema/index.js'
+import { toJSONSchema } from '../schema/index.js'
 
 export const validationToSchema = async <T extends Schema>(schema?: T): Promise<SchemaObject | undefined> => {
 	if (!schema) {
 		return
-	}
-	if (schema instanceof ZodType) {
-		return z.toJSONSchema(schema) as SchemaObject
 	}
 	try {
 		const jsonSchema = await toJSONSchema(schema)
@@ -19,8 +16,6 @@ export const validationToSchema = async <T extends Schema>(schema?: T): Promise<
 		// biome-ignore lint/suspicious/noConsole: Required
 		console.error(error)
 		// biome-ignore lint/suspicious/noConsole: Required
-		console.error('Did you installed peer dependencies?')
-		// biome-ignore lint/suspicious/noConsole: Required
-		console.error('requires: @typeschema/[YOUR_SCHEMA_LIB]')
+		console.error('Make sure your schema library supports Standard Schema JSON conversion.')
 	}
 }

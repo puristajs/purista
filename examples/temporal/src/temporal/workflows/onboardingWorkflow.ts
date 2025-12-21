@@ -30,6 +30,7 @@ export async function onboardingWorkflow(input: unknown): Promise<void> {
 	await condition(() => isEmailVerified, '60 minutes')
 
 	const user = await createUser(register)
-	const _account = await createAccount(user)
+	const account = await createAccount(user)
+	void account
 	// const card = await issueCardForAccount(account)
 }

@@ -16,7 +16,7 @@ export const mergeServiceDefinition = <T extends FullServiceDefinition>(
 ): T => {
 	const commands = definitionToAdd.commands.reduce((current, definition) => {
 		return {
-			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction
 			...current,
 			[definition.commandName]: definition,
 		}
@@ -24,7 +24,7 @@ export const mergeServiceDefinition = <T extends FullServiceDefinition>(
 
 	const subscriptions = definitionToAdd.subscriptions.reduce((current, definition) => {
 		return {
-			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction
 			...current,
 			[definition.subscriptionName]: definition,
 		}

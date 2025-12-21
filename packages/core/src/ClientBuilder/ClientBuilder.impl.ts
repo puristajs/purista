@@ -30,7 +30,7 @@ async function loadTypeScript() {
 	if (!ts) {
 		try {
 			ts = await import('typescript')
-		} catch (error) {
+		} catch {
 			throw new Error('TypeScript is required for this operation. Please install it using `npm install typescript`.')
 		}
 	}
@@ -295,18 +295,18 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 		this.emit('success', `${type} build done`)
 	}
 
-        /**
-         * Load service definitions from JSON files.
-         *
-         * @param path - Optional path to the folder containing the definition files.
-         * Defaults to the configured definition path.
-         *
-         * @example
-         * ```ts
-         * const defs = await clientBuilder.loadDefinitionFiles()
-         * ```
-         */
-        async loadDefinitionFiles(path?: string): Promise<FullServiceDefinition> {
+	/**
+	 * Load service definitions from JSON files.
+	 *
+	 * @param path - Optional path to the folder containing the definition files.
+	 * Defaults to the configured definition path.
+	 *
+	 * @example
+	 * ```ts
+	 * const defs = await clientBuilder.loadDefinitionFiles()
+	 * ```
+	 */
+	async loadDefinitionFiles(path?: string): Promise<FullServiceDefinition> {
 		this.emit('start', 'Start reading definitions')
 
 		const services: FullServiceDefinition = {}
@@ -335,18 +335,18 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 		return services
 	}
 
-        /**
-         * Generate zero‑dependency HTTP client source files from the given definition.
-         *
-         * @param serviceDefinition - The full service definition containing the exposed commands.
-         *
-         * @example
-         * ```ts
-         * const services = await clientBuilder.loadDefinitionFiles()
-         * await clientBuilder.generateHttpClient(services)
-         * ```
-         */
-        async generateHttpClient(serviceDefinition: FullServiceDefinition) {
+	/**
+	 * Generate zero‑dependency HTTP client source files from the given definition.
+	 *
+	 * @param serviceDefinition - The full service definition containing the exposed commands.
+	 *
+	 * @example
+	 * ```ts
+	 * const services = await clientBuilder.loadDefinitionFiles()
+	 * await clientBuilder.generateHttpClient(services)
+	 * ```
+	 */
+	async generateHttpClient(serviceDefinition: FullServiceDefinition) {
 		const ext = this.config.buildAs !== 'commonjs' ? '.js' : ''
 
 		const clientStream = createWriteStream(join(this.getOutputPath(), 'src', 'http_client.ts'))
@@ -544,7 +544,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 								}
 
 								return {
-									// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+									// biome-ignore lint/performance/noAccumulatingSpread: small map construction in codegen
 									...input,
 									[serviceVersion]: commands.reduce((ret: string[], httpDef) => {
 										const meta = httpDef.metadata as unknown as HttpExposedServiceMeta
@@ -784,7 +784,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 								}
 
 								return {
-									// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+									// biome-ignore lint/performance/noAccumulatingSpread: small map construction in codegen
 									...input,
 									[serviceVersion]: commands.reduce((ret: string[], httpDef) => {
 										const meta = httpDef.metadata as unknown as HttpExposedServiceMeta

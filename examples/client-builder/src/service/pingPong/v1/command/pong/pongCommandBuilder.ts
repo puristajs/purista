@@ -12,6 +12,9 @@ export const pongCommandBuilder = pingPongV1ServiceBuilder
 	.addPayloadSchema(pingPongV1PongInputPayloadSchema)
 	.addParameterSchema(pingPongV1PongInputParameterSchema)
 	.addOutputSchema(pingPongV1PongOutputPayloadSchema)
-	.setCommandFunction(async function (_context, payload, _parameter) {
+	// biome-ignore lint/complexity/useArrowFunction: service command functions rely on dynamic `this` binding.
+	.setCommandFunction(async function (context, payload, parameter) {
+		void context
+		void parameter
 		return `${payload.pongMessage} -> PONG!`
 	})

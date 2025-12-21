@@ -40,9 +40,9 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status'
  * ```
  */
 export const addServiceEndpoints = (
-        services: Service | Service[] | undefined,
-        app: Hono,
-        logger: Logger,
+	services: Service | Service[] | undefined,
+	app: Hono,
+	logger: Logger,
 	apiMountPath = '/api',
 ) => {
 	if (!services) {

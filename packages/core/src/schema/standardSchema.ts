@@ -1,0 +1,86 @@
+import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec'
+import type { SchemaObject } from 'openapi3-ts/oas31'
+import type { AnySchema } from 'yup'
+import type { ZodType } from 'zod/v4'
+
+export type Schema = StandardSchemaV1
+export type Infer<TSchema extends Schema> = StandardSchemaV1.InferOutput<TSchema>
+export type InferIn<TSchema extends Schema> = StandardSchemaV1.InferInput<TSchema>
+
+export type ValidationResult<TOutput> =
+	| { success: true; data: TOutput }
+	| { success: false; issues: ReadonlyArray<StandardSchemaV1.Issue> }
+
+type JsonSchemaOptions = {
+	target?: StandardJSONSchemaV1.Target
+	mode?: 'input' | 'output'
+}
+
+const isStandardJsonSchema = (
+	props: StandardSchemaV1.Props,
+): props is StandardSchemaV1.Props & StandardJSONSchemaV1.Props =>
+	'jsonSchema' in props && typeof (props as StandardJSONSchemaV1.Props).jsonSchema === 'object'
+
+const isYupSchema = (schema: unknown): schema is AnySchema =>
+	!!schema && typeof schema === 'object' && '__isYupSchema__' in schema
+
+export const validate = async <TSchema extends Schema>(
+	schema: TSchema,
+	value: unknown,
+): Promise<ValidationResult<Infer<TSchema>>> => {
+	const result = await schema['~standard'].validate(value)
+
+	if (result.issues) {
+		return { success: false, issues: result.issues }
+	}
+
+	return { success: true, data: result.value as Infer<TSchema> }
+}
+
+export const toJSONSchema = async (schema: Schema, options?: JsonSchemaOptions): Promise<SchemaObject> => {
+	const standardProps = schema['~standard']
+	const target = options?.target ?? 'draft-2020-12'
+	const mode = options?.mode ?? 'output'
+
+	if (isYupSchema(schema)) {
+		try {
+			const { convertSchema } = await import('@sodaru/yup-to-json-schema')
+			return convertSchema(schema) as SchemaObject
+		} catch (error) {
+			const err = new Error(
+				'Yup JSON schema conversion requires the optional dependency `@sodaru/yup-to-json-schema` to be installed.',
+			)
+			;(err as { cause?: unknown }).cause = error
+			throw err
+		}
+	}
+
+	if (standardProps.vendor === 'zod') {
+		try {
+			const zodModule = await import('zod/v4')
+			return zodModule.z.toJSONSchema(schema as ZodType, {
+				target,
+				io: mode,
+				unrepresentable: 'any',
+			}) as SchemaObject
+		} catch (error) {
+			const err = new Error('Zod JSON schema conversion requires the optional dependency `zod` to be installed.')
+			;(err as { cause?: unknown }).cause = error
+			throw err
+		}
+	}
+
+	if (isStandardJsonSchema(standardProps)) {
+		try {
+			return (
+				mode === 'input' ? standardProps.jsonSchema.input({ target }) : standardProps.jsonSchema.output({ target })
+			) as SchemaObject
+		} catch (error) {
+			const err = new Error('Failed to convert Standard Schema to JSON Schema.')
+			;(err as { cause?: unknown }).cause = error
+			throw err
+		}
+	}
+
+	throw new Error('Schema does not support JSON schema conversion.')
+}

@@ -1,5 +1,5 @@
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
-import type { Schema } from '@typeschema/main'
+import type { Schema } from '../../schema/index.js'
 
 import type { ConfigStore } from '../ConfigStore/types/ConfigStore.js'
 import type { EventBridge } from '../EventBridge/types/EventBridge.js'

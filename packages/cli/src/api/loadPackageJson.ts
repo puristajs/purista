@@ -9,7 +9,7 @@ export const loadPackageJson = async (projectRootPath: string): Promise<PackageJ
 	try {
 		const content = await readFile(join(projectRootPath, 'package.json'), 'utf-8')
 		return JSON.parse(content)
-	} catch (error) {
+	} catch {
 		throw new Error('Unable to proceed without package.json')
 	}
 }

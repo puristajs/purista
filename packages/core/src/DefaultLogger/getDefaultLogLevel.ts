@@ -11,5 +11,5 @@ import type { LogLevelName } from '../core/types/LogLevelName.js'
  * ```
  */
 export const getDefaultLogLevel = (): LogLevelName => {
-        return isDevelop() ? 'debug' : 'info'
+	return isDevelop() ? 'debug' : 'info'
 }

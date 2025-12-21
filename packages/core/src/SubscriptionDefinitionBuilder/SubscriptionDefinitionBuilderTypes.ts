@@ -1,6 +1,6 @@
-import type { Schema } from '@typeschema/main'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
+import type { Schema } from '../schema/index.js'
 
 export type SubscriptionDefinitionBuilderTypes<
 	PayloadSchema extends Schema = Schema,

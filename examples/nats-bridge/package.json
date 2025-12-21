@@ -36,6 +36,6 @@
 		"@purista/httpserver": "*",
 		"@purista/nats-state-store": "*",
 		"@purista/natsbridge": "*",
-		"zod": "^3.25.76"
+		"zod": "^4.2.1"
 	}
 }

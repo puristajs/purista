@@ -2,8 +2,6 @@ import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 import { vi } from 'vitest'
 
-import { emailV1Service } from '../../emailV1Service.js'
-import { confirmEmailCommandBuilder } from './confirmEmailCommandBuilder.js'
 import type { EmailV1ConfirmEmailInputParameter, EmailV1ConfirmEmailInputPayload } from './types.js'
 
 vi.mock('@temporalio/client', async importOriginal => {
@@ -35,6 +33,8 @@ describe('service Email version 1 - command confirmEmail', () => {
 	})
 
 	test('does not throw', async () => {
+		const { emailV1Service } = await import('../../emailV1Service.js')
+		const { confirmEmailCommandBuilder } = await import('./confirmEmailCommandBuilder.js')
 		const service = await emailV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
 			logger: getLoggerMock(sandbox).mock,
 		})

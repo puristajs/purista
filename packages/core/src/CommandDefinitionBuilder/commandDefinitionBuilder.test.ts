@@ -57,7 +57,8 @@ describe('CommandDefinitionBuilder', () => {
 		.addPayloadSchema(functionPayloadSchema)
 		.addParameterSchema(functionParameterSchema)
 		.addOutputSchema(functionOutputSchema)
-		.setTransformInput(transformPayloudSchema, transformParameterSchema, async (_context, payload, parameter) => {
+		.setTransformInput(transformPayloudSchema, transformParameterSchema, async function (context, payload, parameter) {
+			void context
 			expect(typeof payload).toBe('string')
 			expect(typeof parameter).toBe('string')
 
@@ -75,7 +76,9 @@ describe('CommandDefinitionBuilder', () => {
 				parameter: param,
 			}
 		})
-		.setTransformOutput(transformOutputSchema, async (_context, payload, _parameter) => {
+		.setTransformOutput(transformOutputSchema, async function (context, payload, parameter) {
+			void context
+			void parameter
 			const p: Readonly<{
 				result: {
 					payload: {
@@ -93,7 +96,8 @@ describe('CommandDefinitionBuilder', () => {
 			return JSON.stringify(p)
 		})
 		.setBeforeGuardHooks({
-			beforeOne: async (_context, payload, parameter) => {
+			beforeOne: async function (context, payload, parameter) {
+				void context
 				const pay: {
 					foo: string
 					bar: number
@@ -109,7 +113,8 @@ describe('CommandDefinitionBuilder', () => {
 			},
 		})
 		.setAfterGuardHooks({
-			afterOne: async (_context, fnOutputPayload, input, parameter) => {
+			afterOne: async function (context, fnOutputPayload, input, parameter) {
+				void context
 				const pay: {
 					foo: string
 					bar: number
@@ -150,7 +155,7 @@ describe('CommandDefinitionBuilder', () => {
 			functionParameterSchema,
 		)
 		.canEmit('some', z.object({ example: z.string() }))
-		.setCommandFunction(async (context, payload, parameter) => {
+		.setCommandFunction(async function (context, payload, parameter) {
 			const result = await context.service.OtherService[2].testCommand(payload, parameter)
 
 			const response: {
@@ -322,7 +327,8 @@ describe('CommandDefinitionBuilder', () => {
 
 	it('works with without schema', async () => {
 		const b = new CommandDefinitionBuilder('testCommand', 'a unit test command').setCommandFunction(
-			async (_context, payload, parameter) => {
+			async function (context, payload, parameter) {
+				void context
 				return { payload, parameter }
 			},
 		)

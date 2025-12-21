@@ -1,4 +1,4 @@
-import type { Schema } from '@typeschema/main'
+import type { Schema } from '../../../schema/index.js'
 import type { EmptyObject } from '../../types/EmptyObject.js'
 import type { InvokeList } from '../../types/InvokeList.js'
 

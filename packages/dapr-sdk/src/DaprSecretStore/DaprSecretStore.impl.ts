@@ -77,6 +77,7 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
 		let returnValue: Record<string, string> = {}
 
 		secretNames.forEach((value, index) => {
+			void value
 			returnValue = {
 				...result[index],
 				...returnValue,
@@ -86,11 +87,13 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
 		return returnValue as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
 	}
 
-	protected async setSecretImpl(_secretName: string) {
+	protected async setSecretImpl(secretName: string) {
+		void secretName
 		throw new UnhandledError(StatusCode.NotImplemented, 'setting or changing of secrets is not available')
 	}
 
-	protected async removeSecretImpl(_secretName: string) {
+	protected async removeSecretImpl(secretName: string) {
+		void secretName
 		throw new UnhandledError(StatusCode.NotImplemented, 'removing of secrets is not available')
 	}
 }

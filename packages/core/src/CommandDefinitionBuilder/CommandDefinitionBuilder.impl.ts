@@ -1,10 +1,9 @@
-import type { Infer, InferIn, Schema } from '@typeschema/main'
 import type { SinonSandbox } from 'sinon'
-
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
 import type { QueryParameter } from '../core/HttpServer/types/QueryParameter.js'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
+import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
@@ -24,6 +23,7 @@ import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getCommandContextMock } from '../mocks/getCommandContext.mock.js'
 import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
+import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { CommandDefinitionBuilderTypes } from './CommandDefinitionBuilderTypes.js'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
@@ -414,6 +414,7 @@ export class CommandDefinitionBuilder<
 		inputContentType?: ContentType,
 		inputContentEncoding?: string,
 	) {
+		assertNonArrowFunction(transformFunction, 'setTransformInput')
 		this.inputContentType = inputContentType ?? this.inputContentType
 		this.inputContentEncoding = inputContentEncoding ?? this.inputContentEncoding
 
@@ -484,6 +485,7 @@ export class CommandDefinitionBuilder<
 		outputContentType?: ContentType,
 		outputContentEncoding?: string,
 	) {
+		assertNonArrowFunction(transformFunction, 'setTransformOutput')
 		this.outputContentEncoding = outputContentEncoding ?? this.outputContentEncoding
 		this.outputContentType = outputContentType ?? this.outputContentType
 		this.hooks.transformOutput = {
@@ -547,6 +549,9 @@ export class CommandDefinitionBuilder<
 			>
 		>,
 	) {
+		for (const [name, hook] of Object.entries(beforeGuards)) {
+			assertNonArrowFunction(hook, `setBeforeGuardHooks.${name}`)
+		}
 		this.hooks.beforeGuard = { ...this.hooks.beforeGuard, ...beforeGuards }
 		return this
 	}
@@ -592,6 +597,9 @@ export class CommandDefinitionBuilder<
 			>
 		>,
 	) {
+		for (const [name, hook] of Object.entries(afterGuards)) {
+			assertNonArrowFunction(hook, `setAfterGuardHooks.${name}`)
+		}
 		this.hooks.afterGuard = { ...this.hooks.afterGuard, ...afterGuards }
 		return this
 	}
@@ -880,7 +888,7 @@ export class CommandDefinitionBuilder<
 	 * Required: Set the function implementation.
 	 * The types should be automatically set as soon as schemas previously defined.
 	 * As the function will be a a function of a service class you need to implement as function declaration.
-	 * Anonymous functions do not have access to the `this` scope.
+	 * Arrow functions do not have access to the `this` scope.
 	 *
 	 * @example
 	 * ```ts
@@ -905,6 +913,7 @@ export class CommandDefinitionBuilder<
 			C['EmitList']
 		>,
 	) {
+		assertNonArrowFunction(fn, 'setCommandFunction')
 		this.fn = fn
 
 		return this

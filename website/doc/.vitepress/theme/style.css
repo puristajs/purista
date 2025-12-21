@@ -126,5 +126,6 @@
  * -------------------------------------------------------------------------- */
 
 .DocSearch {
+	/* biome-ignore lint/complexity/noImportantStyles: required to override DocSearch defaults */
 	--docsearch-primary-color: var(--vp-c-brand-1) !important;
 }

@@ -65,7 +65,7 @@ export class DaprClient extends HttpClient<EventBridgeConfig<DaprEventBridgeConf
 			const path = join(this.config.clientConfig?.daprApiVersion ?? DAPR_API_VERSION, 'metadata')
 			const result = await this.get(path)
 			return !!result
-		} catch (e) {
+		} catch {
 			return false
 		}
 	}

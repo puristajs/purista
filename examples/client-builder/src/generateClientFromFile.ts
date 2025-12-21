@@ -35,7 +35,6 @@ const generate = async () => {
 		// compile the source files
 		await clientBuilder.build()
 	} catch (error) {
-		// biome-ignore lint/suspicious/noConsole: used as CLI tool
 		console.error(error)
 	} finally {
 		// cleanup the builder and remove event listeners

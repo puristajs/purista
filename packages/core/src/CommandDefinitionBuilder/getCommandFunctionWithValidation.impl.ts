@@ -1,14 +1,12 @@
 import { SpanStatusCode } from '@opentelemetry/api'
-import { type Schema, validate } from '@typeschema/main'
-
 import { HandledError } from '../core/Error/HandledError.impl.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type { CommandBeforeGuardHook } from '../core/types/commandType/CommandBeforeGuardHook.js'
 import type { CommandFunction } from '../core/types/commandType/CommandFunction.js'
 import type { CommandFunctionContext } from '../core/types/commandType/CommandFunctionContext.js'
-
 import { StatusCode } from '../core/types/StatusCode.enum.js'
+import { type Schema, validate } from '../schema/index.js'
 
 export const getCommandFunctionWithValidation = function <S extends Service>(
 	fn: CommandFunction<S, any, any, any, any, any, any, any, any>,

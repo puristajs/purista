@@ -78,7 +78,7 @@ export const getEventNames = (
 
 		eventNames = []
 		return eventNames
-	} catch (error) {
+	} catch {
 		eventNames = []
 		return eventNames
 	}

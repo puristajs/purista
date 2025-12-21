@@ -34,7 +34,7 @@ export const getFormatConfig = async (projectPath: string) => {
 
 		formatter = 'biome'
 		return { codeWriterOptions, formatter }
-	} catch (error) {
+	} catch {
 		// do nothing
 	}
 
