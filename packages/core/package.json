@@ -50,7 +50,7 @@
 		"code-block-writer": "^13.0.3",
 		"openapi3-ts": "^4.4.0",
 		"pino": "^9.6.0",
-		"sinon": "^20.0.0",
+		"sinon": "^21.0.1",
 		"ts-deepmerge": "^7.0.2",
 		"zod": "^3.24.3",
 		"zod-to-json-schema": "^3.24.5"

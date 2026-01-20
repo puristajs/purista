@@ -46,7 +46,7 @@
 	"devDependencies": {
 		"@types/node": "^22.15.3",
 		"@types/sinon": "^17.0.4",
-		"sinon": "^20.0.0",
+		"sinon": "^21.0.1",
 		"tshy": "^3.0.2",
 		"vitest": "^3.1.2"
 	},

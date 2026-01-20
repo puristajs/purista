@@ -38,7 +38,7 @@
 		"git-cliff": "^2.8.0",
 		"npm-check-updates": "^18.0.1",
 		"rimraf": "^6.0.1",
-		"sinon": "^20.0.0",
+		"sinon": "^21.0.1",
 		"testcontainers": "^10.24.2",
 		"ts-node": "^10.9.2",
 		"tsx": "^4.19.4",
@@ -49,6 +49,6 @@
 	},
 	"packageManager": "npm@11.3.0",
 	"dependencies": {
-		"npm": "^11.2.0"
+		"npm": "^11.7.0"
 	}
 }

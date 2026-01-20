@@ -24,7 +24,7 @@
 	"devDependencies": {
 		"@types/node": "^22.15.3",
 		"pino-pretty": "^13.0.0",
-		"sinon": "^20.0.0",
+		"sinon": "^21.0.1",
 		"tsx": "^4.19.4",
 		"typescript": "^5.8.3",
 		"vitest": "^3.1.2"

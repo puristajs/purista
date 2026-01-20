@@ -48,7 +48,7 @@
 		"@types/qs": "^6.9.18",
 		"@types/sinon": "^17.0.4",
 		"@types/swagger-ui-dist": "^3.30.5",
-		"sinon": "^20.0.0",
+		"sinon": "^21.0.1",
 		"tshy": "^3.0.2",
 		"vitest": "^3.1.2"
 	},
