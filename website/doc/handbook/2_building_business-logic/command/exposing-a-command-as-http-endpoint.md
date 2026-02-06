@@ -93,7 +93,7 @@ export const theServiceV1PingInputParameterSchema = extendApi(
 ```
 
 ::: info Optional path parameters
-You can define a path parameter as optional by adding `?` like `'domain/:id'`.  
+You can define a path parameter as optional by adding `?` like `'domain/:id?'`.  
 Do not forget to mark it in the schema as optional `z.string().optional()` or set a default value `z.string().default('some_default')`.
 :::
 
@@ -120,7 +120,7 @@ const myCommandBuilder = myServiceBuilder
         required: false // [!code ++]
       },  // [!code ++]
       {   // [!code ++]
-        neededParam: true, // [!code ++]
+        required: true, // [!code ++]
         name: 'required' // [!code ++]
       }  // [!code ++]
     )  // [!code ++]
@@ -141,7 +141,7 @@ export const theServiceV1PingInputParameterSchema = extendApi(
         { title: 'The optional query parameter param', example: 'some_id' } // [!code ++]
       ) // [!code ++]
     neededParam: extendApi( // [!code ++]
-        z.string().optional(),  // [!code ++]
+        z.string(),  // [!code ++]
         { title: 'The required query parameter neededParam', example: 'some_id' } // [!code ++]
       ) // [!code ++]
   }),
@@ -149,9 +149,9 @@ export const theServiceV1PingInputParameterSchema = extendApi(
 )
 ```
 
-::: info Quer parameters are strings
+::: info Query parameters are strings
 Query parameters are always provided as string type.  
-Conversation must be implemented via transformers (prefferred) or inside the business logic.
+Conversion must be implemented via transformers (preferred) or inside the business logic.
 :::
 
 ## Security
@@ -178,7 +178,7 @@ const myCommandBuilder = myServiceBuilder
         required: false
       }, 
       {  
-        neededParam: true,
+        required: true,
         name: 'required'
       } 
     ) 

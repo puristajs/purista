@@ -12,7 +12,7 @@ It is essential to understand the concept. When you create a command in PURISTA,
 
 However, the command's service does not implement an HTTP server. Instead, PURISTA provides a generic HTTP server that can be configured to expose any command as an HTTP endpoint. This allows you to focus on building your commands while PURISTA handles the HTTP server details.
 
-This means the HTTP server is an independent service that can be started and scaled separately from your commands. Additionally, you can use different HTTP servers (such as Hono, Fastify, etc.) with PURISTA.
+This means the HTTP server is an independent service that can be started and scaled separately from your commands. The maintained server integration is based on Hono and can run on different runtimes (Node.js, Bun, Deno).
 
 From a high-level perspective, each service in your system informs the HTTP server about which commands should be exposed as HTTP endpoints. The HTTP server then listens for incoming requests and routes them to the appropriate service and command.
 

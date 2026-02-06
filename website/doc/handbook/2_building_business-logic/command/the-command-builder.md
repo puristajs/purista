@@ -142,8 +142,8 @@ Please see the [logging article](../logging.md)
 Resources, which are defined in the resource builder (see [Define Resources](../service/define-resources.md))
 
 ```typescript
-commandBuilder.setCommandFunction(async function ({ resource }) {
-  return resource.myDB.query('SELECT * FROM my_db')
+commandBuilder.setCommandFunction(async function ({ resources }) {
+  return resources.myDB.query('SELECT * FROM my_db')
 })
 ```
 
