@@ -46,13 +46,13 @@
 		"vitest": "^4.0.18"
 	},
 	"dependencies": {
-		"@fastify/static": "^9.0.0",
+		"@hono/node-server": "^1.19.6",
 		"@opentelemetry/exporter-trace-otlp-http": "^0.211.0",
 		"@opentelemetry/exporter-zipkin": "^2.5.0",
 		"@opentelemetry/sdk-trace-node": "^2.5.0",
 		"@purista/amqpbridge": "*",
 		"@purista/core": "*",
-		"@purista/httpserver": "*",
+		"@purista/hono-http-server": "*",
 		"@purista/redis-state-store": "*",
 		"@uptrace/node": "^2.3.0",
 		"pino-loki": "^3.0.0",

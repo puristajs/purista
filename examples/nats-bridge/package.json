@@ -31,9 +31,9 @@
 		"vitest": "^4.0.18"
 	},
 	"dependencies": {
-		"@fastify/static": "^9.0.0",
+		"@hono/node-server": "^1.19.6",
 		"@purista/core": "*",
-		"@purista/httpserver": "*",
+		"@purista/hono-http-server": "*",
 		"@purista/nats-state-store": "*",
 		"@purista/natsbridge": "*",
 		"zod": "^4.3.6"
