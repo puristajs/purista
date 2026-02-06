@@ -7,6 +7,9 @@ import { decodeContent } from './decodeContent.impl.js'
 import type { Encoder } from './types/Encoder.js'
 import type { Encrypter } from './types/Encrypter.js'
 
+/**
+ * Reconstructs OpenTelemetry context from AMQP headers or message payload.
+ */
 export const deserializeOtpFromAmqpHeader = async (
 	logger: Logger,
 	message: ConsumeMessage | null,

@@ -2,6 +2,9 @@ import type { Complete } from '@purista/core'
 
 import type { AmqpBridgeConfig } from './types/AmqpBridgeConfig.js'
 
+/**
+ * Returns default AMQP bridge configuration values.
+ */
 export const getDefaultConfig = (): Complete<AmqpBridgeConfig> & { exchangeName: string; url: string } => {
 	return {
 		exchangeName: 'purista',
