@@ -7,7 +7,7 @@ export const theServiceV1DeleteInputParameterSchema = extendApi(z.object({}), {
 })
 
 // define the input payload
-export const theServiceV1DeleteInputPayloadSchema = extendApi(z.any(), {
+export const theServiceV1DeleteInputPayloadSchema = extendApi(z.unknown(), {
 	title: 'delete input payload schema',
 })
 

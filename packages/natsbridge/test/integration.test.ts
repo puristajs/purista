@@ -37,7 +37,7 @@ describeWithNats('@purista/natsbridge', () => {
 		const serviceBuilder = new ServiceBuilder(serviceInfo).setConfigSchema(serviceConfigSchema)
 		const pingCommandBuilder = serviceBuilder
 			.getCommandBuilder('ping', 'provide a dummy command')
-			.addPayloadSchema(z.any().optional())
+			.addPayloadSchema(z.unknown().optional())
 			.addParameterSchema(z.object({ required: z.string() }))
 			.addOutputSchema(z.object({ ping: z.boolean() }))
 			.setCommandFunction(async function () {
@@ -51,7 +51,7 @@ describeWithNats('@purista/natsbridge', () => {
 		const subscriptionBuilder = serviceBuilder
 			.getSubscriptionBuilder('sendWelcomeEmail', 'send a welcome mail to new registered users')
 			.subscribeToEvent(EXAMPLE_EVENT)
-			.addPayloadSchema(z.any())
+			.addPayloadSchema(z.unknown())
 			.setSubscriptionFunction(subscriptionStub)
 
 		serviceBuilder.addSubscriptionDefinition(subscriptionBuilder.getDefinition())

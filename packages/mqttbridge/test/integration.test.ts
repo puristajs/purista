@@ -43,7 +43,7 @@ describe('@purista/mqttbridge', () => {
 		const subscriptionBuilder = theServiceV1Service
 			.getSubscriptionBuilder('sendWelcomeEmail', 'send a welcome mail to new registered users')
 			.subscribeToEvent(EXAMPLE_EVENT)
-			.addPayloadSchema(z.any())
+			.addPayloadSchema(z.unknown())
 			.setSubscriptionFunction(async function (context, payload, parameter) {
 				return subscriptionStub(context, payload, parameter)
 			})

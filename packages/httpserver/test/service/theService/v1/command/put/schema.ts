@@ -7,11 +7,11 @@ export const theServiceV1PutInputParameterSchema = extendApi(z.object({}), {
 })
 
 // define the input payload
-export const theServiceV1PutInputPayloadSchema = extendApi(z.any(), {
+export const theServiceV1PutInputPayloadSchema = extendApi(z.unknown(), {
 	title: 'put input payload schema',
 })
 
 // define the output payload
-export const theServiceV1PutOutputPayloadSchema = extendApi(z.any(), {
+export const theServiceV1PutOutputPayloadSchema = extendApi(z.unknown(), {
 	title: 'put output payload schema',
 })
