@@ -69,6 +69,9 @@ In your project root simply run:
 purista add [service|command|subscription]
 ```
 
+Generated command and subscription schema stubs default to `z.unknown()` for payloads.
+This keeps generated code type-safe by default and avoids accidental `any` propagation.
+
 ## PURISTA config file
 
 Since version 1.12.0, the PURISTA CLI expects to find a `purista.json` file in the root of your project. This file contains basic information about your project. Especially the settings for file and event casing conventions are important.

@@ -13,7 +13,7 @@ A command is a single function, which will be called (invoked) by someone with t
 
 ## Create the files
 
-Commands can be added to services. The most sight-forward way for adding a command is the usage of the PURISTA CLI.
+Commands can be added to services. The most straightforward way for adding a command is the usage of the PURISTA CLI.
 
 ```bash
 purista add command
@@ -185,12 +185,11 @@ It contains a real test, which then can be extended and aligned to your actual i
 ::: code-group
 
 ```typescript [signUpCommandBuilder.test.ts]
-import { getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { userV1Service } from '../../userV1Service'
 import { signUpCommandBuilder } from './signUpCommandBuilder'
-import { UserV1SignUpInputParameter, UserV1SignUpInputPayload } from './types'
 
 describe('service User version 1 - command signUp', () => {
   let sandbox = createSandbox()
@@ -205,11 +204,11 @@ describe('service User version 1 - command signUp', () => {
   test('does not throw', async () => {
     const service = await userV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
 
-    const signUp = signUpCommandBuilder.getCommandFunction().bind(service)
+    const signUp = safeBind(signUpCommandBuilder.getCommandFunction(), service)
 
-    const payload: UserV1SignUpInputPayload = undefined
+    const payload: Parameters<typeof signUp>[1] = {}
 
-    const parameter: UserV1SignUpInputParameter = {}
+    const parameter: Parameters<typeof signUp>[2] = {}
 
     const context = signUpCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 
