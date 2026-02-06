@@ -125,11 +125,21 @@ describe('getHttpServer', () => {
 		await expect(client.get('healthz')).rejects.toThrowError('Service Unavailable')
 	})
 
-	it.skip('logs uncaughtException', async () => {
-		sandbox.stub(process, 'once')
+	it('logs uncaughtException', async () => {
+		const error = new UnhandledError(StatusCode.InternalServerError, 'some error')
 
-		process.emit('uncaughtException', new UnhandledError(StatusCode.InternalServerError, 'some error'))
-		expect(logger.stubs.error.getCall(0).args[1]).toBe('unhandled error: some error')
-		// expect(logger.stubs.error.calledWithMatch('unhandled error: some error')).toBeTruthy()
+		process.emit('uncaughtException', error, 'test')
+
+		// Wait a bit for the event to be processed
+		await new Promise(resolve => setTimeout(resolve, 10))
+
+		// Find the call that logged the uncaught exception
+		const errorCall = logger.stubs.error.getCalls().find(call => {
+			const message = call.args[1]
+			return typeof message === 'string' && message.includes('unhandled error:')
+		})
+
+		expect(errorCall).toBeDefined()
+		expect(errorCall?.args[1]).toContain('unhandled error: some error')
 	})
 })

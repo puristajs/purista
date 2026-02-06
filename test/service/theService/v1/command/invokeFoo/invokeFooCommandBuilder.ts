@@ -21,4 +21,6 @@ export const invokeFooCommandBuilder = theServiceServiceBuilder
 			parameter: z.any(),
 		}),
 	)
-	.setCommandFunction(async ({ service }, payload, parameter) => service.TheService['1'].foo(payload, parameter))
+	.setCommandFunction(async function ({ service }, payload, parameter) {
+		return service.TheService['1'].foo(payload, parameter)
+	})
