@@ -15,6 +15,9 @@ Subscriptions do not need to return a value.
 If a subscription is returning a value, it will be emitted as custom message to the event bridge.
 The subscription does not have any knowledge if the custom message has a consumer.
 
+Subscriptions can access service resources (for example database clients/connections) via `context.resources`.
+Resources are provided when creating the service instance with `serviceBuilder.getInstance(eventBridge, { resources: ... })`.
+
 Typical use cases:
 
 - update projections/read models after command success events

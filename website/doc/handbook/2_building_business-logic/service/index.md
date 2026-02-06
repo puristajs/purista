@@ -29,7 +29,7 @@ Additionally, services should not hold state data.
 2. Add config schema (if needed).
 3. Define resources used by commands/subscriptions.
 4. Add command and subscription definitions.
-5. Create service instance and call `start()`.
+5. Create service instance, provide required resources (`getInstance(..., { resources })`), and call `start()`.
 
 Continue with:
 

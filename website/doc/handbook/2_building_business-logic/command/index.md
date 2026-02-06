@@ -12,6 +12,9 @@ A command is a single function, which will be called (invoked) by someone with t
 
 Add a command to an existing service with `purista add command`.
 
+Commands can access service resources (for example database clients/connections) via `context.resources`.
+Resources are provided when creating the service instance with `serviceBuilder.getInstance(eventBridge, { resources: ... })`.
+
 ## Command lifecycle
 
 1. optional input transform
