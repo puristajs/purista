@@ -57,10 +57,6 @@ export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<
 			throw err
 		}
 
-		if (!this.config.enableGet) {
-			throw new UnhandledError(StatusCode.Unauthorized, 'get secret from store is disabled by config')
-		}
-
 		if (!this.config.enableCache) {
 			return this.getSecretImpl(...secretNames)
 		}
@@ -81,6 +77,8 @@ export abstract class SecretStoreBaseClass<SecretStoreConfigType extends Record<
 				} else {
 					result[secret] = cachedValue.value
 				}
+			} else {
+				toFetch.push(secret)
 			}
 		}
 

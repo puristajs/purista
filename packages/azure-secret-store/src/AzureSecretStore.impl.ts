@@ -34,6 +34,16 @@ export class AzureSecretStore extends SecretStoreBaseClass<AzureSecretStoreConfi
 		this.client = new SecretClient(this.config.vaultUrl, credential, this.config.options)
 	}
 
+	private isNotFoundError(err: unknown): err is { statusCode: number } {
+		return (
+			typeof err === 'object' &&
+			err !== null &&
+			'statusCode' in err &&
+			typeof err.statusCode === 'number' &&
+			err.statusCode === 404
+		)
+	}
+
 	protected async getSecretImpl<SecretNames extends string[]>(
 		...secretNames: SecretNames
 	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
@@ -44,6 +54,10 @@ export class AzureSecretStore extends SecretStoreBaseClass<AzureSecretStoreConfi
 				const response = await this.client.getSecret(name)
 				result[name] = response?.value
 			} catch (err) {
+				if (this.isNotFoundError(err)) {
+					result[name] = undefined
+					continue
+				}
 				result[name] = undefined
 				this.logger.error({ err })
 				throw UnhandledError.fromError(err, StatusCode.InternalServerError)

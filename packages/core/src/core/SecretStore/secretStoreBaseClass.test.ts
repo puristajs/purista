@@ -23,6 +23,29 @@ class TestClass extends SecretStoreBaseClass {
 	}
 }
 
+class CacheTestClass extends SecretStoreBaseClass {
+	public getSecretCalls: string[][] = []
+
+	protected getSecretImpl<SecretNames extends string[]>(
+		...secretNames: SecretNames
+	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
+		this.getSecretCalls.push([...secretNames])
+		const result: Record<string, string | undefined> = {}
+		for (const name of secretNames) {
+			result[name] = `${name}-value`
+		}
+		return Promise.resolve(result as ObjectWithKeysFromStringArray<SecretNames, string | undefined>)
+	}
+
+	protected setSecretImpl(_secretName: string, _secretValue: string): Promise<void> {
+		return Promise.resolve()
+	}
+
+	protected removeSecretImpl(_secretName: string): Promise<void> {
+		return Promise.resolve()
+	}
+}
+
 describe('SecretStoreBaseClass', () => {
 	let sandbox: SinonSandbox
 	let secretStore: SecretStoreBaseClass
@@ -53,6 +76,29 @@ describe('SecretStoreBaseClass', () => {
 			sandbox.stub(secretStore.config, 'enableGet').value(true)
 
 			await expect(secretStore.getSecret('test')).rejects.toEqual(new Error('Not implemented'))
+		})
+
+		it('fetches uncached secrets when cache is enabled', async () => {
+			const cacheSecretStore = new CacheTestClass('test', { logger: logger.mock, enableCache: true })
+
+			await expect(cacheSecretStore.getSecret('alpha', 'beta')).resolves.toStrictEqual({
+				alpha: 'alpha-value',
+				beta: 'beta-value',
+			})
+
+			expect(cacheSecretStore.getSecretCalls).toStrictEqual([['alpha', 'beta']])
+		})
+
+		it('fetches only cache misses when cache is enabled', async () => {
+			const cacheSecretStore = new CacheTestClass('test', { logger: logger.mock, enableCache: true })
+			cacheSecretStore.cache.set('alpha', { value: 'cached-alpha', createdAt: Date.now() })
+
+			await expect(cacheSecretStore.getSecret('alpha', 'beta')).resolves.toStrictEqual({
+				alpha: 'cached-alpha',
+				beta: 'beta-value',
+			})
+
+			expect(cacheSecretStore.getSecretCalls).toStrictEqual([['beta']])
 		})
 	})
 
