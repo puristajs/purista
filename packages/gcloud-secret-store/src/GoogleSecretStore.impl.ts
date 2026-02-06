@@ -32,6 +32,15 @@ export class GoogleSecretStore extends SecretStoreBaseClass<GoogleSecretStoreCon
 		this.client = new SecretManagerServiceClient(this.config.client)
 	}
 
+	private isNotFoundError(err: unknown): err is { code?: number; statusCode?: number } {
+		return (
+			typeof err === 'object' &&
+			err !== null &&
+			(('code' in err && typeof err.code === 'number' && err.code === 5) ||
+				('statusCode' in err && typeof err.statusCode === 'number' && err.statusCode === 404))
+		)
+	}
+
 	protected async getSecretImpl<SecretNames extends string[]>(
 		...secretNames: SecretNames
 	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
@@ -45,6 +54,10 @@ export class GoogleSecretStore extends SecretStoreBaseClass<GoogleSecretStoreCon
 				})
 				result[name] = res[0].payload?.data?.toString()
 			} catch (err) {
+				if (this.isNotFoundError(err)) {
+					result[name] = undefined
+					continue
+				}
 				this.logger.error({ err })
 				throw UnhandledError.fromError(err, StatusCode.InternalServerError)
 			}
