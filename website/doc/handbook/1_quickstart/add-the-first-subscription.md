@@ -16,8 +16,8 @@ Subscriptions do not need to return a value.
 If a subscription is returning a value, it will be emitted as custom message to the event bridge.
 The subscription does not have any knowledge if the custom message has a consumer.
 
-In our example, the subcription will be part of the "Email" domain.
-Because of this, we will first create a other service called "Email".
+In our example, the subscription will be part of the "Email" domain.
+Because of this, we will first create another service called "Email".
 
 ```bash
 purista add service email
@@ -62,7 +62,7 @@ After you have confirmed your input by pressing the enter key, you will be asked
 Here, you should enter some short, general description, which will be used for some human-facing documentation.
 So, please provide here something like: _send a welcome mail to new registered users_.
 
-In the next step, you will be asked to select an event name. Then subscription will be triggered as soon as an event with given name is sent.
+In the next step, you will be asked to select an event name. The subscription will be triggered as soon as an event with the given name is sent.
 
 After selecting the event name, you must select the service.
 Use the arrow keys to select the service (and version), on which the new command should be registered.

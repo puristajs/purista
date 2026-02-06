@@ -148,7 +148,7 @@ export const userV1SignUpOutputPayloadSchema = extendApi(z.void(), { title: 'sig
 :::
 
 The core package contains some helper here, which are based on the package [`@anatine/zod-openapi`](https://github.com/anatine/zod-plugins/blob/main/packages/zod-openapi/README.md).
-This gives the opportunity, to enrich the schema with more information and details, which than can be used, to improve a generated OpenAPI/AsyncAPI documentation.
+This gives the opportunity to enrich the schema with more information and details, which can then be used to improve generated OpenAPI/AsyncAPI documentation.
 Because of this, you can add human understandable titles, descriptions, examples and so on.
 It is not required, but recommended, to use this package. You can also use plain [zod](https://zod.dev).
 
@@ -180,7 +180,7 @@ export type UserV1SignUpOutputPayload = z.output<typeof userV1SignUpOutputPayloa
 ### Test file
 
 The file with the `.test.ts` extension, is the unit test for the command implementation.
-It contains a real test, which then can be extended and aligned to your actual implementation.
+It contains a real test, which can then be extended and aligned to your actual implementation.
 
 ::: code-group
 

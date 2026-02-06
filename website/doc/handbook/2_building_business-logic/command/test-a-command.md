@@ -76,7 +76,7 @@ context.stubs.service.OtherService[1].otherCommand.resolves('mock data')
 ## Testing
 
 During unit tests, you will need to mock command invokes.  
-PURISTA provides the `getCommandContextMock` in the command builder, which allows to easy mock service invocations.
+PURISTA provides the `getCommandContextMock` in the command builder, which allows you to easily mock service invocations.
 
 Only services defined with `canInvoke` are available in the context mock.
 

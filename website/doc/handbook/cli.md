@@ -8,7 +8,7 @@ order: 30
 
 ## Create a new project
 
-The easiest and fastest way to start with PURISTA is the usage of your package managers `create` command.  
+The easiest and fastest way to start with PURISTA is using your package manager's `create` command.  
 
 In the project folder, simply execute:
 

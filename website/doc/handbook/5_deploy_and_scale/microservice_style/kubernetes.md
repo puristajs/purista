@@ -281,7 +281,7 @@ With this setup, you should be able to build and deploy your app as a container 
 
 ## Build a docker image
 
-To get a docker image, which then can be deployed, you will need to have done two things:
+To get a Docker image that can then be deployed, you need to complete two steps:
 
 - compile the typescript code base to plain JavaScript
 - create a docker file with minimum resources (no dev dependencies) and compiled JavaScript
