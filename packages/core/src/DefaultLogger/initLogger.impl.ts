@@ -22,10 +22,10 @@ export const initLogger = (level: LogLevelName = getDefaultLogLevel(), opt?: Log
 	return new DefaultLogger(
 		pino({
 			name: 'PURISTA',
-			mixin(context: any, _level: any) {
+			mixin(context: object) {
 				return { puristaVersion, ...context }
 			},
-			mixinMergeStrategy(mergeObject: any, mixinObject: any) {
+			mixinMergeStrategy(mergeObject: object, mixinObject: object) {
 				return Object.assign(mixinObject, mergeObject)
 			},
 			...opt,

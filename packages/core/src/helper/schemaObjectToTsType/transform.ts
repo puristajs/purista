@@ -25,6 +25,12 @@ export interface TransformSchemaObjectOptions {
 	/** Shared context */
 	ctx: GlobalContext
 }
+type SchemaObjectWithConst = SchemaObject & { const?: unknown }
+type SchemaObjectWithDiscriminatorCollections = SchemaObject & {
+	oneOf?: (SchemaObject | ReferenceObject)[]
+	allOf?: (SchemaObject | ReferenceObject)[]
+	anyOf?: (SchemaObject | ReferenceObject)[]
+}
 
 export function schemaObjectToTsType(schemaObject: SchemaObject | ReferenceObject, options?: Partial<GlobalContext>) {
 	const ctx: GlobalContext = {
@@ -69,9 +75,9 @@ export function transformSchemaObject(
 	}
 
 	// const (valid for any type)
-	const s = schemaObject as any
+	const s = schemaObject as SchemaObjectWithConst
 	if (s.const !== null && s.const !== undefined) {
-		let schemaConst = s.const as any
+		let schemaConst = s.const
 		if ('type' in s) {
 			if (s.type === 'string') {
 				schemaConst = escStr(schemaConst)
@@ -87,7 +93,7 @@ export function transformSchemaObject(
 
 	// enum (valid for any type)
 	if (schemaObject.enum) {
-		let items = schemaObject.enum as any[]
+		let items = schemaObject.enum as (string | number | boolean)[]
 		if ('type' in schemaObject) {
 			if (
 				schemaObject.type === 'string' ||
@@ -244,12 +250,14 @@ export function transformSchemaObject(
 	}
 
 	// discriminators
+	const schemaWithCompositions = schemaObject as SchemaObjectWithDiscriminatorCollections
 	for (const k of ['oneOf', 'allOf', 'anyOf'] as ('oneOf' | 'allOf' | 'anyOf')[]) {
-		if (!(k in schemaObject)) {
+		const compositionItems = schemaWithCompositions[k]
+		if (!Array.isArray(compositionItems)) {
 			continue
 		}
-		const discriminatorRef: ReferenceObject | undefined = (schemaObject as any)[k].find(
-			(t: SchemaObject | ReferenceObject) => '$ref' in t && t.$ref && ctx.discriminators[t.$ref],
+		const discriminatorRef = compositionItems.find(
+			(t): t is ReferenceObject => '$ref' in t && typeof t.$ref === 'string' && Boolean(ctx.discriminators[t.$ref]),
 		)
 		if (discriminatorRef) {
 			const discriminator = ctx.discriminators[discriminatorRef.$ref]
