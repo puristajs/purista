@@ -236,7 +236,7 @@ You can overwrite this with your own text.
 There are two possible ways to mark a command as deprecated.
 
 Commands are automatically marked as deprecated, as soon as the parent service version is marked as deprecated.
-In this case, alle commands of this service version are marked as deprecated.
+In this case, all commands of this service version are marked as deprecated.
 
 Every command can be marked as deprecated individually by using the `markAsDeprecated` method.
 
