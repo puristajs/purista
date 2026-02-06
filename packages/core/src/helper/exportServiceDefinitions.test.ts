@@ -29,7 +29,10 @@ const createDefinitions = (input: {
 
 describe('mergeServiceDefinition', () => {
 	it('keeps existing command and subscription entries when service version is merged again', () => {
-		const existing = mergeServiceDefinition({}, createDefinitions({ commandNames: ['create'], subscriptionNames: ['mail'] }))
+		const existing = mergeServiceDefinition(
+			{},
+			createDefinitions({ commandNames: ['create'], subscriptionNames: ['mail'] }),
+		)
 		const merged = mergeServiceDefinition(
 			existing,
 			createDefinitions({ commandNames: ['update'], subscriptionNames: ['audit'] }),

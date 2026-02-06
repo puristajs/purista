@@ -1,5 +1,5 @@
-import { mergeIntoServiceDefintion } from './mergeIntoServiceDefintion.impl.js'
 import type { FullServiceDefinition } from '../helper/types/FullServiceDefinition.js'
+import { mergeIntoServiceDefintion } from './mergeIntoServiceDefintion.impl.js'
 
 describe('mergeIntoServiceDefintion', () => {
 	it('adds missing service versions without throwing', () => {
