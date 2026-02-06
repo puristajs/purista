@@ -5,7 +5,7 @@ import type { OpenApiBuilder, OperationObject, ParameterObject, ResponsesObject 
 import { getErrorName } from './getErrorName.js'
 import { getErrorResponseSchema } from './getErrorResponseSchema.js'
 import { getParameterDefinition } from './getParameterDefinition.js'
-import { getQueryDefinition } from './getQueryDefintion.js'
+import { getQueryDefinition } from './getQueryDefinition.js'
 
 type Config = {
 	traceHeaderField?: string
