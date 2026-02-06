@@ -53,10 +53,10 @@ export const getCommandContextMock = <
 			updateName: input.sandbox?.stub() ?? stub(),
 			end: input.sandbox?.stub() ?? stub(),
 			isRecording: () => true,
-				recordException: (input.sandbox?.stub() ?? stub()).callsFake((err: unknown) => {
-					// biome-ignore lint/suspicious/noConsole: no logger available
-					console.error(err)
-				}),
+			recordException: (input.sandbox?.stub() ?? stub()).callsFake((err: unknown) => {
+				// biome-ignore lint/suspicious/noConsole: no logger available
+				console.error(err)
+			}),
 		}
 	}
 

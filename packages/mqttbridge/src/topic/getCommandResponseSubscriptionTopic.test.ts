@@ -1,6 +1,6 @@
 import { getLoggerMock } from '@purista/core'
-import { getCommandResponseSubscriptionTopic } from './getCommandResponseSubscriptionTopic.impl.js'
 import { MqttBridge } from '../MqttEventBridge.js'
+import { getCommandResponseSubscriptionTopic } from './getCommandResponseSubscriptionTopic.impl.js'
 
 describe('getCommandResponseSubscriptionTopic', () => {
 	it('returns the command response topic for the current instance', () => {

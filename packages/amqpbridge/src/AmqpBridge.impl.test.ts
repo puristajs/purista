@@ -72,10 +72,7 @@ describe('AmqpBridge', () => {
 			},
 		}
 
-		const queueKey = await bridge.registerSubscription(
-			subscription,
-			async () => undefined,
-		)
+		const queueKey = await bridge.registerSubscription(subscription, async () => undefined)
 
 		expect(queueKey).toBe('tenant-a.sub.Users.1.onCreated')
 		expect(internals.subscriptions.has(queueKey)).toBe(true)

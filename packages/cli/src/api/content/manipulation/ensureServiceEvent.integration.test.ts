@@ -1,9 +1,9 @@
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { ensureServiceEvent } from './ensureServiceEvent.js' // Adjust the path if needed
 import { puristaConfigSchema } from '../../loadPuristaConfig.js'
 import type { PuristaProjectInfo } from '../../scanPuristaProject.js'
+import { ensureServiceEvent } from './ensureServiceEvent.js' // Adjust the path if needed
 
 // Create a temporary test directory
 let TEST_DIR = join(process.cwd(), 'tmp-test')

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { convertToProjectFileCasing } from './convertToProjectFileCasing.js'
-import { puristaConfigSchema, type PuristaConfig } from './loadPuristaConfig.js'
+import { type PuristaConfig, puristaConfigSchema } from './loadPuristaConfig.js'
 
 const getConfig = (fileConvention: PuristaConfig['fileConvention']) => puristaConfigSchema.parse({ fileConvention })
 

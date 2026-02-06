@@ -62,13 +62,13 @@ export const honoServiceV1ConfigSchema = z.object({
 	openApi: z
 		.object({
 			openapi: z.string().default('3.1.0'),
-				enabled: z.boolean().optional().default(true),
-				info: InfoObjectSchema,
-				servers: z.array(ServerObjectSchema).optional(),
-				// Keep `any`: OpenAPI object fragments are merged from dynamic command metadata.
-				components: z.any().optional(),
-				security: z.array(z.any()).optional(),
-				externalDocs: ExternalDocumentationObjectSchema.optional(),
+			enabled: z.boolean().optional().default(true),
+			info: InfoObjectSchema,
+			servers: z.array(ServerObjectSchema).optional(),
+			// Keep `any`: OpenAPI object fragments are merged from dynamic command metadata.
+			components: z.any().optional(),
+			security: z.array(z.any()).optional(),
+			externalDocs: ExternalDocumentationObjectSchema.optional(),
 			tags: z.array(TagObjectSchema).optional(),
 			paths: z.record(z.string(), z.record(z.string(), z.any())).optional(),
 		})

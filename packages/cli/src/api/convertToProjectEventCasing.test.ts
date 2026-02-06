@@ -1,9 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { convertToProjectEventCasing } from './convertToProjectEventCasing.js'
-import { puristaConfigSchema, type PuristaConfig } from './loadPuristaConfig.js'
+import { type PuristaConfig, puristaConfigSchema } from './loadPuristaConfig.js'
 
-const getConfig = (eventConvention: PuristaConfig['eventConvention']) =>
-	puristaConfigSchema.parse({ eventConvention })
+const getConfig = (eventConvention: PuristaConfig['eventConvention']) => puristaConfigSchema.parse({ eventConvention })
 
 describe('convertToProjectEventCasing', () => {
 	it('camel case', () => {
