@@ -350,4 +350,19 @@ describe('CommandDefinitionBuilder', () => {
 			parameter: 'x',
 		})
 	})
+
+	it('merges repeated canInvoke calls for the same service and version', async () => {
+		const b = new CommandDefinitionBuilder('mergeInvokes', 'merge invokes')
+			.addOutputSchema(z.object({ ok: z.boolean() }))
+			.canInvoke('OtherService', '1', 'first', z.object({ first: z.string() }))
+			.canInvoke('OtherService', '1', 'second', z.object({ second: z.string() }))
+			.setCommandFunction(async function (context) {
+				void context
+				return { ok: true }
+			})
+
+		const definition = await b.getDefinition()
+
+		expect(Object.keys(definition.invokes.OtherService[1]).sort()).toStrictEqual(['first', 'second'])
+	})
 })

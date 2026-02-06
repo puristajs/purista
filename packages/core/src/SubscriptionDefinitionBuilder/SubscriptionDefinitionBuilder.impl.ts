@@ -138,18 +138,16 @@ export class SubscriptionDefinitionBuilder<
 			throw new Error('canInvoke requires non-empty service name, version and target')
 		}
 
-		const x = this.invokes as any
-		if (!x[serviceName]) {
-			x[serviceName] = {}
-		}
-
-		if (!x[serviceName][serviceVersion]) {
-			x[serviceName][serviceVersion] = {}
-		}
+		const existingInvokes = this.invokes as Record<
+			string,
+			Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
+		>
 
 		const f = {
 			[serviceName]: {
+				...existingInvokes[serviceName],
 				[serviceVersion]: {
+					...(existingInvokes[serviceName]?.[serviceVersion] ?? {}),
 					[serviceTarget]: { outputSchema, payloadSchema, parameterSchema },
 				},
 			},
