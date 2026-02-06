@@ -38,6 +38,25 @@ Continue with:
 - [Define resources](./define-resources.md)
 - [Unit test the service](./unit-test-a-service.md)
 
+## When to use
+
+- You want to group related commands/subscriptions by domain.
+- You need shared resources/config for a set of functions.
+- You want clear boundaries for ownership and deployment.
+
+## Common pitfalls
+
+- putting business logic into the service class itself
+- mixing unrelated domains into one service
+- storing mutable runtime state directly on the service instance
+
+## Checklist
+
+- service info is stable and meaningful (`serviceName`, `serviceVersion`)
+- config schema is defined where needed
+- resources are typed and passed at instance creation
+- service setup test (`testServiceSetup`) is present
+
 ## Idea Behind the Design
 
 When a new service is added, it is done via the service builder. The service builder is responsible for collecting all required information. It then provides clearly defined interfaces. By having these interfaces, the actual implementation of a resource, store, or any other dependency can be easily swapped out without affecting other parts of the system.

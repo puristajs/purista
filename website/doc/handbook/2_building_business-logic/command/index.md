@@ -28,3 +28,22 @@ Add a command to an existing service with `purista add command`.
 - [Invoke another command](./invoke_command_from_command.md)
 - [Expose as HTTP endpoint](./exposing-a-command-as-http-endpoint.md)
 - [Test a command](./test-a-command.md)
+
+## When to use
+
+- You need request/response behavior.
+- A caller expects success/error result semantics.
+- You want strict validation on input/output contracts.
+
+## Common pitfalls
+
+- mixing long-running asynchronous workflows into one command
+- overusing broad payload schemas instead of explicit contracts
+- forgetting to define output schema, then losing type guarantees
+
+## Checklist
+
+- payload, parameter and output schemas are defined
+- guards are used for auth/authz concerns
+- command is exposed (or intentionally internal only)
+- unit tests cover success and failure paths

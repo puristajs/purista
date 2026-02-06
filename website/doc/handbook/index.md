@@ -11,11 +11,12 @@ This handbook is organized as a practical learning path.
 ## Recommended reading order
 
 1. [Quickstart](./1_quickstart/index.md)
-2. [Building business logic](./2_building_business-logic/index.md)
-3. [PURISTA ecosystem](./3_eco_system/index.md)
-4. [OpenTelemetry](./4_open_telemetry/index.md)
-5. [Deploy & Scale](./5_deploy_and_scale/index.md)
-6. [Integrations](./6_integrations/index.md)
+2. [From Zero to Production](./from-zero-to-production.md)
+3. [Building business logic](./2_building_business-logic/index.md)
+4. [PURISTA ecosystem](./3_eco_system/index.md)
+5. [OpenTelemetry](./4_open_telemetry/index.md)
+6. [Deploy & Scale](./5_deploy_and_scale/index.md)
+7. [Integrations](./6_integrations/index.md)
 
 ## If you are new to PURISTA
 

@@ -23,3 +23,22 @@ The secret store is designed to safeguard confidential and private data. For ins
 ## State store
 
 State stores are tasked with managing the business states of your application. In PURISTA, commands and subscriptions are designed to be stateless, operating within a distributed system. If, for example, you require user sessions, you would utilize the state store to store session information.
+
+## When to use
+
+- Config store: dynamic non-secret configuration values.
+- Secret store: credentials/tokens/certificates.
+- State store: domain/application state shared across instances.
+
+## Common pitfalls
+
+- storing secrets in config store
+- coupling business logic to vendor-specific SDKs directly
+- expecting store values to be strongly typed without schema validation
+
+## Checklist
+
+- correct store type is selected for each data class
+- getter/setter/remove capabilities are configured intentionally
+- read/write values are validated via schemas where critical
+- integration tests cover the concrete provider behavior

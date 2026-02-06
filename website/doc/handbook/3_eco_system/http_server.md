@@ -16,3 +16,22 @@ order: 303000
 
 | name           | category                                                               | package   | documentation |
 |---             |---                                                                     |---        |---        |
+
+## When to use
+
+- You need REST endpoints and OpenAPI over command definitions.
+- You want transport concerns separated from business logic.
+- You want runtime flexibility (Node.js, Bun, Deno).
+
+## Common pitfalls
+
+- assuming `honoV1Service.start()` also opens a network socket
+- missing auth middleware/protection handlers
+- not aligning command parameter schema with query/path params
+
+## Checklist
+
+- `@purista/hono-http-server` is installed
+- routes are registered via static services list or dynamic mode
+- Hono server socket is explicitly started for your runtime
+- auth, OpenAPI metadata, and graceful shutdown are configured

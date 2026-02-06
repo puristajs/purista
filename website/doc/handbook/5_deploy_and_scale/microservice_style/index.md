@@ -24,8 +24,12 @@ The overall workload is distributed across all running instances and the number 
 If you have for example some service, which does some time-consuming computation, it might make sense to have more instances running.
 
 <Badge text="Be aware" type="warning"/>
-If you still use the deprecated `@purista/httpserver` package, start its instance before all other services, or provide the API routing table in config. Otherwise, the HTTP server instance won't know the correct endpoints and corresponding services.
-For new projects, use `@purista/hono-http-server`.
+When using the Hono HTTP server package, either:
+
+- provide service instances to the server config, or
+- enable and verify dynamic route registration.
+
+This ensures the HTTP server instance has all endpoint mappings before traffic arrives.
 
 ::: tip Pros
 
