@@ -86,8 +86,10 @@ export const addServiceEndpoints = (
 								if (metadata.expose.http.openApi?.query) {
 									const parsedQueries = c.req.query()
 									for (const qp of metadata.expose.http.openApi.query) {
-										queryParams[qp.name] = parsedQueries[qp.name]
-										if (qp.required && !parsedQueries[qp.name]) {
+										const queryName = String(qp.name)
+										const queryValue = parsedQueries[queryName]
+										queryParams[queryName] = queryValue
+										if (qp.required && (queryValue === undefined || queryValue === null || queryValue === '')) {
 											throw new HandledError(StatusCode.BadRequest, `query parameter ${qp.name} is required`)
 										}
 									}
