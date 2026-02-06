@@ -4,7 +4,6 @@ import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import type TS from 'typescript'
-import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
 import { isHttpExposedServiceMeta } from '../core/HttpServer/types/isHttpExposedServiceMeta.impl.js'
 import { GenericEventEmitter } from '../core/types/GenericEventEmitter.js'
 import { mergeServiceDefinition } from '../helper/exportServiceDefinitions.js'
@@ -561,7 +560,11 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 									// biome-ignore lint/performance/noAccumulatingSpread: small map construction in codegen
 									...input,
 									[serviceVersion]: commands.reduce((ret: string[], httpDef) => {
-										const meta = httpDef.metadata as unknown as HttpExposedServiceMeta
+										const meta = httpDef.metadata
+										if (!isHttpExposedServiceMeta(meta)) {
+											return ret
+										}
+
 										const { functionString, typeString } = metaToFunctionHttp(
 											serviceName,
 											serviceVersion,
@@ -808,7 +811,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 									// biome-ignore lint/performance/noAccumulatingSpread: small map construction in codegen
 									...input,
 									[serviceVersion]: commands.reduce((ret: string[], httpDef) => {
-										const meta = httpDef.metadata as unknown as HttpExposedServiceMeta
+										const meta = httpDef.metadata
 										const { functionString, typeString } = metaToFunctionBridge(
 											serviceName,
 											serviceVersion,
