@@ -30,8 +30,8 @@ import {
 	isInfoMessage,
 	PuristaSpanName,
 	PuristaSpanTag,
-	serializeOtp,
 	StatusCode,
+	serializeOtp,
 	UnhandledError,
 } from '@purista/core'
 import type { Channel, ChannelModel } from 'amqplib'

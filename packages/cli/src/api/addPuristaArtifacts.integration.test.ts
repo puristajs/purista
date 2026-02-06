@@ -5,6 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { addPuristaCommand } from './addPuristaCommand.js'
 import { addPuristaService } from './addPuristaService.js'
 import { addPuristaSubscription } from './addPuristaSubscription.js'
+import { puristaConfigSchema } from './loadPuristaConfig.js'
 import { scanPuristaProject } from './scanPuristaProject.js'
 
 let TEST_DIR = ''
@@ -53,13 +54,13 @@ describe('CLI artifact generation (e2e)', () => {
 	it('creates service, command, and subscription with valid wiring', async () => {
 		createBaseProject()
 
-		const puristaConfig = {
+		const puristaConfig = puristaConfigSchema.parse({
 			servicePath: 'src/service',
 			fileConvention: 'camel',
 			eventConvention: 'dotCase',
 			formatter: 'none',
 			linter: 'none',
-		} as const
+		})
 
 		let project = await scanPuristaProject(puristaConfig, TEST_DIR)
 

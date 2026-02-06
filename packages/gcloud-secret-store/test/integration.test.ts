@@ -1,8 +1,8 @@
-import { getLoggerMock } from '@purista/core'
 import { randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { getLoggerMock } from '@purista/core'
 import { GoogleSecretStore } from '../src/GoogleSecretStore.impl.js'
 
 const __filename = fileURLToPath(import.meta.url)

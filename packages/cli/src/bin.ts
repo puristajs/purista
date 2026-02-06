@@ -1,10 +1,10 @@
 #!/usr/bin/env node
+import { writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import confirm from '@inquirer/confirm'
 import input from '@inquirer/input'
 import select from '@inquirer/select'
 import { Argument, program } from 'commander'
-import { writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
 import { addPuristaCommand } from './api/addPuristaCommand.js'
 import { addPuristaService } from './api/addPuristaService.js'
 import { addPuristaSubscription } from './api/addPuristaSubscription.js'

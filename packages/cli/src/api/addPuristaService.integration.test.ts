@@ -3,11 +3,12 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { addPuristaCommand } from './addPuristaCommand.js'
 import { addPuristaService } from './addPuristaService.js'
+import { puristaConfigSchema } from './loadPuristaConfig.js'
 import { scanPuristaProject } from './scanPuristaProject.js'
 
 let DIR: string
 let oldCwd: string
-const config = {
+const config = puristaConfigSchema.parse({
 	servicePath: 'service',
 	fileConvention: 'camel',
 	eventConvention: 'camel',
@@ -15,7 +16,7 @@ const config = {
 	eventBridge: 'default',
 	formatter: 'none',
 	linter: 'none',
-} as any
+})
 
 beforeEach(() => {
 	oldCwd = process.cwd()

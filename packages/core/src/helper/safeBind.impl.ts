@@ -10,9 +10,9 @@
  * @param thisArg
  * @returns
  */
-export function safeBind<T extends (...args: any[]) => any, U>(
-	fn: T,
-	thisArg: U,
-): (...args: Parameters<T>) => ReturnType<T> {
+export function safeBind<ThisType, Args extends unknown[], ReturnType>(
+	fn: (this: ThisType, ...args: Args) => ReturnType,
+	thisArg: ThisType,
+): (...args: Args) => ReturnType {
 	return fn.bind(thisArg)
 }

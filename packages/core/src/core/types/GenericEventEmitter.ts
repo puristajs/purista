@@ -1,6 +1,9 @@
 import { EventEmitter } from 'node:events'
 
-export type EventMap = Record<string, any>
+/**
+ * Event payload map where key is the event name and value is the payload type.
+ */
+export type EventMap = Record<string, unknown>
 
 export type EventKey<T extends EventMap> = string & keyof T
 type EventReceiver<T> = (parameter: T) => void

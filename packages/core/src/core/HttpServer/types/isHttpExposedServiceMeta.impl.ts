@@ -5,11 +5,12 @@ import type { HttpExposedServiceMeta } from './HttpExposedServiceMeta.js'
  * @param input
  * @returns boolean - true if input is type of HttpExposedServiceMeta
  */
-export const isHttpExposedServiceMeta = (input?: any): input is HttpExposedServiceMeta => {
+export const isHttpExposedServiceMeta = (input?: unknown): input is HttpExposedServiceMeta => {
 	if (!input || typeof input !== 'object') {
 		return false
 	}
-	if (!input.expose?.http) {
+	const candidate = input as Partial<HttpExposedServiceMeta>
+	if (!candidate.expose?.http) {
 		return false
 	}
 	return true
