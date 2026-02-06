@@ -7,7 +7,10 @@ import { stub } from 'sinon'
 
 import { AzureSecretStore } from '../src/AzureSecretStore.impl.js'
 
-describe.skip('Azure Secret Manager secret store', () => {
+const azureTestsEnabled = ['1', 'true'].includes(process.env.PURISTA_AZURE_SECRET_STORE_TESTS ?? '')
+const describeWithAzure = azureTestsEnabled ? describe : describe.skip
+
+describeWithAzure('Azure Secret Manager secret store', () => {
 	let store: AzureSecretStore
 	beforeAll(async () => {
 		execSync(`cd ${resolve(__dirname, '../')} && npm run env:up`)
@@ -29,8 +32,12 @@ describe.skip('Azure Secret Manager secret store', () => {
 			enableRemove: true,
 			enableSet: true,
 			logger: getLoggerMock().mock,
-			vaultUrl: 'https://localhost:8443',
-			options: { serviceVersion: '7.4', disableChallengeResourceVerification: true },
+			vaultUrl: process.env.PURISTA_AZURE_VAULT_URL ?? 'https://localhost:8443',
+			options: {
+				serviceVersion: '7.4',
+				disableChallengeResourceVerification: true,
+				allowInsecureConnection: true,
+			},
 		})
 	})
 

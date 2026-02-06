@@ -1,13 +1,13 @@
+import { getLoggerMock } from '@purista/core'
 import { randomUUID } from 'node:crypto'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { getLoggerMock } from '@purista/core'
 import { GoogleSecretStore } from '../src/GoogleSecretStore.impl.js'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const keyFilename = path.join(__dirname, './gcloud-credentials.json')
+const keyFilename = process.env.PURISTA_GCLOUD_CREDENTIALS ?? path.join(__dirname, './gcloud-credentials.json')
 const hasCredentials = existsSync(keyFilename)
 const gcloudTestsEnabled = ['1', 'true'].includes(process.env.PURISTA_GCLOUD_SECRET_STORE_TESTS ?? '')
 const describeWithCredentials = hasCredentials && gcloudTestsEnabled ? describe : describe.skip

@@ -19,7 +19,7 @@ services:
     depends_on:
       - mongo
     image: infisical/backend
-    env_file: .env
+    env_file: ../../.env
     environment:
       - NODE_ENV=production
     networks:
@@ -31,7 +31,7 @@ services:
     depends_on:
       - backend
     image: infisical/frontend
-    env_file: .env
+    env_file: ../../.env
     environment:
       # - NEXT_PUBLIC_POSTHOG_API_KEY=${POSTHOG_PROJECT_API_KEY}
       - INFISICAL_TELEMETRY_ENABLED=${TELEMETRY_ENABLED}
@@ -45,7 +45,7 @@ services:
     container_name: infisical-mongo
     image: mongo
     restart: always
-    env_file: .env
+    env_file: ../../.env
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_USERNAME}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_PASSWORD}

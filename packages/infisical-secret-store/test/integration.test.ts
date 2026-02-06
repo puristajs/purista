@@ -13,8 +13,12 @@ readonly:
 st.64746e08fd775a75b3f6e6db.82cd9d993fa4e5981a8132bdadea6adc.0c902c3ca70cb49d99660537d30c0cdc
 */
 
-describe.skip('Infisical secret store', () => {
-	const baseUrl = 'http://localhost:8080/'
+const infisicalTestsEnabled = ['1', 'true'].includes(process.env.PURISTA_INFISICAL_SECRET_STORE_TESTS ?? '')
+const infisicalToken = process.env.PURISTA_INFISICAL_TOKEN
+const describeWithInfisical = infisicalTestsEnabled && infisicalToken ? describe : describe.skip
+
+describeWithInfisical('Infisical secret store', () => {
+	const baseUrl = process.env.PURISTA_INFISICAL_BASE_URL ?? 'http://localhost:8080/'
 
 	beforeAll(async () => {
 		execSync(`cd ${resolve(__dirname, '../')} && npm run env:up`)
@@ -31,7 +35,7 @@ describe.skip('Infisical secret store', () => {
 	})
 
 	const store = new InfisicalSecretStore({
-		bearerToken: 'st.64f099f22d1513b001b732b6.61aa81633200b752868d9ca701ce1a61.0dd80b7bf98043da184dc719233d476d',
+		bearerToken: infisicalToken as string,
 		baseUrl,
 		enableGet: true,
 		enableRemove: true,

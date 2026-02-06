@@ -5,10 +5,14 @@ import { getLoggerMock } from '@purista/core'
 
 import { AWSSecretStore } from '../src/AWSSecretStore.impl.js'
 
-describe('AWS Secret Manager secret store', () => {
-	beforeAll(async () => {
-		execSync(`cd ${resolve(__dirname, '../')} && npm run env:up`)
+const workspaceRoot = resolve(__dirname, '../')
+const awsTestsEnabled = ['1', 'true'].includes(process.env.PURISTA_AWS_TESTS ?? '')
+const describeIntegration = awsTestsEnabled ? describe : describe.skip
 
+describeIntegration('AWS Secret Manager secret store', () => {
+	beforeAll(async () => {
+		if (!awsTestsEnabled) return
+		execSync(`cd ${workspaceRoot} && npm run env:up`, { stdio: 'inherit' })
 		await new Promise(resolve => {
 			setTimeout(() => {
 				resolve(undefined)
@@ -17,7 +21,8 @@ describe('AWS Secret Manager secret store', () => {
 	})
 
 	afterAll(async () => {
-		execSync(`cd ${resolve(__dirname, '../')} && npm run env:down`)
+		if (!awsTestsEnabled) return
+		execSync(`cd ${workspaceRoot} && npm run env:down`)
 	})
 
 	const store = new AWSSecretStore({
