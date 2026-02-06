@@ -4,5 +4,5 @@ import type { NatsBridgeConfig } from './NatsBridgeConfig.js'
 
 export type INatsBridge = {
 	connection: NatsConnection | undefined
-	sc: Codec<any>
+	sc: Codec<unknown>
 } & EventBridgeBaseClass<NatsBridgeConfig>

@@ -104,7 +104,7 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 		this.app.onError((err, c) => {
 			this.logger.error({ err }, err.message)
 			const responseError = UnhandledError.fromError(err)
-			return c.json(responseError.getErrorResponse(), responseError.errorCode as any)
+			return c.json(responseError.getErrorResponse(), responseError.errorCode as ContentfulStatusCode)
 		})
 
 		if (this.config.enableHttpCompression) {

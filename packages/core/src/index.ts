@@ -38,7 +38,7 @@ declare global {
 		respondWith(response: Promise<Response> | Response): Promise<Response>
 	}
 	interface ExecutionContext {
-		waitUntil(promise: Promise<any>): void
+		waitUntil(promise: Promise<unknown>): void
 		passThroughOnException(): void
 	}
 }

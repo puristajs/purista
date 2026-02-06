@@ -119,7 +119,7 @@ export const getCommandHandlerRestApi = function (
 						})
 
 						span.end()
-						return c.json(result.payload, status as any)
+						return c.json(result.payload, status as ContentfulStatusCode)
 					}
 
 					if (result.eventName) {

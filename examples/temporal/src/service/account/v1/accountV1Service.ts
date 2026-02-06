@@ -1,5 +1,3 @@
-import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
-
 import { accountV1ServiceBuilder } from './accountV1ServiceBuilder.js'
 import { createAccountCommandBuilder } from './command/createAccount/createAccountCommandBuilder.js'
 
@@ -7,9 +5,12 @@ import { createAccountCommandBuilder } from './command/createAccount/createAccou
 // add only definitions and no further service config here
 // other service config should be done in ./accountServiceBuilder.ts file
 
-const commandDefinitions: CommandDefinitionList<any> = [createAccountCommandBuilder.getDefinition()]
+type CommandDefinition = Parameters<typeof accountV1ServiceBuilder.addCommandDefinition>[number]
+type SubscriptionDefinition = Parameters<typeof accountV1ServiceBuilder.addSubscriptionDefinition>[number]
 
-const subscriptionDefinitions: SubscriptionDefinitionList<any> = []
+const commandDefinitions: CommandDefinition[] = [createAccountCommandBuilder.getDefinition()]
+
+const subscriptionDefinitions: SubscriptionDefinition[] = []
 
 export const accountV1Service = accountV1ServiceBuilder
 	.addCommandDefinition(...commandDefinitions)

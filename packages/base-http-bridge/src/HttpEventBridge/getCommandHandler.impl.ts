@@ -26,6 +26,7 @@ import {
 	UnhandledError,
 } from '@purista/core'
 import { HTTP } from 'cloudevents'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 import type { IHttpEventBridge } from './types/IHttpEventBridge.js'
 import type { RouterFunction } from './types/RouterFunction.js'
@@ -110,13 +111,13 @@ export const getCommandHandler = function (
 					const payload = typeof msg.payload === 'string' ? msg.payload : JSON.stringify(msg)
 
 					const status = StatusCode.OK
-					return c.json(payload, status as any)
+					return c.json(payload, status as ContentfulStatusCode)
 				} catch (error) {
 					const err = error instanceof UnhandledError ? error : UnhandledError.fromError(error)
 					span.recordException(err)
 					this.logger.error({ err }, err.message)
 
-					return c.json(err.getErrorResponse(), err.errorCode as any)
+					return c.json(err.getErrorResponse(), err.errorCode as ContentfulStatusCode)
 				}
 			},
 		)

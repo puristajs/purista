@@ -18,7 +18,7 @@ export type AmqpBridgeConfig = {
 	/** the AMQP broker url @default amqp://localhost */
 	url?: string | Options.Connect
 	/** socket options */
-	socketOptions?: any
+	socketOptions?: unknown
 	/** the encoder(s) to be used for AMQP messages @default jsonEncoder  */
 	encoder?: Encoder
 	/** the encrypter(s) to be used for AMQP messages @default plain  */
