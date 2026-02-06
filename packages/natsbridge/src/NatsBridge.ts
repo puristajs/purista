@@ -369,14 +369,22 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		subscription: Subscription,
 		cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
 	): Promise<string> {
+		if (!this.connection) {
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
+		}
+
 		const topic = getSubscriptionTopic.bind(this)(subscription)
 
 		const queueName = getQueueGroupName(this.config.topicPrefix, subscription.subscriber)
 		const queue = subscription.eventBridgeConfig.shared ? queueName : undefined
-		this.connection?.subscribe(topic, {
+		const natsSubscription = this.connection.subscribe(topic, {
 			callback: getSubscriptionHandler(subscription, cb).bind(this),
 			queue,
 		})
+		this.subscriptions.set(
+			`${subscription.subscriber.serviceName}-${subscription.subscriber.serviceVersion},${subscription.subscriber.serviceTarget}`,
+			natsSubscription,
+		)
 
 		return topic
 	}
