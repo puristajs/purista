@@ -11,6 +11,9 @@ import type { ServiceClass } from '../types/ServiceClass.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import type { SubscriptionDefinition } from '../types/subscription/SubscriptionDefinition.js'
 
+/**
+ * Applies subscription transform-input hook with schema validation and tracing.
+ */
 export const subscriptionTransformInput = async <S extends ServiceClass = ServiceClass>(
 	serviceInstance: S,
 	logger: Logger,

@@ -8,6 +8,11 @@ import type { SubscriptionFunction } from '../core/types/subscription/Subscripti
 import type { SubscriptionFunctionContext } from '../core/types/subscription/SubscriptionFunctionContext.js'
 import type { Schema } from '../schema/index.js'
 import { validate } from '../schema/index.js'
+
+/**
+ * Wraps a subscription handler with schema validation and guard execution.
+ * Input payload/parameter is validated before execution and output can be validated after execution.
+ */
 export const getSubscriptionFunctionWithValidation = function <S extends Service>(
 	fn: SubscriptionFunction<S, any, any, any, any, any, any>,
 	inputPayloadSchema: Schema | undefined,

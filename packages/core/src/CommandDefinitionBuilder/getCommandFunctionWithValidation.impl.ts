@@ -8,6 +8,10 @@ import type { CommandFunctionContext } from '../core/types/commandType/CommandFu
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import { type Schema, validate } from '../schema/index.js'
 
+/**
+ * Wraps a command handler with schema validation and guard execution.
+ * Input payload/parameter is validated before execution and output can be validated after execution.
+ */
 export const getCommandFunctionWithValidation = function <S extends Service>(
 	fn: CommandFunction<S, any, any, any, any, any, any, any, any>,
 	inputPayloadSchema: Schema | undefined,

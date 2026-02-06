@@ -10,6 +10,9 @@ import type { Logger } from '../types/Logger.js'
 import type { ServiceClass } from '../types/ServiceClass.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 
+/**
+ * Applies command transform-input hook with schema validation and tracing.
+ */
 export const commandTransformInput = async <S extends ServiceClass>(
 	serviceInstance: S,
 	logger: Logger,

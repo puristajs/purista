@@ -3,10 +3,18 @@ import type { SchemaObject } from 'openapi3-ts/oas31'
 import type { AnySchema } from 'yup'
 import type { ZodType } from 'zod/v4'
 
+/**
+ * Common schema abstraction used across PURISTA.
+ */
 export type Schema = StandardSchemaV1
+/** Infers output type from a schema. */
 export type Infer<TSchema extends Schema> = StandardSchemaV1.InferOutput<TSchema>
+/** Infers input type from a schema. */
 export type InferIn<TSchema extends Schema> = StandardSchemaV1.InferInput<TSchema>
 
+/**
+ * Unified validation result shape for all supported schema vendors.
+ */
 export type ValidationResult<TOutput> =
 	| { success: true; data: TOutput }
 	| { success: false; issues: ReadonlyArray<StandardSchemaV1.Issue> }
@@ -24,6 +32,9 @@ const isStandardJsonSchema = (
 const isYupSchema = (schema: unknown): schema is AnySchema =>
 	!!schema && typeof schema === 'object' && '__isYupSchema__' in schema
 
+/**
+ * Validates input data with a Standard Schema compatible validator.
+ */
 export const validate = async <TSchema extends Schema>(
 	schema: TSchema,
 	value: unknown,
@@ -37,6 +48,9 @@ export const validate = async <TSchema extends Schema>(
 	return { success: true, data: (result as { value: Infer<TSchema> }).value }
 }
 
+/**
+ * Converts supported schema formats into OpenAPI-compatible JSON Schema.
+ */
 export const toJSONSchema = async (schema: Schema, options?: JsonSchemaOptions): Promise<SchemaObject> => {
 	const standardProps = schema['~standard']
 	const target = options?.target ?? 'draft-2020-12'
