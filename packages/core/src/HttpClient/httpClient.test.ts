@@ -5,6 +5,15 @@ import { HttpClient } from './HttpClient.impl.js'
 
 describe('HttpClient', () => {
 	const sandbox = createSandbox()
+	const createJsonResponse = (payload: unknown, init?: ResponseInit): Response => {
+		return new Response(JSON.stringify(payload), {
+			...init,
+			headers: {
+				'content-type': 'application/json',
+				...(init?.headers ?? {}),
+			},
+		})
+	}
 
 	afterEach(() => {
 		sandbox.restore()
@@ -30,21 +39,14 @@ describe('HttpClient', () => {
 			expect(url).toStrictEqual(new URL('http://example.com/example'))
 			expect(req?.method).toBe('POST')
 
-			const x = req?.headers as any
-			expect(x.Authorization).toBe('Bearer 123')
-			expect(x['content-type']).toBe('application/json; charset=utf-8')
+			const headers = new Headers(req?.headers)
+			expect(headers.get('authorization')).toBe('Bearer 123')
+			expect(headers.get('content-type')).toBe('application/json; charset=utf-8')
 
-			return Promise.resolve({
-				headers: {
-					get: () => 'application/json',
-				},
-				ok: true,
-				json: () => Promise.resolve(response),
-				text: () => Promise.resolve(JSON.stringify(response)),
-			} as any)
+			return Promise.resolve(createJsonResponse(response))
 		})
 
-		await expect(client.post('/example', payload)).resolves.toBe(response)
+		await expect(client.post('/example', payload)).resolves.toStrictEqual(response)
 	})
 
 	it('can patch', async () => {
@@ -58,17 +60,10 @@ describe('HttpClient', () => {
 			expect(url).toStrictEqual(new URL('http://example.com/example'))
 			expect(req?.method).toBe('PATCH')
 			expect(req?.body).toBe(JSON.stringify(payload))
-			return Promise.resolve({
-				headers: {
-					get: () => 'application/json',
-				},
-				ok: true,
-				json: () => Promise.resolve(response),
-				text: () => Promise.resolve(JSON.stringify(response)),
-			} as any)
+			return Promise.resolve(createJsonResponse(response))
 		})
 
-		await expect(client.patch('/example', payload)).resolves.toBe(response)
+		await expect(client.patch('/example', payload)).resolves.toStrictEqual(response)
 	})
 
 	it('can put', async () => {
@@ -82,17 +77,10 @@ describe('HttpClient', () => {
 			expect(url).toStrictEqual(new URL('http://example.com/example'))
 			expect(req?.method).toBe('PUT')
 			expect(req?.body).toBe(JSON.stringify(payload))
-			return Promise.resolve({
-				headers: {
-					get: () => 'application/json',
-				},
-				ok: true,
-				json: () => Promise.resolve(response),
-				text: () => Promise.resolve(JSON.stringify(response)),
-			} as any)
+			return Promise.resolve(createJsonResponse(response))
 		})
 
-		await expect(client.put('/example', payload)).resolves.toBe(response)
+		await expect(client.put('/example', payload)).resolves.toStrictEqual(response)
 	})
 
 	it('can delete', async () => {
@@ -105,17 +93,10 @@ describe('HttpClient', () => {
 			expect(url).toStrictEqual(new URL('http://example.com/example'))
 			expect(req?.method).toBe('DELETE')
 			expect(req?.body).toBeUndefined()
-			return Promise.resolve({
-				headers: {
-					get: () => 'application/json',
-				},
-				ok: true,
-				json: () => Promise.resolve(response),
-				text: () => Promise.resolve(JSON.stringify(response)),
-			} as any)
+			return Promise.resolve(createJsonResponse(response))
 		})
 
-		await expect(client.delete('/example')).resolves.toBe(response)
+		await expect(client.delete('/example')).resolves.toStrictEqual(response)
 	})
 
 	it('can get', async () => {
@@ -128,17 +109,10 @@ describe('HttpClient', () => {
 			expect(url).toStrictEqual(new URL('http://example.com/example'))
 			expect(req?.method).toBe('GET')
 			expect(req?.body).toBeUndefined()
-			return Promise.resolve({
-				headers: {
-					get: () => 'application/json',
-				},
-				ok: true,
-				json: () => Promise.resolve(response),
-				text: () => Promise.resolve(JSON.stringify(response)),
-			} as any)
+			return Promise.resolve(createJsonResponse(response))
 		})
 
-		await expect(client.get('/example')).resolves.toBe(response)
+		await expect(client.get('/example')).resolves.toStrictEqual(response)
 	})
 
 	it('can get json', async () => {
@@ -151,17 +125,10 @@ describe('HttpClient', () => {
 			expect(url).toStrictEqual(new URL('http://example.com/example'))
 			expect(req?.method).toBe('GET')
 			expect(req?.body).toBeUndefined()
-			return Promise.resolve({
-				headers: {
-					get: () => 'application/json',
-				},
-				ok: true,
-				json: () => Promise.resolve(response),
-				text: () => Promise.resolve(JSON.stringify(response)),
-			} as any)
+			return Promise.resolve(createJsonResponse(response))
 		})
 
-		await expect(client.get('/example')).resolves.toBe(response)
+		await expect(client.get('/example')).resolves.toStrictEqual(response)
 	})
 
 	it('throws', async () => {
@@ -174,15 +141,7 @@ describe('HttpClient', () => {
 			expect(url).toStrictEqual(new URL('http://example.com/example'))
 			expect(req?.method).toBe('GET')
 			expect(req?.body).toBeUndefined()
-			return Promise.resolve({
-				status: 400,
-				headers: {
-					get: () => 'application/json',
-				},
-				ok: false,
-				json: () => Promise.resolve(response),
-				text: () => Promise.resolve(JSON.stringify(response)),
-			} as any)
+			return Promise.resolve(createJsonResponse(response, { status: 400, statusText: 'Bad Request' }))
 		})
 
 		await expect(client.get('/example')).rejects.toThrow('Bad Request')

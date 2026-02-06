@@ -55,9 +55,8 @@ describe('getHttpServer', () => {
 	afterAll(async () => {
 		await eventBridge.destroy()
 
-		const s = server as any
-		if (s.closeAllConnections) {
-			await s.closeAllConnections()
+		if ('closeAllConnections' in server && typeof server.closeAllConnections === 'function') {
+			await server.closeAllConnections()
 		}
 
 		await server.close()
