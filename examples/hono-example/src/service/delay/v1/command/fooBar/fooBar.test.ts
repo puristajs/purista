@@ -3,7 +3,6 @@ import { createSandbox } from 'sinon'
 
 import { delayV1Service } from '../../delayV1Service.js'
 import { fooBarCommandBuilder } from './fooBarCommandBuilder.js'
-import type { DelayV1FooBarInputParameter, DelayV1FooBarInputPayload } from './types.js'
 
 describe('service Delay version 1 - command fooBar', () => {
 	let sandbox = createSandbox()
@@ -22,9 +21,9 @@ describe('service Delay version 1 - command fooBar', () => {
 
 		const fooBar = safeBind(fooBarCommandBuilder.getCommandFunction(), service)
 
-		const payload: DelayV1FooBarInputPayload = undefined
+		const payload: Parameters<typeof fooBar>[1] = {}
 
-		const parameter: DelayV1FooBarInputParameter = {
+		const parameter: Parameters<typeof fooBar>[2] = {
 			p: 'the_p',
 		}
 

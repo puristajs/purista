@@ -11,11 +11,11 @@ export const delayV1FooBarInputParameterSchema = extendApi(
 )
 
 // define the input payload
-export const delayV1FooBarInputPayloadSchema = extendApi(z.any(), {
+export const delayV1FooBarInputPayloadSchema = extendApi(z.unknown(), {
 	title: 'fooBar input payload schema',
 })
 
 // define the output payload
-export const delayV1FooBarOutputPayloadSchema = extendApi(z.any(), {
+export const delayV1FooBarOutputPayloadSchema = extendApi(z.unknown(), {
 	title: 'fooBar output payload schema',
 })

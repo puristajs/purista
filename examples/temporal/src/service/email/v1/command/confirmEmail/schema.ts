@@ -18,6 +18,6 @@ export const emailV1ConfirmEmailInputPayloadSchema = extendApi(
 )
 
 // define the output payload
-export const emailV1ConfirmEmailOutputPayloadSchema = extendApi(z.any(), {
+export const emailV1ConfirmEmailOutputPayloadSchema = extendApi(z.unknown(), {
 	title: 'confirmEmail output payload schema',
 })

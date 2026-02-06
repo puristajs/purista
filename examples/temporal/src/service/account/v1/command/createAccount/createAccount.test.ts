@@ -3,7 +3,6 @@ import { createSandbox } from 'sinon'
 
 import { accountV1Service } from '../../accountV1Service.js'
 import { createAccountCommandBuilder } from './createAccountCommandBuilder.js'
-import type { AccountV1CreateAccountInputParameter, AccountV1CreateAccountInputPayload } from './types.js'
 
 describe('service Account version 1 - command createAccount', () => {
 	let sandbox = createSandbox()
@@ -22,9 +21,9 @@ describe('service Account version 1 - command createAccount', () => {
 
 		const createAccount = safeBind(createAccountCommandBuilder.getCommandFunction(), service)
 
-		const payload: AccountV1CreateAccountInputPayload = undefined
+		const payload: Parameters<typeof createAccount>[1] = {}
 
-		const parameter: AccountV1CreateAccountInputParameter = {}
+		const parameter: Parameters<typeof createAccount>[2] = {}
 
 		const context = createAccountCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 

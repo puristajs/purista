@@ -20,6 +20,6 @@ export const emailV1SendVerificationEmailInputPayloadSchema = extendApi(
 )
 
 // define the output payload
-export const emailV1SendVerificationEmailOutputPayloadSchema = extendApi(z.any(), {
+export const emailV1SendVerificationEmailOutputPayloadSchema = extendApi(z.unknown(), {
 	title: 'sendVerificationEmail output payload schema',
 })
