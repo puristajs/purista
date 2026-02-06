@@ -43,9 +43,11 @@ export class NatsConfigStore extends ConfigStoreBaseClass<NatsConfigStoreConfig>
 	}
 
 	async getStore() {
-		if (this.kv) {
+		const hasHealthyConnection = this.connection && !this.connection.isClosed() && !this.connection.isDraining()
+		if (this.kv && hasHealthyConnection) {
 			return this.kv
 		}
+		this.kv = undefined
 
 		try {
 			this.connection = await connect({ ...this.config, name: this.name })
@@ -116,5 +118,7 @@ export class NatsConfigStore extends ConfigStoreBaseClass<NatsConfigStoreConfig>
 	async destroy() {
 		await this.connection?.drain()
 		await this.connection?.close()
+		this.kv = undefined
+		this.connection = undefined
 	}
 }
