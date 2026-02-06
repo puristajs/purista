@@ -49,7 +49,7 @@ export class CommandDefinitionBuilder<
 	private outputContentType: ContentType | undefined
 	private outputContentEncoding: string | undefined
 	private parameterSchema?: Schema
-	private queryParameter: QueryParameter[] = []
+	private queryParameter: QueryParameter<Infer<C['ParamsSchema']>>[] = []
 
 	private tags: string[] = []
 
@@ -348,7 +348,7 @@ export class CommandDefinitionBuilder<
 	 * @returns CommandDefinitionBuilder
 	 */
 	addQueryParameters(...queryParams: QueryParameter<Infer<C['ParamsSchema']>>[]) {
-		this.queryParameter.push(...(queryParams as any))
+		this.queryParameter.push(...queryParams)
 		return this
 	}
 
