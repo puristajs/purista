@@ -24,7 +24,7 @@ export interface ServiceClass<S extends ServiceClassTypes = ServiceClassTypes> {
 	start(): Promise<void>
 
 	/**
-	 * Wrap the given function in a opententelemetry span.
+	 * Wrap the given function in an OpenTelemetry span.
 	 * The span will be on same hierarchy level as the current span.
 	 *
 	 * @param name the name of the span

@@ -115,13 +115,13 @@ clientBuilder.destroy()
 ```
 
 The `.writeConfig` method has an optional parameter.  
-Per default, the function will try to store the config in `purista.client.json` in the current working directory.  
+By default, the function will try to store the config in `purista.client.json` in the current working directory.  
 Here you can provide a custom folder.
 
 #### Load the config file
 
 You can load a json config file with `.loadConfig()`.  
-Per default, the function will try to load the config from `purista.client.json` in the current working directory.  
+By default, the function will try to load the config from `purista.client.json` in the current working directory.  
 
 The method as an optional parameter, where you can provide a custom file location.
 
