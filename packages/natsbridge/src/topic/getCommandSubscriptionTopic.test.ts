@@ -1,17 +1,11 @@
 import { getLoggerMock, safeBind } from '@purista/core'
 
-import { getDefaultNatsBridgeConfig } from '../getDefaultNatsBridgeConfig.js'
-import type { INatsBridge } from '../types/INatsBridge.js'
+import { NatsBridge } from '../NatsBridge.js'
 import { getCommandSubscriptionTopic } from './getCommandSubscriptionTopic.impl.js'
 
 describe('getCommandSubscriptionTopic', () => {
 	it('returns the command topic', () => {
-		const bridge = {
-			logger: getLoggerMock().mock,
-			config: {
-				...getDefaultNatsBridgeConfig(),
-			},
-		} as unknown as INatsBridge
+		const bridge = new NatsBridge({ logger: getLoggerMock().mock })
 
 		const topic = safeBind(
 			getCommandSubscriptionTopic,
