@@ -166,7 +166,7 @@ const serverInstance = serve({
 import { type Service, gracefulShutdown } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
 
-const services: Service[] = [serviceInstanceA, serviceInstanceB]]
+const services: Service[] = [serviceInstanceA, serviceInstanceB]
 
 const honoService = await honoV1Service.getInstance(eventBridge,{
   serviceConfig: {
