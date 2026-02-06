@@ -14,11 +14,11 @@ import { validate } from '../schema/index.js'
  * Input payload/parameter is validated before execution and output can be validated after execution.
  */
 export const getSubscriptionFunctionWithValidation = function <S extends Service>(
-	fn: SubscriptionFunction<S, any, any, any, any, any, any>,
+	fn: SubscriptionFunction<S, unknown, unknown, unknown, any, any, any>,
 	inputPayloadSchema: Schema | undefined,
 	inputParameterSchema: Schema | undefined,
 	outputPayloadSchema: Schema | undefined,
-	beforeGuards: Record<string, SubscriptionBeforeGuardHook<S, any, any, any, any, any>> = {},
+	beforeGuards: Record<string, SubscriptionBeforeGuardHook<S, unknown, unknown, any, any, any>> = {},
 ) {
 	const wrapped = async function (
 		this: S,
@@ -28,7 +28,7 @@ export const getSubscriptionFunctionWithValidation = function <S extends Service
 	): Promise<unknown> {
 		const { logger, startActiveSpan, wrapInSpan } = context
 
-		const getPayloadValue = async (): Promise<any> => {
+		const getPayloadValue = async (): Promise<unknown> => {
 			if (!inputPayloadSchema) {
 				return payload
 			}
@@ -53,7 +53,7 @@ export const getSubscriptionFunctionWithValidation = function <S extends Service
 			})
 		}
 
-		const getParameterValue = async (): Promise<any> => {
+		const getParameterValue = async (): Promise<unknown> => {
 			if (!inputParameterSchema) {
 				return parameter
 			}
@@ -87,7 +87,7 @@ export const getSubscriptionFunctionWithValidation = function <S extends Service
 
 				for (const [name, hook] of Object.entries(beforeGuards)) {
 					const guardPromise = wrapInSpan(`beforeGuardHook.${name}`, {}, async _subSpan => {
-						return hook.bind(this, context, safePayload, safeParams)()
+						return hook.bind(this, context, safePayload as Readonly<unknown>, safeParams as Readonly<unknown>)()
 					})
 					guards.push(guardPromise)
 				}
@@ -97,7 +97,7 @@ export const getSubscriptionFunctionWithValidation = function <S extends Service
 		}
 
 		const output = await startActiveSpan('functionExecution', {}, undefined, async () => {
-			const call = fn.bind(this, context, safePayload, safeParams)
+			const call = fn.bind(this, context, safePayload as Readonly<unknown>, safeParams as Readonly<unknown>)
 			return call()
 		})
 
