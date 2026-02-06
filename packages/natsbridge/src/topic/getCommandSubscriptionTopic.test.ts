@@ -11,7 +11,7 @@ describe('getCommandSubscriptionTopic', () => {
 			config: {
 				...getDefaultNatsBridgeConfig(),
 			},
-		} as any as INatsBridge
+		} as unknown as INatsBridge
 
 		const topic = safeBind(
 			getCommandSubscriptionTopic,

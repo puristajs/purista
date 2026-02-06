@@ -10,7 +10,7 @@ describe('getSharedTopicName', () => {
 			config: {
 				...getDefaultMqttBridgeConfig(),
 			},
-		} as any as MqttBridge
+		} as unknown as MqttBridge
 
 		const originalTopic = 'purista/command/test_service/1/test_command'
 		const topic = getSharedTopicName.bind(bridge)(originalTopic)

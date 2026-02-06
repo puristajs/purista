@@ -14,7 +14,6 @@ import { createSandbox } from 'sinon'
 
 import { pingV1Service } from '../../pingV1Service'
 import { fooCommandBuilder } from './fooCommandBuilder'
-import type { PingV1FooInputParameter, PingV1FooInputPayload } from './types'
 
 describe('service Ping version 1 - command foo', () => {
   let sandbox = createSandbox()
@@ -39,16 +38,16 @@ describe('service Ping version 1 - command foo', () => {
     // alternative without
     // const foo = fooCommandBuilder.getCommandFunction().bind(service)
 
-    const payload: PingV1FooInputPayload = undefined
+    const payload: Parameters<typeof foo>[1] = {}
 
-    const parameter: PingV1FooInputParameter = {}
+    const parameter: Parameters<typeof foo>[2] = {}
 
     // get a mocked command context
     const context = fooCommandBuilder.getCommandContextMock({
       payload,
       parameter,
       sandbox,
-      ...resources: service.resources
+      resources: service.resources,
     })
 
     // execute the command including the validations and hooks
@@ -59,7 +58,7 @@ describe('service Ping version 1 - command foo', () => {
 })
 ```
 
-The intersting part is the mocked command context.  
+The interesting part is the mocked command context.  
 The `getCommandContextMock`method of the command builder returns an object, which has two entries.
 
 The `mock` entry is the mocked context, which can be passed to the command function.

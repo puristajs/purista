@@ -10,7 +10,7 @@ describe('getCommandSubscriptionTopic', () => {
 			config: {
 				...getDefaultMqttBridgeConfig(),
 			},
-		} as any as MqttBridge
+		} as unknown as MqttBridge
 
 		const topic = getCommandSubscriptionTopic.bind(bridge)({
 			serviceName: 'testService',

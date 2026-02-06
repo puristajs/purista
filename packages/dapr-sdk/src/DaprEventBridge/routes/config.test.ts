@@ -21,7 +21,7 @@ describe('config route', () => {
 		const json = sandbox.stub()
 		const context = {
 			json,
-		} as any as Context
+		} as unknown as Context
 
 		const bridge = {
 			logger: getLoggerMock().mock,
