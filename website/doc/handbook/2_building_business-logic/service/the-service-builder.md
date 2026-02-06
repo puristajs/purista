@@ -6,7 +6,7 @@ order: 201010
 
 # Service builder
 
-The service builder is a powerfull tool, to define a service. The builder helps to keep the code unified, clear & speakable and takes care of configs, types and so on.
+The service builder is a powerful tool to define a service. The builder helps to keep the code unified, clear, and understandable and takes care of configs, types, and so on.
 
 To create a new service, please use the CLI command.
 
