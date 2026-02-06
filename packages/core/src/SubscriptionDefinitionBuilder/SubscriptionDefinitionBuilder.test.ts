@@ -217,6 +217,45 @@ describe('SubscriptionDefinitionBuilder', () => {
 		expect(context.stubs.emit.some.called).toBeTruthy()
 	})
 
+	it('executes the plain function without hooks and schema validation', async () => {
+		const subscriptionFunction = safeBind(builder.getSubscriptionFunctionPlain(), service)
+		const msg = getCommandMessageMock({
+			payload: {
+				payload,
+				parameter,
+			},
+		})
+
+		const context = builder.getSubscriptionContextMock({
+			message: msg,
+			sandbox,
+		})
+		context.stubs.service.OtherService[2].testSubscription.callsFake(async (payload, parameter) => {
+			return {
+				result: {
+					payload: { ...payload, other: 'added by invoke' },
+					parameter,
+					toBeRemovedInResponse: 'kept in plain mode',
+				},
+			}
+		})
+
+		const result = await subscriptionFunction(
+			context.mock,
+			{ ...payload, def: 'default_value' },
+			{ ...parameter, def: 'default_param' },
+		)
+
+		expect(result).toStrictEqual({
+			result: {
+				payload: { ...payload, other: 'added by invoke', def: 'default_value' },
+				parameter: { ...parameter, def: 'default_param' },
+				toBeRemovedInResponse: 'kept in plain mode',
+			},
+		})
+		expect(beforeOneStub.callCount).toBe(0)
+	})
+
 	it('does not throw on transform input', async () => {
 		const fn = builder.getTransformInputFunction()
 

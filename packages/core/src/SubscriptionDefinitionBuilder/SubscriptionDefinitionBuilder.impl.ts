@@ -737,7 +737,7 @@ export class SubscriptionDefinitionBuilder<
 			})
 		}
 
-		this.fn as SubscriptionFunction<
+		return this.fn as SubscriptionFunction<
 			S,
 			Infer<C['PayloadSchema']>,
 			Infer<C['ParamsSchema']>,

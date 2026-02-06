@@ -259,6 +259,14 @@ describe('CommandDefinitionBuilder', () => {
 		expect(beforeOneStub.callCount).toBe(0)
 	})
 
+	it('returns configured before/after guard hooks by name', () => {
+		const beforeHook = builder.getBeforeGuardHook('beforeOne')
+		const afterHook = builder.getAfterGuardHook('afterOne')
+
+		expect(typeof beforeHook).toBe('function')
+		expect(typeof afterHook).toBe('function')
+	})
+
 	it('does not throw on transform input', async () => {
 		const fn = builder.getTransformInputFunction()
 

@@ -561,7 +561,7 @@ export class CommandDefinitionBuilder<
 	 * @returns The before guard hook, or undefined if not found.
 	 */
 	getBeforeGuardHook(name: keyof typeof this.hooks.beforeGuard) {
-		this.hooks.beforeGuard[name] as CommandBeforeGuardHook<
+		return this.hooks.beforeGuard[name] as CommandBeforeGuardHook<
 			S,
 			GetMessagePayloadType<C['PayloadSchema'], C['TransformInputPayloadSchema']>,
 			GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
@@ -608,7 +608,7 @@ export class CommandDefinitionBuilder<
 	 * @return The after guard hook, or undefined if not found.
 	 */
 	getAfterGuardHook(name: keyof typeof this.hooks.afterGuard) {
-		this.hooks.afterGuard[name] as CommandAfterGuardHook<
+		return this.hooks.afterGuard[name] as CommandAfterGuardHook<
 			S,
 			GetMessagePayloadType<C['PayloadSchema'], C['TransformInputPayloadSchema']>,
 			GetMessageParamsType<C['ParamsSchema'], C['TransformInputParamsSchema']>,
