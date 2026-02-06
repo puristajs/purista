@@ -46,7 +46,8 @@ clientBuilder.destroy()
 ```
 
 ::: info
-`generateHEventBridgeClient(...)` still exists for backward compatibility, but `generateEventBridgeClient(...)` is the preferred method name.
+Deprecated alias: `generateHEventBridgeClient(...)`.  
+Use `generateEventBridgeClient(...)` for all new code.
 :::
 
 ## Use the generated client
