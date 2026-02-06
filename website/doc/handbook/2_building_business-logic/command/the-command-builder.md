@@ -198,7 +198,7 @@ Event names should be in the past tense.
 
 ## Transformer
 
-The idea of having transformers, follows the PURISTA principal to separate things and decouple business logic from technical needs.
+The idea of using transformers follows the PURISTA principle of separating concerns and decoupling business logic from technical needs.
 Transformers are responsible to convert the raw message payload in/to the data shape & type, the command function is expecting.
 
 Use transformers for:
@@ -208,9 +208,9 @@ Use transformers for:
 
 ### Input transformer
 
-If a input transform is set, it will be executed as very first step in the message handling.  
-The input transformer has it's own schemas for input payload and parameters.  
-If the schema validation fails, an error response will automatically created and sent back to the caller. The command guards and the command function are not executed, if this validations fails.  
+If an input transform is set, it will be executed as the very first step in message handling.  
+The input transformer has its own schemas for input payload and parameters.  
+If schema validation fails, an error response is automatically created and sent back to the caller. The command guards and the command function are not executed if this validation fails.  
 The error will be a `HandledError` with status of `Bad Request`, as the input is not as expected.
 
 ```typescript
@@ -247,9 +247,9 @@ Because of this, the input transformer must be defined after the command functio
 
 ### Output transformer
 
-If a output transform is set, it will be executed as very last step in the message handling.  
-The output transformer has it's own schema, which will validate the returned value of the transform function.  
-If the schema validation fails, an error response will automatically created and sent back to the caller. The command guards and the command function are not executed, if this validations fails.
+If an output transform is set, it will be executed as the very last step in message handling.  
+The output transformer has its own schema, which validates the returned value of the transform function.  
+If schema validation fails, an error response is automatically created and sent back to the caller. The command guards and the command function are not executed if this validation fails.
 
 ```typescript
 import {  
