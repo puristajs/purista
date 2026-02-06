@@ -9,6 +9,7 @@ order: 30
 ## Create a new project
 
 The easiest and fastest way to start with PURISTA is using your package manager's `create` command.  
+The scaffold is based on blueprint templates and guides you through runtime/event bridge/server choices.
 
 In the project folder, simply execute:
 
@@ -36,11 +37,11 @@ The CLI tool will guide you through all the necessary steps.
 
 ## PURISTA CLI
 
-PURISTA provides a command line interface (CLI) that allows you to create new services, and add commands or subscriptions to existing services.  
+PURISTA provides a command line interface (CLI) that allows you to create new services, and add commands or subscriptions to existing services.
 
-__It is highly recommended to install the CLI global__.
+You can either install the CLI globally, or run it with `npx`.
 
-You can manually install the PURISTA CLI via:
+Global install:
 
 ::: code-group
 
@@ -62,11 +63,16 @@ pnpm add -g @purista/cli
 
 :::
 
-If you have installed the CLI globally, you can add service, commands and subscriptions to your project.  
-In your project root simply run:
+In your project root run:
 
 ```bash
 purista add [service|command|subscription]
+```
+
+Or without global install:
+
+```bash
+npx @purista/cli add [service|command|subscription]
 ```
 
 Generated command and subscription schema stubs default to `z.unknown()` for payloads.

@@ -22,6 +22,7 @@ export const getSubscriptionTypeFileContent = (input: {
 	writer
 		.write('import type ')
 		.block(() => {
+			writer.writeLine(`${schemaPrefix}InputParameterSchema,`)
 			writer.writeLine(`${schemaPrefix}InputPayloadSchema,`)
 			if (addSuccessEvent) {
 				writer.writeLine(`${schemaPrefix}OutputPayloadSchema,`)
@@ -30,6 +31,8 @@ export const getSubscriptionTypeFileContent = (input: {
 		.write(`from './schema.js'`)
 	writer.blankLine()
 
+	writer.writeLine(`export type ${typePrefix}InputParameter = z.input<typeof ${schemaPrefix}InputParameterSchema>`)
+	writer.blankLine()
 	writer.writeLine(`export type ${typePrefix}InputPayload = z.input<typeof ${schemaPrefix}InputPayloadSchema>`)
 	if (addSuccessEvent) {
 		writer.blankLine()

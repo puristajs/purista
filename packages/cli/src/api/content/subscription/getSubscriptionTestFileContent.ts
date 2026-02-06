@@ -35,7 +35,7 @@ export const getSubscriptionTestFileContent = (input: {
 	writer.blankLine()
 	writer.writeLine(`import { ${serviceName} } from '../../${serviceFileName}.js'`)
 	writer.writeLine(`import { ${subscriptionBuilderName} } from './${subscriptionBuilderFileName}.js'`)
-	writer.writeLine(`import type { ${typePrefix}InputPayload } from './types.js'`)
+	writer.writeLine(`import type { ${typePrefix}InputParameter, ${typePrefix}InputPayload } from './types.js'`)
 	writer.blankLine()
 	writer
 		.write(
@@ -77,6 +77,7 @@ export const getSubscriptionTestFileContent = (input: {
 					writer.blankLine()
 					writer.writeLine(`const payload: ${typePrefix}InputPayload = undefined`)
 					writer.blankLine()
+					writer.writeLine(`const parameter: ${typePrefix}InputParameter = {}`)
 					writer.blankLine()
 					writer.writeLine('const message = getCommandSuccessMessageMock(payload)')
 					writer.blankLine()
@@ -85,7 +86,7 @@ export const getSubscriptionTestFileContent = (input: {
 					)
 					writer.blankLine()
 					writer.writeLine(
-						`const result = await ${camelCase(input.subscriptionName)}(context.mock, payload, service.resources)`,
+						`const result = await ${camelCase(input.subscriptionName)}(context.mock, payload, parameter)`,
 					)
 					writer.blankLine()
 					writer.writeLine('expect(result).toBe(undefined)')

@@ -38,8 +38,9 @@ npm create purista@latest
 ```
 
 The CLI tool will guide you through all the steps.
+The setup uses blueprint templates so you can choose the initial runtime and infrastructure options.
 
-After successful init, install the PURISTA CLI globally, and simply start adding your business logic by adding your first service.
+After successful init, start adding business logic with the PURISTA CLI by adding your first service.
 
 ```bash
 purista add service

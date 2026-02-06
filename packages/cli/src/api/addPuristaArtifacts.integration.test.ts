@@ -126,9 +126,11 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(readFileSync(join(commandDir, 'signUpCommandBuilder.ts'), 'utf-8')).toContain('signUpCommandBuilder')
 
 		const subscriptionSchema = readFileSync(join(subscriptionDir, 'schema.ts'), 'utf-8')
+		expect(subscriptionSchema).toContain('userV1SendWelcomeEmailInputParameterSchema')
 		expect(subscriptionSchema).toContain('userV1SendWelcomeEmailInputPayloadSchema')
 		expect(subscriptionSchema).toContain('userV1SendWelcomeEmailOutputPayloadSchema')
 		const subscriptionTypes = readFileSync(join(subscriptionDir, 'types.ts'), 'utf-8')
+		expect(subscriptionTypes).toContain('UserV1SendWelcomeEmailInputParameter')
 		expect(subscriptionTypes).toContain('UserV1SendWelcomeEmailInputPayload')
 		expect(subscriptionTypes).toContain('UserV1SendWelcomeEmailOutputPayload')
 		expect(readFileSync(join(subscriptionDir, 'sendWelcomeEmailSubscriptionBuilder.ts'), 'utf-8')).toContain(

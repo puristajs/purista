@@ -32,8 +32,8 @@ pnpm create purista@latest
 
 :::
 
-Please follow the steps in the installation process.
-It is recommended to install the PURISTA CLI globally.
+Please follow the scaffold steps and choose the fitting blueprint template options.
+After setup, add services/commands/subscriptions via the PURISTA CLI.
 
 ## Project structure
 

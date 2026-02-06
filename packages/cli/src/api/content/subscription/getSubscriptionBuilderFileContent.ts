@@ -41,6 +41,7 @@ export const getSubscriptionBuilderFileContent = (input: {
 	writer
 		.write('import')
 		.inlineBlock(() => {
+			writer.writeLine(`${schemaPrefix}InputParameterSchema,`)
 			writer.writeLine(`${schemaPrefix}InputPayloadSchema,`)
 			if (addSuccessEvent) {
 				writer.writeLine(`${schemaPrefix}OutputPayloadSchema,`)
@@ -69,6 +70,7 @@ export const getSubscriptionBuilderFileContent = (input: {
 		}
 
 		writer.writeLine(`.addPayloadSchema(${schemaPrefix}InputPayloadSchema)`)
+		writer.writeLine(`.addParameterSchema(${schemaPrefix}InputParameterSchema)`)
 		if (addSuccessEvent) {
 			const eventName = input.puristaProject.eventEnumFileName.length
 				? `ServiceEvent.${pascalCase(input.responseEventName as string)}`
@@ -83,7 +85,7 @@ export const getSubscriptionBuilderFileContent = (input: {
 			)
 		}
 		writer
-			.write('.setSubscriptionFunction(async function (_context, _payload)')
+			.write('.setSubscriptionFunction(async function (_context, _payload, _parameter)')
 			.inlineBlock(() => {
 				writer.writeLine(`// implementation of the subscription ${camelCase(input.subscriptionName)} goes here`)
 			})
