@@ -72,6 +72,11 @@ purista add [service|command|subscription]
 Generated command and subscription schema stubs default to `z.unknown()` for payloads.
 This keeps generated code type-safe by default and avoids accidental `any` propagation.
 
+::: warning Keep CLI-Managed Definition Lists
+When the CLI generates or updates service files, keep `commandDefinitions` and `subscriptionDefinitions` as typed constants.
+Renaming or untyping these lists can break follow-up CLI updates and weaken inferred types.
+:::
+
 ## PURISTA config file
 
 Since version 1.12.0, the PURISTA CLI expects to find a `purista.json` file in the root of your project. This file contains basic information about your project. Especially the settings for file and event casing conventions are important.
