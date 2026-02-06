@@ -1,30 +1,27 @@
 import { describe, expect, it } from 'vitest'
 import { convertToProjectFileCasing } from './convertToProjectFileCasing.js'
+import { puristaConfigSchema, type PuristaConfig } from './loadPuristaConfig.js'
 
-const config = { fileConvention: 'camel' } as any
+const getConfig = (fileConvention: PuristaConfig['fileConvention']) => puristaConfigSchema.parse({ fileConvention })
 
 describe('convertToProjectFileCasing', () => {
 	it('converts to camelCase by default', () => {
-		expect(convertToProjectFileCasing('hello world', config)).toBe('helloWorld')
+		expect(convertToProjectFileCasing('hello world', getConfig('camel'))).toBe('helloWorld')
 	})
 
 	it('supports kebab case', () => {
-		const conf = { fileConvention: 'kebab' } as any
-		expect(convertToProjectFileCasing('hello world', conf)).toBe('hello-world')
+		expect(convertToProjectFileCasing('hello world', getConfig('kebab'))).toBe('hello-world')
 	})
 
 	it('supports pascal case', () => {
-		const conf = { fileConvention: 'pascal' } as any
-		expect(convertToProjectFileCasing('hello world', conf)).toBe('HelloWorld')
+		expect(convertToProjectFileCasing('hello world', getConfig('pascal'))).toBe('HelloWorld')
 	})
 
 	it('supports snake case', () => {
-		const conf = { fileConvention: 'snake' } as any
-		expect(convertToProjectFileCasing('hello world', conf)).toBe('hello_world')
+		expect(convertToProjectFileCasing('hello world', getConfig('snake'))).toBe('hello_world')
 	})
 
 	it('supports pascal snake case', () => {
-		const conf = { fileConvention: 'pascalSnake' } as any
-		expect(convertToProjectFileCasing('hello world', conf)).toBe('Hello_World')
+		expect(convertToProjectFileCasing('hello world', getConfig('pascalSnake'))).toBe('Hello_World')
 	})
 })
