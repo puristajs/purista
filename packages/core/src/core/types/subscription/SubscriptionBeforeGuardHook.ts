@@ -15,7 +15,7 @@ export type SubscriptionBeforeGuardHook<
 	S extends ServiceClass = ServiceClass,
 	FunctionPayloadType = unknown,
 	FunctionParamsType = unknown,
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = (

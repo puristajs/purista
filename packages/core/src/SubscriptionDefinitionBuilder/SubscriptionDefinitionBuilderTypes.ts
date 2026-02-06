@@ -9,7 +9,7 @@ export type SubscriptionDefinitionBuilderTypes<
 	TransformInputPayloadSchema extends Schema = Schema,
 	TransformInputParamsSchema extends Schema = Schema,
 	TransformOutputSchema extends Schema = Schema,
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = InvokeList,
 	EmitList extends Record<string, Schema> = Record<string, Schema>,
 > = {

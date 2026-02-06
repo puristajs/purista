@@ -26,7 +26,7 @@ export type CommandDefinition<
 	FunctionOutputType,
 	FinalFunctionOutputType,
 	TransformOutputHookOutput,
-	Resources extends Record<string, any>,
+	Resources extends Record<string, unknown>,
 	Invokes extends InvokeList,
 	EmitList extends Record<string, Schema>,
 	MetadataType extends CommandDefinitionMetadataBase = CommandDefinitionMetadataBase,

@@ -15,7 +15,7 @@ export type SubscriptionAfterGuardHook<
 	FunctionResultType = unknown,
 	FunctionPayloadOutputType = unknown,
 	FunctionParameterType = unknown,
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = (

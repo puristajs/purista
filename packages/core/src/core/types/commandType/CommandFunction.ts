@@ -16,7 +16,7 @@ export type CommandFunction<
 	FunctionPayloadType = unknown,
 	FunctionParamsType = unknown,
 	FunctionOutputType = unknown,
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = (

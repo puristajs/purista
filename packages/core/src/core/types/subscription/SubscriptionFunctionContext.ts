@@ -16,7 +16,7 @@ import type { Prettify } from '../Prettify.js'
  * @group Subscription
  */
 export type SubscriptionFunctionContextEnhancements<
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = {
@@ -52,7 +52,7 @@ export type SubscriptionFunctionContextEnhancements<
  * @group Subscription
  */
 export type SubscriptionFunctionContext<
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = Prettify<ContextBase & SubscriptionFunctionContextEnhancements<Resources, Invokes, EmitList>>

@@ -6,7 +6,7 @@ import type { Prettify } from '../Prettify.js'
 /**
  * @group Subscription
  */
-export type SubscriptionTransformFunctionContext<Resources extends Record<string, any> = EmptyObject> = Prettify<
+export type SubscriptionTransformFunctionContext<Resources extends Record<string, unknown> = EmptyObject> = Prettify<
 	ContextBase & {
 		/** the original received message */
 		message: Readonly<EBMessage>
