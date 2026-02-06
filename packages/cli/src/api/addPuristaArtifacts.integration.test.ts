@@ -110,6 +110,8 @@ describe('CLI artifact generation (e2e)', () => {
 		const serviceFileContent = readFileSync(serviceFile, 'utf-8')
 		expect(serviceFileContent).toContain('commandDefinitions')
 		expect(serviceFileContent).toContain('subscriptionDefinitions')
+		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addCommandDefinition']>[0][] =")
+		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addSubscriptionDefinition']>[0][] =")
 		expect(serviceFileContent).toContain('signUpCommandBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('sendWelcomeEmailSubscriptionBuilder.getDefinition()')
 
