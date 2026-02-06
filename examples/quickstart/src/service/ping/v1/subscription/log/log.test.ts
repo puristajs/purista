@@ -30,7 +30,7 @@ describe('service Ping version 1 - subscription log', () => {
 		}
 
 		// define the test input parameter
-		const parameter = undefined
+		const parameter: Parameters<typeof log>[2] = {}
 
 		// create a mock message with the expected input for the subscription function
 		const message = getCommandSuccessMessageMock(payload)
@@ -39,7 +39,7 @@ describe('service Ping version 1 - subscription log', () => {
 		const context = logSubscriptionBuilder.getSubscriptionContextMock({ message, sandbox })
 
 		// execute the subscription function
-		const result = await log(context.mock, payload, parameter as any)
+		const result = await log(context.mock, payload, parameter)
 
 		expect(result).toBeUndefined()
 	})
