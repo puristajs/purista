@@ -5,6 +5,16 @@ import { createInfoMessage, EBMessageType } from '../core/index.js'
 import { getCommandMessageMock, getCustomMessageMessageMock, getLoggerMock } from '../mocks/index.js'
 import { DefaultEventBridge } from './DefaultEventBridge.impl.js'
 
+class TestDefaultEventBridge extends DefaultEventBridge {
+	public setHealthy(healthy: boolean) {
+		this.healthy = healthy
+	}
+
+	public getPendingInvocations() {
+		return this.pendingInvocations
+	}
+}
+
 describe('DefaultEventBridge', () => {
 	const sender = {
 		serviceName: 'SenderService',
@@ -141,7 +151,7 @@ describe('DefaultEventBridge', () => {
 			async () => {
 				throw new Error('unexpected failure')
 			},
-			{} as any,
+			{ expose: {} },
 		)
 
 		const commandMessage = getCommandMessageMock({
@@ -194,17 +204,17 @@ describe('DefaultEventBridge', () => {
 	})
 
 	it('returns unhealthy state when internal health flag is false', async () => {
-		const eventBridge = new DefaultEventBridge()
+		const eventBridge = new TestDefaultEventBridge()
 		await eventBridge.start()
 
-		;(eventBridge as any).healthy = false
+		eventBridge.setHealthy(false)
 
 		await expect(eventBridge.isHealthy()).resolves.toBe(false)
 		await eventBridge.destroy()
 	})
 
 	it('rejects invoke and cleans pending invocations when emit fails', async () => {
-		const eventBridge = new DefaultEventBridge()
+		const eventBridge = new TestDefaultEventBridge()
 		await eventBridge.start()
 		stub(eventBridge, 'emitMessage').rejects(new Error('emit failed'))
 
@@ -223,15 +233,15 @@ describe('DefaultEventBridge', () => {
 		})
 
 		await expect(eventBridge.invoke(commandMessage)).rejects.toBeInstanceOf(UnhandledError)
-		expect((eventBridge as any).pendingInvocations.size).toBe(0)
+		expect(eventBridge.getPendingInvocations().size).toBe(0)
 		await eventBridge.destroy()
 	})
 
 	it('waits for running work before destroy completes', async () => {
-		const eventBridge = new DefaultEventBridge({ defaultCommandTimeout: 500 })
+		const eventBridge = new TestDefaultEventBridge({ defaultCommandTimeout: 500 })
 		await eventBridge.start()
 
-		;(eventBridge as any).pendingInvocations.set('pending-id', {
+		eventBridge.getPendingInvocations().set('pending-id', {
 			resolve: () => {
 				/* noop */
 			},
@@ -241,7 +251,7 @@ describe('DefaultEventBridge', () => {
 		})
 
 		setTimeout(() => {
-			;(eventBridge as any).pendingInvocations.delete('pending-id')
+			eventBridge.getPendingInvocations().delete('pending-id')
 		}, 30)
 
 		const start = Date.now()

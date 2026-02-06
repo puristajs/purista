@@ -1,17 +1,10 @@
 import { getLoggerMock } from '@purista/core'
-import { getDefaultMqttBridgeConfig } from '../getDefaultMqttBridgeConfig.impl.js'
-import type { MqttBridge } from '../MqttEventBridge.js'
 import { getCommandResponseSubscriptionTopic } from './getCommandResponseSubscriptionTopic.impl.js'
+import { MqttBridge } from '../MqttEventBridge.js'
 
 describe('getCommandResponseSubscriptionTopic', () => {
 	it('returns the command response topic for the current instance', () => {
-		const bridge = {
-			logger: getLoggerMock().mock,
-			instanceId: 'abc123',
-			config: {
-				...getDefaultMqttBridgeConfig(),
-			},
-		} as unknown as MqttBridge
+		const bridge = new MqttBridge({ logger: getLoggerMock().mock, instanceId: 'abc123' })
 
 		const topic = getCommandResponseSubscriptionTopic.bind(bridge)()
 
