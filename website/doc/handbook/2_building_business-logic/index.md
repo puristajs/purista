@@ -6,8 +6,22 @@ order: 200000
 
 # Building business logic
 
-In this section of the handbook, we'll take a closer look at PURISTA.
+This section explains how to implement domain logic with strong types and clear boundaries.
 
-Here, you'll discover how to efficiently implement your business logic with speed and reliability. 
+## Core flow
 
-Let's dive in and explore the key concepts of PURISTA together.
+1. Define a [Service](./service/index.md)
+2. Add [Commands](./command/index.md)
+3. Add [Subscriptions](./subscription/index.md)
+4. Connect [Stores](./stores/index.md) and resources
+5. Expose endpoints via [REST/GraphQL adapters](./exposing_endpoints/index.md)
+
+## Suggested chapter order
+
+- [Service](./service/index.md)
+- [Command](./command/index.md)
+- [Subscription](./subscription/index.md)
+- [Stores](./stores/index.md)
+- [Error handling](./error-handling.md)
+- [Connect to a PURISTA application](./connect_to_a_purista_application/index.md)
+- [Advanced](./advanced/index.md)

@@ -23,6 +23,21 @@ A service provides:
 In general, a service itself should not contain any logic. It should only act as a logical container for commands and subscriptions.  
 Additionally, services should not hold state data.
 
+## Typical implementation order
+
+1. Define service info and create service builder.
+2. Add config schema (if needed).
+3. Define resources used by commands/subscriptions.
+4. Add command and subscription definitions.
+5. Create service instance and call `start()`.
+
+Continue with:
+
+- [The service builder](./the-service-builder.md)
+- [Add configuration](./add-a-service-config.md)
+- [Define resources](./define-resources.md)
+- [Unit test the service](./unit-test-a-service.md)
+
 ## Idea Behind the Design
 
 When a new service is added, it is done via the service builder. The service builder is responsible for collecting all required information. It then provides clearly defined interfaces. By having these interfaces, the actual implementation of a resource, store, or any other dependency can be easily swapped out without affecting other parts of the system.
