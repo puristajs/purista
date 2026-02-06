@@ -57,7 +57,7 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
 	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
 		const fetchSecretFromStore = async (secretName: string) => {
 			const path = join(
-				this.config.clientConfig?.daprApiToken ?? DAPR_API_VERSION,
+				this.config.clientConfig?.daprApiVersion ?? DAPR_API_VERSION,
 				'secrets',
 				this.config.secretStoreName as string,
 				secretName,

@@ -48,6 +48,8 @@ describe('DaprConfigStore', () => {
 			const result = await daprConfigStore.getConfig('foo', 'bar')
 			expect(result).toEqual({ foo: 'foo', bar: 'bar' })
 			expect(httpClientGetStub.callCount).toBe(2)
+			expect(httpClientGetStub.firstCall.args[0]).toBe('v1.0-alpha1/configuration/test')
+			expect(httpClientGetStub.secondCall.args[0]).toBe('v1.0-alpha1/configuration/test')
 		})
 	})
 

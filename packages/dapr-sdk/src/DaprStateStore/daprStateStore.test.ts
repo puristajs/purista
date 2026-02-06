@@ -48,6 +48,8 @@ describe('DaprStateStore', () => {
 			})
 
 			expect(httpClientGetStub.callCount).toBe(2)
+			expect(httpClientGetStub.firstCall.args[0]).toBe('v1.0/state/test/myState1')
+			expect(httpClientGetStub.secondCall.args[0]).toBe('v1.0/state/test/myState2')
 		})
 
 		it('should throw an error if get state is disabled by config', async () => {
@@ -85,6 +87,7 @@ describe('DaprStateStore', () => {
 			})
 
 			await expect(stateStore.setState(stateName, {})).resolves.toBeUndefined()
+			expect(httpClientGetStub.firstCall.args[0]).toBe('v1.0/state/test')
 		})
 
 		it('should throw an UnhandledError with StatusCode.Unauthorized if enableSet is false', async () => {
@@ -121,6 +124,7 @@ describe('DaprStateStore', () => {
 			})
 
 			await expect(stateStore.removeState(stateName)).resolves.toBeUndefined()
+			expect(httpClientGetStub.firstCall.args[0]).toBe('v1.0/state/test/test-state')
 		})
 
 		it('should throw an UnhandledError with StatusCode.Unauthorized if enableSet is false', async () => {

@@ -47,6 +47,8 @@ describe('DaprSecretStore', () => {
 				[secretName2]: secretValue2,
 			})
 			expect(httpClientGetStub.callCount).toBe(2)
+			expect(httpClientGetStub.firstCall.args[0]).toBe('v1.0/secrets/test/mySecret1')
+			expect(httpClientGetStub.secondCall.args[0]).toBe('v1.0/secrets/test/mySecret2')
 		})
 
 		it('should throw an error if get secret is disabled by config', async () => {

@@ -56,7 +56,7 @@ export class DaprConfigStore extends ConfigStoreBaseClass<DaprConfigStoreConfig>
 	): Promise<ObjectWithKeysFromStringArray<ConfigNames>> {
 		const fetchConfigFromStore = async (configName: string) => {
 			const path = join(
-				this.config.clientConfig?.daprApiToken ?? DAPR_API_VERSION,
+				this.config.clientConfig?.daprApiVersion ?? DAPR_API_VERSION,
 				'configuration',
 				this.config.configStoreName as string,
 			)
