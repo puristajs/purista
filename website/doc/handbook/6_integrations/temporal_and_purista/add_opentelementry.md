@@ -47,7 +47,7 @@ import type { EventBridge } from '@purista/core'
 import { initLogger } from '@purista/core'
 import { NatsBridge } from '@purista/natsbridge'
 
-import jaegerExporterOptions from './config/jaegerExporterOptions.js' // [!code ++]
+import jaegerExporterOptions from '../config/jaegerExporterOptions.js' // [!code ++]
 import natsBridgeConfig from '../config/natsBridgeConfig.js'
 import temporalConfig from '../config/temporalConfig.js'
 import * as activities from './activities/index.js'
