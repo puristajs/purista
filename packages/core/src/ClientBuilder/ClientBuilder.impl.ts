@@ -733,10 +733,10 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	}
 
 	/**
-	 * Generates the zero-dependency HTTP client source files
+	 * Generates the zero-dependency EventBridge client source files.
 	 * @param serviceDefinition
 	 */
-	async generateHEventBridgeClient(serviceDefinition: FullServiceDefinition) {
+	async generateEventBridgeClient(serviceDefinition: FullServiceDefinition) {
 		const ext = this.config.buildAs !== 'commonjs' ? '.js' : ''
 
 		const clientStream = createWriteStream(join(this.getOutputPath(), 'src', 'eventbridge_client.ts'))
@@ -775,6 +775,13 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 			new Promise((resolve, _reject) => clientStream.end(() => resolve(undefined))),
 			new Promise((resolve, _reject) => typeStream.end(() => resolve(undefined))),
 		])
+	}
+
+	/**
+	 * @deprecated Use `generateEventBridgeClient` instead.
+	 */
+	async generateHEventBridgeClient(serviceDefinition: FullServiceDefinition) {
+		return this.generateEventBridgeClient(serviceDefinition)
 	}
 
 	private generateEventBridgeClientSource(
