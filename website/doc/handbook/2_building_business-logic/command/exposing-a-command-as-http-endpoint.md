@@ -19,7 +19,7 @@ The web server service will build the router and OpenApi definition based on thi
 
 ## Define the URL
 
-If you want to make a command accessable via an HTTP endpoint, you need to define the HTTP method and the url path.  
+If you want to make a command accessible via an HTTP endpoint, you need to define the HTTP method and the URL path.  
 
 ```typescript
 import {  
@@ -39,7 +39,7 @@ const myCommandBuilder = myServiceBuilder
   })
 ```
 
-In the example above, we define, that the command is accessable via `GET` method.  
+In the example above, we define that the command is accessible via `GET` method.  
 The given path `ping` will result in final url path `/api/v1/ping`.  
 
 The first part `/api` is a configurable value in PURISTA HTTP servers, which defaults to `api`.  
@@ -69,7 +69,7 @@ As an example:
 )
 ```
 
-It is a very powerfull in combination with input/output transformer functions.
+This is very powerful in combination with input/output transformer functions.
 
 ### Path parameter
 
@@ -99,7 +99,7 @@ Do not forget to mark it in the schema as optional `z.string().optional()` or se
 
 ### Adding query parameters
 
-In case you need to use query parameters, you can use zhe `addQueryParameters` method of the command definition builder.
+In case you need to use query parameters, you can use the `addQueryParameters` method of the command definition builder.
 
 ```typescript
 import {  

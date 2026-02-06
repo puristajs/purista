@@ -6,14 +6,14 @@ order: 206010
 
 # Config Stores
 
-In PURISTA applications, there are two general ways to make configuration data accessable for your commands and subscriptions.
+In PURISTA applications, there are two general ways to make configuration data accessible for your commands and subscriptions.
 
-You can provide conffigurations via the [service configuration](../service/add-a-service-config.md) or via config stores.  
-Both is valid and you might ask why and when to use which option.
+You can provide configurations via the [service configuration](../service/add-a-service-config.md) or via config stores.  
+Both are valid and you might ask why and when to use which option.
 
-Configrations, which are necessarly needed to be able to start a service and which is not changeable during runtime, must be provided via the service configration. As an example: database configurations, setting of timeouts and similar.
+Configurations that are necessary to start a service and are not changeable during runtime must be provided via the service configuration. As an example: database configurations, timeout settings, and similar values.
 
-Configurations, like urls of third party provides credential user names (not passwords!), which you might also want to change during runtime, should be stored in config stores.
+Configurations like URLs of third-party providers, credential user names (not passwords!), and similar values that may change during runtime should be stored in config stores.
 
 |   | config store  | service config  |
 |---|---|---|
@@ -30,7 +30,7 @@ If you need feature flags in your application, you might have a look at [OpenFea
 
 Using config stores, allows to manage configuration, without the need to restart instances, and to use solutions like AWS Parameter Store, without directly coupling vendor specific solutions to business code.
 
-Also, if a command or subscriptions needs further configurations like urls of external services, than the config store is a good place to persist this information.
+Also, if a command or subscription needs further configurations like URLs of external services, then the config store is a good place to persist this information.
 
 The config store is a simple interface to a key-value-store. The key must be a string and the value can be any type which can be serialized via JSON stringify/parse.
 
@@ -95,7 +95,7 @@ Config stores per default have:
 - disabled setter
 - disabled removal
 
-You need to explicit enable via config if needed
+You need to explicitly enable them via config if needed.
 :::
 
 ## Default config store
@@ -112,7 +112,7 @@ const store = new DefaultConfigStore({
   enableSet: true,
   config: {
     initialValue: 'initial',
-    fromEnvVar: process.env.MY_VALUE;
+    fromEnvVar: process.env.MY_VALUE,
   },
 })
 
