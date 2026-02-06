@@ -517,7 +517,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		eventBridgeConfig: DefinitionEventBridgeConfig,
 	): Promise<string> {
 		if (!this.connection) {
-			throw new Error('No connection - not connected')
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'No connection - not connected')
 		}
 
 		const queueName = getCommandQueueName(address, this.config.namePrefix)
@@ -706,7 +706,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
 	): Promise<string> {
 		if (!this.connection) {
-			throw new Error('No connection - not connected')
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'No connection - not connected')
 		}
 
 		const noAck = !!subscription.eventBridgeConfig.autoacknowledge

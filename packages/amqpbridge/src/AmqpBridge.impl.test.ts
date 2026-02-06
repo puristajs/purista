@@ -1,5 +1,6 @@
 import {
 	getCommandMessageMock,
+	getCommandSuccessMessageMock,
 	type PendigInvocation,
 	StatusCode,
 	type Subscription,
@@ -122,6 +123,53 @@ describe('AmqpBridge', () => {
 
 		await expect(bridge.invoke(input, 50)).rejects.toBeInstanceOf(UnhandledError)
 		expect(internals.pendingInvocations.size).toBe(0)
+	})
+
+	it('throws typed service unavailable error when registering command without connection', async () => {
+		const bridge = new AmqpBridge()
+
+		await expect(
+			bridge.registerCommand(
+				{
+					serviceName: 'Users',
+					serviceVersion: '1',
+					serviceTarget: 'create',
+				},
+				async () => getCommandSuccessMessageMock({}),
+				{} as never,
+				{
+					autoacknowledge: true,
+					durable: true,
+					shared: true,
+				},
+			),
+		).rejects.toMatchObject({
+			errorCode: StatusCode.ServiceUnavailable,
+		})
+	})
+
+	it('throws typed service unavailable error when registering subscription without connection', async () => {
+		const bridge = new AmqpBridge()
+
+		await expect(
+			bridge.registerSubscription(
+				{
+					subscriber: {
+						serviceName: 'Users',
+						serviceVersion: '1',
+						serviceTarget: 'onCreated',
+					},
+					eventBridgeConfig: {
+						shared: false,
+						durable: false,
+						autoacknowledge: false,
+					},
+				},
+				async () => undefined,
+			),
+		).rejects.toMatchObject({
+			errorCode: StatusCode.ServiceUnavailable,
+		})
 	})
 
 	it('rejects pending invocations during destroy', async () => {
