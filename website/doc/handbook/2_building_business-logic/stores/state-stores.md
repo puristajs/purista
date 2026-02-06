@@ -8,7 +8,7 @@ order: 206030
 
 State stores are essential for scaling.  
 Decoupling the business logic from the actual used state store, allows the usage of different databases or vendor solutions.  
-The state store is a simple interface to a key-value-store. They key must be a string and the value can be any type which can be serialized via JSON stringify/parse.
+The state store is a simple interface to a key-value-store. The key must be a string and the value can be any type which can be serialized via JSON stringify/parse.
 
 ## Usage
 
@@ -28,14 +28,14 @@ It can be used like this:
 ```typescript
 .setCommandFunction(async function (context, payload) {
 
-  // set a config
+  // set a state value
   await context.states.setState('port', 8080)
 
-  // get a config
+  // get state values
   const myState = await context.states.getState('hostUrl', 'port')
   console.log(myState) // outputs: { hostUrl: "http://example.com", port: 8080 }
 
-  // remove a config
+  // remove a state value
   await context.states.removeState('port')
 })
 ```
@@ -70,10 +70,10 @@ export class CustomStore extends StateStoreBaseClass<CustomStoreConfig> implemen
   private client
 
   constructor(config: StoreBaseConfig<CustomStoreConfig>) {
-    super('CustomStoreName', config, options)
+    super('CustomStoreName', config)
 
     // your custom logic goes here:
-    this.client = customCLient.connect(this.config.config.url)
+    this.client = customClient.connect(this.config.config.url)
   }
 
   protected async getStateImpl<StateNames extends string[]>(...stateNames: StateNames): Promise<ObjectWithKeysFromStringArray<StateNames>> {
@@ -129,7 +129,7 @@ export class CustomStore extends StateStoreBaseClass<CustomStoreConfig> implemen
 
   async destroy() {
     await this.client.disconnect()
-    await destroy()
+    super.destroy()
   }
 }
 ```

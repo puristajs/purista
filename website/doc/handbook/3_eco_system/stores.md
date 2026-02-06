@@ -15,9 +15,10 @@ Here you can see a list of all available stores.
 
 | vendor                                                                                  | package   |
 |---                                                                                      |---        |
-| [AWS Systems Manager Parameter Store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)             | [planned](https://github.com/puristajs/purista/issues/104)      |
+| [AWS Systems Manager Parameter Store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html)             | [@purista/aws-config-store](../../api/@purista/aws-config-store/README.md)      |
 | [Azure App Configuration](https://azure.microsoft.com/en-us/products/app-configuration)   | [planned](https://github.com/puristajs/purista/issues/105)      |
 | [Dapr](https://dapr.io)       | [@purista/dapr-sdk](../5_deploy_and_scale/microservice_style/dapr.md) |
+| [NATS](https://nats.io)       | [@purista/nats-config-store](../../api/@purista/nats-config-store/README.md)  |
 | [Redis](https://redis.io)     | [@purista/redis-config-store](../../api/@purista/redis-config-store/README.md)  |
 
 ### Community config stores
@@ -49,6 +50,7 @@ Here you can see a list of all available stores.
 
 | vendor                        | package                                                                       |
 |---                            |---                                                                            |
+| [NATS](https://nats.io)       | [@purista/nats-state-store](../../api/@purista/nats-state-store/README.md)  |
 | [Redis](https://redis.io)     | [@purista/redis-state-store](../../api/@purista/redis-state-store/README.md)  |
 | [Dapr](https://dapr.io)       | [@purista/dapr-sdk](../5_deploy_and_scale/microservice_style/dapr.md) |
 

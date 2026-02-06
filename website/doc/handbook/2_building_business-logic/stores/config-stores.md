@@ -116,7 +116,7 @@ const store = new DefaultConfigStore({
   },
 })
 
-console.log(store.getState('initialValue')) // outputs: initial
+console.log(await store.getConfig('initialValue')) // outputs: { initialValue: "initial" }
 ```
 
 ## Custom config store
@@ -145,7 +145,7 @@ export class CustomStore extends ConfigStoreBaseClass<CustomStoreConfig> impleme
   constructor(config?: StoreBaseConfig<CustomStoreConfig>) {
     super('CustomStoreName', config)
 
-    this.client = customCLient.connect(this.config.config.url)
+    this.client = customClient.connect(this.config.config.url)
   }
 
   protected async getConfigImpl<ConfigNames extends string[]>(
