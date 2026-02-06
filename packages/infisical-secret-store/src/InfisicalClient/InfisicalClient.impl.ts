@@ -166,6 +166,12 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
 		try {
 			await this.patch<{ secret: Secret }>(encodeURI(`/api/v3/secrets/${name}`), payload)
 		} catch (patchError) {
+			if (!(patchError instanceof UnhandledError) || patchError.errorCode !== StatusCode.NotFound) {
+				const err = UnhandledError.fromError(patchError)
+				this.logger.error({ err })
+				throw err
+			}
+
 			this.logger.debug({ err: patchError }, 'Secret seems to be a new one')
 			try {
 				await this.post<{ secret: Secret }>(encodeURI(`/api/v3/secrets/${name}`), payload)
