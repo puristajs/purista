@@ -25,7 +25,7 @@ describe('config route', () => {
 
 		const bridge = {
 			logger: getLoggerMock().mock,
-		} as any
+		} as unknown as ThisParameterType<typeof configRoute>
 
 		const fn = safeBind(configRoute, bridge)
 		await fn(context)

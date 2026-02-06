@@ -79,16 +79,16 @@ describe('DaprClient', () => {
 		const command = getCommandMessageMock()
 
 		sandbox.stub(global, 'fetch').callsFake(() =>
-			Promise.resolve({
-				headers: {
-					get: () => 'application/json',
-				},
-				ok: true,
-				json: () => Promise.resolve(response),
-				text: () => Promise.resolve(JSON.stringify(response)),
-			} as any),
+			Promise.resolve(
+				new Response(JSON.stringify(response), {
+					status: 200,
+					headers: {
+						'content-type': 'application/json',
+					},
+				}),
+			),
 		)
-		await expect(client.invoke(command)).resolves.toBe(response)
+		await expect(client.invoke(command)).resolves.toStrictEqual(response)
 	})
 
 	it('can send a event a command', async () => {
@@ -102,14 +102,14 @@ describe('DaprClient', () => {
 		const command = getCommandMessageMock({ eventName: 'test' })
 
 		sandbox.stub(global, 'fetch').callsFake(() =>
-			Promise.resolve({
-				headers: {
-					get: () => 'application/json',
-				},
-				ok: true,
-				json: () => Promise.resolve(response),
-				text: () => Promise.resolve(JSON.stringify(response)),
-			} as any),
+			Promise.resolve(
+				new Response(JSON.stringify(response), {
+					status: 200,
+					headers: {
+						'content-type': 'application/json',
+					},
+				}),
+			),
 		)
 		await expect(client.sendEvent(command)).resolves.toBeUndefined()
 	})
@@ -135,14 +135,14 @@ describe('DaprClient', () => {
 		})
 
 		sandbox.stub(global, 'fetch').callsFake(() =>
-			Promise.resolve({
-				headers: {
-					get: () => 'application/json',
-				},
-				ok: true,
-				json: () => Promise.resolve({}),
-				text: () => Promise.resolve(JSON.stringify({})),
-			} as any),
+			Promise.resolve(
+				new Response('{}', {
+					status: 200,
+					headers: {
+						'content-type': 'application/json',
+					},
+				}),
+			),
 		)
 		await expect(client.isSidecarAvailable()).resolves.toBeTruthy()
 	})
@@ -155,14 +155,14 @@ describe('DaprClient', () => {
 		})
 
 		sandbox.stub(global, 'fetch').callsFake(() =>
-			Promise.resolve({
-				headers: {
-					get: () => 'application/json',
-				},
-				ok: true,
-				json: () => Promise.reject(new Error('unavailable')),
-				text: () => Promise.reject(new Error('unavailable')),
-			} as any),
+			Promise.resolve(
+				new Response('invalid-json', {
+					status: 200,
+					headers: {
+						'content-type': 'application/json',
+					},
+				}),
+			),
 		)
 
 		await expect(client.isSidecarAvailable()).resolves.toBeFalsy()
