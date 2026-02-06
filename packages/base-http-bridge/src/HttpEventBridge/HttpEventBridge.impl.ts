@@ -244,6 +244,14 @@ export class HttpEventBridge<CustomConfig extends HttpEventBridgeConfig>
 				throw error
 			}
 
+			if (message === undefined) {
+				return undefined as T
+			}
+
+			if (typeof message !== 'object' || message === null) {
+				throw new UnhandledError(StatusCode.BadGateway, 'invalid command response from sidecar')
+			}
+
 			if (isCommandErrorResponse(message)) {
 				const err = message.isHandledError ? HandledError.fromMessage(message) : UnhandledError.fromMessage(message)
 				this.logger.error({ err }, err.message)

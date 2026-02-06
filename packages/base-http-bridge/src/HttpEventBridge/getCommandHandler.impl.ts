@@ -108,10 +108,8 @@ export const getCommandHandler = function (
 						return c.body(null)
 					}
 
-					const payload = typeof msg.payload === 'string' ? msg.payload : JSON.stringify(msg)
-
 					const status = StatusCode.OK
-					return c.json(payload, status as ContentfulStatusCode)
+					return c.json(msg, status as ContentfulStatusCode)
 				} catch (error) {
 					const err = error instanceof UnhandledError ? error : UnhandledError.fromError(error)
 					span.recordException(err)

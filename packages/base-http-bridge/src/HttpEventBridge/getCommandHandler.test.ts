@@ -1,0 +1,115 @@
+import type { Span } from '@opentelemetry/api'
+import type { DefinitionEventBridgeConfig, EBMessageAddress, HttpExposedServiceMeta } from '@purista/core'
+import {
+	EBMessageType,
+	getCommandMessageMock,
+	getCommandSuccessMessageMock,
+	getLoggerMock,
+	StatusCode,
+} from '@purista/core'
+import { Hono } from 'hono'
+import { describe, expect, it, vi } from 'vitest'
+
+import { getCommandHandler } from './getCommandHandler.impl.js'
+import type { IHttpEventBridge } from './types/IHttpEventBridge.js'
+
+const createBridgeMock = (): IHttpEventBridge => {
+	const spanMock = {
+		setAttribute: vi.fn(),
+		recordException: vi.fn(),
+		end: vi.fn(),
+	} as unknown as Span
+
+	return {
+		config: {
+			defaultCommandTimeout: 1000,
+		},
+		logger: getLoggerMock().mock,
+		emitMessage: vi.fn().mockResolvedValue(undefined),
+		startActiveSpan: vi
+			.fn()
+			.mockImplementation(async (_name, _options, _context, fn: (span: Span) => Promise<Response>) => fn(spanMock)),
+	} as unknown as IHttpEventBridge
+}
+
+const address: EBMessageAddress = {
+	serviceName: 'service',
+	serviceVersion: '1',
+	serviceTarget: 'target',
+}
+
+const metadata: HttpExposedServiceMeta = {
+	expose: {
+		http: {
+			method: 'POST',
+			path: '/command',
+			openApi: {
+				isSecure: false,
+				description: 'test',
+				summary: 'test',
+			},
+		},
+	},
+}
+
+const eventBridgeConfig: DefinitionEventBridgeConfig = {
+	durable: true,
+	autoacknowledge: true,
+	shared: true,
+}
+
+describe('getCommandHandler', () => {
+	it('returns a command response envelope for non-empty payloads', async () => {
+		const bridge = createBridgeMock()
+		const inputMessage = getCommandMessageMock<{ a: number }, { b: number }>({
+			payload: { payload: { a: 1 }, parameter: { b: 2 } },
+		})
+
+		const cb = vi.fn(async () =>
+			getCommandSuccessMessageMock(
+				{ ok: true },
+				{
+					messageType: EBMessageType.CommandSuccessResponse,
+				},
+				inputMessage,
+			),
+		)
+
+		const handler = getCommandHandler.call(bridge, address, cb, metadata, eventBridgeConfig)
+		const app = new Hono()
+		app.post('/command', handler)
+
+		const response = await app.request('http://localhost/command', {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+			},
+			body: JSON.stringify(inputMessage),
+		})
+
+		expect(response.status).toBe(StatusCode.OK)
+		const body = (await response.json()) as { payload?: { ok: boolean }; messageType?: string }
+		expect(body.messageType).toBe(EBMessageType.CommandSuccessResponse)
+		expect(body.payload).toEqual({ ok: true })
+	})
+
+	it('returns no-content for empty payload responses', async () => {
+		const bridge = createBridgeMock()
+		const inputMessage = getCommandMessageMock()
+		const cb = vi.fn(async () => getCommandSuccessMessageMock(undefined, undefined, inputMessage))
+
+		const handler = getCommandHandler.call(bridge, address, cb, metadata, eventBridgeConfig)
+		const app = new Hono()
+		app.post('/command', handler)
+
+		const response = await app.request('http://localhost/command', {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+			},
+			body: JSON.stringify(inputMessage),
+		})
+
+		expect(response.status).toBe(StatusCode.NoContent)
+	})
+})
