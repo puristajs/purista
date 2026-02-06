@@ -48,23 +48,23 @@
 		}
 	},
 	"devDependencies": {
-		"@types/node": "^25.0.3",
+		"@types/node": "^25.2.1",
 		"@types/qs": "^6.14.0",
 		"@types/sinon": "^21.0.0",
 		"@types/swagger-ui-dist": "^3.30.6",
 		"sinon": "^21.0.1",
-		"tshy": "^3.1.0",
-		"vitest": "^4.0.16"
+		"tshy": "^3.1.3",
+		"vitest": "^4.0.18"
 	},
 	"dependencies": {
 		"@fastify/compress": "^8.3.1",
 		"@fastify/cors": "^11.2.0",
 		"@fastify/helmet": "^13.0.2",
-		"@fastify/static": "^8.3.0",
+		"@fastify/static": "^9.0.0",
 		"@opentelemetry/api": "^1.9.0",
-		"@opentelemetry/semantic-conventions": "^1.38.0",
+		"@opentelemetry/semantic-conventions": "^1.39.0",
 		"@purista/core": "*",
-		"fastify": "^5.6.2",
+		"fastify": "^5.7.4",
 		"openapi3-ts": "^4.5.0",
 		"swagger-ui-dist": "^5.31.0",
 		"trouter": "^4.0.0"

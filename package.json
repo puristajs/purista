@@ -8,6 +8,7 @@
 		"lint": "npx @biomejs/biome check",
 		"lint:fix": "npx @biomejs/biome check --write",
 		"test": "vitest",
+		"test:integration": "node --env-file=.env ./node_modules/vitest/vitest.mjs",
 		"test:unit": "tsc --noEmit && vitest -c ./vitest.config.unit.ts",
 		"update:doc": "npm run gitclean && typedoc --options typedoc.json && git add --all && git commit -S -am \"doc: update api documentation\" && git-cliff > CHANGELOG.md && git commit -am \"doc: update CHANGELOG\" && npm run build:doc -w website",
 		"release:major": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version major --no-git-tag-version --workspaces && npm run commit:major && npm publish --workspaces",
@@ -34,24 +35,24 @@
 		"website"
 	],
 	"devDependencies": {
-		"@biomejs/biome": "^2.3.10",
-		"@types/node": "^25.0.3",
+		"@biomejs/biome": "^2.3.14",
+		"@types/node": "^25.2.1",
 		"@types/sinon": "^21.0.0",
-		"@vitest/coverage-v8": "^4.0.16",
-		"check-dependency-version-consistency": "^5.0.1",
-		"git-cliff": "^2.11.0",
-		"npm-check-updates": "^19.2.0",
+		"@vitest/coverage-v8": "^4.0.18",
+		"check-dependency-version-consistency": "^6.0.0",
+		"git-cliff": "^2.12.0",
+		"npm-check-updates": "^19.3.2",
 		"rimraf": "^6.1.2",
 		"sinon": "^21.0.1",
-		"testcontainers": "^11.10.0",
+		"testcontainers": "^11.11.0",
 		"ts-node": "^10.9.2",
 		"tsx": "^4.21.0",
-		"typedoc": "^0.28.15",
+		"typedoc": "^0.28.16",
 		"typedoc-plugin-markdown": "^4.9.0",
 		"typescript": "^5.9.3",
-		"vitest": "^4.0.16"
+		"vitest": "^4.0.18"
 	},
-	"packageManager": "npm@11.7.0",
+	"packageManager": "npm@11.9.0",
 	"dependencies": {
 		"npm": "^11.2.0"
 	}
