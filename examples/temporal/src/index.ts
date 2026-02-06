@@ -23,7 +23,7 @@ export const main = async () => {
 
 	const spanProcessor = new SimpleSpanProcessor(exporter)
 
-	// Keep `Service<any>[]` here: heterogeneous service instances currently rely on this common supertype.
+	// Service generic parameters are invariant; heterogeneous service instances require a widened base type here.
 	const services: Service<any>[] = []
 
 	// initiate the event bridge as first step
