@@ -1,4 +1,5 @@
 import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { addPuristaCommand } from './addPuristaCommand.js'
@@ -20,7 +21,7 @@ const config = puristaConfigSchema.parse({
 
 beforeEach(() => {
 	oldCwd = process.cwd()
-	DIR = mkdtempSync('purista-cli')
+	DIR = mkdtempSync(join(tmpdir(), 'purista-cli-'))
 	process.chdir(DIR)
 	writeFileSync('tsconfig.json', JSON.stringify({ compilerOptions: { module: 'ESNext', target: 'ESNext' } }))
 })

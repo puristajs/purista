@@ -1,4 +1,5 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { getEventNames } from './getEventNames.js'
@@ -14,7 +15,7 @@ afterEach(() => {
 
 describe('getEventNames', () => {
 	it('reads ServiceEvent enum from a project root path', () => {
-		TEST_DIR = mkdtempSync('purista-cli-events-')
+		TEST_DIR = mkdtempSync(join(tmpdir(), 'purista-cli-events-'))
 		writeFileSync(
 			join(TEST_DIR, 'tsconfig.json'),
 			JSON.stringify({ compilerOptions: { target: 'ES2022', module: 'ES2022' } }),
@@ -42,7 +43,7 @@ export enum ServiceEvent {
 	})
 
 	it('reads ServiceEvent const object without a tsconfig', () => {
-		TEST_DIR = mkdtempSync('purista-cli-events-')
+		TEST_DIR = mkdtempSync(join(tmpdir(), 'purista-cli-events-'))
 		const servicePath = join(TEST_DIR, 'src', 'service')
 		mkdirSync(servicePath, { recursive: true })
 		const eventFile = join(servicePath, 'serviceEvent.enum.ts')

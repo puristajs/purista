@@ -11,7 +11,9 @@ import { scanPuristaProject } from './scanPuristaProject.js'
 let TEST_DIR = ''
 
 const createBaseProject = () => {
-	TEST_DIR = mkdtempSync(join(process.cwd(), 'tmp-e2e-'))
+	const coreDtsPath = join(process.cwd(), '..', 'core', 'dist', 'esm', 'index.d.ts')
+	const coreGlobPath = join(process.cwd(), '..', 'core', 'dist', 'esm', '*')
+	TEST_DIR = mkdtempSync(join(process.cwd(), 'node_modules', 'tmp-e2e-'))
 	writeFileSync(
 		join(TEST_DIR, 'tsconfig.json'),
 		JSON.stringify({
@@ -19,12 +21,11 @@ const createBaseProject = () => {
 				target: 'ES2022',
 				module: 'NodeNext',
 				moduleResolution: 'NodeNext',
-				types: ['node'],
 				skipLibCheck: true,
 				baseUrl: '.',
 				paths: {
-					'@purista/core': ['../../core/dist/esm/index.d.ts'],
-					'@purista/core/*': ['../../core/dist/esm/*'],
+					'@purista/core': [coreDtsPath],
+					'@purista/core/*': [coreGlobPath],
 				},
 			},
 			include: ['src/**/*.ts'],

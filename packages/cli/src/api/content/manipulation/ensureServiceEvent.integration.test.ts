@@ -1,16 +1,15 @@
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { puristaConfigSchema } from '../../loadPuristaConfig.js'
 import type { PuristaProjectInfo } from '../../scanPuristaProject.js'
-import { ensureServiceEvent } from './ensureServiceEvent.js' // Adjust the path if needed
+import { ensureServiceEvent } from './ensureServiceEvent.js'
 
-// Create a temporary test directory
-let TEST_DIR = join(process.cwd(), 'tmp-test')
+let TEST_DIR = ''
 
 beforeEach(() => {
-	//rmSync(TEST_DIR, { recursive: true, force: true }) // Clean up previous runs
-	TEST_DIR = mkdtempSync('purista-cli-integration')
+	TEST_DIR = mkdtempSync(join(tmpdir(), 'purista-cli-integration-'))
 	writeFileSync(
 		join(TEST_DIR, 'tsconfig.json'),
 		JSON.stringify({
@@ -24,7 +23,9 @@ beforeEach(() => {
 })
 
 afterEach(() => {
-	rmSync(TEST_DIR, { recursive: true, force: true }) // Clean up after tests
+	if (TEST_DIR) {
+		rmSync(TEST_DIR, { recursive: true, force: true })
+	}
 })
 
 describe('ensureServiceEvent - Integration Test', () => {

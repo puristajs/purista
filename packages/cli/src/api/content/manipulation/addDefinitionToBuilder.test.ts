@@ -1,4 +1,5 @@
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { addDefinitionToBuilder } from './addDefinitionToBuilder.js'
@@ -13,7 +14,7 @@ afterEach(() => {
 
 describe('addDefinitionToBuilder', () => {
 	it('adds import and definition entry without requiring a tsconfig', async () => {
-		TEST_DIR = mkdtempSync('purista-cli-builder-')
+		TEST_DIR = mkdtempSync(join(tmpdir(), 'purista-cli-builder-'))
 		const serviceFile = join(TEST_DIR, 'userV1Service.ts')
 		writeFileSync(
 			serviceFile,
@@ -45,7 +46,7 @@ export const userV1Service = userV1ServiceBuilder
 	})
 
 	it('does not add duplicate imports or definitions', async () => {
-		TEST_DIR = mkdtempSync('purista-cli-builder-')
+		TEST_DIR = mkdtempSync(join(tmpdir(), 'purista-cli-builder-'))
 		const serviceFile = join(TEST_DIR, 'userV1Service.ts')
 		writeFileSync(
 			serviceFile,
@@ -84,7 +85,7 @@ export const userV1Service = userV1ServiceBuilder
 	})
 
 	it('does not treat similarly named definitions as duplicates', async () => {
-		TEST_DIR = mkdtempSync('purista-cli-builder-')
+		TEST_DIR = mkdtempSync(join(tmpdir(), 'purista-cli-builder-'))
 		const serviceFile = join(TEST_DIR, 'userV1Service.ts')
 		writeFileSync(
 			serviceFile,

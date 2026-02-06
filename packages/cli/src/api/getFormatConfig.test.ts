@@ -1,11 +1,12 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { getFormatConfig } from './getFormatConfig.js'
 
 describe('getFormatConfig', () => {
 	it('returns default when no config file exists', async () => {
-		const dir = mkdtempSync('purista-format')
+		const dir = mkdtempSync(join(tmpdir(), 'purista-format-'))
 		try {
 			const result = await getFormatConfig(dir)
 			expect(result.formatter).toBe('none')
@@ -18,7 +19,7 @@ describe('getFormatConfig', () => {
 	})
 
 	it('reads biome configuration', async () => {
-		const dir = mkdtempSync('purista-format')
+		const dir = mkdtempSync(join(tmpdir(), 'purista-format-'))
 		try {
 			const config = {
 				formatter: { indentWidth: 4, indentStyle: 'space', quoteStyle: 'double' },
