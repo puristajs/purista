@@ -60,7 +60,9 @@ export const ServerObjectSchema = z.object({
 export const httpServerServiceV1ConfigSchema = z.object({
 	// Keep `any`: Fastify options are intentionally provider/plugin specific and validated by Fastify itself.
 	fastify: z.any().default({
-		ignoreTrailingSlash: true,
+		routerOptions: {
+			ignoreTrailingSlash: true,
+		},
 	}), //
 	logLevel: z.enum(['info', 'error', 'warn', 'debug', 'trace', 'fatal']).optional().default('warn'),
 	port: z.number().int().min(1).default(9090),
