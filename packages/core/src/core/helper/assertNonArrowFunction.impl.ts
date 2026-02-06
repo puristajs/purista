@@ -1,4 +1,4 @@
-export const assertNonArrowFunction = (fn: (...args: any[]) => unknown, label: string) => {
+export const assertNonArrowFunction = (fn: (...args: never[]) => unknown, label: string) => {
 	const source = fn.toString().trim()
 	const isArrowFunction = /^(async\s*)?(?:\([^)]*\)|[A-Za-z_$][\w$]*)\s*=>/.test(source)
 
