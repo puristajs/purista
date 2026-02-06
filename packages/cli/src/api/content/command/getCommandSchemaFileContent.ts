@@ -22,7 +22,7 @@ export const getCommandSchemaFileContent = (input: {
 	)
 	writer.blankLine()
 	writer.writeLine(
-		`export const ${schemaPrefix}InputPayloadSchema = extendApi(z.any(), { title: 'input payload schema' })`,
+		`export const ${schemaPrefix}InputPayloadSchema = extendApi(z.unknown(), { title: 'input payload schema' })`,
 	)
 	writer.blankLine()
 	writer.writeLine(

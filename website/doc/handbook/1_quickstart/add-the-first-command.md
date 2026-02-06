@@ -139,10 +139,10 @@ import { z } from 'zod/v4'
 export const userV1SignUpInputParameterSchema = extendApi(z.object({}), { title: 'sign up input parameter schema' })
 
 // define the input payload
-export const userV1SignUpInputPayloadSchema = extendApi(z.any(), { title: 'sign up input payload schema' })
+export const userV1SignUpInputPayloadSchema = extendApi(z.unknown(), { title: 'sign up input payload schema' })
 
 // define the output payload
-export const userV1SignUpOutputPayloadSchema = extendApi(z.any(), { title: 'sign up output payload schema' })
+export const userV1SignUpOutputPayloadSchema = extendApi(z.void(), { title: 'sign up output payload schema' })
 ```
 
 :::

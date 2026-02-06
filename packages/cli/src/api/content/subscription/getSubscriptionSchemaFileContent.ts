@@ -20,7 +20,7 @@ export const getSubscriptionSchemaFileContent = (input: {
 	writer.writeLine(`import { z } from 'zod/v4'`)
 	writer.blankLine()
 	writer.writeLine(
-		`export const ${schemaPrefix}InputPayloadSchema = extendApi(z.any(), { title: 'input payload schema' })`,
+		`export const ${schemaPrefix}InputPayloadSchema = extendApi(z.unknown(), { title: 'input payload schema' })`,
 	)
 
 	if (addSuccessEvent) {
