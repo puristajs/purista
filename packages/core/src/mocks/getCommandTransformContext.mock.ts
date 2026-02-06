@@ -14,7 +14,7 @@ import { getCommandMessageMock } from './messages/getCommandMessage.mock.js'
 export const getCommandTransformContextMock = <
 	MessagePayloadType = unknown,
 	MessageParamsType = unknown,
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 >(input: {
 	payload: MessagePayloadType
 	parameter: MessageParamsType
@@ -44,7 +44,7 @@ export const getCommandTransformContextMock = <
 	const resourcesProxy = new Proxy(
 		{},
 		{
-			get(target: Record<string, any>, name) {
+			get(target: object, name) {
 				void target
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
 					throw new Error('Invalid property access on resources proxy')

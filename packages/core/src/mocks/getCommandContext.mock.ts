@@ -19,7 +19,7 @@ export const getCommandContextMock = <
 	MessageParamsType,
 	FunctionPayloadType,
 	FunctionParamsType,
-	Resources extends Record<string, any>,
+	Resources extends Record<string, unknown>,
 	Invokes extends InvokeList,
 	EmitList extends Record<string, Schema>,
 >(input: {
@@ -53,10 +53,10 @@ export const getCommandContextMock = <
 			updateName: input.sandbox?.stub() ?? stub(),
 			end: input.sandbox?.stub() ?? stub(),
 			isRecording: () => true,
-			recordException: (input.sandbox?.stub() ?? stub()).callsFake((err: any) => {
-				// biome-ignore lint/suspicious/noConsole: no logger available
-				console.error(err)
-			}),
+				recordException: (input.sandbox?.stub() ?? stub()).callsFake((err: unknown) => {
+					// biome-ignore lint/suspicious/noConsole: no logger available
+					console.error(err)
+				}),
 		}
 	}
 
@@ -65,7 +65,7 @@ export const getCommandContextMock = <
 	const resourcesProxy = new Proxy(
 		{},
 		{
-			get(target: Record<string, any>, name) {
+			get(target: object, name) {
 				void target
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
 					throw new Error('Invalid property access on resources proxy')
@@ -92,12 +92,11 @@ export const getCommandContextMock = <
 		}
 
 		return new Proxy(() => {}, {
-			get(obj: Record<string, any>, name) {
+			get(_obj: object, name) {
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
 					return undefined
 				}
 
-				const x = obj[name]
 				if (lvl === 0) {
 					const na = {
 						...adr,
@@ -106,7 +105,7 @@ export const getCommandContextMock = <
 					if (!invokeMocks[na.serviceName]) {
 						invokeMocks[na.serviceName] = {}
 					}
-					return getInvokeProxy<typeof x>(na, lvl + 1)
+					return getInvokeProxy<unknown>(na, lvl + 1)
 				}
 				if (lvl === 1) {
 					const na = {
@@ -116,7 +115,7 @@ export const getCommandContextMock = <
 					if (!invokeMocks[na.serviceName][na.serviceVersion]) {
 						invokeMocks[na.serviceName][na.serviceVersion] = {}
 					}
-					return getInvokeProxy<typeof x>(na, lvl + 1)
+					return getInvokeProxy<unknown>(na, lvl + 1)
 				}
 
 				if (lvl === 2) {
@@ -171,8 +170,8 @@ export const getCommandContextMock = <
 			? { payload: input.message }
 			: {
 					payload: {
-						payload: input.payload as any,
-						parameter: input.parameter as any,
+						payload: input.payload as unknown as MessagePayloadType,
+						parameter: input.parameter as unknown as MessageParamsType,
 					},
 				},
 	)

@@ -12,7 +12,7 @@ import { getLoggerMock } from './getLogger.mock.js'
  *
  * @group Unit test helper
  * */
-export const getSubscriptionTransformContextMock = <Resources extends Record<string, any> = EmptyObject>(input: {
+export const getSubscriptionTransformContextMock = <Resources extends Record<string, unknown> = EmptyObject>(input: {
 	message: EBMessage
 	resources?: Partial<Resources>
 	sandbox?: SinonSandbox
@@ -40,7 +40,7 @@ export const getSubscriptionTransformContextMock = <Resources extends Record<str
 	const resourcesProxy = new Proxy(
 		{},
 		{
-			get(target: Record<string, any>, name) {
+			get(target: object, name) {
 				void target
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
 					throw new Error('Invalid property access on resources proxy')

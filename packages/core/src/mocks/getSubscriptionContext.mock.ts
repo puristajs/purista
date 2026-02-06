@@ -15,7 +15,7 @@ import { getLoggerMock } from './getLogger.mock.js'
  * @group Unit test helper
  * */
 export const getSubscriptionContextMock = <
-	Resources extends Record<string, any>,
+	Resources extends Record<string, unknown>,
 	Invokes extends InvokeList,
 	EmitList extends Record<string, Schema>,
 >(input: {
@@ -62,12 +62,11 @@ export const getSubscriptionContextMock = <
 		}
 
 		return new Proxy(() => {}, {
-			get(obj: Record<string, any>, name) {
+			get(_obj: object, name) {
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
 					return undefined
 				}
 
-				const x = obj[name]
 				if (lvl === 0) {
 					const na = {
 						...adr,
@@ -76,7 +75,7 @@ export const getSubscriptionContextMock = <
 					if (!invokeMocks[na.serviceName]) {
 						invokeMocks[na.serviceName] = {}
 					}
-					return getInvokeProxy<typeof x>(na, lvl + 1)
+					return getInvokeProxy<unknown>(na, lvl + 1)
 				}
 				if (lvl === 1) {
 					const na = {
@@ -86,7 +85,7 @@ export const getSubscriptionContextMock = <
 					if (!invokeMocks[na.serviceName][na.serviceVersion]) {
 						invokeMocks[na.serviceName][na.serviceVersion] = {}
 					}
-					return getInvokeProxy<typeof x>(na, lvl + 1)
+					return getInvokeProxy<unknown>(na, lvl + 1)
 				}
 
 				if (lvl === 2) {
@@ -114,7 +113,7 @@ export const getSubscriptionContextMock = <
 	const resourcesProxy = new Proxy(
 		{},
 		{
-			get(target: Record<string, any>, name) {
+			get(target: object, name) {
 				void target
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
 					throw new Error('Invalid property access on resources proxy')
