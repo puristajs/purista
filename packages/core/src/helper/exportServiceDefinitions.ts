@@ -31,33 +31,17 @@ export const mergeServiceDefinition = <T extends FullServiceDefinition>(
 	}, {})
 
 	const ret = { ...existing }
+	const currentServiceName = ret[definitionToAdd.serviceName] ?? {}
+	const currentVersion = currentServiceName[definitionToAdd.serviceVersion]
 
-	if (!ret[definitionToAdd.serviceName]) {
-		ret[definitionToAdd.serviceName] = {
-			[definitionToAdd.serviceVersion]: {
-				description: definitionToAdd.serviceDescription,
-				commands,
-				subscriptions,
-				deprecated: definitionToAdd.deprecated,
-			},
-		}
-	}
-
-	if (!ret[definitionToAdd.serviceName][definitionToAdd.serviceVersion]) {
-		ret[definitionToAdd.serviceName][definitionToAdd.serviceVersion] = {
-			description: definitionToAdd.serviceDescription,
-			commands,
-			subscriptions,
-			deprecated: definitionToAdd.deprecated,
-		}
-	}
-
-	ret[definitionToAdd.serviceName][definitionToAdd.serviceVersion] = {
-		...ret[definitionToAdd.serviceName][definitionToAdd.serviceVersion],
-		description: definitionToAdd.serviceDescription,
-		commands,
-		subscriptions,
-		deprecated: definitionToAdd.deprecated,
+	ret[definitionToAdd.serviceName] = {
+		...currentServiceName,
+		[definitionToAdd.serviceVersion]: {
+			description: currentVersion?.description ?? definitionToAdd.serviceDescription,
+			deprecated: currentVersion?.deprecated ?? definitionToAdd.deprecated,
+			commands: { ...commands, ...currentVersion?.commands },
+			subscriptions: { ...subscriptions, ...currentVersion?.subscriptions },
+		},
 	}
 
 	return ret as T
