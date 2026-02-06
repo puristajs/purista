@@ -79,7 +79,7 @@ This configuration file follows the [JSON Schema](https://json-schema.org/) spec
 
 ```json
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "https://purista.dev/schemas/1.12.0/schema.json",
   "type": "object",
   "properties": { ... }
 }
@@ -91,6 +91,7 @@ This configuration file follows the [JSON Schema](https://json-schema.org/) spec
 
 - __**__Type:__**__ `string`
 - __**__Description:__**__ A field for the [JSON schema](https://json-schema.org/) specification.
+- __**__Default:__**__ `https://purista.dev/schemas/1.12.0/schema.json`
 
 #### `runtime`
 
@@ -144,7 +145,7 @@ This configuration file follows the [JSON Schema](https://json-schema.org/) spec
 
 ```json
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "https://purista.dev/schemas/1.12.0/schema.json",
   "runtime": "node",
   "eventBridge": "nats",
   "fileConvention": "kebab",
