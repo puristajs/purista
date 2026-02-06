@@ -84,4 +84,20 @@ describe('HandledError', () => {
 		expect(result.status).toEqual(statusCode)
 		expect(result.traceId).toEqual(traceId)
 	})
+
+	it('creates HandledError from unknown input', () => {
+		const error = HandledError.fromError('boom', StatusCode.BadRequest, { some: 'data' })
+
+		expect(error).toBeInstanceOf(HandledError)
+		expect(error.message).toBe('boom')
+		expect(error.errorCode).toBe(StatusCode.BadRequest)
+		expect(error.data).toStrictEqual({ some: 'data' })
+	})
+
+	it('keeps trace id when converting from another Purista error', () => {
+		const source = new HandledError(StatusCode.BadRequest, 'invalid input', undefined, 'trace-123')
+		const error = HandledError.fromError(source)
+
+		expect(error.traceId).toBe('trace-123')
+	})
 })

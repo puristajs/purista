@@ -30,11 +30,11 @@ export const validate = async <TSchema extends Schema>(
 ): Promise<ValidationResult<Infer<TSchema>>> => {
 	const result = await schema['~standard'].validate(value)
 
-	if (result.issues) {
+	if (Array.isArray(result.issues) && result.issues.length > 0) {
 		return { success: false, issues: result.issues }
 	}
 
-	return { success: true, data: result.value as Infer<TSchema> }
+	return { success: true, data: (result as { value: Infer<TSchema> }).value }
 }
 
 export const toJSONSchema = async (schema: Schema, options?: JsonSchemaOptions): Promise<SchemaObject> => {

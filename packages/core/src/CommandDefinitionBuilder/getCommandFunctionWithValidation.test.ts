@@ -43,13 +43,7 @@ describe('getCommandFunctionWithValidation', () => {
 			return { success: true }
 		}
 
-		const wrapped = getCommandFunctionWithValidation(
-			commandFunction,
-			undefined,
-			parameterSchema,
-			undefined,
-			{},
-		)
+		const wrapped = getCommandFunctionWithValidation(commandFunction, undefined, parameterSchema, undefined, {})
 
 		const context = builder.getCommandContextMock({
 			payload: {},
@@ -77,13 +71,7 @@ describe('getCommandFunctionWithValidation', () => {
 			return { success: true }
 		}
 
-		const wrapped = getCommandFunctionWithValidation(
-			commandFunction,
-			payloadSchema,
-			undefined,
-			undefined,
-			{},
-		)
+		const wrapped = getCommandFunctionWithValidation(commandFunction, payloadSchema, undefined, undefined, {})
 
 		const context = builder.getCommandContextMock({
 			payload: { wrongField: 'value' },
@@ -108,13 +96,7 @@ describe('getCommandFunctionWithValidation', () => {
 			return expectedOutput
 		}
 
-		const wrapped = getCommandFunctionWithValidation(
-			commandFunction,
-			undefined,
-			undefined,
-			undefined,
-			{},
-		)
+		const wrapped = getCommandFunctionWithValidation(commandFunction, undefined, undefined, undefined, {})
 
 		const context = builder.getCommandContextMock({
 			payload: { any: 'payload' },
@@ -136,13 +118,7 @@ describe('getCommandFunctionWithValidation', () => {
 			return { wrongField: 'value', anotherWrong: 123 }
 		}
 
-		const wrapped = getCommandFunctionWithValidation(
-			commandFunction,
-			undefined,
-			undefined,
-			outputSchema,
-			{},
-		)
+		const wrapped = getCommandFunctionWithValidation(commandFunction, undefined, undefined, outputSchema, {})
 
 		const context = builder.getCommandContextMock({
 			payload: {},
@@ -157,6 +133,7 @@ describe('getCommandFunctionWithValidation', () => {
 			expect(error).toBeInstanceOf(UnhandledError)
 			expect((error as UnhandledError).errorCode).toBe(StatusCode.InternalServerError)
 			expect((error as UnhandledError).message).toContain('output validation failed')
+			expect((error as UnhandledError).data).toHaveProperty('issues')
 		}
 	})
 })

@@ -44,7 +44,7 @@ export class HandledError extends Error {
 	 * @param traceId optional trace id
 	 * @returns HandledError
 	 */
-	static fromError(err: any, errorCode?: StatusCode, data?: unknown, traceId?: TraceId): HandledError {
+	static fromError(err: unknown, errorCode?: StatusCode, data?: unknown, traceId?: TraceId): HandledError {
 		if (err instanceof HandledError) {
 			return err
 		}
@@ -54,9 +54,14 @@ export class HandledError extends Error {
 			t = err.traceId
 		}
 
-		const error = new HandledError(errorCode ?? StatusCode.InternalServerError, err.message, data, traceId ?? t)
-		error.stack = err.stack
-		error.cause = err.cause
+		const message = err instanceof Error ? err.message : String(err)
+		const error = new HandledError(errorCode ?? StatusCode.InternalServerError, message, data, traceId ?? t)
+
+		if (err instanceof Error) {
+			error.stack = err.stack
+			error.cause = err.cause
+		}
+
 		return error
 	}
 

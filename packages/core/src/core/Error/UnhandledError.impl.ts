@@ -45,14 +45,20 @@ export class UnhandledError extends Error {
 	 * @param traceId optional trace id
 	 * @returns UnhandledError
 	 */
-	static fromError(err: any, errorCode?: StatusCode, data?: unknown, traceId?: TraceId): HandledError {
+	static fromError(err: unknown, errorCode?: StatusCode, data?: unknown, traceId?: TraceId): UnhandledError {
 		let t: string | undefined
 		if (err instanceof HandledError || err instanceof UnhandledError) {
 			t = err.traceId
 		}
-		const error = new UnhandledError(errorCode ?? StatusCode.InternalServerError, err.message, data, traceId ?? t)
-		error.stack = err.stack
-		error.cause = err.cause
+
+		const message = err instanceof Error ? err.message : String(err)
+		const error = new UnhandledError(errorCode ?? StatusCode.InternalServerError, message, data, traceId ?? t)
+
+		if (err instanceof Error) {
+			error.stack = err.stack
+			error.cause = err.cause
+		}
+
 		return error
 	}
 

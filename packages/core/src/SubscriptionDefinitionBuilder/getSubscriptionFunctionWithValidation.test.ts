@@ -6,8 +6,8 @@ import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { Service } from '../core/Service/Service.impl.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import { getCommandMessageMock, getEventBridgeMock, getLoggerMock } from '../mocks/index.js'
-import { SubscriptionDefinitionBuilder } from './SubscriptionDefinitionBuilder.impl.js'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl.js'
+import { SubscriptionDefinitionBuilder } from './SubscriptionDefinitionBuilder.impl.js'
 
 describe('getSubscriptionFunctionWithValidation', () => {
 	const sandbox = createSandbox()
@@ -84,13 +84,7 @@ describe('getSubscriptionFunctionWithValidation', () => {
 			return { success: true }
 		}
 
-		const wrapped = getSubscriptionFunctionWithValidation(
-			subscriptionFunction,
-			payloadSchema,
-			undefined,
-			undefined,
-			{},
-		)
+		const wrapped = getSubscriptionFunctionWithValidation(subscriptionFunction, payloadSchema, undefined, undefined, {})
 
 		const message = getCommandMessageMock({
 			payload: {
@@ -122,13 +116,7 @@ describe('getSubscriptionFunctionWithValidation', () => {
 			return expectedOutput
 		}
 
-		const wrapped = getSubscriptionFunctionWithValidation(
-			subscriptionFunction,
-			undefined,
-			undefined,
-			undefined,
-			{},
-		)
+		const wrapped = getSubscriptionFunctionWithValidation(subscriptionFunction, undefined, undefined, undefined, {})
 
 		const message = getCommandMessageMock({
 			payload: {
@@ -157,13 +145,7 @@ describe('getSubscriptionFunctionWithValidation', () => {
 			return { wrongField: 'value', anotherWrong: 123 }
 		}
 
-		const wrapped = getSubscriptionFunctionWithValidation(
-			subscriptionFunction,
-			undefined,
-			undefined,
-			outputSchema,
-			{},
-		)
+		const wrapped = getSubscriptionFunctionWithValidation(subscriptionFunction, undefined, undefined, outputSchema, {})
 
 		const message = getCommandMessageMock({
 			payload: {
@@ -185,6 +167,7 @@ describe('getSubscriptionFunctionWithValidation', () => {
 			expect(error).toBeInstanceOf(UnhandledError)
 			expect((error as UnhandledError).errorCode).toBe(StatusCode.InternalServerError)
 			expect((error as UnhandledError).message).toContain('output validation failed')
+			expect((error as UnhandledError).data).toHaveProperty('issues')
 		}
 	})
 })

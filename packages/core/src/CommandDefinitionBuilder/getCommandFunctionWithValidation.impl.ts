@@ -105,7 +105,9 @@ export const getCommandFunctionWithValidation = function <S extends Service>(
 				return validationResult.data
 			}
 
-			const err = new UnhandledError(StatusCode.InternalServerError, 'output validation failed')
+			const err = new UnhandledError(StatusCode.InternalServerError, 'output validation failed', {
+				issues: validationResult.issues,
+			})
 			span.recordException(err)
 			span.setStatus({
 				code: SpanStatusCode.ERROR,
