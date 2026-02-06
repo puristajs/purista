@@ -47,7 +47,7 @@ Here is a full example, of how the index file might look like, if you want to de
 You can adjust this example for your actual requirements.
 
 ::: warning Node.js package required
-If you use Node.js as runtime, you need to install the additional package `@hono/node-server` with version `1.0.0` or higher!
+If you use Node.js as runtime, you need to install the additional package `@hono/node-server`.
 :::
 
 ::: code-tabs#code
@@ -57,7 +57,7 @@ If you use Node.js as runtime, you need to install the additional package `@hono
 ```typescript
 // src/index.ts
 // For running on Node.js a small additional package is needed:
-import { serve } from '@purista/hono-node-server'
+import { serve } from '@hono/node-server'
 
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
