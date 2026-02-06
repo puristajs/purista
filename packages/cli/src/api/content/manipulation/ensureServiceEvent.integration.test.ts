@@ -2,6 +2,8 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { ensureServiceEvent } from './ensureServiceEvent.js' // Adjust the path if needed
+import { puristaConfigSchema } from '../../loadPuristaConfig.js'
+import type { PuristaProjectInfo } from '../../scanPuristaProject.js'
 
 // Create a temporary test directory
 let TEST_DIR = join(process.cwd(), 'tmp-test')
@@ -26,6 +28,18 @@ afterEach(() => {
 })
 
 describe('ensureServiceEvent - Integration Test', () => {
+	const getPuristaProjectConfig = () =>
+		puristaConfigSchema.parse({
+			servicePath: TEST_DIR,
+			eventConvention: 'dotCase',
+		})
+
+	const puristaProject: PuristaProjectInfo = {
+		services: {},
+		eventNames: [],
+		eventEnumFileName: 'events.ts',
+	}
+
 	it('should add a new event to an existing enum', async () => {
 		// Prepare a test TypeScript file with an enum
 		const filePath = join(TEST_DIR, 'events.ts')
@@ -42,8 +56,8 @@ describe('ensureServiceEvent - Integration Test', () => {
 		await ensureServiceEvent({
 			eventName: 'OrderPlaced',
 			projectRootPath: TEST_DIR,
-			puristaProjectConfig: { servicePath: TEST_DIR, eventConvention: 'dotCase' } as any,
-			puristaProject: { eventEnumFileName: 'events.ts' } as any,
+			puristaProjectConfig: getPuristaProjectConfig(),
+			puristaProject,
 		})
 
 		// Read the modified file
@@ -69,8 +83,8 @@ describe('ensureServiceEvent - Integration Test', () => {
 		await ensureServiceEvent({
 			eventName: 'OrderPlaced',
 			projectRootPath: TEST_DIR,
-			puristaProjectConfig: { servicePath: TEST_DIR, eventConvention: 'dotCase' } as any,
-			puristaProject: { eventEnumFileName: 'events.ts' } as any,
+			puristaProjectConfig: getPuristaProjectConfig(),
+			puristaProject,
 			description: 'Triggered when an order is placed',
 		})
 
@@ -99,8 +113,8 @@ describe('ensureServiceEvent - Integration Test', () => {
 		await ensureServiceEvent({
 			eventName: 'OrderPlaced',
 			projectRootPath: TEST_DIR,
-			puristaProjectConfig: { servicePath: TEST_DIR, eventConvention: 'dotCase' } as any,
-			puristaProject: { eventEnumFileName: 'events.ts' } as any,
+			puristaProjectConfig: getPuristaProjectConfig(),
+			puristaProject,
 		})
 
 		// Read the modified file
@@ -126,8 +140,8 @@ describe('ensureServiceEvent - Integration Test', () => {
 			ensureServiceEvent({
 				eventName: 'NewEvent',
 				projectRootPath: TEST_DIR,
-				puristaProjectConfig: { servicePath: TEST_DIR, eventConvention: 'dotCase' } as any,
-				puristaProject: { eventEnumFileName: 'events.ts' } as any,
+				puristaProjectConfig: getPuristaProjectConfig(),
+				puristaProject,
 			}),
 		).rejects.toThrow('Neither enum nor object ServiceEvent found')
 	})

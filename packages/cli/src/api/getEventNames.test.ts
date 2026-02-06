@@ -2,6 +2,7 @@ import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { getEventNames } from './getEventNames.js'
+import { puristaConfigSchema } from './loadPuristaConfig.js'
 
 let TEST_DIR = ''
 
@@ -31,7 +32,8 @@ export enum ServiceEvent {
 `,
 		)
 
-		const result = getEventNames({ servicePath: 'src/service' } as any, 'serviceEvent.enum.ts', TEST_DIR)
+		const puristaConfig = puristaConfigSchema.parse({ servicePath: 'src/service' })
+		const result = getEventNames(puristaConfig, 'serviceEvent.enum.ts', TEST_DIR)
 
 		expect(result).toEqual([
 			{ name: 'order.placed', value: 'order.placed' },
@@ -54,7 +56,8 @@ export const ServiceEvent = {
 `,
 		)
 
-		const result = getEventNames({ servicePath: 'src/service' } as any, 'serviceEvent.enum.ts', TEST_DIR)
+		const puristaConfig = puristaConfigSchema.parse({ servicePath: 'src/service' })
+		const result = getEventNames(puristaConfig, 'serviceEvent.enum.ts', TEST_DIR)
 
 		expect(result).toEqual([
 			{ name: 'order.placed', value: 'order.placed' },
