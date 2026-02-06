@@ -1,41 +1,37 @@
+import { existsSync } from 'node:fs'
 import { join } from 'node:path'
 
 import { type AsExpression, Project, SyntaxKind } from 'ts-morph'
 import type { PuristaConfig } from './loadPuristaConfig.js'
 
-export let eventNames: { name: string; value: string }[]
 export const getEventNames = (
 	puristaConfig: PuristaConfig,
 	eventEnumFileName: string,
+	projectRootPath: string = process.cwd(),
 ): { name: string; value: string }[] => {
-	if (eventNames) {
-		return eventNames
-	}
 	try {
-		const tsConfigFilePath = join(process.cwd(), 'tsconfig.json')
-		const project = new Project({
-			tsConfigFilePath,
-		})
+		const tsConfigFilePath = join(projectRootPath, 'tsconfig.json')
+		const project = existsSync(tsConfigFilePath)
+			? new Project({ tsConfigFilePath })
+			: new Project({ skipFileDependencyResolution: true, skipLoadingLibFiles: true })
 
-		const enumFile = join(puristaConfig.servicePath, eventEnumFileName)
+		const enumFile = join(projectRootPath, puristaConfig.servicePath, eventEnumFileName)
 		const sourceFile = project.addSourceFileAtPathIfExists(enumFile)
 
 		if (!sourceFile) {
-			eventNames = []
-			return eventNames
+			return []
 		}
 
 		const serviceEventEnum = sourceFile.getEnum('ServiceEvent')
 
 		if (serviceEventEnum) {
-			eventNames = serviceEventEnum
+			return serviceEventEnum
 				.getMembers()
 				.map(member => {
 					const value = member.getValue() as string
 					return { value, name: value }
 				})
 				.sort((a, b) => a.value.localeCompare(b.value))
-			return eventNames
 		}
 
 		// Fallback: Look for a const object named ServiceEvent
@@ -51,7 +47,7 @@ export const getEventNames = (
 			const objLiteral = actualInit?.asKind(SyntaxKind.ObjectLiteralExpression)
 			if (objLiteral) {
 				const properties = objLiteral.getProperties()
-				eventNames = properties
+				return properties
 					.map(prop => {
 						if (prop.getKind() === SyntaxKind.PropertyAssignment) {
 							const assignment = prop.asKind(SyntaxKind.PropertyAssignment)
@@ -72,14 +68,11 @@ export const getEventNames = (
 					})
 					.filter((x): x is { name: string; value: string } => !!x)
 					.sort((a, b) => a.value.localeCompare(b.value))
-				return eventNames
 			}
 		}
 
-		eventNames = []
-		return eventNames
+		return []
 	} catch {
-		eventNames = []
-		return eventNames
+		return []
 	}
 }

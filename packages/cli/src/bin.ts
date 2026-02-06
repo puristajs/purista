@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import { writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
 import confirm from '@inquirer/confirm'
 import input from '@inquirer/input'
 import select from '@inquirer/select'
 import { Argument, program } from 'commander'
+import { writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { addPuristaCommand } from './api/addPuristaCommand.js'
 import { addPuristaService } from './api/addPuristaService.js'
 import { addPuristaSubscription } from './api/addPuristaSubscription.js'
@@ -121,6 +121,11 @@ const main = async () => {
 				return
 			}
 
+			if (!Object.keys(puristaProject.services).length) {
+				console.error('No services found. Please add a service first.')
+				process.exit(1)
+			}
+
 			const serviceNames = Object.keys(puristaProject.services)
 				.map(key => ({
 					name: capitalCase(key),
@@ -152,6 +157,10 @@ const main = async () => {
 					choices: serviceVersions,
 				})
 			} else {
+				if (!serviceVersions.length) {
+					console.error(`No versions found for service ${capitalCase(data.serviceName)}.`)
+					process.exit(1)
+				}
 				data.serviceVersion = serviceVersions[0].value
 			}
 
@@ -175,7 +184,12 @@ const main = async () => {
 			}
 
 			// handle creation of a new subscription
-			if (data.component === 'subscription' && puristaProject.eventNames.length) {
+			if (data.component === 'subscription') {
+				if (!puristaProject.eventNames.length) {
+					console.error('No service events found. Create or register events before adding a subscription.')
+					process.exit(1)
+				}
+
 				data.eventToSubscribe = await select({
 					loop: true,
 					message: 'What event do you want to subscribe?',
