@@ -34,7 +34,7 @@ import type { BeforeResponseHook } from './types/BeforeResponseHook.js'
 
 /**
  * A simple http server based on fastify.
- * @deprecated please migrate to @purista/hono-http-server
+ * @deprecated Please migrate to `@purista/hono-http-server`.
  */
 export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> extends Service<
 	ServiceClassTypes<ConfigType>

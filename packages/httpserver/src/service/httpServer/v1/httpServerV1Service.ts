@@ -13,7 +13,7 @@ const commandDefinitions: CommandDefinition[] = []
 const subscriptionDefinitions: SubscriptionDefinition[] = [serviceCommandsToRestApiSubscriptionBuilder.getDefinition()]
 
 /**
- * @deprecated Since version 1.10.0. Use {@purista/hono-http-server} instead.
+ * @deprecated Since version 1.10.0. Use `@purista/hono-http-server` instead.
  */
 export const httpServerV1Service = httpServerV1ServiceBuilder
 	.addCommandDefinition(...commandDefinitions)
