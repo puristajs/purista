@@ -1,17 +1,29 @@
-import type { SinonSandbox } from 'sinon'
+import type { Logger as PinoLogger } from 'pino'
+import type { SinonSandbox, SinonStub } from 'sinon'
 import { createSandbox } from 'sinon'
 
 import type { Logger, LoggerOptions } from '../core/types/index.js'
 import { DefaultLogger } from './DefaultLogger.impl.js'
 
+type PinoLogStubs = {
+	fatal: SinonStub
+	error: SinonStub
+	warn: SinonStub
+	info: SinonStub
+	debug: SinonStub
+	trace: SinonStub
+	child: SinonStub
+}
+
 describe('DefaultLogger', () => {
 	let sandbox: SinonSandbox
-	let mockLog: any
+	let mockLog: PinoLogger
+	let logStubs: PinoLogStubs
 	let logger: Logger
 
 	beforeEach(() => {
 		sandbox = createSandbox()
-		mockLog = {
+		logStubs = {
 			fatal: sandbox.stub(),
 			error: sandbox.stub(),
 			warn: sandbox.stub(),
@@ -20,6 +32,7 @@ describe('DefaultLogger', () => {
 			trace: sandbox.stub(),
 			child: sandbox.stub().returnsThis(),
 		}
+		mockLog = logStubs as unknown as PinoLogger
 		logger = new DefaultLogger(mockLog)
 	})
 
@@ -29,32 +42,32 @@ describe('DefaultLogger', () => {
 
 	it('should log a fatal message', () => {
 		logger.fatal('fatal error')
-		expect(mockLog.fatal.calledOnceWithExactly('fatal error')).toBeTruthy()
+		expect(logStubs.fatal.calledOnceWithExactly('fatal error')).toBeTruthy()
 	})
 
 	it('should log an error message', () => {
 		logger.error('error message')
-		expect(mockLog.error.calledOnceWithExactly('error message')).toBeTruthy()
+		expect(logStubs.error.calledOnceWithExactly('error message')).toBeTruthy()
 	})
 
 	it('should log a warning message', () => {
 		logger.warn('warning message')
-		expect(mockLog.warn.calledOnceWithExactly('warning message')).toBeTruthy()
+		expect(logStubs.warn.calledOnceWithExactly('warning message')).toBeTruthy()
 	})
 
 	it('should log an info message', () => {
 		logger.info('info message')
-		expect(mockLog.info.calledOnceWithExactly('info message')).toBeTruthy()
+		expect(logStubs.info.calledOnceWithExactly('info message')).toBeTruthy()
 	})
 
 	it('should log a debug message', () => {
 		logger.debug('debug message')
-		expect(mockLog.debug.calledOnceWithExactly('debug message')).toBeTruthy()
+		expect(logStubs.debug.calledOnceWithExactly('debug message')).toBeTruthy()
 	})
 
 	it('should log a trace message', () => {
 		logger.trace('trace message')
-		expect(mockLog.trace.calledOnceWithExactly('trace message')).toBeTruthy()
+		expect(logStubs.trace.calledOnceWithExactly('trace message')).toBeTruthy()
 	})
 
 	it('should get a child logger', () => {
