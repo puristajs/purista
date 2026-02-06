@@ -45,6 +45,7 @@ export const InfoObjectSchema = z.object({
 export const ServerObjectSchema = z.object({
 	url: z.string(),
 	description: z.string().optional(),
+	// Keep `any`: OpenAPI `variables` shape is external and passed through without narrowing.
 	variables: z.any().optional(),
 })
 export const honoServiceV1ConfigSchema = z.object({
@@ -53,6 +54,7 @@ export const honoServiceV1ConfigSchema = z.object({
 	apiMountPath: z.string().optional().default(DEFAULT_API_MOUNT_PATH),
 	enableHealth: z.boolean().optional().default(true),
 	healthPath: z.string().optional().default('/healthz'),
+	// Keep `any`: app-specific health/protection hooks are intentionally framework-agnostic.
 	healthFunction: z.any().optional(),
 	protectHandler: z.any().optional(),
 	services: z.array(z.instanceof(Service)).optional().default([]),
@@ -60,12 +62,13 @@ export const honoServiceV1ConfigSchema = z.object({
 	openApi: z
 		.object({
 			openapi: z.string().default('3.1.0'),
-			enabled: z.boolean().optional().default(true),
-			info: InfoObjectSchema,
-			servers: z.array(ServerObjectSchema).optional(),
-			components: z.any().optional(),
-			security: z.array(z.any()).optional(),
-			externalDocs: ExternalDocumentationObjectSchema.optional(),
+				enabled: z.boolean().optional().default(true),
+				info: InfoObjectSchema,
+				servers: z.array(ServerObjectSchema).optional(),
+				// Keep `any`: OpenAPI object fragments are merged from dynamic command metadata.
+				components: z.any().optional(),
+				security: z.array(z.any()).optional(),
+				externalDocs: ExternalDocumentationObjectSchema.optional(),
 			tags: z.array(TagObjectSchema).optional(),
 			paths: z.record(z.string(), z.record(z.string(), z.any())).optional(),
 		})

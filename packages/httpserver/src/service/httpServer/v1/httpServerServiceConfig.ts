@@ -54,9 +54,11 @@ export const InfoObjectSchema = z.object({
 export const ServerObjectSchema = z.object({
 	url: z.string(),
 	description: z.string().optional(),
+	// Keep `any`: OpenAPI `variables` shape is external and currently passed through without narrowing.
 	variables: z.any().optional(),
 })
 export const httpServerServiceV1ConfigSchema = z.object({
+	// Keep `any`: Fastify options are intentionally provider/plugin specific and validated by Fastify itself.
 	fastify: z.any().default({
 		ignoreTrailingSlash: true,
 	}), //
@@ -69,6 +71,7 @@ export const httpServerServiceV1ConfigSchema = z.object({
 	apiMountPath: z.string().optional().default('/api'),
 	enableHelmet: z.boolean().optional().default(true),
 	enableHealthz: z.boolean().optional().default(true),
+	// Keep generic function input types to avoid over-constraining framework integrations.
 	healthzFunction: z
 		.function({
 			input: [z.any(), z.any()],
@@ -77,6 +80,7 @@ export const httpServerServiceV1ConfigSchema = z.object({
 		.optional(),
 	helmetOptions: FastifyHelmetOptionsSchema.optional(),
 	enableCompress: z.boolean().optional().default(false),
+	// Keep `any`: plugin option bags are intentionally opaque at this schema boundary.
 	compressOptions: z.any().optional(),
 	enableCors: z.boolean().optional().default(false),
 	corsOptions: z.any().optional(),
@@ -84,14 +88,15 @@ export const httpServerServiceV1ConfigSchema = z.object({
 	openApi: z
 		.object({
 			enabled: z.boolean().optional().default(true),
-			path: z.string().optional().default(OPENAPI_DEFAULT_MOUNT_PATH),
-			info: InfoObjectSchema,
-			servers: z.array(ServerObjectSchema).optional(),
-			components: z.any().optional(),
-			security: z.array(z.any()).optional(),
-			externalDocs: ExternalDocumentationObjectSchema.optional(),
-			tags: z.array(TagObjectSchema).optional(),
-			paths: z.record(z.string(), z.record(z.string(), z.any())).optional(),
+				path: z.string().optional().default(OPENAPI_DEFAULT_MOUNT_PATH),
+				info: InfoObjectSchema,
+				servers: z.array(ServerObjectSchema).optional(),
+				// Keep `any`: OpenAPI object fragments are merged from dynamic command metadata.
+				components: z.any().optional(),
+				security: z.array(z.any()).optional(),
+				externalDocs: ExternalDocumentationObjectSchema.optional(),
+				tags: z.array(TagObjectSchema).optional(),
+				paths: z.record(z.string(), z.record(z.string(), z.any())).optional(),
 		})
 		.optional(),
 })
