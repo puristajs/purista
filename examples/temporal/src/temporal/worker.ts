@@ -35,9 +35,10 @@ async function run() {
 	const resource = resourceFromAttributes({
 		[ATTR_SERVICE_NAME]: 'temporal-worker',
 	})
-	// Temporal and app OTEL packages may resolve different ReadableSpan types in workspaces.
-	const exporter = new OTLPTraceExporter(jaegerExporterOptions) as any
+	const exporter = new OTLPTraceExporter(jaegerExporterOptions)
 	const spanProcessor = new SimpleSpanProcessor(exporter)
+	// Temporal and app OTEL packages may resolve different ReadableSpan types in workspaces.
+	const temporalExporter = exporter as unknown as Parameters<typeof makeWorkflowExporter>[0]
 
 	const otel = new NodeSDK({ traceExporter: exporter, resource })
 	otel.start()
@@ -70,7 +71,7 @@ async function run() {
 			activityInbound: [ctx => new OpenTelemetryActivityInboundInterceptor(ctx)],
 		},
 		sinks: {
-			exporter: makeWorkflowExporter(exporter, resource),
+			exporter: makeWorkflowExporter(temporalExporter, resource),
 		},
 	})
 
