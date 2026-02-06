@@ -67,4 +67,5 @@ const _serverInstance = serve({
 - [getErrorName](functions/getErrorName.md)
 - [getErrorResponseSchema](functions/getErrorResponseSchema.md)
 - [getParameterDefinition](functions/getParameterDefinition.md)
+- [getQueryDefinition](functions/getQueryDefinition.md)
 - [getQueryDefintion](functions/getQueryDefintion.md)

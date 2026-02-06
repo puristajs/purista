@@ -37,9 +37,9 @@ describe('client-builder', () => {
 	it('can create a HTTP client', async () => {
 		clientBuilder.rootPath = outputPath
 
-		const defnitions = await clientBuilder.loadDefinitionFiles(join(workPath, 'definitions'))
+		const definitions = await clientBuilder.loadDefinitionFiles(join(workPath, 'definitions'))
 		await clientBuilder.cleanDistFolder()
-		await clientBuilder.generateHttpClient(defnitions)
+		await clientBuilder.generateHttpClient(definitions)
 		await clientBuilder.createIndex()
 		await clientBuilder.createPackageJson()
 		clientBuilder.build()
@@ -48,9 +48,9 @@ describe('client-builder', () => {
 	it('can create a eventbridge client', async () => {
 		clientBuilder.rootPath = outputPath
 
-		const defnitions = await clientBuilder.loadDefinitionFiles(join(workPath, 'definitions'))
+		const definitions = await clientBuilder.loadDefinitionFiles(join(workPath, 'definitions'))
 		await clientBuilder.cleanDistFolder()
-		await clientBuilder.generateHEventBridgeClient(defnitions)
+		await clientBuilder.generateHEventBridgeClient(definitions)
 		await clientBuilder.createIndex()
 		await clientBuilder.createPackageJson()
 		clientBuilder.build()

@@ -15,7 +15,7 @@ import type { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 
 import { puristaVersion } from '../version.js'
 import { getWriter } from './getWriter.impl.js'
-import { mergeIntoServiceDefintion } from './mergeIntoServiceDefintion.impl.js'
+import { mergeIntoServiceDefinition } from './mergeIntoServiceDefintion.impl.js'
 import { metaToFunctionBridge } from './metaToFunctionBridge.impl.js'
 import { metaToFunctionHttp } from './metaToFunctionHttp.impl.js'
 import { configFullSchema, configSchema } from './schema/configSchema.js'
@@ -338,7 +338,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 				const json: FullDefinition = JSON.parse(content)
 
 				if (json.services) {
-					mergeIntoServiceDefintion(services, json.services)
+					mergeIntoServiceDefinition(services, json.services)
 					this.emit('success', file)
 				}
 			} catch (error) {

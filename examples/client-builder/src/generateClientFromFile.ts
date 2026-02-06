@@ -18,13 +18,13 @@ const generate = async () => {
 
 	try {
 		// load the definitions from exported json files
-		const defnitions = await clientBuilder.loadDefinitionFiles()
+		const definitions = await clientBuilder.loadDefinitionFiles()
 
 		// clear the output folder
 		await clientBuilder.cleanDistFolder()
 
 		// generate the source files
-		await clientBuilder.generateHttpClient(defnitions)
+		await clientBuilder.generateHttpClient(definitions)
 
 		// add a index.ts with exports to the source files
 		await clientBuilder.createIndex()

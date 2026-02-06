@@ -1,6 +1,6 @@
 import type { FullServiceDefinition } from '../helper/types/FullServiceDefinition.js'
 
-export const mergeIntoServiceDefintion = (current: FullServiceDefinition, add: FullServiceDefinition) => {
+export const mergeIntoServiceDefinition = (current: FullServiceDefinition, add: FullServiceDefinition) => {
 	for (const [serviceName, value] of Object.entries(add)) {
 		if (current[serviceName]) {
 			for (const [serviceVersion, val] of Object.entries(value)) {
@@ -21,3 +21,8 @@ export const mergeIntoServiceDefintion = (current: FullServiceDefinition, add: F
 		}
 	}
 }
+
+/**
+ * @deprecated Use `mergeIntoServiceDefinition` instead.
+ */
+export const mergeIntoServiceDefintion = mergeIntoServiceDefinition

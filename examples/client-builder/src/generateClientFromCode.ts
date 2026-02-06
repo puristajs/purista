@@ -19,13 +19,13 @@ const generate = async () => {
 
 	try {
 		// get the definitions from the builder source files
-		const defnitions = await clientBuilder.getDefinitionsFromServiceBuilders([pingPongV1Service])
+		const definitions = await clientBuilder.getDefinitionsFromServiceBuilders([pingPongV1Service])
 
 		// clear the output folder
 		await clientBuilder.cleanDistFolder()
 
 		// generate the source files
-		await clientBuilder.generateHttpClient(defnitions)
+		await clientBuilder.generateHttpClient(definitions)
 
 		// add a index.ts with exports to the source files
 		await clientBuilder.createIndex()

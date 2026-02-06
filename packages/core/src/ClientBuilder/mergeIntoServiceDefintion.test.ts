@@ -1,7 +1,7 @@
 import type { FullServiceDefinition } from '../helper/types/FullServiceDefinition.js'
-import { mergeIntoServiceDefintion } from './mergeIntoServiceDefintion.impl.js'
+import { mergeIntoServiceDefinition, mergeIntoServiceDefintion } from './mergeIntoServiceDefintion.impl.js'
 
-describe('mergeIntoServiceDefintion', () => {
+describe('mergeIntoServiceDefinition', () => {
 	it('adds missing service versions without throwing', () => {
 		const current: FullServiceDefinition = {
 			UserService: {
@@ -25,7 +25,7 @@ describe('mergeIntoServiceDefintion', () => {
 			},
 		}
 
-		expect(() => mergeIntoServiceDefintion(current, add)).not.toThrow()
+		expect(() => mergeIntoServiceDefinition(current, add)).not.toThrow()
 		expect(current.UserService['1']).toBeDefined()
 		expect(current.UserService['2']).toBeDefined()
 		expect(current.UserService['2'].description).toBe('v2')
@@ -65,7 +65,7 @@ describe('mergeIntoServiceDefintion', () => {
 			},
 		}
 
-		mergeIntoServiceDefintion(current, add)
+		mergeIntoServiceDefinition(current, add)
 
 		expect(current.UserService['1'].description).toBe('current')
 		expect(current.UserService['1'].deprecated).toBe(false)
@@ -77,5 +77,9 @@ describe('mergeIntoServiceDefintion', () => {
 			currentSubscription: { subscriptionName: 'currentSubscription' },
 			incomingSubscription: { subscriptionName: 'incomingSubscription' },
 		})
+	})
+
+	it('keeps deprecated alias for backward compatibility', () => {
+		expect(mergeIntoServiceDefintion).toBe(mergeIntoServiceDefinition)
 	})
 })

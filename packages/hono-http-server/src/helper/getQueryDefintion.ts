@@ -2,7 +2,7 @@ import type { QueryParameter } from '@purista/core'
 import type { ParameterObject, SchemaObject } from 'openapi3-ts/oas31'
 import { isReferenceObject } from 'openapi3-ts/oas31'
 
-export const getQueryDefintion = (
+export const getQueryDefinition = (
 	queryDefinition: QueryParameter<Record<string, unknown>>[] | undefined,
 	parameterschema?: SchemaObject,
 ): ParameterObject[] => {
@@ -33,3 +33,8 @@ export const getQueryDefintion = (
 		}
 	})
 }
+
+/**
+ * @deprecated Use `getQueryDefinition` instead.
+ */
+export const getQueryDefintion = getQueryDefinition
