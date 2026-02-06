@@ -66,6 +66,7 @@ import type { MqttBridgeConfig } from './types/MqttBridgeConfig.js'
 export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implements EventBridge {
 	public client: MqttClient | undefined
 	public pendingInvocations = new Map<EBMessageId, PendigInvocation>()
+	private registeredSubscriptionTopics = new Map<string, string>()
 	private router = new TopicRouter()
 
 	constructor(config?: EventBridgeConfig<Partial<MqttBridgeConfig>>) {
@@ -376,12 +377,24 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		}
 
 		await this.client?.subscribeAsync(topic, opts)
+		this.registeredSubscriptionTopics.set(
+			`${subscription.subscriber.serviceName}-${subscription.subscriber.serviceVersion},${subscription.subscriber.serviceTarget}`,
+			topic,
+		)
 
 		return topic
 	}
 
 	async unregisterSubscription(address: EBMessageAddress): Promise<void> {
-		void address
+		const key = `${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`
+		const topic = this.registeredSubscriptionTopics.get(key)
+		if (!topic) {
+			return
+		}
+
+		await this.client?.unsubscribeAsync(topic)
+		this.router.remove(topic)
+		this.registeredSubscriptionTopics.delete(key)
 	}
 
 	async destroy() {
