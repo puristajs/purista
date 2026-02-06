@@ -2,6 +2,8 @@
 
 A secret store for using [Infisical](https://infisical.com/) as storage.  
 
+For local docker setup, the `docker-compose.yml` reads the root `.env` file (`../../.env`).  
+
 ```typescript
 const config = {
   token: 'YOUR_INFISICAL_TOKEN',

@@ -32,3 +32,4 @@ __snapshots__
 .tshy
 
 gcloud-credentials.json
+.env

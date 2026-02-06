@@ -52,6 +52,21 @@ To add a command to your service, use the CLI tool.
 purista add command
 ```
 
+## Integration tests
+
+PURISTA supports opt-in integration tests for external systems (AWS Localstack, NATS, Azure, GCloud, Infisical).
+
+1. Create a local env file from `.env.example`.
+2. Set the `PURISTA_*` flags you want to run.
+3. Add required credentials for cloud-backed tests (for example GCloud and Infisical).
+4. Run:
+
+```bash
+npm run test:integration
+```
+
+The integration test runner uses Node's native `--env-file=.env` support via the root `test:integration` script.
+
 ## Security
 
 Please help us to provide a secure software.  
