@@ -21,7 +21,7 @@ Some function "outside" your service can listen to these events, and process the
 - keeps the business code isolated
 - easier to test and to handle errors
 - the dependency will be in one place - easier to maintain, fewer duplicate code
-- the dependency will become optional - e.g. can simpler replaced by other solutions
+- the dependency becomes optional - e.g. it can be replaced by other solutions more easily
 :::
 
 ::: caution CONTRA
