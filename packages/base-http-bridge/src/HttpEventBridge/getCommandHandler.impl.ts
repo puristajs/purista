@@ -99,7 +99,7 @@ export const getCommandHandler = function (
 					}
 
 					// empty response
-					if (msg.payload === undefined || msg.payload === '') {
+					if (msg.payload === undefined || msg.payload === null || msg.payload === '') {
 						const status = StatusCode.NoContent
 
 						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, status)

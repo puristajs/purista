@@ -112,4 +112,24 @@ describe('getCommandHandler', () => {
 
 		expect(response.status).toBe(StatusCode.NoContent)
 	})
+
+	it('returns no-content for null payload responses', async () => {
+		const bridge = createBridgeMock()
+		const inputMessage = getCommandMessageMock()
+		const cb = vi.fn(async () => getCommandSuccessMessageMock(null, undefined, inputMessage))
+
+		const handler = getCommandHandler.call(bridge, address, cb, metadata, eventBridgeConfig)
+		const app = new Hono()
+		app.post('/command', handler)
+
+		const response = await app.request('http://localhost/command', {
+			method: 'POST',
+			headers: {
+				'content-type': 'application/json',
+			},
+			body: JSON.stringify(inputMessage),
+		})
+
+		expect(response.status).toBe(StatusCode.NoContent)
+	})
 })

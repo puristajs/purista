@@ -137,7 +137,7 @@ export const getCommandHandlerRestApi = function (
 					}
 
 					// empty response
-					if (result.payload === undefined || result.payload === '') {
+					if (result.payload === undefined || result.payload === null || result.payload === '') {
 						const status = StatusCode.NoContent
 						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, status)
 						const contentTypeResponse = metadata.expose.contentTypeResponse ?? 'application/json'

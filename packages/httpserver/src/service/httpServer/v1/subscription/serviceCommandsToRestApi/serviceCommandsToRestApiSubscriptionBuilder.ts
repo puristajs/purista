@@ -118,7 +118,7 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 						}
 
 						reply.header('content-type', `${contentType}; charset=${contentEncoding}`)
-						if (response === undefined || response === '') {
+						if (response === undefined || response === null || response === '') {
 							span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.NoContent)
 							reply.statusCode = StatusCode.NoContent
 						} else {

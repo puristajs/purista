@@ -128,4 +128,36 @@ describe('getCommandHandlerRestApi', () => {
 		expect(body.message).toBeDefined()
 		expect(cb).not.toHaveBeenCalled()
 	})
+
+	it('returns no-content for null response payload', async () => {
+		const bridge = createBridgeMock()
+
+		const metadata: HttpExposedServiceMeta = {
+			expose: {
+				http: {
+					method: 'GET',
+					path: '/v1/null',
+					openApi: {
+						isSecure: false,
+						description: 'test',
+						summary: 'test',
+					},
+				},
+			},
+		}
+
+		const cb = vi.fn(async () => {
+			return {
+				messageType: EBMessageType.CommandSuccessResponse,
+				payload: null,
+			} as Readonly<Omit<CommandSuccessResponse, 'instanceId'>>
+		})
+
+		const handler = getCommandHandlerRestApi.call(bridge, address, cb, metadata, eventBridgeConfig)
+		const app = new Hono()
+		app.get('/v1/null', handler)
+
+		const response = await app.request('http://localhost/v1/null')
+		expect(response.status).toBe(StatusCode.NoContent)
+	})
 })

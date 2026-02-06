@@ -152,7 +152,7 @@ export const addServiceEndpoints = (
 								propagation.inject(context.active(), header)
 
 								// empty response
-								if (result.payload === undefined || result.payload === '') {
+								if (result.payload === undefined || result.payload === null || result.payload === '') {
 									span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.NoContent)
 									span.end()
 
