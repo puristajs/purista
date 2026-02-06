@@ -97,10 +97,10 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 			SetNewTypeValues<
 				S,
 				{
-					ConfigType: Infer<T> extends Record<string, any> ? Infer<T> : NeverObject
-					ConfigInputType: InferIn<T> extends Record<string, any> ? InferIn<T> : NeverObject
+					ConfigType: Infer<T> extends Record<string, unknown> ? Infer<T> : NeverObject
+					ConfigInputType: InferIn<T> extends Record<string, unknown> ? InferIn<T> : NeverObject
 					ServiceClassType: Service<
-						ServiceClassTypes<Infer<T> extends Record<string, any> ? Infer<T> : EmptyObject, S['Resources']>
+						ServiceClassTypes<Infer<T> extends Record<string, unknown> ? Infer<T> : EmptyObject, S['Resources']>
 					>
 				}
 			>

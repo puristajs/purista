@@ -726,7 +726,7 @@ export class CommandDefinitionBuilder<
 		FunctionOutputType,
 		FinalFunctionOutputType,
 		TransformOutputHookOutput,
-		Resources extends Record<string, any>,
+		Resources extends Record<string, unknown>,
 		Invokes extends InvokeList,
 		EmitList extends Record<string, Schema>,
 	>(
@@ -873,7 +873,7 @@ export class CommandDefinitionBuilder<
 				},
 			},
 			eventName,
-			call: this.getCommandFunction() as any,
+			call: this.getCommandFunction(),
 			hooks: this.hooks,
 			invokes: this.invokes,
 			emitList: this.emitList,
