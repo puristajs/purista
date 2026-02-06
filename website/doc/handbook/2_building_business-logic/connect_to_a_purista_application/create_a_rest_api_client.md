@@ -24,8 +24,8 @@ const result = client.foo.v1.bar(payload, parameter)
 The client builder is very modular to give you the full control.  
 
 ```typescript
-const config = config = {
-  version: '1.11.0', // PURISTA version
+const config = {
+  version: '2.1.5', // PURISTA version
   definitionPath: './definitions', // path of *.json files with definitions
   outputPath: './dist', // output folder
   httpClient: {
@@ -79,18 +79,18 @@ The config file is a simple json file.
 
 ```json
 {
-  "version": "1.11.0",
+  "version": "2.1.5",
   "definitionPath": "./definitions",
   "outputPath": "./dist",
   "package": {
     "name": "@company/http-client",
     "description": "my custom client",
-    "private": "true"
+    "private": true
   },
   "httpClient": {
     "buildAs": "both",
     "clientName": "HttpClient"
-  },
+  }
 }
 ```
 
@@ -115,13 +115,13 @@ clientBuilder.destroy()
 ```
 
 The `.writeConfig` method has an optional parameter.  
-Per default, the function will try to store the config in `purista.client.json` in the current users folder.  
+Per default, the function will try to store the config in `purista.client.json` in the current working directory.  
 Here you can provide a custom folder.
 
 #### Load the config file
 
 You can load a json config file with `.loadConfig()`.  
-Per default, the function will try to load the config from `purista.client.json` in the current users folder.  
+Per default, the function will try to load the config from `purista.client.json` in the current working directory.  
 
 The method as an optional parameter, where you can provide a custom file location.
 
@@ -129,7 +129,7 @@ The method as an optional parameter, where you can provide a custom file locatio
 
 ```typescript
 const config = {
-  version: '1.11.0', // PURISTA version
+  version: '2.1.5', // PURISTA version
   definitionPath: './definitions', // path of definitions
   outputPath: './dist', // output folder
   httpClient: {
@@ -141,7 +141,7 @@ const config = {
 
 ## Complete code
 
-This small code snipped can be used to create your client.
+This small code snippet can be used to create your client.
 
 ::: code-group
 
@@ -192,18 +192,18 @@ generate()
 
 ```json [purista.client.json]
 {
-  "version": "1.11.0",
+  "version": "2.1.5",
   "definitionPath": "./definitions",
   "outputPath": "./dist",
   "package": {
     "name": "@company/http-client",
     "description": "my custom client",
-    "private": "true"
+    "private": true
   },
   "httpClient": {
     "buildAs": "both",
     "clientName": "HttpClient"
-  },
+  }
 }
 ```
 

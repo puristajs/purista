@@ -44,8 +44,8 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	public config: ConfigFull
 
 	/**
-	 * The root file from where the relative paths are resolved.
-	 * Defaults to current users directory
+	 * The root path from where relative definition/config/output paths are resolved.
+	 * Defaults to the current working directory (`process.cwd()`).
 	 */
 	public rootPath = process.cwd()
 
@@ -75,8 +75,8 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	}
 
 	/**
-	 * Loads the config fom JSON file.
-	 * If no path is provided, it will try to load the config from purista.client.json in rootPath directory
+	 * Loads the config from a JSON file.
+	 * If no path is provided, it loads `purista.client.json` from `rootPath`.
 	 * @param path
 	 */
 	async loadConfig(path?: string) {
