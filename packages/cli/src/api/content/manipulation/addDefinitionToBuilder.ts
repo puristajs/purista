@@ -46,9 +46,11 @@ export const addDefinitionToBuilder = (input: {
 	}
 
 	const definitionExpression = `${input.importDefinition}.getDefinition()`
-	const alreadyDefined = arrayLiteralExpression
-		.getElements()
-		.some(element => element.getText().includes(definitionExpression))
+	const normalizedDefinitionExpression = definitionExpression.replace(/\s+/g, '')
+	const alreadyDefined = arrayLiteralExpression.getElements().some(element => {
+		const normalizedElement = element.getText().replace(/\s+/g, '')
+		return normalizedElement === normalizedDefinitionExpression
+	})
 	if (!alreadyDefined) {
 		arrayLiteralExpression.addElement(definitionExpression)
 	}
