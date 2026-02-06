@@ -1,8 +1,8 @@
 import { assert, spy, stub } from 'sinon'
-
+import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { Subscription } from '../core/index.js'
 import { createInfoMessage, EBMessageType } from '../core/index.js'
-import { getCustomMessageMessageMock, getLoggerMock } from '../mocks/index.js'
+import { getCommandMessageMock, getCustomMessageMessageMock, getLoggerMock } from '../mocks/index.js'
 import { DefaultEventBridge } from './DefaultEventBridge.impl.js'
 
 describe('DefaultEventBridge', () => {
@@ -128,6 +128,39 @@ describe('DefaultEventBridge', () => {
 		expect(true).toBeTruthy()
 	})
 
+	it('returns internal error response when registered command callback rejects', async () => {
+		const eventBridge = new DefaultEventBridge({ defaultCommandTimeout: 500 })
+		await eventBridge.start()
+
+		await eventBridge.registerCommand(
+			{
+				serviceName: 'ReceiverService',
+				serviceVersion: '2',
+				serviceTarget: 'receiverServiceTarget',
+			},
+			async () => {
+				throw new Error('unexpected failure')
+			},
+			{} as any,
+		)
+
+		const commandMessage = getCommandMessageMock({
+			sender,
+			receiver,
+			payload: {
+				payload: { ping: true },
+				parameter: {},
+			},
+		})
+
+		await expect(eventBridge.invoke(commandMessage)).rejects.toMatchObject({
+			errorCode: 500,
+			message: 'Internal Server Error',
+		})
+
+		await eventBridge.destroy()
+	})
+
 	it('traces info messages', async () => {
 		const logger = getLoggerMock()
 		const eventBridge = new DefaultEventBridge({ logger: logger.mock })
@@ -158,5 +191,63 @@ describe('DefaultEventBridge', () => {
 		assert.calledWith(callback, emittedMessage)
 
 		expect(logger.stubs.trace.called).toBeTruthy()
+	})
+
+	it('returns unhealthy state when internal health flag is false', async () => {
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+
+		;(eventBridge as any).healthy = false
+
+		await expect(eventBridge.isHealthy()).resolves.toBe(false)
+		await eventBridge.destroy()
+	})
+
+	it('rejects invoke and cleans pending invocations when emit fails', async () => {
+		const eventBridge = new DefaultEventBridge()
+		await eventBridge.start()
+		stub(eventBridge, 'emitMessage').rejects(new Error('emit failed'))
+
+		const commandMessage = getCommandMessageMock({
+			sender: {
+				serviceName: 'sender',
+				serviceVersion: '1',
+				serviceTarget: 'fn',
+				instanceId: 'sender-instance',
+			},
+			receiver: {
+				serviceName: 'receiver',
+				serviceVersion: '1',
+				serviceTarget: 'fn',
+			},
+		})
+
+		await expect(eventBridge.invoke(commandMessage)).rejects.toBeInstanceOf(UnhandledError)
+		expect((eventBridge as any).pendingInvocations.size).toBe(0)
+		await eventBridge.destroy()
+	})
+
+	it('waits for running work before destroy completes', async () => {
+		const eventBridge = new DefaultEventBridge({ defaultCommandTimeout: 500 })
+		await eventBridge.start()
+
+		;(eventBridge as any).pendingInvocations.set('pending-id', {
+			resolve: () => {
+				/* noop */
+			},
+			reject: () => {
+				/* noop */
+			},
+		})
+
+		setTimeout(() => {
+			;(eventBridge as any).pendingInvocations.delete('pending-id')
+		}, 30)
+
+		const start = Date.now()
+		await eventBridge.destroy()
+		const duration = Date.now() - start
+
+		expect(duration).toBeGreaterThanOrEqual(20)
 	})
 })

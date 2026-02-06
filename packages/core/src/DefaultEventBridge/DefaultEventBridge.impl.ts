@@ -94,7 +94,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 	}
 
 	async isHealthy() {
-		return this.hasStarted
+		return this.healthy
 	}
 
 	async start() {
@@ -147,9 +147,32 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 							}
 
 							isAtLeastDeliveredOnce = true
-							mapEntry(message as Readonly<Command>).then(result => {
-								this.emitMessage(result)
-							})
+							mapEntry(message as Readonly<Command>)
+								.then(result => {
+									this.emitMessage(result)
+								})
+								.catch(error => {
+									const err = UnhandledError.fromError(
+										error,
+										StatusCode.InternalServerError,
+										getCleanedMessage(message),
+									)
+									span.setStatus({
+										code: SpanStatusCode.ERROR,
+										message: err.message,
+									})
+									span.recordException(err)
+									this.logger.error({ err, ...span.spanContext(), customTraceId: message.traceId }, err.message)
+									this.emit(EventBridgeEventNames.EventbridgeError, err)
+
+									const errorResponse = createErrorResponse(
+										this.instanceId,
+										message,
+										StatusCode.InternalServerError,
+										err,
+									)
+									this.emitMessage(errorResponse)
+								})
 							return next()
 						}
 
@@ -381,7 +404,18 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 				})
 			})
 
-			this.emitMessage(command)
+			try {
+				await this.emitMessage(command)
+			} catch (err) {
+				const pending = this.pendingInvocations.get(correlationId)
+				if (pending) {
+					const invocationError =
+						err instanceof Error
+							? UnhandledError.fromError(err, undefined, undefined, command.traceId)
+							: new UnhandledError(StatusCode.InternalServerError, 'invocation emit failed', err, command.traceId)
+					pending.reject(invocationError)
+				}
+			}
 			return executionPromise
 		})
 	}
@@ -395,21 +429,24 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 		}, this.defaultCommandTimeout)
 
 		// ensure actual running commands and subscriptions are finished before closing connection
-		const waitForExecutionEnd = () => {
-			if (this.pendingInvocations.size <= 0 && this.runningSubscriptionCount <= 0) {
-				return
+		await new Promise<void>(resolve => {
+			const waitForExecutionEnd = () => {
+				if (this.pendingInvocations.size <= 0 && this.runningSubscriptionCount <= 0) {
+					resolve()
+					return
+				}
+				if (isTimedOut) {
+					this.logger.error('Some commands or subscriptions could not finish before connection was closed')
+					resolve()
+					return
+				}
+				setImmediate(waitForExecutionEnd)
 			}
-			if (isTimedOut) {
-				this.logger.error('Some commands or subscriptions could not finish before connection was closed')
-				return
-			}
-			setImmediate(waitForExecutionEnd)
-		}
 
-		waitForExecutionEnd()
-		if (timeout) {
-			clearTimeout(timeout)
-		}
+			waitForExecutionEnd()
+		})
+
+		clearTimeout(timeout)
 
 		this.emit(EventBridgeEventNames.EventbridgeDisconnected)
 
