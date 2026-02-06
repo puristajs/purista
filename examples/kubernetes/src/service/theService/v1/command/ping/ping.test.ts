@@ -3,7 +3,6 @@ import { createSandbox } from 'sinon'
 
 import { theServiceV1Service } from '../../theServiceV1Service.js'
 import { pingCommandBuilder } from './pingCommandBuilder.js'
-import type { TheServiceV1PingInputParameter, TheServiceV1PingInputPayload } from './types.js'
 
 describe('service TheService version 1 - command ping', () => {
 	let sandbox = createSandbox()
@@ -22,9 +21,9 @@ describe('service TheService version 1 - command ping', () => {
 
 		const ping = safeBind(pingCommandBuilder.getCommandFunction(), service)
 
-		const payload: TheServiceV1PingInputPayload = undefined
+		const payload: Parameters<typeof ping>[1] = undefined
 
-		const parameter: TheServiceV1PingInputParameter = {}
+		const parameter: Parameters<typeof ping>[2] = {}
 
 		const context = pingCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 

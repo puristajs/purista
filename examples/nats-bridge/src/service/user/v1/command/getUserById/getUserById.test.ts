@@ -5,7 +5,6 @@ import type { User } from '../../../../../types/index.js'
 import { StateStoreKey } from '../../../../../types/index.js'
 import { userV1Service } from '../../userV1Service.js'
 import { getUserByIdCommandBuilder } from './getUserByIdCommandBuilder.js'
-import type { UserV1GetUserByIdInputParameter, UserV1GetUserByIdInputPayload } from './types.js'
 
 describe('service User version 1 - command getUserById', () => {
 	let sandbox = createSandbox()
@@ -24,7 +23,7 @@ describe('service User version 1 - command getUserById', () => {
 
 		const getUserById = safeBind(getUserByIdCommandBuilder.getCommandFunction(), service)
 
-		const payload: UserV1GetUserByIdInputPayload = undefined
+		const payload: Parameters<typeof getUserById>[1] = undefined
 
 		const userMock: User = {
 			email: 'email@example.com',
@@ -33,7 +32,7 @@ describe('service User version 1 - command getUserById', () => {
 			userId: 'a5fef052-911c-472c-ac25-e2da327f0af5',
 		}
 
-		const parameter: UserV1GetUserByIdInputParameter = {
+		const parameter: Parameters<typeof getUserById>[2] = {
 			userId: userMock.userId,
 		}
 
@@ -53,7 +52,7 @@ describe('service User version 1 - command getUserById', () => {
 
 		const getUserById = safeBind(getUserByIdCommandBuilder.getCommandFunction(), service)
 
-		const payload: UserV1GetUserByIdInputPayload = undefined
+		const payload: Parameters<typeof getUserById>[1] = undefined
 
 		const userMock: User = {
 			email: 'email@example.com',
@@ -62,7 +61,7 @@ describe('service User version 1 - command getUserById', () => {
 			userId: 'a5fef052-911c-472c-ac25-e2da327f0af5',
 		}
 
-		const parameter: UserV1GetUserByIdInputParameter = {
+		const parameter: Parameters<typeof getUserById>[2] = {
 			userId: userMock.userId,
 		}
 
