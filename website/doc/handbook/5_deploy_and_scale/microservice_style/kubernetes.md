@@ -135,7 +135,7 @@ const main = async () => {
   // start the http server
   // defaults to port 3000
   // optional: you can set the `port` in the optional parameter of this method
-  // use the `serve` method form the `@purista/hono-node-server` package
+  // use the `serve` method from the `@hono/node-server` package
   const server = serve({
     fetch: app.fetch,
   })
