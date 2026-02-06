@@ -59,7 +59,7 @@ describe('service Ping version 1 - command foo', () => {
 ```
 
 The interesting part is the mocked command context.  
-The `getCommandContextMock`method of the command builder returns an object, which has two entries.
+The `getCommandContextMock` method of the command builder returns an object, which has two entries.
 
 The `mock` entry is the mocked context, which can be passed to the command function.
 
@@ -84,5 +84,5 @@ Only services defined with `canInvoke` are available in the context mock.
 const context = fooCommandBuilder.getCommandContextMock({payload, parameter, sandbox})
 
 // type/autocomplete is done magically
-context.stubs.service.OtherServiceName[1].otherCommandName.resolves({ resultValue: 'the mocked value })
+context.stubs.service.OtherServiceName[1].otherCommandName.resolves({ resultValue: 'the mocked value' })
 ```

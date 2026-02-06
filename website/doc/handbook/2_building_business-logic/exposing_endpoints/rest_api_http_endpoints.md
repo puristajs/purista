@@ -76,7 +76,7 @@ The general steps for a graceful shutdown are:
 import { type Service, gracefulShutdown } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
 
-const services: Service[] = [serviceInstanceA, serviceInstanceB]]
+const services: Service[] = [serviceInstanceA, serviceInstanceB]
 
 const honoService = await honoV1Service.getInstance(eventBridge,{
   serviceConfig: {
@@ -136,7 +136,7 @@ Dynamic registration is enabled by default. To disable it, set `enableDynamicRou
 
 ## Start listening
 
-TThe HTTP server service does not automatically start listening for requests (i.e., open a socket). Instead, it relies on [Hono](https://hono.dev), which provides high flexibility and performance. However, this also means that you need to manually start listening for requests.
+The HTTP server service does not automatically start listening for requests (i.e., open a socket). Instead, it relies on [Hono](https://hono.dev), which provides high flexibility and performance. However, this also means that you need to manually start listening for requests.
 
 ::: code-group
 
@@ -145,7 +145,7 @@ import { type Service, gracefulShutdown } from '@purista/core'
 import { serve } from '@hono/node-server'
 import { honoV1Service } from '@purista/hono-http-server'
 
-const services: Service[] = [serviceInstanceA, serviceInstanceB]]
+const services: Service[] = [serviceInstanceA, serviceInstanceB]
 
 const honoService = await honoV1Service.getInstance(eventBridge,{
   serviceConfig: {
@@ -203,6 +203,7 @@ honoService.app.use(async (c, next) => {
     ...c.get('additionalParameter'),
       someOtherInfo: 'value'
   })
+  await next()
 })
 // [...]
 ```
@@ -223,6 +224,7 @@ honoService.app.use(async (c, next) => {
     ...c.get('additionalParameter'),
       someOtherInfo: 'value'
   })
+  await next()
 })
 ```
 
