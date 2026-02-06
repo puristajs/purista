@@ -89,7 +89,7 @@ export class HonoServiceClass<
 		this.config.healthFunction = this.config.healthFunction ?? async function () {}
 		this.config.protectHandler =
 			this.config.protectHandler ??
-			async function (c: any, n: () => Promise<void>) {
+			async function (c: Parameters<Handler>[0], n: Parameters<Handler>[1]) {
 				void c
 				return n()
 			}

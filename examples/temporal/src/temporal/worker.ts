@@ -35,6 +35,7 @@ async function run() {
 	const resource = resourceFromAttributes({
 		[ATTR_SERVICE_NAME]: 'temporal-worker',
 	})
+	// Temporal and app OTEL packages may resolve different ReadableSpan types in workspaces.
 	const exporter = new OTLPTraceExporter(jaegerExporterOptions) as any
 	const spanProcessor = new SimpleSpanProcessor(exporter)
 
