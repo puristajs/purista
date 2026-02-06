@@ -91,11 +91,11 @@ export const subscriptionTransformInput = async <S extends ServiceClass = Servic
 					try {
 						return await transform(payloadInput, parameterInput)
 					} catch (error) {
-						const err = error as Error
+						const err = error instanceof Error ? error : new Error(String(error))
 						subSpan.recordException(err)
 						subSpan.setStatus({
 							code: SpanStatusCode.ERROR,
-							message: err.message || 'Unable to transform input',
+							message: err.message,
 						})
 
 						if (error instanceof HandledError) {

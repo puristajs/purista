@@ -4,6 +4,7 @@ import { z } from 'zod/v4'
 import { getCommandMessageMock, getEventBridgeMock, getLoggerMock } from '../../mocks/index.js'
 import { SubscriptionDefinitionBuilder } from '../../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.js'
 import { HandledError } from '../Error/HandledError.impl.js'
+import { UnhandledError } from '../Error/UnhandledError.impl.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import { Service } from './Service.impl.js'
 import { subscriptionTransformInput } from './subscriptionTransformInput.impl.js'
@@ -31,13 +32,9 @@ describe('subscriptionTransformInput', () => {
 		})
 
 		const builder = new SubscriptionDefinitionBuilder('testSubscription', 'test subscription')
-			.setTransformInput(
-				transformInputSchema,
-				transformParameterSchema,
-				async function (_context, payload, parameter) {
-					return { payload, parameter }
-				},
-			)
+			.setTransformInput(transformInputSchema, transformParameterSchema, async function (_context, payload, parameter) {
+				return { payload, parameter }
+			})
 			.setSubscriptionFunction(async function (_context, _payload, _parameter) {
 				// Subscription function
 			})
@@ -89,13 +86,9 @@ describe('subscriptionTransformInput', () => {
 		})
 
 		const builder = new SubscriptionDefinitionBuilder('testSubscription', 'test subscription')
-			.setTransformInput(
-				transformInputSchema,
-				transformParameterSchema,
-				async function (_context, payload, parameter) {
-					return { payload, parameter }
-				},
-			)
+			.setTransformInput(transformInputSchema, transformParameterSchema, async function (_context, payload, parameter) {
+				return { payload, parameter }
+			})
 			.setSubscriptionFunction(async function (_context, _payload, _parameter) {
 				// Subscription function
 			})
@@ -189,6 +182,60 @@ describe('subscriptionTransformInput', () => {
 			expect(error).toBeInstanceOf(HandledError)
 			expect((error as HandledError).errorCode).toBe(StatusCode.BadRequest)
 			expect((error as HandledError).message).toContain('Transform function failed')
+		}
+	})
+
+	it('throws UnhandledError if transform function throws a non-error value', async () => {
+		const logger = getLoggerMock(sandbox).mock
+		const eventBridge = getEventBridgeMock(sandbox).mock
+
+		const transformParameterSchema = z.object({
+			paramOne: z.string(),
+		})
+		const transformInputSchema = z.object({
+			someField: z.string(),
+		})
+
+		const builder = new SubscriptionDefinitionBuilder('testSubscription', 'test subscription')
+			.setTransformInput(transformInputSchema, transformParameterSchema, async function () {
+				throw 'non-error'
+			})
+			.setSubscriptionFunction(async function (_context, _payload, _parameter) {
+				// no-op
+			})
+
+		const subscriptionDefinition = await builder.getDefinition()
+
+		const service = new Service({
+			info: {
+				serviceName: 'TestService',
+				serviceVersion: '1',
+				serviceDescription: 'A test service',
+			},
+			commandDefinitionList: [],
+			subscriptionDefinitionList: [subscriptionDefinition],
+			logger,
+			eventBridge,
+			config: {},
+		})
+
+		const message = getCommandMessageMock({
+			payload: {
+				payload: { someField: 'value' },
+				parameter: { paramOne: 'value' },
+			},
+		})
+
+		await expect(subscriptionTransformInput(service, logger, subscriptionDefinition, message)).rejects.toThrow(
+			UnhandledError,
+		)
+
+		try {
+			await subscriptionTransformInput(service, logger, subscriptionDefinition, message)
+		} catch (error) {
+			expect(error).toBeInstanceOf(UnhandledError)
+			expect((error as UnhandledError).errorCode).toBe(StatusCode.InternalServerError)
+			expect((error as UnhandledError).message).toContain('Unable to transform input')
 		}
 	})
 })

@@ -74,11 +74,11 @@ export const commandTransformInput = async <S extends ServiceClass>(
 					parameterInput as Readonly<typeof parameterInput>,
 				)
 			} catch (error) {
-				const err = error as Error
+				const err = error instanceof Error ? error : new Error(String(error))
 				subSpan.recordException(err)
 				subSpan.setStatus({
 					code: SpanStatusCode.ERROR,
-					message: err.message || 'Unable to transform input',
+					message: err.message,
 				})
 
 				if (error instanceof HandledError) {
