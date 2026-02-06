@@ -51,6 +51,19 @@ describe('DaprSecretStore', () => {
 			expect(httpClientGetStub.secondCall.args[0]).toBe('v1.0/secrets/test/mySecret2')
 		})
 
+		it('returns undefined for missing secrets', async () => {
+			const secretName = 'missingSecret'
+			const httpClientGetStub = sandbox.stub(HttpClient.prototype, 'get')
+			httpClientGetStub.onFirstCall().resolves({})
+
+			const secretStore = new DaprSecretStore(config)
+			const result = await secretStore.getSecret(secretName)
+
+			expect(result).toEqual({
+				[secretName]: undefined,
+			})
+		})
+
 		it('should throw an error if get secret is disabled by config', async () => {
 			const disabledConfig = {
 				storeName: 'mySecretStore',

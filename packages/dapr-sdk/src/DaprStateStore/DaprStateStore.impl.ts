@@ -65,12 +65,12 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 				'metadata.contentType': 'application/json',
 			}
 
-			return this.client.get<string>(path, { query })
+			return this.client.get<unknown>(path, { query })
 		}
 
 		const result = await Promise.all(stateNames.map(stateName => fetchStatesFromStore(stateName)))
 
-		const returnValue: Record<string, string> = {}
+		const returnValue: Record<string, unknown> = {}
 
 		stateNames.forEach((value, index) => {
 			returnValue[value] = result[index]

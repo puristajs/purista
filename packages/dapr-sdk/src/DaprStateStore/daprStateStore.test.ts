@@ -52,6 +52,20 @@ describe('DaprStateStore', () => {
 			expect(httpClientGetStub.secondCall.args[0]).toBe('v1.0/state/test/myState2')
 		})
 
+		it('supports object state payloads', async () => {
+			const stateName = 'myState'
+			const stateValue = { nested: true, count: 1 }
+			const httpClientGetStub = sandbox.stub(HttpClient.prototype, 'get')
+			httpClientGetStub.onFirstCall().resolves(stateValue)
+
+			const stateStore = new DaprStateStore(config)
+			const result = await stateStore.getState(stateName)
+
+			expect(result).toStrictEqual({
+				[stateName]: stateValue,
+			})
+		})
+
 		it('should throw an error if get state is disabled by config', async () => {
 			const disabledConfig = {
 				storeName: 'myStateStore',

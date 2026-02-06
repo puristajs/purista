@@ -64,14 +64,12 @@ export class DaprConfigStore extends ConfigStoreBaseClass<DaprConfigStoreConfig>
 			return this.client.get<{ key: string; value: unknown }[]>(path, { query: { key: configName } })
 		}
 
-		const result = await Promise.all(configNames.map(configName => fetchConfigFromStore(configName)))
-
 		const returnValue: Record<string, unknown> = {}
 
-		for (const response of result) {
-			for (const entry of response) {
-				returnValue[entry.key] = entry.value
-			}
+		for (const configName of configNames) {
+			const response = await fetchConfigFromStore(configName)
+			const value = response.find(entry => entry.key === configName)?.value
+			returnValue[configName] = value
 		}
 
 		return returnValue as ObjectWithKeysFromStringArray<ConfigNames>

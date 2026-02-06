@@ -51,6 +51,24 @@ describe('DaprConfigStore', () => {
 			expect(httpClientGetStub.firstCall.args[0]).toBe('v1.0-alpha1/configuration/test')
 			expect(httpClientGetStub.secondCall.args[0]).toBe('v1.0-alpha1/configuration/test')
 		})
+
+		it('returns undefined for missing config keys', async () => {
+			const httpClientGetStub = sandbox.stub(HttpClient.prototype, 'get')
+			httpClientGetStub.onFirstCall().resolves([{ key: 'foo', value: 'foo' }])
+			httpClientGetStub.onSecondCall().resolves([])
+
+			const daprConfigStore = new DaprConfigStore({
+				...config,
+				enableGet: true,
+			})
+
+			const result = await daprConfigStore.getConfig('foo', 'missing')
+
+			expect(result).toEqual({
+				foo: 'foo',
+				missing: undefined,
+			})
+		})
 	})
 
 	describe('setConfig', () => {

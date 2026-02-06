@@ -72,17 +72,11 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
 			return this.client.get<Record<string, string>>(path, { query })
 		}
 
-		const result = await Promise.all(secretNames.map(secretName => fetchSecretFromStore(secretName)))
-
-		let returnValue: Record<string, string> = {}
-
-		secretNames.forEach((value, index) => {
-			void value
-			returnValue = {
-				...result[index],
-				...returnValue,
-			}
-		})
+		const returnValue: Record<string, string | undefined> = {}
+		for (const secretName of secretNames) {
+			const response = await fetchSecretFromStore(secretName)
+			returnValue[secretName] = response[secretName]
+		}
 
 		return returnValue as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
 	}
