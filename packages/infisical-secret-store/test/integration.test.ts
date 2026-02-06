@@ -19,6 +19,7 @@ const describeWithInfisical = infisicalTestsEnabled && infisicalToken ? describe
 
 describeWithInfisical('Infisical secret store', () => {
 	const baseUrl = process.env.PURISTA_INFISICAL_BASE_URL ?? 'http://localhost:8080/'
+	let store!: InfisicalSecretStore
 
 	beforeAll(async () => {
 		execSync(`cd ${resolve(__dirname, '../')} && npm run env:up`)
@@ -28,19 +29,23 @@ describeWithInfisical('Infisical secret store', () => {
 				resolve(undefined)
 			}, 5000)
 		})
+
+		if (!infisicalToken) {
+			throw new Error('PURISTA_INFISICAL_TOKEN is required for Infisical integration tests')
+		}
+
+		store = new InfisicalSecretStore({
+			bearerToken: infisicalToken,
+			baseUrl,
+			enableGet: true,
+			enableRemove: true,
+			enableSet: true,
+			logger: getLoggerMock().mock,
+		})
 	})
 
 	afterAll(async () => {
 		execSync(`cd ${resolve(__dirname, '../')} && npm run env:down`)
-	})
-
-	const store = new InfisicalSecretStore({
-		bearerToken: infisicalToken as string,
-		baseUrl,
-		enableGet: true,
-		enableRemove: true,
-		enableSet: true,
-		logger: getLoggerMock().mock,
 	})
 
 	it('set a secret key', async () => {
