@@ -58,14 +58,13 @@ It takes a single subscription definition as parameter, which will be generated 
 ::: code-group
 
 ```typescript [myServiceV1Service.ts]
-import type { CommandDefinitionList } from '@purista/core'
-
-
 import { pingCommandBuilder } from './command/ping/index.js'
 import { fooCommandBuilder } from './command/foo/index.js'
 import { myServiceV1ServiceBuilder } from './myServiceV1ServiceBuilder'
 
-const commandDefinitions: CommandDefinitionList<any> = [
+type CommandDefinition = Parameters<typeof myServiceV1ServiceBuilder.addCommandDefinition>[number]
+
+const commandDefinitions: CommandDefinition[] = [
   pingCommandBuilder.getDefinition(),
   fooCommandBuilder.getDefinition()
 ]
@@ -98,20 +97,20 @@ In regular usecases, you do not need to create or manipulate this file.
 ::: code-group
 
 ```typescript [myServiceV1Service.ts]
-import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core' // [!code ++]
-
-
 import { pingCommandBuilder } from './command/ping/index.js'
 import { fooCommandBuilder } from './command/foo/index.js'
 import { barSubscriptionBuilder } from './subscription/bar/index.js' // [!code ++]
 import { myServiceV1ServiceBuilder } from './myServiceV1ServiceBuilder'
 
-const commandDefinitions: CommandDefinitionList<any> = [
+type CommandDefinition = Parameters<typeof myServiceV1ServiceBuilder.addCommandDefinition>[number]
+type SubscriptionDefinition = Parameters<typeof myServiceV1ServiceBuilder.addSubscriptionDefinition>[number] // [!code ++]
+
+const commandDefinitions: CommandDefinition[] = [
   pingCommandBuilder.getDefinition(),
   fooCommandBuilder.getDefinition()
 ]
 
-const subscriptionDefinitions: SubscriptionDefinitionList<any> = [  // [!code ++]
+const subscriptionDefinitions: SubscriptionDefinition[] = [  // [!code ++]
   barSubscriptionBuilder.getDefinition()  // [!code ++]
 ]  // [!code ++]
 
