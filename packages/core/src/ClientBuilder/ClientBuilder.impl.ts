@@ -180,7 +180,21 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 		const hasEsm = this.config.buildAs !== 'commonjs'
 		const hasCommonJs = this.config.buildAs !== 'esm'
 
-		const packageJson: Record<string, any> = {
+		const packageJson: {
+			name: string
+			description: string
+			private: boolean
+			type: 'module' | 'commonjs'
+			exports: {
+				'./package.json': string
+				'.': Record<string, unknown>
+			}
+			devDependencies: {
+				'@purista/core': string
+			}
+			main?: string
+			types?: string
+		} = {
 			name: 'my-client',
 			description: 'The client library package for a PURISTA based application',
 			private: true,
