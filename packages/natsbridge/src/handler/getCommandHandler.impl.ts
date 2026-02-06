@@ -138,8 +138,8 @@ export const getCommandHandler = (
 
 							// emit the message 2nd time as event
 							if (
-								(this.config.commandResponsePublishTwice === 'always' ||
-									(responseMessage.eventName && this.config.commandResponsePublishTwice === 'eventOnly')) ??
+								this.config.commandResponsePublishTwice === 'always' ||
+								(responseMessage.eventName && this.config.commandResponsePublishTwice === 'eventOnly') ||
 								(isCommandErrorResponse(responseMessage) && this.config.commandResponsePublishTwice === 'eventAndError')
 							) {
 								const eventTopic = getTopicName.bind(this)(responseMessage)

@@ -110,7 +110,7 @@ export const getCommandHandler = (
 								properties: {
 									messageExpiryInterval: responseMessage.eventName
 										? msToSec(this.config.defaultMessageExpiryInterval)
-										: this.config.defaultCommandTimeout,
+										: msToSec(this.config.defaultCommandTimeout ?? this.defaultCommandTimeout),
 									contentType: 'application/json',
 									userProperties,
 									correlationData: Buffer.from(responseMessage.correlationId),
