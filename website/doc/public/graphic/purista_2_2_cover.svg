@@ -1,0 +1,55 @@
+<svg width="1600" height="900" viewBox="0 0 1600 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1600" y2="900" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0A1A2A"/>
+      <stop offset="0.55" stop-color="#13324A"/>
+      <stop offset="1" stop-color="#0A5A6B"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1260 120) rotate(132.201) scale(520 420)">
+      <stop stop-color="#8FFAFF" stop-opacity="0.5"/>
+      <stop offset="1" stop-color="#8FFAFF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(240 840) rotate(-49.2094) scale(560 420)">
+      <stop stop-color="#48C9B0" stop-opacity="0.45"/>
+      <stop offset="1" stop-color="#48C9B0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.13"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0.04"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="900" fill="url(#bg)"/>
+  <rect width="1600" height="900" fill="url(#glowA)"/>
+  <rect width="1600" height="900" fill="url(#glowB)"/>
+
+  <g opacity="0.28">
+    <path d="M0 720L1600 180" stroke="#9FE7FF" stroke-width="2"/>
+    <path d="M-40 790L1560 250" stroke="#9FE7FF" stroke-width="1"/>
+    <path d="M120 900L1600 390" stroke="#9FE7FF" stroke-width="1"/>
+  </g>
+
+  <rect x="120" y="108" width="1360" height="684" rx="28" fill="url(#card)" stroke="rgba(255,255,255,0.26)"/>
+
+  <text x="180" y="270" fill="#AEEBFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="34" letter-spacing="4">
+    RELEASE NOTES
+  </text>
+  <text x="180" y="410" fill="#FFFFFF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="128" font-weight="700">
+    PURISTA 2.2
+  </text>
+  <text x="180" y="500" fill="#DDF7FF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="44" font-weight="500">
+    Schema + Type-System Hardening
+  </text>
+  <text x="180" y="560" fill="#DDF7FF" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="44" font-weight="500">
+    Stability + Release Pipeline
+  </text>
+
+  <g transform="translate(960 318)">
+    <rect x="0" y="0" width="420" height="270" rx="20" fill="rgba(8,18,30,0.62)" stroke="rgba(175,235,255,0.36)"/>
+    <text x="30" y="56" fill="#95E2FF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="24">types</text>
+    <text x="30" y="104" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="22">- StandardSchema</text>
+    <text x="30" y="142" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="22">- Zod v4 / z.toJSONSchema</text>
+    <text x="30" y="180" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="22">- safer unknown defaults</text>
+    <text x="30" y="218" fill="#FFFFFF" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="22">- stricter builder inference</text>
+  </g>
+</svg>
