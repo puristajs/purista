@@ -32,6 +32,7 @@ console.log(value) // outputs: undefined
 ```
 @module
 */
-export * from './VaultSecretStore.impl.js'
+
 export * from './types.js'
+export * from './VaultSecretStore.impl.js'
 export * from './version.js'
