@@ -1,7 +1,6 @@
 import { fileURLToPath } from 'node:url'
 
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
-import { resourceFromAttributes } from '@opentelemetry/resources'
 import { NodeSDK } from '@opentelemetry/sdk-node'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node'
 import { ATTR_SERVICE_NAME } from '@opentelemetry/semantic-conventions'
@@ -32,15 +31,15 @@ export type ActivitiesType = typeof activities & ReturnType<typeof getPuristaBas
 
 async function run() {
 	// setup OpenTelemetry
-	const resource = resourceFromAttributes({
-		[ATTR_SERVICE_NAME]: 'temporal-worker',
-	})
 	const exporter = new OTLPTraceExporter(jaegerExporterOptions)
 	const spanProcessor = new SimpleSpanProcessor(exporter)
 	// Temporal and app OTEL packages may resolve different ReadableSpan types in workspaces.
 	const temporalExporter = exporter as unknown as Parameters<typeof makeWorkflowExporter>[0]
+	const temporalResource = {
+		attributes: { [ATTR_SERVICE_NAME]: 'temporal-worker' },
+	} as unknown as Parameters<typeof makeWorkflowExporter>[1]
 
-	const otel = new NodeSDK({ traceExporter: exporter, resource })
+	const otel = new NodeSDK({ traceExporter: exporter })
 	otel.start()
 
 	const logger = initLogger('debug')
@@ -71,7 +70,7 @@ async function run() {
 			activityInbound: [ctx => new OpenTelemetryActivityInboundInterceptor(ctx)],
 		},
 		sinks: {
-			exporter: makeWorkflowExporter(temporalExporter, resource),
+			exporter: makeWorkflowExporter(temporalExporter, temporalResource),
 		},
 	})
 
