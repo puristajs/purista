@@ -26,6 +26,29 @@ const myService = await myV1Service.getInstance(eventBridge, {
   })
 ```
 
+## Official Secret Store Adapters
+
+PURISTA provides several ready-to-use secret store adapters:
+
+- `@purista/aws-secret-store`
+- `@purista/azure-secret-store`
+- `@purista/gcloud-secret-store`
+- `@purista/infisical-secret-store`
+- `@purista/vault-secret-store`
+- `@purista/dapr-sdk` (Dapr secret store adapter)
+
+### Example: HashiCorp Vault
+
+```typescript
+import { VaultSecretStore } from '@purista/vault-secret-store'
+
+const secretStore = new VaultSecretStore({
+  endpoint: 'http://localhost:8200',
+  token: 'root',
+  mount: 'secret', // optional, defaults to 'secret'
+})
+```
+
 The secret store is provided inside the `context` of command functions and subscription functions.
 It can be used like this:
 
@@ -46,7 +69,7 @@ It can be used like this:
 ```
 
 ::: info
-Secret stores per default have:
+Secret stores by default have:
 
 - enabled getter
 - disabled setter
@@ -57,8 +80,8 @@ You need to explicitly enable them via config if needed.
 
 ## Default secret store
 
-PURISTA comes with a default secret store, which can be used as placeholder or connector to config files and environment variables.
-In the constructor config, you can add a `config` property. The property must be from type object.
+PURISTA comes with a default secret store, which can be used as a placeholder or for local test/development values.
+In the constructor config, you can add a `config` property. The property must be an object.
 
 Example:
 

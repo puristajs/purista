@@ -16,6 +16,7 @@ PURISTA 2.2.0 is a stabilization release focused on one core goal: **higher corr
 - Removed many unsafe casts and reduced accidental `any` usage across core, CLI, adapters, and tests
 - Updated CLI generation defaults to emit safer **`unknown` payload schemas** where payloads are intentionally open
 - Fixed multiple reliability issues in bridges and stores (unregister semantics, error handling, edge-case response behavior)
+- Added a new official secret store module: **`@purista/vault-secret-store`**
 - Updated examples and handbook sections so docs and code snippets match the current implementation
 - Improved release automation with both publish and dry-run workflows
 
@@ -52,6 +53,16 @@ In parallel with type-system work, this release includes production-focused runt
 - stricter typed error handling in store adapters (AWS, Azure, GCloud, Infisical, Dapr and others)
 - HTTP bridge request/response handling fixes for required query params and null/no-content cases
 - consistent handling of canonical `generateEventBridgeClient` naming while keeping compatibility aliases documented as deprecated
+
+### New Vault Secret Store Module
+
+`@purista/vault-secret-store` is now part of the official ecosystem and provides a typed adapter for HashiCorp Vault.
+
+It supports:
+
+- get/set/remove secret operations through the common PURISTA secret-store interface
+- optional in-memory caching via standard store config
+- KV v2-compatible read/write/delete behavior
 
 ## Examples and Documentation
 

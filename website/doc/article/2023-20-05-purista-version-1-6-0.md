@@ -1,6 +1,6 @@
 ---
 title: Version 1.6
-description: Checkout all the awesome features, improvements and changes in PURISTA v1.6.0 typescript framework.
+description: Check out the features, improvements, and changes in PURISTA v1.6.0.
 date: 2023-05-20
 order: 20230520
 image: /graphic/purista_1_6_cover.png
@@ -12,14 +12,14 @@ This is a huge step forward if you're developing solutions for IoT and Edge.
 
 ---
 
-On the other side, Dapr support is now added for cloud environments.
+On the other hand, Dapr support has now been added for cloud environments.
 This not only includes simple deployments and usage of the core event functionality.
-The new Dapr-SDK provides also the integration of state, config, and secret stores via Dapr.
+The new Dapr SDK also provides integration of state, config, and secret stores via Dapr.
 
 **PURISTA now requires Node version >= 18.15**.
 Also, the provided PURISTA packages no longer contain source map files, resulting in a much smaller size.
 
-A very common task is, to build an HTTP adapter and call external REST APIs.
+A very common task is to build an HTTP adapter and call external REST APIs.
 For such a task, the new base class `HttpClient` is available, which is based on the native fetch function.
 Error handling, JSON decoding, timeout handling, and OpenTelemetry support are built in.
 
@@ -86,7 +86,7 @@ This release contains a lot of improvements.
 By default, HTTP compression is enabled in the Dapr event bridge and the Kubernetes webserver.
 Configurations are now more flat to avoid too much nested parameters.
 
-Dependencies have been updated to the most recent versions. Because of this, the plugin `@anatine/zod-openapi` is replaced by a own version.
+Dependencies have been updated to recent versions. Because of this, the plugin `@anatine/zod-openapi` was replaced by an internal variant.
 A lot of unit and integration tests have been added to the project.
 
 ## Shout out

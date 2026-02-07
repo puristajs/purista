@@ -1,13 +1,13 @@
 ---
 title: Version 2.1
-description: PURISTA 2.1 – A Minor Update with Bug Fixes and Enhancements.
+description: PURISTA 2.1 - a minor update with bug fixes and enhancements.
 date: 2025-03-04
 order: 20250304
 image: /graphic/purista_2_1_cover.jpg
 ---
 <PostDetail>
 
-In version 2.1, we have made several improvements and bug fixes to enhance the functionality of PURISTA. This update includes:
+In version 2.1, we made several improvements and bug fixes to enhance PURISTA. This update includes:
 
 ## Enhancements
 

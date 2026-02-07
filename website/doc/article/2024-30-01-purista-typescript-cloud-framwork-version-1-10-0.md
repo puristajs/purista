@@ -1,7 +1,7 @@
 ---
 title: Version 1.10
 longTitle: Version 1.10
-description: PURISTA TypeScript Cloud Framework v1.10 - Cloud tools 
+description: PURISTA TypeScript Cloud Framework v1.10 - cloud tools
 date: 2024-01-30
 order: 20240130
 image: /graphic/v1-10-0.jpeg
@@ -12,18 +12,18 @@ image: /graphic/v1-10-0.jpeg
 
 ## Website
 
-The website is now based on [Vitepress](https://vitepress.dev) and the handbook and help content will be migrated, extended and updated in the next time.
+The website is now based on [VitePress](https://vitepress.dev), and the handbook and help content will be migrated, extended, and updated over time.
 
 ## CLI
 
-The CLI has ben upgraded to support ESM modules.  
-Because of this, vitest will be installed per default as test framework, if module resultion is set to esm.
+The CLI has been upgraded to support ESM modules.  
+Because of this, Vitest will be installed by default as the test framework if module resolution is set to ESM.
 
 ## New Packages
 
 ## Stores
 
-In version 1.10.0 following stores are now available:
+In version 1.10.0, the following stores are now available:
 
 - [AWS secret store](../handbook/2_building_business-logic/stores/secret-stores.md)
 - [AWS config store](../handbook/2_building_business-logic/stores/config-stores.md)
@@ -48,7 +48,7 @@ Please see: [Invoke other Command](../handbook/2_building_business-logic/command
 
 ### Schemas
 
-PURISTA now supports a whole bunch of different schema libraries - Thank's to [Typeschem](https://typeschema.com/#coverage).
-It is highly recommended to use [Zod](https://zod.dev), as it is the officially supported schema lib. But in some cases you might already have schemas, which can now directly be used.
+PURISTA now supports a broad range of schema libraries, thanks to [TypeSchema](https://typeschema.com/#coverage).
+It is highly recommended to use [Zod](https://zod.dev), as it is the officially supported schema library. However, if you already have schemas, many of them can now be used directly.
 
 </PostDetail>

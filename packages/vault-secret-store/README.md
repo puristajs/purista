@@ -8,7 +8,7 @@ const config = {
   token: 'root',
 }
 
-const store = new VaultSecretStore({ config })
+const store = new VaultSecretStore(config)
 
 await store.setSecret('mySecret', 'value')
 
