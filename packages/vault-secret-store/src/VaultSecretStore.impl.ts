@@ -9,6 +9,22 @@ import vault from 'node-vault'
 
 import type { VaultSecretStoreConfig } from './types.js'
 
+const normalizeMountPath = (mount: string): string => {
+	let start = 0
+	let end = mount.length
+
+	while (start < end && mount[start] === '/') {
+		start++
+	}
+
+	while (end > start && mount[end - 1] === '/') {
+		end--
+	}
+
+	const normalized = mount.slice(start, end)
+	return normalized.length > 0 ? normalized : 'secret'
+}
+
 /**
  * The secret store adapter for HashiCorp Vault.
  * It will store, retrieve, update or remove secrets in HashiCorp Vault.
@@ -19,7 +35,7 @@ export class VaultSecretStore extends SecretStoreBaseClass<VaultSecretStoreConfi
 	constructor(config: StoreBaseConfig<VaultSecretStoreConfig>) {
 		super('VaultSecretStore', { enableCache: true, ...config })
 		const mount = this.config.mount ?? 'secret'
-		this.config.mount = mount.replace(/^\/+|\/+$/g, '')
+		this.config.mount = normalizeMountPath(mount)
 		this.client = vault({ endpoint: this.config.endpoint, token: this.config.token })
 	}
 

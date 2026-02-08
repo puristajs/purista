@@ -1,4 +1,4 @@
-import { execSync } from 'node:child_process'
+import { execFileSync } from 'node:child_process'
 import { resolve } from 'node:path'
 
 import { getLoggerMock } from '@purista/core'
@@ -12,7 +12,7 @@ const describeIntegration = awsTestsEnabled ? describe : describe.skip
 describeIntegration('AWS Secret Manager secret store', () => {
 	beforeAll(async () => {
 		if (!awsTestsEnabled) return
-		execSync(`cd ${workspaceRoot} && npm run env:up`, { stdio: 'inherit' })
+		execFileSync('npm', ['run', 'env:up'], { cwd: workspaceRoot, stdio: 'inherit' })
 		await new Promise(resolve => {
 			setTimeout(() => {
 				resolve(undefined)
@@ -22,7 +22,7 @@ describeIntegration('AWS Secret Manager secret store', () => {
 
 	afterAll(async () => {
 		if (!awsTestsEnabled) return
-		execSync(`cd ${workspaceRoot} && npm run env:down`)
+		execFileSync('npm', ['run', 'env:down'], { cwd: workspaceRoot, stdio: 'inherit' })
 	})
 
 	const store = new AWSSecretStore({
