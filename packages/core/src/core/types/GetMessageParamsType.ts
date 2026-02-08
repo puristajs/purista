@@ -1,4 +1,4 @@
-import type { InferIn, Schema } from '@typeschema/main'
+import type { InferIn, Schema } from '../../schema/index.js'
 
 export type GetMessageParamsType<
 	ParamsSchema extends Schema | undefined,

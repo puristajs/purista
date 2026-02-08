@@ -1,12 +1,11 @@
-import type { Schema } from '@typeschema/main'
 import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
-
+import type { CommandFunctionContext } from '../core/types/commandType/CommandFunctionContext.js'
 import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
 import type { FromInvokeToOtherType } from '../core/types/FromInvokeToOtherType.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
-import type { CommandFunctionContext } from '../core/types/commandType/CommandFunctionContext.js'
+import type { Schema } from '../schema/index.js'
 import { getLoggerMock } from './getLogger.mock.js'
 import { getCommandMessageMock } from './messages/getCommandMessage.mock.js'
 
@@ -20,7 +19,7 @@ export const getCommandContextMock = <
 	MessageParamsType,
 	FunctionPayloadType,
 	FunctionParamsType,
-	Resources extends Record<string, any>,
+	Resources extends Record<string, unknown>,
 	Invokes extends InvokeList,
 	EmitList extends Record<string, Schema>,
 >(input: {
@@ -54,7 +53,7 @@ export const getCommandContextMock = <
 			updateName: input.sandbox?.stub() ?? stub(),
 			end: input.sandbox?.stub() ?? stub(),
 			isRecording: () => true,
-			recordException: (input.sandbox?.stub() ?? stub()).callsFake((err: any) => {
+			recordException: (input.sandbox?.stub() ?? stub()).callsFake((err: unknown) => {
 				// biome-ignore lint/suspicious/noConsole: no logger available
 				console.error(err)
 			}),
@@ -66,7 +65,8 @@ export const getCommandContextMock = <
 	const resourcesProxy = new Proxy(
 		{},
 		{
-			get(obj: Record<string, any>, name) {
+			get(target: object, name) {
+				void target
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
 					throw new Error('Invalid property access on resources proxy')
 				}
@@ -92,12 +92,11 @@ export const getCommandContextMock = <
 		}
 
 		return new Proxy(() => {}, {
-			get(obj: Record<string, any>, name) {
+			get(_obj: object, name) {
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
 					return undefined
 				}
 
-				const x = obj[name]
 				if (lvl === 0) {
 					const na = {
 						...adr,
@@ -106,7 +105,7 @@ export const getCommandContextMock = <
 					if (!invokeMocks[na.serviceName]) {
 						invokeMocks[na.serviceName] = {}
 					}
-					return getInvokeProxy<typeof x>(na, lvl + 1)
+					return getInvokeProxy<unknown>(na, lvl + 1)
 				}
 				if (lvl === 1) {
 					const na = {
@@ -116,7 +115,7 @@ export const getCommandContextMock = <
 					if (!invokeMocks[na.serviceName][na.serviceVersion]) {
 						invokeMocks[na.serviceName][na.serviceVersion] = {}
 					}
-					return getInvokeProxy<typeof x>(na, lvl + 1)
+					return getInvokeProxy<unknown>(na, lvl + 1)
 				}
 
 				if (lvl === 2) {
@@ -141,7 +140,7 @@ export const getCommandContextMock = <
 
 	const eventList = Object.keys(input.emitList ?? {}).reduce((prev, current) => {
 		return {
-			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction in test helper
 			...prev,
 			[current]: input.sandbox?.stub() ?? stub().resolves(),
 		}
@@ -171,8 +170,8 @@ export const getCommandContextMock = <
 			? { payload: input.message }
 			: {
 					payload: {
-						payload: input.payload as any,
-						parameter: input.parameter as any,
+						payload: input.payload as unknown as MessagePayloadType,
+						parameter: input.parameter as unknown as MessageParamsType,
 					},
 				},
 	)
@@ -183,8 +182,17 @@ export const getCommandContextMock = <
 		emit: async <K extends keyof EmitList, Payload = EmitList[K]>(eventName: K, payload: Payload) => {
 			return eventList[eventName](eventName, payload)
 		},
-		wrapInSpan: stubs.wrapInSpan.callsFake((_name, _opts, fn) => fn(getMockSpan())),
-		startActiveSpan: stubs.startActiveSpan.callsFake((_name, _opts, _context, fn) => fn(getMockSpan())),
+		wrapInSpan: stubs.wrapInSpan.callsFake((name, opts, fn) => {
+			void name
+			void opts
+			return fn(getMockSpan())
+		}),
+		startActiveSpan: stubs.startActiveSpan.callsFake((name, opts, context, fn) => {
+			void name
+			void opts
+			void context
+			return fn(getMockSpan())
+		}),
 		service: getInvokeProxy<Invokes>(),
 		secrets: {
 			getSecret: stubs.getSecret.rejects(new Error('getSecret is not stubbed')),

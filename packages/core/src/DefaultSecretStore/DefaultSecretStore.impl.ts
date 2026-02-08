@@ -20,7 +20,7 @@ import type { DefaultSecretStoreConfig } from './types/DefaultSecretStoreConfig.
  * })
  * console.log(await store.getSecret('secretOne', 'secretTwo) // outputs: { secretOne: my_secret_one_value, secretTwo: 'my_secret_two_value' }
  * ```
- * Per default, setting/changing and removal of values are disabled.
+ * By default, setting/changing and removal of values are disabled.
  * You can enable it on instance creation:
  *
  * @example

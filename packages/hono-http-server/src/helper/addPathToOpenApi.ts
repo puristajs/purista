@@ -5,7 +5,7 @@ import type { OpenApiBuilder, OperationObject, ParameterObject, ResponsesObject 
 import { getErrorName } from './getErrorName.js'
 import { getErrorResponseSchema } from './getErrorResponseSchema.js'
 import { getParameterDefinition } from './getParameterDefinition.js'
-import { getQueryDefintion } from './getQueryDefintion.js'
+import { getQueryDefinition } from './getQueryDefinition.js'
 
 type Config = {
 	traceHeaderField?: string
@@ -68,7 +68,7 @@ export const addPathToOpenApi = (
 
 	const errResponses = errArray.reduce((prev, code) => {
 		return {
-			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction
 			...prev,
 			[`${code}`]: {
 				description: getErrorName(code),
@@ -92,7 +92,7 @@ export const addPathToOpenApi = (
 		security: securitySchema.length > 0 && expose.http.openApi?.isSecure ? securitySchema : [],
 		parameters: [
 			...getParameterDefinition(path, expose.parameter),
-			...getQueryDefintion(expose.http.openApi?.query, expose.parameter),
+			...getQueryDefinition(expose.http.openApi?.query, expose.parameter),
 			traceIdParameter,
 			traceParent,
 		],

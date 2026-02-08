@@ -2,12 +2,12 @@ import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
 	EventBridgeEventNames,
 	HandledError,
-	PuristaSpanName,
-	StatusCode,
-	UnhandledError,
 	isCommandErrorResponse,
 	isCommandResponse,
 	isCommandSuccessResponse,
+	PuristaSpanName,
+	StatusCode,
+	UnhandledError,
 } from '@purista/core'
 
 import { deserializeOtpFromMqtt } from '../deserializeOtpFromMqtt.impl.js'

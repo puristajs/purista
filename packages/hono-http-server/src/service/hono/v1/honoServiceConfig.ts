@@ -1,5 +1,5 @@
 import { Service } from '@purista/core'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 // define the service config schema and the default service configuration
 
@@ -45,6 +45,7 @@ export const InfoObjectSchema = z.object({
 export const ServerObjectSchema = z.object({
 	url: z.string(),
 	description: z.string().optional(),
+	// Keep `any`: OpenAPI `variables` shape is external and passed through without narrowing.
 	variables: z.any().optional(),
 })
 export const honoServiceV1ConfigSchema = z.object({
@@ -53,6 +54,7 @@ export const honoServiceV1ConfigSchema = z.object({
 	apiMountPath: z.string().optional().default(DEFAULT_API_MOUNT_PATH),
 	enableHealth: z.boolean().optional().default(true),
 	healthPath: z.string().optional().default('/healthz'),
+	// Keep `any`: app-specific health/protection hooks are intentionally framework-agnostic.
 	healthFunction: z.any().optional(),
 	protectHandler: z.any().optional(),
 	services: z.array(z.instanceof(Service)).optional().default([]),
@@ -63,6 +65,7 @@ export const honoServiceV1ConfigSchema = z.object({
 			enabled: z.boolean().optional().default(true),
 			info: InfoObjectSchema,
 			servers: z.array(ServerObjectSchema).optional(),
+			// Keep `any`: OpenAPI object fragments are merged from dynamic command metadata.
 			components: z.any().optional(),
 			security: z.array(z.any()).optional(),
 			externalDocs: ExternalDocumentationObjectSchema.optional(),

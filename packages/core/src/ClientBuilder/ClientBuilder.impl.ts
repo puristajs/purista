@@ -1,21 +1,20 @@
 import type { WriteStream } from 'node:fs'
 import { createWriteStream } from 'node:fs'
-import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises'
+import { mkdir, readdir, readFile, rm, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
 import type TS from 'typescript'
-import type { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
-import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExposedServiceMeta.js'
 import { isHttpExposedServiceMeta } from '../core/HttpServer/types/isHttpExposedServiceMeta.impl.js'
 import { GenericEventEmitter } from '../core/types/GenericEventEmitter.js'
-import { mergeServiceDefintion } from '../helper/exportServiceDefinitions.js'
+import { mergeServiceDefinition } from '../helper/exportServiceDefinitions.js'
 import { convertToCamelCase } from '../helper/string/convertToCamelCase.impl.js'
 import type { FullDefinition } from '../helper/types/FullDefinition.js'
 import type { FullServiceDefinition } from '../helper/types/FullServiceDefinition.js'
+import type { ServiceBuilder } from '../ServiceBuilder/ServiceBuilder.impl.js'
 
 import { puristaVersion } from '../version.js'
 import { getWriter } from './getWriter.impl.js'
-import { mergeIntoServiceDefintion } from './mergeIntoServiceDefintion.impl.js'
+import { mergeIntoServiceDefinition } from './mergeIntoServiceDefinition.impl.js'
 import { metaToFunctionBridge } from './metaToFunctionBridge.impl.js'
 import { metaToFunctionHttp } from './metaToFunctionHttp.impl.js'
 import { configFullSchema, configSchema } from './schema/configSchema.js'
@@ -30,7 +29,7 @@ async function loadTypeScript() {
 	if (!ts) {
 		try {
 			ts = await import('typescript')
-		} catch (error) {
+		} catch {
 			throw new Error('TypeScript is required for this operation. Please install it using `npm install typescript`.')
 		}
 	}
@@ -44,8 +43,8 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	public config: ConfigFull
 
 	/**
-	 * The root file from where the relative paths are resolved.
-	 * Defaults to current users directory
+	 * The root path from where relative definition/config/output paths are resolved.
+	 * Defaults to the current working directory (`process.cwd()`).
 	 */
 	public rootPath = process.cwd()
 
@@ -75,8 +74,8 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	}
 
 	/**
-	 * Loads the config fom JSON file.
-	 * If no path is provided, it will try to load the config from purista.client.json in rootPath directory
+	 * Loads the config from a JSON file.
+	 * If no path is provided, it loads `purista.client.json` from `rootPath`.
 	 * @param path
 	 */
 	async loadConfig(path?: string) {
@@ -105,8 +104,8 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 		const services: FullServiceDefinition = {}
 
 		for (const builder of serviceBuilders) {
-			const definition = await builder.getFullServiceDefintion()
-			mergeServiceDefintion(services, definition)
+			const definition = await builder.getFullServiceDefinition()
+			mergeServiceDefinition(services, definition)
 		}
 
 		return services
@@ -180,7 +179,21 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 		const hasEsm = this.config.buildAs !== 'commonjs'
 		const hasCommonJs = this.config.buildAs !== 'esm'
 
-		const packageJson: Record<string, any> = {
+		const packageJson: {
+			name: string
+			description: string
+			private: boolean
+			type: 'module' | 'commonjs'
+			exports: {
+				'./package.json': string
+				'.': Record<string, unknown>
+			}
+			devDependencies: {
+				'@purista/core': string
+			}
+			main?: string
+			types?: string
+		} = {
 			name: 'my-client',
 			description: 'The client library package for a PURISTA based application',
 			private: true,
@@ -296,9 +309,15 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	}
 
 	/**
-	 * Loads the definitions from JSON files
-	 * @param path
-	 * @returns
+	 * Load service definitions from JSON files.
+	 *
+	 * @param path - Optional path to the folder containing the definition files.
+	 * Defaults to the configured definition path.
+	 *
+	 * @example
+	 * ```ts
+	 * const defs = await clientBuilder.loadDefinitionFiles()
+	 * ```
 	 */
 	async loadDefinitionFiles(path?: string): Promise<FullServiceDefinition> {
 		this.emit('start', 'Start reading definitions')
@@ -318,7 +337,7 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 				const json: FullDefinition = JSON.parse(content)
 
 				if (json.services) {
-					mergeIntoServiceDefintion(services, json.services)
+					mergeIntoServiceDefinition(services, json.services)
 					this.emit('success', file)
 				}
 			} catch (error) {
@@ -330,8 +349,15 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	}
 
 	/**
-	 * Generates the zero-dependency HTTP client source files
-	 * @param serviceDefinition
+	 * Generate zero‑dependency HTTP client source files from the given definition.
+	 *
+	 * @param serviceDefinition - The full service definition containing the exposed commands.
+	 *
+	 * @example
+	 * ```ts
+	 * const services = await clientBuilder.loadDefinitionFiles()
+	 * await clientBuilder.generateHttpClient(services)
+	 * ```
 	 */
 	async generateHttpClient(serviceDefinition: FullServiceDefinition) {
 		const ext = this.config.buildAs !== 'commonjs' ? '.js' : ''
@@ -531,10 +557,14 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 								}
 
 								return {
-									// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+									// biome-ignore lint/performance/noAccumulatingSpread: small map construction in codegen
 									...input,
 									[serviceVersion]: commands.reduce((ret: string[], httpDef) => {
-										const meta = httpDef.metadata as unknown as HttpExposedServiceMeta
+										const meta = httpDef.metadata
+										if (!isHttpExposedServiceMeta(meta)) {
+											return ret
+										}
+
 										const { functionString, typeString } = metaToFunctionHttp(
 											serviceName,
 											serviceVersion,
@@ -706,10 +736,10 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 	}
 
 	/**
-	 * Generates the zero-dependency HTTP client source files
+	 * Generates the zero-dependency EventBridge client source files.
 	 * @param serviceDefinition
 	 */
-	async generateHEventBridgeClient(serviceDefinition: FullServiceDefinition) {
+	async generateEventBridgeClient(serviceDefinition: FullServiceDefinition) {
 		const ext = this.config.buildAs !== 'commonjs' ? '.js' : ''
 
 		const clientStream = createWriteStream(join(this.getOutputPath(), 'src', 'eventbridge_client.ts'))
@@ -750,6 +780,13 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 		])
 	}
 
+	/**
+	 * @deprecated Use `generateEventBridgeClient` instead.
+	 */
+	async generateHEventBridgeClient(serviceDefinition: FullServiceDefinition) {
+		return this.generateEventBridgeClient(serviceDefinition)
+	}
+
 	private generateEventBridgeClientSource(
 		clientStream: WriteStream,
 		typeStream: WriteStream,
@@ -771,10 +808,10 @@ export class ClientBuilder extends GenericEventEmitter<ClientBuilderEvents> {
 								}
 
 								return {
-									// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+									// biome-ignore lint/performance/noAccumulatingSpread: small map construction in codegen
 									...input,
 									[serviceVersion]: commands.reduce((ret: string[], httpDef) => {
-										const meta = httpDef.metadata as unknown as HttpExposedServiceMeta
+										const meta = httpDef.metadata
 										const { functionString, typeString } = metaToFunctionBridge(
 											serviceName,
 											serviceVersion,

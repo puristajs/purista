@@ -14,7 +14,6 @@ import { createSandbox } from 'sinon'
 
 import { pingV1Service } from '../../pingV1Service'
 import { fooCommandBuilder } from './fooCommandBuilder'
-import type { PingV1FooInputParameter, PingV1FooInputPayload } from './types'
 
 describe('service Ping version 1 - command foo', () => {
   let sandbox = createSandbox()
@@ -39,16 +38,16 @@ describe('service Ping version 1 - command foo', () => {
     // alternative without
     // const foo = fooCommandBuilder.getCommandFunction().bind(service)
 
-    const payload: PingV1FooInputPayload = undefined
+    const payload: Parameters<typeof foo>[1] = {}
 
-    const parameter: PingV1FooInputParameter = {}
+    const parameter: Parameters<typeof foo>[2] = {}
 
     // get a mocked command context
     const context = fooCommandBuilder.getCommandContextMock({
       payload,
       parameter,
       sandbox,
-      ...resources: service.resources
+      resources: service.resources,
     })
 
     // execute the command including the validations and hooks
@@ -59,8 +58,8 @@ describe('service Ping version 1 - command foo', () => {
 })
 ```
 
-The intersting part is the mocked command context.  
-The `getCommandContextMock`method of the command builder returns an object, which has two entries.
+The interesting part is the mocked command context.  
+The `getCommandContextMock` method of the command builder returns an object, which has two entries.
 
 The `mock` entry is the mocked context, which can be passed to the command function.
 
@@ -77,7 +76,7 @@ context.stubs.service.OtherService[1].otherCommand.resolves('mock data')
 ## Testing
 
 During unit tests, you will need to mock command invokes.  
-PURISTA provides the `getCommandContextMock` in the command builder, which allows to easy mock service invocations.
+PURISTA provides the `getCommandContextMock` in the command builder, which allows you to easily mock service invocations.
 
 Only services defined with `canInvoke` are available in the context mock.
 
@@ -85,5 +84,5 @@ Only services defined with `canInvoke` are available in the context mock.
 const context = fooCommandBuilder.getCommandContextMock({payload, parameter, sandbox})
 
 // type/autocomplete is done magically
-context.stubs.service.OtherServiceName[1].otherCommandName.resolves({ resultValue: 'the mocked value })
+context.stubs.service.OtherServiceName[1].otherCommandName.resolves({ resultValue: 'the mocked value' })
 ```

@@ -1,4 +1,4 @@
-import type { Schema } from '@typeschema/main'
+import type { Schema } from '../../../schema/index.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
@@ -15,7 +15,7 @@ export type SubscriptionBeforeGuardHook<
 	S extends ServiceClass = ServiceClass,
 	FunctionPayloadType = unknown,
 	FunctionParamsType = unknown,
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = (

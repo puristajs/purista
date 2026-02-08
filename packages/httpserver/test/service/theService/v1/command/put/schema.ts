@@ -1,13 +1,17 @@
 import { extendApi } from '@purista/core'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 // define the input parameters
-export const theServiceV1PutInputParameterSchema = extendApi(z.object({}), { title: 'put input parameter schema' })
+export const theServiceV1PutInputParameterSchema = extendApi(z.object({}), {
+	title: 'put input parameter schema',
+})
 
 // define the input payload
-export const theServiceV1PutInputPayloadSchema = extendApi(z.any(), { title: 'put input payload schema' })
+export const theServiceV1PutInputPayloadSchema = extendApi(z.unknown(), {
+	title: 'put input payload schema',
+})
 
 // define the output payload
-export const theServiceV1PutOutputPayloadSchema = extendApi(z.any(), {
+export const theServiceV1PutOutputPayloadSchema = extendApi(z.unknown(), {
 	title: 'put output payload schema',
 })

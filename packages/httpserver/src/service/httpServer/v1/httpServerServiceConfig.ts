@@ -3,7 +3,7 @@ import type { Http2SecureServer } from 'node:http2'
 import type { FastifyCompressOptions } from '@fastify/compress'
 import type { FastifyCorsOptions } from '@fastify/cors'
 import type { FastifyHttp2SecureOptions, FastifyServerOptions } from 'fastify'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 // define the service config schema and the default service configuration
 
@@ -54,11 +54,15 @@ export const InfoObjectSchema = z.object({
 export const ServerObjectSchema = z.object({
 	url: z.string(),
 	description: z.string().optional(),
+	// Keep `any`: OpenAPI `variables` shape is external and currently passed through without narrowing.
 	variables: z.any().optional(),
 })
 export const httpServerServiceV1ConfigSchema = z.object({
+	// Keep `any`: Fastify options are intentionally provider/plugin specific and validated by Fastify itself.
 	fastify: z.any().default({
-		ignoreTrailingSlash: true,
+		routerOptions: {
+			ignoreTrailingSlash: true,
+		},
 	}), //
 	logLevel: z.enum(['info', 'error', 'warn', 'debug', 'trace', 'fatal']).optional().default('warn'),
 	port: z.number().int().min(1).default(9090),
@@ -69,9 +73,16 @@ export const httpServerServiceV1ConfigSchema = z.object({
 	apiMountPath: z.string().optional().default('/api'),
 	enableHelmet: z.boolean().optional().default(true),
 	enableHealthz: z.boolean().optional().default(true),
-	healthzFunction: z.function().args(z.any(), z.any()).returns(z.promise(z.void())).optional(),
+	// Keep generic function input types to avoid over-constraining framework integrations.
+	healthzFunction: z
+		.function({
+			input: [z.any(), z.any()],
+			output: z.promise(z.void()),
+		})
+		.optional(),
 	helmetOptions: FastifyHelmetOptionsSchema.optional(),
 	enableCompress: z.boolean().optional().default(false),
+	// Keep `any`: plugin option bags are intentionally opaque at this schema boundary.
 	compressOptions: z.any().optional(),
 	enableCors: z.boolean().optional().default(false),
 	corsOptions: z.any().optional(),
@@ -82,6 +93,7 @@ export const httpServerServiceV1ConfigSchema = z.object({
 			path: z.string().optional().default(OPENAPI_DEFAULT_MOUNT_PATH),
 			info: InfoObjectSchema,
 			servers: z.array(ServerObjectSchema).optional(),
+			// Keep `any`: OpenAPI object fragments are merged from dynamic command metadata.
 			components: z.any().optional(),
 			security: z.array(z.any()).optional(),
 			externalDocs: ExternalDocumentationObjectSchema.optional(),

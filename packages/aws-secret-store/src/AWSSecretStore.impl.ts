@@ -91,7 +91,10 @@ export class AWSSecretStore extends SecretStoreBaseClass<AWSSecretStoreConfig> {
 				})
 
 				await this.client.send(command)
+				return
 			}
+
+			throw UnhandledError.fromError(err, StatusCode.InternalServerError)
 		}
 	}
 }

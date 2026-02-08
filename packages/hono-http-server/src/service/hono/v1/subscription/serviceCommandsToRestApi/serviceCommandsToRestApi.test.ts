@@ -29,10 +29,10 @@ describe('service Hono version 1 - subscription serviceCommandsToRestApi', () =>
 		)
 
 		// define the test input payload
-		const payload: HonoV1ServiceCommandsToRestApiInputPayload = undefined
+		const payload: HonoV1ServiceCommandsToRestApiInputPayload = {}
 
 		// define the test input parameter
-		const parameter = undefined as unknown as Readonly<unknown>
+		const parameter: Readonly<unknown> = {}
 
 		// create a mock message with the expected input for the subscription function
 		const message = getCommandSuccessMessageMock(payload)

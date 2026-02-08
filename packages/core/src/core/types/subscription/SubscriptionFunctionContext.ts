@@ -1,4 +1,4 @@
-import type { Schema } from '@typeschema/main'
+import type { Schema } from '../../../schema/index.js'
 import type { ContextBase } from '../ContextBase.js'
 import type { EBMessage } from '../EBMessage.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
@@ -16,7 +16,7 @@ import type { Prettify } from '../Prettify.js'
  * @group Subscription
  */
 export type SubscriptionFunctionContextEnhancements<
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = {
@@ -52,7 +52,7 @@ export type SubscriptionFunctionContextEnhancements<
  * @group Subscription
  */
 export type SubscriptionFunctionContext<
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = Prettify<ContextBase & SubscriptionFunctionContextEnhancements<Resources, Invokes, EmitList>>

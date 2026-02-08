@@ -16,24 +16,24 @@ import type {
 	Subscription,
 } from '@purista/core'
 import {
+	createInfoMessage,
+	deserializeOtp,
 	EBMessageType,
 	EventBridgeBaseClass,
 	EventBridgeEventNames,
+	getNewCorrelationId,
+	getNewEBMessageId,
 	HandledError,
+	isCommandResponse,
+	isCommandSuccessResponse,
 	PuristaSpanName,
 	PuristaSpanTag,
 	StatusCode,
-	UnhandledError,
-	createInfoMessage,
-	deserializeOtp,
-	getNewCorrelationId,
-	getNewEBMessageId,
-	isCommandResponse,
-	isCommandSuccessResponse,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 import type { JetStreamManager, MsgHdrs, NatsConnection, Subscription as NatsSubscription } from 'nats'
-import { JSONCodec, connect, headers as getNewHeaders } from 'nats'
+import { connect, headers as getNewHeaders, JSONCodec } from 'nats'
 
 import { deserializeOtpFromNats } from './deserializeOtpFromNats.impl.js'
 import { getDefaultNatsBridgeConfig } from './getDefaultNatsBridgeConfig.js'
@@ -369,14 +369,22 @@ export class NatsBridge extends EventBridgeBaseClass<NatsBridgeConfig> implement
 		subscription: Subscription,
 		cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
 	): Promise<string> {
+		if (!this.connection) {
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a NATS server')
+		}
+
 		const topic = getSubscriptionTopic.bind(this)(subscription)
 
 		const queueName = getQueueGroupName(this.config.topicPrefix, subscription.subscriber)
 		const queue = subscription.eventBridgeConfig.shared ? queueName : undefined
-		this.connection?.subscribe(topic, {
+		const natsSubscription = this.connection.subscribe(topic, {
 			callback: getSubscriptionHandler(subscription, cb).bind(this),
 			queue,
 		})
+		this.subscriptions.set(
+			`${subscription.subscriber.serviceName}-${subscription.subscriber.serviceVersion},${subscription.subscriber.serviceTarget}`,
+			natsSubscription,
+		)
 
 		return topic
 	}

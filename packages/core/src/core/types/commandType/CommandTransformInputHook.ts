@@ -20,7 +20,7 @@ export type CommandTransformInputHook<
 	TransformInputParams,
 	FunctionPayloadType,
 	FunctionParamsType,
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 > = (
 	/** the service instance */
 	this: S,

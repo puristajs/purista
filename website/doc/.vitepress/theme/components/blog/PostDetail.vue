@@ -1,10 +1,8 @@
 <script setup lang="ts">
-import { useData } from 'vitepress'
 import usePosts from '../../composables/usePosts.js'
 
-const { site } = useData()
-
-const { currentPost: post, path, prevPost, nextPost } = usePosts()
+// biome-ignore lint/correctness/noUnusedVariables: used in template
+const { currentPost: post } = usePosts()
 </script>
 
 <template>

@@ -10,7 +10,9 @@
 	"author": "Sebastian Wessel",
 	"license": "ISC",
 	"type": "module",
-	"files": ["dist"],
+	"files": [
+		"dist"
+	],
 	"publishConfig": {
 		"access": "public"
 	},
@@ -24,36 +26,36 @@
 		"test:integration": "vitest -c ../../vitest.config.ts"
 	},
 	"tshy": {
-		"exclude": ["src/**/*.test.ts"],
+		"exclude": [
+			"src/**/*.test.ts"
+		],
 		"exports": {
 			"./package.json": "./package.json",
 			".": "./src/index.ts"
 		}
 	},
 	"devDependencies": {
-		"@sodaru/yup-to-json-schema": "^2.0.1",
-		"@types/node": "^22.15.3",
-		"@types/sinon": "^17.0.4",
-		"@typeschema/yup": "^0.14.0",
-		"rimraf": "^6.0.1",
-		"tshy": "^3.0.2",
-		"vitest": "^3.1.2",
-		"yup": "^1.6.1"
+		"@types/node": "^25.2.1",
+		"@types/sinon": "^21.0.0",
+		"rimraf": "^6.1.2",
+		"tshy": "^3.1.3",
+		"vitest": "^4.0.18",
+		"yup": "^1.7.1"
 	},
 	"dependencies": {
 		"@opentelemetry/api": "^1.9.0",
-		"@opentelemetry/resources": "^2.0.0",
-		"@opentelemetry/sdk-trace-node": "^2.0.0",
-		"@opentelemetry/semantic-conventions": "^1.32.0",
-		"@typeschema/main": "^0.14.1",
-		"@typeschema/zod": "^0.14.0",
+		"@opentelemetry/resources": "^2.5.0",
+		"@opentelemetry/sdk-trace-node": "^2.5.0",
+		"@opentelemetry/semantic-conventions": "^1.39.0",
+		"@sodaru/yup-to-json-schema": "^2.0.1",
+		"@standard-schema/spec": "^1.1.0",
 		"code-block-writer": "^13.0.3",
-		"openapi3-ts": "^4.4.0",
-		"pino": "^9.6.0",
-		"sinon": "^20.0.0",
-		"ts-deepmerge": "^7.0.2",
-		"zod": "^3.24.3",
-		"zod-to-json-schema": "^3.24.5"
+		"openapi3-ts": "^4.5.0",
+		"pino": "^10.3.0",
+		"sinon": "^21.0.1",
+		"ts-deepmerge": "^7.0.3",
+		"zod": "^4.3.6",
+		"zod-to-json-schema": "^3.25.1"
 	},
 	"exports": {
 		"./package.json": "./package.json",

@@ -20,7 +20,7 @@ export const metaToFunctionBridge = (
 
 	const parameterType = meta.expose.parameter ? schemaObjectToTsType(meta.expose.parameter) : '{}'
 	const payloadType = meta.expose.inputPayload ? schemaObjectToTsType(meta.expose.inputPayload) : 'unknown'
-	const resposeType = meta.expose.outputPayload ? schemaObjectToTsType(meta.expose.outputPayload) : 'unknown'
+	const responseType = meta.expose.outputPayload ? schemaObjectToTsType(meta.expose.outputPayload) : 'unknown'
 
 	typeWriter
 		.blankLine()
@@ -31,7 +31,10 @@ export const metaToFunctionBridge = (
 		.writeLine(`export type ${typeNamePrefix}PayloadType = ${payloadType}`)
 		.blankLine()
 		.writeLine(`/** ${functionName} return type of ${serviceName} version ${serviceVersion} */`)
-		.writeLine(`export type ${typeNamePrefix}ResposeType = ${resposeType}`)
+		.writeLine(`export type ${typeNamePrefix}ResponseType = ${responseType}`)
+		.blankLine()
+		.writeLine('/** @deprecated Use `ResponseType` instead. */')
+		.writeLine(`export type ${typeNamePrefix}ResposeType = ${typeNamePrefix}ResponseType`)
 
 	codeWriter
 		.writeLine(
@@ -39,7 +42,7 @@ export const metaToFunctionBridge = (
 		)
 		.block(() => {
 			codeWriter
-				.write(`return this.__eventBridge__.invoke<ClientType.${typeNamePrefix}ResposeType>(`)
+				.write(`return this.__eventBridge__.invoke<ClientType.${typeNamePrefix}ResponseType>(`)
 				.block(() => {
 					codeWriter
 						.write('sender:')

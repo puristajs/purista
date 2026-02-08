@@ -1,6 +1,6 @@
 ---
 title: Version 1.5
-description: Checkout all the awesome features, improvements and changes in PURISTA v1.5.0 typescript framework.
+description: Check out the features, improvements, and changes in PURISTA v1.5.0.
 date: 2023-01-14
 order: 20230114
 image: /graphic/advertise_large.png
@@ -21,13 +21,13 @@ The application can:
 - deploy as serverless functions (FaaS) at different cloud vendors.
 
 ::: tip Awesome!
-**All this is possible From one code base, with no or low overhead and without touching the business logic!**
+**All this is possible from one code base, with low overhead and without touching business logic.**
 See: [Deployment in handbook](../handbook/5_deploy_and_scale/)
 :::
 
 ![PURISTA typescript Framework 1.5](/graphic/advertise_large.svg)
 
-You can also follow news on twitter **[@purista_js](https://twitter.com/purista_js)** and get direct in touch at the **[Discord Chat](https://discord.gg/9feaUm3H2v)**.
+You can also follow updates on Twitter **[@purista_js](https://twitter.com/purista_js)** and connect directly in the **[Discord Chat](https://discord.gg/9feaUm3H2v)**.
 
 PURISTA has now a CLI tool, which will help to set up a project and speed up the creation of new services, commands, and subscriptions.
 The biggest addition in version 1.5 is the integration of [OpenTelemetry](https://opentelemetry.io) into the core functionality of PURISTA.
@@ -36,7 +36,7 @@ Subscriptions have been overhauled and are now aligned to commands. You have now
 
 PURISTA version 1.5, introduces stores for configurations, states, and secrets. They are interfaces in the context of commands and subscriptions. This allows drop-in replacements for specific vendor solutions, without touching your business logic.
 
-The first infrastructure-focused SDK `@purista/k8s-sdk` is available now, which will help developers, to deploy their applications in microservice style on [Kubernetes](https://kubernetes.io).
+The first infrastructure-focused SDK `@purista/k8s-sdk` is now available, helping developers deploy applications in microservice style on [Kubernetes](https://kubernetes.io).
 
 In addition to bug fixes, type, and documentation improvements, a set of breaking changes and name changes are coming with version 1.5. This was necessary to unify and improve naming and simplify constructors and method calls.
 
@@ -45,7 +45,7 @@ In addition to bug fixes, type, and documentation improvements, a set of breakin
 ## CLI tool
 
 The CLI tool is a great helper for your daily business!
-It does not only allow you to set up and initialize new repositories.
+It not only allows you to set up and initialize new repositories.
 You can now quickly add new services or add commands and subscriptions to an existing service.
 
 All needed files, like builders, and unit tests will be created for you.
@@ -78,7 +78,7 @@ Previously, subscriptions were not able to return values.
 This has been changed!
 
 Now, subscriptions can return values.
-If they return values, they need a corresponding output schema and an event name. The result is validated and then published to the event bridge as a custom message with the given even name.
+If they return values, they need a corresponding output schema and an event name. The result is validated and then published to the event bridge as a custom message with the given event name.
 
 This allows much more complex scenarios in the real world.
 
@@ -89,7 +89,7 @@ Also, subscriptions have now optional in- and output transformers and hooks, lik
 OpenTelemetry support is now built into the core of the framework.
 This allows tracing and monitoring of your application by using an open standard protocol.
 
-You can now use great third-party solutions like [Grafana](https://grafana.com), [Jaeger](https://www.jaegertracing.io), [ZipKin](https://zipkin.io), [Uptrace](https://uptrace.dev) or solutions from your preferred cloud vendor, to get insights of your application.
+You can now use great third-party solutions like [Grafana](https://grafana.com), [Jaeger](https://www.jaegertracing.io), [Zipkin](https://zipkin.io), [Uptrace](https://uptrace.dev), or solutions from your preferred cloud vendor, to gain insight into your application.
 
 ## Introducing stores
 
@@ -115,7 +115,7 @@ You can also provide a custom solution, which can be implemented in a very simpl
 
 ## Kubernetes SDK
 
-Using Kubernetes as the basement for an application and deploying a software solution as a bunch of microservices, has become a de facto standard for scalable applications, running on servers and in the cloud.
+Using Kubernetes as the foundation for an application and deploying software as a set of microservices has become a de facto standard for scalable workloads on servers and in the cloud.
 
 The SDK provides a simple helper, to get single services, based on PURISTA, quickly deployed in Kubernetes.
 
@@ -125,7 +125,7 @@ More SDKs will come later, to provide helpers for different vendors and deployme
 
 Some breaking changes were necessary to improve the naming and usage of methods and constructors.
 The constructors have been simplified.
-Also, some previously required parameters, like the logger, have become optional, to follow the pattern: _"Default everywhere and allow overwriting in case it is needed"_.
+Also, some previously required parameters, like the logger, have become optional, following the pattern: _"Default everywhere and allow overriding when needed"_.
 
 ### Breaking changes
 
@@ -158,10 +158,10 @@ The _FunctionDefinitionBuilder_ is renamed to _CommandDefinitionBuilder_.
 
 Mocks have now an optional parameter for a [sinon.js](https://sinonjs.org) sandbox.
 
-- `getEventBridgeMock` has now optionalparameter sandbox
-- `getLoggerMock` has now optionalparameter sandbox
+- `getEventBridgeMock` now has an optional sandbox parameter
+- `getLoggerMock` now has an optional sandbox parameter
 - `getCommandContextMock` has now optional parameter sandbox
-- `getSubscriptionContextMock` has now optionalparameter sandbox
+- `getSubscriptionContextMock` now has an optional sandbox parameter
 - new test helper `getCommandTransformContextMock`
 - new test helper `getSubscriptionTransformContextMock`
 - new test helper `getCommandErrorMessageMock`

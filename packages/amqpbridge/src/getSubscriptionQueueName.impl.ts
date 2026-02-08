@@ -1,5 +1,8 @@
 import type { EBMessageAddress } from '@purista/core'
 
+/**
+ * Builds the AMQP queue name for a subscription endpoint.
+ */
 export const getSubscriptionQueueName = (address: EBMessageAddress, prefix?: string): string => {
 	let pre = ''
 	if (prefix?.length) {

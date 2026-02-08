@@ -1,8 +1,7 @@
-import { resolve } from 'node:path'
-
-import fastifyStatic from '@fastify/static'
+import { serve } from '@hono/node-server'
+import { serveStatic } from '@hono/node-server/serve-static'
 import { DefaultStateStore, gracefulShutdown, initLogger } from '@purista/core'
-import { httpServerV1Service } from '@purista/httpserver'
+import { honoV1Service } from '@purista/hono-http-server'
 import { MqttBridge } from '@purista/mqttbridge'
 
 import httpServerConfig from './config/httpServerConfig.js'
@@ -26,20 +25,19 @@ export const main = async () => {
 	const stateStore = new DefaultStateStore({ logger })
 
 	// create and init a webserver
-	const httpServerService = await httpServerV1Service.getInstance(eventBridge, {
+	const honoService = await honoV1Service.getInstance(eventBridge, {
 		serviceConfig: httpServerConfig,
 	})
 
-	const defaultPublicPath = resolve(__dirname, '..', 'public')
-
-	// static file handler
-	httpServerService.server?.register(fastifyStatic, {
-		root: defaultPublicPath,
-		decorateReply: false,
-	})
+	honoService.app.get('*', serveStatic({ root: './public' }))
 
 	// start the webserver
-	await httpServerService.start()
+	await honoService.start()
+
+	const _serverInstance = serve({
+		fetch: honoService.app.fetch,
+		port: httpServerConfig.port,
+	})
 
 	const userService = await userV1Service.getInstance(eventBridge, { logger, stateStore })
 	await userService.start()
@@ -56,6 +54,6 @@ export const main = async () => {
 		userService,
 		emailService,
 		stateStore,
-		httpServerService,
+		honoService,
 	])
 }

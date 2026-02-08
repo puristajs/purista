@@ -12,8 +12,8 @@ As an example:
 You like to try out [Prometheus](https://prometheus.io) to track certain data.
 One way of doing it, would be to directly integrate the Prometheus client into your commands and subscriptions.
 
-But, by doing this, it would add a dependency, directly to your business code, with all the down sides.
-A better way is, to emit the data from your command or subscription as regular JavaScript events.
+But by doing this, it adds a dependency directly to your business code, with all the downsides.
+A better way is to emit the data from your command or subscription as regular JavaScript events.
 Some function "outside" your service can listen to these events, and process the data.
 
 ::: tip PRO
@@ -21,7 +21,7 @@ Some function "outside" your service can listen to these events, and process the
 - keeps the business code isolated
 - easier to test and to handle errors
 - the dependency will be in one place - easier to maintain, fewer duplicate code
-- the dependency will become optional - e.g. can simpler replaced by other solutions
+- the dependency becomes optional - e.g. it can be replaced by other solutions more easily
 :::
 
 ::: caution CONTRA
@@ -52,21 +52,21 @@ export const collectData = (serviceInstance: Service) => {
   client.collectDefaultMetrics({ register })
   // Add a default label which is added to all metrics
   register.setDefaultLabels({
-    serviceName: theService.info.serviceName,
-    serviceVersion: theService.info.serviceVersion,
+    serviceName: serviceInstance.info.serviceName,
+    serviceVersion: serviceInstance.info.serviceVersion,
   })
 
   // create a counter
   const counter = new client.Counter({
     name: 'unhandled_error_count',
     help: 'metric_help',
-  });
+  })
 
-  serviceInstace.on(ServiceEventsNames.CommandUnhandledError, ()=> {
+  serviceInstance.on(ServiceEventsNames.CommandUnhandledError, () => {
     counter.inc()
   })
 
-  serviceInstace.on(ServiceEventsNames.SubscriptionUnhandledError, ()=> {
+  serviceInstance.on(ServiceEventsNames.SubscriptionUnhandledError, () => {
     counter.inc()
   })
 
@@ -103,31 +103,27 @@ Example of emitting custom events:
 
 ```typescript
 .setCommandFunction(async function (context, payload, parameter) {
-  const customValue = {
+  const customObject = {
     value: 'something'
   }
 
-  this.emit('misc-object', customValue)
-
-  const customValue = {
-    value: 'something'
-  }
+  this.emit('misc-object', customObject)
 
   this.emit('misc-string', 'string_value')
   this.emit('misc-number', 1)
-  this.emit('misc-boolean', 1)
+  this.emit('misc-boolean', true)
 })
 ```
 
 Example of listening for custom events:
 
 ```typescript
-serviceInstace.on('misc-string', (eventPayload)=> {
-    console.log(eventPayload) // outputs: string_value
+serviceInstance.on('misc-string', (eventPayload) => {
+  console.log(eventPayload) // outputs: string_value
 })
 ```
 
 ::: tip Use enum for custom events
-It is recommended, to use your own enum for emitting and listener registration of events.
-Your code will become more maintable.
+It is recommended to use your own enum for emitting and listener registration of events.
+Your code will become more maintainable.
 :::

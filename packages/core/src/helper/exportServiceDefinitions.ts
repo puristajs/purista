@@ -7,57 +7,41 @@ import type { ServiceDefinitions } from './types/ServiceDefinitions.js'
 /**
  * Merge service definitions into one big full service definition structure
  * @param existing
- * @param defintionToAdd
+ * @param definitionToAdd
  * @returns
  */
-export const mergeServiceDefintion = <T extends FullServiceDefinition>(
+export const mergeServiceDefinition = <T extends FullServiceDefinition>(
 	existing: FullServiceDefinition,
-	defintionToAdd: ServiceDefinitions,
+	definitionToAdd: ServiceDefinitions,
 ): T => {
-	const commands = defintionToAdd.commands.reduce((current, definition) => {
+	const commands = definitionToAdd.commands.reduce((current, definition) => {
 		return {
-			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction
 			...current,
 			[definition.commandName]: definition,
 		}
 	}, {})
 
-	const subscriptions = defintionToAdd.subscriptions.reduce((current, definition) => {
+	const subscriptions = definitionToAdd.subscriptions.reduce((current, definition) => {
 		return {
-			// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+			// biome-ignore lint/performance/noAccumulatingSpread: small map construction
 			...current,
 			[definition.subscriptionName]: definition,
 		}
 	}, {})
 
 	const ret = { ...existing }
+	const currentServiceName = ret[definitionToAdd.serviceName] ?? {}
+	const currentVersion = currentServiceName[definitionToAdd.serviceVersion]
 
-	if (!ret[defintionToAdd.serviceName]) {
-		ret[defintionToAdd.serviceName] = {
-			[defintionToAdd.serviceVersion]: {
-				description: defintionToAdd.serviceDescription,
-				commands,
-				subscriptions,
-				deprecated: defintionToAdd.deprecated,
-			},
-		}
-	}
-
-	if (!ret[defintionToAdd.serviceName][defintionToAdd.serviceVersion]) {
-		ret[defintionToAdd.serviceName][defintionToAdd.serviceVersion] = {
-			description: defintionToAdd.serviceDescription,
-			commands,
-			subscriptions,
-			deprecated: defintionToAdd.deprecated,
-		}
-	}
-
-	ret[defintionToAdd.serviceName][defintionToAdd.serviceVersion] = {
-		...ret[defintionToAdd.serviceName][defintionToAdd.serviceVersion],
-		description: defintionToAdd.serviceDescription,
-		commands,
-		subscriptions,
-		deprecated: defintionToAdd.deprecated,
+	ret[definitionToAdd.serviceName] = {
+		...currentServiceName,
+		[definitionToAdd.serviceVersion]: {
+			description: currentVersion?.description ?? definitionToAdd.serviceDescription,
+			deprecated: currentVersion?.deprecated ?? definitionToAdd.deprecated,
+			commands: { ...commands, ...currentVersion?.commands },
+			subscriptions: { ...subscriptions, ...currentVersion?.subscriptions },
+		},
 	}
 
 	return ret as T
@@ -67,16 +51,16 @@ export const mergeServiceDefintion = <T extends FullServiceDefinition>(
  * Exports the service definitions.
  * Includes the information about commands and subscriptions.
  *
- * The output can be saves as JSON string in a file.
+ * The output can be saved as JSON string in a file.
  *
  * @param serviceBuilders
  * @returns
  */
 export const exportServiceDefinitions = async (serviceBuilders: ServiceBuilder[]): Promise<FullDefinition> => {
-	const serviceDefinitions = await Promise.all(serviceBuilders.map(builder => builder.getFullServiceDefintion()))
+	const serviceDefinitions = await Promise.all(serviceBuilders.map(builder => builder.getFullServiceDefinition()))
 
 	return {
 		version: puristaVersion,
-		services: serviceDefinitions.reduce((def, current) => mergeServiceDefintion(def, current), {}),
+		services: serviceDefinitions.reduce((def, current) => mergeServiceDefinition(def, current), {}),
 	}
 }

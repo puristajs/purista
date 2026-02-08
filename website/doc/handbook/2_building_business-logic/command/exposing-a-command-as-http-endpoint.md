@@ -19,7 +19,7 @@ The web server service will build the router and OpenApi definition based on thi
 
 ## Define the URL
 
-If you want to make a command accessable via an HTTP endpoint, you need to define the HTTP method and the url path.  
+If you want to make a command accessible via an HTTP endpoint, you need to define the HTTP method and the URL path.  
 
 ```typescript
 import {  
@@ -39,7 +39,7 @@ const myCommandBuilder = myServiceBuilder
   })
 ```
 
-In the example above, we define, that the command is accessable via `GET` method.  
+In the example above, we define that the command is accessible via `GET` method.  
 The given path `ping` will result in final url path `/api/v1/ping`.  
 
 The first part `/api` is a configurable value in PURISTA HTTP servers, which defaults to `api`.  
@@ -69,7 +69,7 @@ As an example:
 )
 ```
 
-It is a very powerfull in combination with input/output transformer functions.
+This is very powerful in combination with input/output transformer functions.
 
 ### Path parameter
 
@@ -93,13 +93,13 @@ export const theServiceV1PingInputParameterSchema = extendApi(
 ```
 
 ::: info Optional path parameters
-You can define a path parameter as optional by adding `?` like `'domain/:id'`.  
+You can define a path parameter as optional by adding `?` like `'domain/:id?'`.  
 Do not forget to mark it in the schema as optional `z.string().optional()` or set a default value `z.string().default('some_default')`.
 :::
 
 ### Adding query parameters
 
-In case you need to use query parameters, you can use zhe `addQueryParameters` method of the command definition builder.
+In case you need to use query parameters, you can use the `addQueryParameters` method of the command definition builder.
 
 ```typescript
 import {  
@@ -120,7 +120,7 @@ const myCommandBuilder = myServiceBuilder
         required: false // [!code ++]
       },  // [!code ++]
       {   // [!code ++]
-        neededParam: true, // [!code ++]
+        required: true, // [!code ++]
         name: 'required' // [!code ++]
       }  // [!code ++]
     )  // [!code ++]
@@ -141,7 +141,7 @@ export const theServiceV1PingInputParameterSchema = extendApi(
         { title: 'The optional query parameter param', example: 'some_id' } // [!code ++]
       ) // [!code ++]
     neededParam: extendApi( // [!code ++]
-        z.string().optional(),  // [!code ++]
+        z.string(),  // [!code ++]
         { title: 'The required query parameter neededParam', example: 'some_id' } // [!code ++]
       ) // [!code ++]
   }),
@@ -149,9 +149,9 @@ export const theServiceV1PingInputParameterSchema = extendApi(
 )
 ```
 
-::: info Quer parameters are strings
+::: info Query parameters are strings
 Query parameters are always provided as string type.  
-Conversation must be implemented via transformers (prefferred) or inside the business logic.
+Conversion must be implemented via transformers (preferred) or inside the business logic.
 :::
 
 ## Security
@@ -178,7 +178,7 @@ const myCommandBuilder = myServiceBuilder
         required: false
       }, 
       {  
-        neededParam: true,
+        required: true,
         name: 'required'
       } 
     ) 
@@ -236,7 +236,7 @@ You can overwrite this with your own text.
 There are two possible ways to mark a command as deprecated.
 
 Commands are automatically marked as deprecated, as soon as the parent service version is marked as deprecated.
-In this case, alle commands of this service version are marked as deprecated.
+In this case, all commands of this service version are marked as deprecated.
 
 Every command can be marked as deprecated individually by using the `markAsDeprecated` method.
 

@@ -1,7 +1,7 @@
 import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
 import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
 import type { KV, NatsConnection } from 'nats'
-import { JSONCodec, connect } from 'nats'
+import { connect, JSONCodec } from 'nats'
 
 import type { NatsStateStoreConfig } from './types/NatsStateStoreConfig.js'
 
@@ -43,9 +43,11 @@ export class NatsStateStore extends StateStoreBaseClass<NatsStateStoreConfig> {
 	}
 
 	async getStore() {
-		if (this.kv) {
+		const hasHealthyConnection = this.connection && !this.connection.isClosed() && !this.connection.isDraining()
+		if (this.kv && hasHealthyConnection) {
 			return this.kv
 		}
+		this.kv = undefined
 
 		try {
 			this.connection = await connect({ ...this.config, name: this.name })
@@ -116,5 +118,7 @@ export class NatsStateStore extends StateStoreBaseClass<NatsStateStoreConfig> {
 	async destroy() {
 		await this.connection?.drain()
 		await this.connection?.close()
+		this.kv = undefined
+		this.connection = undefined
 	}
 }

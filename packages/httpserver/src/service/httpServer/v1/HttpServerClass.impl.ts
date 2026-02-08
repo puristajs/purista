@@ -3,13 +3,12 @@ import { posix } from 'node:path'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import fastifyStatic from '@fastify/static'
-import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
 import * as api from '@opentelemetry/api'
-import { ATTR_SERVER_ADDRESS } from '@opentelemetry/semantic-conventions'
-
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
 	ATTR_HTTP_REQUEST_METHOD,
 	ATTR_HTTP_RESPONSE_STATUS_CODE,
+	ATTR_SERVER_ADDRESS,
 	ATTR_URL_FULL,
 } from '@opentelemetry/semantic-conventions'
 
@@ -20,7 +19,7 @@ import type {
 	ServiceClassTypes,
 	ServiceConstructorInput,
 } from '@purista/core'
-import { HandledError, Service, StatusCode, UnhandledError, safeBind } from '@purista/core'
+import { HandledError, Service, StatusCode, safeBind, UnhandledError } from '@purista/core'
 import type { FastifyInstance, HTTPMethods } from 'fastify'
 import fastify from 'fastify'
 import * as swaggerUi from 'swagger-ui-dist'
@@ -35,7 +34,7 @@ import type { BeforeResponseHook } from './types/BeforeResponseHook.js'
 
 /**
  * A simple http server based on fastify.
- * @deprecated please migrate to @purista/hono-http-server
+ * @deprecated Please migrate to `@purista/hono-http-server`.
  */
 export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> extends Service<
 	ServiceClassTypes<ConfigType>
@@ -88,10 +87,11 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
 				const con = propagation.extract(context.active(), request.headers)
 				await this.startActiveSpan('errorHandler', { kind: SpanKind.SERVER }, con, async span => {
 					addSpanTags(span, request)
-					span.recordException(err)
+					const exception = err instanceof Error ? err : new Error(String(err))
+					span.recordException(exception)
 					span.setStatus({
 						code: SpanStatusCode.ERROR,
-						message: err.message,
+						message: exception.message,
 					})
 
 					addHeaders(span, reply)

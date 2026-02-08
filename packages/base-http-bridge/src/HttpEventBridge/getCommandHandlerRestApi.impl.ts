@@ -1,7 +1,6 @@
 import type { ParsedUrlQuery } from 'node:querystring'
-import { parse } from 'node:querystring'
 
-import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
 	ATTR_HTTP_REQUEST_METHOD,
 	ATTR_HTTP_RESPONSE_STATUS_CODE,
@@ -19,14 +18,14 @@ import type {
 } from '@purista/core'
 import {
 	EBMessageType,
-	HandledError,
-	PuristaSpanName,
-	StatusCode,
-	UnhandledError,
 	getErrorMessageForCode,
 	getTimeoutPromise,
+	HandledError,
 	isCommandErrorResponse,
+	PuristaSpanName,
+	StatusCode,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
@@ -59,13 +58,16 @@ export const getCommandHandlerRestApi = function (
 
 				try {
 					const queryParams: ParsedUrlQuery = {}
+					const requestUrl = c.req.url ?? ''
+					const parsedUrl = new URL(requestUrl, 'http://localhost')
 
 					// allow only defined parameters
 					if (metadata.expose.http.openApi?.query) {
-						const parsedQueries = parse(c.req.url || '')
 						for (const qp of metadata.expose.http.openApi.query) {
-							queryParams[qp.name] = parsedQueries[qp.name]
-							if (qp.required && !parsedQueries[qp.name]) {
+							const queryName = String(qp.name)
+							const queryValue = parsedUrl.searchParams.get(queryName)
+							queryParams[queryName] = queryValue ?? undefined
+							if (qp.required && (queryValue === null || queryValue.length === 0)) {
 								throw new HandledError(StatusCode.BadRequest, `query parameter ${qp.name} is required`)
 							}
 						}
@@ -75,10 +77,18 @@ export const getCommandHandlerRestApi = function (
 					if (c.req.method === 'POST' || c.req.method === 'PUT' || c.req.method === 'PATCH') {
 						const contentType = metadata.expose.contentTypeRequest ?? 'application/json'
 
-						body = contentType.toLowerCase() === 'application/json' ? await c.req.json() : await c.req.text()
+						if (contentType.toLowerCase() === 'application/json') {
+							try {
+								body = await c.req.json()
+							} catch (error) {
+								throw HandledError.fromError(error, StatusCode.BadRequest, 'payload must be a parsable json')
+							}
+						} else {
+							body = await c.req.text()
+						}
 					}
 
-					const parameter = c.req.param
+					const parameter = c.req.param()
 
 					const command: Command = {
 						id: '',
@@ -119,7 +129,7 @@ export const getCommandHandlerRestApi = function (
 						})
 
 						span.end()
-						return c.json(result.payload, status as any)
+						return c.json(result.payload, status as ContentfulStatusCode)
 					}
 
 					if (result.eventName) {
@@ -127,41 +137,40 @@ export const getCommandHandlerRestApi = function (
 					}
 
 					// empty response
-					if (result.payload === undefined || result.payload === '') {
+					if (result.payload === undefined || result.payload === null || result.payload === '') {
 						const status = StatusCode.NoContent
 						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, status)
+						const contentTypeResponse = metadata.expose.contentTypeResponse ?? 'application/json'
+						const contentEncodingResponse = metadata.expose.contentEncodingResponse ?? 'utf-8'
 
 						span.end()
 						return new Response(undefined, {
 							status,
 							statusText: getErrorMessageForCode(status),
 							headers: {
-								'content-type': `${metadata.expose.contentTypeResponse} || 'application/json'; charset=${
-									metadata.expose.contentEncodingResponse ?? 'utf-8'
-								}`,
+								'content-type': `${contentTypeResponse}; charset=${contentEncodingResponse}`,
 							},
 						})
 					}
 
 					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.OK)
-
-					let payload = ''
-					if (typeof result.payload === 'string') {
-						payload = result.payload
-					} else {
-						payload = JSON.stringify(result.payload)
-					}
+					const contentTypeResponse = metadata.expose.contentTypeResponse ?? 'application/json'
+					const contentEncodingResponse = metadata.expose.contentEncodingResponse ?? 'utf-8'
+					const payload =
+						contentTypeResponse.toLowerCase() === 'application/json'
+							? JSON.stringify(result.payload)
+							: typeof result.payload === 'string'
+								? result.payload
+								: JSON.stringify(result.payload)
 
 					const status = StatusCode.OK
 
 					span.end()
-					return new Response(JSON.stringify(payload), {
+					return new Response(payload, {
 						status,
 						statusText: getErrorMessageForCode(status),
 						headers: {
-							'content-type': `${metadata.expose.contentTypeResponse} || 'application/json'; charset=${
-								metadata.expose.contentEncodingResponse ?? 'utf-8'
-							}`,
+							'content-type': `${contentTypeResponse}; charset=${contentEncodingResponse}`,
 						},
 					})
 				} catch (error) {

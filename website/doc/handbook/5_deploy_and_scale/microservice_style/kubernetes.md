@@ -47,7 +47,7 @@ Here is a full example, of how the index file might look like, if you want to de
 You can adjust this example for your actual requirements.
 
 ::: warning Node.js package required
-If you use Node.js as runtime, you need to install the additional package `@hono/node-server` with version `1.0.0` or higher!
+If you use Node.js as runtime, you need to install the additional package `@hono/node-server`.
 :::
 
 ::: code-tabs#code
@@ -57,7 +57,7 @@ If you use Node.js as runtime, you need to install the additional package `@hono
 ```typescript
 // src/index.ts
 // For running on Node.js a small additional package is needed:
-import { serve } from '@purista/hono-node-server'
+import { serve } from '@hono/node-server'
 
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-base'
@@ -135,7 +135,7 @@ const main = async () => {
   // start the http server
   // defaults to port 3000
   // optional: you can set the `port` in the optional parameter of this method
-  // use the `serve` method form the `@purista/hono-node-server` package
+  // use the `serve` method from the `@hono/node-server` package
   const server = serve({
     fetch: app.fetch,
   })
@@ -281,7 +281,7 @@ With this setup, you should be able to build and deploy your app as a container 
 
 ## Build a docker image
 
-To get a docker image, which then can be deployed, you will need to have done two things:
+To get a Docker image that can then be deployed, you need to complete two steps:
 
 - compile the typescript code base to plain JavaScript
 - create a docker file with minimum resources (no dev dependencies) and compiled JavaScript

@@ -1,4 +1,4 @@
-import type { Schema } from '@typeschema/main'
+import type { Schema } from '../../../schema/index.js'
 
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { EBMessageType } from '../EBMessageType.enum.js'
@@ -28,7 +28,7 @@ export type SubscriptionDefinition<
 	FunctionOutputType,
 	FinalFunctionOutputType,
 	TransformOutputHookOutput,
-	Resources extends Record<string, any>,
+	Resources extends Record<string, unknown>,
 	Invokes extends InvokeList,
 	EmitList extends Record<string, Schema>,
 	MetadataType extends SubscriptionDefinitionMetadataBase = SubscriptionDefinitionMetadataBase,

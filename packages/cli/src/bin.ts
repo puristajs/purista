@@ -11,7 +11,7 @@ import { addPuristaSubscription } from './api/addPuristaSubscription.js'
 import { camelCase, capitalCase } from './api/change-case.js'
 import { ensureServiceEvent } from './api/content/manipulation/ensureServiceEvent.js'
 import { getFormatConfig } from './api/getFormatConfig.js'
-import { type PuristaConfig, loadPuristaConfig, puristaConfigSchema } from './api/loadPuristaConfig.js'
+import { loadPuristaConfig, type PuristaConfig, puristaConfigSchema } from './api/loadPuristaConfig.js'
 import { scanPuristaProject } from './api/scanPuristaProject.js'
 import { puristaVersion } from './version.js'
 
@@ -87,7 +87,7 @@ const main = async () => {
 					loop: true,
 					message: 'What do you want to add?',
 					choices: ['service', 'command', 'subscription'],
-					default: 0,
+					default: 'service',
 				}))
 
 			data.name =
@@ -121,6 +121,11 @@ const main = async () => {
 				return
 			}
 
+			if (!Object.keys(puristaProject.services).length) {
+				console.error('No services found. Please add a service first.')
+				process.exit(1)
+			}
+
 			const serviceNames = Object.keys(puristaProject.services)
 				.map(key => ({
 					name: capitalCase(key),
@@ -152,6 +157,10 @@ const main = async () => {
 					choices: serviceVersions,
 				})
 			} else {
+				if (!serviceVersions.length) {
+					console.error(`No versions found for service ${capitalCase(data.serviceName)}.`)
+					process.exit(1)
+				}
 				data.serviceVersion = serviceVersions[0].value
 			}
 
@@ -175,7 +184,12 @@ const main = async () => {
 			}
 
 			// handle creation of a new subscription
-			if (data.component === 'subscription' && puristaProject.eventNames.length) {
+			if (data.component === 'subscription') {
+				if (!puristaProject.eventNames.length) {
+					console.error('No service events found. Create or register events before adding a subscription.')
+					process.exit(1)
+				}
+
 				data.eventToSubscribe = await select({
 					loop: true,
 					message: 'What event do you want to subscribe?',

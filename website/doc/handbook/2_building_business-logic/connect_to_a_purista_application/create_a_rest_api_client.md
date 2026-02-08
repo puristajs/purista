@@ -1,6 +1,6 @@
 ---
 title: REST API client
-description: Export the service defintions to share them and to use them for building connectors or visualizations
+description: Export the service definitions to share them and to use them for building connectors or visualizations
 order: 210020
 ---
 
@@ -24,8 +24,8 @@ const result = client.foo.v1.bar(payload, parameter)
 The client builder is very modular to give you the full control.  
 
 ```typescript
-const config = config = {
-  version: '1.11.0', // PURISTA version
+const config = {
+  version: '2.1.5', // PURISTA version
   definitionPath: './definitions', // path of *.json files with definitions
   outputPath: './dist', // output folder
   httpClient: {
@@ -37,7 +37,7 @@ const config = config = {
 const clientBuilder = new ClientBuilder(config)
 
 // generate the source files
-await clientBuilder.generateHttpClient(defnitions)
+await clientBuilder.generateHttpClient(definitions)
 
 // cleanup the builder and remove event listeners
 clientBuilder.destroy()
@@ -66,7 +66,7 @@ clientBuilder.on('success', (...args) => console.info(...args)) // [!code ++]
 clientBuilder.on('start', (...args) => console.log(...args)) // [!code ++]
 
 // generate the source files
-await clientBuilder.generateHttpClient(defnitions)
+await clientBuilder.generateHttpClient(definitions)
 
 // cleanup the builder and remove event listeners
 clientBuilder.destroy()
@@ -79,18 +79,18 @@ The config file is a simple json file.
 
 ```json
 {
-  "version": "1.11.0",
+  "version": "2.1.5",
   "definitionPath": "./definitions",
   "outputPath": "./dist",
   "package": {
     "name": "@company/http-client",
     "description": "my custom client",
-    "private": "true"
+    "private": true
   },
   "httpClient": {
     "buildAs": "both",
     "clientName": "HttpClient"
-  },
+  }
 }
 ```
 
@@ -115,13 +115,13 @@ clientBuilder.destroy()
 ```
 
 The `.writeConfig` method has an optional parameter.  
-Per default, the function will try to store the config in `purista.client.json` in the current users folder.  
+By default, the function will try to store the config in `purista.client.json` in the current working directory.  
 Here you can provide a custom folder.
 
 #### Load the config file
 
 You can load a json config file with `.loadConfig()`.  
-Per default, the function will try to load the config from `purista.client.json` in the current users folder.  
+By default, the function will try to load the config from `purista.client.json` in the current working directory.  
 
 The method as an optional parameter, where you can provide a custom file location.
 
@@ -129,7 +129,7 @@ The method as an optional parameter, where you can provide a custom file locatio
 
 ```typescript
 const config = {
-  version: '1.11.0', // PURISTA version
+  version: '2.1.5', // PURISTA version
   definitionPath: './definitions', // path of definitions
   outputPath: './dist', // output folder
   httpClient: {
@@ -141,7 +141,7 @@ const config = {
 
 ## Complete code
 
-This small code snipped can be used to create your client.
+This small code snippet can be used to create your client.
 
 ::: code-group
 
@@ -162,13 +162,13 @@ const generate = async ()=> {
 
   try {
     // load the definitions from exported json files
-    const defnitions = await clientBuilder.loadDefinitionFiles()
+    const definitions = await clientBuilder.loadDefinitionFiles()
 
     // clear the output folder
     await clientBuilder.cleanDistFolder()
 
     // generate the source files
-    await clientBuilder.generateHttpClient(defnitions)
+    await clientBuilder.generateHttpClient(definitions)
 
     // add a index.ts with exports to the source files
     await clientBuilder.createIndex()
@@ -192,18 +192,18 @@ generate()
 
 ```json [purista.client.json]
 {
-  "version": "1.11.0",
+  "version": "2.1.5",
   "definitionPath": "./definitions",
   "outputPath": "./dist",
   "package": {
     "name": "@company/http-client",
     "description": "my custom client",
-    "private": "true"
+    "private": true
   },
   "httpClient": {
     "buildAs": "both",
     "clientName": "HttpClient"
-  },
+  }
 }
 ```
 
@@ -220,11 +220,11 @@ import { fooV1Service } from './backend/src/service/foo/v1/index.js' // [!code +
 import { barV1Service } from './backend/src/service/bar/v1/index.js' // [!code ++]
 // ....
 // load the definitions from exported json files // [!code --]
-const defnitions = await clientBuilder.loadDefinitionFiles() // [!code --]
+const definitions = await clientBuilder.loadDefinitionFiles() // [!code --]
 
 // use definitions from imported service builders // [!code ++]
 const serviceBuilders = [pingV1Service, fooV1Service, barV1Service] // [!code ++]
-const defnitions = await clientBuilder.getDefinitionsFromServiceBuilders(serviceBuilders)
+const definitions = await clientBuilder.getDefinitionsFromServiceBuilders(serviceBuilders)
  // [!code ++]
 // ....
 ```

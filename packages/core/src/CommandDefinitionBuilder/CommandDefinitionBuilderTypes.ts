@@ -1,6 +1,6 @@
-import type { Schema } from '@typeschema/main'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
+import type { Schema } from '../schema/index.js'
 
 export type CommandDefinitionBuilderTypes<
 	PayloadSchema extends Schema = Schema,
@@ -9,7 +9,7 @@ export type CommandDefinitionBuilderTypes<
 	TransformInputPayloadSchema extends Schema = Schema,
 	TransformInputParamsSchema extends Schema = Schema,
 	TransformOutputSchema extends Schema = Schema,
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = InvokeList,
 	EmitList extends Record<string, Schema> = Record<string, Schema>,
 > = {

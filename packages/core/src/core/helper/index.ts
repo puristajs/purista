@@ -1,3 +1,4 @@
+export * from './assertNonArrowFunction.impl.js'
 export * from './createErrorResponse.impl.js'
 export * from './createInfoMessage.impl.js'
 export * from './createInvokeFunctionProxy.impl.js'

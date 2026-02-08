@@ -37,20 +37,31 @@ describe('client-builder', () => {
 	it('can create a HTTP client', async () => {
 		clientBuilder.rootPath = outputPath
 
-		const defnitions = await clientBuilder.loadDefinitionFiles(join(workPath, 'definitions'))
+		const definitions = await clientBuilder.loadDefinitionFiles(join(workPath, 'definitions'))
 		await clientBuilder.cleanDistFolder()
-		await clientBuilder.generateHttpClient(defnitions)
+		await clientBuilder.generateHttpClient(definitions)
 		await clientBuilder.createIndex()
 		await clientBuilder.createPackageJson()
 		clientBuilder.build()
 	})
 
-	it('can create a eventbridge client', async () => {
+	it('can create an eventbridge client via canonical method', async () => {
 		clientBuilder.rootPath = outputPath
 
-		const defnitions = await clientBuilder.loadDefinitionFiles(join(workPath, 'definitions'))
+		const definitions = await clientBuilder.loadDefinitionFiles(join(workPath, 'definitions'))
 		await clientBuilder.cleanDistFolder()
-		await clientBuilder.generateHEventBridgeClient(defnitions)
+		await clientBuilder.generateEventBridgeClient(definitions)
+		await clientBuilder.createIndex()
+		await clientBuilder.createPackageJson()
+		clientBuilder.build()
+	})
+
+	it('can create an eventbridge client via deprecated alias', async () => {
+		clientBuilder.rootPath = outputPath
+
+		const definitions = await clientBuilder.loadDefinitionFiles(join(workPath, 'definitions'))
+		await clientBuilder.cleanDistFolder()
+		await clientBuilder.generateHEventBridgeClient(definitions)
 		await clientBuilder.createIndex()
 		await clientBuilder.createPackageJson()
 		clientBuilder.build()

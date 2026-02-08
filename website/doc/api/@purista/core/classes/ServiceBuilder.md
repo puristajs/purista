@@ -200,14 +200,14 @@ Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:222](https:
 
 ***
 
-### getFullServiceDefintion()
+### getFullServiceDefinition()
 
-> **getFullServiceDefintion**(): `Promise`\<\{ `commands`: [`CommandDefinitionListResolved`](../type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `deprecated`: `boolean`; `serviceDescription`: `string`; `serviceName`: `string`; `serviceVersion`: `string`; `subscriptions`: [`SubscriptionDefinitionListResolved`](../type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
+> **getFullServiceDefinition**(): `Promise`\<\{ `commands`: [`CommandDefinitionListResolved`](../type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `deprecated`: `boolean`; `serviceDescription`: `string`; `serviceName`: `string`; `serviceVersion`: `string`; `subscriptions`: [`SubscriptionDefinitionListResolved`](../type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
 
 Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:421](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L421)
 
 Returns the service definition.
-This inclues information about commands and subscriptions.
+This includes information about commands and subscriptions.
 
 #### Returns
 

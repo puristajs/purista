@@ -1,5 +1,5 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { Service } from '../core/index.js'
 import { safeBind } from '../helper/index.js'
@@ -9,7 +9,11 @@ import { SubscriptionDefinitionBuilder } from './SubscriptionDefinitionBuilder.i
 describe('SubscriptionDefinitionBuilder', () => {
 	const sandbox = createSandbox()
 	const service = new Service({
-		info: { serviceName: 'TestService', serviceVersion: '1', serviceDescription: 'A service' },
+		info: {
+			serviceName: 'TestService',
+			serviceVersion: '1',
+			serviceDescription: 'A service',
+		},
 		commandDefinitionList: [],
 		subscriptionDefinitionList: [],
 		logger: getLoggerMock(sandbox).mock,
@@ -17,7 +21,11 @@ describe('SubscriptionDefinitionBuilder', () => {
 		config: {},
 	})
 
-	const functionPayloadSchema = z.object({ foo: z.string(), bar: z.number(), def: z.string().default('default_value') })
+	const functionPayloadSchema = z.object({
+		foo: z.string(),
+		bar: z.number(),
+		def: z.string().default('default_value'),
+	})
 	const functionParameterSchema = z.object({
 		paramOne: z.string(),
 		paramTwo: z.number(),
@@ -25,8 +33,17 @@ describe('SubscriptionDefinitionBuilder', () => {
 	})
 	const functionOutputSchema = z.object({
 		result: z.object({
-			payload: z.object({ foo: z.string(), bar: z.number(), other: z.string(), def: z.string() }),
-			parameter: z.object({ paramOne: z.string(), paramTwo: z.number(), def: z.string() }),
+			payload: z.object({
+				foo: z.string(),
+				bar: z.number(),
+				other: z.string(),
+				def: z.string(),
+			}),
+			parameter: z.object({
+				paramOne: z.string(),
+				paramTwo: z.number(),
+				def: z.string(),
+			}),
 		}),
 	})
 	const transformPayloadSchema = z.string()
@@ -40,7 +57,8 @@ describe('SubscriptionDefinitionBuilder', () => {
 		.addPayloadSchema(functionPayloadSchema)
 		.addParameterSchema(functionParameterSchema)
 		.addOutputSchema('subscriptionEndEmitted', functionOutputSchema)
-		.setTransformInput(transformPayloadSchema, transformParameterSchema, async (_context, payload, parameter) => {
+		.setTransformInput(transformPayloadSchema, transformParameterSchema, async function (context, payload, parameter) {
+			void context
 			expect(typeof payload).toBe('string')
 			expect(typeof parameter).toBe('string')
 
@@ -58,7 +76,9 @@ describe('SubscriptionDefinitionBuilder', () => {
 				parameter: param,
 			}
 		})
-		.setTransformOutput(transformOutputSchema, async (_context, payload, _parameter) => {
+		.setTransformOutput(transformOutputSchema, async function (context, payload, parameter) {
+			void context
+			void parameter
 			const p: Readonly<{
 				result: {
 					payload: {
@@ -77,7 +97,8 @@ describe('SubscriptionDefinitionBuilder', () => {
 			return JSON.stringify(p)
 		})
 		.setBeforeGuardHooks({
-			beforeOne: async (_context, payload, parameter) => {
+			beforeOne: async function (context, payload, parameter) {
+				void context
 				const pay: {
 					foo: string
 					bar: number
@@ -93,7 +114,8 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 		.setAfterGuardHooks({
-			afterOne: async (_context, fnOutputPayload, input, parameter) => {
+			afterOne: async function (context, fnOutputPayload, input, parameter) {
+				void context
 				const pay: {
 					foo: string
 					bar: number
@@ -134,7 +156,7 @@ describe('SubscriptionDefinitionBuilder', () => {
 			functionParameterSchema,
 		)
 		.canEmit('some', z.object({ example: z.string() }))
-		.setSubscriptionFunction(async (context, payload, parameter) => {
+		.setSubscriptionFunction(async function (context, payload, parameter) {
 			const result = await context.service.OtherService[2].testSubscription(payload, parameter)
 
 			context.emit('some', { example: 'test' })
@@ -169,7 +191,10 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionContextMock({ message: msg, sandbox })
+		const context = builder.getSubscriptionContextMock({
+			message: msg,
+			sandbox,
+		})
 		context.stubs.service.OtherService[2].testSubscription.callsFake(async (payload, parameter) => {
 			return {
 				result: {
@@ -192,6 +217,45 @@ describe('SubscriptionDefinitionBuilder', () => {
 		expect(context.stubs.emit.some.called).toBeTruthy()
 	})
 
+	it('executes the plain function without hooks and schema validation', async () => {
+		const subscriptionFunction = safeBind(builder.getSubscriptionFunctionPlain(), service)
+		const msg = getCommandMessageMock({
+			payload: {
+				payload,
+				parameter,
+			},
+		})
+
+		const context = builder.getSubscriptionContextMock({
+			message: msg,
+			sandbox,
+		})
+		context.stubs.service.OtherService[2].testSubscription.callsFake(async (payload, parameter) => {
+			return {
+				result: {
+					payload: { ...payload, other: 'added by invoke' },
+					parameter,
+					toBeRemovedInResponse: 'kept in plain mode',
+				},
+			}
+		})
+
+		const result = await subscriptionFunction(
+			context.mock,
+			{ ...payload, def: 'default_value' },
+			{ ...parameter, def: 'default_param' },
+		)
+
+		expect(result).toStrictEqual({
+			result: {
+				payload: { ...payload, other: 'added by invoke', def: 'default_value' },
+				parameter: { ...parameter, def: 'default_param' },
+				toBeRemovedInResponse: 'kept in plain mode',
+			},
+		})
+		expect(beforeOneStub.callCount).toBe(0)
+	})
+
 	it('does not throw on transform input', async () => {
 		const fn = builder.getTransformInputFunction()
 
@@ -209,7 +273,10 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionTransformContextMock({ message: msg, sandbox })
+		const context = builder.getSubscriptionTransformContextMock({
+			message: msg,
+			sandbox,
+		})
 
 		const result = await transformFunction(context.mock, JSON.stringify(payload), JSON.stringify(parameter))
 
@@ -233,13 +300,20 @@ describe('SubscriptionDefinitionBuilder', () => {
 			},
 		})
 
-		const context = builder.getSubscriptionTransformContextMock({ message: msg, sandbox })
+		const context = builder.getSubscriptionTransformContextMock({
+			message: msg,
+			sandbox,
+		})
 
 		const result = await transformFunction(
 			context.mock,
 			{
 				result: {
-					payload: { ...payload, other: 'added by invoke', def: 'default_value' },
+					payload: {
+						...payload,
+						other: 'added by invoke',
+						def: 'default_value',
+					},
 					parameter: { ...parameter, def: 'default_param' },
 				},
 			},
@@ -249,7 +323,11 @@ describe('SubscriptionDefinitionBuilder', () => {
 		expect(result).toStrictEqual(
 			JSON.stringify({
 				result: {
-					payload: { ...payload, other: 'added by invoke', def: 'default_value' },
+					payload: {
+						...payload,
+						other: 'added by invoke',
+						def: 'default_value',
+					},
 					parameter: { ...parameter, def: 'default_param' },
 				},
 			}),
@@ -259,7 +337,8 @@ describe('SubscriptionDefinitionBuilder', () => {
 	it('works with without schema', async () => {
 		const b = new SubscriptionDefinitionBuilder('testCommand', 'a unit test command')
 
-		b.setSubscriptionFunction(async (context, payload, parameter) => {
+		b.setSubscriptionFunction(async function (context, payload, parameter) {
+			void context
 			return { payload, parameter }
 		})
 
@@ -282,5 +361,21 @@ describe('SubscriptionDefinitionBuilder', () => {
 			payload: 'y',
 			parameter: 'x',
 		})
+	})
+
+	it('merges repeated canInvoke calls for the same service and version', async () => {
+		const b = new SubscriptionDefinitionBuilder('mergeInvokes', 'merge invokes')
+			.addOutputSchema('done', z.object({ ok: z.boolean() }))
+			.canInvoke('OtherService', '1', 'first', z.object({ first: z.string() }))
+			.canInvoke('OtherService', '1', 'second', z.object({ second: z.string() }))
+
+		b.setSubscriptionFunction(async function (context) {
+			void context
+			return { ok: true }
+		})
+
+		const definition = await b.getDefinition()
+
+		expect(Object.keys(definition.invokes.OtherService[1]).sort()).toStrictEqual(['first', 'second'])
 	})
 })

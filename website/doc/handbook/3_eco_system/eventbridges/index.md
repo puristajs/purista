@@ -1,6 +1,6 @@
 ---
 title: Event Bridges
-description: Use the right event bridge for PURISTA typescript framwork
+description: Use the right event bridge for PURISTA typescript framework
 order: 301000
 ---
 
@@ -58,3 +58,24 @@ But what about subscriptions? Subscriptions are kind of dynamic and unknown. You
 Also, you do not want to have a 1:1 relation. You always have one message producer, but you might have n message consumers.
 
 The broker should be able to deliver the same message to n different consumers, based on the message and the consumers.
+
+## When to use which bridge
+
+- `DefaultEventBridge`: local development, single-instance setups.
+- `AMQP`: robust queueing, retries, and durable delivery requirements.
+- `MQTT`: IoT/edge scenarios and lightweight broker environments.
+- `NATS`: fast low-latency messaging with simple operations.
+- `Dapr`: polyglot/service-mesh-oriented environments.
+
+## Common pitfalls
+
+- different topic/prefix/QoS settings across instances
+- assuming delivery guarantees without broker-level configuration
+- using the wrong bridge for durability/retry requirements
+
+## Checklist
+
+- chosen bridge matches required delivery semantics
+- broker and bridge configs are identical across instances
+- tracing headers propagation is enabled and verified
+- failure and reconnect behavior is tested in integration tests

@@ -1,28 +1,27 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
-	"organizeImports": {
-		"enabled": true
-	},
+	"$schema": "https://biomejs.dev/schemas/2.3.14/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
 	"files": {
-		"ignore": [
-			"**/lib/**/*",
-			"cookieconsent.js",
-			"cookieconsent-config2.js",
-			"package-lock.json",
-			"**/dist/**/*",
-			"*.d.ts",
-			"**/coverage/**/*",
-			"docs/**/*",
-			"**/.tshy/**/*",
-			"**/.tshy-build/**/*",
-			"**/.vitepress/cache/**",
-			"**/doc/public/**/*",
-			"examples/fullexample/signoz/**",
-			"examples/fullexample/grafana/**",
-			"examples/fullexample/jaeger/**",
-			"examples/fullexample/teletrace/**",
-			"examples/fullexample/uptrace/**",
-			"examples/fullexample/zipkin/**"
+		"includes": [
+			"**",
+			"!**/lib/**/*",
+			"!**/cookieconsent.js",
+			"!**/cookieconsent-config2.js",
+			"!**/package-lock.json",
+			"!**/dist/**/*",
+			"!**/*.d.ts",
+			"!**/coverage/**/*",
+			"!**/docs/**/*",
+			"!**/.tshy/**/*",
+			"!**/.tshy-build/**/*",
+			"!**/.vitepress/cache",
+			"!**/doc/public/**/*",
+			"!**/examples/fullexample/signoz",
+			"!**/examples/fullexample/grafana",
+			"!**/examples/fullexample/jaeger",
+			"!**/examples/fullexample/teletrace",
+			"!**/examples/fullexample/uptrace",
+			"!**/examples/fullexample/zipkin"
 		]
 	},
 	"linter": {
@@ -64,7 +63,16 @@
 				"noUnusedTemplateLiteral": {
 					"level": "warn",
 					"fix": "safe"
-				}
+				},
+				"noParameterAssign": "error",
+				"useAsConstAssertion": "error",
+				"useDefaultParameterLast": "error",
+				"useEnumInitializers": "error",
+				"useSelfClosingElements": "error",
+				"useSingleVarDeclarator": "error",
+				"useNumberNamespace": "error",
+				"noInferrableTypes": "error",
+				"noUselessElse": "error"
 			}
 		}
 	},
@@ -99,7 +107,7 @@
 	},
 	"overrides": [
 		{
-			"include": ["packages/cli/**"],
+			"includes": ["**/packages/cli/**"],
 			"linter": {
 				"rules": {
 					"suspicious": {

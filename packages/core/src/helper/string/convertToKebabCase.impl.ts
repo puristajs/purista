@@ -1,9 +1,13 @@
 /**
- * Converts a string into kebab-case
- * @param str string
- * @returns string converted to kebab-case
- * @link https://github.com/30-seconds/30-seconds-of-code
+ * Converts a string into kebab-case.
  *
+ * @example
+ * ```ts
+ * convertToKebabCase('SomeText')
+ * // => 'some-text'
+ * ```
+ *
+ * @link https://github.com/30-seconds/30-seconds-of-code
  * @group Helper
  */
 export const convertToKebabCase = (str: string): string =>

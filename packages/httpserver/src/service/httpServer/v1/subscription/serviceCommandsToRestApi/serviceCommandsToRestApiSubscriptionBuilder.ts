@@ -1,14 +1,14 @@
 import { posix } from 'node:path'
 
-import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { ATTR_HTTP_RESPONSE_STATUS_CODE } from '@opentelemetry/semantic-conventions'
 import {
+	convertToSnakeCase,
 	EBMessageType,
 	HandledError,
+	isHttpExposedServiceMeta,
 	StatusCode,
 	UnhandledError,
-	convertToSnakeCase,
-	isHttpExposedServiceMeta,
 } from '@purista/core'
 import type { FastifyReply, FastifyRequest } from 'fastify'
 import type { Methods } from 'trouter'
@@ -65,8 +65,10 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 						const queries = request.query as Record<string, unknown>
 						if (data.http.openApi?.query) {
 							for (const qp of data.http.openApi.query) {
-								queryParams[qp.name] = queries[qp.name]
-								if (qp.required && !queries[qp.name]) {
+								const queryName = String(qp.name)
+								const queryValue = queries[queryName]
+								queryParams[queryName] = queryValue
+								if (qp.required && (queryValue === undefined || queryValue === null || queryValue === '')) {
 									throw new HandledError(StatusCode.BadRequest, `query parameter ${qp.name} is required`)
 								}
 							}
@@ -116,12 +118,12 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 						}
 
 						reply.header('content-type', `${contentType}; charset=${contentEncoding}`)
-						if (response === undefined || response === '') {
+						if (response === undefined || response === null || response === '') {
 							span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.NoContent)
 							reply.statusCode = StatusCode.NoContent
+						} else {
+							span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.OK)
 						}
-
-						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.OK)
 
 						reply.send(response)
 					} catch (err) {

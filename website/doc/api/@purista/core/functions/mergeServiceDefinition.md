@@ -2,11 +2,11 @@
 
 ***
 
-[PURISTA API](../../../packages.md) / [@purista/core](../README.md) / mergeServiceDefintion
+[PURISTA API](../../../packages.md) / [@purista/core](../README.md) / mergeServiceDefinition
 
-# Function: mergeServiceDefintion()
+# Function: mergeServiceDefinition()
 
-> **mergeServiceDefintion**\<`T`\>(`existing`, `defintionToAdd`): `T`
+> **mergeServiceDefinition**\<`T`\>(`existing`, `definitionToAdd`): `T`
 
 Defined in: [packages/core/src/helper/exportServiceDefinitions.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/exportServiceDefinitions.ts#L13)
 
@@ -22,7 +22,7 @@ Merge service definitions into one big full service definition structure
 
 [`FullServiceDefinition`](../type-aliases/FullServiceDefinition.md)
 
-### defintionToAdd
+### definitionToAdd
 
 [`ServiceDefinitions`](../type-aliases/ServiceDefinitions.md)
 

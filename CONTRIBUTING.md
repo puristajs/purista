@@ -27,3 +27,17 @@ We encourage inclusive and professional interactions on our project.
 We welcome everyone to open an issue, improve the documentation, report bug or ssubmit a pull request.  
 By participating in this project, you agree to abide by the Yahoo Code of Conduct.  
 If you feel there is a conduct issue related to this project, please raise it per the Code of Conduct process and we will address it.
+
+## Release Process
+Releases can be prepared locally or by CI.
+
+- CI release: run the `Release And Publish` workflow (`.github/workflows/release_version.yml`) with `patch`, `minor`, or `major`.
+- Local dry run: run `./scripts/releasePrepare.sh <patch|minor|major>`.
+
+The release sequence is:
+1. run unit tests (`npm run test:unit`)
+2. run build (`npm run build`)
+3. bump versions for root and workspaces
+4. update all `packages/*/src/version.ts` files (`scripts/commitVersion.sh`)
+5. rebuild to include updated versions
+6. update `CHANGELOG.md` and regenerate docs (`npm run build:doc`)

@@ -9,7 +9,7 @@ import type {
 	EventBridgeConfig,
 	HttpExposedServiceMeta,
 } from '@purista/core'
-import { HttpClient, StatusCode, UnhandledError, convertToKebabCase } from '@purista/core'
+import { convertToKebabCase, HttpClient, StatusCode, UnhandledError } from '@purista/core'
 
 import type { DaprEventBridgeConfig } from '../DaprEventBridge/types/DaprEventBridgeConfig.js'
 import { DAPR_API_VERSION } from '../types/constants.js'
@@ -65,7 +65,7 @@ export class DaprClient extends HttpClient<EventBridgeConfig<DaprEventBridgeConf
 			const path = join(this.config.clientConfig?.daprApiVersion ?? DAPR_API_VERSION, 'metadata')
 			const result = await this.get(path)
 			return !!result
-		} catch (e) {
+		} catch {
 			return false
 		}
 	}

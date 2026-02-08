@@ -1,12 +1,10 @@
-import type { HttpServerServiceV1Config } from '@purista/httpserver'
+import type { HonoServiceV1ConfigPartial } from '@purista/hono-http-server'
 
-const httpServerConfig: HttpServerServiceV1Config = {
-	fastify: {},
-	port: 8080,
+const httpServerConfig: HonoServiceV1ConfigPartial & { port: number } = {
+	enableDynamicRoutes: true,
 	logLevel: 'debug',
-	domain: 'localhost',
+	port: 8080,
 	apiMountPath: '/api',
-	enableCors: false,
 	openApi: {
 		enabled: true,
 		info: {

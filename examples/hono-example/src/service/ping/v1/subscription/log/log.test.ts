@@ -30,7 +30,7 @@ describe('service Ping version 1 - subscription log', () => {
 		}
 
 		// define the test input parameter
-		const parameter = undefined as unknown as Readonly<unknown>
+		const parameter: Parameters<typeof log>[2] = {}
 
 		// create a mock message with the expected input for the subscription function
 		const message = getCommandSuccessMessageMock(payload)

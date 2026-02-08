@@ -5,7 +5,6 @@ import type { User } from '../../../../../types/index.js'
 import { StateStoreKey } from '../../../../../types/index.js'
 import { userV1Service } from '../../userV1Service.js'
 import { getAllUsersCommandBuilder } from './getAllUsersCommandBuilder.js'
-import type { UserV1GetAllUsersInputParameter, UserV1GetAllUsersInputPayload } from './types.js'
 
 describe('service User version 1 - command getAllUsers', () => {
 	let sandbox = createSandbox()
@@ -24,9 +23,9 @@ describe('service User version 1 - command getAllUsers', () => {
 
 		const getAllUsers = safeBind(getAllUsersCommandBuilder.getCommandFunction(), service)
 
-		const payload: UserV1GetAllUsersInputPayload = undefined
+		const payload: Parameters<typeof getAllUsers>[1] = undefined
 
-		const parameter: UserV1GetAllUsersInputParameter = {}
+		const parameter: Parameters<typeof getAllUsers>[2] = {}
 
 		const context = getAllUsersCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 

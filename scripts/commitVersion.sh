@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -euo pipefail
+
 # Extract the version from package.json
 NODE_VERSION=$(node -p "require('./package.json').version")
 

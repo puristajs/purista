@@ -1,5 +1,5 @@
 import { extendApi } from '@purista/core'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 // define the input parameters
 export const theServiceV1DeleteInputParameterSchema = extendApi(z.object({}), {
@@ -7,7 +7,9 @@ export const theServiceV1DeleteInputParameterSchema = extendApi(z.object({}), {
 })
 
 // define the input payload
-export const theServiceV1DeleteInputPayloadSchema = extendApi(z.any(), { title: 'delete input payload schema' })
+export const theServiceV1DeleteInputPayloadSchema = extendApi(z.unknown(), {
+	title: 'delete input payload schema',
+})
 
 // define the output payload
 export const theServiceV1DeleteOutputPayloadSchema = extendApi(z.void(), {

@@ -9,15 +9,15 @@ import type {
 	EBMessageAddress,
 } from '@purista/core'
 import {
+	deserializeOtp,
 	EventBridgeEventNames,
+	isCommand,
+	isCommandErrorResponse,
 	PuristaSpanName,
 	PuristaSpanTag,
 	StatusCode,
-	UnhandledError,
-	deserializeOtp,
-	isCommand,
-	isCommandErrorResponse,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 import type { MsgHdrs } from 'nats'
 import { headers as getNewHeaders } from 'nats'
@@ -138,8 +138,8 @@ export const getCommandHandler = (
 
 							// emit the message 2nd time as event
 							if (
-								(this.config.commandResponsePublishTwice === 'always' ||
-									(responseMessage.eventName && this.config.commandResponsePublishTwice === 'eventOnly')) ??
+								this.config.commandResponsePublishTwice === 'always' ||
+								(responseMessage.eventName && this.config.commandResponsePublishTwice === 'eventOnly') ||
 								(isCommandErrorResponse(responseMessage) && this.config.commandResponsePublishTwice === 'eventAndError')
 							) {
 								const eventTopic = getTopicName.bind(this)(responseMessage)

@@ -4,5 +4,5 @@
 	"compilerOptions": {
 		"outDir": "./build"
 	},
-	"files": ["src/index.ts", "fastify.d.ts"]
+	"files": ["src/index.ts"]
 }

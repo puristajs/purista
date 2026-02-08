@@ -1,35 +1,43 @@
 import { posix } from 'node:path'
 
-import { SpanKind, SpanStatusCode, context, propagation } from '@opentelemetry/api'
-import { ATTR_URL_FULL } from '@opentelemetry/semantic-conventions'
-
+import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import {
 	ATTR_HTTP_REQUEST_METHOD,
 	ATTR_HTTP_RESPONSE_STATUS_CODE,
 	ATTR_SERVER_ADDRESS,
+	ATTR_URL_FULL,
 } from '@opentelemetry/semantic-conventions'
 
 import type { Command, HttpExposedServiceMeta, Logger, Service } from '@purista/core'
 import {
 	EBMessageType,
 	HandledError,
-	PuristaSpanName,
-	StatusCode,
-	UnhandledError,
 	isCommandErrorResponse,
 	isHttpExposedServiceMeta,
+	PuristaSpanName,
+	StatusCode,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 import type { Hono, Context as HonoContext } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 /**
+ * Add HTTP endpoints for all commands that expose HTTP metadata.
  *
- * @param services instance of the service to add
- * @param router the TRouter instance
- * @param logger the logger used for logging the addition
- * @param apiMountPath @default /api
- * @returns
+ * This helper registers the routes on the provided Hono application and
+ * connects them with the corresponding service commands.
+ *
+ * @param services - Instance or array of services whose commands should be exposed.
+ * @param app - The Hono application instance.
+ * @param logger - Logger used for debug output.
+ * @param apiMountPath - Base path for all generated endpoints. Defaults to `/api`.
+ *
+ * @example
+ * ```ts
+ * const app = new Hono()
+ * addServiceEndpoints(myService, app, logger)
+ * ```
  */
 export const addServiceEndpoints = (
 	services: Service | Service[] | undefined,
@@ -78,8 +86,10 @@ export const addServiceEndpoints = (
 								if (metadata.expose.http.openApi?.query) {
 									const parsedQueries = c.req.query()
 									for (const qp of metadata.expose.http.openApi.query) {
-										queryParams[qp.name] = parsedQueries[qp.name]
-										if (qp.required && !parsedQueries[qp.name]) {
+										const queryName = String(qp.name)
+										const queryValue = parsedQueries[queryName]
+										queryParams[queryName] = queryValue
+										if (qp.required && (queryValue === undefined || queryValue === null || queryValue === '')) {
 											throw new HandledError(StatusCode.BadRequest, `query parameter ${qp.name} is required`)
 										}
 									}
@@ -142,7 +152,7 @@ export const addServiceEndpoints = (
 								propagation.inject(context.active(), header)
 
 								// empty response
-								if (result.payload === undefined || result.payload === '') {
+								if (result.payload === undefined || result.payload === null || result.payload === '') {
 									span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.NoContent)
 									span.end()
 

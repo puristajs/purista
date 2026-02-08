@@ -1,5 +1,3 @@
-import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
-
 import { fooBarCommandBuilder } from './command/fooBar/fooBarCommandBuilder.js'
 import { delayV1ServiceBuilder } from './delayV1ServiceBuilder.js'
 
@@ -7,9 +5,12 @@ import { delayV1ServiceBuilder } from './delayV1ServiceBuilder.js'
 // add only definitions and no further service config here
 // other service config should be done in ./delayServiceBuilder.ts file
 
-const commandDefinitions: CommandDefinitionList<any> = [fooBarCommandBuilder.getDefinition()]
+type CommandDefinition = Parameters<typeof delayV1ServiceBuilder.addCommandDefinition>[number]
+type SubscriptionDefinition = Parameters<typeof delayV1ServiceBuilder.addSubscriptionDefinition>[number]
 
-const subscriptionDefinitions: SubscriptionDefinitionList<any> = []
+const commandDefinitions: CommandDefinition[] = [fooBarCommandBuilder.getDefinition()]
+
+const subscriptionDefinitions: SubscriptionDefinition[] = []
 
 export const delayV1Service = delayV1ServiceBuilder
 	.addCommandDefinition(...commandDefinitions)

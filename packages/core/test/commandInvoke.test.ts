@@ -11,7 +11,7 @@ describe('command invoke test', () => {
 
 	beforeAll(async () => {
 		await eventBridge.start()
-		service = await theServiceV1Service.getInstance(eventBridge, {})
+		service = await theServiceV1Service.getInstance(eventBridge, { serviceConfig: {} })
 		await service.start()
 	})
 

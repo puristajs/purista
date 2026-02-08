@@ -3,7 +3,6 @@ import { createSandbox } from 'sinon'
 
 import { userV1Service } from '../../userV1Service.js'
 import { computeDataCommandBuilder } from './computeDataCommandBuilder.js'
-import type { UserV1ComputeDataInputParameter, UserV1ComputeDataInputPayload } from './types.js'
 
 describe('service User version 1 - command computeData', () => {
 	let sandbox = createSandbox()
@@ -22,9 +21,9 @@ describe('service User version 1 - command computeData', () => {
 
 		const computeData = safeBind(computeDataCommandBuilder.getCommandFunction(), service)
 
-		const payload: UserV1ComputeDataInputPayload = 'example value'
+		const payload: Parameters<typeof computeData>[1] = 'example value'
 
-		const parameter: UserV1ComputeDataInputParameter = {}
+		const parameter: Parameters<typeof computeData>[2] = {}
 
 		const context = computeDataCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 

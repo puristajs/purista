@@ -10,6 +10,8 @@
 
 Defined in: [packages/hono-http-server/src/helper/getQueryDefintion.ts:5](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/getQueryDefintion.ts#L5)
 
+Deprecated: Use [`getQueryDefinition`](getQueryDefinition.md) instead.
+
 ## Parameters
 
 ### queryDefinition

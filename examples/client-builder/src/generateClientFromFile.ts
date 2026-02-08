@@ -1,6 +1,7 @@
 /**
  * Example on how to generate a client from JSON definition files
  */
+/** biome-ignore-all lint/suspicious/noConsole: is ok as it is a CLI tool example */
 import { ClientBuilder } from '@purista/core'
 
 const generate = async () => {
@@ -17,13 +18,13 @@ const generate = async () => {
 
 	try {
 		// load the definitions from exported json files
-		const defnitions = await clientBuilder.loadDefinitionFiles()
+		const definitions = await clientBuilder.loadDefinitionFiles()
 
 		// clear the output folder
 		await clientBuilder.cleanDistFolder()
 
 		// generate the source files
-		await clientBuilder.generateHttpClient(defnitions)
+		await clientBuilder.generateHttpClient(definitions)
 
 		// add a index.ts with exports to the source files
 		await clientBuilder.createIndex()
@@ -34,7 +35,6 @@ const generate = async () => {
 		// compile the source files
 		await clientBuilder.build()
 	} catch (error) {
-		// biome-ignore lint/suspicious/noConsole: <explanation>
 		console.error(error)
 	} finally {
 		// cleanup the builder and remove event listeners

@@ -1,21 +1,24 @@
 import { SpanStatusCode } from '@opentelemetry/api'
-import type { Schema } from '@typeschema/main'
-import { validate } from '@typeschema/main'
-
 import { HandledError } from '../core/Error/HandledError.impl.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { Service } from '../core/Service/Service.impl.js'
+import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { SubscriptionBeforeGuardHook } from '../core/types/subscription/SubscriptionBeforeGuardHook.js'
 import type { SubscriptionFunction } from '../core/types/subscription/SubscriptionFunction.js'
 import type { SubscriptionFunctionContext } from '../core/types/subscription/SubscriptionFunctionContext.js'
+import type { Schema } from '../schema/index.js'
+import { validate } from '../schema/index.js'
 
-import { StatusCode } from '../core/types/StatusCode.enum.js'
+/**
+ * Wraps a subscription handler with schema validation and guard execution.
+ * Input payload/parameter is validated before execution and output can be validated after execution.
+ */
 export const getSubscriptionFunctionWithValidation = function <S extends Service>(
-	fn: SubscriptionFunction<S, any, any, any, any, any, any>,
+	fn: SubscriptionFunction<S, unknown, unknown, unknown, any, any, any>,
 	inputPayloadSchema: Schema | undefined,
 	inputParameterSchema: Schema | undefined,
 	outputPayloadSchema: Schema | undefined,
-	beforeGuards: Record<string, SubscriptionBeforeGuardHook<S, any, any, any, any, any>> = {},
+	beforeGuards: Record<string, SubscriptionBeforeGuardHook<S, unknown, unknown, any, any, any>> = {},
 ) {
 	const wrapped = async function (
 		this: S,
@@ -25,7 +28,7 @@ export const getSubscriptionFunctionWithValidation = function <S extends Service
 	): Promise<unknown> {
 		const { logger, startActiveSpan, wrapInSpan } = context
 
-		const getPayloadValue = async (): Promise<any> => {
+		const getPayloadValue = async (): Promise<unknown> => {
 			if (!inputPayloadSchema) {
 				return payload
 			}
@@ -50,7 +53,7 @@ export const getSubscriptionFunctionWithValidation = function <S extends Service
 			})
 		}
 
-		const getParameterValue = async (): Promise<any> => {
+		const getParameterValue = async (): Promise<unknown> => {
 			if (!inputParameterSchema) {
 				return parameter
 			}
@@ -84,7 +87,7 @@ export const getSubscriptionFunctionWithValidation = function <S extends Service
 
 				for (const [name, hook] of Object.entries(beforeGuards)) {
 					const guardPromise = wrapInSpan(`beforeGuardHook.${name}`, {}, async _subSpan => {
-						return hook.bind(this, context, safePayload, safeParams)()
+						return hook.bind(this, context, safePayload as Readonly<unknown>, safeParams as Readonly<unknown>)()
 					})
 					guards.push(guardPromise)
 				}
@@ -94,7 +97,7 @@ export const getSubscriptionFunctionWithValidation = function <S extends Service
 		}
 
 		const output = await startActiveSpan('functionExecution', {}, undefined, async () => {
-			const call = fn.bind(this, context, safePayload, safeParams)
+			const call = fn.bind(this, context, safePayload as Readonly<unknown>, safeParams as Readonly<unknown>)
 			return call()
 		})
 
@@ -108,7 +111,9 @@ export const getSubscriptionFunctionWithValidation = function <S extends Service
 				return validationResult.data
 			}
 
-			const err = new UnhandledError(StatusCode.InternalServerError, 'output validation failed')
+			const err = new UnhandledError(StatusCode.InternalServerError, 'output validation failed', {
+				issues: validationResult.issues,
+			})
 			span.recordException(err)
 			span.setStatus({
 				code: SpanStatusCode.ERROR,

@@ -1,7 +1,7 @@
-import { type Schema as ValidationSchema, toJSONSchema } from '@typeschema/main'
 import type { SchemaObject } from 'openapi3-ts/oas31'
-
 import type { FromInvokeToOtherType } from '../core/types/FromInvokeToOtherType.js'
+import type { Schema as ValidationSchema } from '../schema/index.js'
+import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 
 type InputType = {
 	[serviceName: string]: {
@@ -44,15 +44,9 @@ export const convertInvokeValidationsToSchema = async <T extends InputType>(
 			for (const [command, schemas] of Object.entries(commands)) {
 				result[serviceName][serviceVersion][command] = { ...result[serviceName][serviceVersion][command] }
 				const [outputSchema, payloadSchema, parameterSchema] = await Promise.all([
-					schemas.outputSchema
-						? toJSONSchema(schemas.outputSchema)
-						: new Promise<undefined>(resolve => resolve(undefined)),
-					schemas.payloadSchema
-						? toJSONSchema(schemas.payloadSchema)
-						: new Promise<undefined>(resolve => resolve(undefined)),
-					schemas.parameterSchema
-						? toJSONSchema(schemas.parameterSchema)
-						: new Promise<undefined>(resolve => resolve(undefined)),
+					schemas.outputSchema ? validationToSchema(schemas.outputSchema) : Promise.resolve(undefined),
+					schemas.payloadSchema ? validationToSchema(schemas.payloadSchema) : Promise.resolve(undefined),
+					schemas.parameterSchema ? validationToSchema(schemas.parameterSchema) : Promise.resolve(undefined),
 				])
 
 				result[serviceName][serviceVersion][command] = {

@@ -58,7 +58,7 @@ export const scanPuristaProject = async (
 			const unifiedFileName = camelCase(splitPath[0], { suffixCharacters: '.enum.ts' })
 			if (unifiedFileName === 'serviceEvent.enum.ts') {
 				result.eventEnumFileName = splitPath[0]
-				result.eventNames = getEventNames(puristaConfig, result.eventEnumFileName)
+				result.eventNames = getEventNames(puristaConfig, result.eventEnumFileName, projectPath)
 			}
 			continue
 		}

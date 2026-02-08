@@ -57,7 +57,7 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
 	): Promise<ObjectWithKeysFromStringArray<SecretNames, string | undefined>> {
 		const fetchSecretFromStore = async (secretName: string) => {
 			const path = join(
-				this.config.clientConfig?.daprApiToken ?? DAPR_API_VERSION,
+				this.config.clientConfig?.daprApiVersion ?? DAPR_API_VERSION,
 				'secrets',
 				this.config.secretStoreName as string,
 				secretName,
@@ -72,25 +72,22 @@ export class DaprSecretStore extends SecretStoreBaseClass<DaprSecretStoreConfig>
 			return this.client.get<Record<string, string>>(path, { query })
 		}
 
-		const result = await Promise.all(secretNames.map(secretName => fetchSecretFromStore(secretName)))
-
-		let returnValue: Record<string, string> = {}
-
-		secretNames.forEach((value, index) => {
-			returnValue = {
-				...result[index],
-				...returnValue,
-			}
-		})
+		const returnValue: Record<string, string | undefined> = {}
+		for (const secretName of secretNames) {
+			const response = await fetchSecretFromStore(secretName)
+			returnValue[secretName] = response[secretName]
+		}
 
 		return returnValue as ObjectWithKeysFromStringArray<SecretNames, string | undefined>
 	}
 
-	protected async setSecretImpl(_secretName: string) {
+	protected async setSecretImpl(secretName: string) {
+		void secretName
 		throw new UnhandledError(StatusCode.NotImplemented, 'setting or changing of secrets is not available')
 	}
 
-	protected async removeSecretImpl(_secretName: string) {
+	protected async removeSecretImpl(secretName: string) {
+		void secretName
 		throw new UnhandledError(StatusCode.NotImplemented, 'removing of secrets is not available')
 	}
 }

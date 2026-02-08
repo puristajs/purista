@@ -1,13 +1,13 @@
 ---
 title: Version 1.11
 longTitle: Version 1.11
-description: Version 1.11 of the PURISTA framework introduces various new features and enhancements, aimed at improving performance and developer experience 
+description: Version 1.11 of the PURISTA framework introduces new features and enhancements aimed at improving performance and developer experience.
 date: 2024-02-30
 order: 20240230
 ---
 <PostDetail>
 
-The new version 1.11 of PURISTA includes some bigger changes under the hood, which results in some breaking changes.
+Version 1.11 of PURISTA includes significant internal changes, which result in some breaking changes.
 
 ---
 
@@ -15,8 +15,8 @@ The new version 1.11 of PURISTA includes some bigger changes under the hood, whi
 
 ## Breaking changes
 
-In version 1.11 a few methods are becoming `async` and some functionality is deprecated in favor of new possibilities.  
-Before upgrading to to the new version, please have a short look, where you need to align your existing code base.
+In version 1.11, a few methods become `async`, and some functionality is deprecated in favor of new options.  
+Before upgrading, please take a short look at where you need to align your existing codebase.
 
 ::: info
 The reason for these changes is that we can now support more validation schemas and generate OpenAPI definitions from schema libraries other than zod.
@@ -60,7 +60,7 @@ They will get removed in one of the next versions.
 
 ## Improvements
 
-Store Getters provide now better types. The keys in the returned object are based on the provided keys in the getter.
+Store getters now provide better types. The keys in the returned object are based on the provided keys in the getter.
 
 ```typescript
 const conf = await context.configs.getConfig('one','two')
@@ -76,7 +76,7 @@ if(conf.two) {
 }
 ```
 
-The stores have been cleaned up and types and namings have been improved.  
+The stores have been cleaned up, and types and naming have been improved.  
 Custom store implementations only need to implement the `Impl` methods.
 
 ```typescript

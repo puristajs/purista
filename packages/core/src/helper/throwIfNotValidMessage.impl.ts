@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { EBMessageType } from '../core/types/EBMessageType.enum.js'
@@ -34,7 +34,7 @@ export const throwIfNotValidMessage = (input: unknown) => {
 
 	try {
 		ebMessageSchema.parse(input)
-	} catch (error) {
+	} catch {
 		throw new UnhandledError(
 			StatusCode.BadRequest,
 			'Input is no valid PURISTA event bridge message - see https://purista.dev',

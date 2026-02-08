@@ -1,5 +1,3 @@
-import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
-
 import { honoV1ServiceBuilder } from './honoV1ServiceBuilder.js'
 import { serviceCommandsToRestApiSubscriptionBuilder } from './subscription/serviceCommandsToRestApi/serviceCommandsToRestApiSubscriptionBuilder.js'
 
@@ -7,11 +5,12 @@ import { serviceCommandsToRestApiSubscriptionBuilder } from './subscription/serv
 // add only definitions and no further service config here
 // other service config should be done in ./honoServiceBuilder.ts file
 
-const commandDefinitions: CommandDefinitionList<any> = []
+type CommandDefinition = Parameters<typeof honoV1ServiceBuilder.addCommandDefinition>[number]
+type SubscriptionDefinition = Parameters<typeof honoV1ServiceBuilder.addSubscriptionDefinition>[number]
 
-const subscriptionDefinitions: SubscriptionDefinitionList<any> = [
-	serviceCommandsToRestApiSubscriptionBuilder.getDefinition(),
-]
+const commandDefinitions: CommandDefinition[] = []
+
+const subscriptionDefinitions: SubscriptionDefinition[] = [serviceCommandsToRestApiSubscriptionBuilder.getDefinition()]
 
 export const honoV1Service = honoV1ServiceBuilder
 	.addCommandDefinition(...commandDefinitions)

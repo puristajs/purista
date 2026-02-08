@@ -30,7 +30,7 @@ This example also contains the usage of the Dapr config store, secret store and 
 
 ### Kubernetes deployment file
 
-The deployment of an application or service follows teh regular Kubernetes deployment.
+The deployment of an application or service follows the regular Kubernetes deployment.
 The only difference here is, to provide the information, required by Dapr to work properly.
 
 Dapr requires to have a unique app-ID for a service defined in the deployment.

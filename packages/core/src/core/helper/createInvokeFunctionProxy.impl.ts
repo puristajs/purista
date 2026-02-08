@@ -1,4 +1,5 @@
 import type { EBMessageAddress } from '../types/EBMessageAddress.js'
+import type { EmptyObject } from '../types/EmptyObject.js'
 import type { InvokeFunction } from '../types/InvokeFunction.js'
 
 const noop = () => {
@@ -26,14 +27,17 @@ export const createInvokeFunctionProxy = <TFaux>(
 	}
 
 	return new Proxy(noop, {
-		get(obj: Record<string, any>, name) {
+		get(obj: () => void, name) {
 			if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
 				// special case for if the proxy is accidentally treated
 				// like a PromiseLike (like in `Promise.resolve(proxy)`)
 				return undefined
 			}
 
-			const x = obj[name]
+			const x = (obj as unknown as Record<string, unknown>)[name] as (
+				payload: unknown,
+				parameter: EmptyObject,
+			) => unknown
 			if (lvl === 0) {
 				const na = {
 					...adr,
@@ -55,7 +59,7 @@ export const createInvokeFunctionProxy = <TFaux>(
 					serviceTarget: name,
 				}
 				return (payload: Parameters<typeof x>[0], parameter: Parameters<typeof x>[1]) => {
-					return invokeOg<Parameters<typeof x>[0], Parameters<typeof x>[1], ReturnType<typeof x>>(
+					return invokeOg<ReturnType<typeof x>, Parameters<typeof x>[0], Parameters<typeof x>[1]>(
 						na,
 						payload,
 						parameter,

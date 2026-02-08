@@ -1,21 +1,23 @@
 import { SpanStatusCode } from '@opentelemetry/api'
-import { type Schema, validate } from '@typeschema/main'
-
 import { HandledError } from '../core/Error/HandledError.impl.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type { CommandBeforeGuardHook } from '../core/types/commandType/CommandBeforeGuardHook.js'
 import type { CommandFunction } from '../core/types/commandType/CommandFunction.js'
 import type { CommandFunctionContext } from '../core/types/commandType/CommandFunctionContext.js'
-
 import { StatusCode } from '../core/types/StatusCode.enum.js'
+import { type Schema, validate } from '../schema/index.js'
 
+/**
+ * Wraps a command handler with schema validation and guard execution.
+ * Input payload/parameter is validated before execution and output can be validated after execution.
+ */
 export const getCommandFunctionWithValidation = function <S extends Service>(
-	fn: CommandFunction<S, any, any, any, any, any, any, any, any>,
+	fn: CommandFunction<S, unknown, unknown, unknown, unknown, unknown, any, any, any>,
 	inputPayloadSchema: Schema | undefined,
 	inputParameterSchema: Schema | undefined,
 	outputPayloadSchema: Schema | undefined,
-	beforeGuards: Record<string, CommandBeforeGuardHook<S, any, any, any, any, any, any, any>>,
+	beforeGuards: Record<string, CommandBeforeGuardHook<S, unknown, unknown, unknown, unknown, any, any, any>>,
 ) {
 	const wrapped = async function (
 		this: S,
@@ -25,7 +27,7 @@ export const getCommandFunctionWithValidation = function <S extends Service>(
 	): Promise<unknown> {
 		const { logger, startActiveSpan, wrapInSpan } = context
 
-		const getPayloadValue = async (): Promise<any> => {
+		const getPayloadValue = async (): Promise<unknown> => {
 			if (!inputPayloadSchema) {
 				return payload
 			}
@@ -50,7 +52,7 @@ export const getCommandFunctionWithValidation = function <S extends Service>(
 			})
 		}
 
-		const getParameterValue = async (): Promise<any> => {
+		const getParameterValue = async (): Promise<unknown> => {
 			if (!inputParameterSchema) {
 				return parameter
 			}
@@ -83,7 +85,7 @@ export const getCommandFunctionWithValidation = function <S extends Service>(
 
 				for (const [name, hook] of Object.entries(beforeGuards)) {
 					const guardPromise = wrapInSpan(`beforeGuardHook.${name}`, {}, async _subSpan => {
-						return hook.bind(this, context, safePayload, safeParams)()
+						return hook.bind(this, context, safePayload as Readonly<unknown>, safeParams as Readonly<unknown>)()
 					})
 					guards.push(guardPromise)
 				}
@@ -93,7 +95,7 @@ export const getCommandFunctionWithValidation = function <S extends Service>(
 		}
 
 		const output = await startActiveSpan('functionExecution', {}, undefined, async () => {
-			const call = fn.bind(this, context, safePayload, safeParams)
+			const call = fn.bind(this, context, safePayload as Readonly<unknown>, safeParams as Readonly<unknown>)
 			return call()
 		})
 
@@ -107,7 +109,9 @@ export const getCommandFunctionWithValidation = function <S extends Service>(
 				return validationResult.data
 			}
 
-			const err = new UnhandledError(StatusCode.InternalServerError, 'output validation failed')
+			const err = new UnhandledError(StatusCode.InternalServerError, 'output validation failed', {
+				issues: validationResult.issues,
+			})
 			span.recordException(err)
 			span.setStatus({
 				code: SpanStatusCode.ERROR,

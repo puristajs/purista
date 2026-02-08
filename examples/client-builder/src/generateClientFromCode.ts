@@ -1,6 +1,7 @@
 /**
  * Example on how to generate a client from JSON definition files
  */
+/** biome-ignore-all lint/suspicious/noConsole: used as CLI tool example */
 import { ClientBuilder } from '@purista/core'
 import { pingPongV1Service } from './service/pingPong/v1/pingPongV1Service.js'
 
@@ -18,13 +19,13 @@ const generate = async () => {
 
 	try {
 		// get the definitions from the builder source files
-		const defnitions = await clientBuilder.getDefinitionsFromServiceBuilders([pingPongV1Service])
+		const definitions = await clientBuilder.getDefinitionsFromServiceBuilders([pingPongV1Service])
 
 		// clear the output folder
 		await clientBuilder.cleanDistFolder()
 
 		// generate the source files
-		await clientBuilder.generateHttpClient(defnitions)
+		await clientBuilder.generateHttpClient(definitions)
 
 		// add a index.ts with exports to the source files
 		await clientBuilder.createIndex()
@@ -35,7 +36,6 @@ const generate = async () => {
 		// compile the source files
 		await clientBuilder.build()
 	} catch (error) {
-		// biome-ignore lint/suspicious/noConsole: <explanation>
 		console.error(error)
 	} finally {
 		// cleanup the builder and remove event listeners

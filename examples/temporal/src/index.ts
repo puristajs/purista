@@ -3,7 +3,7 @@ import { serveStatic } from '@hono/node-server/serve-static'
 import { swaggerUI } from '@hono/swagger-ui'
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-http'
 import { SimpleSpanProcessor } from '@opentelemetry/sdk-trace-node'
-import { type Service, gracefulShutdown, initLogger } from '@purista/core'
+import { gracefulShutdown, initLogger, type Service } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
 import { NatsBridge } from '@purista/natsbridge'
 import { compress } from 'hono/compress'
@@ -23,6 +23,7 @@ export const main = async () => {
 
 	const spanProcessor = new SimpleSpanProcessor(exporter)
 
+	// Service generic parameters are invariant; heterogeneous service instances require a widened base type here.
 	const services: Service<any>[] = []
 
 	// initiate the event bridge as first step

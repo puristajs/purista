@@ -10,6 +10,7 @@ const FS_RE = /\//g
 export const TS_INDEX_RE = /\[("(\\"|[^"])+"|'(\\'|[^'])+')]/g // splits apart TS indexes (and allows for escaped quotes)
 const TS_UNION_INTERSECTION_RE = /[&|]/
 const JS_OBJ_KEY = /^(\d+|[A-Za-z_$][A-Za-z0-9_$]*)$/
+type SchemaObjectWithSummary = SchemaObject & { summary?: string }
 
 /** Walk through any JSON-serializable object */
 export function walk(
@@ -26,10 +27,11 @@ export function walk(
 		}
 		return
 	}
+	const objectValue = obj as Record<string, unknown>
 	// eslint-disable-next-line n/no-callback-literal
-	cb(obj as any, path)
-	for (const k of Object.keys(obj)) {
-		walk((obj as any)[k], cb, path.concat(k))
+	cb(objectValue, path)
+	for (const [key, value] of Object.entries(objectValue)) {
+		walk(value, cb, path.concat(key))
 	}
 }
 
@@ -48,8 +50,9 @@ export function getSchemaObjectComment(v?: SchemaObject, indentLv?: number): str
 	if (v.title) {
 		output.push(`${v.title} `)
 	}
-	if ((v as any).summary) {
-		output.push(`${(v as any).summary} `)
+	const schemaWithSummary = v as SchemaObjectWithSummary
+	if (schemaWithSummary.summary) {
+		output.push(`${schemaWithSummary.summary} `)
 	}
 	if (v.format) {
 		output.push(`Format: ${v.format} `)
@@ -287,9 +290,9 @@ export function tsUnionOf(...types: (string | number | boolean)[]): string {
 }
 
 /** escape string value */
-export function escStr(input: any): string {
+export function escStr(input: unknown): string {
 	if (typeof input !== 'string') {
-		return input
+		return String(input)
 	}
 	return `"${input.trim().replace(DOUBLE_QUOTE_RE, '\\"')}"`
 }

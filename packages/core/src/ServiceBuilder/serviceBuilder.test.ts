@@ -1,10 +1,10 @@
 import { createSandbox } from 'sinon'
 
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/index.js'
-import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/index.js'
 import type { ServiceInfoType } from '../core/index.js'
 import { Service } from '../core/index.js'
 import { getEventBridgeMock, getLoggerMock } from '../mocks/index.js'
+import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/index.js'
 import { ServiceBuilder } from './ServiceBuilder.impl.js'
 
 describe('ServiceBuilder', () => {
@@ -65,5 +65,26 @@ describe('ServiceBuilder', () => {
 			logger: logger.mock,
 			resources: { x: new ExampleClass() },
 		})
+	})
+
+	it('throws when definitions are not resolved', () => {
+		const service = new ServiceBuilder(serviceInfo)
+
+		expect(() => {
+			service.getCommandDefinitions()
+		}).toThrow('Definitions not resolve. Please call resolveDefinitions() before using getCommandDefinitions')
+
+		expect(() => {
+			service.getSubscriptionDefinitions()
+		}).toThrow('Definitions not resolve. Please call resolveDefinitions() before using getCommandDefinitions')
+	})
+
+	it('returns definitions after resolving', async () => {
+		const service = new ServiceBuilder(serviceInfo)
+
+		await service.resolveDefinitions()
+
+		expect(service.getCommandDefinitions()).toEqual([])
+		expect(service.getSubscriptionDefinitions()).toEqual([])
 	})
 })

@@ -1,5 +1,5 @@
 import { extendApi } from '@purista/core'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 // define the input parameters
 export const emailV1ConfirmEmailInputParameterSchema = extendApi(z.object({}), {
@@ -9,12 +9,15 @@ export const emailV1ConfirmEmailInputParameterSchema = extendApi(z.object({}), {
 // define the input payload
 export const emailV1ConfirmEmailInputPayloadSchema = extendApi(
 	z.object({
-		email: extendApi(z.string().email().toLowerCase(), { title: 'The users name', example: 'john_doe@example.com' }),
+		email: extendApi(z.string().email().toLowerCase(), {
+			title: 'The users name',
+			example: 'john_doe@example.com',
+		}),
 	}),
 	{ title: 'confirmEmail input payload schema' },
 )
 
 // define the output payload
-export const emailV1ConfirmEmailOutputPayloadSchema = extendApi(z.any(), {
+export const emailV1ConfirmEmailOutputPayloadSchema = extendApi(z.unknown(), {
 	title: 'confirmEmail output payload schema',
 })

@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises'
 import { join } from 'node:path'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 /**
  * Schema of the purista.json configuration file.
@@ -46,7 +46,7 @@ export const loadPuristaConfig = async (projectRootPath?: string) => {
 	let fileContent = ''
 	try {
 		fileContent = await readFile(configFile, 'utf-8')
-	} catch (error) {
+	} catch {
 		console.error('PURISTA config file purista.json not found')
 		console.error('This file must exist in the project root.')
 		throw new Error('purista.json not found')
@@ -56,7 +56,7 @@ export const loadPuristaConfig = async (projectRootPath?: string) => {
 	try {
 		puristaProjectConfig = puristaConfigSchema.parse(JSON.parse(fileContent))
 		return puristaProjectConfig
-	} catch (error) {
+	} catch {
 		console.error('The PURISTA config file purista.json seems to be invalid')
 		throw new Error('Invalid purista.json configuration file')
 	}

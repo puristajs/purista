@@ -6,9 +6,9 @@ order: 20250218
 image: /graphic/purista_2_0_cover.jpg
 ---
 <PostDetail>
-A **huge shout-out 🎉** to the community for your incredible support and feedback! Your suggestions have been instrumental in shaping PURISTA v2.  
+Thanks to the community for the support and feedback. Your suggestions have been instrumental in shaping PURISTA v2.  
 
-While the core functionality of PURISTA remains intact, this release introduces **significant enhancements** based on real-world experiences and production use cases.  
+While the core functionality of PURISTA remains intact, this release introduces **significant enhancements** based on real-world experience and production use cases.  
 
 ## What’s New?
 
@@ -166,7 +166,7 @@ By default, **all endpoints are non-public**. If you want to expose an endpoint 
 
 ✅ **New method:** `.makeEndpointPublic()`  
 
-### Changed Method Shape for Mock Context Getter
+### Changed Method Signature for Mock Context Getters
 
 The input structure of the **mock context getter methods** has changed.  
 
@@ -185,7 +185,7 @@ const ctx = pingCommandBuilder.getCommandContextMock({  // [code ++]
 })                   // [code ++]
 ```
 
-This change affects the following methods:  
+This change affects the following methods:
 
 - `getCommandContextMock`  
 - `getCommandTransformContextMock`  

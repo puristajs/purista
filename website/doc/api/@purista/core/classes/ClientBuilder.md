@@ -209,13 +209,36 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:24](https://git
 
 ***
 
+### generateEventBridgeClient()
+
+> **generateEventBridgeClient**(`serviceDefinition`): `Promise`\<`void`\>
+
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:739](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L739)
+
+Generates the zero-dependency EventBridge client source files.
+
+#### Parameters
+
+##### serviceDefinition
+
+[`FullServiceDefinition`](../type-aliases/FullServiceDefinition.md)
+
+#### Returns
+
+`Promise`\<`void`\>
+
+***
+
 ### generateHEventBridgeClient()
 
 > **generateHEventBridgeClient**(`serviceDefinition`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:712](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L712)
+Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:783](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L783)
 
-Generates the zero-dependency HTTP client source files
+Deprecated: Use `generateEventBridgeClient(...)` instead
+([source](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L739)).
+
+Backward-compatibility alias for the old misspelled method name.
 
 #### Parameters
 

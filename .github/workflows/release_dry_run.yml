@@ -1,0 +1,56 @@
+name: Release Dry Run
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Release type
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-dry-run-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dry-run:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          registry-url: https://registry.npmjs.org
+          scope: '@purista'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prepare release (no publish)
+        run: ./scripts/releasePrepare.sh ${{ inputs.version }}
+
+      - name: Verify workspace publishability (dry-run)
+        run: npm publish --access public --dry-run --workspaces
+
+      - name: Upload dry-run artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-dry-run-${{ github.run_id }}
+          path: |
+            CHANGELOG.md
+            website/doc/api
+            docs

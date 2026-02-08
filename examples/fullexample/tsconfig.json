@@ -5,5 +5,5 @@
 		"outDir": "./build",
 		"types": ["vitest/globals", "node"]
 	},
-	"files": ["src/index.ts", "fastify.d.ts"]
+	"files": ["src/index.ts"]
 }

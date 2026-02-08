@@ -1,17 +1,19 @@
 import { SpanStatusCode } from '@opentelemetry/api'
-import { validate } from '@typeschema/main'
+import { validate } from '../../schema/index.js'
 
 import { HandledError } from '../Error/HandledError.impl.js'
 import { UnhandledError } from '../Error/UnhandledError.impl.js'
-
+import { isCommand } from '../types/commandType/isCommand.impl.js'
 import type { EBMessage } from '../types/EBMessage.js'
 import type { Logger } from '../types/Logger.js'
-import type { SubscriptionDefinition } from '../types/subscription/SubscriptionDefinition.js'
 
 import type { ServiceClass } from '../types/ServiceClass.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
-import { isCommand } from '../types/commandType/isCommand.impl.js'
+import type { SubscriptionDefinition } from '../types/subscription/SubscriptionDefinition.js'
 
+/**
+ * Applies subscription transform-input hook with schema validation and tracing.
+ */
 export const subscriptionTransformInput = async <S extends ServiceClass = ServiceClass>(
 	serviceInstance: S,
 	logger: Logger,
@@ -92,11 +94,11 @@ export const subscriptionTransformInput = async <S extends ServiceClass = Servic
 					try {
 						return await transform(payloadInput, parameterInput)
 					} catch (error) {
-						const err = error as Error
+						const err = error instanceof Error ? error : new Error(String(error))
 						subSpan.recordException(err)
 						subSpan.setStatus({
 							code: SpanStatusCode.ERROR,
-							message: err.message || 'Unable to transform input',
+							message: err.message,
 						})
 
 						if (error instanceof HandledError) {

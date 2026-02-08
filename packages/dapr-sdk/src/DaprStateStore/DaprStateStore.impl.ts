@@ -55,7 +55,7 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 	): Promise<ObjectWithKeysFromStringArray<StateNames>> {
 		const fetchStatesFromStore = async (stateName: string) => {
 			const path = join(
-				this.config.clientConfig?.daprApiToken ?? DAPR_API_VERSION,
+				this.config.clientConfig?.daprApiVersion ?? DAPR_API_VERSION,
 				'state',
 				this.config.stateStoreName as string,
 				stateName,
@@ -65,12 +65,12 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 				'metadata.contentType': 'application/json',
 			}
 
-			return this.client.get<string>(path, { query })
+			return this.client.get<unknown>(path, { query })
 		}
 
 		const result = await Promise.all(stateNames.map(stateName => fetchStatesFromStore(stateName)))
 
-		const returnValue: Record<string, string> = {}
+		const returnValue: Record<string, unknown> = {}
 
 		stateNames.forEach((value, index) => {
 			returnValue[value] = result[index]
@@ -81,7 +81,7 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 
 	protected async setStateImpl(stateName: string, stateValue: unknown) {
 		const path = join(
-			this.config.clientConfig?.daprApiToken ?? DAPR_API_VERSION,
+			this.config.clientConfig?.daprApiVersion ?? DAPR_API_VERSION,
 			'state',
 			this.config.stateStoreName as string,
 		)
@@ -98,7 +98,7 @@ export class DaprStateStore extends StateStoreBaseClass<DaprStateStoreConfig> {
 
 	protected async removeStateImpl(stateName: string) {
 		const path = join(
-			this.config.clientConfig?.daprApiToken ?? DAPR_API_VERSION,
+			this.config.clientConfig?.daprApiVersion ?? DAPR_API_VERSION,
 			'state',
 			this.config.stateStoreName as string,
 			stateName,

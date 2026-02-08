@@ -15,7 +15,7 @@ PURISTA provides the `@purista/natsbridge`
 ::: tip Pros
 
 - allows scaling
-- fault tollerant
+- fault tolerant
 - can be used with NATS State store (`@purista/nats-state-store`)
 - can be used with NATS Config store (`@purista/nats-config-store`)
 :::
@@ -23,7 +23,7 @@ PURISTA provides the `@purista/natsbridge`
 ::: warning Cons
 
 - needs managing of an NATS broker
-- no persistance of messages available
+- no persistence of messages available
 - hard to handle dead letters
 :::
 

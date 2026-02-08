@@ -1,5 +1,4 @@
-import type { Context, Span, SpanOptions } from '@opentelemetry/api'
-import type { Tracer } from '@opentelemetry/api'
+import type { Context, Span, SpanOptions, Tracer } from '@opentelemetry/api'
 
 import type { ContextBase } from './ContextBase.js'
 import type { Logger } from './Logger.js'
@@ -25,7 +24,7 @@ export interface ServiceClass<S extends ServiceClassTypes = ServiceClassTypes> {
 	start(): Promise<void>
 
 	/**
-	 * Wrap the given function in a opententelemetry span.
+	 * Wrap the given function in an OpenTelemetry span.
 	 * The span will be on same hierarchy level as the current span.
 	 *
 	 * @param name the name of the span

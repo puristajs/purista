@@ -17,20 +17,20 @@ import type {
 	Subscription,
 } from '@purista/core'
 import {
+	createInfoMessage,
+	deserializeOtp,
 	EBMessageType,
 	EventBridgeBaseClass,
 	EventBridgeEventNames,
-	PuristaSpanName,
-	PuristaSpanTag,
-	StatusCode,
-	UnhandledError,
-	createInfoMessage,
-	deserializeOtp,
 	getNewCorrelationId,
 	getNewEBMessageId,
 	getNewInstanceId,
 	isCommandResponse,
+	PuristaSpanName,
+	PuristaSpanTag,
+	StatusCode,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 import type { IClientSubscribeOptions, IPublishPacket, MqttClient } from 'mqtt'
 import { connectAsync } from 'mqtt'
@@ -41,13 +41,12 @@ import { getSubscriptionHandler } from './handler/getSubscriptionHandler.impl.js
 import { handleCommandResponse } from './handler/handleCommandResponse.impl.js'
 import { msToSec } from './msToSec.impl.js'
 import { serializeOtpToMqtt } from './serializeOtpToMqtt.impl.js'
-import { TopicRouter } from './topic/TopicRouter.js'
-
 import { getCommandResponseSubscriptionTopic } from './topic/getCommandResponseSubscriptionTopic.impl.js'
 import { getCommandSubscriptionTopic } from './topic/getCommandSubscriptionTopic.impl.js'
 import { getSharedTopicName } from './topic/getSharedTopicName.impl.js'
 import { getSubscriptionTopic } from './topic/getSubscriptionTopic.impl.js'
 import { getTopicName } from './topic/getTopicName.impl.js'
+import { TopicRouter } from './topic/TopicRouter.js'
 import type { MqttBridgeConfig } from './types/MqttBridgeConfig.js'
 
 /**
@@ -65,11 +64,17 @@ import type { MqttBridgeConfig } from './types/MqttBridgeConfig.js'
  * @group Event bridge
  */
 export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implements EventBridge {
-	private healthy = false
-	private ready = false
 	public client: MqttClient | undefined
 	public pendingInvocations = new Map<EBMessageId, PendigInvocation>()
+	private registeredSubscriptionTopics = new Map<string, string>()
 	private router = new TopicRouter()
+
+	private getConnectedClient(): MqttClient {
+		if (!this.client) {
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'not connected to a MQTT server')
+		}
+		return this.client
+	}
 
 	constructor(config?: EventBridgeConfig<Partial<MqttBridgeConfig>>) {
 		const conf = {
@@ -135,6 +140,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		contentType = 'application/json',
 		contentEncoding = 'utf-8',
 	): Promise<Readonly<EBMessage>> {
+		const client = this.getConnectedClient()
 		const context = deserializeOtp(this.logger, message.otp)
 
 		const name = isCommandResponse(message as EBMessage)
@@ -185,7 +191,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 			}
 
 			const topic = getTopicName.bind(this)(msg)
-			await this.client?.publishAsync(topic, JSON.stringify(msg), {
+			await client.publishAsync(topic, JSON.stringify(msg), {
 				qos: this.config.qoSSubscription,
 				properties: {
 					contentType: 'application/json',
@@ -210,6 +216,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
 		commandTimeout: number = this.defaultCommandTimeout,
 	): Promise<T> {
+		const client = this.getConnectedClient()
 		const context = deserializeOtp(this.logger, input.otp)
 		return this.startActiveSpan(
 			PuristaSpanName.EventBridgeInvokeCommand,
@@ -306,7 +313,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 
 				const topic = getTopicName.bind(this)(command)
 
-				await this.client?.publishAsync(topic, JSON.stringify(command), {
+				await client.publishAsync(topic, JSON.stringify(command), {
 					// if event name is set use the largest QOS
 					qos: command.eventName
 						? this.config.qoSSubscription > this.config.qosCommand
@@ -334,9 +341,10 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		metadata: CommandDefinitionMetadataBase,
 		eventBridgeConfig: DefinitionEventBridgeConfig,
 	): Promise<string> {
+		const client = this.getConnectedClient()
 		const topic = getSharedTopicName.bind(this)(getCommandSubscriptionTopic.bind(this)(address))
 		const subscriptionIdentifier = this.router.add(topic, getCommandHandler(address, cb, metadata, eventBridgeConfig))
-		await this.client?.subscribeAsync(topic, {
+		await client.subscribeAsync(topic, {
 			qos: this.config.qosCommand,
 			properties: { subscriptionIdentifier },
 		})
@@ -352,8 +360,9 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 	}
 
 	async unregisterCommand(address: EBMessageAddress): Promise<void> {
+		const client = this.getConnectedClient()
 		const topic = getSharedTopicName.bind(this)(getCommandSubscriptionTopic.bind(this)(address))
-		await this.client?.unsubscribeAsync(topic)
+		await client.unsubscribeAsync(topic)
 		this.router.remove(topic)
 	}
 
@@ -361,6 +370,7 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 		subscription: Subscription,
 		cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
 	): Promise<string> {
+		const client = this.getConnectedClient()
 		const opts: IClientSubscribeOptions = { qos: this.config.qoSSubscription, properties: {} }
 
 		let topic = getSubscriptionTopic.bind(this)(subscription)
@@ -378,12 +388,27 @@ export class MqttBridge extends EventBridgeBaseClass<MqttBridgeConfig> implement
 			subscriptionIdentifier,
 		}
 
-		await this.client?.subscribeAsync(topic, opts)
+		await client.subscribeAsync(topic, opts)
+		this.registeredSubscriptionTopics.set(
+			`${subscription.subscriber.serviceName}-${subscription.subscriber.serviceVersion},${subscription.subscriber.serviceTarget}`,
+			topic,
+		)
 
 		return topic
 	}
 
-	async unregisterSubscription(_address: EBMessageAddress): Promise<void> {}
+	async unregisterSubscription(address: EBMessageAddress): Promise<void> {
+		const client = this.getConnectedClient()
+		const key = `${address.serviceName}-${address.serviceVersion},${address.serviceTarget}`
+		const topic = this.registeredSubscriptionTopics.get(key)
+		if (!topic) {
+			return
+		}
+
+		await client.unsubscribeAsync(topic)
+		this.router.remove(topic)
+		this.registeredSubscriptionTopics.delete(key)
+	}
 
 	async destroy() {
 		this.client?.end(true)

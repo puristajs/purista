@@ -15,24 +15,24 @@ import type {
 	Subscription,
 } from '@purista/core'
 import {
+	createInfoMessage,
+	deserializeOtp,
 	EBMessageType,
 	EventBridgeBaseClass,
 	EventBridgeEventNames,
-	HandledError,
-	PuristaSpanName,
-	PuristaSpanTag,
-	StatusCode,
-	UnhandledError,
-	createInfoMessage,
-	deserializeOtp,
 	getCleanedMessage,
 	getNewCorrelationId,
 	getNewEBMessageId,
+	HandledError,
 	isCommandErrorResponse,
 	isCommandResponse,
 	isCommandSuccessResponse,
 	isInfoMessage,
+	PuristaSpanName,
+	PuristaSpanTag,
+	StatusCode,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 import type { Channel, ChannelModel } from 'amqplib'
 import amqplib from 'amqplib'
@@ -75,7 +75,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 	protected healthy = false
 	protected ready = false
 
-	protected consumerTags: string[] = []
+	protected consumerRegistrations: { channel: Channel; tag: string }[] = []
 
 	protected replyQueueName?: string
 	protected serviceFunctions = new Map<
@@ -106,6 +106,14 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		...plainEncrypter,
 	}
 
+	protected addConsumerRegistration(channel: Channel, tag: string) {
+		this.consumerRegistrations.push({ channel, tag })
+	}
+
+	protected removeConsumerRegistrationsForChannel(channel: Channel) {
+		this.consumerRegistrations = this.consumerRegistrations.filter(entry => entry.channel !== channel)
+	}
+
 	constructor(config?: EventBridgeConfig<AmqpBridgeConfig>) {
 		//= getDefaultConfig()
 		const conf = {
@@ -125,10 +133,16 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		}
 	}
 
+	/**
+	 * Indicates if the bridge finished startup and is ready to process traffic.
+	 */
 	async isReady() {
 		return this.ready
 	}
 
+	/**
+	 * Indicates if the bridge connection and channels are currently healthy.
+	 */
 	async isHealthy() {
 		return this.healthy
 	}
@@ -271,7 +285,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			{ noAck: true },
 		)
 
-		this.consumerTags.push(consume.consumerTag)
+		this.addConsumerRegistration(this.channel, consume.consumerTag)
 
 		this.healthy = true
 		this.ready = true
@@ -280,6 +294,10 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		this.logger.info('amqp event bridge ready')
 	}
 
+	/**
+	 * Emits a message via AMQP headers exchange.
+	 * The message is encoded and encrypted according to configured codecs.
+	 */
 	async emitMessage<T extends EBMessage>(
 		message: Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>,
 		contentType = 'application/json',
@@ -355,6 +373,10 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		})
 	}
 
+	/**
+	 * Invokes a remote command and waits for a matching command response.
+	 * The call is rejected with timeout if no response is received in time.
+	 */
 	async invoke<T>(
 		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
 		commandTimeout: number = this.defaultCommandTimeout,
@@ -452,17 +474,30 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
 				const content = await this.encodeContent(command, 'application/json', 'utf-8')
 
-				this.channel.publish(this.config.exchangeName ?? getDefaultConfig().exchangeName, '', content, {
-					messageId: command.id,
-					timestamp: command.timestamp,
-					correlationId: command.correlationId,
-					contentType: 'application/json',
-					contentEncoding: 'utf-8',
-					type: command.messageType,
-					headers,
-					replyTo: this.replyQueueName,
-					persistent: true,
-				})
+				try {
+					this.channel.publish(this.config.exchangeName ?? getDefaultConfig().exchangeName, '', content, {
+						messageId: command.id,
+						timestamp: command.timestamp,
+						correlationId: command.correlationId,
+						contentType: 'application/json',
+						contentEncoding: 'utf-8',
+						type: command.messageType,
+						headers,
+						replyTo: this.replyQueueName,
+						persistent: true,
+					})
+				} catch (error) {
+					const pending = this.pendingInvocations.get(correlationId)
+					if (pending) {
+						const invocationError = UnhandledError.fromError(
+							error,
+							StatusCode.InternalServerError,
+							'invoke failed to publish command',
+							command.traceId,
+						)
+						pending.reject(invocationError)
+					}
+				}
 
 				return executionPromise
 			},
@@ -482,7 +517,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		eventBridgeConfig: DefinitionEventBridgeConfig,
 	): Promise<string> {
 		if (!this.connection) {
-			throw new Error('No connection - not connected')
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'No connection - not connected')
 		}
 
 		const queueName = getCommandQueueName(address, this.config.namePrefix)
@@ -544,7 +579,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 									const responseMessage = {
 										...result,
 										otp: serializeOtp(),
-										sennder: {
+										sender: {
 											...result.sender,
 											instanceId: this.instanceId,
 										},
@@ -581,7 +616,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 
 									const payload = await this.encodeContent(responseMessage, contentType, contentEncoding)
 
-									this.channel?.publish(this.config.exchangeName ?? getDefaultConfig().exchangeName, '', payload, {
+									channel.publish(this.config.exchangeName ?? getDefaultConfig().exchangeName, '', payload, {
 										messageId: responseMessage.id,
 										timestamp: responseMessage.timestamp,
 										correlationId: msg.properties.correlationId,
@@ -622,7 +657,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			{ noAck },
 		)
 
-		this.consumerTags.push(consume.consumerTag)
+		this.addConsumerRegistration(channel, consume.consumerTag)
 
 		this.serviceFunctions.set(queueName, { cb, channel })
 
@@ -638,14 +673,18 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		return queueName
 	}
 
+	/**
+	 * Unregisters a command consumer and closes the dedicated command channel.
+	 */
 	async unregisterCommand(address: EBMessageAddress): Promise<void> {
 		try {
-			const queueName = getCommandQueueName(address)
+			const queueName = getCommandQueueName(address, this.config.namePrefix)
 			const entry = this.serviceFunctions.get(queueName)
 			if (!entry) {
 				return
 			}
 			await entry.channel.close()
+			this.removeConsumerRegistrationsForChannel(entry.channel)
 			if (!this.serviceFunctions.delete(queueName)) {
 				this.logger.error({ queueName, address }, 'Failed to clean unregister service command')
 			}
@@ -659,12 +698,15 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		}
 	}
 
+	/**
+	 * Registers a subscription consumer and returns its stable subscription key.
+	 */
 	async registerSubscription(
 		subscription: Subscription,
 		cb: (message: EBMessage) => Promise<Omit<CustomMessage, 'id' | 'timestamp'> | undefined>,
 	): Promise<string> {
 		if (!this.connection) {
-			throw new Error('No connection - not connected')
+			throw new UnhandledError(StatusCode.ServiceUnavailable, 'No connection - not connected')
 		}
 
 		const noAck = !!subscription.eventBridgeConfig.autoacknowledge
@@ -672,6 +714,7 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		const isShared = subscription.eventBridgeConfig.shared === undefined || subscription.eventBridgeConfig.shared
 
 		const queueName = isShared ? getSubscriptionQueueName(subscription.subscriber, this.config.namePrefix) : ''
+		const subscriptionStorageKey = getSubscriptionQueueName(subscription.subscriber, this.config.namePrefix)
 
 		const queueOptions: amqplib.Options.AssertQueue = isShared
 			? {
@@ -773,20 +816,24 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			{ noAck },
 		)
 
-		this.consumerTags.push(consume.consumerTag)
+		this.addConsumerRegistration(channel, consume.consumerTag)
 
-		this.subscriptions.set(queueName, { cb, channel })
-		return queueName
+		this.subscriptions.set(subscriptionStorageKey, { cb, channel })
+		return subscriptionStorageKey
 	}
 
+	/**
+	 * Unregisters a subscription consumer and closes its channel.
+	 */
 	async unregisterSubscription(address: EBMessageAddress): Promise<void> {
 		try {
-			const queueName = getSubscriptionQueueName(address)
+			const queueName = getSubscriptionQueueName(address, this.config.namePrefix)
 			const entry = this.subscriptions.get(queueName)
 			if (!entry) {
 				return
 			}
 			await entry.channel.close()
+			this.removeConsumerRegistrationsForChannel(entry.channel)
 			if (!this.subscriptions.delete(queueName)) {
 				this.logger.error({ queueName, address }, 'Failed to clean unregister subscription function')
 			}
@@ -843,12 +890,15 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 		return decoder.decode(decrypted)
 	}
 
+	/**
+	 * Gracefully stops all consumers, waits for in-flight subscription handlers,
+	 * closes AMQP resources and rejects unresolved pending invocations.
+	 */
 	async destroy() {
 		if (this.channel) {
-			const channel = this.channel
 			// instruct message broker to no longer send messages
-			const cancelProms = this.consumerTags.map(tag => channel.cancel(tag))
-			await Promise.all(cancelProms)
+			await Promise.allSettled(this.consumerRegistrations.map(entry => entry.channel.cancel(entry.tag)))
+			this.consumerRegistrations = []
 
 			let isTimedOut = false
 			const timeout = setTimeout(() => {
@@ -856,27 +906,35 @@ export class AmqpBridge extends EventBridgeBaseClass<AmqpBridgeConfig> implement
 			}, this.defaultCommandTimeout)
 
 			// ensure actual running commands and subscriptions are finished before closing connection
-			const waitForExecutionEnd = () => {
-				if (this.pendingInvocations.size <= 0 && this.runningSubscriptionCount <= 0) {
-					return
+			await new Promise<void>(resolve => {
+				const waitForExecutionEnd = () => {
+					if (this.runningSubscriptionCount <= 0) {
+						resolve()
+						return
+					}
+					if (isTimedOut) {
+						this.logger.error('Some commands or subscriptions could not finish before connection was closed')
+						resolve()
+						return
+					}
+					setImmediate(waitForExecutionEnd)
 				}
-				if (isTimedOut) {
-					this.logger.error('Some commands or subscriptions could not finish before connection was closed')
-					return
-				}
-				setImmediate(waitForExecutionEnd)
-			}
 
-			waitForExecutionEnd()
-			if (timeout) {
-				clearTimeout(timeout)
-			}
+				waitForExecutionEnd()
+			})
+			clearTimeout(timeout)
 
 			await this.channel.close()
 		}
 		if (this.connection) {
 			await this.connection.close()
 		}
+		for (const [_, value] of Array.from(this.pendingInvocations)) {
+			value.reject(new UnhandledError(StatusCode.ServiceUnavailable))
+		}
+		this.pendingInvocations.clear()
+		this.healthy = false
+		this.ready = false
 
 		await super.destroy()
 	}

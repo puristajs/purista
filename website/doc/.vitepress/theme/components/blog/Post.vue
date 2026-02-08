@@ -1,11 +1,11 @@
 <script setup lang="ts">
-import { useData } from 'vitepress'
 import type { Post } from '../../composables/posts.data.js'
 
+// biome-ignore lint/correctness/noUnusedVariables: false biome - used in template
 const props = defineProps<{
 	post: Post
 }>()
-const { site } = useData()
+// biome-ignore lint/correctness/noUnusedVariables: false biome - used in template
 const getImgUrl = (title: string, description: string) =>
 	`https://ogpreview-ten.vercel.app/api/og?title=${encodeURIComponent(title)}&description=${encodeURIComponent(description)}`
 </script>

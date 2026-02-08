@@ -1,7 +1,7 @@
+import type { CommandDefinitionMetadataBase } from '../../types/commandType/CommandDefinitionMetadataBase.js'
 import type { EmptyObject } from '../../types/EmptyObject.js'
 import type { Prettify } from '../../types/Prettify.js'
 import type { StatusCode } from '../../types/StatusCode.enum.js'
-import type { CommandDefinitionMetadataBase } from '../../types/commandType/CommandDefinitionMetadataBase.js'
 
 import type { QueryParameter } from './QueryParameter.js'
 

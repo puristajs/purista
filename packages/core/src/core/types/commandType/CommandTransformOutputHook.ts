@@ -19,7 +19,7 @@ export type CommandTransformOutputHook<
 	FinalFunctionOutputType,
 	FunctionParamsType,
 	TransformOutputHookOutput,
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 > = (
 	this: S,
 	context: CommandTransformFunctionContext<MessagePayloadType, MessageParamsType, Resources>,

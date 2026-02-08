@@ -56,21 +56,29 @@ export class AWSConfigStore extends ConfigStoreBaseClass<AWSConfigStoreConfig> {
 	}
 
 	protected async removeConfigImpl(configName: string) {
-		const command = new DeleteParameterCommand({
-			Name: configName,
-		})
+		try {
+			const command = new DeleteParameterCommand({
+				Name: configName,
+			})
 
-		await this.client.send(command)
+			await this.client.send(command)
+		} catch (err) {
+			throw UnhandledError.fromError(err, StatusCode.InternalServerError)
+		}
 	}
 
 	protected async setConfigImpl(configName: string, configValue: string) {
-		const command = new PutParameterCommand({
-			Name: configName,
-			Value: configValue,
-			Type: ParameterType.STRING,
-			Overwrite: true,
-		})
+		try {
+			const command = new PutParameterCommand({
+				Name: configName,
+				Value: configValue,
+				Type: ParameterType.STRING,
+				Overwrite: true,
+			})
 
-		await this.client.send(command)
+			await this.client.send(command)
+		} catch (err) {
+			throw UnhandledError.fromError(err, StatusCode.InternalServerError)
+		}
 	}
 }

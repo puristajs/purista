@@ -1,5 +1,5 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { Service } from '../core/index.js'
 import { safeBind } from '../helper/index.js'
@@ -9,7 +9,11 @@ import { CommandDefinitionBuilder } from './CommandDefinitionBuilder.impl.js'
 describe('CommandDefinitionBuilder', () => {
 	const sandbox = createSandbox()
 	const service = new Service({
-		info: { serviceName: 'TestService', serviceVersion: '1', serviceDescription: 'A service' },
+		info: {
+			serviceName: 'TestService',
+			serviceVersion: '1',
+			serviceDescription: 'A service',
+		},
 		commandDefinitionList: [],
 		subscriptionDefinitionList: [],
 		logger: getLoggerMock(sandbox).mock,
@@ -17,7 +21,11 @@ describe('CommandDefinitionBuilder', () => {
 		config: {},
 	})
 
-	const functionPayloadSchema = z.object({ foo: z.string(), bar: z.number(), def: z.string().default('default_value') })
+	const functionPayloadSchema = z.object({
+		foo: z.string(),
+		bar: z.number(),
+		def: z.string().default('default_value'),
+	})
 	const functionParameterSchema = z.object({
 		paramOne: z.string(),
 		paramTwo: z.number(),
@@ -25,8 +33,17 @@ describe('CommandDefinitionBuilder', () => {
 	})
 	const functionOutputSchema = z.object({
 		result: z.object({
-			payload: z.object({ foo: z.string(), bar: z.number(), other: z.string(), def: z.string() }),
-			parameter: z.object({ paramOne: z.string(), paramTwo: z.number(), def: z.string() }),
+			payload: z.object({
+				foo: z.string(),
+				bar: z.number(),
+				other: z.string(),
+				def: z.string(),
+			}),
+			parameter: z.object({
+				paramOne: z.string(),
+				paramTwo: z.number(),
+				def: z.string(),
+			}),
 		}),
 	})
 	const transformPayloudSchema = z.string()
@@ -40,7 +57,8 @@ describe('CommandDefinitionBuilder', () => {
 		.addPayloadSchema(functionPayloadSchema)
 		.addParameterSchema(functionParameterSchema)
 		.addOutputSchema(functionOutputSchema)
-		.setTransformInput(transformPayloudSchema, transformParameterSchema, async (_context, payload, parameter) => {
+		.setTransformInput(transformPayloudSchema, transformParameterSchema, async function (context, payload, parameter) {
+			void context
 			expect(typeof payload).toBe('string')
 			expect(typeof parameter).toBe('string')
 
@@ -58,7 +76,9 @@ describe('CommandDefinitionBuilder', () => {
 				parameter: param,
 			}
 		})
-		.setTransformOutput(transformOutputSchema, async (_context, payload, _parameter) => {
+		.setTransformOutput(transformOutputSchema, async function (context, payload, parameter) {
+			void context
+			void parameter
 			const p: Readonly<{
 				result: {
 					payload: {
@@ -76,7 +96,8 @@ describe('CommandDefinitionBuilder', () => {
 			return JSON.stringify(p)
 		})
 		.setBeforeGuardHooks({
-			beforeOne: async (_context, payload, parameter) => {
+			beforeOne: async function (context, payload, parameter) {
+				void context
 				const pay: {
 					foo: string
 					bar: number
@@ -92,7 +113,8 @@ describe('CommandDefinitionBuilder', () => {
 			},
 		})
 		.setAfterGuardHooks({
-			afterOne: async (_context, fnOutputPayload, input, parameter) => {
+			afterOne: async function (context, fnOutputPayload, input, parameter) {
+				void context
 				const pay: {
 					foo: string
 					bar: number
@@ -133,7 +155,7 @@ describe('CommandDefinitionBuilder', () => {
 			functionParameterSchema,
 		)
 		.canEmit('some', z.object({ example: z.string() }))
-		.setCommandFunction(async (context, payload, parameter) => {
+		.setCommandFunction(async function (context, payload, parameter) {
 			const result = await context.service.OtherService[2].testCommand(payload, parameter)
 
 			const response: {
@@ -237,6 +259,14 @@ describe('CommandDefinitionBuilder', () => {
 		expect(beforeOneStub.callCount).toBe(0)
 	})
 
+	it('returns configured before/after guard hooks by name', () => {
+		const beforeHook = builder.getBeforeGuardHook('beforeOne')
+		const afterHook = builder.getAfterGuardHook('afterOne')
+
+		expect(typeof beforeHook).toBe('function')
+		expect(typeof afterHook).toBe('function')
+	})
+
 	it('does not throw on transform input', async () => {
 		const fn = builder.getTransformInputFunction()
 
@@ -278,7 +308,11 @@ describe('CommandDefinitionBuilder', () => {
 			context.mock,
 			{
 				result: {
-					payload: { ...payload, other: 'added by invoke', def: 'default_value' },
+					payload: {
+						...payload,
+						other: 'added by invoke',
+						def: 'default_value',
+					},
 					parameter: { ...parameter, def: 'default_param' },
 				},
 			},
@@ -288,7 +322,11 @@ describe('CommandDefinitionBuilder', () => {
 		expect(result).toStrictEqual(
 			JSON.stringify({
 				result: {
-					payload: { ...payload, other: 'added by invoke', def: 'default_value' },
+					payload: {
+						...payload,
+						other: 'added by invoke',
+						def: 'default_value',
+					},
 					parameter: { ...parameter, def: 'default_param' },
 				},
 			}),
@@ -297,7 +335,8 @@ describe('CommandDefinitionBuilder', () => {
 
 	it('works with without schema', async () => {
 		const b = new CommandDefinitionBuilder('testCommand', 'a unit test command').setCommandFunction(
-			async (_context, payload, parameter) => {
+			async function (context, payload, parameter) {
+				void context
 				return { payload, parameter }
 			},
 		)
@@ -306,7 +345,11 @@ describe('CommandDefinitionBuilder', () => {
 
 		const theFunction = safeBind(fn, service)
 
-		const context = b.getCommandContextMock({ payload: '', parameter: {}, sandbox })
+		const context = b.getCommandContextMock({
+			payload: '',
+			parameter: {},
+			sandbox,
+		})
 
 		const result = await theFunction(context.mock, 'y', 'x')
 
@@ -314,5 +357,20 @@ describe('CommandDefinitionBuilder', () => {
 			payload: 'y',
 			parameter: 'x',
 		})
+	})
+
+	it('merges repeated canInvoke calls for the same service and version', async () => {
+		const b = new CommandDefinitionBuilder('mergeInvokes', 'merge invokes')
+			.addOutputSchema(z.object({ ok: z.boolean() }))
+			.canInvoke('OtherService', '1', 'first', z.object({ first: z.string() }))
+			.canInvoke('OtherService', '1', 'second', z.object({ second: z.string() }))
+			.setCommandFunction(async function (context) {
+				void context
+				return { ok: true }
+			})
+
+		const definition = await b.getDefinition()
+
+		expect(Object.keys(definition.invokes.OtherService[1]).sort()).toStrictEqual(['first', 'second'])
 	})
 })

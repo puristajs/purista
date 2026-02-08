@@ -1,5 +1,5 @@
 import * as yup from 'yup'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import { validationToSchema } from './validationToSchema.js'
 
@@ -13,6 +13,8 @@ describe('validateToSchema', () => {
 		const result = await validationToSchema(schema)
 
 		expect(result).toStrictEqual({
+			$schema: 'https://json-schema.org/draft/2020-12/schema',
+			additionalProperties: false,
 			properties: {
 				one: {
 					type: 'string',
@@ -35,6 +37,10 @@ describe('validateToSchema', () => {
 		const result = await validationToSchema(schema)
 
 		expect(result).toStrictEqual({
+			default: {
+				one: undefined,
+				two: undefined,
+			},
 			properties: {
 				one: {
 					type: 'string',
@@ -45,10 +51,6 @@ describe('validateToSchema', () => {
 			},
 			required: ['one'],
 			type: 'object',
-			default: {
-				one: undefined,
-				two: undefined,
-			},
 		})
 	})
 })

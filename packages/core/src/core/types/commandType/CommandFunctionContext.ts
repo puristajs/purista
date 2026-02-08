@@ -1,4 +1,4 @@
-import type { Schema } from '@typeschema/main'
+import type { Schema } from '../../../schema/index.js'
 import type { ContextBase } from '../ContextBase.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
 import type { EmptyObject } from '../EmptyObject.js'
@@ -19,7 +19,7 @@ import type { Command } from './Command.js'
 export type CommandFunctionContextEnhancements<
 	MessagePayloadType = unknown,
 	MessageParamsType = unknown,
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = {
@@ -57,7 +57,7 @@ export type CommandFunctionContextEnhancements<
 export type CommandFunctionContext<
 	MessagePayloadType = unknown,
 	MessageParamsType = unknown,
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = Prettify<

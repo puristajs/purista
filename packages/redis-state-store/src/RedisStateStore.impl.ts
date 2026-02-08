@@ -1,6 +1,13 @@
 import type { ObjectWithKeysFromStringArray, StoreBaseConfig } from '@purista/core'
 import { StateStoreBaseClass, StatusCode, UnhandledError } from '@purista/core'
-import type { RedisClientType, RedisFunctions, RedisModules, RedisScripts } from '@redis/client'
+import type {
+	RedisClientType,
+	RedisFunctions,
+	RedisModules,
+	RedisScripts,
+	RespVersions,
+	TypeMapping,
+} from '@redis/client'
 import { createClient } from '@redis/client'
 
 import type { RedisStoreConfig } from './types.js'
@@ -43,7 +50,7 @@ export class RedisStateStore<
 	F extends RedisFunctions = RedisFunctions,
 	S extends RedisScripts = RedisScripts,
 > extends StateStoreBaseClass<RedisStoreConfig<M, F, S>> {
-	public client: RedisClientType<M, F, S>
+	public client: RedisClientType<M, F, S, RespVersions, TypeMapping>
 
 	constructor(config?: StoreBaseConfig<RedisStoreConfig<M, F, S>>) {
 		super('RedisStateStore', { ...config })

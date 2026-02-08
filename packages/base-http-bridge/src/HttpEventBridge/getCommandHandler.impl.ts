@@ -1,6 +1,6 @@
 // file deepcode ignore ServerLeak: <please specify a reason of ignoring this>
 
-import { SpanKind, context, propagation } from '@opentelemetry/api'
+import { context, propagation, SpanKind } from '@opentelemetry/api'
 import {
 	ATTR_HTTP_REQUEST_METHOD,
 	ATTR_HTTP_RESPONSE_STATUS_CODE,
@@ -17,22 +17,23 @@ import type {
 	HttpExposedServiceMeta,
 } from '@purista/core'
 import {
+	getTimeoutPromise,
 	HandledError,
 	PuristaSpanName,
 	StatusCode,
-	UnhandledError,
-	getTimeoutPromise,
 	serializeOtp,
 	throwIfNotValidMessage,
+	UnhandledError,
 } from '@purista/core'
 import { HTTP } from 'cloudevents'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 import type { IHttpEventBridge } from './types/IHttpEventBridge.js'
 import type { RouterFunction } from './types/RouterFunction.js'
 
 export const getCommandHandler = function (
 	this: IHttpEventBridge,
-	address: EBMessageAddress,
+	_address: EBMessageAddress,
 	cb: (
 		message: Command,
 	) => Promise<
@@ -67,7 +68,7 @@ export const getCommandHandler = function (
 					if (wrappedInCloudEvent) {
 						const body = await c.req.text()
 						const headers = [...c.req.raw.headers.entries()].reduce((prev: Record<string, string>, val) => {
-							// biome-ignore lint/performance/noAccumulatingSpread: <explanation>
+							// biome-ignore lint/performance/noAccumulatingSpread: ok here
 							return { ...prev, [val[0]]: val[1] }
 						}, {})
 
@@ -83,7 +84,7 @@ export const getCommandHandler = function (
 						try {
 							message = await c.req.json()
 						} catch (error) {
-							throw new HandledError(StatusCode.BadRequest, 'payload must be a parsable json')
+							throw HandledError.fromError(error, StatusCode.BadRequest, 'payload must be a parsable json')
 						}
 					}
 
@@ -98,7 +99,7 @@ export const getCommandHandler = function (
 					}
 
 					// empty response
-					if (msg.payload === undefined || msg.payload === '') {
+					if (msg.payload === undefined || msg.payload === null || msg.payload === '') {
 						const status = StatusCode.NoContent
 
 						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, status)
@@ -107,16 +108,14 @@ export const getCommandHandler = function (
 						return c.body(null)
 					}
 
-					const payload = typeof msg.payload === 'string' ? msg.payload : JSON.stringify(msg)
-
 					const status = StatusCode.OK
-					return c.json(payload, status as any)
+					return c.json(msg, status as ContentfulStatusCode)
 				} catch (error) {
 					const err = error instanceof UnhandledError ? error : UnhandledError.fromError(error)
 					span.recordException(err)
 					this.logger.error({ err }, err.message)
 
-					return c.json(err.getErrorResponse(), err.errorCode as any)
+					return c.json(err.getErrorResponse(), err.errorCode as ContentfulStatusCode)
 				}
 			},
 		)

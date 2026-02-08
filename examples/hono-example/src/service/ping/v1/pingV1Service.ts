@@ -1,5 +1,3 @@
-import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
-
 import { deleteCommandBuilder } from './command/delete/deleteCommandBuilder.js'
 import { fooCommandBuilder } from './command/foo/fooCommandBuilder.js'
 import { paramTestCommandBuilder } from './command/paramTest/paramTestCommandBuilder.js'
@@ -11,14 +9,17 @@ import { logSubscriptionBuilder } from './subscription/log/logSubscriptionBuilde
 // add only definitions and no further service config here
 // other service config should be done in ./pingServiceBuilder.ts file
 
-const commandDefinitions: CommandDefinitionList<any> = [
+type CommandDefinition = Parameters<typeof pingV1ServiceBuilder.addCommandDefinition>[number]
+type SubscriptionDefinition = Parameters<typeof pingV1ServiceBuilder.addSubscriptionDefinition>[number]
+
+const commandDefinitions: CommandDefinition[] = [
 	pingCommandBuilder.getDefinition(),
 	fooCommandBuilder.getDefinition(),
 	paramTestCommandBuilder.getDefinition(),
 	deleteCommandBuilder.getDefinition(),
 ]
 
-const subscriptionDefinitions: SubscriptionDefinitionList<any> = [logSubscriptionBuilder.getDefinition()]
+const subscriptionDefinitions: SubscriptionDefinition[] = [logSubscriptionBuilder.getDefinition()]
 
 export const pingV1Service = pingV1ServiceBuilder
 	.addCommandDefinition(...commandDefinitions)

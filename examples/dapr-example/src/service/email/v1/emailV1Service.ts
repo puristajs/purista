@@ -1,5 +1,3 @@
-import type { CommandDefinitionList, SubscriptionDefinitionList } from '@purista/core'
-
 import { pingCommandBuilder } from './command/ping/pingCommandBuilder.js'
 import { emailV1ServiceBuilder } from './emailV1ServiceBuilder.js'
 import { sendWelcomeEmailSubscriptionBuilder } from './subscription/sendWelcomeEmail/sendWelcomeEmailSubscriptionBuilder.js'
@@ -8,9 +6,12 @@ import { sendWelcomeEmailSubscriptionBuilder } from './subscription/sendWelcomeE
 // add only definitions and no further service config here
 // other service config should be done in ./emailServiceBuilder.ts file
 
-const commandDefinitions: CommandDefinitionList<any> = [pingCommandBuilder.getDefinition()]
+type CommandDefinition = Parameters<typeof emailV1ServiceBuilder.addCommandDefinition>[number]
+type SubscriptionDefinition = Parameters<typeof emailV1ServiceBuilder.addSubscriptionDefinition>[number]
 
-const subscriptionDefinitions: SubscriptionDefinitionList<any> = [sendWelcomeEmailSubscriptionBuilder.getDefinition()]
+const commandDefinitions: CommandDefinition[] = [pingCommandBuilder.getDefinition()]
+
+const subscriptionDefinitions: SubscriptionDefinition[] = [sendWelcomeEmailSubscriptionBuilder.getDefinition()]
 
 export const emailV1Service = emailV1ServiceBuilder
 	.addCommandDefinition(...commandDefinitions)

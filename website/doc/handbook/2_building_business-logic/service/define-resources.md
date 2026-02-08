@@ -6,7 +6,7 @@ order: 201025
 
 # Define Resources
 
-As a service acts as container for comands and subscriptions, it is possible to define resources that can be used by these commands and subscriptions. This allows you to create more generic commands and subscriptions.
+As a service acts as container for commands and subscriptions, it is possible to define resources that can be used by these commands and subscriptions. This allows you to create more generic commands and subscriptions.
 
 A typical example is, to provide a database connection pool which can be used by multiple commands and subscriptions of a service.
 
@@ -36,7 +36,7 @@ const service = await serviceBuilder.getInstance(eventbridge, {
 })
 ```
 
-The instance can be access via the context of commands and subscriptions.
+The instance can be accessed via the context of commands and subscriptions.
 
 ```ts
 commandBuilder.setCommandFunction(async function ({ resources }) {

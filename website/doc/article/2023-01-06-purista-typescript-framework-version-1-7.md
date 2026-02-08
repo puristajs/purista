@@ -6,8 +6,8 @@ order: 20230601
 ---
 <PostDetail>
 
-We are thrilled to announce the release of PURISTA TypeScript Framework v1.7, the latest version of our powerful and versatile framework for building robust applications.
-This release introduces exciting new features, improvements, and bug fixes, making PURISTA even more reliable and efficient. Let's dive into the highlights of this release.
+We are happy to announce the release of PURISTA TypeScript Framework v1.7.
+This release introduces new features, improvements, and bug fixes that make PURISTA more reliable and efficient.
 
 ---
 
@@ -23,7 +23,7 @@ PURISTA now supports the NATS State Store for JetStream enabled NATS servers. Th
 
 ### NATS Config Store for JetStream Enabled NATS Server
 
-To further enhance the configurability of your JetStream enabled NATS server, we have introduced the NATS Config Store feature in PURISTA v1.7. This feature enables you to store and manage configuration data in the JetStream enabled NATS server, providing a centralized and scalable solution.
+To further enhance the configurability of JetStream-enabled NATS servers, we introduced the NATS Config Store in PURISTA v1.7. This enables you to store and manage configuration data in NATS with a centralized and scalable approach.
 
 ### Redis Config Store
 
@@ -35,8 +35,8 @@ Keeping secrets secure is crucial in modern applications. With the Infisical Sec
 
 ## Breaking Changes
 
-In previous versions of PURISTA, messages only contained the instanceId of the sender, with the instanceId being a property in the root of a message.
-However, in v1.7, we have made changes to enhance the messaging structure.
+In previous versions of PURISTA, messages only contained the sender `instanceId` in the root object.
+In v1.7, we changed this to improve messaging structure.
 The instanceId of the sender is now moved to the sender property, and the instanceId of the receiver (if available) is included in the receiver property.
 This change allows for more granular subscription targeting, enabling you to subscribe to specific senders or receivers.
 Additionally, this modification simplifies support for topic-based brokers like MQTT and NATS, eliminating the need for duplicate message publications.
@@ -45,8 +45,8 @@ Additionally, this modification simplifies support for topic-based brokers like 
 
 In addition to the exciting new features mentioned above, PURISTA v1.7 includes various other enhancements and bug fixes to provide a more stable and seamless development experience. Some notable improvements include:
 
-**Improved documentation:** We have invested effort in enhancing the documentation to make it more comprehensive, accessible, and easier to follow. The updated documentation will serve as an excellent resource for both new and experienced PURISTA users.
-Fixed minor bugs: We have addressed several minor bugs reported by the community, ensuring a smoother and more reliable framework experience.
+- **Improved documentation:** We enhanced documentation to make it more comprehensive, accessible, and easier to follow.
+- **Fixed minor bugs:** We addressed several community-reported issues for a smoother and more reliable framework experience.
 
 ## Examples and Documentation
 

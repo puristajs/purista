@@ -1,6 +1,6 @@
 ---
 title: Secret Stores
-description: Secret stores in PURISTA typescript framwork
+description: Secret stores in PURISTA typescript framework
 order: 206020
 ---
 
@@ -26,39 +26,62 @@ const myService = await myV1Service.getInstance(eventBridge, {
   })
 ```
 
+## Official Secret Store Adapters
+
+PURISTA provides several ready-to-use secret store adapters:
+
+- `@purista/aws-secret-store`
+- `@purista/azure-secret-store`
+- `@purista/gcloud-secret-store`
+- `@purista/infisical-secret-store`
+- `@purista/vault-secret-store`
+- `@purista/dapr-sdk` (Dapr secret store adapter)
+
+### Example: HashiCorp Vault
+
+```typescript
+import { VaultSecretStore } from '@purista/vault-secret-store'
+
+const secretStore = new VaultSecretStore({
+  endpoint: 'http://localhost:8200',
+  token: 'root',
+  mount: 'secret', // optional, defaults to 'secret'
+})
+```
+
 The secret store is provided inside the `context` of command functions and subscription functions.
 It can be used like this:
 
 ```typescript
 .setCommandFunction(async function (context, payload) {
 
-  // set a config
-  await context.configs.setSecret('secret_key', 'super_secret_string_only')
-  await context.configs.setSecret('other_secret', 'confidential')
+  // set a secret
+  await context.secrets.setSecret('secret_key', 'super_secret_string_only')
+  await context.secrets.setSecret('other_secret', 'confidential')
 
-  // get a config
-  const myConfig = await context.configs.getConfig('secret_key', 'other_secret')
-  console.log(myConfig) // outputs: { secret_key: "super_secret_string_only", other_secret: "confidential" }
+  // get secrets
+  const mySecrets = await context.secrets.getSecret('secret_key', 'other_secret')
+  console.log(mySecrets) // outputs: { secret_key: "super_secret_string_only", other_secret: "confidential" }
 
-  // remove a config
-  await context.configs.removeConfig('port')
+  // remove a secret
+  await context.secrets.removeSecret('other_secret')
 })
 ```
 
 ::: info
-Config stores per default:
+Secret stores by default have:
 
 - enabled getter
 - disabled setter
 - disabled removal
 
-You need to explicit enable via config if needed
+You need to explicitly enable them via config if needed.
 :::
 
 ## Default secret store
 
-PURISTA comes with a default secret store, which can be used as placeholder or connector to config files and environment variables.
-In the constructor config, you can add a `config` property. The property must be from type object.
+PURISTA comes with a default secret store, which can be used as a placeholder or for local test/development values.
+In the constructor config, you can add a `config` property. The property must be an object.
 
 Example:
 
@@ -72,7 +95,7 @@ const store = new DefaultSecretStore({
   },
 })
 
-console.log(store.getSecret('mySecret')) // outputs: secret_value
+console.log(await store.getSecret('mySecret')) // outputs: { mySecret: "secret_value" }
 ```
 
 ## Custom secret store
@@ -86,7 +109,7 @@ import {
     SecretStoreBaseClass, 
     UnhandledError, 
     StatusCode, 
-    StoreBaseConfig 
+    StoreBaseConfig,
     type ObjectWithKeysFromStringArray,
   } from '@purista/core'
 
@@ -101,7 +124,7 @@ export class CustomStore extends SecretStoreBaseClass<CustomStoreConfig> impleme
   constructor(config: StoreBaseConfig<CustomStoreConfig>) {
     super('CustomStoreName', config)
 
-    this.client = customCLient.connect(this.config.config.url)
+    this.client = customClient.connect(this.config.config.url)
   }
 
   protected async getSecretImpl<SecretNames extends string []>(
@@ -137,7 +160,7 @@ export class CustomStore extends SecretStoreBaseClass<CustomStoreConfig> impleme
       // your custom logic goes here:
       await this.client.set(secretName, secretValue)
     } catch (err) {
-      const msg = `error in secret store setting value ${stateName}`
+      const msg = `error in secret store setting value ${secretName}`
       this.logger.error({ err }, msg)
       throw new UnhandledError(StatusCode.InternalServerError, msg)
     }

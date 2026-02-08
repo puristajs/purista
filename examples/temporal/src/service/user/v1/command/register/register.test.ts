@@ -2,8 +2,6 @@ import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 import { vi } from 'vitest'
 
-import { userV1Service } from '../../userV1Service.js'
-import { registerCommandBuilder } from './registerCommandBuilder.js'
 import type { UserV1RegisterInputParameter, UserV1RegisterInputPayload } from './types.js'
 
 vi.mock('@temporalio/client', async importOriginal => {
@@ -31,6 +29,8 @@ describe('service User version 1 - command register', () => {
 	})
 
 	test('does not throw', async () => {
+		const { userV1Service } = await import('../../userV1Service.js')
+		const { registerCommandBuilder } = await import('./registerCommandBuilder.js')
 		const service = await userV1Service.getInstance(getEventBridgeMock(sandbox).mock, {
 			logger: getLoggerMock(sandbox).mock,
 			serviceConfig: {

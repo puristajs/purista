@@ -46,7 +46,7 @@ export type HttpEventBridgeConfig = {
 	pathPrefix?: string
 
 	/**
-	 * the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI defintion
+	 * the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI definition
 	 * needs to `enableRestApiExpose` set to `true`
 	 *
 	 * @default /api

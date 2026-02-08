@@ -12,7 +12,7 @@ It is essential to understand the concept. When you create a command in PURISTA,
 
 However, the command's service does not implement an HTTP server. Instead, PURISTA provides a generic HTTP server that can be configured to expose any command as an HTTP endpoint. This allows you to focus on building your commands while PURISTA handles the HTTP server details.
 
-This means the HTTP server is an independent service that can be started and scaled separately from your commands. Additionally, you can use different HTTP servers (such as Hono, Fastify, etc.) with PURISTA.
+This means the HTTP server is an independent service that can be started and scaled separately from your commands. The maintained server integration is based on Hono and can run on different runtimes (Node.js, Bun, Deno).
 
 From a high-level perspective, each service in your system informs the HTTP server about which commands should be exposed as HTTP endpoints. The HTTP server then listens for incoming requests and routes them to the appropriate service and command.
 
@@ -76,7 +76,7 @@ The general steps for a graceful shutdown are:
 import { type Service, gracefulShutdown } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
 
-const services: Service[] = [serviceInstanceA, serviceInstanceB]]
+const services: Service[] = [serviceInstanceA, serviceInstanceB]
 
 const honoService = await honoV1Service.getInstance(eventBridge,{
   serviceConfig: {
@@ -136,7 +136,7 @@ Dynamic registration is enabled by default. To disable it, set `enableDynamicRou
 
 ## Start listening
 
-TThe HTTP server service does not automatically start listening for requests (i.e., open a socket). Instead, it relies on [Hono](https://hono.dev), which provides high flexibility and performance. However, this also means that you need to manually start listening for requests.
+The HTTP server service does not automatically start listening for requests (i.e., open a socket). Instead, it relies on [Hono](https://hono.dev), which provides high flexibility and performance. However, this also means that you need to manually start listening for requests.
 
 ::: code-group
 
@@ -145,7 +145,7 @@ import { type Service, gracefulShutdown } from '@purista/core'
 import { serve } from '@hono/node-server'
 import { honoV1Service } from '@purista/hono-http-server'
 
-const services: Service[] = [serviceInstanceA, serviceInstanceB]]
+const services: Service[] = [serviceInstanceA, serviceInstanceB]
 
 const honoService = await honoV1Service.getInstance(eventBridge,{
   serviceConfig: {
@@ -166,7 +166,7 @@ const serverInstance = serve({
 import { type Service, gracefulShutdown } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
 
-const services: Service[] = [serviceInstanceA, serviceInstanceB]]
+const services: Service[] = [serviceInstanceA, serviceInstanceB]
 
 const honoService = await honoV1Service.getInstance(eventBridge,{
   serviceConfig: {
@@ -203,6 +203,7 @@ honoService.app.use(async (c, next) => {
     ...c.get('additionalParameter'),
       someOtherInfo: 'value'
   })
+  await next()
 })
 // [...]
 ```
@@ -223,6 +224,7 @@ honoService.app.use(async (c, next) => {
     ...c.get('additionalParameter'),
       someOtherInfo: 'value'
   })
+  await next()
 })
 ```
 

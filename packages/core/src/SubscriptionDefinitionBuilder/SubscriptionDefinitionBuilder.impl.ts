@@ -1,7 +1,6 @@
-import type { Infer, InferIn, Schema } from '@typeschema/main'
 import type { SinonSandbox } from 'sinon'
-
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
+import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
@@ -10,7 +9,7 @@ import type { EBMessage } from '../core/types/EBMessage.js'
 import type { EBMessageType } from '../core/types/EBMessageType.enum.js'
 import type { InstanceId } from '../core/types/InstanceId.js'
 import type { PrincipalId } from '../core/types/PrincipalId.js'
-import type { TenantId } from '../core/types/TenantId.js'
+import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { SubscriptionAfterGuardHook } from '../core/types/subscription/SubscriptionAfterGuardHook.js'
 import type { SubscriptionBeforeGuardHook } from '../core/types/subscription/SubscriptionBeforeGuardHook.js'
 import type { SubscriptionDefinition } from '../core/types/subscription/SubscriptionDefinition.js'
@@ -18,17 +17,14 @@ import type { SubscriptionDefinitionMetadataBase } from '../core/types/subscript
 import type { SubscriptionFunction } from '../core/types/subscription/SubscriptionFunction.js'
 import type { SubscriptionTransformInputHook } from '../core/types/subscription/SubscriptionTransformInputHook.js'
 import type { SubscriptionTransformOutputHook } from '../core/types/subscription/SubscriptionTransformOutputHook.js'
-
-import { StatusCode } from '../core/types/StatusCode.enum.js'
-
+import type { TenantId } from '../core/types/TenantId.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
-
 import { getSubscriptionContextMock } from '../mocks/getSubscriptionContext.mock.js'
 import { getSubscriptionTransformContextMock } from '../mocks/getSubscriptionTransformContext.mock.js'
-
+import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
-import type { SubscriptionDefinitionBuilderTypes } from './SubscriptionDefinitionBuilderTypes.js'
 import { getSubscriptionFunctionWithValidation } from './getSubscriptionFunctionWithValidation.impl.js'
+import type { SubscriptionDefinitionBuilderTypes } from './SubscriptionDefinitionBuilderTypes.js'
 
 /**
  * Subscription definition builder is a helper to create and define a subscriptions for a service.
@@ -142,18 +138,16 @@ export class SubscriptionDefinitionBuilder<
 			throw new Error('canInvoke requires non-empty service name, version and target')
 		}
 
-		const x = this.invokes as any
-		if (!x[serviceName]) {
-			x[serviceName] = {}
-		}
-
-		if (!x[serviceName][serviceVersion]) {
-			x[serviceName][serviceVersion] = {}
-		}
+		const existingInvokes = this.invokes as Record<
+			string,
+			Record<string, Record<string, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>>
+		>
 
 		const f = {
 			[serviceName]: {
+				...existingInvokes[serviceName],
 				[serviceVersion]: {
+					...(existingInvokes[serviceName]?.[serviceVersion] ?? {}),
 					[serviceTarget]: { outputSchema, payloadSchema, parameterSchema },
 				},
 			},
@@ -509,6 +503,7 @@ export class SubscriptionDefinitionBuilder<
 		inputContentType?: ContentType,
 		inputContentEncoding?: string,
 	) {
+		assertNonArrowFunction(transformFunction, 'setTransformInput')
 		this.inputContentType = inputContentType ?? this.inputContentType
 		this.inputContentEncoding = inputContentEncoding ?? this.inputContentEncoding
 
@@ -572,6 +567,7 @@ export class SubscriptionDefinitionBuilder<
 		outputContentType?: ContentType,
 		outputContentEncoding?: string,
 	) {
+		assertNonArrowFunction(transformFunction, 'setTransformOutput')
 		this.outputContentEncoding = outputContentEncoding ?? this.outputContentEncoding
 		this.outputContentType = outputContentType ?? this.outputContentType
 
@@ -631,6 +627,9 @@ export class SubscriptionDefinitionBuilder<
 			>
 		>,
 	) {
+		for (const [name, hook] of Object.entries(beforeGuards)) {
+			assertNonArrowFunction(hook, `setBeforeGuardHooks.${name}`)
+		}
 		this.hooks.beforeGuard = { ...this.hooks.beforeGuard, ...beforeGuards }
 		return this
 	}
@@ -655,6 +654,9 @@ export class SubscriptionDefinitionBuilder<
 			>
 		>,
 	) {
+		for (const [name, hook] of Object.entries(afterGuards)) {
+			assertNonArrowFunction(hook, `setAfterGuardHooks.${name}`)
+		}
 		this.hooks.afterGuard = { ...this.hooks.afterGuard, ...afterGuards }
 		return this
 	}
@@ -663,7 +665,7 @@ export class SubscriptionDefinitionBuilder<
 	 * Required: Set the function implementation.
 	 * The types should be automatically set as soon as schemas previously defined.
 	 * As the function will be a a function of a service class you need to implement as function declaration.
-	 * Anonymous functions do not have access to the `this` scope.
+	 * Arrow functions do not have access to the `this` scope.
 	 *
 	 * @example
 	 * ```ts
@@ -686,6 +688,7 @@ export class SubscriptionDefinitionBuilder<
 			C['EmitList']
 		>,
 	) {
+		assertNonArrowFunction(fn, 'setSubscriptionFunction')
 		this.fn = fn
 
 		return this
@@ -734,7 +737,7 @@ export class SubscriptionDefinitionBuilder<
 			})
 		}
 
-		this.fn as SubscriptionFunction<
+		return this.fn as SubscriptionFunction<
 			S,
 			Infer<C['PayloadSchema']>,
 			Infer<C['ParamsSchema']>,

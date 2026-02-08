@@ -1,10 +1,9 @@
-import { resolve } from 'node:path'
-
-import fastifyStatic from '@fastify/static'
+import { serve } from '@hono/node-server'
+import { serveStatic } from '@hono/node-server/serve-static'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-base'
 import { AmqpBridge } from '@purista/amqpbridge'
 import { DefaultConfigStore, DefaultSecretStore, gracefulShutdown, initLogger } from '@purista/core'
-import { httpServerV1Service } from '@purista/httpserver'
+import { honoV1Service } from '@purista/hono-http-server'
 import { RedisStateStore } from '@purista/redis-state-store'
 
 import httpServerConfig from './config/httpServerConfig.js'
@@ -26,21 +25,20 @@ export const main = async (getProcessor: () => SpanProcessor) => {
 	await eventBridge.start()
 
 	// create and init a webserver
-	const httpServerService = await httpServerV1Service.getInstance(eventBridge, {
+	const honoService = await honoV1Service.getInstance(eventBridge, {
 		serviceConfig: httpServerConfig,
 		spanProcessor,
 	})
 
-	const defaultPublicPath = resolve(__dirname, '..', 'public')
-
-	// static file handler
-	httpServerService.server?.register(fastifyStatic, {
-		root: defaultPublicPath,
-		decorateReply: false,
-	})
+	honoService.app.get('*', serveStatic({ root: './public' }))
 
 	// start the webserver
-	await httpServerService.start()
+	await honoService.start()
+
+	const _serverInstance = serve({
+		fetch: honoService.app.fetch,
+		port: httpServerConfig.port,
+	})
 
 	// create a state store
 	const stateStore = new RedisStateStore({ config: { url: 'redis://localhost:6379' } })
@@ -81,7 +79,7 @@ export const main = async (getProcessor: () => SpanProcessor) => {
 		eventBridge,
 		userService,
 		emailService,
-		httpServerService,
+		honoService,
 		secretStore,
 		stateStore,
 		configStore,

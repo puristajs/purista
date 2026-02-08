@@ -15,6 +15,19 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
 	private tokenData: TokenData | undefined
 	private projectKey = ''
 
+	private static getServiceTokenSecretFromBearerToken(token: unknown): string {
+		if (typeof token !== 'string' || token.trim().length === 0) {
+			throw new UnhandledError(StatusCode.InvalidToken, 'Invalid service token - bearer token is missing')
+		}
+
+		const tokenSecret = token.substring(token.lastIndexOf('.') + 1)
+		if (tokenSecret.trim().length === 0) {
+			throw new UnhandledError(StatusCode.InvalidToken, 'Invalid service token - token secret segment is missing')
+		}
+
+		return tokenSecret
+	}
+
 	constructor(conf: ClientConfig) {
 		const config = {
 			name: 'InfisicalClient',
@@ -26,7 +39,7 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
 			...conf,
 		}
 		super(config)
-		this.serviceTokenSecret = config.bearerToken.substring(config.bearerToken.lastIndexOf('.') + 1)
+		this.serviceTokenSecret = InfisicalClient.getServiceTokenSecretFromBearerToken(config.bearerToken)
 	}
 
 	/**
@@ -153,6 +166,12 @@ export class InfisicalClient extends HttpClient<HttpClientConfigCustom> {
 		try {
 			await this.patch<{ secret: Secret }>(encodeURI(`/api/v3/secrets/${name}`), payload)
 		} catch (patchError) {
+			if (!(patchError instanceof UnhandledError) || patchError.errorCode !== StatusCode.NotFound) {
+				const err = UnhandledError.fromError(patchError)
+				this.logger.error({ err })
+				throw err
+			}
+
 			this.logger.debug({ err: patchError }, 'Secret seems to be a new one')
 			try {
 				await this.post<{ secret: Secret }>(encodeURI(`/api/v3/secrets/${name}`), payload)

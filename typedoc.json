@@ -20,7 +20,8 @@
 		"./packages/nats-state-store",
 		"./packages/natsbridge",
 		"./packages/redis-config-store",
-		"./packages/redis-state-store"
+		"./packages/redis-state-store",
+		"./packages/vault-secret-store"
 	],
 	"plugin": ["typedoc-plugin-markdown"],
 	"out": "website/doc/api",

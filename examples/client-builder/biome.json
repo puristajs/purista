@@ -1,12 +1,26 @@
 {
-	"$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
-	"organizeImports": {
-		"enabled": true
+	"root": false,
+	"$schema": "https://biomejs.dev/schemas/2.3.14/schema.json",
+	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"files": {
+		"includes": ["**", "!**/dist/**/*", "!**/*.d.ts"]
 	},
 	"linter": {
 		"enabled": true,
 		"rules": {
-			"recommended": true
+			"recommended": true,
+			"style": {
+				"noParameterAssign": "error",
+				"useAsConstAssertion": "error",
+				"useDefaultParameterLast": "error",
+				"useEnumInitializers": "error",
+				"useSelfClosingElements": "error",
+				"useSingleVarDeclarator": "error",
+				"noUnusedTemplateLiteral": "error",
+				"useNumberNamespace": "error",
+				"noInferrableTypes": "error",
+				"noUselessElse": "error"
+			}
 		}
 	},
 	"formatter": {

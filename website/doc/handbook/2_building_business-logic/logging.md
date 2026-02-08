@@ -7,7 +7,7 @@ order: 204010
 # Logging
 
 PURISTA provides logging as integral part.
-Per default, [pino](https://getpino.io/) is used under the hood as logging library.
+By default, [pino](https://getpino.io/) is used under the hood as logging library.
 
 This means, during development you are able to use [pino-pretty](https://github.com/pinojs/pino-pretty) for better human readable console log output.
 

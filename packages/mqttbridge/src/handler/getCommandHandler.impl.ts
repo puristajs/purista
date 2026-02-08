@@ -10,14 +10,14 @@ import type {
 	EBMessageAddress,
 } from '@purista/core'
 import {
+	deserializeOtp,
 	EventBridgeEventNames,
+	isCommand,
 	PuristaSpanName,
 	PuristaSpanTag,
 	StatusCode,
-	UnhandledError,
-	deserializeOtp,
-	isCommand,
 	serializeOtp,
+	UnhandledError,
 } from '@purista/core'
 
 import { deserializeOtpFromMqtt } from '../deserializeOtpFromMqtt.impl.js'
@@ -32,6 +32,7 @@ export const getCommandHandler = (
 	_metadata: CommandDefinitionMetadataBase,
 	_eventBridgeConfig: DefinitionEventBridgeConfig,
 ) => {
+	void address
 	const handleCommand: IncomingMessageFunction = async function (command: EBMessage, packet) {
 		const context = deserializeOtpFromMqtt(this.logger, command, packet.properties?.userProperties)
 		return this.startActiveSpan(
@@ -109,7 +110,7 @@ export const getCommandHandler = (
 								properties: {
 									messageExpiryInterval: responseMessage.eventName
 										? msToSec(this.config.defaultMessageExpiryInterval)
-										: this.config.defaultCommandTimeout,
+										: msToSec(this.config.defaultCommandTimeout ?? this.defaultCommandTimeout),
 									contentType: 'application/json',
 									userProperties,
 									correlationData: Buffer.from(responseMessage.correlationId),

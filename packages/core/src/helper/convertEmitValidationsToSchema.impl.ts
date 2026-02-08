@@ -1,7 +1,6 @@
-import type { Schema } from '@typeschema/main'
 import type { SchemaObject } from 'openapi3-ts/oas31'
-
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
+import type { Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 
 type InputType = {

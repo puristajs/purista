@@ -1,48 +1,44 @@
 import { fail } from 'node:assert'
 
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
-import { type Infer, type InferIn, type Schema, validate } from '@typeschema/main'
-
 import { CommandDefinitionBuilder } from '../CommandDefinitionBuilder/CommandDefinitionBuilder.impl.js'
 import type { CommandDefinitionBuilderTypes } from '../CommandDefinitionBuilder/CommandDefinitionBuilderTypes.js'
-import { initDefaultConfigStore } from '../DefaultConfigStore/initDefaultConfigStore.impl.js'
-import { initLogger } from '../DefaultLogger/initLogger.impl.js'
-import { initDefaultSecretStore } from '../DefaultSecretStore/initDefaultSecretStore.impl.js'
-import { initDefaultStateStore } from '../DefaultStateStore/initDefaultStateStore.impl.js'
-import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.js'
-import type { SubscriptionDefinitionBuilderTypes } from '../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.js'
+import type { ConfigStore } from '../core/ConfigStore/types/ConfigStore.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
+import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
+import type { SecretStore } from '../core/SecretStore/types/SecretStore.js'
 import { Service } from '../core/Service/Service.impl.js'
+import type { StateStore } from '../core/StateStore/types/StateStore.js'
+import type { Complete } from '../core/types/Complete.js'
 import type {
 	CommandDefinitionList,
 	CommandDefinitionListResolved,
 } from '../core/types/commandType/CommandDefinitionList.js'
-
-import type { ConfigStore } from '../core/ConfigStore/types/ConfigStore.js'
-import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
-import type { SecretStore } from '../core/SecretStore/types/SecretStore.js'
-import type { StateStore } from '../core/StateStore/types/StateStore.js'
-import type { Complete } from '../core/types/Complete.js'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
-import type { LogLevelName } from '../core/types/LogLevelName.js'
+import type { ServiceInfoType } from '../core/types/infoType/ServiceInfoType.js'
 import type { Logger } from '../core/types/Logger.js'
+import type { LogLevelName } from '../core/types/LogLevelName.js'
 import type { NeverObject } from '../core/types/NeverObject.js'
 import type { Prettify } from '../core/types/Prettify.js'
 import type { ServiceBuilderTypes } from '../core/types/ServiceBuilderTypes.js'
 import type { ServiceClassTypes } from '../core/types/ServiceClassTypes.js'
 import type { ServiceConstructorInput } from '../core/types/ServiceConstructorInput.js'
 import type { SetNewTypeValue, SetNewTypeValues } from '../core/types/SetNewTypeValue.js'
-import type { ServiceInfoType } from '../core/types/infoType/ServiceInfoType.js'
+import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type {
 	SubscriptionDefinitionList,
 	SubscriptionDefinitionListResolved,
 } from '../core/types/subscription/SubscriptionDefinitionList.js'
-
-import { StatusCode } from '../core/types/StatusCode.enum.js'
-
+import { initDefaultConfigStore } from '../DefaultConfigStore/initDefaultConfigStore.impl.js'
+import { initLogger } from '../DefaultLogger/initLogger.impl.js'
+import { initDefaultSecretStore } from '../DefaultSecretStore/initDefaultSecretStore.impl.js'
+import { initDefaultStateStore } from '../DefaultStateStore/initDefaultStateStore.impl.js'
 import type { InstanceOrType } from '../helper/types/InstanceOrType.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
+import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.js'
+import type { SubscriptionDefinitionBuilderTypes } from '../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.js'
+import { type Infer, type InferIn, type Schema, validate } from '../schema/index.js'
 
 export type Newable<T extends Service, S extends ServiceClassTypes> = new (config: ServiceConstructorInput<S>) => T
 
@@ -57,7 +53,7 @@ type InstanceConfigType<S extends ServiceBuilderTypes> = Prettify<
 	} & (keyof S['Resources'] extends NeverObject ? { resources?: never } : { resources: S['Resources'] }) &
 		(keyof S['ConfigInputType'] extends NeverObject
 			? { serviceConfig?: never }
-			: { serviceConfig: S['ConfigInputType'] })
+			: { serviceConfig?: S['ConfigInputType'] })
 >
 
 /**
@@ -101,10 +97,10 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 			SetNewTypeValues<
 				S,
 				{
-					ConfigType: Infer<T> extends Record<string, any> ? Infer<T> : NeverObject
-					ConfigInputType: InferIn<T> extends Record<string, any> ? InferIn<T> : NeverObject
+					ConfigType: Infer<T> extends Record<string, unknown> ? Infer<T> : NeverObject
+					ConfigInputType: InferIn<T> extends Record<string, unknown> ? InferIn<T> : NeverObject
 					ServiceClassType: Service<
-						ServiceClassTypes<Infer<T> extends Record<string, any> ? Infer<T> : EmptyObject, S['Resources']>
+						ServiceClassTypes<Infer<T> extends Record<string, unknown> ? Infer<T> : EmptyObject, S['Resources']>
 					>
 				}
 			>
@@ -165,8 +161,13 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	}
 
 	/**
+	 * Resolve all added command and subscription definitions.
 	 *
-	 * Resolves the command and subscription definitions
+	 * The resolved definitions are cached and subsequent calls
+	 * will return the cached result. No new definitions can be
+	 * added after this method was executed.
+	 *
+	 * @returns The resolved command and subscription definitions
 	 */
 	public async resolveDefinitions() {
 		if (this.definitionsResolved) {
@@ -219,16 +220,31 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'ServiceClassType', T>>
 	}
 
+	/**
+	 * Get the service class used when creating instances.
+	 *
+	 * @returns The constructor function of the service
+	 */
 	getCustomClass() {
 		return this.SClass
 	}
 
 	/**
-	 * It creates a new instance of the service class, passing in the logger, service info, event bridge,
-	 * command functions, subscription list, and configuration
-	 * @param eventBridge - EventBridge
-	 * @param options - additional config like logger, stores and opentelemetry span processor
-	 * @returns The instance of the service class
+	 * Instantiate the service with the provided EventBridge and optional configuration.
+	 *
+	 * All command and subscription definitions are resolved automatically
+	 * before the instance is created.
+	 *
+	 * @param eventBridge - The event bridge implementation to use.
+	 * @param options - Optional configuration such as logger or stores.
+	 *
+	 * @example
+	 * ```ts
+	 * const svc = await serviceBuilder.getInstance(eventBridge, { logger })
+	 * svc.start()
+	 * ```
+	 *
+	 * @returns The initialized service instance
 	 */
 	async getInstance(eventBridge: EventBridge, options?: InstanceConfigType<S>) {
 		const logger = options?.logger ?? initLogger(options?.logLevel)
@@ -301,13 +317,20 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	}
 
 	/**
-	 * It returns a new instance of the CommandDefinitionBuilder class, which is a class that is used to
-	 * build a command definition
-	 * @param commandName - The name of the command.
-	 * @param description - The description of the command.
-	 * @param eventName - The name of the event that will be emitted when the command is
-	 * executed.
-	 * @returns A CommandDefinitionBuilder object.
+	 * Create a {@link CommandDefinitionBuilder} for defining a command of this service.
+	 *
+	 * @param commandName - The name of the command to create.
+	 * @param description - A short description of what the command does.
+	 * @param eventName - Optional event name emitted on success.
+	 *
+	 * @example
+	 * ```ts
+	 * const cmd = serviceBuilder.getCommandBuilder('login', 'Authenticate user')
+	 *   .addPayloadSchema(z.object({ user: z.string() }))
+	 *   .setCommandFunction(async function () {})
+	 * ```
+	 *
+	 * @returns A new command builder instance
 	 */
 	getCommandBuilder<T extends string, N extends string>(
 		commandName: NonEmptyString<T>,
@@ -331,11 +354,19 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	}
 
 	/**
-	 * It returns a new instance of the `SubscriptionDefinitionBuilder` class, which is a class that is
-	 * used to build a subscription definition
+	 * Create a {@link SubscriptionDefinitionBuilder} for defining a subscription.
+	 *
 	 * @param subscriptionName - The name of the subscription.
-	 * @param description - The description of the subscription.
-	 * @returns A SubscriptionDefinitionBuilder
+	 * @param description - A human readable description.
+	 *
+	 * @example
+	 * ```ts
+	 * const sub = serviceBuilder
+	 *   .getSubscriptionBuilder('userCreated', 'React on user creation')
+	 *   .subscribeToEvent('UserCreated')
+	 * ```
+	 *
+	 * @returns A subscription builder instance
 	 */
 	getSubscriptionBuilder<T extends string>(
 		subscriptionName: NonEmptyString<T>,
@@ -354,7 +385,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	 * @returns the definition of registered commands
 	 */
 	getCommandDefinitions() {
-		if (!this.resolveDefinitions) {
+		if (!this.definitionsResolved) {
 			throw new UnhandledError(
 				StatusCode.InternalServerError,
 				'Definitions not resolve. Please call resolveDefinitions() before using getCommandDefinitions',
@@ -367,7 +398,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	 * @returns the definition of registered subscriptions
 	 */
 	getSubscriptionDefinitions() {
-		if (!this.resolveDefinitions) {
+		if (!this.definitionsResolved) {
 			throw new UnhandledError(
 				StatusCode.InternalServerError,
 				'Definitions not resolve. Please call resolveDefinitions() before using getCommandDefinitions',
@@ -377,7 +408,16 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	}
 
 	/**
-	 * A simple test helper, which ensures, that there ar no duplicate names used.
+	 * Simple helper to verify the service configuration during tests.
+	 *
+	 * It resolves the definitions and checks for duplicated command or
+	 * subscription names. Useful to ensure that your service setup is
+	 * correct before starting it.
+	 *
+	 * @example
+	 * ```ts
+	 * await serviceBuilder.testServiceSetup()
+	 * ```
 	 */
 	async testServiceSetup() {
 		const { subscriptions, commands } = await this.resolveDefinitions()
@@ -414,11 +454,11 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 
 	/**
 	 * Returns the service definition.
-	 * This inclues information about commands and subscriptions.
+	 * This includes information about commands and subscriptions.
 	 *
 	 * @returns
 	 */
-	async getFullServiceDefintion() {
+	async getFullServiceDefinition() {
 		const definitions = await this.resolveDefinitions()
 
 		return {

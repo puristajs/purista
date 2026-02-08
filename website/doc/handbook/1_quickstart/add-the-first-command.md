@@ -13,7 +13,7 @@ A command is a single function, which will be called (invoked) by someone with t
 
 ## Create the files
 
-Commands can be added to services. The most sight-forward way for adding a command is the usage of the PURISTA CLI.
+Commands can be added to services. The most straightforward way for adding a command is the usage of the PURISTA CLI.
 
 ```bash
 purista add command
@@ -133,22 +133,22 @@ The schema file contains the schemas for input and output validation.
 
 ```typescript [schema.ts]
 import { extendApi } from '@purista/core'
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 // define the input parameters
 export const userV1SignUpInputParameterSchema = extendApi(z.object({}), { title: 'sign up input parameter schema' })
 
 // define the input payload
-export const userV1SignUpInputPayloadSchema = extendApi(z.any(), { title: 'sign up input payload schema' })
+export const userV1SignUpInputPayloadSchema = extendApi(z.unknown(), { title: 'sign up input payload schema' })
 
 // define the output payload
-export const userV1SignUpOutputPayloadSchema = extendApi(z.any(), { title: 'sign up output payload schema' })
+export const userV1SignUpOutputPayloadSchema = extendApi(z.void(), { title: 'sign up output payload schema' })
 ```
 
 :::
 
 The core package contains some helper here, which are based on the package [`@anatine/zod-openapi`](https://github.com/anatine/zod-plugins/blob/main/packages/zod-openapi/README.md).
-This gives the opportunity, to enrich the schema with more information and details, which than can be used, to improve a generated OpenAPI/AsyncAPI documentation.
+This gives the opportunity to enrich the schema with more information and details, which can then be used to improve generated OpenAPI/AsyncAPI documentation.
 Because of this, you can add human understandable titles, descriptions, examples and so on.
 It is not required, but recommended, to use this package. You can also use plain [zod](https://zod.dev).
 
@@ -160,7 +160,7 @@ The types are not used by PURISTA or one of the builders. The types can be used 
 ::: code-group
 
 ```typescript [types.ts]
-import { z } from 'zod'
+import { z } from 'zod/v4'
 
 import {
   userV1SignUpInputParameterSchema,
@@ -180,17 +180,16 @@ export type UserV1SignUpOutputPayload = z.output<typeof userV1SignUpOutputPayloa
 ### Test file
 
 The file with the `.test.ts` extension, is the unit test for the command implementation.
-It contains a real test, which then can be extended and aligned to your actual implementation.
+It contains a real test, which can then be extended and aligned to your actual implementation.
 
 ::: code-group
 
 ```typescript [signUpCommandBuilder.test.ts]
-import { getEventBridgeMock, getLoggerMock } from '@purista/core'
+import { getEventBridgeMock, getLoggerMock, safeBind } from '@purista/core'
 import { createSandbox } from 'sinon'
 
 import { userV1Service } from '../../userV1Service'
 import { signUpCommandBuilder } from './signUpCommandBuilder'
-import { UserV1SignUpInputParameter, UserV1SignUpInputPayload } from './types'
 
 describe('service User version 1 - command signUp', () => {
   let sandbox = createSandbox()
@@ -205,11 +204,11 @@ describe('service User version 1 - command signUp', () => {
   test('does not throw', async () => {
     const service = await userV1Service.getInstance(getEventBridgeMock(sandbox).mock, { logger: getLoggerMock(sandbox).mock })
 
-    const signUp = signUpCommandBuilder.getCommandFunction().bind(service)
+    const signUp = safeBind(signUpCommandBuilder.getCommandFunction(), service)
 
-    const payload: UserV1SignUpInputPayload = undefined
+    const payload: Parameters<typeof signUp>[1] = {}
 
-    const parameter: UserV1SignUpInputParameter = {}
+    const parameter: Parameters<typeof signUp>[2] = {}
 
     const context = signUpCommandBuilder.getCommandContextMock({ payload, parameter, sandbox })
 

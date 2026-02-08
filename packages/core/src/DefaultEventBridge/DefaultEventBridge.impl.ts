@@ -1,22 +1,11 @@
 import { Stream } from 'node:stream'
 
 import { SpanKind, SpanStatusCode } from '@opentelemetry/api'
-
-import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
-import type { EventBridgeConfig } from '../core/EventBridge/types/EventBridgeConfig.js'
-import type { CustomMessage } from '../core/types/CustomMessage.js'
-import type { EBMessage } from '../core/types/EBMessage.js'
-import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
-import type { EBMessageId } from '../core/types/EBMessageId.js'
-import type { Command } from '../core/types/commandType/Command.js'
-import type { CommandDefinitionMetadataBase } from '../core/types/commandType/CommandDefinitionMetadataBase.js'
-import type { CommandErrorResponse } from '../core/types/commandType/CommandErrorResponse.js'
-import type { CommandSuccessResponse } from '../core/types/commandType/CommandSuccessResponse.js'
-import type { Subscription } from '../core/types/subscription/Subscription.js'
-
 import { HandledError } from '../core/Error/HandledError.impl.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { EventBridgeBaseClass } from '../core/EventBridge/EventBridgeBaseClass.impl.js'
+import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
+import type { EventBridgeConfig } from '../core/EventBridge/types/EventBridgeConfig.js'
 import { EventBridgeEventNames } from '../core/EventBridge/types/EventBridgeEvents.js'
 import { createErrorResponse } from '../core/helper/createErrorResponse.impl.js'
 import { createInfoMessage } from '../core/helper/createInfoMessage.impl.js'
@@ -26,15 +15,24 @@ import { getNewCorrelationId } from '../core/helper/getNewCorrelationId.impl.js'
 import { getNewEBMessageId } from '../core/helper/getNewEBMessageId.impl.js'
 import { getSubscriptionQueueName } from '../core/helper/getSubscriptionQueueName.impl.js'
 import { deserializeOtp, serializeOtp } from '../core/helper/serializeOtp.impl.js'
-import { EBMessageType } from '../core/types/EBMessageType.enum.js'
-import { PuristaSpanName } from '../core/types/PuristaSpanName.enum.js'
-import { PuristaSpanTag } from '../core/types/PuristaSpanTag.enum.js'
-import { StatusCode } from '../core/types/StatusCode.enum.js'
+import type { CustomMessage } from '../core/types/CustomMessage.js'
+import type { Command } from '../core/types/commandType/Command.js'
+import type { CommandDefinitionMetadataBase } from '../core/types/commandType/CommandDefinitionMetadataBase.js'
+import type { CommandErrorResponse } from '../core/types/commandType/CommandErrorResponse.js'
+import type { CommandSuccessResponse } from '../core/types/commandType/CommandSuccessResponse.js'
 import { isCommand } from '../core/types/commandType/isCommand.impl.js'
 import { isCommandErrorResponse } from '../core/types/commandType/isCommandErrorResponse.impl.js'
 import { isCommandResponse } from '../core/types/commandType/isCommandResponse.impl.js'
 import { isCommandSuccessResponse } from '../core/types/commandType/isCommandSuccessResponse.impl.js'
+import type { EBMessage } from '../core/types/EBMessage.js'
+import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
+import type { EBMessageId } from '../core/types/EBMessageId.js'
+import { EBMessageType } from '../core/types/EBMessageType.enum.js'
 import { isInfoMessage } from '../core/types/infoType/isInfoMessage.impl.js'
+import { PuristaSpanName } from '../core/types/PuristaSpanName.enum.js'
+import { PuristaSpanTag } from '../core/types/PuristaSpanTag.enum.js'
+import { StatusCode } from '../core/types/StatusCode.enum.js'
+import type { Subscription } from '../core/types/subscription/Subscription.js'
 
 import { puristaVersion } from '../version.js'
 import { getDefaultEventBridgeConfig } from './getDefaultEventBridgeConfig.impl.js'
@@ -96,7 +94,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 	}
 
 	async isHealthy() {
-		return this.hasStarted
+		return this.healthy
 	}
 
 	async start() {
@@ -149,9 +147,32 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 							}
 
 							isAtLeastDeliveredOnce = true
-							mapEntry(message as Readonly<Command>).then(result => {
-								this.emitMessage(result)
-							})
+							mapEntry(message as Readonly<Command>)
+								.then(result => {
+									this.emitMessage(result)
+								})
+								.catch(error => {
+									const err = UnhandledError.fromError(
+										error,
+										StatusCode.InternalServerError,
+										getCleanedMessage(message),
+									)
+									span.setStatus({
+										code: SpanStatusCode.ERROR,
+										message: err.message,
+									})
+									span.recordException(err)
+									this.logger.error({ err, ...span.spanContext(), customTraceId: message.traceId }, err.message)
+									this.emit(EventBridgeEventNames.EventbridgeError, err)
+
+									const errorResponse = createErrorResponse(
+										this.instanceId,
+										message,
+										StatusCode.InternalServerError,
+										err,
+									)
+									this.emitMessage(errorResponse)
+								})
 							return next()
 						}
 
@@ -383,7 +404,18 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 				})
 			})
 
-			this.emitMessage(command)
+			try {
+				await this.emitMessage(command)
+			} catch (err) {
+				const pending = this.pendingInvocations.get(correlationId)
+				if (pending) {
+					const invocationError =
+						err instanceof Error
+							? UnhandledError.fromError(err, undefined, undefined, command.traceId)
+							: new UnhandledError(StatusCode.InternalServerError, 'invocation emit failed', err, command.traceId)
+					pending.reject(invocationError)
+				}
+			}
 			return executionPromise
 		})
 	}
@@ -397,21 +429,24 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 		}, this.defaultCommandTimeout)
 
 		// ensure actual running commands and subscriptions are finished before closing connection
-		const waitForExecutionEnd = () => {
-			if (this.pendingInvocations.size <= 0 && this.runningSubscriptionCount <= 0) {
-				return
+		await new Promise<void>(resolve => {
+			const waitForExecutionEnd = () => {
+				if (this.pendingInvocations.size <= 0 && this.runningSubscriptionCount <= 0) {
+					resolve()
+					return
+				}
+				if (isTimedOut) {
+					this.logger.error('Some commands or subscriptions could not finish before connection was closed')
+					resolve()
+					return
+				}
+				setImmediate(waitForExecutionEnd)
 			}
-			if (isTimedOut) {
-				this.logger.error('Some commands or subscriptions could not finish before connection was closed')
-				return
-			}
-			setImmediate(waitForExecutionEnd)
-		}
 
-		waitForExecutionEnd()
-		if (timeout) {
-			clearTimeout(timeout)
-		}
+			waitForExecutionEnd()
+		})
+
+		clearTimeout(timeout)
 
 		this.emit(EventBridgeEventNames.EventbridgeDisconnected)
 

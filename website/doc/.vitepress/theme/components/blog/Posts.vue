@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import usePosts from '../../composables/usePosts.js'
 
+// biome-ignore lint/correctness/noUnusedVariables: used in template
 const { allPosts: posts } = usePosts()
 </script>
 

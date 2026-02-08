@@ -1,15 +1,10 @@
 import type { SinonSandbox } from 'sinon'
 import { stub } from 'sinon'
-
-import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { CommandTransformFunctionContext } from '../core/types/commandType/CommandTransformFunctionContext.js'
+import type { EmptyObject } from '../core/types/EmptyObject.js'
 
 import { getLoggerMock } from './getLogger.mock.js'
 import { getCommandMessageMock } from './messages/getCommandMessage.mock.js'
-
-const noop = () => {
-	// noop
-}
 
 /**
  * A function that returns a mock object for command transform function context
@@ -19,7 +14,7 @@ const noop = () => {
 export const getCommandTransformContextMock = <
 	MessagePayloadType = unknown,
 	MessageParamsType = unknown,
-	Resources extends Record<string, any> = EmptyObject,
+	Resources extends Record<string, unknown> = EmptyObject,
 >(input: {
 	payload: MessagePayloadType
 	parameter: MessageParamsType
@@ -49,7 +44,8 @@ export const getCommandTransformContextMock = <
 	const resourcesProxy = new Proxy(
 		{},
 		{
-			get(obj: Record<string, any>, name) {
+			get(target: object, name) {
+				void target
 				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
 					throw new Error('Invalid property access on resources proxy')
 				}
@@ -74,8 +70,17 @@ export const getCommandTransformContextMock = <
 	const mock: CommandTransformFunctionContext<MessagePayloadType, MessageParamsType, Resources> = {
 		logger: logger.mock,
 		message,
-		wrapInSpan: stubs.wrapInSpan.callsFake((_name, _opts, fn) => fn()),
-		startActiveSpan: stubs.startActiveSpan.callsFake((_name, _opts, _context, fn) => fn()),
+		wrapInSpan: stubs.wrapInSpan.callsFake((name, opts, fn) => {
+			void name
+			void opts
+			return fn()
+		}),
+		startActiveSpan: stubs.startActiveSpan.callsFake((name, opts, context, fn) => {
+			void name
+			void opts
+			void context
+			return fn()
+		}),
 		secrets: {
 			getSecret: stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
