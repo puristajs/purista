@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,9 +8,9 @@
 
 > **convertToCamelCase**(`str`): `string`
 
-Defined in: [packages/core/src/helper/string/convertToCamelCase.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/string/convertToCamelCase.impl.ts#L9)
+Defined in: [helper/string/convertToCamelCase.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/string/convertToCamelCase.impl.ts#L13)
 
-Converts a string into camelCase
+Converts a string into camelCase.
 
 ## Parameters
 
@@ -18,13 +18,16 @@ Converts a string into camelCase
 
 `string`
 
-string
-
 ## Returns
 
 `string`
 
-string converted to camelCase
+## Example
+
+```ts
+convertToCamelCase('some-text')
+// => 'someText'
+```
 
 ## Link
 

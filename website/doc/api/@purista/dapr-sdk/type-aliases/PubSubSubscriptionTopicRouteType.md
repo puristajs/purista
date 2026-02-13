@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,18 +6,24 @@
 
 # Type Alias: PubSubSubscriptionTopicRouteType
 
-> **PubSubSubscriptionTopicRouteType**: `object`
+> **PubSubSubscriptionTopicRouteType** = `object`
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoute.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoute.type.ts#L19)
 
 This defines the routeName object
 
-## Type declaration
+## Properties
 
 ### eventHandlers
 
 > **eventHandlers**: [`TypeDaprPubSubCallback`](TypeDaprPubSubCallback.md)[]
 
+Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoute.type.ts:21](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoute.type.ts#L21)
+
+***
+
 ### path
 
 > **path**: `string`
+
+Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoute.type.ts:24](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoute.type.ts#L24)

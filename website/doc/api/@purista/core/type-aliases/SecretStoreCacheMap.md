@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: SecretStoreCacheMap
 
-> **SecretStoreCacheMap**: `Map`\<`string`, \{ `createdAt`: `number`; `value`: `string`; \}\>
+> **SecretStoreCacheMap** = `Map`\<`string`, \{ `createdAt`: `number`; `value`: `string`; \}\>
 
-Defined in: [packages/core/src/core/SecretStore/types/SecretStoreCacheMap.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStoreCacheMap.ts#L1)
+Defined in: [core/SecretStore/types/SecretStoreCacheMap.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStoreCacheMap.ts#L1)

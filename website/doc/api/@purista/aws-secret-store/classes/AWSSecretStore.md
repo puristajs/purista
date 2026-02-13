@@ -1,4 +1,4 @@
-[**@purista/aws-secret-store v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -26,9 +26,9 @@ It will be removed/overwritten on next get request.
 
 ## Constructors
 
-### new AWSSecretStore()
+### Constructor
 
-> **new AWSSecretStore**(`config`): [`AWSSecretStore`](AWSSecretStore.md)
+> **new AWSSecretStore**(`config`): `AWSSecretStore`
 
 Defined in: [aws-secret-store/src/AWSSecretStore.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L35)
 
@@ -86,11 +86,11 @@ A log level for new logger if logger is not set
 
 #### Returns
 
-[`AWSSecretStore`](AWSSecretStore.md)
+`AWSSecretStore`
 
 #### Overrides
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`constructor`](../../core/classes/SecretStoreBaseClass.md#constructors)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`constructor`](../../core/classes/SecretStoreBaseClass.md#constructor)
 
 ## Properties
 
@@ -170,7 +170,7 @@ A log level for new logger if logger is not set
 
 #### Inherited from
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`config`](../../core/classes/SecretStoreBaseClass.md#config-1)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`config`](../../core/classes/SecretStoreBaseClass.md#config)
 
 ***
 
@@ -194,7 +194,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 #### Inherited from
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`name`](../../core/classes/SecretStoreBaseClass.md#name-1)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`name`](../../core/classes/SecretStoreBaseClass.md#name)
 
 ## Methods
 
@@ -216,13 +216,15 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:3
 
 ### getSecret()
 
-> **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+> **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
 
 #### Type Parameters
 
-• **SecretNames** *extends* `string`[]
+##### SecretNames
+
+`SecretNames` *extends* `string`[]
 
 #### Parameters
 
@@ -232,7 +234,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 #### Returns
 
-`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 #### Inherited from
 
@@ -242,13 +244,15 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 ### getSecretImpl()
 
-> `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+> `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 Defined in: [aws-secret-store/src/AWSSecretStore.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L40)
 
 #### Type Parameters
 
-• **SecretNames** *extends* `string`[]
+##### SecretNames
+
+`SecretNames` *extends* `string`[]
 
 #### Parameters
 
@@ -258,7 +262,7 @@ Defined in: [aws-secret-store/src/AWSSecretStore.impl.ts:40](https://github.com/
 
 #### Returns
 
-`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 #### Overrides
 

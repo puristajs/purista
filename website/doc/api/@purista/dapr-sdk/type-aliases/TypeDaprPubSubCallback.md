@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Type Alias: TypeDaprPubSubCallback()
 
-> **TypeDaprPubSubCallback**: (`data`, `headers`) => `Promise`\<`any` \| `undefined`\>
+> **TypeDaprPubSubCallback** = (`data`, `headers`) => `Promise`\<`unknown` \| `undefined`\>
 
 Defined in: [dapr-sdk/src/types/pubsub/DaprPubSubCallback.type.ts:14](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubCallback.type.ts#L14)
 
@@ -14,12 +14,12 @@ Defined in: [dapr-sdk/src/types/pubsub/DaprPubSubCallback.type.ts:14](https://gi
 
 ### data
 
-`any`
+`unknown`
 
 ### headers
 
-`object`
+`Record`\<`string`, `string`\>
 
 ## Returns
 
-`Promise`\<`any` \| `undefined`\>
+`Promise`\<`unknown` \| `undefined`\>

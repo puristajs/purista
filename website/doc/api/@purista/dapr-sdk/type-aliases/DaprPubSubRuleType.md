@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,18 +6,24 @@
 
 # Type Alias: DaprPubSubRuleType
 
-> **DaprPubSubRuleType**: `object`
+> **DaprPubSubRuleType** = `object`
 
 Defined in: [dapr-sdk/src/types/pubsub/DaprPubSubRuleType.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubRuleType.type.ts#L19)
 
 DaprPubSubRuleType defines a rule set
 
-## Type declaration
+## Properties
 
 ### match
 
 > **match**: `string`
 
+Defined in: [dapr-sdk/src/types/pubsub/DaprPubSubRuleType.type.ts:21](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubRuleType.type.ts#L21)
+
+***
+
 ### path
 
 > **path**: `string`
+
+Defined in: [dapr-sdk/src/types/pubsub/DaprPubSubRuleType.type.ts:24](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/DaprPubSubRuleType.type.ts#L24)

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Type Alias: ConfigSetterFunction()
 
-> **ConfigSetterFunction**: (`configName`, `configValue`) => `Promise`\<`void`\>
+> **ConfigSetterFunction** = (`configName`, `configValue`) => `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/ConfigStore/types/ConfigSetterFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigSetterFunction.ts#L2)
+Defined in: [core/ConfigStore/types/ConfigSetterFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigSetterFunction.ts#L2)
 
 set a config value in the config store
 

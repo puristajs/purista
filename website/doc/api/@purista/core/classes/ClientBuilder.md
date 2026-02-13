@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: ClientBuilder
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L43)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L42)
 
 ClientBuilder to generate clients, based on service definitions.
 
@@ -16,25 +16,25 @@ ClientBuilder to generate clients, based on service definitions.
 
 ## Constructors
 
-### new ClientBuilder()
+### Constructor
 
-> **new ClientBuilder**(`config`?): [`ClientBuilder`](ClientBuilder.md)
+> **new ClientBuilder**(`config?`): `ClientBuilder`
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L52)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L51)
 
 #### Parameters
 
 ##### config?
 
-`Partial`\<\{ `buildAs`: `"esm"` \| `"commonjs"` \| `"both"`; `definitionPath`: `string`; `eventBridgeClient`: \{ `clientName`: `string`; \}; `httpClient`: \{ `clientName`: `string`; \}; `outputPath`: `string`; `package`: \{ `description`: `string`; `name`: `string`; `private`: `boolean`; \}; `version`: `string`; \}\>
+`Partial`\<\{ `buildAs`: `"esm"` \| `"commonjs"` \| `"both"`; `definitionPath`: `string`; `eventBridgeClient?`: \{ `clientName`: `string`; \}; `httpClient?`: \{ `clientName`: `string`; \}; `outputPath`: `string`; `package?`: \{ `description`: `string`; `name`: `string`; `private`: `boolean`; \}; `version`: `string`; \}\>
 
 #### Returns
 
-[`ClientBuilder`](ClientBuilder.md)
+`ClientBuilder`
 
 #### Overrides
 
-[`GenericEventEmitter`](GenericEventEmitter.md).[`constructor`](GenericEventEmitter.md#constructors)
+[`GenericEventEmitter`](GenericEventEmitter.md).[`constructor`](GenericEventEmitter.md#constructor)
 
 ## Properties
 
@@ -42,7 +42,7 @@ Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:52](https://g
 
 > **config**: `object`
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L44)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L43)
 
 #### buildAs
 
@@ -58,7 +58,7 @@ Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:44](https://g
 
 ##### eventBridgeClient.clientName
 
-> **eventBridgeClient.clientName**: `string`
+> **clientName**: `string`
 
 #### httpClient
 
@@ -66,7 +66,7 @@ Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:44](https://g
 
 ##### httpClient.clientName
 
-> **httpClient.clientName**: `string`
+> **clientName**: `string`
 
 #### outputPath
 
@@ -78,15 +78,15 @@ Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:44](https://g
 
 ##### package.description
 
-> **package.description**: `string`
+> **description**: `string`
 
 ##### package.name
 
-> **package.name**: `string`
+> **name**: `string`
 
 ##### package.private
 
-> **package.private**: `boolean`
+> **private**: `boolean`
 
 #### version
 
@@ -98,10 +98,10 @@ Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:44](https://g
 
 > **rootPath**: `string`
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L50)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L49)
 
-The root file from where the relative paths are resolved.
-Defaults to current users directory
+The root path from where relative definition/config/output paths are resolved.
+Defaults to the current working directory (`process.cwd()`).
 
 ## Methods
 
@@ -109,7 +109,7 @@ Defaults to current users directory
 
 > **build**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:227](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L227)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:240](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L240)
 
 Runs the tsc against the generated ts source files.
 Depending on settings, it will generate ESM and/or commonJS files
@@ -124,7 +124,7 @@ Depending on settings, it will generate ESM and/or commonJS files
 
 > **cleanDistFolder**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:147](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L147)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:146](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L146)
 
 Deletes the content of the output folder.
 Should be called before generating the client
@@ -139,7 +139,7 @@ Should be called before generating the client
 
 > **createIndex**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:157](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L157)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:156](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L156)
 
 Creates a index.ts file which exports the client(s) and types.
 Is used in generated package.json
@@ -154,7 +154,7 @@ Is used in generated package.json
 
 > **createPackageJson**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:179](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L179)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:178](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L178)
 
 Creates a package.json file in the output folder.
 Exports the files which are build by tsc based on generated client files
@@ -169,7 +169,7 @@ Exports the files which are build by tsc based on generated client files
 
 > **destroy**(): `void`
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:816](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L816)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:853](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L853)
 
 Destroys the builder and cleans the event listeners
 
@@ -181,13 +181,15 @@ Destroys the builder and cleans the event listeners
 
 ### emit()
 
-> **emit**\<`K`\>(`eventName`, `parameter`?): `void`
+> **emit**\<`K`\>(`eventName`, `parameter?`): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+Defined in: [core/types/GenericEventEmitter.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L27)
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../type-aliases/EventKey.md)\<[`ClientBuilderEvents`](../type-aliases/ClientBuilderEvents.md)\>
+##### K
+
+`K` *extends* [`EventKey`](../type-aliases/EventKey.md)\<[`ClientBuilderEvents`](../type-aliases/ClientBuilderEvents.md)\>
 
 #### Parameters
 
@@ -213,7 +215,7 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:24](https://git
 
 > **generateEventBridgeClient**(`serviceDefinition`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:739](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L739)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:742](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L742)
 
 Generates the zero-dependency EventBridge client source files.
 
@@ -229,16 +231,11 @@ Generates the zero-dependency EventBridge client source files.
 
 ***
 
-### generateHEventBridgeClient()
+### ~~generateHEventBridgeClient()~~
 
 > **generateHEventBridgeClient**(`serviceDefinition`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:783](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L783)
-
-Deprecated: Use `generateEventBridgeClient(...)` instead
-([source](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L739)).
-
-Backward-compatibility alias for the old misspelled method name.
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:786](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L786)
 
 #### Parameters
 
@@ -249,6 +246,10 @@ Backward-compatibility alias for the old misspelled method name.
 #### Returns
 
 `Promise`\<`void`\>
+
+#### Deprecated
+
+Use `generateEventBridgeClient` instead.
 
 ***
 
@@ -256,9 +257,9 @@ Backward-compatibility alias for the old misspelled method name.
 
 > **generateHttpClient**(`serviceDefinition`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:336](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L336)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:362](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L362)
 
-Generates the zero-dependency HTTP client source files
+Generate zero‑dependency HTTP client source files from the given definition.
 
 #### Parameters
 
@@ -266,9 +267,18 @@ Generates the zero-dependency HTTP client source files
 
 [`FullServiceDefinition`](../type-aliases/FullServiceDefinition.md)
 
+The full service definition containing the exposed commands.
+
 #### Returns
 
 `Promise`\<`void`\>
+
+#### Example
+
+```ts
+const services = await clientBuilder.loadDefinitionFiles()
+await clientBuilder.generateHttpClient(services)
+```
 
 ***
 
@@ -276,7 +286,7 @@ Generates the zero-dependency HTTP client source files
 
 > **getDefinitionPath**(): `string`
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:130](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L130)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:129](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L129)
 
 Resolves the definitions folder path from config with rootPath
 
@@ -292,7 +302,7 @@ path of definitions folder
 
 > **getDefinitionsFromServiceBuilders**(`serviceBuilders`): `Promise`\<[`FullServiceDefinition`](../type-aliases/FullServiceDefinition.md)\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:104](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L104)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:103](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L103)
 
 Gets the definitions from the provided service builders
 
@@ -312,7 +322,7 @@ Gets the definitions from the provided service builders
 
 > **getOutputPath**(): `string`
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:138](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L138)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:137](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L137)
 
 Resolves the output folder path from config with rootPath
 
@@ -326,12 +336,12 @@ path of output folder
 
 ### loadConfig()
 
-> **loadConfig**(`path`?): `Promise`\<`void`\>
+> **loadConfig**(`path?`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:82](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L82)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:81](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L81)
 
-Loads the config fom JSON file.
-If no path is provided, it will try to load the config from purista.client.json in rootPath directory
+Loads the config from a JSON file.
+If no path is provided, it loads `purista.client.json` from `rootPath`.
 
 #### Parameters
 
@@ -347,11 +357,11 @@ If no path is provided, it will try to load the config from purista.client.json 
 
 ### loadDefinitionFiles()
 
-> **loadDefinitionFiles**(`path`?): `Promise`\<[`FullServiceDefinition`](../type-aliases/FullServiceDefinition.md)\>
+> **loadDefinitionFiles**(`path?`): `Promise`\<[`FullServiceDefinition`](../type-aliases/FullServiceDefinition.md)\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:303](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L303)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:322](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L322)
 
-Loads the definitions from JSON files
+Load service definitions from JSON files.
 
 #### Parameters
 
@@ -359,9 +369,18 @@ Loads the definitions from JSON files
 
 `string`
 
+Optional path to the folder containing the definition files.
+Defaults to the configured definition path.
+
 #### Returns
 
 `Promise`\<[`FullServiceDefinition`](../type-aliases/FullServiceDefinition.md)\>
+
+#### Example
+
+```ts
+const defs = await clientBuilder.loadDefinitionFiles()
+```
 
 ***
 
@@ -369,11 +388,13 @@ Loads the definitions from JSON files
 
 > **off**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+Defined in: [core/types/GenericEventEmitter.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L23)
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../type-aliases/EventKey.md)\<[`ClientBuilderEvents`](../type-aliases/ClientBuilderEvents.md)\>
+##### K
+
+`K` *extends* [`EventKey`](../type-aliases/EventKey.md)\<[`ClientBuilderEvents`](../type-aliases/ClientBuilderEvents.md)\>
 
 #### Parameters
 
@@ -399,11 +420,13 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:20](https://git
 
 > **on**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+Defined in: [core/types/GenericEventEmitter.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L19)
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../type-aliases/EventKey.md)\<[`ClientBuilderEvents`](../type-aliases/ClientBuilderEvents.md)\>
+##### K
+
+`K` *extends* [`EventKey`](../type-aliases/EventKey.md)\<[`ClientBuilderEvents`](../type-aliases/ClientBuilderEvents.md)\>
 
 #### Parameters
 
@@ -429,7 +452,7 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:16](https://git
 
 > **removeAllListeners**(): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L28)
+Defined in: [core/types/GenericEventEmitter.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L31)
 
 #### Returns
 
@@ -443,9 +466,9 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:28](https://git
 
 ### writeConfig()
 
-> **writeConfig**(`path`?): `Promise`\<`void`\>
+> **writeConfig**(`path?`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:121](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L121)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:120](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L120)
 
 Writes the config to a config file.
 Defaults to purista.client.json in rootPath directory

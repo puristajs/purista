@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,12 +6,14 @@
 
 # Type Alias: CommandResponse\<T\>
 
-> **CommandResponse**\<`T`\>: [`CommandSuccessResponse`](CommandSuccessResponse.md)\<`T`\> \| [`CommandErrorResponse`](CommandErrorResponse.md)
+> **CommandResponse**\<`T`\> = [`CommandSuccessResponse`](CommandSuccessResponse.md)\<`T`\> \| [`CommandErrorResponse`](CommandErrorResponse.md)
 
-Defined in: [packages/core/src/core/types/commandType/CommandResponse.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandResponse.ts#L9)
+Defined in: [core/types/commandType/CommandResponse.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandResponse.ts#L9)
 
 CommandResponse is a response to a specific previously received command which can be either a success or failure
 
 ## Type Parameters
 
-• **T** = `unknown`
+### T
+
+`T` = `unknown`

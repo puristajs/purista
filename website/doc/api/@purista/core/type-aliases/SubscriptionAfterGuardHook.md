@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,28 +6,42 @@
 
 # Type Alias: SubscriptionAfterGuardHook()\<ServiceClassType, FunctionResultType, FunctionPayloadOutputType, FunctionParameterType, Resources, Invokes, EmitList\>
 
-> **SubscriptionAfterGuardHook**\<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadOutputType`, `FunctionParameterType`, `Resources`, `Invokes`, `EmitList`\>: (`this`, `context`, `result`, `payload`, `parameter`) => `Promise`\<`void`\>
+> **SubscriptionAfterGuardHook**\<`ServiceClassType`, `FunctionResultType`, `FunctionPayloadOutputType`, `FunctionParameterType`, `Resources`, `Invokes`, `EmitList`\> = (`this`, `context`, `result`, `payload`, `parameter`) => `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/types/subscription/SubscriptionAfterGuardHook.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionAfterGuardHook.ts#L13)
+Defined in: [core/types/subscription/SubscriptionAfterGuardHook.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionAfterGuardHook.ts#L13)
 
 Definition of after guard hook functions.
 This guard is called after function successfully returns and after output validation.
 
 ## Type Parameters
 
-• **ServiceClassType** = [`ServiceClass`](../interfaces/ServiceClass.md)
+### ServiceClassType
 
-• **FunctionResultType** = `unknown`
+`ServiceClassType` = [`ServiceClass`](../interfaces/ServiceClass.md)
 
-• **FunctionPayloadOutputType** = `unknown`
+### FunctionResultType
 
-• **FunctionParameterType** = `unknown`
+`FunctionResultType` = `unknown`
 
-• **Resources** *extends* `Record`\<`string`, `any`\> = [`EmptyObject`](EmptyObject.md)
+### FunctionPayloadOutputType
 
-• **Invokes** *extends* [`InvokeList`](InvokeList.md) = [`EmptyObject`](EmptyObject.md)
+`FunctionPayloadOutputType` = `unknown`
 
-• **EmitList** *extends* `Record`\<`string`, `Schema`\> = [`EmptyObject`](EmptyObject.md)
+### FunctionParameterType
+
+`FunctionParameterType` = `unknown`
+
+### Resources
+
+`Resources` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](EmptyObject.md)
+
+### Invokes
+
+`Invokes` *extends* [`InvokeList`](InvokeList.md) = [`EmptyObject`](EmptyObject.md)
+
+### EmitList
+
+`EmitList` *extends* `Record`\<`string`, [`Schema`](Schema.md)\> = [`EmptyObject`](EmptyObject.md)
 
 ## Parameters
 

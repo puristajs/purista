@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: TransformSchemaObjectOptions
 
-Defined in: [packages/core/src/helper/schemaObjectToTsType/transform.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/schemaObjectToTsType/transform.ts#L22)
+Defined in: [helper/schemaObjectToTsType/transform.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/schemaObjectToTsType/transform.ts#L22)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [packages/core/src/helper/schemaObjectToTsType/transform.ts:22](http
 
 > **ctx**: `GlobalContext`
 
-Defined in: [packages/core/src/helper/schemaObjectToTsType/transform.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/schemaObjectToTsType/transform.ts#L26)
+Defined in: [helper/schemaObjectToTsType/transform.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/schemaObjectToTsType/transform.ts#L26)
 
 Shared context
 
@@ -24,6 +24,6 @@ Shared context
 
 > **path**: `string`
 
-Defined in: [packages/core/src/helper/schemaObjectToTsType/transform.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/schemaObjectToTsType/transform.ts#L24)
+Defined in: [helper/schemaObjectToTsType/transform.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/schemaObjectToTsType/transform.ts#L24)
 
 The full ID for this object (mostly used in error messages)

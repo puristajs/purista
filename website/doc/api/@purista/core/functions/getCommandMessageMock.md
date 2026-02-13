@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,24 +6,28 @@
 
 # Function: getCommandMessageMock()
 
-> **getCommandMessageMock**\<`Payload`, `Parameter`\>(`input`?): `Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`Command`](../enumerations/EBMessageType.md#command); `otp`: `string`; `payload`: \{ `parameter`: `Parameter`; `payload`: `Payload`; \}; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+> **getCommandMessageMock**\<`Payload`, `Parameter`\>(`input?`): `Readonly`\<[`Command`](../type-aliases/Command.md)\<`Payload`, `Parameter`\>\>
 
-Defined in: [packages/core/src/mocks/messages/getCommandMessage.mock.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCommandMessage.mock.ts#L13)
+Defined in: [mocks/messages/getCommandMessage.mock.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCommandMessage.mock.ts#L13)
 
 A function that returns a mocked command message.
 
 ## Type Parameters
 
-• **Payload**
+### Payload
 
-• **Parameter**
+`Payload`
+
+### Parameter
+
+`Parameter`
 
 ## Parameters
 
 ### input?
 
-`Partial`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`Command`](../enumerations/EBMessageType.md#command); `otp`: `string`; `payload`: \{ `parameter`: `Parameter`; `payload`: `Payload`; \}; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\> & `object`
+`Partial`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`Command`](../enumerations/EBMessageType.md#command); `otp?`: `string`; `payload`: \{ `parameter`: `Parameter`; `payload`: `Payload`; \}; `principalId?`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\> & `object`
 
 ## Returns
 
-`Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`Command`](../enumerations/EBMessageType.md#command); `otp`: `string`; `payload`: \{ `parameter`: `Parameter`; `payload`: `Payload`; \}; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+`Readonly`\<[`Command`](../type-aliases/Command.md)\<`Payload`, `Parameter`\>\>

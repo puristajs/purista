@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Type Alias: PubSubBulkPublishMessage
 
-> **PubSubBulkPublishMessage**: `PubSubBulkPublishMessageExplicit` \| `object` \| `string`
+> **PubSubBulkPublishMessage** = `PubSubBulkPublishMessageExplicit` \| `object` \| `string`
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts:26](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishMessage.type.ts#L26)
 

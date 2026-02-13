@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: ConfigStoreCacheMap
 
-> **ConfigStoreCacheMap**: `Map`\<`string`, \{ `createdAt`: `number`; `value`: `string`; \}\>
+> **ConfigStoreCacheMap** = `Map`\<`string`, \{ `createdAt`: `number`; `value`: `string`; \}\>
 
-Defined in: [packages/core/src/core/ConfigStore/types/ConfigStoreCacheMap.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStoreCacheMap.ts#L1)
+Defined in: [core/ConfigStore/types/ConfigStoreCacheMap.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStoreCacheMap.ts#L1)

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Function: getCleanedMessage()
 
-> **getCleanedMessage**(`message`, `stripeOutContent`): `Record`\<`string`, `unknown`\>
+> **getCleanedMessage**(`message`, `stripeOutContent?`): `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/core/src/core/helper/getCleanedMessage.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getCleanedMessage.impl.ts#L17)
+Defined in: [core/helper/getCleanedMessage.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getCleanedMessage.impl.ts#L17)
 
 Helper function for logging.
 Returns a message object, where fields which might contain sensitive data, are overwritten with string values.
@@ -24,7 +24,7 @@ Command error responses are not changed.
 
 `Readonly`\<[`EBMessage`](../type-aliases/EBMessage.md)\>
 
-### stripeOutContent
+### stripeOutContent?
 
 `boolean` = `...`
 

@@ -1,4 +1,4 @@
-[**@purista/gcloud-secret-store v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,23 +6,29 @@
 
 # Type Alias: GoogleSecretStoreConfig
 
-> **GoogleSecretStoreConfig**: `object`
+> **GoogleSecretStoreConfig** = `object`
 
 Defined in: [gcloud-secret-store/src/types.ts:6](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/types.ts#L6)
 
 Google Secret Manager store config
 
-## Type declaration
+## Properties
 
 ### client?
 
 > `optional` **client**: `ClientOptions`
 
+Defined in: [gcloud-secret-store/src/types.ts:15](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/types.ts#L15)
+
 Google client options
+
+***
 
 ### project
 
 > **project**: `string`
+
+Defined in: [gcloud-secret-store/src/types.ts:11](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/types.ts#L11)
 
 The google project id in format of projects/* without ending /secrets
 

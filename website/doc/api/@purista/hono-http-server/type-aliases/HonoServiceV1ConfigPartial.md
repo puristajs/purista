@@ -1,4 +1,4 @@
-[**@purista/hono-http-server v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,8 +6,8 @@
 
 # Type Alias: HonoServiceV1ConfigPartial
 
-> **HonoServiceV1ConfigPartial**: `z.input`\<*typeof* [`honoServiceV1ConfigSchema`](../variables/honoServiceV1ConfigSchema.md)\>
+> **HonoServiceV1ConfigPartial** = `z.input`\<*typeof* [`honoServiceV1ConfigSchema`](../variables/honoServiceV1ConfigSchema.md)\>
 
-Defined in: [packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:76](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L76)
+Defined in: [hono-http-server/src/service/hono/v1/honoServiceConfig.ts:79](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L79)
 
 Config which will be sent through the schema validation, which will set missing defaults

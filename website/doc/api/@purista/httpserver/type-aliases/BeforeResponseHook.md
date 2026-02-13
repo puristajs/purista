@@ -1,18 +1,20 @@
-[**@purista/httpserver v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
 [PURISTA API](../../../packages.md) / [@purista/httpserver](../README.md) / BeforeResponseHook
 
-# Type Alias: ~~BeforeResponseHook()~~
+# ~~Type Alias: BeforeResponseHook()~~
 
-> **BeforeResponseHook**: \<`T`\>(`payload`, `request`, `reply`, `parameter`) => `void`
+> **BeforeResponseHook** = \<`T`\>(`payload`, `request`, `reply`, `parameter`) => `void`
 
-Defined in: [packages/httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts:3](https://github.com/puristajs/purista/blob/master/packages/httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts#L3)
+Defined in: [httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts:3](https://github.com/puristajs/purista/blob/master/packages/httpserver/src/service/httpServer/v1/types/BeforeResponseHook.ts#L3)
 
 ## Type Parameters
 
-• **T** = `unknown`
+### T
+
+`T` = `unknown`
 
 ## Parameters
 

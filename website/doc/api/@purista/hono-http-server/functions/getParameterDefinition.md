@@ -1,4 +1,4 @@
-[**@purista/hono-http-server v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Function: getParameterDefinition()
 
-> **getParameterDefinition**(`path`, `parameterschema`?): `ParameterObject`[]
+> **getParameterDefinition**(`path`, `parameterschema?`): `ParameterObject`[]
 
-Defined in: [packages/hono-http-server/src/helper/getParameterDefinition.ts:6](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/getParameterDefinition.ts#L6)
+Defined in: [hono-http-server/src/helper/getParameterDefinition.ts:6](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/getParameterDefinition.ts#L6)
 
 ## Parameters
 

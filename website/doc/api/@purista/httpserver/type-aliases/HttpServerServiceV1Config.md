@@ -1,16 +1,16 @@
-[**@purista/httpserver v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
 [PURISTA API](../../../packages.md) / [@purista/httpserver](../README.md) / HttpServerServiceV1Config
 
-# Type Alias: ~~HttpServerServiceV1Config~~
+# ~~Type Alias: HttpServerServiceV1Config~~
 
-> **HttpServerServiceV1Config**: `HttpServerServiceV1ConfigRaw` & `object`
+> **HttpServerServiceV1Config** = `HttpServerServiceV1ConfigRaw` & `object`
 
-Defined in: [packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts:96](https://github.com/puristajs/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts#L96)
+Defined in: [httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts:108](https://github.com/puristajs/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts#L108)
 
-## Type declaration
+## Type Declaration
 
 ### ~~compressOptions?~~
 

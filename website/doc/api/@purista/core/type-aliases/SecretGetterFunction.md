@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,15 +6,17 @@
 
 # Type Alias: SecretGetterFunction()
 
-> **SecretGetterFunction**: \<`SecretNames`\>(...`secretNames`) => `Promise`\<[`ObjectWithKeysFromStringArray`](ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
+> **SecretGetterFunction** = \<`SecretNames`\>(...`secretNames`) => `Promise`\<[`ObjectWithKeysFromStringArray`](ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
-Defined in: [packages/core/src/core/SecretStore/types/SecretGetterFunction.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretGetterFunction.ts#L4)
+Defined in: [core/SecretStore/types/SecretGetterFunction.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretGetterFunction.ts#L4)
 
 get a secret from the secret store
 
 ## Type Parameters
 
-• **SecretNames** *extends* `string`[]
+### SecretNames
+
+`SecretNames` *extends* `string`[]
 
 ## Parameters
 

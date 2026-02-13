@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,13 +6,15 @@
 
 # Type Alias: FullServiceDefinition\<S\>
 
-> **FullServiceDefinition**\<`S`\>: `object`
+> **FullServiceDefinition**\<`S`\> = `object`
 
-Defined in: [packages/core/src/helper/types/FullServiceDefinition.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/FullServiceDefinition.ts#L5)
+Defined in: [helper/types/FullServiceDefinition.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/FullServiceDefinition.ts#L5)
 
 ## Type Parameters
 
-• **S** *extends* [`Service`](../classes/Service.md) = [`Service`](../classes/Service.md)
+### S
+
+`S` *extends* [`Service`](../classes/Service.md) = [`Service`](../classes/Service.md)
 
 ## Index Signature
 

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,10 +6,12 @@
 
 # Type Alias: HttpExposedServiceMeta\<ParameterType\>
 
-> **HttpExposedServiceMeta**\<`ParameterType`\>: [`Prettify`](Prettify.md)\<[`CommandDefinitionMetadataBase`](CommandDefinitionMetadataBase.md) & `object`\>
+> **HttpExposedServiceMeta**\<`ParameterType`\> = [`Prettify`](Prettify.md)\<[`CommandDefinitionMetadataBase`](CommandDefinitionMetadataBase.md) & `object`\>
 
-Defined in: [packages/core/src/core/HttpServer/types/HttpExposedServiceMeta.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/HttpExposedServiceMeta.ts#L8)
+Defined in: [core/HttpServer/types/HttpExposedServiceMeta.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/HttpExposedServiceMeta.ts#L8)
 
 ## Type Parameters
 
-• **ParameterType** = [`EmptyObject`](EmptyObject.md)
+### ParameterType
+
+`ParameterType` = [`EmptyObject`](EmptyObject.md)

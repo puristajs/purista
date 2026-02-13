@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: HttpClient\<CustomConfig\>
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L43)
+Defined in: [HttpClient/HttpClient.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L40)
 
 A HTTP client which will provide simple methods for GET, POST, PATCH, PUT and DELETE.
 Body payload will be handled as JSON requests
@@ -28,7 +28,9 @@ const result = await client.get('v1/orders')
 
 ## Type Parameters
 
-• **CustomConfig** *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../type-aliases/EmptyObject.md)
+### CustomConfig
+
+`CustomConfig` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../type-aliases/EmptyObject.md)
 
 ## Implements
 
@@ -36,11 +38,11 @@ const result = await client.get('v1/orders')
 
 ## Constructors
 
-### new HttpClient()
+### Constructor
 
-> **new HttpClient**\<`CustomConfig`\>(`config`): [`HttpClient`](HttpClient.md)\<`CustomConfig`\>
+> **new HttpClient**\<`CustomConfig`\>(`config`): `HttpClient`\<`CustomConfig`\>
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:56](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L56)
+Defined in: [HttpClient/HttpClient.impl.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L53)
 
 #### Parameters
 
@@ -50,7 +52,7 @@ Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:56](https://github.
 
 #### Returns
 
-[`HttpClient`](HttpClient.md)\<`CustomConfig`\>
+`HttpClient`\<`CustomConfig`\>
 
 ## Properties
 
@@ -58,15 +60,15 @@ Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:56](https://github.
 
 > `protected` **auth**: [`AuthCredentials`](../type-aliases/AuthCredentials.md)
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:55](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L55)
+Defined in: [HttpClient/HttpClient.impl.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L52)
 
 ***
 
 ### baseUrl
 
-> **baseUrl**: `undefined` \| `URL` = `undefined`
+> **baseUrl**: `URL` \| `undefined` = `undefined`
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L50)
+Defined in: [HttpClient/HttpClient.impl.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L47)
 
 ***
 
@@ -74,7 +76,7 @@ Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:50](https://github.
 
 > **config**: \{ \[K in string \| number \| symbol\]: (\{ baseUrl?: string; basicAuth?: \{ password: string; username: string \}; bearerToken?: string; defaultHeaders?: Record\<string, string\>; defaultTimeout?: number; enableOpentelemetry?: boolean; isKeepAlive?: boolean; logger?: Logger; logLevel?: LogLevelName; name?: string; spanProcessor?: SpanProcessor; traceId?: string \} & CustomConfig)\[K\] \}
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L46)
+Defined in: [HttpClient/HttpClient.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L43)
 
 ***
 
@@ -82,7 +84,7 @@ Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:46](https://github.
 
 > **logger**: [`Logger`](Logger.md)
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L45)
+Defined in: [HttpClient/HttpClient.impl.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L42)
 
 ***
 
@@ -90,15 +92,15 @@ Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:45](https://github.
 
 > **name**: `string` = `'HttpClient'`
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L44)
+Defined in: [HttpClient/HttpClient.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L41)
 
 ***
 
 ### spanProcessor
 
-> **spanProcessor**: `undefined` \| `SpanProcessor`
+> **spanProcessor**: `SpanProcessor` \| `undefined`
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L52)
+Defined in: [HttpClient/HttpClient.impl.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L49)
 
 ***
 
@@ -106,7 +108,7 @@ Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:52](https://github.
 
 > **timeout**: `number`
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L48)
+Defined in: [HttpClient/HttpClient.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L45)
 
 ***
 
@@ -114,21 +116,23 @@ Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:48](https://github.
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L53)
+Defined in: [HttpClient/HttpClient.impl.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L50)
 
 ## Methods
 
 ### delete()
 
-> **delete**\<`T`\>(`path`, `options`?, `payload`?): `Promise`\<`T`\>
+> **delete**\<`T`\>(`path`, `options?`, `payload?`): `Promise`\<`T`\>
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:336](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L336)
+Defined in: [HttpClient/HttpClient.impl.ts:330](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L330)
 
 DELETE request
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
@@ -156,9 +160,9 @@ DELETE request
 
 ### execute()
 
-> `protected` **execute**(`method`, `path`, `options`?, `payload`?): `Promise`\<`any`\>
+> `protected` **execute**(`method`, `path`, `options?`, `payload?`): `Promise`\<`any`\>
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:200](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L200)
+Defined in: [HttpClient/HttpClient.impl.ts:194](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L194)
 
 Helper method
 
@@ -192,15 +196,17 @@ UnhandledError
 
 ### get()
 
-> **get**\<`T`\>(`path`, `options`?): `Promise`\<`T`\>
+> **get**\<`T`\>(`path`, `options?`): `Promise`\<`T`\>
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:296](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L296)
+Defined in: [HttpClient/HttpClient.impl.ts:290](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L290)
 
 GET request
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
@@ -226,7 +232,7 @@ GET request
 
 > **getTracer**(): `Tracer`
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:101](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L101)
+Defined in: [HttpClient/HttpClient.impl.ts:95](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L95)
 
 Returns open telemetry tracer of this service
 
@@ -240,9 +246,9 @@ Tracer
 
 ### getUrlAndHeader()
 
-> `protected` **getUrlAndHeader**(`path`, `options`?): `object`
+> `protected` **getUrlAndHeader**(`path`, `options?`): `object`
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:148](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L148)
+Defined in: [HttpClient/HttpClient.impl.ts:142](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L142)
 
 #### Parameters
 
@@ -270,15 +276,17 @@ Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:148](https://github
 
 ### patch()
 
-> **patch**\<`T`\>(`path`, `payload`, `options`?): `Promise`\<`T`\>
+> **patch**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:326](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L326)
+Defined in: [HttpClient/HttpClient.impl.ts:320](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L320)
 
 PATCH request
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
@@ -306,15 +314,17 @@ PATCH request
 
 ### post()
 
-> **post**\<`T`\>(`path`, `payload`, `options`?): `Promise`\<`T`\>
+> **post**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:306](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L306)
+Defined in: [HttpClient/HttpClient.impl.ts:300](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L300)
 
 POST request
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
@@ -342,15 +352,17 @@ POST request
 
 ### put()
 
-> **put**\<`T`\>(`path`, `payload`, `options`?): `Promise`\<`T`\>
+> **put**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:316](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L316)
+Defined in: [HttpClient/HttpClient.impl.ts:310](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L310)
 
 PUT request
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
@@ -380,7 +392,7 @@ PUT request
 
 > **setBearerToken**(`token`): `void`
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:187](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L187)
+Defined in: [HttpClient/HttpClient.impl.ts:181](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L181)
 
 Set the bearer token for all following requests.
 
@@ -390,7 +402,7 @@ Set the bearer token for all following requests.
 
 the bearer token
 
-`undefined` | `string`
+`string` | `undefined`
 
 #### Returns
 
@@ -406,13 +418,15 @@ the bearer token
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: [packages/core/src/HttpClient/HttpClient.impl.ts:113](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L113)
+Defined in: [HttpClient/HttpClient.impl.ts:107](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/HttpClient.impl.ts#L107)
 
 Start a child span for opentelemetry tracking
 
 #### Type Parameters
 
-• **F**
+##### F
+
+`F`
 
 #### Parameters
 
@@ -432,7 +446,7 @@ span options
 
 optional context
 
-`undefined` | `Context`
+`Context` | `undefined`
 
 ##### fn
 

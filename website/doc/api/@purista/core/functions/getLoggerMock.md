@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Function: getLoggerMock()
 
-> **getLoggerMock**(`sandbox`?): `object`
+> **getLoggerMock**(`sandbox?`): `object`
 
-Defined in: [packages/core/src/mocks/getLogger.mock.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getLogger.mock.ts#L11)
+Defined in: [mocks/getLogger.mock.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getLogger.mock.ts#L11)
 
 Mocks the logger and methods are stubs
 
@@ -34,24 +34,24 @@ logger mocked
 
 #### stubs.debug
 
-> **stubs.debug**: `SinonStub`\<`any`[], `any`\>
+> **debug**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.error
 
-> **stubs.error**: `SinonStub`\<`any`[], `any`\>
+> **error**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.fatal
 
-> **stubs.fatal**: `SinonStub`\<`any`[], `any`\>
+> **fatal**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.info
 
-> **stubs.info**: `SinonStub`\<`any`[], `any`\>
+> **info**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.trace
 
-> **stubs.trace**: `SinonStub`\<`any`[], `any`\>
+> **trace**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.warn
 
-> **stubs.warn**: `SinonStub`\<`any`[], `any`\>
+> **warn**: `SinonStub`\<`any`[], `any`\>

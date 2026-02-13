@@ -1,24 +1,32 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / Constructor
 
-# Type Alias: Constructor()\<T\>
+# Type Alias: Constructor()\<T, A\>
 
-> **Constructor**\<`T`\>: (...`args`) => `T`
+> **Constructor**\<`T`, `A`\> = (...`args`) => `T`
 
-Defined in: [packages/core/src/helper/types/Constructor.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/Constructor.ts#L1)
+Defined in: [helper/types/Constructor.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/Constructor.ts#L4)
+
+Generic constructor type that preserves argument tuple inference.
 
 ## Type Parameters
 
-• **T** = `any`
+### T
+
+`T` = `unknown`
+
+### A
+
+`A` *extends* `unknown`[] = `unknown`[]
 
 ## Parameters
 
 ### args
 
-...`any`[]
+...`A`
 
 ## Returns
 

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: InfoServiceShutdown
 
-> **InfoServiceShutdown**: [`Prettify`](Prettify.md)\<`object` & [`InfoServiceBase`](InfoServiceBase.md)\>
+> **InfoServiceShutdown** = [`Prettify`](Prettify.md)\<`object` & [`InfoServiceBase`](InfoServiceBase.md)\>
 
-Defined in: [packages/core/src/core/types/infoType/InfoServiceShutdown.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceShutdown.ts#L5)
+Defined in: [core/types/infoType/InfoServiceShutdown.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceShutdown.ts#L5)

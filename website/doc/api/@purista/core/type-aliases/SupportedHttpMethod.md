@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,8 +6,8 @@
 
 # Type Alias: SupportedHttpMethod
 
-> **SupportedHttpMethod**: `"GET"` \| `"POST"` \| `"PATCH"` \| `"PUT"` \| `"DELETE"`
+> **SupportedHttpMethod** = `"GET"` \| `"POST"` \| `"PATCH"` \| `"PUT"` \| `"DELETE"`
 
-Defined in: [packages/core/src/core/HttpServer/types/SupportedHttpMethod.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/SupportedHttpMethod.ts#L2)
+Defined in: [core/HttpServer/types/SupportedHttpMethod.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/SupportedHttpMethod.ts#L2)
 
 Supported HTTP-Methods for defining endpoints

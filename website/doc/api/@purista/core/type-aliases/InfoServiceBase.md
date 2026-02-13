@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: InfoServiceBase
 
-> **InfoServiceBase**: [`Prettify`](Prettify.md)\<`object` & [`EBMessageBase`](EBMessageBase.md)\>
+> **InfoServiceBase** = [`Prettify`](Prettify.md)\<`object` & [`EBMessageBase`](EBMessageBase.md)\>
 
-Defined in: [packages/core/src/core/types/infoType/InfoServiceBase.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceBase.ts#L4)
+Defined in: [core/types/infoType/InfoServiceBase.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoServiceBase.ts#L4)

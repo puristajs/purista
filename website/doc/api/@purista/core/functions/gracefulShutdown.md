@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Function: gracefulShutdown()
 
-> **gracefulShutdown**(`logger`, `list`, `timeoutMs`): `void`
+> **gracefulShutdown**(`logger`, `list`, `timeoutMs?`): `void`
 
-Defined in: [packages/core/src/helper/gracefulShutdown.impl.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/gracefulShutdown.impl.ts#L37)
+Defined in: [helper/gracefulShutdown.impl.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/gracefulShutdown.impl.ts#L37)
 
 Helps to gracefully shut down your application.
 Provide in list objects. The objects contains a name and a promise function which should be executed.
@@ -29,7 +29,7 @@ the logger object
 
 a object containing name and function
 
-### timeoutMs
+### timeoutMs?
 
 `number` = `30000`
 

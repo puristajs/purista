@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,14 +6,20 @@
 
 # Type Alias: SetNewTypeValue\<T, K, V\>
 
-> **SetNewTypeValue**\<`T`, `K`, `V`\>: `{ [P in keyof T]: P extends K ? V : T[P] }`
+> **SetNewTypeValue**\<`T`, `K`, `V`\> = `{ [P in keyof T]: P extends K ? V : T[P] }`
 
-Defined in: [packages/core/src/core/types/SetNewTypeValue.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/SetNewTypeValue.ts#L1)
+Defined in: [core/types/SetNewTypeValue.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/SetNewTypeValue.ts#L1)
 
 ## Type Parameters
 
-• **T**
+### T
 
-• **K** *extends* keyof `T`
+`T`
 
-• **V**
+### K
+
+`K` *extends* keyof `T`
+
+### V
+
+`V`

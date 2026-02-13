@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **exportServiceDefinitions**(`serviceBuilders`): `Promise`\<[`FullDefinition`](../type-aliases/FullDefinition.md)\>
 
-Defined in: [packages/core/src/helper/exportServiceDefinitions.ts:75](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/exportServiceDefinitions.ts#L75)
+Defined in: [helper/exportServiceDefinitions.ts:59](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/exportServiceDefinitions.ts#L59)
 
 Exports the service definitions.
 Includes the information about commands and subscriptions.

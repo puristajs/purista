@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: DefaultSecretStoreConfig
 
-> **DefaultSecretStoreConfig**: `Record`\<`string`, `unknown`\>
+> **DefaultSecretStoreConfig** = `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/core/src/DefaultSecretStore/types/DefaultSecretStoreConfig.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/types/DefaultSecretStoreConfig.ts#L1)
+Defined in: [DefaultSecretStore/types/DefaultSecretStoreConfig.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/types/DefaultSecretStoreConfig.ts#L1)

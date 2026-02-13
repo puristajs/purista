@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Type Alias: ConfigDeleteFunction()
 
-> **ConfigDeleteFunction**: (`configName`) => `Promise`\<`void`\>
+> **ConfigDeleteFunction** = (`configName`) => `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/ConfigStore/types/ConfigDeleteFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigDeleteFunction.ts#L2)
+Defined in: [core/ConfigStore/types/ConfigDeleteFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigDeleteFunction.ts#L2)
 
 delete a config value from the config store
 

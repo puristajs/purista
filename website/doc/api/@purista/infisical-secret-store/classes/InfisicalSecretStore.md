@@ -1,4 +1,4 @@
-[**@purista/infisical-secret-store v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -48,9 +48,9 @@ console.log(value) // outputs: undefined
 
 ## Constructors
 
-### new InfisicalSecretStore()
+### Constructor
 
-> **new InfisicalSecretStore**(`config`): [`InfisicalSecretStore`](InfisicalSecretStore.md)
+> **new InfisicalSecretStore**(`config`): `InfisicalSecretStore`
 
 Defined in: [infisical-secret-store/src/InfisicalSecretStore.impl.ts:42](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L42)
 
@@ -194,11 +194,11 @@ Custom trace Id
 
 #### Returns
 
-[`InfisicalSecretStore`](InfisicalSecretStore.md)
+`InfisicalSecretStore`
 
 #### Overrides
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`constructor`](../../core/classes/SecretStoreBaseClass.md#constructors)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`constructor`](../../core/classes/SecretStoreBaseClass.md#constructor)
 
 ## Properties
 
@@ -252,13 +252,13 @@ Basic-Auth information
 
 ##### basicAuth.password
 
-> **basicAuth.password**: `string`
+> **password**: `string`
 
 Basic-Auth password
 
 ##### basicAuth.username
 
-> **basicAuth.username**: `string`
+> **username**: `string`
 
 Basic-Auth username
 
@@ -364,7 +364,7 @@ Custom trace Id
 
 #### Inherited from
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`config`](../../core/classes/SecretStoreBaseClass.md#config-1)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`config`](../../core/classes/SecretStoreBaseClass.md#config)
 
 ***
 
@@ -388,7 +388,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 #### Inherited from
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`name`](../../core/classes/SecretStoreBaseClass.md#name-1)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`name`](../../core/classes/SecretStoreBaseClass.md#name)
 
 ## Methods
 
@@ -410,13 +410,15 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:3
 
 ### getSecret()
 
-> **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+> **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
 
 #### Type Parameters
 
-• **SecretNames** *extends* `string`[]
+##### SecretNames
+
+`SecretNames` *extends* `string`[]
 
 #### Parameters
 
@@ -426,7 +428,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 #### Returns
 
-`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 #### Inherited from
 
@@ -436,13 +438,15 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 ### getSecretImpl()
 
-> `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+> `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 Defined in: [infisical-secret-store/src/InfisicalSecretStore.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalSecretStore.impl.ts#L51)
 
 #### Type Parameters
 
-• **SecretNames** *extends* `string`[]
+##### SecretNames
+
+`SecretNames` *extends* `string`[]
 
 #### Parameters
 
@@ -452,7 +456,7 @@ Defined in: [infisical-secret-store/src/InfisicalSecretStore.impl.ts:51](https:/
 
 #### Returns
 
-`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 #### Overrides
 

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Enumeration: PuristaSpanTag
 
-Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L4)
+Defined in: [core/types/PuristaSpanTag.enum.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L4)
 
 Opentelemetry tags set by PURISTA framework
 
@@ -16,7 +16,7 @@ Opentelemetry tags set by PURISTA framework
 
 > **PrincipalId**: `"purista.principalId"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L6)
+Defined in: [core/types/PuristaSpanTag.enum.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L6)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:6](https://gith
 
 > **PuristaVersion**: `"purista.version"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L5)
+Defined in: [core/types/PuristaSpanTag.enum.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L5)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:5](https://gith
 
 > **ReceiverServiceName**: `"purista.receiver.name"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L12)
+Defined in: [core/types/PuristaSpanTag.enum.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L12)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:12](https://git
 
 > **ReceiverServiceTarget**: `"purista.receiver.target"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L14)
+Defined in: [core/types/PuristaSpanTag.enum.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L14)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:14](https://git
 
 > **ReceiverServiceVersion**: `"purista.receiver.version"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L13)
+Defined in: [core/types/PuristaSpanTag.enum.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L13)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:13](https://git
 
 > **SenderServiceName**: `"purista.sender.name"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L8)
+Defined in: [core/types/PuristaSpanTag.enum.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L8)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:8](https://gith
 
 > **SenderServiceTarget**: `"purista.sender.target"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L10)
+Defined in: [core/types/PuristaSpanTag.enum.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L10)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:10](https://git
 
 > **SenderServiceVersion**: `"purista.sender.version"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L9)
+Defined in: [core/types/PuristaSpanTag.enum.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L9)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:9](https://gith
 
 > **StoreName**: `"purista.store.name"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L17)
+Defined in: [core/types/PuristaSpanTag.enum.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L17)
 
 ***
 
@@ -88,7 +88,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:17](https://git
 
 > **StoreType**: `"purista.store.type"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L16)
+Defined in: [core/types/PuristaSpanTag.enum.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L16)
 
 ***
 
@@ -96,4 +96,4 @@ Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:16](https://git
 
 > **TenantId**: `"purista.tenantId"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanTag.enum.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L7)
+Defined in: [core/types/PuristaSpanTag.enum.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L7)

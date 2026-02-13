@@ -1,4 +1,4 @@
-[**@purista/amqpbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,11 @@
 
 # Function: deserializeOtpFromAmqpHeader()
 
-> **deserializeOtpFromAmqpHeader**(`logger`, `message`, `encrypter`, `encoder`): `Promise`\<`undefined` \| `Context`\>
+> **deserializeOtpFromAmqpHeader**(`logger`, `message`, `encrypter`, `encoder`): `Promise`\<`Context` \| `undefined`\>
 
-Defined in: [amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts#L10)
+Defined in: [amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts#L13)
+
+Reconstructs OpenTelemetry context from AMQP headers or message payload.
 
 ## Parameters
 
@@ -18,7 +20,7 @@ Defined in: [amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts:10](https://git
 
 ### message
 
-`null` | `ConsumeMessage`
+`ConsumeMessage` | `null`
 
 ### encrypter
 
@@ -30,4 +32,4 @@ Defined in: [amqpbridge/src/deserializeOtpFromAmqpHeader.impl.ts:10](https://git
 
 ## Returns
 
-`Promise`\<`undefined` \| `Context`\>
+`Promise`\<`Context` \| `undefined`\>

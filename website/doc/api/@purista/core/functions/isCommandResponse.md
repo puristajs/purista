@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **isCommandResponse**(`message`): `message is CommandResponse`
 
-Defined in: [packages/core/src/core/types/commandType/isCommandResponse.impl.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/isCommandResponse.impl.ts#L12)
+Defined in: [core/types/commandType/isCommandResponse.impl.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/isCommandResponse.impl.ts#L12)
 
 Checks if given message is type of CommandResponse (success or error)
 

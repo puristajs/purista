@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,22 +6,32 @@
 
 # Type Alias: ServiceClassTypes\<ConfigType, Resources\>
 
-> **ServiceClassTypes**\<`ConfigType`, `Resources`\>: `object`
+> **ServiceClassTypes**\<`ConfigType`, `Resources`\> = `object`
 
-Defined in: [packages/core/src/core/types/ServiceClassTypes.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClassTypes.ts#L3)
+Defined in: [core/types/ServiceClassTypes.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClassTypes.ts#L3)
 
 ## Type Parameters
 
-• **ConfigType** *extends* [`EmptyObject`](EmptyObject.md) = [`EmptyObject`](EmptyObject.md)
+### ConfigType
 
-• **Resources** = [`EmptyObject`](EmptyObject.md)
+`ConfigType` *extends* [`EmptyObject`](EmptyObject.md) = [`EmptyObject`](EmptyObject.md)
 
-## Type declaration
+### Resources
+
+`Resources` = [`EmptyObject`](EmptyObject.md)
+
+## Properties
 
 ### ConfigType
 
 > **ConfigType**: `ConfigType`
 
+Defined in: [core/types/ServiceClassTypes.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClassTypes.ts#L4)
+
+***
+
 ### Resources
 
 > **Resources**: `Resources`
+
+Defined in: [core/types/ServiceClassTypes.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceClassTypes.ts#L5)

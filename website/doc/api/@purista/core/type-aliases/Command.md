@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Type Alias: Command\<PayloadType, ParameterType\>
 
-> **Command**\<`PayloadType`, `ParameterType`\>: [`Prettify`](Prettify.md)\<`object` & [`EBMessageBase`](EBMessageBase.md)\>
+> **Command**\<`PayloadType`, `ParameterType`\> = [`Prettify`](Prettify.md)\<`object` & [`EBMessageBase`](EBMessageBase.md)\>
 
-Defined in: [packages/core/src/core/types/commandType/Command.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/Command.ts#L18)
+Defined in: [core/types/commandType/Command.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/Command.ts#L18)
 
 Command is a event bridge message, which is emitted by sender to event bridge.
 The event bridge dispatches the event to the receiver.
@@ -22,6 +22,10 @@ Subscribers should not respond with command responses if they are "silent" subsc
 
 ## Type Parameters
 
-• **PayloadType** = `unknown`
+### PayloadType
 
-• **ParameterType** = `unknown`
+`PayloadType` = `unknown`
+
+### ParameterType
+
+`ParameterType` = `unknown`

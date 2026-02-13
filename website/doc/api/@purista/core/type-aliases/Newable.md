@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,15 +6,19 @@
 
 # Type Alias: Newable()\<T, S\>
 
-> **Newable**\<`T`, `S`\>: (`config`) => `T`
+> **Newable**\<`T`, `S`\> = (`config`) => `T`
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L47)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L43)
 
 ## Type Parameters
 
-• **T** *extends* [`Service`](../classes/Service.md)
+### T
 
-• **S** *extends* [`ServiceClassTypes`](ServiceClassTypes.md)
+`T` *extends* [`Service`](../classes/Service.md)
+
+### S
+
+`S` *extends* [`ServiceClassTypes`](ServiceClassTypes.md)
 
 ## Parameters
 

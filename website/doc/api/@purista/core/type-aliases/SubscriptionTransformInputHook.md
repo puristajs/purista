@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,21 +6,31 @@
 
 # Type Alias: SubscriptionTransformInputHook()\<S, TransformInputPayload, TransformInputParams, FunctionPayloadType, FunctionParamsType\>
 
-> **SubscriptionTransformInputHook**\<`S`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`\>: (`this`, `context`, `payload`, `parameter`) => `Promise`\<\{ `parameter`: `Readonly`\<`FunctionParamsType`\>; `payload`: `Readonly`\<`FunctionPayloadType`\>; \}\>
+> **SubscriptionTransformInputHook**\<`S`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<\{ `parameter`: `Readonly`\<`FunctionParamsType`\>; `payload`: `Readonly`\<`FunctionPayloadType`\>; \}\>
 
-Defined in: [packages/core/src/core/types/subscription/SubscriptionTransformInputHook.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionTransformInputHook.ts#L7)
+Defined in: [core/types/subscription/SubscriptionTransformInputHook.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionTransformInputHook.ts#L7)
 
 ## Type Parameters
 
-• **S** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
+### S
 
-• **TransformInputPayload**
+`S` *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
 
-• **TransformInputParams**
+### TransformInputPayload
 
-• **FunctionPayloadType**
+`TransformInputPayload`
 
-• **FunctionParamsType**
+### TransformInputParams
+
+`TransformInputParams`
+
+### FunctionPayloadType
+
+`FunctionPayloadType`
+
+### FunctionParamsType
+
+`FunctionParamsType`
 
 ## Parameters
 

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: DefaultStateStoreConfig
 
-> **DefaultStateStoreConfig**: `Record`\<`string`, `unknown`\>
+> **DefaultStateStoreConfig** = `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/core/src/DefaultStateStore/types/DefaultStateStoreConfig.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultStateStore/types/DefaultStateStoreConfig.ts#L1)
+Defined in: [DefaultStateStore/types/DefaultStateStoreConfig.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultStateStore/types/DefaultStateStoreConfig.ts#L1)

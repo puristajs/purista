@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,10 +6,12 @@
 
 # Type Alias: EventKey\<T\>
 
-> **EventKey**\<`T`\>: `string` & keyof `T`
+> **EventKey**\<`T`\> = `string` & keyof `T`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L5)
+Defined in: [core/types/GenericEventEmitter.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L8)
 
 ## Type Parameters
 
-• **T** *extends* [`EventMap`](EventMap.md)
+### T
+
+`T` *extends* [`EventMap`](EventMap.md)

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,13 +6,15 @@
 
 # Function: convertInvokeValidationsToSchema()
 
-> **convertInvokeValidationsToSchema**\<`T`\>(`invokes`): `Promise`\<[`FromInvokeToOtherType`](../type-aliases/FromInvokeToOtherType.md)\<`T`, \{ `outputSchema`: `SchemaObject`; `parameterSchema`: `SchemaObject`; `payloadSchema`: `SchemaObject`; \}\>\>
+> **convertInvokeValidationsToSchema**\<`T`\>(`invokes`): `Promise`\<[`FromInvokeToOtherType`](../type-aliases/FromInvokeToOtherType.md)\<`T`, \{ `outputSchema?`: `SchemaObject`; `parameterSchema?`: `SchemaObject`; `payloadSchema?`: `SchemaObject`; \}\>\>
 
-Defined in: [packages/core/src/helper/convertInvokeValidationsToSchema.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/convertInvokeValidationsToSchema.impl.ts#L30)
+Defined in: [helper/convertInvokeValidationsToSchema.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/convertInvokeValidationsToSchema.impl.ts#L30)
 
 ## Type Parameters
 
-• **T** *extends* `InputType`
+### T
+
+`T` *extends* `InputType`
 
 ## Parameters
 
@@ -22,4 +24,4 @@ Defined in: [packages/core/src/helper/convertInvokeValidationsToSchema.impl.ts:3
 
 ## Returns
 
-`Promise`\<[`FromInvokeToOtherType`](../type-aliases/FromInvokeToOtherType.md)\<`T`, \{ `outputSchema`: `SchemaObject`; `parameterSchema`: `SchemaObject`; `payloadSchema`: `SchemaObject`; \}\>\>
+`Promise`\<[`FromInvokeToOtherType`](../type-aliases/FromInvokeToOtherType.md)\<`T`, \{ `outputSchema?`: `SchemaObject`; `parameterSchema?`: `SchemaObject`; `payloadSchema?`: `SchemaObject`; \}\>\>

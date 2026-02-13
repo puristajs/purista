@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,34 +6,48 @@
 
 # Type Alias: ErrorResponsePayload
 
-> **ErrorResponsePayload**: `object`
+> **ErrorResponsePayload** = `object`
 
-Defined in: [packages/core/src/core/types/ErrorResponsePayload.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ErrorResponsePayload.ts#L7)
+Defined in: [core/types/ErrorResponsePayload.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ErrorResponsePayload.ts#L7)
 
 Error message payload
 
-## Type declaration
+## Properties
 
 ### data?
 
 > `optional` **data**: `unknown`
 
+Defined in: [core/types/ErrorResponsePayload.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ErrorResponsePayload.ts#L15)
+
 addition data
+
+***
 
 ### message
 
 > **message**: `string`
 
+Defined in: [core/types/ErrorResponsePayload.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ErrorResponsePayload.ts#L11)
+
 a human readable error message
+
+***
 
 ### status
 
 > **status**: [`StatusCode`](../enumerations/StatusCode.md)
 
+Defined in: [core/types/ErrorResponsePayload.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ErrorResponsePayload.ts#L9)
+
 the error status code
+
+***
 
 ### traceId?
 
 > `optional` **traceId**: [`TraceId`](TraceId.md)
+
+Defined in: [core/types/ErrorResponsePayload.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ErrorResponsePayload.ts#L13)
 
 the trace if of the request

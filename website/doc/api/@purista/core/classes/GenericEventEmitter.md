@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,16 +6,18 @@
 
 # Class: GenericEventEmitter\<T\>
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L14)
+Defined in: [core/types/GenericEventEmitter.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L17)
 
 ## Extended by
 
-- [`EventBridgeBaseClass`](EventBridgeBaseClass.md)
 - [`ClientBuilder`](ClientBuilder.md)
+- [`EventBridgeBaseClass`](EventBridgeBaseClass.md)
 
 ## Type Parameters
 
-• **T** *extends* [`EventMap`](../type-aliases/EventMap.md)
+### T
+
+`T` *extends* [`EventMap`](../type-aliases/EventMap.md)
 
 ## Implements
 
@@ -23,25 +25,27 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:14](https://git
 
 ## Constructors
 
-### new GenericEventEmitter()
+### Constructor
 
-> **new GenericEventEmitter**\<`T`\>(): [`GenericEventEmitter`](GenericEventEmitter.md)\<`T`\>
+> **new GenericEventEmitter**\<`T`\>(): `GenericEventEmitter`\<`T`\>
 
 #### Returns
 
-[`GenericEventEmitter`](GenericEventEmitter.md)\<`T`\>
+`GenericEventEmitter`\<`T`\>
 
 ## Methods
 
 ### emit()
 
-> **emit**\<`K`\>(`eventName`, `parameter`?): `void`
+> **emit**\<`K`\>(`eventName`, `parameter?`): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+Defined in: [core/types/GenericEventEmitter.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L27)
 
 #### Type Parameters
 
-• **K** *extends* `string`
+##### K
+
+`K` *extends* `string`
 
 #### Parameters
 
@@ -67,11 +71,13 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:24](https://git
 
 > **off**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+Defined in: [core/types/GenericEventEmitter.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L23)
 
 #### Type Parameters
 
-• **K** *extends* `string`
+##### K
+
+`K` *extends* `string`
 
 #### Parameters
 
@@ -97,11 +103,13 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:20](https://git
 
 > **on**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+Defined in: [core/types/GenericEventEmitter.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L19)
 
 #### Type Parameters
 
-• **K** *extends* `string`
+##### K
+
+`K` *extends* `string`
 
 #### Parameters
 
@@ -127,7 +135,7 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:16](https://git
 
 > **removeAllListeners**(): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L28)
+Defined in: [core/types/GenericEventEmitter.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L31)
 
 #### Returns
 

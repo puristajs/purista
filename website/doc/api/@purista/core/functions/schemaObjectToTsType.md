@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Function: schemaObjectToTsType()
 
-> **schemaObjectToTsType**(`schemaObject`, `options`?): `string`
+> **schemaObjectToTsType**(`schemaObject`, `options?`): `string`
 
-Defined in: [packages/core/src/helper/schemaObjectToTsType/transform.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/schemaObjectToTsType/transform.ts#L29)
+Defined in: [helper/schemaObjectToTsType/transform.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/schemaObjectToTsType/transform.ts#L35)
 
 ## Parameters
 

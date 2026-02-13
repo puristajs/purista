@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,15 +6,17 @@
 
 # Type Alias: DaprClientConfig
 
-> **DaprClientConfig**: `object`
+> **DaprClientConfig** = `object`
 
 Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:1](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L1)
 
-## Type declaration
+## Properties
 
 ### appPrefix?
 
 > `optional` **appPrefix**: `string`
+
+Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:22](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L22)
 
 The prefix to generate the app-ID of other services.
 
@@ -22,16 +24,24 @@ The prefix to generate the app-ID of other services.
 
 `app-`
 
+***
+
 ### daprApiToken?
 
 > `optional` **daprApiToken**: `string`
 
+Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:28](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L28)
+
 API token to authenticate with Dapr.
 See https://docs.dapr.io/operations/security/api-token/.
+
+***
 
 ### daprApiVersion
 
 > **daprApiVersion**: `string`
+
+Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L6)
 
 The Dapr api version
 
@@ -41,9 +51,13 @@ The Dapr api version
 v1.0
 ```
 
+***
+
 ### daprHost?
 
 > `optional` **daprHost**: `string`
+
+Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:11](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L11)
 
 Host location of the Dapr sidecar.
 
@@ -53,9 +67,13 @@ Host location of the Dapr sidecar.
 127.0.0.1
 ```
 
+***
+
 ### daprPort?
 
 > `optional` **daprPort**: `string`
+
+Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:16](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L16)
 
 Port of the Dapr sidecar.
 
@@ -65,9 +83,13 @@ Port of the Dapr sidecar.
 3500.
 ```
 
+***
+
 ### isKeepAlive?
 
 > `optional` **isKeepAlive**: `boolean`
+
+Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:34](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L34)
 
 If set to false, the HTTP client will not reuse the same connection for multiple requests.
 
@@ -77,9 +99,13 @@ If set to false, the HTTP client will not reuse the same connection for multiple
 true
 ```
 
+***
+
 ### pubSubName?
 
 > `optional` **pubSubName**: `string`
+
+Defined in: [dapr-sdk/src/DaprClient/types/DaprClientConfig.ts:40](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/types/DaprClientConfig.ts#L40)
 
 The PubSub to be used for event messages
 

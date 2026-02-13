@@ -1,4 +1,4 @@
-[**@purista/base-http-bridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -91,7 +91,7 @@ url path of endpoint
 
 ### invoke()
 
-> **invoke**: (`command`, `headers`?, `timeout`?) => `Promise`\<[`CommandResponse`](../../core/type-aliases/CommandResponse.md)\>
+> **invoke**: (`command`, `headers?`, `timeout?`) => `Promise`\<[`CommandResponse`](../../core/type-aliases/CommandResponse.md)\>
 
 Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:40](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L40)
 
@@ -247,7 +247,7 @@ boolean
 
 ### sendEvent()
 
-> **sendEvent**: (`message`, `headers`?) => `Promise`\<`void`\>
+> **sendEvent**: (`message`, `headers?`) => `Promise`\<`void`\>
 
 Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:48](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L48)
 

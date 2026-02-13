@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: EmptyObject
 
-> **EmptyObject**: `object`
+> **EmptyObject** = `object`
 
-Defined in: [packages/core/src/core/types/EmptyObject.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EmptyObject.ts#L2)
+Defined in: [core/types/EmptyObject.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EmptyObject.ts#L2)

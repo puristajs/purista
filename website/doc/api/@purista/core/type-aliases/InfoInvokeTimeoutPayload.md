@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,52 +6,70 @@
 
 # Type Alias: InfoInvokeTimeoutPayload
 
-> **InfoInvokeTimeoutPayload**: `object`
+> **InfoInvokeTimeoutPayload** = `object`
 
-Defined in: [packages/core/src/core/types/infoType/InfoInvokeTimeout.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L6)
+Defined in: [core/types/infoType/InfoInvokeTimeout.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L6)
 
-## Type declaration
+## Properties
 
 ### correlationId
 
 > **correlationId**: [`CorrelationId`](CorrelationId.md)
 
+Defined in: [core/types/infoType/InfoInvokeTimeout.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L8)
+
+***
+
 ### receiver
 
 > **receiver**: `object`
 
-#### receiver.serviceName
+Defined in: [core/types/infoType/InfoInvokeTimeout.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L14)
 
-> **receiver.serviceName**: `string`
+#### serviceName
 
-#### receiver.serviceTarget
+> **serviceName**: `string`
 
-> **receiver.serviceTarget**: `string`
+#### serviceTarget
 
-#### receiver.serviceVersion
+> **serviceTarget**: `string`
 
-> **receiver.serviceVersion**: `string`
+#### serviceVersion
+
+> **serviceVersion**: `string`
+
+***
 
 ### sender
 
 > **sender**: `object`
 
-#### sender.serviceName
+Defined in: [core/types/infoType/InfoInvokeTimeout.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L9)
 
-> **sender.serviceName**: `string`
+#### serviceName
 
-#### sender.serviceTarget
+> **serviceName**: `string`
 
-> **sender.serviceTarget**: `string`
+#### serviceTarget
 
-#### sender.serviceVersion
+> **serviceTarget**: `string`
 
-> **sender.serviceVersion**: `string`
+#### serviceVersion
+
+> **serviceVersion**: `string`
+
+***
 
 ### timestamp
 
 > **timestamp**: `number`
 
+Defined in: [core/types/infoType/InfoInvokeTimeout.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L19)
+
+***
+
 ### traceId
 
 > **traceId**: [`TraceId`](TraceId.md)
+
+Defined in: [core/types/infoType/InfoInvokeTimeout.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L7)

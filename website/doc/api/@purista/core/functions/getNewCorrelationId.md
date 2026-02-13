@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **getNewCorrelationId**(): `string`
 
-Defined in: [packages/core/src/core/helper/getNewCorrelationId.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getNewCorrelationId.impl.ts#L10)
+Defined in: [core/helper/getNewCorrelationId.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getNewCorrelationId.impl.ts#L10)
 
 Create a new unique event bridge correlation id
 

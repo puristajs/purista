@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -24,31 +24,31 @@ Defined in: [dapr-sdk/src/DaprEventBridge/getDefaultConfig.impl.ts:3](https://gi
 
 #### clientConfig.appPrefix
 
-> **clientConfig.appPrefix**: `string` = `'app-'`
+> **appPrefix**: `string` = `'app-'`
 
 #### clientConfig.daprApiToken
 
-> **clientConfig.daprApiToken**: `undefined` = `undefined`
+> **daprApiToken**: `undefined` = `undefined`
 
 #### clientConfig.daprApiVersion
 
-> **clientConfig.daprApiVersion**: `string` = `DAPR_API_VERSION`
+> **daprApiVersion**: `string` = `DAPR_API_VERSION`
 
 #### clientConfig.daprHost
 
-> **clientConfig.daprHost**: `string`
+> **daprHost**: `string`
 
 #### clientConfig.daprPort
 
-> **clientConfig.daprPort**: `string`
+> **daprPort**: `string`
 
 #### clientConfig.isKeepAlive
 
-> **clientConfig.isKeepAlive**: `boolean` = `true`
+> **isKeepAlive**: `boolean` = `true`
 
 #### clientConfig.pubSubName
 
-> **clientConfig.pubSubName**: `string` = `'pubsub'`
+> **pubSubName**: `string` = `'pubsub'`
 
 ### commandPayloadAsCloudEvent
 

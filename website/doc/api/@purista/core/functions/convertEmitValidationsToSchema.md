@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,11 +8,13 @@
 
 > **convertEmitValidationsToSchema**\<`T`\>(`emits`): `Promise`\<[`FromEmitToOtherType`](../type-aliases/FromEmitToOtherType.md)\<`T`, `SchemaObject`\>\>
 
-Defined in: [packages/core/src/helper/convertEmitValidationsToSchema.impl.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/convertEmitValidationsToSchema.impl.ts#L11)
+Defined in: [helper/convertEmitValidationsToSchema.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/convertEmitValidationsToSchema.impl.ts#L10)
 
 ## Type Parameters
 
-• **T** *extends* `InputType`
+### T
+
+`T` *extends* `InputType`
 
 ## Parameters
 

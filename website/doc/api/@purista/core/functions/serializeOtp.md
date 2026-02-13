@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **serializeOtp**(): `string`
 
-Defined in: [packages/core/src/core/helper/serializeOtp.impl.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/serializeOtp.impl.ts#L11)
+Defined in: [core/helper/serializeOtp.impl.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/serializeOtp.impl.ts#L11)
 
 ## Returns
 

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Enumeration: StoreType
 
-Defined in: [packages/core/src/core/types/StoreType.enum.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StoreType.enum.ts#L1)
+Defined in: [core/types/StoreType.enum.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StoreType.enum.ts#L1)
 
 ## Enumeration Members
 
@@ -14,7 +14,7 @@ Defined in: [packages/core/src/core/types/StoreType.enum.ts:1](https://github.co
 
 > **ConfigStore**: `"ConfigStore"`
 
-Defined in: [packages/core/src/core/types/StoreType.enum.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StoreType.enum.ts#L3)
+Defined in: [core/types/StoreType.enum.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StoreType.enum.ts#L3)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [packages/core/src/core/types/StoreType.enum.ts:3](https://github.co
 
 > **SecretStore**: `"SecretStore"`
 
-Defined in: [packages/core/src/core/types/StoreType.enum.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StoreType.enum.ts#L4)
+Defined in: [core/types/StoreType.enum.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StoreType.enum.ts#L4)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [packages/core/src/core/types/StoreType.enum.ts:4](https://github.co
 
 > **StateStore**: `"StateStore"`
 
-Defined in: [packages/core/src/core/types/StoreType.enum.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StoreType.enum.ts#L2)
+Defined in: [core/types/StoreType.enum.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StoreType.enum.ts#L2)

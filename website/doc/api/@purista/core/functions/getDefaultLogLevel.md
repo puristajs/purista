@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,8 +8,17 @@
 
 > **getDefaultLogLevel**(): [`LogLevelName`](../type-aliases/LogLevelName.md)
 
-Defined in: [packages/core/src/DefaultLogger/getDefaultLogLevel.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/getDefaultLogLevel.ts#L4)
+Defined in: [DefaultLogger/getDefaultLogLevel.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/getDefaultLogLevel.ts#L13)
+
+Determine the default log level based on the current environment.
 
 ## Returns
 
 [`LogLevelName`](../type-aliases/LogLevelName.md)
+
+## Example
+
+```ts
+const level = getDefaultLogLevel()
+logger.setLevel(level)
+```

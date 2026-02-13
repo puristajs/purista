@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Type Alias: addPrefixToObject\<T, P\>
 
-> **addPrefixToObject**\<`T`, `P`\>: `` { [K in keyof T as K extends string ? `${P}${K}` : never]: T[K] } ``
+> **addPrefixToObject**\<`T`, `P`\> = `` { [K in keyof T as K extends string ? `${P}${K}` : never]: T[K] } ``
 
-Defined in: [packages/core/src/core/types/addPrefixToObject.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/addPrefixToObject.ts#L7)
+Defined in: [core/types/addPrefixToObject.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/addPrefixToObject.ts#L7)
 
 Helper for better typescript type.
 All keys of given object must start with the given prefix. Otherwise Typescript will complain.
@@ -17,6 +17,10 @@ All keys of given object must start with the given prefix. Otherwise Typescript 
 
 ## Type Parameters
 
-• **T**
+### T
 
-• **P** *extends* `string`
+`T`
+
+### P
+
+`P` *extends* `string`

@@ -1,4 +1,4 @@
-[**@purista/natsbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Type Alias: IncomingMessageFunction()
 
-> **IncomingMessageFunction**: (`this`, `error`, `msg`) => `Promise`\<`void`\>
+> **IncomingMessageFunction** = (`this`, `error`, `msg`) => `Promise`\<`void`\>
 
 Defined in: [natsbridge/src/types/IncomingMessageFunction.ts:5](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/types/IncomingMessageFunction.ts#L5)
 

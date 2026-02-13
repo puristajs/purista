@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,13 +6,15 @@
 
 # Type Alias: HttpClientConfig\<CustomConfig\>
 
-> **HttpClientConfig**\<`CustomConfig`\>: [`Prettify`](Prettify.md)\<`object` & `CustomConfig`\>
+> **HttpClientConfig**\<`CustomConfig`\> = [`Prettify`](Prettify.md)\<`object` & `CustomConfig`\>
 
-Defined in: [packages/core/src/HttpClient/types/HttpClientConfig.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/HttpClientConfig.ts#L11)
+Defined in: [HttpClient/types/HttpClientConfig.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/HttpClientConfig.ts#L10)
 
 Tha basic configuration for a HTTPClient
 Requires as least a `baseUrl`
 
 ## Type Parameters
 
-• **CustomConfig** *extends* `Record`\<`string`, `unknown`\>
+### CustomConfig
+
+`CustomConfig` *extends* `Record`\<`string`, `unknown`\>

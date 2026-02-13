@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,37 +8,42 @@
 
 > **getCommandFunctionWithValidation**\<`S`\>(`fn`, `inputPayloadSchema`, `inputParameterSchema`, `outputPayloadSchema`, `beforeGuards`): (`this`, `context`, `payload`, `parameter`) => `Promise`\<`unknown`\>
 
-Defined in: [packages/core/src/CommandDefinitionBuilder/getCommandFunctionWithValidation.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/getCommandFunctionWithValidation.impl.ts#L13)
+Defined in: [CommandDefinitionBuilder/getCommandFunctionWithValidation.impl.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/getCommandFunctionWithValidation.impl.ts#L15)
+
+Wraps a command handler with schema validation and guard execution.
+Input payload/parameter is validated before execution and output can be validated after execution.
 
 ## Type Parameters
 
-• **S** *extends* [`Service`](../classes/Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\>
+### S
+
+`S` *extends* [`Service`](../classes/Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\>
 
 ## Parameters
 
 ### fn
 
-[`CommandFunction`](../type-aliases/CommandFunction.md)\<`S`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`\>
+[`CommandFunction`](../type-aliases/CommandFunction.md)\<`S`, `unknown`, `unknown`, `unknown`, `unknown`, `unknown`, `any`, `any`, `any`\>
 
 ### inputPayloadSchema
 
-`undefined` | `Schema`\<`any`, `any`, `any`, `""`\> | `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+[`Schema`](../type-aliases/Schema.md) | `undefined`
 
 ### inputParameterSchema
 
-`undefined` | `Schema`\<`any`, `any`, `any`, `""`\> | `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+[`Schema`](../type-aliases/Schema.md) | `undefined`
 
 ### outputPayloadSchema
 
-`undefined` | `Schema`\<`any`, `any`, `any`, `""`\> | `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+[`Schema`](../type-aliases/Schema.md) | `undefined`
 
 ### beforeGuards
 
-`Record`\<`string`, [`CommandBeforeGuardHook`](../type-aliases/CommandBeforeGuardHook.md)\<`S`, `any`, `any`, `any`, `any`, `any`, `any`, `any`\>\>
+`Record`\<`string`, [`CommandBeforeGuardHook`](../type-aliases/CommandBeforeGuardHook.md)\<`S`, `unknown`, `unknown`, `unknown`, `unknown`, `any`, `any`, `any`\>\>
 
 ## Returns
 
-`Function`
+> (`this`, `context`, `payload`, `parameter`): `Promise`\<`unknown`\>
 
 ### Parameters
 
@@ -86,7 +91,7 @@ the logger instance
 
 ##### message
 
-`Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`Command`](../enumerations/EBMessageType.md#command); `otp`: `string`; `payload`: \{ `parameter`: `unknown`; `payload`: `unknown`; \}; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+`Readonly`\<[`Command`](../type-aliases/Command.md)\<`MessagePayloadType`, `MessageParamsType`\>\>
 
 the original message
 
@@ -171,7 +176,7 @@ set a state value in the state store
 
 ##### wrapInSpan
 
-\<`F`\>(`name`, `opts`, `fn`, `context`?) => `Promise`\<`F`\>
+\<`F`\>(`name`, `opts`, `fn`, `context?`) => `Promise`\<`F`\>
 
 wrap given function in an opentelemetry span
 

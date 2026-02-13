@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -16,9 +16,9 @@ DaprStateStore is an adapter which connects to the state store provided by the u
 
 ## Constructors
 
-### new DaprStateStore()
+### Constructor
 
-> **new DaprStateStore**(`config`?): [`DaprStateStore`](DaprStateStore.md)
+> **new DaprStateStore**(`config?`): `DaprStateStore`
 
 Defined in: [dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts#L18)
 
@@ -82,11 +82,11 @@ The name of the state store
 
 #### Returns
 
-[`DaprStateStore`](DaprStateStore.md)
+`DaprStateStore`
 
 #### Overrides
 
-[`StateStoreBaseClass`](../../core/classes/StateStoreBaseClass.md).[`constructor`](../../core/classes/StateStoreBaseClass.md#constructors)
+[`StateStoreBaseClass`](../../core/classes/StateStoreBaseClass.md).[`constructor`](../../core/classes/StateStoreBaseClass.md#constructor)
 
 ## Properties
 
@@ -152,7 +152,7 @@ The name of the state store
 
 #### Inherited from
 
-[`StateStoreBaseClass`](../../core/classes/StateStoreBaseClass.md).[`config`](../../core/classes/StateStoreBaseClass.md#config-1)
+[`StateStoreBaseClass`](../../core/classes/StateStoreBaseClass.md).[`config`](../../core/classes/StateStoreBaseClass.md#config)
 
 ***
 
@@ -176,7 +176,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:19
 
 #### Inherited from
 
-[`StateStoreBaseClass`](../../core/classes/StateStoreBaseClass.md).[`name`](../../core/classes/StateStoreBaseClass.md#name-1)
+[`StateStoreBaseClass`](../../core/classes/StateStoreBaseClass.md).[`name`](../../core/classes/StateStoreBaseClass.md#name)
 
 ## Methods
 
@@ -204,7 +204,9 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:22
 
 #### Type Parameters
 
-• **StateNames** *extends* `string`[]
+##### StateNames
+
+`StateNames` *extends* `string`[]
 
 #### Parameters
 
@@ -230,7 +232,9 @@ Defined in: [dapr-sdk/src/DaprStateStore/DaprStateStore.impl.ts:53](https://gith
 
 #### Type Parameters
 
-• **StateNames** *extends* `string`[]
+##### StateNames
+
+`StateNames` *extends* `string`[]
 
 #### Parameters
 

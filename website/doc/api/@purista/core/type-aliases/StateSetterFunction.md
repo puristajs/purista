@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Type Alias: StateSetterFunction()
 
-> **StateSetterFunction**: (`stateName`, `stateValue`) => `Promise`\<`void`\>
+> **StateSetterFunction** = (`stateName`, `stateValue`) => `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/StateStore/types/StateSetterFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateSetterFunction.ts#L2)
+Defined in: [core/StateStore/types/StateSetterFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateSetterFunction.ts#L2)
 
 set a state value in the state store
 

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,4 +8,4 @@
 
 > `const` **CONFIG\_FILE\_NAME**: `"purista.client.json"` = `'purista.client.json'`
 
-Defined in: [packages/core/src/ClientBuilder/ClientBuilder.impl.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L25)
+Defined in: [ClientBuilder/ClientBuilder.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/ClientBuilder.impl.ts#L24)

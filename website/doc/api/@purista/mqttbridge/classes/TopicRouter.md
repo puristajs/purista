@@ -1,4 +1,4 @@
-[**@purista/mqttbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -10,9 +10,9 @@ Defined in: [mqttbridge/src/topic/TopicRouter.ts:7](https://github.com/puristajs
 
 ## Constructors
 
-### new TopicRouter()
+### Constructor
 
-> **new TopicRouter**(`logger`?): [`TopicRouter`](TopicRouter.md)
+> **new TopicRouter**(`logger?`): `TopicRouter`
 
 Defined in: [mqttbridge/src/topic/TopicRouter.ts:13](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L13)
 
@@ -24,7 +24,7 @@ Defined in: [mqttbridge/src/topic/TopicRouter.ts:13](https://github.com/puristaj
 
 #### Returns
 
-[`TopicRouter`](TopicRouter.md)
+`TopicRouter`
 
 ## Properties
 
@@ -76,7 +76,7 @@ Defined in: [mqttbridge/src/topic/TopicRouter.ts:18](https://github.com/puristaj
 
 ### match()
 
-> **match**(`topic`, `id`?): [`IncomingMessageFunction`](../type-aliases/IncomingMessageFunction.md)[]
+> **match**(`topic`, `id?`): [`IncomingMessageFunction`](../type-aliases/IncomingMessageFunction.md)[]
 
 Defined in: [mqttbridge/src/topic/TopicRouter.ts:32](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/TopicRouter.ts#L32)
 

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,15 +6,17 @@
 
 # Type Alias: StateGetterFunction()
 
-> **StateGetterFunction**: \<`StateNames`\>(...`stateNames`) => `Promise`\<[`ObjectWithKeysFromStringArray`](ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
+> **StateGetterFunction** = \<`StateNames`\>(...`stateNames`) => `Promise`\<[`ObjectWithKeysFromStringArray`](ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 
-Defined in: [packages/core/src/core/StateStore/types/StateGetterFunction.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateGetterFunction.ts#L4)
+Defined in: [core/StateStore/types/StateGetterFunction.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateGetterFunction.ts#L4)
 
 get a state value from the state store
 
 ## Type Parameters
 
-• **StateNames** *extends* `string`[]
+### StateNames
+
+`StateNames` *extends* `string`[]
 
 ## Parameters
 

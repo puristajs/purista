@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -16,9 +16,9 @@ DaprConfigStore is an adapter which connects to the config store provided by the
 
 ## Constructors
 
-### new DaprConfigStore()
+### Constructor
 
-> **new DaprConfigStore**(`config`?): [`DaprConfigStore`](DaprConfigStore.md)
+> **new DaprConfigStore**(`config?`): `DaprConfigStore`
 
 Defined in: [dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L19)
 
@@ -82,11 +82,11 @@ A log level for new logger if logger is not set
 
 #### Returns
 
-[`DaprConfigStore`](DaprConfigStore.md)
+`DaprConfigStore`
 
 #### Overrides
 
-[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`constructor`](../../core/classes/ConfigStoreBaseClass.md#constructors)
+[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`constructor`](../../core/classes/ConfigStoreBaseClass.md#constructor)
 
 ## Properties
 
@@ -164,7 +164,7 @@ A log level for new logger if logger is not set
 
 #### Inherited from
 
-[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`config`](../../core/classes/ConfigStoreBaseClass.md#config-1)
+[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`config`](../../core/classes/ConfigStoreBaseClass.md#config)
 
 ***
 
@@ -188,7 +188,7 @@ Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:2
 
 #### Inherited from
 
-[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`name`](../../core/classes/ConfigStoreBaseClass.md#name-1)
+[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`name`](../../core/classes/ConfigStoreBaseClass.md#name)
 
 ## Methods
 
@@ -220,7 +220,9 @@ For implementation overwrite protected `getConfigImpl`
 
 #### Type Parameters
 
-• **ConfigNames** *extends* `string`[]
+##### ConfigNames
+
+`ConfigNames` *extends* `string`[]
 
 #### Parameters
 
@@ -250,7 +252,9 @@ This method must be overwritten by actual store implementation.
 
 #### Type Parameters
 
-• **ConfigNames** *extends* `string`[]
+##### ConfigNames
+
+`ConfigNames` *extends* `string`[]
 
 #### Parameters
 
@@ -302,7 +306,7 @@ For implementation overwrite protected `removeConfigImpl`
 
 > **removeConfigImpl**(`_configName`): `Promise`\<`void`\>
 
-Defined in: [dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:84](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L84)
+Defined in: [dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:82](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L82)
 
 This method must be overwritten by actual store implementation.
 
@@ -356,7 +360,7 @@ For implementation overwrite protected `setConfigImpl`
 
 > **setConfigImpl**(`_configName`, `_configValue`): `Promise`\<`void`\>
 
-Defined in: [dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L80)
+Defined in: [dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts:78](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprConfigStore/DaprConfigStore.impl.ts#L78)
 
 This method must be overwritten by actual store implementation.
 

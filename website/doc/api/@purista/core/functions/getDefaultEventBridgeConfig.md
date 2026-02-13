@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **getDefaultEventBridgeConfig**(): [`Complete`](../type-aliases/Complete.md)\<[`DefaultEventBridgeConfig`](../type-aliases/DefaultEventBridgeConfig.md)\>
 
-Defined in: [packages/core/src/DefaultEventBridge/getDefaultEventBridgeConfig.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/getDefaultEventBridgeConfig.impl.ts#L4)
+Defined in: [DefaultEventBridge/getDefaultEventBridgeConfig.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/getDefaultEventBridgeConfig.impl.ts#L4)
 
 ## Returns
 

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,23 +6,27 @@
 
 # Interface: IEmitter\<T\>
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L8)
+Defined in: [core/types/GenericEventEmitter.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L11)
 
 ## Type Parameters
 
-• **T** *extends* [`EventMap`](../type-aliases/EventMap.md)
+### T
+
+`T` *extends* [`EventMap`](../type-aliases/EventMap.md)
 
 ## Methods
 
 ### emit()
 
-> **emit**\<`K`\>(`eventName`, `parameter`?): `void`
+> **emit**\<`K`\>(`eventName`, `parameter?`): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L11)
+Defined in: [core/types/GenericEventEmitter.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L14)
 
 #### Type Parameters
 
-• **K** *extends* `string`
+##### K
+
+`K` *extends* `string`
 
 #### Parameters
 
@@ -44,11 +48,13 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:11](https://git
 
 > **off**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L10)
+Defined in: [core/types/GenericEventEmitter.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L13)
 
 #### Type Parameters
 
-• **K** *extends* `string`
+##### K
+
+`K` *extends* `string`
 
 #### Parameters
 
@@ -70,11 +76,13 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:10](https://git
 
 > **on**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L9)
+Defined in: [core/types/GenericEventEmitter.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L12)
 
 #### Type Parameters
 
-• **K** *extends* `string`
+##### K
+
+`K` *extends* `string`
 
 #### Parameters
 

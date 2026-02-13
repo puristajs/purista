@@ -1,4 +1,4 @@
-[**@purista/hono-http-server v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **addPathToOpenApi**(`openApiBuilder`, `metadata`, `path`, `config`): `void`
 
-Defined in: [packages/hono-http-server/src/helper/addPathToOpenApi.ts:14](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/addPathToOpenApi.ts#L14)
+Defined in: [hono-http-server/src/helper/addPathToOpenApi.ts:14](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/addPathToOpenApi.ts#L14)
 
 ## Parameters
 

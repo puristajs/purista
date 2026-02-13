@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,8 +6,8 @@
 
 # Type Alias: EBMessageSenderAddress
 
-> **EBMessageSenderAddress**: [`Prettify`](Prettify.md)\<`Omit`\<[`EBMessageAddress`](EBMessageAddress.md), `"instanceId"`\> & `Required`\<`Pick`\<[`EBMessageAddress`](EBMessageAddress.md), `"instanceId"`\>\>\>
+> **EBMessageSenderAddress** = [`Prettify`](Prettify.md)\<`Omit`\<[`EBMessageAddress`](EBMessageAddress.md), `"instanceId"`\> & `Required`\<`Pick`\<[`EBMessageAddress`](EBMessageAddress.md), `"instanceId"`\>\>\>
 
-Defined in: [packages/core/src/core/types/EBMessageSenderAddress.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageSenderAddress.ts#L7)
+Defined in: [core/types/EBMessageSenderAddress.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageSenderAddress.ts#L7)
 
 A event bridge message address describes the sender or receiver of a message.

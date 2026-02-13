@@ -1,4 +1,4 @@
-[**@purista/amqpbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,9 @@
 
 # Type Alias: Encoder
 
-> **Encoder**: `Record`\<`string`, [`EncoderFunctions`](EncoderFunctions.md)\>
+> **Encoder** = `Record`\<`string`, [`EncoderFunctions`](EncoderFunctions.md)\>
 
-Defined in: [amqpbridge/src/types/Encoder.ts:3](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/Encoder.ts#L3)
+Defined in: [amqpbridge/src/types/Encoder.ts:7](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/Encoder.ts#L7)
+
+Map of content-type to codec implementation.
+Example key: `application/json`.

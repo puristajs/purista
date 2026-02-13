@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,13 +6,15 @@
 
 # Function: createSuccessResponse()
 
-> **createSuccessResponse**\<`T`\>(`instanceId`, `originalEBMessage`, `payload`, `eventName`?, `contentType`?, `contentEncoding`?): `Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `T`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+> **createSuccessResponse**\<`T`\>(`instanceId`, `originalEBMessage`, `payload`, `eventName?`, `contentType?`, `contentEncoding?`): `Readonly`\<[`CommandSuccessResponse`](../type-aliases/CommandSuccessResponse.md)\<`T`\>\>
 
-Defined in: [packages/core/src/core/helper/createSuccessResponse.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createSuccessResponse.impl.ts#L18)
+Defined in: [core/helper/createSuccessResponse.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createSuccessResponse.impl.ts#L18)
 
 ## Type Parameters
 
-• **T**
+### T
+
+`T`
 
 ## Parameters
 
@@ -22,7 +24,7 @@ Defined in: [packages/core/src/core/helper/createSuccessResponse.impl.ts:18](htt
 
 ### originalEBMessage
 
-`Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`Command`](../enumerations/EBMessageType.md#command); `otp`: `string`; `payload`: \{ `parameter`: `unknown`; `payload`: `unknown`; \}; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+`Readonly`\<[`Command`](../type-aliases/Command.md)\>
 
 ### payload
 
@@ -42,4 +44,4 @@ Defined in: [packages/core/src/core/helper/createSuccessResponse.impl.ts:18](htt
 
 ## Returns
 
-`Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `T`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+`Readonly`\<[`CommandSuccessResponse`](../type-aliases/CommandSuccessResponse.md)\<`T`\>\>

@@ -1,4 +1,4 @@
-[**@purista/nats-state-store v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: NatsStateStoreConfig
 
-> **NatsStateStoreConfig**: [`Prettify`](../../core/type-aliases/Prettify.md)\<`object` & `ConnectionOptions` & `Partial`\<`KvOptions`\>\>
+> **NatsStateStoreConfig** = [`Prettify`](../../core/type-aliases/Prettify.md)\<`object` & `ConnectionOptions` & `Partial`\<`KvOptions`\>\>
 
 Defined in: [nats-state-store/src/types/NatsStateStoreConfig.ts:4](https://github.com/puristajs/purista/blob/master/packages/nats-state-store/src/types/NatsStateStoreConfig.ts#L4)

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **isMessageMatchingSubscription**(`_log`, `message`, `subscription`): `boolean`
 
-Defined in: [packages/core/src/DefaultEventBridge/isMessageMatchingSubscription.impl.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/isMessageMatchingSubscription.impl.ts#L11)
+Defined in: [DefaultEventBridge/isMessageMatchingSubscription.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/isMessageMatchingSubscription.impl.ts#L10)
 
 ## Parameters
 

@@ -1,4 +1,4 @@
-[**@purista/hono-http-server v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **getErrorName**(`code`): `string`
 
-Defined in: [packages/hono-http-server/src/helper/getErrorName.ts:3](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/getErrorName.ts#L3)
+Defined in: [hono-http-server/src/helper/getErrorName.ts:3](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/helper/getErrorName.ts#L3)
 
 ## Parameters
 

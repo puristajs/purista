@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **isInfoMessage**(`message`): `message is InfoMessage`
 
-Defined in: [packages/core/src/core/types/infoType/isInfoMessage.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/isInfoMessage.impl.ts#L5)
+Defined in: [core/types/infoType/isInfoMessage.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/isInfoMessage.impl.ts#L5)
 
 ## Parameters
 

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Type Alias: SecretDeleteFunction()
 
-> **SecretDeleteFunction**: (`secretName`) => `Promise`\<`void`\>
+> **SecretDeleteFunction** = (`secretName`) => `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/SecretStore/types/SecretDeleteFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretDeleteFunction.ts#L2)
+Defined in: [core/SecretStore/types/SecretDeleteFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretDeleteFunction.ts#L2)
 
 delete a secret from the secret store
 

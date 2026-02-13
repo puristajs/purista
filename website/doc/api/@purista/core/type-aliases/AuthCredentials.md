@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,34 +6,40 @@
 
 # Type Alias: AuthCredentials
 
-> **AuthCredentials**: `object`
+> **AuthCredentials** = `object`
 
-Defined in: [packages/core/src/HttpClient/types/AuthCredentials.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/AuthCredentials.ts#L4)
+Defined in: [HttpClient/types/AuthCredentials.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/AuthCredentials.ts#L4)
 
 HTTP authentication information
 
-## Type declaration
+## Properties
 
 ### basicAuth?
 
 > `optional` **basicAuth**: `object`
 
+Defined in: [HttpClient/types/AuthCredentials.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/AuthCredentials.ts#L6)
+
 Basic-Auth information
 
-#### basicAuth.password
+#### password
 
-> **basicAuth.password**: `string`
+> **password**: `string`
 
 Basic-Auth password
 
-#### basicAuth.username
+#### username
 
-> **basicAuth.username**: `string`
+> **username**: `string`
 
 Basic-Auth username
+
+***
 
 ### bearerToken?
 
 > `optional` **bearerToken**: `string`
+
+Defined in: [HttpClient/types/AuthCredentials.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/HttpClient/types/AuthCredentials.ts#L13)
 
 Bearer token header

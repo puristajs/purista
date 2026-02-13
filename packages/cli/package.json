@@ -1,6 +1,6 @@
 {
 	"name": "@purista/cli",
-	"version": "2.1.5",
+	"version": "2.2.0",
 	"description": "cli helper for PURISTA backend framework",
 	"homepage": "https://purista.dev",
 	"repository": {

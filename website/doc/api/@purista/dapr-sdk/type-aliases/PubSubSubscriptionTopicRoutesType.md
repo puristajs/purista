@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Type Alias: PubSubSubscriptionTopicRoutesType
 
-> **PubSubSubscriptionTopicRoutesType**: `object`
+> **PubSubSubscriptionTopicRoutesType** = `object`
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoutes.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscriptionTopicRoutes.type.ts#L19)
 

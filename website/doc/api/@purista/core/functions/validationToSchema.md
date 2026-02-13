@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,13 +6,15 @@
 
 # Function: validationToSchema()
 
-> **validationToSchema**\<`T`\>(`schema`?): `Promise`\<`undefined` \| `SchemaObject`\>
+> **validationToSchema**\<`T`\>(`schema?`): `Promise`\<`SchemaObject` \| `undefined`\>
 
-Defined in: [packages/core/src/zodOpenApi/validationToSchema.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/zodOpenApi/validationToSchema.ts#L9)
+Defined in: [zodOpenApi/validationToSchema.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/zodOpenApi/validationToSchema.ts#L7)
 
 ## Type Parameters
 
-• **T** *extends* `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+### T
+
+`T` *extends* [`Schema`](../type-aliases/Schema.md)
 
 ## Parameters
 
@@ -22,4 +24,4 @@ Defined in: [packages/core/src/zodOpenApi/validationToSchema.ts:9](https://githu
 
 ## Returns
 
-`Promise`\<`undefined` \| `SchemaObject`\>
+`Promise`\<`SchemaObject` \| `undefined`\>

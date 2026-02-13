@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,10 +6,12 @@
 
 # Type Alias: InferTypeOrEmptyObject\<T\>
 
-> **InferTypeOrEmptyObject**\<`T`\>: `T` *extends* `Schema` ? `Infer`\<`T`\> *extends* [`EmptyObject`](EmptyObject.md) ? `Infer`\<`T`\> : [`EmptyObject`](EmptyObject.md) : [`EmptyObject`](EmptyObject.md)
+> **InferTypeOrEmptyObject**\<`T`\> = `T` *extends* [`Schema`](Schema.md) ? [`Infer`](Infer.md)\<`T`\> *extends* [`EmptyObject`](EmptyObject.md) ? [`Infer`](Infer.md)\<`T`\> : [`EmptyObject`](EmptyObject.md) : [`EmptyObject`](EmptyObject.md)
 
-Defined in: [packages/core/src/core/types/InferTypeOrEmptyObject.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/InferTypeOrEmptyObject.ts#L4)
+Defined in: [core/types/InferTypeOrEmptyObject.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/InferTypeOrEmptyObject.ts#L4)
 
 ## Type Parameters
 
-• **T** *extends* `Schema` \| `undefined`
+### T
+
+`T` *extends* [`Schema`](Schema.md) \| `undefined`

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,22 +6,28 @@
 
 # Type Alias: DefaultEventBridgeConfig
 
-> **DefaultEventBridgeConfig**: `object`
+> **DefaultEventBridgeConfig** = `object`
 
-Defined in: [packages/core/src/DefaultEventBridge/types/DefaultEventBridgeConfig.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/DefaultEventBridgeConfig.ts#L4)
+Defined in: [DefaultEventBridge/types/DefaultEventBridgeConfig.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/DefaultEventBridgeConfig.ts#L4)
 
 The configuration for the DefaultEventBridge.
 
-## Type declaration
+## Properties
 
 ### emitMessagesAsEventBridgeEvents?
 
 > `optional` **emitMessagesAsEventBridgeEvents**: `boolean`
 
+Defined in: [DefaultEventBridge/types/DefaultEventBridgeConfig.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/DefaultEventBridgeConfig.ts#L9)
+
 Emit messages which have an event name set as javascript events on the event bridge instance
+
+***
 
 ### logWarnOnMessagesWithoutReceiver?
 
 > `optional` **logWarnOnMessagesWithoutReceiver**: `boolean`
+
+Defined in: [DefaultEventBridge/types/DefaultEventBridgeConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/DefaultEventBridgeConfig.ts#L6)
 
 Log warnings on messages which are emitted, but could not delivered to at least one receiver

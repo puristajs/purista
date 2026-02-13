@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: NeverObject
 
-> **NeverObject**: `Record`\<`string`, `never`\>
+> **NeverObject** = `Record`\<`string`, `never`\>
 
-Defined in: [packages/core/src/core/types/NeverObject.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/NeverObject.ts#L1)
+Defined in: [core/types/NeverObject.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/NeverObject.ts#L1)

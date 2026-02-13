@@ -1,4 +1,4 @@
-[**@purista/k8s-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,38 +6,48 @@
 
 # Function: addServiceEndpoints()
 
-> **addServiceEndpoints**(`services`, `app`, `logger`, `apiMountPath`): `void`
+> **addServiceEndpoints**(`services`, `app`, `logger`, `apiMountPath?`): `void`
 
-Defined in: [addServiceEndpoints.impl.ts:34](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/addServiceEndpoints.impl.ts#L34)
+Defined in: [addServiceEndpoints.impl.ts:42](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/addServiceEndpoints.impl.ts#L42)
+
+Add HTTP endpoints for all commands that expose HTTP metadata.
+
+This helper registers the routes on the provided Hono application and
+connects them with the corresponding service commands.
 
 ## Parameters
 
 ### services
 
-instance of the service to add
+Instance or array of services whose commands should be exposed.
 
-`undefined` | [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\> | [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\>[]
+[`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\> | [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\>[] | `undefined`
 
 ### app
 
 `Hono`
 
+The Hono application instance.
+
 ### logger
 
 [`Logger`](../../core/classes/Logger.md)
 
-the logger used for logging the addition
+Logger used for debug output.
 
-### apiMountPath
+### apiMountPath?
 
 `string` = `'/api'`
+
+Base path for all generated endpoints. Defaults to `/api`.
 
 ## Returns
 
 `void`
 
-## Default
+## Example
 
 ```ts
-/api
+const app = new Hono()
+addServiceEndpoints(myService, app, logger)
 ```

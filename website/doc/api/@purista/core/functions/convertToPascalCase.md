@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,9 +8,9 @@
 
 > **convertToPascalCase**(`str`): `string`
 
-Defined in: [packages/core/src/helper/string/convertToPascalCase.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/string/convertToPascalCase.impl.ts#L9)
+Defined in: [helper/string/convertToPascalCase.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/string/convertToPascalCase.impl.ts#L13)
 
-Converts a string into PascalCase
+Converts a string into PascalCase.
 
 ## Parameters
 
@@ -18,13 +18,16 @@ Converts a string into PascalCase
 
 `string`
 
-string
-
 ## Returns
 
 `string`
 
-string converted to PascalCase
+## Example
+
+```ts
+convertToPascalCase('my-text')
+// => 'MyText'
+```
 
 ## Link
 

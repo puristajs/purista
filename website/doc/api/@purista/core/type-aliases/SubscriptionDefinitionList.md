@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Type Alias: SubscriptionDefinitionList\<ServiceClassType\>
 
-> **SubscriptionDefinitionList**\<`ServiceClassType`\>: `Promise`\<[`SubscriptionDefinition`](SubscriptionDefinition.md)\<`ServiceClassType`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`\>\>[]
+> **SubscriptionDefinitionList**\<`ServiceClassType`\> = `Promise`\<[`SubscriptionDefinition`](SubscriptionDefinition.md)\<`ServiceClassType`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`\>\>[]
 
-Defined in: [packages/core/src/core/types/subscription/SubscriptionDefinitionList.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinitionList.ts#L11)
+Defined in: [core/types/subscription/SubscriptionDefinitionList.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinitionList.ts#L11)
 
 Helper type for creating list of service commands to be passed as input to service class
 
@@ -18,4 +18,6 @@ export const userServiceCommands: SubscriptionDefinitionList<UserService> = [sig
 
 ## Type Parameters
 
-• **ServiceClassType** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
+### ServiceClassType
+
+`ServiceClassType` *extends* [`ServiceClass`](../interfaces/ServiceClass.md)

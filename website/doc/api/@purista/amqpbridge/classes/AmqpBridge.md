@@ -1,4 +1,4 @@
-[**@purista/amqpbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -35,11 +35,11 @@ await eventBridge.start()
 
 ## Constructors
 
-### new AmqpBridge()
+### Constructor
 
-> **new AmqpBridge**(`config`?): [`AmqpBridge`](AmqpBridge.md)
+> **new AmqpBridge**(`config?`): `AmqpBridge`
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:109](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L109)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:117](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L117)
 
 #### Parameters
 
@@ -127,7 +127,7 @@ purista
 
 ###### socketOptions?
 
-`any`
+`unknown`
 
 socket options
 
@@ -151,11 +151,11 @@ amqp://localhost
 
 #### Returns
 
-[`AmqpBridge`](AmqpBridge.md)
+`AmqpBridge`
 
 #### Overrides
 
-[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`constructor`](../../core/classes/EventBridgeBaseClass.md#constructors)
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`constructor`](../../core/classes/EventBridgeBaseClass.md#constructor)
 
 ## Properties
 
@@ -169,13 +169,13 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:73](https://github.com/puristajs/
 
 ### config
 
-> **config**: [`Complete`](../../core/type-aliases/Complete.md)\<\{ `defaultCommandTimeout`: `number`; `encoder`: [`Encoder`](../type-aliases/Encoder.md); `encrypter`: [`Encrypter`](../type-aliases/Encrypter.md); `exchangeName`: `string`; `exchangeOptions`: `AssertExchange`; `instanceId`: `string`; `logger`: [`Logger`](../../core/classes/Logger.md); `logLevel`: [`LogLevelName`](../../core/type-aliases/LogLevelName.md); `namePrefix`: `string`; `socketOptions`: `any`; `spanProcessor`: `SpanProcessor`; `url`: `string` \| `Connect`; \}\>
+> **config**: [`Complete`](../../core/type-aliases/Complete.md)\<[`EventBridgeConfig`](../../core/type-aliases/EventBridgeConfig.md)\<`ConfigType`\>\>
 
 Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:17
 
 #### Inherited from
 
-[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`config`](../../core/classes/EventBridgeBaseClass.md#config-1)
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`config`](../../core/classes/EventBridgeBaseClass.md#config)
 
 ***
 
@@ -187,11 +187,19 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:72](https://github.com/puristajs/
 
 ***
 
-### consumerTags
+### consumerRegistrations
 
-> `protected` **consumerTags**: `string`[] = `[]`
+> `protected` **consumerRegistrations**: `object`[] = `[]`
 
 Defined in: [amqpbridge/src/AmqpBridge.impl.ts:78](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L78)
+
+#### channel
+
+> **channel**: `Channel`
+
+#### tag
+
+> **tag**: `string`
 
 ***
 
@@ -261,7 +269,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 #### Inherited from
 
-[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`logger`](../../core/classes/EventBridgeBaseClass.md#logger)
+`AmqpBridge`.[`logger`](#logger)
 
 ***
 
@@ -277,7 +285,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 #### Inherited from
 
-[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`name`](../../core/classes/EventBridgeBaseClass.md#name-1)
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`name`](../../core/classes/EventBridgeBaseClass.md#name)
 
 ***
 
@@ -315,7 +323,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:91](https://github.com/puristajs/
 
 ### serviceFunctions
 
-> `protected` **serviceFunctions**: `Map`\<`string`, \{ `cb`: (`message`) => `Promise`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../../core/enumerations/EBMessageType.md#commanderrorresponse); `otp`: `string`; `payload`: \{ `data`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../../core/enumerations/StatusCode.md); \}; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \} \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../../core/enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>; `channel`: `Channel`; \}\>
+> `protected` **serviceFunctions**: `Map`\<`string`, \{ `cb`: (`message`) => `Promise`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../../core/enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../../core/enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \} \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../../core/enumerations/EBMessageType.md#commandsuccessresponse); `otp?`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>; `channel`: `Channel`; \}\>
 
 Defined in: [amqpbridge/src/AmqpBridge.impl.ts:81](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L81)
 
@@ -323,7 +331,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:81](https://github.com/puristajs/
 
 ### subscriptions
 
-> `protected` **subscriptions**: `Map`\<`string`, \{ `cb`: (`message`) => `Promise`\<`undefined` \| `Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"id"` \| `"timestamp"`\>\>; `channel`: `Channel`; \}\>
+> `protected` **subscriptions**: `Map`\<`string`, \{ `cb`: (`message`) => `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>; `channel`: `Channel`; \}\>
 
 Defined in: [amqpbridge/src/AmqpBridge.impl.ts:93](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L93)
 
@@ -341,17 +349,41 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 ## Methods
 
+### addConsumerRegistration()
+
+> `protected` **addConsumerRegistration**(`channel`, `tag`): `void`
+
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:109](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L109)
+
+#### Parameters
+
+##### channel
+
+`Channel`
+
+##### tag
+
+`string`
+
+#### Returns
+
+`void`
+
+***
+
 ### decodeContent()
 
 > `protected` **decodeContent**\<`T`\>(`input`, `contentType`, `contentEncoding`): `Promise`\<`T`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:831](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L831)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:878](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L878)
 
 Decode buffer into given type
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
@@ -383,9 +415,10 @@ the encoding type of buffer content
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:846](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L846)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:897](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L897)
 
-Shut down event bridge as gracefully as possible
+Gracefully stops all consumers, waits for in-flight subscription handlers,
+closes AMQP resources and rejects unresolved pending invocations.
 
 #### Returns
 
@@ -403,13 +436,16 @@ Shut down event bridge as gracefully as possible
 
 ### emit()
 
-> **emit**\<`K`\>(`eventName`, `parameter`?): `void`
+> **emit**\<`K`\>(`eventName`, `parameter?`): `void`
 
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:13
+Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:16
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{ `[key: `custom-${string}`]`: `unknown`;  `[key: `adapter-${string}`]`: `unknown`;  `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+##### K
+
+`K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
 
 #### Parameters
 
@@ -433,15 +469,18 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:13
 
 ### emitMessage()
 
-> **emitMessage**\<`T`\>(`message`, `contentType`, `contentEncoding`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
+> **emitMessage**\<`T`\>(`message`, `contentType?`, `contentEncoding?`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:283](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L283)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:301](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L301)
 
-Emit a message to the eventbridge without awaiting a result
+Emits a message via AMQP headers exchange.
+The message is encoded and encrypted according to configured codecs.
 
 #### Type Parameters
 
-• **T** *extends* [`EBMessage`](../../core/type-aliases/EBMessage.md)
+##### T
+
+`T` *extends* [`EBMessage`](../../core/type-aliases/EBMessage.md)
 
 #### Parameters
 
@@ -449,13 +488,11 @@ Emit a message to the eventbridge without awaiting a result
 
 `Omit`\<[`EBMessage`](../../core/type-aliases/EBMessage.md), `"id"` \| `"timestamp"` \| `"correlationId"`\>
 
-the message
-
-##### contentType
+##### contentType?
 
 `string` = `'application/json'`
 
-##### contentEncoding
+##### contentEncoding?
 
 `string` = `'utf-8'`
 
@@ -473,13 +510,15 @@ the message
 
 > `protected` **encodeContent**\<`T`\>(`input`, `contentType`, `contentEncoding`): `Promise`\<`Buffer`\<`ArrayBufferLike`\>\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:810](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L810)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:857](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L857)
 
 Encode given payload to buffer
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
@@ -523,29 +562,28 @@ Tracer
 
 ### invoke()
 
-> **invoke**\<`T`\>(`input`, `commandTimeout`): `Promise`\<`T`\>
+> **invoke**\<`T`\>(`input`, `commandTimeout?`): `Promise`\<`T`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:358](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L358)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:380](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L380)
 
-Call a command of a service and return the result of this command
+Invokes a remote command and waits for a matching command response.
+The call is rejected with timeout if no response is received in time.
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
 ##### input
 
-`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`Command`](../../core/enumerations/EBMessageType.md#command); `otp`: `string`; `payload`: \{ `parameter`: `unknown`; `payload`: `unknown`; \}; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"id"` \| `"timestamp"` \| `"correlationId"` \| `"messageType"`\>
+`Omit`\<[`Command`](../../core/type-aliases/Command.md), `"id"` \| `"messageType"` \| `"timestamp"` \| `"correlationId"`\>
 
-a partial command message
-
-##### commandTimeout
+##### commandTimeout?
 
 `number` = `...`
-
-the time to live (timeout) of the invocation
 
 #### Returns
 
@@ -561,9 +599,9 @@ the time to live (timeout) of the invocation
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:132](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L132)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:146](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L146)
 
-Indicates if the eventbridge is running and works correctly
+Indicates if the bridge connection and channels are currently healthy.
 
 #### Returns
 
@@ -579,9 +617,9 @@ Indicates if the eventbridge is running and works correctly
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:128](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L128)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:139](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L139)
 
-Indicates if the eventbridge has been started and is connected to underlaying message broker
+Indicates if the bridge finished startup and is ready to process traffic.
 
 #### Returns
 
@@ -597,11 +635,14 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 > **off**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:12
+Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:15
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{ `[key: `custom-${string}`]`: `unknown`;  `[key: `adapter-${string}`]`: `unknown`;  `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+##### K
+
+`K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
 
 #### Parameters
 
@@ -627,11 +668,14 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:12
 
 > **on**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:11
+Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:14
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{ `[key: `custom-${string}`]`: `unknown`;  `[key: `adapter-${string}`]`: `unknown`;  `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+##### K
+
+`K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
 
 #### Parameters
 
@@ -657,7 +701,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:11
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:478](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L478)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:513](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L513)
 
 Register a service function and ensure that there is a queue for all incoming command requests.
 
@@ -671,7 +715,7 @@ The service function address
 
 ##### cb
 
-(`message`) => `Promise`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../../core/enumerations/EBMessageType.md#commanderrorresponse); `otp`: `string`; `payload`: \{ `data`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../../core/enumerations/StatusCode.md); \}; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \} \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../../core/enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+(`message`) => `Promise`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../../core/enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../../core/enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \} \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../../core/enumerations/EBMessageType.md#commandsuccessresponse); `otp?`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>
 
 the function to call if a matching command message arrives
 
@@ -699,9 +743,9 @@ the id of command function queue
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:662](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L662)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:704](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L704)
 
-Register a new subscription
+Registers a subscription consumer and returns its stable subscription key.
 
 #### Parameters
 
@@ -709,13 +753,9 @@ Register a new subscription
 
 [`Subscription`](../../core/type-aliases/Subscription.md)
 
-the subscription definition
-
 ##### cb
 
-(`message`) => `Promise`\<`undefined` \| `Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"id"` \| `"timestamp"`\>\>
-
-the function to be called if a matching message arrives
+(`message`) => `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
 #### Returns
 
@@ -731,7 +771,7 @@ the function to be called if a matching message arrives
 
 > **removeAllListeners**(): `void`
 
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:14
+Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:17
 
 #### Returns
 
@@ -743,11 +783,29 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:14
 
 ***
 
+### removeConsumerRegistrationsForChannel()
+
+> `protected` **removeConsumerRegistrationsForChannel**(`channel`): `void`
+
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:113](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L113)
+
+#### Parameters
+
+##### channel
+
+`Channel`
+
+#### Returns
+
+`void`
+
+***
+
 ### start()
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:139](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L139)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:153](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L153)
 
 Connect to RabbitMQ broker, ensure exchange, call back queue
 
@@ -775,7 +833,9 @@ Start a child span for opentelemetry tracking
 
 #### Type Parameters
 
-• **F**
+##### F
+
+`F`
 
 #### Parameters
 
@@ -795,7 +855,7 @@ span options
 
 optional context
 
-`undefined` | `Context`
+`Context` | `undefined`
 
 ##### fn
 
@@ -819,17 +879,15 @@ return value of fn
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:641](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L641)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:679](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L679)
 
-Unregister a service command
+Unregisters a command consumer and closes the dedicated command channel.
 
 #### Parameters
 
 ##### address
 
 [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md)
-
-The address (service name, version and command name) of the command to be de-registered
 
 #### Returns
 
@@ -845,7 +903,9 @@ The address (service name, version and command name) of the command to be de-reg
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [amqpbridge/src/AmqpBridge.impl.ts:782](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L782)
+Defined in: [amqpbridge/src/AmqpBridge.impl.ts:828](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/AmqpBridge.impl.ts#L828)
+
+Unregisters a subscription consumer and closes its channel.
 
 #### Parameters
 
@@ -865,7 +925,7 @@ Defined in: [amqpbridge/src/AmqpBridge.impl.ts:782](https://github.com/puristajs
 
 ### wrapInSpan()
 
-> **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context`?): `Promise`\<`F`\>
+> **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
 Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:52
 
@@ -879,7 +939,9 @@ but not to trace the program flow itself
 
 #### Type Parameters
 
-• **F**
+##### F
+
+`F`
 
 #### Parameters
 

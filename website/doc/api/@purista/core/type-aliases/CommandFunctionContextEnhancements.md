@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Type Alias: CommandFunctionContextEnhancements\<MessagePayloadType, MessageParamsType, Resources, Invokes, EmitList\>
 
-> **CommandFunctionContextEnhancements**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `EmitList`\>: `object`
+> **CommandFunctionContextEnhancements**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `EmitList`\> = `object`
 
-Defined in: [packages/core/src/core/types/commandType/CommandFunctionContext.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L19)
+Defined in: [core/types/commandType/CommandFunctionContext.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L19)
 
 It provides the original command message with types for payload and parameter.
 Also, the methods:
@@ -18,39 +18,63 @@ Also, the methods:
 
 ## Type Parameters
 
-• **MessagePayloadType** = `unknown`
+### MessagePayloadType
 
-• **MessageParamsType** = `unknown`
+`MessagePayloadType` = `unknown`
 
-• **Resources** *extends* `Record`\<`string`, `any`\> = [`EmptyObject`](EmptyObject.md)
+### MessageParamsType
 
-• **Invokes** *extends* [`InvokeList`](InvokeList.md) = [`EmptyObject`](EmptyObject.md)
+`MessageParamsType` = `unknown`
 
-• **EmitList** *extends* `Record`\<`string`, `Schema`\> = [`EmptyObject`](EmptyObject.md)
+### Resources
 
-## Type declaration
+`Resources` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](EmptyObject.md)
+
+### Invokes
+
+`Invokes` *extends* [`InvokeList`](InvokeList.md) = [`EmptyObject`](EmptyObject.md)
+
+### EmitList
+
+`EmitList` *extends* `Record`\<`string`, [`Schema`](Schema.md)\> = [`EmptyObject`](EmptyObject.md)
+
+## Properties
 
 ### emit
 
 > **emit**: [`EmitCustomMessageFunction`](EmitCustomMessageFunction.md)\<`EmitList`\>
 
+Defined in: [core/types/commandType/CommandFunctionContext.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L29)
+
 emit a custom message
+
+***
 
 ### message
 
 > **message**: `Readonly`\<[`Command`](Command.md)\<`MessagePayloadType`, `MessageParamsType`\>\>
 
+Defined in: [core/types/commandType/CommandFunctionContext.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L27)
+
 the original message
+
+***
 
 ### resources
 
 > **resources**: `Resources`
 
+Defined in: [core/types/commandType/CommandFunctionContext.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L49)
+
 Provides resources defined in service builder and set via config during service creation
+
+***
 
 ### service
 
 > **service**: `Invokes`
+
+Defined in: [core/types/commandType/CommandFunctionContext.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L45)
 
 Invokes a command and returns the result.
 It is recommended to validate the result against a schema which only contains the data you actually need.

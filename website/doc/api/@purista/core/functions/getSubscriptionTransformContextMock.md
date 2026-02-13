@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,13 +8,15 @@
 
 > **getSubscriptionTransformContextMock**\<`Resources`\>(`input`): `object`
 
-Defined in: [packages/core/src/mocks/getSubscriptionTransformContext.mock.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionTransformContext.mock.ts#L15)
+Defined in: [mocks/getSubscriptionTransformContext.mock.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionTransformContext.mock.ts#L15)
 
 A function that returns a mock object for subscription transform function context
 
 ## Type Parameters
 
-• **Resources** *extends* `Record`\<`string`, `any`\> = [`EmptyObject`](../type-aliases/EmptyObject.md)
+### Resources
+
+`Resources` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../type-aliases/EmptyObject.md)
 
 ## Parameters
 
@@ -42,77 +44,79 @@ A function that returns a mock object for subscription transform function contex
 
 #### mock.configs
 
-> **mock.configs**: `object`
+> **configs**: `object`
 
 the config store
 
 #### mock.configs.getConfig
 
-> **mock.configs.getConfig**: [`ConfigGetterFunction`](../type-aliases/ConfigGetterFunction.md)
+> **getConfig**: [`ConfigGetterFunction`](../type-aliases/ConfigGetterFunction.md)
 
 get a config value from the config store
 
 #### mock.configs.removeConfig
 
-> **mock.configs.removeConfig**: [`ConfigDeleteFunction`](../type-aliases/ConfigDeleteFunction.md)
+> **removeConfig**: [`ConfigDeleteFunction`](../type-aliases/ConfigDeleteFunction.md)
 
 delete a config value from the config store
 
 #### mock.configs.setConfig
 
-> **mock.configs.setConfig**: [`ConfigSetterFunction`](../type-aliases/ConfigSetterFunction.md)
+> **setConfig**: [`ConfigSetterFunction`](../type-aliases/ConfigSetterFunction.md)
 
 set a config value in the config store
 
 #### mock.logger
 
-> **mock.logger**: [`Logger`](../classes/Logger.md)
+> **logger**: [`Logger`](../classes/Logger.md)
 
 the logger instance
 
 #### mock.message
 
-> **mock.message**: `Readonly`\<[`EBMessage`](../type-aliases/EBMessage.md)\>
+> **message**: `Readonly`\<[`EBMessage`](../type-aliases/EBMessage.md)\>
 
 the original received message
 
 #### mock.resources
 
-> **mock.resources**: [`EmptyObject`](../type-aliases/EmptyObject.md)
+> **resources**: [`EmptyObject`](../type-aliases/EmptyObject.md)
 
 #### mock.secrets
 
-> **mock.secrets**: `object`
+> **secrets**: `object`
 
 the secret store
 
 #### mock.secrets.getSecret
 
-> **mock.secrets.getSecret**: [`SecretGetterFunction`](../type-aliases/SecretGetterFunction.md)
+> **getSecret**: [`SecretGetterFunction`](../type-aliases/SecretGetterFunction.md)
 
 get a secret from the secret store
 
 #### mock.secrets.removeSecret
 
-> **mock.secrets.removeSecret**: [`SecretDeleteFunction`](../type-aliases/SecretDeleteFunction.md)
+> **removeSecret**: [`SecretDeleteFunction`](../type-aliases/SecretDeleteFunction.md)
 
 delete a secret from the secret store
 
 #### mock.secrets.setSecret
 
-> **mock.secrets.setSecret**: [`SecretSetterFunction`](../type-aliases/SecretSetterFunction.md)
+> **setSecret**: [`SecretSetterFunction`](../type-aliases/SecretSetterFunction.md)
 
 set a secret in the secret store
 
 #### mock.startActiveSpan()
 
-> **mock.startActiveSpan**: \<`F`\>(`name`, `opts`, `context`, `fn`) => `Promise`\<`F`\>
+> **startActiveSpan**: \<`F`\>(`name`, `opts`, `context`, `fn`) => `Promise`\<`F`\>
 
 wrap given function in an opentelemetry active span
 
 ##### Type Parameters
 
-• **F**
+###### F
+
+`F`
 
 ##### Parameters
 
@@ -126,7 +130,7 @@ wrap given function in an opentelemetry active span
 
 ###### context
 
-`undefined` | `Context`
+`Context` | `undefined`
 
 ###### fn
 
@@ -138,37 +142,39 @@ wrap given function in an opentelemetry active span
 
 #### mock.states
 
-> **mock.states**: `object`
+> **states**: `object`
 
 the state store
 
 #### mock.states.getState
 
-> **mock.states.getState**: [`StateGetterFunction`](../type-aliases/StateGetterFunction.md)
+> **getState**: [`StateGetterFunction`](../type-aliases/StateGetterFunction.md)
 
 get a state value from the state store
 
 #### mock.states.removeState
 
-> **mock.states.removeState**: [`StateDeleteFunction`](../type-aliases/StateDeleteFunction.md)
+> **removeState**: [`StateDeleteFunction`](../type-aliases/StateDeleteFunction.md)
 
 delete a state value from the state store
 
 #### mock.states.setState
 
-> **mock.states.setState**: [`StateSetterFunction`](../type-aliases/StateSetterFunction.md)
+> **setState**: [`StateSetterFunction`](../type-aliases/StateSetterFunction.md)
 
 set a state value in the state store
 
 #### mock.wrapInSpan()
 
-> **mock.wrapInSpan**: \<`F`\>(`name`, `opts`, `fn`, `context`?) => `Promise`\<`F`\>
+> **wrapInSpan**: \<`F`\>(`name`, `opts`, `fn`, `context?`) => `Promise`\<`F`\>
 
 wrap given function in an opentelemetry span
 
 ##### Type Parameters
 
-• **F**
+###### F
+
+`F`
 
 ##### Parameters
 
@@ -198,76 +204,76 @@ wrap given function in an opentelemetry span
 
 #### stubs.getConfig
 
-> **stubs.getConfig**: `SinonStub`\<`any`[], `any`\>
+> **getConfig**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.getSecret
 
-> **stubs.getSecret**: `SinonStub`\<`any`[], `any`\>
+> **getSecret**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.getState
 
-> **stubs.getState**: `SinonStub`\<`any`[], `any`\>
+> **getState**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.logger
 
-> **stubs.logger**: `object` = `logger.stubs`
+> **logger**: `object` = `logger.stubs`
 
 #### stubs.logger.debug
 
-> **stubs.logger.debug**: `SinonStub`\<`any`[], `any`\>
+> **debug**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.logger.error
 
-> **stubs.logger.error**: `SinonStub`\<`any`[], `any`\>
+> **error**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.logger.fatal
 
-> **stubs.logger.fatal**: `SinonStub`\<`any`[], `any`\>
+> **fatal**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.logger.info
 
-> **stubs.logger.info**: `SinonStub`\<`any`[], `any`\>
+> **info**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.logger.trace
 
-> **stubs.logger.trace**: `SinonStub`\<`any`[], `any`\>
+> **trace**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.logger.warn
 
-> **stubs.logger.warn**: `SinonStub`\<`any`[], `any`\>
+> **warn**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.removeConfig
 
-> **stubs.removeConfig**: `SinonStub`\<`any`[], `any`\>
+> **removeConfig**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.removeSecret
 
-> **stubs.removeSecret**: `SinonStub`\<`any`[], `any`\>
+> **removeSecret**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.removeState
 
-> **stubs.removeState**: `SinonStub`\<`any`[], `any`\>
+> **removeState**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.resources
 
-> **stubs.resources**: `Partial`\<`Resources`\>
+> **resources**: `Partial`\<`Resources`\>
 
 #### stubs.setConfig
 
-> **stubs.setConfig**: `SinonStub`\<`any`[], `any`\>
+> **setConfig**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.setSecret
 
-> **stubs.setSecret**: `SinonStub`\<`any`[], `any`\>
+> **setSecret**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.setState
 
-> **stubs.setState**: `SinonStub`\<`any`[], `any`\>
+> **setState**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.startActiveSpan
 
-> **stubs.startActiveSpan**: `SinonStub`\<`any`[], `any`\>
+> **startActiveSpan**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.wrapInSpan
 
-> **stubs.wrapInSpan**: `SinonStub`\<`any`[], `any`\>
+> **wrapInSpan**: `SinonStub`\<`any`[], `any`\>

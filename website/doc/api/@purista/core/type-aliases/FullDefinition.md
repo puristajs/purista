@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,28 +6,38 @@
 
 # Type Alias: FullDefinition
 
-> **FullDefinition**: `object`
+> **FullDefinition** = `object`
 
-Defined in: [packages/core/src/helper/types/FullDefinition.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/FullDefinition.ts#L3)
+Defined in: [helper/types/FullDefinition.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/FullDefinition.ts#L3)
 
-## Type declaration
+## Properties
 
 ### rest?
 
 > `optional` **rest**: `object`
 
-#### rest.apiPath
+Defined in: [helper/types/FullDefinition.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/FullDefinition.ts#L5)
 
-> **rest.apiPath**: `string`
+#### apiPath
 
-#### rest.domain
+> **apiPath**: `string`
 
-> **rest.domain**: `string`
+#### domain
+
+> **domain**: `string`
+
+***
 
 ### services
 
 > **services**: [`FullServiceDefinition`](FullServiceDefinition.md)
 
+Defined in: [helper/types/FullDefinition.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/FullDefinition.ts#L9)
+
+***
+
 ### version
 
 > **version**: `string`
+
+Defined in: [helper/types/FullDefinition.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/FullDefinition.ts#L4)

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,15 +6,17 @@
 
 # Function: getCustomMessageMessageMock()
 
-> **getCustomMessageMessageMock**\<`PayloadType`\>(`eventName`, `payload`, `input`?): `Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../enumerations/EBMessageType.md#custommessage); `otp`: `string`; `payload`: `PayloadType`; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+> **getCustomMessageMessageMock**\<`PayloadType`\>(`eventName`, `payload`, `input?`): `Readonly`\<[`CustomMessage`](../type-aliases/CustomMessage.md)\<`PayloadType`\>\>
 
-Defined in: [packages/core/src/mocks/messages/getCustomMessage.mock.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCustomMessage.mock.ts#L13)
+Defined in: [mocks/messages/getCustomMessage.mock.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCustomMessage.mock.ts#L13)
 
 A function that returns a mocked custom message.
 
 ## Type Parameters
 
-• **PayloadType**
+### PayloadType
+
+`PayloadType`
 
 ## Parameters
 
@@ -28,8 +30,8 @@ A function that returns a mocked custom message.
 
 ### input?
 
-`Partial`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../enumerations/EBMessageType.md#custommessage); `otp`: `string`; `payload`: `PayloadType`; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+`Partial`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `PayloadType`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>
 
 ## Returns
 
-`Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../enumerations/EBMessageType.md#custommessage); `otp`: `string`; `payload`: `PayloadType`; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+`Readonly`\<[`CustomMessage`](../type-aliases/CustomMessage.md)\<`PayloadType`\>\>

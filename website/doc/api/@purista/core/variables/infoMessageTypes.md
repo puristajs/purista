@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,4 +8,4 @@
 
 > `const` **infoMessageTypes**: [`EBMessageType`](../enumerations/EBMessageType.md)[]
 
-Defined in: [packages/core/src/core/types/infoType/InfoMessage.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoMessage.ts#L30)
+Defined in: [core/types/infoType/InfoMessage.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoMessage.ts#L30)

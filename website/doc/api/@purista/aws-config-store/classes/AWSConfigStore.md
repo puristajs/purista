@@ -1,4 +1,4 @@
-[**@purista/aws-config-store v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -26,9 +26,9 @@ It will be removed/overwritten on next get request.
 
 ## Constructors
 
-### new AWSConfigStore()
+### Constructor
 
-> **new AWSConfigStore**(`config`): [`AWSConfigStore`](AWSConfigStore.md)
+> **new AWSConfigStore**(`config`): `AWSConfigStore`
 
 Defined in: [aws-config-store/src/AWSConfigStore.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L30)
 
@@ -86,11 +86,11 @@ A log level for new logger if logger is not set
 
 #### Returns
 
-[`AWSConfigStore`](AWSConfigStore.md)
+`AWSConfigStore`
 
 #### Overrides
 
-[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`constructor`](../../core/classes/ConfigStoreBaseClass.md#constructors)
+[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`constructor`](../../core/classes/ConfigStoreBaseClass.md#constructor)
 
 ## Properties
 
@@ -170,7 +170,7 @@ A log level for new logger if logger is not set
 
 #### Inherited from
 
-[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`config`](../../core/classes/ConfigStoreBaseClass.md#config-1)
+[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`config`](../../core/classes/ConfigStoreBaseClass.md#config)
 
 ***
 
@@ -194,7 +194,7 @@ Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:2
 
 #### Inherited from
 
-[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`name`](../../core/classes/ConfigStoreBaseClass.md#name-1)
+[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`name`](../../core/classes/ConfigStoreBaseClass.md#name)
 
 ## Methods
 
@@ -226,7 +226,9 @@ For implementation overwrite protected `getConfigImpl`
 
 #### Type Parameters
 
-• **ConfigNames** *extends* `string`[]
+##### ConfigNames
+
+`ConfigNames` *extends* `string`[]
 
 #### Parameters
 
@@ -256,7 +258,9 @@ This method must be overwritten by actual store implementation.
 
 #### Type Parameters
 
-• **ConfigNames** *extends* `string`[]
+##### ConfigNames
+
+`ConfigNames` *extends* `string`[]
 
 #### Parameters
 
@@ -362,7 +366,7 @@ For implementation overwrite protected `setConfigImpl`
 
 > `protected` **setConfigImpl**(`configName`, `configValue`): `Promise`\<`void`\>
 
-Defined in: [aws-config-store/src/AWSConfigStore.impl.ts:66](https://github.com/puristajs/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L66)
+Defined in: [aws-config-store/src/AWSConfigStore.impl.ts:70](https://github.com/puristajs/purista/blob/master/packages/aws-config-store/src/AWSConfigStore.impl.ts#L70)
 
 This method must be overwritten by actual store implementation.
 

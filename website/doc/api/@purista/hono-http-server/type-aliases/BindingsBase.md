@@ -1,4 +1,4 @@
-[**@purista/hono-http-server v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: BindingsBase
 
-> **BindingsBase**: [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
+> **BindingsBase** = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
 
-Defined in: [packages/hono-http-server/src/types/BindingsBase.ts:3](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/types/BindingsBase.ts#L3)
+Defined in: [hono-http-server/src/types/BindingsBase.ts:3](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/types/BindingsBase.ts#L3)

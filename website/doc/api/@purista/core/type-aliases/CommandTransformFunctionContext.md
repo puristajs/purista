@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,14 +6,20 @@
 
 # Type Alias: CommandTransformFunctionContext\<PayloadType, ParameterType, Resources\>
 
-> **CommandTransformFunctionContext**\<`PayloadType`, `ParameterType`, `Resources`\>: [`Prettify`](Prettify.md)\<[`ContextBase`](ContextBase.md) & `object`\>
+> **CommandTransformFunctionContext**\<`PayloadType`, `ParameterType`, `Resources`\> = [`Prettify`](Prettify.md)\<[`ContextBase`](ContextBase.md) & `object`\>
 
-Defined in: [packages/core/src/core/types/commandType/CommandTransformFunctionContext.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandTransformFunctionContext.ts#L8)
+Defined in: [core/types/commandType/CommandTransformFunctionContext.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandTransformFunctionContext.ts#L8)
 
 ## Type Parameters
 
-• **PayloadType**
+### PayloadType
 
-• **ParameterType**
+`PayloadType`
 
-• **Resources**
+### ParameterType
+
+`ParameterType`
+
+### Resources
+
+`Resources`

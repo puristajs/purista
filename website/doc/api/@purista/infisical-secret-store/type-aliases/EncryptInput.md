@@ -1,4 +1,4 @@
-[**@purista/infisical-secret-store v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,16 +6,22 @@
 
 # Type Alias: EncryptInput
 
-> **EncryptInput**: `object`
+> **EncryptInput** = `object`
 
 Defined in: [infisical-secret-store/src/InfisicalClient/types/EncryptInput.ts:1](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/EncryptInput.ts#L1)
 
-## Type declaration
+## Properties
 
 ### secret
 
 > **secret**: `string`
 
+Defined in: [infisical-secret-store/src/InfisicalClient/types/EncryptInput.ts:1](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/EncryptInput.ts#L1)
+
+***
+
 ### text
 
 > **text**: `string`
+
+Defined in: [infisical-secret-store/src/InfisicalClient/types/EncryptInput.ts:1](https://github.com/puristajs/purista/blob/master/packages/infisical-secret-store/src/InfisicalClient/types/EncryptInput.ts#L1)

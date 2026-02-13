@@ -1,4 +1,4 @@
-[**@purista/gcloud-secret-store v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -26,9 +26,9 @@ It will be removed/overwritten on next get request.
 
 ## Constructors
 
-### new GoogleSecretStore()
+### Constructor
 
-> **new GoogleSecretStore**(`config`): [`GoogleSecretStore`](GoogleSecretStore.md)
+> **new GoogleSecretStore**(`config`): `GoogleSecretStore`
 
 Defined in: [gcloud-secret-store/src/GoogleSecretStore.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L30)
 
@@ -98,11 +98,11 @@ projects/428371962963
 
 #### Returns
 
-[`GoogleSecretStore`](GoogleSecretStore.md)
+`GoogleSecretStore`
 
 #### Overrides
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`constructor`](../../core/classes/SecretStoreBaseClass.md#constructors)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`constructor`](../../core/classes/SecretStoreBaseClass.md#constructor)
 
 ## Properties
 
@@ -194,7 +194,7 @@ projects/428371962963
 
 #### Inherited from
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`config`](../../core/classes/SecretStoreBaseClass.md#config-1)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`config`](../../core/classes/SecretStoreBaseClass.md#config)
 
 ***
 
@@ -218,7 +218,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 #### Inherited from
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`name`](../../core/classes/SecretStoreBaseClass.md#name-1)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`name`](../../core/classes/SecretStoreBaseClass.md#name)
 
 ## Methods
 
@@ -240,13 +240,15 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:3
 
 ### getSecret()
 
-> **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+> **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
 
 #### Type Parameters
 
-• **SecretNames** *extends* `string`[]
+##### SecretNames
+
+`SecretNames` *extends* `string`[]
 
 #### Parameters
 
@@ -256,7 +258,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 #### Returns
 
-`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 #### Inherited from
 
@@ -266,13 +268,15 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 ### getSecretImpl()
 
-> `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+> `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
-Defined in: [gcloud-secret-store/src/GoogleSecretStore.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L35)
+Defined in: [gcloud-secret-store/src/GoogleSecretStore.impl.ts:44](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L44)
 
 #### Type Parameters
 
-• **SecretNames** *extends* `string`[]
+##### SecretNames
+
+`SecretNames` *extends* `string`[]
 
 #### Parameters
 
@@ -282,7 +286,7 @@ Defined in: [gcloud-secret-store/src/GoogleSecretStore.impl.ts:35](https://githu
 
 #### Returns
 
-`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 #### Overrides
 
@@ -316,7 +320,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 > **removeSecretImpl**(`secretName`): `Promise`\<`void`\>
 
-Defined in: [gcloud-secret-store/src/GoogleSecretStore.impl.ts:56](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L56)
+Defined in: [gcloud-secret-store/src/GoogleSecretStore.impl.ts:69](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L69)
 
 #### Parameters
 
@@ -364,7 +368,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:3
 
 > **setSecretImpl**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
-Defined in: [gcloud-secret-store/src/GoogleSecretStore.impl.ts:60](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L60)
+Defined in: [gcloud-secret-store/src/GoogleSecretStore.impl.ts:73](https://github.com/puristajs/purista/blob/master/packages/gcloud-secret-store/src/GoogleSecretStore.impl.ts#L73)
 
 #### Parameters
 

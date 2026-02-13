@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: LogFnParamType
 
-> **LogFnParamType**: \[`unknown`, `string`?, `...any`\] \| \[`string`, `...any`\]
+> **LogFnParamType** = \[`unknown`, `string`?, `...any`\] \| \[`string`, `...any`\]
 
-Defined in: [packages/core/src/core/types/Logger.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L20)
+Defined in: [core/types/Logger.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L20)

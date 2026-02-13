@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,12 +6,14 @@
 
 # Type Alias: StoreBaseConfig\<Config\>
 
-> **StoreBaseConfig**\<`Config`\>: [`Prettify`](Prettify.md)\<`object` & `Config`\>
+> **StoreBaseConfig**\<`Config`\> = [`Prettify`](Prettify.md)\<`object` & `Config`\>
 
-Defined in: [packages/core/src/core/types/StoreBaseConfig.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StoreBaseConfig.ts#L8)
+Defined in: [core/types/StoreBaseConfig.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StoreBaseConfig.ts#L8)
 
 Basic configuration object which is used by any store
 
 ## Type Parameters
 
-• **Config** *extends* `Record`\<`string`, `unknown`\>
+### Config
+
+`Config` *extends* `Record`\<`string`, `unknown`\>

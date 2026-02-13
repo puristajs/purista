@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -21,9 +21,9 @@ This client is responsible for the communication to the sidecar service.
 
 ## Constructors
 
-### new DaprClient()
+### Constructor
 
-> **new DaprClient**(`config`): [`DaprClient`](DaprClient.md)
+> **new DaprClient**(`config`): `DaprClient`
 
 Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:32
 
@@ -35,7 +35,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:32
 
 `string`
 
-the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI defintion
+the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI definition
 needs to `enableRestApiExpose` set to `true`
 
 **Default**
@@ -274,11 +274,11 @@ Custom trace Id
 
 #### Returns
 
-[`DaprClient`](DaprClient.md)
+`DaprClient`
 
 #### Inherited from
 
-[`HttpClient`](../../core/classes/HttpClient.md).[`constructor`](../../core/classes/HttpClient.md#constructors)
+[`HttpClient`](../../core/classes/HttpClient.md).[`constructor`](../../core/classes/HttpClient.md#constructor)
 
 ## Properties
 
@@ -296,7 +296,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:31
 
 ### baseUrl
 
-> **baseUrl**: `undefined` \| `URL`
+> **baseUrl**: `URL` \| `undefined`
 
 Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:28
 
@@ -316,7 +316,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:26
 
 > `optional` **apiPrefix**: `string`
 
-the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI defintion
+the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI definition
 needs to `enableRestApiExpose` set to `true`
 
 ##### Default
@@ -349,13 +349,13 @@ Basic-Auth information
 
 ##### basicAuth.password
 
-> **basicAuth.password**: `string`
+> **password**: `string`
 
 Basic-Auth password
 
 ##### basicAuth.username
 
-> **basicAuth.username**: `string`
+> **username**: `string`
 
 Basic-Auth username
 
@@ -575,7 +575,7 @@ Custom trace Id
 
 #### Inherited from
 
-[`HttpClient`](../../core/classes/HttpClient.md).[`config`](../../core/classes/HttpClient.md#config-1)
+[`HttpClient`](../../core/classes/HttpClient.md).[`config`](../../core/classes/HttpClient.md#config)
 
 ***
 
@@ -605,7 +605,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:24
 
 ### spanProcessor
 
-> **spanProcessor**: `undefined` \| `SpanProcessor`
+> **spanProcessor**: `SpanProcessor` \| `undefined`
 
 Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:29
 
@@ -641,7 +641,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:30
 
 ### delete()
 
-> **delete**\<`T`\>(`path`, `options`?, `payload`?): `Promise`\<`T`\>
+> **delete**\<`T`\>(`path`, `options?`, `payload?`): `Promise`\<`T`\>
 
 Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:101
 
@@ -649,7 +649,9 @@ DELETE request
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
@@ -677,7 +679,7 @@ DELETE request
 
 ### execute()
 
-> `protected` **execute**(`method`, `path`, `options`?, `payload`?): `Promise`\<`any`\>
+> `protected` **execute**(`method`, `path`, `options?`, `payload?`): `Promise`\<`any`\>
 
 Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:66
 
@@ -717,7 +719,7 @@ UnhandledError
 
 ### get()
 
-> **get**\<`T`\>(`path`, `options`?): `Promise`\<`T`\>
+> **get**\<`T`\>(`path`, `options?`): `Promise`\<`T`\>
 
 Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:73
 
@@ -725,7 +727,9 @@ GET request
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
@@ -857,7 +861,7 @@ Tracer
 
 ### getUrlAndHeader()
 
-> `protected` **getUrlAndHeader**(`path`, `options`?): `object`
+> `protected` **getUrlAndHeader**(`path`, `options?`): `object`
 
 Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:48
 
@@ -891,7 +895,7 @@ Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:48
 
 ### invoke()
 
-> **invoke**(`command`, `headers`?, `timeout`?): `Promise`\<[`CommandResponse`](../../core/type-aliases/CommandResponse.md)\>
+> **invoke**(`command`, `headers?`, `timeout?`): `Promise`\<[`CommandResponse`](../../core/type-aliases/CommandResponse.md)\>
 
 Defined in: [dapr-sdk/src/DaprClient/DaprClient.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L33)
 
@@ -1055,7 +1059,7 @@ boolean
 
 ### patch()
 
-> **patch**\<`T`\>(`path`, `payload`, `options`?): `Promise`\<`T`\>
+> **patch**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
 Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:94
 
@@ -1063,7 +1067,9 @@ PATCH request
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
@@ -1091,7 +1097,7 @@ PATCH request
 
 ### post()
 
-> **post**\<`T`\>(`path`, `payload`, `options`?): `Promise`\<`T`\>
+> **post**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
 Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:80
 
@@ -1099,7 +1105,9 @@ POST request
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
@@ -1127,7 +1135,7 @@ POST request
 
 ### put()
 
-> **put**\<`T`\>(`path`, `payload`, `options`?): `Promise`\<`T`\>
+> **put**\<`T`\>(`path`, `payload`, `options?`): `Promise`\<`T`\>
 
 Defined in: core/dist/commonjs/HttpClient/HttpClient.impl.d.ts:87
 
@@ -1135,7 +1143,9 @@ PUT request
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
@@ -1163,7 +1173,7 @@ PUT request
 
 ### sendEvent()
 
-> **sendEvent**(`message`, `headers`?): `Promise`\<`void`\>
+> **sendEvent**(`message`, `headers?`): `Promise`\<`void`\>
 
 Defined in: [dapr-sdk/src/DaprClient/DaprClient.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprClient/DaprClient.impl.ts#L48)
 
@@ -1203,7 +1213,7 @@ Set the bearer token for all following requests.
 
 the bearer token
 
-`undefined` | `string`
+`string` | `undefined`
 
 #### Returns
 
@@ -1225,7 +1235,9 @@ Start a child span for opentelemetry tracking
 
 #### Type Parameters
 
-• **F**
+##### F
+
+`F`
 
 #### Parameters
 
@@ -1245,7 +1257,7 @@ span options
 
 optional context
 
-`undefined` | `Context`
+`Context` | `undefined`
 
 ##### fn
 

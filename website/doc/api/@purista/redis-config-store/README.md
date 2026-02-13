@@ -1,4 +1,4 @@
-**@purista/redis-config-store v2.1.0**
+[**PURISTA API**](../../README.md)
 
 ***
 
@@ -38,3 +38,49 @@
 **Join the [Discord Chat](https://discord.gg/9feaUm3H2v)**
 
 <a href="https://www.producthunt.com/posts/purista?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-purista" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=386519&theme=light" alt="PURISTA - Typescript&#0032;framework&#0032;for&#0032;IoT&#0044;&#0032;microservices&#0044;&#0032;and&#0032;serverless | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
+A state store for using redis as storage.
+Config values are stored as stringified JSON.
+
+Per default, setting/changing and removal of values are enabled.
+
+## Example
+
+```typescript
+const config = {
+ enableGet: true, // optional, default is true
+ enableRemove: true, // optional, default is true
+ enableSet: true, // optional, default is true
+ url: 'redis://alice:foobared@awesome.redis.server:6379'
+}
+
+const store = new RedisConfigStore(config)
+
+await store.setConfig('stateKey',{ myConfig: 'value' })
+
+let value = await store.getConfig('stateKey')
+console.log(value) // outputs: { myConfig: 'value' }
+
+await store.removeConfig('stateKey')
+
+value = await store.getConfig('stateKey')
+console.log(value) // outputs: undefined
+```
+
+See documentation of underlaying redis lib package for detailed configuration options.
+
+## See
+
+[NODE-REDIS](https://redis.js.org)
+
+## Classes
+
+- [RedisConfigStore](classes/RedisConfigStore.md)
+
+## Type Aliases
+
+- [RedisStoreConfig](type-aliases/RedisStoreConfig.md)
+
+## Variables
+
+- [puristaVersion](variables/puristaVersion.md)
