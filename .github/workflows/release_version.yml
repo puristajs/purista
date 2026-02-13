@@ -1,4 +1,4 @@
-name: Release And Publish
+name: Release Prepare PR
 
 on:
   workflow_dispatch:
@@ -15,14 +15,14 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
 
 concurrency:
-  group: release-${{ github.ref }}
+  group: release-prepare-${{ github.ref }}
   cancel-in-progress: false
 
 jobs:
-  release:
-    environment: publish_version
+  prepare-release-pr:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -48,22 +48,41 @@ jobs:
         id: version
         run: echo "value=$(node -p 'require(\"./package.json\").version')" >> "$GITHUB_OUTPUT"
 
-      - name: Commit release changes and tag
+      - name: Commit release changes to branch
+        id: commit
         run: |
+          RELEASE_BRANCH="release/v${{ steps.version.outputs.value }}"
           git config user.name "${{ vars.CI_COMMIT_AUTHOR || 'github-actions[bot]' }}"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -B "$RELEASE_BRANCH"
           git add -A
+          if git diff --cached --quiet; then
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "branch=$RELEASE_BRANCH" >> "$GITHUB_OUTPUT"
+            echo "No release changes detected."
+            exit 0
+          fi
           git commit -m "chore(release): v${{ steps.version.outputs.value }}"
-          git tag -a "v${{ steps.version.outputs.value }}" -m "v${{ steps.version.outputs.value }}"
-          git push origin HEAD
-          git push origin "v${{ steps.version.outputs.value }}"
+          git push --force-with-lease origin "$RELEASE_BRANCH"
+          echo "has_changes=true" >> "$GITHUB_OUTPUT"
+          echo "branch=$RELEASE_BRANCH" >> "$GITHUB_OUTPUT"
 
-      - name: Publish to npm
-        run: npm publish --access public --workspaces
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Create GitHub release
-        run: gh release create "v${{ steps.version.outputs.value }}" -F CHANGELOG.md
+      - name: Create or update release PR
+        if: steps.commit.outputs.has_changes == 'true'
+        run: |
+          RELEASE_BRANCH="${{ steps.commit.outputs.branch }}"
+          VERSION="${{ steps.version.outputs.value }}"
+          PR_NUMBER="$(gh pr list --head "$RELEASE_BRANCH" --base master --json number --jq '.[0].number')"
+          if [ -n "$PR_NUMBER" ]; then
+            gh pr edit "$PR_NUMBER" \
+              --title "chore(release): v$VERSION" \
+              --body "Automated release preparation PR for v$VERSION."
+          else
+            gh pr create \
+              --base master \
+              --head "$RELEASE_BRANCH" \
+              --title "chore(release): v$VERSION" \
+              --body "Automated release preparation PR for v$VERSION."
+          fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
