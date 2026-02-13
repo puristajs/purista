@@ -61,8 +61,27 @@ jobs:
             exit 1
           fi
 
-      - name: Publish to npm
-        run: npm publish --provenance --access public --workspaces
+      - name: Publish workspaces to npm (rerun-safe)
+        run: |
+          VERSION="${{ steps.version.outputs.value }}"
+          for pkg_json in packages/*/package.json; do
+            [ -f "$pkg_json" ] || continue
+            pkg_dir="$(dirname "$pkg_json")"
+            pkg_name="$(node -e "process.stdout.write(require('./$pkg_json').name || '')")"
+            pkg_private="$(node -e "const p=require('./$pkg_json'); process.stdout.write(String(Boolean(p.private)))")"
+
+            if [ -z "$pkg_name" ] || [ "$pkg_private" = "true" ]; then
+              continue
+            fi
+
+            if npm view "${pkg_name}@${VERSION}" version >/dev/null 2>&1; then
+              echo "Skipping ${pkg_name}@${VERSION} (already published)"
+              continue
+            fi
+
+            echo "Publishing ${pkg_name}@${VERSION}"
+            npm publish --provenance --access public --workspace "$pkg_dir"
+          done
 
       - name: Create tag and push
         run: |
