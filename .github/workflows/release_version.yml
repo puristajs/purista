@@ -46,7 +46,13 @@ jobs:
 
       - name: Read new version
         id: version
-        run: echo "value=$(node -p 'require(\"./package.json\").version')" >> "$GITHUB_OUTPUT"
+        run: |
+          VERSION="$(node -e "process.stdout.write(require('./package.json').version)")"
+          if [ -z "$VERSION" ]; then
+            echo "Could not read package version."
+            exit 1
+          fi
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Commit release changes to branch
         id: commit
@@ -72,17 +78,25 @@ jobs:
         run: |
           RELEASE_BRANCH="${{ steps.commit.outputs.branch }}"
           VERSION="${{ steps.version.outputs.value }}"
-          PR_NUMBER="$(gh pr list --head "$RELEASE_BRANCH" --base master --json number --jq '.[0].number')"
-          if [ -n "$PR_NUMBER" ]; then
-            gh pr edit "$PR_NUMBER" \
+          COMPARE_URL="https://github.com/${{ github.repository }}/compare/master...$RELEASE_BRANCH?expand=1"
+          PR_NUMBER="$(gh pr list --head "$RELEASE_BRANCH" --base master --json number --jq '.[0].number' || true)"
+          if [ -n "$PR_NUMBER" ] && [ "$PR_NUMBER" != "null" ]; then
+            if ! gh pr edit "$PR_NUMBER" \
               --title "chore(release): v$VERSION" \
-              --body "Automated release preparation PR for v$VERSION."
+              --body "Automated release preparation PR for v$VERSION."; then
+              echo "Failed to update release PR #$PR_NUMBER."
+              exit 1
+            fi
           else
-            gh pr create \
+            if ! gh pr create \
               --base master \
               --head "$RELEASE_BRANCH" \
               --title "chore(release): v$VERSION" \
-              --body "Automated release preparation PR for v$VERSION."
+              --body "Automated release preparation PR for v$VERSION."; then
+              echo "::warning::Could not create release PR automatically. Open it manually: $COMPARE_URL"
+            fi
           fi
+          echo "Release branch is ready: $RELEASE_BRANCH"
+          echo "If no PR was created automatically, open: $COMPARE_URL"
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ secrets.RELEASE_PR_TOKEN || secrets.GITHUB_TOKEN }}
