@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,10 +6,12 @@
 
 # Type Alias: EventBridgeCustomEvents
 
-> **EventBridgeCustomEvents**: `object`
+> **EventBridgeCustomEvents** = `object`
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L38)
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L38)
 
 ## Index Signature
 
 \[`key`: `string`\]: `unknown`
+
+emitted a EBMessage if event name is provided and if it is enabled and supported on the event bridge

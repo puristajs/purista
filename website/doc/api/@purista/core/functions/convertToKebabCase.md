@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,9 +8,9 @@
 
 > **convertToKebabCase**(`str`): `string`
 
-Defined in: [packages/core/src/helper/string/convertToKebabCase.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/string/convertToKebabCase.impl.ts#L9)
+Defined in: [helper/string/convertToKebabCase.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/string/convertToKebabCase.impl.ts#L13)
 
-Converts a string into kebab-case
+Converts a string into kebab-case.
 
 ## Parameters
 
@@ -18,13 +18,16 @@ Converts a string into kebab-case
 
 `string`
 
-string
-
 ## Returns
 
 `string`
 
-string converted to kebab-case
+## Example
+
+```ts
+convertToKebabCase('SomeText')
+// => 'some-text'
+```
 
 ## Link
 

@@ -1,4 +1,4 @@
-[**@purista/mqttbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: MqttBridge
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:67](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L67)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:66](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L66)
 
 The MQTT event bridge connects to a MQTT broker.
 The broker must support the MQTT 5 protocol version
@@ -32,11 +32,11 @@ await eventBridge.start()
 
 ## Constructors
 
-### new MqttBridge()
+### Constructor
 
-> **new MqttBridge**(`config`?): [`MqttBridge`](MqttBridge.md)
+> **new MqttBridge**(`config?`): `MqttBridge`
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:74](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L74)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:79](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L79)
 
 #### Parameters
 
@@ -176,31 +176,31 @@ purista
 
 #### Returns
 
-[`MqttBridge`](MqttBridge.md)
+`MqttBridge`
 
 #### Overrides
 
-[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`constructor`](../../core/classes/EventBridgeBaseClass.md#constructors)
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`constructor`](../../core/classes/EventBridgeBaseClass.md#constructor)
 
 ## Properties
 
 ### client
 
-> **client**: `undefined` \| `MqttClient`
+> **client**: `MqttClient` \| `undefined`
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:70](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L70)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:67](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L67)
 
 ***
 
 ### config
 
-> **config**: [`Complete`](../../core/type-aliases/Complete.md)\<\{ `allowRetries`: `boolean`; `defaultCommandTimeout`: `number`; `defaultMessageExpiryInterval`: `number`; `defaultSessionExpiryInterval`: `number`; `emptyTopicPartString`: `string`; `instanceId`: `string`; `logger`: [`Logger`](../../core/classes/Logger.md); `logLevel`: [`LogLevelName`](../../core/type-aliases/LogLevelName.md); `qosCommand`: `QoS`; `qoSSubscription`: `QoS`; `shareTopicName`: `string`; `shareTopicPrefix`: `string`; `spanProcessor`: `SpanProcessor`; `topicPrefix`: `string`; \}\>
+> **config**: [`Complete`](../../core/type-aliases/Complete.md)\<[`EventBridgeConfig`](../../core/type-aliases/EventBridgeConfig.md)\<`ConfigType`\>\>
 
 Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:17
 
 #### Inherited from
 
-[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`config`](../../core/classes/EventBridgeBaseClass.md#config-1)
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`config`](../../core/classes/EventBridgeBaseClass.md#config)
 
 ***
 
@@ -262,7 +262,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 #### Inherited from
 
-[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`name`](../../core/classes/EventBridgeBaseClass.md#name-1)
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`name`](../../core/classes/EventBridgeBaseClass.md#name)
 
 ***
 
@@ -270,7 +270,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 > **pendingInvocations**: `Map`\<`string`, [`PendigInvocation`](../../core/type-aliases/PendigInvocation.md)\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:71](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L71)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:68](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L68)
 
 ***
 
@@ -290,7 +290,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:388](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L388)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:413](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L413)
 
 Shut down event bridge as gracefully as possible
 
@@ -310,13 +310,16 @@ Shut down event bridge as gracefully as possible
 
 ### emit()
 
-> **emit**\<`K`\>(`eventName`, `parameter`?): `void`
+> **emit**\<`K`\>(`eventName`, `parameter?`): `void`
 
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:13
+Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:16
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{ `[key: `custom-${string}`]`: `unknown`;  `[key: `adapter-${string}`]`: `unknown`;  `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+##### K
+
+`K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
 
 #### Parameters
 
@@ -340,15 +343,17 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:13
 
 ### emitMessage()
 
-> **emitMessage**\<`T`\>(`message`, `contentType`, `contentEncoding`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
+> **emitMessage**\<`T`\>(`message`, `contentType?`, `contentEncoding?`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:133](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L133)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:138](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L138)
 
 Emit a message to the eventbridge without awaiting a result
 
 #### Type Parameters
 
-• **T** *extends* [`EBMessage`](../../core/type-aliases/EBMessage.md)
+##### T
+
+`T` *extends* [`EBMessage`](../../core/type-aliases/EBMessage.md)
 
 #### Parameters
 
@@ -358,11 +363,11 @@ Emit a message to the eventbridge without awaiting a result
 
 the message
 
-##### contentType
+##### contentType?
 
 `string` = `'application/json'`
 
-##### contentEncoding
+##### contentEncoding?
 
 `string` = `'utf-8'`
 
@@ -398,25 +403,27 @@ Tracer
 
 ### invoke()
 
-> **invoke**\<`T`\>(`input`, `commandTimeout`): `Promise`\<`T`\>
+> **invoke**\<`T`\>(`input`, `commandTimeout?`): `Promise`\<`T`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:209](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L209)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:215](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L215)
 
 Call a command of a service and return the result of this command
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
 ##### input
 
-`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`Command`](../../core/enumerations/EBMessageType.md#command); `otp`: `string`; `payload`: \{ `parameter`: `unknown`; `payload`: `unknown`; \}; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"id"` \| `"timestamp"` \| `"correlationId"` \| `"messageType"`\>
+`Omit`\<[`Command`](../../core/type-aliases/Command.md), `"id"` \| `"messageType"` \| `"timestamp"` \| `"correlationId"`\>
 
 a partial command message
 
-##### commandTimeout
+##### commandTimeout?
 
 `number` = `...`
 
@@ -436,7 +443,7 @@ the time to live (timeout) of the invocation
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:205](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L205)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:211](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L211)
 
 Indicates if the eventbridge is running and works correctly
 
@@ -454,7 +461,7 @@ Indicates if the eventbridge is running and works correctly
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:201](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L201)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:207](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L207)
 
 Indicates if the eventbridge has been started and is connected to underlaying message broker
 
@@ -472,11 +479,14 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 > **off**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:12
+Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:15
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{ `[key: `custom-${string}`]`: `unknown`;  `[key: `adapter-${string}`]`: `unknown`;  `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+##### K
+
+`K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
 
 #### Parameters
 
@@ -502,11 +512,14 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:12
 
 > **on**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:11
+Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:14
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{ `[key: `custom-${string}`]`: `unknown`;  `[key: `adapter-${string}`]`: `unknown`;  `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+##### K
+
+`K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
 
 #### Parameters
 
@@ -532,7 +545,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:11
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:331](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L331)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:338](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L338)
 
 #### Parameters
 
@@ -544,7 +557,7 @@ the address of the service command (service name, version and command name)
 
 ##### cb
 
-(`message`) => `Promise`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../../core/enumerations/EBMessageType.md#commanderrorresponse); `otp`: `string`; `payload`: \{ `data`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../../core/enumerations/StatusCode.md); \}; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \} \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../../core/enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+(`message`) => `Promise`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../../core/enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../../core/enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \} \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../../core/enumerations/EBMessageType.md#commandsuccessresponse); `otp?`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>
 
 the function to be called if a matching command arrives
 
@@ -570,7 +583,7 @@ the function to be called if a matching command arrives
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:360](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L360)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:369](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L369)
 
 Register a new subscription
 
@@ -584,7 +597,7 @@ the subscription definition
 
 ##### cb
 
-(`message`) => `Promise`\<`undefined` \| `Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"id"` \| `"timestamp"`\>\>
+(`message`) => `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
 the function to be called if a matching message arrives
 
@@ -602,7 +615,7 @@ the function to be called if a matching message arrives
 
 > **removeAllListeners**(): `void`
 
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:14
+Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:17
 
 #### Returns
 
@@ -618,7 +631,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:14
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:83](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L83)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:88](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L88)
 
 Start the eventbridge and connect to the underlaying message broker
 
@@ -646,7 +659,9 @@ Start a child span for opentelemetry tracking
 
 #### Type Parameters
 
-• **F**
+##### F
+
+`F`
 
 #### Parameters
 
@@ -666,7 +681,7 @@ span options
 
 optional context
 
-`undefined` | `Context`
+`Context` | `undefined`
 
 ##### fn
 
@@ -690,7 +705,7 @@ return value of fn
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:354](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L354)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:362](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L362)
 
 Unregister a service command
 
@@ -714,13 +729,13 @@ The address (service name, version and command name) of the command to be de-reg
 
 ### unregisterSubscription()
 
-> **unregisterSubscription**(`_address`): `Promise`\<`void`\>
+> **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [mqttbridge/src/MqttEventBridge.ts:386](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L386)
+Defined in: [mqttbridge/src/MqttEventBridge.ts:400](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/MqttEventBridge.ts#L400)
 
 #### Parameters
 
-##### \_address
+##### address
 
 [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md)
 
@@ -736,7 +751,7 @@ Defined in: [mqttbridge/src/MqttEventBridge.ts:386](https://github.com/puristajs
 
 ### wrapInSpan()
 
-> **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context`?): `Promise`\<`F`\>
+> **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
 Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:52
 
@@ -750,7 +765,9 @@ but not to trace the program flow itself
 
 #### Type Parameters
 
-• **F**
+##### F
+
+`F`
 
 #### Parameters
 

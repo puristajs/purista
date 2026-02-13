@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: BrokerHeaderCommandResponseMsg
 
-> **BrokerHeaderCommandResponseMsg**: [`Prettify`](Prettify.md)\<[`BrokerHeaderCommandMsg`](BrokerHeaderCommandMsg.md) & `object`\>
+> **BrokerHeaderCommandResponseMsg** = [`Prettify`](Prettify.md)\<[`BrokerHeaderCommandMsg`](BrokerHeaderCommandMsg.md) & `object`\>
 
-Defined in: [packages/core/src/core/types/BrokerHeaderCommandResponseMsg.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/BrokerHeaderCommandResponseMsg.ts#L5)
+Defined in: [core/types/BrokerHeaderCommandResponseMsg.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/BrokerHeaderCommandResponseMsg.ts#L5)

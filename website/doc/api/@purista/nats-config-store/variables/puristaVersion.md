@@ -1,4 +1,4 @@
-[**@purista/nats-config-store v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Variable: puristaVersion
 
-> `const` **puristaVersion**: `"2.1.0"` = `'2.1.0'`
+> `const` **puristaVersion**: `"2.2.0"` = `'2.2.0'`
 
 Defined in: [nats-config-store/src/version.ts:1](https://github.com/puristajs/purista/blob/master/packages/nats-config-store/src/version.ts#L1)

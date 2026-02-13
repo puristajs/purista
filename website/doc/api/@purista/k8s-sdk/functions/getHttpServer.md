@@ -1,4 +1,4 @@
-[**@purista/k8s-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,15 +6,15 @@
 
 # Function: getHttpServer()
 
-> **getHttpServer**(`input`, `name`): `Hono`\<`BlankEnv`, `BlankSchema`, `"/"`\>
+> **getHttpServer**(`input`, `name?`): `Hono`\<`BlankEnv`, `BlankSchema`, `"/"`\>
 
-Defined in: [getHttpServer.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/getHttpServer.impl.ts#L21)
+Defined in: [getHttpServer.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/k8s-sdk/src/getHttpServer.impl.ts#L26)
 
-Create a Hono web server.
-It adds per default the /healthz endpoint
-If services is set in options, all commands, which have defined http endpoints, will also be added as endpoints
+Create a Hono based web server.
 
-The returned server is not started. You need to do it manually.
+The server exposes a `/healthz` endpoint and, if configured, adds all HTTP
+enabled command routes from the given services.
+The returned `Hono` instance is not started automatically.
 
 ## Parameters
 
@@ -22,9 +22,9 @@ The returned server is not started. You need to do it manually.
 
 [`GetHttpServerConfig`](../type-aliases/GetHttpServerConfig.md)
 
-the config
+Server configuration.
 
-### name
+### name?
 
 `string` = `'K8sHttpHelperServer'`
 
@@ -32,4 +32,11 @@ the config
 
 `Hono`\<`BlankEnv`, `BlankSchema`, `"/"`\>
 
-a object with server, router, start and destroy functions and name var
+The configured `Hono` application instance.
+
+## Example
+
+```ts
+const app = getHttpServer({ logger, services: [svc], healthFn: async () => true })
+serve({ fetch: app.fetch, port: 3000 })
+```

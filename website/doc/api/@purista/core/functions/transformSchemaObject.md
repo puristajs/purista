@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **transformSchemaObject**(`schemaObject`, `ctx`, `path`): `string`
 
-Defined in: [packages/core/src/helper/schemaObjectToTsType/transform.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/schemaObjectToTsType/transform.ts#L49)
+Defined in: [helper/schemaObjectToTsType/transform.ts:55](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/schemaObjectToTsType/transform.ts#L55)
 
 ## Parameters
 

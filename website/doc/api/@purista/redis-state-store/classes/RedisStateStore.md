@@ -1,4 +1,4 @@
-[**@purista/redis-state-store v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: RedisStateStore\<M, F, S\>
 
-Defined in: [redis-state-store/src/RedisStateStore.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L41)
+Defined in: [redis-state-store/src/RedisStateStore.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L48)
 
 A state store for using redis as storage.
 State values are stored as stringified JSON.
@@ -48,19 +48,25 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 ## Type Parameters
 
-• **M** *extends* `RedisModules` = `RedisModules`
+### M
 
-• **F** *extends* `RedisFunctions` = `RedisFunctions`
+`M` *extends* `RedisModules` = `RedisModules`
 
-• **S** *extends* `RedisScripts` = `RedisScripts`
+### F
+
+`F` *extends* `RedisFunctions` = `RedisFunctions`
+
+### S
+
+`S` *extends* `RedisScripts` = `RedisScripts`
 
 ## Constructors
 
-### new RedisStateStore()
+### Constructor
 
-> **new RedisStateStore**\<`M`, `F`, `S`\>(`config`?): [`RedisStateStore`](RedisStateStore.md)\<`M`, `F`, `S`\>
+> **new RedisStateStore**\<`M`, `F`, `S`\>(`config?`): `RedisStateStore`\<`M`, `F`, `S`\>
 
-Defined in: [redis-state-store/src/RedisStateStore.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L48)
+Defined in: [redis-state-store/src/RedisStateStore.impl.ts:55](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L55)
 
 #### Parameters
 
@@ -74,7 +80,7 @@ Cache time to live in ms
 
 ###### config?
 
-`RedisClientOptions`\<`M`, `F`, `S`\>
+`RedisClientOptions`\<`M`, `F`, `S`, `RespVersions`, `TypeMapping`, `RedisSocketOptions`\>
 
 ###### enableCache?
 
@@ -114,19 +120,19 @@ A log level for new logger if logger is not set
 
 #### Returns
 
-[`RedisStateStore`](RedisStateStore.md)\<`M`, `F`, `S`\>
+`RedisStateStore`\<`M`, `F`, `S`\>
 
 #### Overrides
 
-[`StateStoreBaseClass`](../../core/classes/StateStoreBaseClass.md).[`constructor`](../../core/classes/StateStoreBaseClass.md#constructors)
+[`StateStoreBaseClass`](../../core/classes/StateStoreBaseClass.md).[`constructor`](../../core/classes/StateStoreBaseClass.md#constructor)
 
 ## Properties
 
 ### client
 
-> **client**: `RedisClientType`\<`M`, `F`, `S`\>
+> **client**: `RedisClientType`\<`M`, `F`, `S`, `RespVersions`, `TypeMapping`\>
 
-Defined in: [redis-state-store/src/RedisStateStore.impl.ts:46](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L46)
+Defined in: [redis-state-store/src/RedisStateStore.impl.ts:53](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L53)
 
 ***
 
@@ -144,7 +150,7 @@ Cache time to live in ms
 
 #### config?
 
-> `optional` **config**: `RedisClientOptions`\<`M`, `F`, `S`\>
+> `optional` **config**: `RedisClientOptions`\<`M`, `F`, `S`, `RespVersions`, `TypeMapping`, `RedisSocketOptions`\>
 
 #### enableCache?
 
@@ -184,7 +190,7 @@ A log level for new logger if logger is not set
 
 #### Inherited from
 
-[`StateStoreBaseClass`](../../core/classes/StateStoreBaseClass.md).[`config`](../../core/classes/StateStoreBaseClass.md#config-1)
+[`StateStoreBaseClass`](../../core/classes/StateStoreBaseClass.md).[`config`](../../core/classes/StateStoreBaseClass.md#config)
 
 ***
 
@@ -208,7 +214,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:19
 
 #### Inherited from
 
-[`StateStoreBaseClass`](../../core/classes/StateStoreBaseClass.md).[`name`](../../core/classes/StateStoreBaseClass.md#name-1)
+[`StateStoreBaseClass`](../../core/classes/StateStoreBaseClass.md).[`name`](../../core/classes/StateStoreBaseClass.md#name)
 
 ## Methods
 
@@ -216,7 +222,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:19
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [redis-state-store/src/RedisStateStore.impl.ts:107](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L107)
+Defined in: [redis-state-store/src/RedisStateStore.impl.ts:114](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L114)
 
 #### Returns
 
@@ -230,13 +236,13 @@ Defined in: [redis-state-store/src/RedisStateStore.impl.ts:107](https://github.c
 
 ### getClient()
 
-> `protected` **getClient**(): `Promise`\<`RedisClientType`\<`M`, `F`, `S`\>\>
+> `protected` **getClient**(): `Promise`\<`RedisClientType`\<`M`, `F`, `S`, `RespVersions`, `TypeMapping`\>\>
 
-Defined in: [redis-state-store/src/RedisStateStore.impl.ts:54](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L54)
+Defined in: [redis-state-store/src/RedisStateStore.impl.ts:61](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L61)
 
 #### Returns
 
-`Promise`\<`RedisClientType`\<`M`, `F`, `S`\>\>
+`Promise`\<`RedisClientType`\<`M`, `F`, `S`, `RespVersions`, `TypeMapping`\>\>
 
 ***
 
@@ -248,7 +254,9 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:22
 
 #### Type Parameters
 
-• **StateNames** *extends* `string`[]
+##### StateNames
+
+`StateNames` *extends* `string`[]
 
 #### Parameters
 
@@ -270,11 +278,13 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:22
 
 > `protected` **getStateImpl**\<`StateNames`\>(...`stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 
-Defined in: [redis-state-store/src/RedisStateStore.impl.ts:61](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L61)
+Defined in: [redis-state-store/src/RedisStateStore.impl.ts:68](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L68)
 
 #### Type Parameters
 
-• **StateNames** *extends* `string`[]
+##### StateNames
+
+`StateNames` *extends* `string`[]
 
 #### Parameters
 
@@ -318,7 +328,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:24
 
 > `protected` **removeStateImpl**(`stateName`): `Promise`\<`void`\>
 
-Defined in: [redis-state-store/src/RedisStateStore.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L80)
+Defined in: [redis-state-store/src/RedisStateStore.impl.ts:87](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L87)
 
 #### Parameters
 
@@ -366,7 +376,7 @@ Defined in: core/dist/commonjs/core/StateStore/StateStoreBaseClass.impl.d.ts:26
 
 > `protected` **setStateImpl**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
-Defined in: [redis-state-store/src/RedisStateStore.impl.ts:92](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L92)
+Defined in: [redis-state-store/src/RedisStateStore.impl.ts:99](https://github.com/puristajs/purista/blob/master/packages/redis-state-store/src/RedisStateStore.impl.ts#L99)
 
 #### Parameters
 

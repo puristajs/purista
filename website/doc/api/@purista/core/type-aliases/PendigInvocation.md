@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,25 +6,35 @@
 
 # Type Alias: PendigInvocation
 
-> **PendigInvocation**: `object`
+> **PendigInvocation** = `object`
 
-Defined in: [packages/core/src/DefaultEventBridge/types/PendingInvocations.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/PendingInvocations.ts#L4)
+Defined in: [DefaultEventBridge/types/PendingInvocations.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/PendingInvocations.ts#L4)
 
-## Type declaration
+## Methods
 
 ### reject()
+
+> **reject**(`error`): `void`
+
+Defined in: [DefaultEventBridge/types/PendingInvocations.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/PendingInvocations.ts#L6)
 
 #### Parameters
 
 ##### error
 
-[`UnhandledError`](../classes/UnhandledError.md) | [`HandledError`](../classes/HandledError.md)
+[`HandledError`](../classes/HandledError.md) | [`UnhandledError`](../classes/UnhandledError.md)
 
 #### Returns
 
 `void`
 
+***
+
 ### resolve()
+
+> **resolve**(`responsePayload`): `void`
+
+Defined in: [DefaultEventBridge/types/PendingInvocations.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/PendingInvocations.ts#L5)
 
 #### Parameters
 

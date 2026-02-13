@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Enumeration: EventBridgeEventNames
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L5)
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L5)
 
 ## Enumeration Members
 
@@ -14,7 +14,7 @@ Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:5](ht
 
 > **EventbridgeConnected**: `"eventbridge-connected"`
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L6)
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L6)
 
 ***
 
@@ -22,7 +22,7 @@ Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:6](ht
 
 > **EventbridgeConnectionError**: `"eventbridge-connection-error"`
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L7)
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L7)
 
 ***
 
@@ -30,7 +30,7 @@ Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:7](ht
 
 > **EventbridgeDisconnected**: `"eventbridge-disconnected"`
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L9)
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L9)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:9](ht
 
 > **EventbridgeError**: `"eventbridge-error"`
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L13)
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L13)
 
 ***
 
@@ -46,4 +46,4 @@ Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:13](h
 
 > **EventbridgeReconnecting**: `"eventbridge-reconnecting"`
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L11)
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L11)

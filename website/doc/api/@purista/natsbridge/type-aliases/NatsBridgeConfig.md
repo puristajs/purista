@@ -1,4 +1,4 @@
-[**@purista/natsbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Type Alias: NatsBridgeConfig
 
-> **NatsBridgeConfig**: [`Prettify`](../../core/type-aliases/Prettify.md)\<`object` & `ConnectionOptions`\>
+> **NatsBridgeConfig** = [`Prettify`](../../core/type-aliases/Prettify.md)\<`object` & `ConnectionOptions`\>
 
 Defined in: [natsbridge/src/types/NatsBridgeConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/types/NatsBridgeConfig.ts#L6)
 

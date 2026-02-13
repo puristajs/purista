@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Type Alias: CommandDefinitionList\<S\>
 
-> **CommandDefinitionList**\<`S`\>: `Promise`\<[`CommandDefinition`](CommandDefinition.md)\<`S`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`CommandDefinitionMetadataBase`](CommandDefinitionMetadataBase.md)\>\>[]
+> **CommandDefinitionList**\<`S`\> = `Promise`\<[`CommandDefinition`](CommandDefinition.md)\<`S`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`CommandDefinitionMetadataBase`](CommandDefinitionMetadataBase.md)\>\>[]
 
-Defined in: [packages/core/src/core/types/commandType/CommandDefinitionList.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinitionList.ts#L12)
+Defined in: [core/types/commandType/CommandDefinitionList.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinitionList.ts#L12)
 
 Helper type for creating list of service commands to be passed as input to service class
 
@@ -18,4 +18,6 @@ export const userServiceCommands: CommandDefinitionList<UserService> = [signUp.g
 
 ## Type Parameters
 
-• **S** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
+### S
+
+`S` *extends* [`ServiceClass`](../interfaces/ServiceClass.md)

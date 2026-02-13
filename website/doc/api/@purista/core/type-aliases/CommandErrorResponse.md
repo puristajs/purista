@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,8 +6,8 @@
 
 # Type Alias: CommandErrorResponse
 
-> **CommandErrorResponse**: [`Prettify`](Prettify.md)\<`object` & [`EBMessageBase`](EBMessageBase.md)\>
+> **CommandErrorResponse** = [`Prettify`](Prettify.md)\<`object` & [`EBMessageBase`](EBMessageBase.md)\>
 
-Defined in: [packages/core/src/core/types/commandType/CommandErrorResponse.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandErrorResponse.ts#L13)
+Defined in: [core/types/commandType/CommandErrorResponse.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandErrorResponse.ts#L13)
 
 CommandErrorResponse is a response to a specific previously received command which indicates some failure.

@@ -1,4 +1,4 @@
-[**@purista/base-http-bridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -12,13 +12,11 @@ Defined in: [base-http-bridge/src/HttpEventBridge/getDefaultHttpEventBridgeConfi
 
 ## Returns
 
-`object`
-
 ### apiPrefix?
 
 > `optional` **apiPrefix**: `string`
 
-the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI defintion
+the prefix to be used if the command is configured as REST api endpoint according to the OpenAPI definition
 needs to `enableRestApiExpose` set to `true`
 
 #### Default

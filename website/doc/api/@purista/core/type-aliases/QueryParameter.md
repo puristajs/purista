@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,20 +6,28 @@
 
 # Type Alias: QueryParameter\<ParameterType\>
 
-> **QueryParameter**\<`ParameterType`\>: `object`
+> **QueryParameter**\<`ParameterType`\> = `object`
 
-Defined in: [packages/core/src/core/HttpServer/types/QueryParameter.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/QueryParameter.ts#L3)
+Defined in: [core/HttpServer/types/QueryParameter.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/QueryParameter.ts#L3)
 
 ## Type Parameters
 
-• **ParameterType** = [`EmptyObject`](EmptyObject.md)
+### ParameterType
 
-## Type declaration
+`ParameterType` = [`EmptyObject`](EmptyObject.md)
+
+## Properties
 
 ### name
 
 > **name**: keyof `ParameterType`
 
+Defined in: [core/HttpServer/types/QueryParameter.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/QueryParameter.ts#L5)
+
+***
+
 ### required
 
 > **required**: `boolean`
+
+Defined in: [core/HttpServer/types/QueryParameter.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/types/QueryParameter.ts#L4)

@@ -1,4 +1,4 @@
-**@purista/hono-http-server v2.1.0**
+[**PURISTA API**](../../README.md)
 
 ***
 
@@ -69,3 +69,67 @@ main()
 **Join the [Discord Chat](https://discord.gg/9feaUm3H2v)**
 
 <a href="https://www.producthunt.com/posts/purista?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-purista" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=386519&theme=light" alt="PURISTA - Typescript&#0032;framework&#0032;for&#0032;IoT&#0044;&#0032;microservices&#0044;&#0032;and&#0032;serverless | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
+Package for using a Hono as webserver.
+
+Minimal example:
+
+## Example
+
+```typescript
+import { serve } from '@hono/node-server'
+import { DefaultEventBridge } from '@purista/core'
+import { honoV1Service } from '@purista/hono-http-server'
+
+// create and init our eventbridge
+const eventBridge = new DefaultEventBridge()
+await eventBridge.start()
+
+// add your service
+const pingService = await pingV1Service.getInstance(eventBridge)
+await pingService.start()
+
+const honoService = await honoV1Service.getInstance(eventBridge, {
+  serviceConfig: {
+    services: [pingService]
+  }
+})
+await honoService.start()
+
+const _serverInstance = serve({
+  fetch: honoService.app.fetch,
+  port: 3000,
+})
+
+```
+
+## Type Aliases
+
+- [BindingsBase](type-aliases/BindingsBase.md)
+- [EndpointProtectMiddleware](type-aliases/EndpointProtectMiddleware.md)
+- [HealthFunction](type-aliases/HealthFunction.md)
+- [HonoServiceV1Config](type-aliases/HonoServiceV1Config.md)
+- [HonoServiceV1ConfigPartial](type-aliases/HonoServiceV1ConfigPartial.md)
+- [VariablesBase](type-aliases/VariablesBase.md)
+
+## Variables
+
+- [DEFAULT\_API\_MOUNT\_PATH](variables/DEFAULT_API_MOUNT_PATH.md)
+- [ExternalDocumentationObjectSchema](variables/ExternalDocumentationObjectSchema.md)
+- [~~getQueryDefintion~~](variables/getQueryDefintion.md)
+- [honoServiceV1ConfigSchema](variables/honoServiceV1ConfigSchema.md)
+- [honoV1Service](variables/honoV1Service.md)
+- [InfoObjectSchema](variables/InfoObjectSchema.md)
+- [OPENAPI\_DEFAULT\_INFO](variables/OPENAPI_DEFAULT_INFO.md)
+- [puristaVersion](variables/puristaVersion.md)
+- [ServerObjectSchema](variables/ServerObjectSchema.md)
+- [ServiceEvent](variables/ServiceEvent.md)
+- [TagObjectSchema](variables/TagObjectSchema.md)
+
+## Functions
+
+- [addPathToOpenApi](functions/addPathToOpenApi.md)
+- [getErrorName](functions/getErrorName.md)
+- [getErrorResponseSchema](functions/getErrorResponseSchema.md)
+- [getParameterDefinition](functions/getParameterDefinition.md)
+- [getQueryDefinition](functions/getQueryDefinition.md)

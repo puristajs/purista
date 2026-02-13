@@ -1,4 +1,4 @@
-[**@purista/hono-http-server v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Variable: ExternalDocumentationObjectSchema
 
-> `const` **ExternalDocumentationObjectSchema**: `ZodObject`\<\{ `description`: `ZodOptional`\<`ZodString`\>; `url`: `ZodString`; \}, `"strip"`, `ZodTypeAny`, \{ `description`: `string`; `url`: `string`; \}, \{ `description`: `string`; `url`: `string`; \}\>
+> `const` **ExternalDocumentationObjectSchema**: `ZodObject`\<\{ `description`: `ZodOptional`\<`ZodString`\>; `url`: `ZodString`; \}, `$strip`\>
 
-Defined in: [packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:14](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L14)
+Defined in: [hono-http-server/src/service/hono/v1/honoServiceConfig.ts:14](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L14)

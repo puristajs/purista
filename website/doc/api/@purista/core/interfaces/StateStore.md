@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: StateStore
 
-Defined in: [packages/core/src/core/StateStore/types/StateStore.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L10)
+Defined in: [core/StateStore/types/StateStore.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L10)
 
 Interface definition for state store implementations
 
@@ -16,7 +16,7 @@ Interface definition for state store implementations
 
 > **getState**: [`StateGetterFunction`](../type-aliases/StateGetterFunction.md)
 
-Defined in: [packages/core/src/core/StateStore/types/StateStore.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L19)
+Defined in: [core/StateStore/types/StateStore.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L19)
 
 get a state value
 
@@ -38,7 +38,7 @@ UnhandledError
 
 > **name**: `string`
 
-Defined in: [packages/core/src/core/StateStore/types/StateStore.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L12)
+Defined in: [core/StateStore/types/StateStore.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L12)
 
 name of store
 
@@ -48,7 +48,7 @@ name of store
 
 > **removeState**: [`StateDeleteFunction`](../type-aliases/StateDeleteFunction.md)
 
-Defined in: [packages/core/src/core/StateStore/types/StateStore.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L26)
+Defined in: [core/StateStore/types/StateStore.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L26)
 
 delete a state value
 
@@ -66,7 +66,7 @@ UnhandledError
 
 > **setState**: [`StateSetterFunction`](../type-aliases/StateSetterFunction.md)
 
-Defined in: [packages/core/src/core/StateStore/types/StateStore.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L34)
+Defined in: [core/StateStore/types/StateStore.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L34)
 
 set a state value
 
@@ -88,7 +88,7 @@ UnhandledError
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/StateStore/types/StateStore.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L39)
+Defined in: [core/StateStore/types/StateStore.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateStore.ts#L39)
 
 disconnects and shuts down the state store
 

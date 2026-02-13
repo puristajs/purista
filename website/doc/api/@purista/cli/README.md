@@ -1,4 +1,4 @@
-**@purista/cli**
+[**PURISTA API**](../../README.md)
 
 ***
 
@@ -50,3 +50,55 @@ purista add command user
 **Join the [Discord Chat](https://discord.gg/9feaUm3H2v)**
 
 <a href="https://www.producthunt.com/posts/purista?utm_source=badge-featured&utm_medium=badge&utm_souce=badge-purista" target="_blank"><img src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=386519&theme=light" alt="PURISTA - Typescript&#0032;framework&#0032;for&#0032;IoT&#0044;&#0032;microservices&#0044;&#0032;and&#0032;serverless | Product Hunt" style="width: 250px; height: 54px;" width="250" height="54" /></a>
+
+## Interfaces
+
+- [Options](interfaces/Options.md)
+- [PascalCaseOptions](interfaces/PascalCaseOptions.md)
+
+## Type Aliases
+
+- [Locale](type-aliases/Locale.md)
+- [PuristaConfig](type-aliases/PuristaConfig.md)
+- [PuristaProjectInfo](type-aliases/PuristaProjectInfo.md)
+- [PuristaProjectServices](type-aliases/PuristaProjectServices.md)
+
+## Variables
+
+- [puristaConfigSchema](variables/puristaConfigSchema.md)
+
+## Functions
+
+- [addPuristaCommand](functions/addPuristaCommand.md)
+- [addPuristaService](functions/addPuristaService.md)
+- [addPuristaSubscription](functions/addPuristaSubscription.md)
+- [camelCase](functions/camelCase.md)
+- [capitalCase](functions/capitalCase.md)
+- [constantCase](functions/constantCase.md)
+- [convertToProjectFileCasing](functions/convertToProjectFileCasing.md)
+- [dotCase](functions/dotCase.md)
+- [getCommandBuilderFileContent](functions/getCommandBuilderFileContent.md)
+- [getCommandSchemaFileContent](functions/getCommandSchemaFileContent.md)
+- [getCommandTestFileContent](functions/getCommandTestFileContent.md)
+- [getCommandTypeFileContent](functions/getCommandTypeFileContent.md)
+- [getGeneralServiceConfigFileContent](functions/getGeneralServiceConfigFileContent.md)
+- [getServiceBuilderFileContent](functions/getServiceBuilderFileContent.md)
+- [getServiceConfigFileContent](functions/getServiceConfigFileContent.md)
+- [getServiceFileContent](functions/getServiceFileContent.md)
+- [getServiceTestFileContent](functions/getServiceTestFileContent.md)
+- [getSubscriptionBuilderFileContent](functions/getSubscriptionBuilderFileContent.md)
+- [getSubscriptionSchemaFileContent](functions/getSubscriptionSchemaFileContent.md)
+- [getSubscriptionTestFileContent](functions/getSubscriptionTestFileContent.md)
+- [getSubscriptionTypeFileContent](functions/getSubscriptionTypeFileContent.md)
+- [kebabCase](functions/kebabCase.md)
+- [loadPuristaConfig](functions/loadPuristaConfig.md)
+- [noCase](functions/noCase.md)
+- [pascalCase](functions/pascalCase.md)
+- [pascalSnakeCase](functions/pascalSnakeCase.md)
+- [pathCase](functions/pathCase.md)
+- [scanPuristaProject](functions/scanPuristaProject.md)
+- [sentenceCase](functions/sentenceCase.md)
+- [snakeCase](functions/snakeCase.md)
+- [split](functions/split.md)
+- [splitSeparateNumbers](functions/splitSeparateNumbers.md)
+- [trainCase](functions/trainCase.md)

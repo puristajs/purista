@@ -1,12 +1,12 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / StateStoreBaseClass
 
-# Class: `abstract` StateStoreBaseClass\<StateStoreConfigType\>
+# Abstract Class: StateStoreBaseClass\<StateStoreConfigType\>
 
-Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L20)
+Defined in: [core/StateStore/StateStoreBaseClass.impl.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L20)
 
 Base class for config store implementations
 The actual store implementation must overwrite the protected methods:
@@ -26,15 +26,17 @@ __DO NOT OVERWRITE__: the regular methods getState, setState or removeState
 
 ## Type Parameters
 
-• **StateStoreConfigType** *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../type-aliases/EmptyObject.md)
+### StateStoreConfigType
+
+`StateStoreConfigType` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](../type-aliases/EmptyObject.md)
 
 ## Constructors
 
-### new StateStoreBaseClass()
+### Constructor
 
-> **new StateStoreBaseClass**\<`StateStoreConfigType`\>(`name`, `config`): [`StateStoreBaseClass`](StateStoreBaseClass.md)\<`StateStoreConfigType`\>
+> **new StateStoreBaseClass**\<`StateStoreConfigType`\>(`name`, `config`): `StateStoreBaseClass`\<`StateStoreConfigType`\>
 
-Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L26)
+Defined in: [core/StateStore/StateStoreBaseClass.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L26)
 
 #### Parameters
 
@@ -48,7 +50,7 @@ Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:26](h
 
 #### Returns
 
-[`StateStoreBaseClass`](StateStoreBaseClass.md)\<`StateStoreConfigType`\>
+`StateStoreBaseClass`\<`StateStoreConfigType`\>
 
 ## Properties
 
@@ -56,7 +58,7 @@ Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:26](h
 
 > **config**: \{ \[K in string \| number \| symbol\]: (\{ cacheTtl?: number; enableCache?: boolean; enableGet?: boolean; enableRemove?: boolean; enableSet?: boolean; logger?: Logger; logLevel?: LogLevelName \} & StateStoreConfigType)\[K\] \}
 
-Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L22)
+Defined in: [core/StateStore/StateStoreBaseClass.impl.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L22)
 
 ***
 
@@ -64,7 +66,7 @@ Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:22](h
 
 > **logger**: [`Logger`](Logger.md)
 
-Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L21)
+Defined in: [core/StateStore/StateStoreBaseClass.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L21)
 
 ***
 
@@ -72,7 +74,7 @@ Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:21](h
 
 > **name**: `string`
 
-Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L24)
+Defined in: [core/StateStore/StateStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L24)
 
 ## Methods
 
@@ -80,7 +82,7 @@ Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:24](h
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:84](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L84)
+Defined in: [core/StateStore/StateStoreBaseClass.impl.ts:84](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L84)
 
 #### Returns
 
@@ -92,11 +94,13 @@ Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:84](h
 
 > **getState**\<`StateNames`\>(...`stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../type-aliases/ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 
-Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L45)
+Defined in: [core/StateStore/StateStoreBaseClass.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L45)
 
 #### Type Parameters
 
-• **StateNames** *extends* `string`[]
+##### StateNames
+
+`StateNames` *extends* `string`[]
 
 #### Parameters
 
@@ -114,11 +118,13 @@ Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:45](h
 
 > `abstract` `protected` **getStateImpl**\<`StateNames`\>(...`stateNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../type-aliases/ObjectWithKeysFromStringArray.md)\<`StateNames`\>\>
 
-Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L40)
+Defined in: [core/StateStore/StateStoreBaseClass.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L40)
 
 #### Type Parameters
 
-• **StateNames** *extends* `string`[]
+##### StateNames
+
+`StateNames` *extends* `string`[]
 
 #### Parameters
 
@@ -136,7 +142,7 @@ Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:40](h
 
 > **removeState**(`stateName`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:60](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L60)
+Defined in: [core/StateStore/StateStoreBaseClass.impl.ts:60](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L60)
 
 #### Parameters
 
@@ -154,7 +160,7 @@ Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:60](h
 
 > `abstract` `protected` **removeStateImpl**(`stateName`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:58](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L58)
+Defined in: [core/StateStore/StateStoreBaseClass.impl.ts:58](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L58)
 
 #### Parameters
 
@@ -172,7 +178,7 @@ Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:58](h
 
 > **setState**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:74](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L74)
+Defined in: [core/StateStore/StateStoreBaseClass.impl.ts:74](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L74)
 
 #### Parameters
 
@@ -194,7 +200,7 @@ Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:74](h
 
 > `abstract` `protected` **setStateImpl**(`stateName`, `stateValue`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts:71](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L71)
+Defined in: [core/StateStore/StateStoreBaseClass.impl.ts:71](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/StateStoreBaseClass.impl.ts#L71)
 
 #### Parameters
 

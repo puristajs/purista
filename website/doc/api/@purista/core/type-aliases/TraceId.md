@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,8 +6,8 @@
 
 # Type Alias: TraceId
 
-> **TraceId**: `string`
+> **TraceId** = `string`
 
-Defined in: [packages/core/src/core/types/TraceId.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/TraceId.ts#L4)
+Defined in: [core/types/TraceId.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/TraceId.ts#L4)
 
 The trace id which will be passed through all commands, invocations and subscriptions

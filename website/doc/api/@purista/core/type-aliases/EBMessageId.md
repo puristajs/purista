@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,8 +6,8 @@
 
 # Type Alias: EBMessageId
 
-> **EBMessageId**: `string`
+> **EBMessageId** = `string`
 
-Defined in: [packages/core/src/core/types/EBMessageId.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageId.ts#L4)
+Defined in: [core/types/EBMessageId.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageId.ts#L4)
 
 Unique id of the event bridge message

@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Type Alias: PubSubSubscriptionType
 
-> **PubSubSubscriptionType**: `object`
+> **PubSubSubscriptionType** = `object`
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubSubscription.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubSubscription.type.ts#L19)
 

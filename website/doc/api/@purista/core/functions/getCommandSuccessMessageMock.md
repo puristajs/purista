@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,15 +6,17 @@
 
 # Function: getCommandSuccessMessageMock()
 
-> **getCommandSuccessMessageMock**\<`PayloadType`\>(`payload`, `input`?, `commandMessage`?): `Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `PayloadType`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+> **getCommandSuccessMessageMock**\<`PayloadType`\>(`payload`, `input?`, `commandMessage?`): `Readonly`\<[`CommandSuccessResponse`](../type-aliases/CommandSuccessResponse.md)\<`PayloadType`\>\>
 
-Defined in: [packages/core/src/mocks/messages/getCommandSuccessMessage.mock.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCommandSuccessMessage.mock.ts#L14)
+Defined in: [mocks/messages/getCommandSuccessMessage.mock.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/messages/getCommandSuccessMessage.mock.ts#L13)
 
 A function that returns a mocked command success response message.
 
 ## Type Parameters
 
-• **PayloadType**
+### PayloadType
+
+`PayloadType`
 
 ## Parameters
 
@@ -24,7 +26,7 @@ A function that returns a mocked command success response message.
 
 ### input?
 
-`Partial`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `PayloadType`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+`Partial`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp?`: `string`; `payload`: `PayloadType`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>
 
 ### commandMessage?
 
@@ -138,4 +140,4 @@ trace id of message
 
 ## Returns
 
-`Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `PayloadType`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+`Readonly`\<[`CommandSuccessResponse`](../type-aliases/CommandSuccessResponse.md)\<`PayloadType`\>\>

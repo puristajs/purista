@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: InvokeList
 
-> **InvokeList**: `Record`\<`string`, `Record`\<`string`, `Record`\<`string`, \{ `outputSchema`: `Schema`; `parameterSchema`: `Schema`; `payloadSchema`: `Schema`; \}\>\>\>
+> **InvokeList** = `Record`\<`string`, `Record`\<`string`, `Record`\<`string`, \{ `outputSchema?`: [`Schema`](Schema.md); `parameterSchema?`: [`Schema`](Schema.md); `payloadSchema?`: [`Schema`](Schema.md); \}\>\>\>
 
-Defined in: [packages/core/src/core/types/InvokeList.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/InvokeList.ts#L3)
+Defined in: [core/types/InvokeList.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/InvokeList.ts#L3)

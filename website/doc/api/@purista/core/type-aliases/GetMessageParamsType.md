@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,12 +6,16 @@
 
 # Type Alias: GetMessageParamsType\<ParamsSchema, TransformInputParamsSchema\>
 
-> **GetMessageParamsType**\<`ParamsSchema`, `TransformInputParamsSchema`\>: `TransformInputParamsSchema` *extends* `Schema` ? `InferIn`\<`TransformInputParamsSchema`\> : `ParamsSchema` *extends* `Schema` ? `InferIn`\<`ParamsSchema`\> : `unknown`
+> **GetMessageParamsType**\<`ParamsSchema`, `TransformInputParamsSchema`\> = `TransformInputParamsSchema` *extends* [`Schema`](Schema.md) ? [`InferIn`](InferIn.md)\<`TransformInputParamsSchema`\> : `ParamsSchema` *extends* [`Schema`](Schema.md) ? [`InferIn`](InferIn.md)\<`ParamsSchema`\> : `unknown`
 
-Defined in: [packages/core/src/core/types/GetMessageParamsType.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GetMessageParamsType.ts#L3)
+Defined in: [core/types/GetMessageParamsType.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GetMessageParamsType.ts#L3)
 
 ## Type Parameters
 
-• **ParamsSchema** *extends* `Schema` \| `undefined`
+### ParamsSchema
 
-• **TransformInputParamsSchema** *extends* `Schema` \| `undefined`
+`ParamsSchema` *extends* [`Schema`](Schema.md) \| `undefined`
+
+### TransformInputParamsSchema
+
+`TransformInputParamsSchema` *extends* [`Schema`](Schema.md) \| `undefined`

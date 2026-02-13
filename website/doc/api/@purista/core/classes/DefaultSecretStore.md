@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: DefaultSecretStore
 
-Defined in: [packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L38)
+Defined in: [DefaultSecretStore/DefaultSecretStore.impl.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L38)
 
 The DefaultSecretStore is a placeholder which offers all needed methods.
 Getters and setters will throw a UnhandledError with status `Unauthorized`, when a disabled operation is called.
@@ -24,7 +24,7 @@ const store = new DefaultSecretStore({
 })
 console.log(await store.getSecret('secretOne', 'secretTwo) // outputs: { secretOne: my_secret_one_value, secretTwo: 'my_secret_two_value' }
 ```
-Per default, setting/changing and removal of values are disabled.
+By default, setting/changing and removal of values are disabled.
 You can enable it on instance creation:
 
 ```typescript
@@ -45,11 +45,11 @@ const store = new DefaultSecretStore({
 
 ## Constructors
 
-### new DefaultSecretStore()
+### Constructor
 
-> **new DefaultSecretStore**(`config`?): [`DefaultSecretStore`](DefaultSecretStore.md)
+> **new DefaultSecretStore**(`config?`): `DefaultSecretStore`
 
-Defined in: [packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L40)
+Defined in: [DefaultSecretStore/DefaultSecretStore.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L40)
 
 #### Parameters
 
@@ -99,11 +99,11 @@ A log level for new logger if logger is not set
 
 #### Returns
 
-[`DefaultSecretStore`](DefaultSecretStore.md)
+`DefaultSecretStore`
 
 #### Overrides
 
-[`SecretStoreBaseClass`](SecretStoreBaseClass.md).[`constructor`](SecretStoreBaseClass.md#constructors)
+[`SecretStoreBaseClass`](SecretStoreBaseClass.md).[`constructor`](SecretStoreBaseClass.md#constructor)
 
 ## Properties
 
@@ -111,7 +111,7 @@ A log level for new logger if logger is not set
 
 > **cache**: [`SecretStoreCacheMap`](../type-aliases/SecretStoreCacheMap.md)
 
-Defined in: [packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L29)
+Defined in: [core/SecretStore/SecretStoreBaseClass.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L29)
 
 #### Inherited from
 
@@ -123,7 +123,7 @@ Defined in: [packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:29]
 
 > **config**: `object`
 
-Defined in: [packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L25)
+Defined in: [core/SecretStore/SecretStoreBaseClass.impl.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L25)
 
 #### Index Signature
 
@@ -173,7 +173,7 @@ A log level for new logger if logger is not set
 
 #### Inherited from
 
-[`SecretStoreBaseClass`](SecretStoreBaseClass.md).[`config`](SecretStoreBaseClass.md#config-1)
+[`SecretStoreBaseClass`](SecretStoreBaseClass.md).[`config`](SecretStoreBaseClass.md#config)
 
 ***
 
@@ -181,7 +181,7 @@ A log level for new logger if logger is not set
 
 > **logger**: [`Logger`](Logger.md)
 
-Defined in: [packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L24)
+Defined in: [core/SecretStore/SecretStoreBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L24)
 
 #### Inherited from
 
@@ -193,7 +193,7 @@ Defined in: [packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:24]
 
 > **name**: `string`
 
-Defined in: [packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L27)
+Defined in: [core/SecretStore/SecretStoreBaseClass.impl.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L27)
 
 name of store
 
@@ -203,7 +203,7 @@ name of store
 
 #### Inherited from
 
-[`SecretStoreBaseClass`](SecretStoreBaseClass.md).[`name`](SecretStoreBaseClass.md#name-1)
+[`SecretStoreBaseClass`](SecretStoreBaseClass.md).[`name`](SecretStoreBaseClass.md#name)
 
 ## Methods
 
@@ -211,7 +211,7 @@ name of store
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:139](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L139)
+Defined in: [core/SecretStore/SecretStoreBaseClass.impl.ts:137](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L137)
 
 disconnects and shuts down the secret store
 
@@ -231,15 +231,17 @@ disconnects and shuts down the secret store
 
 ### getSecret()
 
-> **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+> **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
-Defined in: [packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L51)
+Defined in: [core/SecretStore/SecretStoreBaseClass.impl.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L51)
 
 get a secret
 
 #### Type Parameters
 
-• **SecretNames** *extends* `string`[]
+##### SecretNames
+
+`SecretNames` *extends* `string`[]
 
 #### Parameters
 
@@ -249,7 +251,7 @@ get a secret
 
 #### Returns
 
-`Promise`\<[`ObjectWithKeysFromStringArray`](../type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 #### Param
 
@@ -271,13 +273,15 @@ UnhandledError
 
 ### getSecretImpl()
 
-> `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+> `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
-Defined in: [packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L50)
+Defined in: [DefaultSecretStore/DefaultSecretStore.impl.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L50)
 
 #### Type Parameters
 
-• **SecretNames** *extends* `string`[]
+##### SecretNames
+
+`SecretNames` *extends* `string`[]
 
 #### Parameters
 
@@ -287,7 +291,7 @@ Defined in: [packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:50]
 
 #### Returns
 
-`Promise`\<[`ObjectWithKeysFromStringArray`](../type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 #### Overrides
 
@@ -299,7 +303,7 @@ Defined in: [packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:50]
 
 > **removeSecret**(`secretName`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:107](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L107)
+Defined in: [core/SecretStore/SecretStoreBaseClass.impl.ts:105](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L105)
 
 delete a secret
 
@@ -335,7 +339,7 @@ UnhandledError
 
 > `protected` **removeSecretImpl**(`secretName`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:65](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L65)
+Defined in: [DefaultSecretStore/DefaultSecretStore.impl.ts:65](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L65)
 
 #### Parameters
 
@@ -357,7 +361,7 @@ Defined in: [packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:65]
 
 > **setSecret**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts:123](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L123)
+Defined in: [core/SecretStore/SecretStoreBaseClass.impl.ts:121](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/SecretStoreBaseClass.impl.ts#L121)
 
 set a secret
 
@@ -401,7 +405,7 @@ UnhandledError
 
 > `protected` **setSecretImpl**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts:61](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L61)
+Defined in: [DefaultSecretStore/DefaultSecretStore.impl.ts:61](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/DefaultSecretStore.impl.ts#L61)
 
 #### Parameters
 

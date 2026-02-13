@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: Config
 
-> **Config**: `z.infer`\<*typeof* [`configSchema`](../variables/configSchema.md)\>
+> **Config** = `z.infer`\<*typeof* `configSchema`\>
 
-Defined in: [packages/core/src/ClientBuilder/types/Config.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/types/Config.ts#L5)
+Defined in: [ClientBuilder/types/Config.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/types/Config.ts#L5)

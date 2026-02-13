@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,40 +6,42 @@
 
 # Type Alias: SubscriptionDefinitionMetadataBase
 
-> **SubscriptionDefinitionMetadataBase**: `object`
+> **SubscriptionDefinitionMetadataBase** = `object`
 
-Defined in: [packages/core/src/core/types/subscription/SubscriptionDefinitionMetadataBase.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinitionMetadataBase.ts#L5)
+Defined in: [core/types/subscription/SubscriptionDefinitionMetadataBase.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinitionMetadataBase.ts#L5)
 
-## Type declaration
+## Properties
 
 ### expose
 
 > **expose**: `object`
 
-#### expose.contentEncodingRequest?
+Defined in: [core/types/subscription/SubscriptionDefinitionMetadataBase.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinitionMetadataBase.ts#L6)
 
-> `optional` **expose.contentEncodingRequest**: `string`
+#### contentEncodingRequest?
 
-#### expose.contentEncodingResponse?
+> `optional` **contentEncodingRequest**: `string`
 
-> `optional` **expose.contentEncodingResponse**: `string`
+#### contentEncodingResponse?
 
-#### expose.contentTypeRequest?
+> `optional` **contentEncodingResponse**: `string`
 
-> `optional` **expose.contentTypeRequest**: [`ContentType`](ContentType.md)
+#### contentTypeRequest?
 
-#### expose.contentTypeResponse?
+> `optional` **contentTypeRequest**: [`ContentType`](ContentType.md)
 
-> `optional` **expose.contentTypeResponse**: [`ContentType`](ContentType.md)
+#### contentTypeResponse?
 
-#### expose.inputPayload?
+> `optional` **contentTypeResponse**: [`ContentType`](ContentType.md)
 
-> `optional` **expose.inputPayload**: `SchemaObject`
+#### inputPayload?
 
-#### expose.outputPayload?
+> `optional` **inputPayload**: `SchemaObject`
 
-> `optional` **expose.outputPayload**: `SchemaObject`
+#### outputPayload?
 
-#### expose.parameter?
+> `optional` **outputPayload**: `SchemaObject`
 
-> `optional` **expose.parameter**: `SchemaObject`
+#### parameter?
+
+> `optional` **parameter**: `SchemaObject`

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,19 +6,23 @@
 
 # Type Alias: EmitCustomMessageFunction()\<EmitList\>
 
-> **EmitCustomMessageFunction**\<`EmitList`\>: \<`K`\>(`eventName`, `payload`, `contentType`?, `contentEncoding`?) => `Promise`\<`void`\>
+> **EmitCustomMessageFunction**\<`EmitList`\> = \<`K`\>(`eventName`, `payload`, `contentType?`, `contentEncoding?`) => `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/types/EmitCustomMessageFunction.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EmitCustomMessageFunction.ts#L12)
+Defined in: [core/types/EmitCustomMessageFunction.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EmitCustomMessageFunction.ts#L12)
 
 Emits the given payload as custom message with the given event name.
 
 ## Type Parameters
 
-• **EmitList**
+### EmitList
+
+`EmitList`
 
 ## Type Parameters
 
-• **K** *extends* keyof [`EmitSchemaList`](EmitSchemaList.md)\<`EmitList`\>
+### K
+
+`K` *extends* keyof [`EmitSchemaList`](EmitSchemaList.md)\<`EmitList`\>
 
 ## Parameters
 

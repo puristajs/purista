@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,8 @@
 
 # Type Alias: EventMap
 
-> **EventMap**: `Record`\<`string`, `any`\>
+> **EventMap** = `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L3)
+Defined in: [core/types/GenericEventEmitter.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L6)
+
+Event payload map where key is the event name and value is the payload type.

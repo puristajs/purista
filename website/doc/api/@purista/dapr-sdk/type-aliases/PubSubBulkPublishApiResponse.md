@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,14 +6,16 @@
 
 # Type Alias: PubSubBulkPublishApiResponse
 
-> **PubSubBulkPublishApiResponse**: `object`
+> **PubSubBulkPublishApiResponse** = `object`
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishApiResponse.type.ts:22](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishApiResponse.type.ts#L22)
 
 Response from a bulk publish API request.
 
-## Type declaration
+## Properties
 
 ### failedEntries
 
 > **failedEntries**: `PubSubBulkPublishApiResponseStatus`[]
+
+Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishApiResponse.type.ts:23](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishApiResponse.type.ts#L23)

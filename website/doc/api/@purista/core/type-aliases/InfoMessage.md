@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: InfoMessage
 
-> **InfoMessage**: [`InfoServiceDrain`](InfoServiceDrain.md) \| [`InfoServiceFunctionAdded`](InfoServiceFunctionAdded.md) \| [`InfoServiceInit`](InfoServiceInit.md) \| [`InfoServiceNotReady`](InfoServiceNotReady.md) \| [`InfoServiceReady`](InfoServiceReady.md) \| [`InfoServiceShutdown`](InfoServiceShutdown.md) \| [`InfoInvokeTimeout`](InfoInvokeTimeout.md) \| [`InfoSubscriptionError`](InfoSubscriptionError.md)
+> **InfoMessage** = [`InfoServiceDrain`](InfoServiceDrain.md) \| [`InfoServiceFunctionAdded`](InfoServiceFunctionAdded.md) \| [`InfoServiceInit`](InfoServiceInit.md) \| [`InfoServiceNotReady`](InfoServiceNotReady.md) \| [`InfoServiceReady`](InfoServiceReady.md) \| [`InfoServiceShutdown`](InfoServiceShutdown.md) \| [`InfoInvokeTimeout`](InfoInvokeTimeout.md) \| [`InfoSubscriptionError`](InfoSubscriptionError.md)
 
-Defined in: [packages/core/src/core/types/infoType/InfoMessage.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoMessage.ts#L11)
+Defined in: [core/types/infoType/InfoMessage.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoMessage.ts#L11)

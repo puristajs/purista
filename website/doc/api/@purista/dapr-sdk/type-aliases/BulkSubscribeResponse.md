@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,14 +6,16 @@
 
 # Type Alias: BulkSubscribeResponse
 
-> **BulkSubscribeResponse**: `object`
+> **BulkSubscribeResponse** = `object`
 
 Defined in: [dapr-sdk/src/types/pubsub/BulkSubscribeResponse.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeResponse.type.ts#L19)
 
 BulkSubscribeResponse is the response for a bulk subscribe request
 
-## Type declaration
+## Properties
 
 ### statuses
 
 > **statuses**: [`BulkSubscribeResponseEntry`](BulkSubscribeResponseEntry.md)[]
+
+Defined in: [dapr-sdk/src/types/pubsub/BulkSubscribeResponse.type.ts:21](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/BulkSubscribeResponse.type.ts#L21)

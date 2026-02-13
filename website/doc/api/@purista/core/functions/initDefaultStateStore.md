@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **initDefaultStateStore**(`options`): [`DefaultStateStore`](../classes/DefaultStateStore.md)
 
-Defined in: [packages/core/src/DefaultStateStore/initDefaultStateStore.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultStateStore/initDefaultStateStore.impl.ts#L4)
+Defined in: [DefaultStateStore/initDefaultStateStore.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultStateStore/initDefaultStateStore.impl.ts#L4)
 
 ## Parameters
 

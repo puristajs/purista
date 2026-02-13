@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: EventBridgeEvents
 
-> **EventBridgeEvents**: [`Prettify`](Prettify.md)\<[`EventBridgeEventsBasic`](EventBridgeEventsBasic.md) & [`addPrefixToObject`](addPrefixToObject.md)\<[`EventBridgeAdapterEvents`](EventBridgeAdapterEvents.md), `"adapter-"`\> & [`addPrefixToObject`](addPrefixToObject.md)\<[`EventBridgeCustomEvents`](EventBridgeCustomEvents.md), `"custom-"`\>\>
+> **EventBridgeEvents** = [`Prettify`](Prettify.md)\<[`EventBridgeEventsBasic`](EventBridgeEventsBasic.md) & [`addPrefixToObject`](addPrefixToObject.md)\<[`EventBridgeAdapterEvents`](EventBridgeAdapterEvents.md), `"adapter-"`\> & [`addPrefixToObject`](addPrefixToObject.md)\<[`EventBridgeCustomEvents`](EventBridgeCustomEvents.md), `"custom-"`\>\>
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L48)
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L48)

@@ -1,4 +1,4 @@
-[**@purista/hono-http-server v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,4 +8,4 @@
 
 > `const` **DEFAULT\_API\_MOUNT\_PATH**: `"/api"` = `'/api'`
 
-Defined in: [packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L6)
+Defined in: [hono-http-server/src/service/hono/v1/honoServiceConfig.ts:6](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L6)

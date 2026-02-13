@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,24 +6,26 @@
 
 # Function: extendApi()
 
-> **extendApi**\<`T`\>(`schema`, `SchemaObject`): `T`
+> **extendApi**\<`TSchema`\>(`schema`, `meta`): `TSchema`
 
-Defined in: [packages/core/src/zodOpenApi/zodOpenApi.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/zodOpenApi/zodOpenApi.impl.ts#L26)
+Defined in: [zodOpenApi/extendApi.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/zodOpenApi/extendApi.ts#L8)
 
 ## Type Parameters
 
-• **T** *extends* [`OpenApiZodAny`](../interfaces/OpenApiZodAny.md)
+### TSchema
+
+`TSchema` *extends* `ZodType`\<`unknown`, `unknown`, `$ZodTypeInternals`\<`unknown`, `unknown`\>\>
 
 ## Parameters
 
 ### schema
 
-`T`
+`TSchema`
 
-### SchemaObject
+### meta
 
-`SchemaObject` = `{}`
+`SchemaObject` | `SchemaObject`[]
 
 ## Returns
 
-`T`
+`TSchema`

@@ -1,4 +1,4 @@
-[**@purista/mqttbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Type Alias: MqttBridgeConfig
 
-> **MqttBridgeConfig**: [`Prettify`](../../core/type-aliases/Prettify.md)\<`object` & `IClientOptions`\>
+> **MqttBridgeConfig** = [`Prettify`](../../core/type-aliases/Prettify.md)\<`object` & `IClientOptions`\>
 
 Defined in: [mqttbridge/src/types/MqttBridgeConfig.ts:8](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/types/MqttBridgeConfig.ts#L8)
 

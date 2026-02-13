@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,6 +6,6 @@
 
 # Type Alias: ClientBuilderConfig
 
-> **ClientBuilderConfig**: `z.infer`\<*typeof* [`httpClientConfigSchema`](../variables/httpClientConfigSchema.md)\>
+> **ClientBuilderConfig** = `z.infer`\<*typeof* `httpClientConfigSchema`\>
 
-Defined in: [packages/core/src/ClientBuilder/types/ClientBuilderConfig.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/types/ClientBuilderConfig.ts#L5)
+Defined in: [ClientBuilder/types/ClientBuilderConfig.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/ClientBuilder/types/ClientBuilderConfig.ts#L5)

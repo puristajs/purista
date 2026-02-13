@@ -1,4 +1,4 @@
-[**@purista/natsbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -38,9 +38,9 @@ import { NatsBridge } from '@purista/natsbridge'
 
 ## Constructors
 
-### new NatsBridge()
+### Constructor
 
-> **new NatsBridge**(`config`?): [`NatsBridge`](NatsBridge.md)
+> **new NatsBridge**(`config?`): `NatsBridge`
 
 Defined in: [natsbridge/src/NatsBridge.ts:81](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L81)
 
@@ -153,11 +153,11 @@ purista
 
 #### Returns
 
-[`NatsBridge`](NatsBridge.md)
+`NatsBridge`
 
 #### Overrides
 
-[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`constructor`](../../core/classes/EventBridgeBaseClass.md#constructors)
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`constructor`](../../core/classes/EventBridgeBaseClass.md#constructor)
 
 ## Properties
 
@@ -171,19 +171,19 @@ Defined in: [natsbridge/src/NatsBridge.ts:76](https://github.com/puristajs/puris
 
 ### config
 
-> **config**: [`Complete`](../../core/type-aliases/Complete.md)\<\{ `commandResponsePublishTwice`: `"always"` \| `"eventOnly"` \| `"eventAndError"` \| `"never"`; `defaultCommandTimeout`: `number`; `defaultMessageExpiryInterval`: `number`; `emptyTopicPartString`: `string`; `instanceId`: `string`; `logger`: [`Logger`](../../core/classes/Logger.md); `logLevel`: [`LogLevelName`](../../core/type-aliases/LogLevelName.md); `maxMessages`: `number`; `spanProcessor`: `SpanProcessor`; `topicPrefix`: `string`; \}\>
+> **config**: [`Complete`](../../core/type-aliases/Complete.md)\<[`EventBridgeConfig`](../../core/type-aliases/EventBridgeConfig.md)\<`ConfigType`\>\>
 
 Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:17
 
 #### Inherited from
 
-[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`config`](../../core/classes/EventBridgeBaseClass.md#config-1)
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`config`](../../core/classes/EventBridgeBaseClass.md#config)
 
 ***
 
 ### connection
 
-> **connection**: `undefined` \| `NatsConnection`
+> **connection**: `NatsConnection` \| `undefined`
 
 Defined in: [natsbridge/src/NatsBridge.ts:70](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L70)
 
@@ -233,7 +233,7 @@ Defined in: [natsbridge/src/NatsBridge.ts:72](https://github.com/puristajs/puris
 
 ### jsm
 
-> **jsm**: `undefined` \| `JetStreamManager`
+> **jsm**: `JetStreamManager` \| `undefined`
 
 Defined in: [natsbridge/src/NatsBridge.ts:74](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L74)
 
@@ -263,7 +263,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 #### Inherited from
 
-[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`name`](../../core/classes/EventBridgeBaseClass.md#name-1)
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`name`](../../core/classes/EventBridgeBaseClass.md#name)
 
 ***
 
@@ -299,7 +299,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:397](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L397)
+Defined in: [natsbridge/src/NatsBridge.ts:405](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L405)
 
 Shut down event bridge as gracefully as possible
 
@@ -319,13 +319,16 @@ Shut down event bridge as gracefully as possible
 
 ### emit()
 
-> **emit**\<`K`\>(`eventName`, `parameter`?): `void`
+> **emit**\<`K`\>(`eventName`, `parameter?`): `void`
 
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:13
+Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:16
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{ `[key: `custom-${string}`]`: `unknown`;  `[key: `adapter-${string}`]`: `unknown`;  `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+##### K
+
+`K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
 
 #### Parameters
 
@@ -349,7 +352,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:13
 
 ### emitMessage()
 
-> **emitMessage**\<`T`\>(`message`, `contentType`, `contentEncoding`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
+> **emitMessage**\<`T`\>(`message`, `contentType?`, `contentEncoding?`): `Promise`\<`Readonly`\<[`EBMessage`](../../core/type-aliases/EBMessage.md)\>\>
 
 Defined in: [natsbridge/src/NatsBridge.ts:111](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L111)
 
@@ -357,7 +360,9 @@ Emit a message to the eventbridge without awaiting a result
 
 #### Type Parameters
 
-• **T** *extends* [`EBMessage`](../../core/type-aliases/EBMessage.md)
+##### T
+
+`T` *extends* [`EBMessage`](../../core/type-aliases/EBMessage.md)
 
 #### Parameters
 
@@ -367,11 +372,11 @@ Emit a message to the eventbridge without awaiting a result
 
 the message
 
-##### contentType
+##### contentType?
 
 `string` = `'application/json'`
 
-##### contentEncoding
+##### contentEncoding?
 
 `string` = `'utf-8'`
 
@@ -407,7 +412,7 @@ Tracer
 
 ### invoke()
 
-> **invoke**\<`T`\>(`input`, `commandTimeout`): `Promise`\<`T`\>
+> **invoke**\<`T`\>(`input`, `commandTimeout?`): `Promise`\<`T`\>
 
 Defined in: [natsbridge/src/NatsBridge.ts:184](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L184)
 
@@ -415,17 +420,19 @@ Call a command of a service and return the result of this command
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
 ##### input
 
-`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`Command`](../../core/enumerations/EBMessageType.md#command); `otp`: `string`; `payload`: \{ `parameter`: `unknown`; `payload`: `unknown`; \}; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"id"` \| `"timestamp"` \| `"correlationId"` \| `"messageType"`\>
+`Omit`\<[`Command`](../../core/type-aliases/Command.md), `"id"` \| `"messageType"` \| `"timestamp"` \| `"correlationId"`\>
 
 a partial command message
 
-##### commandTimeout
+##### commandTimeout?
 
 `number` = `...`
 
@@ -481,11 +488,14 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 > **off**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:12
+Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:15
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{ `[key: `custom-${string}`]`: `unknown`;  `[key: `adapter-${string}`]`: `unknown`;  `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+##### K
+
+`K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
 
 #### Parameters
 
@@ -511,11 +521,14 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:12
 
 > **on**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:11
+Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:14
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{ `[key: `custom-${string}`]`: `unknown`;  `[key: `adapter-${string}`]`: `unknown`;  `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+##### K
+
+`K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
 
 #### Parameters
 
@@ -553,7 +566,7 @@ the address of the service command (service name, version and command name)
 
 ##### cb
 
-(`message`) => `Promise`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../../core/enumerations/EBMessageType.md#commanderrorresponse); `otp`: `string`; `payload`: \{ `data`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../../core/enumerations/StatusCode.md); \}; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \} \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../../core/enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+(`message`) => `Promise`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../../core/enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../../core/enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \} \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../../core/enumerations/EBMessageType.md#commandsuccessresponse); `otp?`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>
 
 the function to be called if a matching command arrives
 
@@ -593,7 +606,7 @@ the subscription definition
 
 ##### cb
 
-(`message`) => `Promise`\<`undefined` \| `Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"id"` \| `"timestamp"`\>\>
+(`message`) => `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
 the function to be called if a matching message arrives
 
@@ -611,7 +624,7 @@ the function to be called if a matching message arrives
 
 > **removeAllListeners**(): `void`
 
-Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:14
+Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:17
 
 #### Returns
 
@@ -655,7 +668,9 @@ Start a child span for opentelemetry tracking
 
 #### Type Parameters
 
-• **F**
+##### F
+
+`F`
 
 #### Parameters
 
@@ -675,7 +690,7 @@ span options
 
 optional context
 
-`undefined` | `Context`
+`Context` | `undefined`
 
 ##### fn
 
@@ -725,7 +740,7 @@ The address (service name, version and command name) of the command to be de-reg
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [natsbridge/src/NatsBridge.ts:384](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L384)
+Defined in: [natsbridge/src/NatsBridge.ts:392](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/NatsBridge.ts#L392)
 
 #### Parameters
 
@@ -745,7 +760,7 @@ Defined in: [natsbridge/src/NatsBridge.ts:384](https://github.com/puristajs/puri
 
 ### wrapInSpan()
 
-> **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context`?): `Promise`\<`F`\>
+> **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
 Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:52
 
@@ -759,7 +774,9 @@ but not to trace the program flow itself
 
 #### Type Parameters
 
-• **F**
+##### F
+
+`F`
 
 #### Parameters
 

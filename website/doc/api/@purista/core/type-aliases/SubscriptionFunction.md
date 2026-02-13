@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,27 +6,41 @@
 
 # Type Alias: SubscriptionFunction()\<ServiceClassType, FunctionPayloadType, FunctionParamsType, FunctionOutputType, Resources, Invokes, EmitList\>
 
-> **SubscriptionFunction**\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `EmitList`\>: (`this`, `context`, `payload`, `parameter`) => `Promise`\<`FunctionOutputType`\>
+> **SubscriptionFunction**\<`ServiceClassType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `EmitList`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`FunctionOutputType`\>
 
-Defined in: [packages/core/src/core/types/subscription/SubscriptionFunction.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunction.ts#L11)
+Defined in: [core/types/subscription/SubscriptionFunction.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunction.ts#L11)
 
 CommandFunction is a function which will be triggered when a matching event bridge message is received by the service
 
 ## Type Parameters
 
-• **ServiceClassType** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
+### ServiceClassType
 
-• **FunctionPayloadType** = `unknown`
+`ServiceClassType` *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
 
-• **FunctionParamsType** = `unknown`
+### FunctionPayloadType
 
-• **FunctionOutputType** = `unknown`
+`FunctionPayloadType` = `unknown`
 
-• **Resources** *extends* `Record`\<`string`, `any`\> = [`EmptyObject`](EmptyObject.md)
+### FunctionParamsType
 
-• **Invokes** *extends* [`InvokeList`](InvokeList.md) = [`EmptyObject`](EmptyObject.md)
+`FunctionParamsType` = `unknown`
 
-• **EmitList** *extends* `Record`\<`string`, `Schema`\> = [`EmptyObject`](EmptyObject.md)
+### FunctionOutputType
+
+`FunctionOutputType` = `unknown`
+
+### Resources
+
+`Resources` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](EmptyObject.md)
+
+### Invokes
+
+`Invokes` *extends* [`InvokeList`](InvokeList.md) = [`EmptyObject`](EmptyObject.md)
+
+### EmitList
+
+`EmitList` *extends* `Record`\<`string`, [`Schema`](Schema.md)\> = [`EmptyObject`](EmptyObject.md)
 
 ## Parameters
 

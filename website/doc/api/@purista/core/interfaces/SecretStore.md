@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: SecretStore
 
-Defined in: [packages/core/src/core/SecretStore/types/SecretStore.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L9)
+Defined in: [core/SecretStore/types/SecretStore.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L9)
 
 Interface definition for a secret store implementation
 
@@ -16,7 +16,7 @@ Interface definition for a secret store implementation
 
 > **getSecret**: [`SecretGetterFunction`](../type-aliases/SecretGetterFunction.md)
 
-Defined in: [packages/core/src/core/SecretStore/types/SecretStore.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L18)
+Defined in: [core/SecretStore/types/SecretStore.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L18)
 
 get a secret
 
@@ -38,7 +38,7 @@ UnhandledError
 
 > **name**: `string`
 
-Defined in: [packages/core/src/core/SecretStore/types/SecretStore.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L11)
+Defined in: [core/SecretStore/types/SecretStore.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L11)
 
 name of store
 
@@ -48,7 +48,7 @@ name of store
 
 > **removeSecret**: [`SecretDeleteFunction`](../type-aliases/SecretDeleteFunction.md)
 
-Defined in: [packages/core/src/core/SecretStore/types/SecretStore.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L25)
+Defined in: [core/SecretStore/types/SecretStore.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L25)
 
 delete a secret
 
@@ -66,7 +66,7 @@ UnhandledError
 
 > **setSecret**: [`SecretSetterFunction`](../type-aliases/SecretSetterFunction.md)
 
-Defined in: [packages/core/src/core/SecretStore/types/SecretStore.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L33)
+Defined in: [core/SecretStore/types/SecretStore.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L33)
 
 set a secret
 
@@ -88,7 +88,7 @@ UnhandledError
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/SecretStore/types/SecretStore.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L38)
+Defined in: [core/SecretStore/types/SecretStore.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/SecretStore/types/SecretStore.ts#L38)
 
 disconnects and shuts down the secret store
 

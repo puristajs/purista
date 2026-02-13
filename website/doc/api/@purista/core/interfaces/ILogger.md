@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: ILogger
 
-Defined in: [packages/core/src/core/types/Logger.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L32)
+Defined in: [core/types/Logger.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L32)
 
 ## Methods
 
@@ -14,7 +14,7 @@ Defined in: [packages/core/src/core/types/Logger.ts:32](https://github.com/puris
 
 > **debug**(...`args`): `void`
 
-Defined in: [packages/core/src/core/types/Logger.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L37)
+Defined in: [core/types/Logger.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L37)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [packages/core/src/core/types/Logger.ts:37](https://github.com/puris
 
 > **error**(...`args`): `void`
 
-Defined in: [packages/core/src/core/types/Logger.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L35)
+Defined in: [core/types/Logger.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L35)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [packages/core/src/core/types/Logger.ts:35](https://github.com/puris
 
 > **fatal**(...`args`): `void`
 
-Defined in: [packages/core/src/core/types/Logger.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L34)
+Defined in: [core/types/Logger.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L34)
 
 #### Parameters
 
@@ -68,7 +68,7 @@ Defined in: [packages/core/src/core/types/Logger.ts:34](https://github.com/puris
 
 > **info**(...`args`): `void`
 
-Defined in: [packages/core/src/core/types/Logger.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L33)
+Defined in: [core/types/Logger.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L33)
 
 #### Parameters
 
@@ -86,7 +86,7 @@ Defined in: [packages/core/src/core/types/Logger.ts:33](https://github.com/puris
 
 > **trace**(...`args`): `void`
 
-Defined in: [packages/core/src/core/types/Logger.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L38)
+Defined in: [core/types/Logger.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L38)
 
 #### Parameters
 
@@ -104,7 +104,7 @@ Defined in: [packages/core/src/core/types/Logger.ts:38](https://github.com/puris
 
 > **warn**(...`args`): `void`
 
-Defined in: [packages/core/src/core/types/Logger.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L36)
+Defined in: [core/types/Logger.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L36)
 
 #### Parameters
 

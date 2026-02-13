@@ -1,4 +1,4 @@
-[**@purista/amqpbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,19 +6,27 @@
 
 # Type Alias: EncoderFunctions
 
-> **EncoderFunctions**: `object`
+> **EncoderFunctions** = `object`
 
-Defined in: [amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/EncoderFunctions.ts#L1)
+Defined in: [amqpbridge/src/types/EncoderFunctions.ts:4](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/EncoderFunctions.ts#L4)
 
-## Type declaration
+Encode/decode contract for one content-type codec.
+
+## Properties
 
 ### decode()
 
 > **decode**: \<`T`\>(`input`) => `Promise`\<`T`\>
 
+Defined in: [amqpbridge/src/types/EncoderFunctions.ts:8](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/EncoderFunctions.ts#L8)
+
+Decodes a binary payload into a JavaScript value.
+
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
@@ -30,13 +38,21 @@ Defined in: [amqpbridge/src/types/EncoderFunctions.ts:1](https://github.com/puri
 
 `Promise`\<`T`\>
 
+***
+
 ### encode()
 
 > **encode**: \<`T`\>(`input`) => `Promise`\<`Buffer`\>
 
+Defined in: [amqpbridge/src/types/EncoderFunctions.ts:6](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/types/EncoderFunctions.ts#L6)
+
+Encodes a JavaScript value into a binary payload.
+
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 

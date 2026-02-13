@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,15 +6,17 @@
 
 # Type Alias: SubscriptionStorageEntry
 
-> **SubscriptionStorageEntry**: `object`
+> **SubscriptionStorageEntry** = `object`
 
-Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L9)
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L9)
 
-## Type declaration
+## Properties
 
 ### cb()
 
 > **cb**: (`message`) => `Promise`\<`Omit`\<[`CustomMessage`](CustomMessage.md), `"id"` \| `"timestamp"`\> \| `undefined`\>
+
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L23)
 
 #### Parameters
 
@@ -26,11 +28,21 @@ Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry
 
 `Promise`\<`Omit`\<[`CustomMessage`](CustomMessage.md), `"id"` \| `"timestamp"`\> \| `undefined`\>
 
+***
+
 ### emitEventName?
 
 > `optional` **emitEventName**: `string`
 
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L22)
+
+## Methods
+
 ### isMatchingEventName()
+
+> **isMatchingEventName**(`input?`): `boolean`
+
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L19)
 
 #### Parameters
 
@@ -42,7 +54,13 @@ Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry
 
 `boolean`
 
+***
+
 ### isMatchingMessageType()
+
+> **isMatchingMessageType**(`input`): `boolean`
+
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L10)
 
 #### Parameters
 
@@ -54,7 +72,13 @@ Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry
 
 `boolean`
 
+***
+
 ### isMatchingPrincipalId()
+
+> **isMatchingPrincipalId**(`input?`): `boolean`
+
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L20)
 
 #### Parameters
 
@@ -65,9 +89,15 @@ Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry
 #### Returns
 
 `boolean`
+
+***
 
 ### isMatchingReceiverInstanceId()
 
+> **isMatchingReceiverInstanceId**(`input?`): `boolean`
+
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L18)
+
 #### Parameters
 
 ##### input?
@@ -77,9 +107,15 @@ Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry
 #### Returns
 
 `boolean`
+
+***
 
 ### isMatchingReceiverServiceName()
 
+> **isMatchingReceiverServiceName**(`input?`): `boolean`
+
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L15)
+
 #### Parameters
 
 ##### input?
@@ -89,9 +125,15 @@ Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry
 #### Returns
 
 `boolean`
+
+***
 
 ### isMatchingReceiverServiceTarget()
 
+> **isMatchingReceiverServiceTarget**(`input?`): `boolean`
+
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L17)
+
 #### Parameters
 
 ##### input?
@@ -101,9 +143,15 @@ Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry
 #### Returns
 
 `boolean`
+
+***
 
 ### isMatchingReceiverServiceVersion()
 
+> **isMatchingReceiverServiceVersion**(`input?`): `boolean`
+
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L16)
+
 #### Parameters
 
 ##### input?
@@ -113,9 +161,15 @@ Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry
 #### Returns
 
 `boolean`
+
+***
 
 ### isMatchingSenderInstanceId()
 
+> **isMatchingSenderInstanceId**(`input?`): `boolean`
+
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L14)
+
 #### Parameters
 
 ##### input?
@@ -125,9 +179,15 @@ Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry
 #### Returns
 
 `boolean`
+
+***
 
 ### isMatchingSenderServiceName()
 
+> **isMatchingSenderServiceName**(`input?`): `boolean`
+
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L11)
+
 #### Parameters
 
 ##### input?
@@ -137,9 +197,15 @@ Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry
 #### Returns
 
 `boolean`
+
+***
 
 ### isMatchingSenderServiceTarget()
 
+> **isMatchingSenderServiceTarget**(`input?`): `boolean`
+
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L13)
+
 #### Parameters
 
 ##### input?
@@ -149,9 +215,15 @@ Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry
 #### Returns
 
 `boolean`
+
+***
 
 ### isMatchingSenderServiceVersion()
 
+> **isMatchingSenderServiceVersion**(`input?`): `boolean`
+
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L12)
+
 #### Parameters
 
 ##### input?
@@ -162,7 +234,13 @@ Defined in: [packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry
 
 `boolean`
 
+***
+
 ### isMatchingTenantId()
+
+> **isMatchingTenantId**(`input?`): `boolean`
+
+Defined in: [DefaultEventBridge/types/SubscriptionStorageEntry.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/types/SubscriptionStorageEntry.ts#L21)
 
 #### Parameters
 

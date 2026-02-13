@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **initDefaultConfigStore**(`options`): [`DefaultConfigStore`](../classes/DefaultConfigStore.md)
 
-Defined in: [packages/core/src/DefaultConfigStore/initDefaultConfigStore.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/initDefaultConfigStore.impl.ts#L4)
+Defined in: [DefaultConfigStore/initDefaultConfigStore.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultConfigStore/initDefaultConfigStore.impl.ts#L4)
 
 ## Parameters
 

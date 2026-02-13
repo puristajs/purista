@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,11 +8,13 @@
 
 > `const` **ServiceInfoValidator**: `object`
 
-Defined in: [packages/core/src/core/Service/ServiceInfoValidator.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceInfoValidator.impl.ts#L5)
+Defined in: [core/Service/ServiceInfoValidator.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceInfoValidator.impl.ts#L5)
 
-## Type declaration
+## Type Declaration
 
 ### set()
+
+> **set**(`obj`, `prop`, `value`): `boolean`
 
 #### Parameters
 

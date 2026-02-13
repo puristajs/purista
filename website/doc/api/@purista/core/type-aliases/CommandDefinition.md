@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,126 +6,188 @@
 
 # Type Alias: CommandDefinition\<S, MessagePayloadType, MessageParamsType, TransformInputPayload, TransformInputParams, FunctionPayloadType, FunctionParamsType, FunctionOutputType, FinalFunctionOutputType, TransformOutputHookOutput, Resources, Invokes, EmitList, MetadataType\>
 
-> **CommandDefinition**\<`S`, `MessagePayloadType`, `MessageParamsType`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `FinalFunctionOutputType`, `TransformOutputHookOutput`, `Resources`, `Invokes`, `EmitList`, `MetadataType`\>: `object`
+> **CommandDefinition**\<`S`, `MessagePayloadType`, `MessageParamsType`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `FinalFunctionOutputType`, `TransformOutputHookOutput`, `Resources`, `Invokes`, `EmitList`, `MetadataType`\> = `object`
 
-Defined in: [packages/core/src/core/types/commandType/CommandDefinition.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L18)
+Defined in: [core/types/commandType/CommandDefinition.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L18)
 
 The definition for a command provided by some service.
 
 ## Type Parameters
 
-• **S** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
+### S
 
-• **MessagePayloadType**
+`S` *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
 
-• **MessageParamsType**
+### MessagePayloadType
 
-• **TransformInputPayload**
+`MessagePayloadType`
 
-• **TransformInputParams**
+### MessageParamsType
 
-• **FunctionPayloadType**
+`MessageParamsType`
 
-• **FunctionParamsType**
+### TransformInputPayload
 
-• **FunctionOutputType**
+`TransformInputPayload`
 
-• **FinalFunctionOutputType**
+### TransformInputParams
 
-• **TransformOutputHookOutput**
+`TransformInputParams`
 
-• **Resources** *extends* `Record`\<`string`, `any`\>
+### FunctionPayloadType
 
-• **Invokes** *extends* [`InvokeList`](InvokeList.md)
+`FunctionPayloadType`
 
-• **EmitList** *extends* `Record`\<`string`, `Schema`\>
+### FunctionParamsType
 
-• **MetadataType** *extends* [`CommandDefinitionMetadataBase`](CommandDefinitionMetadataBase.md) = [`CommandDefinitionMetadataBase`](CommandDefinitionMetadataBase.md)
+`FunctionParamsType`
 
-## Type declaration
+### FunctionOutputType
+
+`FunctionOutputType`
+
+### FinalFunctionOutputType
+
+`FinalFunctionOutputType`
+
+### TransformOutputHookOutput
+
+`TransformOutputHookOutput`
+
+### Resources
+
+`Resources` *extends* `Record`\<`string`, `unknown`\>
+
+### Invokes
+
+`Invokes` *extends* [`InvokeList`](InvokeList.md)
+
+### EmitList
+
+`EmitList` *extends* `Record`\<`string`, [`Schema`](Schema.md)\>
+
+### MetadataType
+
+`MetadataType` *extends* [`CommandDefinitionMetadataBase`](CommandDefinitionMetadataBase.md) = [`CommandDefinitionMetadataBase`](CommandDefinitionMetadataBase.md)
+
+## Properties
 
 ### call
 
 > **call**: [`CommandFunction`](CommandFunction.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `EmitList`\>
 
+Defined in: [core/types/commandType/CommandDefinition.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L43)
+
 the command function
+
+***
 
 ### commandDescription
 
 > **commandDescription**: `string`
 
+Defined in: [core/types/commandType/CommandDefinition.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L37)
+
 the description of the command
+
+***
 
 ### commandName
 
 > **commandName**: `string`
 
+Defined in: [core/types/commandType/CommandDefinition.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L35)
+
 the name of the command
+
+***
 
 ### emitList
 
 > **emitList**: `EmitList`
 
+Defined in: [core/types/commandType/CommandDefinition.ts:111](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L111)
+
+***
+
 ### eventBridgeConfig
 
 > **eventBridgeConfig**: [`DefinitionEventBridgeConfig`](DefinitionEventBridgeConfig.md)
 
+Defined in: [core/types/commandType/CommandDefinition.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L41)
+
 config information for event bridge
+
+***
 
 ### eventName?
 
 > `optional` **eventName**: `string`
 
+Defined in: [core/types/commandType/CommandDefinition.ts:55](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L55)
+
 the eventName for the command response
+
+***
 
 ### hooks
 
 > **hooks**: `object`
 
+Defined in: [core/types/commandType/CommandDefinition.ts:57](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L57)
+
 hooks of command
 
-#### hooks.afterGuard?
+#### afterGuard?
 
-> `optional` **hooks.afterGuard**: `Record`\<`string`, [`CommandAfterGuardHook`](CommandAfterGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `EmitList`\>\>
+> `optional` **afterGuard**: `Record`\<`string`, [`CommandAfterGuardHook`](CommandAfterGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `EmitList`\>\>
 
-#### hooks.beforeGuard?
+#### beforeGuard?
 
-> `optional` **hooks.beforeGuard**: `Record`\<`string`, [`CommandBeforeGuardHook`](CommandBeforeGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `EmitList`\>\>
+> `optional` **beforeGuard**: `Record`\<`string`, [`CommandBeforeGuardHook`](CommandBeforeGuardHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `EmitList`\>\>
 
-#### hooks.transformInput?
+#### transformInput?
 
-> `optional` **hooks.transformInput**: `object`
+> `optional` **transformInput**: `object`
 
-#### hooks.transformInput.transformFunction
+##### transformInput.transformFunction
 
-> **hooks.transformInput.transformFunction**: [`CommandTransformInputHook`](CommandTransformInputHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`\>
+> **transformFunction**: [`CommandTransformInputHook`](CommandTransformInputHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`\>
 
-#### hooks.transformInput.transformInputSchema
+##### transformInput.transformInputSchema
 
-> **hooks.transformInput.transformInputSchema**: `Schema`
+> **transformInputSchema**: [`Schema`](Schema.md)
 
-#### hooks.transformInput.transformParameterSchema
+##### transformInput.transformParameterSchema
 
-> **hooks.transformInput.transformParameterSchema**: `Schema`
+> **transformParameterSchema**: [`Schema`](Schema.md)
 
-#### hooks.transformOutput?
+#### transformOutput?
 
-> `optional` **hooks.transformOutput**: `object`
+> `optional` **transformOutput**: `object`
 
-#### hooks.transformOutput.transformFunction
+##### transformOutput.transformFunction
 
-> **hooks.transformOutput.transformFunction**: [`CommandTransformOutputHook`](CommandTransformOutputHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FinalFunctionOutputType`, `FunctionParamsType`, `TransformOutputHookOutput`\>
+> **transformFunction**: [`CommandTransformOutputHook`](CommandTransformOutputHook.md)\<`S`, `MessagePayloadType`, `MessageParamsType`, `FinalFunctionOutputType`, `FunctionParamsType`, `TransformOutputHookOutput`\>
 
-#### hooks.transformOutput.transformOutputSchema
+##### transformOutput.transformOutputSchema
 
-> **hooks.transformOutput.transformOutputSchema**: `Schema`
+> **transformOutputSchema**: [`Schema`](Schema.md)
+
+***
 
 ### invokes
 
 > **invokes**: `Invokes`
 
+Defined in: [core/types/commandType/CommandDefinition.ts:110](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L110)
+
+***
+
 ### metadata
 
 > **metadata**: `MetadataType`
+
+Defined in: [core/types/commandType/CommandDefinition.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinition.ts#L39)
 
 the metadata of the command

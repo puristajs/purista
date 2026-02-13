@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Enumeration: PuristaSpanName
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L4)
+Defined in: [core/types/PuristaSpanName.enum.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L4)
 
 Opentelemetry span names used by PURISTA framework
 
@@ -16,7 +16,7 @@ Opentelemetry span names used by PURISTA framework
 
 > **ConfigStoreGetValue**: `"purista.configStore.getValue"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L20)
+Defined in: [core/types/PuristaSpanName.enum.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L20)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:20](https://gi
 
 > **ConfigStoreRemoveValue**: `"purista.configStore.removeValue"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L22)
+Defined in: [core/types/PuristaSpanName.enum.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L22)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:22](https://gi
 
 > **ConfigStoreSetValue**: `"purista.configStore.setValue"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L21)
+Defined in: [core/types/PuristaSpanName.enum.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L21)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:21](https://gi
 
 > **EventBridgeCommandReceived**: `"purista.command.received"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L11)
+Defined in: [core/types/PuristaSpanName.enum.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L11)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:11](https://gi
 
 > **EventBridgeCommandResponse**: `"purista.command.response"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L7)
+Defined in: [core/types/PuristaSpanName.enum.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L7)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:7](https://git
 
 > **EventBridgeCommandResponseReceived**: `"purista.command.response.received"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L13)
+Defined in: [core/types/PuristaSpanName.enum.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L13)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:13](https://gi
 
 > **EventBridgeCommandResponseSent**: `"purista.command.response.sent"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L12)
+Defined in: [core/types/PuristaSpanName.enum.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L12)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:12](https://gi
 
 > **EventBridgeCommandSent**: `"purista.command.sent"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L10)
+Defined in: [core/types/PuristaSpanName.enum.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L10)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:10](https://gi
 
 > **EventBridgeEmitMessage**: `"purista.emit.MessageToBridge"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L5)
+Defined in: [core/types/PuristaSpanName.enum.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L5)
 
 ***
 
@@ -88,7 +88,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:5](https://git
 
 > **EventBridgeHandleIncomingMessage**: `"purista.handle.incomingMessage"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L8)
+Defined in: [core/types/PuristaSpanName.enum.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L8)
 
 ***
 
@@ -96,7 +96,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:8](https://git
 
 > **EventBridgeInvokeCommand**: `"purista.command.invoke"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L6)
+Defined in: [core/types/PuristaSpanName.enum.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L6)
 
 ***
 
@@ -104,7 +104,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:6](https://git
 
 > **EventBridgeSubscriptionEventReceived**: `"purista.subscription.eventReceived"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L14)
+Defined in: [core/types/PuristaSpanName.enum.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L14)
 
 ***
 
@@ -112,7 +112,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:14](https://gi
 
 > **KubernetesHttpRequest**: `"purist.kubernetes.HttpRequest"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L28)
+Defined in: [core/types/PuristaSpanName.enum.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L28)
 
 ***
 
@@ -120,7 +120,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:28](https://gi
 
 > **SecretStoreGetValue**: `"purista.secretStore.getValue"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L16)
+Defined in: [core/types/PuristaSpanName.enum.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L16)
 
 ***
 
@@ -128,7 +128,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:16](https://gi
 
 > **SecretStoreRemoveValue**: `"purista.secretStore.removeValue"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L18)
+Defined in: [core/types/PuristaSpanName.enum.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L18)
 
 ***
 
@@ -136,7 +136,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:18](https://gi
 
 > **SecretStoreSetValue**: `"purista.secretStore.setValue"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L17)
+Defined in: [core/types/PuristaSpanName.enum.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L17)
 
 ***
 
@@ -144,7 +144,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:17](https://gi
 
 > **StateStoreGetValue**: `"purista.stateStore.getValue"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L24)
+Defined in: [core/types/PuristaSpanName.enum.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L24)
 
 ***
 
@@ -152,7 +152,7 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:24](https://gi
 
 > **StateStoreRemoveValue**: `"purista.stateStore.removeValue"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L26)
+Defined in: [core/types/PuristaSpanName.enum.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L26)
 
 ***
 
@@ -160,4 +160,4 @@ Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:26](https://gi
 
 > **StateStoreSetValue**: `"purista.stateStore.setValue"`
 
-Defined in: [packages/core/src/core/types/PuristaSpanName.enum.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L25)
+Defined in: [core/types/PuristaSpanName.enum.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L25)

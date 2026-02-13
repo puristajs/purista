@@ -1,4 +1,4 @@
-[**@purista/hono-http-server v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,9 +8,9 @@
 
 > `const` **OPENAPI\_DEFAULT\_INFO**: `object`
 
-Defined in: [packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts:8](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L8)
+Defined in: [hono-http-server/src/service/hono/v1/honoServiceConfig.ts:8](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/honoServiceConfig.ts#L8)
 
-## Type declaration
+## Type Declaration
 
 ### description
 

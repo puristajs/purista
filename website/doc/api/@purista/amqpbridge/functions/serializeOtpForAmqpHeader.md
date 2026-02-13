@@ -1,4 +1,4 @@
-[**@purista/amqpbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,16 +6,19 @@
 
 # Function: serializeOtpForAmqpHeader()
 
-> **serializeOtpForAmqpHeader**(`header`): `Record`\<`string`, `undefined` \| `string`\>
+> **serializeOtpForAmqpHeader**(`header`): `Record`\<`string`, `string` \| `undefined`\>
 
-Defined in: [amqpbridge/src/serializeOtpForAmqpHeader.impl.ts:3](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/serializeOtpForAmqpHeader.impl.ts#L3)
+Defined in: [amqpbridge/src/serializeOtpForAmqpHeader.impl.ts:7](https://github.com/puristajs/purista/blob/master/packages/amqpbridge/src/serializeOtpForAmqpHeader.impl.ts#L7)
+
+Injects the active OpenTelemetry trace context into AMQP headers.
+This enables cross-service trace propagation for messages.
 
 ## Parameters
 
 ### header
 
-`Record`\<`string`, `undefined` \| `string`\>
+`Record`\<`string`, `string` \| `undefined`\>
 
 ## Returns
 
-`Record`\<`string`, `undefined` \| `string`\>
+`Record`\<`string`, `string` \| `undefined`\>

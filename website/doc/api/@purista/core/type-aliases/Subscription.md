@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,116 +6,158 @@
 
 # Type Alias: Subscription\<PayloadType, ParameterType\>
 
-> **Subscription**\<`PayloadType`, `ParameterType`\>: `object`
+> **Subscription**\<`PayloadType`, `ParameterType`\> = `object`
 
-Defined in: [packages/core/src/core/types/subscription/Subscription.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L13)
+Defined in: [core/types/subscription/Subscription.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L13)
 
 A subscription managed by the event bridge
 
 ## Type Parameters
 
-• **PayloadType** = `unknown`
+### PayloadType
 
-• **ParameterType** = `unknown`
+`PayloadType` = `unknown`
 
-## Type declaration
+### ParameterType
+
+`ParameterType` = `unknown`
+
+## Properties
 
 ### emitEventName?
 
 > `optional` **emitEventName**: `string`
 
+Defined in: [core/types/subscription/Subscription.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L33)
+
 the event name to be used for custom message if the subscriptions returns a result
+
+***
 
 ### eventBridgeConfig
 
 > **eventBridgeConfig**: [`DefinitionEventBridgeConfig`](DefinitionEventBridgeConfig.md)
 
+Defined in: [core/types/subscription/Subscription.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L46)
+
 config information for event bridge
+
+***
 
 ### eventName?
 
 > `optional` **eventName**: `string`
 
+Defined in: [core/types/subscription/Subscription.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L31)
+
 the event name to subscribe for
+
+***
 
 ### messageType?
 
 > `optional` **messageType**: [`EBMessageType`](../enumerations/EBMessageType.md)
 
+Defined in: [core/types/subscription/Subscription.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L29)
+
 the message type
+
+***
 
 ### payload?
 
 > `optional` **payload**: `object`
 
+Defined in: [core/types/subscription/Subscription.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L39)
+
 the message payload
 
-#### payload.parameter?
+#### parameter?
 
-> `optional` **payload.parameter**: `ParameterType`
+> `optional` **parameter**: `ParameterType`
 
-#### payload.payload?
+#### payload?
 
-> `optional` **payload.payload**: `PayloadType`
+> `optional` **payload**: `PayloadType`
+
+***
 
 ### principalId?
 
 > `optional` **principalId**: [`PrincipalId`](PrincipalId.md)
 
+Defined in: [core/types/subscription/Subscription.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L35)
+
 the principal id
+
+***
 
 ### receiver?
 
 > `optional` **receiver**: `object`
 
+Defined in: [core/types/subscription/Subscription.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L22)
+
 the consumer address of the message
 
-#### receiver.instanceId?
+#### instanceId?
 
-> `optional` **receiver.instanceId**: [`InstanceId`](InstanceId.md)
+> `optional` **instanceId**: [`InstanceId`](InstanceId.md)
 
-#### receiver.serviceName?
+#### serviceName?
 
-> `optional` **receiver.serviceName**: `string`
+> `optional` **serviceName**: `string`
 
-#### receiver.serviceTarget?
+#### serviceTarget?
 
-> `optional` **receiver.serviceTarget**: `string`
+> `optional` **serviceTarget**: `string`
 
-#### receiver.serviceVersion?
+#### serviceVersion?
 
-> `optional` **receiver.serviceVersion**: `string`
+> `optional` **serviceVersion**: `string`
+
+***
 
 ### sender?
 
 > `optional` **sender**: `object`
 
+Defined in: [core/types/subscription/Subscription.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L15)
+
 the producer address of the message
 
-#### sender.instanceId?
+#### instanceId?
 
-> `optional` **sender.instanceId**: [`InstanceId`](InstanceId.md)
+> `optional` **instanceId**: [`InstanceId`](InstanceId.md)
 
-#### sender.serviceName?
+#### serviceName?
 
-> `optional` **sender.serviceName**: `string`
+> `optional` **serviceName**: `string`
 
-#### sender.serviceTarget?
+#### serviceTarget?
 
-> `optional` **sender.serviceTarget**: `string`
+> `optional` **serviceTarget**: `string`
 
-#### sender.serviceVersion?
+#### serviceVersion?
 
-> `optional` **sender.serviceVersion**: `string`
+> `optional` **serviceVersion**: `string`
+
+***
 
 ### subscriber
 
 > **subscriber**: [`EBMessageAddress`](EBMessageAddress.md)
 
+Defined in: [core/types/subscription/Subscription.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L44)
+
 the address of the subscription (service name, version and subscription name)
+
+***
 
 ### tenantId?
 
 > `optional` **tenantId**: [`TenantId`](TenantId.md)
+
+Defined in: [core/types/subscription/Subscription.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/Subscription.ts#L37)
 
 the tenant id

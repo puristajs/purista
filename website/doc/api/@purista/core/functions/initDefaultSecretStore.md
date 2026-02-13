@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **initDefaultSecretStore**(`options`): [`DefaultSecretStore`](../classes/DefaultSecretStore.md)
 
-Defined in: [packages/core/src/DefaultSecretStore/initDefaultSecretStore.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/initDefaultSecretStore.impl.ts#L4)
+Defined in: [DefaultSecretStore/initDefaultSecretStore.impl.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultSecretStore/initDefaultSecretStore.impl.ts#L4)
 
 ## Parameters
 

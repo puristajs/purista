@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,15 +6,15 @@
 
 # Function: initLogger()
 
-> **initLogger**(`level`, `opt`?): [`Logger`](../classes/Logger.md)
+> **initLogger**(`level?`, `opt?`): [`Logger`](../classes/Logger.md)
 
-Defined in: [packages/core/src/DefaultLogger/initLogger.impl.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/initLogger.impl.ts#L15)
+Defined in: [DefaultLogger/initLogger.impl.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultLogger/initLogger.impl.ts#L21)
 
-Create a new logger with the given minimum log level
+Create a new logger instance using pino.
 
 ## Parameters
 
-### level
+### level?
 
 [`LogLevelName`](../type-aliases/LogLevelName.md) = `...`
 
@@ -22,6 +22,15 @@ Create a new logger with the given minimum log level
 
 `LoggerOptions`\<`never`, `boolean`\>
 
+Optional pino configuration.
+
 ## Returns
 
 [`Logger`](../classes/Logger.md)
+
+## Example
+
+```ts
+const logger = initLogger('debug')
+logger.info('logger ready')
+```

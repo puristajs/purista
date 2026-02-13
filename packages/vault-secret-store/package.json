@@ -1,6 +1,6 @@
 {
 	"name": "@purista/vault-secret-store",
-	"version": "2.1.5",
+	"version": "2.2.0",
 	"description": "State store adapter for HashiCorp Vault",
 	"homepage": "https://purista.dev",
 	"repository": {

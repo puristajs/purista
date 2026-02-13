@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,10 +6,12 @@
 
 # Type Alias: CommandDefinitionListResolved\<S\>
 
-> **CommandDefinitionListResolved**\<`S`\>: [`CommandDefinition`](CommandDefinition.md)\<`S`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`CommandDefinitionMetadataBase`](CommandDefinitionMetadataBase.md)\>[]
+> **CommandDefinitionListResolved**\<`S`\> = [`CommandDefinition`](CommandDefinition.md)\<`S`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`CommandDefinitionMetadataBase`](CommandDefinitionMetadataBase.md)\>[]
 
-Defined in: [packages/core/src/core/types/commandType/CommandDefinitionList.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinitionList.ts#L16)
+Defined in: [core/types/commandType/CommandDefinitionList.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandDefinitionList.ts#L16)
 
 ## Type Parameters
 
-• **S** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
+### S
+
+`S` *extends* [`ServiceClass`](../interfaces/ServiceClass.md)

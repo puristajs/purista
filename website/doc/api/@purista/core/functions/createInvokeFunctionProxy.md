@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,15 +6,17 @@
 
 # Function: createInvokeFunctionProxy()
 
-> **createInvokeFunctionProxy**\<`TFaux`\>(`invokeOg`, `address`?, `lvl`?): `TFaux`
+> **createInvokeFunctionProxy**\<`TFaux`\>(`invokeOg`, `address?`, `lvl?`): `TFaux`
 
-Defined in: [packages/core/src/core/helper/createInvokeFunctionProxy.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createInvokeFunctionProxy.impl.ts#L16)
+Defined in: [core/helper/createInvokeFunctionProxy.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createInvokeFunctionProxy.impl.ts#L17)
 
 Creates a proxy which allows to chain the invoke function.
 
 ## Type Parameters
 
-• **TFaux**
+### TFaux
+
+`TFaux`
 
 ## Parameters
 

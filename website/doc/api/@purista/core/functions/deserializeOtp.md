@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Function: deserializeOtp()
 
-> **deserializeOtp**(`logger`, `otp`?): `undefined` \| `Context`
+> **deserializeOtp**(`logger`, `otp?`): `Context` \| `undefined`
 
-Defined in: [packages/core/src/core/helper/serializeOtp.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/serializeOtp.impl.ts#L26)
+Defined in: [core/helper/serializeOtp.impl.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/serializeOtp.impl.ts#L26)
 
 ## Parameters
 
@@ -22,4 +22,4 @@ Defined in: [packages/core/src/core/helper/serializeOtp.impl.ts:26](https://gith
 
 ## Returns
 
-`undefined` \| `Context`
+`Context` \| `undefined`

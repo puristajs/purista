@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,8 +6,8 @@
 
 # Type Alias: InstanceId
 
-> **InstanceId**: `string`
+> **InstanceId** = `string`
 
-Defined in: [packages/core/src/core/types/InstanceId.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/InstanceId.ts#L2)
+Defined in: [core/types/InstanceId.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/InstanceId.ts#L2)
 
 the instance id of the event bridge

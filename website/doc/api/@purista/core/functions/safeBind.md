@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,43 +6,51 @@
 
 # Function: safeBind()
 
-> **safeBind**\<`T`, `U`\>(`fn`, `thisArg`): (...`args`) => `ReturnType`\<`T`\>
+> **safeBind**\<`ThisType`, `Args`, `ReturnType`\>(`fn`, `thisArg`): (...`args`) => `ReturnType`
 
-Defined in: [packages/core/src/helper/safeBind.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/safeBind.impl.ts#L13)
+Defined in: [helper/safeBind.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/safeBind.impl.ts#L13)
 
 Bind `this` argument like regular `.bind(thisArg)`, but keeps the typescript types in result
 
 ## Type Parameters
 
-• **T** *extends* (...`args`) => `any`
+### ThisType
 
-• **U**
+`ThisType`
+
+### Args
+
+`Args` *extends* `unknown`[]
+
+### ReturnType
+
+`ReturnType`
 
 ## Parameters
 
 ### fn
 
-`T`
+(`this`, ...`args`) => `ReturnType`
 
 The function
 
 ### thisArg
 
-`U`
+`ThisType`
 
 ## Returns
 
-`Function`
+> (...`args`): `ReturnType`
 
 ### Parameters
 
 #### args
 
-...`Parameters`\<`T`\>
+...`Args`
 
 ### Returns
 
-`ReturnType`\<`T`\>
+`ReturnType`
 
 ## Example
 

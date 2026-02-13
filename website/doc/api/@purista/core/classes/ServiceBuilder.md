@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: ServiceBuilder\<S\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:71](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L71)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:67](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L67)
 
 This class is used to build a service.
 The `ServiceBuilder` class is used to build a service. It has a few methods that are used to add
@@ -15,15 +15,17 @@ to create an instance of the service class.
 
 ## Type Parameters
 
-• **S** *extends* [`ServiceBuilderTypes`](../type-aliases/ServiceBuilderTypes.md) = [`ServiceBuilderTypes`](../type-aliases/ServiceBuilderTypes.md)
+### S
+
+`S` *extends* [`ServiceBuilderTypes`](../type-aliases/ServiceBuilderTypes.md) = [`ServiceBuilderTypes`](../type-aliases/ServiceBuilderTypes.md)
 
 ## Constructors
 
-### new ServiceBuilder()
+### Constructor
 
-> **new ServiceBuilder**\<`S`\>(`info`): [`ServiceBuilder`](ServiceBuilder.md)\<`S`\>
+> **new ServiceBuilder**\<`S`\>(`info`): `ServiceBuilder`\<`S`\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:90](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L90)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:86](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L86)
 
 #### Parameters
 
@@ -33,7 +35,7 @@ Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:90](https:/
 
 #### Returns
 
-[`ServiceBuilder`](ServiceBuilder.md)\<`S`\>
+`ServiceBuilder`\<`S`\>
 
 ## Properties
 
@@ -41,7 +43,7 @@ Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:90](https:/
 
 > **info**: [`ServiceInfoType`](../type-aliases/ServiceInfoType.md)
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:90](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L90)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:86](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L86)
 
 ***
 
@@ -49,15 +51,15 @@ Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:90](https:/
 
 > **SClass**: [`Newable`](../type-aliases/Newable.md)\<`S`\[`"ServiceClassType"`\], [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\]\>\> = `Service`
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:87](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L87)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:83](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L83)
 
 ## Methods
 
 ### addCommandDefinition()
 
-> **addCommandDefinition**(...`commands`): [`ServiceBuilder`](ServiceBuilder.md)\<`S`\>
+> **addCommandDefinition**(...`commands`): `ServiceBuilder`\<`S`\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:140](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L140)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:136](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L136)
 
 `addCommandDefinition` adds a list of command definitions to the service builder
 
@@ -71,7 +73,7 @@ CommandDefinitionList
 
 #### Returns
 
-[`ServiceBuilder`](ServiceBuilder.md)\<`S`\>
+`ServiceBuilder`\<`S`\>
 
 The service builder
 
@@ -79,9 +81,9 @@ The service builder
 
 ### addSubscriptionDefinition()
 
-> **addSubscriptionDefinition**(...`subscription`): [`ServiceBuilder`](ServiceBuilder.md)\<`S`\>
+> **addSubscriptionDefinition**(...`subscription`): `ServiceBuilder`\<`S`\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:156](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L156)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:152](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L152)
 
 It adds a subscription definition to the service builder
 
@@ -95,7 +97,7 @@ SubscriptionDefinitionList
 
 #### Returns
 
-[`ServiceBuilder`](ServiceBuilder.md)\<`S`\>
+`ServiceBuilder`\<`S`\>
 
 The service builder
 
@@ -103,22 +105,26 @@ The service builder
 
 ### defineResource()
 
-> **defineResource**\<`ResourceName`, `ResourcesType`\>(): [`ServiceBuilder`](ServiceBuilder.md)\<[`SetNewTypeValue`](../type-aliases/SetNewTypeValue.md)\<`S`, `"Resources"`, `S`\[`"Resources"`\] & `{ [K in string]: InstanceOrType<ResourcesType> }`\>\>
+> **defineResource**\<`ResourceName`, `ResourcesType`\>(): `ServiceBuilder`\<[`SetNewTypeValue`](../type-aliases/SetNewTypeValue.md)\<`S`, `"Resources"`, `S`\[`"Resources"`\] & `{ [K in string]: InstanceOrType<ResourcesType> }`\>\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:203](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L203)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:204](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L204)
 
 Define the resources of the service.
 Resources are available within commands and subscriptions.
 
 #### Type Parameters
 
-• **ResourceName** *extends* `string`
+##### ResourceName
 
-• **ResourcesType**
+`ResourceName` *extends* `string`
+
+##### ResourcesType
+
+`ResourcesType`
 
 #### Returns
 
-[`ServiceBuilder`](ServiceBuilder.md)\<[`SetNewTypeValue`](../type-aliases/SetNewTypeValue.md)\<`S`, `"Resources"`, `S`\[`"Resources"`\] & `{ [K in string]: InstanceOrType<ResourcesType> }`\>\>
+`ServiceBuilder`\<[`SetNewTypeValue`](../type-aliases/SetNewTypeValue.md)\<`S`, `"Resources"`, `S`\[`"Resources"`\] & `{ [K in string]: InstanceOrType<ResourcesType> }`\>\>
 
 The builder with defined types for resources
 
@@ -132,18 +138,21 @@ serviceBuilder.defineResources<'resource_name',ResourceType>()
 
 ### getCommandBuilder()
 
-> **getCommandBuilder**\<`T`, `N`\>(`commandName`, `description`, `eventName`?): [`CommandDefinitionBuilder`](CommandDefinitionBuilder.md)\<`S`\[`"ServiceClassType"`\], [`CommandDefinitionBuilderTypes`](../type-aliases/CommandDefinitionBuilderTypes.md)\<`Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>, `S`\[`"Resources"`\], [`InvokeList`](../type-aliases/InvokeList.md), `Record`\<`string`, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>\>\>\>
+> **getCommandBuilder**\<`T`, `N`\>(`commandName`, `description`, `eventName?`): [`CommandDefinitionBuilder`](CommandDefinitionBuilder.md)\<`S`\[`"ServiceClassType"`\], [`CommandDefinitionBuilderTypes`](../type-aliases/CommandDefinitionBuilderTypes.md)\<[`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), `S`\[`"Resources"`\], [`InvokeList`](../type-aliases/InvokeList.md), `Record`\<`string`, [`Schema`](../type-aliases/Schema.md)\>\>\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:312](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L312)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:335](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L335)
 
-It returns a new instance of the CommandDefinitionBuilder class, which is a class that is used to
-build a command definition
+Create a [CommandDefinitionBuilder](CommandDefinitionBuilder.md) for defining a command of this service.
 
 #### Type Parameters
 
-• **T** *extends* `string`
+##### T
 
-• **N** *extends* `string`
+`T` *extends* `string`
+
+##### N
+
+`N` *extends* `string`
 
 #### Parameters
 
@@ -151,26 +160,33 @@ build a command definition
 
 [`NonEmptyString`](../type-aliases/NonEmptyString.md)\<`T`\>
 
-The name of the command.
+The name of the command to create.
 
 ##### description
 
 `string`
 
-The description of the command.
+A short description of what the command does.
 
 ##### eventName?
 
 [`NonEmptyString`](../type-aliases/NonEmptyString.md)\<`N`\>
 
-The name of the event that will be emitted when the command is
-executed.
+Optional event name emitted on success.
 
 #### Returns
 
-[`CommandDefinitionBuilder`](CommandDefinitionBuilder.md)\<`S`\[`"ServiceClassType"`\], [`CommandDefinitionBuilderTypes`](../type-aliases/CommandDefinitionBuilderTypes.md)\<`Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>, `S`\[`"Resources"`\], [`InvokeList`](../type-aliases/InvokeList.md), `Record`\<`string`, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>\>\>\>
+[`CommandDefinitionBuilder`](CommandDefinitionBuilder.md)\<`S`\[`"ServiceClassType"`\], [`CommandDefinitionBuilderTypes`](../type-aliases/CommandDefinitionBuilderTypes.md)\<[`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), [`Schema`](../type-aliases/Schema.md), `S`\[`"Resources"`\], [`InvokeList`](../type-aliases/InvokeList.md), `Record`\<`string`, [`Schema`](../type-aliases/Schema.md)\>\>\>
 
-A CommandDefinitionBuilder object.
+A new command builder instance
+
+#### Example
+
+```ts
+const cmd = serviceBuilder.getCommandBuilder('login', 'Authenticate user')
+  .addPayloadSchema(z.object({ user: z.string() }))
+  .setCommandFunction(async function () {})
+```
 
 ***
 
@@ -178,7 +194,7 @@ A CommandDefinitionBuilder object.
 
 > **getCommandDefinitions**(): [`CommandDefinitionListResolved`](../type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:356](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L356)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:387](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L387)
 
 #### Returns
 
@@ -192,11 +208,15 @@ the definition of registered commands
 
 > **getCustomClass**(): [`Newable`](../type-aliases/Newable.md)\<`S`\[`"ServiceClassType"`\], [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\]\>\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:222](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L222)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:228](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L228)
+
+Get the service class used when creating instances.
 
 #### Returns
 
 [`Newable`](../type-aliases/Newable.md)\<`S`\[`"ServiceClassType"`\], [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\]\>\>
+
+The constructor function of the service
 
 ***
 
@@ -204,7 +224,7 @@ Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:222](https:
 
 > **getFullServiceDefinition**(): `Promise`\<\{ `commands`: [`CommandDefinitionListResolved`](../type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `deprecated`: `boolean`; `serviceDescription`: `string`; `serviceName`: `string`; `serviceVersion`: `string`; `subscriptions`: [`SubscriptionDefinitionListResolved`](../type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:421](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L421)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:461](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L461)
 
 Returns the service definition.
 This includes information about commands and subscriptions.
@@ -217,12 +237,14 @@ This includes information about commands and subscriptions.
 
 ### getInstance()
 
-> **getInstance**(`eventBridge`, `options`?): `Promise`\<`S`\[`"ServiceClassType"`\]\>
+> **getInstance**(`eventBridge`, `options?`): `Promise`\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:233](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L233)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:249](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L249)
 
-It creates a new instance of the service class, passing in the logger, service info, event bridge,
-command functions, subscription list, and configuration
+Instantiate the service with the provided EventBridge and optional configuration.
+
+All command and subscription definitions are resolved automatically
+before the instance is created.
 
 #### Parameters
 
@@ -230,19 +252,26 @@ command functions, subscription list, and configuration
 
 [`EventBridge`](../interfaces/EventBridge.md)
 
-EventBridge
+The event bridge implementation to use.
 
 ##### options?
 
-\{ \[K in string \| number \| symbol\]: (\{ configStore?: ConfigStore; logger?: Logger; logLevel?: LogLevelName; secretStore?: SecretStore; spanProcessor?: SpanProcessor; stateStore?: StateStore \} & (keyof S\["Resources"\] extends NeverObject ? \{ resources?: undefined \} : \{ resources: S\["Resources"\] \}) & (keyof S\["ConfigInputType"\] extends NeverObject ? \{ serviceConfig?: undefined \} : \{ serviceConfig: S\["ConfigInputType"\] \}))\[K\] \}
+\{ \[K in string \| number \| symbol\]: (\{ configStore?: ConfigStore; logger?: Logger; logLevel?: LogLevelName; secretStore?: SecretStore; spanProcessor?: SpanProcessor; stateStore?: StateStore \} & (keyof S\["Resources"\] extends NeverObject ? \{ resources?: undefined \} : \{ resources: S\["Resources"\] \}) & (keyof S\["ConfigInputType"\] extends NeverObject ? \{ serviceConfig?: undefined \} : \{ serviceConfig?: S\["ConfigInputType"\] \}))\[K\] \}
 
-additional config like logger, stores and opentelemetry span processor
+Optional configuration such as logger or stores.
 
 #### Returns
 
 `Promise`\<`S`\[`"ServiceClassType"`\]\>
 
-The instance of the service class
+The initialized service instance
+
+#### Example
+
+```ts
+const svc = await serviceBuilder.getInstance(eventBridge, { logger })
+svc.start()
+```
 
 ***
 
@@ -250,14 +279,15 @@ The instance of the service class
 
 > **getSubscriptionBuilder**\<`T`\>(`subscriptionName`, `description`): [`SubscriptionDefinitionBuilder`](SubscriptionDefinitionBuilder.md)\<`S`\[`"ServiceClassType"`\], [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `S`\[`"Resources"`\]\>\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:340](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L340)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:371](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L371)
 
-It returns a new instance of the `SubscriptionDefinitionBuilder` class, which is a class that is
-used to build a subscription definition
+Create a [SubscriptionDefinitionBuilder](SubscriptionDefinitionBuilder.md) for defining a subscription.
 
 #### Type Parameters
 
-• **T** *extends* `string`
+##### T
+
+`T` *extends* `string`
 
 #### Parameters
 
@@ -271,13 +301,21 @@ The name of the subscription.
 
 `string`
 
-The description of the subscription.
+A human readable description.
 
 #### Returns
 
 [`SubscriptionDefinitionBuilder`](SubscriptionDefinitionBuilder.md)\<`S`\[`"ServiceClassType"`\], [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `S`\[`"Resources"`\]\>\>
 
-A SubscriptionDefinitionBuilder
+A subscription builder instance
+
+#### Example
+
+```ts
+const sub = serviceBuilder
+  .getSubscriptionBuilder('userCreated', 'React on user creation')
+  .subscribeToEvent('UserCreated')
+```
 
 ***
 
@@ -285,7 +323,7 @@ A SubscriptionDefinitionBuilder
 
 > **getSubscriptionDefinitions**(): [`SubscriptionDefinitionListResolved`](../type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:369](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L369)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:400](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L400)
 
 #### Returns
 
@@ -297,15 +335,15 @@ the definition of registered subscriptions
 
 ### markAsDeprecated()
 
-> **markAsDeprecated**(): [`ServiceBuilder`](ServiceBuilder.md)\<`S`\>
+> **markAsDeprecated**(): `ServiceBuilder`\<`S`\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:130](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L130)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:126](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L126)
 
 Mark this service as deprecated
 
 #### Returns
 
-[`ServiceBuilder`](ServiceBuilder.md)\<`S`\>
+`ServiceBuilder`\<`S`\>
 
 The ServiceBuilder instance
 
@@ -315,27 +353,35 @@ The ServiceBuilder instance
 
 > **resolveDefinitions**(): `Promise`\<\{ `commands`: [`CommandDefinitionListResolved`](../type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `subscriptions`: [`SubscriptionDefinitionListResolved`](../type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:171](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L171)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:172](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L172)
 
-Resolves the command and subscription definitions
+Resolve all added command and subscription definitions.
+
+The resolved definitions are cached and subsequent calls
+will return the cached result. No new definitions can be
+added after this method was executed.
 
 #### Returns
 
 `Promise`\<\{ `commands`: [`CommandDefinitionListResolved`](../type-aliases/CommandDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; `subscriptions`: [`SubscriptionDefinitionListResolved`](../type-aliases/SubscriptionDefinitionListResolved.md)\<`S`\[`"ServiceClassType"`\]\>; \}\>
 
+The resolved command and subscription definitions
+
 ***
 
 ### setConfigSchema()
 
-> **setConfigSchema**\<`T`\>(`schema`): [`ServiceBuilder`](ServiceBuilder.md)\<[`SetNewTypeValues`](../type-aliases/SetNewTypeValues.md)\<`S`, \{ `ConfigInputType`: `UnknownIfNever`\<`InputFrom`\<`AdapterResolver`, `T`\>\> *extends* `Record`\<`string`, `any`\> ? `Record`\<`string`, `any`\> & `UnknownIfNever`\<`InputFrom`\<`AdapterResolver`, `T`\>\> : [`NeverObject`](../type-aliases/NeverObject.md); `ConfigType`: `UnknownIfNever`\<`OutputFrom`\<`AdapterResolver`, `T`\>\> *extends* `Record`\<`string`, `any`\> ? `Record`\<`string`, `any`\> & `UnknownIfNever`\<`OutputFrom`\<`AdapterResolver`, `T`\>\> : [`NeverObject`](../type-aliases/NeverObject.md); `ServiceClassType`: [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`UnknownIfNever`\<`OutputFrom`\<`AdapterResolver`, `T`\>\> *extends* `Record`\<`string`, `any`\> ? `Record`\<`string`, `any`\> & `UnknownIfNever`\<`OutputFrom`\<`AdapterResolver`, `T`\>\> : [`EmptyObject`](../type-aliases/EmptyObject.md), `S`\[`"Resources"`\]\>\>; \}\>\>
+> **setConfigSchema**\<`T`\>(`schema`): `ServiceBuilder`\<[`SetNewTypeValues`](../type-aliases/SetNewTypeValues.md)\<`S`, \{ `ConfigInputType`: [`InferIn`](../type-aliases/InferIn.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`InferIn`](../type-aliases/InferIn.md)\<[`InferIn`](../type-aliases/InferIn.md)\<`T`\>\> : [`NeverObject`](../type-aliases/NeverObject.md); `ConfigType`: [`Infer`](../type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../type-aliases/Infer.md)\<[`Infer`](../type-aliases/Infer.md)\<`T`\>\> : [`NeverObject`](../type-aliases/NeverObject.md); `ServiceClassType`: [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<[`Infer`](../type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../type-aliases/Infer.md)\<[`Infer`](../type-aliases/Infer.md)\<`T`\>\> : [`EmptyObject`](../type-aliases/EmptyObject.md), `S`\[`"Resources"`\]\>\>; \}\>\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:98](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L98)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:94](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L94)
 
 "This function sets the config schema for the service builder."
 
 #### Type Parameters
 
-• **T** *extends* `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+##### T
+
+`T` *extends* [`Schema`](../type-aliases/Schema.md)
 
 #### Parameters
 
@@ -347,7 +393,7 @@ The schema that will be used to validate the config.
 
 #### Returns
 
-[`ServiceBuilder`](ServiceBuilder.md)\<[`SetNewTypeValues`](../type-aliases/SetNewTypeValues.md)\<`S`, \{ `ConfigInputType`: `UnknownIfNever`\<`InputFrom`\<`AdapterResolver`, `T`\>\> *extends* `Record`\<`string`, `any`\> ? `Record`\<`string`, `any`\> & `UnknownIfNever`\<`InputFrom`\<`AdapterResolver`, `T`\>\> : [`NeverObject`](../type-aliases/NeverObject.md); `ConfigType`: `UnknownIfNever`\<`OutputFrom`\<`AdapterResolver`, `T`\>\> *extends* `Record`\<`string`, `any`\> ? `Record`\<`string`, `any`\> & `UnknownIfNever`\<`OutputFrom`\<`AdapterResolver`, `T`\>\> : [`NeverObject`](../type-aliases/NeverObject.md); `ServiceClassType`: [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`UnknownIfNever`\<`OutputFrom`\<`AdapterResolver`, `T`\>\> *extends* `Record`\<`string`, `any`\> ? `Record`\<`string`, `any`\> & `UnknownIfNever`\<`OutputFrom`\<`AdapterResolver`, `T`\>\> : [`EmptyObject`](../type-aliases/EmptyObject.md), `S`\[`"Resources"`\]\>\>; \}\>\>
+`ServiceBuilder`\<[`SetNewTypeValues`](../type-aliases/SetNewTypeValues.md)\<`S`, \{ `ConfigInputType`: [`InferIn`](../type-aliases/InferIn.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`InferIn`](../type-aliases/InferIn.md)\<[`InferIn`](../type-aliases/InferIn.md)\<`T`\>\> : [`NeverObject`](../type-aliases/NeverObject.md); `ConfigType`: [`Infer`](../type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../type-aliases/Infer.md)\<[`Infer`](../type-aliases/Infer.md)\<`T`\>\> : [`NeverObject`](../type-aliases/NeverObject.md); `ServiceClassType`: [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<[`Infer`](../type-aliases/Infer.md)\<`T`\> *extends* `Record`\<`string`, `unknown`\> ? [`Infer`](../type-aliases/Infer.md)\<[`Infer`](../type-aliases/Infer.md)\<`T`\>\> : [`EmptyObject`](../type-aliases/EmptyObject.md), `S`\[`"Resources"`\]\>\>; \}\>\>
 
 ServiceBuilder
 
@@ -355,15 +401,17 @@ ServiceBuilder
 
 ### setCustomClass()
 
-> **setCustomClass**\<`T`\>(`customClass`): [`ServiceBuilder`](ServiceBuilder.md)\<[`SetNewTypeValue`](../type-aliases/SetNewTypeValue.md)\<`S`, `"ServiceClassType"`, `T`\>\>
+> **setCustomClass**\<`T`\>(`customClass`): `ServiceBuilder`\<[`SetNewTypeValue`](../type-aliases/SetNewTypeValue.md)\<`S`, `"ServiceClassType"`, `T`\>\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:215](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L215)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:216](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L216)
 
 It sets the class type of the service.
 
 #### Type Parameters
 
-• **T** *extends* [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\]\>\>
+##### T
+
+`T` *extends* [`Service`](Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\<`S`\[`"ConfigType"`\], `S`\[`"Resources"`\]\>\>
 
 #### Parameters
 
@@ -375,7 +423,7 @@ A class which extends the Service class
 
 #### Returns
 
-[`ServiceBuilder`](ServiceBuilder.md)\<[`SetNewTypeValue`](../type-aliases/SetNewTypeValue.md)\<`S`, `"ServiceClassType"`, `T`\>\>
+`ServiceBuilder`\<[`SetNewTypeValue`](../type-aliases/SetNewTypeValue.md)\<`S`, `"ServiceClassType"`, `T`\>\>
 
 The builder itself, but with the type of the service class changed.
 
@@ -385,7 +433,7 @@ The builder itself, but with the type of the service class changed.
 
 > **setDefaultConfig**(`config`): `this`
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:121](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L121)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:117](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L117)
 
 "This function sets the default configuration for the service."
 
@@ -413,13 +461,23 @@ Use a default value in the config validation schema instead
 
 > **testServiceSetup**(): `Promise`\<`boolean`\>
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:382](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L382)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:422](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L422)
 
-A simple test helper, which ensures, that there ar no duplicate names used.
+Simple helper to verify the service configuration during tests.
+
+It resolves the definitions and checks for duplicated command or
+subscription names. Useful to ensure that your service setup is
+correct before starting it.
 
 #### Returns
 
 `Promise`\<`boolean`\>
+
+#### Example
+
+```ts
+await serviceBuilder.testServiceSetup()
+```
 
 ***
 
@@ -427,7 +485,7 @@ A simple test helper, which ensures, that there ar no duplicate names used.
 
 > **validateCommandDefinitions**(): `void`
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:446](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L446)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:486](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L486)
 
 #### Returns
 
@@ -443,7 +501,7 @@ Use testServiceSetup() instead
 
 > `protected` **validateCommands**(`commandDefinitions`): `void`
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:391](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L391)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:431](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L431)
 
 #### Parameters
 
@@ -461,7 +519,7 @@ Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:391](https:
 
 > **validateSubscriptionDefinitions**(): `void`
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:454](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L454)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:494](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L494)
 
 #### Returns
 
@@ -477,7 +535,7 @@ Use testServiceSetup() instead
 
 > `protected` **validateSubscriptions**(`subscriptionDefinitions`): `void`
 
-Defined in: [packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts:431](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L431)
+Defined in: [ServiceBuilder/ServiceBuilder.impl.ts:471](https://github.com/puristajs/purista/blob/master/packages/core/src/ServiceBuilder/ServiceBuilder.impl.ts#L471)
 
 #### Parameters
 

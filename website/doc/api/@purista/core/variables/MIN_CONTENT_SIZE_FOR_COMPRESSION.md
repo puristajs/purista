@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,4 +8,4 @@
 
 > `const` **MIN\_CONTENT\_SIZE\_FOR\_COMPRESSION**: `1024` = `1024`
 
-Defined in: [packages/core/src/core/HttpServer/MinContentSizeForCompression.const.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/MinContentSizeForCompression.const.ts#L1)
+Defined in: [core/HttpServer/MinContentSizeForCompression.const.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/HttpServer/MinContentSizeForCompression.const.ts#L1)

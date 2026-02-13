@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Enumeration: StatusCode
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L5)
+Defined in: [core/types/StatusCode.enum.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L5)
 
 Message and error status codes.
 The codes are based on HTTP status codes
@@ -17,7 +17,7 @@ The codes are based on HTTP status codes
 
 > **Accepted**: `202`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L11)
+Defined in: [core/types/StatusCode.enum.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L11)
 
 ***
 
@@ -25,7 +25,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:11](https://github.
 
 > **AlreadyReported**: `208`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L17)
+Defined in: [core/types/StatusCode.enum.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L17)
 
 ***
 
@@ -33,7 +33,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:17](https://github.
 
 > **BadGateway**: `502`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:63](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L63)
+Defined in: [core/types/StatusCode.enum.ts:63](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L63)
 
 ***
 
@@ -41,7 +41,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:63](https://github.
 
 > **BadRequest**: `400`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L30)
+Defined in: [core/types/StatusCode.enum.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L30)
 
 ***
 
@@ -49,7 +49,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:30](https://github.
 
 > **BandwidthLimitExceeded**: `509`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:70](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L70)
+Defined in: [core/types/StatusCode.enum.ts:70](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L70)
 
 ***
 
@@ -57,7 +57,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:70](https://github.
 
 > **Conflict**: `409`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L39)
+Defined in: [core/types/StatusCode.enum.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L39)
 
 ***
 
@@ -65,7 +65,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:39](https://github.
 
 > **Created**: `201`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L10)
+Defined in: [core/types/StatusCode.enum.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L10)
 
 ***
 
@@ -73,7 +73,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:10](https://github.
 
 > **ExpectationFailed**: `417`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L47)
+Defined in: [core/types/StatusCode.enum.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L47)
 
 ***
 
@@ -81,7 +81,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:47](https://github.
 
 > **Forbidden**: `403`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L33)
+Defined in: [core/types/StatusCode.enum.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L33)
 
 ***
 
@@ -89,7 +89,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:33](https://github.
 
 > **GatewayTimeout**: `504`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:65](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L65)
+Defined in: [core/types/StatusCode.enum.ts:65](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L65)
 
 ***
 
@@ -97,7 +97,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:65](https://github.
 
 > **Gone**: `410`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L40)
+Defined in: [core/types/StatusCode.enum.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L40)
 
 ***
 
@@ -105,7 +105,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:40](https://github.
 
 > **HTTPVersionNotSupported**: `505`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:66](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L66)
+Defined in: [core/types/StatusCode.enum.ts:66](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L66)
 
 ***
 
@@ -113,7 +113,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:66](https://github.
 
 > **ImATeapot**: `418`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L48)
+Defined in: [core/types/StatusCode.enum.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L48)
 
 ***
 
@@ -121,7 +121,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:48](https://github.
 
 > **IMUsed**: `229`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L18)
+Defined in: [core/types/StatusCode.enum.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L18)
 
 ***
 
@@ -129,7 +129,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:18](https://github.
 
 > **InfoContinue**: `100`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L6)
+Defined in: [core/types/StatusCode.enum.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L6)
 
 ***
 
@@ -137,7 +137,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:6](https://github.c
 
 > **InfoProcessing**: `102`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L8)
+Defined in: [core/types/StatusCode.enum.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L8)
 
 ***
 
@@ -145,7 +145,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:8](https://github.c
 
 > **InfoSwitchingProtocols**: `101`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L7)
+Defined in: [core/types/StatusCode.enum.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L7)
 
 ***
 
@@ -153,7 +153,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:7](https://github.c
 
 > **InsufficientStorage**: `507`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:68](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L68)
+Defined in: [core/types/StatusCode.enum.ts:68](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L68)
 
 ***
 
@@ -161,7 +161,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:68](https://github.
 
 > **InternalServerError**: `500`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:61](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L61)
+Defined in: [core/types/StatusCode.enum.ts:61](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L61)
 
 ***
 
@@ -169,7 +169,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:61](https://github.
 
 > **InvalidToken**: `498`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:59](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L59)
+Defined in: [core/types/StatusCode.enum.ts:59](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L59)
 
 ***
 
@@ -177,7 +177,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:59](https://github.
 
 > **LengthRequired**: `411`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L41)
+Defined in: [core/types/StatusCode.enum.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L41)
 
 ***
 
@@ -185,7 +185,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:41](https://github.
 
 > **Locked**: `423`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L51)
+Defined in: [core/types/StatusCode.enum.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L51)
 
 ***
 
@@ -193,7 +193,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:51](https://github.
 
 > **LoginTimeOut**: `440`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:56](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L56)
+Defined in: [core/types/StatusCode.enum.ts:56](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L56)
 
 ***
 
@@ -201,7 +201,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:56](https://github.
 
 > **LoopDetected**: `508`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:69](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L69)
+Defined in: [core/types/StatusCode.enum.ts:69](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L69)
 
 ***
 
@@ -209,7 +209,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:69](https://github.
 
 > **MethodNotAllowed**: `405`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L35)
+Defined in: [core/types/StatusCode.enum.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L35)
 
 ***
 
@@ -217,7 +217,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:35](https://github.
 
 > **MisdirectedRequest**: `421`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L49)
+Defined in: [core/types/StatusCode.enum.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L49)
 
 ***
 
@@ -225,7 +225,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:49](https://github.
 
 > **MultiStatus**: `207`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L16)
+Defined in: [core/types/StatusCode.enum.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L16)
 
 ***
 
@@ -233,7 +233,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:16](https://github.
 
 > **NetworkAuthRequired**: `511`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:72](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L72)
+Defined in: [core/types/StatusCode.enum.ts:72](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L72)
 
 ***
 
@@ -241,7 +241,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:72](https://github.
 
 > **NoContent**: `204`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L13)
+Defined in: [core/types/StatusCode.enum.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L13)
 
 ***
 
@@ -249,7 +249,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:13](https://github.
 
 > **NonAuthoritativeInfo**: `203`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L12)
+Defined in: [core/types/StatusCode.enum.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L12)
 
 ***
 
@@ -257,7 +257,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:12](https://github.
 
 > **NotAcceptable**: `406`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L36)
+Defined in: [core/types/StatusCode.enum.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L36)
 
 ***
 
@@ -265,7 +265,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:36](https://github.
 
 > **NotExtended**: `510`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:71](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L71)
+Defined in: [core/types/StatusCode.enum.ts:71](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L71)
 
 ***
 
@@ -273,7 +273,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:71](https://github.
 
 > **NotFound**: `404`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L34)
+Defined in: [core/types/StatusCode.enum.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L34)
 
 ***
 
@@ -281,7 +281,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:34](https://github.
 
 > **NotImplemented**: `501`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L62)
+Defined in: [core/types/StatusCode.enum.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L62)
 
 ***
 
@@ -289,7 +289,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:62](https://github.
 
 > **OK**: `200`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L9)
+Defined in: [core/types/StatusCode.enum.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L9)
 
 ***
 
@@ -297,7 +297,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:9](https://github.c
 
 > **PartialContent**: `206`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L15)
+Defined in: [core/types/StatusCode.enum.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L15)
 
 ***
 
@@ -305,7 +305,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:15](https://github.
 
 > **PayloadTooLarge**: `413`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L43)
+Defined in: [core/types/StatusCode.enum.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L43)
 
 ***
 
@@ -313,7 +313,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:43](https://github.
 
 > **PaymentRequired**: `402`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L32)
+Defined in: [core/types/StatusCode.enum.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L32)
 
 ***
 
@@ -321,7 +321,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:32](https://github.
 
 > **PreconditionFailed**: `412`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L42)
+Defined in: [core/types/StatusCode.enum.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L42)
 
 ***
 
@@ -329,7 +329,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:42](https://github.
 
 > **PreconditionRequired**: `428`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L53)
+Defined in: [core/types/StatusCode.enum.ts:53](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L53)
 
 ***
 
@@ -337,7 +337,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:53](https://github.
 
 > **ProxyAuthRequired**: `407`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L37)
+Defined in: [core/types/StatusCode.enum.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L37)
 
 ***
 
@@ -345,7 +345,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:37](https://github.
 
 > **RangeNotSatisfiable**: `416`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L46)
+Defined in: [core/types/StatusCode.enum.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L46)
 
 ***
 
@@ -353,7 +353,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:46](https://github.
 
 > **RedirectFound**: `302`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L21)
+Defined in: [core/types/StatusCode.enum.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L21)
 
 ***
 
@@ -361,7 +361,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:21](https://github.
 
 > **RedirectMovedPermanently**: `301`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L20)
+Defined in: [core/types/StatusCode.enum.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L20)
 
 ***
 
@@ -369,7 +369,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:20](https://github.
 
 > **RedirectMultipleChoices**: `300`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L19)
+Defined in: [core/types/StatusCode.enum.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L19)
 
 ***
 
@@ -377,7 +377,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:19](https://github.
 
 > **RedirectNotModified**: `304`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L24)
+Defined in: [core/types/StatusCode.enum.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L24)
 
 ***
 
@@ -385,7 +385,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:24](https://github.
 
 > **RedirectPermanent**: `308`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L29)
+Defined in: [core/types/StatusCode.enum.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L29)
 
 ***
 
@@ -393,7 +393,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:29](https://github.
 
 > **RedirectSeeOther**: `303`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L23)
+Defined in: [core/types/StatusCode.enum.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L23)
 
 ***
 
@@ -401,7 +401,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:23](https://github.
 
 > **RedirectSwitchProxy**: `306`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L27)
+Defined in: [core/types/StatusCode.enum.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L27)
 
 ***
 
@@ -409,7 +409,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:27](https://github.
 
 > **RedirectTemp**: `307`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L28)
+Defined in: [core/types/StatusCode.enum.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L28)
 
 ***
 
@@ -417,7 +417,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:28](https://github.
 
 > **RedirectUseProxy**: `305`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L25)
+Defined in: [core/types/StatusCode.enum.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L25)
 
 ***
 
@@ -425,7 +425,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:25](https://github.
 
 > **RequestHeaderFieldsTooLarge**: `431`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:55](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L55)
+Defined in: [core/types/StatusCode.enum.ts:55](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L55)
 
 ***
 
@@ -433,7 +433,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:55](https://github.
 
 > **RequestTimeout**: `408`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L38)
+Defined in: [core/types/StatusCode.enum.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L38)
 
 ***
 
@@ -441,7 +441,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:38](https://github.
 
 > **ResetContent**: `205`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L14)
+Defined in: [core/types/StatusCode.enum.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L14)
 
 ***
 
@@ -449,7 +449,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:14](https://github.
 
 > **RetryWith**: `449`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:57](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L57)
+Defined in: [core/types/StatusCode.enum.ts:57](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L57)
 
 ***
 
@@ -457,7 +457,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:57](https://github.
 
 > **ServiceUnavailable**: `503`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:64](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L64)
+Defined in: [core/types/StatusCode.enum.ts:64](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L64)
 
 ***
 
@@ -465,7 +465,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:64](https://github.
 
 > **TokenRequired**: `499`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:60](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L60)
+Defined in: [core/types/StatusCode.enum.ts:60](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L60)
 
 ***
 
@@ -473,7 +473,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:60](https://github.
 
 > **TooManyRequests**: `429`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L54)
+Defined in: [core/types/StatusCode.enum.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L54)
 
 ***
 
@@ -481,7 +481,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:54](https://github.
 
 > **Unauthorized**: `401`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L31)
+Defined in: [core/types/StatusCode.enum.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L31)
 
 ***
 
@@ -489,7 +489,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:31](https://github.
 
 > **UnavailableForLegalReasons**: `451`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:58](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L58)
+Defined in: [core/types/StatusCode.enum.ts:58](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L58)
 
 ***
 
@@ -497,7 +497,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:58](https://github.
 
 > **UnprocessableEntity**: `422`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L50)
+Defined in: [core/types/StatusCode.enum.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L50)
 
 ***
 
@@ -505,7 +505,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:50](https://github.
 
 > **UnsupportedMediaType**: `415`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L45)
+Defined in: [core/types/StatusCode.enum.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L45)
 
 ***
 
@@ -513,7 +513,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:45](https://github.
 
 > **UpgradeRequired**: `426`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L52)
+Defined in: [core/types/StatusCode.enum.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L52)
 
 ***
 
@@ -521,7 +521,7 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:52](https://github.
 
 > **URITooLong**: `414`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L44)
+Defined in: [core/types/StatusCode.enum.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L44)
 
 ***
 
@@ -529,4 +529,4 @@ Defined in: [packages/core/src/core/types/StatusCode.enum.ts:44](https://github.
 
 > **VariantAlsoNegotiates**: `506`
 
-Defined in: [packages/core/src/core/types/StatusCode.enum.ts:67](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L67)
+Defined in: [core/types/StatusCode.enum.ts:67](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/StatusCode.enum.ts#L67)

@@ -1,4 +1,4 @@
-[**@purista/aws-secret-store v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,16 +6,18 @@
 
 # Type Alias: AWSSecretStoreConfig
 
-> **AWSSecretStoreConfig**: `object`
+> **AWSSecretStoreConfig** = `object`
 
 Defined in: [aws-secret-store/src/types.ts:6](https://github.com/puristajs/purista/blob/master/packages/aws-secret-store/src/types.ts#L6)
 
 AWS Secret Manager store config
 
-## Type declaration
+## Properties
 
 ### client
 
 > **client**: `SecretsManagerClientConfigType`
+
+Defined in: [aws-secret-store/src/types.ts:10](https://github.com/puristajs/purista/blob/master/packages/aws-secret-store/src/types.ts#L10)
 
 AWS client options

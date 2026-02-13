@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,39 +6,44 @@
 
 # Function: getSubscriptionFunctionWithValidation()
 
-> **getSubscriptionFunctionWithValidation**\<`S`\>(`fn`, `inputPayloadSchema`, `inputParameterSchema`, `outputPayloadSchema`, `beforeGuards`): (`this`, `context`, `payload`, `parameter`) => `Promise`\<`unknown`\>
+> **getSubscriptionFunctionWithValidation**\<`S`\>(`fn`, `inputPayloadSchema`, `inputParameterSchema`, `outputPayloadSchema`, `beforeGuards?`): (`this`, `context`, `payload`, `parameter`) => `Promise`\<`unknown`\>
 
-Defined in: [packages/core/src/SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts#L13)
+Defined in: [SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/getSubscriptionFunctionWithValidation.impl.ts#L16)
+
+Wraps a subscription handler with schema validation and guard execution.
+Input payload/parameter is validated before execution and output can be validated after execution.
 
 ## Type Parameters
 
-• **S** *extends* [`Service`](../classes/Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\>
+### S
+
+`S` *extends* [`Service`](../classes/Service.md)\<[`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)\>
 
 ## Parameters
 
 ### fn
 
-[`SubscriptionFunction`](../type-aliases/SubscriptionFunction.md)\<`S`, `any`, `any`, `any`, `any`, `any`, `any`\>
+[`SubscriptionFunction`](../type-aliases/SubscriptionFunction.md)\<`S`, `unknown`, `unknown`, `unknown`, `any`, `any`, `any`\>
 
 ### inputPayloadSchema
 
-`undefined` | `Schema`\<`any`, `any`, `any`, `""`\> | `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+[`Schema`](../type-aliases/Schema.md) | `undefined`
 
 ### inputParameterSchema
 
-`undefined` | `Schema`\<`any`, `any`, `any`, `""`\> | `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+[`Schema`](../type-aliases/Schema.md) | `undefined`
 
 ### outputPayloadSchema
 
-`undefined` | `Schema`\<`any`, `any`, `any`, `""`\> | `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+[`Schema`](../type-aliases/Schema.md) | `undefined`
 
-### beforeGuards
+### beforeGuards?
 
-`Record`\<`string`, [`SubscriptionBeforeGuardHook`](../type-aliases/SubscriptionBeforeGuardHook.md)\<`S`, `any`, `any`, `any`, `any`, `any`\>\> = `{}`
+`Record`\<`string`, [`SubscriptionBeforeGuardHook`](../type-aliases/SubscriptionBeforeGuardHook.md)\<`S`, `unknown`, `unknown`, `any`, `any`, `any`\>\> = `{}`
 
 ## Returns
 
-`Function`
+> (`this`, `context`, `payload`, `parameter`): `Promise`\<`unknown`\>
 
 ### Parameters
 
@@ -171,7 +176,7 @@ set a state value in the state store
 
 ##### wrapInSpan
 
-\<`F`\>(`name`, `opts`, `fn`, `context`?) => `Promise`\<`F`\>
+\<`F`\>(`name`, `opts`, `fn`, `context?`) => `Promise`\<`F`\>
 
 wrap given function in an opentelemetry span
 

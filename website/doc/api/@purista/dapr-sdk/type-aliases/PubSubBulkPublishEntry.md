@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,26 +6,40 @@
 
 # Type Alias: PubSubBulkPublishEntry
 
-> **PubSubBulkPublishEntry**: `object`
+> **PubSubBulkPublishEntry** = `object`
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts#L19)
 
 PubSubBulkPublishEntry defines an entry in a bulk publish request.
 
-## Type declaration
+## Properties
 
 ### contentType
 
 > **contentType**: `string`
 
+Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts:23](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts#L23)
+
+***
+
 ### entryID
 
 > **entryID**: `string`
+
+Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts:20](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts#L20)
+
+***
 
 ### event
 
 > **event**: `object` \| `string`
 
+Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts:21](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts#L21)
+
+***
+
 ### metadata
 
 > **metadata**: [`KeyValueType`](KeyValueType.md)
+
+Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts:22](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishEntry.type.ts#L22)

@@ -1,4 +1,4 @@
-[**@purista/mqttbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -11,8 +11,6 @@
 Defined in: [mqttbridge/src/getDefaultMqttBridgeConfig.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/getDefaultMqttBridgeConfig.impl.ts#L5)
 
 ## Returns
-
-`object`
 
 ### allowRetries?
 

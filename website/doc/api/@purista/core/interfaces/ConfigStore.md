@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: ConfigStore
 
-Defined in: [packages/core/src/core/ConfigStore/types/ConfigStore.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L10)
+Defined in: [core/ConfigStore/types/ConfigStore.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L10)
 
 Interface definition for config store adapters
 
@@ -16,7 +16,7 @@ Interface definition for config store adapters
 
 > **getConfig**: [`ConfigGetterFunction`](../type-aliases/ConfigGetterFunction.md)
 
-Defined in: [packages/core/src/core/ConfigStore/types/ConfigStore.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L19)
+Defined in: [core/ConfigStore/types/ConfigStore.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L19)
 
 get a config value
 
@@ -38,7 +38,7 @@ UnhandledError
 
 > **name**: `string`
 
-Defined in: [packages/core/src/core/ConfigStore/types/ConfigStore.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L12)
+Defined in: [core/ConfigStore/types/ConfigStore.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L12)
 
 name of store
 
@@ -48,7 +48,7 @@ name of store
 
 > **removeConfig**: [`ConfigDeleteFunction`](../type-aliases/ConfigDeleteFunction.md)
 
-Defined in: [packages/core/src/core/ConfigStore/types/ConfigStore.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L34)
+Defined in: [core/ConfigStore/types/ConfigStore.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L34)
 
 delete a config value
 
@@ -66,7 +66,7 @@ UnhandledError
 
 > **setConfig**: [`ConfigSetterFunction`](../type-aliases/ConfigSetterFunction.md)
 
-Defined in: [packages/core/src/core/ConfigStore/types/ConfigStore.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L27)
+Defined in: [core/ConfigStore/types/ConfigStore.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L27)
 
 set a config value
 
@@ -88,7 +88,7 @@ UnhandledError
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/ConfigStore/types/ConfigStore.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L39)
+Defined in: [core/ConfigStore/types/ConfigStore.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/ConfigStore/types/ConfigStore.ts#L39)
 
 disconnects and shuts down the config store
 

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Type Alias: StateDeleteFunction()
 
-> **StateDeleteFunction**: (`stateName`) => `Promise`\<`void`\>
+> **StateDeleteFunction** = (`stateName`) => `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/StateStore/types/StateDeleteFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateDeleteFunction.ts#L2)
+Defined in: [core/StateStore/types/StateDeleteFunction.ts:2](https://github.com/puristajs/purista/blob/master/packages/core/src/core/StateStore/types/StateDeleteFunction.ts#L2)
 
 delete a state value from the state store
 

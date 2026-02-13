@@ -1,4 +1,4 @@
-[**@purista/redis-config-store v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: RedisConfigStore\<M, F, S\>
 
-Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L41)
+Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L48)
 
 A config store for using redis as storage.
 Config values are stored as stringified JSON.
@@ -48,19 +48,25 @@ See documentation of underlaying redis lib package for detailed configuration op
 
 ## Type Parameters
 
-• **M** *extends* `RedisModules` = `RedisModules`
+### M
 
-• **F** *extends* `RedisFunctions` = `RedisFunctions`
+`M` *extends* `RedisModules` = `RedisModules`
 
-• **S** *extends* `RedisScripts` = `RedisScripts`
+### F
+
+`F` *extends* `RedisFunctions` = `RedisFunctions`
+
+### S
+
+`S` *extends* `RedisScripts` = `RedisScripts`
 
 ## Constructors
 
-### new RedisConfigStore()
+### Constructor
 
-> **new RedisConfigStore**\<`M`, `F`, `S`\>(`config`?): [`RedisConfigStore`](RedisConfigStore.md)\<`M`, `F`, `S`\>
+> **new RedisConfigStore**\<`M`, `F`, `S`\>(`config?`): `RedisConfigStore`\<`M`, `F`, `S`\>
 
-Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L48)
+Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:55](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L55)
 
 #### Parameters
 
@@ -74,7 +80,7 @@ Cache time to live in ms
 
 ###### config?
 
-`RedisClientOptions`\<`M`, `F`, `S`\>
+`RedisClientOptions`\<`M`, `F`, `S`, `RespVersions`, `TypeMapping`, `RedisSocketOptions`\>
 
 ###### enableCache?
 
@@ -114,11 +120,11 @@ A log level for new logger if logger is not set
 
 #### Returns
 
-[`RedisConfigStore`](RedisConfigStore.md)\<`M`, `F`, `S`\>
+`RedisConfigStore`\<`M`, `F`, `S`\>
 
 #### Overrides
 
-[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`constructor`](../../core/classes/ConfigStoreBaseClass.md#constructors)
+[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`constructor`](../../core/classes/ConfigStoreBaseClass.md#constructor)
 
 ## Properties
 
@@ -136,9 +142,9 @@ Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:2
 
 ### client
 
-> **client**: `RedisClientType`\<`M`, `F`, `S`\>
+> **client**: `RedisClientType`\<`M`, `F`, `S`, `RespVersions`, `TypeMapping`\>
 
-Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:46](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L46)
+Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:53](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L53)
 
 ***
 
@@ -156,7 +162,7 @@ Cache time to live in ms
 
 #### config?
 
-> `optional` **config**: `RedisClientOptions`\<`M`, `F`, `S`\>
+> `optional` **config**: `RedisClientOptions`\<`M`, `F`, `S`, `RespVersions`, `TypeMapping`, `RedisSocketOptions`\>
 
 #### enableCache?
 
@@ -196,7 +202,7 @@ A log level for new logger if logger is not set
 
 #### Inherited from
 
-[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`config`](../../core/classes/ConfigStoreBaseClass.md#config-1)
+[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`config`](../../core/classes/ConfigStoreBaseClass.md#config)
 
 ***
 
@@ -220,7 +226,7 @@ Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:2
 
 #### Inherited from
 
-[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`name`](../../core/classes/ConfigStoreBaseClass.md#name-1)
+[`ConfigStoreBaseClass`](../../core/classes/ConfigStoreBaseClass.md).[`name`](../../core/classes/ConfigStoreBaseClass.md#name)
 
 ## Methods
 
@@ -228,7 +234,7 @@ Defined in: core/dist/commonjs/core/ConfigStore/ConfigStoreBaseClass.impl.d.ts:2
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:103](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L103)
+Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:110](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L110)
 
 #### Returns
 
@@ -242,13 +248,13 @@ Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:103](https://github
 
 ### getClient()
 
-> `protected` **getClient**(): `Promise`\<`RedisClientType`\<`M`, `F`, `S`\>\>
+> `protected` **getClient**(): `Promise`\<`RedisClientType`\<`M`, `F`, `S`, `RespVersions`, `TypeMapping`\>\>
 
-Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:54](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L54)
+Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:61](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L61)
 
 #### Returns
 
-`Promise`\<`RedisClientType`\<`M`, `F`, `S`\>\>
+`Promise`\<`RedisClientType`\<`M`, `F`, `S`, `RespVersions`, `TypeMapping`\>\>
 
 ***
 
@@ -264,7 +270,9 @@ For implementation overwrite protected `getConfigImpl`
 
 #### Type Parameters
 
-• **ConfigNames** *extends* `string`[]
+##### ConfigNames
+
+`ConfigNames` *extends* `string`[]
 
 #### Parameters
 
@@ -288,13 +296,15 @@ an object of { [configName]: value | undefined }
 
 > `protected` **getConfigImpl**\<`ConfigNames`\>(...`configNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`ConfigNames`\>\>
 
-Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:61](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L61)
+Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:68](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L68)
 
 This method must be overwritten by actual store implementation.
 
 #### Type Parameters
 
-• **ConfigNames** *extends* `string`[]
+##### ConfigNames
+
+`ConfigNames` *extends* `string`[]
 
 #### Parameters
 
@@ -346,7 +356,7 @@ For implementation overwrite protected `removeConfigImpl`
 
 > `protected` **removeConfigImpl**(`configName`): `Promise`\<`void`\>
 
-Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L80)
+Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:87](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L87)
 
 This method must be overwritten by actual store implementation.
 
@@ -400,7 +410,7 @@ For implementation overwrite protected `setConfigImpl`
 
 > `protected` **setConfigImpl**(`configName`, `configValue`): `Promise`\<`void`\>
 
-Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:92](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L92)
+Defined in: [redis-config-store/src/RedisConfigStore.impl.ts:99](https://github.com/puristajs/purista/blob/master/packages/redis-config-store/src/RedisConfigStore.impl.ts#L99)
 
 This method must be overwritten by actual store implementation.
 

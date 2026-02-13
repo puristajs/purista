@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,10 +6,12 @@
 
 # Type Alias: NonEmptyString\<T\>
 
-> **NonEmptyString**\<`T`\>: `""` *extends* `T` ? `never` : `T`
+> **NonEmptyString**\<`T`\> = `""` *extends* `T` ? `never` : `T`
 
-Defined in: [packages/core/src/helper/types/NonEmptyString.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/NonEmptyString.ts#L1)
+Defined in: [helper/types/NonEmptyString.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/NonEmptyString.ts#L1)
 
 ## Type Parameters
 
-• **T** *extends* `string`
+### T
+
+`T` *extends* `string`

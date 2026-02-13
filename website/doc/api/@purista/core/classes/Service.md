@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: Service\<S\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:89](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L89)
+Defined in: [core/Service/Service.impl.ts:83](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L83)
 
 Base class for all services.
 This class provides base functions to work with the event bridge, logging and so on
@@ -34,7 +34,9 @@ class MyService extends Service {
 
 ## Type Parameters
 
-• **S** *extends* [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md) = [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)
+### S
+
+`S` *extends* [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md) = [`ServiceClassTypes`](../type-aliases/ServiceClassTypes.md)
 
 ## Implements
 
@@ -42,11 +44,11 @@ class MyService extends Service {
 
 ## Constructors
 
-### new Service()
+### Constructor
 
-> **new Service**\<`S`\>(`config`): [`Service`](Service.md)\<`S`\>
+> **new Service**\<`S`\>(`config`): `Service`\<`S`\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:110](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L110)
+Defined in: [core/Service/Service.impl.ts:104](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L104)
 
 #### Parameters
 
@@ -56,7 +58,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:110](https://github.
 
 #### Returns
 
-[`Service`](Service.md)\<`S`\>
+`Service`\<`S`\>
 
 #### Overrides
 
@@ -68,7 +70,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:110](https://github.
 
 > **commandDefinitionList**: [`CommandDefinitionListResolved`](../type-aliases/CommandDefinitionListResolved.md)\<`any`\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:102](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L102)
+Defined in: [core/Service/Service.impl.ts:96](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L96)
 
 ***
 
@@ -76,7 +78,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:102](https://github.
 
 > `protected` **commands**: `Map`\<`string`, [`CommandDefinition`](../type-aliases/CommandDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `S`\[`"Resources"`\], `any`, `any`, `any`\>\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:97](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L97)
+Defined in: [core/Service/Service.impl.ts:91](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L91)
 
 ***
 
@@ -84,7 +86,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:97](https://github.c
 
 > **config**: `S`\[`"ConfigType"`\]
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:104](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L104)
+Defined in: [core/Service/Service.impl.ts:98](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L98)
 
 #### Implementation of
 
@@ -94,9 +96,9 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:104](https://github.
 
 ### configSchema
 
-> `protected` **configSchema**: `undefined` \| `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>
+> `protected` **configSchema**: [`Schema`](../type-aliases/Schema.md) \| `undefined`
 
-Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L48)
+Defined in: [core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L45)
 
 #### Inherited from
 
@@ -108,7 +110,7 @@ Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > `protected` **configStore**: [`ConfigStore`](../interfaces/ConfigStore.md)
 
-Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L45)
+Defined in: [core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L42)
 
 #### Inherited from
 
@@ -120,7 +122,7 @@ Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > `protected` **eventBridge**: [`EventBridge`](../interfaces/EventBridge.md)
 
-Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L36)
+Defined in: [core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L33)
 
 #### Inherited from
 
@@ -132,7 +134,7 @@ Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > `readonly` **info**: [`ServiceInfoType`](../type-aliases/ServiceInfoType.md)
 
-Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L34)
+Defined in: [core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L31)
 
 #### Inherited from
 
@@ -144,7 +146,7 @@ Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > **isStarted**: `boolean` = `false`
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:108](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L108)
+Defined in: [core/Service/Service.impl.ts:102](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L102)
 
 ***
 
@@ -152,7 +154,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:108](https://github.
 
 > **logger**: [`Logger`](Logger.md)
 
-Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L38)
+Defined in: [core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L35)
 
 #### Inherited from
 
@@ -164,7 +166,7 @@ Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > **resources**: `S`\[`"Resources"`\]
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:106](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L106)
+Defined in: [core/Service/Service.impl.ts:100](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L100)
 
 #### Implementation of
 
@@ -176,7 +178,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:106](https://github.
 
 > `protected` **secretStore**: [`SecretStore`](../interfaces/SecretStore.md)
 
-Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L44)
+Defined in: [core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L41)
 
 #### Inherited from
 
@@ -186,9 +188,9 @@ Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 ### spanProcessor
 
-> **spanProcessor**: `undefined` \| `SpanProcessor`
+> **spanProcessor**: `SpanProcessor` \| `undefined`
 
-Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L40)
+Defined in: [core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L37)
 
 #### Inherited from
 
@@ -200,7 +202,7 @@ Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > `protected` **stateStore**: [`StateStore`](../interfaces/StateStore.md)
 
-Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L46)
+Defined in: [core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L43)
 
 #### Inherited from
 
@@ -212,7 +214,7 @@ Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > **subscriptionDefinitionList**: [`SubscriptionDefinitionListResolved`](../type-aliases/SubscriptionDefinitionListResolved.md)\<`any`\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:103](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L103)
+Defined in: [core/Service/Service.impl.ts:97](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L97)
 
 ***
 
@@ -220,7 +222,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:103](https://github.
 
 > `protected` **subscriptions**: `Map`\<`string`, [`SubscriptionDefinition`](../type-aliases/SubscriptionDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `S`\[`"Resources"`\], `any`, `any`, `any`\>\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:93](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L93)
+Defined in: [core/Service/Service.impl.ts:87](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L87)
 
 ***
 
@@ -228,7 +230,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:93](https://github.c
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L42)
+Defined in: [core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L39)
 
 #### Inherited from
 
@@ -242,7 +244,7 @@ Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > **get** **name**(): `string`
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:128](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L128)
+Defined in: [core/Service/Service.impl.ts:122](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L122)
 
 ##### Returns
 
@@ -256,7 +258,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:128](https://github.
 
 > **get** **serviceInfo**(): [`ServiceInfoType`](../type-aliases/ServiceInfoType.md)
 
-Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:108](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L108)
+Defined in: [core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:103](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L103)
 
 Get service info
 
@@ -274,7 +276,7 @@ Get service info
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:1108](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1108)
+Defined in: [core/Service/Service.impl.ts:1103](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1103)
 
 Stop and destroy the current service
 
@@ -294,13 +296,15 @@ Stop and destroy the current service
 
 ### emit()
 
-> **emit**\<`K`\>(`eventName`, `parameter`?): `void`
+> **emit**\<`K`\>(`eventName`, `parameter?`): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L24)
+Defined in: [core/types/GenericEventEmitter.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L27)
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../type-aliases/EventKey.md)\<[`ServiceEvents`](../type-aliases/ServiceEvents.md)\>
+##### K
+
+`K` *extends* [`EventKey`](../type-aliases/EventKey.md)\<[`ServiceEvents`](../type-aliases/ServiceEvents.md)\>
 
 #### Parameters
 
@@ -324,9 +328,9 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:24](https://git
 
 ### executeCommand()
 
-> **executeCommand**(`message`): `Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../enumerations/EBMessageType.md#commanderrorresponse); `otp`: `string`; `payload`: \{ `data`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../enumerations/StatusCode.md); \}; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"instanceId"`\>\> \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+> **executeCommand**(`message`): `Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"instanceId"`\>\> \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:614](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L614)
+Defined in: [core/Service/Service.impl.ts:608](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L608)
 
 Called when a command is received by the service
 
@@ -334,19 +338,19 @@ Called when a command is received by the service
 
 ##### message
 
-`Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`Command`](../enumerations/EBMessageType.md#command); `otp`: `string`; `payload`: \{ `parameter`: `unknown`; `payload`: `unknown`; \}; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+`Readonly`\<[`Command`](../type-aliases/Command.md)\>
 
 #### Returns
 
-`Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../enumerations/EBMessageType.md#commanderrorresponse); `otp`: `string`; `payload`: \{ `data`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../enumerations/StatusCode.md); \}; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"instanceId"`\>\> \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+`Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"instanceId"`\>\> \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>
 
 ***
 
 ### executeSubscription()
 
-> **executeSubscription**(`message`, `subscriptionName`): `Promise`\<`undefined` \| `Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../enumerations/EBMessageType.md#custommessage); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"id"` \| `"timestamp"`\>\>
+> **executeSubscription**(`message`, `subscriptionName`): `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:853](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L853)
+Defined in: [core/Service/Service.impl.ts:847](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L847)
 
 #### Parameters
 
@@ -360,7 +364,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:853](https://github.
 
 #### Returns
 
-`Promise`\<`undefined` \| `Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../enumerations/EBMessageType.md#custommessage); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"id"` \| `"timestamp"`\>\>
+`Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
 ***
 
@@ -368,7 +372,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:853](https://github.
 
 > **getContextFunctions**(`logger`): [`ContextBase`](../type-aliases/ContextBase.md)
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:441](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L441)
+Defined in: [core/Service/Service.impl.ts:435](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L435)
 
 Registers a new subscription for the service
 
@@ -390,13 +394,15 @@ Registers a new subscription for the service
 
 ### getEmitFunction()
 
-> `protected` **getEmitFunction**\<`EmitList`\>(`serviceTarget`, `traceId`?, `principalId`?, `tenantId`?, `emitList`?): \<`K`, `Payload`\>(`eventName`, `eventPayload`?, `contentType`, `contentEncoding`) => `Promise`\<`void`\>
+> `protected` **getEmitFunction**\<`EmitList`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `emitList?`): \<`K`, `Payload`\>(`eventName`, `eventPayload?`, `contentType`, `contentEncoding`) => `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:363](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L363)
+Defined in: [core/Service/Service.impl.ts:357](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L357)
 
 #### Type Parameters
 
-• **EmitList** *extends* `Record`\<`string`, `Schema`\<`any`, `any`, `any`, `""`\> \| `ZodType`\<`any`, `ZodTypeDef`, `any`\>\> = [`EmptyObject`](../type-aliases/EmptyObject.md)
+##### EmitList
+
+`EmitList` *extends* `Record`\<`string`, [`Schema`](../type-aliases/Schema.md)\> = [`EmptyObject`](../type-aliases/EmptyObject.md)
 
 #### Parameters
 
@@ -422,13 +428,17 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:363](https://github.
 
 #### Returns
 
-`Function`
+> \<`K`, `Payload`\>(`eventName`, `eventPayload?`, `contentType?`, `contentEncoding?`): `Promise`\<`void`\>
 
 ##### Type Parameters
 
-• **K** *extends* `string` \| `number` \| `symbol`
+###### K
 
-• **Payload** = `EmitList`\[`K`\]
+`K` *extends* `string` \| `number` \| `symbol`
+
+###### Payload
+
+`Payload` = `EmitList`\[`K`\]
 
 ##### Parameters
 
@@ -456,13 +466,15 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:363](https://github.
 
 ### getInvokeFunction()
 
-> `protected` **getInvokeFunction**\<`Invokes`\>(`serviceTarget`, `traceId`?, `principalId`?, `tenantId`?, `invokes`?): \<`Payload`, `Parameter`\>(`receiver`, `invokePayload`, `invokeparameter`, `contentType`, `contentEncoding`) => `Promise`\<`any`\>
+> `protected` **getInvokeFunction**\<`Invokes`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `invokes?`): \<`Payload`, `Parameter`\>(`receiver`, `invokePayload`, `invokeparameter`, `contentType`, `contentEncoding`) => `Promise`\<`any`\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:228](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L228)
+Defined in: [core/Service/Service.impl.ts:222](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L222)
 
 #### Type Parameters
 
-• **Invokes** *extends* [`InvokeList`](../type-aliases/InvokeList.md)
+##### Invokes
+
+`Invokes` *extends* [`InvokeList`](../type-aliases/InvokeList.md)
 
 #### Parameters
 
@@ -488,13 +500,17 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:228](https://github.
 
 #### Returns
 
-`Function`
+> \<`Payload`, `Parameter`\>(`receiver`, `invokePayload`, `invokeparameter`, `contentType?`, `contentEncoding?`): `Promise`\<`any`\>
 
 ##### Type Parameters
 
-• **Payload**
+###### Payload
 
-• **Parameter** *extends* [`EmptyObject`](../type-aliases/EmptyObject.md)
+`Payload`
+
+###### Parameter
+
+`Parameter` *extends* [`EmptyObject`](../type-aliases/EmptyObject.md)
 
 ##### Parameters
 
@@ -510,11 +526,11 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:228](https://github.
 
 `Parameter`
 
-###### contentType
+###### contentType?
 
 `string` = `'application/json'`
 
-###### contentEncoding
+###### contentEncoding?
 
 `string` = `'utf-8'`
 
@@ -526,9 +542,9 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:228](https://github.
 
 ### getTracer()
 
-> **getTracer**(`name`?, `version`?): `Tracer`
+> **getTracer**(`name?`, `version?`): `Tracer`
 
-Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:117](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L117)
+Defined in: [core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:112](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L112)
 
 Returns open telemetry tracer of this service
 
@@ -562,7 +578,7 @@ Tracer
 
 > `protected` **initializeEventbridgeConnect**(`commandDefinitionList`, `subscriptions`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:174](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L174)
+Defined in: [core/Service/Service.impl.ts:168](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L168)
 
 Connect service to event bridge to receive commands and command responses
 
@@ -586,11 +602,13 @@ Connect service to event bridge to receive commands and command responses
 
 > **off**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L20)
+Defined in: [core/types/GenericEventEmitter.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L23)
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../type-aliases/EventKey.md)\<[`ServiceEvents`](../type-aliases/ServiceEvents.md)\>
+##### K
+
+`K` *extends* [`EventKey`](../type-aliases/EventKey.md)\<[`ServiceEvents`](../type-aliases/ServiceEvents.md)\>
 
 #### Parameters
 
@@ -616,11 +634,13 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:20](https://git
 
 > **on**\<`K`\>(`eventName`, `fn`): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L16)
+Defined in: [core/types/GenericEventEmitter.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L19)
 
 #### Type Parameters
 
-• **K** *extends* [`EventKey`](../type-aliases/EventKey.md)\<[`ServiceEvents`](../type-aliases/ServiceEvents.md)\>
+##### K
+
+`K` *extends* [`EventKey`](../type-aliases/EventKey.md)\<[`ServiceEvents`](../type-aliases/ServiceEvents.md)\>
 
 #### Parameters
 
@@ -646,7 +666,7 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:16](https://git
 
 > **registerCommand**(`commandDefinition`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:809](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L809)
+Defined in: [core/Service/Service.impl.ts:803](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L803)
 
 #### Parameters
 
@@ -664,7 +684,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:809](https://github.
 
 > **registerSubscription**(`subscriptionDefinition`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:1057](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1057)
+Defined in: [core/Service/Service.impl.ts:1052](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L1052)
 
 #### Parameters
 
@@ -682,7 +702,7 @@ Defined in: [packages/core/src/core/Service/Service.impl.ts:1057](https://github
 
 > **removeAllListeners**(): `void`
 
-Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L28)
+Defined in: [core/types/GenericEventEmitter.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/GenericEventEmitter.ts#L31)
 
 #### Returns
 
@@ -696,9 +716,9 @@ Defined in: [packages/core/src/core/types/GenericEventEmitter.ts:28](https://git
 
 ### sendServiceInfo()
 
-> `protected` **sendServiceInfo**(`infoType`, `target`?, `payload`?): `Promise`\<`Readonly`\<[`EBMessage`](../type-aliases/EBMessage.md)\>\>
+> `protected` **sendServiceInfo**(`infoType`, `target?`, `payload?`): `Promise`\<`Readonly`\<[`EBMessage`](../type-aliases/EBMessage.md)\>\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:208](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L208)
+Defined in: [core/Service/Service.impl.ts:202](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L202)
 
 Broadcast service info message
 
@@ -730,7 +750,7 @@ function name is need in messages like InfoServiceFunctionAdded
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/Service/Service.impl.ts:135](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L135)
+Defined in: [core/Service/Service.impl.ts:129](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L129)
 
 It connects to the event bridge and subscribes to the topics that are in the subscription list.
 
@@ -748,13 +768,15 @@ It connects to the event bridge and subscribes to the topics that are in the sub
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:132](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L132)
+Defined in: [core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:127](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L127)
 
 Start a child span for opentelemetry tracking
 
 #### Type Parameters
 
-• **F**
+##### F
+
+`F`
 
 #### Parameters
 
@@ -774,7 +796,7 @@ span options
 
 optional context
 
-`undefined` | `Context`
+`Context` | `undefined`
 
 ##### fn
 
@@ -800,9 +822,9 @@ return value of fn
 
 ### wrapInSpan()
 
-> **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context`?): `Promise`\<`F`\>
+> **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
-Defined in: [packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:182](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L182)
+Defined in: [core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts:177](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/ServiceBaseClass/ServiceBaseClass.impl.ts#L177)
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!
@@ -814,7 +836,9 @@ but not to trace the program flow itself
 
 #### Type Parameters
 
-• **F**
+##### F
+
+`F`
 
 #### Parameters
 

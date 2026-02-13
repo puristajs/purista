@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,10 +6,12 @@
 
 # Type Alias: EmitSchemaList\<T\>
 
-> **EmitSchemaList**\<`T`\>: `{ [K in keyof T]: Schema }`
+> **EmitSchemaList**\<`T`\> = `{ [K in keyof T]: Schema }`
 
-Defined in: [packages/core/src/core/types/EmitSchemaList.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EmitSchemaList.ts#L3)
+Defined in: [core/types/EmitSchemaList.ts:3](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EmitSchemaList.ts#L3)
 
 ## Type Parameters
 
-• **T**
+### T
+
+`T`

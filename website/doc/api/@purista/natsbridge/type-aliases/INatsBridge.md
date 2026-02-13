@@ -1,4 +1,4 @@
-[**@purista/natsbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,11 +6,11 @@
 
 # Type Alias: INatsBridge
 
-> **INatsBridge**: `object` & [`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md)\<[`NatsBridgeConfig`](NatsBridgeConfig.md)\>
+> **INatsBridge** = `object` & [`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md)\<[`NatsBridgeConfig`](NatsBridgeConfig.md)\>
 
 Defined in: [natsbridge/src/types/INatsBridge.ts:5](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/types/INatsBridge.ts#L5)
 
-## Type declaration
+## Type Declaration
 
 ### connection
 
@@ -18,4 +18,4 @@ Defined in: [natsbridge/src/types/INatsBridge.ts:5](https://github.com/puristajs
 
 ### sc
 
-> **sc**: `Codec`\<`any`\>
+> **sc**: `Codec`\<`unknown`\>

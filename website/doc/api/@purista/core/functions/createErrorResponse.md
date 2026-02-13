@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Function: createErrorResponse()
 
-> **createErrorResponse**(`instanceId`, `originalEBMessage`, `statusCode`, `error`?): `Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../enumerations/EBMessageType.md#commanderrorresponse); `otp`: `string`; `payload`: \{ `data`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../enumerations/StatusCode.md); \}; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"instanceId"`\>\>
+> **createErrorResponse**(`instanceId`, `originalEBMessage`, `statusCode?`, `error?`): `Readonly`\<`Omit`\<[`CommandErrorResponse`](../type-aliases/CommandErrorResponse.md), `"instanceId"`\>\>
 
-Defined in: [packages/core/src/core/helper/createErrorResponse.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createErrorResponse.impl.ts#L24)
+Defined in: [core/helper/createErrorResponse.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createErrorResponse.impl.ts#L24)
 
 Creates a error response object based on original command
 Toggles sender and receiver
@@ -21,9 +21,9 @@ Toggles sender and receiver
 
 ### originalEBMessage
 
-`Readonly`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`Command`](../enumerations/EBMessageType.md#command); `otp`: `string`; `payload`: \{ `parameter`: `unknown`; `payload`: `unknown`; \}; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+`Readonly`\<[`Command`](../type-aliases/Command.md)\>
 
-### statusCode
+### statusCode?
 
 [`StatusCode`](../enumerations/StatusCode.md) = `StatusCode.InternalServerError`
 
@@ -33,6 +33,6 @@ Toggles sender and receiver
 
 ## Returns
 
-`Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../enumerations/EBMessageType.md#commanderrorresponse); `otp`: `string`; `payload`: \{ `data`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../enumerations/StatusCode.md); \}; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"instanceId"`\>\>
+`Readonly`\<`Omit`\<[`CommandErrorResponse`](../type-aliases/CommandErrorResponse.md), `"instanceId"`\>\>
 
 CommandErrorResponse message object

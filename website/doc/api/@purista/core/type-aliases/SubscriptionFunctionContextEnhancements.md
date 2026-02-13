@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Type Alias: SubscriptionFunctionContextEnhancements\<Resources, Invokes, EmitList\>
 
-> **SubscriptionFunctionContextEnhancements**\<`Resources`, `Invokes`, `EmitList`\>: `object`
+> **SubscriptionFunctionContextEnhancements**\<`Resources`, `Invokes`, `EmitList`\> = `object`
 
-Defined in: [packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L18)
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L18)
 
 It provides the original command message.
 Also, the methods:
@@ -18,35 +18,55 @@ Also, the methods:
 
 ## Type Parameters
 
-• **Resources** *extends* `Record`\<`string`, `any`\> = [`EmptyObject`](EmptyObject.md)
+### Resources
 
-• **Invokes** *extends* [`InvokeList`](InvokeList.md) = [`EmptyObject`](EmptyObject.md)
+`Resources` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](EmptyObject.md)
 
-• **EmitList** *extends* `Record`\<`string`, `Schema`\> = [`EmptyObject`](EmptyObject.md)
+### Invokes
 
-## Type declaration
+`Invokes` *extends* [`InvokeList`](InvokeList.md) = [`EmptyObject`](EmptyObject.md)
+
+### EmitList
+
+`EmitList` *extends* `Record`\<`string`, [`Schema`](Schema.md)\> = [`EmptyObject`](EmptyObject.md)
+
+## Properties
 
 ### emit
 
 > **emit**: [`EmitCustomMessageFunction`](EmitCustomMessageFunction.md)\<`EmitList`\>
 
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L26)
+
 emit a custom message
+
+***
 
 ### message
 
 > **message**: `Readonly`\<[`EBMessage`](EBMessage.md)\>
 
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L24)
+
 the original message
+
+***
 
 ### resources
 
 > **resources**: `Resources`
 
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L46)
+
 Provides resources defined in service builder and set via config during service creation
+
+***
 
 ### service
 
 > **service**: `Invokes`
+
+Defined in: [core/types/subscription/SubscriptionFunctionContext.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionFunctionContext.ts#L42)
 
 Invokes a command and returns the result.
 It is recommended to validate the result against a schema which only contains the data you actually need.

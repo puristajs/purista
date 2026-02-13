@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **isDevelop**(): `boolean`
 
-Defined in: [packages/core/src/core/helper/isDevelop.impl.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/isDevelop.impl.ts#L6)
+Defined in: [core/helper/isDevelop.impl.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/isDevelop.impl.ts#L6)
 
 returns true if NODE_ENV is set to value starting with "develop"
 

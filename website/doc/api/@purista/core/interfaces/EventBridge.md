@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Interface: EventBridge
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L17)
+Defined in: [core/EventBridge/types/EventBridge.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L17)
 
 Event bridge interface
 The event bridge must implement this interface.
@@ -17,7 +17,7 @@ The event bridge must implement this interface.
 
 > `readonly` **defaultCommandTimeout**: `number`
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L24)
+Defined in: [core/EventBridge/types/EventBridge.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L24)
 
 The default time until when a command invocation automatically returns a time out error
 
@@ -27,7 +27,7 @@ The default time until when a command invocation automatically returns a time ou
 
 > `readonly` **instanceId**: `string`
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L20)
+Defined in: [core/EventBridge/types/EventBridge.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L20)
 
 ***
 
@@ -35,7 +35,7 @@ Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:20](https:/
 
 > `readonly` **name**: `string`
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L18)
+Defined in: [core/EventBridge/types/EventBridge.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L18)
 
 ## Methods
 
@@ -43,7 +43,7 @@ Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:18](https:/
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:97](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L97)
+Defined in: [core/EventBridge/types/EventBridge.ts:97](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L97)
 
 Shut down event bridge as gracefully as possible
 
@@ -57,7 +57,7 @@ Shut down event bridge as gracefully as possible
 
 > **emitMessage**(`message`): `Promise`\<`Readonly`\<[`EBMessage`](../type-aliases/EBMessage.md)\>\>
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L35)
+Defined in: [core/EventBridge/types/EventBridge.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L35)
 
 Emit a message to the eventbridge without awaiting a result
 
@@ -77,21 +77,23 @@ the message
 
 ### invoke()
 
-> **invoke**\<`T`\>(`input`, `ttl`?): `Promise`\<`T`\>
+> **invoke**\<`T`\>(`input`, `ttl?`): `Promise`\<`T`\>
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L44)
+Defined in: [core/EventBridge/types/EventBridge.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L44)
 
 Call a command of a service and return the result of this command
 
 #### Type Parameters
 
-• **T**
+##### T
+
+`T`
 
 #### Parameters
 
 ##### input
 
-`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`Command`](../enumerations/EBMessageType.md#command); `otp`: `string`; `payload`: \{ `parameter`: `unknown`; `payload`: `unknown`; \}; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"messageType"` \| `"id"` \| `"timestamp"` \| `"correlationId"`\>
+`Omit`\<[`Command`](../type-aliases/Command.md), `"id"` \| `"messageType"` \| `"timestamp"` \| `"correlationId"`\>
 
 a partial command message
 
@@ -111,7 +113,7 @@ the time to live (timeout) of the invocation
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:92](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L92)
+Defined in: [core/EventBridge/types/EventBridge.ts:92](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L92)
 
 Indicates if the eventbridge is running and works correctly
 
@@ -125,7 +127,7 @@ Indicates if the eventbridge is running and works correctly
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:87](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L87)
+Defined in: [core/EventBridge/types/EventBridge.ts:87](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L87)
 
 Indicates if the eventbridge has been started and is connected to underlaying message broker
 
@@ -139,7 +141,7 @@ Indicates if the eventbridge has been started and is connected to underlaying me
 
 > **registerCommand**(`address`, `cb`, `metadata`, `eventBridgeConfig`): `Promise`\<`string`\>
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L51)
+Defined in: [core/EventBridge/types/EventBridge.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L51)
 
 #### Parameters
 
@@ -151,7 +153,7 @@ the address of the service command (service name, version and command name)
 
 ##### cb
 
-(`message`) => `Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"instanceId"`\>\> \| `Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../enumerations/EBMessageType.md#commanderrorresponse); `otp`: `string`; `payload`: \{ `data`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../enumerations/StatusCode.md); \}; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"instanceId"`\>\>\>
+(`message`) => `Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"instanceId"`\>\> \| `Readonly`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp?`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"instanceId"`\>\>\>
 
 the function to be called if a matching command arrives
 
@@ -173,7 +175,7 @@ the function to be called if a matching command arrives
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:73](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L73)
+Defined in: [core/EventBridge/types/EventBridge.ts:73](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L73)
 
 Register a new subscription
 
@@ -187,7 +189,7 @@ the subscription definition
 
 ##### cb
 
-(`message`) => `Promise`\<`undefined` \| `Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../enumerations/EBMessageType.md#custommessage); `otp`: `string`; `payload`: `unknown`; `principalId`: `string`; `receiver`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}, `"id"` \| `"timestamp"`\>\>
+(`message`) => `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
 the function to be called if a matching message arrives
 
@@ -201,7 +203,7 @@ the function to be called if a matching message arrives
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L29)
+Defined in: [core/EventBridge/types/EventBridge.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L29)
 
 Start the eventbridge and connect to the underlaying message broker
 
@@ -215,7 +217,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:66](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L66)
+Defined in: [core/EventBridge/types/EventBridge.ts:66](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L66)
 
 Unregister a service command
 
@@ -237,7 +239,7 @@ The address (service name, version and command name) of the command to be de-reg
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridge.ts:82](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L82)
+Defined in: [core/EventBridge/types/EventBridge.ts:82](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridge.ts#L82)
 
 #### Parameters
 

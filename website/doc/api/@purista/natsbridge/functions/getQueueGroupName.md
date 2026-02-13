@@ -1,4 +1,4 @@
-[**@purista/natsbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 

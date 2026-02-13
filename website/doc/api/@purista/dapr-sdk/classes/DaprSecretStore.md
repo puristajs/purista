@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -18,9 +18,9 @@ Dapr currently provides only the possibility to fetch a secret. Creating a new s
 
 ## Constructors
 
-### new DaprSecretStore()
+### Constructor
 
-> **new DaprSecretStore**(`config`?): [`DaprSecretStore`](DaprSecretStore.md)
+> **new DaprSecretStore**(`config?`): `DaprSecretStore`
 
 Defined in: [dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:20](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L20)
 
@@ -78,7 +78,7 @@ A log level for new logger if logger is not set
 
 ###### metadata?
 
-\{ `namespace`: `string`; \}
+\{ `namespace?`: `string`; \}
 
 Dapr secret store metadata
 
@@ -96,11 +96,11 @@ The name of the secret store
 
 #### Returns
 
-[`DaprSecretStore`](DaprSecretStore.md)
+`DaprSecretStore`
 
 #### Overrides
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`constructor`](../../core/classes/SecretStoreBaseClass.md#constructors)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`constructor`](../../core/classes/SecretStoreBaseClass.md#constructor)
 
 ## Properties
 
@@ -178,7 +178,7 @@ Dapr secret store metadata
 
 ##### metadata.namespace?
 
-> `optional` **metadata.namespace**: `string`
+> `optional` **namespace**: `string`
 
 In case of deploying into namespace other than default, the namespace (e.g. production) must be set
 
@@ -190,7 +190,7 @@ The name of the secret store
 
 #### Inherited from
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`config`](../../core/classes/SecretStoreBaseClass.md#config-1)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`config`](../../core/classes/SecretStoreBaseClass.md#config)
 
 ***
 
@@ -214,7 +214,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 #### Inherited from
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`name`](../../core/classes/SecretStoreBaseClass.md#name-1)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`name`](../../core/classes/SecretStoreBaseClass.md#name)
 
 ## Methods
 
@@ -236,13 +236,15 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:3
 
 ### getSecret()
 
-> **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+> **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
 
 #### Type Parameters
 
-• **SecretNames** *extends* `string`[]
+##### SecretNames
+
+`SecretNames` *extends* `string`[]
 
 #### Parameters
 
@@ -252,7 +254,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 #### Returns
 
-`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 #### Inherited from
 
@@ -262,13 +264,15 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 ### getSecretImpl()
 
-> `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+> `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 Defined in: [dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:55](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L55)
 
 #### Type Parameters
 
-• **SecretNames** *extends* `string`[]
+##### SecretNames
+
+`SecretNames` *extends* `string`[]
 
 #### Parameters
 
@@ -278,7 +282,7 @@ Defined in: [dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:55](https://gi
 
 #### Returns
 
-`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 #### Overrides
 
@@ -310,13 +314,13 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 ### removeSecretImpl()
 
-> `protected` **removeSecretImpl**(`_secretName`): `Promise`\<`void`\>
+> `protected` **removeSecretImpl**(`secretName`): `Promise`\<`void`\>
 
-Defined in: [dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:93](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L93)
+Defined in: [dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:89](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L89)
 
 #### Parameters
 
-##### \_secretName
+##### secretName
 
 `string`
 
@@ -358,13 +362,13 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:3
 
 ### setSecretImpl()
 
-> `protected` **setSecretImpl**(`_secretName`): `Promise`\<`void`\>
+> `protected` **setSecretImpl**(`secretName`): `Promise`\<`void`\>
 
-Defined in: [dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:89](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L89)
+Defined in: [dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts:84](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/DaprSecretStore/DaprSecretStore.impl.ts#L84)
 
 #### Parameters
 
-##### \_secretName
+##### secretName
 
 `string`
 

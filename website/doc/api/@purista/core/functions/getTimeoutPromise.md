@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,13 +6,15 @@
 
 # Function: getTimeoutPromise()
 
-> **getTimeoutPromise**\<`T`\>(`fn`, `ttl`): `Promise`\<`T`\>
+> **getTimeoutPromise**\<`T`\>(`fn`, `ttl?`): `Promise`\<`T`\>
 
-Defined in: [packages/core/src/helper/getTimeoutPromise.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/getTimeoutPromise.impl.ts#L10)
+Defined in: [helper/getTimeoutPromise.impl.ts:10](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/getTimeoutPromise.impl.ts#L10)
 
 ## Type Parameters
 
-• **T**
+### T
+
+`T`
 
 ## Parameters
 
@@ -22,7 +24,7 @@ Defined in: [packages/core/src/helper/getTimeoutPromise.impl.ts:10](https://gith
 
 the promise which should get a timeout
 
-### ttl
+### ttl?
 
 `number` = `30000`
 

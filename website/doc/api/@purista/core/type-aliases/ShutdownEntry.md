@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,17 +6,19 @@
 
 # Type Alias: ShutdownEntry
 
-> **ShutdownEntry**: `object`
+> **ShutdownEntry** = `object`
 
-Defined in: [packages/core/src/helper/types/ShutdownEntry.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ShutdownEntry.ts#L4)
+Defined in: [helper/types/ShutdownEntry.ts:4](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ShutdownEntry.ts#L4)
 
 Entry of thing you like to shutdown gracefully
 
-## Type declaration
+## Properties
 
 ### destroy()
 
 > **destroy**: () => `Promise`\<`void`\>
+
+Defined in: [helper/types/ShutdownEntry.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ShutdownEntry.ts#L8)
 
 a async function that is called during shutdown
 
@@ -24,8 +26,12 @@ a async function that is called during shutdown
 
 `Promise`\<`void`\>
 
+***
+
 ### name
 
 > **name**: `string`
+
+Defined in: [helper/types/ShutdownEntry.ts:6](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/types/ShutdownEntry.ts#L6)
 
 the name

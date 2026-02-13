@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **getNewTraceId**(): `string`
 
-Defined in: [packages/core/src/core/helper/getNewTraceId.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getNewTraceId.impl.ts#L9)
+Defined in: [core/helper/getNewTraceId.impl.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/getNewTraceId.impl.ts#L9)
 
 ## Returns
 

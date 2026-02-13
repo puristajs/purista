@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,11 +6,11 @@
 
 # Type Alias: InfoInvokeTimeout
 
-> **InfoInvokeTimeout**: `object` & [`InfoServiceBase`](InfoServiceBase.md)
+> **InfoInvokeTimeout** = `object` & [`InfoServiceBase`](InfoServiceBase.md)
 
-Defined in: [packages/core/src/core/types/infoType/InfoInvokeTimeout.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L22)
+Defined in: [core/types/infoType/InfoInvokeTimeout.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/InfoInvokeTimeout.ts#L22)
 
-## Type declaration
+## Type Declaration
 
 ### messageType
 

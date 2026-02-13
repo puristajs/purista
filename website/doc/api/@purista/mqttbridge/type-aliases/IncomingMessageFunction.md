@@ -1,4 +1,4 @@
-[**@purista/mqttbridge v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Type Alias: IncomingMessageFunction()
 
-> **IncomingMessageFunction**: (`this`, `payload`, `packet`) => `Promise`\<`void`\>
+> **IncomingMessageFunction** = (`this`, `payload`, `packet`) => `Promise`\<`void`\>
 
 Defined in: [mqttbridge/src/types/IncomingMessageFunction.ts:5](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/types/IncomingMessageFunction.ts#L5)
 

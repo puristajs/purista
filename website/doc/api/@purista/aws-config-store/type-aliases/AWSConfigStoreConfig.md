@@ -1,4 +1,4 @@
-[**@purista/aws-config-store v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,16 +6,18 @@
 
 # Type Alias: AWSConfigStoreConfig
 
-> **AWSConfigStoreConfig**: `object`
+> **AWSConfigStoreConfig** = `object`
 
 Defined in: [aws-config-store/src/types.ts:6](https://github.com/puristajs/purista/blob/master/packages/aws-config-store/src/types.ts#L6)
 
 AWS System Manager config
 
-## Type declaration
+## Properties
 
 ### client
 
 > **client**: `SSMClientConfig`
+
+Defined in: [aws-config-store/src/types.ts:10](https://github.com/puristajs/purista/blob/master/packages/aws-config-store/src/types.ts#L10)
 
 AWS client options

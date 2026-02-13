@@ -1,4 +1,4 @@
-[**@purista/dapr-sdk v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,14 +6,16 @@
 
 # Type Alias: PubSubPublishResponseType
 
-> **PubSubPublishResponseType**: `object`
+> **PubSubPublishResponseType** = `object`
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubPublishResponse.type.ts:17](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubPublishResponse.type.ts#L17)
 
 PubSubPublishResponseType defines the response from a publish.
 
-## Type declaration
+## Properties
 
 ### error?
 
 > `optional` **error**: `Error`
+
+Defined in: [dapr-sdk/src/types/pubsub/PubSubPublishResponse.type.ts:19](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubPublishResponse.type.ts#L19)

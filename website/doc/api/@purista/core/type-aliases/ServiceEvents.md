@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Type Alias: ServiceEvents
 
-> **ServiceEvents**: [`ServiceEventsInternal`](ServiceEventsInternal.md) & [`addPrefixToObject`](addPrefixToObject.md)\<`CustomEvents`, `"custom-"`\> & [`addPrefixToObject`](addPrefixToObject.md)\<`CustomEvents`, `"misc-"`\>
+> **ServiceEvents** = [`ServiceEventsInternal`](ServiceEventsInternal.md) & [`addPrefixToObject`](addPrefixToObject.md)\<`CustomEvents`, `"custom-"`\> & [`addPrefixToObject`](addPrefixToObject.md)\<`CustomEvents`, `"misc-"`\>
 
-Defined in: [packages/core/src/core/types/ServiceEvents.ts:98](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L98)
+Defined in: [core/types/ServiceEvents.ts:98](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L98)
 
 ServiceEvents are plain javascript events sent by the service.
 There are three types:

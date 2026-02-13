@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Function: createInfoMessage()
 
-> **createInfoMessage**(`messageType`, `sender`, `additional`?): [`InfoMessage`](../type-aliases/InfoMessage.md)
+> **createInfoMessage**(`messageType`, `sender`, `additional?`): [`InfoMessage`](../type-aliases/InfoMessage.md)
 
-Defined in: [packages/core/src/core/helper/createInfoMessage.impl.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createInfoMessage.impl.ts#L15)
+Defined in: [core/helper/createInfoMessage.impl.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createInfoMessage.impl.ts#L15)
 
 ## Parameters
 

@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,28 +6,46 @@
 
 # Type Alias: LoggerStubs
 
-> **LoggerStubs**: `object`
+> **LoggerStubs** = `object`
 
-Defined in: [packages/core/src/mocks/getLogger.mock.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getLogger.mock.ts#L42)
+Defined in: [mocks/getLogger.mock.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getLogger.mock.ts#L42)
 
-## Type declaration
+## Properties
 
 ### debug
 
 > **debug**: `SinonStub`
 
+Defined in: [mocks/getLogger.mock.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getLogger.mock.ts#L46)
+
+***
+
 ### error
 
 > **error**: `SinonStub`
+
+Defined in: [mocks/getLogger.mock.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getLogger.mock.ts#L44)
+
+***
 
 ### info
 
 > **info**: `SinonStub`
 
+Defined in: [mocks/getLogger.mock.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getLogger.mock.ts#L43)
+
+***
+
 ### trace
 
 > **trace**: `SinonStub`
 
+Defined in: [mocks/getLogger.mock.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getLogger.mock.ts#L47)
+
+***
+
 ### warn
 
 > **warn**: `SinonStub`
+
+Defined in: [mocks/getLogger.mock.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getLogger.mock.ts#L45)

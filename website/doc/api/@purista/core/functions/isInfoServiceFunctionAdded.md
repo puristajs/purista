@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -8,7 +8,7 @@
 
 > **isInfoServiceFunctionAdded**(`message`): `message is { contentEncoding: "utf-8"; contentType: "application/json"; correlationId?: string; eventName?: string; id: string; messageType: InfoServiceFunctionAdded; otp?: string; payload?: unknown; principalId?: string; sender: { instanceId: string; serviceName: string; serviceTarget: string; serviceVersion: string }; tenantId?: string; timestamp: number; traceId?: string }`
 
-Defined in: [packages/core/src/core/types/infoType/isInfoServiceFunctionAdded.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/isInfoServiceFunctionAdded.impl.ts#L5)
+Defined in: [core/types/infoType/isInfoServiceFunctionAdded.impl.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/infoType/isInfoServiceFunctionAdded.impl.ts#L5)
 
 ## Parameters
 

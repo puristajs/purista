@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,194 +6,280 @@
 
 # Type Alias: SubscriptionDefinition\<S, TransformInputPayload, TransformInputParams, FunctionPayloadType, FunctionParamsType, FunctionOutputType, FinalFunctionOutputType, TransformOutputHookOutput, Resources, Invokes, EmitList, MetadataType\>
 
-> **SubscriptionDefinition**\<`S`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `FinalFunctionOutputType`, `TransformOutputHookOutput`, `Resources`, `Invokes`, `EmitList`, `MetadataType`\>: `object`
+> **SubscriptionDefinition**\<`S`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `FinalFunctionOutputType`, `TransformOutputHookOutput`, `Resources`, `Invokes`, `EmitList`, `MetadataType`\> = `object`
 
-Defined in: [packages/core/src/core/types/subscription/SubscriptionDefinition.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L22)
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L22)
 
 The definition for a subscription provided by some service.
 
 ## Type Parameters
 
-• **S** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
+### S
 
-• **TransformInputPayload**
+`S` *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
 
-• **TransformInputParams**
+### TransformInputPayload
 
-• **FunctionPayloadType**
+`TransformInputPayload`
 
-• **FunctionParamsType**
+### TransformInputParams
 
-• **FunctionOutputType**
+`TransformInputParams`
 
-• **FinalFunctionOutputType**
+### FunctionPayloadType
 
-• **TransformOutputHookOutput**
+`FunctionPayloadType`
 
-• **Resources** *extends* `Record`\<`string`, `any`\>
+### FunctionParamsType
 
-• **Invokes** *extends* [`InvokeList`](InvokeList.md)
+`FunctionParamsType`
 
-• **EmitList** *extends* `Record`\<`string`, `Schema`\>
+### FunctionOutputType
 
-• **MetadataType** *extends* [`SubscriptionDefinitionMetadataBase`](SubscriptionDefinitionMetadataBase.md) = [`SubscriptionDefinitionMetadataBase`](SubscriptionDefinitionMetadataBase.md)
+`FunctionOutputType`
 
-## Type declaration
+### FinalFunctionOutputType
+
+`FinalFunctionOutputType`
+
+### TransformOutputHookOutput
+
+`TransformOutputHookOutput`
+
+### Resources
+
+`Resources` *extends* `Record`\<`string`, `unknown`\>
+
+### Invokes
+
+`Invokes` *extends* [`InvokeList`](InvokeList.md)
+
+### EmitList
+
+`EmitList` *extends* `Record`\<`string`, [`Schema`](Schema.md)\>
+
+### MetadataType
+
+`MetadataType` *extends* [`SubscriptionDefinitionMetadataBase`](SubscriptionDefinitionMetadataBase.md) = [`SubscriptionDefinitionMetadataBase`](SubscriptionDefinitionMetadataBase.md)
+
+## Properties
 
 ### call
 
 > **call**: [`SubscriptionFunction`](SubscriptionFunction.md)\<`S`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `EmitList`\>
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L45)
+
 the subscription function
+
+***
 
 ### deprecated
 
 > **deprecated**: `boolean`
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:119](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L119)
+
+***
+
 ### emitEventName?
 
 > `optional` **emitEventName**: `string`
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:73](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L73)
+
 event name to be used for custom message if the subscription functions returns value
+
+***
 
 ### emitList
 
 > **emitList**: `EmitList`
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:118](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L118)
+
+***
+
 ### eventBridgeConfig
 
 > **eventBridgeConfig**: [`DefinitionEventBridgeConfig`](DefinitionEventBridgeConfig.md)
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L43)
+
 config information for event bridge
+
+***
 
 ### eventName?
 
 > `optional` **eventName**: `string`
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:71](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L71)
+
 filter forevent name
+
+***
 
 ### hooks
 
 > **hooks**: `object`
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:79](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L79)
+
 hooks of subscription
 
-#### hooks.afterGuard?
+#### afterGuard?
 
-> `optional` **hooks.afterGuard**: `Record`\<`string`, [`SubscriptionAfterGuardHook`](SubscriptionAfterGuardHook.md)\<`S`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `EmitList`\>\>
+> `optional` **afterGuard**: `Record`\<`string`, [`SubscriptionAfterGuardHook`](SubscriptionAfterGuardHook.md)\<`S`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `EmitList`\>\>
 
-#### hooks.beforeGuard?
+#### beforeGuard?
 
-> `optional` **hooks.beforeGuard**: `Record`\<`string`, [`SubscriptionBeforeGuardHook`](SubscriptionBeforeGuardHook.md)\<`S`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `EmitList`\>\>
+> `optional` **beforeGuard**: `Record`\<`string`, [`SubscriptionBeforeGuardHook`](SubscriptionBeforeGuardHook.md)\<`S`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `EmitList`\>\>
 
-#### hooks.transformInput?
+#### transformInput?
 
-> `optional` **hooks.transformInput**: `object`
+> `optional` **transformInput**: `object`
 
-#### hooks.transformInput.transformFunction
+##### transformInput.transformFunction
 
-> **hooks.transformInput.transformFunction**: [`SubscriptionTransformInputHook`](SubscriptionTransformInputHook.md)\<`S`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`\>
+> **transformFunction**: [`SubscriptionTransformInputHook`](SubscriptionTransformInputHook.md)\<`S`, `TransformInputPayload`, `TransformInputParams`, `FunctionPayloadType`, `FunctionParamsType`\>
 
-#### hooks.transformInput.transformInputSchema
+##### transformInput.transformInputSchema
 
-> **hooks.transformInput.transformInputSchema**: `Schema`
+> **transformInputSchema**: [`Schema`](Schema.md)
 
-#### hooks.transformInput.transformParameterSchema
+##### transformInput.transformParameterSchema
 
-> **hooks.transformInput.transformParameterSchema**: `Schema`
+> **transformParameterSchema**: [`Schema`](Schema.md)
 
-#### hooks.transformOutput?
+#### transformOutput?
 
-> `optional` **hooks.transformOutput**: `object`
+> `optional` **transformOutput**: `object`
 
-#### hooks.transformOutput.transformFunction
+##### transformOutput.transformFunction
 
-> **hooks.transformOutput.transformFunction**: [`SubscriptionTransformOutputHook`](SubscriptionTransformOutputHook.md)\<`S`, `FinalFunctionOutputType`, `FunctionParamsType`, `TransformOutputHookOutput`\>
+> **transformFunction**: [`SubscriptionTransformOutputHook`](SubscriptionTransformOutputHook.md)\<`S`, `FinalFunctionOutputType`, `FunctionParamsType`, `TransformOutputHookOutput`\>
 
-#### hooks.transformOutput.transformOutputSchema
+##### transformOutput.transformOutputSchema
 
-> **hooks.transformOutput.transformOutputSchema**: `Schema`
+> **transformOutputSchema**: [`Schema`](Schema.md)
+
+***
 
 ### invokes
 
 > **invokes**: `Invokes`
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:117](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L117)
+
+***
+
 ### messageType?
 
 > `optional` **messageType**: [`EBMessageType`](../enumerations/EBMessageType.md)
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:69](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L69)
+
 filter for message type
+
+***
 
 ### metadata
 
 > **metadata**: `MetadataType`
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L41)
+
 the metadata of the subscription
+
+***
 
 ### principalId?
 
 > `optional` **principalId**: [`PrincipalId`](PrincipalId.md)
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:75](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L75)
+
 filter for principal id
+
+***
 
 ### receiver?
 
 > `optional` **receiver**: `object`
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L62)
+
 filter for messages consumed by given receiver
 
-#### receiver.instanceId?
+#### instanceId?
 
-> `optional` **receiver.instanceId**: [`InstanceId`](InstanceId.md)
+> `optional` **instanceId**: [`InstanceId`](InstanceId.md)
 
-#### receiver.serviceName?
+#### serviceName?
 
-> `optional` **receiver.serviceName**: `string`
+> `optional` **serviceName**: `string`
 
-#### receiver.serviceTarget?
+#### serviceTarget?
 
-> `optional` **receiver.serviceTarget**: `string`
+> `optional` **serviceTarget**: `string`
 
-#### receiver.serviceVersion?
+#### serviceVersion?
 
-> `optional` **receiver.serviceVersion**: `string`
+> `optional` **serviceVersion**: `string`
+
+***
 
 ### sender?
 
 > `optional` **sender**: `object`
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:55](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L55)
+
 filter for messages produced by given sender
 
-#### sender.instanceId?
+#### instanceId?
 
-> `optional` **sender.instanceId**: [`InstanceId`](InstanceId.md)
+> `optional` **instanceId**: [`InstanceId`](InstanceId.md)
 
-#### sender.serviceName?
+#### serviceName?
 
-> `optional` **sender.serviceName**: `string`
+> `optional` **serviceName**: `string`
 
-#### sender.serviceTarget?
+#### serviceTarget?
 
-> `optional` **sender.serviceTarget**: `string`
+> `optional` **serviceTarget**: `string`
 
-#### sender.serviceVersion?
+#### serviceVersion?
 
-> `optional` **sender.serviceVersion**: `string`
+> `optional` **serviceVersion**: `string`
+
+***
 
 ### subscriptionDescription
 
 > **subscriptionDescription**: `string`
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L39)
+
 the description of the subscription
+
+***
 
 ### subscriptionName
 
 > **subscriptionName**: `string`
 
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L37)
+
 the name of the subscription
+
+***
 
 ### tenantId?
 
 > `optional` **tenantId**: [`TenantId`](TenantId.md)
+
+Defined in: [core/types/subscription/SubscriptionDefinition.ts:77](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinition.ts#L77)
 
 filter for tenant id

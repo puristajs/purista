@@ -1,4 +1,4 @@
-[**@purista/azure-secret-store v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -26,9 +26,9 @@ It will be removed/overwritten on next get request.
 
 ## Constructors
 
-### new AzureSecretStore()
+### Constructor
 
-> **new AzureSecretStore**(`config`): [`AzureSecretStore`](AzureSecretStore.md)
+> **new AzureSecretStore**(`config`): `AzureSecretStore`
 
 Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L29)
 
@@ -96,11 +96,11 @@ https://[KEY_VAULT_NAME].vault.azure.net
 
 #### Returns
 
-[`AzureSecretStore`](AzureSecretStore.md)
+`AzureSecretStore`
 
 #### Overrides
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`constructor`](../../core/classes/SecretStoreBaseClass.md#constructors)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`constructor`](../../core/classes/SecretStoreBaseClass.md#constructor)
 
 ## Properties
 
@@ -190,7 +190,7 @@ https://[KEY_VAULT_NAME].vault.azure.net
 
 #### Inherited from
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`config`](../../core/classes/SecretStoreBaseClass.md#config-1)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`config`](../../core/classes/SecretStoreBaseClass.md#config)
 
 ***
 
@@ -214,7 +214,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 #### Inherited from
 
-[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`name`](../../core/classes/SecretStoreBaseClass.md#name-1)
+[`SecretStoreBaseClass`](../../core/classes/SecretStoreBaseClass.md).[`name`](../../core/classes/SecretStoreBaseClass.md#name)
 
 ## Methods
 
@@ -236,13 +236,15 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:3
 
 ### getSecret()
 
-> **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+> **getSecret**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:26
 
 #### Type Parameters
 
-• **SecretNames** *extends* `string`[]
+##### SecretNames
+
+`SecretNames` *extends* `string`[]
 
 #### Parameters
 
@@ -252,7 +254,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 #### Returns
 
-`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 #### Inherited from
 
@@ -262,13 +264,15 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 ### getSecretImpl()
 
-> `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+> `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
-Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:37](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L37)
+Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:47](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L47)
 
 #### Type Parameters
 
-• **SecretNames** *extends* `string`[]
+##### SecretNames
+
+`SecretNames` *extends* `string`[]
 
 #### Parameters
 
@@ -278,7 +282,7 @@ Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:37](https://github.
 
 #### Returns
 
-`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `undefined` \| `string`\>\>
+`Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
 #### Overrides
 
@@ -312,7 +316,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 > `protected` **removeSecretImpl**(`secretName`): `Promise`\<`void`\>
 
-Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:56](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L56)
+Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:70](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L70)
 
 #### Parameters
 
@@ -360,7 +364,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:3
 
 > `protected` **setSecretImpl**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
-Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:60](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L60)
+Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:74](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L74)
 
 #### Parameters
 

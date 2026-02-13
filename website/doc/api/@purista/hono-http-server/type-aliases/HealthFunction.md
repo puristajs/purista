@@ -1,4 +1,4 @@
-[**@purista/hono-http-server v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,13 +6,15 @@
 
 # Type Alias: HealthFunction()\<T\>
 
-> **HealthFunction**\<`T`\>: (`this`) => `Promise`\<`void`\>
+> **HealthFunction**\<`T`\> = (`this`) => `Promise`\<`void`\>
 
-Defined in: [packages/hono-http-server/src/types/HealthFunction.ts:3](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/types/HealthFunction.ts#L3)
+Defined in: [hono-http-server/src/types/HealthFunction.ts:3](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/types/HealthFunction.ts#L3)
 
 ## Type Parameters
 
-• **T** *extends* [`Service`](../../core/classes/Service.md)
+### T
+
+`T` *extends* [`Service`](../../core/classes/Service.md)
 
 ## Parameters
 

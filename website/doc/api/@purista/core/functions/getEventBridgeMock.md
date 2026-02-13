@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,9 +6,9 @@
 
 # Function: getEventBridgeMock()
 
-> **getEventBridgeMock**(`sandbox`?): `object`
+> **getEventBridgeMock**(`sandbox?`): `object`
 
-Defined in: [packages/core/src/mocks/getEventBridge.mock.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getEventBridge.mock.ts#L11)
+Defined in: [mocks/getEventBridge.mock.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getEventBridge.mock.ts#L11)
 
 Mocks the eventBridge and stubs the methods
 
@@ -30,4 +30,4 @@ EventBridge mocked
 
 ### stubs
 
-> **stubs**: `Record`\<`string`, `SinonStub`\<`any`[], `any`\>\>
+> **stubs**: `Record`\<`string`, `SinonStub`\>

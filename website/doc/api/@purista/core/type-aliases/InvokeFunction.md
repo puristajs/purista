@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,20 +6,26 @@
 
 # Type Alias: InvokeFunction()
 
-> **InvokeFunction**: \<`InvokeResponseType`, `PayloadType`, `ParameterType`\>(`address`, `payload`, `parameter`) => `Promise`\<`InvokeResponseType`\>
+> **InvokeFunction** = \<`InvokeResponseType`, `PayloadType`, `ParameterType`\>(`address`, `payload`, `parameter`) => `Promise`\<`InvokeResponseType`\>
 
-Defined in: [packages/core/src/core/types/InvokeFunction.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/InvokeFunction.ts#L23)
+Defined in: [core/types/InvokeFunction.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/InvokeFunction.ts#L23)
 
 Invokes a command and returns the result.
 It is recommended to validate the result against a schema which only contains the data you actually need.
 
 ## Type Parameters
 
-• **InvokeResponseType** = `unknown`
+### InvokeResponseType
 
-• **PayloadType** = `unknown`
+`InvokeResponseType` = `unknown`
 
-• **ParameterType** *extends* [`EmptyObject`](EmptyObject.md) = [`EmptyObject`](EmptyObject.md)
+### PayloadType
+
+`PayloadType` = `unknown`
+
+### ParameterType
+
+`ParameterType` *extends* [`EmptyObject`](EmptyObject.md) = [`EmptyObject`](EmptyObject.md)
 
 ## Parameters
 

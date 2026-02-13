@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,7 +6,7 @@
 
 # Class: HandledError
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L13)
+Defined in: [core/Error/HandledError.impl.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L13)
 
 A handled error is an error which is handled or thrown by business logic.
 It is wanted to expose it the outside world.
@@ -18,11 +18,11 @@ Scenarios are input validation failures or "404 Not Found" errors which should b
 
 ## Constructors
 
-### new HandledError()
+### Constructor
 
-> **new HandledError**(`errorCode`, `message`?, `data`?, `traceId`?): [`HandledError`](HandledError.md)
+> **new HandledError**(`errorCode`, `message?`, `data?`, `traceId?`): `HandledError`
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L14)
+Defined in: [core/Error/HandledError.impl.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L14)
 
 #### Parameters
 
@@ -44,7 +44,7 @@ Defined in: [packages/core/src/core/Error/HandledError.impl.ts:14](https://githu
 
 #### Returns
 
-[`HandledError`](HandledError.md)
+`HandledError`
 
 #### Overrides
 
@@ -56,7 +56,7 @@ Defined in: [packages/core/src/core/Error/HandledError.impl.ts:14](https://githu
 
 > `optional` **data**: `unknown`
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L17)
+Defined in: [core/Error/HandledError.impl.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L17)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [packages/core/src/core/Error/HandledError.impl.ts:17](https://githu
 
 > **errorCode**: [`StatusCode`](../enumerations/StatusCode.md)
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L15)
+Defined in: [core/Error/HandledError.impl.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L15)
 
 ***
 
@@ -72,15 +72,15 @@ Defined in: [packages/core/src/core/Error/HandledError.impl.ts:15](https://githu
 
 > `optional` **traceId**: `string`
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L18)
+Defined in: [core/Error/HandledError.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L18)
 
 ## Methods
 
 ### getErrorResponse()
 
-> **getErrorResponse**(`traceId`?): `Readonly`\<[`ErrorResponsePayload`](../type-aliases/ErrorResponsePayload.md)\>
+> **getErrorResponse**(`traceId?`): `Readonly`\<[`ErrorResponsePayload`](../type-aliases/ErrorResponsePayload.md)\>
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:67](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L67)
+Defined in: [core/Error/HandledError.impl.ts:72](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L72)
 
 Returns error response object
 
@@ -102,11 +102,9 @@ ErrorResponsePayload
 
 > **toJSON**(): `object`
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:86](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L86)
+Defined in: [core/Error/HandledError.impl.ts:91](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L91)
 
 #### Returns
-
-`object`
 
 ##### data?
 
@@ -126,7 +124,7 @@ a human readable error message
 
 ##### stack
 
-> **stack**: `undefined` \| `string`
+> **stack**: `string` \| `undefined`
 
 ##### status
 
@@ -146,7 +144,7 @@ the trace if of the request
 
 > **toString**(): `string`
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:82](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L82)
+Defined in: [core/Error/HandledError.impl.ts:87](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L87)
 
 Returns stringified error response object
 
@@ -160,9 +158,9 @@ ErrorResponse as string
 
 ### fromError()
 
-> `static` **fromError**(`err`, `errorCode`?, `data`?, `traceId`?): [`HandledError`](HandledError.md)
+> `static` **fromError**(`err`, `errorCode?`, `data?`, `traceId?`): `HandledError`
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L47)
+Defined in: [core/Error/HandledError.impl.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L47)
 
 Creates a HandledError from an input.
 If the input error is a HandledError it will be returned without modifications.
@@ -171,7 +169,7 @@ If the input error is a HandledError it will be returned without modifications.
 
 ##### err
 
-`any`
+`unknown`
 
 the input
 
@@ -195,7 +193,7 @@ optional trace id
 
 #### Returns
 
-[`HandledError`](HandledError.md)
+`HandledError`
 
 HandledError
 
@@ -203,9 +201,9 @@ HandledError
 
 ### fromMessage()
 
-> `static` **fromMessage**(`message`): [`HandledError`](HandledError.md)
+> `static` **fromMessage**(`message`): `HandledError`
 
-Defined in: [packages/core/src/core/Error/HandledError.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L33)
+Defined in: [core/Error/HandledError.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Error/HandledError.impl.ts#L33)
 
 Create a error object from EBMessage error message
 
@@ -213,12 +211,12 @@ Create a error object from EBMessage error message
 
 ##### message
 
-`Readonly`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../enumerations/EBMessageType.md#commanderrorresponse); `otp`: `string`; `payload`: \{ `data`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../enumerations/StatusCode.md); \}; `principalId`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId`: `string`; `timestamp`: `number`; `traceId`: `string`; \}\>
+`Readonly`\<[`CommandErrorResponse`](../type-aliases/CommandErrorResponse.md)\>
 
 CommandErrorResponse
 
 #### Returns
 
-[`HandledError`](HandledError.md)
+`HandledError`
 
 HandledError

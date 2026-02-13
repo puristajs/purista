@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,10 +6,12 @@
 
 # Type Alias: Prettify\<T\>
 
-> **Prettify**\<`T`\>: `{ [K in keyof T]: T[K] }` & `object`
+> **Prettify**\<`T`\> = `{ [K in keyof T]: T[K] }` & `object`
 
-Defined in: [packages/core/src/core/types/Prettify.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Prettify.ts#L1)
+Defined in: [core/types/Prettify.ts:1](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Prettify.ts#L1)
 
 ## Type Parameters
 
-• **T**
+### T
+
+`T`

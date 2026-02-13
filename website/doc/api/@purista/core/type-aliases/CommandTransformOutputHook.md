@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,27 +6,41 @@
 
 # Type Alias: CommandTransformOutputHook()\<S, MessagePayloadType, MessageParamsType, FinalFunctionOutputType, FunctionParamsType, TransformOutputHookOutput, Resources\>
 
-> **CommandTransformOutputHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FinalFunctionOutputType`, `FunctionParamsType`, `TransformOutputHookOutput`, `Resources`\>: (`this`, `context`, `input`, `params`) => `Promise`\<`TransformOutputHookOutput`\>
+> **CommandTransformOutputHook**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FinalFunctionOutputType`, `FunctionParamsType`, `TransformOutputHookOutput`, `Resources`\> = (`this`, `context`, `input`, `params`) => `Promise`\<`TransformOutputHookOutput`\>
 
-Defined in: [packages/core/src/core/types/commandType/CommandTransformOutputHook.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandTransformOutputHook.ts#L15)
+Defined in: [core/types/commandType/CommandTransformOutputHook.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandTransformOutputHook.ts#L15)
 
 This transform hook is executed after function output validation and AfterGuardHooks.
 
 ## Type Parameters
 
-• **S** *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
+### S
 
-• **MessagePayloadType**
+`S` *extends* [`ServiceClass`](../interfaces/ServiceClass.md)
 
-• **MessageParamsType**
+### MessagePayloadType
 
-• **FinalFunctionOutputType**
+`MessagePayloadType`
 
-• **FunctionParamsType**
+### MessageParamsType
 
-• **TransformOutputHookOutput**
+`MessageParamsType`
 
-• **Resources** *extends* `Record`\<`string`, `any`\> = [`EmptyObject`](EmptyObject.md)
+### FinalFunctionOutputType
+
+`FinalFunctionOutputType`
+
+### FunctionParamsType
+
+`FunctionParamsType`
+
+### TransformOutputHookOutput
+
+`TransformOutputHookOutput`
+
+### Resources
+
+`Resources` *extends* `Record`\<`string`, `unknown`\> = [`EmptyObject`](EmptyObject.md)
 
 ## Parameters
 

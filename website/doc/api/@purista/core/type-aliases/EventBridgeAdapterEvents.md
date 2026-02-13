@@ -1,4 +1,4 @@
-[**@purista/core v2.1.0**](../README.md)
+[**PURISTA API**](../../../README.md)
 
 ***
 
@@ -6,10 +6,12 @@
 
 # Type Alias: EventBridgeAdapterEvents
 
-> **EventBridgeAdapterEvents**: `object`
+> **EventBridgeAdapterEvents** = `object`
 
-Defined in: [packages/core/src/core/EventBridge/types/EventBridgeEvents.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L43)
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L43)
 
 ## Index Signature
 
 \[`key`: `string`\]: `unknown`
+
+currently not used, but reserved for further events
