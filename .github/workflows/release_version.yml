@@ -46,7 +46,13 @@ jobs:
 
       - name: Read new version
         id: version
-        run: echo "value=$(node -p 'require(\"./package.json\").version')" >> "$GITHUB_OUTPUT"
+        run: |
+          VERSION="$(node -e "process.stdout.write(require('./package.json').version)")"
+          if [ -z "$VERSION" ]; then
+            echo "Could not read package version."
+            exit 1
+          fi
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Commit release changes to branch
         id: commit
