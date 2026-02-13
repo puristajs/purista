@@ -5,6 +5,7 @@ on:
 
 permissions:
   contents: write
+  id-token: write
 
 concurrency:
   group: release-publish-${{ github.ref }}
@@ -44,7 +45,13 @@ jobs:
 
       - name: Read current version
         id: version
-        run: echo "value=$(node -p 'require(\"./package.json\").version')" >> "$GITHUB_OUTPUT"
+        run: |
+          VERSION="$(node -e "process.stdout.write(require('./package.json').version)")"
+          if [ -z "$VERSION" ]; then
+            echo "Could not read package version."
+            exit 1
+          fi
+          echo "value=$VERSION" >> "$GITHUB_OUTPUT"
 
       - name: Ensure release tag does not already exist
         run: |
@@ -55,9 +62,7 @@ jobs:
           fi
 
       - name: Publish to npm
-        run: npm publish --access public --workspaces
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --provenance --access public --workspaces
 
       - name: Create tag and push
         run: |
