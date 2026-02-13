@@ -62,7 +62,41 @@ jobs:
           fi
 
       - name: Publish to npm
-        run: npm publish --provenance --access public --workspaces
+        run: |
+          node <<'NODE'
+          const fs = require('node:fs')
+          const path = require('node:path')
+          const { execSync } = require('node:child_process')
+
+          const packagesDir = path.join(process.cwd(), 'packages')
+          const packageDirs = fs
+            .readdirSync(packagesDir, { withFileTypes: true })
+            .filter((entry) => entry.isDirectory())
+            .map((entry) => path.join(packagesDir, entry.name))
+
+          for (const dir of packageDirs) {
+            const packageJsonPath = path.join(dir, 'package.json')
+            if (!fs.existsSync(packageJsonPath)) continue
+
+            const pkg = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8'))
+            if (!pkg.name || !pkg.version) continue
+            if (pkg.private === true) continue
+
+            const viewCmd = `npm view "${pkg.name}@${pkg.version}" version --registry=https://registry.npmjs.org --silent`
+            try {
+              const publishedVersion = execSync(viewCmd, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] }).trim()
+              if (publishedVersion === pkg.version) {
+                console.log(`Skipping ${pkg.name}@${pkg.version} (already published)`)
+                continue
+              }
+            } catch {
+              // npm view exits non-zero when the exact version does not exist yet.
+            }
+
+            console.log(`Publishing ${pkg.name}@${pkg.version}`)
+            execSync('npm publish --provenance --access public', { cwd: dir, stdio: 'inherit' })
+          }
+          NODE
 
       - name: Create tag and push
         run: |
