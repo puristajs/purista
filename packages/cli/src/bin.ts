@@ -7,6 +7,7 @@ import select from '@inquirer/select'
 import { Argument, program } from 'commander'
 import { addPuristaCommand } from './api/addPuristaCommand.js'
 import { addPuristaService } from './api/addPuristaService.js'
+import { addPuristaStream } from './api/addPuristaStream.js'
 import { addPuristaSubscription } from './api/addPuristaSubscription.js'
 import { camelCase, capitalCase } from './api/change-case.js'
 import { ensureServiceEvent } from './api/content/manipulation/ensureServiceEvent.js'
@@ -16,7 +17,7 @@ import { scanPuristaProject } from './api/scanPuristaProject.js'
 import { puristaVersion } from './version.js'
 
 type addComponetInput = {
-	component: 'service' | 'command' | 'subscription'
+	component: 'service' | 'command' | 'subscription' | 'stream'
 	name: string
 	description: string
 	eventToSubscribe?: string
@@ -67,12 +68,12 @@ const main = async () => {
 
 	program
 		.command('add')
-		.description('Add a new service, command or subscription. ')
+		.description('Add a new service, command, subscription or stream. ')
 		.addArgument(
-			new Argument('[component]', 'Type of component to add').choices(['service', 'command', 'subscription']),
+			new Argument('[component]', 'Type of component to add').choices(['service', 'command', 'subscription', 'stream']),
 		)
 		.addArgument(new Argument('[name]', 'Name of component'))
-		.action(async (...args: ['service' | 'command' | 'subscription' | undefined, string?]) => {
+		.action(async (...args: ['service' | 'command' | 'subscription' | 'stream' | undefined, string?]) => {
 			const data: addComponetInput = {
 				component: 'service',
 				name: '',
@@ -86,7 +87,7 @@ const main = async () => {
 				(await select({
 					loop: true,
 					message: 'What do you want to add?',
-					choices: ['service', 'command', 'subscription'],
+					choices: ['service', 'command', 'subscription', 'stream'],
 					default: 'service',
 				}))
 
@@ -205,6 +206,21 @@ const main = async () => {
 					subscriptionName: data.name,
 					responseEventName: data.responseEventName,
 					eventToSubscribe: data.eventToSubscribe,
+					puristaProject,
+					codeWriterOptions,
+				})
+				return
+			}
+
+			if (data.component === 'stream') {
+				await addPuristaStream({
+					projectRootPath,
+					puristaConfig,
+					streamDescription: data.description,
+					serviceName: data.serviceName,
+					serviceVersion: data.serviceVersion,
+					streamName: data.name,
+					responseEventName: data.responseEventName,
 					puristaProject,
 					codeWriterOptions,
 				})

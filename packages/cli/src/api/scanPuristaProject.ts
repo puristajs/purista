@@ -14,12 +14,16 @@ const matchVersionRegex = /^\D*(\d+)$/i
  * [serviceName][serviceVersion] is an object that contains:
  * - `commands`: An array of strings representing the command names available for the service.
  * - `subscriptions`: An array of strings representing the subscription names available for the service.
+ * - `streams`: An array of strings representing the stream names available for the service.
  * - `builderFile`: The path to the builder file for the service.
  * - `serviceFile`: The path to the service file for the service.
  */
 export type PuristaProjectServices = Record<
 	string,
-	Record<string, { commands: string[]; subscriptions: string[]; builderFile: string; serviceFile: string }>
+	Record<
+		string,
+		{ commands: string[]; subscriptions: string[]; streams: string[]; builderFile: string; serviceFile: string }
+	>
 >
 
 /**
@@ -80,6 +84,7 @@ export const scanPuristaProject = async (
 				...(result.services[serviceName]?.[serviceVersion] ?? {
 					commands: [],
 					subscriptions: [],
+					streams: [],
 					builderFile: '',
 					serviceFile: '',
 				}),
