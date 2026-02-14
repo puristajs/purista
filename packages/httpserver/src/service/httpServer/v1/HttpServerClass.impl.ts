@@ -254,6 +254,26 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
 		})
 	}
 
+	async openStream(
+		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'sender'>,
+		endpoint: string,
+	) {
+		return this.eventBridge.openStream({
+			sender: {
+				serviceName: this.serviceInfo.serviceName,
+				serviceVersion: this.serviceInfo.serviceVersion,
+				serviceTarget: `$$endpoint:${endpoint}`,
+				instanceId: this.eventBridge.instanceId,
+			},
+			...input,
+			payload: {
+				frameType: 'open',
+				payload: input.payload.payload,
+				parameter: input.payload.parameter,
+			},
+		})
+	}
+
 	async destroy() {
 		await this.server?.close()
 		await super.destroy()

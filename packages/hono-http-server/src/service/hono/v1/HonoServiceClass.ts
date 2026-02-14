@@ -12,8 +12,10 @@ import type {
 	CommandDefinitionMetadataBase,
 	EBMessageAddress,
 	EmptyObject,
+	HttpExposedServiceMeta,
 	ServiceClassTypes,
 	ServiceConstructorInput,
+	StreamHandle,
 } from '@purista/core'
 import { HandledError, isHttpExposedServiceMeta, Service, StatusCode, safeBind, UnhandledError } from '@purista/core'
 import type { Handler } from 'hono'
@@ -294,6 +296,12 @@ export class HonoServiceClass<
 			for (const command of service.commandDefinitionList) {
 				this.addEndpoint(command.metadata, { ...service.serviceInfo, serviceTarget: command.commandName })
 			}
+			for (const stream of service.streamDefinitionList) {
+				this.addEndpoint(stream.metadata as unknown as CommandDefinitionMetadataBase, {
+					...service.serviceInfo,
+					serviceTarget: stream.streamName,
+				})
+			}
 		}
 
 		return this
@@ -326,7 +334,9 @@ export class HonoServiceClass<
 		const responseContentType = expose.contentTypeResponse ?? 'application/json'
 		const responseEncodingType = expose.contentEncodingResponse ?? 'utf-8'
 
-		addPathToOpenApi(this.openApi, metadata, path, this.config)
+		addPathToOpenApi(this.openApi, metadata as unknown as HttpExposedServiceMeta, path, this.config)
+
+		const isStreamEndpoint = responseContentType.toLowerCase() === 'text/event-stream'
 
 		const handler: Handler = async c => {
 			const parentContext = propagation.extract(context.active(), c.req.raw.headers)
@@ -373,6 +383,55 @@ export class HonoServiceClass<
 					}
 
 					const traceId = c.get('traceId') || c.req.header(this.config.traceHeaderField)
+
+					if (isStreamEndpoint) {
+						const handle = await this.openStream(
+							{
+								traceId,
+								receiver: service,
+								payload: {
+									payload,
+									parameter,
+								},
+								principalId: c.get('principalId'),
+								tenantId: c.get('tenantId'),
+								contentType: expose.contentTypeRequest ?? 'application/json',
+								contentEncoding: expose.contentEncodingRequest ?? 'utf-8',
+							},
+							`${method}:${path}`,
+						)
+
+						const encoder = new TextEncoder()
+						const stream = new ReadableStream<Uint8Array>({
+							start: controller => {
+								const run = async (activeHandle: StreamHandle) => {
+									try {
+										for await (const frame of activeHandle) {
+											controller.enqueue(
+												encoder.encode(`event: ${frame.payload.frameType}\ndata: ${JSON.stringify(frame.payload)}\n\n`),
+											)
+										}
+										controller.close()
+									} catch (error) {
+										controller.error(error)
+									}
+								}
+								void run(handle)
+							},
+							cancel: async reason => {
+								await handle.cancel(typeof reason === 'string' ? reason : 'client disconnected')
+							},
+						})
+
+						return new Response(stream, {
+							status: StatusCode.OK,
+							headers: {
+								'content-type': `${responseContentType}; charset=${responseEncodingType}`,
+								'cache-control': 'no-cache, no-transform',
+								connection: 'keep-alive',
+							},
+						})
+					}
 
 					const result = await this.invoke(
 						{
@@ -456,6 +515,26 @@ export class HonoServiceClass<
 				instanceId: this.eventBridge.instanceId,
 			},
 			...input,
+		})
+	}
+
+	async openStream(
+		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'sender'>,
+		endpoint: string,
+	) {
+		return this.eventBridge.openStream({
+			sender: {
+				serviceName: this.serviceInfo.serviceName,
+				serviceVersion: this.serviceInfo.serviceVersion,
+				serviceTarget: `$$endpoint:${endpoint}`,
+				instanceId: this.eventBridge.instanceId,
+			},
+			...input,
+			payload: {
+				frameType: 'open',
+				payload: input.payload.payload,
+				parameter: input.payload.parameter,
+			},
 		})
 	}
 

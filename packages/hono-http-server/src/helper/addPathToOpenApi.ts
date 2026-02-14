@@ -26,6 +26,11 @@ export const addPathToOpenApi = (
 
 	const responseContentType = expose.contentTypeResponse ?? 'application/json'
 	const responseEncodingType = expose.contentEncodingResponse ?? 'utf-8'
+	const exposeWithSchemas = expose as typeof expose & {
+		outputPayload?: unknown
+		chunkPayload?: unknown
+		finalPayload?: unknown
+	}
 
 	const traceIdParameter: ParameterObject = {
 		in: 'header',
@@ -48,7 +53,12 @@ export const addPathToOpenApi = (
 		[name]: [],
 	}))
 
-	const okCode = expose.outputPayload?.type ? StatusCode.OK : StatusCode.NoContent
+	const isStreamResponse = expose.contentTypeResponse === 'text/event-stream'
+	const okCode = isStreamResponse
+		? StatusCode.OK
+		: (exposeWithSchemas.outputPayload as { type?: unknown } | undefined)?.type
+			? StatusCode.OK
+			: StatusCode.NoContent
 
 	const errorCodes: Set<StatusCode> = new Set([...(expose.http.openApi?.additionalStatusCodes ?? [])])
 
@@ -111,7 +121,32 @@ export const addPathToOpenApi = (
 						? undefined
 						: {
 								[responseContentType]: {
-									schema: expose.outputPayload,
+									schema: isStreamResponse
+										? {
+												type: 'object',
+												properties: {
+													frameType: {
+														type: 'string',
+														enum: ['start', 'chunk', 'complete', 'error', 'cancel'],
+													},
+													sequence: {
+														type: 'integer',
+													},
+													chunk: exposeWithSchemas.chunkPayload,
+													final: exposeWithSchemas.finalPayload,
+													error: {
+														type: 'object',
+														properties: {
+															status: { type: 'integer' },
+															message: { type: 'string' },
+															isHandledError: { type: 'boolean' },
+															traceId: { type: 'string' },
+														},
+													},
+													reason: { type: 'string' },
+												},
+											}
+										: exposeWithSchemas.outputPayload,
 									encoding: responseEncodingType,
 								},
 							},

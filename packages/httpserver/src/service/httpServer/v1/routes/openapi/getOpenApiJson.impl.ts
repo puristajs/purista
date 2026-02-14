@@ -94,6 +94,12 @@ export const getOpenApiJson = function (this: IHttpService): RouteOptions {
 		const findPathParamsRegex = /:[^:/]+/gm
 		for (const entry of this.routeDefinitions) {
 			const expose = entry.expose
+			const exposeSchemas = expose as typeof expose & {
+				outputPayload?: SchemaObject
+				chunkPayload?: SchemaObject
+				finalPayload?: SchemaObject
+			}
+			const isStreamEndpoint = expose.contentTypeResponse === 'text/event-stream'
 			const definition = expose.http
 
 			let m: RegExpExecArray | null
@@ -141,7 +147,7 @@ export const getOpenApiJson = function (this: IHttpService): RouteOptions {
 			})
 
 			const queryParams =
-				definition.openApi?.query?.map((queryParam): ParameterObject => {
+				definition.openApi?.query?.map((queryParam: { name: string; required?: boolean }): ParameterObject => {
 					const name = queryParam.name
 					const schema = expose.parameter?.properties?.[name]
 					const required = queryParam.required
@@ -286,7 +292,7 @@ export const getOpenApiJson = function (this: IHttpService): RouteOptions {
 			}
 
 			definition.openApi?.additionalStatusCodes
-				?.filter(code => !Object.keys(errorResponses).includes(code.toString()))
+				?.filter((code: StatusCode) => !Object.keys(errorResponses).includes(code.toString()))
 				.forEach(addStatusCodes)
 
 			const traceIdParameter: ParameterObject = {
@@ -318,11 +324,34 @@ export const getOpenApiJson = function (this: IHttpService): RouteOptions {
 					operationId: definition.openApi?.operationId,
 					requestBody,
 					responses: {
-						[expose.outputPayload ? 200 : 204]: {
+						[isStreamEndpoint ? 200 : exposeSchemas.outputPayload ? 200 : 204]: {
 							description: definition.openApi?.description,
 							content: {
 								[expose.contentTypeResponse ?? 'application/json']: {
-									schema: expose.outputPayload,
+									schema: isStreamEndpoint
+										? {
+												type: 'object',
+												properties: {
+													frameType: {
+														type: 'string',
+														enum: ['start', 'chunk', 'complete', 'error', 'cancel'],
+													},
+													sequence: { type: 'integer' },
+													chunk: exposeSchemas.chunkPayload,
+													final: exposeSchemas.finalPayload,
+													error: {
+														type: 'object',
+														properties: {
+															status: { type: 'integer' },
+															message: { type: 'string' },
+															isHandledError: { type: 'boolean' },
+															traceId: { type: 'string' },
+														},
+													},
+													reason: { type: 'string' },
+												},
+											}
+										: exposeSchemas.outputPayload,
 								},
 							},
 						},
