@@ -13,6 +13,7 @@ A service is a logical group of functions and subscriptions. This is where the d
 A service provides:
 
 - [Commands](../command/index.md) that are callable by the outside world (like an API).
+- [Streams](../stream/index.md) for multi-frame request/response workloads.
 - [Subscriptions](../subscription/index.md) that listen to events and react accordingly.
 - A custom [service configuration](./add-a-service-config.md), which is available in commands and subscriptions.
 - [Secret stores](../stores/secret-stores.md), which allow commands and subscriptions to access secrets via a unified interface.

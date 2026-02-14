@@ -14,6 +14,7 @@ Add a command to an existing service with `purista add command`.
 
 Commands can access service resources (for example database clients/connections) via `context.resources`.
 Resources are provided when creating the service instance with `serviceBuilder.getInstance(eventBridge, { resources: ... })`.
+Commands can also consume stream endpoints via `context.stream` when declared with `.canConsumeStream(...)`.
 
 ## Command lifecycle
 
