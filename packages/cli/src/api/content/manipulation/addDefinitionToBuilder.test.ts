@@ -23,10 +23,12 @@ import { userV1ServiceBuilder } from './userV1ServiceBuilder.js'
 
 const commandDefinitions: Parameters<typeof userV1ServiceBuilder['addCommandDefinition']>[0][] = []
 const subscriptionDefinitions: Parameters<typeof userV1ServiceBuilder['addSubscriptionDefinition']>[0][] = []
+const streamDefinitions: Parameters<typeof userV1ServiceBuilder['addStreamDefinition']>[0][] = []
 
 export const userV1Service = userV1ServiceBuilder
   .addCommandDefinition(...commandDefinitions)
   .addSubscriptionDefinition(...subscriptionDefinitions)
+  .addStreamDefinition(...streamDefinitions)
 `,
 		)
 
@@ -55,10 +57,12 @@ import { userV1ServiceBuilder } from './userV1ServiceBuilder.js'
 
 const commandDefinitions: Parameters<typeof userV1ServiceBuilder['addCommandDefinition']>[0][] = []
 const subscriptionDefinitions: Parameters<typeof userV1ServiceBuilder['addSubscriptionDefinition']>[0][] = []
+const streamDefinitions: Parameters<typeof userV1ServiceBuilder['addStreamDefinition']>[0][] = []
 
 export const userV1Service = userV1ServiceBuilder
   .addCommandDefinition(...commandDefinitions)
   .addSubscriptionDefinition(...subscriptionDefinitions)
+  .addStreamDefinition(...streamDefinitions)
 `,
 		)
 
@@ -97,10 +101,12 @@ const commandDefinitions: Parameters<typeof userV1ServiceBuilder['addCommandDefi
   pingCommandBuilderExtended.getDefinition()
 ]
 const subscriptionDefinitions: Parameters<typeof userV1ServiceBuilder['addSubscriptionDefinition']>[0][] = []
+const streamDefinitions: Parameters<typeof userV1ServiceBuilder['addStreamDefinition']>[0][] = []
 
 export const userV1Service = userV1ServiceBuilder
   .addCommandDefinition(...commandDefinitions)
   .addSubscriptionDefinition(...subscriptionDefinitions)
+  .addStreamDefinition(...streamDefinitions)
 `,
 		)
 
@@ -114,5 +120,38 @@ export const userV1Service = userV1ServiceBuilder
 		const updated = readFileSync(serviceFile, 'utf-8')
 		expect(updated.match(/pingCommandBuilderExtended\.getDefinition\(\)/g)?.length).toBe(1)
 		expect(updated.match(/pingCommandBuilder\.getDefinition\(\)/g)?.length).toBe(1)
+	})
+
+	it('adds stream definition entries', async () => {
+		TEST_DIR = mkdtempSync(join(tmpdir(), 'purista-cli-builder-'))
+		const serviceFile = join(TEST_DIR, 'userV1Service.ts')
+		writeFileSync(
+			serviceFile,
+			`
+import { userV1ServiceBuilder } from './userV1ServiceBuilder.js'
+
+const commandDefinitions: Parameters<typeof userV1ServiceBuilder['addCommandDefinition']>[0][] = []
+const subscriptionDefinitions: Parameters<typeof userV1ServiceBuilder['addSubscriptionDefinition']>[0][] = []
+const streamDefinitions: Parameters<typeof userV1ServiceBuilder['addStreamDefinition']>[0][] = []
+
+export const userV1Service = userV1ServiceBuilder
+  .addCommandDefinition(...commandDefinitions)
+  .addSubscriptionDefinition(...subscriptionDefinitions)
+  .addStreamDefinition(...streamDefinitions)
+`,
+		)
+
+		await addDefinitionToBuilder({
+			arrayName: 'streamDefinitions',
+			serviceFile,
+			importFile: './stream/search/searchStreamBuilder.ts',
+			importDefinition: 'searchStreamBuilder',
+		})
+
+		const updated = readFileSync(serviceFile, 'utf-8')
+		expect(updated).toContain('searchStreamBuilder.getDefinition()')
+		expect(updated).toMatch(
+			/import\s+\{\s*searchStreamBuilder\s*\}\s+from\s+['"]\.\/stream\/search\/searchStreamBuilder\.js['"]/,
+		)
 	})
 })

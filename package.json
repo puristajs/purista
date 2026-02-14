@@ -10,6 +10,7 @@
 		"test": "vitest",
 		"test:integration": "node --env-file=.env ./node_modules/vitest/vitest.mjs",
 		"test:unit": "tsc --noEmit && vitest -c ./vitest.config.unit.ts",
+		"test:coverage:streaming": "tsc --noEmit && vitest -c ./vitest.config.streaming.ts --run",
 		"update:doc": "npm run gitclean && git-cliff > CHANGELOG.md && typedoc --options typedoc.json && git add --all && git commit -S -am \"doc: update api documentation\" && git commit -am \"doc: update CHANGELOG\" && npm run build:doc -w website",
 		"release:major": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version major --no-git-tag-version --workspaces && npm run commit:major && npm publish --workspaces",
 		"release:minor": "npm run gitclean && npm run release:prepare && npm run gitclean && npm version minor --no-git-tag-version --workspaces && npm run commit:minor && npm publish --workspaces",

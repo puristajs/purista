@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { addPuristaCommand } from './addPuristaCommand.js'
 import { addPuristaService } from './addPuristaService.js'
+import { addPuristaStream } from './addPuristaStream.js'
 import { addPuristaSubscription } from './addPuristaSubscription.js'
 import { puristaConfigSchema } from './loadPuristaConfig.js'
 import { scanPuristaProject } from './scanPuristaProject.js'
@@ -52,7 +53,7 @@ afterEach(() => {
 })
 
 describe('CLI artifact generation (e2e)', () => {
-	it('creates service, command, and subscription with valid wiring', async () => {
+	it('creates service, command, subscription, and stream with valid wiring', async () => {
 		createBaseProject()
 
 		const puristaConfig = puristaConfigSchema.parse({
@@ -100,20 +101,37 @@ describe('CLI artifact generation (e2e)', () => {
 			responseEventName: 'user.welcome_sent',
 		})
 
+		project = await scanPuristaProject(puristaConfig, TEST_DIR)
+
+		await addPuristaStream({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			streamName: 'search users',
+			streamDescription: 'Stream user search results',
+			responseEventName: 'user.welcome_sent',
+		})
+
 		const serviceDir = join(TEST_DIR, 'src', 'service', 'user', 'v1')
 		const serviceFile = join(serviceDir, 'userV1Service.ts')
 		const builderFile = join(serviceDir, 'userV1ServiceBuilder.ts')
 		const commandDir = join(serviceDir, 'command', 'signUp')
 		const subscriptionDir = join(serviceDir, 'subscription', 'sendWelcomeEmail')
+		const streamDir = join(serviceDir, 'stream', 'searchUsers')
 
 		expect(readFileSync(builderFile, 'utf-8')).toContain('new ServiceBuilder')
 		const serviceFileContent = readFileSync(serviceFile, 'utf-8')
 		expect(serviceFileContent).toContain('commandDefinitions')
 		expect(serviceFileContent).toContain('subscriptionDefinitions')
+		expect(serviceFileContent).toContain('streamDefinitions')
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addCommandDefinition']>[0][] =")
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addSubscriptionDefinition']>[0][] =")
+		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addStreamDefinition']>[0][] =")
 		expect(serviceFileContent).toContain('signUpCommandBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('sendWelcomeEmailSubscriptionBuilder.getDefinition()')
+		expect(serviceFileContent).toContain('searchUsersStreamBuilder.getDefinition()')
 
 		const commandSchema = readFileSync(join(commandDir, 'schema.ts'), 'utf-8')
 		expect(commandSchema).toContain('userV1SignUpInputParameterSchema')
@@ -136,6 +154,18 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(readFileSync(join(subscriptionDir, 'sendWelcomeEmailSubscriptionBuilder.ts'), 'utf-8')).toContain(
 			'sendWelcomeEmailSubscriptionBuilder',
 		)
+
+		const streamSchema = readFileSync(join(streamDir, 'schema.ts'), 'utf-8')
+		expect(streamSchema).toContain('userV1SearchUsersInputParameterSchema')
+		expect(streamSchema).toContain('userV1SearchUsersInputPayloadSchema')
+		expect(streamSchema).toContain('userV1SearchUsersChunkPayloadSchema')
+		expect(streamSchema).toContain('userV1SearchUsersFinalPayloadSchema')
+		const streamTypes = readFileSync(join(streamDir, 'types.ts'), 'utf-8')
+		expect(streamTypes).toContain('UserV1SearchUsersInputParameter')
+		expect(streamTypes).toContain('UserV1SearchUsersInputPayload')
+		expect(streamTypes).toContain('UserV1SearchUsersChunkPayload')
+		expect(streamTypes).toContain('UserV1SearchUsersFinalPayload')
+		expect(readFileSync(join(streamDir, 'searchUsersStreamBuilder.ts'), 'utf-8')).toContain('searchUsersStreamBuilder')
 
 		try {
 			execSync('npm run build -w @purista/core', {
