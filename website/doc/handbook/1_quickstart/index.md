@@ -8,14 +8,15 @@ order: 100000
 
 In this quickstart example, you will learn how you can install and use PURISTA.
 
-We will build a simple application, which includes services, commands and subscriptions.  
+We will build a simple application, which includes services, commands, subscriptions, and streams.  
 
 ## What you will build
 
 1. a service
 2. one command
 3. one subscription reacting to command events
-4. a runnable local setup
+4. one stream for incremental responses
+5. a runnable local setup
 
 ## Requirements
 

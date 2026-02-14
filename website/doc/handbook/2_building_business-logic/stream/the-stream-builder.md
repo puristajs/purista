@@ -8,6 +8,12 @@ order: 202510
 
 Use `serviceBuilder.getStreamBuilder(...)` to define a stream function.
 
+Scaffold a stream with:
+
+```bash
+purista add stream
+```
+
 ## Minimal example
 
 ```ts
@@ -94,3 +100,19 @@ for await (const frame of handle) {
 }
 ```
 
+## Testing streams
+
+For unit tests, bind the stream function to the service instance and provide a writer stub:
+
+```ts
+const streamFn = safeBind(myStreamBuilder.getStreamFunction(), service)
+const writer = {
+  cancelled: false,
+  write: vi.fn().mockResolvedValue(undefined),
+  close: vi.fn().mockResolvedValue(undefined),
+  fail: vi.fn().mockResolvedValue(undefined),
+  onCancel: vi.fn(),
+}
+
+await streamFn(context, payload, parameter, writer)
+```

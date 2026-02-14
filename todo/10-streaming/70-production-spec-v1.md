@@ -9,6 +9,8 @@ This document is intended to be implementation-ready. It aligns streaming with e
 - Support HTTP exposure as SSE (`text/event-stream`) with good DX for browsers and server-to-server clients.
 - Work across all event bridge integrations without cross-instance stream mixups.
 - Provide cancellation, timeouts, and robust error handling.
+- Ship implementation-grade documentation, examples, and API inline docs for IDE/autocomplete.
+- Meet a minimum test coverage target of `>= 80%` for streaming-related modules.
 
 ## Non-goals (v1)
 
@@ -231,6 +233,32 @@ On shutdown:
 Chunk/final validation on consumer:
 - if the consuming site declared `canConsumeStream(..., chunkSchema, finalSchema?)`, validate received frames accordingly (similar to `canInvoke` output schema validation).
 - allow disabling consumer-side validation explicitly for performance (default ON in v1).
+
+## Documentation and DX requirements (normative)
+
+- All public streaming APIs must have inline TSDoc suitable for generated API docs.
+- Handbook pages must include:
+  - stream builder usage
+  - consuming streams from commands/subscriptions
+  - SSE exposure and frame model
+  - cancellation/error behavior
+  - bridge capability and delivery semantics
+- CLI docs must include stream generation (`purista add stream`).
+- At least one runnable example must demonstrate end-to-end stream usage.
+
+## Test and quality gates (normative)
+
+- Unit tests required for:
+  - stream type guards and frame helpers
+  - stream builder schema/aggregation behavior
+  - context stream-consume typing
+  - stream proxy behavior
+- Integration tests required for:
+  - CLI stream generation
+  - stream runtime open/chunk/complete/cancel path
+  - HTTP/SSE stream projection behavior
+- Coverage gate:
+  - streaming-related module coverage must be `>= 80%` (lines/functions/statements; branches target where feasible).
 
 ## HTTP/SSE projection (normative)
 

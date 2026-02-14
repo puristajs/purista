@@ -20,6 +20,7 @@ order: 303000
 ## When to use
 
 - You need REST endpoints and OpenAPI over command definitions.
+- You need SSE endpoints over stream definitions.
 - You want transport concerns separated from business logic.
 - You want runtime flexibility (Node.js, Bun, Deno).
 
@@ -33,5 +34,7 @@ order: 303000
 
 - `@purista/hono-http-server` is installed
 - routes are registered via static services list or dynamic mode
+- command endpoints are mapped to JSON responses
+- stream endpoints are mapped to `text/event-stream` (SSE) responses
 - Hono server socket is explicitly started for your runtime
 - auth, OpenAPI metadata, and graceful shutdown are configured

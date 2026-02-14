@@ -163,6 +163,11 @@ For each bridge: implement the new EventBridge methods and ensure no cross-talk 
 3. HTTP tests:
    - SSE route returns correct event-stream frames
    - handshake validation errors return HTTP errors
+4. Documentation tests/checks:
+   - handbook links resolve for new stream docs
+   - generated API docs include new stream public interfaces (no missing exports)
+5. Coverage gates:
+   - add a streaming-focused coverage task and enforce `>=80%` in CI for streaming modules.
 
 ## 10) Acceptance Criteria (v1)
 
@@ -183,3 +188,4 @@ For each bridge: implement the new EventBridge methods and ensure no cross-talk 
 - Examples are added and runnable:
   - one minimal stream service + client (broker-based)
   - one HTTP-exposed SSE example (GET/EventSource and POST/fetch streaming)
+- Inline documentation exists for all new public stream APIs for API docs + IDE hints.

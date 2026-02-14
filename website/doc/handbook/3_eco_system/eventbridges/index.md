@@ -1,81 +1,43 @@
 ---
 title: Event Bridges
-description: Use the right event bridge for PURISTA typescript framework
+description: Choose the right PURISTA event bridge and understand delivery semantics
 order: 301000
 ---
 
 # Event Bridges
 
-The concept of PURISTA is based on "some" message broker. The message broker is handling all the communication messages between single functions and subscriptions.
+Event bridges are the transport backbone of PURISTA. They determine routing, scaling behavior, durability options, and delivery guarantees.
 
-There are a lot of different message system out there. So the question is, which one to choose. So, what features should an ideal message broker provide.
+## Support matrix
 
-## Supported message broker
+| bridge | scale out | durable backlog | typical delivery mode | stream support (`openStream`) |
+|---|---:|---:|---|---:|
+| [Default](./default_event_bridge.md) | no | no | at-most-once (in-memory) | yes |
+| [AMQP](./amqp.md) | yes | yes | at-least-once (queue + ack based) | no (currently) |
+| [MQTT](./mqtt.md) | yes | broker-dependent | QoS dependent (0/1/2) | no (currently) |
+| [NATS](./nats.md) | yes | no (core NATS) | typically at-most-once | no (currently) |
+| [Dapr](./dapr.md) | yes | component-dependent | component-dependent (often at-least-once) | no (currently) |
 
-| name                                        | scale | subscriptions*                        | durable   | status   |
-|---                                          |:---:    |---                                    |:---:        |:---:       |
-| [__Default__](./default_event_bridge.md)  | 🚫     | ✅ __complex__                        | 🚫        | stable   |
-| [__MQTT__](./mqtt.md)                     | ✅     | ✅ __complex__                        | ✅        | beta |
-| [__AMQP__](./amqp.md)        | ✅     | ✅ __complex__                        | ✅        | beta |
-| __KubeMQ__                | ✅     | ☑️ _event only_                        | ✅        | [planned](https://github.com/puristajs/purista/issues/64)     |
-| [__NATS__](./nats.md)                     | ✅     | ✅ __complex__                        | 🚫       | beta |
-| [__Dapr__](./dapr.md)                     | ✅     | ☑️ _event only_                        | ✅        | beta |
-| __Knative__| ✅     | 🔎 under investigation   | 🔎        | [requested](https://github.com/puristajs/purista/issues/113)|
-| __AWS EventBridge__  | ✅     | ☑️ _event only<br>(max 5 per event)_   | ✅        | [planned](https://github.com/puristajs/purista/issues/99)|
+## Delivery semantics in practice
 
-__(*)__ _- complex = based on events and/or additional properties like sender, receiver, type_
-__(*)__ _- event only = subscriptions can subscribe to event names only_
+PURISTA itself provides typed message contracts and processing flow. Delivery guarantees come from the selected bridge + broker/component configuration.
 
-You need a other message broker to be supported?
-Than you can [open an issue](https://github.com/puristajs/purista/issues) or implement on your own.
+- `at-most-once`: low latency, but a message can be lost on failures.
+- `at-least-once`: safer delivery, but duplicates are possible.
+- `exactly-once`: generally not guaranteed end-to-end in distributed systems; design handlers to be idempotent.
 
-### Push based
+## Reliability checklist
 
-The broker should actively deliver messages to the client instead of client pull. The reason is, that if you deploy in serverless function style, single functions are stateless, and the single instances are only existing at the time of execution. So, there is no real instance at all, which can  continuously pulling for new messages.
-
-### Queues
-
-Most of the brokers have the concept of queues, but not all queue concepts are sufficient for our use case.
-
-To be able to share the load across multiple instances, the queue mechanism must be able to send one single message to exactly one client instance. It should not send the same message to multiple client instances.
-
-An other point to mentioned here:
-We need in best case persistency per queue. Queues for command requests/responses should not hold the messages forever. If a command or its response is not handled within a given amount of time, the request has been timed out. So there is no need to deliver these messages after timeout.
-
-But on the other hand, subscriptions should be able to handle messages later and the information should not get lost.
-
-### Request reply pattern
-
-The broker must be able to provide some way, to build a request-replay mechanism. Otherwise, it is not possible to call a service function and receive a result.
-In general, this pattern can be build with some kind of response queue. But, as our functions and subscriptions are maybe serverless/stateless, we will need the possibility to have response queues, which are short living and automatically created and removed.
-
-### Content based delivery
-
-Many message brokers have the concept of topics or routing key delivery. This works well, if you have some fixed topics or routing keys. The service function part of PURISTA would work, because you could simply use a combination of message type, service name, service version and function/subscription name as a routing key.
-
-But what about subscriptions? Subscriptions are kind of dynamic and unknown. You might want to subscribe to one single event name, or you might want to subscribe to all error responses from any service function.
-
-Also, you do not want to have a 1:1 relation. You always have one message producer, but you might have n message consumers.
-
-The broker should be able to deliver the same message to n different consumers, based on the message and the consumers.
+- configure broker durability/retry features explicitly
+- keep bridge settings identical across instances
+- implement idempotency in command/subscription side effects
+- define timeout/retry policies intentionally (do not rely on defaults only)
+- test reconnect and broker outage scenarios in integration tests
 
 ## When to use which bridge
 
-- `DefaultEventBridge`: local development, single-instance setups.
-- `AMQP`: robust queueing, retries, and durable delivery requirements.
-- `MQTT`: IoT/edge scenarios and lightweight broker environments.
-- `NATS`: fast low-latency messaging with simple operations.
-- `Dapr`: polyglot/service-mesh-oriented environments.
-
-## Common pitfalls
-
-- different topic/prefix/QoS settings across instances
-- assuming delivery guarantees without broker-level configuration
-- using the wrong bridge for durability/retry requirements
-
-## Checklist
-
-- chosen bridge matches required delivery semantics
-- broker and bridge configs are identical across instances
-- tracing headers propagation is enabled and verified
-- failure and reconnect behavior is tested in integration tests
+- `DefaultEventBridge`: local development, single-instance deployments, stream development.
+- `AMQP`: production systems with durable queues/retries and strong operational control.
+- `MQTT`: IoT/edge and broker setups where topic/QoS tuning is central.
+- `NATS`: low-latency eventing where simple operations are preferred.
+- `Dapr`: polyglot/service-mesh environments leveraging Dapr components.
