@@ -8,10 +8,10 @@ export type FullServiceDefinition<S extends Service = Service> = {
 			description: string
 			deprecated: boolean
 			commands: {
-				[commandName: string]: CommandDefinition<S, any, any, any, any, any, any, any, any, any, any, any, any>
+				[commandName: string]: CommandDefinition<S, any, any, any, any, any, any, any, any, any, any, any, any, any>
 			}
 			subscriptions: {
-				[subscriptionName: string]: SubscriptionDefinition<S, any, any, any, any, any, any, any, any, any, any>
+				[subscriptionName: string]: SubscriptionDefinition<S, any, any, any, any, any, any, any, any, any, any, any>
 			}
 		}
 	}

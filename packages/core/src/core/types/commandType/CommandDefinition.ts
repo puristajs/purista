@@ -3,6 +3,7 @@ import type { Schema } from '../../../schema/index.js'
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
+import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { CommandAfterGuardHook } from './CommandAfterGuardHook.js'
 import type { CommandBeforeGuardHook } from './CommandBeforeGuardHook.js'
 import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase.js'
@@ -28,6 +29,7 @@ export type CommandDefinition<
 	TransformOutputHookOutput,
 	Resources extends Record<string, unknown>,
 	Invokes extends InvokeList,
+	StreamInvokes extends StreamInvokeList,
 	EmitList extends Record<string, Schema>,
 	MetadataType extends CommandDefinitionMetadataBase = CommandDefinitionMetadataBase,
 > = {
@@ -49,6 +51,7 @@ export type CommandDefinition<
 		FunctionOutputType,
 		Resources,
 		Invokes,
+		StreamInvokes,
 		EmitList
 	>
 	/** the eventName for the command response */
@@ -78,6 +81,7 @@ export type CommandDefinition<
 				FunctionParamsType,
 				Resources,
 				Invokes,
+				StreamInvokes,
 				EmitList
 			>
 		>
@@ -92,6 +96,7 @@ export type CommandDefinition<
 				FunctionOutputType,
 				Resources,
 				Invokes,
+				StreamInvokes,
 				EmitList
 			>
 		>
@@ -108,5 +113,6 @@ export type CommandDefinition<
 		}
 	}
 	invokes: Invokes
+	streamInvokes: StreamInvokes
 	emitList: EmitList
 }

@@ -4,6 +4,7 @@ import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { Prettify } from '../Prettify.js'
+import type { StreamInvokeList } from '../StreamInvokeList.js'
 
 import type { Command } from './Command.js'
 
@@ -21,6 +22,7 @@ export type CommandFunctionContextEnhancements<
 	MessageParamsType = unknown,
 	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
+	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = {
 	/** the original message */
@@ -43,6 +45,8 @@ export type CommandFunctionContextEnhancements<
 	 * ```
 	 */
 	service: Invokes
+	/** consumes stream responses from other service stream endpoints */
+	stream: StreamInvokes
 	/**
 	 * Provides resources defined in service builder and set via config during service creation
 	 */
@@ -59,7 +63,16 @@ export type CommandFunctionContext<
 	MessageParamsType = unknown,
 	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
+	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = Prettify<
-	ContextBase & CommandFunctionContextEnhancements<MessagePayloadType, MessageParamsType, Resources, Invokes, EmitList>
+	ContextBase &
+		CommandFunctionContextEnhancements<
+			MessagePayloadType,
+			MessageParamsType,
+			Resources,
+			Invokes,
+			StreamInvokes,
+			EmitList
+		>
 >

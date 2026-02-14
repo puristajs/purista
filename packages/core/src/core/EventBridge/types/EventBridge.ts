@@ -6,6 +6,10 @@ import type { CommandSuccessResponse } from '../../types/commandType/CommandSucc
 import type { DefinitionEventBridgeConfig } from '../../types/DefinitionEventBridgeConfig.js'
 import type { EBMessage } from '../../types/EBMessage.js'
 import type { EBMessageAddress } from '../../types/EBMessageAddress.js'
+import type { StreamDefinitionMetadataBase } from '../../types/stream/StreamDefinitionMetadataBase.js'
+import type { StreamHandle } from '../../types/stream/StreamHandle.js'
+import type { StreamMessage } from '../../types/stream/StreamMessage.js'
+import type { StreamOpenRequest } from '../../types/stream/StreamOpenRequest.js'
 import type { Subscription } from '../../types/subscription/Subscription.js'
 
 /**
@@ -44,6 +48,15 @@ export interface EventBridge {
 	invoke<T>(input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>, ttl?: number): Promise<T>
 
 	/**
+	 * Open a stream invocation.
+	 * The returned handle can be consumed via async iteration and can be cancelled by caller.
+	 */
+	openStream<Chunk = unknown, Final = unknown>(
+		input: Omit<StreamOpenRequest, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
+		ttl?: number,
+	): Promise<StreamHandle<Chunk, Final>>
+
+	/**
 	 *
 	 * @param address the address of the service command (service name, version and command name)
 	 * @param cb the function to be called if a matching command arrives
@@ -60,10 +73,25 @@ export interface EventBridge {
 	): Promise<string>
 
 	/**
+	 * Register a service stream.
+	 */
+	registerStream(
+		address: EBMessageAddress,
+		cb: (message: StreamMessage) => Promise<void>,
+		metadata: StreamDefinitionMetadataBase,
+		eventBridgeConfig: DefinitionEventBridgeConfig,
+	): Promise<string>
+
+	/**
 	 * Unregister a service command
 	 * @param address The address (service name, version and command name) of the command to be de-registered
 	 */
 	unregisterCommand(address: EBMessageAddress): Promise<void>
+
+	/**
+	 * Unregister a service stream
+	 */
+	unregisterStream(address: EBMessageAddress): Promise<void>
 
 	/**
 	 * Register a new subscription

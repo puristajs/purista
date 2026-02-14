@@ -32,6 +32,15 @@ import { isInfoMessage } from '../core/types/infoType/isInfoMessage.impl.js'
 import { PuristaSpanName } from '../core/types/PuristaSpanName.enum.js'
 import { PuristaSpanTag } from '../core/types/PuristaSpanTag.enum.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
+import { isStreamControl } from '../core/types/stream/isStreamControl.impl.js'
+import { isStreamFrame } from '../core/types/stream/isStreamFrame.impl.js'
+import { isStreamMessage } from '../core/types/stream/isStreamMessage.impl.js'
+import { isStreamOpenRequest } from '../core/types/stream/isStreamOpenRequest.impl.js'
+import type { StreamDefinitionMetadataBase } from '../core/types/stream/StreamDefinitionMetadataBase.js'
+import type { StreamFrame } from '../core/types/stream/StreamFrame.js'
+import type { StreamHandle } from '../core/types/stream/StreamHandle.js'
+import type { StreamMessage } from '../core/types/stream/StreamMessage.js'
+import type { StreamOpenRequest } from '../core/types/stream/StreamOpenRequest.js'
 import type { Subscription } from '../core/types/subscription/Subscription.js'
 
 import { puristaVersion } from '../version.js'
@@ -41,6 +50,12 @@ import { isMessageMatchingSubscription } from './isMessageMatchingSubscription.i
 import type { DefaultEventBridgeConfig } from './types/DefaultEventBridgeConfig.js'
 import type { PendigInvocation } from './types/PendingInvocations.js'
 import type { SubscriptionStorageEntry } from './types/SubscriptionStorageEntry.js'
+
+type PendingStreamInvocation<Chunk = unknown, Final = unknown> = {
+	push: (frame: StreamFrame<Chunk, Final>) => void
+	reject: (error: unknown) => void
+	setOwnerInstanceId: (instanceId: string) => Promise<void>
+}
 
 /**
  * Simple implementation of some simple in-memory event bridge.
@@ -72,7 +87,10 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 		(message: Command) => Promise<CommandSuccessResponse | CommandErrorResponse>
 	>()
 
+	protected streamFunctions = new Map<string, (message: StreamMessage) => Promise<void>>()
+
 	protected pendingInvocations = new Map<EBMessageId, PendigInvocation>()
+	protected pendingStreams = new Map<string, PendingStreamInvocation<any, any>>()
 	protected runningSubscriptionCount = 0
 
 	protected subscriptions = new Map<string, SubscriptionStorageEntry>()
@@ -206,6 +224,33 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 							return next()
 						}
 
+						if (isStreamMessage(message)) {
+							if (isStreamFrame(message)) {
+								const pendingStream = this.pendingStreams.get(message.correlationId)
+								if (!pendingStream) {
+									return next()
+								}
+								isAtLeastDeliveredOnce = true
+								if (message.payload.frameType === 'start') {
+									await pendingStream.setOwnerInstanceId(message.sender.instanceId)
+								}
+								pendingStream.push(message)
+								this.emit(EventBridgeEventNames.StreamFrameReceived, message)
+								return next()
+							}
+
+							const streamTarget = this.streamFunctions.get(getCommandQueueName(message.receiver))
+							if (!streamTarget) {
+								return next()
+							}
+
+							if (isStreamOpenRequest(message) || isStreamControl(message)) {
+								isAtLeastDeliveredOnce = true
+								void streamTarget(message)
+								return next()
+							}
+						}
+
 						if (isInfoMessage(message)) {
 							this.logger.trace('info message', message)
 							return next()
@@ -280,10 +325,37 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 		return queueName
 	}
 
+	async registerStream(
+		address: EBMessageAddress,
+		cb: (message: StreamMessage) => Promise<void>,
+		metadata: StreamDefinitionMetadataBase,
+	): Promise<string> {
+		const queueName = getCommandQueueName(address)
+		this.streamFunctions.set(queueName, cb)
+
+		const info = createInfoMessage(
+			EBMessageType.InfoServiceFunctionAdded,
+			{ ...address, instanceId: this.instanceId },
+			{
+				payload: metadata,
+			},
+		)
+		await this.emitMessage(info)
+
+		return queueName
+	}
+
 	async unregisterCommand(address: EBMessageAddress): Promise<void> {
 		const queueName = getCommandQueueName(address)
 		if (!this.serviceFunctions.delete(queueName)) {
 			this.logger.error({ queueName, address }, 'Failed to clean unregister service command')
+		}
+	}
+
+	async unregisterStream(address: EBMessageAddress): Promise<void> {
+		const queueName = getCommandQueueName(address)
+		if (!this.streamFunctions.delete(queueName)) {
+			this.logger.error({ queueName, address }, 'Failed to clean unregister service stream')
 		}
 	}
 
@@ -335,6 +407,10 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
 				if (this.config.emitMessagesAsEventBridgeEvents && msg.eventName) {
 					this.emit(`custom-${msg.eventName}`, msg)
+				}
+
+				if (isStreamMessage(msg as unknown as EBMessage) && isStreamFrame(msg as unknown as StreamMessage)) {
+					this.emit(EventBridgeEventNames.StreamFrameSent, msg as unknown as StreamFrame)
 				}
 
 				return msg as Readonly<EBMessage>
@@ -420,6 +496,189 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 		})
 	}
 
+	async openStream<Chunk = unknown, Final = unknown>(
+		input: Omit<StreamOpenRequest, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
+		commandTimeout = this.defaultCommandTimeout,
+	): Promise<StreamHandle<Chunk, Final>> {
+		const correlationId = getNewCorrelationId()
+
+		let ownerInstanceId: string | undefined
+		let pendingCancelReason: string | undefined
+		let isDone = false
+		let streamError: unknown
+
+		const queue: StreamFrame<Chunk, Final>[] = []
+		const waiters: Array<(value: IteratorResult<StreamFrame<Chunk, Final>>) => void> = []
+
+		const flushDone = () => {
+			while (waiters.length > 0) {
+				const resolve = waiters.shift()
+				if (resolve) {
+					resolve({ done: true, value: undefined })
+				}
+			}
+		}
+
+		const sendCancel = async (reason?: string) => {
+			if (!ownerInstanceId || isDone) {
+				pendingCancelReason = reason
+				return
+			}
+
+			const cancelMessage: Omit<StreamMessage, 'id' | 'timestamp'> = {
+				messageType: EBMessageType.Stream,
+				sender: {
+					...input.sender,
+					instanceId: this.instanceId,
+				},
+				receiver: {
+					...input.receiver,
+					instanceId: ownerInstanceId,
+				},
+				contentType: 'application/json',
+				contentEncoding: 'utf-8',
+				traceId: input.traceId,
+				principalId: input.principalId,
+				tenantId: input.tenantId,
+				correlationId,
+				payload: {
+					frameType: 'cancel',
+					reason,
+				},
+			}
+			await this.emitMessage(cancelMessage as unknown as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
+		}
+
+		const clear = () => {
+			if (!this.pendingStreams.delete(correlationId)) {
+				this.logger.debug({ correlationId }, 'stream session already cleaned up')
+			}
+		}
+
+		const timeout = setTimeout(() => {
+			if (isDone) {
+				return
+			}
+			streamError = new UnhandledError(
+				StatusCode.GatewayTimeout,
+				'stream invocation timed out',
+				undefined,
+				input.traceId,
+			)
+			isDone = true
+			clear()
+			flushDone()
+		}, commandTimeout)
+
+		this.pendingStreams.set(correlationId, {
+			push: (frame: StreamFrame<any, any>) => {
+				if (isDone) {
+					return
+				}
+				queue.push(frame)
+				const waiter = waiters.shift()
+				if (waiter) {
+					const nextFrame = queue.shift()
+					if (nextFrame) {
+						waiter({ done: false, value: nextFrame })
+					}
+				}
+
+				if (
+					frame.payload.frameType === 'complete' ||
+					frame.payload.frameType === 'error' ||
+					frame.payload.frameType === 'cancel'
+				) {
+					isDone = true
+					clearTimeout(timeout)
+					clear()
+					if (queue.length === 0) {
+						flushDone()
+					}
+				}
+			},
+			reject: error => {
+				if (isDone) {
+					return
+				}
+				streamError = error
+				isDone = true
+				clearTimeout(timeout)
+				clear()
+				flushDone()
+			},
+			setOwnerInstanceId: async instanceId => {
+				ownerInstanceId = instanceId
+				if (pendingCancelReason) {
+					const reason = pendingCancelReason
+					pendingCancelReason = undefined
+					await sendCancel(reason)
+				}
+			},
+		})
+
+		const streamOpenMessage: Omit<StreamOpenRequest, 'id' | 'timestamp'> = {
+			messageType: EBMessageType.Stream,
+			sender: {
+				...input.sender,
+				instanceId: this.instanceId,
+			},
+			receiver: input.receiver,
+			contentType: input.contentType,
+			contentEncoding: input.contentEncoding,
+			traceId: input.traceId,
+			principalId: input.principalId,
+			tenantId: input.tenantId,
+			correlationId,
+			payload: input.payload,
+		}
+
+		await this.emitMessage(streamOpenMessage as unknown as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
+		this.emit(EventBridgeEventNames.StreamOpened, { sessionId: correlationId })
+
+		return {
+			sessionId: correlationId,
+			cancel: async reason => {
+				await sendCancel(reason)
+			},
+			[Symbol.asyncIterator]: () => {
+				return {
+					next: async () => {
+						if (queue.length > 0) {
+							const value = queue.shift()
+							if (value) {
+								if (
+									value.payload.frameType === 'complete' ||
+									value.payload.frameType === 'error' ||
+									value.payload.frameType === 'cancel'
+								) {
+									this.emit(EventBridgeEventNames.StreamClosed, { sessionId: correlationId })
+								}
+								if (isDone && queue.length === 0) {
+									flushDone()
+								}
+								return { done: false, value }
+							}
+						}
+
+						if (streamError) {
+							throw streamError
+						}
+
+						if (isDone) {
+							this.emit(EventBridgeEventNames.StreamClosed, { sessionId: correlationId })
+							return { done: true, value: undefined }
+						}
+
+						return await new Promise<IteratorResult<StreamFrame<Chunk, Final>>>(resolve => {
+							waiters.push(resolve)
+						})
+					},
+				}
+			},
+		}
+	}
+
 	async destroy(): Promise<void> {
 		await super.destroy()
 
@@ -454,6 +713,12 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 			value.reject(new UnhandledError(StatusCode.ServiceUnavailable))
 		}
 		this.pendingInvocations.clear()
+
+		for (const [_, value] of Array.from(this.pendingStreams)) {
+			value.reject(new UnhandledError(StatusCode.ServiceUnavailable, 'stream closed'))
+		}
+		this.pendingStreams.clear()
+
 		this.removeAllListeners()
 		this.writeStream.end().removeAllListeners()
 		this.readStream.destroy()

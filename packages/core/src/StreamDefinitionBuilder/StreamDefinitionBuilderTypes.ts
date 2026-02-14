@@ -3,13 +3,11 @@ import type { InvokeList } from '../core/types/InvokeList.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { Schema } from '../schema/index.js'
 
-export type SubscriptionDefinitionBuilderTypes<
+export type StreamDefinitionBuilderTypes<
 	PayloadSchema extends Schema = Schema,
 	ParamsSchema extends Schema = Schema,
-	OutputSchema extends Schema = Schema,
-	TransformInputPayloadSchema extends Schema = Schema,
-	TransformInputParamsSchema extends Schema = Schema,
-	TransformOutputSchema extends Schema = Schema,
+	ChunkSchema extends Schema = Schema,
+	FinalSchema extends Schema = Schema,
 	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = InvokeList,
 	StreamInvokes extends StreamInvokeList = StreamInvokeList,
@@ -17,10 +15,8 @@ export type SubscriptionDefinitionBuilderTypes<
 > = {
 	PayloadSchema: PayloadSchema
 	ParamsSchema: ParamsSchema
-	OutputSchema: OutputSchema
-	TransformInputPayloadSchema: TransformInputPayloadSchema
-	TransformInputParamsSchema: TransformInputParamsSchema
-	TransformOutputSchema: TransformOutputSchema
+	ChunkSchema: ChunkSchema
+	FinalSchema: FinalSchema
 	Resources: Resources
 	Invokes: Invokes
 	StreamInvokes: StreamInvokes

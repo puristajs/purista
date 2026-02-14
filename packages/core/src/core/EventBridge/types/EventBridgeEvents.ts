@@ -11,6 +11,11 @@ export enum EventBridgeEventNames {
 	EventbridgeReconnecting = 'eventbridge-reconnecting',
 
 	EventbridgeError = 'eventbridge-error',
+	StreamOpened = 'stream-opened',
+	StreamClosed = 'stream-closed',
+	StreamError = 'stream-error',
+	StreamFrameReceived = 'stream-frame-received',
+	StreamFrameSent = 'stream-frame-sent',
 }
 
 /**
@@ -33,6 +38,21 @@ export type EventBridgeEventsBasic = {
 
 	/** emitted on internal event bridge error @event */
 	[EventBridgeEventNames.EventbridgeError]: UnhandledError | unknown
+
+	/** emitted when a stream session is opened @event */
+	[EventBridgeEventNames.StreamOpened]: { sessionId: string } | undefined
+
+	/** emitted when a stream session is closed @event */
+	[EventBridgeEventNames.StreamClosed]: { sessionId: string } | undefined
+
+	/** emitted when stream handling fails @event */
+	[EventBridgeEventNames.StreamError]: unknown
+
+	/** emitted when a stream frame is received @event */
+	[EventBridgeEventNames.StreamFrameReceived]: unknown
+
+	/** emitted when a stream frame is sent @event */
+	[EventBridgeEventNames.StreamFrameSent]: unknown
 }
 
 export type EventBridgeCustomEvents = {

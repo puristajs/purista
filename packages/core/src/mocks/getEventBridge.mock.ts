@@ -12,9 +12,12 @@ export const getEventBridgeMock = (sandbox?: SinonSandbox): { mock: EventBridge;
 	const emitMessage = sandbox?.stub() ?? stub()
 	const registerCommand = sandbox?.stub() ?? stub()
 	const registerSubscription = sandbox?.stub() ?? stub()
+	const registerStream = sandbox?.stub() ?? stub()
 	const unregisterCommand = sandbox?.stub() ?? stub()
 	const unregisterSubscription = sandbox?.stub() ?? stub()
+	const unregisterStream = sandbox?.stub() ?? stub()
 	const invoke = sandbox?.stub() ?? stub()
+	const openStream = sandbox?.stub() ?? stub()
 	const start = sandbox?.stub() ?? stub()
 	const isReady = sandbox?.stub().resolves(true) ?? stub().resolves(true)
 	const isHealthy = sandbox?.stub().resolves(true) ?? stub().resolves(true)
@@ -27,9 +30,12 @@ export const getEventBridgeMock = (sandbox?: SinonSandbox): { mock: EventBridge;
 		emitMessage,
 		registerCommand,
 		registerSubscription,
+		registerStream,
 		unregisterCommand,
 		unregisterSubscription,
+		unregisterStream,
 		invoke,
+		openStream,
 		start,
 		isReady,
 		isHealthy,
@@ -41,9 +47,12 @@ export const getEventBridgeMock = (sandbox?: SinonSandbox): { mock: EventBridge;
 			emitMessage,
 			registerCommand,
 			registerSubscription,
+			registerStream,
 			unregisterCommand,
 			unregisterSubscription,
+			unregisterStream,
 			invoke,
+			openStream,
 			start,
 			isReady,
 			isHealthy,

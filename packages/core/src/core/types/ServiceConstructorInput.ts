@@ -9,6 +9,7 @@ import type { CommandDefinitionListResolved } from './commandType/CommandDefinit
 import type { ServiceInfoType } from './infoType/ServiceInfoType.js'
 import type { Logger } from './Logger.js'
 import type { ServiceClassTypes } from './ServiceClassTypes.js'
+import type { StreamDefinitionListResolved } from './stream/StreamDefinitionList.js'
 import type { SubscriptionDefinitionListResolved } from './subscription/SubscriptionDefinitionList.js'
 
 /**
@@ -25,6 +26,8 @@ export type ServiceConstructorInput<S extends ServiceClassTypes = ServiceClassTy
 	commandDefinitionList: CommandDefinitionListResolved<any>
 	/** The list of subscription definitions for this service */
 	subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
+	/** The list of stream definitions for this service */
+	streamDefinitionList?: StreamDefinitionListResolved<any>
 	/** The service specific config */
 	config: S['ConfigType']
 	/** The secret store instance */

@@ -5,6 +5,7 @@ import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
 import type { FromInvokeToOtherType } from '../core/types/FromInvokeToOtherType.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
+import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { Schema } from '../schema/index.js'
 import { getLoggerMock } from './getLogger.mock.js'
 import { getCommandMessageMock } from './messages/getCommandMessage.mock.js'
@@ -21,12 +22,14 @@ export const getCommandContextMock = <
 	FunctionParamsType,
 	Resources extends Record<string, unknown>,
 	Invokes extends InvokeList,
+	StreamInvokes extends StreamInvokeList,
 	EmitList extends Record<string, Schema>,
 >(input: {
 	payload: FunctionPayloadType
 	parameter: FunctionParamsType
 	sandbox?: SinonSandbox
 	invokes: FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
+	streamInvokes?: StreamInvokes
 	emitList: FromEmitToOtherType<EmitList, Schema>
 	resources?: Partial<Resources>
 	message?: {
@@ -176,7 +179,14 @@ export const getCommandContextMock = <
 				},
 	)
 
-	const mock: CommandFunctionContext<MessagePayloadType, MessageParamsType, Resources, Invokes, EmitList> = {
+	const mock: CommandFunctionContext<
+		MessagePayloadType,
+		MessageParamsType,
+		Resources,
+		Invokes,
+		StreamInvokes,
+		EmitList
+	> = {
 		logger: logger.mock,
 		message,
 		emit: async <K extends keyof EmitList, Payload = EmitList[K]>(eventName: K, payload: Payload) => {
@@ -194,6 +204,7 @@ export const getCommandContextMock = <
 			return fn(getMockSpan())
 		}),
 		service: getInvokeProxy<Invokes>(),
+		stream: getInvokeProxy<StreamInvokes>(),
 		secrets: {
 			getSecret: stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: stubs.setSecret.rejects(new Error('setSecret is not stubbed')),

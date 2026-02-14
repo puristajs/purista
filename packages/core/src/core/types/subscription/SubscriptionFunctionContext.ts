@@ -5,6 +5,7 @@ import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { Prettify } from '../Prettify.js'
+import type { StreamInvokeList } from '../StreamInvokeList.js'
 
 /**
  * It provides the original command message.
@@ -18,6 +19,7 @@ import type { Prettify } from '../Prettify.js'
 export type SubscriptionFunctionContextEnhancements<
 	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
+	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = {
 	/** the original message */
@@ -40,6 +42,8 @@ export type SubscriptionFunctionContextEnhancements<
 	 * ```
 	 */
 	service: Invokes
+	/** consumes stream responses from other service stream endpoints */
+	stream: StreamInvokes
 	/**
 	 * Provides resources defined in service builder and set via config during service creation
 	 */
@@ -54,5 +58,6 @@ export type SubscriptionFunctionContextEnhancements<
 export type SubscriptionFunctionContext<
 	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
+	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
-> = Prettify<ContextBase & SubscriptionFunctionContextEnhancements<Resources, Invokes, EmitList>>
+> = Prettify<ContextBase & SubscriptionFunctionContextEnhancements<Resources, Invokes, StreamInvokes, EmitList>>

@@ -9,7 +9,7 @@ export const isHttpExposedServiceMeta = (input?: unknown): input is HttpExposedS
 	if (!input || typeof input !== 'object') {
 		return false
 	}
-	const candidate = input as Partial<HttpExposedServiceMeta>
+	const candidate = input as { expose?: { http?: unknown } }
 	if (!candidate.expose?.http) {
 		return false
 	}

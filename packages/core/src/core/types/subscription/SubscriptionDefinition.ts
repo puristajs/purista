@@ -6,6 +6,7 @@ import type { InstanceId } from '../InstanceId.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { PrincipalId } from '../PrincipalId.js'
 import type { ServiceClass } from '../ServiceClass.js'
+import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { TenantId } from '../TenantId.js'
 import type { SubscriptionAfterGuardHook } from './SubscriptionAfterGuardHook.js'
 import type { SubscriptionBeforeGuardHook } from './SubscriptionBeforeGuardHook.js'
@@ -30,6 +31,7 @@ export type SubscriptionDefinition<
 	TransformOutputHookOutput,
 	Resources extends Record<string, unknown>,
 	Invokes extends InvokeList,
+	StreamInvokes extends StreamInvokeList,
 	EmitList extends Record<string, Schema>,
 	MetadataType extends SubscriptionDefinitionMetadataBase = SubscriptionDefinitionMetadataBase,
 > = {
@@ -49,6 +51,7 @@ export type SubscriptionDefinition<
 		FunctionOutputType,
 		Resources,
 		Invokes,
+		StreamInvokes,
 		EmitList
 	>
 	/** filter for messages produced by given sender */
@@ -90,7 +93,15 @@ export type SubscriptionDefinition<
 		}
 		beforeGuard?: Record<
 			string,
-			SubscriptionBeforeGuardHook<S, FunctionPayloadType, FunctionParamsType, Resources, Invokes, EmitList>
+			SubscriptionBeforeGuardHook<
+				S,
+				FunctionPayloadType,
+				FunctionParamsType,
+				Resources,
+				Invokes,
+				StreamInvokes,
+				EmitList
+			>
 		>
 		afterGuard?: Record<
 			string,
@@ -101,6 +112,7 @@ export type SubscriptionDefinition<
 				FunctionOutputType,
 				Resources,
 				Invokes,
+				StreamInvokes,
 				EmitList
 			>
 		>
@@ -115,6 +127,7 @@ export type SubscriptionDefinition<
 		}
 	}
 	invokes: Invokes
+	streamInvokes: StreamInvokes
 	emitList: EmitList
 	deprecated: boolean
 }

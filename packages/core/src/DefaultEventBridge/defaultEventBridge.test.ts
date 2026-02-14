@@ -260,4 +260,106 @@ describe('DefaultEventBridge', () => {
 
 		expect(duration).toBeGreaterThanOrEqual(20)
 	})
+
+	it('supports stream open and frame delivery', async () => {
+		const eventBridge = new DefaultEventBridge({ defaultCommandTimeout: 500 })
+		await eventBridge.start()
+
+		await eventBridge.registerStream(
+			{
+				serviceName: receiver.serviceName,
+				serviceVersion: receiver.serviceVersion,
+				serviceTarget: receiver.serviceTarget,
+			},
+			async message => {
+				if (message.payload.frameType !== 'open') {
+					return
+				}
+
+				await eventBridge.emitMessage({
+					messageType: EBMessageType.Stream,
+					correlationId: message.correlationId,
+					traceId: message.traceId,
+					sender: {
+						serviceName: receiver.serviceName,
+						serviceVersion: receiver.serviceVersion,
+						serviceTarget: receiver.serviceTarget,
+						instanceId: eventBridge.instanceId,
+					},
+					receiver: message.sender,
+					contentType: 'application/json',
+					contentEncoding: 'utf-8',
+					payload: { frameType: 'start', sequence: 0 },
+				} as any)
+
+				await eventBridge.emitMessage({
+					messageType: EBMessageType.Stream,
+					correlationId: message.correlationId,
+					traceId: message.traceId,
+					sender: {
+						serviceName: receiver.serviceName,
+						serviceVersion: receiver.serviceVersion,
+						serviceTarget: receiver.serviceTarget,
+						instanceId: eventBridge.instanceId,
+					},
+					receiver: message.sender,
+					contentType: 'application/json',
+					contentEncoding: 'utf-8',
+					payload: { frameType: 'chunk', sequence: 1, chunk: { value: 'hello' } },
+				} as any)
+
+				await eventBridge.emitMessage({
+					messageType: EBMessageType.Stream,
+					correlationId: message.correlationId,
+					traceId: message.traceId,
+					sender: {
+						serviceName: receiver.serviceName,
+						serviceVersion: receiver.serviceVersion,
+						serviceTarget: receiver.serviceTarget,
+						instanceId: eventBridge.instanceId,
+					},
+					receiver: message.sender,
+					contentType: 'application/json',
+					contentEncoding: 'utf-8',
+					payload: { frameType: 'complete', sequence: 2, final: { done: true } },
+				} as any)
+			},
+			{
+				expose: {},
+			},
+		)
+
+		const handle = await eventBridge.openStream({
+			sender,
+			receiver,
+			contentType: 'application/json',
+			contentEncoding: 'utf-8',
+			traceId: 'trace-test',
+			payload: {
+				frameType: 'open',
+				payload: { q: 'test' },
+				parameter: {},
+			},
+		})
+
+		const frameTypes: string[] = []
+		const chunks: unknown[] = []
+		let finalPayload: unknown
+
+		for await (const frame of handle) {
+			frameTypes.push(frame.payload.frameType)
+			if (frame.payload.frameType === 'chunk') {
+				chunks.push(frame.payload.chunk)
+			}
+			if (frame.payload.frameType === 'complete') {
+				finalPayload = frame.payload.final
+			}
+		}
+
+		expect(frameTypes).toEqual(['start', 'chunk', 'complete'])
+		expect(chunks).toEqual([{ value: 'hello' }])
+		expect(finalPayload).toEqual({ done: true })
+
+		await eventBridge.destroy()
+	})
 })
