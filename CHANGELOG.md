@@ -60,6 +60,9 @@ All notable changes to this project will be documented in this file.
 
 ### Documentation
 
+- Document async queue lifecycle defaults, HTTP 202 polling contract, and canEnqueue security parity
+- Extend quickstart/starter guides with queue builders, workers, and HTTP async examples
+- Describe new `purista add queue` / `purista add queue-worker` stories and CLI prompts
 - Fix typos ([#217](https://github.com/orhun/git-cliff/issues/217))
 - Add contributor guide and integration test env docs
 - Add API jsdoc for exported helpers and types
@@ -105,6 +108,10 @@ All notable changes to this project will be documented in this file.
 - Migrate to zod v4
 - Generate unknown payload schemas by default
 - Add vault secret store package
+- Add queue builders, worker builders, and `.canEnqueue` context helpers for commands/subscriptions/streams
+- Ship DefaultQueueBridge plus queue lifecycle types and proxies
+- Introduce RedisQueueBridge provider implementation
+- Add CLI scaffolding for queues/workers and queue-aware templates/examples
 
 ### Miscellaneous Tasks
 

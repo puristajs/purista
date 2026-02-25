@@ -5,12 +5,9 @@
 		"declaration": true,
 		"sourceMap": false,
 		"declarationMap": true,
-		"baseUrl": ".",
-		"paths": {
-			"@purista/core": ["./src/index.ts"]
-		},
+		"strictNullChecks": true,
 		"types": ["vitest/globals", "node"]
 	},
-	"include": ["./src/**/*", "./test/**/*"],
-	"exclude": ["./**/*.d.ts", "./dist/*"]
+	"exclude": ["./**/*.d.ts"],
+	"include": ["./src/**/*", "./test/*"]
 }

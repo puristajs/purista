@@ -37,7 +37,7 @@ The CLI tool will guide you through all the necessary steps.
 
 ## PURISTA CLI
 
-PURISTA provides a command line interface (CLI) that allows you to create new services, and add commands or subscriptions to existing services.
+PURISTA provides a command line interface (CLI) that allows you to create new services and add commands, subscriptions, streams, and queues to existing services.
 
 You can either install the CLI globally, or run it with `npx`.
 
@@ -66,17 +66,17 @@ pnpm add -g @purista/cli
 In your project root run:
 
 ```bash
-purista add [service|command|subscription]
+purista add [service|command|subscription|stream|queue|queue-worker]
 ```
 
 Or without global install:
 
 ```bash
-npx @purista/cli add [service|command|subscription]
+npx @purista/cli add [service|command|subscription|stream|queue|queue-worker]
 ```
 
-Generated command and subscription schema stubs default to `z.unknown()` for payloads.
-This keeps generated code type-safe by default and avoids accidental `any` propagation.
+Generated command, subscription, and queue schema stubs default to `z.unknown()` for payloads.
+This keeps generated code type-safe by default and avoids accidental `any` propagation. The queue wizard also inserts `.canEnqueue()` declarations plus optional producer commands so you can expose HTTP `202 Accepted` endpoints immediately.
 
 ::: warning Keep CLI-Managed Definition Lists
 When the CLI generates or updates service files, keep `commandDefinitions` and `subscriptionDefinitions` as typed constants.

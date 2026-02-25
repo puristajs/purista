@@ -13,12 +13,8 @@ describe('httpserver integration test', () => {
 	let eventBridge: EventBridge
 	let server: HonoServiceClass
 	let serverInstance: ReturnType<typeof serve>
-	const port = 3000
-	const client = new HttpClient({
-		logger: getLoggerMock().mock,
-		baseUrl: `http://127.0.0.1:${port}`,
-		defaultHeaders: { 'content-type': 'application/json; charset=utf-8' },
-	})
+	let port: number
+	let client: HttpClient
 
 	const content = { some: 'content' }
 
@@ -56,7 +52,20 @@ describe('httpserver integration test', () => {
 
 		serverInstance = serve({
 			fetch: server.app.fetch,
-			port,
+			port: 0,
+		})
+
+		const address = serverInstance.address()
+		if (typeof address === 'object' && address) {
+			port = address.port
+		} else {
+			throw new Error('Unable to determine hono server port')
+		}
+
+		client = new HttpClient({
+			logger: getLoggerMock().mock,
+			baseUrl: `http://127.0.0.1:${port}`,
+			defaultHeaders: { 'content-type': 'application/json; charset=utf-8' },
 		})
 
 		await new Promise(resolve => setTimeout(resolve, 0))

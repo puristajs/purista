@@ -69,21 +69,6 @@ export const toJSONSchema = async (schema: Schema, options?: JsonSchemaOptions):
 		}
 	}
 
-	if (standardProps.vendor === 'zod') {
-		try {
-			const zodModule = await import('zod/v4')
-			return zodModule.z.toJSONSchema(schema as ZodType, {
-				target,
-				io: mode,
-				unrepresentable: 'any',
-			}) as SchemaObject
-		} catch (error) {
-			const err = new Error('Zod JSON schema conversion requires the optional dependency `zod` to be installed.')
-			;(err as { cause?: unknown }).cause = error
-			throw err
-		}
-	}
-
 	if (isStandardJsonSchema(standardProps)) {
 		try {
 			return (
@@ -91,6 +76,29 @@ export const toJSONSchema = async (schema: Schema, options?: JsonSchemaOptions):
 			) as SchemaObject
 		} catch (error) {
 			const err = new Error('Failed to convert Standard Schema to JSON Schema.')
+			;(err as { cause?: unknown }).cause = error
+			throw err
+		}
+	}
+
+	if (standardProps.vendor === 'zod') {
+		const zodModule = await import('zod/v4')
+		const maybeZod = schema as ZodType & { _def?: { typeName?: string } }
+		const typeName = maybeZod?._def?.typeName
+		if (typeName === zodModule.z.ZodFirstPartyTypeKind?.ZodUndefined || typeName === 'ZodUndefined') {
+			return { type: 'null' } as SchemaObject
+		}
+		if (typeName === zodModule.z.ZodFirstPartyTypeKind?.ZodVoid || typeName === 'ZodVoid') {
+			return { type: 'null' } as SchemaObject
+		}
+		try {
+			return zodModule.z.toJSONSchema(maybeZod, {
+				target,
+				io: mode,
+				unrepresentable: 'any',
+			}) as SchemaObject
+		} catch (error) {
+			const err = new Error('Zod JSON schema conversion requires the optional dependency `zod` to be installed.')
 			;(err as { cause?: unknown }).cause = error
 			throw err
 		}

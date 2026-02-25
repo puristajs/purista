@@ -41,4 +41,6 @@ There are currently 4 builders available.
 - [Command Builder](command/the-command-builder.md)
 - [Stream Builder](stream/the-stream-builder.md)
 - [Subscription Builder](subscription/the-subscription-builder.md)
+- [Queue Builder](queue/index.md)
+- [Queue Worker Builder](queue/index.md#workers-and-leases)
 - [Client Builder](connect_to_a_purista_application/index.md)
