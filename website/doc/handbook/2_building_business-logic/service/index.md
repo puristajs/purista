@@ -24,6 +24,28 @@ A service provides:
 In general, a service itself should not contain any logic. It should only act as a logical container for commands and subscriptions.  
 Additionally, services should not hold state data.
 
+## Event bridge vs. queue bridge injection
+
+Services always need an event bridge for command/subscription/stream traffic, but queues are supplied through a separate `queueBridge` option. This allows you to mix transports per use case (e.g., AMQP for synchronous messaging plus Redis for pull queues):
+
+```ts
+import { AmqpBridge } from '@purista/amqpbridge'
+import { RedisQueueBridge } from '@purista/redis-queue-bridge'
+import { myServiceV1Service } from './my-service'
+
+const eventBridge = new AmqpBridge({ /* ... */ })
+const queueBridge = new RedisQueueBridge({ /* ... */ })
+
+const service = await myServiceV1Service.getInstance(eventBridge, {
+  logger,
+  resources,
+  queueBridge,
+})
+await service.start()
+```
+
+If you skip `queueBridge`, PURISTA injects the in-memory default bridge automatically so your service still starts (handy for tests/local dev). Production deployments should always supply an explicit queue bridge.
+
 ## Typical implementation order
 
 1. Define service info and create service builder.

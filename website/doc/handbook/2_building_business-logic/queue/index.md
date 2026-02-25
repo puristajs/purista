@@ -1,5 +1,5 @@
 ---
-order: 200300
+order: 203500
 title: Queues
 description: Define pull-based queues and workers, wire them via the CLI, and expose async HTTP endpoints.
 ---
@@ -95,3 +95,24 @@ Handlers receive the queue context (`context.job`) with helpers to `complete`, `
 Each bridge advertises its capabilities (delayed delivery, FIFO, native DLQ, etc.). Builders surface warnings when you try to use a lifecycle feature that the selected bridge cannot provide—no hidden emulation.
 
 See [Event Bridges](../../3_eco_system/eventbridges/index.md#queue-bridge-support) for the up-to-date matrix of queue bridge packages and how they align with existing event bridges.
+
+## Injecting queue bridges independently
+
+Queue bridges are independent from event bridges. This lets you deploy, for example, RabbitMQ for synchronous messaging while delegating pull-based workloads to Redis:
+
+```ts
+import { AmqpBridge } from '@purista/amqpbridge'
+import { RedisQueueBridge } from '@purista/redis-queue-bridge'
+import { myServiceV1Service } from './my-service'
+
+const eventBridge = new AmqpBridge({ /* ... */ })
+const queueBridge = new RedisQueueBridge({ /* ... */ })
+
+const service = await myServiceV1Service.getInstance(eventBridge, {
+  logger,
+  queueBridge,
+})
+await service.start()
+```
+
+If you omit `queueBridge`, the service falls back to the in-memory default bridge so tests and local dev work without extra infrastructure. Because the abstractions are orthogonal, you can combine any event bridge with any queue bridge as long as both share the same service runtime.
