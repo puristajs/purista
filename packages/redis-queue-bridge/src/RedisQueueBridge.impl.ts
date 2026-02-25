@@ -29,6 +29,9 @@ const DEFAULT_LEASE_TTL_MS = 15 * 60 * 1000
 const DEAD_LETTER_HEADER = 'x-purista-dead-letter-reason'
 const LAST_RETRY_HEADER = 'x-purista-last-retry-reason'
 
+type RedisBulk = string | Buffer
+type RedisScoredEntry = { value: RedisBulk; score: number | string }
+
 export class RedisQueueBridge<
 	M extends RedisModules = RedisModules,
 	F extends RedisFunctions = RedisFunctions,
@@ -150,17 +153,19 @@ export class RedisQueueBridge<
 		const blockSeconds = this.waitSeconds(options?.waitTimeMs)
 
 		while (true) {
-			const jobId = await client.brPopLPush(
+			const jobIdRaw = await client.brPopLPush(
 				this.pendingKey(queueName),
 				this.processingKey(queueName),
 				blockSeconds,
 			)
 
+			const jobId = this.decodeBulkString(jobIdRaw)
 			if (!jobId) {
 				return undefined
 			}
 
-			const jobData = await client.hGet(this.jobsKey(queueName), jobId)
+			const jobDataRaw = await client.hGet(this.jobsKey(queueName), jobId)
+			const jobData = this.decodeBulkString(jobDataRaw)
 			if (!jobData) {
 				await client.lRem(this.processingKey(queueName), 0, jobId)
 				continue
@@ -194,11 +199,11 @@ export class RedisQueueBridge<
 
 	async extendLease(queueName: string, leaseId: string, extensionMs: number): Promise<void> {
 		const client = await this.getClient()
-		const jobId = await client.hGet(this.leaseMapKey(queueName), leaseId)
+		const jobId = this.decodeBulkString(await client.hGet(this.leaseMapKey(queueName), leaseId))
 		if (!jobId) {
 			return
 		}
-		const jobData = await client.hGet(this.jobsKey(queueName), jobId)
+		const jobData = this.decodeBulkString(await client.hGet(this.jobsKey(queueName), jobId))
 		if (!jobData) {
 			return
 		}
@@ -214,7 +219,7 @@ export class RedisQueueBridge<
 
 	async ack(queueName: string, leaseId: string): Promise<void> {
 		const client = await this.getClient()
-		const jobId = await client.hGet(this.leaseMapKey(queueName), leaseId)
+		const jobId = this.decodeBulkString(await client.hGet(this.leaseMapKey(queueName), leaseId))
 		if (!jobId) {
 			return
 		}
@@ -230,7 +235,7 @@ export class RedisQueueBridge<
 
 	async nack(queueName: string, leaseId: string, request: QueueRetryRequest): Promise<void> {
 		const client = await this.getClient()
-		const jobId = await client.hGet(this.leaseMapKey(queueName), leaseId)
+		const jobId = this.decodeBulkString(await client.hGet(this.leaseMapKey(queueName), leaseId))
 		if (!jobId) {
 			return
 		}
@@ -259,14 +264,15 @@ export class RedisQueueBridge<
 
 	async metrics(queueName: string) {
 		const client = await this.getClient()
-		const pending = await client.lLen(this.pendingKey(queueName))
-		const inflight = await client.lLen(this.processingKey(queueName))
-		const deadLetter = await client.lLen(this.deadLetterKey(queueName))
-		const retries = Number(await client.hGet(this.statsKey(queueName), 'retries')) || 0
-		const oldestJobId = await client.lIndex(this.pendingKey(queueName), -1)
+		const pending = this.normalizeNumber(await client.lLen(this.pendingKey(queueName)))
+		const inflight = this.normalizeNumber(await client.lLen(this.processingKey(queueName)))
+		const deadLetter = this.normalizeNumber(await client.lLen(this.deadLetterKey(queueName)))
+		const retriesRaw = await client.hGet(this.statsKey(queueName), 'retries')
+		const retries = retriesRaw ? Number(this.decodeBulkString(retriesRaw) ?? 0) : 0
+		const oldestJobId = this.decodeBulkString(await client.lIndex(this.pendingKey(queueName), -1))
 		let oldestAgeMs: number | undefined
 		if (oldestJobId) {
-			const raw = await client.hGet(this.jobsKey(queueName), oldestJobId)
+			const raw = this.decodeBulkString(await client.hGet(this.jobsKey(queueName), oldestJobId))
 			if (raw) {
 				const message = JSON.parse(raw) as QueueMessage
 				oldestAgeMs = Date.now() - (message.createdAt ?? Date.now())
@@ -284,7 +290,7 @@ export class RedisQueueBridge<
 
 	private async requeueJob(queueName: string, jobId: string, delayMs = 0, reason?: string) {
 		const client = await this.getClient()
-		const jobData = await client.hGet(this.jobsKey(queueName), jobId)
+		const jobData = this.decodeBulkString(await client.hGet(this.jobsKey(queueName), jobId))
 		if (!jobData) {
 			return
 		}
@@ -314,7 +320,7 @@ export class RedisQueueBridge<
 	private async releaseDueJobs(queueName: string) {
 		const client = await this.getClient()
 		const now = Date.now()
-		const dueJobs = await client.zRangeByScoreWithScores(
+		const rawDueJobs = (await client.zRangeByScoreWithScores(
 			this.scheduledKey(queueName),
 			0,
 			now,
@@ -324,7 +330,9 @@ export class RedisQueueBridge<
 					count: this.scheduleBatchSize,
 				},
 			},
-		)
+		)) as RedisScoredEntry[] | null
+
+		const dueJobs = this.normalizeScoredEntries(rawDueJobs)
 
 		if (!dueJobs.length) {
 			return
@@ -341,7 +349,7 @@ export class RedisQueueBridge<
 	private async recoverExpiredLeases(queueName: string) {
 		const client = await this.getClient()
 		const now = Date.now()
-		const expired = await client.zRangeByScoreWithScores(
+		const rawExpired = (await client.zRangeByScoreWithScores(
 			this.leaseExpiryKey(queueName),
 			0,
 			now,
@@ -351,7 +359,9 @@ export class RedisQueueBridge<
 					count: this.recoveryBatchSize,
 				},
 			},
-		)
+		)) as RedisScoredEntry[] | null
+
+		const expired = this.normalizeScoredEntries(rawExpired)
 
 		if (!expired.length) {
 			return
@@ -359,7 +369,7 @@ export class RedisQueueBridge<
 
 		for (const entry of expired) {
 			const leaseId = entry.value
-			const jobId = await client.hGet(this.leaseMapKey(queueName), leaseId)
+			const jobId = this.decodeBulkString(await client.hGet(this.leaseMapKey(queueName), leaseId))
 			await client
 				.multi()
 				.zRem(this.leaseExpiryKey(queueName), leaseId)
@@ -410,6 +420,39 @@ export class RedisQueueBridge<
 
 	private statsKey(queueName: string) {
 		return `${this.keyPrefix}${queueName}:stats`
+	}
+
+	private decodeBulkString(value: string | Buffer | null | undefined) {
+		if (value === null || value === undefined) {
+			return undefined
+		}
+		return typeof value === 'string' ? value : value.toString('utf-8')
+	}
+
+	private normalizeScoredEntries(entries: RedisScoredEntry[] | null | undefined) {
+		if (!entries) {
+			return [] as Array<{ value: string; score: number }>
+		}
+		return entries
+			.map(entry => {
+				const value = this.decodeBulkString(entry.value)
+				if (!value) {
+					return undefined
+				}
+				const score = typeof entry.score === 'number' ? entry.score : Number(entry.score)
+				return { value, score }
+			})
+			.filter((entry): entry is { value: string; score: number } => !!entry)
+	}
+
+	private normalizeNumber(value: number | `${number}` | null | undefined) {
+		if (typeof value === 'number') {
+			return value
+		}
+		if (typeof value === 'string') {
+			return Number(value)
+		}
+		return 0
 	}
 
 	private async getClient() {
