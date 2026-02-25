@@ -1,15 +1,14 @@
 {
+	"extends": "../../tsconfig.json",
 	"compilerOptions": {
 		"module": "ESNext",
-		"esModuleInterop": true,
-		"skipLibCheck": true,
 		"moduleResolution": "node",
-		"strict": true,
 		"baseUrl": "./",
 		"outDir": "./dist",
 		"declaration": true,
 		"sourceMap": false,
-		"declarationMap": true
+		"declarationMap": true,
+		"types": ["vitest/globals", "node"]
 	},
 	"include": ["./src"]
 }
