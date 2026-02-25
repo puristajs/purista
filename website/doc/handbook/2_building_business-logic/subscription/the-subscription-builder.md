@@ -104,6 +104,22 @@ const builder = myServiceBuilder
   })
 ```
 
+Subscriptions can also consume streams with typed contracts:
+
+```typescript
+const builder = myServiceBuilder
+  .getSubscriptionBuilder('mySub', '...')
+  .canConsumeStream('SearchService', '1', 'searchUsers', chunkSchema, payloadSchema, parameterSchema, finalSchema)
+  .setSubscriptionFunction(async function (context, payload, parameter) {
+    const handle = await context.stream.SearchService['1'].searchUsers(payload, parameter)
+    for await (const frame of handle) {
+      if (frame.payload.frameType === 'chunk') {
+        // consume chunk
+      }
+    }
+  })
+```
+
 ## Context
 
 The subscription function context provides:
@@ -113,6 +129,7 @@ The subscription function context provides:
 - `context.resources`: service resources
 - `context.secrets` / `context.configs` / `context.states`: store access
 - `context.service`: typed invoke API from `canInvoke`
+- `context.stream`: typed stream consume API from `canConsumeStream`
 - `context.emit`: typed custom event API from `canEmit`
 
 ## Guards and transformers

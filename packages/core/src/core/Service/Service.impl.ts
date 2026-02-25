@@ -14,6 +14,7 @@ import { UnhandledError } from '../Error/UnhandledError.impl.js'
 import { createErrorResponse } from '../helper/createErrorResponse.impl.js'
 import { createInfoMessage } from '../helper/createInfoMessage.impl.js'
 import { createInvokeFunctionProxy } from '../helper/createInvokeFunctionProxy.impl.js'
+import { createOpenStreamFunctionProxy } from '../helper/createOpenStreamFunctionProxy.impl.js'
 import { createSuccessResponse } from '../helper/createSuccessResponse.impl.js'
 import { getCleanedMessage } from '../helper/getCleanedMessage.impl.js'
 import { deserializeOtp, serializeOtp } from '../helper/serializeOtp.impl.js'
@@ -38,6 +39,7 @@ import type { EmptyObject } from '../types/EmptyObject.js'
 import type { InvokeList } from '../types/InvokeList.js'
 import type { InfoMessageType } from '../types/infoType/InfoMessage.js'
 import type { Logger } from '../types/Logger.js'
+import type { OpenStreamFunction } from '../types/OpenStreamFunction.js'
 import type { PrincipalId } from '../types/PrincipalId.js'
 import { PuristaSpanName } from '../types/PuristaSpanName.enum.js'
 import { PuristaSpanTag } from '../types/PuristaSpanTag.enum.js'
@@ -47,6 +49,15 @@ import type { ServiceConstructorInput } from '../types/ServiceConstructorInput.j
 import { ServiceEventsNames } from '../types/ServiceEvents.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import { StoreType } from '../types/StoreType.enum.js'
+import type { StreamInvokeList } from '../types/StreamInvokeList.js'
+import { isStreamControl } from '../types/stream/isStreamControl.impl.js'
+import { isStreamOpenRequest } from '../types/stream/isStreamOpenRequest.impl.js'
+import type { StreamDefinition } from '../types/stream/StreamDefinition.js'
+import type { StreamDefinitionListResolved } from '../types/stream/StreamDefinitionList.js'
+import type { StreamFrame } from '../types/stream/StreamFrame.js'
+import type { StreamMessage } from '../types/stream/StreamMessage.js'
+import type { StreamOpenRequest } from '../types/stream/StreamOpenRequest.js'
+import type { StreamWriter } from '../types/stream/StreamWriter.js'
 import type { Subscription } from '../types/subscription/Subscription.js'
 import type { SubscriptionDefinition } from '../types/subscription/SubscriptionDefinition.js'
 import type { SubscriptionDefinitionListResolved } from '../types/subscription/SubscriptionDefinitionList.js'
@@ -92,9 +103,22 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		string,
 		CommandDefinition<any, any, any, any, any, any, any, any, any, any, S['Resources'], any, any, any>
 	>()
+	protected streams = new Map<
+		string,
+		StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any>
+	>()
+	protected activeStreamSessions = new Map<
+		string,
+		{
+			cancelled: boolean
+			cancelReason?: string
+			onCancel: Array<(reason?: string) => void>
+		}
+	>()
 
 	public commandDefinitionList: CommandDefinitionListResolved<any>
 	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
+	public streamDefinitionList: StreamDefinitionListResolved<any>
 	public config: S['ConfigType']
 
 	public resources: S['Resources']
@@ -117,6 +141,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		this.resources = config.resources ?? {}
 		this.commandDefinitionList = config.commandDefinitionList
 		this.subscriptionDefinitionList = config.subscriptionDefinitionList
+		this.streamDefinitionList = config.streamDefinitionList ?? []
 	}
 
 	get name() {
@@ -145,7 +170,11 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					}
 				}
 
-				await this.initializeEventbridgeConnect(this.commandDefinitionList, this.subscriptionDefinitionList)
+				await this.initializeEventbridgeConnect(
+					this.commandDefinitionList,
+					this.subscriptionDefinitionList,
+					this.streamDefinitionList,
+				)
 				await this.sendServiceInfo(EBMessageType.InfoServiceReady)
 				this.logger.info(
 					{ ...span.spanContext(), puristaVersion },
@@ -168,6 +197,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	protected async initializeEventbridgeConnect(
 		commandDefinitionList: CommandDefinitionListResolved<any>,
 		subscriptions: SubscriptionDefinitionListResolved<any>,
+		streams: StreamDefinitionListResolved<any>,
 	) {
 		return this.startActiveSpan('purista.initializeEventbridgeConnect', {}, undefined, async span => {
 			const isEventBridgeReady = await this.eventBridge.isHealthy()
@@ -191,6 +221,12 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				return this.registerSubscription(subscription)
 			})
 			await Promise.all(subscriptionProms)
+
+			const streamProms = streams.map(stream => {
+				this.logger.debug({ name: stream.streamName, ...span.spanContext() }, 'start stream')
+				return this.registerStream(stream)
+			})
+			await Promise.all(streamProms)
 		})
 	}
 
@@ -352,6 +388,118 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 
 		return invokeCommand.bind(this)
+	}
+
+	protected getConsumeStreamFunction<StreamInvokes extends StreamInvokeList>(
+		serviceTarget: string,
+		traceId?: TraceId,
+		principalId?: PrincipalId,
+		tenantId?: TenantId,
+		streamInvokes?: StreamInvokes,
+	): OpenStreamFunction {
+		const sender: EBMessageSenderAddress = {
+			serviceName: this.info.serviceName,
+			serviceVersion: this.info.serviceVersion,
+			serviceTarget,
+			instanceId: this.eventBridge.instanceId,
+		}
+
+		const consumeStream = async <Payload, Parameter extends EmptyObject>(
+			receiver: EBMessageAddress,
+			streamPayload: Payload,
+			streamParameter: Parameter,
+			contentType = 'application/json',
+			contentEncoding = 'utf-8',
+		) => {
+			let payload = streamPayload
+			let parameter = streamParameter
+
+			const streamConfig = streamInvokes?.[receiver.serviceName]?.[receiver.serviceVersion]?.[receiver.serviceTarget]
+
+			const payloadSchema = streamConfig?.payloadSchema
+			if (payloadSchema) {
+				const res = await validate(payloadSchema, payload)
+				if (!res.success) {
+					throw new UnhandledError(StatusCode.BadRequest, 'stream payload schema validation failed', {
+						issues: res.issues,
+						invokedFrom: sender,
+						responseFrom: receiver,
+					})
+				}
+				payload = res.data as Payload
+			}
+
+			const parameterSchema = streamConfig?.parameterSchema
+			if (parameterSchema) {
+				const res = await validate(parameterSchema, parameter)
+				if (!res.success) {
+					throw new UnhandledError(StatusCode.BadRequest, 'stream parameter schema validation failed', {
+						issues: res.issues,
+						invokedFrom: sender,
+						responseFrom: receiver,
+					})
+				}
+				parameter = res.data as Parameter
+			}
+
+			const message: Omit<StreamOpenRequest, 'id' | 'messageType' | 'timestamp' | 'correlationId'> = {
+				traceId,
+				sender,
+				receiver,
+				contentType,
+				contentEncoding,
+				payload: {
+					frameType: 'open',
+					payload,
+					parameter,
+				},
+				principalId,
+				tenantId,
+			}
+
+			const handle = await this.eventBridge.openStream(message)
+
+			return {
+				sessionId: handle.sessionId,
+				cancel: handle.cancel,
+				[Symbol.asyncIterator]: async function* () {
+					for await (const frame of handle) {
+						if (
+							frame.payload.frameType === 'chunk' &&
+							streamConfig?.chunkSchema &&
+							streamConfig.validateChunk !== false
+						) {
+							const res = await validate(streamConfig.chunkSchema, frame.payload.chunk)
+							if (!res.success) {
+								throw new UnhandledError(StatusCode.InternalServerError, 'stream chunk validation failed', {
+									issues: res.issues,
+									invokedFrom: sender,
+									responseFrom: receiver,
+								})
+							}
+						}
+
+						if (
+							frame.payload.frameType === 'complete' &&
+							streamConfig?.finalSchema &&
+							streamConfig.validateFinal !== false
+						) {
+							const res = await validate(streamConfig.finalSchema, frame.payload.final)
+							if (!res.success) {
+								throw new UnhandledError(StatusCode.InternalServerError, 'stream final validation failed', {
+									issues: res.issues,
+									invokedFrom: sender,
+									responseFrom: receiver,
+								})
+							}
+						}
+						yield frame
+					}
+				},
+			}
+		}
+
+		return consumeStream.bind(this) as OpenStreamFunction
 	}
 
 	protected getEmitFunction<EmitList extends Record<string, Schema> = EmptyObject>(
@@ -668,8 +816,17 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 									command.invokes,
 								),
 							),
+							stream: createOpenStreamFunctionProxy(
+								this.getConsumeStreamFunction(
+									command.commandName,
+									traceId,
+									message.principalId,
+									message.tenantId,
+									command.streamInvokes,
+								),
+							),
 							resources: this.resources,
-						}
+						} as unknown as CommandFunctionContext
 						const call = command.call.bind(this, context)
 						return (await call(payload as Readonly<typeof payload>, parameter as Readonly<typeof parameter>)) as unknown
 					},
@@ -701,8 +858,17 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 										command.invokes,
 									),
 								),
+								stream: createOpenStreamFunctionProxy(
+									this.getConsumeStreamFunction(
+										command.commandName,
+										traceId,
+										message.principalId,
+										message.tenantId,
+										command.streamInvokes,
+									),
+								),
 								resources: this.resources,
-							}
+							} as unknown as CommandFunctionContext
 
 							const guardPromise = this.wrapInSpan(`afterGuardHook.${name}`, {}, async _subSpan => {
 								return hook.bind(this)(
@@ -844,6 +1010,251 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		})
 	}
 
+	public async executeStream(message: Readonly<StreamMessage>) {
+		if (isStreamControl(message)) {
+			const active = this.activeStreamSessions.get(message.correlationId)
+			if (!active) {
+				return
+			}
+			active.cancelled = true
+			active.cancelReason = message.payload.reason
+			for (const fn of active.onCancel) {
+				fn(message.payload.reason)
+			}
+			return
+		}
+
+		if (!isStreamOpenRequest(message)) {
+			return
+		}
+
+		const stream = this.streams.get(message.receiver.serviceTarget)
+		const context = deserializeOtp(this.logger, message.otp)
+
+		return this.startActiveSpan(stream?.streamName ?? 'purista.executeStream', {}, context, async span => {
+			const traceId = message.traceId
+			const logger = this.logger.getChildLogger({
+				serviceTarget: stream?.streamName,
+				...span.spanContext(),
+				customTraceId: traceId,
+				principalId: message.principalId,
+				tenantId: message.tenantId,
+			})
+
+			if (!stream) {
+				logger.error({ message: getCleanedMessage(message) }, 'received invalid stream open request')
+				return
+			}
+
+			const payload = message.payload.payload
+			const parameter = message.payload.parameter
+
+			const activeSession = {
+				cancelled: false,
+				cancelReason: undefined as string | undefined,
+				onCancel: [] as Array<(reason?: string) => void>,
+			}
+			this.activeStreamSessions.set(message.correlationId, activeSession)
+
+			let sequence = 0
+			const chunks: unknown[] = []
+
+			const publishFrame = async (frame: StreamFrame['payload']) => {
+				const streamFrame: Omit<StreamFrame, 'id' | 'timestamp'> = {
+					messageType: EBMessageType.Stream,
+					correlationId: message.correlationId,
+					contentType: 'application/json',
+					contentEncoding: 'utf-8',
+					traceId: message.traceId,
+					principalId: message.principalId,
+					tenantId: message.tenantId,
+					sender: {
+						serviceName: this.info.serviceName,
+						serviceVersion: this.info.serviceVersion,
+						serviceTarget: stream.streamName,
+						instanceId: this.eventBridge.instanceId,
+					},
+					receiver: {
+						...message.sender,
+					},
+					payload: frame,
+				}
+				await this.eventBridge.emitMessage(
+					streamFrame as unknown as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>,
+				)
+			}
+
+			const writer: StreamWriter = {
+				get cancelled() {
+					return activeSession.cancelled
+				},
+				write: async chunk => {
+					if (activeSession.cancelled) {
+						return
+					}
+					if (stream.chunkValidationEnabled && stream.chunkSchema) {
+						const chunkValidationResult = await validate(stream.chunkSchema, chunk)
+						if (!chunkValidationResult.success) {
+							throw new UnhandledError(StatusCode.InternalServerError, 'stream chunk output validation failed', {
+								issues: chunkValidationResult.issues,
+								stream: stream.streamName,
+							})
+						}
+					}
+					chunks.push(chunk)
+					await publishFrame({
+						frameType: 'chunk',
+						sequence: sequence++,
+						chunk,
+					})
+				},
+				close: async final => {
+					let finalPayload = final
+					if (stream.aggregateChunks && finalPayload === undefined) {
+						finalPayload = {
+							chunkCount: chunks.length,
+							chunks,
+						}
+					}
+
+					if (stream.finalValidationEnabled && stream.finalSchema) {
+						const finalValidationResult = await validate(stream.finalSchema, finalPayload)
+						if (!finalValidationResult.success) {
+							throw new UnhandledError(StatusCode.InternalServerError, 'stream final output validation failed', {
+								issues: finalValidationResult.issues,
+								stream: stream.streamName,
+							})
+						}
+					}
+
+					if (stream.finalEventName && finalPayload !== undefined) {
+						await this.eventBridge.emitMessage({
+							messageType: EBMessageType.CustomMessage,
+							contentType: 'application/json',
+							contentEncoding: 'utf-8',
+							traceId: message.traceId,
+							principalId: message.principalId,
+							tenantId: message.tenantId,
+							sender: {
+								serviceName: this.info.serviceName,
+								serviceVersion: this.info.serviceVersion,
+								serviceTarget: stream.streamName,
+								instanceId: this.eventBridge.instanceId,
+							},
+							eventName: stream.finalEventName,
+							payload: finalPayload,
+						} as Omit<EBMessage, 'id' | 'timestamp' | 'correlationId'>)
+					}
+
+					await publishFrame({
+						frameType: 'complete',
+						sequence: sequence++,
+						final: finalPayload,
+					})
+				},
+				fail: async error => {
+					const err = error instanceof HandledError ? error : UnhandledError.fromError(error)
+					await publishFrame({
+						frameType: 'error',
+						sequence: sequence++,
+						error: {
+							status: err.errorCode,
+							message: err.message,
+							isHandledError: err instanceof HandledError,
+							data: err.data,
+							traceId: err.traceId,
+						},
+					})
+				},
+				onCancel: cb => {
+					activeSession.onCancel.push(cb)
+				},
+			}
+
+			try {
+				await publishFrame({
+					frameType: 'start',
+					sequence: sequence++,
+				})
+
+				const call = stream.call.bind(this)
+				const streamContext = {
+					message,
+					emit: this.getEmitFunction(
+						stream.streamName,
+						traceId,
+						message.principalId,
+						message.tenantId,
+						stream.emitList,
+					),
+					...this.getContextFunctions(logger),
+					service: createInvokeFunctionProxy(
+						this.getInvokeFunction(stream.streamName, traceId, message.principalId, message.tenantId, stream.invokes),
+					),
+					stream: createOpenStreamFunctionProxy(
+						this.getConsumeStreamFunction(
+							stream.streamName,
+							traceId,
+							message.principalId,
+							message.tenantId,
+							stream.streamInvokes,
+						),
+					),
+					resources: this.resources,
+				}
+
+				await call(streamContext as any, payload as any, parameter as any, writer)
+
+				if (activeSession.cancelled) {
+					await publishFrame({
+						frameType: 'cancel',
+						sequence: sequence++,
+						reason: activeSession.cancelReason,
+					})
+					return
+				}
+
+				// If producer did not close explicitly, auto-complete.
+				if (sequence <= 1 || chunks.length > 0) {
+					await writer.close()
+				}
+			} catch (error) {
+				await writer.fail(error)
+			} finally {
+				this.activeStreamSessions.delete(message.correlationId)
+			}
+		})
+	}
+
+	public async registerStream(
+		streamDefinition: StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any>,
+	): Promise<void> {
+		return this.startActiveSpan('purista.registerStream', {}, undefined, async span => {
+			this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register stream')
+
+			span.setAttributes({
+				serviceName: this.serviceInfo.serviceName,
+				serviceVersion: this.serviceInfo.serviceVersion,
+				streamName: streamDefinition.streamName,
+			})
+
+			this.streams.set(streamDefinition.streamName, streamDefinition)
+
+			await this.eventBridge.registerStream(
+				{
+					serviceName: this.serviceInfo.serviceName,
+					serviceVersion: this.serviceInfo.serviceVersion,
+					serviceTarget: streamDefinition.streamName,
+				},
+				this.executeStream.bind(this),
+				streamDefinition.metadata,
+				streamDefinition.eventBridgeConfig,
+			)
+
+			span.end()
+		})
+	}
+
 	public async executeSubscription(
 		message: Readonly<EBMessage>,
 		subscriptionName: string,
@@ -913,8 +1324,17 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 										subscription.invokes,
 									),
 								),
+								stream: createOpenStreamFunctionProxy(
+									this.getConsumeStreamFunction(
+										subscriptionName,
+										traceId,
+										message.principalId,
+										message.tenantId,
+										subscription.streamInvokes,
+									),
+								),
 								resources: this.resources,
-							}
+							} as unknown as SubscriptionFunctionContext
 							const call2 = subscription.call.bind(this, context)
 							return await call2(payload, parameter)
 						},
@@ -946,8 +1366,17 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 											subscription.invokes,
 										),
 									),
+									stream: createOpenStreamFunctionProxy(
+										this.getConsumeStreamFunction(
+											subscription.subscriptionName,
+											traceId,
+											message.principalId,
+											message.tenantId,
+											subscription.streamInvokes,
+										),
+									),
 									resources: this.resources,
-								}
+								} as unknown as SubscriptionFunctionContext
 
 								const guardPromise = this.wrapInSpan(`afterGuardHook.${name}`, {}, async _subSpan => {
 									return hook.bind(this)(context, result as Readonly<unknown>, payload, parameter)
@@ -1101,6 +1530,10 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	}
 
 	async destroy() {
+		for (const [_, session] of this.activeStreamSessions) {
+			session.cancelled = true
+		}
+		this.activeStreamSessions.clear()
 		this.emit(ServiceEventsNames.ServiceDrain)
 		this.emit(ServiceEventsNames.ServiceStopped)
 		this.removeAllListeners()

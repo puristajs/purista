@@ -20,6 +20,7 @@ import type { GetMessagePayloadType } from '../core/types/GetMessagePayloadType.
 import type { InferTypeOrEmptyObject } from '../core/types/InferTypeOrEmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
+import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getCommandContextMock } from '../mocks/getCommandContext.mock.js'
 import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
@@ -67,6 +68,7 @@ export class CommandDefinitionBuilder<
 	private autoacknowledge = true
 
 	private invokes: C['Invokes'] = {}
+	private streamInvokes: C['StreamInvokes'] = {}
 
 	private emitList: C['EmitList'] = {}
 
@@ -78,11 +80,11 @@ export class CommandDefinitionBuilder<
 		}
 		beforeGuard: Record<
 			string,
-			CommandBeforeGuardHook<S, any, any, any, any, C['Resources'], C['Invokes'], C['EmitList']>
+			CommandBeforeGuardHook<S, any, any, any, any, C['Resources'], C['Invokes'], C['StreamInvokes'], C['EmitList']>
 		>
 		afterGuard: Record<
 			string,
-			CommandAfterGuardHook<S, any, any, any, any, any, C['Resources'], C['Invokes'], C['EmitList']>
+			CommandAfterGuardHook<S, any, any, any, any, any, C['Resources'], C['Invokes'], C['StreamInvokes'], C['EmitList']>
 		>
 		transformOutput?: {
 			transformOutputSchema: Schema
@@ -95,7 +97,18 @@ export class CommandDefinitionBuilder<
 		transformOutput: undefined,
 	}
 
-	private fn?: CommandFunction<S, any, any, any, any, any, C['Resources'], C['Invokes'], C['EmitList']>
+	private fn?: CommandFunction<
+		S,
+		any,
+		any,
+		any,
+		any,
+		any,
+		C['Resources'],
+		C['Invokes'],
+		C['StreamInvokes'],
+		C['EmitList']
+	>
 
 	constructor(
 		private commandName: Exclude<string, ''>,
@@ -180,6 +193,98 @@ export class CommandDefinitionBuilder<
 							Record<Fname, (payload: InferIn<Payload>, parameter: InferIn<Parameter>) => Promise<Infer<Output>>>
 						>
 					>,
+				C['StreamInvokes'],
+				C['EmitList']
+			>
+		>
+	}
+
+	canConsumeStream<
+		Chunk extends Schema,
+		Final extends Schema,
+		Payload extends Schema,
+		Parameter extends Schema,
+		SName extends string = string,
+		Version extends string = string,
+		Fname extends string = string,
+	>(
+		serviceName: SName,
+		serviceVersion: Version,
+		serviceTarget: Fname,
+		chunkSchema?: Chunk,
+		payloadSchema?: Payload,
+		parameterSchema?: Parameter,
+		finalSchema?: Final,
+		validateChunk = true,
+		validateFinal = true,
+	) {
+		if (serviceName.trim() === '' || serviceVersion.trim() === '' || serviceTarget.trim() === '') {
+			throw new Error('canConsumeStream requires non-empty service name, version and target')
+		}
+
+		const existingStreams = this.streamInvokes as Record<
+			string,
+			Record<
+				string,
+				Record<
+					string,
+					{
+						chunkSchema?: Schema
+						finalSchema?: Schema
+						payloadSchema?: Schema
+						parameterSchema?: Schema
+						validateChunk?: boolean
+						validateFinal?: boolean
+					}
+				>
+			>
+		>
+
+		this.streamInvokes = {
+			...this.streamInvokes,
+			[serviceName]: {
+				...existingStreams[serviceName],
+				[serviceVersion]: {
+					...(existingStreams[serviceName]?.[serviceVersion] ?? {}),
+					[serviceTarget]: { chunkSchema, finalSchema, payloadSchema, parameterSchema, validateChunk, validateFinal },
+				},
+			},
+		}
+
+		return this as unknown as CommandDefinitionBuilder<
+			S,
+			CommandDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'] &
+					Record<
+						SName,
+						Record<
+							Version,
+							Record<
+								Fname,
+								(
+									payload: InferIn<Payload>,
+									parameter: InferIn<Parameter>,
+								) => Promise<{
+									sessionId: string
+									cancel(reason?: string): Promise<void>
+									[Symbol.asyncIterator](): AsyncIterator<{
+										payload: {
+											chunk?: Infer<Chunk>
+											final?: Infer<Final>
+										}
+									}>
+								}>
+							>
+						>
+					>,
 				C['EmitList']
 			>
 		>
@@ -210,6 +315,7 @@ export class CommandDefinitionBuilder<
 				C['TransformOutputSchema'],
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList'] & Record<EventName, InferIn<typeof schema>>
 			>
 		>
@@ -253,6 +359,7 @@ export class CommandDefinitionBuilder<
 				C['TransformOutputSchema'],
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>
@@ -277,6 +384,7 @@ export class CommandDefinitionBuilder<
 				C['TransformOutputSchema'],
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>
@@ -309,6 +417,7 @@ export class CommandDefinitionBuilder<
 				C['TransformOutputSchema'],
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>
@@ -432,6 +541,7 @@ export class CommandDefinitionBuilder<
 				C['TransformOutputSchema'],
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>
@@ -501,6 +611,7 @@ export class CommandDefinitionBuilder<
 				TransformOutputSchema,
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>
@@ -543,6 +654,7 @@ export class CommandDefinitionBuilder<
 				Infer<C['ParamsSchema']>,
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>,
@@ -569,6 +681,7 @@ export class CommandDefinitionBuilder<
 			Infer<C['ParamsSchema']>,
 			C['Resources'],
 			C['Invokes'],
+			C['StreamInvokes'],
 			C['EmitList']
 		>
 	}
@@ -591,6 +704,7 @@ export class CommandDefinitionBuilder<
 				Infer<C['OutputSchema']>,
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>,
@@ -617,6 +731,7 @@ export class CommandDefinitionBuilder<
 			Infer<C['OutputSchema']>,
 			C['Resources'],
 			C['Invokes'],
+			C['StreamInvokes'],
 			C['EmitList']
 		>
 	}
@@ -728,6 +843,7 @@ export class CommandDefinitionBuilder<
 		TransformOutputHookOutput,
 		Resources extends Record<string, unknown>,
 		Invokes extends InvokeList,
+		StreamInvokes extends StreamInvokeList,
 		EmitList extends Record<string, Schema>,
 	>(
 		definition: Complete<
@@ -744,6 +860,7 @@ export class CommandDefinitionBuilder<
 				TransformOutputHookOutput,
 				Resources,
 				Invokes,
+				StreamInvokes,
 				EmitList,
 				CommandDefinitionMetadataBase
 			>
@@ -767,6 +884,7 @@ export class CommandDefinitionBuilder<
 				TransformOutputHookOutput,
 				Resources,
 				Invokes,
+				StreamInvokes,
 				EmitList,
 				HttpExposedServiceMeta<InferTypeOrEmptyObject<C['ParamsSchema']>>
 			>
@@ -854,6 +972,7 @@ export class CommandDefinitionBuilder<
 				InferIn<C['TransformOutputSchema']>,
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		> = {
@@ -876,6 +995,7 @@ export class CommandDefinitionBuilder<
 			call: this.getCommandFunction(),
 			hooks: this.hooks,
 			invokes: this.invokes,
+			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
 		}
 
@@ -908,6 +1028,7 @@ export class CommandDefinitionBuilder<
 			InferIn<C['OutputSchema']>,
 			C['Resources'],
 			C['Invokes'],
+			C['StreamInvokes'],
 			C['EmitList']
 		>,
 	) {
@@ -945,6 +1066,7 @@ export class CommandDefinitionBuilder<
 			InferIn<C['OutputSchema']>,
 			C['Resources'],
 			C['Invokes'],
+			C['StreamInvokes'],
 			C['EmitList']
 		>
 	}
@@ -971,6 +1093,7 @@ export class CommandDefinitionBuilder<
 			InferIn<C['OutputSchema']>,
 			C['Resources'],
 			C['Invokes'],
+			C['StreamInvokes'],
 			C['EmitList']
 		>
 	}
@@ -1002,10 +1125,12 @@ export class CommandDefinitionBuilder<
 			FunctionParamsType,
 			C['Resources'],
 			C['Invokes'],
+			C['StreamInvokes'],
 			C['EmitList']
 		>({
 			...input,
 			invokes: this.invokes,
+			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
 		})
 	}

@@ -1,16 +1,16 @@
 ---
 title: Project Setup
-description: Add the first subscription to your PURISTA service
+description: Create a new PURISTA project and scaffold service artifacts
 order: 101000
 ---
 
 # Setup a PURISTA project
 
-In this short quickstart example, we will setup a new project, based on PURISTA.
+In this quickstart step, you create a new project from the official blueprint templates.
 
 ## Create a new project
 
-Run the following command, and you will be guided through the installation:
+Run one of the following commands:
 
 ::: code-group
 
@@ -32,14 +32,18 @@ pnpm create purista@latest
 
 :::
 
-Please follow the scaffold steps and choose the fitting blueprint template options.
-After setup, add services/commands/subscriptions via the PURISTA CLI.
+Choose the blueprint options that fit your runtime/deployment setup.
+
+After setup, generate services and business artifacts with the CLI:
+
+1. `purista add service`
+2. `purista add command`
+3. `purista add subscription`
+4. `purista add stream`
 
 ## Project structure
 
-The created project will have a pre-defined folder structure and expects this structure to work properly.
-
-Here is an example of the folder structure:
+The blueprint creates a folder structure expected by PURISTA tooling and code generation.
 
 ```text
 |-config/
@@ -60,8 +64,13 @@ Here is an example of the folder structure:
 | |           |   |- schema.ts
 | |           |   |- types.ts
 | |           |- subscription/
-| |               |- [subscriptionName]SubscriptionBuilder.ts
-| |               |- [subscriptionName].test.ts
+| |           |   |- [subscriptionName]SubscriptionBuilder.ts
+| |           |   |- [subscriptionName].test.ts
+| |           |   |- schema.ts
+| |           |   |- types.ts
+| |           |- stream/
+| |               |- [streamName]StreamBuilder.ts
+| |               |- [streamName].test.ts
 | |               |- schema.ts
 | |               |- types.ts
 | |- store/
@@ -74,4 +83,6 @@ Here is an example of the folder structure:
 |- tsconfig.json
 |- .gitignore
 |- readme.md
-|- jest.config.js
+```
+
+The CLI expects this structure for automated updates and type-safe wiring.

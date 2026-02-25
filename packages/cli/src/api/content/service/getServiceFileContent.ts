@@ -30,10 +30,13 @@ export const getServiceFileContent = (input: {
 	writer.writeLine(
 		`const subscriptionDefinitions: Parameters<typeof ${serviceBuilderName}['addSubscriptionDefinition']>[0][] = []`,
 	)
+	writer.blankLine()
+	writer.writeLine(`const streamDefinitions: Parameters<typeof ${serviceBuilderName}['addStreamDefinition']>[0][] = []`)
 	writer.writeLine(`export const ${serviceName} = ${serviceBuilderName}`)
 	writer.withIndentationLevel(1, () => {
 		writer.writeLine('.addCommandDefinition(...commandDefinitions)')
 		writer.writeLine('.addSubscriptionDefinition(...subscriptionDefinitions)')
+		writer.writeLine('.addStreamDefinition(...streamDefinitions)')
 	})
 
 	return writer.toString()

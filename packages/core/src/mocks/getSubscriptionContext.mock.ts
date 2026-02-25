@@ -5,6 +5,7 @@ import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
 import type { FromInvokeToOtherType } from '../core/types/FromInvokeToOtherType.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
+import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { SubscriptionFunctionContext } from '../core/types/subscription/SubscriptionFunctionContext.js'
 import type { Schema } from '../schema/index.js'
 import { getLoggerMock } from './getLogger.mock.js'
@@ -17,11 +18,13 @@ import { getLoggerMock } from './getLogger.mock.js'
 export const getSubscriptionContextMock = <
 	Resources extends Record<string, unknown>,
 	Invokes extends InvokeList,
+	StreamInvokes extends StreamInvokeList,
 	EmitList extends Record<string, Schema>,
 >(input: {
 	message: EBMessage
 	sandbox?: SinonSandbox
 	invokes: FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
+	streamInvokes?: StreamInvokes
 	emitList: FromEmitToOtherType<EmitList, Schema>
 	resources?: Partial<Resources>
 }) => {
@@ -156,7 +159,7 @@ export const getSubscriptionContextMock = <
 		resources: {} as Partial<Resources>,
 	}
 
-	const mock: SubscriptionFunctionContext<Resources, Invokes, EmitList> = {
+	const mock: SubscriptionFunctionContext<Resources, Invokes, StreamInvokes, EmitList> = {
 		logger: logger.mock,
 		message: input.message,
 		emit: async <K extends keyof EmitList, Payload = EmitList[K]>(eventName: K, payload: Payload) => {
@@ -174,6 +177,7 @@ export const getSubscriptionContextMock = <
 			return fn(getMockSpan())
 		}),
 		service: getInvokeProxy<Invokes>(),
+		stream: getInvokeProxy<StreamInvokes>(),
 		secrets: {
 			getSecret: stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: stubs.setSecret.rejects(new Error('setSecret is not stubbed')),

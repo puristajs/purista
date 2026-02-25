@@ -2,6 +2,7 @@ import type { Schema } from '../../../schema/index.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
+import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { SubscriptionFunctionContext } from './SubscriptionFunctionContext.js'
 
 /**
@@ -17,10 +18,11 @@ export type SubscriptionAfterGuardHook<
 	FunctionParameterType = unknown,
 	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = EmptyObject,
+	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 > = (
 	this: ServiceClassType,
-	context: SubscriptionFunctionContext<Resources, Invokes, EmitList>,
+	context: SubscriptionFunctionContext<Resources, Invokes, StreamInvokes, EmitList>,
 	result: Readonly<FunctionResultType>,
 	payload: Readonly<FunctionPayloadOutputType>,
 	parameter: Readonly<FunctionParameterType>,

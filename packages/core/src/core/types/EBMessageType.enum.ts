@@ -3,6 +3,12 @@
  */
 export enum EBMessageType {
 	/**
+	 * Stream message type:
+	 * Message used for opening, transferring frames, and controlling stream sessions.
+	 */
+	Stream = 'stream',
+
+	/**
 	 * Command message type:
 	 * Message which is sent from a single sender to exactly one single receiver.
 	 * The sender expects a answer response from receiver within a specific time frame (ttl).

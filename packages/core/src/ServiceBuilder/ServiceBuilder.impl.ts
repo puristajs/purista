@@ -26,6 +26,8 @@ import type { ServiceClassTypes } from '../core/types/ServiceClassTypes.js'
 import type { ServiceConstructorInput } from '../core/types/ServiceConstructorInput.js'
 import type { SetNewTypeValue, SetNewTypeValues } from '../core/types/SetNewTypeValue.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
+import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
+import type { StreamDefinitionList, StreamDefinitionListResolved } from '../core/types/stream/StreamDefinitionList.js'
 import type {
 	SubscriptionDefinitionList,
 	SubscriptionDefinitionListResolved,
@@ -36,6 +38,8 @@ import { initDefaultSecretStore } from '../DefaultSecretStore/initDefaultSecretS
 import { initDefaultStateStore } from '../DefaultStateStore/initDefaultStateStore.impl.js'
 import type { InstanceOrType } from '../helper/types/InstanceOrType.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
+import { StreamDefinitionBuilder } from '../StreamDefinitionBuilder/StreamDefinitionBuilder.impl.js'
+import type { StreamDefinitionBuilderTypes } from '../StreamDefinitionBuilder/StreamDefinitionBuilderTypes.js'
 import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.js'
 import type { SubscriptionDefinitionBuilderTypes } from '../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilderTypes.js'
 import { type Infer, type InferIn, type Schema, validate } from '../schema/index.js'
@@ -58,18 +62,17 @@ type InstanceConfigType<S extends ServiceBuilderTypes> = Prettify<
 
 /**
  * This class is used to build a service.
- * The `ServiceBuilder` class is used to build a service. It has a few methods that are used to add
- * command definitions and subscription definitions to the service. It also has a method that is used
- * to create an instance of the service class.
  *
  * @group Service
  */
 export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes> {
 	private commandDefinitionList: CommandDefinitionList<S['ServiceClassType']> = []
 	private subscriptionDefinitionList: SubscriptionDefinitionList<S['ServiceClassType']> = []
+	private streamDefinitionList: StreamDefinitionList<S['ServiceClassType']> = []
 
 	private commandDefinitionListResolved: CommandDefinitionListResolved<S['ServiceClassType']> = []
 	private subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<S['ServiceClassType']> = []
+	private streamDefinitionListResolved: StreamDefinitionListResolved<S['ServiceClassType']> = []
 
 	private configSchema?: Schema
 	private defaultConfig?: Complete<S['ConfigType']>
@@ -85,12 +88,6 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	// eslint-disable-next-line no-useless-constructor
 	constructor(public info: ServiceInfoType) {}
 
-	/**
-	 * "This function sets the config schema for the service builder."
-	 *
-	 * @param schema - The schema that will be used to validate the config.
-	 * @returns ServiceBuilder
-	 */
 	setConfigSchema<T extends Schema>(schema: T) {
 		this.configSchema = schema
 		return this as unknown as ServiceBuilder<
@@ -107,32 +104,16 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		>
 	}
 
-	/**
-	 * "This function sets the default configuration for the service."
-	 *
-	 * @param config - ConfigType - The default configuration for the service.
-	 * @returns The ServiceBuilder instance
-	 * @deprecated Use a default value in the config validation schema instead
-	 */
 	setDefaultConfig(config: Complete<S['ConfigType']>): this {
 		this.defaultConfig = config
 		return this
 	}
 
-	/**
-	 * Mark this service as deprecated
-	 * @returns The ServiceBuilder instance
-	 */
 	markAsDeprecated() {
 		this.deprecated = true
 		return this
 	}
 
-	/**
-	 * `addCommandDefinition` adds a list of command definitions to the service builder
-	 * @param commands - CommandDefinitionList
-	 * @returns The service builder
-	 */
 	addCommandDefinition(...commands: CommandDefinitionList<S['ServiceClassType']>) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
@@ -144,11 +125,6 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		return this
 	}
 
-	/**
-	 * It adds a subscription definition to the service builder
-	 * @param subscription - SubscriptionDefinitionList
-	 * @returns The service builder
-	 */
 	addSubscriptionDefinition(...subscription: SubscriptionDefinitionList<S['ServiceClassType']>) {
 		if (this.definitionsResolved) {
 			throw new UnhandledError(
@@ -160,47 +136,42 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		return this
 	}
 
-	/**
-	 * Resolve all added command and subscription definitions.
-	 *
-	 * The resolved definitions are cached and subsequent calls
-	 * will return the cached result. No new definitions can be
-	 * added after this method was executed.
-	 *
-	 * @returns The resolved command and subscription definitions
-	 */
+	addStreamDefinition(...streams: StreamDefinitionList<S['ServiceClassType']>) {
+		if (this.definitionsResolved) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'You can not add streams after resolveDefinitions is called.',
+			)
+		}
+		this.streamDefinitionList.push(...streams)
+		return this
+	}
+
 	public async resolveDefinitions() {
 		if (this.definitionsResolved) {
 			return {
 				commands: this.commandDefinitionListResolved,
 				subscriptions: this.subscriptionDefinitionListResolved,
+				streams: this.streamDefinitionListResolved,
 			}
 		}
 
 		this.commandDefinitionListResolved = await Promise.all(this.commandDefinitionList)
 		this.subscriptionDefinitionListResolved = await Promise.all(this.subscriptionDefinitionList)
+		this.streamDefinitionListResolved = await Promise.all(this.streamDefinitionList)
 
 		this.subscriptionDefinitionList = []
 		this.commandDefinitionList = []
+		this.streamDefinitionList = []
 
 		this.definitionsResolved = true
 		return {
 			commands: this.commandDefinitionListResolved,
 			subscriptions: this.subscriptionDefinitionListResolved,
+			streams: this.streamDefinitionListResolved,
 		}
 	}
 
-	/**
-	 * Define the resources of the service.
-	 * Resources are available within commands and subscriptions.
-	 *
-	 * @example
-	 * ```ts
-	 * serviceBuilder.defineResources<'resource_name',ResourceType>()
-	 * ```
-	 *
-	 * @returns The builder with defined types for resources
-	 */
 	defineResource<ResourceName extends string, ResourcesType>() {
 		this.requiresResources = true
 		return this as unknown as ServiceBuilder<
@@ -208,11 +179,6 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		>
 	}
 
-	/**
-	 * It sets the class type of the service.
-	 * @param customClass - A class which extends the Service class
-	 * @returns The builder itself, but with the type of the service class changed.
-	 */
 	setCustomClass<T extends Service<ServiceClassTypes<S['ConfigType'], S['Resources']>>>(
 		customClass: Newable<T, ServiceClassTypes<S['ConfigType'], S['Resources']>>,
 	) {
@@ -220,32 +186,10 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		return this as unknown as ServiceBuilder<SetNewTypeValue<S, 'ServiceClassType', T>>
 	}
 
-	/**
-	 * Get the service class used when creating instances.
-	 *
-	 * @returns The constructor function of the service
-	 */
 	getCustomClass() {
 		return this.SClass
 	}
 
-	/**
-	 * Instantiate the service with the provided EventBridge and optional configuration.
-	 *
-	 * All command and subscription definitions are resolved automatically
-	 * before the instance is created.
-	 *
-	 * @param eventBridge - The event bridge implementation to use.
-	 * @param options - Optional configuration such as logger or stores.
-	 *
-	 * @example
-	 * ```ts
-	 * const svc = await serviceBuilder.getInstance(eventBridge, { logger })
-	 * svc.start()
-	 * ```
-	 *
-	 * @returns The initialized service instance
-	 */
 	async getInstance(eventBridge: EventBridge, options?: InstanceConfigType<S>) {
 		const logger = options?.logger ?? initLogger(options?.logLevel)
 
@@ -296,7 +240,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 				logger,
 			})
 
-		const { commands, subscriptions } = await this.resolveDefinitions()
+		const { commands, subscriptions, streams } = await this.resolveDefinitions()
 
 		const C = this.getCustomClass()
 
@@ -306,6 +250,7 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 			info: this.info,
 			commandDefinitionList: commands,
 			subscriptionDefinitionList: subscriptions,
+			streamDefinitionList: streams,
 			config,
 			spanProcessor: options?.spanProcessor,
 			secretStore,
@@ -316,22 +261,6 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		})
 	}
 
-	/**
-	 * Create a {@link CommandDefinitionBuilder} for defining a command of this service.
-	 *
-	 * @param commandName - The name of the command to create.
-	 * @param description - A short description of what the command does.
-	 * @param eventName - Optional event name emitted on success.
-	 *
-	 * @example
-	 * ```ts
-	 * const cmd = serviceBuilder.getCommandBuilder('login', 'Authenticate user')
-	 *   .addPayloadSchema(z.object({ user: z.string() }))
-	 *   .setCommandFunction(async function () {})
-	 * ```
-	 *
-	 * @returns A new command builder instance
-	 */
 	getCommandBuilder<T extends string, N extends string>(
 		commandName: NonEmptyString<T>,
 		description: string,
@@ -348,42 +277,45 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 				Schema,
 				S['Resources'],
 				InvokeList,
+				StreamInvokeList,
 				Record<string, Schema>
 			>
 		>(commandName, description, eventName, this.deprecated)
 	}
 
-	/**
-	 * Create a {@link SubscriptionDefinitionBuilder} for defining a subscription.
-	 *
-	 * @param subscriptionName - The name of the subscription.
-	 * @param description - A human readable description.
-	 *
-	 * @example
-	 * ```ts
-	 * const sub = serviceBuilder
-	 *   .getSubscriptionBuilder('userCreated', 'React on user creation')
-	 *   .subscribeToEvent('UserCreated')
-	 * ```
-	 *
-	 * @returns A subscription builder instance
-	 */
 	getSubscriptionBuilder<T extends string>(
 		subscriptionName: NonEmptyString<T>,
 		description: string,
 	): SubscriptionDefinitionBuilder<
 		S['ServiceClassType'],
-		SubscriptionDefinitionBuilderTypes<any, any, any, any, any, any, S['Resources']>
+		SubscriptionDefinitionBuilderTypes<any, any, any, any, any, any, S['Resources'], InvokeList, StreamInvokeList>
 	> {
 		return new SubscriptionDefinitionBuilder<
 			S['ServiceClassType'],
-			SubscriptionDefinitionBuilderTypes<any, any, any, any, any, any, S['Resources']>
+			SubscriptionDefinitionBuilderTypes<any, any, any, any, any, any, S['Resources'], InvokeList, StreamInvokeList>
 		>(subscriptionName, description, this.deprecated)
 	}
 
-	/**
-	 * @returns the definition of registered commands
-	 */
+	getStreamBuilder<T extends string, N extends string>(
+		streamName: NonEmptyString<T>,
+		description: string,
+		finalEventName?: NonEmptyString<N>,
+	) {
+		return new StreamDefinitionBuilder<
+			S['ServiceClassType'],
+			StreamDefinitionBuilderTypes<
+				Schema,
+				Schema,
+				Schema,
+				Schema,
+				S['Resources'],
+				InvokeList,
+				StreamInvokeList,
+				Record<string, Schema>
+			>
+		>(streamName, description, finalEventName, this.deprecated)
+	}
+
 	getCommandDefinitions() {
 		if (!this.definitionsResolved) {
 			throw new UnhandledError(
@@ -394,9 +326,6 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		return this.commandDefinitionListResolved
 	}
 
-	/**
-	 * @returns the definition of registered subscriptions
-	 */
 	getSubscriptionDefinitions() {
 		if (!this.definitionsResolved) {
 			throw new UnhandledError(
@@ -407,23 +336,22 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		return this.subscriptionDefinitionListResolved
 	}
 
-	/**
-	 * Simple helper to verify the service configuration during tests.
-	 *
-	 * It resolves the definitions and checks for duplicated command or
-	 * subscription names. Useful to ensure that your service setup is
-	 * correct before starting it.
-	 *
-	 * @example
-	 * ```ts
-	 * await serviceBuilder.testServiceSetup()
-	 * ```
-	 */
+	getStreamDefinitions() {
+		if (!this.definitionsResolved) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'Definitions not resolve. Please call resolveDefinitions() before using getStreamDefinitions',
+			)
+		}
+		return this.streamDefinitionListResolved
+	}
+
 	async testServiceSetup() {
-		const { subscriptions, commands } = await this.resolveDefinitions()
+		const { subscriptions, commands, streams } = await this.resolveDefinitions()
 
 		this.validateCommands(commands)
 		this.validateSubscriptions(subscriptions)
+		this.validateStreams(streams)
 
 		return true
 	}
@@ -436,35 +364,17 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 			const name = definition.commandName.toLowerCase().trim()
 			const eventName = definition.eventName
 
-			// check for duplicate command names
 			if (existingNames.has(name)) {
 				fail(`duplicate command name ${name}`)
 			}
 			existingNames.add(name)
 
-			// check for duplicate event names
 			if (eventName) {
 				if (eventNames.has(eventName)) {
 					fail(`response event "${eventName}" in ${name} is used in other command`)
 				}
 				eventNames.add(eventName)
 			}
-		}
-	}
-
-	/**
-	 * Returns the service definition.
-	 * This includes information about commands and subscriptions.
-	 *
-	 * @returns
-	 */
-	async getFullServiceDefinition() {
-		const definitions = await this.resolveDefinitions()
-
-		return {
-			...this.info,
-			...definitions,
-			deprecated: this.deprecated,
 		}
 	}
 
@@ -477,6 +387,27 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 				fail(`duplicate subscription name ${name}`)
 			}
 			existingNames.add(name)
+		}
+	}
+
+	protected validateStreams(streamDefinitions: StreamDefinitionListResolved<any>) {
+		const existingNames = new Set()
+		for (const definition of streamDefinitions) {
+			const name = definition.streamName.toLowerCase().trim()
+			if (existingNames.has(name)) {
+				fail(`duplicate stream name ${name}`)
+			}
+			existingNames.add(name)
+		}
+	}
+
+	async getFullServiceDefinition() {
+		const definitions = await this.resolveDefinitions()
+
+		return {
+			...this.info,
+			...definitions,
+			deprecated: this.deprecated,
 		}
 	}
 

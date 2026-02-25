@@ -6,12 +6,20 @@ import { ATTR_SERVICE_NAME, ATTR_SERVICE_VERSION } from '@opentelemetry/semantic
 
 import { initLogger } from '../../DefaultLogger/initLogger.impl.js'
 import { puristaVersion } from '../../version.js'
+import { UnhandledError } from '../Error/UnhandledError.impl.js'
 import { getNewInstanceId } from '../helper/getNewInstanceId.impl.js'
 import type { Complete } from '../types/Complete.js'
+import type { DefinitionEventBridgeConfig } from '../types/DefinitionEventBridgeConfig.js'
+import type { EBMessageAddress } from '../types/EBMessageAddress.js'
 import { GenericEventEmitter } from '../types/GenericEventEmitter.js'
 import type { InstanceId } from '../types/InstanceId.js'
 import type { Logger } from '../types/Logger.js'
 import { PuristaSpanTag } from '../types/PuristaSpanTag.enum.js'
+import { StatusCode } from '../types/StatusCode.enum.js'
+import type { StreamDefinitionMetadataBase } from '../types/stream/StreamDefinitionMetadataBase.js'
+import type { StreamHandle } from '../types/stream/StreamHandle.js'
+import type { StreamMessage } from '../types/stream/StreamMessage.js'
+import type { StreamOpenRequest } from '../types/stream/StreamOpenRequest.js'
 import type { EventBridgeConfig } from './types/EventBridgeConfig.js'
 import type { EventBridgeEvents } from './types/EventBridgeEvents.js'
 
@@ -155,4 +163,24 @@ export class EventBridgeBaseClass<ConfigType> extends GenericEventEmitter<EventB
 
 	async destroy() {}
 	async start() {}
+
+	async openStream<Chunk = unknown, Final = unknown>(
+		_input: Omit<StreamOpenRequest, 'id' | 'messageType' | 'timestamp' | 'correlationId'>,
+		_ttl?: number,
+	): Promise<StreamHandle<Chunk, Final>> {
+		throw new UnhandledError(StatusCode.NotImplemented, `${this.name} does not support streams`)
+	}
+
+	async registerStream(
+		_address: EBMessageAddress,
+		_cb: (message: StreamMessage) => Promise<void>,
+		_metadata: StreamDefinitionMetadataBase,
+		_eventBridgeConfig: DefinitionEventBridgeConfig,
+	): Promise<string> {
+		throw new UnhandledError(StatusCode.NotImplemented, `${this.name} does not support streams`)
+	}
+
+	async unregisterStream(_address: EBMessageAddress): Promise<void> {
+		throw new UnhandledError(StatusCode.NotImplemented, `${this.name} does not support streams`)
+	}
 }

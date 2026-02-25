@@ -54,8 +54,8 @@ export class SubscriptionDefinitionBuilder<
 			transformParameterSchema: Schema
 			transformFunction: SubscriptionTransformInputHook<S, any, any, any, any>
 		}
-		beforeGuard: Record<string, SubscriptionBeforeGuardHook<S, any, any, C['Resources'], any, any>>
-		afterGuard: Record<string, SubscriptionAfterGuardHook<S, any, any, any, C['Resources'], any, any>>
+		beforeGuard: Record<string, SubscriptionBeforeGuardHook<S, any, any, C['Resources'], any, any, any>>
+		afterGuard: Record<string, SubscriptionAfterGuardHook<S, any, any, any, C['Resources'], any, any, any>>
 		transformOutput?: {
 			transformOutputSchema: Schema
 			transformFunction: SubscriptionTransformOutputHook<S, any, any, any>
@@ -81,7 +81,7 @@ export class SubscriptionDefinitionBuilder<
 		instanceId?: InstanceId
 	}
 
-	private fn?: SubscriptionFunction<S, any, any, any, any, any, any>
+	private fn?: SubscriptionFunction<S, any, any, any, any, any, any, any>
 
 	private eventName?: string
 	private emitEventName?: string
@@ -95,6 +95,7 @@ export class SubscriptionDefinitionBuilder<
 	private autoacknowledge = false
 
 	private invokes: C['Invokes'] = {}
+	private streamInvokes: C['StreamInvokes'] = {}
 
 	private emitList: C['EmitList'] = {}
 
@@ -183,6 +184,98 @@ export class SubscriptionDefinitionBuilder<
 							Record<Fname, (payload: InferIn<Payload>, parameter: InferIn<Parameter>) => Promise<Infer<Output>>>
 						>
 					>,
+				C['StreamInvokes'],
+				C['EmitList']
+			>
+		>
+	}
+
+	canConsumeStream<
+		Chunk extends Schema,
+		Final extends Schema,
+		Payload extends Schema,
+		Parameter extends Schema,
+		SName extends string = string,
+		Version extends string = string,
+		Fname extends string = string,
+	>(
+		serviceName: SName,
+		serviceVersion: Version,
+		serviceTarget: Fname,
+		chunkSchema?: Chunk,
+		payloadSchema?: Payload,
+		parameterSchema?: Parameter,
+		finalSchema?: Final,
+		validateChunk = true,
+		validateFinal = true,
+	) {
+		if (serviceName.trim() === '' || serviceVersion.trim() === '' || serviceTarget.trim() === '') {
+			throw new Error('canConsumeStream requires non-empty service name, version and target')
+		}
+
+		const existingStreams = this.streamInvokes as Record<
+			string,
+			Record<
+				string,
+				Record<
+					string,
+					{
+						chunkSchema?: Schema
+						finalSchema?: Schema
+						payloadSchema?: Schema
+						parameterSchema?: Schema
+						validateChunk?: boolean
+						validateFinal?: boolean
+					}
+				>
+			>
+		>
+
+		this.streamInvokes = {
+			...this.streamInvokes,
+			[serviceName]: {
+				...existingStreams[serviceName],
+				[serviceVersion]: {
+					...(existingStreams[serviceName]?.[serviceVersion] ?? {}),
+					[serviceTarget]: { chunkSchema, finalSchema, payloadSchema, parameterSchema, validateChunk, validateFinal },
+				},
+			},
+		}
+
+		return this as unknown as SubscriptionDefinitionBuilder<
+			S,
+			SubscriptionDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'] &
+					Record<
+						SName,
+						Record<
+							Version,
+							Record<
+								Fname,
+								(
+									payload: InferIn<Payload>,
+									parameter: InferIn<Parameter>,
+								) => Promise<{
+									sessionId: string
+									cancel(reason?: string): Promise<void>
+									[Symbol.asyncIterator](): AsyncIterator<{
+										payload: {
+											chunk?: Infer<Chunk>
+											final?: Infer<Final>
+										}
+									}>
+								}>
+							>
+						>
+					>,
 				C['EmitList']
 			>
 		>
@@ -213,6 +306,7 @@ export class SubscriptionDefinitionBuilder<
 				C['TransformOutputSchema'],
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList'] & Record<EventName, InferIn<typeof schema>>
 			>
 		>
@@ -415,6 +509,7 @@ export class SubscriptionDefinitionBuilder<
 				C['TransformOutputSchema'],
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>
@@ -450,6 +545,7 @@ export class SubscriptionDefinitionBuilder<
 				C['TransformOutputSchema'],
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>
@@ -474,6 +570,7 @@ export class SubscriptionDefinitionBuilder<
 				C['TransformOutputSchema'],
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>
@@ -523,6 +620,7 @@ export class SubscriptionDefinitionBuilder<
 				C['TransformOutputSchema'],
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>
@@ -586,6 +684,7 @@ export class SubscriptionDefinitionBuilder<
 				TransformOutputSchema,
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>
@@ -623,6 +722,7 @@ export class SubscriptionDefinitionBuilder<
 				Infer<C['ParamsSchema']>,
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>,
@@ -650,6 +750,7 @@ export class SubscriptionDefinitionBuilder<
 				Infer<C['ParamsSchema']>,
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList']
 			>
 		>,
@@ -685,6 +786,7 @@ export class SubscriptionDefinitionBuilder<
 			InferIn<C['OutputSchema']>,
 			C['Resources'],
 			C['Invokes'],
+			C['StreamInvokes'],
 			C['EmitList']
 		>,
 	) {
@@ -720,6 +822,7 @@ export class SubscriptionDefinitionBuilder<
 			InferIn<C['OutputSchema']>,
 			C['Resources'],
 			C['Invokes'],
+			C['StreamInvokes'],
 			C['EmitList']
 		>
 	}
@@ -744,6 +847,7 @@ export class SubscriptionDefinitionBuilder<
 			InferIn<C['OutputSchema']>,
 			C['Resources'],
 			C['Invokes'],
+			C['StreamInvokes'],
 			C['EmitList']
 		>
 	}
@@ -787,6 +891,7 @@ export class SubscriptionDefinitionBuilder<
 				InferIn<C['TransformOutputSchema']>,
 				C['Resources'],
 				C['Invokes'],
+				C['StreamInvokes'],
 				C['EmitList'],
 				SubscriptionDefinitionMetadataBase
 			>
@@ -816,6 +921,7 @@ export class SubscriptionDefinitionBuilder<
 			call: this.getSubscriptionFunction(),
 			hooks: this.hooks,
 			invokes: this.invokes,
+			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
 		}
 
@@ -834,9 +940,10 @@ export class SubscriptionDefinitionBuilder<
 		resources?: Partial<C['Resources']>
 		sandbox?: SinonSandbox
 	}) {
-		return getSubscriptionContextMock<C['Resources'], C['Invokes'], C['EmitList']>({
+		return getSubscriptionContextMock<C['Resources'], C['Invokes'], C['StreamInvokes'], C['EmitList']>({
 			...input,
 			invokes: this.invokes,
+			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
 		})
 	}

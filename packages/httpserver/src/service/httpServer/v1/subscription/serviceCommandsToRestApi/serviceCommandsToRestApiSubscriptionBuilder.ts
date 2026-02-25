@@ -46,8 +46,11 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 			data.http.openApi.operationId = convertToSnakeCase(`${serviceName}_v${version}_${data.http.openApi.operationId}`)
 		}
 
-		const contentType = data.contentTypeResponse ?? 'application/json'
-		const contentEncoding = data.contentEncodingResponse ?? 'utf-8'
+		const requestContentType = data.contentTypeRequest ?? 'application/json'
+		const requestContentEncoding = data.contentEncodingRequest ?? 'utf-8'
+		const responseContentType = data.contentTypeResponse ?? 'application/json'
+		const responseContentEncoding = data.contentEncodingResponse ?? 'utf-8'
+		const isStreamEndpoint = responseContentType.toLowerCase() === 'text/event-stream'
 
 		const getHandler = () => {
 			return async (request: FastifyRequest, reply: FastifyReply, parameter: Record<string, unknown>) => {
@@ -92,6 +95,44 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 							traceId = headerTraceId
 						}
 
+						if (isStreamEndpoint) {
+							const streamHandle = await this.openStream(
+								{
+									traceId,
+									receiver: {
+										serviceName: message.sender.serviceName,
+										serviceVersion: message.sender.serviceVersion,
+										serviceTarget: message.sender.serviceTarget,
+									},
+									payload: { payload: request.body, parameter: parameterExtended },
+									principalId,
+									tenantId,
+									contentType: requestContentType,
+									contentEncoding: requestContentEncoding,
+								},
+								`${method}:${url}`,
+							)
+
+							reply.hijack()
+							reply.raw.setHeader('content-type', `${responseContentType}; charset=${responseContentEncoding}`)
+							reply.raw.setHeader('cache-control', 'no-cache, no-transform')
+							reply.raw.setHeader('connection', 'keep-alive')
+
+							const abortStream = async () => {
+								await streamHandle.cancel('client disconnected')
+							}
+							request.raw.once('close', () => {
+								void abortStream()
+							})
+
+							for await (const frame of streamHandle) {
+								reply.raw.write(`event: ${frame.payload.frameType}\n`)
+								reply.raw.write(`data: ${JSON.stringify(frame.payload)}\n\n`)
+							}
+							reply.raw.end()
+							return
+						}
+
 						const response = await this.invoke(
 							{
 								traceId,
@@ -103,8 +144,8 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 								payload: { payload: request.body, parameter: parameterExtended },
 								principalId,
 								tenantId,
-								contentType,
-								contentEncoding,
+								contentType: requestContentType,
+								contentEncoding: requestContentEncoding,
 							},
 							`${method}:${url}`,
 						)
@@ -117,7 +158,7 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 							})
 						}
 
-						reply.header('content-type', `${contentType}; charset=${contentEncoding}`)
+						reply.header('content-type', `${responseContentType}; charset=${responseContentEncoding}`)
 						if (response === undefined || response === null || response === '') {
 							span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.NoContent)
 							reply.statusCode = StatusCode.NoContent

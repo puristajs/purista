@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import { Project, SyntaxKind } from 'ts-morph'
 
 export const addDefinitionToBuilder = (input: {
-	arrayName: 'commandDefinitions' | 'subscriptionDefinitions'
+	arrayName: 'commandDefinitions' | 'subscriptionDefinitions' | 'streamDefinitions'
 	serviceFile: string
 	importFile: string
 	importDefinition: string

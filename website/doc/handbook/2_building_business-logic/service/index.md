@@ -13,12 +13,13 @@ A service is a logical group of functions and subscriptions. This is where the d
 A service provides:
 
 - [Commands](../command/index.md) that are callable by the outside world (like an API).
+- [Streams](../stream/index.md) for multi-frame request/response workloads.
 - [Subscriptions](../subscription/index.md) that listen to events and react accordingly.
-- A custom [service configuration](./add-a-service-config.md), which is available in commands and subscriptions.
-- [Secret stores](../stores/secret-stores.md), which allow commands and subscriptions to access secrets via a unified interface.
-- [Config stores](../stores/config-stores.md), which allow commands and subscriptions to access (dynamic) configurations via a unified interface.
-- [State stores](../stores/state-stores.md), which allow commands and subscriptions to access state data via a unified interface.
-- [Resources](./define-resources.md), which are used by commands and subscriptions (e.g., database connections or external APIs).
+- A custom [service configuration](./add-a-service-config.md), which is available in commands, subscriptions, and streams.
+- [Secret stores](../stores/secret-stores.md), which allow commands/subscriptions/streams to access secrets via a unified interface.
+- [Config stores](../stores/config-stores.md), which allow commands/subscriptions/streams to access (dynamic) configurations via a unified interface.
+- [State stores](../stores/state-stores.md), which allow commands/subscriptions/streams to access state data via a unified interface.
+- [Resources](./define-resources.md), which are used by commands/subscriptions/streams (e.g., database connections or external APIs).
 
 In general, a service itself should not contain any logic. It should only act as a logical container for commands and subscriptions.  
 Additionally, services should not hold state data.
@@ -28,7 +29,7 @@ Additionally, services should not hold state data.
 1. Define service info and create service builder.
 2. Add config schema (if needed).
 3. Define resources used by commands/subscriptions.
-4. Add command and subscription definitions.
+4. Add command, subscription, and stream definitions.
 5. Create service instance, provide required resources (`getInstance(..., { resources })`), and call `start()`.
 
 Continue with:

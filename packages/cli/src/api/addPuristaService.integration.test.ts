@@ -4,6 +4,7 @@ import { join } from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { addPuristaCommand } from './addPuristaCommand.js'
 import { addPuristaService } from './addPuristaService.js'
+import { addPuristaStream } from './addPuristaStream.js'
 import { puristaConfigSchema } from './loadPuristaConfig.js'
 import { scanPuristaProject } from './scanPuristaProject.js'
 
@@ -31,8 +32,8 @@ afterEach(() => {
 	rmSync(DIR, { recursive: true, force: true })
 })
 
-describe('service and command creation', () => {
-	it('creates files for service and command', async () => {
+describe('service artifact creation', () => {
+	it('creates files for service, command, and stream', async () => {
 		await addPuristaService({
 			projectRootPath: DIR,
 			puristaConfig: config,
@@ -52,11 +53,24 @@ describe('service and command creation', () => {
 			commandDescription: 'ping',
 		})
 
+		await addPuristaStream({
+			projectRootPath: DIR,
+			puristaConfig: config,
+			puristaProject: project,
+			serviceName: 'demo',
+			serviceVersion: '1',
+			streamName: 'ping stream',
+			streamDescription: 'stream ping output',
+		})
+
 		const commandFile = join(DIR, 'service', 'demo', 'v1', 'command', 'ping', 'pingCommandBuilder.ts')
+		const streamFile = join(DIR, 'service', 'demo', 'v1', 'stream', 'pingStream', 'pingStreamStreamBuilder.ts')
 		expect(existsSync(commandFile)).toBe(true)
+		expect(existsSync(streamFile)).toBe(true)
 
 		const serviceFile = join(DIR, 'service', 'demo', 'v1', 'demoV1Service.ts')
 		const content = readFileSync(serviceFile, 'utf-8')
 		expect(content).toContain('pingCommandBuilder')
+		expect(content).toContain('pingStreamStreamBuilder')
 	})
 })

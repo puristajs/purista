@@ -1,5 +1,6 @@
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
+import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { Schema } from '../schema/index.js'
 
 export type CommandDefinitionBuilderTypes<
@@ -11,6 +12,7 @@ export type CommandDefinitionBuilderTypes<
 	TransformOutputSchema extends Schema = Schema,
 	Resources extends Record<string, unknown> = EmptyObject,
 	Invokes extends InvokeList = InvokeList,
+	StreamInvokes extends StreamInvokeList = StreamInvokeList,
 	EmitList extends Record<string, Schema> = Record<string, Schema>,
 > = {
 	PayloadSchema: PayloadSchema
@@ -21,5 +23,6 @@ export type CommandDefinitionBuilderTypes<
 	TransformOutputSchema: TransformOutputSchema
 	Resources: Resources
 	Invokes: Invokes
+	StreamInvokes: StreamInvokes
 	EmitList: EmitList
 }

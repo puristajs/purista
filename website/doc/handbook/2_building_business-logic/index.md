@@ -12,14 +12,16 @@ This section explains how to implement domain logic with strong types and clear 
 
 1. Define a [Service](./service/index.md)
 2. Add [Commands](./command/index.md)
-3. Add [Subscriptions](./subscription/index.md)
-4. Connect [Stores](./stores/index.md) and resources
-5. Expose endpoints via [REST/GraphQL adapters](./exposing_endpoints/index.md)
+3. Add [Streams](./stream/index.md)
+4. Add [Subscriptions](./subscription/index.md)
+5. Connect [Stores](./stores/index.md) and resources
+6. Expose endpoints via [REST/GraphQL adapters](./exposing_endpoints/index.md)
 
 ## Suggested chapter order
 
 - [Service](./service/index.md)
 - [Command](./command/index.md)
+- [Stream](./stream/index.md)
 - [Subscription](./subscription/index.md)
 - [Stores](./stores/index.md)
 - [Error handling](./error-handling.md)

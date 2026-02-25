@@ -1,6 +1,6 @@
 ---
 title: NATS Event Bridge
-description: Use the NATS event bridge of PURISTA
+description: Use NATS with PURISTA
 order: 301050
 ---
 
@@ -8,84 +8,24 @@ order: 301050
 
 # NATS Event Bridge
 
-The [NATS message broker](https://nats.io/) is a fast and scalable message broker.
+The `@purista/natsbridge` package integrates NATS subject-based routing.
 
-PURISTA provides the `@purista/natsbridge`
+## Delivery semantics
 
-::: tip Pros
+For core NATS (without JetStream persistence), behavior is typically:
 
-- allows scaling
-- fault tolerant
-- can be used with NATS State store (`@purista/nats-state-store`)
-- can be used with NATS Config store (`@purista/nats-config-store`)
-:::
+- durability: no persistent backlog
+- retries: application-level retry patterns required
+- typical delivery mode: at-most-once
 
-::: warning Cons
+If you need stronger durability/replay, plan explicit broker/runtime patterns around it.
 
-- needs managing of an NATS broker
-- no persistence of messages available
-- hard to handle dead letters
-:::
+## Stream support
 
-## Configuration
+PURISTA stream runtime (`openStream`) is currently not implemented for NATS bridge.
 
-The NATS event bridge uses the unified configuration schema as all event bridges.
+## Reliability recommendations
 
-::: info API documentation
-
-- [General event bridge config](../../../api/@purista/core/README.md)
-- [NATS bridge config](../../../api/@purista/natsbridge/README.md)
-:::
-
-## Usage example
-
-```typescript
-import { NatsBridge } from '@purista/natsbridge'
-
-const eventBridge = new NatsBridge()
-await eventBridge.start()
-
-```
-
-## Topic names
-
-The NATS protocol relays on topics for message publishing/subscribe.
-
-PURISTA is using the following schema for topics:
-
-```typescript
-const topicPrefix = config.topicPrefix
-const empty = config.emptyTopicPartString
-
-const path join(
-  this.config.topicPrefix,
-  convertToSnakeCase(message.messageType),
-  convertToSnakeCase(message.principalId || empty),
-  convertToSnakeCase(message.tenantId || empty),
-  convertToSnakeCase(message.sender.instanceId || empty),
-  convertToSnakeCase(message.sender.serviceName),
-  convertToSnakeCase(message.sender.serviceVersion),
-  convertToSnakeCase(message.sender.serviceTarget),
-  convertToSnakeCase(message.eventName || empty),
-  convertToSnakeCase((message as Command).receiver?.instanceId || empty),
-  convertToSnakeCase((message as Command).receiver?.serviceName || empty),
-  convertToSnakeCase((message as Command).receiver?.serviceVersion || empty),
-  convertToSnakeCase((message as Command).receiver?.serviceTarget || empty),
-)
-```
-
-This allows to have subscriptions for very specific messages.
-The NATS event bridge does not use the available request-response pattern of NATS to be able to use the unified topic schema.
-Otherwise, there would be the need to duplicate command response to be available for subscriptions.
-
-## Hints
-
-::: warning Ensure settings across instances
-Remember to ensure, prefixes, and so on are the same on every event bridge instance.
-Otherwise, you might get some unexpected behaviors.
-:::
-
-::: tip OpenTelemetry
-PURISTA is using the NATS header feature to add the OpenTelemetry information to each message, as recommended:
-[https://w3c.github.io/trace-context-mqtt/](https://w3c.github.io/trace-context-mqtt/).
-:::
+- design handlers idempotent even when retries are app-driven
+- keep subject prefix configuration identical across instances
+- validate timeout/error behavior under broker disconnect scenarios

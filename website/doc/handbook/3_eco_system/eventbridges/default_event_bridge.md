@@ -1,59 +1,51 @@
 ---
 title: Default Event Bridge
-description: Use the built in default event bridge of PURISTA
+description: Built-in in-memory bridge for local and single-instance setups
 order: 301010
 ---
 
 # Default Event Bridge
 
-The core package comes with `DefaultEventBridge`, which will work on local without any further installation.
-The `DefaultEventBridge` acts as event bridge and simple message broker.
+`DefaultEventBridge` is included in `@purista/core` and works without external broker infrastructure.
 
-It should work out of the box for single instances.
-You can also use it, for simple horizontal scaling, but the messages and states are not shared or load balanced between instances.
+## Best use cases
 
-This means a subscription is always running on the same instance. Also, any command invocation is done within the same instance.
-Sharing of states and data must be done over third party software, like usage of redis or other databases.
+- local development
+- tests and prototypes
+- single-instance deployments
 
-Because of this, the `DefaultEventBridge` will only work for scenarios, where you deploy your services as single instance monolith (edge) and you don't have the requirement to share messages and states across instances.
+## Delivery semantics
 
-A simplified schema of how the `DefaultEventBridge` works:
+- durability: none (in-memory only)
+- retries: none
+- typical delivery mode: at-most-once
+- cross-instance routing: not supported
 
-![single instance](/graphic/single_instance.svg)
+## Stream support
 
-::: tip Pros
+`DefaultEventBridge` currently supports PURISTA stream sessions (`openStream`, stream frames, cancellation).
 
-- no extra message broker needed
-- full subscription support
-- ideal for local development and debug purpose
-:::
+## Pros
 
-::: warning Cons
+- zero setup
+- full command/subscription routing in-process
+- supports stream runtime behavior
 
-- does not scale
-- no persistence of messages
-- no retry mechanism for messages
-:::
+## Cons
 
-## Configuration
+- no broker persistence
+- no horizontal scale sharing
+- no durable recovery after process restart
 
-The `DefaultEventBridge` can be configured to emit every message, which has set the  `eventName` property as javascript event.
-This must be enabled in the configuration by setting the `emitMessagesAsEventBridgeEvents` property to true.
-Than, you can subscribe to specific events in regular JavaScript fashion.
-The event names will be prefixed with `custom-` to avoid name collisions.
-
-## Usage example
+## Example
 
 ```typescript
 import { DefaultEventBridge } from '@purista/core'
 
 const eventBridge = new DefaultEventBridge({ emitMessagesAsEventBridgeEvents: true })
 await eventBridge.start()
-
-eventBridge.on('custom-example-event', (msg)=> {
-  console.log(JSON.stringify(msg, null, 2))
-})
-
-// ... register and start your services
-
 ```
+
+## Notes
+
+For production systems with multi-instance delivery guarantees, use an external broker bridge (AMQP/MQTT/NATS/Dapr).

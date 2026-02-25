@@ -384,3 +384,32 @@ const myCommandBuilder = myServiceBuilder
 In the AfterGuard function, the parameter value will be provided.
 It will be the same value provided to the command function.
 :::
+
+## Consume streams from commands
+
+Commands can declare and consume typed streams:
+
+```typescript
+const builder = myServiceBuilder
+  .getCommandBuilder('summarize', '...')
+  .canConsumeStream(
+    'AiService',
+    '1',
+    'generateTokens',
+    chunkSchema,
+    payloadSchema,
+    parameterSchema,
+    finalSchema,
+  )
+  .setCommandFunction(async function (context, payload, parameter) {
+    const handle = await context.stream.AiService['1'].generateTokens(payload, parameter)
+    for await (const frame of handle) {
+      if (frame.payload.frameType === 'chunk') {
+        // consume chunk
+      }
+    }
+    return { ok: true }
+  })
+```
+
+`canConsumeStream(...)` preserves full type inference for payload, parameter, chunk, and final frame payloads.
