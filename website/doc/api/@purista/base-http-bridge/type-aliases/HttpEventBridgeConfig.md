@@ -37,9 +37,7 @@ Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts
 
 command invocations are wrapped in CloudEvent
 
-#### Link
-
-https://github.com/cloudevents/spec/tree/v1.0
+CloudEvents specification v1.0: https://github.com/cloudevents/spec/tree/v1.0
 
 #### Default
 
@@ -191,9 +189,7 @@ Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeConfig.ts
 
 subscription invocations are wrapped in CloudEvent
 
-#### Link
-
-https://github.com/cloudevents/spec/tree/v1.0
+CloudEvents specification v1.0: https://github.com/cloudevents/spec/tree/v1.0
 
 #### Default
 

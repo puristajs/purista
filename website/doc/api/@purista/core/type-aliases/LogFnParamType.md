@@ -8,4 +8,4 @@
 
 > **LogFnParamType** = \[`unknown`, `string`?, `...any`\] \| \[`string`, `...any`\]
 
-Defined in: [core/types/Logger.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L20)
+Defined in: [core/types/Logger.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L21)

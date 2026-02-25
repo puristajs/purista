@@ -6,7 +6,7 @@
 
 # Variable: getTopicName
 
-> `const` **getTopicName**: `GetTopicNameFn`
+> `const` **getTopicName**: [`GetTopicNameFn`](../type-aliases/GetTopicNameFn.md)
 
 Defined in: [mqttbridge/src/topic/getTopicName.impl.ts:30](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/getTopicName.impl.ts#L30)
 

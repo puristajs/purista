@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / CommandFunction
 
-# Type Alias: CommandFunction()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, FunctionOutputType, Resources, Invokes, EmitList\>
+# Type Alias: CommandFunction()\<S, MessagePayloadType, MessageParamsType, FunctionPayloadType, FunctionParamsType, FunctionOutputType, Resources, Invokes, StreamInvokes, EmitList\>
 
-> **CommandFunction**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `EmitList`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`FunctionOutputType`\>
+> **CommandFunction**\<`S`, `MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `FunctionOutputType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`\> = (`this`, `context`, `payload`, `parameter`) => `Promise`\<`FunctionOutputType`\>
 
-Defined in: [core/types/commandType/CommandFunction.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunction.ts#L12)
+Defined in: [core/types/commandType/CommandFunction.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunction.ts#L13)
 
 CommandFunction is a function which will be triggered when a matching event bridge message is received by the service
 
@@ -46,6 +46,10 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 `Invokes` *extends* [`InvokeList`](InvokeList.md) = [`EmptyObject`](EmptyObject.md)
 
+### StreamInvokes
+
+`StreamInvokes` *extends* [`StreamInvokeList`](StreamInvokeList.md) = [`EmptyObject`](EmptyObject.md)
+
 ### EmitList
 
 `EmitList` *extends* `Record`\<`string`, [`Schema`](Schema.md)\> = [`EmptyObject`](EmptyObject.md)
@@ -58,7 +62,7 @@ CommandFunction is a function which will be triggered when a matching event brid
 
 ### context
 
-[`CommandFunctionContext`](CommandFunctionContext.md)\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `EmitList`\>
+[`CommandFunctionContext`](CommandFunctionContext.md)\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`\>
 
 ### payload
 

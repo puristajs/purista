@@ -27,6 +27,8 @@ Event bridges are the transport backbone of PURISTA. They determine routing, sca
 
 Future queue bridge packages will live next to the event bridge adapters (e.g. `@purista/nats-queue-bridge`) once those providers expose reliable pull + lease semantics. When evaluating infrastructure, pick an event bridge + queue bridge pair that matches your durability and scaling needs.
 
+See the dedicated [Queue Bridges](../queue_bridges/index.md) page for wiring guidance and capability details.
+
 ## Delivery semantics in practice
 
 PURISTA itself provides typed message contracts and processing flow. Delivery guarantees come from the selected bridge + broker/component configuration.

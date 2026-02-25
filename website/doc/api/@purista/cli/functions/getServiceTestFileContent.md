@@ -8,7 +8,7 @@
 
 > **getServiceTestFileContent**(`input`): `string`
 
-Defined in: [content/service/getServiceTestFileContent.ts:10](https://github.com/puristajs/purista/blob/d4f52fc34958022c6b9693e9270946d1111d759c/packages/cli/src/api/content/service/getServiceTestFileContent.ts#L10)
+Defined in: [content/service/getServiceTestFileContent.ts:10](https://github.com/puristajs/purista/blob/b97488a5ed11e245981e53a0e4c5254551300a08/packages/cli/src/api/content/service/getServiceTestFileContent.ts#L10)
 
 Create the content of the service test file.
 

@@ -13,11 +13,13 @@ This section explains how to implement domain logic with strong types and clear 
 1. Scaffold service artifacts with the [PURISTA CLI](../cli.md) (`purista add ...`).
 2. Define a [Service](./service/index.md) and shared [Builders](./builders.md).
 3. Capture [Schemas & validation](./schemas.md) to power types/OpenAPI.
-4. Configure [Queues](./queue/index.md) for pull-based workloads.
-5. Add [Commands](./command/index.md), [Streams](./stream/index.md), and [Subscriptions](./subscription/index.md).
-6. Emit [Custom event messages](./custom_events.md), wire [Logging](./logging.md), and [Error handling](./error-handling.md).
-7. Connect [Stores](./stores/index.md) and expose APIs through [exposing commands](./exposing_endpoints/index.md) + [HTTP clients](./fetch_based_http_client.md).
-8. Operate/observe services via [Connect to PURISTA](./connect_to_a_purista_application/index.md) and the [Advanced](./advanced/index.md) topics (JavaScript events, message structure, delivery semantics).
+4. Add [Commands](./command/index.md) with request/response contracts.
+5. Stream multi-frame responses through [Streams](./stream/index.md).
+6. React to events via [Subscriptions](./subscription/index.md).
+7. Configure [Queues](./queue/index.md) for pull-based workloads.
+8. Emit [Custom event messages](./custom_events.md), wire [Logging](./logging.md), and [Error handling](./error-handling.md).
+9. Connect [Stores](./stores/index.md) and expose APIs through [exposing commands](./exposing_endpoints/index.md) + [HTTP clients](./fetch_based_http_client.md).
+10. Operate/observe services via [Connect to PURISTA](./connect_to_a_purista_application/index.md) and the [Advanced](./advanced/index.md) topics (JavaScript events, message structure, delivery semantics).
 
 ## Suggested chapter order
 

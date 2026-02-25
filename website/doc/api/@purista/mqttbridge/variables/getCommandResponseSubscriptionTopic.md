@@ -6,6 +6,6 @@
 
 # Variable: getCommandResponseSubscriptionTopic
 
-> `const` **getCommandResponseSubscriptionTopic**: `GetCommandResponseSubscriptionTopicFn`
+> `const` **getCommandResponseSubscriptionTopic**: [`GetCommandResponseSubscriptionTopicFn`](../type-aliases/GetCommandResponseSubscriptionTopicFn.md)
 
 Defined in: [mqttbridge/src/topic/getCommandResponseSubscriptionTopic.impl.ts:8](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/getCommandResponseSubscriptionTopic.impl.ts#L8)

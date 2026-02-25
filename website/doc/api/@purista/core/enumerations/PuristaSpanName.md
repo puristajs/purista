@@ -116,6 +116,54 @@ Defined in: [core/types/PuristaSpanName.enum.ts:28](https://github.com/puristajs
 
 ***
 
+### QueueAck
+
+> **QueueAck**: `"purista.queue.ack"`
+
+Defined in: [core/types/PuristaSpanName.enum.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L33)
+
+***
+
+### QueueDeadLetter
+
+> **QueueDeadLetter**: `"purista.queue.deadletter"`
+
+Defined in: [core/types/PuristaSpanName.enum.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L35)
+
+***
+
+### QueueEnqueue
+
+> **QueueEnqueue**: `"purista.queue.enqueue"`
+
+Defined in: [core/types/PuristaSpanName.enum.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L30)
+
+***
+
+### QueueLease
+
+> **QueueLease**: `"purista.queue.lease"`
+
+Defined in: [core/types/PuristaSpanName.enum.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L31)
+
+***
+
+### QueueNack
+
+> **QueueNack**: `"purista.queue.nack"`
+
+Defined in: [core/types/PuristaSpanName.enum.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L34)
+
+***
+
+### QueueProcess
+
+> **QueueProcess**: `"purista.queue.process"`
+
+Defined in: [core/types/PuristaSpanName.enum.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanName.enum.ts#L32)
+
+***
+
 ### SecretStoreGetValue
 
 > **SecretStoreGetValue**: `"purista.secretStore.getValue"`

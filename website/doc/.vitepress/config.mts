@@ -148,12 +148,25 @@ export default defineConfig({
 							link: '/api/@purista/core/README.md',
 						},
 						{
+							text: '@purista/base-http-bridge',
+							link: '/api/@purista/base-http-bridge/README.md',
+						},
+						{
 							text: '@purista/hono-http-server',
 							link: '/api/@purista/hono-http-server/README.md',
 						},
 						{
 							text: '@purista/httpserver',
 							link: '/api/@purista/httpserver/README.md',
+						},
+					],
+				},
+				{
+					text: 'Tooling',
+					items: [
+						{
+							text: '@purista/cli',
+							link: '/api/@purista/cli/README.md',
 						},
 					],
 				},
@@ -175,6 +188,15 @@ export default defineConfig({
 						{
 							text: '@purista/natsbridge',
 							link: '/api/@purista/natsbridge/README.md',
+						},
+					],
+				},
+				{
+					text: 'Queue bridges',
+					items: [
+						{
+							text: '@purista/redis-queue-bridge',
+							link: '/api/@purista/redis-queue-bridge/README.md',
 						},
 					],
 				},
@@ -221,6 +243,10 @@ export default defineConfig({
 						{
 							text: '@purista/infisical-secret-store',
 							link: '/api/@purista/infisical-secret-store/README.md',
+						},
+						{
+							text: '@purista/vault-secret-store',
+							link: '/api/@purista/vault-secret-store/README.md',
 						},
 					],
 				},

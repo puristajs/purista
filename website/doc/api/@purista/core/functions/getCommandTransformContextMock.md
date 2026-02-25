@@ -8,7 +8,7 @@
 
 > **getCommandTransformContextMock**\<`MessagePayloadType`, `MessageParamsType`, `Resources`\>(`input`): `object`
 
-Defined in: [mocks/getCommandTransformContext.mock.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getCommandTransformContext.mock.ts#L14)
+Defined in: [mocks/getCommandTransformContext.mock.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getCommandTransformContext.mock.ts#L18)
 
 A function that returns a mock object for command transform function context
 
@@ -89,6 +89,10 @@ the logger instance
 > **message**: `Readonly`\<[`Command`](../type-aliases/Command.md)\<`PayloadType`, `ParameterType`\>\>
 
 the original message
+
+#### mock.queue
+
+> **queue**: [`QueueContext`](../type-aliases/QueueContext.md)
 
 #### mock.resources
 
@@ -214,6 +218,10 @@ wrap given function in an opentelemetry span
 
 > **stubs**: `object`
 
+#### stubs.enqueue
+
+> **enqueue**: `SinonStub`\<`any`[], `any`\>
+
 #### stubs.getConfig
 
 > **getConfig**: `SinonStub`\<`any`[], `any`\>
@@ -269,6 +277,10 @@ wrap given function in an opentelemetry span
 #### stubs.resources
 
 > **resources**: `Partial`\<`Resources`\>
+
+#### stubs.scheduleAt
+
+> **scheduleAt**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.setConfig
 

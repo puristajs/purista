@@ -6,7 +6,7 @@
 
 # Variable: getTopicName
 
-> `const` **getTopicName**: `GetTopicNameFn`
+> `const` **getTopicName**: [`GetTopicNameFn`](../type-aliases/GetTopicNameFn.md)
 
 Defined in: [natsbridge/src/topic/getTopicName.impl.ts:18](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/topic/getTopicName.impl.ts#L18)
 

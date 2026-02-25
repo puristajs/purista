@@ -8,7 +8,7 @@
 
 > **ContextBase** = `object`
 
-Defined in: [core/types/ContextBase.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L20)
+Defined in: [core/types/ContextBase.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L19)
 
 The ContextBase provides is a basic type.
 Each context for command function, subscription function and all Hooks and transformers will have at least the properties of this type.
@@ -19,7 +19,7 @@ Each context for command function, subscription function and all Hooks and trans
 
 > **configs**: `object`
 
-Defined in: [core/types/ContextBase.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L42)
+Defined in: [core/types/ContextBase.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L41)
 
 the config store
 
@@ -47,9 +47,17 @@ set a config value in the config store
 
 > **logger**: [`Logger`](../classes/Logger.md)
 
-Defined in: [core/types/ContextBase.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L22)
+Defined in: [core/types/ContextBase.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L21)
 
 the logger instance
+
+***
+
+### queue
+
+> **queue**: [`QueueContext`](QueueContext.md)
+
+Defined in: [core/types/ContextBase.ts:58](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L58)
 
 ***
 
@@ -57,7 +65,7 @@ the logger instance
 
 > **secrets**: `object`
 
-Defined in: [core/types/ContextBase.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L33)
+Defined in: [core/types/ContextBase.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L32)
 
 the secret store
 
@@ -85,7 +93,7 @@ set a secret in the secret store
 
 > **startActiveSpan**: \<`F`\>(`name`, `opts`, `context`, `fn`) => `Promise`\<`F`\>
 
-Defined in: [core/types/ContextBase.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L26)
+Defined in: [core/types/ContextBase.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L25)
 
 wrap given function in an opentelemetry active span
 
@@ -123,7 +131,7 @@ wrap given function in an opentelemetry active span
 
 > **states**: `object`
 
-Defined in: [core/types/ContextBase.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L51)
+Defined in: [core/types/ContextBase.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L50)
 
 the state store
 
@@ -151,7 +159,7 @@ set a state value in the state store
 
 > **wrapInSpan**: \<`F`\>(`name`, `opts`, `fn`, `context?`) => `Promise`\<`F`\>
 
-Defined in: [core/types/ContextBase.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L24)
+Defined in: [core/types/ContextBase.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ContextBase.ts#L23)
 
 wrap given function in an opentelemetry span
 

@@ -8,7 +8,7 @@
 
 > **getSubscriptionTransformContextMock**\<`Resources`\>(`input`): `object`
 
-Defined in: [mocks/getSubscriptionTransformContext.mock.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionTransformContext.mock.ts#L15)
+Defined in: [mocks/getSubscriptionTransformContext.mock.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionTransformContext.mock.ts#L19)
 
 A function that returns a mock object for subscription transform function context
 
@@ -77,6 +77,10 @@ the logger instance
 > **message**: `Readonly`\<[`EBMessage`](../type-aliases/EBMessage.md)\>
 
 the original received message
+
+#### mock.queue
+
+> **queue**: [`QueueContext`](../type-aliases/QueueContext.md)
 
 #### mock.resources
 
@@ -202,6 +206,10 @@ wrap given function in an opentelemetry span
 
 > **stubs**: `object`
 
+#### stubs.enqueue
+
+> **enqueue**: `SinonStub`\<`any`[], `any`\>
+
 #### stubs.getConfig
 
 > **getConfig**: `SinonStub`\<`any`[], `any`\>
@@ -257,6 +265,10 @@ wrap given function in an opentelemetry span
 #### stubs.resources
 
 > **resources**: `Partial`\<`Resources`\>
+
+#### stubs.scheduleAt
+
+> **scheduleAt**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.setConfig
 

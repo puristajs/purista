@@ -48,6 +48,11 @@ await eventBridge.start()
 
 ## Type Aliases
 
+- [GetCommandResponseSubscriptionTopicFn](type-aliases/GetCommandResponseSubscriptionTopicFn.md)
+- [GetCommandTopicFn](type-aliases/GetCommandTopicFn.md)
+- [GetSharedTopicNameFn](type-aliases/GetSharedTopicNameFn.md)
+- [GetSubscriptionTopicFn](type-aliases/GetSubscriptionTopicFn.md)
+- [GetTopicNameFn](type-aliases/GetTopicNameFn.md)
 - [IMqttBridge](type-aliases/IMqttBridge.md)
 - [IncomingMessageFunction](type-aliases/IncomingMessageFunction.md)
 - [MqttBridgeConfig](type-aliases/MqttBridgeConfig.md)

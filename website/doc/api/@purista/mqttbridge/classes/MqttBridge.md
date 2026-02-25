@@ -196,7 +196,7 @@ Defined in: [mqttbridge/src/MqttEventBridge.ts:67](https://github.com/puristajs/
 
 > **config**: [`Complete`](../../core/type-aliases/Complete.md)\<[`EventBridgeConfig`](../../core/type-aliases/EventBridgeConfig.md)\<`ConfigType`\>\>
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:17
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:23
 
 #### Inherited from
 
@@ -208,7 +208,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 > **defaultCommandTimeout**: `number`
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:20
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:26
 
 The default time until when a command invocation automatically returns a time out error
 
@@ -226,7 +226,7 @@ The default time until when a command invocation automatically returns a time ou
 
 > **instanceId**: `string`
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:19
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:25
 
 #### Implementation of
 
@@ -242,7 +242,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:15
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:21
 
 #### Inherited from
 
@@ -254,7 +254,7 @@ Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:1
 
 > **name**: `string`
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:18
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:24
 
 #### Implementation of
 
@@ -278,7 +278,7 @@ Defined in: [mqttbridge/src/MqttEventBridge.ts:68](https://github.com/puristajs/
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:16
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:22
 
 #### Inherited from
 
@@ -319,7 +319,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:16
 ##### K
 
 `K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
-\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; `stream-closed`: \{ `sessionId`: `string`; \} \| `undefined`; `stream-error`: `unknown`; `stream-frame-received`: `unknown`; `stream-frame-sent`: `unknown`; `stream-opened`: \{ `sessionId`: `string`; \} \| `undefined`; \}\>
 
 #### Parameters
 
@@ -385,7 +385,7 @@ the message
 
 > **getTracer**(): `Tracer`
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:27
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:33
 
 Returns open telemetry tracer of this service
 
@@ -486,7 +486,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:15
 ##### K
 
 `K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
-\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; `stream-closed`: \{ `sessionId`: `string`; \} \| `undefined`; `stream-error`: `unknown`; `stream-frame-received`: `unknown`; `stream-frame-sent`: `unknown`; `stream-opened`: \{ `sessionId`: `string`; \} \| `undefined`; \}\>
 
 #### Parameters
 
@@ -496,7 +496,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:15
 
 ##### fn
 
-`EventReceiver`\<`object`\[`K`\]\>
+[`EventReceiver`](../../core/type-aliases/EventReceiver.md)\<`object`\[`K`\]\>
 
 #### Returns
 
@@ -519,7 +519,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:14
 ##### K
 
 `K` *extends* [`EventKey`](../../core/type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
-\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; `stream-closed`: \{ `sessionId`: `string`; \} \| `undefined`; `stream-error`: `unknown`; `stream-frame-received`: `unknown`; `stream-frame-sent`: `unknown`; `stream-opened`: \{ `sessionId`: `string`; \} \| `undefined`; \}\>
 
 #### Parameters
 
@@ -529,7 +529,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:14
 
 ##### fn
 
-`EventReceiver`\<`object`\[`K`\]\>
+[`EventReceiver`](../../core/type-aliases/EventReceiver.md)\<`object`\[`K`\]\>
 
 #### Returns
 
@@ -538,6 +538,49 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:14
 #### Inherited from
 
 [`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`on`](../../core/classes/EventBridgeBaseClass.md#on)
+
+***
+
+### openStream()
+
+> **openStream**\<`Chunk`, `Final`\>(`_input`, `_ttl?`): `Promise`\<[`StreamHandle`](../../core/interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
+
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:61
+
+Open a stream invocation.
+The returned handle can be consumed via async iteration and can be cancelled by caller.
+
+#### Type Parameters
+
+##### Chunk
+
+`Chunk` = `unknown`
+
+##### Final
+
+`Final` = `unknown`
+
+#### Parameters
+
+##### \_input
+
+`Omit`\<[`StreamOpenRequest`](../../core/type-aliases/StreamOpenRequest.md), `"id"` \| `"messageType"` \| `"timestamp"` \| `"correlationId"`\>
+
+##### \_ttl?
+
+`number`
+
+#### Returns
+
+`Promise`\<[`StreamHandle`](../../core/interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
+
+#### Implementation of
+
+[`EventBridge`](../../core/interfaces/EventBridge.md).[`openStream`](../../core/interfaces/EventBridge.md#openstream)
+
+#### Inherited from
+
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`openStream`](../../core/classes/EventBridgeBaseClass.md#openstream)
 
 ***
 
@@ -576,6 +619,46 @@ the function to be called if a matching command arrives
 #### Implementation of
 
 [`EventBridge`](../../core/interfaces/EventBridge.md).[`registerCommand`](../../core/interfaces/EventBridge.md#registercommand)
+
+***
+
+### registerStream()
+
+> **registerStream**(`_address`, `_cb`, `_metadata`, `_eventBridgeConfig`): `Promise`\<`string`\>
+
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:62
+
+Register a service stream.
+
+#### Parameters
+
+##### \_address
+
+[`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md)
+
+##### \_cb
+
+(`message`) => `Promise`\<`void`\>
+
+##### \_metadata
+
+[`StreamDefinitionMetadataBase`](../../core/type-aliases/StreamDefinitionMetadataBase.md)
+
+##### \_eventBridgeConfig
+
+[`DefinitionEventBridgeConfig`](../../core/type-aliases/DefinitionEventBridgeConfig.md)
+
+#### Returns
+
+`Promise`\<`string`\>
+
+#### Implementation of
+
+[`EventBridge`](../../core/interfaces/EventBridge.md).[`registerStream`](../../core/interfaces/EventBridge.md#registerstream)
+
+#### Inherited from
+
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`registerStream`](../../core/classes/EventBridgeBaseClass.md#registerstream)
 
 ***
 
@@ -653,7 +736,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:36
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:42
 
 Start a child span for opentelemetry tracking
 
@@ -727,6 +810,34 @@ The address (service name, version and command name) of the command to be de-reg
 
 ***
 
+### unregisterStream()
+
+> **unregisterStream**(`_address`): `Promise`\<`void`\>
+
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:63
+
+Unregister a service stream
+
+#### Parameters
+
+##### \_address
+
+[`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md)
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Implementation of
+
+[`EventBridge`](../../core/interfaces/EventBridge.md).[`unregisterStream`](../../core/interfaces/EventBridge.md#unregisterstream)
+
+#### Inherited from
+
+[`EventBridgeBaseClass`](../../core/classes/EventBridgeBaseClass.md).[`unregisterStream`](../../core/classes/EventBridgeBaseClass.md#unregisterstream)
+
+***
+
 ### unregisterSubscription()
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
@@ -753,7 +864,7 @@ Defined in: [mqttbridge/src/MqttEventBridge.ts:400](https://github.com/puristajs
 
 > **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
-Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:52
+Defined in: core/dist/commonjs/core/EventBridge/EventBridgeBaseClass.impl.d.ts:58
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!

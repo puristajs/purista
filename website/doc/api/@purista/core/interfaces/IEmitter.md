@@ -64,7 +64,7 @@ Defined in: [core/types/GenericEventEmitter.ts:13](https://github.com/puristajs/
 
 ##### fn
 
-`EventReceiver`\<`T`\[`K`\]\>
+[`EventReceiver`](../type-aliases/EventReceiver.md)\<`T`\[`K`\]\>
 
 #### Returns
 
@@ -92,7 +92,7 @@ Defined in: [core/types/GenericEventEmitter.ts:12](https://github.com/puristajs/
 
 ##### fn
 
-`EventReceiver`\<`T`\[`K`\]\>
+[`EventReceiver`](../type-aliases/EventReceiver.md)\<`T`\[`K`\]\>
 
 #### Returns
 

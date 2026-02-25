@@ -14,7 +14,7 @@ Defined in: [helper/convertInvokeValidationsToSchema.impl.ts:30](https://github.
 
 ### T
 
-`T` *extends* `InputType`
+`T` *extends* [`InvokeValidationMap`](../type-aliases/InvokeValidationMap.md)
 
 ## Parameters
 

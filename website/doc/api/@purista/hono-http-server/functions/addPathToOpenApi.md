@@ -28,7 +28,7 @@ Defined in: [hono-http-server/src/helper/addPathToOpenApi.ts:14](https://github.
 
 ### config
 
-`Config`
+[`Config`](../type-aliases/Config.md)
 
 ## Returns
 

@@ -8,10 +8,226 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Breaking changes
+
+- Breaking change: switch from custom generateSchema to native z.toJSONSchema
+- Breaking change: migrate from typeschema to standardschema
+
+### Bug Fixes
+
+- Correct typo in dapr deploy docs ([#211](https://github.com/orhun/git-cliff/issues/211))
+- Check definitionsResolved ([#212](https://github.com/orhun/git-cliff/issues/212))
+- Harden generators and add e2e validation tests
+- Harden validation and error conversion paths
+- Normalize transform hook exceptions to UnhandledError
+- Improve event bridge reliability and subscription invoke wiring
+- Harden delivery lifecycle and unregister semantics
+- Harden typing utilities and stabilize integration tests
+- Tighten hono middleware and temporal otel config typing
+- Preserve invoke targets across repeated canInvoke calls
+- Handle new service versions in definition merge
+- Avoid integration setup when token is missing
+- Preserve merged definitions during export aggregation
+- Avoid false duplicate detection for builder definitions
+- Persist subscriptions for reliable unregister
+- Implement subscription unregister cleanup
+- Use typed unavailable errors when disconnected
+- Fail fast when bridge client is disconnected
+- Use api version instead of token in store paths
+- Reset stale kv cache after disconnect and destroy
+- Validate bearer token before deriving secret
+- Fetch cache misses and handle azure 404s
+- Surface update failures when setting secrets
+- Treat missing secrets as undefined
+- Wrap set and remove failures with typed errors
+- Only create secrets after typed not-found patch failures
+- Correct rest command query and response handling
+- Keep missing keys explicit in store adapter responses
+- Return typed command envelopes and guard invoke responses
+- Correct response publish logic and mqtt ttl units
+- Eventbridge client rename alias and docs
+- Validate required query params without falsy regression
+- Align required query and null no-content handling
+- Use routerOptions.ignoreTrailingSlash default
+- Keep dynamic payload object typing strict
+- Add canonical ResponseType alias in generated bridge client
+- Return hook and plain subscription functions
+- Improve subscription scaffolding and align install docs
+- Resolve opentelemetry resource type conflict in unit CI
+- Align deps and harden kv-v2 secret handling
+- Harden vault mount parsing and shell command usage
+- Make case-split regexes typedoc target compatible
+- Build core and workspaces before unit tests
+- Make release version read step shell-safe ([#233](https://github.com/orhun/git-cliff/issues/233))
+- Split release prepare and publish workflows ([#234](https://github.com/orhun/git-cliff/issues/234))
+- Handle release PR creation permission restrictions ([#235](https://github.com/orhun/git-cliff/issues/235))
+
+### Documentation
+
+- Document async queue lifecycle defaults, HTTP 202 polling contract, and canEnqueue security parity
+- Extend quickstart/starter guides with queue builders, workers, and HTTP async examples
+- Describe new `purista add queue` / `purista add queue-worker` stories and CLI prompts
+- Fix typos ([#217](https://github.com/orhun/git-cliff/issues/217))
+- Add contributor guide and integration test env docs
+- Add API jsdoc for exported helpers and types
+- Improve jsdoc for schema and transform public helpers
+- Align purista.json schema URL with CLI config
+- Replace any-based service definition snippets
+- Align quickstart typing patterns and cli schema defaults
+- Improve quickstart clarity and fix wording issues
+- Document required Service<any> variance in temporal setup
+- Fix business-logic wording and snippet correctness
+- Improve service builder wording clarity
+- Annotate intentional any schema boundaries
+- Improve transformer and opentelemetry guidance clarity
+- Sync temporal opentelemetry guide with current implementation
+- Clarify cli-managed definition lists and service builder typing
+- Fix javascript events examples and typos
+- Refine javascript events guidance wording
+- Align definition list typing with cli output
+- Fix OpenTelemetry config import path in snippet
+- Add canonical generateEventBridgeClient method section
+- Fix OpenAPI definition typo
+- Mark deprecated eventbridge client alias explicitly
+- Align client builder defaults and REST client examples
+- Polish wording and OpenTelemetry phrasing
+- Fix deprecation hints for IDE tooltips
+- Fix hono REST snippets and deprecated httpserver guidance
+- Fix remaining Bun REST snippet typo
+- Polish deprecation wording and command docs typo
+- Align hono node-server guidance in dapr and kubernetes
+- Fix remaining @hono/node-server comment typo
+- Fix store snippets and align ecosystem store matrix
+- Expand subscriptions and complete endpoint chapters
+- Improve structure with learning paths and section roadmaps
+- Add production path and section checklists
+- Clarify resources are injected into command and subscription context
+- Add PURISTA 2.2 release post with cover image
+- Add vault secret store
+- Expand 2.2.0 release post with full scope
+- Add vault secret-store coverage and polish release articles
+
+### Features
+
+- Migrate to zod v4
+- Generate unknown payload schemas by default
+- Add vault secret store package
+- Add queue builders, worker builders, and `.canEnqueue` context helpers for commands/subscriptions/streams
+- Ship DefaultQueueBridge plus queue lifecycle types and proxies
+- Introduce RedisQueueBridge provider implementation
+- Add CLI scaffolding for queues/workers and queue-aware templates/examples
+
+### Miscellaneous Tasks
+
+- Update deps
+- Migrate to biome v2
+- Fix lint
+- Bump packages
+- Bump node target and workspace dependency versions
+- Apply biome formatting and import ordering fixes
+- Align merge definition tests with biome formatting
+- Clarify heterogeneous service list typing rationale
+- Sync workspace package-lock with manifests
+- Updated packages
+- Harden CI release workflow and prepare script
+- Align biome schema and typedoc formatting
+- Use .nvmrc for setup-node version
+
+### Refactor
+
+- Strengthen service definition arrays and bridge typings
+- Remove remaining list<any> service fixture typings
+- Remove unsafe any usage in schema object utils
+- Remove any casts in casing conversion tests
+- Tighten logger and schema transform typing
+- Derive subscription parameter types in tests
+- Tighten mock helper typing and remove any casts
+- Use unknown payload schemas and signature-derived test types
+- Tighten client builder package json typing
+- Replace any payload schemas with unknown in package fixtures
+- Replace any double-casts and refresh command test snippet
+- Avoid any in non-arrow function assertion helper
+- Derive command test input types from bound signatures
+- Tighten invoke proxy typing and generic order
+- Use unknown resource constraints in type declarations
+- Remove any cast in query parameter collection
+- Replace any exporter cast with typed workflow bridge
+- Tighten builder generics and remove command call cast
+- Add canonical symbol names with deprecated aliases
+- Add canonical helper filenames with shim exports
+- Use unknown schema for dynamic subscription payload
+- Remove unsafe metadata casts
+- Avoid any in guard validation helpers
+- Migrate deprecated httpserver to hono
+- Migrate nats mqtt and full examples to hono server
+- Drop obsolete fastify type shims
+
+### Testing
+
+- Gate and stabilize local secret-store and bridge suites
+- Replace todo validation tests and unskip k8s error logging
+- Remove any casts from cli and amqpbridge tests
+- Remove any casts from dapr sdk tests
+- Remove any casts from core and mqttbridge tests
+- Remove remaining any casts in core and k8s tests
+- Remove bridge cast in nats topic test
+- Remove unknown casts in http subscription tests
+- Validate config route through hono request flow
+- Use object fixtures for unknown payload placeholders
+- Isolate temp fixtures outside repository tree
+- Guard typed service definition arrays in generated files
+- Cover canonical eventbridge client and dedupe hono helper exports
+- Type default logger mock without any
+
+### Ci
+
+- Add non-publishing release dry-run workflow
+
+## [2.1.5] - 2025-04-30
+
+## [2.1.4] - 2025-03-31
+
+### Bug Fixes
+
+- Cli code update when command or subscription is added ([#200](https://github.com/orhun/git-cliff/issues/200))
+
+## [2.1.3] - 2025-03-31
+
+### Bug Fixes
+
+- Cli test code generation
+
+### Miscellaneous Tasks
+
+- Update to version 2.1.3
+
+## [2.1.2] - 2025-03-31
+
+### Bug Fixes
+
+- Fix handling of service event as const
+
+### Miscellaneous Tasks
+
+- Version 2.1.2
+
+## [2.1.1] - 2025-03-31
+
+### Bug Fixes
+
+- Respect service enum as const in cli
+
 ### Documentation
 
 - Correct wording and spelling
 - Update api documentation
+- Update CHANGELOG
+
+### Miscellaneous Tasks
+
+- Update website
+- Update dependency versions
+- Bump to version 2.1.1
 
 ## [2.1.0] - 2025-03-04
 

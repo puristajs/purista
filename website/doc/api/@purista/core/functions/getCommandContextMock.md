@@ -6,9 +6,9 @@
 
 # Function: getCommandContextMock()
 
-> **getCommandContextMock**\<`MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `EmitList`\>(`input`): `object`
+> **getCommandContextMock**\<`MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`\>(`input`): `object`
 
-Defined in: [mocks/getCommandContext.mock.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getCommandContext.mock.ts#L17)
+Defined in: [mocks/getCommandContext.mock.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getCommandContext.mock.ts#L24)
 
 A function that returns a mock object for command function context
 
@@ -37,6 +37,10 @@ A function that returns a mock object for command function context
 ### Invokes
 
 `Invokes` *extends* [`InvokeList`](../type-aliases/InvokeList.md)
+
+### StreamInvokes
+
+`StreamInvokes` *extends* [`StreamInvokeList`](../type-aliases/StreamInvokeList.md)
 
 ### EmitList
 
@@ -74,6 +78,10 @@ A function that returns a mock object for command function context
 
 `FunctionPayloadType`
 
+#### queueInvokes?
+
+[`QueueInvokeList`](../type-aliases/QueueInvokeList.md)
+
 #### resources?
 
 `Partial`\<`Resources`\>
@@ -81,6 +89,10 @@ A function that returns a mock object for command function context
 #### sandbox?
 
 `SinonSandbox`
+
+#### streamInvokes?
+
+`StreamInvokes`
 
 ## Returns
 
@@ -131,6 +143,12 @@ the logger instance
 > **message**: `Readonly`\<[`Command`](../type-aliases/Command.md)\<`MessagePayloadType`, `MessageParamsType`\>\>
 
 the original message
+
+#### mock.queue
+
+> **queue**: [`QueueContext`](../type-aliases/QueueContext.md) & [`QueueContext`](../type-aliases/QueueContext.md)\<[`QueueInvokeList`](../type-aliases/QueueInvokeList.md)\>
+
+typed queue enqueue helpers
 
 #### mock.resources
 
@@ -239,6 +257,12 @@ delete a state value from the state store
 
 set a state value in the state store
 
+#### mock.stream
+
+> **stream**: `StreamInvokes`
+
+consumes stream responses from other service stream endpoints
+
 #### mock.wrapInSpan()
 
 > **wrapInSpan**: \<`F`\>(`name`, `opts`, `fn`, `context?`) => `Promise`\<`F`\>
@@ -280,6 +304,10 @@ wrap given function in an opentelemetry span
 #### stubs.emit
 
 > **emit**: [`FromEmitToOtherType`](../type-aliases/FromEmitToOtherType.md)\<`EmitList`, `SinonStub`\<`any`[], `any`\>\> = `eventList`
+
+#### stubs.enqueue
+
+> **enqueue**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.getConfig
 
@@ -340,6 +368,10 @@ wrap given function in an opentelemetry span
 #### stubs.resources
 
 > **resources**: `Partial`\<`Resources`\>
+
+#### stubs.scheduleAt
+
+> **scheduleAt**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.service
 

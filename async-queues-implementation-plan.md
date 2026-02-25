@@ -151,3 +151,15 @@ Team agreement: execute these steps sequentially, committing each milestone sepa
 ---
 
 Work should proceed milestone by milestone, keeping PRs focused (core, runtime, bridge, CLI, docs). This file should be updated as milestones complete or scope changes.
+
+---
+
+## Status update – February 25, 2026
+
+- ✅ Core/runtime refactor merged into `codex/async-queues-specs`; queue builders, `.canEnqueue`, default bridge, and Redis bridge package exist with passing unit coverage.
+- ✅ CLI gained `purista add queue` / `purista add queue-worker` scaffolds plus test fixtures.
+- 🔄 Documentation + API site polish in progress:
+  - Handbook restructuring (Queues, Builders, Ecosystem, Advanced) to reflect the new abstractions.
+  - Typedoc/VitePress config fixes so every package (including `@purista/redis-queue-bridge`) renders working links without stale `globals.md` references.
+  - Queue HTTP exposure guide gains concrete examples for async endpoints/status polling.
+- 🔜 Test infrastructure follow-up: restore Docker images for AMQP/MQTT/NATS/Redis/Vault integration suites once docs + typedoc blockers are cleared, then re-run the dockerized Vitest jobs locally/CI.

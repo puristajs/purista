@@ -28,6 +28,54 @@ Defined in: [core/types/PuristaSpanTag.enum.ts:5](https://github.com/puristajs/p
 
 ***
 
+### QueueAttempt
+
+> **QueueAttempt**: `"purista.queue.attempt"`
+
+Defined in: [core/types/PuristaSpanTag.enum.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L24)
+
+***
+
+### QueueBridge
+
+> **QueueBridge**: `"purista.queue.bridge"`
+
+Defined in: [core/types/PuristaSpanTag.enum.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L21)
+
+***
+
+### QueueDelay
+
+> **QueueDelay**: `"purista.queue.delayMs"`
+
+Defined in: [core/types/PuristaSpanTag.enum.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L23)
+
+***
+
+### QueueJobId
+
+> **QueueJobId**: `"purista.queue.jobId"`
+
+Defined in: [core/types/PuristaSpanTag.enum.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L20)
+
+***
+
+### QueueName
+
+> **QueueName**: `"purista.queue.name"`
+
+Defined in: [core/types/PuristaSpanTag.enum.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L19)
+
+***
+
+### QueueReason
+
+> **QueueReason**: `"purista.queue.reason"`
+
+Defined in: [core/types/PuristaSpanTag.enum.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/PuristaSpanTag.enum.ts#L22)
+
+***
+
 ### ReceiverServiceName
 
 > **ReceiverServiceName**: `"purista.receiver.name"`

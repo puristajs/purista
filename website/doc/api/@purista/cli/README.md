@@ -58,10 +58,15 @@ purista add command user
 
 ## Type Aliases
 
+- [AddPuristaQueueInput](type-aliases/AddPuristaQueueInput.md)
+- [AddPuristaQueueWorkerInput](type-aliases/AddPuristaQueueWorkerInput.md)
+- [EnqueueOption](type-aliases/EnqueueOption.md)
 - [Locale](type-aliases/Locale.md)
 - [PuristaConfig](type-aliases/PuristaConfig.md)
 - [PuristaProjectInfo](type-aliases/PuristaProjectInfo.md)
 - [PuristaProjectServices](type-aliases/PuristaProjectServices.md)
+- [QueueProducerOptions](type-aliases/QueueProducerOptions.md)
+- [QueueWorkerOptions](type-aliases/QueueWorkerOptions.md)
 
 ## Variables
 
@@ -70,7 +75,10 @@ purista add command user
 ## Functions
 
 - [addPuristaCommand](functions/addPuristaCommand.md)
+- [addPuristaQueue](functions/addPuristaQueue.md)
+- [addPuristaQueueWorker](functions/addPuristaQueueWorker.md)
 - [addPuristaService](functions/addPuristaService.md)
+- [addPuristaStream](functions/addPuristaStream.md)
 - [addPuristaSubscription](functions/addPuristaSubscription.md)
 - [camelCase](functions/camelCase.md)
 - [capitalCase](functions/capitalCase.md)
@@ -82,10 +90,20 @@ purista add command user
 - [getCommandTestFileContent](functions/getCommandTestFileContent.md)
 - [getCommandTypeFileContent](functions/getCommandTypeFileContent.md)
 - [getGeneralServiceConfigFileContent](functions/getGeneralServiceConfigFileContent.md)
+- [getQueueBuilderFileContent](functions/getQueueBuilderFileContent.md)
+- [getQueueSchemaFileContent](functions/getQueueSchemaFileContent.md)
+- [getQueueTestFileContent](functions/getQueueTestFileContent.md)
+- [getQueueTypeFileContent](functions/getQueueTypeFileContent.md)
+- [getQueueWorkerBuilderFileContent](functions/getQueueWorkerBuilderFileContent.md)
+- [getQueueWorkerTestFileContent](functions/getQueueWorkerTestFileContent.md)
 - [getServiceBuilderFileContent](functions/getServiceBuilderFileContent.md)
 - [getServiceConfigFileContent](functions/getServiceConfigFileContent.md)
 - [getServiceFileContent](functions/getServiceFileContent.md)
 - [getServiceTestFileContent](functions/getServiceTestFileContent.md)
+- [getStreamBuilderFileContent](functions/getStreamBuilderFileContent.md)
+- [getStreamSchemaFileContent](functions/getStreamSchemaFileContent.md)
+- [getStreamTestFileContent](functions/getStreamTestFileContent.md)
+- [getStreamTypeFileContent](functions/getStreamTypeFileContent.md)
 - [getSubscriptionBuilderFileContent](functions/getSubscriptionBuilderFileContent.md)
 - [getSubscriptionSchemaFileContent](functions/getSubscriptionSchemaFileContent.md)
 - [getSubscriptionTestFileContent](functions/getSubscriptionTestFileContent.md)

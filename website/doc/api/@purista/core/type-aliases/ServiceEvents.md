@@ -6,7 +6,7 @@
 
 # Type Alias: ServiceEvents
 
-> **ServiceEvents** = [`ServiceEventsInternal`](ServiceEventsInternal.md) & [`addPrefixToObject`](addPrefixToObject.md)\<`CustomEvents`, `"custom-"`\> & [`addPrefixToObject`](addPrefixToObject.md)\<`CustomEvents`, `"misc-"`\>
+> **ServiceEvents** = [`ServiceEventsInternal`](ServiceEventsInternal.md) & [`addPrefixToObject`](addPrefixToObject.md)\<[`CustomEvents`](CustomEvents.md), `"custom-"`\> & [`addPrefixToObject`](addPrefixToObject.md)\<[`CustomEvents`](CustomEvents.md), `"misc-"`\>
 
 Defined in: [core/types/ServiceEvents.ts:98](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceEvents.ts#L98)
 

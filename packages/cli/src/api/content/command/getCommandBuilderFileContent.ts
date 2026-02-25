@@ -6,7 +6,7 @@ import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 import type { PuristaProjectInfo } from '../../scanPuristaProject.js'
 
-type EnqueueOption = {
+export type EnqueueOption = {
 	queueName: string
 	importPath: string
 	payloadSchemaIdentifier: string
@@ -46,13 +46,13 @@ export const getCommandBuilderFileContent = (input: {
 			names.add(option.parameterSchemaIdentifier)
 			groupedImports.set(option.importPath, names)
 		}
-		for (const [modulePath, names] of groupedImports) {
+		groupedImports.forEach((names, modulePath) => {
 			const filteredNames = Array.from(names).filter(Boolean)
 			if (filteredNames.length === 0) {
-				continue
+				return
 			}
 			writer.writeLine(`import { ${filteredNames.join(', ')} } from '${modulePath.replace(/\.ts$/, '.js')}'`)
-		}
+		})
 	}
 
 	if (addSuccessEvent && input.puristaProject.eventEnumFileName.length > 0) {

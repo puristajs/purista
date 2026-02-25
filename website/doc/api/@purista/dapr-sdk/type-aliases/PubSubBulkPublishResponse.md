@@ -16,6 +16,6 @@ PubSubBulkPublishResponse defines the response from a bulk publish request.
 
 ### failedMessages
 
-> **failedMessages**: `PubSubBulkPublishResponseFailedEntry`[]
+> **failedMessages**: [`PubSubBulkPublishResponseFailedEntry`](PubSubBulkPublishResponseFailedEntry.md)[]
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishResponse.type.ts:25](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishResponse.type.ts#L25)

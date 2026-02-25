@@ -18,6 +18,8 @@ Create a new logger instance using pino.
 
 [`LogLevelName`](../type-aliases/LogLevelName.md) = `...`
 
+The minimum log level to use.
+
 ### opt?
 
 `LoggerOptions`\<`never`, `boolean`\>

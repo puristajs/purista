@@ -20,7 +20,7 @@ Converts supported schema formats into OpenAPI-compatible JSON Schema.
 
 ### options?
 
-`JsonSchemaOptions`
+[`JsonSchemaOptions`](../type-aliases/JsonSchemaOptions.md)
 
 ## Returns
 

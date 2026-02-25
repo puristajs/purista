@@ -27,6 +27,7 @@ It only shares some basic functionality for other event bridge implementations b
 ## Type Aliases
 
 - [HttpEventBridgeConfig](type-aliases/HttpEventBridgeConfig.md)
+- [IHttpEventBridge](type-aliases/IHttpEventBridge.md)
 - [RouterFunction](type-aliases/RouterFunction.md)
 
 ## Variables

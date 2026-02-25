@@ -16,7 +16,7 @@ Type of event bridge message
 
 > **Command**: `"command"`
 
-Defined in: [core/types/EBMessageType.enum.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L11)
+Defined in: [core/types/EBMessageType.enum.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L17)
 
 Command message type:
 Message which is sent from a single sender to exactly one single receiver.
@@ -29,7 +29,7 @@ If the sender does not receive a answer within this time frame, the command will
 
 > **CommandErrorResponse**: `"commandErrorResponse"`
 
-Defined in: [core/types/EBMessageType.enum.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L17)
+Defined in: [core/types/EBMessageType.enum.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L23)
 
 a error response from receiver of a command message
 
@@ -39,7 +39,7 @@ a error response from receiver of a command message
 
 > **CommandSuccessResponse**: `"commandSuccessResponse"`
 
-Defined in: [core/types/EBMessageType.enum.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L14)
+Defined in: [core/types/EBMessageType.enum.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L20)
 
 a success response from receiver of a command message
 
@@ -49,7 +49,7 @@ a success response from receiver of a command message
 
 > **CustomMessage**: `"customMessage"`
 
-Defined in: [core/types/EBMessageType.enum.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L42)
+Defined in: [core/types/EBMessageType.enum.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L48)
 
 a custom message / custom event
 
@@ -59,7 +59,7 @@ a custom message / custom event
 
 > **InfoInvokeTimeout**: `"infoInvokeTimeout"`
 
-Defined in: [core/types/EBMessageType.enum.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L38)
+Defined in: [core/types/EBMessageType.enum.ts:44](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L44)
 
 a service invoked a other function and did not get a answer within given ttl
 
@@ -69,7 +69,7 @@ a service invoked a other function and did not get a answer within given ttl
 
 > **InfoServiceDrain**: `"infoServiceDrain"`
 
-Defined in: [core/types/EBMessageType.enum.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L34)
+Defined in: [core/types/EBMessageType.enum.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L40)
 
 indicates that a service is going to shut down and does no longer accept new requests
 
@@ -79,7 +79,7 @@ indicates that a service is going to shut down and does no longer accept new req
 
 > **InfoServiceFunctionAdded**: `"infoServiceFunctionAdded"`
 
-Defined in: [core/types/EBMessageType.enum.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L32)
+Defined in: [core/types/EBMessageType.enum.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L38)
 
 send when a service provides a new function
 
@@ -89,7 +89,7 @@ send when a service provides a new function
 
 > **InfoServiceInit**: `"infoServiceInit"`
 
-Defined in: [core/types/EBMessageType.enum.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L26)
+Defined in: [core/types/EBMessageType.enum.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L32)
 
 indicates that a service is booting
 
@@ -99,7 +99,7 @@ indicates that a service is booting
 
 > **InfoServiceNotReady**: `"infoServiceNotReady"`
 
-Defined in: [core/types/EBMessageType.enum.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L30)
+Defined in: [core/types/EBMessageType.enum.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L36)
 
 indicates that a service is not able to process requests (e.g. db not available)
 
@@ -109,7 +109,7 @@ indicates that a service is not able to process requests (e.g. db not available)
 
 > **InfoServiceReady**: `"infoServiceReady"`
 
-Defined in: [core/types/EBMessageType.enum.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L28)
+Defined in: [core/types/EBMessageType.enum.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L34)
 
 indicates that a service is ready
 
@@ -119,7 +119,7 @@ indicates that a service is ready
 
 > **InfoServiceShutdown**: `"infoServiceShutdown"`
 
-Defined in: [core/types/EBMessageType.enum.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L36)
+Defined in: [core/types/EBMessageType.enum.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L42)
 
 last event from service before service is destroyed
 
@@ -129,6 +129,17 @@ last event from service before service is destroyed
 
 > **InfoSubscriptionError**: `"infoSubscriptionError"`
 
-Defined in: [core/types/EBMessageType.enum.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L40)
+Defined in: [core/types/EBMessageType.enum.ts:46](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L46)
 
 a subscription function is throwing
+
+***
+
+### Stream
+
+> **Stream**: `"stream"`
+
+Defined in: [core/types/EBMessageType.enum.ts:9](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/EBMessageType.enum.ts#L9)
+
+Stream message type:
+Message used for opening, transferring frames, and controlling stream sessions.

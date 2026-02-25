@@ -97,16 +97,26 @@ main()
 
 Please migrate to `@purista/hono-http-server`.
 
+## Classes
+
+- [~~HttpServerClass~~](classes/HttpServerClass.md)
+
 ## Type Aliases
 
 - [~~BeforeResponseHook~~](type-aliases/BeforeResponseHook.md)
 - [~~HttpServerServiceV1Config~~](type-aliases/HttpServerServiceV1Config.md)
+- [~~HttpServerServiceV1ConfigRaw~~](type-aliases/HttpServerServiceV1ConfigRaw.md)
 - [~~HttpServerV1ServiceCommandsToRestApiInputPayload~~](type-aliases/HttpServerV1ServiceCommandsToRestApiInputPayload.md)
 
 ## Variables
 
 - [~~httpServerServiceInfo~~](variables/httpServerServiceInfo.md)
+- [~~httpServerServiceV1ConfigSchema~~](variables/httpServerServiceV1ConfigSchema.md)
 - [~~httpServerV1Service~~](variables/httpServerV1Service.md)
 - [~~httpServerV1ServiceBuilder~~](variables/httpServerV1ServiceBuilder.md)
+- [~~httpServerV1ServiceCommandsToRestApiInputPayloadSchema~~](variables/httpServerV1ServiceCommandsToRestApiInputPayloadSchema.md)
+- [~~OPENAPI\_DEFAULT\_INFO~~](variables/OPENAPI_DEFAULT_INFO.md)
+- [~~OPENAPI\_DEFAULT\_MOUNT\_PATH~~](variables/OPENAPI_DEFAULT_MOUNT_PATH.md)
 - [~~puristaVersion~~](variables/puristaVersion.md)
+- [~~serviceCommandsToRestApiSubscriptionBuilder~~](variables/serviceCommandsToRestApiSubscriptionBuilder.md)
 - [~~ServiceEvent~~](variables/ServiceEvent.md)
