@@ -150,6 +150,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	private queueWorkerTasks = new Set<Promise<void>>()
 	private queueWorkersShouldStop = false
 	private queueMetricsCache = new Map<string, QueueMetrics>()
+	private queueBridgeStarted = false
 
 	public commandDefinitionList: CommandDefinitionListResolved<any>
 	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
@@ -273,7 +274,16 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	}
 
 	protected async initializeQueues() {
-		await this.queueBridge.start()
+		if (!this.hasQueueFeatures()) {
+			this.logger.debug('no queues/workers declared; skipping queue bridge startup')
+			return
+		}
+
+		if (!this.queueBridgeStarted) {
+			await this.queueBridge.start()
+			this.queueBridgeStarted = true
+		}
+
 		const isQueueBridgeReady = await this.queueBridge.isHealthy()
 		if (!isQueueBridgeReady) {
 			const err = new UnhandledError(StatusCode.ServiceUnavailable, 'queue bridge not healthy')
@@ -1713,35 +1723,39 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	}
 
 	public async getServiceHealth(): Promise<ServiceHealthState> {
-		const [eventBridgeHealthy, queueBridgeHealthy] = await Promise.all([
-			this.eventBridge.isHealthy(),
-			this.queueBridge.isHealthy(),
-		])
+		const eventBridgeHealthy = await this.eventBridge.isHealthy()
+		const hasQueues = this.hasQueueFeatures()
 
-		const queues = await Promise.all(
-			this.queueDefinitionList.map(async queue => {
-				try {
-					const metrics = await this.queueBridge.metrics(queue.queueName)
-					this.queueMetricsCache.set(queue.queueName, metrics)
-					const health = this.evaluateQueueHealth(queue.queueName, metrics)
-					return {
-						queueName: queue.queueName,
-						status: health.status,
-						reason: health.reason,
-						metrics,
-					} as QueueHealthState
-				} catch (error) {
-					const fallback: QueueMetrics = { pending: 0, inflight: 0, deadLetter: 0, retries: 0 }
-					const reason = error instanceof Error ? error.message : 'queue metrics unavailable'
-					return {
-						queueName: queue.queueName,
-						status: 'error',
-						reason,
-						metrics: this.queueMetricsCache.get(queue.queueName) ?? fallback,
-					} as QueueHealthState
-				}
-			}),
-		)
+		let queueBridgeHealthy = true
+		let queues: QueueHealthState[] = []
+
+		if (hasQueues) {
+			queueBridgeHealthy = await this.queueBridge.isHealthy()
+			queues = await Promise.all(
+				this.queueDefinitionList.map(async queue => {
+					try {
+						const metrics = await this.queueBridge.metrics(queue.queueName)
+						this.queueMetricsCache.set(queue.queueName, metrics)
+						const health = this.evaluateQueueHealth(queue.queueName, metrics)
+						return {
+							queueName: queue.queueName,
+							status: health.status,
+							reason: health.reason,
+							metrics,
+						} as QueueHealthState
+					} catch (error) {
+						const fallback: QueueMetrics = { pending: 0, inflight: 0, deadLetter: 0, retries: 0 }
+						const reason = error instanceof Error ? error.message : 'queue metrics unavailable'
+						return {
+							queueName: queue.queueName,
+							status: 'error',
+							reason,
+							metrics: this.queueMetricsCache.get(queue.queueName) ?? fallback,
+						} as QueueHealthState
+					}
+				}),
+			)
+		}
 
 		let status: ServiceHealthState['status'] = 'ok'
 		if (!eventBridgeHealthy || !queueBridgeHealthy || queues.some(queue => queue.status === 'error')) {
@@ -2306,6 +2320,10 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		return name.trim().toLowerCase()
 	}
 
+	private hasQueueFeatures() {
+		return this.queueDefinitionList.length > 0 || this.queueWorkerDefinitionList.length > 0
+	}
+
 	private getQueueDefinition(queueName: string) {
 		return this.queueDefinitionMap.get(this.normalizeQueueName(queueName))
 	}
@@ -2320,7 +2338,10 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 		this.activeStreamSessions.clear()
 		await this.stopQueueWorkers()
-		await this.queueBridge.destroy()
+		if (this.queueBridgeStarted) {
+			await this.queueBridge.destroy()
+			this.queueBridgeStarted = false
+		}
 		this.emit(ServiceEventsNames.ServiceDrain)
 		this.emit(ServiceEventsNames.ServiceStopped)
 		this.removeAllListeners()
