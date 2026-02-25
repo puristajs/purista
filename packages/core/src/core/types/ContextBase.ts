@@ -3,15 +3,14 @@ import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 import type { ConfigDeleteFunction } from '../ConfigStore/types/ConfigDeleteFunction.js'
 import type { ConfigGetterFunction } from '../ConfigStore/types/ConfigGetterFunction.js'
 import type { ConfigSetterFunction } from '../ConfigStore/types/ConfigSetterFunction.js'
-
 import type { SecretDeleteFunction } from '../SecretStore/types/SecretDeleteFunction.js'
 import type { SecretGetterFunction } from '../SecretStore/types/SecretGetterFunction.js'
 import type { SecretSetterFunction } from '../SecretStore/types/SecretSetterFunction.js'
-
 import type { StateDeleteFunction } from '../StateStore/types/StateDeleteFunction.js'
 import type { StateGetterFunction } from '../StateStore/types/StateGetterFunction.js'
 import type { StateSetterFunction } from '../StateStore/types/StateSetterFunction.js'
 import type { Logger } from './Logger.js'
+import type { QueueContext } from './queue/QueueContext.js'
 
 /**
  * The ContextBase provides is a basic type.
@@ -56,4 +55,5 @@ export type ContextBase = {
 		/** delete a state value from the state store */
 		removeState: StateDeleteFunction
 	}
+	queue: QueueContext
 }

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { existsSync, readdirSync } from 'node:fs'
 import { writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 import confirm from '@inquirer/confirm'
@@ -6,18 +7,21 @@ import input from '@inquirer/input'
 import select from '@inquirer/select'
 import { Argument, program } from 'commander'
 import { addPuristaCommand } from './api/addPuristaCommand.js'
+import { addPuristaQueue } from './api/addPuristaQueue.js'
+import { addPuristaQueueWorker } from './api/addPuristaQueueWorker.js'
 import { addPuristaService } from './api/addPuristaService.js'
 import { addPuristaStream } from './api/addPuristaStream.js'
 import { addPuristaSubscription } from './api/addPuristaSubscription.js'
 import { camelCase, capitalCase } from './api/change-case.js'
 import { ensureServiceEvent } from './api/content/manipulation/ensureServiceEvent.js'
+import { convertToProjectFileCasing } from './api/convertToProjectFileCasing.js'
 import { getFormatConfig } from './api/getFormatConfig.js'
 import { loadPuristaConfig, type PuristaConfig, puristaConfigSchema } from './api/loadPuristaConfig.js'
 import { scanPuristaProject } from './api/scanPuristaProject.js'
 import { puristaVersion } from './version.js'
 
 type addComponetInput = {
-	component: 'service' | 'command' | 'subscription' | 'stream'
+	component: 'service' | 'command' | 'subscription' | 'stream' | 'queue' | 'queue-worker'
 	name: string
 	description: string
 	eventToSubscribe?: string
@@ -68,9 +72,16 @@ const main = async () => {
 
 	program
 		.command('add')
-		.description('Add a new service, command, subscription or stream. ')
+		.description('Add a new service, command, subscription, stream, queue, or queue worker.')
 		.addArgument(
-			new Argument('[component]', 'Type of component to add').choices(['service', 'command', 'subscription', 'stream']),
+			new Argument('[component]', 'Type of component to add').choices([
+				'service',
+				'command',
+				'subscription',
+				'stream',
+				'queue',
+				'queue-worker',
+			]),
 		)
 		.addArgument(new Argument('[name]', 'Name of component'))
 		.action(async (...args: ['service' | 'command' | 'subscription' | 'stream' | undefined, string?]) => {
@@ -87,7 +98,7 @@ const main = async () => {
 				(await select({
 					loop: true,
 					message: 'What do you want to add?',
-					choices: ['service', 'command', 'subscription', 'stream'],
+					choices: ['service', 'command', 'subscription', 'stream', 'queue', 'queue-worker'],
 					default: 'service',
 				}))
 
@@ -165,23 +176,199 @@ const main = async () => {
 				data.serviceVersion = serviceVersions[0].value
 			}
 
-			data.responseEventName = await input({
-				message: 'Name of the response event (optional)',
-				required: false,
-			})
-
-			if (data.responseEventName?.trim().length) {
-				const description = `Emitted by ${data.serviceName} v${data.serviceVersion} command ${camelCase(
-					data.name,
-				)}:\n${data.description}`
-
-				await ensureServiceEvent({
-					projectRootPath,
-					puristaProjectConfig: puristaConfig,
-					puristaProject,
-					eventName: data.responseEventName,
-					description,
+			if (data.component === 'queue') {
+				const defaultWorkerName = `${camelCase(data.name)}Worker`
+				const workerName = await input({
+					message: 'Name of the queue worker (default derived)',
+					required: true,
+					default: defaultWorkerName,
 				})
+
+				const workerDescription = await input({
+					message: 'Description of the queue worker',
+					required: true,
+					default: data.description,
+				})
+
+				const workerMode = (await select({
+					loop: true,
+					message: 'Select worker mode',
+					choices: [
+						{ name: 'continuous', value: 'continuous' },
+						{ name: 'interval', value: 'interval' },
+						{ name: 'sequential', value: 'sequential' },
+					],
+					default: 'continuous',
+				})) as 'continuous' | 'interval' | 'sequential'
+
+				let intervalMs: number | undefined
+				if (workerMode === 'interval') {
+					const intervalInput = await input({
+						message: 'Interval in milliseconds',
+						default: '60000',
+						required: true,
+						validate: text => {
+							const value = Number.parseInt(text, 10)
+							return Number.isNaN(value) || value <= 0 ? 'Enter a positive integer' : true
+						},
+					})
+					intervalMs = Number.parseInt(intervalInput, 10)
+				}
+
+				const maxParallelInput = await input({
+					message: 'Max parallel handlers',
+					default: '1',
+					required: true,
+					validate: text => {
+						const value = Number.parseInt(text, 10)
+						return Number.isNaN(value) || value <= 0 ? 'Enter a positive integer' : true
+					},
+				})
+				const maxParallelHandlers = Number.parseInt(maxParallelInput, 10)
+
+				let producerOptions: { commandName: string; commandDescription: string; responseEventName?: string } | undefined
+				const scaffoldProducer = await confirm({
+					message: 'Create a producer command that enqueues jobs?',
+					default: true,
+				})
+				if (scaffoldProducer) {
+					const commandName = await input({
+						message: 'Name of the producer command',
+						required: true,
+						default: `${data.name} producer`,
+					})
+					const commandDescription = await input({
+						message: 'Description of the producer command',
+						required: true,
+					})
+					const responseEventName = await input({
+						message: 'Name of the response event (optional)',
+						required: false,
+					})
+
+					if (responseEventName?.trim().length) {
+						const description = `Emitted by ${data.serviceName} v${data.serviceVersion} command ${camelCase(
+							commandName,
+						)}:\n${commandDescription}`
+
+						await ensureServiceEvent({
+							projectRootPath,
+							puristaProjectConfig: puristaConfig,
+							puristaProject,
+							eventName: responseEventName,
+							description,
+						})
+					}
+
+					producerOptions = {
+						commandName,
+						commandDescription,
+						responseEventName: responseEventName?.trim() ? responseEventName : undefined,
+					}
+				}
+
+				await addPuristaQueue({
+					projectRootPath,
+					puristaConfig,
+					puristaProject,
+					serviceName: data.serviceName,
+					serviceVersion: data.serviceVersion,
+					queueName: data.name,
+					queueDescription: data.description,
+					worker: {
+						name: workerName,
+						description: workerDescription,
+						mode: workerMode,
+						intervalMs,
+						maxParallelHandlers,
+					},
+					producer: producerOptions,
+					codeWriterOptions,
+				})
+
+				return
+			}
+
+			if (data.component === 'queue-worker') {
+				const queueRoot = join(
+					projectRootPath,
+					puristaConfig.servicePath,
+					convertToProjectFileCasing(data.serviceName, puristaConfig),
+					`v${data.serviceVersion}`,
+					'queue',
+				)
+
+				if (!existsSync(queueRoot)) {
+					console.error('No queues found for the selected service. Create a queue first.')
+					process.exit(1)
+				}
+
+				const queueDirs = readdirSync(queueRoot, { withFileTypes: true })
+					.filter(entry => entry.isDirectory())
+					.map(entry => entry.name)
+				if (!queueDirs.length) {
+					console.error('No queues found for the selected service. Create a queue first.')
+					process.exit(1)
+				}
+
+				const queueName = await select({
+					loop: true,
+					message: 'Select the queue to attach a worker to',
+					choices: queueDirs.map(dir => ({ name: capitalCase(dir), value: dir })),
+				})
+
+				const workerMode = (await select({
+					loop: true,
+					message: 'Select worker mode',
+					choices: [
+						{ name: 'continuous', value: 'continuous' },
+						{ name: 'interval', value: 'interval' },
+						{ name: 'sequential', value: 'sequential' },
+					],
+					default: 'continuous',
+				})) as 'continuous' | 'interval' | 'sequential'
+
+				let intervalMs: number | undefined
+				if (workerMode === 'interval') {
+					const intervalInput = await input({
+						message: 'Interval in milliseconds',
+						default: '60000',
+						required: true,
+						validate: text => {
+							const value = Number.parseInt(text, 10)
+							return Number.isNaN(value) || value <= 0 ? 'Enter a positive integer' : true
+						},
+					})
+					intervalMs = Number.parseInt(intervalInput, 10)
+				}
+
+				const maxParallelInput = await input({
+					message: 'Max parallel handlers',
+					default: '1',
+					required: true,
+					validate: text => {
+						const value = Number.parseInt(text, 10)
+						return Number.isNaN(value) || value <= 0 ? 'Enter a positive integer' : true
+					},
+				})
+				const maxParallelHandlers = Number.parseInt(maxParallelInput, 10)
+
+				await addPuristaQueueWorker({
+					projectRootPath,
+					puristaConfig,
+					puristaProject,
+					serviceName: data.serviceName,
+					serviceVersion: data.serviceVersion,
+					queueName,
+					workerName: data.name,
+					workerDescription: data.description,
+					mode: workerMode,
+					intervalMs,
+					maxParallelHandlers,
+					codeWriterOptions,
+				})
+
+				return
 			}
 
 			// handle creation of a new subscription
@@ -197,6 +384,25 @@ const main = async () => {
 					choices: puristaProject.eventNames,
 				})
 
+				const responseEventName = await input({
+					message: 'Name of the response event (optional)',
+					required: false,
+				})
+
+				if (responseEventName?.trim().length) {
+					const description = `Emitted by ${data.serviceName} v${data.serviceVersion} subscription ${camelCase(
+						data.name,
+					)}:\n${data.description}`
+
+					await ensureServiceEvent({
+						projectRootPath,
+						puristaProjectConfig: puristaConfig,
+						puristaProject,
+						eventName: responseEventName,
+						description,
+					})
+				}
+
 				await addPuristaSubscription({
 					projectRootPath,
 					puristaConfig,
@@ -204,7 +410,7 @@ const main = async () => {
 					serviceName: data.serviceName,
 					serviceVersion: data.serviceVersion,
 					subscriptionName: data.name,
-					responseEventName: data.responseEventName,
+					responseEventName: responseEventName?.trim() ? responseEventName : undefined,
 					eventToSubscribe: data.eventToSubscribe,
 					puristaProject,
 					codeWriterOptions,
@@ -213,6 +419,25 @@ const main = async () => {
 			}
 
 			if (data.component === 'stream') {
+				const responseEventName = await input({
+					message: 'Name of the response event (optional)',
+					required: false,
+				})
+
+				if (responseEventName?.trim().length) {
+					const description = `Emitted by ${data.serviceName} v${data.serviceVersion} stream ${camelCase(
+						data.name,
+					)}:\n${data.description}`
+
+					await ensureServiceEvent({
+						projectRootPath,
+						puristaProjectConfig: puristaConfig,
+						puristaProject,
+						eventName: responseEventName,
+						description,
+					})
+				}
+
 				await addPuristaStream({
 					projectRootPath,
 					puristaConfig,
@@ -220,7 +445,7 @@ const main = async () => {
 					serviceName: data.serviceName,
 					serviceVersion: data.serviceVersion,
 					streamName: data.name,
-					responseEventName: data.responseEventName,
+					responseEventName: responseEventName?.trim() ? responseEventName : undefined,
 					puristaProject,
 					codeWriterOptions,
 				})
@@ -228,6 +453,25 @@ const main = async () => {
 			}
 
 			// handle creation of a new command
+			const responseEventName = await input({
+				message: 'Name of the response event (optional)',
+				required: false,
+			})
+
+			if (responseEventName?.trim().length) {
+				const description = `Emitted by ${data.serviceName} v${data.serviceVersion} command ${camelCase(
+					data.name,
+				)}:\n${data.description}`
+
+				await ensureServiceEvent({
+					projectRootPath,
+					puristaProjectConfig: puristaConfig,
+					puristaProject,
+					eventName: responseEventName,
+					description,
+				})
+			}
+
 			await addPuristaCommand({
 				projectRootPath,
 				puristaConfig,
@@ -235,7 +479,7 @@ const main = async () => {
 				serviceName: data.serviceName,
 				serviceVersion: data.serviceVersion,
 				commandName: data.name,
-				responseEventName: data.responseEventName,
+				responseEventName: responseEventName?.trim() ? responseEventName : undefined,
 				puristaProject,
 				codeWriterOptions,
 			})

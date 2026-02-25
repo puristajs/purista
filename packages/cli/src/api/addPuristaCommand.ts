@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises'
-import { join } from 'node:path'
+import { join, relative } from 'node:path'
 import type { Options } from 'code-block-writer'
 import { camelCase } from './change-case.js'
 import { getCommandBuilderFileContent } from './content/command/getCommandBuilderFileContent.js'
@@ -25,6 +25,12 @@ export const addPuristaCommand = async (input: {
 	serviceVersion: string
 	codeWriterOptions?: Partial<Options>
 	puristaProject: PuristaProjectInfo
+	enqueues?: {
+		queueName: string
+		schemaFilePath: string
+		payloadSchemaExportName: string
+		parameterSchemaExportName: string
+	}[]
 }) => {
 	const projectPath = input.projectRootPath ?? process.cwd()
 
@@ -40,9 +46,23 @@ export const addPuristaCommand = async (input: {
 
 	await mkdir(commandPath, { recursive: true })
 
+	const enqueueOptions = input.enqueues?.map(option => {
+		const relativePath = relative(commandPath, option.schemaFilePath).replace(/\\/g, '/')
+		const moduleSpecifier = relativePath.startsWith('.') ? relativePath : `./${relativePath}`
+		return {
+			queueName: option.queueName,
+			importPath: moduleSpecifier,
+			payloadSchemaIdentifier: option.payloadSchemaExportName,
+			parameterSchemaIdentifier: option.parameterSchemaExportName,
+		}
+	})
+
 	await writeFile(join(commandPath, 'types.ts'), getCommandTypeFileContent(input))
 	await writeFile(join(commandPath, 'schema.ts'), getCommandSchemaFileContent(input))
-	await writeFile(join(commandPath, `${commandBuilderFileName}.ts`), getCommandBuilderFileContent(input))
+	await writeFile(
+		join(commandPath, `${commandBuilderFileName}.ts`),
+		getCommandBuilderFileContent({ ...input, enqueueOptions }),
+	)
 	await writeFile(join(commandPath, `${commandBuilderFileName}.test.ts`), getCommandTestFileContent(input))
 
 	await addDefinitionToBuilder({

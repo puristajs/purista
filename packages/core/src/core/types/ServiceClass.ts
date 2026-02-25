@@ -3,6 +3,7 @@ import type { Context, Span, SpanOptions, Tracer } from '@opentelemetry/api'
 import type { ContextBase } from './ContextBase.js'
 import type { Logger } from './Logger.js'
 import type { ServiceClassTypes } from './ServiceClassTypes.js'
+import type { ServiceHealthState } from './ServiceHealthState.js'
 
 /**
  * The ServiceClass interface
@@ -75,4 +76,5 @@ export interface ServiceClass<S extends ServiceClassTypes = ServiceClassTypes> {
   */
 
 	getContextFunctions(logger: Logger): ContextBase
+	getServiceHealth(): Promise<ServiceHealthState>
 }

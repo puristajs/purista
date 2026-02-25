@@ -6,6 +6,8 @@ import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { Prettify } from '../Prettify.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
+import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
+import type { QueueContext } from '../queue/QueueContext.js'
 
 /**
  * It provides the original command message.
@@ -21,6 +23,7 @@ export type SubscriptionFunctionContextEnhancements<
 	Invokes extends InvokeList = EmptyObject,
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 > = {
 	/** the original message */
 	message: Readonly<EBMessage>
@@ -44,6 +47,7 @@ export type SubscriptionFunctionContextEnhancements<
 	service: Invokes
 	/** consumes stream responses from other service stream endpoints */
 	stream: StreamInvokes
+	queue: QueueContext<QueueInvokes>
 	/**
 	 * Provides resources defined in service builder and set via config during service creation
 	 */
@@ -60,4 +64,7 @@ export type SubscriptionFunctionContext<
 	Invokes extends InvokeList = EmptyObject,
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
-> = Prettify<ContextBase & SubscriptionFunctionContextEnhancements<Resources, Invokes, StreamInvokes, EmitList>>
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
+> = Prettify<
+	ContextBase & SubscriptionFunctionContextEnhancements<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes>
+>

@@ -14,6 +14,7 @@ Purista currently centers around:
 
 1. Streaming support as a first-class concept.
 2. Agent/LLM capabilities with strong typing, observability, and provider abstraction.
+3. Pull-based async queues that let services offload long-running work while preserving CQRS patterns.
 
 ## Global constraints
 

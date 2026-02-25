@@ -6,6 +6,13 @@ import { convertToProjectFileCasing } from '../../convertToProjectFileCasing.js'
 import type { PuristaConfig } from '../../loadPuristaConfig.js'
 import type { PuristaProjectInfo } from '../../scanPuristaProject.js'
 
+type EnqueueOption = {
+	queueName: string
+	importPath: string
+	payloadSchemaIdentifier: string
+	parameterSchemaIdentifier: string
+}
+
 export const getCommandBuilderFileContent = (input: {
 	serviceName: string
 	serviceVersion: string
@@ -15,6 +22,7 @@ export const getCommandBuilderFileContent = (input: {
 	puristaConfig: PuristaConfig
 	codeWriterOptions?: Partial<Options>
 	puristaProject: PuristaProjectInfo
+	enqueueOptions?: EnqueueOption[]
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
 
@@ -29,6 +37,23 @@ export const getCommandBuilderFileContent = (input: {
 	const schemaPrefix = camelCase(`${input.serviceName} v${input.serviceVersion} ${input.commandName}`)
 
 	writer.writeLine(`import { ${serviceBuilderName} } from '../../${serviceBuilderFileName}.js'`)
+
+	if (input.enqueueOptions?.length) {
+		const groupedImports = new Map<string, Set<string>>()
+		for (const option of input.enqueueOptions) {
+			const names = groupedImports.get(option.importPath) ?? new Set<string>()
+			names.add(option.payloadSchemaIdentifier)
+			names.add(option.parameterSchemaIdentifier)
+			groupedImports.set(option.importPath, names)
+		}
+		for (const [modulePath, names] of groupedImports) {
+			const filteredNames = Array.from(names).filter(Boolean)
+			if (filteredNames.length === 0) {
+				continue
+			}
+			writer.writeLine(`import { ${filteredNames.join(', ')} } from '${modulePath.replace(/\.ts$/, '.js')}'`)
+		}
+	}
 
 	if (addSuccessEvent && input.puristaProject.eventEnumFileName.length > 0) {
 		writer.writeLine(
@@ -67,18 +92,30 @@ export const getCommandBuilderFileContent = (input: {
 		writer.writeLine(`.addPayloadSchema(${schemaPrefix}InputPayloadSchema)`)
 		writer.writeLine(`.addParameterSchema(${schemaPrefix}InputParameterSchema)`)
 		writer.writeLine(`.addOutputSchema(${schemaPrefix}OutputPayloadSchema)`)
+		if (input.enqueueOptions?.length) {
+			for (const option of input.enqueueOptions) {
+				writer.writeLine(
+					`.canEnqueue('${option.queueName}', ${option.payloadSchemaIdentifier}, ${option.parameterSchemaIdentifier})`,
+				)
+			}
+		}
 
 		if (input.puristaConfig.linter === 'biome') {
 			writer.writeLine(
 				'// biome-ignore lint/complexity/useArrowFunction: use function as the this-context contains the service',
 			)
 		}
-		writer
-			.write('.setCommandFunction(async function (_context, _payload, _parameter)')
-			.inlineBlock(() => {
-				writer.writeLine(`// implementation of the command ${camelCase(input.commandName)} goes here`)
-			})
-			.write(')')
+		writer.write('.setCommandFunction(async function (context, payload, parameter)')
+		writer.inlineBlock(() => {
+			writer.writeLine(`// implementation of the command ${camelCase(input.commandName)} goes here`)
+			if (input.enqueueOptions?.length) {
+				writer.writeLine('// enqueue asynchronous work if needed')
+				for (const option of input.enqueueOptions) {
+					writer.writeLine(`await context.queue.enqueue.${camelCase(option.queueName)}(payload, parameter)`)
+				}
+			}
+		})
+		writer.write(')')
 	})
 
 	return writer.toString()

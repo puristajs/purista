@@ -8,11 +8,14 @@ import type { Service } from '../core/Service/Service.impl.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
 import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventBridgeConfig.js'
+import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamDefinition } from '../core/types/stream/StreamDefinition.js'
 import type { StreamDefinitionMetadataBase } from '../core/types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamFunction } from '../core/types/stream/StreamFunction.js'
 import type { StreamWriter } from '../core/types/stream/StreamWriter.js'
+import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
@@ -34,6 +37,7 @@ export class StreamDefinitionBuilder<
 	private invokes: C['Invokes'] = {}
 	private streamInvokes: C['StreamInvokes'] = {}
 	private emitList: C['EmitList'] = {}
+	private queueInvokes: QueueInvokeList = {}
 
 	private inputContentType: ContentType | undefined
 	private inputContentEncoding: string | undefined
@@ -62,7 +66,8 @@ export class StreamDefinitionBuilder<
 		C['Resources'],
 		C['Invokes'],
 		C['StreamInvokes'],
-		C['EmitList']
+		C['EmitList'],
+		C['QueueInvokes']
 	>
 
 	constructor(
@@ -73,6 +78,47 @@ export class StreamDefinitionBuilder<
 	) {
 		this.finalEventName = finalEventName
 		this.deprecated = deprecated
+	}
+
+	canEnqueue<
+		Payload extends Schema,
+		Parameter extends Schema,
+		QueueName extends string = string,
+	>(queueName: QueueName, payloadSchema?: Payload, parameterSchema?: Parameter) {
+		if (queueName.trim() === '') {
+			throw new Error('canEnqueue requires non-empty queue name')
+		}
+
+		this.queueInvokes = {
+			...this.queueInvokes,
+			[queueName]: { payloadSchema, parameterSchema },
+		}
+
+		return this as unknown as StreamDefinitionBuilder<
+			S,
+			StreamDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['ChunkSchema'],
+				C['FinalSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes'] &
+					Record<
+						QueueName,
+						(
+							payload: InferIn<Payload>,
+							parameter: InferIn<Parameter>,
+							options?: Omit<
+								QueueEnqueueOptions<InferIn<Payload>, InferIn<Parameter>>,
+								'queueName' | 'payload' | 'parameter'
+							>,
+						) => Promise<QueueEnqueueResult>
+					>
+			>
+		>
 	}
 
 	canInvoke<
@@ -123,7 +169,8 @@ export class StreamDefinitionBuilder<
 						>
 					>,
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -208,7 +255,8 @@ export class StreamDefinitionBuilder<
 							>
 						>
 					>,
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -225,7 +273,8 @@ export class StreamDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList'] & Record<EventName, InferIn<typeof schema>>
+				C['EmitList'] & Record<EventName, InferIn<typeof schema>>,
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -249,7 +298,8 @@ export class StreamDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -266,7 +316,8 @@ export class StreamDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -284,7 +335,8 @@ export class StreamDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -302,7 +354,8 @@ export class StreamDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		>
 	}
@@ -385,7 +438,8 @@ export class StreamDefinitionBuilder<
 			C['Resources'],
 			C['Invokes'],
 			C['StreamInvokes'],
-			C['EmitList']
+			C['EmitList'],
+			C['QueueInvokes']
 		>,
 	) {
 		assertNonArrowFunction(fn, 'setStreamFunction')
@@ -411,7 +465,8 @@ export class StreamDefinitionBuilder<
 			C['Resources'],
 			C['Invokes'],
 			C['StreamInvokes'],
-			C['EmitList']
+			C['EmitList'],
+			C['QueueInvokes']
 		>
 	}
 
@@ -499,7 +554,8 @@ export class StreamDefinitionBuilder<
 			C['Resources'],
 			C['Invokes'],
 			C['StreamInvokes'],
-			C['EmitList']
+			C['EmitList'],
+			C['QueueInvokes']
 		> = {
 			streamName: this.streamName,
 			streamDescription: this.streamDescription,
@@ -515,6 +571,7 @@ export class StreamDefinitionBuilder<
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
+			queueInvokes: this.queueInvokes,
 		}
 
 		return definition

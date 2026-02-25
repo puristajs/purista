@@ -18,6 +18,9 @@ import type { SubscriptionFunction } from '../core/types/subscription/Subscripti
 import type { SubscriptionTransformInputHook } from '../core/types/subscription/SubscriptionTransformInputHook.js'
 import type { SubscriptionTransformOutputHook } from '../core/types/subscription/SubscriptionTransformOutputHook.js'
 import type { TenantId } from '../core/types/TenantId.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
+import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
+import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getSubscriptionContextMock } from '../mocks/getSubscriptionContext.mock.js'
 import { getSubscriptionTransformContextMock } from '../mocks/getSubscriptionTransformContext.mock.js'
@@ -81,7 +84,7 @@ export class SubscriptionDefinitionBuilder<
 		instanceId?: InstanceId
 	}
 
-	private fn?: SubscriptionFunction<S, any, any, any, any, any, any, any>
+	private fn?: SubscriptionFunction<S, any, any, any, any, any, any, any, C['QueueInvokes']>
 
 	private eventName?: string
 	private emitEventName?: string
@@ -98,6 +101,7 @@ export class SubscriptionDefinitionBuilder<
 	private streamInvokes: C['StreamInvokes'] = {}
 
 	private emitList: C['EmitList'] = {}
+	private queueInvokes: QueueInvokeList = {}
 
 	private deprecated = false
 
@@ -277,6 +281,49 @@ export class SubscriptionDefinitionBuilder<
 						>
 					>,
 				C['EmitList']
+			>
+		>
+	}
+
+	canEnqueue<
+		Payload extends Schema,
+		Parameter extends Schema,
+		QueueName extends string = string,
+	>(queueName: QueueName, payloadSchema?: Payload, parameterSchema?: Parameter) {
+		if (queueName.trim() === '') {
+			throw new Error('canEnqueue requires non-empty queue name')
+		}
+
+		this.queueInvokes = {
+			...this.queueInvokes,
+			[queueName]: { payloadSchema, parameterSchema },
+		}
+
+		return this as unknown as SubscriptionDefinitionBuilder<
+			S,
+			SubscriptionDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes'] &
+					Record<
+						QueueName,
+						(
+							payload: InferIn<Payload>,
+							parameter: InferIn<Parameter>,
+							options?: Omit<
+								QueueEnqueueOptions<InferIn<Payload>, InferIn<Parameter>>,
+								'queueName' | 'payload' | 'parameter'
+							>,
+						) => Promise<QueueEnqueueResult>
+					>
 			>
 		>
 	}
@@ -787,7 +834,8 @@ export class SubscriptionDefinitionBuilder<
 			C['Resources'],
 			C['Invokes'],
 			C['StreamInvokes'],
-			C['EmitList']
+			C['EmitList'],
+			C['QueueInvokes']
 		>,
 	) {
 		assertNonArrowFunction(fn, 'setSubscriptionFunction')
@@ -823,7 +871,8 @@ export class SubscriptionDefinitionBuilder<
 			C['Resources'],
 			C['Invokes'],
 			C['StreamInvokes'],
-			C['EmitList']
+			C['EmitList'],
+			C['QueueInvokes']
 		>
 	}
 
@@ -893,6 +942,7 @@ export class SubscriptionDefinitionBuilder<
 				C['Invokes'],
 				C['StreamInvokes'],
 				C['EmitList'],
+				C['QueueInvokes'],
 				SubscriptionDefinitionMetadataBase
 			>
 		> = {
@@ -923,6 +973,7 @@ export class SubscriptionDefinitionBuilder<
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
+			queueInvokes: this.queueInvokes,
 		}
 
 		return subscription

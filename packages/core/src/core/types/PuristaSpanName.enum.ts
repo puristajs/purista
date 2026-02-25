@@ -26,4 +26,11 @@ export enum PuristaSpanName {
 	StateStoreRemoveValue = 'purista.stateStore.removeValue',
 
 	KubernetesHttpRequest = 'purist.kubernetes.HttpRequest',
+
+	QueueEnqueue = 'purista.queue.enqueue',
+	QueueLease = 'purista.queue.lease',
+	QueueProcess = 'purista.queue.process',
+	QueueAck = 'purista.queue.ack',
+	QueueNack = 'purista.queue.nack',
+	QueueDeadLetter = 'purista.queue.deadletter',
 }

@@ -40,6 +40,19 @@ Deliverables:
 - Capability matrix docs.
 - Bridge-level test coverage.
 
+## Phase 2b: Async queue rollout
+
+- Land QueueDefinition/QueueWorker builders, lifecycle defaults, and context additions (`.canEnqueue`, `context.queue.*`).
+- Ship `DefaultQueueBridge` plus Redis queue bridge (lists/BLPOP) with full integration tests; document supported providers (Redis, JetStream, SQS, Azure queues).
+- Update CLI/templates/examples to scaffold queue flows and HTTP async `202 Accepted` endpoints.
+- Extend test helpers + health telemetry to cover queue metrics, DLQ depth, and job lifecycle spans.
+
+Deliverables:
+
+- Queue spec docs + implementation plan (`todo/15-async-queues/*`, `async-queues-implementation-plan.md`).
+- Core queue runtime + default bridge merged behind feature flag (if necessary).
+- CLI/tests/docs updated to demonstrate command → queue → worker flow.
+
 ## Phase 3: Agent core runtime
 
 - Create `ai-core` orchestration package.
@@ -80,6 +93,7 @@ Deliverables:
 
 1. Create RFC templates for streaming and agents.
 2. Build an event-bridge capability matrix document.
-3. Prototype minimal stream session API in `@purista/core` (no bridge integration yet).
-4. Prototype `ai-core` interfaces with strict typings and no provider implementation.
-5. Prototype builder shape in TypeScript only (no runtime), validate type inference ergonomics.
+3. Prototype queue builder types + lifecycle defaults (`QueueDefinitionBuilder`, `QueueWorkerBuilder`) and wire `.canEnqueue` contexts.
+4. Prototype minimal stream session API in `@purista/core` (no bridge integration yet).
+5. Prototype `ai-core` interfaces with strict typings and no provider implementation.
+6. Prototype builder shape in TypeScript only (no runtime), validate type inference ergonomics.

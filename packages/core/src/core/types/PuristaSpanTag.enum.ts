@@ -15,4 +15,11 @@ export enum PuristaSpanTag {
 
 	StoreType = 'purista.store.type',
 	StoreName = 'purista.store.name',
+
+	QueueName = 'purista.queue.name',
+	QueueJobId = 'purista.queue.jobId',
+	QueueBridge = 'purista.queue.bridge',
+	QueueReason = 'purista.queue.reason',
+	QueueDelay = 'purista.queue.delayMs',
+	QueueAttempt = 'purista.queue.attempt',
 }

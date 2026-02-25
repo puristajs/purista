@@ -85,10 +85,10 @@ export const toJSONSchema = async (schema: Schema, options?: JsonSchemaOptions):
 		const zodModule = await import('zod/v4')
 		const maybeZod = schema as ZodType & { _def?: { typeName?: string } }
 		const typeName = maybeZod?._def?.typeName
-		if (typeName === zodModule.z.ZodFirstPartyTypeKind?.ZodUndefined || typeName === 'ZodUndefined') {
+		if (typeName === 'ZodUndefined') {
 			return { type: 'null' } as SchemaObject
 		}
-		if (typeName === zodModule.z.ZodFirstPartyTypeKind?.ZodVoid || typeName === 'ZodVoid') {
+		if (typeName === 'ZodVoid') {
 			return { type: 'null' } as SchemaObject
 		}
 		try {

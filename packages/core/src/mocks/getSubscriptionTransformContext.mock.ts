@@ -4,6 +4,10 @@ import { stub } from 'sinon'
 import type { EBMessage } from '../core/types/EBMessage.js'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { SubscriptionTransformFunctionContext } from '../core/types/subscription/SubscriptionTransformFunctionContext.js'
+import type { QueueInvokeFunction } from '../core/types/queue/QueueInvokeFunction.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
+import type { QueueScheduleFunction } from '../core/types/queue/QueueScheduleFunction.js'
+import type { QueueInvokeClientMap, QueueScheduleProxy } from '../core/types/queue/QueueContext.js'
 
 import { getLoggerMock } from './getLogger.mock.js'
 
@@ -32,6 +36,8 @@ export const getSubscriptionTransformContextMock = <Resources extends Record<str
 		getState: input.sandbox?.stub() ?? stub(),
 		setState: input.sandbox?.stub() ?? stub(),
 		removeState: input.sandbox?.stub() ?? stub(),
+		enqueue: input.sandbox?.stub() ?? stub().resolves(),
+		scheduleAt: input.sandbox?.stub() ?? stub().resolves(),
 		resources: {} as Partial<Resources>,
 	}
 
@@ -84,6 +90,12 @@ export const getSubscriptionTransformContextMock = <Resources extends Record<str
 			getState: stubs.getState.rejects(new Error('getState is not stubbed')),
 			setState: stubs.setState.rejects(new Error('setState is not stubbed')),
 			removeState: stubs.removeState.rejects(new Error('removeState is not stubbed')),
+		},
+		queue: {
+			enqueue: stubs.enqueue.rejects(new Error('enqueue is not stubbed')) as unknown as QueueInvokeFunction &
+				QueueInvokeClientMap<QueueInvokeList>,
+			scheduleAt: stubs.scheduleAt.rejects(new Error('scheduleAt is not stubbed')) as unknown as QueueScheduleFunction &
+				QueueScheduleProxy<QueueInvokeClientMap<QueueInvokeList>>,
 		},
 		resources: resourcesProxy,
 	}

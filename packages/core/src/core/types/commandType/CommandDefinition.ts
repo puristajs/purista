@@ -4,6 +4,7 @@ import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig
 import type { InvokeList } from '../InvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
+import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 import type { CommandAfterGuardHook } from './CommandAfterGuardHook.js'
 import type { CommandBeforeGuardHook } from './CommandBeforeGuardHook.js'
 import type { CommandDefinitionMetadataBase } from './CommandDefinitionMetadataBase.js'
@@ -31,6 +32,7 @@ export type CommandDefinition<
 	Invokes extends InvokeList,
 	StreamInvokes extends StreamInvokeList,
 	EmitList extends Record<string, Schema>,
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 	MetadataType extends CommandDefinitionMetadataBase = CommandDefinitionMetadataBase,
 > = {
 	/** the name of the command */
@@ -115,4 +117,5 @@ export type CommandDefinition<
 	invokes: Invokes
 	streamInvokes: StreamInvokes
 	emitList: EmitList
+	queueInvokes: QueueInvokes
 }
