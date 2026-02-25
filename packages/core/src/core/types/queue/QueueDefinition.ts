@@ -1,5 +1,5 @@
 import type { Infer, Schema } from '../../../schema/index.js'
-import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
+import type { DefinitionQueueBridgeConfig } from '../DefinitionQueueBridgeConfig.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
@@ -22,7 +22,7 @@ export type QueueDefinition<
 	tags: string[]
 	deprecated: boolean
 	lifecycle?: QueueLifecycleConfig
-	eventBridgeConfig: DefinitionEventBridgeConfig
+	queueBridgeConfig: DefinitionQueueBridgeConfig
 	workers: QueueWorkerDefinition<PayloadSchema, ParamsSchema, Resources, Invokes, StreamInvokes>[]
 	deadLetter?: {
 		queueName?: string

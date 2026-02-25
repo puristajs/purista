@@ -1,5 +1,5 @@
 import type { Schema } from '../schema/index.js'
-import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventBridgeConfig.js'
+import type { DefinitionQueueBridgeConfig } from '../core/types/DefinitionQueueBridgeConfig.js'
 import type { QueueDefinition } from '../core/types/queue/QueueDefinition.js'
 import type { QueueLifecycleConfig } from '../core/types/queue/QueueLifecycleConfig.js'
 import type { QueueWorkerDefinition } from '../core/types/queue/QueueWorkerDefinition.js'
@@ -16,10 +16,11 @@ export class QueueDefinitionBuilder {
 	private deprecated = false
 	private workers: QueueWorkerDefinition[] = []
 	private deadLetter?: { queueName?: string; eventName?: string; emitEvent?: boolean }
-	private eventBridgeConfig: DefinitionEventBridgeConfig = {
-		autoacknowledge: false,
+	private queueBridgeConfig: DefinitionQueueBridgeConfig = {
 		durable: true,
 		shared: true,
+		prefetch: 1,
+		orderingGuarantee: 'fifo',
 	}
 
 	constructor(
@@ -70,8 +71,11 @@ export class QueueDefinitionBuilder {
 		return this
 	}
 
-	setEventBridgeConfig(config: DefinitionEventBridgeConfig) {
-		this.eventBridgeConfig = config
+	setQueueBridgeConfig(config: Partial<DefinitionQueueBridgeConfig>) {
+		this.queueBridgeConfig = {
+			...this.queueBridgeConfig,
+			...config,
+		}
 		return this
 	}
 
@@ -91,7 +95,7 @@ export class QueueDefinitionBuilder {
 			lifecycle: { ...lifecycle },
 			tags: this.tags,
 			deprecated: this.deprecated,
-			eventBridgeConfig: this.eventBridgeConfig,
+			queueBridgeConfig: this.queueBridgeConfig,
 			workers: this.workers,
 			deadLetter: this.deadLetter
 				? {
