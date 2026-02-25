@@ -9,6 +9,7 @@ import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/ser
 import { AmqpBridge } from '../src/index.js'
 
 const AMQP_PORT = 5672
+const RABBITMQ_IMAGE = 'rabbitmq:3.13-alpine'
 const EXAMPLE_EVENT = 'exampleEvent'
 
 describe('@purista/amqpbridge', () => {
@@ -31,7 +32,7 @@ describe('@purista/amqpbridge', () => {
 	let service: Service
 
 	beforeAll(async () => {
-		container = await new GenericContainer('rabbitmq:alpine')
+		container = await new GenericContainer(RABBITMQ_IMAGE)
 			.withExposedPorts({ host: AMQP_PORT, container: AMQP_PORT })
 			.start()
 

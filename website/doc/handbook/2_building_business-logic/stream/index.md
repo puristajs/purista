@@ -17,11 +17,6 @@ Key properties:
 - optional final aggregation can emit a custom event
 - can be exposed as HTTP endpoint with `text/event-stream` (SSE)
 
-## Current bridge support
-
-Stream runtime (`openStream`) is currently implemented in `DefaultEventBridge`.
-Other bridge adapters can still expose stream definitions in service metadata and OpenAPI, but runtime stream transport support is not implemented yet.
-
 ## Reliability notes
 
 - stream sessions are correlated by `correlationId`

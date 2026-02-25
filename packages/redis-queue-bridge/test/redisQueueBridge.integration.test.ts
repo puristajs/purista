@@ -8,6 +8,7 @@ import { describeQueueBridgeContract } from '../../core/test/helpers/queueBridge
 import { RedisQueueBridge } from '../src/RedisQueueBridge.impl.js'
 
 const REDIS_PORT = 6379
+const REDIS_IMAGE = 'redis:7.2-alpine'
 
 let container: StartedTestContainer | undefined
 let dockerAvailable = true
@@ -16,7 +17,7 @@ let redisUrl: string | undefined
 describeQueueBridgeContract('@purista/redis-queue-bridge contract', {
 	beforeAll: async () => {
 		try {
-			container = await new GenericContainer('redis:7')
+			container = await new GenericContainer(REDIS_IMAGE)
 				.withExposedPorts(REDIS_PORT)
 				.withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
 				.start()

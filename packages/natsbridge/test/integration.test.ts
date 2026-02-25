@@ -10,6 +10,7 @@ import { NatsBridge } from '../src/index.js'
 const EXAMPLE_EVENT = 'exampleEvent'
 const natsTestsEnabled = ['1', 'true'].includes(process.env.PURISTA_NATSBRIDGE_TESTS ?? '')
 const describeWithNats = natsTestsEnabled ? describe : describe.skip
+const NATS_IMAGE = 'nats:2.10-alpine'
 const serviceInfo = {
 	serviceName: 'TheService',
 	serviceVersion: '1',
@@ -26,7 +27,7 @@ describeWithNats('@purista/natsbridge', () => {
 	const serviceConfigSchema = z.object({}).default({})
 
 	beforeAll(async () => {
-		container = await new NatsContainer('nats:alpine').withStartupTimeout(30000).start()
+		container = await new NatsContainer(NATS_IMAGE).withStartupTimeout(30000).start()
 
 		eventbridge = new NatsBridge({
 			logger: logger.mock,

@@ -11,6 +11,7 @@ import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/ser
 import { MqttBridge } from '../src/index.js'
 
 const MQTT_PORT = 1883
+const MOSQUITTO_IMAGE = 'eclipse-mosquitto:2.0.18'
 const EXAMPLE_EVENT = 'exampleEvent'
 
 describe('@purista/mqttbridge', () => {
@@ -24,7 +25,7 @@ describe('@purista/mqttbridge', () => {
 	beforeAll(async () => {
 		const source = join(__dirname, 'mosquitto.conf')
 
-		container = await new GenericContainer('eclipse-mosquitto')
+		container = await new GenericContainer(MOSQUITTO_IMAGE)
 			.withExposedPorts({
 				container: MQTT_PORT,
 				host: MQTT_PORT,

@@ -1,12 +1,15 @@
 ---
-order: 200450
-title: Async queues
-description: Define pull-based queues and workers that reuse PURISTA's builder patterns.
+order: 200300
+title: Queues
+description: Define pull-based queues and workers, wire them via the CLI, and expose async HTTP endpoints.
 ---
 
-# Async queues
+# Queues
 
-Queues complement commands, streams, and subscriptions when you need pull-based workloads (for example CQRS write models, ML agents, or expensive background tasks). A queue definition describes the payload/parameter schema, lifecycle defaults (visibility timeout, retries, heartbeats), and optional dead-letter routing. Queue workers pull jobs via a queue bridge, acknowledge progress, and emit telemetry just like commands.
+Queues complement commands, streams, and subscriptions when you need **pull-based workloads** (CQRS write models, AI agent pools, delayed jobs, or any task where consumers decide when to fetch the next unit of work). A queue definition describes payload/parameter schemas, lifecycle defaults (visibility timeout, retries, heartbeats), and optional dead-letter routing. Workers lease jobs from a queue bridge, acknowledge progress, and emit telemetry just like commands.
+
+> 💡 **Start with the CLI:**  
+> Use `purista add queue` to scaffold a queue definition, worker, and an optional producer command. The wizard wires schemas, `.canEnqueue(...)` guards, tests, and service registration so you can focus on business logic instead of boilerplate. Run `purista add queue-worker` whenever you want to add additional worker variants (interval vs sequential, different concurrency, etc.).
 
 ## Declaring queues
 
@@ -22,7 +25,23 @@ const pingJobQueueBuilder = pingV1ServiceBuilder
 
 Register the queue in your service (or let the CLI do it via `purista add queue`). The default queue bridge is in-memory for local development, and you can inject another bridge (for example Redis) via `ServiceBuilder.defineResource('queueBridge', ...)`.
 
-## Guarding enqueue access
+## Architecture fit & CQRS relation
+
+Queues sit **between synchronous commands and subscription-driven pushes**:
+
+- Commands emit jobs into a queue when the client should receive a fast `202 Accepted` response, or when the remaining work is CPU/IO heavy.
+- Streams/subscriptions remain push-based and react to events immediately.
+- Queues enable **pull semantics** so workers scale horizontally and each consumer can choose when to take the next job (classic CQRS “write → async projection” flow).
+
+This makes queues a natural fit for:
+
+- HTTP endpoints that must respond quickly but kick off longer-running batches (document processing, AI orchestration, billing retries).
+- Fan-out job pools where you want to limit concurrency per tenant/worker.
+- Workflows where a failure should delay retries without blocking traffic (dead-letter queues, exponential backoff).
+
+The queue bridge sits inside the service runtime next to the event bridge. Commands/subscriptions get a `context.queue` helper (see below), while queue workers are registered inside the same service builder. In other words, queues reuse the same service boundaries, tracing, security context, and resource injection you already use for synchronous handlers.
+
+## Guarding enqueue access & HTTP exposure
 
 Commands, subscriptions, and streams declare `.canEnqueue('queueName', payloadSchema, parameterSchema)` just like `.canInvoke`. The declaration enables typed helpers (`context.queue.enqueue.pingJob`) and enforces runtime security: attempts to enqueue an undeclared queue throw `UnhandledError`.
 
@@ -40,6 +59,12 @@ export const pingAsyncCommandBuilder = pingV1ServiceBuilder
 ```
 
 The HTTP adapter uses `mode: 'async'` to return `202 Accepted` plus a polling document (`jobId`, `queueId`, `statusUrl`). Follow-up status handlers respond with `200` (completed), `202` (still processing), `303` (external redirect), `410` (expired), or `500` (failed) depending on the queue lifecycle state.
+
+When exposing async endpoints:
+
+- Return a lightweight envelope `{ queueId, jobId, statusUrl }`.
+- Implement a status command/endpoint that reads queue metrics/job state so polling clients know when to retry or surface errors.
+- Prefer `context.queue.scheduleAt(queueName, runAt, payload)` when you need delayed start times (cron-style tasks).
 
 ## Workers and leases
 
@@ -61,6 +86,12 @@ export const pingJobWorkerQueueWorkerBuilder = pingV1ServiceBuilder
 
 Handlers receive the queue context (`context.job`) with helpers to `complete`, `extendLease`, `retry`, or `moveToDeadLetter`. If a worker crashes or misses its heartbeat, the queue bridge automatically re-queues the job after the visibility timeout. Dead-letter queue names default to `<queueId>.dead-letter` but can be overridden per queue or provider.
 
-## Provider bridges
+## Provider bridges & ecosystem
 
-`@purista/core` ships with an in-memory `DefaultQueueBridge` for local dev/tests. Production deployments should wire a provider-specific bridge (for example `@purista/redis-queue-bridge`) using the same interface (enqueue, leaseNext, ack, nack, moveToDeadLetter, metrics). Bridges advertise their capabilities so builders can warn when a lifecycle feature (delay, FIFO, leases) is unsupported.
+- `@purista/core` ships with the in-memory `DefaultQueueBridge`. It’s deterministic and perfect for unit tests/local dev.
+- `@purista/redis-queue-bridge` implements the queue bridge contract on top of Redis lists/BLPOP and supports retries, visibility extensions, DLQs, and metrics.
+- Future bridge packages will live under `packages/<provider>-queue-bridge` and follow the same contract (`enqueue`, `leaseNext`, `ack`, `nack`, `moveToDeadLetter`, `metrics`).
+
+Each bridge advertises its capabilities (delayed delivery, FIFO, native DLQ, etc.). Builders surface warnings when you try to use a lifecycle feature that the selected bridge cannot provide—no hidden emulation.
+
+See [Event Bridges](../../3_eco_system/eventbridges/index.md#queue-bridge-support) for the up-to-date matrix of queue bridge packages and how they align with existing event bridges.

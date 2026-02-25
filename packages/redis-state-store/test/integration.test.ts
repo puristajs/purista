@@ -4,12 +4,13 @@ import { GenericContainer, Wait } from 'testcontainers'
 import { RedisStateStore } from '../src/RedisStateStore.impl.js'
 
 const REDIS_PORT = 6379
+const REDIS_IMAGE = 'redis:7.2-alpine'
 
 describe('@purista/redis-state-store', () => {
 	let container: StartedTestContainer
 
 	beforeAll(async () => {
-		container = await new GenericContainer('redis')
+		container = await new GenericContainer(REDIS_IMAGE)
 			.withExposedPorts({
 				container: REDIS_PORT,
 				host: REDIS_PORT,

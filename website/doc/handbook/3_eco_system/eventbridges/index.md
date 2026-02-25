@@ -18,6 +18,15 @@ Event bridges are the transport backbone of PURISTA. They determine routing, sca
 | [NATS](./nats.md) | yes | no (core NATS) | typically at-most-once | no (currently) |
 | [Dapr](./dapr.md) | yes | component-dependent | component-dependent (often at-least-once) | no (currently) |
 
+### Queue bridge support
+
+| queue bridge package | preferred workloads | compatible event bridges |
+| --- | --- | --- |
+| `@purista/core` default queue bridge | local dev, unit tests, single instance deployments | Any (in-memory inside the service) |
+| `@purista/redis-queue-bridge` | production pull-based CQRS, delayed jobs, AI worker pools | Default, AMQP, MQTT, NATS, Dapr (redis acts as the queue backend while the event bridge handles command/subscription traffic) |
+
+Future queue bridge packages will live next to the event bridge adapters (e.g. `@purista/nats-queue-bridge`) once those providers expose reliable pull + lease semantics. When evaluating infrastructure, pick an event bridge + queue bridge pair that matches your durability and scaling needs.
+
 ## Delivery semantics in practice
 
 PURISTA itself provides typed message contracts and processing flow. Delivery guarantees come from the selected bridge + broker/component configuration.

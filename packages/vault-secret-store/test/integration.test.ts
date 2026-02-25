@@ -6,13 +6,14 @@ import { VaultSecretStore } from '../src/VaultSecretStore.impl.js'
 
 const VAULT_PORT = 8200
 const ROOT_TOKEN = 'root'
+const VAULT_IMAGE = 'hashicorp/vault:1.15'
 
 describe('Vault secret store', () => {
 	let container: StartedTestContainer
 	let store: VaultSecretStore
 
 	beforeAll(async () => {
-		container = await new GenericContainer('hashicorp/vault:1.13.3')
+		container = await new GenericContainer(VAULT_IMAGE)
 			.withEnvironment({
 				VAULT_DEV_ROOT_TOKEN_ID: ROOT_TOKEN,
 			})
