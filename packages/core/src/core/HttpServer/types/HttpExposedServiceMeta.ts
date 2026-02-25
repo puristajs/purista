@@ -11,6 +11,7 @@ export type HttpExposedServiceMeta<ParameterType = EmptyObject> = Prettify<
 			http: {
 				method: 'GET' | 'POST' | 'PATCH' | 'PUT' | 'DELETE'
 				path: string
+				mode?: 'sync' | 'async'
 				openApi?: {
 					isSecure: boolean
 					description: string

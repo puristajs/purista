@@ -1,11 +1,17 @@
 import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
+import { createQueueEnqueueProxy } from '../core/helper/createQueueEnqueueProxy.impl.js'
+import { createQueueScheduleProxy } from '../core/helper/createQueueScheduleProxy.impl.js'
 import type { CommandFunctionContext } from '../core/types/commandType/CommandFunctionContext.js'
 import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
 import type { FromInvokeToOtherType } from '../core/types/FromInvokeToOtherType.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
+import type { QueueInvokeFunction } from '../core/types/queue/QueueInvokeFunction.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
+import type { QueueScheduleFunction } from '../core/types/queue/QueueScheduleFunction.js'
+import type { QueueInvokeClientMap, QueueScheduleProxy } from '../core/types/queue/QueueContext.js'
 import type { Schema } from '../schema/index.js'
 import { getLoggerMock } from './getLogger.mock.js'
 import { getCommandMessageMock } from './messages/getCommandMessage.mock.js'
@@ -31,6 +37,7 @@ export const getCommandContextMock = <
 	invokes: FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
 	streamInvokes?: StreamInvokes
 	emitList: FromEmitToOtherType<EmitList, Schema>
+	queueInvokes?: QueueInvokeList
 	resources?: Partial<Resources>
 	message?: {
 		payload: MessagePayloadType
@@ -164,6 +171,8 @@ export const getCommandContextMock = <
 		getState: input.sandbox?.stub() ?? stub(),
 		setState: input.sandbox?.stub() ?? stub(),
 		removeState: input.sandbox?.stub() ?? stub(),
+		enqueue: input.sandbox?.stub() ?? stub().resolves(),
+		scheduleAt: input.sandbox?.stub() ?? stub().resolves(),
 		service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
 		resources: {} as Partial<Resources>,
 	}
@@ -219,6 +228,18 @@ export const getCommandContextMock = <
 			getState: stubs.getState.rejects(new Error('getState is not stubbed')),
 			setState: stubs.setState.rejects(new Error('setState is not stubbed')),
 			removeState: stubs.removeState.rejects(new Error('removeState is not stubbed')),
+		},
+		queue: {
+			enqueue: createQueueEnqueueProxy<QueueInvokeList>(
+				(async (queueName, payload, parameter, options) =>
+					stubs.enqueue(queueName, payload, parameter, options)) as QueueInvokeFunction,
+				input.queueInvokes,
+			),
+			scheduleAt: createQueueScheduleProxy(
+				(async (queueName, runAt, payload, parameter, options) =>
+					stubs.scheduleAt(queueName, runAt, payload, parameter, options)) as QueueScheduleFunction,
+				input.queueInvokes,
+			),
 		},
 		resources: resourcesProxy,
 	}

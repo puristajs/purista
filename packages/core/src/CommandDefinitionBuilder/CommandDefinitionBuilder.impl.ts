@@ -21,6 +21,9 @@ import type { InferTypeOrEmptyObject } from '../core/types/InferTypeOrEmptyObjec
 import type { InvokeList } from '../core/types/InvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
+import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
+import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getCommandContextMock } from '../mocks/getCommandContext.mock.js'
 import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
@@ -28,6 +31,10 @@ import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { CommandDefinitionBuilderTypes } from './CommandDefinitionBuilderTypes.js'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
+
+type HttpExposureOptions = {
+	mode?: 'sync' | 'async'
+}
 
 /**
  * Command definition builder is a helper to create and define a command for a service.
@@ -96,6 +103,62 @@ export class CommandDefinitionBuilder<
 		afterGuard: {},
 		transformOutput: undefined,
 	}
+
+	canEnqueue<
+		Payload extends Schema,
+		Parameter extends Schema,
+		QueueName extends string = string,
+	>(queueName: QueueName, payloadSchema?: Payload, parameterSchema?: Parameter) {
+		if (queueName.trim() === '') {
+			throw new Error('canEnqueue requires non-empty queue name')
+		}
+
+		const entry = {
+			[queueName]: { payloadSchema, parameterSchema },
+		} as unknown as C['QueueInvokes'] &
+			Record<
+				QueueName,
+				(
+					payload: InferIn<Payload>,
+					parameter: InferIn<Parameter>,
+					options?: Omit<QueueEnqueueOptions<InferIn<Payload>, InferIn<Parameter>>, 'queueName' | 'payload' | 'parameter'>,
+				) => Promise<QueueEnqueueResult>
+			>
+
+		this.queueInvokes = {
+			...this.queueInvokes,
+			[queueName]: { payloadSchema, parameterSchema },
+		}
+
+		return this as unknown as CommandDefinitionBuilder<
+			S,
+			CommandDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes'] &
+					Record<
+						QueueName,
+						(
+							payload: InferIn<Payload>,
+							parameter: InferIn<Parameter>,
+							options?: Omit<
+								QueueEnqueueOptions<InferIn<Payload>, InferIn<Parameter>>,
+								'queueName' | 'payload' | 'parameter'
+							>,
+						) => Promise<QueueEnqueueResult>
+					>
+			>
+		>
+	}
+	private queueInvokes: QueueInvokeList = {}
 
 	private fn?: CommandFunction<
 		S,
@@ -758,7 +821,9 @@ export class CommandDefinitionBuilder<
 		contentEncodingRequest?: string,
 		contentTypeResponse?: ContentType,
 		contentEncodingResponse?: string,
+		options?: HttpExposureOptions,
 	) {
+		const mode = options?.mode ?? 'sync'
 		this.httpMetadata = {
 			expose: {
 				contentTypeRequest: contentTypeRequest ?? this.inputContentType ?? 'application/json',
@@ -768,8 +833,12 @@ export class CommandDefinitionBuilder<
 				http: {
 					method,
 					path,
+					mode,
 				},
 			},
+		}
+		if (mode === 'async') {
+			this.addOpenApiErrorStatusCodes(StatusCode.Accepted)
 		}
 		return this
 	}
@@ -862,6 +931,7 @@ export class CommandDefinitionBuilder<
 				Invokes,
 				StreamInvokes,
 				EmitList,
+				C['QueueInvokes'],
 				CommandDefinitionMetadataBase
 			>
 		>,
@@ -886,6 +956,7 @@ export class CommandDefinitionBuilder<
 				Invokes,
 				StreamInvokes,
 				EmitList,
+				C['QueueInvokes'],
 				HttpExposedServiceMeta<InferTypeOrEmptyObject<C['ParamsSchema']>>
 			>
 		> = {
@@ -973,7 +1044,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		> = {
 			commandName: this.commandName,
@@ -997,6 +1069,7 @@ export class CommandDefinitionBuilder<
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
+			queueInvokes: this.queueInvokes,
 		}
 
 		return this.extendWithHttpMetadata(definition)
@@ -1132,6 +1205,7 @@ export class CommandDefinitionBuilder<
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
+			queueInvokes: this.queueInvokes,
 		})
 	}
 
