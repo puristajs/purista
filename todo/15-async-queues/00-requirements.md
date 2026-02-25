@@ -16,6 +16,7 @@
 - Provide a default in-memory `QueueBridge` so services can develop and test without external dependencies, mirroring `DefaultEventBridge`.
 - Define a queue message envelope with trace/correlation IDs, retry counters, lease/visibility timestamps, payload, parameters, and custom headers.
 - Provide a `QueueBridge` abstraction similar to `EventBridge` that can target Redis core lists, NATS JetStream, AWS SQS/FIFO, Azure Storage Queues, and other providers that expose pull + lease semantics; explicitly skip push-only transports such as RabbitMQ/AMQP exchanges.
+- QueueBridge lifecycle mirrors EventBridge wiring: independent `{ queueBridge }` injection on `serviceBuilder.getInstance`, matching `start/destroy/isHealthy` semantics, so developers can mix transports (e.g., AMQP EventBridge + Redis QueueBridge) without coupling the packages.
 - Support manual lease acknowledgement so long-running jobs do not disappear yet can be reclaimed on failure/timeouts.
 - Allow extendable retry strategies (exponential backoff, fixed interval, custom function) and dead-letter routing.
 - Provide transformation hooks both before enqueue (mutate payload/params) and before execute (normalize again) with schema validation toggles.

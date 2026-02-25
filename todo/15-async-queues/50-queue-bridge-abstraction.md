@@ -5,6 +5,8 @@
 - `QueueBridge` lives beside `EventBridge` under `packages/core/src/core/QueueBridge`.
 - Shared helpers (`createLease`, `withRetry`, `serializeEnvelope`) ship in `packages/core/src/core/QueueBridge/helper` and can be reused by provider implementations.
 - Service runtime requests both bridges from dependency injection when a service declares commands/subscriptions/streams (EventBridge) and queues/workers (QueueBridge). Either bridge can be omitted to keep lightweight services lean.
+- API surface mirrors the EventBridge shape exactly: `{ name, start(), destroy(), isHealthy(), isReady?, capabilities }` so wiring/telemetry remains consistent and providers can share test harnesses.
+- Event bridge packages must not import queue bridge code (and vice versa). Shared provider utilities (e.g., Redis connection pools) live in neutral helper modules that both adapters can consume without creating circular dependencies.
 
 ## Capabilities handshake
 
@@ -60,6 +62,7 @@ Each provider lives in its own package (e.g., `packages/redis-queue-bridge`, `pa
 - EventBridge remains the transport for commands/subscriptions/custom events.
 - QueueBridge can optionally emit events (e.g., `QueueJobDeadLettered`) through EventBridge so other services can react. This emission path is part of the core runtime, not the provider, ensuring consistent telemetry.
 - For providers that **are** already message brokers (NATS, AMQP), we still treat queue operations as a separate concern because leasing semantics differ from event pub/sub. Implementations may share the underlying connection but must keep APIs separate to honor the Muldar isolation principle.
+- Runtime wiring exposes both bridges independently ( `serviceBuilder.getInstance(eventBridge, { queueBridge })` ). This enables combinations such as “NATS event bridge + Redis queue bridge” or “Default event bridge + in-memory queues” without any feature flags.
 
 ## Local + test story
 

@@ -6,7 +6,8 @@
 2. `ServiceBuilder.addQueueDefinition()` registers producer-side metadata (schemas, preprocess hooks).
 3. `ServiceBuilder.addQueueWorker()` registers one or more worker configs per queue (pull strategy, concurrency, resources needed).
 4. `resolveDefinitions()` returns `{ commands, subscriptions, streams, queues, queueWorkers }` so runtime + CLI exports remain consistent.
-5. `Service.getInstance(...)` wires the configured `QueueBridge` into the service context if either a queue or worker has been declared. Otherwise, the property remains undefined to avoid overhead.
+5. `Service.getInstance(...)` accepts `{ queueBridge }` exactly like `{ eventBridge }`, defaulting to the in-memory implementation when omitted. The bridge is instantiated even when the current service has no queues yet so `.canEnqueue` contexts remain consistent, but the runtime only starts worker loops if definitions exist.
+6. Event bridges never reference queues. Queue bridges are injected independently, allowing deployments such as “RabbitMQ for commands/subscriptions + Redis for queues” without any conditional logic inside provider packages.
 
 ## QueueDefinitionBuilder API sketch
 

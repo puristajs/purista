@@ -118,4 +118,36 @@ Scope: implement pull-based queue primitives, default bridge, DX, and docs/tests
 
 ---
 
+## Architecture refinement plan (February 2026)
+
+Even though the initial implementation already injects `queueBridge` alongside `eventBridge`, we want to streamline the architecture before release so queue transports mirror event bridge abstractions exactly and no residual coupling remains. The refactor spans the following steps:
+
+1. **Spec alignment**
+   - Update `specs/15-async-queues` docs to spell out the final separation rules (event bridges never reference queues, queue bridges follow event bridge naming/typing conventions, default queue bridge in core, provider packages optional).
+   - Document lifecycle state machine defaults (including optional DLQ state config) and HTTP async response mapping again so builders/tests have a single source of truth.
+
+2. **Core service/runtime cleanup**
+   - Ensure QueueBridge types live under `core/EventBridge`-style namespaces (`QueueBridge`, `QueueBridgeConfig`, `QueueBridgeCapabilities`, typed handler contracts).
+   - Remove any leftover queue logic from event bridge modules (helpers, span tags, tests) so each abstraction is isolated.
+   - Service runtime should instantiate queue bridges only when queues/workers exist, surface health independently, and provide `context.queue` even when event bridge is swapped.
+   - Introduce explicit guard builder parity: `.canEnqueue` mirrors `.canInvoke` API/telemetry, `.canSchedule` uses same builder style as event bridge invokes.
+
+3. **Default + provider bridges**
+   - Keep `DefaultQueueBridge` under `packages/core` as the canonical in-memory implementation, matching DefaultEventBridge code structure.
+   - Extract/confirm Redis queue bridge resides in its own package (`packages/redis-queue-bridge`) with zero dependencies on event bridge modules.
+   - Audit other provider packages to ensure they only export event bridge adapters; if any queue-specific helpers leaked there, move them beside the queue bridge.
+
+4. **Builder/CLI/test helpers**
+   - Update builders so queue definitions/workers register under the new abstraction, adjust context mocks, and ensure `.canEnqueue` hooking replicates event invoke guard ergonomics.
+   - Extend CLI scaffolding + test helpers to wire queue bridges through the new flow (embedding code samples that show independent `queueBridge` injection).
+   - Refresh Vitest suites + integration tests to cover the decoupled wiring (service creation with only event bridge, only queue bridge, both, plus Redis bridge contract tests).
+
+5. **Documentation + communication**
+   - Rewrite handbook sections (Queues, Service, Event Bridges, Quickstart, Advanced) to highlight “mix and match” deployments and the default queue bridge story.
+   - Update CHANGELOG + migration notes to mention the architecture shift (no releases yet, but future readers need guidance).
+
+Team agreement: execute these steps sequentially, committing each milestone separately for easier review. Tests/docs must pass after every major chunk.
+
+---
+
 Work should proceed milestone by milestone, keeping PRs focused (core, runtime, bridge, CLI, docs). This file should be updated as milestones complete or scope changes.

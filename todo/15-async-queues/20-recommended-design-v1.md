@@ -75,7 +75,7 @@ The defaults live under `packages/core/src/core/types/queue/defaultQueueLifecycl
 
 - Commands/subscriptions/streams gain typed `context.queue.enqueue` + `context.queue.scheduleAt` (delayed) provided they declare `canEnqueue('queueName', schema)` in their builder.
 - ServiceBuilder registers queue/worker definitions during `resolveDefinitions()`, similar to commands/subscriptions/streams.
-- Existing EventBridge continues to handle synchronous messaging; QueueBridge is optional per service (if not configured, ServiceBuilder injects the default in-memory bridge for tests).
+- Existing EventBridge continues to handle synchronous messaging; QueueBridge is optional per service (if not configured, ServiceBuilder injects the default in-memory bridge for tests). Injection is independent, so teams can pair e.g. AMQP for commands with Redis for queues without writing adapter glue.
 - Queue handlers inherit the full command/subscription context surface (`context.command.invoke`, `context.event.emit`, auth info) so they can emit events or invoke other commands as follow-up work without bespoke wiring.
 - HTTP exposure (via `packages/httpserver` + `packages/hono-http-server`) uses a standard contract:
   - `POST /queue-endpoint` validates payload, enqueues work, and returns `202 Accepted` with body `{ jobId, queue: string }`.

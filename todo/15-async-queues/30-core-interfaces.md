@@ -37,24 +37,21 @@ export interface QueueBridge {
 
   start(): Promise<void>
   destroy(): Promise<void>
+  isHealthy(): Promise<boolean>
+  isReady?(): Promise<boolean>
 
   enqueue(options: QueueEnqueueOptions): Promise<QueueEnqueueResult>
-
   leaseNext(queue: string, opts: LeaseOptions): Promise<QueueLease | undefined>
-
-  extendLease(lease: QueueLease, extensionMs: number): Promise<void>
-
-  ack(lease: QueueLease, result?: QueueAckMetadata): Promise<void>
-
-  nack(lease: QueueLease, error: QueueRetryRequest): Promise<void>
-
-  moveToDeadLetter(queue: string, payload: QueueMessage, reason: DeadLetterReason): Promise<void>
-
+  extendLease(queue: string, leaseId: string, extensionMs: number): Promise<void>
+  ack(queue: string, leaseId: string): Promise<void>
+  nack(queue: string, leaseId: string, error: QueueRetryRequest): Promise<void>
+  moveToDeadLetter(queue: string, payload: QueueMessage, reason?: DeadLetterReason): Promise<void>
   metrics(queue: string): Promise<QueueMetrics>
 }
 ```
 
 - `QueueBridgeCapabilities` includes booleans (`delayedDelivery`, `fifo`, `exactlyOnce`, `priorityLevels`, `deadLetterNative`) plus descriptive hints (`defaultDeadLetterPrefix`, `defaultDeadLetterSuffix`, `deadLetterInspectable`, `maxBatchSize`). These hints allow builders/ops tooling to show the implicit DLQ target when the queue definition does not override it.
+- Signatures mirror `EventBridge` conventions: every method receives the queue name/identifier explicitly plus IDs for leases/jobs, enabling consistent logging/telemetry and making it trivial to implement new providers by copying the EventBridge scaffolding.
 - Example:
 
 ```ts
@@ -91,7 +88,7 @@ export type QueueDefinition = {
   maxParallelHandlers: number
   partitionKey?: (payload, params) => string | undefined
   deadLetter?: { queueName?: string; emitEvent?: string; eventName?: string } // queueName defaults to <name>.dead-letter if undefined
-  eventBridgeConfig: DefinitionQueueBridgeConfig
+  queueBridgeConfig: DefinitionQueueBridgeConfig
   httpExposure?: AsyncHttpExposure
 }
 
