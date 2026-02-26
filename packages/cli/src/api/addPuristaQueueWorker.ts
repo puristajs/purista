@@ -97,5 +97,4 @@ export const addPuristaQueueWorker = async (input: AddPuristaQueueWorkerInput) =
 		importFile: `./queue-worker/${workerDirName}/${queueWorkerBuilderFileName}.ts`,
 		importDefinition: camelCase(`${input.workerName} queue worker builder`),
 	})
-
 }

@@ -56,8 +56,9 @@ export const getQueueWorkerBuilderFileContent = (input: {
 				`.setHandler(async function (context, message: QueueMessage<${queueTypePrefix}Payload, ${queueTypePrefix}Parameter>)`,
 			)
 			.inlineBlock(() => {
-				writer.writeLine('context.logger.debug({ message }, \'processing queue job\')')
+				writer.writeLine("context.logger.debug({ message }, 'processing queue job')")
 				writer.writeLine('await context.job.complete()')
+				writer.writeLine('return undefined')
 			})
 			.write(')')
 	})

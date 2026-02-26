@@ -1,5 +1,5 @@
-import type { QueueEnqueueOptions } from './QueueEnqueueOptions.js'
 import type { QueueEnqueueResult } from '../../QueueBridge/types/QueueEnqueueResult.js'
+import type { QueueEnqueueOptions } from './QueueEnqueueOptions.js'
 
 export type QueueInvokeFunction = <Payload = unknown, Params = unknown>(
 	queueName: string,

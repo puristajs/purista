@@ -1,11 +1,11 @@
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
+import type { QueueWorkerAfterGuardHook } from '../core/types/queue/QueueWorkerAfterGuardHook.js'
+import type { QueueWorkerBeforeGuardHook } from '../core/types/queue/QueueWorkerBeforeGuardHook.js'
 import type {
 	QueueWorkerDefinition,
 	QueueWorkerHandler,
 	QueueWorkerMode,
 } from '../core/types/queue/QueueWorkerDefinition.js'
-import type { QueueWorkerBeforeGuardHook } from '../core/types/queue/QueueWorkerBeforeGuardHook.js'
-import type { QueueWorkerAfterGuardHook } from '../core/types/queue/QueueWorkerAfterGuardHook.js'
 
 export class QueueWorkerBuilder {
 	private mode: QueueWorkerMode = 'continuous'

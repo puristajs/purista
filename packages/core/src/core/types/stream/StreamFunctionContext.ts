@@ -4,9 +4,9 @@ import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { Prettify } from '../Prettify.js'
-import type { StreamInvokeList } from '../StreamInvokeList.js'
-import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 import type { QueueContext } from '../queue/QueueContext.js'
+import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
+import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { StreamOpenRequest } from './StreamOpenRequest.js'
 
 export type StreamFunctionContextEnhancements<

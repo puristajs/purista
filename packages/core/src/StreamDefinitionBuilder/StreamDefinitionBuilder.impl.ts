@@ -4,6 +4,7 @@ import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExpose
 import type { QueryParameter } from '../core/HttpServer/types/QueryParameter.js'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
+import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
@@ -15,7 +16,6 @@ import type { StreamDefinition } from '../core/types/stream/StreamDefinition.js'
 import type { StreamDefinitionMetadataBase } from '../core/types/stream/StreamDefinitionMetadataBase.js'
 import type { StreamFunction } from '../core/types/stream/StreamFunction.js'
 import type { StreamWriter } from '../core/types/stream/StreamWriter.js'
-import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
@@ -80,11 +80,11 @@ export class StreamDefinitionBuilder<
 		this.deprecated = deprecated
 	}
 
-	canEnqueue<
-		Payload extends Schema,
-		Parameter extends Schema,
-		QueueName extends string = string,
-	>(queueName: QueueName, payloadSchema?: Payload, parameterSchema?: Parameter) {
+	canEnqueue<Payload extends Schema, Parameter extends Schema, QueueName extends string = string>(
+		queueName: QueueName,
+		payloadSchema?: Payload,
+		parameterSchema?: Parameter,
+	) {
 		if (queueName.trim() === '') {
 			throw new Error('canEnqueue requires non-empty queue name')
 		}

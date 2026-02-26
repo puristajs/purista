@@ -1,9 +1,6 @@
 import type { z } from 'zod/v4'
 
-import type {
-	pingV1PingJobQueueParameterSchema,
-	pingV1PingJobQueuePayloadSchema,
-} from './schema.js'
+import type { pingV1PingJobQueueParameterSchema, pingV1PingJobQueuePayloadSchema } from './schema.js'
 
 export type PingV1PingJobQueuePayload = z.input<typeof pingV1PingJobQueuePayloadSchema>
 

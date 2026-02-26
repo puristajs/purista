@@ -3,11 +3,11 @@ import { stub } from 'sinon'
 
 import type { EBMessage } from '../core/types/EBMessage.js'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
-import type { SubscriptionTransformFunctionContext } from '../core/types/subscription/SubscriptionTransformFunctionContext.js'
+import type { QueueInvokeClientMap, QueueScheduleProxy } from '../core/types/queue/QueueContext.js'
 import type { QueueInvokeFunction } from '../core/types/queue/QueueInvokeFunction.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { QueueScheduleFunction } from '../core/types/queue/QueueScheduleFunction.js'
-import type { QueueInvokeClientMap, QueueScheduleProxy } from '../core/types/queue/QueueContext.js'
+import type { SubscriptionTransformFunctionContext } from '../core/types/subscription/SubscriptionTransformFunctionContext.js'
 
 import { getLoggerMock } from './getLogger.mock.js'
 

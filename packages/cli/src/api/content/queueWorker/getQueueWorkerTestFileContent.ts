@@ -14,7 +14,10 @@ export const getQueueWorkerTestFileContent = (input: {
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
 
-	const workerBuilderFileName = convertToProjectFileCasing(`${input.workerName} queue worker builder`, input.puristaConfig)
+	const workerBuilderFileName = convertToProjectFileCasing(
+		`${input.workerName} queue worker builder`,
+		input.puristaConfig,
+	)
 	const workerBuilderName = camelCase(`${input.workerName} queue worker builder`)
 	const testLib = input.puristaConfig.runtime === 'bun' ? 'bun:test' : 'vitest'
 

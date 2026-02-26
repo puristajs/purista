@@ -22,13 +22,16 @@ describe('DefaultQueueBridge specifics', () => {
 
 		const lease = await bridge.leaseNext(queueName)
 		expect(lease).toBeDefined()
+		if (!lease) {
+			throw new Error('Failed to lease job')
+		}
 
-		const originalExpiry = lease!.message.leaseExpiresAt
-		await bridge.extendLease(queueName, lease!.leaseId, 200)
+		const originalExpiry = lease.message.leaseExpiresAt
+		await bridge.extendLease(queueName, lease.leaseId, 200)
 
-		expect(lease!.message.leaseExpiresAt).toBeGreaterThan(originalExpiry)
+		expect(lease.message.leaseExpiresAt).toBeGreaterThan(originalExpiry)
 
-		await bridge.ack(queueName, lease!.leaseId)
+		await bridge.ack(queueName, lease.leaseId)
 		await bridge.destroy()
 	})
 })

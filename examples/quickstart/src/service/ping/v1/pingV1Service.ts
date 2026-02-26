@@ -1,5 +1,5 @@
-import { pingAsyncCommandBuilder } from './command/pingAsync/pingAsyncCommandBuilder.js'
 import { pingCommandBuilder } from './command/ping/pingCommandBuilder.js'
+import { pingAsyncCommandBuilder } from './command/pingAsync/pingAsyncCommandBuilder.js'
 import { pingV1ServiceBuilder } from './pingV1ServiceBuilder.js'
 import { pingJobQueueBuilder } from './queue/pingJob/pingJobQueueBuilder.js'
 import { pingJobWorkerQueueWorkerBuilder } from './queue-worker/pingJobWorker/pingJobWorkerQueueWorkerBuilder.js'
@@ -21,9 +21,7 @@ const commandDefinitions: CommandDefinition[] = [
 
 const subscriptionDefinitions: SubscriptionDefinition[] = [logSubscriptionBuilder.getDefinition()]
 const queueDefinitions: QueueDefinition[] = [pingJobQueueBuilder.getDefinition()]
-const queueWorkerDefinitions: QueueWorkerDefinition[] = [
-	pingJobWorkerQueueWorkerBuilder.getDefinition(),
-]
+const queueWorkerDefinitions: QueueWorkerDefinition[] = [pingJobWorkerQueueWorkerBuilder.getDefinition()]
 
 export const pingV1Service = pingV1ServiceBuilder
 	.addCommandDefinition(...commandDefinitions)

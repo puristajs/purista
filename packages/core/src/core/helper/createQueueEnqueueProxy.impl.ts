@@ -1,12 +1,8 @@
+import type { QueueEnqueueResult } from '../QueueBridge/types/QueueEnqueueResult.js'
+import type { QueueInvokeClientMap } from '../types/queue/QueueContext.js'
+import type { QueueEnqueueOptions } from '../types/queue/QueueEnqueueOptions.js'
 import type { QueueInvokeFunction } from '../types/queue/QueueInvokeFunction.js'
 import type { QueueInvokeList } from '../types/queue/QueueInvokeList.js'
-import type { QueueEnqueueResult } from '../QueueBridge/types/QueueEnqueueResult.js'
-import type { QueueEnqueueOptions } from '../types/queue/QueueEnqueueOptions.js'
-import type { QueueInvokeClientMap } from '../types/queue/QueueContext.js'
-
-const noop = () => {
-	// noop
-}
 
 export const createQueueEnqueueProxy = <TQueues extends QueueInvokeList>(
 	enqueueFn: QueueInvokeFunction,

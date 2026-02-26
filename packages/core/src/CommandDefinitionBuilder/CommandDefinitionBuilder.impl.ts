@@ -4,6 +4,7 @@ import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExpose
 import type { QueryParameter } from '../core/HttpServer/types/QueryParameter.js'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
+import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
@@ -19,11 +20,10 @@ import type { GetMessageParamsType } from '../core/types/GetMessageParamsType.js
 import type { GetMessagePayloadType } from '../core/types/GetMessagePayloadType.js'
 import type { InferTypeOrEmptyObject } from '../core/types/InferTypeOrEmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
+import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
-import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
-import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
-import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getCommandContextMock } from '../mocks/getCommandContext.mock.js'
 import { getCommandTransformContextMock } from '../mocks/getCommandTransformContext.mock.js'
@@ -104,26 +104,14 @@ export class CommandDefinitionBuilder<
 		transformOutput: undefined,
 	}
 
-	canEnqueue<
-		Payload extends Schema,
-		Parameter extends Schema,
-		QueueName extends string = string,
-	>(queueName: QueueName, payloadSchema?: Payload, parameterSchema?: Parameter) {
+	canEnqueue<Payload extends Schema, Parameter extends Schema, QueueName extends string = string>(
+		queueName: QueueName,
+		payloadSchema?: Payload,
+		parameterSchema?: Parameter,
+	) {
 		if (queueName.trim() === '') {
 			throw new Error('canEnqueue requires non-empty queue name')
 		}
-
-		const entry = {
-			[queueName]: { payloadSchema, parameterSchema },
-		} as unknown as C['QueueInvokes'] &
-			Record<
-				QueueName,
-				(
-					payload: InferIn<Payload>,
-					parameter: InferIn<Parameter>,
-					options?: Omit<QueueEnqueueOptions<InferIn<Payload>, InferIn<Parameter>>, 'queueName' | 'payload' | 'parameter'>,
-				) => Promise<QueueEnqueueResult>
-			>
 
 		this.queueInvokes = {
 			...this.queueInvokes,

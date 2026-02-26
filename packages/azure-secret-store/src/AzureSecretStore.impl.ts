@@ -34,8 +34,7 @@ export class AzureSecretStore extends SecretStoreBaseClass<AzureSecretStoreConfi
 		}
 
 		const credential = new DefaultAzureCredential()
-		const allowInsecureConnection =
-			this.config.allowInsecureConnection ?? this.config.options?.allowInsecureConnection
+		const allowInsecureConnection = this.config.allowInsecureConnection ?? this.config.options?.allowInsecureConnection
 
 		this.client = new SecretClient(this.config.vaultUrl, credential, {
 			...this.config.options,

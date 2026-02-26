@@ -1,7 +1,7 @@
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
-import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
+import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { Schema } from '../schema/index.js'
 
 export type CommandDefinitionBuilderTypes<

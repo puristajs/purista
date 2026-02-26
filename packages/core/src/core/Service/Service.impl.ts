@@ -1,5 +1,5 @@
-import { SpanStatusCode, trace } from '@opentelemetry/api'
 import type { Span } from '@opentelemetry/api'
+import { SpanStatusCode, trace } from '@opentelemetry/api'
 import { DefaultConfigStore } from '../../DefaultConfigStore/DefaultConfigStore.impl.js'
 import { DefaultQueueBridge } from '../../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/DefaultSecretStore.impl.js'
@@ -23,6 +23,7 @@ import { createSuccessResponse } from '../helper/createSuccessResponse.impl.js'
 import { getCleanedMessage } from '../helper/getCleanedMessage.impl.js'
 import { deserializeOtp, serializeOtp } from '../helper/serializeOtp.impl.js'
 import type { QueueBridge } from '../QueueBridge/types/QueueBridge.js'
+import type { QueueEnqueueResult } from '../QueueBridge/types/QueueEnqueueResult.js'
 import type { QueueRetryRequest } from '../QueueBridge/types/QueueRetryRequest.js'
 import type { SecretDeleteFunction } from '../SecretStore/types/SecretDeleteFunction.js'
 import type { SecretGetterFunction } from '../SecretStore/types/SecretGetterFunction.js'
@@ -49,28 +50,26 @@ import type { OpenStreamFunction } from '../types/OpenStreamFunction.js'
 import type { PrincipalId } from '../types/PrincipalId.js'
 import { PuristaSpanName } from '../types/PuristaSpanName.enum.js'
 import { PuristaSpanTag } from '../types/PuristaSpanTag.enum.js'
+import { defaultQueueLifecycleConfig } from '../types/queue/defaultQueueLifecycleConfig.js'
+import type { QueueContext } from '../types/queue/QueueContext.js'
 import type { QueueDefinition } from '../types/queue/QueueDefinition.js'
 import type { QueueDefinitionListResolved } from '../types/queue/QueueDefinitionList.js'
 import type { QueueEnqueueOptions } from '../types/queue/QueueEnqueueOptions.js'
-import type { QueueEnqueueResult } from '../QueueBridge/types/QueueEnqueueResult.js'
 import type { QueueHandlerResult } from '../types/queue/QueueHandlerResult.js'
+import type { QueueInvokeList } from '../types/queue/QueueInvokeList.js'
 import type { QueueJobContext } from '../types/queue/QueueJobContext.js'
 import type { QueueLease } from '../types/queue/QueueLease.js'
-import type { QueueContext, QueueScheduleProxy } from '../types/queue/QueueContext.js'
-import type { QueueScheduleFunction } from '../types/queue/QueueScheduleFunction.js'
-import type { QueueWorkerDefinition } from '../types/queue/QueueWorkerDefinition.js'
-import type { QueueWorkerDefinitionListResolved } from '../types/queue/QueueWorkerDefinitionList.js'
-import type { QueueInvokeList } from '../types/queue/QueueInvokeList.js'
-import type { QueueMetrics } from '../types/queue/QueueMetrics.js'
-import type { QueueHealthState, ServiceHealthState } from '../types/ServiceHealthState.js'
 import type { QueueLifecycleConfig } from '../types/queue/QueueLifecycleConfig.js'
 import type { QueueMessage } from '../types/queue/QueueMessage.js'
+import type { QueueMetrics } from '../types/queue/QueueMetrics.js'
 import type { QueueTransformContext } from '../types/queue/QueueTransformHook.js'
-import { defaultQueueLifecycleConfig } from '../types/queue/defaultQueueLifecycleConfig.js'
+import type { QueueWorkerDefinition } from '../types/queue/QueueWorkerDefinition.js'
+import type { QueueWorkerDefinitionListResolved } from '../types/queue/QueueWorkerDefinitionList.js'
 import type { ServiceClass } from '../types/ServiceClass.js'
 import type { ServiceClassTypes } from '../types/ServiceClassTypes.js'
 import type { ServiceConstructorInput } from '../types/ServiceConstructorInput.js'
 import { ServiceEventsNames } from '../types/ServiceEvents.js'
+import type { QueueHealthState, ServiceHealthState } from '../types/ServiceHealthState.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import { StoreType } from '../types/StoreType.enum.js'
 import type { StreamInvokeList } from '../types/StreamInvokeList.js'
@@ -527,11 +526,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		lifecycle: QueueLifecycleConfig,
 		logger: Logger,
 	): LeaseHeartbeatController {
-		if (
-			lifecycle.autoHeartbeat === false ||
-			lifecycle.heartbeatIntervalMs <= 0 ||
-			lifecycle.maxLeaseExtensions <= 0
-		) {
+		if (lifecycle.autoHeartbeat === false || lifecycle.heartbeatIntervalMs <= 0 || lifecycle.maxLeaseExtensions <= 0) {
 			return {
 				stop: () => {
 					// noop
@@ -573,8 +568,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 
 		// do not keep the event loop alive for tests/in-process workers
-		// biome-ignore lint/suspicious/noExplicitAny: timer unref only exists on Node timers
-		;(timer as any).unref?.()
+		const nodeTimer = timer as { unref?: () => void }
+		nodeTimer.unref?.()
 
 		return {
 			stop,
@@ -606,7 +601,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			message.parameter as never,
 		)
 
-		const hasParameter = Object.prototype.hasOwnProperty.call(transformed, 'parameter')
+		const hasParameter = Object.hasOwn(transformed, 'parameter')
 
 		return {
 			...message,
@@ -628,11 +623,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		return `${prefix}${queueName}${suffix}`
 	}
 
-	private computeRetryDelay(
-		lifecycle: QueueLifecycleConfig,
-		attempt: number,
-		requestedDelay?: number,
-	): number {
+	private computeRetryDelay(lifecycle: QueueLifecycleConfig, attempt: number, requestedDelay?: number): number {
 		if (typeof requestedDelay === 'number') {
 			return Math.max(0, Math.min(requestedDelay, lifecycle.retryStrategy.maxDelayMs))
 		}
@@ -710,7 +701,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		worker: QueueWorkerDefinition<any, any, any, any, any>,
 		context: QueueJobContext,
 		message: QueueMessage,
-		result: QueueHandlerResult | void,
+		result: QueueHandlerResult | undefined,
 	) {
 		const afterGuards = worker.afterGuards
 		if (!afterGuards || Object.keys(afterGuards).length === 0) {
@@ -857,13 +848,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		let normalizedParameter = validatedParameter
 
 		if (queueDefinition?.transformBeforeEnqueue) {
-			const transformContext = this.createQueueTransformContext(
-				queueName,
-				queueInvokes,
-				traceId,
-				principalId,
-				tenantId,
-			)
+			const transformContext = this.createQueueTransformContext(queueName, queueInvokes, traceId, principalId, tenantId)
 			const transformed = await queueDefinition.transformBeforeEnqueue.call(
 				this,
 				transformContext,
@@ -871,7 +856,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				validatedParameter as never,
 			)
 			normalizedPayload = transformed.payload as Payload
-			if (Object.prototype.hasOwnProperty.call(transformed, 'parameter')) {
+			if (Object.hasOwn(transformed, 'parameter')) {
 				normalizedParameter = transformed.parameter as Params | undefined
 			}
 		}
@@ -1571,36 +1556,36 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					continue
 				}
 
+				const activeLease = lease
 				const queueDefinition = this.getQueueDefinition(worker.queueName)
-				lease.message = await this.applyQueueBeforeExecuteTransform(queueDefinition, lease.message, workerLogger)
+				activeLease.message = await this.applyQueueBeforeExecuteTransform(
+					queueDefinition,
+					activeLease.message,
+					workerLogger,
+				)
 				const lifecycle = queueDefinition?.lifecycle ?? defaultQueueLifecycleConfig
 
-				heartbeat = this.startLeaseHeartbeat(worker.queueName, lease, lifecycle, workerLogger)
+				heartbeat = this.startLeaseHeartbeat(worker.queueName, activeLease, lifecycle, workerLogger)
 				jobState = { handled: false }
 				const stopHeartbeat = () => heartbeat?.stop()
 
 				const context = this.createQueueJobContext(
 					worker,
 					queueDefinition,
-					lease,
+					activeLease,
 					workerLogger,
 					jobState,
 					stopHeartbeat,
 				)
-				await this.runQueueWorkerBeforeGuards(worker, context, lease.message)
-				const result = await this.startActiveSpan(
-					PuristaSpanName.QueueProcess,
-					{},
-					undefined,
-					async span => {
-						this.annotateQueueSpan(span, worker.queueName, lease?.message.id, lease?.message.attempt)
-						return worker.handler.call(this, context, lease!.message)
-					},
-				)
-				await this.runQueueWorkerAfterGuards(worker, context, lease.message, result)
+				await this.runQueueWorkerBeforeGuards(worker, context, activeLease.message)
+				const result = await this.startActiveSpan(PuristaSpanName.QueueProcess, {}, undefined, async span => {
+					this.annotateQueueSpan(span, worker.queueName, activeLease.message.id, activeLease.message.attempt)
+					return worker.handler.call(this, context, activeLease.message)
+				})
+				await this.runQueueWorkerAfterGuards(worker, context, activeLease.message, result)
 
 				if (!jobState.handled) {
-					await this.handleQueueResult(worker, queueDefinition, lease, result, jobState, stopHeartbeat)
+					await this.handleQueueResult(worker, queueDefinition, activeLease, result, jobState, stopHeartbeat)
 				}
 			} catch (err) {
 				heartbeat?.stop()
@@ -1689,7 +1674,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		worker: QueueWorkerDefinition<any, any, any, any, any>,
 		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
 		lease: QueueLease,
-		result: QueueHandlerResult | void,
+		result: QueueHandlerResult | undefined,
 		jobState: { handled: boolean },
 		stopHeartbeat: () => void,
 	) {
@@ -1945,16 +1930,16 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				})
 
 				const call = stream.call.bind(this)
-					const streamContext = {
-						message,
-						emit: this.getEmitFunction(
-							stream.streamName,
-							traceId,
-							message.principalId,
-							message.tenantId,
-							stream.emitList,
-						),
-						...this.getContextFunctions(logger, streamQueue),
+				const streamContext = {
+					message,
+					emit: this.getEmitFunction(
+						stream.streamName,
+						traceId,
+						message.principalId,
+						message.tenantId,
+						stream.emitList,
+					),
+					...this.getContextFunctions(logger, streamQueue),
 					service: createInvokeFunctionProxy(
 						this.getInvokeFunction(stream.streamName, traceId, message.principalId, message.tenantId, stream.invokes),
 					),

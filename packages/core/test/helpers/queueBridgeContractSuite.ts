@@ -61,9 +61,17 @@ export const describeQueueBridgeContract = (title: string, config: QueueBridgeCo
 			return true
 		}
 
+		const getBridgeOrThrow = () => {
+			if (!bridge) {
+				throw new Error('Queue bridge is not initialized')
+			}
+			return bridge
+		}
+
 		const waitForLease = async (queueName: string, attempts = 20) => {
+			const activeBridge = getBridgeOrThrow()
 			for (let attempt = 0; attempt < attempts; attempt++) {
-				const lease = await bridge!.leaseNext(queueName, { waitTimeMs: 50 })
+				const lease = await activeBridge.leaseNext(queueName, { waitTimeMs: 50 })
 				if (lease) {
 					return lease
 				}
@@ -78,7 +86,8 @@ export const describeQueueBridgeContract = (title: string, config: QueueBridgeCo
 			}
 
 			const queueName = `contract-basic-${randomUUID()}`
-			await bridge!.enqueue({
+			const activeBridge = getBridgeOrThrow()
+			await activeBridge.enqueue({
 				queueName,
 				payload: { foo: 'bar' },
 			})
@@ -86,9 +95,9 @@ export const describeQueueBridgeContract = (title: string, config: QueueBridgeCo
 			const lease = await waitForLease(queueName)
 			expect(lease.message.payload).toStrictEqual({ foo: 'bar' })
 
-			await bridge!.ack(queueName, lease.leaseId)
+			await activeBridge.ack(queueName, lease.leaseId)
 
-			const metrics = await bridge!.metrics(queueName)
+			const metrics = await activeBridge.metrics(queueName)
 			expect(metrics.pending).toBe(0)
 			expect(metrics.inflight).toBe(0)
 			expect(metrics.deadLetter).toBe(0)
@@ -100,20 +109,21 @@ export const describeQueueBridgeContract = (title: string, config: QueueBridgeCo
 			}
 
 			const queueName = `contract-delay-${randomUUID()}`
-			await bridge!.enqueue({
+			const activeBridge = getBridgeOrThrow()
+			await activeBridge.enqueue({
 				queueName,
 				payload: { slow: true },
 				delayMs: 150,
 			})
 
-			const immediateLease = await bridge!.leaseNext(queueName, { waitTimeMs: 10 })
+			const immediateLease = await activeBridge.leaseNext(queueName, { waitTimeMs: 10 })
 			expect(immediateLease).toBeUndefined()
 
 			await delay(180)
 
 			const delayedLease = await waitForLease(queueName)
 			expect(delayedLease.message.payload).toStrictEqual({ slow: true })
-			await bridge!.ack(queueName, delayedLease.leaseId)
+			await activeBridge.ack(queueName, delayedLease.leaseId)
 		})
 
 		it('retries jobs and moves them to the dead-letter queue after max attempts', async () => {
@@ -122,16 +132,17 @@ export const describeQueueBridgeContract = (title: string, config: QueueBridgeCo
 			}
 
 			const queueName = `contract-retry-${randomUUID()}`
-			await bridge!.enqueue({
+			const activeBridge = getBridgeOrThrow()
+			await activeBridge.enqueue({
 				queueName,
 				payload: { id: 'job' },
 				maxAttempts: 2,
 			})
 
 			const firstLease = await waitForLease(queueName)
-			await bridge!.nack(queueName, firstLease.leaseId, { delayMs: 75, reason: 'fail-1' })
+			await activeBridge.nack(queueName, firstLease.leaseId, { delayMs: 75, reason: 'fail-1' })
 
-			const beforeDelayLease = await bridge!.leaseNext(queueName, { waitTimeMs: 10 })
+			const beforeDelayLease = await activeBridge.leaseNext(queueName, { waitTimeMs: 10 })
 			expect(beforeDelayLease).toBeUndefined()
 
 			await delay(100)
@@ -139,9 +150,9 @@ export const describeQueueBridgeContract = (title: string, config: QueueBridgeCo
 			const secondLease = await waitForLease(queueName)
 			expect(secondLease.message.attempt).toBeGreaterThanOrEqual(2)
 
-			await bridge!.nack(queueName, secondLease.leaseId, { reason: 'fail-2' })
+			await activeBridge.nack(queueName, secondLease.leaseId, { reason: 'fail-2' })
 
-			const metrics = await bridge!.metrics(queueName)
+			const metrics = await activeBridge.metrics(queueName)
 			expect(metrics.deadLetter).toBeGreaterThanOrEqual(1)
 		})
 
@@ -151,7 +162,8 @@ export const describeQueueBridgeContract = (title: string, config: QueueBridgeCo
 			}
 
 			const queueName = `contract-manual-${randomUUID()}`
-			await bridge!.enqueue({
+			const activeBridge = getBridgeOrThrow()
+			await activeBridge.enqueue({
 				queueName,
 				payload: { id: 'manual' },
 			})
@@ -159,9 +171,9 @@ export const describeQueueBridgeContract = (title: string, config: QueueBridgeCo
 			const lease = await waitForLease(queueName)
 			const dlqName = `${queueName}.manual`
 
-			await bridge!.moveToDeadLetter(dlqName, lease.message, 'manual-move')
+			await activeBridge.moveToDeadLetter(dlqName, lease.message, 'manual-move')
 
-			const dlqMetrics = await bridge!.metrics(dlqName)
+			const dlqMetrics = await activeBridge.metrics(dlqName)
 			expect(dlqMetrics.deadLetter).toBeGreaterThanOrEqual(1)
 		})
 	})

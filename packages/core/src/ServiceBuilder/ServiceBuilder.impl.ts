@@ -23,11 +23,11 @@ import type { LogLevelName } from '../core/types/LogLevelName.js'
 import type { NeverObject } from '../core/types/NeverObject.js'
 import type { Prettify } from '../core/types/Prettify.js'
 import type { QueueDefinitionList, QueueDefinitionListResolved } from '../core/types/queue/QueueDefinitionList.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type {
 	QueueWorkerDefinitionList,
 	QueueWorkerDefinitionListResolved,
 } from '../core/types/queue/QueueWorkerDefinitionList.js'
-import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { ServiceBuilderTypes } from '../core/types/ServiceBuilderTypes.js'
 import type { ServiceClassTypes } from '../core/types/ServiceClassTypes.js'
 import type { ServiceConstructorInput } from '../core/types/ServiceConstructorInput.js'
@@ -339,7 +339,19 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		description: string,
 	): SubscriptionDefinitionBuilder<
 		S['ServiceClassType'],
-		SubscriptionDefinitionBuilderTypes<any, any, any, any, any, any, S['Resources'], InvokeList, StreamInvokeList, Record<string, Schema>, QueueInvokeList>
+		SubscriptionDefinitionBuilderTypes<
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			S['Resources'],
+			InvokeList,
+			StreamInvokeList,
+			Record<string, Schema>,
+			QueueInvokeList
+		>
 	> {
 		return new SubscriptionDefinitionBuilder<
 			S['ServiceClassType'],

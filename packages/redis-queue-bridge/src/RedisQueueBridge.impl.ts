@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { emitWarning } from 'node:process'
 
 import type {
 	QueueBridge,
@@ -7,8 +8,8 @@ import type {
 	QueueEnqueueResult,
 	QueueLease,
 	QueueLeaseOptions,
-	QueueRetryRequest,
 	QueueMessage,
+	QueueRetryRequest,
 } from '@purista/core'
 import type {
 	RedisClientType,
@@ -65,14 +66,12 @@ export class RedisQueueBridge<
 
 	private readonly recoveryBatchSize: number
 
-	constructor(
-		private readonly options: RedisQueueBridgeOptions<M, F, S, RESP, TYPE_MAPPING> = {},
-	) {
+	constructor(private readonly options: RedisQueueBridgeOptions<M, F, S, RESP, TYPE_MAPPING> = {}) {
 		this.instanceId = randomUUID()
 		this.client = createClient(this.options.config)
 		this.client.on('error', err => {
-			// eslint-disable-next-line no-console
-			console.error({ err }, 'Redis queue bridge client error')
+			const warning = err instanceof Error ? err : new Error(`Redis queue bridge client error: ${String(err)}`)
+			emitWarning(warning, 'RedisQueueBridge')
 		})
 		this.keyPrefix = this.options.keyPrefix ?? DEFAULT_KEY_PREFIX
 		this.scheduleBatchSize = this.options.scheduleBatchSize ?? 50
@@ -153,11 +152,7 @@ export class RedisQueueBridge<
 		const blockSeconds = this.waitSeconds(options?.waitTimeMs)
 
 		while (true) {
-			const jobIdRaw = await client.brPopLPush(
-				this.pendingKey(queueName),
-				this.processingKey(queueName),
-				blockSeconds,
-			)
+			const jobIdRaw = await client.brPopLPush(this.pendingKey(queueName), this.processingKey(queueName), blockSeconds)
 
 			const jobId = this.decodeBulkString(jobIdRaw)
 			if (!jobId) {
@@ -329,17 +324,12 @@ export class RedisQueueBridge<
 	private async releaseDueJobs(queueName: string) {
 		const client = await this.getClient()
 		const now = Date.now()
-		const rawDueJobs = (await client.zRangeByScoreWithScores(
-			this.scheduledKey(queueName),
-			0,
-			now,
-			{
-				LIMIT: {
-					offset: 0,
-					count: this.scheduleBatchSize,
-				},
+		const rawDueJobs = (await client.zRangeByScoreWithScores(this.scheduledKey(queueName), 0, now, {
+			LIMIT: {
+				offset: 0,
+				count: this.scheduleBatchSize,
 			},
-		)) as RedisScoredEntry[] | null
+		})) as RedisScoredEntry[] | null
 
 		const dueJobs = this.normalizeScoredEntries(rawDueJobs)
 
@@ -358,17 +348,12 @@ export class RedisQueueBridge<
 	private async recoverExpiredLeases(queueName: string) {
 		const client = await this.getClient()
 		const now = Date.now()
-		const rawExpired = (await client.zRangeByScoreWithScores(
-			this.leaseExpiryKey(queueName),
-			0,
-			now,
-			{
-				LIMIT: {
-					offset: 0,
-					count: this.recoveryBatchSize,
-				},
+		const rawExpired = (await client.zRangeByScoreWithScores(this.leaseExpiryKey(queueName), 0, now, {
+			LIMIT: {
+				offset: 0,
+				count: this.recoveryBatchSize,
 			},
-		)) as RedisScoredEntry[] | null
+		})) as RedisScoredEntry[] | null
 
 		const expired = this.normalizeScoredEntries(rawExpired)
 

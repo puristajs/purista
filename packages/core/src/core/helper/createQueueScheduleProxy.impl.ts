@@ -1,7 +1,7 @@
-import type { QueueInvokeFunction } from '../types/queue/QueueInvokeFunction.js'
-import type { QueueScheduleFunction } from '../types/queue/QueueScheduleFunction.js'
-import type { QueueInvokeList } from '../types/queue/QueueInvokeList.js'
 import type { QueueInvokeClientMap, QueueScheduleProxy } from '../types/queue/QueueContext.js'
+import type { QueueInvokeFunction } from '../types/queue/QueueInvokeFunction.js'
+import type { QueueInvokeList } from '../types/queue/QueueInvokeList.js'
+import type { QueueScheduleFunction } from '../types/queue/QueueScheduleFunction.js'
 
 export const createQueueScheduleProxy = <TQueues extends QueueInvokeList>(
 	scheduleFn: QueueScheduleFunction,

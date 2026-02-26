@@ -1,10 +1,10 @@
-import type { Schema } from '../schema/index.js'
 import type { DefinitionQueueBridgeConfig } from '../core/types/DefinitionQueueBridgeConfig.js'
+import { defaultQueueLifecycleConfig } from '../core/types/queue/defaultQueueLifecycleConfig.js'
 import type { QueueDefinition } from '../core/types/queue/QueueDefinition.js'
 import type { QueueLifecycleConfig } from '../core/types/queue/QueueLifecycleConfig.js'
-import type { QueueWorkerDefinition } from '../core/types/queue/QueueWorkerDefinition.js'
 import type { QueueTransformHook } from '../core/types/queue/QueueTransformHook.js'
-import { defaultQueueLifecycleConfig } from '../core/types/queue/defaultQueueLifecycleConfig.js'
+import type { QueueWorkerDefinition } from '../core/types/queue/QueueWorkerDefinition.js'
+import type { Schema } from '../schema/index.js'
 
 export class QueueDefinitionBuilder {
 	private payloadSchema?: Schema
@@ -102,7 +102,7 @@ export class QueueDefinitionBuilder {
 						queueName: this.deadLetter.queueName,
 						eventName: this.deadLetter.eventName,
 						emitEvent: this.deadLetter.emitEvent,
-				  }
+					}
 				: undefined,
 			transformBeforeEnqueue: this.beforeEnqueueTransform,
 			transformBeforeExecute: this.beforeExecuteTransform,

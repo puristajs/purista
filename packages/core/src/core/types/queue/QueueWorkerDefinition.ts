@@ -1,8 +1,8 @@
 import type { InferIn, Schema } from '../../../schema/index.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
-import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
+import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { QueueHandlerResult } from './QueueHandlerResult.js'
 import type { QueueJobContext } from './QueueJobContext.js'
 import type { QueueMessage } from './QueueMessage.js'
@@ -20,7 +20,7 @@ export type QueueWorkerHandler<
 > = (
 	context: QueueJobContext<MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes>,
 	message: QueueMessage<MessagePayloadType, MessageParamsType>,
-) => Promise<QueueHandlerResult | void>
+) => Promise<QueueHandlerResult | undefined>
 
 export type QueueWorkerDefinition<
 	PayloadSchema extends Schema = Schema,
@@ -37,10 +37,24 @@ export type QueueWorkerDefinition<
 	handler: QueueWorkerHandler<PayloadSchema, ParamsSchema, Resources, Invokes, StreamInvokes>
 	beforeGuards?: Record<
 		string,
-		QueueWorkerBeforeGuardHook<ServiceClass, InferIn<PayloadSchema>, InferIn<ParamsSchema>, Resources, Invokes, StreamInvokes>
+		QueueWorkerBeforeGuardHook<
+			ServiceClass,
+			InferIn<PayloadSchema>,
+			InferIn<ParamsSchema>,
+			Resources,
+			Invokes,
+			StreamInvokes
+		>
 	>
 	afterGuards?: Record<
 		string,
-		QueueWorkerAfterGuardHook<ServiceClass, InferIn<PayloadSchema>, InferIn<ParamsSchema>, Resources, Invokes, StreamInvokes>
+		QueueWorkerAfterGuardHook<
+			ServiceClass,
+			InferIn<PayloadSchema>,
+			InferIn<ParamsSchema>,
+			Resources,
+			Invokes,
+			StreamInvokes
+		>
 	>
 }

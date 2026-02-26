@@ -22,7 +22,7 @@ export const getQueueBuilderFileContent = (input: {
 	const schemaPrefix = camelCase(`${input.serviceName} v${input.serviceVersion} ${input.queueName} queue`)
 
 	writer.writeLine(`import { ${serviceBuilderName} } from '../../${serviceBuilderFileName}.js'`)
-	writer.writeLine(`import {`)
+	writer.writeLine('import {')
 	writer.indent(() => {
 		writer.writeLine(`${schemaPrefix}PayloadSchema,`)
 		writer.writeLine(`${schemaPrefix}ParameterSchema,`)

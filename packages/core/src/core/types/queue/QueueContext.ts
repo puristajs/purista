@@ -1,9 +1,9 @@
 import type { InferIn, Schema } from '../../../schema/index.js'
 import type { QueueEnqueueResult } from '../../QueueBridge/types/QueueEnqueueResult.js'
+import type { QueueEnqueueOptions } from './QueueEnqueueOptions.js'
 import type { QueueInvokeFunction } from './QueueInvokeFunction.js'
 import type { QueueInvokeList } from './QueueInvokeList.js'
 import type { QueueScheduleFunction } from './QueueScheduleFunction.js'
-import type { QueueEnqueueOptions } from './QueueEnqueueOptions.js'
 
 export type InferPayload<S> = S extends Schema ? InferIn<S> : unknown
 export type InferParameter<S> = S extends Schema ? InferIn<S> : unknown
@@ -19,9 +19,7 @@ export type QueueInvokeClientMap<TQueues extends QueueInvokeList> = {
 	) => Promise<QueueEnqueueResult>
 }
 
-export type QueueScheduleProxy<
-	TQueues extends Record<string, (...args: any[]) => Promise<QueueEnqueueResult>>,
-> = {
+export type QueueScheduleProxy<TQueues extends Record<string, (...args: any[]) => Promise<QueueEnqueueResult>>> = {
 	[K in keyof TQueues]: TQueues[K] extends (
 		payload: infer Payload,
 		parameter?: infer Params,
@@ -32,7 +30,7 @@ export type QueueScheduleProxy<
 				payload: Payload,
 				parameter?: Params,
 				options?: Options extends Record<string, unknown> ? Omit<Options, 'delayMs'> : Options,
-		  ) => Promise<QueueEnqueueResult>
+			) => Promise<QueueEnqueueResult>
 		: never
 }
 

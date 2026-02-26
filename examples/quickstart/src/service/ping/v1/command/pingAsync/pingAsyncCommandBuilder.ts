@@ -1,13 +1,10 @@
 import { pingV1ServiceBuilder } from '../../pingV1ServiceBuilder.js'
+import { pingV1PingJobQueueParameterSchema, pingV1PingJobQueuePayloadSchema } from '../../queue/pingJob/schema.js'
 import {
 	pingV1PingAsyncInputParameterSchema,
 	pingV1PingAsyncInputPayloadSchema,
 	pingV1PingAsyncOutputPayloadSchema,
 } from './schema.js'
-import {
-	pingV1PingJobQueueParameterSchema,
-	pingV1PingJobQueuePayloadSchema,
-} from '../../queue/pingJob/schema.js'
 
 export const pingAsyncCommandBuilder = pingV1ServiceBuilder
 	.getCommandBuilder('pingAsync', 'Enqueues ping requests for async processing via queues')

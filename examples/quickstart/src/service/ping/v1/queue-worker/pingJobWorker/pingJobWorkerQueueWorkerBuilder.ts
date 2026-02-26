@@ -6,4 +6,5 @@ export const pingJobWorkerQueueWorkerBuilder = pingV1ServiceBuilder
 	.setHandler(async function (context, message) {
 		context.logger.info({ jobId: message.id }, 'processing async ping job')
 		await context.job.complete()
+		return undefined
 	})

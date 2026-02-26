@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto'
+import { emitWarning } from 'node:process'
 
 import type { StartedTestContainer } from 'testcontainers'
 import { GenericContainer, Wait } from 'testcontainers'
@@ -24,7 +25,10 @@ describeQueueBridgeContract('@purista/redis-queue-bridge contract', {
 			redisUrl = `redis://127.0.0.1:${container.getMappedPort(REDIS_PORT)}`
 		} catch (err) {
 			dockerAvailable = false
-			console.warn('Skipping redis queue bridge contract tests because Docker is unavailable', err)
+			emitWarning(
+				`Skipping redis queue bridge contract tests because Docker is unavailable: ${err instanceof Error ? err.message : String(err)}`,
+				'RedisQueueBridge',
+			)
 		}
 	},
 	afterAll: async () => {
@@ -59,7 +63,10 @@ describe('RedisQueueBridge specific behaviour', () => {
 			metricsRedisUrl = `redis://127.0.0.1:${metricsContainer.getMappedPort(REDIS_PORT)}`
 		} catch (err) {
 			metricsDockerAvailable = false
-			console.warn('Skipping redis queue bridge specific tests because Docker is unavailable', err)
+			emitWarning(
+				`Skipping redis queue bridge specific tests because Docker is unavailable: ${err instanceof Error ? err.message : String(err)}`,
+				'RedisQueueBridge',
+			)
 		}
 	})
 

@@ -1,6 +1,7 @@
 import type { SinonSandbox } from 'sinon'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
+import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
@@ -9,6 +10,8 @@ import type { EBMessage } from '../core/types/EBMessage.js'
 import type { EBMessageType } from '../core/types/EBMessageType.enum.js'
 import type { InstanceId } from '../core/types/InstanceId.js'
 import type { PrincipalId } from '../core/types/PrincipalId.js'
+import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { SubscriptionAfterGuardHook } from '../core/types/subscription/SubscriptionAfterGuardHook.js'
 import type { SubscriptionBeforeGuardHook } from '../core/types/subscription/SubscriptionBeforeGuardHook.js'
@@ -18,9 +21,6 @@ import type { SubscriptionFunction } from '../core/types/subscription/Subscripti
 import type { SubscriptionTransformInputHook } from '../core/types/subscription/SubscriptionTransformInputHook.js'
 import type { SubscriptionTransformOutputHook } from '../core/types/subscription/SubscriptionTransformOutputHook.js'
 import type { TenantId } from '../core/types/TenantId.js'
-import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
-import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
-import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import { getSubscriptionContextMock } from '../mocks/getSubscriptionContext.mock.js'
 import { getSubscriptionTransformContextMock } from '../mocks/getSubscriptionTransformContext.mock.js'
@@ -285,11 +285,11 @@ export class SubscriptionDefinitionBuilder<
 		>
 	}
 
-	canEnqueue<
-		Payload extends Schema,
-		Parameter extends Schema,
-		QueueName extends string = string,
-	>(queueName: QueueName, payloadSchema?: Payload, parameterSchema?: Parameter) {
+	canEnqueue<Payload extends Schema, Parameter extends Schema, QueueName extends string = string>(
+		queueName: QueueName,
+		payloadSchema?: Payload,
+		parameterSchema?: Parameter,
+	) {
 		if (queueName.trim() === '') {
 			throw new Error('canEnqueue requires non-empty queue name')
 		}

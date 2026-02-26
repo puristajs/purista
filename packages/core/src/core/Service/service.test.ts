@@ -1,15 +1,15 @@
 import { stub } from 'sinon'
+import { vi } from 'vitest'
 import { z } from 'zod/v4'
-import { QueueDefinitionBuilder } from '../../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'
-import { QueueWorkerBuilder } from '../../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
 import { getEventBridgeMock, getLoggerMock } from '../../mocks/index.js'
 import { getCustomMessageMessageMock } from '../../mocks/messages/getCustomMessage.mock.js'
-import type { QueueBridge } from '../QueueBridge/types/QueueBridge.js'
+import { QueueDefinitionBuilder } from '../../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'
+import { QueueWorkerBuilder } from '../../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
 import { SubscriptionDefinitionBuilder } from '../../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.js'
 import { UnhandledError } from '../Error/UnhandledError.impl.js'
+import type { QueueBridge } from '../QueueBridge/types/QueueBridge.js'
 import type { ServiceInfoType } from '../types/index.js'
 import { Service } from './Service.impl.js'
-import { vi } from 'vitest'
 
 const getQueueBridgeMock = () => {
 	const enqueue = stub().resolves({ jobId: 'job', queueName: 'queue' })
@@ -235,15 +235,15 @@ describe('Service', () => {
 			config: {},
 		})
 
-		await expect(
-			(service as any).enqueueQueue('orders', { id: 123 }, undefined, undefined),
-		).rejects.toBeInstanceOf(UnhandledError)
+		await expect((service as any).enqueueQueue('orders', { id: 123 }, undefined, undefined)).rejects.toBeInstanceOf(
+			UnhandledError,
+		)
 
 		queueBridge.stubs.enqueue.resetHistory()
 
-		await expect(
-			(service as any).enqueueQueue('orders', { id: 'abc' }, undefined, undefined),
-		).resolves.toMatchObject({ queueName: 'queue' })
+		await expect((service as any).enqueueQueue('orders', { id: 'abc' }, undefined, undefined)).resolves.toMatchObject({
+			queueName: 'queue',
+		})
 
 		expect(queueBridge.stubs.enqueue.callCount).toBe(1)
 		const callArgs = queueBridge.stubs.enqueue.getCall(0).args[0]
@@ -258,17 +258,17 @@ describe('Service', () => {
 		let hookCalled = false
 		let hookQueueNamespace: unknown
 
-	const queueDefinition = await new QueueDefinitionBuilder('orders', 'orders queue')
-		.addPayloadSchema(z.object({ id: z.string() }))
-		.setBeforeEnqueueTransform(async function (context, payload) {
-			expect(this).toBeInstanceOf(Service)
-			const typedPayload = payload as Readonly<{ id: string }>
-			expect(typedPayload.id).toBe('abc')
-			hookCalled = true
-			hookQueueNamespace = context.queue
-			return { payload: { id: typedPayload.id.toUpperCase() } }
-		})
-		.getDefinition()
+		const queueDefinition = await new QueueDefinitionBuilder('orders', 'orders queue')
+			.addPayloadSchema(z.object({ id: z.string() }))
+			.setBeforeEnqueueTransform(async function (context, payload) {
+				expect(this).toBeInstanceOf(Service)
+				const typedPayload = payload as Readonly<{ id: string }>
+				expect(typedPayload.id).toBe('abc')
+				hookCalled = true
+				hookQueueNamespace = context.queue
+				return { payload: { id: typedPayload.id.toUpperCase() } }
+			})
+			.getDefinition()
 
 		const service = new Service({
 			logger,
@@ -286,8 +286,8 @@ describe('Service', () => {
 
 		expect(hookCalled).toBe(true)
 		expect(typeof (hookQueueNamespace as { enqueue?: unknown })?.enqueue).toBe('function')
-	const callArgs = queueBridge.stubs.enqueue.getCall(0).args[0]
-	expect((callArgs.payload as { id: string }).id).toBe('ABC')
+		const callArgs = queueBridge.stubs.enqueue.getCall(0).args[0]
+		expect((callArgs.payload as { id: string }).id).toBe('ABC')
 	})
 
 	it('applies transformBeforeExecute hook before invoking the worker handler', async () => {

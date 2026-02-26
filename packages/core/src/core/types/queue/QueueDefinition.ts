@@ -2,11 +2,11 @@ import type { Infer, Schema } from '../../../schema/index.js'
 import type { DefinitionQueueBridgeConfig } from '../DefinitionQueueBridgeConfig.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
-import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
+import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { QueueLifecycleConfig } from './QueueLifecycleConfig.js'
-import type { QueueWorkerDefinition } from './QueueWorkerDefinition.js'
 import type { QueueTransformHook } from './QueueTransformHook.js'
+import type { QueueWorkerDefinition } from './QueueWorkerDefinition.js'
 
 export type QueueDefinition<
 	PayloadSchema extends Schema = Schema,
@@ -29,16 +29,6 @@ export type QueueDefinition<
 		eventName?: string
 		emitEvent?: boolean
 	}
-	transformBeforeEnqueue?: QueueTransformHook<
-		ServiceClass,
-		Infer<PayloadSchema>,
-		Infer<ParamsSchema>,
-		Resources
-	>
-	transformBeforeExecute?: QueueTransformHook<
-		ServiceClass,
-		Infer<PayloadSchema>,
-		Infer<ParamsSchema>,
-		Resources
-	>
+	transformBeforeEnqueue?: QueueTransformHook<ServiceClass, Infer<PayloadSchema>, Infer<ParamsSchema>, Resources>
+	transformBeforeExecute?: QueueTransformHook<ServiceClass, Infer<PayloadSchema>, Infer<ParamsSchema>, Resources>
 }

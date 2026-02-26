@@ -75,10 +75,7 @@ export const ensureQueueCollections = async (input: EnsureQueueCollectionsInput)
 		}
 	}
 
-	ensureTypeAlias(
-		'QueueDefinition',
-		`Parameters<typeof ${serviceBuilderName}['addQueueDefinition']>[number]`,
-	)
+	ensureTypeAlias('QueueDefinition', `Parameters<typeof ${serviceBuilderName}['addQueueDefinition']>[number]`)
 	ensureTypeAlias(
 		'QueueWorkerDefinition',
 		`Parameters<typeof ${serviceBuilderName}['addQueueWorkerDefinition']>[number]`,

@@ -16,6 +16,6 @@ export type QueueWorkerAfterGuardHook<
 > = (
 	this: S,
 	context: QueueJobContext<MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes>,
-	result: Readonly<QueueHandlerResult | void>,
+	result: Readonly<QueueHandlerResult | undefined>,
 	message: Readonly<QueueMessage<MessagePayloadType, MessageParamsType>>,
 ) => Promise<void>

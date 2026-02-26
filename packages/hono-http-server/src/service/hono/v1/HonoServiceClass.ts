@@ -44,6 +44,7 @@ const assertAsyncHttpResult = (result: unknown): QueueEnqueueResult => {
 		scheduledAt: candidate.scheduledAt,
 	}
 }
+
 import type { HealthFunction } from '../../../types/HealthFunction.js'
 import type { VariablesBase } from '../../../types/VariablesBase.js'
 import type { HonoServiceV1Config } from './honoServiceConfig.js'
