@@ -7,7 +7,7 @@
  * // => 'someText'
  * ```
  *
- * @link https://github.com/30-seconds/30-seconds-of-code
+ * Based on: https://github.com/30-seconds/30-seconds-of-code
  * @group Helper
  */
 export const convertToCamelCase = (str: string): string => {

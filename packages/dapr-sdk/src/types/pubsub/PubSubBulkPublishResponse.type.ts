@@ -13,7 +13,7 @@ limitations under the License.
 
 import type { PubSubBulkPublishEntry } from './PubSubBulkPublishEntry.type.js'
 
-type PubSubBulkPublishResponseFailedEntry = {
+export type PubSubBulkPublishResponseFailedEntry = {
 	message: PubSubBulkPublishEntry
 	error: Error
 }

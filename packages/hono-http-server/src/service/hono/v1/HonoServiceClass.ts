@@ -325,10 +325,8 @@ export class HonoServiceClass<
 
 	/**
 	 * Adds a single service command endpoint to the Hono router
-	 * @param metadata
-	 * @param commandName
-	 * @param service
-	 * @returns
+	 * @param metadata Command metadata produced by the builder
+	 * @param service Address of the service hosting the command
 	 */
 	public addEndpoint(metadata: CommandDefinitionMetadataBase, service: EBMessageAddress) {
 		if (!isHttpExposedServiceMeta(metadata)) {

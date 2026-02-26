@@ -32,7 +32,7 @@ import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { CommandDefinitionBuilderTypes } from './CommandDefinitionBuilderTypes.js'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
 
-type HttpExposureOptions = {
+export type HttpExposureOptions = {
 	mode?: 'sync' | 'async'
 }
 
@@ -752,7 +752,7 @@ export class CommandDefinitionBuilder<
 	/**
 	 * Set one or more after guard hook(s).
 	 * If there are multiple after guard hooks, they are executed in parallel
-	 * @param afterGuard  Object of key = name of guard, value = function
+	 * @param afterGuards Object of key = name of guard, value = function
 	 * @returns CommandDefinitionBuilder
 	 */
 	setAfterGuardHooks(
@@ -855,7 +855,7 @@ export class CommandDefinitionBuilder<
 
 	/**
 	 * enable or disable security for this endpoint
-	 * @param enabled Defaults to true if not set meaning "disable security"
+	 * @param disabled Defaults to true if not set meaning "disable security"
 	 * @returns CommandDefinitionBuilder
 	 * @deprecated Use makeEndpointPublic() instead.
 	 */

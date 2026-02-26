@@ -84,7 +84,7 @@ export type ServiceEventsInternal = {
 	[ServiceEventsNames.CommandUnhandledError]: { commandName: string; error: unknown; traceId?: TraceId }
 }
 
-type CustomEvents = {
+export type CustomEvents = {
 	[key: string]: unknown
 }
 

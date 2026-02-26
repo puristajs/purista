@@ -13,7 +13,7 @@ limitations under the License.
 
 import type { KeyValueType } from './KeyValue.type.js'
 
-type PubSubBulkPublishMessageExplicit = {
+export type PubSubBulkPublishMessageExplicit = {
 	entryID?: string
 	event: object | string
 	metadata?: KeyValueType

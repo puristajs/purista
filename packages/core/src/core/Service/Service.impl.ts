@@ -1259,8 +1259,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	/**
 	 * Called when a command is received by the service
 	 *
-	 * @param subscriptionId
-	 * @param command
+	 * @param message Command envelope to execute
 	 */
 	public async executeCommand(message: Readonly<Command>) {
 		const command = this.commands.get(message.receiver.serviceTarget)

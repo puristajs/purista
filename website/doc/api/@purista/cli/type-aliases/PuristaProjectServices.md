@@ -8,7 +8,7 @@
 
 > **PuristaProjectServices** = `Record`\<`string`, `Record`\<`string`, \{ `builderFile`: `string`; `commands`: `string`[]; `serviceFile`: `string`; `streams`: `string`[]; `subscriptions`: `string`[]; \}\>\>
 
-Defined in: [scanPuristaProject.ts:21](https://github.com/puristajs/purista/blob/b97488a5ed11e245981e53a0e4c5254551300a08/packages/cli/src/api/scanPuristaProject.ts#L21)
+Defined in: [scanPuristaProject.ts:21](https://github.com/puristajs/purista/blob/643d8ae461234cbb142aca5f38526a7b04d6fea0/packages/cli/src/api/scanPuristaProject.ts#L21)
 
 Information about a service.
 It is a nested object.

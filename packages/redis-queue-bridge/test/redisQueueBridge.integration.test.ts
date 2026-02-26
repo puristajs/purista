@@ -41,15 +41,41 @@ describeQueueBridgeContract('@purista/redis-queue-bridge contract', {
 })
 
 describe('RedisQueueBridge specific behaviour', () => {
-	it('exposes queue metrics', async () => {
+	let metricsContainer: StartedTestContainer | undefined
+	let metricsRedisUrl: string | undefined
+	let metricsDockerAvailable = true
+
+	beforeAll(async () => {
 		if (!dockerAvailable) {
+			metricsDockerAvailable = false
+			return
+		}
+
+		try {
+			metricsContainer = await new GenericContainer(REDIS_IMAGE)
+				.withExposedPorts(REDIS_PORT)
+				.withWaitStrategy(Wait.forLogMessage('Ready to accept connections'))
+				.start()
+			metricsRedisUrl = `redis://127.0.0.1:${metricsContainer.getMappedPort(REDIS_PORT)}`
+		} catch (err) {
+			metricsDockerAvailable = false
+			console.warn('Skipping redis queue bridge specific tests because Docker is unavailable', err)
+		}
+	})
+
+	afterAll(async () => {
+		await metricsContainer?.stop()
+	})
+
+	it('exposes queue metrics', async () => {
+		if (!metricsDockerAvailable) {
 			expect(true).toBe(true)
 			return
 		}
 
 		const bridge = new RedisQueueBridge({
 			config: {
-				url: redisUrl ?? `redis://127.0.0.1:${REDIS_PORT}`,
+				url: metricsRedisUrl ?? `redis://127.0.0.1:${REDIS_PORT}`,
 			},
 			keyPrefix: `metrics:${randomUUID()}:`,
 		})

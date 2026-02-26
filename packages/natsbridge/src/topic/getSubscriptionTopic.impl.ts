@@ -2,7 +2,7 @@ import type { Subscription } from '@purista/core'
 import { convertToSnakeCase } from '@purista/core'
 import type { INatsBridge } from '../types/INatsBridge.js'
 
-type GetSubscriptionTopicFn = (this: INatsBridge, subscription: Subscription) => string
+export type GetSubscriptionTopicFn = (this: INatsBridge, subscription: Subscription) => string
 
 export const getSubscriptionTopic: GetSubscriptionTopicFn = function (subscription) {
 	return [

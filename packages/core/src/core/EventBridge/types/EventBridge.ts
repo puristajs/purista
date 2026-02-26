@@ -41,8 +41,6 @@ export interface EventBridge {
 	/**
 	 * Call a command of a service and return the result of this command
 	 * @param input a partial command message
-	 * @param contentType the content type of the message payload
-	 * @param contentEncoding the content encoding of the message
 	 * @param ttl the time to live (timeout) of the invocation
 	 */
 	invoke<T>(input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId'>, ttl?: number): Promise<T>

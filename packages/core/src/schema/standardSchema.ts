@@ -19,7 +19,7 @@ export type ValidationResult<TOutput> =
 	| { success: true; data: TOutput }
 	| { success: false; issues: ReadonlyArray<StandardSchemaV1.Issue> }
 
-type JsonSchemaOptions = {
+export type JsonSchemaOptions = {
 	target?: StandardJSONSchemaV1.Target
 	mode?: 'input' | 'output'
 }
@@ -69,26 +69,10 @@ export const toJSONSchema = async (schema: Schema, options?: JsonSchemaOptions):
 		}
 	}
 
-	if (isStandardJsonSchema(standardProps)) {
-		try {
-			return (
-				mode === 'input' ? standardProps.jsonSchema.input({ target }) : standardProps.jsonSchema.output({ target })
-			) as SchemaObject
-		} catch (error) {
-			const err = new Error('Failed to convert Standard Schema to JSON Schema.')
-			;(err as { cause?: unknown }).cause = error
-			throw err
-		}
-	}
-
 	if (standardProps.vendor === 'zod') {
 		const zodModule = await import('zod/v4')
-		const maybeZod = schema as ZodType & { _def?: { typeName?: string } }
-		const typeName = maybeZod?._def?.typeName
-		if (typeName === 'ZodUndefined') {
-			return { type: 'null' } as SchemaObject
-		}
-		if (typeName === 'ZodVoid') {
+		const maybeZod = schema as ZodType
+		if (maybeZod instanceof zodModule.z.ZodUndefined || maybeZod instanceof zodModule.z.ZodVoid) {
 			return { type: 'null' } as SchemaObject
 		}
 		try {
@@ -98,7 +82,24 @@ export const toJSONSchema = async (schema: Schema, options?: JsonSchemaOptions):
 				unrepresentable: 'any',
 			}) as SchemaObject
 		} catch (error) {
+			const originalError = error as Error
+			const message = originalError?.message ?? ''
+			if (message.includes('Void cannot be represented') || message.includes('Undefined cannot be represented')) {
+				return { type: 'null' } as SchemaObject
+			}
 			const err = new Error('Zod JSON schema conversion requires the optional dependency `zod` to be installed.')
+			;(err as { cause?: unknown }).cause = error
+			throw err
+		}
+	}
+
+	if (isStandardJsonSchema(standardProps)) {
+		try {
+			return (
+				mode === 'input' ? standardProps.jsonSchema.input({ target }) : standardProps.jsonSchema.output({ target })
+			) as SchemaObject
+		} catch (error) {
+			const err = new Error('Failed to convert Standard Schema to JSON Schema.')
 			;(err as { cause?: unknown }).cause = error
 			throw err
 		}

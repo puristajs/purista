@@ -63,7 +63,7 @@ export type HttpEventBridgeConfig = {
 	/**
 	 * subscription invocations are wrapped in CloudEvent
 	 *
-	 * @link https://github.com/cloudevents/spec/tree/v1.0
+	 * CloudEvents specification v1.0: https://github.com/cloudevents/spec/tree/v1.0
 	 *
 	 * @default false
 	 */
@@ -72,7 +72,7 @@ export type HttpEventBridgeConfig = {
 	/**
 	 * command invocations are wrapped in CloudEvent
 	 *
-	 * @link https://github.com/cloudevents/spec/tree/v1.0
+	 * CloudEvents specification v1.0: https://github.com/cloudevents/spec/tree/v1.0
 	 *
 	 * @default false
 	 */

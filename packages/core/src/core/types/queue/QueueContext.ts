@@ -5,8 +5,8 @@ import type { QueueInvokeList } from './QueueInvokeList.js'
 import type { QueueScheduleFunction } from './QueueScheduleFunction.js'
 import type { QueueEnqueueOptions } from './QueueEnqueueOptions.js'
 
-type InferPayload<S> = S extends Schema ? InferIn<S> : unknown
-type InferParameter<S> = S extends Schema ? InferIn<S> : unknown
+export type InferPayload<S> = S extends Schema ? InferIn<S> : unknown
+export type InferParameter<S> = S extends Schema ? InferIn<S> : unknown
 
 export type QueueInvokeClientMap<TQueues extends QueueInvokeList> = {
 	[K in keyof TQueues]: (

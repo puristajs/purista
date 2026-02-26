@@ -19,7 +19,7 @@ export interface HttpEventBridgeClient {
 	 * @param address
 	 * @returns url path of endpoint
 	 */
-	getApiPathForCommand: (addess: EBMessageAddress, metadata: HttpExposedServiceMeta) => string
+	getApiPathForCommand: (address: EBMessageAddress, metadata: HttpExposedServiceMeta) => string
 
 	/**
 	 * Generate the url path of the subscription.

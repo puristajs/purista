@@ -7,7 +7,7 @@
  * // => 'some_text'
  * ```
  *
- * @link https://github.com/30-seconds/30-seconds-of-code
+ * Based on: https://github.com/30-seconds/30-seconds-of-code
  * @group Helper
  */
 export const convertToSnakeCase = (str: string): string =>

@@ -427,7 +427,7 @@ export class SubscriptionDefinitionBuilder<
 	 *
 	 * In serverless environments, this flag should not have any effect
 	 *
-	 * @param shared
+	 * @param enforce Set to true to deliver message to every running instance
 	 * @returns SubscriptionDefinition
 	 */
 	receiveMessageOnEveryInstance(enforce = true) {
@@ -784,7 +784,7 @@ export class SubscriptionDefinitionBuilder<
 	/**
 	 * Set one or more after guard hook(s).
 	 * If there are multiple after guard hooks, they are executed in parallel
-	 * @param afterGuard Object of key = name of guard, value = function
+	 * @param afterGuards Object of key = name of guard, value = function
 	 * @returns SubscriptionDefinitionBuilder
 	 */
 	setAfterGuardHooks(
@@ -982,8 +982,7 @@ export class SubscriptionDefinitionBuilder<
 	/**
 	 * Returns a mocked command function context, which can be used in unit tests.
 	 *
-	 * @param message
-	 * @param sandbox Sinon sandbox
+	 * @param input Options to create the context mock (message/resources/sandbox)
 	 * @returns a mocked command function context
 	 */
 	getSubscriptionContextMock(input: {
@@ -1002,9 +1001,7 @@ export class SubscriptionDefinitionBuilder<
 	/**
 	 * Returns a mocked transform function context, which can be used in unit tests.
 	 *
-	 * @param message
-	 * @param resources Resources to be used in the mock
-	 * @param sandbox Sinon sandbox
+	 * @param input Options to create the transform context mock (message/resources/sandbox)
 	 * @returns a mocked transform function context
 	 */
 	getSubscriptionTransformContextMock(input: {

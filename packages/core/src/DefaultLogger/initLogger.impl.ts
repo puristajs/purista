@@ -9,7 +9,7 @@ import { getDefaultLogLevel } from './getDefaultLogLevel.js'
 /**
  * Create a new logger instance using pino.
  *
- * @param minLevel - The minimum log level to use.
+ * @param level - The minimum log level to use.
  * @param opt - Optional pino configuration.
  *
  * @example

@@ -301,6 +301,15 @@ export class RedisQueueBridge<
 				[LAST_RETRY_HEADER]: reason,
 			}
 		}
+
+		const maxAttempts = message.maxAttempts ?? DEFAULT_MAX_ATTEMPTS
+		if (message.attempt >= maxAttempts) {
+			await this.moveToDeadLetter(queueName, message, reason)
+			await client.hDel(this.jobsKey(queueName), jobId)
+			await client.hIncrBy(this.statsKey(queueName), 'deadLetter', 1)
+			return
+		}
+
 		message.leaseExpiresAt = 0
 		message.scheduledAt = delayMs > 0 ? Date.now() + delayMs : Date.now()
 

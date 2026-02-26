@@ -4,6 +4,47 @@ All notable changes to this project will be documented in this file.
 
 ## [unreleased]
 
+### Bug Fixes
+
+- Escape changelog angle brackets for api docs build ([#240](https://github.com/orhun/git-cliff/issues/240))
+- Point api nav to existing readme
+
+### Documentation
+
+- Expand queue coverage and pin test containers
+- Clarify queue bridge navigation and injection
+- Refresh queue docs and api output
+
+### Features
+
+- Showcase async queue http contract
+- Add bridge contract tests, redis bridge polish, and docs
+- Introduce builders, CLI scaffolding, and specs
+
+### Miscellaneous Tasks
+
+- Add context snapshot
+- Inherit root tsconfig
+
+### Core
+
+- Lazy start queue bridge
+- Add queue bridge config
+
+### Examples
+
+- Wire queue bridge in quickstart
+
+### Redis-queue-bridge
+
+- Normalize redis types
+
+### Spec
+
+- Document queue bridge separation
+
+## [2.2.0] - 2026-02-13
+
 ### Breaking changes
 
 - Breaking change: switch from custom generateSchema to native z.toJSONSchema
@@ -57,12 +98,11 @@ All notable changes to this project will be documented in this file.
 - Make release version read step shell-safe ([#233](https://github.com/orhun/git-cliff/issues/233))
 - Split release prepare and publish workflows ([#234](https://github.com/orhun/git-cliff/issues/234))
 - Handle release PR creation permission restrictions ([#235](https://github.com/orhun/git-cliff/issues/235))
+- Harden release workflows and use npm trusted publishing ([#237](https://github.com/orhun/git-cliff/issues/237))
+- Make publish rerun-safe and normalize repository urls ([#239](https://github.com/orhun/git-cliff/issues/239))
 
 ### Documentation
 
-- Document async queue lifecycle defaults, HTTP 202 polling contract, and canEnqueue security parity
-- Extend quickstart/starter guides with queue builders, workers, and HTTP async examples
-- Describe new `purista add queue` / `purista add queue-worker` stories and CLI prompts
 - Fix typos ([#217](https://github.com/orhun/git-cliff/issues/217))
 - Add contributor guide and integration test env docs
 - Add API jsdoc for exported helpers and types
@@ -71,7 +111,7 @@ All notable changes to this project will be documented in this file.
 - Replace any-based service definition snippets
 - Align quickstart typing patterns and cli schema defaults
 - Improve quickstart clarity and fix wording issues
-- Document required Service<any> variance in temporal setup
+- Document required Service&lt;any&gt; variance in temporal setup
 - Fix business-logic wording and snippet correctness
 - Improve service builder wording clarity
 - Annotate intentional any schema boundaries
@@ -108,10 +148,6 @@ All notable changes to this project will be documented in this file.
 - Migrate to zod v4
 - Generate unknown payload schemas by default
 - Add vault secret store package
-- Add queue builders, worker builders, and `.canEnqueue` context helpers for commands/subscriptions/streams
-- Ship DefaultQueueBridge plus queue lifecycle types and proxies
-- Introduce RedisQueueBridge provider implementation
-- Add CLI scaffolding for queues/workers and queue-aware templates/examples
 
 ### Miscellaneous Tasks
 
@@ -128,11 +164,12 @@ All notable changes to this project will be documented in this file.
 - Harden CI release workflow and prepare script
 - Align biome schema and typedoc formatting
 - Use .nvmrc for setup-node version
+- V2.2.0 ([#236](https://github.com/orhun/git-cliff/issues/236))
 
 ### Refactor
 
 - Strengthen service definition arrays and bridge typings
-- Remove remaining list<any> service fixture typings
+- Remove remaining list&lt;any&gt; service fixture typings
 - Remove unsafe any usage in schema object utils
 - Remove any casts in casing conversion tests
 - Tighten logger and schema transform typing
@@ -917,7 +954,7 @@ All notable changes to this project will be documented in this file.
 - Breaking change: remove inclusion of source maps in libs to reduce size
 - Breaking change: Add instanceId for receiver and remove root instanceId from message
 
-Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
+Signed-off-by: Sebastian Wessel &lt;sebastianwessel@users.noreply.github.com&gt;
 
 ### Bug Fixes
 
@@ -960,7 +997,7 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 - Setting instance id in event bridge
 - Fixup
 
-Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
+Signed-off-by: Sebastian Wessel &lt;sebastianwessel@users.noreply.github.com&gt;
 - Cli init template outdated fixes #128
 - Cli init does not contain nats bridge #130
 - Core package requires Hono package fixes #129
@@ -1145,7 +1182,7 @@ Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
 - Log span context and traceId
 - Chore improve HttpClient
 
-Signed-off-by: Sebastian Wessel <sebastianwessel@users.noreply.github.com>
+Signed-off-by: Sebastian Wessel &lt;sebastianwessel@users.noreply.github.com&gt;
 - Add inline doc and cleanup code
 - Minor changes
 - Minor cleanup

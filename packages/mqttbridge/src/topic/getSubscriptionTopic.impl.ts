@@ -4,7 +4,7 @@ import type { Subscription } from '@purista/core'
 import { convertToSnakeCase } from '@purista/core'
 import type { IMqttBridge } from '../types/IMqttBridge.js'
 
-type GetSubscriptionTopicFn = (this: IMqttBridge, subscription: Subscription) => string
+export type GetSubscriptionTopicFn = (this: IMqttBridge, subscription: Subscription) => string
 
 export const getSubscriptionTopic: GetSubscriptionTopicFn = function (subscription) {
 	return join(

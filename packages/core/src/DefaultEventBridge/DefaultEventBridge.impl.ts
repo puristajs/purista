@@ -51,7 +51,7 @@ import type { DefaultEventBridgeConfig } from './types/DefaultEventBridgeConfig.
 import type { PendigInvocation } from './types/PendingInvocations.js'
 import type { SubscriptionStorageEntry } from './types/SubscriptionStorageEntry.js'
 
-type PendingStreamInvocation<Chunk = unknown, Final = unknown> = {
+export type PendingStreamInvocation<Chunk = unknown, Final = unknown> = {
 	push: (frame: StreamFrame<Chunk, Final>) => void
 	reject: (error: unknown) => void
 	setOwnerInstanceId: (instanceId: string) => Promise<void>
