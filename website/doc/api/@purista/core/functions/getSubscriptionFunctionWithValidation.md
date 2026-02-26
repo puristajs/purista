@@ -95,6 +95,10 @@ the logger instance
 
 the original message
 
+##### queue
+
+[`QueueContext`](../type-aliases/QueueContext.md) & [`QueueContext`](../type-aliases/QueueContext.md)\<[`QueueInvokeList`](../type-aliases/QueueInvokeList.md)\>
+
 ##### resources
 
 [`EmptyObject`](../type-aliases/EmptyObject.md)
@@ -173,6 +177,12 @@ delete a state value from the state store
 [`StateSetterFunction`](../type-aliases/StateSetterFunction.md)
 
 set a state value in the state store
+
+##### stream
+
+[`EmptyObject`](../type-aliases/EmptyObject.md)
+
+consumes stream responses from other service stream endpoints
 
 ##### wrapInSpan
 

@@ -1,5 +1,7 @@
+import type { Span } from '@opentelemetry/api'
 import { SpanStatusCode, trace } from '@opentelemetry/api'
 import { DefaultConfigStore } from '../../DefaultConfigStore/DefaultConfigStore.impl.js'
+import { DefaultQueueBridge } from '../../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { DefaultSecretStore } from '../../DefaultSecretStore/DefaultSecretStore.impl.js'
 import { DefaultStateStore } from '../../DefaultStateStore/DefaultStateStore.impl.js'
 import type { Infer, Schema } from '../../schema/index.js'
@@ -15,9 +17,14 @@ import { createErrorResponse } from '../helper/createErrorResponse.impl.js'
 import { createInfoMessage } from '../helper/createInfoMessage.impl.js'
 import { createInvokeFunctionProxy } from '../helper/createInvokeFunctionProxy.impl.js'
 import { createOpenStreamFunctionProxy } from '../helper/createOpenStreamFunctionProxy.impl.js'
+import { createQueueEnqueueProxy } from '../helper/createQueueEnqueueProxy.impl.js'
+import { createQueueScheduleProxy } from '../helper/createQueueScheduleProxy.impl.js'
 import { createSuccessResponse } from '../helper/createSuccessResponse.impl.js'
 import { getCleanedMessage } from '../helper/getCleanedMessage.impl.js'
 import { deserializeOtp, serializeOtp } from '../helper/serializeOtp.impl.js'
+import type { QueueBridge } from '../QueueBridge/types/QueueBridge.js'
+import type { QueueEnqueueResult } from '../QueueBridge/types/QueueEnqueueResult.js'
+import type { QueueRetryRequest } from '../QueueBridge/types/QueueRetryRequest.js'
 import type { SecretDeleteFunction } from '../SecretStore/types/SecretDeleteFunction.js'
 import type { SecretGetterFunction } from '../SecretStore/types/SecretGetterFunction.js'
 import type { SecretSetterFunction } from '../SecretStore/types/SecretSetterFunction.js'
@@ -43,10 +50,26 @@ import type { OpenStreamFunction } from '../types/OpenStreamFunction.js'
 import type { PrincipalId } from '../types/PrincipalId.js'
 import { PuristaSpanName } from '../types/PuristaSpanName.enum.js'
 import { PuristaSpanTag } from '../types/PuristaSpanTag.enum.js'
+import { defaultQueueLifecycleConfig } from '../types/queue/defaultQueueLifecycleConfig.js'
+import type { QueueContext } from '../types/queue/QueueContext.js'
+import type { QueueDefinition } from '../types/queue/QueueDefinition.js'
+import type { QueueDefinitionListResolved } from '../types/queue/QueueDefinitionList.js'
+import type { QueueEnqueueOptions } from '../types/queue/QueueEnqueueOptions.js'
+import type { QueueHandlerResult } from '../types/queue/QueueHandlerResult.js'
+import type { QueueInvokeList } from '../types/queue/QueueInvokeList.js'
+import type { QueueJobContext } from '../types/queue/QueueJobContext.js'
+import type { QueueLease } from '../types/queue/QueueLease.js'
+import type { QueueLifecycleConfig } from '../types/queue/QueueLifecycleConfig.js'
+import type { QueueMessage } from '../types/queue/QueueMessage.js'
+import type { QueueMetrics } from '../types/queue/QueueMetrics.js'
+import type { QueueTransformContext } from '../types/queue/QueueTransformHook.js'
+import type { QueueWorkerDefinition } from '../types/queue/QueueWorkerDefinition.js'
+import type { QueueWorkerDefinitionListResolved } from '../types/queue/QueueWorkerDefinitionList.js'
 import type { ServiceClass } from '../types/ServiceClass.js'
 import type { ServiceClassTypes } from '../types/ServiceClassTypes.js'
 import type { ServiceConstructorInput } from '../types/ServiceConstructorInput.js'
 import { ServiceEventsNames } from '../types/ServiceEvents.js'
+import type { QueueHealthState, ServiceHealthState } from '../types/ServiceHealthState.js'
 import { StatusCode } from '../types/StatusCode.enum.js'
 import { StoreType } from '../types/StoreType.enum.js'
 import type { StreamInvokeList } from '../types/StreamInvokeList.js'
@@ -67,6 +90,10 @@ import type { TraceId } from '../types/TraceId.js'
 import { commandTransformInput } from './commandTransformInput.impl.js'
 import { ServiceBaseClass } from './ServiceBaseClass/ServiceBaseClass.impl.js'
 import { subscriptionTransformInput } from './subscriptionTransformInput.impl.js'
+
+type LeaseHeartbeatController = {
+	stop: () => void
+}
 
 /**
  * Base class for all services.
@@ -105,8 +132,10 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	>()
 	protected streams = new Map<
 		string,
-		StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any>
+		StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any, QueueInvokeList>
 	>()
+	protected queueDefinitionList: QueueDefinitionListResolved<any>
+	protected queueWorkerDefinitionList: QueueWorkerDefinitionListResolved<any>
 	protected activeStreamSessions = new Map<
 		string,
 		{
@@ -115,6 +144,12 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			onCancel: Array<(reason?: string) => void>
 		}
 	>()
+	private queueBridge: QueueBridge
+	private readonly queueDefinitionMap: Map<string, QueueDefinition<any, any, any, any, any>>
+	private queueWorkerTasks = new Set<Promise<void>>()
+	private queueWorkersShouldStop = false
+	private queueMetricsCache = new Map<string, QueueMetrics>()
+	private queueBridgeStarted = false
 
 	public commandDefinitionList: CommandDefinitionListResolved<any>
 	public subscriptionDefinitionList: SubscriptionDefinitionListResolved<any>
@@ -142,6 +177,12 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		this.commandDefinitionList = config.commandDefinitionList
 		this.subscriptionDefinitionList = config.subscriptionDefinitionList
 		this.streamDefinitionList = config.streamDefinitionList ?? []
+		this.queueDefinitionList = config.queueDefinitionList ?? []
+		this.queueWorkerDefinitionList = config.queueWorkerDefinitionList ?? []
+		this.queueBridge = config.queueBridge ?? new DefaultQueueBridge()
+		this.queueDefinitionMap = new Map(
+			this.queueDefinitionList.map(def => [this.normalizeQueueName(def.queueName), def]),
+		)
 	}
 
 	get name() {
@@ -175,6 +216,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					this.subscriptionDefinitionList,
 					this.streamDefinitionList,
 				)
+				await this.initializeQueues()
 				await this.sendServiceInfo(EBMessageType.InfoServiceReady)
 				this.logger.info(
 					{ ...span.spanContext(), puristaVersion },
@@ -228,6 +270,26 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			})
 			await Promise.all(streamProms)
 		})
+	}
+
+	protected async initializeQueues() {
+		if (!this.hasQueueFeatures()) {
+			this.logger.debug('no queues/workers declared; skipping queue bridge startup')
+			return
+		}
+
+		if (!this.queueBridgeStarted) {
+			await this.queueBridge.start()
+			this.queueBridgeStarted = true
+		}
+
+		const isQueueBridgeReady = await this.queueBridge.isHealthy()
+		if (!isQueueBridgeReady) {
+			const err = new UnhandledError(StatusCode.ServiceUnavailable, 'queue bridge not healthy')
+			this.logger.error({ err }, 'Queue bridge is not ready - can not start service')
+			throw err
+		}
+		this.startQueueWorkers()
 	}
 
 	/**
@@ -388,6 +450,435 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 
 		return invokeCommand.bind(this)
+	}
+
+	protected getQueueNamespace(
+		queueInvokes?: QueueInvokeList,
+		traceId?: TraceId,
+		principalId?: PrincipalId,
+		tenantId?: TenantId,
+	) {
+		const enqueue = async <Payload, Params>(
+			queueName: string,
+			payload: Payload,
+			parameter?: Params,
+			options?: Omit<QueueEnqueueOptions<Payload, Params>, 'queueName' | 'payload' | 'parameter'>,
+		) => {
+			return this.enqueueQueue(queueName, payload, parameter, queueInvokes, traceId, principalId, tenantId, options)
+		}
+
+		const schedule = async <Payload, Params>(
+			queueName: string,
+			runAt: Date | number,
+			payload: Payload,
+			parameter?: Params,
+			options?: Omit<QueueEnqueueOptions<Payload, Params>, 'queueName' | 'payload' | 'parameter' | 'delayMs'>,
+		) => {
+			const epoch = runAt instanceof Date ? runAt.getTime() : runAt
+			const delayMs = Math.max(0, epoch - Date.now())
+			return this.enqueueQueue(queueName, payload, parameter, queueInvokes, traceId, principalId, tenantId, {
+				...options,
+				delayMs,
+			} as Omit<QueueEnqueueOptions<Payload, Params>, 'queueName' | 'payload' | 'parameter'>)
+		}
+
+		type QueueDescriptorType = typeof queueInvokes extends QueueInvokeList ? typeof queueInvokes : QueueInvokeList
+		const queueDescriptors = (queueInvokes ?? {}) as QueueDescriptorType
+		const enqueueProxy = createQueueEnqueueProxy<QueueDescriptorType>(enqueue, queueDescriptors)
+		const scheduleProxy = createQueueScheduleProxy<QueueDescriptorType>(schedule, queueDescriptors)
+
+		return {
+			enqueue: enqueueProxy,
+			scheduleAt: scheduleProxy,
+		}
+	}
+
+	private createQueueTransformContext(
+		queueName: string,
+		queueInvokes?: QueueInvokeList,
+		traceId?: TraceId,
+		principalId?: PrincipalId,
+		tenantId?: TenantId,
+		loggerOverride?: Logger,
+	): QueueTransformContext {
+		const transformLogger =
+			loggerOverride ??
+			this.logger.getChildLogger({
+				serviceTarget: queueName,
+				queueName,
+				customTraceId: traceId,
+				principalId,
+				tenantId,
+			})
+
+		const queueNamespace = this.getQueueNamespace(queueInvokes, traceId, principalId, tenantId)
+		const contextBase = this.getContextFunctions(transformLogger, queueNamespace)
+
+		return {
+			...contextBase,
+			resources: this.resources,
+		}
+	}
+
+	private startLeaseHeartbeat(
+		queueName: string,
+		lease: QueueLease,
+		lifecycle: QueueLifecycleConfig,
+		logger: Logger,
+	): LeaseHeartbeatController {
+		if (lifecycle.autoHeartbeat === false || lifecycle.heartbeatIntervalMs <= 0 || lifecycle.maxLeaseExtensions <= 0) {
+			return {
+				stop: () => {
+					// noop
+				},
+			}
+		}
+
+		let stopped = false
+		let extensions = 0
+		const timer = setInterval(() => {
+			if (stopped) {
+				return
+			}
+			if (extensions >= lifecycle.maxLeaseExtensions) {
+				logger.warn(
+					{ queueName, leaseId: lease.leaseId },
+					'max lease extensions reached, letting queue message visibility expire',
+				)
+				stop()
+				return
+			}
+
+			void this.queueBridge
+				.extendLease(queueName, lease.leaseId, lifecycle.visibilityTimeoutMs)
+				.then(() => {
+					extensions += 1
+				})
+				.catch(err => {
+					logger.warn({ err, queueName, leaseId: lease.leaseId }, 'failed to extend queue lease')
+				})
+		}, lifecycle.heartbeatIntervalMs)
+
+		const stop = () => {
+			if (stopped) {
+				return
+			}
+			stopped = true
+			clearInterval(timer)
+		}
+
+		// do not keep the event loop alive for tests/in-process workers
+		const nodeTimer = timer as { unref?: () => void }
+		nodeTimer.unref?.()
+
+		return {
+			stop,
+		}
+	}
+
+	private async applyQueueBeforeExecuteTransform(
+		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
+		message: QueueMessage,
+		logger: Logger,
+	): Promise<QueueMessage> {
+		if (!queueDefinition?.transformBeforeExecute) {
+			return message
+		}
+
+		const transformContext = this.createQueueTransformContext(
+			message.queueName,
+			undefined,
+			message.traceId,
+			undefined,
+			undefined,
+			logger,
+		)
+
+		const transformed = await queueDefinition.transformBeforeExecute.call(
+			this,
+			transformContext,
+			message.payload as never,
+			message.parameter as never,
+		)
+
+		const hasParameter = Object.hasOwn(transformed, 'parameter')
+
+		return {
+			...message,
+			payload: transformed.payload,
+			parameter: hasParameter ? transformed.parameter : message.parameter,
+		}
+	}
+
+	private resolveDeadLetterQueueName(
+		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
+		queueName: string,
+	) {
+		if (queueDefinition?.deadLetter?.queueName) {
+			return queueDefinition.deadLetter.queueName
+		}
+		const capabilities = this.queueBridge.capabilities
+		const prefix = capabilities.defaultDeadLetterPrefix ?? ''
+		const suffix = capabilities.defaultDeadLetterSuffix ?? '.dead-letter'
+		return `${prefix}${queueName}${suffix}`
+	}
+
+	private computeRetryDelay(lifecycle: QueueLifecycleConfig, attempt: number, requestedDelay?: number): number {
+		if (typeof requestedDelay === 'number') {
+			return Math.max(0, Math.min(requestedDelay, lifecycle.retryStrategy.maxDelayMs))
+		}
+
+		const exponent = Math.max(0, attempt - 1)
+		const baseDelay = Math.min(
+			lifecycle.retryStrategy.maxDelayMs,
+			lifecycle.retryStrategy.initialDelayMs * Math.max(1, lifecycle.retryStrategy.multiplier ** exponent),
+		)
+		if (lifecycle.retryStrategy.jitterFactor <= 0) {
+			return Math.round(baseDelay)
+		}
+		const jittered = baseDelay * (1 + lifecycle.retryStrategy.jitterFactor)
+		return Math.round(Math.min(lifecycle.retryStrategy.maxDelayMs, jittered))
+	}
+
+	private hasRetryWindowExpired(lifecycle: QueueLifecycleConfig, message: QueueMessage) {
+		return Date.now() - message.createdAt >= lifecycle.retryWindowMs
+	}
+
+	private async scheduleRetryOrDeadLetter(
+		workerQueueName: string,
+		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
+		lease: QueueLease,
+		request?: QueueRetryRequest,
+	) {
+		const lifecycle = queueDefinition?.lifecycle ?? defaultQueueLifecycleConfig
+		const attemptsExceeded = lease.message.attempt >= lifecycle.maxAttempts
+		const retryWindowExpired = this.hasRetryWindowExpired(lifecycle, lease.message)
+
+		if (attemptsExceeded || retryWindowExpired) {
+			const fallbackReason = attemptsExceeded ? 'max_attempts_exceeded' : 'retry_window_expired'
+			await this.deadLetterJob(queueDefinition, workerQueueName, lease, request?.reason ?? fallbackReason)
+			return
+		}
+
+		const delayMs = this.computeRetryDelay(lifecycle, lease.message.attempt, request?.delayMs)
+		await this.nackQueueJob(workerQueueName, lease.leaseId, lease.message.id, {
+			...request,
+			delayMs,
+		})
+	}
+
+	private async deadLetterJob(
+		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
+		queueName: string,
+		lease: QueueLease,
+		reason?: string,
+	) {
+		const dlq = this.resolveDeadLetterQueueName(queueDefinition, queueName)
+		await this.moveMessageToDeadLetter(dlq, lease.message, reason)
+		await this.ackQueueJob(queueName, lease.leaseId, lease.message.id)
+	}
+
+	private async runQueueWorkerBeforeGuards(
+		worker: QueueWorkerDefinition<any, any, any, any, any>,
+		context: QueueJobContext,
+		message: QueueMessage,
+	) {
+		const beforeGuards = worker.beforeGuards
+		if (!beforeGuards || Object.keys(beforeGuards).length === 0) {
+			return
+		}
+		await context.startActiveSpan(`${worker.name}.beforeGuards`, {}, undefined, async () => {
+			const guards = Object.entries(beforeGuards).map(([name, hook]) =>
+				context.startActiveSpan(`${worker.name}.beforeGuard.${name}`, {}, undefined, () =>
+					hook.call(this, context, message),
+				),
+			)
+			await Promise.all(guards)
+		})
+	}
+
+	private async runQueueWorkerAfterGuards(
+		worker: QueueWorkerDefinition<any, any, any, any, any>,
+		context: QueueJobContext,
+		message: QueueMessage,
+		result: QueueHandlerResult | undefined,
+	) {
+		const afterGuards = worker.afterGuards
+		if (!afterGuards || Object.keys(afterGuards).length === 0) {
+			return
+		}
+		await context.startActiveSpan(`${worker.name}.afterGuards`, {}, undefined, async () => {
+			const guards = Object.entries(afterGuards).map(([name, hook]) =>
+				context.startActiveSpan(`${worker.name}.afterGuard.${name}`, {}, undefined, () =>
+					hook.call(this, context, result, message),
+				),
+			)
+			await Promise.all(guards)
+		})
+	}
+
+	private annotateQueueSpan(span: Span, queueName: string, jobId?: string, attempt?: number) {
+		span.setAttribute(PuristaSpanTag.QueueName, queueName)
+		span.setAttribute(PuristaSpanTag.QueueBridge, this.queueBridge.name)
+		if (jobId) {
+			span.setAttribute(PuristaSpanTag.QueueJobId, jobId)
+		}
+		if (typeof attempt === 'number') {
+			span.setAttribute(PuristaSpanTag.QueueAttempt, attempt)
+		}
+	}
+
+	private async queueSpan<T>(
+		name: PuristaSpanName,
+		queueName: string,
+		jobId: string | undefined,
+		attributes: Record<string, string | number | boolean | undefined> | undefined,
+		fn: () => Promise<T>,
+	) {
+		return this.wrapInSpan(name, {}, async span => {
+			this.annotateQueueSpan(span, queueName, jobId)
+			if (attributes) {
+				for (const [key, value] of Object.entries(attributes)) {
+					if (value !== undefined) {
+						span.setAttribute(key, value)
+					}
+				}
+			}
+			return fn()
+		})
+	}
+
+	private ackQueueJob(queueName: string, leaseId: string, jobId?: string) {
+		return this.queueSpan(PuristaSpanName.QueueAck, queueName, jobId, undefined, () =>
+			this.queueBridge.ack(queueName, leaseId),
+		)
+	}
+
+	private nackQueueJob(queueName: string, leaseId: string, jobId: string | undefined, request: QueueRetryRequest = {}) {
+		const attrs = {
+			[PuristaSpanTag.QueueReason]: request.reason,
+			[PuristaSpanTag.QueueDelay]: request.delayMs,
+		}
+		return this.queueSpan(PuristaSpanName.QueueNack, queueName, jobId, attrs, () =>
+			this.queueBridge.nack(queueName, leaseId, request),
+		)
+	}
+
+	private moveMessageToDeadLetter(targetQueue: string, message: QueueMessage, reason?: string) {
+		const attrs = {
+			[PuristaSpanTag.QueueReason]: reason,
+		}
+		return this.queueSpan(PuristaSpanName.QueueDeadLetter, targetQueue, message.id, attrs, () =>
+			this.queueBridge.moveToDeadLetter(targetQueue, message, reason),
+		)
+	}
+
+	private getQueueWorkerParallelism(queueName: string) {
+		return (
+			this.queueWorkerDefinitionList
+				.filter(worker => worker.queueName === queueName)
+				.reduce((sum, worker) => sum + Math.max(1, worker.maxParallelHandlers ?? 1), 0) || 1
+		)
+	}
+
+	private evaluateQueueHealth(queueName: string, metrics: QueueMetrics) {
+		const parallelism = this.getQueueWorkerParallelism(queueName)
+		const backlogWarn = parallelism * 5
+		const backlogError = parallelism * 20
+
+		if (metrics.deadLetter > 0) {
+			return { status: 'warn', reason: 'dead-letter backlog detected' } as const
+		}
+		if (metrics.pending > backlogError) {
+			return { status: 'error', reason: 'queue backlog above emergency threshold' } as const
+		}
+		if (metrics.pending > backlogWarn) {
+			return { status: 'warn', reason: 'queue backlog above warning threshold' } as const
+		}
+		return { status: 'ok' as const }
+	}
+
+	private async enqueueQueue<Payload, Params>(
+		queueName: string,
+		payload: Payload,
+		parameter: Params | undefined,
+		queueInvokes?: QueueInvokeList,
+		traceId?: TraceId,
+		principalId?: PrincipalId,
+		tenantId?: TenantId,
+		options?: Omit<QueueEnqueueOptions<Payload, Params>, 'queueName' | 'payload' | 'parameter'>,
+	): Promise<QueueEnqueueResult> {
+		const descriptor = queueInvokes?.[queueName]
+		if (queueInvokes && !descriptor) {
+			throw new UnhandledError(StatusCode.Forbidden, `queue "${queueName}" is not allowed in this handler`)
+		}
+
+		const queueDefinition = this.getQueueDefinition(queueName)
+		if (!queueDefinition) {
+			throw new UnhandledError(StatusCode.NotFound, `queue "${queueName}" is not registered in this service`)
+		}
+
+		let validatedPayload = payload
+		const payloadSchema = descriptor?.payloadSchema ?? queueDefinition?.payloadSchema
+		if (payloadSchema) {
+			const validation = await validate(payloadSchema, payload)
+			if (!validation.success) {
+				throw new UnhandledError(StatusCode.BadRequest, 'queue payload schema validation failed', {
+					queueName,
+					issues: validation.issues,
+				})
+			}
+			validatedPayload = validation.data as Payload
+		}
+
+		let validatedParameter = parameter
+		const parameterSchema = descriptor?.parameterSchema ?? queueDefinition?.parameterSchema
+		if (parameterSchema) {
+			const validation = await validate(parameterSchema, parameter)
+			if (!validation.success) {
+				throw new UnhandledError(StatusCode.BadRequest, 'queue parameter schema validation failed', {
+					queueName,
+					issues: validation.issues,
+				})
+			}
+			validatedParameter = validation.data as Params
+		}
+
+		let normalizedPayload = validatedPayload
+		let normalizedParameter = validatedParameter
+
+		if (queueDefinition?.transformBeforeEnqueue) {
+			const transformContext = this.createQueueTransformContext(queueName, queueInvokes, traceId, principalId, tenantId)
+			const transformed = await queueDefinition.transformBeforeEnqueue.call(
+				this,
+				transformContext,
+				validatedPayload as never,
+				validatedParameter as never,
+			)
+			normalizedPayload = transformed.payload as Payload
+			if (Object.hasOwn(transformed, 'parameter')) {
+				normalizedParameter = transformed.parameter as Params | undefined
+			}
+		}
+
+		const lifecycle = queueDefinition?.lifecycle ?? defaultQueueLifecycleConfig
+
+		return this.wrapInSpan(PuristaSpanName.QueueEnqueue, {}, async span => {
+			this.annotateQueueSpan(span, queueName)
+			const result = await this.queueBridge.enqueue({
+				queueName,
+				payload: normalizedPayload,
+				parameter: normalizedParameter,
+				delayMs: options?.delayMs,
+				idempotencyKey: options?.idempotencyKey,
+				headers: options?.headers,
+				maxAttempts: options?.maxAttempts ?? lifecycle.maxAttempts,
+				priority: options?.priority,
+				leaseTtlMs: options?.leaseTtlMs ?? lifecycle.visibilityTimeoutMs,
+			})
+			span.setAttribute(PuristaSpanTag.QueueJobId, result.jobId)
+			return result
+		})
 	}
 
 	protected getConsumeStreamFunction<StreamInvokes extends StreamInvokeList>(
@@ -580,7 +1071,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		return emitCustomEvent.bind(this)
 	}
 
-	public getContextFunctions(logger: Logger): ContextBase {
+	public getContextFunctions(logger: Logger, queueNamespace?: QueueContext): ContextBase {
 		const getSecretFunction = async function (this: Service<S>, ...secretNames: string[]) {
 			return this.wrapInSpan(PuristaSpanName.SecretStoreGetValue, {}, async span => {
 				try {
@@ -725,6 +1216,8 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 		const removeState: StateDeleteFunction = removeStateFunction.bind(this)
 
+		const queue = queueNamespace ?? this.getQueueNamespace()
+
 		return {
 			logger,
 			wrapInSpan: this.wrapInSpan.bind(this),
@@ -744,14 +1237,14 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				setState,
 				removeState,
 			},
+			queue,
 		}
 	}
 
 	/**
 	 * Called when a command is received by the service
 	 *
-	 * @param subscriptionId
-	 * @param command
+	 * @param message Command envelope to execute
 	 */
 	public async executeCommand(message: Readonly<Command>) {
 		const command = this.commands.get(message.receiver.serviceTarget)
@@ -791,12 +1284,19 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 
 			try {
 				const { payload, parameter } = await commandTransformInput(this, logger, command, message)
+				const queueClient = this.getQueueNamespace(
+					this.resolveQueueInvokes(command.queueInvokes),
+					traceId,
+					message.principalId,
+					message.tenantId,
+				)
 
 				let result = await this.startActiveSpan(
 					`${command.commandName}.functionExecution`,
 					{},
 					undefined,
 					async _subSpan => {
+						const contextBase = this.getContextFunctions(logger, queueClient)
 						const context: CommandFunctionContext = {
 							message,
 							emit: this.getEmitFunction(
@@ -806,7 +1306,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 								message.tenantId,
 								command.emitList,
 							),
-							...this.getContextFunctions(logger),
+							...contextBase,
 							service: createInvokeFunctionProxy(
 								this.getInvokeFunction(
 									command.commandName,
@@ -839,6 +1339,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						const guardsPromises: Promise<void>[] = []
 
 						for (const [name, hook] of Object.entries(guards ?? {})) {
+							const contextBase = this.getContextFunctions(logger, queueClient)
 							const context: CommandFunctionContext = {
 								message,
 								emit: this.getEmitFunction(
@@ -848,7 +1349,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 									message.tenantId,
 									command.emitList,
 								),
-								...this.getContextFunctions(logger),
+								...contextBase,
 								service: createInvokeFunctionProxy(
 									this.getInvokeFunction(
 										command.commandName,
@@ -890,7 +1391,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					await this.startActiveSpan(`${command.commandName}.outputTransformation`, {}, undefined, async subSpan => {
 						const afterTransform = transformOutput.transformFunction.bind(this, {
 							message,
-							...this.getContextFunctions(logger),
+							...this.getContextFunctions(logger, queueClient),
 							resources: this.resources,
 						})
 						const resultTransformed = await afterTransform(
@@ -1008,6 +1509,251 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 
 			span.end()
 		})
+	}
+
+	protected startQueueWorkers() {
+		if (this.queueWorkerDefinitionList.length === 0) {
+			return
+		}
+		this.queueWorkersShouldStop = false
+		for (const worker of this.queueWorkerDefinitionList) {
+			const parallelism = worker.mode === 'sequential' ? 1 : Math.max(1, worker.maxParallelHandlers)
+			for (let slot = 0; slot < parallelism; slot += 1) {
+				const task = this.runQueueWorker(worker, slot)
+				this.queueWorkerTasks.add(task)
+				task.finally(() => this.queueWorkerTasks.delete(task))
+			}
+		}
+	}
+
+	protected async stopQueueWorkers() {
+		this.queueWorkersShouldStop = true
+		await Promise.allSettled(Array.from(this.queueWorkerTasks))
+		this.queueWorkerTasks.clear()
+	}
+
+	private async runQueueWorker(worker: QueueWorkerDefinition<any, any, any, any, any>, slot = 0): Promise<void> {
+		const workerLogger = this.logger.getChildLogger({
+			serviceTarget: `${worker.name}:${worker.queueName}:${slot}`,
+		})
+
+		while (!this.queueWorkersShouldStop) {
+			let lease: QueueLease | undefined
+			let jobState: { handled: boolean } | undefined
+			let heartbeat: LeaseHeartbeatController | undefined
+			try {
+				lease = await this.wrapInSpan(PuristaSpanName.QueueLease, {}, async span => {
+					span.setAttribute(PuristaSpanTag.QueueName, worker.queueName)
+					span.setAttribute(PuristaSpanTag.QueueBridge, this.queueBridge.name)
+					const result = await this.queueBridge.leaseNext(worker.queueName)
+					if (result) {
+						this.annotateQueueSpan(span, worker.queueName, result.message.id, result.message.attempt)
+					}
+					return result
+				})
+				if (!lease) {
+					await this.waitForNextPoll(worker)
+					continue
+				}
+
+				const activeLease = lease
+				const queueDefinition = this.getQueueDefinition(worker.queueName)
+				activeLease.message = await this.applyQueueBeforeExecuteTransform(
+					queueDefinition,
+					activeLease.message,
+					workerLogger,
+				)
+				const lifecycle = queueDefinition?.lifecycle ?? defaultQueueLifecycleConfig
+
+				heartbeat = this.startLeaseHeartbeat(worker.queueName, activeLease, lifecycle, workerLogger)
+				jobState = { handled: false }
+				const stopHeartbeat = () => heartbeat?.stop()
+
+				const context = this.createQueueJobContext(
+					worker,
+					queueDefinition,
+					activeLease,
+					workerLogger,
+					jobState,
+					stopHeartbeat,
+				)
+				await this.runQueueWorkerBeforeGuards(worker, context, activeLease.message)
+				const result = await this.startActiveSpan(PuristaSpanName.QueueProcess, {}, undefined, async span => {
+					this.annotateQueueSpan(span, worker.queueName, activeLease.message.id, activeLease.message.attempt)
+					return worker.handler.call(this, context, activeLease.message)
+				})
+				await this.runQueueWorkerAfterGuards(worker, context, activeLease.message, result)
+
+				if (!jobState.handled) {
+					await this.handleQueueResult(worker, queueDefinition, activeLease, result, jobState, stopHeartbeat)
+				}
+			} catch (err) {
+				heartbeat?.stop()
+				workerLogger.error({ err }, 'queue worker execution failed')
+				if (lease && !jobState?.handled) {
+					try {
+						await this.nackQueueJob(worker.queueName, lease.leaseId, lease.message.id, {
+							reason: err instanceof Error ? err.message : 'queue worker failure',
+						})
+					} catch (nackErr) {
+						workerLogger.error({ err: nackErr }, 'nack failed after worker error')
+					}
+				}
+				await this.waitForNextPoll(worker)
+			} finally {
+				heartbeat?.stop()
+				if (worker.mode === 'interval') {
+					await this.waitForNextPoll(worker)
+				}
+			}
+		}
+	}
+
+	private async waitForNextPoll(worker: QueueWorkerDefinition<any, any, any, any, any>) {
+		const delay = worker.mode === 'interval' ? (worker.intervalMs ?? 1_000) : 200
+		await new Promise(resolve => {
+			setTimeout(resolve, delay)
+		})
+	}
+
+	private createQueueJobContext(
+		worker: QueueWorkerDefinition<any, any, any, any, any>,
+		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
+		lease: QueueLease,
+		logger: Logger,
+		jobState: { handled: boolean },
+		stopHeartbeat: () => void,
+	): QueueJobContext {
+		const settle = () => {
+			if (jobState.handled) {
+				return false
+			}
+			jobState.handled = true
+			stopHeartbeat()
+			return true
+		}
+
+		const jobControls = {
+			complete: async (_output?: unknown, _headers?: Record<string, string>) => {
+				if (!settle()) return
+				await this.ackQueueJob(worker.queueName, lease.leaseId, lease.message.id)
+			},
+			retry: async (request?: QueueRetryRequest) => {
+				if (!settle()) return
+				await this.scheduleRetryOrDeadLetter(worker.queueName, queueDefinition, lease, request)
+			},
+			fail: async (reason: string, fatal?: boolean) => {
+				if (!settle()) return
+				if (fatal) {
+					await this.deadLetterJob(queueDefinition, worker.queueName, lease, reason)
+				} else {
+					await this.scheduleRetryOrDeadLetter(worker.queueName, queueDefinition, lease, { reason })
+				}
+			},
+			extendLease: async (durationMs: number) => {
+				await this.queueBridge.extendLease(worker.queueName, lease.leaseId, durationMs)
+			},
+		}
+
+		const traceId = lease.message.traceId
+
+		return {
+			message: lease.message,
+			job: jobControls,
+			emit: this.getEmitFunction(worker.name, traceId, undefined, undefined, {}),
+			...this.getContextFunctions(logger),
+			service: createInvokeFunctionProxy(this.getInvokeFunction(worker.name, traceId, undefined, undefined, {})),
+			stream: createOpenStreamFunctionProxy(
+				this.getConsumeStreamFunction(worker.name, traceId, undefined, undefined, {}),
+			),
+			resources: this.resources,
+		} as QueueJobContext
+	}
+
+	private async handleQueueResult(
+		worker: QueueWorkerDefinition<any, any, any, any, any>,
+		queueDefinition: QueueDefinition<any, any, any, any, any> | undefined,
+		lease: QueueLease,
+		result: QueueHandlerResult | undefined,
+		jobState: { handled: boolean },
+		stopHeartbeat: () => void,
+	) {
+		jobState.handled = true
+		stopHeartbeat()
+
+		if (!result || result.status === 'success') {
+			await this.ackQueueJob(worker.queueName, lease.leaseId, lease.message.id)
+			return
+		}
+
+		if (result.status === 'retry') {
+			await this.scheduleRetryOrDeadLetter(worker.queueName, queueDefinition, lease, {
+				delayMs: result.delayMs,
+				reason: result.reason,
+			})
+			return
+		}
+
+		if (result.status === 'fail') {
+			if (result.fatal) {
+				await this.deadLetterJob(queueDefinition, worker.queueName, lease, result.reason)
+			} else {
+				await this.scheduleRetryOrDeadLetter(worker.queueName, queueDefinition, lease, {
+					reason: result.reason,
+					delayMs: result.delayMs,
+				})
+			}
+		}
+	}
+
+	public async getServiceHealth(): Promise<ServiceHealthState> {
+		const eventBridgeHealthy = await this.eventBridge.isHealthy()
+		const hasQueues = this.hasQueueFeatures()
+
+		let queueBridgeHealthy = true
+		let queues: QueueHealthState[] = []
+
+		if (hasQueues) {
+			queueBridgeHealthy = await this.queueBridge.isHealthy()
+			queues = await Promise.all(
+				this.queueDefinitionList.map(async queue => {
+					try {
+						const metrics = await this.queueBridge.metrics(queue.queueName)
+						this.queueMetricsCache.set(queue.queueName, metrics)
+						const health = this.evaluateQueueHealth(queue.queueName, metrics)
+						return {
+							queueName: queue.queueName,
+							status: health.status,
+							reason: health.reason,
+							metrics,
+						} as QueueHealthState
+					} catch (error) {
+						const fallback: QueueMetrics = { pending: 0, inflight: 0, deadLetter: 0, retries: 0 }
+						const reason = error instanceof Error ? error.message : 'queue metrics unavailable'
+						return {
+							queueName: queue.queueName,
+							status: 'error',
+							reason,
+							metrics: this.queueMetricsCache.get(queue.queueName) ?? fallback,
+						} as QueueHealthState
+					}
+				}),
+			)
+		}
+
+		let status: ServiceHealthState['status'] = 'ok'
+		if (!eventBridgeHealthy || !queueBridgeHealthy || queues.some(queue => queue.status === 'error')) {
+			status = 'error'
+		} else if (queues.some(queue => queue.status === 'warn')) {
+			status = 'warn'
+		}
+
+		return {
+			status,
+			eventBridgeHealthy,
+			queueBridgeHealthy,
+			queues,
+		}
 	}
 
 	public async executeStream(message: Readonly<StreamMessage>) {
@@ -1172,6 +1918,12 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			}
 
 			try {
+				const streamQueue = this.getQueueNamespace(
+					this.resolveQueueInvokes(stream.queueInvokes),
+					traceId,
+					message.principalId,
+					message.tenantId,
+				)
 				await publishFrame({
 					frameType: 'start',
 					sequence: sequence++,
@@ -1187,7 +1939,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						message.tenantId,
 						stream.emitList,
 					),
-					...this.getContextFunctions(logger),
+					...this.getContextFunctions(logger, streamQueue),
 					service: createInvokeFunctionProxy(
 						this.getInvokeFunction(stream.streamName, traceId, message.principalId, message.tenantId, stream.invokes),
 					),
@@ -1227,7 +1979,20 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	}
 
 	public async registerStream(
-		streamDefinition: StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any>,
+		streamDefinition: StreamDefinition<
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			S['Resources'],
+			any,
+			any,
+			any,
+			QueueInvokeList
+		>,
 	): Promise<void> {
 		return this.startActiveSpan('purista.registerStream', {}, undefined, async span => {
 			this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register stream')
@@ -1298,6 +2063,12 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				}
 
 				try {
+					const subscriptionQueue = this.getQueueNamespace(
+						this.resolveQueueInvokes(subscription.queueInvokes),
+						traceId,
+						message.principalId,
+						message.tenantId,
+					)
 					const { payload, parameter } = await subscriptionTransformInput(this, logger, subscription, message)
 
 					let result: unknown = await this.startActiveSpan(
@@ -1314,7 +2085,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 									message.tenantId,
 									subscription.emitList,
 								),
-								...this.getContextFunctions(logger),
+								...this.getContextFunctions(logger, subscriptionQueue),
 								service: createInvokeFunctionProxy(
 									this.getInvokeFunction(
 										subscriptionName,
@@ -1356,7 +2127,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 										message.tenantId,
 										subscription.emitList,
 									),
-									...this.getContextFunctions(logger),
+									...this.getContextFunctions(logger, subscriptionQueue),
 									service: createInvokeFunctionProxy(
 										this.getInvokeFunction(
 											subscription.subscriptionName,
@@ -1397,7 +2168,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 							async subSpan => {
 								const afterTransform = transformOutput.transformFunction.bind(this, {
 									message,
-									...this.getContextFunctions(logger),
+									...this.getContextFunctions(logger, subscriptionQueue),
 									resources: this.resources,
 								})
 								const resultTransformed = await afterTransform(result as Readonly<unknown>, parameter)
@@ -1529,11 +2300,32 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		})
 	}
 
+	private normalizeQueueName(name: string) {
+		return name.trim().toLowerCase()
+	}
+
+	private hasQueueFeatures() {
+		return this.queueDefinitionList.length > 0 || this.queueWorkerDefinitionList.length > 0
+	}
+
+	private getQueueDefinition(queueName: string) {
+		return this.queueDefinitionMap.get(this.normalizeQueueName(queueName))
+	}
+
+	private resolveQueueInvokes(queueInvokes?: QueueInvokeList) {
+		return queueInvokes
+	}
+
 	async destroy() {
 		for (const [_, session] of this.activeStreamSessions) {
 			session.cancelled = true
 		}
 		this.activeStreamSessions.clear()
+		await this.stopQueueWorkers()
+		if (this.queueBridgeStarted) {
+			await this.queueBridge.destroy()
+			this.queueBridgeStarted = false
+		}
 		this.emit(ServiceEventsNames.ServiceDrain)
 		this.emit(ServiceEventsNames.ServiceStopped)
 		this.removeAllListeners()

@@ -4,11 +4,13 @@ import { NatsContainer } from '@testcontainers/nats'
 
 import { NatsStateStore } from '../src/NatsStateStore.impl.js'
 
+const NATS_IMAGE = 'nats:2.10-alpine'
+
 describe('@purista/nats-state-store', () => {
 	let container: StartedNatsContainer
 
 	beforeAll(async () => {
-		container = await new NatsContainer('nats:alpine').withArg('-js', '-js').start()
+		container = await new NatsContainer(NATS_IMAGE).withArg('-js', '-js').start()
 	})
 
 	afterAll(async () => {

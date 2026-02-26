@@ -35,10 +35,12 @@ You must declare the input and output schemas before adding transforms, hooks an
 As you can see in the diagram above, they impact the input/output types of transforms, hooks and functions.
 :::
 
-There are currently 4 builders available.
+The following builders are available:
 
 - [Service Builder](service/the-service-builder.md)
 - [Command Builder](command/the-command-builder.md)
 - [Stream Builder](stream/the-stream-builder.md)
 - [Subscription Builder](subscription/the-subscription-builder.md)
+- [Queue Builder](queue/the-queue-builder.md)
+- [Queue Worker Builder](queue/the-queue-worker-builder.md)
 - [Client Builder](connect_to_a_purista_application/index.md)

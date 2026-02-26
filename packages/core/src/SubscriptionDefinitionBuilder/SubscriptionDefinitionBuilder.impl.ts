@@ -1,6 +1,7 @@
 import type { SinonSandbox } from 'sinon'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
+import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
@@ -9,6 +10,8 @@ import type { EBMessage } from '../core/types/EBMessage.js'
 import type { EBMessageType } from '../core/types/EBMessageType.enum.js'
 import type { InstanceId } from '../core/types/InstanceId.js'
 import type { PrincipalId } from '../core/types/PrincipalId.js'
+import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { SubscriptionAfterGuardHook } from '../core/types/subscription/SubscriptionAfterGuardHook.js'
 import type { SubscriptionBeforeGuardHook } from '../core/types/subscription/SubscriptionBeforeGuardHook.js'
@@ -81,7 +84,7 @@ export class SubscriptionDefinitionBuilder<
 		instanceId?: InstanceId
 	}
 
-	private fn?: SubscriptionFunction<S, any, any, any, any, any, any, any>
+	private fn?: SubscriptionFunction<S, any, any, any, any, any, any, any, C['QueueInvokes']>
 
 	private eventName?: string
 	private emitEventName?: string
@@ -98,6 +101,7 @@ export class SubscriptionDefinitionBuilder<
 	private streamInvokes: C['StreamInvokes'] = {}
 
 	private emitList: C['EmitList'] = {}
+	private queueInvokes: QueueInvokeList = {}
 
 	private deprecated = false
 
@@ -281,6 +285,49 @@ export class SubscriptionDefinitionBuilder<
 		>
 	}
 
+	canEnqueue<Payload extends Schema, Parameter extends Schema, QueueName extends string = string>(
+		queueName: QueueName,
+		payloadSchema?: Payload,
+		parameterSchema?: Parameter,
+	) {
+		if (queueName.trim() === '') {
+			throw new Error('canEnqueue requires non-empty queue name')
+		}
+
+		this.queueInvokes = {
+			...this.queueInvokes,
+			[queueName]: { payloadSchema, parameterSchema },
+		}
+
+		return this as unknown as SubscriptionDefinitionBuilder<
+			S,
+			SubscriptionDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes'] &
+					Record<
+						QueueName,
+						(
+							payload: InferIn<Payload>,
+							parameter: InferIn<Parameter>,
+							options?: Omit<
+								QueueEnqueueOptions<InferIn<Payload>, InferIn<Parameter>>,
+								'queueName' | 'payload' | 'parameter'
+							>,
+						) => Promise<QueueEnqueueResult>
+					>
+			>
+		>
+	}
+
 	/**
 	 * Define which custom events the subscription can emit.
 	 *
@@ -380,7 +427,7 @@ export class SubscriptionDefinitionBuilder<
 	 *
 	 * In serverless environments, this flag should not have any effect
 	 *
-	 * @param shared
+	 * @param enforce Set to true to deliver message to every running instance
 	 * @returns SubscriptionDefinition
 	 */
 	receiveMessageOnEveryInstance(enforce = true) {
@@ -737,7 +784,7 @@ export class SubscriptionDefinitionBuilder<
 	/**
 	 * Set one or more after guard hook(s).
 	 * If there are multiple after guard hooks, they are executed in parallel
-	 * @param afterGuard Object of key = name of guard, value = function
+	 * @param afterGuards Object of key = name of guard, value = function
 	 * @returns SubscriptionDefinitionBuilder
 	 */
 	setAfterGuardHooks(
@@ -787,7 +834,8 @@ export class SubscriptionDefinitionBuilder<
 			C['Resources'],
 			C['Invokes'],
 			C['StreamInvokes'],
-			C['EmitList']
+			C['EmitList'],
+			C['QueueInvokes']
 		>,
 	) {
 		assertNonArrowFunction(fn, 'setSubscriptionFunction')
@@ -823,7 +871,8 @@ export class SubscriptionDefinitionBuilder<
 			C['Resources'],
 			C['Invokes'],
 			C['StreamInvokes'],
-			C['EmitList']
+			C['EmitList'],
+			C['QueueInvokes']
 		>
 	}
 
@@ -893,6 +942,7 @@ export class SubscriptionDefinitionBuilder<
 				C['Invokes'],
 				C['StreamInvokes'],
 				C['EmitList'],
+				C['QueueInvokes'],
 				SubscriptionDefinitionMetadataBase
 			>
 		> = {
@@ -923,6 +973,7 @@ export class SubscriptionDefinitionBuilder<
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
+			queueInvokes: this.queueInvokes,
 		}
 
 		return subscription
@@ -931,8 +982,7 @@ export class SubscriptionDefinitionBuilder<
 	/**
 	 * Returns a mocked command function context, which can be used in unit tests.
 	 *
-	 * @param message
-	 * @param sandbox Sinon sandbox
+	 * @param input Options to create the context mock (message/resources/sandbox)
 	 * @returns a mocked command function context
 	 */
 	getSubscriptionContextMock(input: {
@@ -951,9 +1001,7 @@ export class SubscriptionDefinitionBuilder<
 	/**
 	 * Returns a mocked transform function context, which can be used in unit tests.
 	 *
-	 * @param message
-	 * @param resources Resources to be used in the mock
-	 * @param sandbox Sinon sandbox
+	 * @param input Options to create the transform context mock (message/resources/sandbox)
 	 * @returns a mocked transform function context
 	 */
 	getSubscriptionTransformContextMock(input: {

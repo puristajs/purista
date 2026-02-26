@@ -1,4 +1,4 @@
-import { join } from 'node:path'
+import { isAbsolute, join } from 'node:path'
 import { ObjectLiteralExpression, Project, type PropertyAssignment, type SourceFile, SyntaxKind } from 'ts-morph'
 import { pascalCase } from '../../change-case.js'
 import { convertToProjectEventCasing } from '../../convertToProjectEventCasing.js'
@@ -23,7 +23,11 @@ export const ensureServiceEvent = async (input: {
 	const tsConfigFilePath = join(projectRootPath, 'tsconfig.json')
 	const project = new Project({ tsConfigFilePath })
 
-	const enumFile = join(input.puristaProjectConfig.servicePath, input.puristaProject.eventEnumFileName)
+	const serviceRoot = isAbsolute(input.puristaProjectConfig.servicePath)
+		? input.puristaProjectConfig.servicePath
+		: join(projectRootPath, input.puristaProjectConfig.servicePath)
+
+	const enumFile = join(serviceRoot, input.puristaProject.eventEnumFileName)
 	const sourceFile = project.addSourceFileAtPathIfExists(enumFile)
 
 	if (!sourceFile) {

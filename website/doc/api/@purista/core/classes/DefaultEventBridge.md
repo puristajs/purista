@@ -6,7 +6,7 @@
 
 # Class: DefaultEventBridge
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:61](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L61)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:76](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L76)
 
 Simple implementation of some simple in-memory event bridge.
 Does not support threads and does not need any external databases.
@@ -36,7 +36,7 @@ await eventBridge.start()
 
 > **new DefaultEventBridge**(`config?`): `DefaultEventBridge`
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:83](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L83)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:101](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L101)
 
 #### Parameters
 
@@ -100,7 +100,7 @@ A OpenTelemetry span processor
 
 > **config**: [`Complete`](../type-aliases/Complete.md)\<[`EventBridgeConfig`](../type-aliases/EventBridgeConfig.md)\<`ConfigType`\>\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L27)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L35)
 
 #### Inherited from
 
@@ -112,7 +112,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:27](https://github.co
 
 > **defaultCommandTimeout**: `number`
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L33)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L41)
 
 The default time until when a command invocation automatically returns a time out error
 
@@ -130,7 +130,7 @@ The default time until when a command invocation automatically returns a time ou
 
 > `protected` **hasStarted**: `boolean` = `false`
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:80](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L80)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:98](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L98)
 
 ***
 
@@ -138,7 +138,7 @@ Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:80](https://github.co
 
 > `protected` **healthy**: `boolean` = `false`
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:81](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L81)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:99](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L99)
 
 ***
 
@@ -146,7 +146,7 @@ Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:81](https://github.co
 
 > **instanceId**: `string`
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L31)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L39)
 
 #### Implementation of
 
@@ -162,7 +162,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:31](https://github.co
 
 > **logger**: [`Logger`](Logger.md)
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L24)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L32)
 
 #### Inherited from
 
@@ -174,7 +174,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:24](https://github.co
 
 > **name**: `string`
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L29)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L37)
 
 #### Implementation of
 
@@ -190,7 +190,15 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:29](https://github.co
 
 > `protected` **pendingInvocations**: `Map`\<`string`, [`PendigInvocation`](../type-aliases/PendigInvocation.md)\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:75](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L75)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:92](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L92)
+
+***
+
+### pendingStreams
+
+> `protected` **pendingStreams**: `Map`\<`string`, [`PendingStreamInvocation`](../type-aliases/PendingStreamInvocation.md)\<`any`, `any`\>\>
+
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:93](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L93)
 
 ***
 
@@ -198,7 +206,7 @@ Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:75](https://github.co
 
 > `protected` **readStream**: `Readable`
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:63](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L63)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:78](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L78)
 
 ***
 
@@ -206,7 +214,7 @@ Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:63](https://github.co
 
 > `protected` **runningSubscriptionCount**: `number` = `0`
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:76](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L76)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:94](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L94)
 
 ***
 
@@ -214,7 +222,15 @@ Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:76](https://github.co
 
 > `protected` **serviceFunctions**: `Map`\<`string`, (`message`) => `Promise`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \} \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../enumerations/EBMessageType.md#commandsuccessresponse); `otp?`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:70](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L70)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:85](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L85)
+
+***
+
+### streamFunctions
+
+> `protected` **streamFunctions**: `Map`\<`string`, (`message`) => `Promise`\<`void`\>\>
+
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:90](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L90)
 
 ***
 
@@ -222,7 +238,7 @@ Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:70](https://github.co
 
 > `protected` **subscriptions**: `Map`\<`string`, [`SubscriptionStorageEntry`](../type-aliases/SubscriptionStorageEntry.md)\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:78](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L78)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:96](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L96)
 
 ***
 
@@ -230,7 +246,7 @@ Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:78](https://github.co
 
 > **traceProvider**: `NodeTracerProvider`
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L25)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L33)
 
 #### Inherited from
 
@@ -242,7 +258,7 @@ Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:25](https://github.co
 
 > `protected` **writeStream**: `Writable`
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:62](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L62)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:77](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L77)
 
 ## Methods
 
@@ -250,7 +266,7 @@ Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:62](https://github.co
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:423](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L423)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:682](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L682)
 
 Shut down event bridge as gracefully as possible
 
@@ -279,7 +295,7 @@ Defined in: [core/types/GenericEventEmitter.ts:27](https://github.com/puristajs/
 ##### K
 
 `K` *extends* [`EventKey`](../type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
-\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; `stream-closed`: \{ `sessionId`: `string`; \} \| `undefined`; `stream-error`: `unknown`; `stream-frame-received`: `unknown`; `stream-frame-sent`: `unknown`; `stream-opened`: \{ `sessionId`: `string`; \} \| `undefined`; \}\>
 
 #### Parameters
 
@@ -305,7 +321,7 @@ Defined in: [core/types/GenericEventEmitter.ts:27](https://github.com/puristajs/
 
 > **emitMessage**(`message`): `Promise`\<`Readonly`\<[`EBMessage`](../type-aliases/EBMessage.md)\>\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:312](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L312)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:384](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L384)
 
 Emit a new message to event bridge to be delivered to receiver
 
@@ -331,7 +347,7 @@ EBMessage
 
 > **getTracer**(): `Tracer`
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:71](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L71)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:79](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L79)
 
 Returns open telemetry tracer of this service
 
@@ -351,7 +367,7 @@ Tracer
 
 > **invoke**\<`T`\>(`input`, `commandTimeout?`): `Promise`\<`T`\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:353](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L353)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:429](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L429)
 
 Call a command of a service and return the result of this command
 
@@ -389,7 +405,7 @@ the time to live (timeout) of the invocation
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:96](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L96)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:114](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L114)
 
 Indicates if the eventbridge is running and works correctly
 
@@ -407,7 +423,7 @@ Indicates if the eventbridge is running and works correctly
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:92](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L92)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:110](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L110)
 
 Indicates if the eventbridge has been started and is connected to underlaying message broker
 
@@ -432,7 +448,7 @@ Defined in: [core/types/GenericEventEmitter.ts:23](https://github.com/puristajs/
 ##### K
 
 `K` *extends* [`EventKey`](../type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
-\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; `stream-closed`: \{ `sessionId`: `string`; \} \| `undefined`; `stream-error`: `unknown`; `stream-frame-received`: `unknown`; `stream-frame-sent`: `unknown`; `stream-opened`: \{ `sessionId`: `string`; \} \| `undefined`; \}\>
 
 #### Parameters
 
@@ -442,7 +458,7 @@ Defined in: [core/types/GenericEventEmitter.ts:23](https://github.com/puristajs/
 
 ##### fn
 
-`EventReceiver`\<`object`\[`K`\]\>
+[`EventReceiver`](../type-aliases/EventReceiver.md)\<`object`\[`K`\]\>
 
 #### Returns
 
@@ -465,7 +481,7 @@ Defined in: [core/types/GenericEventEmitter.ts:19](https://github.com/puristajs/
 ##### K
 
 `K` *extends* [`EventKey`](../type-aliases/EventKey.md)\<\{\[`key`: `` `adapter-${string}` ``\]: `unknown`;
-\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; \}\>
+\[`key`: `` `custom-${string}` ``\]: `unknown`; `eventbridge-connected`: `never`; `eventbridge-connection-error`: `unknown`; `eventbridge-disconnected`: `never`; `eventbridge-error`: `unknown`; `eventbridge-reconnecting`: `never`; `stream-closed`: \{ `sessionId`: `string`; \} \| `undefined`; `stream-error`: `unknown`; `stream-frame-received`: `unknown`; `stream-frame-sent`: `unknown`; `stream-opened`: \{ `sessionId`: `string`; \} \| `undefined`; \}\>
 
 #### Parameters
 
@@ -475,7 +491,7 @@ Defined in: [core/types/GenericEventEmitter.ts:19](https://github.com/puristajs/
 
 ##### fn
 
-`EventReceiver`\<`object`\[`K`\]\>
+[`EventReceiver`](../type-aliases/EventReceiver.md)\<`object`\[`K`\]\>
 
 #### Returns
 
@@ -487,11 +503,54 @@ Defined in: [core/types/GenericEventEmitter.ts:19](https://github.com/puristajs/
 
 ***
 
+### openStream()
+
+> **openStream**\<`Chunk`, `Final`\>(`input`, `commandTimeout?`): `Promise`\<[`StreamHandle`](../interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
+
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:499](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L499)
+
+Open a stream invocation.
+The returned handle can be consumed via async iteration and can be cancelled by caller.
+
+#### Type Parameters
+
+##### Chunk
+
+`Chunk` = `unknown`
+
+##### Final
+
+`Final` = `unknown`
+
+#### Parameters
+
+##### input
+
+`Omit`\<[`StreamOpenRequest`](../type-aliases/StreamOpenRequest.md), `"id"` \| `"messageType"` \| `"timestamp"` \| `"correlationId"`\>
+
+##### commandTimeout?
+
+`number` = `...`
+
+#### Returns
+
+`Promise`\<[`StreamHandle`](../interfaces/StreamHandle.md)\<`Chunk`, `Final`\>\>
+
+#### Implementation of
+
+[`EventBridge`](../interfaces/EventBridge.md).[`openStream`](../interfaces/EventBridge.md#openstream)
+
+#### Overrides
+
+[`EventBridgeBaseClass`](EventBridgeBaseClass.md).[`openStream`](EventBridgeBaseClass.md#openstream)
+
+***
+
 ### registerCommand()
 
 > **registerCommand**(`address`, `cb`, `metadata`): `Promise`\<`string`\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:263](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L263)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:308](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L308)
 
 Register a service command and ensure that there is a queue for all incoming command requests.
 
@@ -525,11 +584,47 @@ the id of command function queue
 
 ***
 
+### registerStream()
+
+> **registerStream**(`address`, `cb`, `metadata`): `Promise`\<`string`\>
+
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:328](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L328)
+
+Register a service stream.
+
+#### Parameters
+
+##### address
+
+[`EBMessageAddress`](../type-aliases/EBMessageAddress.md)
+
+##### cb
+
+(`message`) => `Promise`\<`void`\>
+
+##### metadata
+
+[`StreamDefinitionMetadataBase`](../type-aliases/StreamDefinitionMetadataBase.md)
+
+#### Returns
+
+`Promise`\<`string`\>
+
+#### Implementation of
+
+[`EventBridge`](../interfaces/EventBridge.md).[`registerStream`](../interfaces/EventBridge.md#registerstream)
+
+#### Overrides
+
+[`EventBridgeBaseClass`](EventBridgeBaseClass.md).[`registerStream`](EventBridgeBaseClass.md#registerstream)
+
+***
+
 ### registerSubscription()
 
 > **registerSubscription**(`subscription`, `cb`): `Promise`\<`string`\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:290](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L290)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:362](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L362)
 
 Register a new subscription
 
@@ -577,7 +672,7 @@ Defined in: [core/types/GenericEventEmitter.ts:31](https://github.com/puristajs/
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:100](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L100)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:118](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L118)
 
 Start the eventbridge and connect to the underlaying message broker
 
@@ -599,7 +694,7 @@ Start the eventbridge and connect to the underlaying message broker
 
 > **startActiveSpan**\<`F`\>(`name`, `opts`, `context`, `fn`): `Promise`\<`F`\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:83](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L83)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:91](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L91)
 
 Start a child span for opentelemetry tracking
 
@@ -651,7 +746,7 @@ return value of fn
 
 > **unregisterCommand**(`address`): `Promise`\<`void`\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:283](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L283)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:348](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L348)
 
 Unregister a service command
 
@@ -673,11 +768,39 @@ The address (service name, version and command name) of the command to be de-reg
 
 ***
 
+### unregisterStream()
+
+> **unregisterStream**(`address`): `Promise`\<`void`\>
+
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:355](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L355)
+
+Unregister a service stream
+
+#### Parameters
+
+##### address
+
+[`EBMessageAddress`](../type-aliases/EBMessageAddress.md)
+
+#### Returns
+
+`Promise`\<`void`\>
+
+#### Implementation of
+
+[`EventBridge`](../interfaces/EventBridge.md).[`unregisterStream`](../interfaces/EventBridge.md#unregisterstream)
+
+#### Overrides
+
+[`EventBridgeBaseClass`](EventBridgeBaseClass.md).[`unregisterStream`](EventBridgeBaseClass.md#unregisterstream)
+
+***
+
 ### unregisterSubscription()
 
 > **unregisterSubscription**(`address`): `Promise`\<`void`\>
 
-Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:300](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L300)
+Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:372](https://github.com/puristajs/purista/blob/master/packages/core/src/DefaultEventBridge/DefaultEventBridge.impl.ts#L372)
 
 #### Parameters
 
@@ -699,7 +822,7 @@ Defined in: [DefaultEventBridge/DefaultEventBridge.impl.ts:300](https://github.c
 
 > **wrapInSpan**\<`F`\>(`name`, `opts`, `fn`, `context?`): `Promise`\<`F`\>
 
-Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:133](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L133)
+Defined in: [core/EventBridge/EventBridgeBaseClass.impl.ts:141](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/EventBridgeBaseClass.impl.ts#L141)
 
 Start span for opentelemetry tracking on same level.
 The created span will not become the "active" span within opentelemetry!

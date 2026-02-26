@@ -1,5 +1,6 @@
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { Schema } from '../schema/index.js'
 
@@ -14,6 +15,7 @@ export type SubscriptionDefinitionBuilderTypes<
 	Invokes extends InvokeList = InvokeList,
 	StreamInvokes extends StreamInvokeList = StreamInvokeList,
 	EmitList extends Record<string, Schema> = Record<string, Schema>,
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 > = {
 	PayloadSchema: PayloadSchema
 	ParamsSchema: ParamsSchema
@@ -25,4 +27,5 @@ export type SubscriptionDefinitionBuilderTypes<
 	Invokes: Invokes
 	StreamInvokes: StreamInvokes
 	EmitList: EmitList
+	QueueInvokes: QueueInvokes
 }

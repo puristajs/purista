@@ -19,7 +19,7 @@ export type ValidationResult<TOutput> =
 	| { success: true; data: TOutput }
 	| { success: false; issues: ReadonlyArray<StandardSchemaV1.Issue> }
 
-type JsonSchemaOptions = {
+export type JsonSchemaOptions = {
 	target?: StandardJSONSchemaV1.Target
 	mode?: 'input' | 'output'
 }
@@ -70,14 +70,23 @@ export const toJSONSchema = async (schema: Schema, options?: JsonSchemaOptions):
 	}
 
 	if (standardProps.vendor === 'zod') {
+		const zodModule = await import('zod/v4')
+		const maybeZod = schema as ZodType
+		if (maybeZod instanceof zodModule.z.ZodUndefined || maybeZod instanceof zodModule.z.ZodVoid) {
+			return { type: 'null' } as SchemaObject
+		}
 		try {
-			const zodModule = await import('zod/v4')
-			return zodModule.z.toJSONSchema(schema as ZodType, {
+			return zodModule.z.toJSONSchema(maybeZod, {
 				target,
 				io: mode,
 				unrepresentable: 'any',
 			}) as SchemaObject
 		} catch (error) {
+			const originalError = error as Error
+			const message = originalError?.message ?? ''
+			if (message.includes('Void cannot be represented') || message.includes('Undefined cannot be represented')) {
+				return { type: 'null' } as SchemaObject
+			}
 			const err = new Error('Zod JSON schema conversion requires the optional dependency `zod` to be installed.')
 			;(err as { cause?: unknown }).cause = error
 			throw err

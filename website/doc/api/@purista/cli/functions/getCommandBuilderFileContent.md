@@ -8,7 +8,7 @@
 
 > **getCommandBuilderFileContent**(`input`): `string`
 
-Defined in: [content/command/getCommandBuilderFileContent.ts:9](https://github.com/puristajs/purista/blob/d4f52fc34958022c6b9693e9270946d1111d759c/packages/cli/src/api/content/command/getCommandBuilderFileContent.ts#L9)
+Defined in: [content/command/getCommandBuilderFileContent.ts:16](https://github.com/puristajs/purista/blob/643d8ae461234cbb142aca5f38526a7b04d6fea0/packages/cli/src/api/content/command/getCommandBuilderFileContent.ts#L16)
 
 ## Parameters
 
@@ -25,6 +25,10 @@ Defined in: [content/command/getCommandBuilderFileContent.ts:9](https://github.c
 #### commandName
 
 `string`
+
+#### enqueueOptions?
+
+[`EnqueueOption`](../type-aliases/EnqueueOption.md)[]
 
 #### puristaConfig
 

@@ -47,3 +47,43 @@ Defined in: [core/EventBridge/types/EventBridgeEvents.ts:13](https://github.com/
 > **EventbridgeReconnecting**: `"eventbridge-reconnecting"`
 
 Defined in: [core/EventBridge/types/EventBridgeEvents.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L11)
+
+***
+
+### StreamClosed
+
+> **StreamClosed**: `"stream-closed"`
+
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L15)
+
+***
+
+### StreamError
+
+> **StreamError**: `"stream-error"`
+
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L16)
+
+***
+
+### StreamFrameReceived
+
+> **StreamFrameReceived**: `"stream-frame-received"`
+
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L17)
+
+***
+
+### StreamFrameSent
+
+> **StreamFrameSent**: `"stream-frame-sent"`
+
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L18)
+
+***
+
+### StreamOpened
+
+> **StreamOpened**: `"stream-opened"`
+
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L14)

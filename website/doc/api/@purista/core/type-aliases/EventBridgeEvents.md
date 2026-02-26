@@ -8,4 +8,4 @@
 
 > **EventBridgeEvents** = [`Prettify`](Prettify.md)\<[`EventBridgeEventsBasic`](EventBridgeEventsBasic.md) & [`addPrefixToObject`](addPrefixToObject.md)\<[`EventBridgeAdapterEvents`](EventBridgeAdapterEvents.md), `"adapter-"`\> & [`addPrefixToObject`](addPrefixToObject.md)\<[`EventBridgeCustomEvents`](EventBridgeCustomEvents.md), `"custom-"`\>\>
 
-Defined in: [core/EventBridge/types/EventBridgeEvents.ts:48](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L48)
+Defined in: [core/EventBridge/types/EventBridgeEvents.ts:68](https://github.com/puristajs/purista/blob/master/packages/core/src/core/EventBridge/types/EventBridgeEvents.ts#L68)

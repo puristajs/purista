@@ -3,11 +3,7 @@ import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
 import type { Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 
-type InputType = {
-	[key: string]: Schema
-}
-
-export const convertEmitValidationsToSchema = async <T extends InputType>(
+export const convertEmitValidationsToSchema = async <T extends Record<string, Schema>>(
 	emits: T,
 ): Promise<FromEmitToOtherType<T, SchemaObject>> => {
 	const result: {

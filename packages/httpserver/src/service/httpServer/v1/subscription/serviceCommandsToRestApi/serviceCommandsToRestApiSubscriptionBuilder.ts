@@ -2,11 +2,13 @@ import { posix } from 'node:path'
 
 import { context, propagation, SpanKind, SpanStatusCode } from '@opentelemetry/api'
 import { ATTR_HTTP_RESPONSE_STATUS_CODE } from '@opentelemetry/semantic-conventions'
+import type { HttpExposedServiceMeta } from '@purista/core'
 import {
 	convertToSnakeCase,
 	EBMessageType,
 	HandledError,
 	isHttpExposedServiceMeta,
+	type QueueEnqueueResult,
 	StatusCode,
 	UnhandledError,
 } from '@purista/core'
@@ -15,6 +17,21 @@ import type { Methods } from 'trouter'
 
 import { httpServerV1ServiceBuilder } from '../../httpServerV1ServiceBuilder.js'
 import { addHeaders } from './helper/addHeaders.impl.js'
+
+const assertAsyncHttpResult = (result: unknown): QueueEnqueueResult => {
+	if (!result || typeof result !== 'object') {
+		throw new UnhandledError(StatusCode.InternalServerError, 'Async endpoint must return queue enqueue result')
+	}
+	const candidate = result as Partial<QueueEnqueueResult>
+	if (typeof candidate.jobId !== 'string' || typeof candidate.queueName !== 'string') {
+		throw new UnhandledError(StatusCode.InternalServerError, 'Async endpoint must return queue enqueue result')
+	}
+	return {
+		jobId: candidate.jobId,
+		queueName: candidate.queueName,
+		scheduledAt: candidate.scheduledAt,
+	}
+}
 
 export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBuilder
 	.getSubscriptionBuilder(
@@ -33,7 +50,8 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 
 		this.routeDefinitions.push(payload)
 
-		const data = payload.expose
+		const httpMetadata = payload as HttpExposedServiceMeta
+		const data = httpMetadata.expose
 		const version = message.sender.serviceVersion
 		const serviceName = message.sender.serviceName
 		const method = data.http.method
@@ -151,22 +169,41 @@ export const serviceCommandsToRestApiSubscriptionBuilder = httpServerV1ServiceBu
 						)
 
 						const beforeResponse = this.beforeResponse.find(request.method as Methods, request.url)
+						let responsePayload: unknown = response
+						let statusCode = StatusCode.OK
+
+						const httpMode = (data.http as { mode?: 'sync' | 'async' }).mode ?? 'sync'
+
+						if (httpMode === 'async') {
+							const job = assertAsyncHttpResult(response)
+							responsePayload = {
+								jobId: job.jobId,
+								queue: job.queueName,
+								queueName: job.queueName,
+								scheduledAt: job.scheduledAt,
+							}
+							statusCode = StatusCode.Accepted
+						} else if (response === undefined || response === null || response === '') {
+							statusCode = StatusCode.NoContent
+						}
 
 						for (const hook of beforeResponse.handlers) {
 							await this.startActiveSpan('beforeResponseHook', { kind: SpanKind.SERVER }, undefined, async _span => {
-								hook(response, request, reply, beforeResponse.params)
+								hook(responsePayload, request, reply, beforeResponse.params)
 							})
 						}
 
 						reply.header('content-type', `${responseContentType}; charset=${responseContentEncoding}`)
-						if (response === undefined || response === null || response === '') {
-							span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.NoContent)
+						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, statusCode)
+
+						if (statusCode === StatusCode.NoContent) {
 							reply.statusCode = StatusCode.NoContent
-						} else {
-							span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.OK)
+							reply.send()
+							return
 						}
 
-						reply.send(response)
+						reply.statusCode = statusCode
+						reply.send(responsePayload)
 					} catch (err) {
 						reply.header('content-type', 'application/json; charset=utf-8')
 

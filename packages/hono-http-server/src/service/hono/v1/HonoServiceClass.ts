@@ -13,6 +13,7 @@ import type {
 	EBMessageAddress,
 	EmptyObject,
 	HttpExposedServiceMeta,
+	QueueEnqueueResult,
 	ServiceClassTypes,
 	ServiceConstructorInput,
 	StreamHandle,
@@ -28,6 +29,22 @@ import { OpenApiBuilder } from 'openapi3-ts/oas31'
 import { addPathToOpenApi } from '../../../helper/addPathToOpenApi.js'
 import type { BindingsBase } from '../../../types/BindingsBase.js'
 import type { EndpointProtectMiddleware } from '../../../types/EndpointProtectMiddleware.js'
+
+const assertAsyncHttpResult = (result: unknown): QueueEnqueueResult => {
+	if (!result || typeof result !== 'object') {
+		throw new UnhandledError(StatusCode.InternalServerError, 'Async endpoint must return queue enqueue result')
+	}
+	const candidate = result as Partial<QueueEnqueueResult>
+	if (typeof candidate.jobId !== 'string' || typeof candidate.queueName !== 'string') {
+		throw new UnhandledError(StatusCode.InternalServerError, 'Async endpoint must return queue enqueue result')
+	}
+	return {
+		jobId: candidate.jobId,
+		queueName: candidate.queueName,
+		scheduledAt: candidate.scheduledAt,
+	}
+}
+
 import type { HealthFunction } from '../../../types/HealthFunction.js'
 import type { VariablesBase } from '../../../types/VariablesBase.js'
 import type { HonoServiceV1Config } from './honoServiceConfig.js'
@@ -309,10 +326,8 @@ export class HonoServiceClass<
 
 	/**
 	 * Adds a single service command endpoint to the Hono router
-	 * @param metadata
-	 * @param commandName
-	 * @param service
-	 * @returns
+	 * @param metadata Command metadata produced by the builder
+	 * @param service Address of the service hosting the command
 	 */
 	public addEndpoint(metadata: CommandDefinitionMetadataBase, service: EBMessageAddress) {
 		if (!isHttpExposedServiceMeta(metadata)) {
@@ -323,7 +338,9 @@ export class HonoServiceClass<
 			return
 		}
 
-		const expose = metadata.expose
+		const httpMetadata = metadata as HttpExposedServiceMeta
+		const expose = httpMetadata.expose
+		const httpMode = (expose.http as { mode?: 'sync' | 'async' }).mode ?? 'sync'
 
 		const method = expose.http.method.toLowerCase() as 'put' | 'post' | 'patch' | 'get' | 'delete'
 		const path = posix.join(this.config.apiMountPath, `v${service.serviceVersion}`, expose.http.path)
@@ -451,25 +468,36 @@ export class HonoServiceClass<
 
 					c.header('content-type', `${responseContentType}; charset=${responseEncodingType}`)
 
+					let statusCode: StatusCode = StatusCode.OK
+					let responsePayload: unknown = result
+
+					if (httpMode === 'async') {
+						const job = assertAsyncHttpResult(result)
+						responsePayload = {
+							jobId: job.jobId,
+							queue: job.queueName,
+							queueName: job.queueName,
+							scheduledAt: job.scheduledAt,
+						}
+						statusCode = StatusCode.Accepted
+					} else if (result === undefined || result === null || result === '') {
+						statusCode = StatusCode.NoContent
+					}
+
 					span.setStatus({
 						code: SpanStatusCode.OK,
 					})
+					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, statusCode)
 
-					if (result === undefined || result === null || result === '') {
-						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.NoContent)
-						if (responseContentType.toLowerCase() !== 'application/json') {
-							return c.body(null, StatusCode.NoContent)
-						}
+					if (statusCode === StatusCode.NoContent) {
 						return c.body(null, StatusCode.NoContent)
 					}
 
-					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.OK)
-
 					if (responseContentType.toLowerCase() !== 'application/json') {
-						return c.text(result.toString(), StatusCode.OK)
+						return c.text(String(responsePayload ?? ''), statusCode as ContentfulStatusCode)
 					}
 
-					return c.json(result, StatusCode.OK)
+					return c.json(responsePayload, statusCode as ContentfulStatusCode)
 				} catch (err) {
 					span.recordException(err as Error)
 					span.setStatus({
@@ -522,6 +550,9 @@ export class HonoServiceClass<
 		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'sender'>,
 		endpoint: string,
 	) {
+		if (!this.eventBridge.openStream) {
+			throw new UnhandledError(StatusCode.NotImplemented, 'Event bridge does not support streams')
+		}
 		return this.eventBridge.openStream({
 			sender: {
 				serviceName: this.serviceInfo.serviceName,

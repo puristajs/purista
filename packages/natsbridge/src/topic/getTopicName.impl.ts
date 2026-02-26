@@ -3,7 +3,7 @@ import { convertToSnakeCase } from '@purista/core'
 
 import type { INatsBridge } from '../types/INatsBridge.js'
 
-type GetTopicNameFn = (this: INatsBridge, message: EBMessage) => string
+export type GetTopicNameFn = (this: INatsBridge, message: EBMessage) => string
 
 /**
  * Calculates the NATS topic name for a message which should be sent.

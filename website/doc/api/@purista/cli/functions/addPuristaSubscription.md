@@ -8,7 +8,7 @@
 
 > **addPuristaSubscription**(`input`): `Promise`\<`void`\>
 
-Defined in: [addPuristaSubscription.ts:17](https://github.com/puristajs/purista/blob/d4f52fc34958022c6b9693e9270946d1111d759c/packages/cli/src/api/addPuristaSubscription.ts#L17)
+Defined in: [addPuristaSubscription.ts:17](https://github.com/puristajs/purista/blob/643d8ae461234cbb142aca5f38526a7b04d6fea0/packages/cli/src/api/addPuristaSubscription.ts#L17)
 
 Add all folders and files for a new subscription to an existing PURISTA service.
 

@@ -18,7 +18,7 @@ Defined in: [helper/schemaObjectToTsType/transform.ts:55](https://github.com/pur
 
 ### ctx
 
-`GlobalContext`
+[`GlobalContext`](../interfaces/GlobalContext.md)
 
 ### path
 

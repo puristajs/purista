@@ -4,6 +4,7 @@ import type { HttpExposedServiceMeta } from '../core/HttpServer/types/HttpExpose
 import type { QueryParameter } from '../core/HttpServer/types/QueryParameter.js'
 import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttpMethod.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
+import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
@@ -19,6 +20,8 @@ import type { GetMessageParamsType } from '../core/types/GetMessageParamsType.js
 import type { GetMessagePayloadType } from '../core/types/GetMessagePayloadType.js'
 import type { InferTypeOrEmptyObject } from '../core/types/InferTypeOrEmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
+import type { QueueEnqueueOptions } from '../core/types/queue/QueueEnqueueOptions.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
@@ -28,6 +31,10 @@ import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { CommandDefinitionBuilderTypes } from './CommandDefinitionBuilderTypes.js'
 import { getCommandFunctionWithValidation } from './getCommandFunctionWithValidation.impl.js'
+
+export type HttpExposureOptions = {
+	mode?: 'sync' | 'async'
+}
 
 /**
  * Command definition builder is a helper to create and define a command for a service.
@@ -96,6 +103,50 @@ export class CommandDefinitionBuilder<
 		afterGuard: {},
 		transformOutput: undefined,
 	}
+
+	canEnqueue<Payload extends Schema, Parameter extends Schema, QueueName extends string = string>(
+		queueName: QueueName,
+		payloadSchema?: Payload,
+		parameterSchema?: Parameter,
+	) {
+		if (queueName.trim() === '') {
+			throw new Error('canEnqueue requires non-empty queue name')
+		}
+
+		this.queueInvokes = {
+			...this.queueInvokes,
+			[queueName]: { payloadSchema, parameterSchema },
+		}
+
+		return this as unknown as CommandDefinitionBuilder<
+			S,
+			CommandDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes'] &
+					Record<
+						QueueName,
+						(
+							payload: InferIn<Payload>,
+							parameter: InferIn<Parameter>,
+							options?: Omit<
+								QueueEnqueueOptions<InferIn<Payload>, InferIn<Parameter>>,
+								'queueName' | 'payload' | 'parameter'
+							>,
+						) => Promise<QueueEnqueueResult>
+					>
+			>
+		>
+	}
+	private queueInvokes: QueueInvokeList = {}
 
 	private fn?: CommandFunction<
 		S,
@@ -689,7 +740,7 @@ export class CommandDefinitionBuilder<
 	/**
 	 * Set one or more after guard hook(s).
 	 * If there are multiple after guard hooks, they are executed in parallel
-	 * @param afterGuard  Object of key = name of guard, value = function
+	 * @param afterGuards Object of key = name of guard, value = function
 	 * @returns CommandDefinitionBuilder
 	 */
 	setAfterGuardHooks(
@@ -758,7 +809,9 @@ export class CommandDefinitionBuilder<
 		contentEncodingRequest?: string,
 		contentTypeResponse?: ContentType,
 		contentEncodingResponse?: string,
+		options?: HttpExposureOptions,
 	) {
+		const mode = options?.mode ?? 'sync'
 		this.httpMetadata = {
 			expose: {
 				contentTypeRequest: contentTypeRequest ?? this.inputContentType ?? 'application/json',
@@ -768,8 +821,12 @@ export class CommandDefinitionBuilder<
 				http: {
 					method,
 					path,
+					mode,
 				},
 			},
+		}
+		if (mode === 'async') {
+			this.addOpenApiErrorStatusCodes(StatusCode.Accepted)
 		}
 		return this
 	}
@@ -786,7 +843,7 @@ export class CommandDefinitionBuilder<
 
 	/**
 	 * enable or disable security for this endpoint
-	 * @param enabled Defaults to true if not set meaning "disable security"
+	 * @param disabled Defaults to true if not set meaning "disable security"
 	 * @returns CommandDefinitionBuilder
 	 * @deprecated Use makeEndpointPublic() instead.
 	 */
@@ -862,6 +919,7 @@ export class CommandDefinitionBuilder<
 				Invokes,
 				StreamInvokes,
 				EmitList,
+				C['QueueInvokes'],
 				CommandDefinitionMetadataBase
 			>
 		>,
@@ -886,6 +944,7 @@ export class CommandDefinitionBuilder<
 				Invokes,
 				StreamInvokes,
 				EmitList,
+				C['QueueInvokes'],
 				HttpExposedServiceMeta<InferTypeOrEmptyObject<C['ParamsSchema']>>
 			>
 		> = {
@@ -973,7 +1032,8 @@ export class CommandDefinitionBuilder<
 				C['Resources'],
 				C['Invokes'],
 				C['StreamInvokes'],
-				C['EmitList']
+				C['EmitList'],
+				C['QueueInvokes']
 			>
 		> = {
 			commandName: this.commandName,
@@ -997,6 +1057,7 @@ export class CommandDefinitionBuilder<
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
+			queueInvokes: this.queueInvokes,
 		}
 
 		return this.extendWithHttpMetadata(definition)
@@ -1132,6 +1193,7 @@ export class CommandDefinitionBuilder<
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
+			queueInvokes: this.queueInvokes,
 		})
 	}
 

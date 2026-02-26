@@ -18,7 +18,7 @@ Defined in: [helper/schemaObjectToTsType/transform.ts:35](https://github.com/pur
 
 ### options?
 
-`Partial`\<`GlobalContext`\>
+`Partial`\<[`GlobalContext`](../interfaces/GlobalContext.md)\>
 
 ## Returns
 

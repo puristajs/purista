@@ -63,6 +63,7 @@ export class AWSSecretStore extends SecretStoreBaseClass<AWSSecretStoreConfig> {
 	protected async removeSecretImpl(secretName: string) {
 		const command = new DeleteSecretCommand({
 			SecretId: secretName,
+			ForceDeleteWithoutRecovery: true,
 		})
 
 		await this.client.send(command)

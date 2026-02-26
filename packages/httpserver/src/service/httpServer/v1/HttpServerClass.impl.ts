@@ -258,6 +258,9 @@ export class HttpServerClass<ConfigType extends HttpServerServiceV1ConfigRaw> ex
 		input: Omit<Command, 'id' | 'messageType' | 'timestamp' | 'correlationId' | 'sender'>,
 		endpoint: string,
 	) {
+		if (!this.eventBridge.openStream) {
+			throw new UnhandledError(StatusCode.NotImplemented, 'Event bridge does not support streams')
+		}
 		return this.eventBridge.openStream({
 			sender: {
 				serviceName: this.serviceInfo.serviceName,

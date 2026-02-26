@@ -6,6 +6,6 @@
 
 # Variable: getSharedTopicName
 
-> `const` **getSharedTopicName**: `GetSharedTopicNameFn`
+> `const` **getSharedTopicName**: [`GetSharedTopicNameFn`](../type-aliases/GetSharedTopicNameFn.md)
 
 Defined in: [mqttbridge/src/topic/getSharedTopicName.impl.ts:7](https://github.com/puristajs/purista/blob/master/packages/mqttbridge/src/topic/getSharedTopicName.impl.ts#L7)

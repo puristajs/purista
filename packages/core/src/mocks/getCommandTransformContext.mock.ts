@@ -2,6 +2,10 @@ import type { SinonSandbox } from 'sinon'
 import { stub } from 'sinon'
 import type { CommandTransformFunctionContext } from '../core/types/commandType/CommandTransformFunctionContext.js'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
+import type { QueueInvokeClientMap, QueueScheduleProxy } from '../core/types/queue/QueueContext.js'
+import type { QueueInvokeFunction } from '../core/types/queue/QueueInvokeFunction.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
+import type { QueueScheduleFunction } from '../core/types/queue/QueueScheduleFunction.js'
 
 import { getLoggerMock } from './getLogger.mock.js'
 import { getCommandMessageMock } from './messages/getCommandMessage.mock.js'
@@ -36,6 +40,8 @@ export const getCommandTransformContextMock = <
 		getState: input.sandbox?.stub() ?? stub(),
 		setState: input.sandbox?.stub() ?? stub(),
 		removeState: input.sandbox?.stub() ?? stub(),
+		enqueue: input.sandbox?.stub() ?? stub().resolves(),
+		scheduleAt: input.sandbox?.stub() ?? stub().resolves(),
 		resources: {} as Partial<Resources>,
 	}
 
@@ -95,6 +101,12 @@ export const getCommandTransformContextMock = <
 			getState: stubs.getState.rejects(new Error('getState is not stubbed')),
 			setState: stubs.setState.rejects(new Error('setState is not stubbed')),
 			removeState: stubs.removeState.rejects(new Error('removeState is not stubbed')),
+		},
+		queue: {
+			enqueue: stubs.enqueue.rejects(new Error('enqueue is not stubbed')) as unknown as QueueInvokeFunction &
+				QueueInvokeClientMap<QueueInvokeList>,
+			scheduleAt: stubs.scheduleAt.rejects(new Error('scheduleAt is not stubbed')) as unknown as QueueScheduleFunction &
+				QueueScheduleProxy<QueueInvokeClientMap<QueueInvokeList>>,
 		},
 		resources: resourcesProxy,
 	}

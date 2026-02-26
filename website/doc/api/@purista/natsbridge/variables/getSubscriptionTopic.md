@@ -6,6 +6,6 @@
 
 # Variable: getSubscriptionTopic
 
-> `const` **getSubscriptionTopic**: `GetSubscriptionTopicFn`
+> `const` **getSubscriptionTopic**: [`GetSubscriptionTopicFn`](../type-aliases/GetSubscriptionTopicFn.md)
 
 Defined in: [natsbridge/src/topic/getSubscriptionTopic.impl.ts:7](https://github.com/puristajs/purista/blob/master/packages/natsbridge/src/topic/getSubscriptionTopic.impl.ts#L7)

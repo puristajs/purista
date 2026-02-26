@@ -6,9 +6,9 @@
 
 # Function: getSubscriptionContextMock()
 
-> **getSubscriptionContextMock**\<`Resources`, `Invokes`, `EmitList`\>(`input`): `object`
+> **getSubscriptionContextMock**\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`\>(`input`): `object`
 
-Defined in: [mocks/getSubscriptionContext.mock.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionContext.mock.ts#L17)
+Defined in: [mocks/getSubscriptionContext.mock.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionContext.mock.ts#L22)
 
 A function that returns a mock object for subscription function context
 
@@ -21,6 +21,10 @@ A function that returns a mock object for subscription function context
 ### Invokes
 
 `Invokes` *extends* [`InvokeList`](../type-aliases/InvokeList.md)
+
+### StreamInvokes
+
+`StreamInvokes` *extends* [`StreamInvokeList`](../type-aliases/StreamInvokeList.md)
 
 ### EmitList
 
@@ -49,6 +53,10 @@ A function that returns a mock object for subscription function context
 #### sandbox?
 
 `SinonSandbox`
+
+#### streamInvokes?
+
+`StreamInvokes`
 
 ## Returns
 
@@ -99,6 +107,10 @@ the logger instance
 > **message**: `Readonly`\<[`EBMessage`](../type-aliases/EBMessage.md)\>
 
 the original message
+
+#### mock.queue
+
+> **queue**: [`QueueContext`](../type-aliases/QueueContext.md) & [`QueueContext`](../type-aliases/QueueContext.md)\<[`QueueInvokeList`](../type-aliases/QueueInvokeList.md)\>
 
 #### mock.resources
 
@@ -207,6 +219,12 @@ delete a state value from the state store
 
 set a state value in the state store
 
+#### mock.stream
+
+> **stream**: `StreamInvokes`
+
+consumes stream responses from other service stream endpoints
+
 #### mock.wrapInSpan()
 
 > **wrapInSpan**: \<`F`\>(`name`, `opts`, `fn`, `context?`) => `Promise`\<`F`\>
@@ -248,6 +266,10 @@ wrap given function in an opentelemetry span
 #### stubs.emit
 
 > **emit**: [`FromEmitToOtherType`](../type-aliases/FromEmitToOtherType.md)\<`EmitList`, `SinonStub`\<`any`[], `any`\>\> = `eventList`
+
+#### stubs.enqueue
+
+> **enqueue**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.getConfig
 
@@ -308,6 +330,10 @@ wrap given function in an opentelemetry span
 #### stubs.resources
 
 > **resources**: `Partial`\<`Resources`\>
+
+#### stubs.scheduleAt
+
+> **scheduleAt**: `SinonStub`\<`any`[], `any`\>
 
 #### stubs.service
 

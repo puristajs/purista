@@ -1,6 +1,7 @@
 import type { Schema } from '../../../schema/index.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
+import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { StreamFunctionContext } from './StreamFunctionContext.js'
@@ -18,9 +19,18 @@ export type StreamFunction<
 	Invokes extends InvokeList = EmptyObject,
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 > = (
 	this: S,
-	context: StreamFunctionContext<MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes, EmitList>,
+	context: StreamFunctionContext<
+		MessagePayloadType,
+		MessageParamsType,
+		Resources,
+		Invokes,
+		StreamInvokes,
+		EmitList,
+		QueueInvokes
+	>,
 	payload: Readonly<FunctionPayloadType>,
 	parameter: Readonly<FunctionParamsType>,
 	writer: StreamWriter<ChunkType, FinalType>,

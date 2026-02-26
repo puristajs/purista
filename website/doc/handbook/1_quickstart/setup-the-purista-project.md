@@ -40,6 +40,8 @@ After setup, generate services and business artifacts with the CLI:
 2. `purista add command`
 3. `purista add subscription`
 4. `purista add stream`
+5. `purista add queue`
+6. `purista add queue-worker`
 
 ## Project structure
 
@@ -73,6 +75,16 @@ The blueprint creates a folder structure expected by PURISTA tooling and code ge
 | |               |- [streamName].test.ts
 | |               |- schema.ts
 | |               |- types.ts
+| |           |- queue/
+| |           |   |- [queueName]/
+| |           |       |- schema.ts
+| |           |       |- types.ts
+| |           |       |- [queueName]QueueBuilder.ts
+| |           |       |- [queueName]QueueBuilder.test.ts
+| |           |- queue-worker/
+| |               |- [workerName]/
+| |                   |- [workerName]QueueWorkerBuilder.ts
+| |                   |- [workerName]QueueWorkerBuilder.test.ts
 | |- store/
 | |   |- config/
 | |   |- state/

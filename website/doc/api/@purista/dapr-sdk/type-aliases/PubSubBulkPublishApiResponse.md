@@ -16,6 +16,6 @@ Response from a bulk publish API request.
 
 ### failedEntries
 
-> **failedEntries**: `PubSubBulkPublishApiResponseStatus`[]
+> **failedEntries**: [`PubSubBulkPublishApiResponseStatus`](PubSubBulkPublishApiResponseStatus.md)[]
 
 Defined in: [dapr-sdk/src/types/pubsub/PubSubBulkPublishApiResponse.type.ts:23](https://github.com/puristajs/purista/blob/master/packages/dapr-sdk/src/types/pubsub/PubSubBulkPublishApiResponse.type.ts#L23)

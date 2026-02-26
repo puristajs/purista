@@ -4,6 +4,8 @@ import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { Prettify } from '../Prettify.js'
+import type { QueueContext } from '../queue/QueueContext.js'
+import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { StreamOpenRequest } from './StreamOpenRequest.js'
 
@@ -14,11 +16,13 @@ export type StreamFunctionContextEnhancements<
 	Invokes extends InvokeList = EmptyObject,
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 > = {
 	message: Readonly<StreamOpenRequest<MessagePayloadType, MessageParamsType>>
 	emit: EmitCustomMessageFunction<EmitList>
 	service: Invokes
 	stream: StreamInvokes
+	queue: QueueContext<QueueInvokes>
 	resources: Resources
 }
 
@@ -29,6 +33,7 @@ export type StreamFunctionContext<
 	Invokes extends InvokeList = EmptyObject,
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 > = Prettify<
 	ContextBase &
 		StreamFunctionContextEnhancements<
@@ -37,6 +42,7 @@ export type StreamFunctionContext<
 			Resources,
 			Invokes,
 			StreamInvokes,
-			EmitList
+			EmitList,
+			QueueInvokes
 		>
 >

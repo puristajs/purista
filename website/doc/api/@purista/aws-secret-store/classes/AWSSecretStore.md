@@ -344,7 +344,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:3
 
 > `protected` **setSecretImpl**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
-Defined in: [aws-secret-store/src/AWSSecretStore.impl.ts:71](https://github.com/puristajs/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L71)
+Defined in: [aws-secret-store/src/AWSSecretStore.impl.ts:72](https://github.com/puristajs/purista/blob/master/packages/aws-secret-store/src/AWSSecretStore.impl.ts#L72)
 
 #### Parameters
 

@@ -53,6 +53,15 @@ To add a command to your service, use the CLI tool.
 purista add command
 ```
 
+For pull-based CQRS workloads you can now scaffold queues and worker implementations directly from the CLI.  
+The queue wizard adds typed schemas, `.canEnqueue()` entries, and optional producer commands so HTTP handlers can return a `202 Accepted` response immediately.
+
+```bash
+purista add queue
+# or add an additional worker for an existing queue
+purista add queue-worker
+```
+
 ## Integration tests
 
 PURISTA supports opt-in integration tests for external systems (AWS Localstack, NATS, Azure, GCloud, Infisical).

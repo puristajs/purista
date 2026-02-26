@@ -29,6 +29,4 @@ convertToCamelCase('some-text')
 // => 'someText'
 ```
 
-## Link
-
-https://github.com/30-seconds/30-seconds-of-code
+Based on: https://github.com/30-seconds/30-seconds-of-code

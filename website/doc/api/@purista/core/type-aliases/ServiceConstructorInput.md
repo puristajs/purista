@@ -8,7 +8,7 @@
 
 > **ServiceConstructorInput**\<`S`\> = `object`
 
-Defined in: [core/types/ServiceConstructorInput.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L17)
+Defined in: [core/types/ServiceConstructorInput.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L21)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: [core/types/ServiceConstructorInput.ts:17](https://github.com/purist
 
 > **commandDefinitionList**: [`CommandDefinitionListResolved`](CommandDefinitionListResolved.md)\<`any`\>
 
-Defined in: [core/types/ServiceConstructorInput.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L25)
+Defined in: [core/types/ServiceConstructorInput.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L29)
 
 The list of command definitions for this service
 
@@ -32,7 +32,7 @@ The list of command definitions for this service
 
 > **config**: `S`\[`"ConfigType"`\]
 
-Defined in: [core/types/ServiceConstructorInput.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L29)
+Defined in: [core/types/ServiceConstructorInput.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L39)
 
 The service specific config
 
@@ -42,7 +42,7 @@ The service specific config
 
 > `optional` **configSchema**: [`Schema`](Schema.md)
 
-Defined in: [core/types/ServiceConstructorInput.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L39)
+Defined in: [core/types/ServiceConstructorInput.ts:51](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L51)
 
 The config validation schema
 
@@ -52,7 +52,7 @@ The config validation schema
 
 > `optional` **configStore**: [`ConfigStore`](../interfaces/ConfigStore.md)
 
-Defined in: [core/types/ServiceConstructorInput.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L33)
+Defined in: [core/types/ServiceConstructorInput.ts:43](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L43)
 
 The config store instance
 
@@ -62,7 +62,7 @@ The config store instance
 
 > **eventBridge**: [`EventBridge`](../interfaces/EventBridge.md)
 
-Defined in: [core/types/ServiceConstructorInput.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L23)
+Defined in: [core/types/ServiceConstructorInput.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L27)
 
 The eventBridge instance
 
@@ -72,7 +72,7 @@ The eventBridge instance
 
 > **info**: [`ServiceInfoType`](ServiceInfoType.md)
 
-Defined in: [core/types/ServiceConstructorInput.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L21)
+Defined in: [core/types/ServiceConstructorInput.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L25)
 
 The service info with name, version and description of service
 
@@ -82,9 +82,39 @@ The service info with name, version and description of service
 
 > **logger**: [`Logger`](../classes/Logger.md)
 
-Defined in: [core/types/ServiceConstructorInput.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L19)
+Defined in: [core/types/ServiceConstructorInput.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L23)
 
 A logger instance
+
+***
+
+### queueBridge?
+
+> `optional` **queueBridge**: [`QueueBridge`](../interfaces/QueueBridge.md)
+
+Defined in: [core/types/ServiceConstructorInput.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L49)
+
+Queue bridge implementation
+
+***
+
+### queueDefinitionList?
+
+> `optional` **queueDefinitionList**: [`QueueDefinitionListResolved`](QueueDefinitionListResolved.md)\<`any`\>
+
+Defined in: [core/types/ServiceConstructorInput.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L35)
+
+The list of queue definitions for this service
+
+***
+
+### queueWorkerDefinitionList?
+
+> `optional` **queueWorkerDefinitionList**: [`QueueWorkerDefinitionListResolved`](QueueWorkerDefinitionListResolved.md)\<`any`\>
+
+Defined in: [core/types/ServiceConstructorInput.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L37)
+
+The list of queue worker definitions for this service
 
 ***
 
@@ -92,7 +122,7 @@ A logger instance
 
 > `optional` **resources**: `S`\[`"Resources"`\]
 
-Defined in: [core/types/ServiceConstructorInput.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L40)
+Defined in: [core/types/ServiceConstructorInput.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L52)
 
 ***
 
@@ -100,7 +130,7 @@ Defined in: [core/types/ServiceConstructorInput.ts:40](https://github.com/purist
 
 > `optional` **secretStore**: [`SecretStore`](../interfaces/SecretStore.md)
 
-Defined in: [core/types/ServiceConstructorInput.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L31)
+Defined in: [core/types/ServiceConstructorInput.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L41)
 
 The secret store instance
 
@@ -110,7 +140,7 @@ The secret store instance
 
 > `optional` **spanProcessor**: `SpanProcessor`
 
-Defined in: [core/types/ServiceConstructorInput.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L37)
+Defined in: [core/types/ServiceConstructorInput.ts:47](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L47)
 
 The opentelemetry span processor instance
 
@@ -120,9 +150,19 @@ The opentelemetry span processor instance
 
 > `optional` **stateStore**: [`StateStore`](../interfaces/StateStore.md)
 
-Defined in: [core/types/ServiceConstructorInput.ts:35](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L35)
+Defined in: [core/types/ServiceConstructorInput.ts:45](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L45)
 
 the state store instance
+
+***
+
+### streamDefinitionList?
+
+> `optional` **streamDefinitionList**: [`StreamDefinitionListResolved`](StreamDefinitionListResolved.md)\<`any`\>
+
+Defined in: [core/types/ServiceConstructorInput.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L33)
+
+The list of stream definitions for this service
 
 ***
 
@@ -130,6 +170,6 @@ the state store instance
 
 > **subscriptionDefinitionList**: [`SubscriptionDefinitionListResolved`](SubscriptionDefinitionListResolved.md)\<`any`\>
 
-Defined in: [core/types/ServiceConstructorInput.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L27)
+Defined in: [core/types/ServiceConstructorInput.ts:31](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/ServiceConstructorInput.ts#L31)
 
 The list of subscription definitions for this service

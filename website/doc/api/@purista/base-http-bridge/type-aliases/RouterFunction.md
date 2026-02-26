@@ -14,7 +14,7 @@ Defined in: [base-http-bridge/src/HttpEventBridge/types/RouterFunction.ts:5](htt
 
 ### T
 
-`T` *extends* `IHttpEventBridge` = `IHttpEventBridge`
+`T` *extends* [`IHttpEventBridge`](IHttpEventBridge.md) = [`IHttpEventBridge`](IHttpEventBridge.md)
 
 ## Parameters
 

@@ -103,13 +103,19 @@ const _serverInstance = serve({
 
 ```
 
+## Classes
+
+- [HonoServiceClass](classes/HonoServiceClass.md)
+
 ## Type Aliases
 
 - [BindingsBase](type-aliases/BindingsBase.md)
+- [Config](type-aliases/Config.md)
 - [EndpointProtectMiddleware](type-aliases/EndpointProtectMiddleware.md)
 - [HealthFunction](type-aliases/HealthFunction.md)
 - [HonoServiceV1Config](type-aliases/HonoServiceV1Config.md)
 - [HonoServiceV1ConfigPartial](type-aliases/HonoServiceV1ConfigPartial.md)
+- [HonoV1ServiceCommandsToRestApiInputPayload](type-aliases/HonoV1ServiceCommandsToRestApiInputPayload.md)
 - [VariablesBase](type-aliases/VariablesBase.md)
 
 ## Variables
@@ -117,12 +123,16 @@ const _serverInstance = serve({
 - [DEFAULT\_API\_MOUNT\_PATH](variables/DEFAULT_API_MOUNT_PATH.md)
 - [ExternalDocumentationObjectSchema](variables/ExternalDocumentationObjectSchema.md)
 - [~~getQueryDefintion~~](variables/getQueryDefintion.md)
+- [honoServiceInfo](variables/honoServiceInfo.md)
 - [honoServiceV1ConfigSchema](variables/honoServiceV1ConfigSchema.md)
 - [honoV1Service](variables/honoV1Service.md)
+- [honoV1ServiceBuilder](variables/honoV1ServiceBuilder.md)
+- [honoV1ServiceCommandsToRestApiInputPayloadSchema](variables/honoV1ServiceCommandsToRestApiInputPayloadSchema.md)
 - [InfoObjectSchema](variables/InfoObjectSchema.md)
 - [OPENAPI\_DEFAULT\_INFO](variables/OPENAPI_DEFAULT_INFO.md)
 - [puristaVersion](variables/puristaVersion.md)
 - [ServerObjectSchema](variables/ServerObjectSchema.md)
+- [serviceCommandsToRestApiSubscriptionBuilder](variables/serviceCommandsToRestApiSubscriptionBuilder.md)
 - [ServiceEvent](variables/ServiceEvent.md)
 - [TagObjectSchema](variables/TagObjectSchema.md)
 

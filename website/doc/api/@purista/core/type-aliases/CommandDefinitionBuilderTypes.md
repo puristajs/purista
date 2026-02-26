@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / CommandDefinitionBuilderTypes
 
-# Type Alias: CommandDefinitionBuilderTypes\<PayloadSchema, ParamsSchema, OutputSchema, TransformInputPayloadSchema, TransformInputParamsSchema, TransformOutputSchema, Resources, Invokes, EmitList\>
+# Type Alias: CommandDefinitionBuilderTypes\<PayloadSchema, ParamsSchema, OutputSchema, TransformInputPayloadSchema, TransformInputParamsSchema, TransformOutputSchema, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
 
-> **CommandDefinitionBuilderTypes**\<`PayloadSchema`, `ParamsSchema`, `OutputSchema`, `TransformInputPayloadSchema`, `TransformInputParamsSchema`, `TransformOutputSchema`, `Resources`, `Invokes`, `EmitList`\> = `object`
+> **CommandDefinitionBuilderTypes**\<`PayloadSchema`, `ParamsSchema`, `OutputSchema`, `TransformInputPayloadSchema`, `TransformInputParamsSchema`, `TransformOutputSchema`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = `object`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:5](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L5)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L7)
 
 ## Type Parameters
 
@@ -44,9 +44,17 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:5](https:
 
 `Invokes` *extends* [`InvokeList`](InvokeList.md) = [`InvokeList`](InvokeList.md)
 
+### StreamInvokes
+
+`StreamInvokes` *extends* [`StreamInvokeList`](StreamInvokeList.md) = [`StreamInvokeList`](StreamInvokeList.md)
+
 ### EmitList
 
 `EmitList` *extends* `Record`\<`string`, [`Schema`](Schema.md)\> = `Record`\<`string`, [`Schema`](Schema.md)\>
+
+### QueueInvokes
+
+`QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
 ## Properties
 
@@ -54,7 +62,7 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:5](https:
 
 > **EmitList**: `EmitList`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L24)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:29](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L29)
 
 ***
 
@@ -62,7 +70,7 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:24](https
 
 > **Invokes**: `Invokes`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L23)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:27](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L27)
 
 ***
 
@@ -70,7 +78,7 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:23](https
 
 > **OutputSchema**: `OutputSchema`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L18)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L22)
 
 ***
 
@@ -78,7 +86,7 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:18](https
 
 > **ParamsSchema**: `ParamsSchema`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L17)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L21)
 
 ***
 
@@ -86,7 +94,15 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:17](https
 
 > **PayloadSchema**: `PayloadSchema`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L16)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L20)
+
+***
+
+### QueueInvokes
+
+> **QueueInvokes**: `QueueInvokes`
+
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:30](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L30)
 
 ***
 
@@ -94,7 +110,15 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:16](https
 
 > **Resources**: `Resources`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L22)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L26)
+
+***
+
+### StreamInvokes
+
+> **StreamInvokes**: `StreamInvokes`
+
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:28](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L28)
 
 ***
 
@@ -102,7 +126,7 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:22](https
 
 > **TransformInputParamsSchema**: `TransformInputParamsSchema`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:20](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L20)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L24)
 
 ***
 
@@ -110,7 +134,7 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:20](https
 
 > **TransformInputPayloadSchema**: `TransformInputPayloadSchema`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:19](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L19)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L23)
 
 ***
 
@@ -118,4 +142,4 @@ Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:19](https
 
 > **TransformOutputSchema**: `TransformOutputSchema`
 
-Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:21](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L21)
+Defined in: [CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/CommandDefinitionBuilder/CommandDefinitionBuilderTypes.ts#L25)

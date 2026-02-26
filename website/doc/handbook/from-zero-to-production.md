@@ -11,7 +11,7 @@ This page is a practical implementation path to build and ship a PURISTA applica
 ## Phase 1: Foundation
 
 1. Create project and run quickstart flow.
-2. Create first service, command, subscription, and stream.
+2. Create first service plus at least one command, subscription, stream, and—if you need pull-based async work—a queue + worker pair.
 3. Add schema validation for payload/parameter/output.
 4. Add unit tests for service/command/subscription/stream.
 
@@ -22,6 +22,7 @@ Reference:
 - [Command](./2_building_business-logic/command/index.md)
 - [Stream](./2_building_business-logic/stream/index.md)
 - [Subscription](./2_building_business-logic/subscription/index.md)
+- [Queues](./2_building_business-logic/queue/index.md)
 
 ## Phase 2: Integration-ready logic
 
@@ -39,12 +40,14 @@ Reference:
 ## Phase 3: Runtime architecture
 
 1. Choose event bridge based on delivery requirements.
-2. Choose deployment model (monolith, microservice style, edge, serverless).
-3. Configure graceful shutdown and startup ordering.
+2. Choose queue bridge (default in-memory vs Redis or other providers) for pull-based workloads.
+3. Choose deployment model (monolith, microservice style, edge, serverless).
+4. Configure graceful shutdown and startup ordering.
 
 Reference:
 
 - [Event bridges](./3_eco_system/eventbridges/index.md)
+- [Queue bridges](./3_eco_system/queue_bridges/index.md)
 - [Deploy & Scale](./5_deploy_and_scale/index.md)
 
 ## Phase 4: Production readiness

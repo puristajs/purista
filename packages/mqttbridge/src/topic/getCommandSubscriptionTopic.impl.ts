@@ -4,7 +4,7 @@ import type { EBMessageAddress } from '@purista/core'
 import { convertToSnakeCase, EBMessageType } from '@purista/core'
 import type { IMqttBridge } from '../types/IMqttBridge.js'
 
-type GetCommandTopicFn = (this: IMqttBridge, address: EBMessageAddress) => string
+export type GetCommandTopicFn = (this: IMqttBridge, address: EBMessageAddress) => string
 
 export const getCommandSubscriptionTopic: GetCommandTopicFn = function (address) {
 	return join(

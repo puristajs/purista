@@ -15,7 +15,7 @@ This client is responsible for the communication to the sidecar service.
 
 ### getApiPathForCommand()
 
-> **getApiPathForCommand**: (`addess`, `metadata`) => `string`
+> **getApiPathForCommand**: (`address`, `metadata`) => `string`
 
 Defined in: [base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts:22](https://github.com/puristajs/purista/blob/master/packages/base-http-bridge/src/HttpEventBridge/types/HttpEventBridgeClient.ts#L22)
 
@@ -24,7 +24,7 @@ This url is a POST endpoint and expects the payload and parameter as defined for
 
 #### Parameters
 
-##### addess
+##### address
 
 [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md)
 

@@ -4,6 +4,8 @@ import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { Prettify } from '../Prettify.js'
+import type { QueueContext } from '../queue/QueueContext.js'
+import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
 
 import type { Command } from './Command.js'
@@ -24,6 +26,7 @@ export type CommandFunctionContextEnhancements<
 	Invokes extends InvokeList = EmptyObject,
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 > = {
 	/** the original message */
 	message: Readonly<Command<MessagePayloadType, MessageParamsType>>
@@ -47,6 +50,8 @@ export type CommandFunctionContextEnhancements<
 	service: Invokes
 	/** consumes stream responses from other service stream endpoints */
 	stream: StreamInvokes
+	/** typed queue enqueue helpers */
+	queue: QueueContext<QueueInvokes>
 	/**
 	 * Provides resources defined in service builder and set via config during service creation
 	 */
@@ -65,6 +70,7 @@ export type CommandFunctionContext<
 	Invokes extends InvokeList = EmptyObject,
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 > = Prettify<
 	ContextBase &
 		CommandFunctionContextEnhancements<
@@ -73,6 +79,7 @@ export type CommandFunctionContext<
 			Resources,
 			Invokes,
 			StreamInvokes,
-			EmitList
+			EmitList,
+			QueueInvokes
 		>
 >

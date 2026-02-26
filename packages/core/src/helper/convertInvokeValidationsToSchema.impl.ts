@@ -3,7 +3,7 @@ import type { FromInvokeToOtherType } from '../core/types/FromInvokeToOtherType.
 import type { Schema as ValidationSchema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 
-type InputType = {
+export type InvokeValidationMap = {
 	[serviceName: string]: {
 		[serviceVersion: string]: {
 			[name: string]: {
@@ -27,7 +27,7 @@ type ResultType = {
 	}
 }
 
-export const convertInvokeValidationsToSchema = async <T extends InputType>(
+export const convertInvokeValidationsToSchema = async <T extends InvokeValidationMap>(
 	invokes: T,
 ): Promise<
 	FromInvokeToOtherType<

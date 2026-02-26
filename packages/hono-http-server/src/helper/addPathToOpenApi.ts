@@ -7,7 +7,7 @@ import { getErrorResponseSchema } from './getErrorResponseSchema.js'
 import { getParameterDefinition } from './getParameterDefinition.js'
 import { getQueryDefinition } from './getQueryDefinition.js'
 
-type Config = {
+export type Config = {
 	traceHeaderField?: string
 }
 

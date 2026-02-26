@@ -5,6 +5,7 @@ import type { EBMessageType } from '../EBMessageType.enum.js'
 import type { InstanceId } from '../InstanceId.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { PrincipalId } from '../PrincipalId.js'
+import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
 import type { StreamInvokeList } from '../StreamInvokeList.js'
 import type { TenantId } from '../TenantId.js'
@@ -33,6 +34,7 @@ export type SubscriptionDefinition<
 	Invokes extends InvokeList,
 	StreamInvokes extends StreamInvokeList,
 	EmitList extends Record<string, Schema>,
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 	MetadataType extends SubscriptionDefinitionMetadataBase = SubscriptionDefinitionMetadataBase,
 > = {
 	/** the name of the subscription */
@@ -129,5 +131,6 @@ export type SubscriptionDefinition<
 	invokes: Invokes
 	streamInvokes: StreamInvokes
 	emitList: EmitList
+	queueInvokes: QueueInvokes
 	deprecated: boolean
 }

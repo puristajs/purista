@@ -3,6 +3,8 @@ import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'nod
 import { join } from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 import { addPuristaCommand } from './addPuristaCommand.js'
+import { addPuristaQueue } from './addPuristaQueue.js'
+import { addPuristaQueueWorker } from './addPuristaQueueWorker.js'
 import { addPuristaService } from './addPuristaService.js'
 import { addPuristaStream } from './addPuristaStream.js'
 import { addPuristaSubscription } from './addPuristaSubscription.js'
@@ -114,6 +116,43 @@ describe('CLI artifact generation (e2e)', () => {
 			responseEventName: 'user.welcome_sent',
 		})
 
+		project = await scanPuristaProject(puristaConfig, TEST_DIR)
+
+		await addPuristaQueue({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			queueName: 'process jobs',
+			queueDescription: 'Process background jobs',
+			worker: {
+				name: 'process jobs worker',
+				description: 'Default worker',
+				mode: 'continuous',
+				maxParallelHandlers: 1,
+			},
+			producer: {
+				commandName: 'enqueue job',
+				commandDescription: 'Enqueue a job for async processing',
+				responseEventName: 'user.job_enqueued',
+			},
+		})
+
+		await addPuristaQueueWorker({
+			projectRootPath: TEST_DIR,
+			puristaConfig,
+			puristaProject: project,
+			serviceName: 'user',
+			serviceVersion: '1',
+			queueName: 'process jobs',
+			workerName: 'process jobs interval worker',
+			workerDescription: 'Interval worker',
+			mode: 'interval',
+			intervalMs: 30000,
+			maxParallelHandlers: 2,
+		})
+
 		const serviceDir = join(TEST_DIR, 'src', 'service', 'user', 'v1')
 		const serviceFile = join(serviceDir, 'userV1Service.ts')
 		const builderFile = join(serviceDir, 'userV1ServiceBuilder.ts')
@@ -126,12 +165,24 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(serviceFileContent).toContain('commandDefinitions')
 		expect(serviceFileContent).toContain('subscriptionDefinitions')
 		expect(serviceFileContent).toContain('streamDefinitions')
+		expect(serviceFileContent).toContain('queueDefinitions')
+		expect(serviceFileContent).toContain('queueWorkerDefinitions')
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addCommandDefinition']>[0][] =")
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addSubscriptionDefinition']>[0][] =")
 		expect(serviceFileContent).toContain("Parameters<typeof userV1ServiceBuilder['addStreamDefinition']>[0][] =")
+		expect(serviceFileContent).toContain(
+			"type QueueDefinition = Parameters<typeof userV1ServiceBuilder['addQueueDefinition']>[number]",
+		)
+		expect(serviceFileContent).toContain(
+			"type QueueWorkerDefinition = Parameters<typeof userV1ServiceBuilder['addQueueWorkerDefinition']>[number]",
+		)
 		expect(serviceFileContent).toContain('signUpCommandBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('sendWelcomeEmailSubscriptionBuilder.getDefinition()')
 		expect(serviceFileContent).toContain('searchUsersStreamBuilder.getDefinition()')
+		expect(serviceFileContent).toContain('enqueueJobCommandBuilder.getDefinition()')
+		expect(serviceFileContent).toContain('.addQueueDefinition(...queueDefinitions)')
+		expect(serviceFileContent).toContain('.addQueueWorkerDefinition(...queueWorkerDefinitions)')
+		expect(serviceFileContent).toContain('processJobsQueueBuilder.getDefinition()')
 
 		const commandSchema = readFileSync(join(commandDir, 'schema.ts'), 'utf-8')
 		expect(commandSchema).toContain('userV1SignUpInputParameterSchema')
@@ -142,6 +193,29 @@ describe('CLI artifact generation (e2e)', () => {
 		expect(commandTypes).toContain('UserV1SignUpInputPayload')
 		expect(commandTypes).toContain('UserV1SignUpOutputPayload')
 		expect(readFileSync(join(commandDir, 'signUpCommandBuilder.ts'), 'utf-8')).toContain('signUpCommandBuilder')
+
+		const queueDirPath = join(serviceDir, 'queue', 'processJobs')
+		expect(readFileSync(join(queueDirPath, 'schema.ts'), 'utf-8')).toContain('userV1ProcessJobsQueuePayloadSchema')
+		expect(readFileSync(join(queueDirPath, 'types.ts'), 'utf-8')).toContain('UserV1ProcessJobsQueuePayload')
+		const queueBuilderContent = readFileSync(join(queueDirPath, 'processJobsQueueBuilder.ts'), 'utf-8')
+		expect(queueBuilderContent).toContain('.getQueueBuilder("processJobs"')
+		expect(queueBuilderContent).toContain('.addPayloadSchema(userV1ProcessJobsQueuePayloadSchema)')
+
+		const queueWorkerDir = join(serviceDir, 'queue-worker', 'processJobsWorker')
+		expect(readFileSync(join(queueWorkerDir, 'processJobsWorkerQueueWorkerBuilder.ts'), 'utf-8')).toContain(
+			'.getQueueWorkerBuilder("processJobs"',
+		)
+		const queueWorkerIntervalDir = join(serviceDir, 'queue-worker', 'processJobsIntervalWorker')
+		expect(
+			readFileSync(join(queueWorkerIntervalDir, 'processJobsIntervalWorkerQueueWorkerBuilder.ts'), 'utf-8'),
+		).toContain('.setIntervalMs(30000)')
+
+		const producerCommandBuilder = readFileSync(
+			join(serviceDir, 'command', 'enqueueJob', 'enqueueJobCommandBuilder.ts'),
+			'utf-8',
+		)
+		expect(producerCommandBuilder).toContain(".canEnqueue('processJobs'")
+		expect(producerCommandBuilder).toContain('context.queue.enqueue.processJobs')
 
 		const subscriptionSchema = readFileSync(join(subscriptionDir, 'schema.ts'), 'utf-8')
 		expect(subscriptionSchema).toContain('userV1SendWelcomeEmailInputParameterSchema')

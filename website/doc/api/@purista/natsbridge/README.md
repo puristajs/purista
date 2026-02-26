@@ -53,6 +53,9 @@ import { NatsBridge } from '@purista/natsbridge'
 
 ## Type Aliases
 
+- [GetCommandTopicFn](type-aliases/GetCommandTopicFn.md)
+- [GetSubscriptionTopicFn](type-aliases/GetSubscriptionTopicFn.md)
+- [GetTopicNameFn](type-aliases/GetTopicNameFn.md)
 - [INatsBridge](type-aliases/INatsBridge.md)
 - [IncomingMessageFunction](type-aliases/IncomingMessageFunction.md)
 - [NatsBridgeConfig](type-aliases/NatsBridgeConfig.md)

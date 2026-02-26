@@ -14,9 +14,10 @@ import { serializeOtp } from './serializeOtp.impl.js'
  * Creates a error response object based on original command
  * Toggles sender and receiver
  *
- * @param originalEBMessage
- * @param status
- * @param error
+ * @param instanceId The service instance originating the response
+ * @param originalEBMessage The command that triggered the error
+ * @param statusCode Optional HTTP-like status to propagate
+ * @param error Optional error payload
  * @returns CommandErrorResponse message object
  *
  * @group Helper

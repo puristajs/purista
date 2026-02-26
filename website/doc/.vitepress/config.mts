@@ -145,15 +145,28 @@ export default defineConfig({
 					items: [
 						{
 							text: '@purista/core',
-							link: '/api/@purista/core/globals.md',
+							link: '/api/@purista/core/README.md',
+						},
+						{
+							text: '@purista/base-http-bridge',
+							link: '/api/@purista/base-http-bridge/README.md',
 						},
 						{
 							text: '@purista/hono-http-server',
-							link: '/api/@purista/hono-http-server/globals.md',
+							link: '/api/@purista/hono-http-server/README.md',
 						},
 						{
 							text: '@purista/httpserver',
-							link: '/api/@purista/httpserver/globals.md',
+							link: '/api/@purista/httpserver/README.md',
+						},
+					],
+				},
+				{
+					text: 'Tooling',
+					items: [
+						{
+							text: '@purista/cli',
+							link: '/api/@purista/cli/README.md',
 						},
 					],
 				},
@@ -162,19 +175,28 @@ export default defineConfig({
 					items: [
 						{
 							text: '@purista/amqpbridge',
-							link: '/api/@purista/amqpbridge/globals.md',
+							link: '/api/@purista/amqpbridge/README.md',
 						},
 						{
 							text: '@purista/dapr-sdk',
-							link: '/api/@purista/dapr-sdk/globals.md',
+							link: '/api/@purista/dapr-sdk/README.md',
 						},
 						{
 							text: '@purista/mqttbridge',
-							link: '/api/@purista/mqttbridge/globals.md',
+							link: '/api/@purista/mqttbridge/README.md',
 						},
 						{
 							text: '@purista/natsbridge',
-							link: '/api/@purista/natsbridge/globals.md',
+							link: '/api/@purista/natsbridge/README.md',
+						},
+					],
+				},
+				{
+					text: 'Queue bridges',
+					items: [
+						{
+							text: '@purista/redis-queue-bridge',
+							link: '/api/@purista/redis-queue-bridge/README.md',
 						},
 					],
 				},
@@ -183,19 +205,19 @@ export default defineConfig({
 					items: [
 						{
 							text: '@purista/aws-config-store',
-							link: '/api/@purista/aws-config-store/globals.md',
+							link: '/api/@purista/aws-config-store/README.md',
 						},
 						{
 							text: '@purista/dapr-sdk',
-							link: '/api/@purista/dapr-sdk/globals.md',
+							link: '/api/@purista/dapr-sdk/README.md',
 						},
 						{
 							text: '@purista/nats-config-store',
-							link: '/api/@purista/nats-config-store/globals.md',
+							link: '/api/@purista/nats-config-store/README.md',
 						},
 						{
 							text: '@purista/redis-config-store',
-							link: '/api/@purista/redis-config-store/globals.md',
+							link: '/api/@purista/redis-config-store/README.md',
 						},
 					],
 				},
@@ -204,23 +226,27 @@ export default defineConfig({
 					items: [
 						{
 							text: '@purista/aws-secret-store',
-							link: '/api/@purista/aws-secret-store/globals.md',
+							link: '/api/@purista/aws-secret-store/README.md',
 						},
 						{
 							text: '@purista/azure-secret-store',
-							link: '/api/@purista/azure-secret-store/globals.md',
+							link: '/api/@purista/azure-secret-store/README.md',
 						},
 						{
 							text: '@purista/dapr-sdk',
-							link: '/api/@purista/dapr-sdk/globals.md',
+							link: '/api/@purista/dapr-sdk/README.md',
 						},
 						{
 							text: '@purista/gcloud-secret-store',
-							link: '/api/@purista/gcloud-secret-store/globals.md',
+							link: '/api/@purista/gcloud-secret-store/README.md',
 						},
 						{
 							text: '@purista/infisical-secret-store',
-							link: '/api/@purista/infisical-secret-store/globals.md',
+							link: '/api/@purista/infisical-secret-store/README.md',
+						},
+						{
+							text: '@purista/vault-secret-store',
+							link: '/api/@purista/vault-secret-store/README.md',
 						},
 					],
 				},
@@ -229,15 +255,15 @@ export default defineConfig({
 					items: [
 						{
 							text: '@purista/dapr-sdk',
-							link: '/api/@purista/dapr-sdk/globals.md',
+							link: '/api/@purista/dapr-sdk/README.md',
 						},
 						{
 							text: '@purista/nats-state-store',
-							link: '/api/@purista/nats-state-store/globals.md',
+							link: '/api/@purista/nats-state-store/README.md',
 						},
 						{
 							text: '@purista/redis-state-store',
-							link: '/api/@purista/redis-state-store/globals.md',
+							link: '/api/@purista/redis-state-store/README.md',
 						},
 					],
 				},
@@ -246,11 +272,11 @@ export default defineConfig({
 					items: [
 						{
 							text: '@purista/dapr-sdk',
-							link: '/api/@purista/dapr-sdk/globals.md',
+							link: '/api/@purista/dapr-sdk/README.md',
 						},
 						{
 							text: '@purista/k8s-sdk',
-							link: '/api/@purista/k8s-sdk/globals.md',
+							link: '/api/@purista/k8s-sdk/README.md',
 						},
 					],
 				},

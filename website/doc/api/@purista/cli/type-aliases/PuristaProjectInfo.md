@@ -8,7 +8,7 @@
 
 > **PuristaProjectInfo** = `object`
 
-Defined in: [scanPuristaProject.ts:28](https://github.com/puristajs/purista/blob/d4f52fc34958022c6b9693e9270946d1111d759c/packages/cli/src/api/scanPuristaProject.ts#L28)
+Defined in: [scanPuristaProject.ts:32](https://github.com/puristajs/purista/blob/643d8ae461234cbb142aca5f38526a7b04d6fea0/packages/cli/src/api/scanPuristaProject.ts#L32)
 
 Information about a Purista project.
 
@@ -18,7 +18,7 @@ Information about a Purista project.
 
 > **eventEnumFileName**: `string`
 
-Defined in: [scanPuristaProject.ts:34](https://github.com/puristajs/purista/blob/d4f52fc34958022c6b9693e9270946d1111d759c/packages/cli/src/api/scanPuristaProject.ts#L34)
+Defined in: [scanPuristaProject.ts:38](https://github.com/puristajs/purista/blob/643d8ae461234cbb142aca5f38526a7b04d6fea0/packages/cli/src/api/scanPuristaProject.ts#L38)
 
 The file name of the file that contains the event enum
 
@@ -28,7 +28,7 @@ The file name of the file that contains the event enum
 
 > **eventNames**: `object`[]
 
-Defined in: [scanPuristaProject.ts:32](https://github.com/puristajs/purista/blob/d4f52fc34958022c6b9693e9270946d1111d759c/packages/cli/src/api/scanPuristaProject.ts#L32)
+Defined in: [scanPuristaProject.ts:36](https://github.com/puristajs/purista/blob/643d8ae461234cbb142aca5f38526a7b04d6fea0/packages/cli/src/api/scanPuristaProject.ts#L36)
 
 List of event names and their corresponding values
 
@@ -46,6 +46,6 @@ List of event names and their corresponding values
 
 > **services**: [`PuristaProjectServices`](PuristaProjectServices.md)
 
-Defined in: [scanPuristaProject.ts:30](https://github.com/puristajs/purista/blob/d4f52fc34958022c6b9693e9270946d1111d759c/packages/cli/src/api/scanPuristaProject.ts#L30)
+Defined in: [scanPuristaProject.ts:34](https://github.com/puristajs/purista/blob/643d8ae461234cbb142aca5f38526a7b04d6fea0/packages/cli/src/api/scanPuristaProject.ts#L34)
 
 The information about existing services

@@ -36,6 +36,13 @@ Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:29](https://github.
 
 ##### config
 
+###### allowInsecureConnection?
+
+`boolean`
+
+Allow connections to self-signed / insecure endpoints (useful for local emulators).
+Never enable this in production.
+
 ###### cacheTtl?
 
 `number`
@@ -129,6 +136,13 @@ Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:27](https://github.
 > **config**: `object`
 
 Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:21
+
+#### allowInsecureConnection?
+
+> `optional` **allowInsecureConnection**: `boolean`
+
+Allow connections to self-signed / insecure endpoints (useful for local emulators).
+Never enable this in production.
 
 #### cacheTtl?
 
@@ -266,7 +280,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 > `protected` **getSecretImpl**\<`SecretNames`\>(...`secretNames`): `Promise`\<[`ObjectWithKeysFromStringArray`](../../core/type-aliases/ObjectWithKeysFromStringArray.md)\<`SecretNames`, `string` \| `undefined`\>\>
 
-Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:47](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L47)
+Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:56](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L56)
 
 #### Type Parameters
 
@@ -316,7 +330,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:2
 
 > `protected` **removeSecretImpl**(`secretName`): `Promise`\<`void`\>
 
-Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:70](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L70)
+Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:79](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L79)
 
 #### Parameters
 
@@ -364,7 +378,7 @@ Defined in: core/dist/commonjs/core/SecretStore/SecretStoreBaseClass.impl.d.ts:3
 
 > `protected` **setSecretImpl**(`secretName`, `secretValue`): `Promise`\<`void`\>
 
-Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:74](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L74)
+Defined in: [azure-secret-store/src/AzureSecretStore.impl.ts:83](https://github.com/puristajs/purista/blob/master/packages/azure-secret-store/src/AzureSecretStore.impl.ts#L83)
 
 #### Parameters
 

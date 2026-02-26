@@ -6,6 +6,7 @@ import type { CommandDefinitionBuilderTypes } from '../CommandDefinitionBuilder/
 import type { ConfigStore } from '../core/ConfigStore/types/ConfigStore.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import type { EventBridge } from '../core/EventBridge/types/EventBridge.js'
+import type { QueueBridge } from '../core/QueueBridge/types/QueueBridge.js'
 import type { SecretStore } from '../core/SecretStore/types/SecretStore.js'
 import { Service } from '../core/Service/Service.impl.js'
 import type { StateStore } from '../core/StateStore/types/StateStore.js'
@@ -21,6 +22,12 @@ import type { Logger } from '../core/types/Logger.js'
 import type { LogLevelName } from '../core/types/LogLevelName.js'
 import type { NeverObject } from '../core/types/NeverObject.js'
 import type { Prettify } from '../core/types/Prettify.js'
+import type { QueueDefinitionList, QueueDefinitionListResolved } from '../core/types/queue/QueueDefinitionList.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
+import type {
+	QueueWorkerDefinitionList,
+	QueueWorkerDefinitionListResolved,
+} from '../core/types/queue/QueueWorkerDefinitionList.js'
 import type { ServiceBuilderTypes } from '../core/types/ServiceBuilderTypes.js'
 import type { ServiceClassTypes } from '../core/types/ServiceClassTypes.js'
 import type { ServiceConstructorInput } from '../core/types/ServiceConstructorInput.js'
@@ -34,10 +41,13 @@ import type {
 } from '../core/types/subscription/SubscriptionDefinitionList.js'
 import { initDefaultConfigStore } from '../DefaultConfigStore/initDefaultConfigStore.impl.js'
 import { initLogger } from '../DefaultLogger/initLogger.impl.js'
+import { DefaultQueueBridge } from '../DefaultQueueBridge/DefaultQueueBridge.impl.js'
 import { initDefaultSecretStore } from '../DefaultSecretStore/initDefaultSecretStore.impl.js'
 import { initDefaultStateStore } from '../DefaultStateStore/initDefaultStateStore.impl.js'
 import type { InstanceOrType } from '../helper/types/InstanceOrType.js'
 import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
+import { QueueDefinitionBuilder } from '../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'
+import { QueueWorkerBuilder } from '../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
 import { StreamDefinitionBuilder } from '../StreamDefinitionBuilder/StreamDefinitionBuilder.impl.js'
 import type { StreamDefinitionBuilderTypes } from '../StreamDefinitionBuilder/StreamDefinitionBuilderTypes.js'
 import { SubscriptionDefinitionBuilder } from '../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.js'
@@ -54,6 +64,7 @@ type InstanceConfigType<S extends ServiceBuilderTypes> = Prettify<
 		secretStore?: SecretStore
 		configStore?: ConfigStore
 		stateStore?: StateStore
+		queueBridge?: QueueBridge
 	} & (keyof S['Resources'] extends NeverObject ? { resources?: never } : { resources: S['Resources'] }) &
 		(keyof S['ConfigInputType'] extends NeverObject
 			? { serviceConfig?: never }
@@ -69,10 +80,14 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 	private commandDefinitionList: CommandDefinitionList<S['ServiceClassType']> = []
 	private subscriptionDefinitionList: SubscriptionDefinitionList<S['ServiceClassType']> = []
 	private streamDefinitionList: StreamDefinitionList<S['ServiceClassType']> = []
+	private queueDefinitionList: QueueDefinitionList<S['ServiceClassType']> = []
+	private queueWorkerDefinitionList: QueueWorkerDefinitionList<S['ServiceClassType']> = []
 
 	private commandDefinitionListResolved: CommandDefinitionListResolved<S['ServiceClassType']> = []
 	private subscriptionDefinitionListResolved: SubscriptionDefinitionListResolved<S['ServiceClassType']> = []
 	private streamDefinitionListResolved: StreamDefinitionListResolved<S['ServiceClassType']> = []
+	private queueDefinitionListResolved: QueueDefinitionListResolved<S['ServiceClassType']> = []
+	private queueWorkerDefinitionListResolved: QueueWorkerDefinitionListResolved<S['ServiceClassType']> = []
 
 	private configSchema?: Schema
 	private defaultConfig?: Complete<S['ConfigType']>
@@ -147,28 +162,58 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		return this
 	}
 
+	addQueueDefinition(...queues: QueueDefinitionList<S['ServiceClassType']>) {
+		if (this.definitionsResolved) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'You can not add queues after resolveDefinitions is called.',
+			)
+		}
+		this.queueDefinitionList.push(...queues)
+		return this
+	}
+
+	addQueueWorkerDefinition(...workers: QueueWorkerDefinitionList<S['ServiceClassType']>) {
+		if (this.definitionsResolved) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'You can not add queue workers after resolveDefinitions is called.',
+			)
+		}
+		this.queueWorkerDefinitionList.push(...workers)
+		return this
+	}
+
 	public async resolveDefinitions() {
 		if (this.definitionsResolved) {
 			return {
 				commands: this.commandDefinitionListResolved,
 				subscriptions: this.subscriptionDefinitionListResolved,
 				streams: this.streamDefinitionListResolved,
+				queues: this.queueDefinitionListResolved,
+				queueWorkers: this.queueWorkerDefinitionListResolved,
 			}
 		}
 
 		this.commandDefinitionListResolved = await Promise.all(this.commandDefinitionList)
 		this.subscriptionDefinitionListResolved = await Promise.all(this.subscriptionDefinitionList)
 		this.streamDefinitionListResolved = await Promise.all(this.streamDefinitionList)
+		this.queueDefinitionListResolved = await Promise.all(this.queueDefinitionList)
+		this.queueWorkerDefinitionListResolved = await Promise.all(this.queueWorkerDefinitionList)
 
 		this.subscriptionDefinitionList = []
 		this.commandDefinitionList = []
 		this.streamDefinitionList = []
+		this.queueDefinitionList = []
+		this.queueWorkerDefinitionList = []
 
 		this.definitionsResolved = true
 		return {
 			commands: this.commandDefinitionListResolved,
 			subscriptions: this.subscriptionDefinitionListResolved,
 			streams: this.streamDefinitionListResolved,
+			queues: this.queueDefinitionListResolved,
+			queueWorkers: this.queueWorkerDefinitionListResolved,
 		}
 	}
 
@@ -240,7 +285,9 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 				logger,
 			})
 
-		const { commands, subscriptions, streams } = await this.resolveDefinitions()
+		const queueBridge: QueueBridge = options?.queueBridge ?? new DefaultQueueBridge()
+
+		const { commands, subscriptions, streams, queues, queueWorkers } = await this.resolveDefinitions()
 
 		const C = this.getCustomClass()
 
@@ -251,11 +298,14 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 			commandDefinitionList: commands,
 			subscriptionDefinitionList: subscriptions,
 			streamDefinitionList: streams,
+			queueDefinitionList: queues,
+			queueWorkerDefinitionList: queueWorkers,
 			config,
 			spanProcessor: options?.spanProcessor,
 			secretStore,
 			configStore,
 			stateStore,
+			queueBridge,
 			configSchema: this.configSchema,
 			resources: options?.resources,
 		})
@@ -278,7 +328,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 				S['Resources'],
 				InvokeList,
 				StreamInvokeList,
-				Record<string, Schema>
+				Record<string, Schema>,
+				QueueInvokeList
 			>
 		>(commandName, description, eventName, this.deprecated)
 	}
@@ -288,11 +339,35 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		description: string,
 	): SubscriptionDefinitionBuilder<
 		S['ServiceClassType'],
-		SubscriptionDefinitionBuilderTypes<any, any, any, any, any, any, S['Resources'], InvokeList, StreamInvokeList>
+		SubscriptionDefinitionBuilderTypes<
+			any,
+			any,
+			any,
+			any,
+			any,
+			any,
+			S['Resources'],
+			InvokeList,
+			StreamInvokeList,
+			Record<string, Schema>,
+			QueueInvokeList
+		>
 	> {
 		return new SubscriptionDefinitionBuilder<
 			S['ServiceClassType'],
-			SubscriptionDefinitionBuilderTypes<any, any, any, any, any, any, S['Resources'], InvokeList, StreamInvokeList>
+			SubscriptionDefinitionBuilderTypes<
+				any,
+				any,
+				any,
+				any,
+				any,
+				any,
+				S['Resources'],
+				InvokeList,
+				StreamInvokeList,
+				Record<string, Schema>,
+				QueueInvokeList
+			>
 		>(subscriptionName, description, this.deprecated)
 	}
 
@@ -311,7 +386,8 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 				S['Resources'],
 				InvokeList,
 				StreamInvokeList,
-				Record<string, Schema>
+				Record<string, Schema>,
+				QueueInvokeList
 			>
 		>(streamName, description, finalEventName, this.deprecated)
 	}
@@ -346,12 +422,42 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 		return this.streamDefinitionListResolved
 	}
 
+	getQueueBuilder<T extends string>(queueName: NonEmptyString<T>, description: string) {
+		return new QueueDefinitionBuilder(queueName, description)
+	}
+
+	getQueueWorkerBuilder<T extends string>(queueName: NonEmptyString<T>, workerName: string) {
+		return new QueueWorkerBuilder(queueName, workerName)
+	}
+
+	getQueueDefinitions() {
+		if (!this.definitionsResolved) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'Definitions not resolve. Please call resolveDefinitions() before using getQueueDefinitions',
+			)
+		}
+		return this.queueDefinitionListResolved
+	}
+
+	getQueueWorkerDefinitions() {
+		if (!this.definitionsResolved) {
+			throw new UnhandledError(
+				StatusCode.InternalServerError,
+				'Definitions not resolve. Please call resolveDefinitions() before using getQueueWorkerDefinitions',
+			)
+		}
+		return this.queueWorkerDefinitionListResolved
+	}
+
 	async testServiceSetup() {
-		const { subscriptions, commands, streams } = await this.resolveDefinitions()
+		const { subscriptions, commands, streams, queues, queueWorkers } = await this.resolveDefinitions()
 
 		this.validateCommands(commands)
 		this.validateSubscriptions(subscriptions)
 		this.validateStreams(streams)
+		this.validateQueues(queues)
+		this.validateQueueWorkers(queueWorkers, queues)
 
 		return true
 	}
@@ -398,6 +504,36 @@ export class ServiceBuilder<S extends ServiceBuilderTypes = ServiceBuilderTypes>
 				fail(`duplicate stream name ${name}`)
 			}
 			existingNames.add(name)
+		}
+	}
+
+	protected validateQueues(queueDefinitions: QueueDefinitionListResolved<any>) {
+		const existingNames = new Set()
+		for (const definition of queueDefinitions) {
+			const name = definition.queueName.toLowerCase().trim()
+			if (existingNames.has(name)) {
+				fail(`duplicate queue name ${name}`)
+			}
+			existingNames.add(name)
+		}
+	}
+
+	protected validateQueueWorkers(
+		queueWorkers: QueueWorkerDefinitionListResolved<any>,
+		queues: QueueDefinitionListResolved<any>,
+	) {
+		const queueNames = new Set(queues.map(queue => queue.queueName.toLowerCase().trim()))
+		const workerNames = new Set<string>()
+
+		for (const worker of queueWorkers) {
+			const queueName = worker.queueName.toLowerCase().trim()
+			if (!queueNames.has(queueName)) {
+				fail(`queue worker ${worker.name} references unknown queue ${queueName}`)
+			}
+			if (workerNames.has(worker.name.toLowerCase().trim())) {
+				fail(`duplicate queue worker name ${worker.name}`)
+			}
+			workerNames.add(worker.name.toLowerCase().trim())
 		}
 	}
 

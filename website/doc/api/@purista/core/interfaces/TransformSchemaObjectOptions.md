@@ -12,7 +12,7 @@ Defined in: [helper/schemaObjectToTsType/transform.ts:22](https://github.com/pur
 
 ### ctx
 
-> **ctx**: `GlobalContext`
+> **ctx**: [`GlobalContext`](GlobalContext.md)
 
 Defined in: [helper/schemaObjectToTsType/transform.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/helper/schemaObjectToTsType/transform.ts#L26)
 

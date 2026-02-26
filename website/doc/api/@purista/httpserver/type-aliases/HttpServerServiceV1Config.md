@@ -6,7 +6,7 @@
 
 # ~~Type Alias: HttpServerServiceV1Config~~
 
-> **HttpServerServiceV1Config** = `HttpServerServiceV1ConfigRaw` & `object`
+> **HttpServerServiceV1Config** = [`HttpServerServiceV1ConfigRaw`](HttpServerServiceV1ConfigRaw.md) & `object`
 
 Defined in: [httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts:108](https://github.com/puristajs/purista/blob/master/packages/httpserver/src/service/httpServer/v1/httpServerServiceConfig.ts#L108)
 

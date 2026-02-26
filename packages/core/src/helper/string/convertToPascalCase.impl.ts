@@ -7,7 +7,7 @@
  * // => 'MyText'
  * ```
  *
- * @link https://github.com/30-seconds/30-seconds-of-code
+ * Based on: https://github.com/30-seconds/30-seconds-of-code
  * @group Helper
  */
 export const convertToPascalCase = (str: string): string =>

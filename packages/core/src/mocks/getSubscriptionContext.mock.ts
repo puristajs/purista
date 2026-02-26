@@ -5,6 +5,10 @@ import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
 import type { FromInvokeToOtherType } from '../core/types/FromInvokeToOtherType.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
+import type { QueueInvokeClientMap, QueueScheduleProxy } from '../core/types/queue/QueueContext.js'
+import type { QueueInvokeFunction } from '../core/types/queue/QueueInvokeFunction.js'
+import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
+import type { QueueScheduleFunction } from '../core/types/queue/QueueScheduleFunction.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
 import type { SubscriptionFunctionContext } from '../core/types/subscription/SubscriptionFunctionContext.js'
 import type { Schema } from '../schema/index.js'
@@ -155,6 +159,8 @@ export const getSubscriptionContextMock = <
 		getState: input.sandbox?.stub() ?? stub(),
 		setState: input.sandbox?.stub() ?? stub(),
 		removeState: input.sandbox?.stub() ?? stub(),
+		enqueue: input.sandbox?.stub() ?? stub().resolves(),
+		scheduleAt: input.sandbox?.stub() ?? stub().resolves(),
 		service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
 		resources: {} as Partial<Resources>,
 	}
@@ -192,6 +198,12 @@ export const getSubscriptionContextMock = <
 			getState: stubs.getState.rejects(new Error('getState is not stubbed')),
 			setState: stubs.setState.rejects(new Error('setState is not stubbed')),
 			removeState: stubs.removeState.rejects(new Error('removeState is not stubbed')),
+		},
+		queue: {
+			enqueue: stubs.enqueue.rejects(new Error('enqueue is not stubbed')) as unknown as QueueInvokeFunction &
+				QueueInvokeClientMap<QueueInvokeList>,
+			scheduleAt: stubs.scheduleAt.rejects(new Error('scheduleAt is not stubbed')) as unknown as QueueScheduleFunction &
+				QueueScheduleProxy<QueueInvokeClientMap<QueueInvokeList>>,
 		},
 		resources: resourcesProxy,
 	}

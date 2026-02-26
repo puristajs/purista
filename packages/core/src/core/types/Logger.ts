@@ -10,6 +10,7 @@ export type LoggerOptions = {
 	serviceVersion?: string
 	serviceName?: string
 	serviceTarget?: string
+	queueName?: string
 	customTraceId?: TraceId
 	instanceId?: InstanceId
 	principalId?: PrincipalId

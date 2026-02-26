@@ -16,7 +16,7 @@ Defined in: [core/types/Logger.ts:6](https://github.com/puristajs/purista/blob/m
 
 > `optional` **customTraceId**: [`TraceId`](TraceId.md)
 
-Defined in: [core/types/Logger.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L13)
+Defined in: [core/types/Logger.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L14)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [core/types/Logger.ts:13](https://github.com/puristajs/purista/blob/
 
 > `optional` **hostname**: `string`
 
-Defined in: [core/types/Logger.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L17)
+Defined in: [core/types/Logger.ts:18](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L18)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [core/types/Logger.ts:17](https://github.com/puristajs/purista/blob/
 
 > `optional` **instanceId**: [`InstanceId`](InstanceId.md)
 
-Defined in: [core/types/Logger.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L14)
+Defined in: [core/types/Logger.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L15)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [core/types/Logger.ts:8](https://github.com/puristajs/purista/blob/m
 
 > `optional` **principalId**: [`PrincipalId`](PrincipalId.md)
 
-Defined in: [core/types/Logger.ts:15](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L15)
+Defined in: [core/types/Logger.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L16)
 
 ***
 
@@ -65,6 +65,14 @@ Defined in: [core/types/Logger.ts:15](https://github.com/puristajs/purista/blob/
 > `optional` **puristaVersion**: `string`
 
 Defined in: [core/types/Logger.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L7)
+
+***
+
+### queueName?
+
+> `optional` **queueName**: `string`
+
+Defined in: [core/types/Logger.ts:13](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L13)
 
 ***
 
@@ -96,4 +104,4 @@ Defined in: [core/types/Logger.ts:10](https://github.com/puristajs/purista/blob/
 
 > `optional` **tenantId**: [`TenantId`](TenantId.md)
 
-Defined in: [core/types/Logger.ts:16](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L16)
+Defined in: [core/types/Logger.ts:17](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/Logger.ts#L17)

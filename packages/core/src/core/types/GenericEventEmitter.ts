@@ -6,7 +6,7 @@ import { EventEmitter } from 'node:events'
 export type EventMap = Record<string, unknown>
 
 export type EventKey<T extends EventMap> = string & keyof T
-type EventReceiver<T> = (parameter: T) => void
+export type EventReceiver<T> = (parameter: T) => void
 
 export interface IEmitter<T extends EventMap> {
 	on<K extends EventKey<T>>(eventName: K, fn: EventReceiver<T[K]>): void

@@ -31,9 +31,7 @@ needs to `enableRestApiExpose` set to `true`
 
 command invocations are wrapped in CloudEvent
 
-#### Link
-
-https://github.com/cloudevents/spec/tree/v1.0
+CloudEvents specification v1.0: https://github.com/cloudevents/spec/tree/v1.0
 
 #### Default
 
@@ -151,9 +149,7 @@ A OpenTelemetry span processor
 
 subscription invocations are wrapped in CloudEvent
 
-#### Link
-
-https://github.com/cloudevents/spec/tree/v1.0
+CloudEvents specification v1.0: https://github.com/cloudevents/spec/tree/v1.0
 
 #### Default
 
