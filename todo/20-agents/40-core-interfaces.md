@@ -1,157 +1,145 @@
-# Agent Core Interfaces (Draft)
+# Core Interfaces & Types
 
-Goal: define a strict, provider-agnostic agent runtime surface that composes with Purista (commands/subscriptions/streams) and preserves schema-driven typing.
-
-## Design principles
-
-- Provider adapters must expose explicit capability flags.
-- Structured outputs must be schema validated at runtime and typed at compile time.
-- Tool calls must be validated (never execute raw model JSON).
-- Streaming is first-class (agent output, step events, tool events, metrics).
-
-## Errors
-
-Prefer a closed error taxonomy that callers can switch on.
+## 1. Agent definition & manifest
 
 ```ts
-export type AgentError =
-  | { type: 'ProviderAuthError'; message: string; cause?: unknown }
-  | { type: 'ProviderRateLimitError'; message: string; retryAfterMs?: number; cause?: unknown }
-  | { type: 'ProviderTransientError'; message: string; cause?: unknown }
-  | { type: 'ToolValidationError'; message: string; toolName: string; cause?: unknown }
-  | { type: 'ToolExecutionError'; message: string; toolName: string; cause?: unknown }
-  | { type: 'MemoryAccessError'; message: string; cause?: unknown }
-  | { type: 'PolicyViolationError'; message: string; cause?: unknown }
-  | { type: 'AgentTimeoutError'; message: string; cause?: unknown }
-```
+type AgentManifest = {
+  agentName: string
+  agentVersion: string
+  description?: string
+  eventBridge: string
+  modelResource?: { resourceName: string; variant?: string }
+  session?: { storeName: string; strategy?: 'full' | 'summary'; maxFrames?: number }
+  knowledge?: Array<{ adapterName: string; options?: Record<string, unknown> }>
+  concurrency: { poolId: string; maxWorkers: number }
+  retryPolicy?: { maxAttempts: number; delayMs?: number; strategy?: 'fixed' | 'exponential' }
+  telemetry?: { attributes?: Record<string, string | number | boolean> }
+  allowedTools: Array<{ serviceName: string; serviceVersion: string; commandName: string; description?: string }>
+  payloadSchema?: Schema
+  parameterSchema?: Schema
+  outputSchema?: Schema
+  contextSchema?: Schema
+  httpExposure?: {
+    method: HttpMethod
+    path: string
+    streamingMode: 'sse' | 'chunked' | 'buffered'
+    requestContentType?: string
+    responseContentType?: string
+    public?: boolean
+    queryParameters?: Array<{ name: string; required: boolean }>
+  }
+}
 
-## Provider capability model
-
-```ts
-export type ProviderCapability =
-  | 'text-generate'
-  | 'text-stream'
-  | 'tool-calls'
-  | 'structured-output'
-  | 'embeddings'
-
-export interface ProviderCapabilities {
-  readonly supports: ReadonlySet<ProviderCapability>
+type AgentDefinition = {
+  info: { agentName: string; agentVersion: string; description?: string }
+  getManifest(): AgentManifest
+  getInstance(options: AgentRuntimeOptions): Promise<AgentInstance>
+  schemas: {
+    payload?: Schema
+    parameter?: Schema
+    output?: Schema
+    context?: Schema
+  }
 }
 ```
 
-## Token/cost usage model
+If a builder omits `concurrency`, the runtime injects the default `{ poolId: \`agent:${agentName}\`, maxWorkers: 1 }` so every agent is governed by a pool even in development.
+
+`AgentRuntimeOptions` mirror service instances: event bridge, logger, span processor, managed config access, session/knowledge adapters, resources (LLM providers, storage), and optional overrides (`config.maxWorkers`, `resources.llm`, etc.).
+
+## 2. Instance lifecycle & invocation
 
 ```ts
-export type Usage = Readonly<{
-  inputTokens?: number
-  outputTokens?: number
-  totalTokens?: number
-  costUsd?: number
-}>
-```
-
-## Core request/response types
-
-We need to keep this minimal but extensible. It should cover:
-- plain completion
-- streaming completion
-- tool calling
-- structured outputs
-
-```ts
-export type ModelMessage =
-  | { role: 'system'; content: string }
-  | { role: 'user'; content: string }
-  | { role: 'assistant'; content: string }
-  | { role: 'tool'; name: string; content: string }
-
-export type ModelCompletion = Readonly<{
-  content: string
-  usage?: Usage
-}>
-```
-
-## Structured output (schema-driven)
-
-```ts
-export type StructuredCompletion<T> = Readonly<{
-  value: T
-  rawText?: string
-  usage?: Usage
-}>
-```
-
-Rule: `T` must come from a runtime-validated schema in the public API (example: zod schema -> `Infer<typeof schema>`).
-
-## Streaming types
-
-Agent streaming should be representable as a stream of typed events (not just tokens).
-
-```ts
-export type AgentStreamEvent =
-  | { type: 'RunStarted'; runId: string; timestamp: number }
-  | { type: 'Token'; runId: string; token: string; timestamp: number }
-  | { type: 'ToolCallRequested'; runId: string; toolName: string; argsJson: string; timestamp: number }
-  | { type: 'ToolCallSucceeded'; runId: string; toolName: string; timestamp: number }
-  | { type: 'ToolCallFailed'; runId: string; toolName: string; error: AgentError; timestamp: number }
-  | { type: 'Usage'; runId: string; usage: Usage; timestamp: number }
-  | { type: 'RunCompleted'; runId: string; timestamp: number }
-  | { type: 'RunFailed'; runId: string; error: AgentError; timestamp: number }
-```
-
-Implementation detail: these events can be mapped onto the streaming primitives in `todo/10-streaming/*`.
-
-## Tools
-
-Tools must be schema-validated at the boundary:
-
-- model emits `args` (string/unknown)
-- runtime validates against schema
-- tool handler runs with typed args
-- output is serialized back into model context (and optionally validated too)
-
-```ts
-export interface ToolDefinition<TArgs, TResult> {
-  readonly name: string
-  readonly description: string
-  validateArgs(input: unknown): TArgs
-  validateResult?(input: unknown): TResult
-  execute(args: TArgs): Promise<TResult>
+interface AgentInstance {
+  start(): Promise<void>
+  stop(): Promise<void>
+  invoke(request: AgentInvokeRequest, contextOverrides?: Partial<InvokeContext>): Promise<AgentInvokeResult>
 }
 
-export interface ToolRegistry {
-  get(name: string): ToolDefinition<unknown, unknown> | undefined
-  list(): ToolDefinition<unknown, unknown>[]
+type AgentInvokeRequest = {
+  payload: unknown
+  parameter?: unknown
+  correlationId?: string
+  sessionId?: string
+  stream?: AgentStreamResponder
+}
+
+type AgentInvokeResult = {
+  envelopes: AgentProtocolEnvelope[]
+  telemetry?: AgentTelemetry
+}
+
+type AgentStreamResponder = {
+  onFrame(frame: AgentProtocolEnvelope): void
+  onComplete(): void
+  onError(error: unknown): void
 }
 ```
 
-## Memory
+`invokeAgent()` is a helper exported from `@purista/ai` that wraps this interaction, handling EventBridge messaging, retries, streaming vs buffering, and conversion to HTTP responses when needed.
 
-We likely need at least two layers:
-- run-scoped scratchpad state
-- persistent memory store (optional)
+## 3. Provider, session, and knowledge interfaces
 
 ```ts
-export interface AgentMemoryStore {
-  get(runId: string, key: string): Promise<unknown>
-  set(runId: string, key: string, value: unknown, ttlMs?: number): Promise<void>
+interface ModelProvider {
+  id: string
+  supportsStreaming: boolean
+  generate(request: {
+    conversation: ConversationHistory
+    prompt: string
+    tools: AllowedToolDescriptor[]
+    responseSchema?: Schema
+    context?: string
+  }): AsyncGenerator<ProviderChunk, ProviderCompletion>
+}
+
+interface SessionStore {
+  load(sessionId: string): Promise<ConversationRecord | undefined>
+  save(record: ConversationRecord): Promise<void>
+  delete(sessionId: string): Promise<void>
+}
+
+interface KnowledgeAdapter {
+  id: string
+  query(prompt: string, limit?: number): Promise<KnowledgeDocument[]>
+  upsert(document: KnowledgeDocument): Promise<void>
+  delete(id: string): Promise<void>
 }
 ```
 
-To preserve typing, higher-level memory helpers should be schema-driven (not shown here).
+Default implementations (echo provider, in-memory session store, in-memory knowledge adapter) keep examples runnable. Custom adapters follow the same contracts and plug in through builder resources/config.
 
-## Agent runtime orchestration
+`ModelProvider` implementations are thin wrappers around the [Vercel AI SDK](https://ai-sdk.dev/docs/introduction). Each registry entry binds a configured `LanguageModel` (or tool-capable runner) so the runtime inherits telemetry, safety features, and the ability to transform responses into AI SDK streams when exposing HTTP endpoints. Advanced projects can still implement the interface directly (e.g., for highly specialized local inference) without opting into the SDK.
+
+## 4. Protocol helpers
+
+- `createProtocolEnvelope`, `createMessageFrame`, `createTelemetryFrame`, `createErrorFrame`, `createArtifactFrame`, `createTokenUsage` – low-level builders exported via `@purista/ai/protocol`.
+- `ProtocolEmitter` (available through `context.protocol`) offers higher-level APIs:
+  - `emitMessage({ content, partial?, final?, summary? })`
+  - `emitArtifact({ artifactId, sequence, mimeType, data, final? })`
+  - `emitToolEvent({ toolName, status, input, output, errorCode })`
+  - `emitTelemetry({ usage, durationMs, waitTimeMs, provider, poolId })`
+  - `emitError(error, { code?, handled? })`
+  - `has(kind)` – introspection so handlers can avoid duplicate frames.
+- `streamAgentResult(generator, emitter)` consumes async generators (LLM providers, MCP bridges) and emits frames plus token usage automatically.
+
+These helpers live in a standalone subpath so non-PURISTA environments (frontends, integration services) can build or consume protocol frames.
+
+## 5. Error & telemetry taxonomy
 
 ```ts
-export interface AgentRuntime {
-  readonly capabilities: ProviderCapabilities
-  run(input: { messages: ModelMessage[]; runId?: string }): Promise<ModelCompletion>
-  stream(input: { messages: ModelMessage[]; runId?: string }): AsyncIterable<AgentStreamEvent>
-}
+type AgentProtocolFrame =
+  | { kind: 'message'; role: 'assistant' | 'tool'; content: string; partial?: boolean; final?: boolean; summary?: string }
+  | { kind: 'artifact'; artifactId: string; sequence: number; total?: number; mimeType?: string; data: string | Record<string, unknown> }
+  | { kind: 'tool'; toolName: string; status: 'invoked' | 'success' | 'error'; input?: unknown; output?: unknown; errorCode?: string }
+  | { kind: 'telemetry';
+      usage?: { promptTokens?: number; completionTokens?: number; totalTokens?: number; costUsd?: number };
+      durationMs?: number;
+      waitTimeMs?: number;
+      poolId?: string;
+      provider?: string;
+    }
+  | { kind: 'error'; code: string; message: string; handled: boolean; details?: unknown }
 ```
 
-Open questions:
-- How do we represent multi-turn state (conversation) across invocations?
-- Where should policies (redaction, allowlists) live: runtime vs builder vs service hooks?
-
+Telemetry attributes are mapped onto OpenTelemetry spans with the prefix `purista.ai.*`, ensuring dashboards and tracing remain consistent with the rest of the framework. Errors automatically propagate as `HandledError`/`UnhandledError` in addition to emitting protocol frames, so downstream systems receive structured diagnostics without losing the native PURISTA semantics.
