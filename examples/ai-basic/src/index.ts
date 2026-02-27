@@ -1,4 +1,7 @@
-import { agentProtocolEnvelopeSchema, invokeAgent, toAiSdkStreamEvents } from '@purista/ai'
+import 'dotenv/config'
+
+import { createOpenAI } from '@ai-sdk/openai'
+import { AiSdkProvider, agentProtocolEnvelopeSchema, invokeAgent, toAiSdkStreamEvents } from '@purista/ai'
 import { DefaultEventBridge } from '@purista/core'
 
 import { supportAgentDefinition } from './agents/supportAgent/v1/supportAgent.js'
@@ -7,8 +10,23 @@ async function main() {
 	const eventBridge = new DefaultEventBridge()
 	await eventBridge.start()
 
+	const apiKey = process.env.OPENAI_API_KEY
+	if (!apiKey) {
+		throw new Error('Set OPENAI_API_KEY in your environment to run the example')
+	}
+
+	const openai = createOpenAI({ apiKey })
+	const provider = new AiSdkProvider({
+		model: openai('gpt-4o-mini'),
+		systemPrompt: 'You are a cheerful PURISTA support engineer.',
+		defaults: { temperature: 0.2 },
+	})
+
 	const supportAgent = await supportAgentDefinition.getInstance({
 		eventBridge,
+		resources: {
+			model: provider,
+		},
 	})
 	await supportAgent.start()
 

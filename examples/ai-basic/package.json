@@ -1,0 +1,27 @@
+{
+	"name": "@purista/example-ai-basic",
+	"version": "2.2.0",
+	"description": "Minimal example showing how to use @purista/ai",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"start": "tsx src/index.ts",
+		"build": "tsc --noEmit",
+		"lint": "npx @biomejs/biome check --write",
+		"test": "tsc --noEmit"
+	},
+ "dependencies": {
+    "@ai-sdk/openai": "^3.0.31",
+    "@opentelemetry/api": "^1.9.0",
+    "@purista/ai": "*",
+    "@purista/core": "*",
+    "ai": "^6.0.103",
+    "dotenv": "^16.4.5",
+    "zod": "^4.3.6"
+  },
+	"devDependencies": {
+		"@types/node": "^25.2.1",
+		"tsx": "^4.21.0",
+		"typescript": "^5.9.3"
+	}
+}
