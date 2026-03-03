@@ -88,6 +88,28 @@ Status legend:
 - [ ] Add concise examples in TSDoc for key APIs (`AgentBuilder`, runtime invocation, protocol helpers).
 - [ ] Ensure typedoc output and IDE hover docs are clear and task-oriented.
 
+## MCP integration boundary
+- [ ] Clarify in spec that MCP support in Vercel AI SDK can be reused as first-class provider/tool plumbing.
+- [ ] Keep Purista-side responsibility for:
+  - allowlist enforcement (`allowTool`)
+  - protocol frame mapping (tool events, telemetry, errors)
+  - identity/correlation propagation (service/instance/message ids)
+  - OTel span linkage for tool calls
+- [ ] Avoid re-implementing generic MCP client/server mechanics already provided by upstream SDK where possible.
+
+## Integration testing strategy (non-flaky)
+- [ ] Add full-flow integration tests for `@purista/ai` covering:
+  - command -> agent invocation
+  - HTTP/SSE streaming frames
+  - event subscription -> agent path
+  - agent -> tool call(s)
+  - agent -> agent invocation
+- [ ] Introduce deterministic test doubles in `@purista/ai` test utilities:
+  - mock model provider (scripted tokens/usage/errors)
+  - mock streaming provider for chunk-by-chunk assertions
+- [ ] Prefer deterministic provider tests over real network/provider calls in CI.
+- [ ] Keep one optional manual smoke test doc for real provider wiring outside CI.
+
 ## Notes for upcoming implementation phase
 - Keep backward compatibility out of scope unless explicitly requested.
 - Validate with:
