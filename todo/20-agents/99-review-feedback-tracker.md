@@ -104,6 +104,21 @@ Status legend:
   - agent-to-agent orchestration
   - event subscription into agent
   - command invoking agent (sync + stream)
+  - explicit tool-calling workflow (allowlist + invocation + tool event frames)
+
+## Internal protocol documentation (Purista message + AI envelope)
+- [ ] Add a dedicated section documenting the internal protocol layering:
+  - outer transport: standard PURISTA message envelope
+  - inner payload: AI protocol envelope/frame schema
+  - mapping of ids (`message.id`, `correlationId`, `inReplyTo`, conversation id semantics)
+- [ ] Document required backend handling contracts:
+  - frame ordering guarantees
+  - final frame semantics
+  - error frame contract (handled/unhandled)
+  - telemetry frame contract (usage/timing/provider)
+- [ ] Add implementation-focused examples for backend consumers:
+  - parsing/validating envelopes
+  - forwarding across services/bridges without losing correlation metadata
 
 ## MCP integration boundary
 - [ ] Clarify in spec that MCP support in Vercel AI SDK can be reused as first-class provider/tool plumbing.
