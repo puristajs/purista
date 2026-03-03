@@ -52,6 +52,18 @@ Status legend:
   - queue bridge defaults
 - [ ] Ensure typed docs/examples show the same mental model as `ServiceBuilder.getInstance(...)`.
 
+### 6) Concurrency/pool config belongs to runtime (deploy-time), not builder
+- [~] Move `maxWorkers` out of `AgentBuilder` API (`.setConcurrency(...)` should not hardcode deploy scaling).
+- [~] Move pool selection out of static definition as default behavior:
+  - no pool config -> auto-generated pool id per agent version (safe default)
+  - explicit pool id -> set at runtime in `getInstance(...)` options
+- [ ] Runtime API shape to support:
+  - `poolId?: string` (optional override)
+  - `maxWorkers?: number` (runtime/deploy control)
+  - optional injected `PoolManager` instance for host-managed pools
+- [ ] Managed config store should be the preferred source for environment-specific worker counts.
+- [ ] Builder should keep only generic capability declarations, not deployment sizing values.
+
 ## Next spec update pass (planned)
 - [ ] Update `website/doc/handbook/2_building_business-logic/agent/protocol-and-streaming.md`
 - [ ] Update `website/doc/handbook/2_building_business-logic/agent/model-providers-and-openai.md`
