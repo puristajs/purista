@@ -58,6 +58,18 @@ Status legend:
 - [ ] Update `website/doc/handbook/2_building_business-logic/agent/agent-builder.md`
 - [ ] Update `todo/20-agents/*` sections to match final runtime API naming and telemetry contract
 
+## Example scope feedback (to implement after spec updates)
+- [ ] Expand `examples/ai-basic` to a full end-to-end showcase with:
+  - static HTML frontend with streaming chat (SSE)
+  - tool calls through allowed command invocation
+  - agent-to-agent invocation flow
+  - event subscription that routes into an agent
+  - command handler invoking an agent and returning/streaming result
+- [ ] Ensure example reflects queue usage options:
+  - direct synchronous/streaming agent invocation (no queue required)
+  - optional background queue path for controlled concurrency
+- [ ] Add explicit docs section: when queue is required vs optional, and scaling guidance.
+
 ## Notes for upcoming implementation phase
 - Keep backward compatibility out of scope unless explicitly requested.
 - Validate with:

@@ -22,11 +22,6 @@
 		"forceConsistentCasingInFileNames": true,
 		"declarationMap": true,
 		"types": ["vitest/globals", "node"],
-		"baseUrl": ".",
-		"paths": {
-			"@purista/ai": ["packages/ai/src/index.ts"],
-			"@purista/ai/*": ["packages/ai/src/*"]
-		},
 		"noFallthroughCasesInSwitch": true,
 		"useUnknownInCatchVariables": true
 	},
