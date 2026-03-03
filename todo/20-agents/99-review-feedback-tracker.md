@@ -82,6 +82,12 @@ Status legend:
   - optional background queue path for controlled concurrency
 - [ ] Add explicit docs section: when queue is required vs optional, and scaling guidance.
 
+## Code style and API docs alignment
+- [ ] Separate type definitions from implementation files where practical (follow existing PURISTA style).
+- [ ] Improve TSDoc coverage for public classes, functions, and exported types used in `@purista/ai`.
+- [ ] Add concise examples in TSDoc for key APIs (`AgentBuilder`, runtime invocation, protocol helpers).
+- [ ] Ensure typedoc output and IDE hover docs are clear and task-oriented.
+
 ## Notes for upcoming implementation phase
 - Keep backward compatibility out of scope unless explicitly requested.
 - Validate with:

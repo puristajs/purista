@@ -43,9 +43,10 @@ When you expose an agent as an HTTP endpoint, the bridge forwards frames immedia
 ```ts
 export const supportAgentDefinition = new AgentBuilder({ ... })
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
-  .setStreamingMode('sse')
   .build()
 ```
+
+SSE is the default streaming mode for exposed agent endpoints. Use `.setStreamingMode(...)` only when you need `chunked` or `buffered`.
 
 On the server side you can reuse the helper that turns envelopes into Vercel AI SDK events:
 

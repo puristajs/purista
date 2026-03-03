@@ -100,10 +100,11 @@ Use the optional `stream` argument to attach a responder that processes frames a
 ```ts
 export const supportAgentDefinition = new AgentBuilder({ ... })
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
-  .setStreamingMode('sse')
   .setHandler(...)
   .build()
 ```
+
+SSE is the default streaming mode for exposed agent endpoints. Call `.setStreamingMode(...)` only when you need a non-default mode.
 
 If your API gateway already maps `POST /api/v1/agents/supportAgent` to the bridge, clients can `fetch` it directly. For custom controllers, pipe the envelopes to SSE/chunked responses using the [Protocol & Streaming](./protocol-and-streaming.md) helpers.
 

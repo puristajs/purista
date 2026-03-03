@@ -21,7 +21,6 @@ export const supportAgentDefinition = new AgentBuilder({
 	.persistHistory({ storeName: 'aiConversation', maxFrames: 20 })
 	.setConcurrency({ poolId: 'support', maxWorkers: 2 })
 	.exposeAsHttpEndpoint('POST', 'agents/supportAgent')
-	.setStreamingMode('sse')
 	.setHandler<SupportAgentInput>(async function (context: SupportAgentContext, payload) {
 		const sessionId = payload.sessionId ?? context.message.id ?? 'session'
 		const model = context.models['openai:gpt-5.2-mini']

@@ -86,7 +86,7 @@ describe('AgentBuilder', () => {
 			.persistHistory({ storeName: 'aiConversation', maxFrames: 10 })
 			.setConcurrency({ maxWorkers: 2, poolId: 'support' })
 			.exposeAsHttpEndpoint('POST', 'agents/supportAgent')
-			.setStreamingMode('sse')
+			.setStreamingMode('chunked')
 			.setHandler<{ prompt: string }>(async (context, payload) => {
 				const result = await context.models.echo.generate({ prompt: payload.prompt })
 				context.protocol.emitMessage({ content: result.output, final: true })

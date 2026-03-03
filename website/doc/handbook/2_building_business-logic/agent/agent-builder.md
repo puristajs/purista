@@ -39,7 +39,6 @@ export const supportAgentDefinition = new AgentBuilder({
   .allowTool({ serviceName: 'support', serviceVersion: '1', commandName: 'createTicket' })
   .setConcurrency({ poolId: 'support', maxWorkers: 3 })
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
-  .setStreamingMode('sse')
   .makeEndpointPublic()
   .setRetryPolicy({ maxAttempts: 2, initialIntervalMs: 1_000 })
   .setHandler(async function handler(context, payload) {
@@ -73,7 +72,7 @@ export const supportAgentDefinition = new AgentBuilder({
 - `.defineModel(alias)` declares which model aliases the agent can use. Pass the actual provider implementation later through `getInstance({ models: { [alias]: provider } })`.
 - `.allowTool` works exactly like `.canInvoke`: only allowlisted service commands may be invoked by `context.tools.invoke()`.
 - `.persistHistory`, `.useSessionStore`, and `.useKnowledgeAdapter` describe how conversation history and shared knowledge should be stored. Defaults are in-memory, but you can plug in Redis/PGVector/etc. per agent.
-- `.exposeAsHttpEndpoint` + `.setStreamingMode` wires up an HTTP route in the OpenAPI spec. Use `buffered` for single-payload responses or `sse`/`chunked` for token streams.
+- `.exposeAsHttpEndpoint` wires up an HTTP route in the OpenAPI spec. SSE is the default mode; use `.setStreamingMode(...)` only when you need `buffered` or `chunked`.
 - `.setConcurrency` registers the agent in the `PoolManager` so that no more than `maxWorkers` run at once, protecting token quotas and rate limits.
 - `.setRetryPolicy` mirrors queue/command retries. The runtime automatically replays transient failures and emits handled/unhandled error frames.
 

@@ -43,7 +43,6 @@ export const getAgentBuilderFileContent = (input: {
 		writer.writeLine(".persistHistory({ storeName: 'aiConversation', maxFrames: 20 })")
 		writer.writeLine(`.setConcurrency({ poolId: '${normalizedAgentName}', maxWorkers: 1 })`)
 		writer.writeLine(`.exposeAsHttpEndpoint('POST', 'agents/${normalizedAgentName}')`)
-		writer.writeLine(".setStreamingMode('sse')")
 		writer.writeLine(
 			'.setHandler<{ sessionId?: string; prompt: string; context?: string }>(async function (context, payload) {',
 		)
