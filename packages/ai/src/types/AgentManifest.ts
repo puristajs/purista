@@ -32,7 +32,6 @@ export type KnowledgeAdapterConfig = {
 
 export type ConcurrencyConfig = {
 	poolId?: string
-	maxWorkers: number
 }
 
 export type RetryPolicy = {

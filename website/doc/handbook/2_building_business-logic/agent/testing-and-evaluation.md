@@ -23,8 +23,7 @@ describe('support agent', () => {
     const eventBridge = new DefaultEventBridge()
     await eventBridge.start()
 
-    const agent = await supportAgentDefinition.getInstance({
-      eventBridge,
+    const agent = await supportAgentDefinition.getInstance(eventBridge, {
       models: { 'openai:gpt-4o-mini': new EchoProvider() },
     })
     await agent.start()
@@ -114,5 +113,5 @@ Store the resulting JSON under `evaluations/<suite>/<timestamp>.json`. The struc
 Agents ship alongside services, so apply the same quality bar:
 
 - Document configs and endpoints in the handbook (or internal docs) when you add a new agent.
-- Record assumptions (temperature, max workers, tool allowlists) in the repository so on-call engineers understand the blast radius.
+- Record assumptions (temperature, runtime pool sizing, tool allowlists) in the repository so on-call engineers understand the blast radius.
 - Keep evaluation fixtures under version control. They double as living documentation and make refactors safer.

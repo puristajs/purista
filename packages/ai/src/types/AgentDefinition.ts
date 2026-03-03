@@ -1,3 +1,4 @@
+import type { Tracer } from '@opentelemetry/api'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import type { ConfigStore, EventBridge, Logger, QueueBridge, Schema, SecretStore, StateStore } from '@purista/core'
 
@@ -24,7 +25,7 @@ export type AgentDefinition = {
 		context?: Schema
 	}
 	getManifest(): AgentManifest
-	getInstance(options: AgentInstanceOptions): Promise<AgentRuntimeInstance>
+	getInstance(eventBridge: EventBridge, options?: AgentInstanceOptions): Promise<AgentRuntimeInstance>
 }
 
 export type AgentRuntimeInstance = {
@@ -34,9 +35,9 @@ export type AgentRuntimeInstance = {
 }
 
 export type AgentInstanceOptions = {
-	eventBridge: EventBridge
 	logger?: Logger
 	spanProcessor?: SpanProcessor
+	tracer?: Tracer
 	secretStore?: SecretStore
 	configStore?: ConfigStore
 	stateStore?: StateStore
@@ -47,6 +48,10 @@ export type AgentInstanceOptions = {
 	models?: Record<string, ModelProvider>
 	/** @deprecated use `models` */
 	resources?: Record<string, unknown>
+	poolConfig?: {
+		poolId?: string
+		maxWorkers?: number
+	}
 	config?: Record<string, unknown>
 }
 

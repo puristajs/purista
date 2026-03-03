@@ -84,36 +84,30 @@ describe('AgentBuilder', () => {
 			)
 			.defineModel('echo')
 			.persistHistory({ storeName: 'aiConversation', maxFrames: 10 })
-			.setConcurrency({ maxWorkers: 2, poolId: 'support' })
+			.setConcurrency({ poolId: 'support' })
 			.exposeAsHttpEndpoint('POST', 'agents/supportAgent')
 			.setStreamingMode('chunked')
 			.setHandler<{ prompt: string }>(async (context, payload) => {
 				const result = await context.models.echo.generate({ prompt: payload.prompt })
-				context.protocol.emitMessage({ content: result.output, final: true })
-				context.protocol.emitTelemetry({
-					provider: context.models.echo.name,
-					usage: {
-						promptTokens: result.tokens?.prompt,
-						completionTokens: result.tokens?.completion,
-						totalTokens: (result.tokens?.prompt ?? 0) + (result.tokens?.completion ?? 0),
-					},
-				})
+				context.stream.sendFinal(result.output)
 				return { message: result.output }
 			})
 			.build()
 
 		expect(definition.getManifest().models).toEqual(['echo'])
-		expect(definition.getManifest().concurrency?.maxWorkers).toBe(2)
+		expect(definition.getManifest().concurrency?.poolId).toBe('support')
 
-		const instance = await definition.getInstance({
-			eventBridge: {
+		const instance = await definition.getInstance(
+			{
 				instanceId: 'bridge-1',
 				invoke: async () => [],
 			} as any,
-			models: {
-				echo: new EchoProvider(),
+			{
+				models: {
+					echo: new EchoProvider(),
+				},
 			},
-		})
+		)
 		expect(instance).toBeDefined()
 	})
 
@@ -127,7 +121,7 @@ describe('AgentBuilder', () => {
 		bridges.push(eventBridge)
 		await eventBridge.start()
 
-		await expect(definition.getInstance({ eventBridge, models: {} })).rejects.toThrow(
+		await expect(definition.getInstance(eventBridge, { models: {} })).rejects.toThrow(
 			'Missing model provider for alias "missing"',
 		)
 	})

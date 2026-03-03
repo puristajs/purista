@@ -1,3 +1,4 @@
+import type { Tracer } from '@opentelemetry/api'
 import type { LanguageModel } from 'ai'
 import { generateText } from 'ai'
 
@@ -23,6 +24,10 @@ export type AiSdkProviderOptions = {
 	 * Default call options forwarded to `generateText` (temperature, maxOutputTokens, tools, ...).
 	 */
 	defaults?: AiSdkProviderOverrides
+	/**
+	 * Optional tracer injected by the runtime. When set, AI SDK telemetry uses this tracer.
+	 */
+	tracer?: Tracer
 }
 
 /**
@@ -88,11 +93,13 @@ export class AiSdkProvider implements ModelProvider {
 	private readonly model: LanguageModel
 	private readonly systemPrompt?: string
 	private readonly defaults: AiSdkProviderOverrides
+	private readonly tracer?: Tracer
 
 	constructor(options: AiSdkProviderOptions) {
 		this.model = options.model
 		this.systemPrompt = options.systemPrompt
 		this.defaults = options.defaults ?? {}
+		this.tracer = options.tracer
 		this.name = options.name ?? (typeof options.model === 'string' ? options.model : 'ai-sdk-provider')
 	}
 
@@ -104,6 +111,12 @@ export class AiSdkProvider implements ModelProvider {
 			model: this.model,
 			prompt: request.prompt,
 			system: composeSystemPrompt(this.systemPrompt, request.context),
+			experimental_telemetry: {
+				isEnabled: true,
+				...(this.tracer ? { tracer: this.tracer } : {}),
+				...(this.defaults.experimental_telemetry ?? {}),
+				...(metadataOverrides.experimental_telemetry ?? {}),
+			},
 		}
 
 		const result = await generateText(callInput)

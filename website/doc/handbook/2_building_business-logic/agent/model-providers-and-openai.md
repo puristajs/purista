@@ -52,7 +52,7 @@ defaultModelResourceRegistry.register('openai:gpt-4o-mini', gpt4oMini)
 2. Export a helper that registers each model with `defaultModelResourceRegistry`. The string key (`openai:gpt-4o-mini`) should match the alias declared by your agent builder via `.defineModel('openai:gpt-4o-mini')`.
 3. Load this module during bootstrap (before starting any agents or workers) so the registry knows how to resolve the resource name.
 
-The registry is optional but handy when multiple agents share the same provider. For one-off setups you can also pass the provider instance directly through `getInstance({ models: { 'openai:gpt-4o-mini': provider } })`.
+The registry is optional but handy when multiple agents share the same provider. For one-off setups you can also pass the provider instance directly through `getInstance(eventBridge, { models: { 'openai:gpt-4o-mini': provider } })`.
 
 ## Per-run overrides with metadata
 

@@ -37,7 +37,7 @@ export const supportAgentDefinition = new AgentBuilder({
   .useKnowledgeAdapter({ adapterName: 'supportFaq', options: { locale: 'en-US' } })
   .defineModel('openai:gpt-4o-mini')
   .allowTool({ serviceName: 'support', serviceVersion: '1', commandName: 'createTicket' })
-  .setConcurrency({ poolId: 'support', maxWorkers: 3 })
+  .setConcurrency({ poolId: 'support' })
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
   .makeEndpointPublic()
   .setRetryPolicy({ maxAttempts: 2, initialIntervalMs: 1_000 })
@@ -51,13 +51,8 @@ export const supportAgentDefinition = new AgentBuilder({
       context: [payload.context, knowledge.map(doc => doc.body).join('\n')].filter(Boolean).join('\n\n'),
     })
 
-    context.protocol.emitMessage({ content: 'Checking your account…', partial: true })
-    context.protocol.emitMessage({ content: output, final: true })
-    context.protocol.emitTelemetry({ provider: model.name, usage: {
-      promptTokens: tokens?.prompt,
-      completionTokens: tokens?.completion,
-      totalTokens: (tokens?.prompt ?? 0) + (tokens?.completion ?? 0),
-    } })
+    context.stream.sendChunk('Checking your account…')
+    context.stream.sendFinal(output)
 
     await context.session.save({ sessionId, data: { lastMessage: output }, updatedAt: Date.now() })
 
@@ -69,11 +64,11 @@ export const supportAgentDefinition = new AgentBuilder({
 ### Key builder calls
 
 - `.addPayloadSchema` / `.addParameterSchema` / `.addOutputSchema` reuse the same schema primitives (`extendApi`, Zod, TypeBox, …) you already use in services.
-- `.defineModel(alias)` declares which model aliases the agent can use. Pass the actual provider implementation later through `getInstance({ models: { [alias]: provider } })`.
+- `.defineModel(alias)` declares which model aliases the agent can use. Pass the actual provider implementation later through `getInstance(eventBridge, { models: { [alias]: provider } })`.
 - `.allowTool` works exactly like `.canInvoke`: only allowlisted service commands may be invoked by `context.tools.invoke()`.
 - `.persistHistory`, `.useSessionStore`, and `.useKnowledgeAdapter` describe how conversation history and shared knowledge should be stored. Defaults are in-memory, but you can plug in Redis/PGVector/etc. per agent.
 - `.exposeAsHttpEndpoint` wires up an HTTP route in the OpenAPI spec. SSE is the default mode; use `.setStreamingMode(...)` only when you need `buffered` or `chunked`.
-- `.setConcurrency` registers the agent in the `PoolManager` so that no more than `maxWorkers` run at once, protecting token quotas and rate limits.
+- `.setConcurrency` only declares a pool reference (`poolId`). Set actual worker counts via `getInstance(..., { poolConfig: { maxWorkers } })` so scaling stays environment-specific.
 - `.setRetryPolicy` mirrors queue/command retries. The runtime automatically replays transient failures and emits handled/unhandled error frames.
 
 ## Handler context breakdown
@@ -83,7 +78,7 @@ The handler receives a familiar context object with agent-specific helpers:
 | Property | Description |
 | --- | --- |
 | `logger`, `message`, `serviceContext` | Same observability handles you use inside services. |
-| `protocol` | Emits frames that follow the [agent protocol](./protocol-and-streaming.md). `emitMessage`, `emitArtifact`, `emitTelemetry`, and `emitError` are all optional—the runtime auto-fills defaults when you `return` a payload. |
+| `stream` | Action-oriented streaming helpers that map to the [agent protocol](./protocol-and-streaming.md): `sendChunk`, `sendFinal`, `sendArtifact`, `sendError`. |
 | `session` | Wrapper around the chosen session store. Use `.load`, `.save`, `.delete` for conversation state. |
 | `knowledge` | Fan-out to allowlisted knowledge adapters (vector stores, RAG indexes, etc.). |
 | `tools` | Invoke allowlisted PURISTA commands. Events appear as tool frames for tracing/debugging. |

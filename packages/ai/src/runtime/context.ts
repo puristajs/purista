@@ -19,7 +19,7 @@ type ProtocolFrameEntry = {
 	frame: AgentProtocolFrame
 }
 
-export type ProtocolEmitter = {
+type ProtocolEmitter = {
 	emitMessage(
 		content: string | { content: string; summary?: string; partial?: boolean; final?: boolean },
 		options?: { summary?: string; partial?: boolean; final?: boolean },
@@ -56,6 +56,35 @@ export type AgentProtocolBuffer = {
 	toEnvelopes(): AgentProtocolEnvelope[]
 	frames(): AgentProtocolFrame[]
 }
+
+export type AgentStreamEmitter = {
+	sendChunk(content: string): void
+	sendFinal(content: string, options?: { summary?: string }): void
+	sendArtifact(input: {
+		artifactId: string
+		content: string | Record<string, unknown>
+		mimeType?: string
+		sequence?: number
+		total?: number
+		final?: boolean
+	}): void
+	sendError(error: unknown, overrides?: { code?: string; handled?: boolean }): void
+}
+
+const createStreamEmitter = (protocol: ProtocolEmitter): AgentStreamEmitter => ({
+	sendChunk(content) {
+		protocol.emitMessage({ content, partial: true, final: false })
+	},
+	sendFinal(content, options) {
+		protocol.emitMessage({ content, summary: options?.summary, partial: false, final: true })
+	},
+	sendArtifact(input) {
+		protocol.emitArtifact(input)
+	},
+	sendError(error, overrides) {
+		protocol.emitError(error, overrides)
+	},
+})
 
 const stringifyResult = (result: unknown): string => {
 	if (typeof result === 'string') {
@@ -301,7 +330,7 @@ export type AgentHandlerContext<
 	message: CommandFunctionContext['message']
 	session: SessionHelpers
 	knowledge: KnowledgeHelpers
-	protocol: ProtocolEmitter
+	stream: AgentStreamEmitter
 	tools: ToolInvoker
 	resources: Resources
 	models: Models
@@ -341,7 +370,7 @@ export const createAgentHandlerContext = <
 		message: input.serviceContext.message,
 		session: createSessionHelpers(input.sessionStore),
 		knowledge: createKnowledgeHelpers(input.knowledgeAdapters),
-		protocol: input.protocol,
+		stream: createStreamEmitter(input.protocol),
 		tools: createToolInvoker(input.serviceContext, input.manifest.allowedTools ?? [], input.protocol),
 		resources: input.resources,
 		models: input.models,

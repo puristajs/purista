@@ -1,3 +1,4 @@
+import type { Tracer } from '@opentelemetry/api'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import {
 	type Command,
@@ -37,9 +38,9 @@ export type AgentInstanceDependencies = {
 }
 
 export type AgentRuntimeDependencies = {
-	eventBridge: EventBridge
 	logger?: Logger
 	spanProcessor?: SpanProcessor
+	tracer?: Tracer
 	secretStore?: SecretStore
 	configStore?: ConfigStore
 	stateStore?: StateStore
@@ -49,6 +50,10 @@ export type AgentRuntimeDependencies = {
 	poolManager?: PoolManager
 	models?: Record<string, ModelProvider>
 	resources?: Record<string, unknown>
+	poolConfig?: {
+		poolId?: string
+		maxWorkers?: number
+	}
 	config?: Record<string, unknown>
 }
 
@@ -56,6 +61,7 @@ type ResolvedAgentRuntimeDependencies = {
 	eventBridge: EventBridge
 	logger?: Logger
 	spanProcessor?: SpanProcessor
+	tracer?: Tracer
 	secretStore?: SecretStore
 	configStore?: ConfigStore
 	stateStore?: StateStore
@@ -65,6 +71,7 @@ type ResolvedAgentRuntimeDependencies = {
 	poolManager: PoolManager
 	models: Record<string, ModelProvider>
 	resources: Record<string, unknown>
+	poolId: string
 	config?: Record<string, unknown>
 }
 
@@ -76,7 +83,9 @@ type AgentServiceConfig = {
 		knowledgeAdapters: Record<string, KnowledgeAdapter>
 		poolManager: PoolManager
 		models: Record<string, ModelProvider>
+		tracer?: Tracer
 		resources: Record<string, unknown>
+		poolId: string
 	}
 }
 
@@ -85,15 +94,16 @@ export class AgentInstance implements AgentInstanceContract {
 	private readonly dependencies: AgentInstanceDependencies
 	private readonly runtime: ResolvedAgentRuntimeDependencies
 
-	constructor(deps: AgentInstanceDependencies, runtime: AgentRuntimeDependencies) {
+	constructor(deps: AgentInstanceDependencies, eventBridge: EventBridge, runtime: AgentRuntimeDependencies = {}) {
 		this.dependencies = deps
-		if (!runtime.eventBridge) {
-			throw new Error('AgentInstance requires an event bridge')
-		}
+		const poolId = runtime.poolConfig?.poolId ?? deps.manifest.concurrency?.poolId ?? `agent:${deps.info.agentName}`
+		const maxWorkers = runtime.poolConfig?.maxWorkers ?? 1
+
 		this.runtime = {
-			eventBridge: runtime.eventBridge,
+			eventBridge,
 			logger: runtime.logger,
 			spanProcessor: runtime.spanProcessor,
+			tracer: runtime.tracer,
 			secretStore: runtime.secretStore,
 			configStore: runtime.configStore,
 			stateStore: runtime.stateStore,
@@ -106,6 +116,7 @@ export class AgentInstance implements AgentInstanceContract {
 			poolManager: runtime.poolManager ?? new PoolManager(),
 			models: runtime.models ?? {},
 			resources: runtime.resources ?? {},
+			poolId,
 		}
 
 		for (const alias of deps.manifest.models ?? []) {
@@ -114,8 +125,6 @@ export class AgentInstance implements AgentInstanceContract {
 			}
 		}
 
-		const poolId = deps.manifest.concurrency?.poolId ?? `agent:${deps.info.agentName}`
-		const maxWorkers = deps.manifest.concurrency?.maxWorkers ?? 1
 		this.runtime.poolManager.registerPool(poolId, maxWorkers)
 	}
 
@@ -132,7 +141,9 @@ export class AgentInstance implements AgentInstanceContract {
 				knowledgeAdapters: this.runtime.knowledgeAdapters,
 				poolManager: this.runtime.poolManager,
 				models: this.runtime.models,
+				tracer: this.runtime.tracer,
 				resources: this.runtime.resources,
+				poolId: this.runtime.poolId,
 			},
 		}
 

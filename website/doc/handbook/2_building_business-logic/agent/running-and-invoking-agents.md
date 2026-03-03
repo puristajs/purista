@@ -26,10 +26,13 @@ const provider = new AiSdkProvider({
   defaults: { temperature: 0.2 },
 })
 
-const supportAgent = await supportAgentDefinition.getInstance({
-  eventBridge,
+const supportAgent = await supportAgentDefinition.getInstance(eventBridge, {
   models: {
     'openai:gpt-5.2-mini': provider,
+  },
+  poolConfig: {
+    poolId: 'support',
+    maxWorkers: 4,
   },
 })
 
@@ -114,6 +117,6 @@ Agents can also run fully asynchronously:
 
 - `@purista/ai` ships reference services (`AIOrchestratorService`, `AIWorkerService`) that ingest manifests, enqueue runs, and execute them in isolated workers.
 - Queue bridges (Redis, NATS, AMQP, …) treat agents like any other workload—define a queue worker that calls `invokeAgent` internally, then rely on the queue bridge for delayed or batched execution.
-- Concurrency pools apply across sync and async invocations, so even background workers respect the same `maxWorkers` guardrails.
+- Concurrency pools apply across sync and async invocations. Configure `poolConfig.maxWorkers` at runtime/deploy-time so each environment controls throughput independently.
 
 Pick the approach that matches your deployment. Local development usually starts agents inside the same process; production often combines HTTP exposure for real-time calls plus queue workers for heavy background chains.

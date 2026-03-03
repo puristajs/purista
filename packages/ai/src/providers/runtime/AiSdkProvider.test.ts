@@ -49,6 +49,9 @@ describe('AiSdkProvider', () => {
 			prompt: 'Hello',
 			system: 'You are helpful\n\nuser context',
 			temperature: 0.1,
+			experimental_telemetry: {
+				isEnabled: true,
+			},
 		})
 		expect(result.output).toBe('response')
 		expect(result.tokens).toEqual({ prompt: 10, completion: 5 })
@@ -71,6 +74,9 @@ describe('AiSdkProvider', () => {
 			temperature: 0.2,
 			maxOutputTokens: 256,
 			system: undefined,
+			experimental_telemetry: {
+				isEnabled: true,
+			},
 		})
 	})
 })

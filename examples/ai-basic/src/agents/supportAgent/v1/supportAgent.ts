@@ -19,13 +19,13 @@ export const supportAgentDefinition = new AgentBuilder({
 	.addPayloadSchema(supportAgentInputSchema)
 	.defineModel('openai:gpt-5.2-mini')
 	.persistHistory({ storeName: 'aiConversation', maxFrames: 20 })
-	.setConcurrency({ poolId: 'support', maxWorkers: 2 })
+	.setConcurrency({ poolId: 'support' })
 	.exposeAsHttpEndpoint('POST', 'agents/supportAgent')
 	.setHandler<SupportAgentInput>(async function (context: SupportAgentContext, payload) {
 		const sessionId = payload.sessionId ?? context.message.id ?? 'session'
 		const model = context.models['openai:gpt-5.2-mini']
 
-		context.protocol.emitMessage({ content: 'Let me check that for you...', partial: true })
+		context.stream.sendChunk('Let me check that for you...')
 		const result = await model.generate({
 			prompt: payload.prompt,
 			context: payload.context,
@@ -36,15 +36,7 @@ export const supportAgentDefinition = new AgentBuilder({
 			},
 		})
 		const answer = result.output
-		context.protocol.emitMessage({ content: answer, final: true })
-		context.protocol.emitTelemetry({
-			provider: model.name,
-			usage: {
-				promptTokens: result.tokens?.prompt,
-				completionTokens: result.tokens?.completion,
-				totalTokens: (result.tokens?.prompt ?? 0) + (result.tokens?.completion ?? 0),
-			},
-		})
+		context.stream.sendFinal(answer)
 
 		await context.session.save(buildSessionRecord(sessionId, answer))
 

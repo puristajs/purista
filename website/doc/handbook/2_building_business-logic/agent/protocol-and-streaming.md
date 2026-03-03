@@ -18,23 +18,14 @@ Agents communicate through the `agent_protocol_concept` format defined in `specs
 | `toolEvent` | Trace allowlisted tool invocations (invoked/success/error plus arguments/results). |
 | `error` | Normalised error payload matching PURISTA handled/unhandled semantics. |
 
-`context.protocol.emitX` helpers push these frames for you:
+`context.stream.sendX` helpers push message/artifact/error frames for you:
 
 ```ts
-context.protocol.emitMessage({ content: 'Checking knowledge base…', partial: true })
-context.protocol.emitMessage({ content: answer, final: true })
-context.protocol.emitTelemetry({
-  provider: context.models['openai:gpt-4o-mini'].name,
-  durationMs: Date.now() - started,
-  usage: {
-    promptTokens: tokens?.prompt,
-    completionTokens: tokens?.completion,
-    totalTokens: (tokens?.prompt ?? 0) + (tokens?.completion ?? 0),
-  },
-})
+context.stream.sendChunk('Checking knowledge base…')
+context.stream.sendFinal(answer)
 ```
 
-If you only `return { message: '...' }`, the runtime automatically emits a `message` + `telemetry` frame so downstream consumers always see a consistent stream.
+If you only `return { message: '...' }`, the runtime automatically emits a final `message` frame plus telemetry metadata (duration/token usage/provider when available) so downstream consumers always see a consistent stream.
 
 ## HTTP streaming
 
@@ -95,4 +86,4 @@ You never need to populate protocol IDs manually—the runtime copies all requir
 
 ## Token usage & costs
 
-`AgentBuilder` automatically emits telemetry. You can override or enrich it by calling `context.protocol.emitTelemetry()` after the provider returns. Populate `usage.promptTokens`, `usage.completionTokens`, and `usage.totalTokens` to unlock Grafana/Prometheus dashboards and keep external alerting informed about throughput.
+Telemetry is emitted automatically. The runtime enables AI SDK telemetry by default, forwards trace context, and publishes usage/duration/provider metrics in protocol telemetry frames and the final response metadata.

@@ -22,10 +22,13 @@ async function main() {
 		defaults: { temperature: 0.2 },
 	})
 
-	const supportAgent = await supportAgentDefinition.getInstance({
-		eventBridge,
+	const supportAgent = await supportAgentDefinition.getInstance(eventBridge, {
 		models: {
 			'openai:gpt-5.2-mini': provider,
+		},
+		poolConfig: {
+			poolId: 'support',
+			maxWorkers: 2,
 		},
 	})
 	await supportAgent.start()

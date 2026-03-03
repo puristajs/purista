@@ -37,7 +37,7 @@ new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
   })
 ```
 
-- **Default implementation:** `AgentInstance` falls back to an in-memory session store, perfect for local development. Provide a custom store via `await agentDefinition.getInstance({ sessionStore: new RedisSessionStore(...) })` when you need persistence.
+- **Default implementation:** `AgentInstance` falls back to an in-memory session store, perfect for local development. Provide a custom store via `await agentDefinition.getInstance(eventBridge, { sessionStore: new RedisSessionStore(...) })` when you need persistence.
 - **Session helpers:** `context.session.load/save/delete` abstracts the underlying store. Records are plain objects (`{ sessionId, data, updatedAt }`), so you can stash summarized history, embeddings, persona settings, etc.
 
 ## Knowledge adapters

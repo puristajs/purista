@@ -24,9 +24,8 @@ const allowedToolSchema = extendApi(
 const concurrencySchema = extendApi(
 	z.object({
 		poolId: extendApi(z.string().min(1).optional(), { title: 'Concurrency pool id' }),
-		maxWorkers: extendApi(z.number().int().positive(), { title: 'Pool size' }),
 	}),
-	{ title: 'Concurrency pool config' },
+	{ title: 'Concurrency pool reference' },
 )
 
 const planWorkloadPayloadSchema = extendApi(

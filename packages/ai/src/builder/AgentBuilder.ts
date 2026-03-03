@@ -9,7 +9,7 @@ import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import { AgentInstance, type AgentInstanceDependencies } from '../runtime/AgentInstance.js'
 import type { AgentHandlerContext } from '../runtime/context.js'
 import { createAgentHandlerContext, createProtocolBuffer } from '../runtime/context.js'
-import type { AgentDefinition, AgentInfo, AgentInstanceOptions } from '../types/AgentDefinition.js'
+import type { AgentDefinition, AgentInfo } from '../types/AgentDefinition.js'
 import type {
 	AgentManifest,
 	AgentSessionConfig,
@@ -50,6 +50,8 @@ type AgentRuntimeConfig = {
 	poolManager: PoolManager
 	resources: Record<string, unknown>
 	models: Record<string, ModelProvider>
+	tracer?: import('@opentelemetry/api').Tracer
+	poolId: string
 }
 
 const agentRuntimeConfigSchema = extendApi(
@@ -292,7 +294,7 @@ export class AgentBuilder {
 				throw new HandledError(StatusCode.InternalServerError, 'Agent runtime not configured')
 			}
 
-			const poolId = runtime.manifest.concurrency?.poolId ?? `agent:${runtime.manifest.agentName}`
+			const poolId = runtime.poolId
 			const enqueuedAt = Date.now()
 			await runtime.poolManager.acquire(poolId)
 			const started = Date.now()
@@ -300,6 +302,54 @@ export class AgentBuilder {
 			const protocolBuffer = createProtocolBuffer(context)
 
 			try {
+				const usage = {
+					provider: undefined as string | undefined,
+					promptTokens: 0,
+					completionTokens: 0,
+					costUsd: 0,
+				}
+
+				const instrumentedModels = Object.fromEntries(
+					Object.entries(runtime.models).map(([alias, provider]) => [
+						alias,
+						{
+							name: provider.name,
+							generate: async (request: { prompt: string; context?: string; metadata?: Record<string, unknown> }) => {
+								const metadata = request.metadata ?? {}
+								const aiSdkMetadata =
+									typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
+										? (metadata.aiSdk as Record<string, unknown>)
+										: {}
+
+								const result = await provider.generate({
+									...request,
+									metadata: {
+										...metadata,
+										aiSdk: {
+											...aiSdkMetadata,
+											experimental_telemetry: {
+												isEnabled: true,
+												functionId: `${runtime.manifest.agentName}.model.generate`,
+												metadata: {
+													agentName: runtime.manifest.agentName,
+													agentVersion: runtime.manifest.agentVersion,
+													poolId,
+												},
+												tracer: runtime.tracer,
+											},
+										},
+									},
+								})
+								usage.provider = provider.name
+								usage.promptTokens += result.tokens?.prompt ?? 0
+								usage.completionTokens += result.tokens?.completion ?? 0
+								usage.costUsd += result.costUsd ?? 0
+								return result
+							},
+						} satisfies ModelProvider,
+					]),
+				) as Record<string, ModelProvider>
+
 				const agentContext = createAgentHandlerContext({
 					serviceContext: context,
 					payload,
@@ -308,7 +358,7 @@ export class AgentBuilder {
 					knowledgeAdapters: runtime.knowledgeAdapters,
 					protocol: protocolBuffer.protocol,
 					resources: runtime.resources,
-					models: runtime.models,
+					models: instrumentedModels,
 					manifest: runtime.manifest,
 				})
 
@@ -334,8 +384,14 @@ export class AgentBuilder {
 						durationMs: Date.now() - started,
 						waitTimeMs: started - enqueuedAt,
 						poolId,
-						provider: runtime.manifest.modelResource?.resourceName,
-						usage: resultObject?.usage,
+						provider: usage.provider ?? runtime.manifest.modelResource?.resourceName,
+						usage: resultObject?.usage ?? {
+							promptTokens: usage.promptTokens || undefined,
+							completionTokens: usage.completionTokens || undefined,
+							totalTokens:
+								usage.promptTokens || usage.completionTokens ? usage.promptTokens + usage.completionTokens : undefined,
+							costUsd: usage.costUsd || undefined,
+						},
 					})
 				}
 
@@ -361,13 +417,6 @@ export class AgentBuilder {
 		}
 
 		manifest.allowedTools = manifest.allowedTools ?? []
-		if (!manifest.concurrency) {
-			manifest.concurrency = {
-				poolId: `agent:${manifest.agentName}`,
-				maxWorkers: 1,
-			}
-		}
-
 		const dependencies: AgentInstanceDependencies = {
 			info: this.info,
 			manifest,
@@ -385,8 +434,8 @@ export class AgentBuilder {
 				context: this.contextSchema,
 			},
 			getManifest: () => manifest,
-			getInstance: async (options: AgentInstanceOptions) => {
-				const instance = new AgentInstance(dependencies, options)
+			getInstance: async (eventBridge, options) => {
+				const instance = new AgentInstance(dependencies, eventBridge, options)
 				return instance
 			},
 		}

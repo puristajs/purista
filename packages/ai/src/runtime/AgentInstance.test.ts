@@ -9,7 +9,7 @@ const baseManifest: AgentManifest = {
 	agentVersion: '1',
 	eventBridge: 'default',
 	allowedTools: [],
-	concurrency: { poolId: 'support', maxWorkers: 1 },
+	concurrency: { poolId: 'support' },
 }
 
 const baseDependencies = {
@@ -20,7 +20,7 @@ const baseDependencies = {
 	manifest: baseManifest,
 	serviceBuilder: {
 		info: {
-			serviceName: 'agent.supportAgent',
+			serviceName: 'supportAgent',
 			serviceVersion: '1',
 		},
 		getInstance: vi.fn(),
@@ -37,13 +37,9 @@ describe('AgentInstance', () => {
 
 		expect(
 			() =>
-				new AgentInstance(
-					{ ...baseDependencies, manifest },
-					{
-						eventBridge: { instanceId: 'bridge-1' } as any,
-						models: {},
-					},
-				),
+				new AgentInstance({ ...baseDependencies, manifest }, { instanceId: 'bridge-1' } as any, {
+					models: {},
+				}),
 		).toThrow('Missing model provider for alias "openai:gpt-4o-mini"')
 	})
 
@@ -64,7 +60,8 @@ describe('AgentInstance', () => {
 					getInstance,
 				},
 			},
-			{ eventBridge, models: {} },
+			eventBridge,
+			{ models: {} },
 		)
 
 		const onFrame = vi.fn()
