@@ -88,6 +88,23 @@ Status legend:
 - [ ] Add concise examples in TSDoc for key APIs (`AgentBuilder`, runtime invocation, protocol helpers).
 - [ ] Ensure typedoc output and IDE hover docs are clear and task-oriented.
 
+## Handbook coverage gaps
+- [ ] Add a dedicated, comprehensive "AI Protocol" section in handbook:
+  - envelope/frame schema reference
+  - required/optional fields
+  - final-response metadata contract
+  - error semantics and handling rules
+  - protocol transformation patterns (Purista <-> AI SDK stream protocol)
+- [ ] Add explicit "what `@purista/ai` exposes from AI SDK" section:
+  - `AiSdkProvider` wrapper (generate path)
+  - `toAiSdkStreamEvents` transformation helper
+  - clarify that full AI SDK surface is **not** re-exported by `@purista/ai`
+- [ ] Add integration cookbook pages:
+  - frontend SSE consumer
+  - agent-to-agent orchestration
+  - event subscription into agent
+  - command invoking agent (sync + stream)
+
 ## MCP integration boundary
 - [ ] Clarify in spec that MCP support in Vercel AI SDK can be reused as first-class provider/tool plumbing.
 - [ ] Keep Purista-side responsibility for:
