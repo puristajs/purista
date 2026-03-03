@@ -94,8 +94,13 @@ Status legend:
   - allowlist enforcement (`allowTool`)
   - protocol frame mapping (tool events, telemetry, errors)
   - identity/correlation propagation (service/instance/message ids)
-  - OTel span linkage for tool calls
 - [ ] Avoid re-implementing generic MCP client/server mechanics already provided by upstream SDK where possible.
+
+## OpenTelemetry via AI SDK (automatic by default)
+- [ ] Use Vercel AI SDK telemetry support out of the box for model/tool spans instead of custom span plumbing in handlers.
+- [ ] Ensure telemetry is enabled automatically in runtime/provider wiring (no manual user setup in agent handler code).
+- [ ] Bridge Purista message correlation/trace context into AI SDK telemetry context so traces remain connected end-to-end.
+- [ ] Keep token usage/duration surfaced in final response metadata and protocol frames from provider telemetry outputs.
 
 ## Integration testing strategy (non-flaky)
 - [ ] Add full-flow integration tests for `@purista/ai` covering:
