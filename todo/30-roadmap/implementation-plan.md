@@ -55,7 +55,7 @@ Deliverables:
 
 ## Phase 3: Agent core runtime
 
-- Create `ai-core` orchestration package.
+- Create `@purista/ai` orchestration package.
 - Implement provider adapter contract.
 - Add token/cost metrics and tracing.
 - Define agent lifecycle event stream types (for streaming and observability).
@@ -95,5 +95,5 @@ Deliverables:
 2. Build an event-bridge capability matrix document.
 3. Prototype queue builder types + lifecycle defaults (`QueueDefinitionBuilder`, `QueueWorkerBuilder`) and wire `.canEnqueue` contexts.
 4. Prototype minimal stream session API in `@purista/core` (no bridge integration yet).
-5. Prototype `ai-core` interfaces with strict typings and no provider implementation.
+5. Prototype `@purista/ai` interfaces with strict typings and no provider implementation.
 6. Prototype builder shape in TypeScript only (no runtime), validate type inference ergonomics.

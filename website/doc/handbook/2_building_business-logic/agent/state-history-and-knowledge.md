@@ -13,7 +13,8 @@ Agents rarely operate statelessly. They need conversation history, scratchpads, 
 `persistHistory` (alias: `useSessionStore`) links an agent to a session store definition in the manifest:
 
 ```ts
-AgentBuilder.create({ agentName: 'supportAgent', agentVersion: '1' })
+new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
+  .defineModel('openai:gpt-4o-mini')
   .persistHistory({
     storeName: 'aiConversation',
     maxFrames: 40,
@@ -24,7 +25,7 @@ AgentBuilder.create({ agentName: 'supportAgent', agentVersion: '1' })
     const previous = await context.session.load(sessionId)
 
     const prompt = [previous?.data?.lastMessage, payload.prompt].filter(Boolean).join('\n')
-    const result = await context.resources.model.generate({ prompt })
+    const result = await context.models['openai:gpt-4o-mini'].generate({ prompt })
 
     await context.session.save({
       sessionId,
@@ -44,13 +45,14 @@ AgentBuilder.create({ agentName: 'supportAgent', agentVersion: '1' })
 Knowledge adapters let you query external corpora (RAG, FAQ tables, product catalogs) and share them across agents.
 
 ```ts
-AgentBuilder.create({ ... })
+new AgentBuilder({ ... })
+  .defineModel('openai:gpt-4o-mini')
   .useKnowledgeAdapter({ adapterName: 'supportFaq', options: { locale: 'en-US' } })
   .setHandler(async context => {
     const docs = await context.knowledge.query('supportFaq', context.payload.prompt, 5)
     const contextBlock = docs.map(doc => `• ${doc.title}: ${doc.body}`).join('\n')
 
-    const { output } = await context.resources.model.generate({
+    const { output } = await context.models['openai:gpt-4o-mini'].generate({
       prompt: `${context.payload.prompt}\n\nContext:\n${contextBlock}`,
     })
 
@@ -80,7 +82,7 @@ const history = await context.session.load(sessionId)
 const conversation = (history?.data.conversation ?? []) as ConversationHistory
 const transcript = summarizeHistory(conversation)
 
-const { output } = await context.resources.model.generate({
+const { output } = await context.models['openai:gpt-4o-mini'].generate({
   prompt: `${transcript}\n\nUser: ${payload.prompt}`,
 })
 

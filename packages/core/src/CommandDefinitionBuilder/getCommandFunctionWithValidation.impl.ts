@@ -13,11 +13,11 @@ import { type Schema, validate } from '../schema/index.js'
  * Input payload/parameter is validated before execution and output can be validated after execution.
  */
 export const getCommandFunctionWithValidation = function <S extends Service>(
-	fn: CommandFunction<S, unknown, unknown, unknown, unknown, unknown, any, any, any>,
+	fn: CommandFunction<S, unknown, unknown, unknown, unknown, unknown, any, any, any, any, any>,
 	inputPayloadSchema: Schema | undefined,
 	inputParameterSchema: Schema | undefined,
 	outputPayloadSchema: Schema | undefined,
-	beforeGuards: Record<string, CommandBeforeGuardHook<S, unknown, unknown, unknown, unknown, any, any, any>>,
+	beforeGuards: Record<string, CommandBeforeGuardHook<S, unknown, unknown, unknown, unknown, any, any, any, any, any>>,
 ) {
 	const wrapped = async function (
 		this: S,

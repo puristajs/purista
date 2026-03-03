@@ -8,7 +8,7 @@
 
 > **createTelemetryFrame**(`input`): `object`
 
-Defined in: protocol/helpers.ts:90
+Defined in: [ai/src/protocol/helpers.ts:104](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/helpers.ts#L104)
 
 ## Parameters
 
@@ -17,6 +17,14 @@ Defined in: protocol/helpers.ts:90
 #### durationMs?
 
 `number`
+
+#### poolId?
+
+`string`
+
+#### provider?
+
+`string`
 
 #### usage?
 
@@ -38,6 +46,10 @@ Defined in: protocol/helpers.ts:90
 
 `number` = `...`
 
+#### waitTimeMs?
+
+`number`
+
 ## Returns
 
 `object`
@@ -50,6 +62,18 @@ Defined in: protocol/helpers.ts:90
 
 > `readonly` **kind**: `"telemetry"` = `'telemetry'`
 
+### poolId
+
+> `readonly` **poolId**: `string` \| `undefined` = `input.poolId`
+
+### provider
+
+> `readonly` **provider**: `string` \| `undefined` = `input.provider`
+
 ### usage
 
 > `readonly` **usage**: \{ `completionTokens?`: `number`; `costUsd?`: `number`; `promptTokens?`: `number`; `totalTokens?`: `number`; \} \| `undefined` = `input.usage`
+
+### waitTimeMs
+
+> `readonly` **waitTimeMs**: `number` \| `undefined` = `input.waitTimeMs`

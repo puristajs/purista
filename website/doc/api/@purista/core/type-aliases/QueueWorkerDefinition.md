@@ -38,7 +38,7 @@ Defined in: [core/types/queue/QueueWorkerDefinition.ts:25](https://github.com/pu
 
 > `optional` **afterGuards**: `Record`\<`string`, [`QueueWorkerAfterGuardHook`](QueueWorkerAfterGuardHook.md)\<[`ServiceClass`](../interfaces/ServiceClass.md), [`InferIn`](InferIn.md)\<`PayloadSchema`\>, [`InferIn`](InferIn.md)\<`ParamsSchema`\>, `Resources`, `Invokes`, `StreamInvokes`\>\>
 
-Defined in: [core/types/queue/QueueWorkerDefinition.ts:42](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L42)
+Defined in: [core/types/queue/QueueWorkerDefinition.ts:49](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L49)
 
 ***
 

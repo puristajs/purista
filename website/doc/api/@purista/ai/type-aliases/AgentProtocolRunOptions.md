@@ -8,7 +8,7 @@
 
 > **AgentProtocolRunOptions** = [`PuristaProtocolOptions`](PuristaProtocolOptions.md) & `object`
 
-Defined in: protocol/purista.ts:92
+Defined in: [ai/src/protocol/purista.ts:92](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/purista.ts#L92)
 
 ## Type Declaration
 

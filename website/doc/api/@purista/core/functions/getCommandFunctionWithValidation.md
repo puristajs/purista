@@ -23,7 +23,7 @@ Input payload/parameter is validated before execution and output can be validate
 
 ### fn
 
-[`CommandFunction`](../type-aliases/CommandFunction.md)\<`S`, `unknown`, `unknown`, `unknown`, `unknown`, `unknown`, `any`, `any`, `any`\>
+[`CommandFunction`](../type-aliases/CommandFunction.md)\<`S`, `unknown`, `unknown`, `unknown`, `unknown`, `unknown`, `any`, `any`, `any`, `any`, `any`\>
 
 ### inputPayloadSchema
 
@@ -39,7 +39,7 @@ Input payload/parameter is validated before execution and output can be validate
 
 ### beforeGuards
 
-`Record`\<`string`, [`CommandBeforeGuardHook`](../type-aliases/CommandBeforeGuardHook.md)\<`S`, `unknown`, `unknown`, `unknown`, `unknown`, `any`, `any`, `any`\>\>
+`Record`\<`string`, [`CommandBeforeGuardHook`](../type-aliases/CommandBeforeGuardHook.md)\<`S`, `unknown`, `unknown`, `unknown`, `unknown`, `any`, `any`, `any`, `any`, `any`\>\>
 
 ## Returns
 
@@ -82,6 +82,12 @@ set a config value in the config store
 [`EmitCustomMessageFunction`](../type-aliases/EmitCustomMessageFunction.md)\<[`EmptyObject`](../type-aliases/EmptyObject.md)\>
 
 emit a custom message
+
+##### invokeAgent
+
+[`EmptyObject`](../type-aliases/EmptyObject.md)
+
+Invokes an agent and returns the result.
 
 ##### logger
 

@@ -8,4 +8,4 @@
 
 > `const` **aiWorkerServiceInfo**: [`ServiceInfoType`](../../core/type-aliases/ServiceInfoType.md)
 
-Defined in: runtime/services/AIWorkerService/info/info.ts:4
+Defined in: [ai/src/platform/runtime/AIWorkerService/info/info.ts:4](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/platform/runtime/AIWorkerService/info/info.ts#L4)

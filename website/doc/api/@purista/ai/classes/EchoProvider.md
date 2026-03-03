@@ -6,7 +6,7 @@
 
 # Class: EchoProvider
 
-Defined in: providers/runtime/ModelProvider.ts:33
+Defined in: [ai/src/providers/runtime/ModelProvider.ts:34](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/ModelProvider.ts#L34)
 
 Deterministic provider useful for tests and docs; just echoes the prompt back.
 
@@ -30,7 +30,7 @@ Deterministic provider useful for tests and docs; just echoes the prompt back.
 
 > `readonly` **name**: `"echo"` = `'echo'`
 
-Defined in: providers/runtime/ModelProvider.ts:34
+Defined in: [ai/src/providers/runtime/ModelProvider.ts:35](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/ModelProvider.ts#L35)
 
 #### Implementation of
 
@@ -42,7 +42,7 @@ Defined in: providers/runtime/ModelProvider.ts:34
 
 > **generate**(`request`): `Promise`\<[`ProviderResponse`](../type-aliases/ProviderResponse.md)\>
 
-Defined in: providers/runtime/ModelProvider.ts:36
+Defined in: [ai/src/providers/runtime/ModelProvider.ts:37](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/ModelProvider.ts#L37)
 
 #### Parameters
 

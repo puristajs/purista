@@ -8,15 +8,15 @@
 
 > **KnowledgeAdapterConfig** = `object`
 
-Defined in: types/AgentManifest.ts:21
+Defined in: [ai/src/types/AgentManifest.ts:28](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentManifest.ts#L28)
 
 ## Properties
 
-### adapterId
+### adapterName
 
-> **adapterId**: `string`
+> **adapterName**: `string`
 
-Defined in: types/AgentManifest.ts:22
+Defined in: [ai/src/types/AgentManifest.ts:29](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentManifest.ts#L29)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: types/AgentManifest.ts:22
 
 > `optional` **options**: `Record`\<`string`, `unknown`\>
 
-Defined in: types/AgentManifest.ts:23
+Defined in: [ai/src/types/AgentManifest.ts:30](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentManifest.ts#L30)

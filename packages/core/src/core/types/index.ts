@@ -1,4 +1,5 @@
 export * from './addPrefixToObject.js'
+export * from './agent/index.js'
 export * from './BrokerHeaderCommandMsg.js'
 export * from './BrokerHeaderCommandResponseMsg.js'
 export * from './BrokerHeaderCustomMsg.js'

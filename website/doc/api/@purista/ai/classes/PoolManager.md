@@ -6,7 +6,7 @@
 
 # Class: PoolManager
 
-Defined in: pools/PoolManager.ts:18
+Defined in: [ai/src/pools/PoolManager.ts:18](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/pools/PoolManager.ts#L18)
 
 Tracks concurrency pools for background agents so hosts can guard rate limits and costs.
 
@@ -25,7 +25,7 @@ pools.release('default')
 
 > **new PoolManager**(`initial?`): `PoolManager`
 
-Defined in: pools/PoolManager.ts:21
+Defined in: [ai/src/pools/PoolManager.ts:21](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/pools/PoolManager.ts#L21)
 
 #### Parameters
 
@@ -43,7 +43,7 @@ Defined in: pools/PoolManager.ts:21
 
 > **acquire**(`id`): `Promise`\<`void`\>
 
-Defined in: pools/PoolManager.ts:38
+Defined in: [ai/src/pools/PoolManager.ts:38](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/pools/PoolManager.ts#L38)
 
 #### Parameters
 
@@ -61,7 +61,7 @@ Defined in: pools/PoolManager.ts:38
 
 > **registerPool**(`id`, `maxParallel`): `void`
 
-Defined in: pools/PoolManager.ts:29
+Defined in: [ai/src/pools/PoolManager.ts:29](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/pools/PoolManager.ts#L29)
 
 #### Parameters
 
@@ -83,7 +83,7 @@ Defined in: pools/PoolManager.ts:29
 
 > **release**(`id`): `void`
 
-Defined in: pools/PoolManager.ts:52
+Defined in: [ai/src/pools/PoolManager.ts:52](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/pools/PoolManager.ts#L52)
 
 #### Parameters
 
@@ -101,7 +101,7 @@ Defined in: pools/PoolManager.ts:52
 
 > **snapshot**(): `object`[]
 
-Defined in: pools/PoolManager.ts:61
+Defined in: [ai/src/pools/PoolManager.ts:61](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/pools/PoolManager.ts#L61)
 
 #### Returns
 

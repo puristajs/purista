@@ -36,6 +36,7 @@
 	"scripts": {
 		"lint": "npx @biomejs/biome check --write",
 		"test": "vitest",
+		"test:coverage": "vitest run -c ./vitest.config.ts --coverage",
 		"build": "rimraf dist && tshy"
 	},
 	"tshy": {

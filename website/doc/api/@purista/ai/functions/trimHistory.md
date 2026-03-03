@@ -8,7 +8,7 @@
 
 > **trimHistory**(`history`, `maxTokens`): [`ConversationHistory`](../type-aliases/ConversationHistory.md)
 
-Defined in: memory/historyHelpers.ts:18
+Defined in: [ai/src/memory/historyHelpers.ts:18](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/memory/historyHelpers.ts#L18)
 
 Trims a history to the last `maxTokens` frames.
 

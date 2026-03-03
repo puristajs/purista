@@ -8,7 +8,7 @@
 
 > **createTokenUsage**(`input`): \{ `completionTokens?`: `number`; `costUsd?`: `number`; `promptTokens?`: `number`; `totalTokens?`: `number`; \} \| `undefined`
 
-Defined in: protocol/helpers.ts:106
+Defined in: [ai/src/protocol/helpers.ts:129](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/helpers.ts#L129)
 
 ## Parameters
 

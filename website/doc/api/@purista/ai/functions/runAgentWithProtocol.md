@@ -8,7 +8,7 @@
 
 > **runAgentWithProtocol**(`context`, `runner`, `options?`): `Promise`\<`object`[]\>
 
-Defined in: protocol/purista.ts:101
+Defined in: [ai/src/protocol/purista.ts:101](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/purista.ts#L101)
 
 Utility used by commands and subscriptions to wrap an [AgentExecutor](../classes/AgentExecutor.md) call
 so protocol envelopes (message + telemetry + errors) are emitted consistently.

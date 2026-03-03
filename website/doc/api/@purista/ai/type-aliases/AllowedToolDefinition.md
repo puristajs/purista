@@ -8,7 +8,7 @@
 
 > **AllowedToolDefinition** = `object`
 
-Defined in: types/AgentManifest.ts:36
+Defined in: [ai/src/types/AgentManifest.ts:15](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentManifest.ts#L15)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: types/AgentManifest.ts:36
 
 > **commandName**: `string`
 
-Defined in: types/AgentManifest.ts:37
+Defined in: [ai/src/types/AgentManifest.ts:18](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentManifest.ts#L18)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: types/AgentManifest.ts:37
 
 > `optional` **description**: `string`
 
-Defined in: types/AgentManifest.ts:40
+Defined in: [ai/src/types/AgentManifest.ts:19](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentManifest.ts#L19)
 
 ***
 
@@ -32,12 +32,12 @@ Defined in: types/AgentManifest.ts:40
 
 > **serviceName**: `string`
 
-Defined in: types/AgentManifest.ts:38
+Defined in: [ai/src/types/AgentManifest.ts:16](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentManifest.ts#L16)
 
 ***
 
-### version
+### serviceVersion
 
-> **version**: `string`
+> **serviceVersion**: `string`
 
-Defined in: types/AgentManifest.ts:39
+Defined in: [ai/src/types/AgentManifest.ts:17](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentManifest.ts#L17)

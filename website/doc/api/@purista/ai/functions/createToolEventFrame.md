@@ -8,7 +8,7 @@
 
 > **createToolEventFrame**(`input`): `object`
 
-Defined in: protocol/helpers.ts:74
+Defined in: [ai/src/protocol/helpers.ts:86](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/helpers.ts#L86)
 
 ## Parameters
 
@@ -17,6 +17,10 @@ Defined in: protocol/helpers.ts:74
 #### args?
 
 `unknown`
+
+#### errorCode?
+
+`string`
 
 #### message?
 
@@ -28,7 +32,7 @@ Defined in: protocol/helpers.ts:74
 
 #### status
 
-`"invoked"` \| `"succeeded"` \| `"failed"`
+`"error"` \| `"success"` \| `"invoked"`
 
 #### toolName
 
@@ -37,6 +41,10 @@ Defined in: protocol/helpers.ts:74
 ## Returns
 
 `object`
+
+### errorCode
+
+> `readonly` **errorCode**: `string` \| `undefined` = `input.errorCode`
 
 ### input
 
@@ -56,7 +64,7 @@ Defined in: protocol/helpers.ts:74
 
 ### status
 
-> `readonly` **status**: `"invoked"` \| `"succeeded"` \| `"failed"` = `input.status`
+> `readonly` **status**: `"error"` \| `"success"` \| `"invoked"` = `input.status`
 
 ### toolName
 

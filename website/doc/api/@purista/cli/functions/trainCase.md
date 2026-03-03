@@ -8,7 +8,7 @@
 
 > **trainCase**(`input`, `options?`): `string`
 
-Defined in: [change-case.ts:205](https://github.com/puristajs/purista/blob/643d8ae461234cbb142aca5f38526a7b04d6fea0/packages/cli/src/api/change-case.ts#L205)
+Defined in: [change-case.ts:205](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/cli/src/api/change-case.ts#L205)
 
 Convert a string to header case (`Foo-Bar`).
 

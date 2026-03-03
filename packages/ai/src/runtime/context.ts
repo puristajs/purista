@@ -12,6 +12,7 @@ import {
 	createToolEventFrame,
 } from '../protocol/index.js'
 import type { AgentProtocolEnvelope, AgentProtocolFrame } from '../protocol/types.js'
+import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import type { AgentManifest, AllowedToolDefinition } from '../types/AgentManifest.js'
 
 type ProtocolFrameEntry = {
@@ -292,6 +293,7 @@ export type AgentHandlerContext<
 	Payload = unknown,
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
+	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
 > = {
 	logger: Logger
 	payload: Payload
@@ -302,11 +304,17 @@ export type AgentHandlerContext<
 	protocol: ProtocolEmitter
 	tools: ToolInvoker
 	resources: Resources
+	models: Models
 	serviceContext: CommandFunctionContext
 	manifest: AgentManifest
 }
 
-export type CreateAgentHandlerContextInput<Payload, Parameter, Resources extends Record<string, unknown>> = {
+export type CreateAgentHandlerContextInput<
+	Payload,
+	Parameter,
+	Resources extends Record<string, unknown>,
+	Models extends Record<string, ModelProvider>,
+> = {
 	serviceContext: CommandFunctionContext<Payload, Parameter>
 	payload: Payload
 	parameter: Parameter
@@ -314,12 +322,18 @@ export type CreateAgentHandlerContextInput<Payload, Parameter, Resources extends
 	knowledgeAdapters: Record<string, KnowledgeAdapter | undefined>
 	protocol: ProtocolEmitter
 	resources: Resources
+	models: Models
 	manifest: AgentManifest
 }
 
-export const createAgentHandlerContext = <Payload, Parameter, Resources extends Record<string, unknown>>(
-	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources>,
-): AgentHandlerContext<Payload, Parameter, Resources> => {
+export const createAgentHandlerContext = <
+	Payload,
+	Parameter,
+	Resources extends Record<string, unknown>,
+	Models extends Record<string, ModelProvider>,
+>(
+	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models>,
+): AgentHandlerContext<Payload, Parameter, Resources, Models> => {
 	return {
 		logger: input.serviceContext.logger,
 		payload: input.payload,
@@ -330,6 +344,7 @@ export const createAgentHandlerContext = <Payload, Parameter, Resources extends 
 		protocol: input.protocol,
 		tools: createToolInvoker(input.serviceContext, input.manifest.allowedTools ?? [], input.protocol),
 		resources: input.resources,
+		models: input.models,
 		serviceContext: input.serviceContext,
 		manifest: input.manifest,
 	}

@@ -1,5 +1,4 @@
 export * from './builder/AgentBuilder.js'
-export * from './builder/defineAgent.js'
 export * from './evaluation/index.js'
 export * from './knowledge/adapters/inMemoryAdapter.js'
 export * from './manifest/publisher.js'

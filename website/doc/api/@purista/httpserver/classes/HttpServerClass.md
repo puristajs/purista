@@ -82,7 +82,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:76
 
 ### ~~commands~~
 
-> `protected` **commands**: `Map`\<`string`, [`CommandDefinition`](../../core/type-aliases/CommandDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`\>\>
+> `protected` **commands**: `Map`\<`string`, [`CommandDefinition`](../../core/type-aliases/CommandDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`, `any`, `any`, `any`\>\>
 
 Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:61
 
@@ -374,7 +374,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:78
 
 ### ~~streams~~
 
-> `protected` **streams**: `Map`\<`string`, [`StreamDefinition`](../../core/type-aliases/StreamDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`, [`QueueInvokeList`](../../core/type-aliases/QueueInvokeList.md)\>\>
+> `protected` **streams**: `Map`\<`string`, [`StreamDefinition`](../../core/type-aliases/StreamDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`, `any`, `any`, `any`\>\>
 
 Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:62
 
@@ -398,7 +398,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:77
 
 ### ~~subscriptions~~
 
-> `protected` **subscriptions**: `Map`\<`string`, [`SubscriptionDefinition`](../../core/type-aliases/SubscriptionDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`\>\>
+> `protected` **subscriptions**: `Map`\<`string`, [`SubscriptionDefinition`](../../core/type-aliases/SubscriptionDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`, `any`, `any`, `any`\>\>
 
 Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:60
 
@@ -538,7 +538,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:16
 
 > **executeCommand**(`message`): `Promise`\<`Readonly`\<`Omit`\<\{ `contentEncoding`: `"utf-8"`; `contentType`: `"application/json"`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `isHandledError`: `boolean`; `messageType`: [`CommandErrorResponse`](../../core/enumerations/EBMessageType.md#commanderrorresponse); `otp?`: `string`; `payload`: \{ `data?`: `unknown`; `message`: `string`; `status`: [`StatusCode`](../../core/enumerations/StatusCode.md); \}; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"instanceId"`\>\> \| \{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId`: `string`; `eventName?`: `string`; `id`: `string`; `messageType`: [`CommandSuccessResponse`](../../core/enumerations/EBMessageType.md#commandsuccessresponse); `otp`: `string`; `payload`: `unknown`; `principalId?`: `string`; `receiver`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:130
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:140
 
 Called when a command is received by the service
 
@@ -564,7 +564,7 @@ Command envelope to execute
 
 > **executeStream**(`message`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:174
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:184
 
 #### Parameters
 
@@ -586,7 +586,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:174
 
 > **executeSubscription**(`message`, `subscriptionName`): `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../../core/enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:176
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:186
 
 #### Parameters
 
@@ -608,11 +608,87 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:176
 
 ***
 
+### ~~getAgentInvokeFunction()~~
+
+> `protected` **getAgentInvokeFunction**\<`Invokes`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `agentInvokes?`): \<`InvokeResponseType`, `PayloadType`, `ParameterType`\>(`receiver`, `payload`, `parameter`) => [`AgentInvocation`](../../core/interfaces/AgentInvocation.md)\<`InvokeResponseType`\>
+
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:100
+
+#### Type Parameters
+
+##### Invokes
+
+`Invokes` *extends* [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)
+
+#### Parameters
+
+##### serviceTarget
+
+`string`
+
+##### traceId?
+
+`string`
+
+##### principalId?
+
+`string`
+
+##### tenantId?
+
+`string`
+
+##### agentInvokes?
+
+`Invokes`
+
+#### Returns
+
+> \<`InvokeResponseType`, `PayloadType`, `ParameterType`\>(`receiver`, `payload`, `parameter`): [`AgentInvocation`](../../core/interfaces/AgentInvocation.md)\<`InvokeResponseType`\>
+
+##### Type Parameters
+
+###### InvokeResponseType
+
+`InvokeResponseType` = \{ `history`: `any`[]; `message`: `any`; \}
+
+###### PayloadType
+
+`PayloadType` = \{\[`x`: `string`\]: `unknown`; `attachments`: `any`[]; `conversationId?`: `string`; `history`: `any`[]; `message`: `string`; \}
+
+###### ParameterType
+
+`ParameterType` = [`EmptyObject`](../../core/type-aliases/EmptyObject.md)
+
+##### Parameters
+
+###### receiver
+
+[`EBMessageAddress`](../../core/type-aliases/EBMessageAddress.md)
+
+###### payload
+
+`PayloadType`
+
+###### parameter
+
+`ParameterType`
+
+##### Returns
+
+[`AgentInvocation`](../../core/interfaces/AgentInvocation.md)\<`InvokeResponseType`\>
+
+#### Inherited from
+
+[`Service`](../../core/classes/Service.md).[`getAgentInvokeFunction`](../../core/classes/Service.md#getagentinvokefunction)
+
+***
+
 ### ~~getConsumeStreamFunction()~~
 
 > `protected` **getConsumeStreamFunction**\<`StreamInvokes`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `streamInvokes?`): [`OpenStreamFunction`](../../core/type-aliases/OpenStreamFunction.md)
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:122
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:132
 
 #### Type Parameters
 
@@ -656,7 +732,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:122
 
 > **getContextFunctions**(`logger`, `queueNamespace?`): [`ContextBase`](../../core/type-aliases/ContextBase.md)
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:124
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:134
 
 #### Parameters
 
@@ -682,7 +758,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:124
 
 > `protected` **getEmitFunction**\<`EmitList`\>(`serviceTarget`, `traceId?`, `principalId?`, `tenantId?`, `emitList?`): \<`K`, `Payload`\>(`eventName`, `eventPayload?`, `contentType?`, `contentEncoding?`) => `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:123
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:133
 
 #### Type Parameters
 
@@ -838,7 +914,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:99
 
 > `protected` **getQueueNamespace**(`queueInvokes?`, `traceId?`, `principalId?`, `tenantId?`): `object`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:100
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:110
 
 #### Parameters
 
@@ -880,7 +956,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:100
 
 > **getServiceHealth**(): `Promise`\<[`ServiceHealthState`](../../core/type-aliases/ServiceHealthState.md)\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:173
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:183
 
 #### Returns
 
@@ -1088,7 +1164,7 @@ Defined in: [httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:257](h
 
 > **registerCommand**(`commandDefinition`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:166
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:176
 
 #### Parameters
 
@@ -1110,13 +1186,13 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:166
 
 > **registerStream**(`streamDefinition`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:175
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:185
 
 #### Parameters
 
 ##### streamDefinition
 
-[`StreamDefinition`](../../core/type-aliases/StreamDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`, [`QueueInvokeList`](../../core/type-aliases/QueueInvokeList.md)\>
+[`StreamDefinition`](../../core/type-aliases/StreamDefinition.md)\<`any`, `any`, `any`, `any`, `any`, `any`, `any`, [`EmptyObject`](../../core/type-aliases/EmptyObject.md), `any`, `any`, `any`, `any`, `any`, `any`\>
 
 #### Returns
 
@@ -1132,7 +1208,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:175
 
 > **registerSubscription**(`subscriptionDefinition`): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:177
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:187
 
 #### Parameters
 
@@ -1276,7 +1352,7 @@ return value of fn
 
 > `protected` **startQueueWorkers**(): `void`
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:167
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:177
 
 #### Returns
 
@@ -1292,7 +1368,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:167
 
 > `protected` **stopQueueWorkers**(): `Promise`\<`void`\>
 
-Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:168
+Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:178
 
 #### Returns
 

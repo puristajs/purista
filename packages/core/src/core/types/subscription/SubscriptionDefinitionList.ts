@@ -1,5 +1,6 @@
 import type { ServiceClass } from '../ServiceClass.js'
 import type { SubscriptionDefinition } from './SubscriptionDefinition.js'
+import type { SubscriptionDefinitionMetadataBase } from './SubscriptionDefinitionMetadataBase.js'
 
 /**
  * Helper type for creating list of service commands to be passed as input to service class
@@ -9,7 +10,21 @@ import type { SubscriptionDefinition } from './SubscriptionDefinition.js'
  * ```
  */
 export type SubscriptionDefinitionList<ServiceClassType extends ServiceClass> = Promise<
-	SubscriptionDefinition<ServiceClassType, any, any, any, any, any, any, any, any, any, any, any, any, any>
+	SubscriptionDefinition<
+		ServiceClassType,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		any,
+		SubscriptionDefinitionMetadataBase
+	>
 >[]
 
 export type SubscriptionDefinitionListResolved<ServiceClassType extends ServiceClass> = SubscriptionDefinition<
@@ -25,6 +40,5 @@ export type SubscriptionDefinitionListResolved<ServiceClassType extends ServiceC
 	any,
 	any,
 	any,
-	any,
-	any
+	SubscriptionDefinitionMetadataBase
 >[]

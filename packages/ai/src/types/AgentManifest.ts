@@ -46,6 +46,7 @@ export type AgentManifest = {
 	agentVersion: string
 	description?: string
 	eventBridge: string
+	models?: string[]
 	modelResource?: { resourceName: string; variant?: string }
 	session?: AgentSessionConfig
 	knowledge?: KnowledgeAdapterConfig[]

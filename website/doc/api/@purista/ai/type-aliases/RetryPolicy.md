@@ -8,15 +8,15 @@
 
 > **RetryPolicy** = `object`
 
-Defined in: types/AgentManifest.ts:10
+Defined in: [ai/src/types/AgentManifest.ts:38](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentManifest.ts#L38)
 
 ## Properties
 
-### backoffMs?
+### delayMs?
 
-> `optional` **backoffMs**: `number`
+> `optional` **delayMs**: `number`
 
-Defined in: types/AgentManifest.ts:13
+Defined in: [ai/src/types/AgentManifest.ts:41](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentManifest.ts#L41)
 
 ***
 
@@ -24,12 +24,12 @@ Defined in: types/AgentManifest.ts:13
 
 > **maxAttempts**: `number`
 
-Defined in: types/AgentManifest.ts:12
+Defined in: [ai/src/types/AgentManifest.ts:40](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentManifest.ts#L40)
 
 ***
 
-### strategy
+### strategy?
 
-> **strategy**: `"none"` \| `"exponential"` \| `"fixed"`
+> `optional` **strategy**: `"fixed"` \| `"exponential"`
 
-Defined in: types/AgentManifest.ts:11
+Defined in: [ai/src/types/AgentManifest.ts:39](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentManifest.ts#L39)

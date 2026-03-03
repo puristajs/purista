@@ -8,7 +8,7 @@
 
 > **createMessageFrame**(`input`): `object`
 
-Defined in: protocol/helpers.ts:50
+Defined in: [ai/src/protocol/helpers.ts:50](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/helpers.ts#L50)
 
 ## Parameters
 
@@ -17,6 +17,14 @@ Defined in: protocol/helpers.ts:50
 #### content
 
 `string`
+
+#### final?
+
+`boolean`
+
+#### partial?
+
+`boolean`
 
 #### role
 
@@ -34,9 +42,17 @@ Defined in: protocol/helpers.ts:50
 
 > `readonly` **content**: `string` = `input.content`
 
+### final
+
+> `readonly` **final**: `boolean` \| `undefined` = `input.final`
+
 ### kind
 
 > `readonly` **kind**: `"message"` = `'message'`
+
+### partial
+
+> `readonly` **partial**: `boolean` \| `undefined` = `input.partial`
 
 ### role
 

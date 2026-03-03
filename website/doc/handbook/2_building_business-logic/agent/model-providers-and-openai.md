@@ -49,17 +49,17 @@ defaultModelResourceRegistry.register('openai:gpt-4o-mini', gpt4oMini)
    ```bash
    pnpm add @ai-sdk/openai ai
    ```
-2. Export a helper that registers each model with `defaultModelResourceRegistry`. The string key (`openai:gpt-4o-mini`) is what agents reference in their manifests via `.useResource('model', { resourceName: 'openai:gpt-4o-mini' })` or `.setModelResource({ resourceName: 'openai:gpt-4o-mini' })`.
+2. Export a helper that registers each model with `defaultModelResourceRegistry`. The string key (`openai:gpt-4o-mini`) should match the alias declared by your agent builder via `.defineModel('openai:gpt-4o-mini')`.
 3. Load this module during bootstrap (before starting any agents or workers) so the registry knows how to resolve the resource name.
 
-The registry is optional but handy when multiple agents share the same provider. For one-off setups you can also pass the provider instance directly through `getInstance({ resources: { model: provider } })`.
+The registry is optional but handy when multiple agents share the same provider. For one-off setups you can also pass the provider instance directly through `getInstance({ models: { 'openai:gpt-4o-mini': provider } })`.
 
 ## Per-run overrides with metadata
 
 `AiSdkProvider` understands the `metadata.aiSdk` object to override call options without recreating the provider:
 
 ```ts
-await context.resources.model.generate({
+await context.models['openai:gpt-4o-mini'].generate({
   prompt: payload.prompt,
   metadata: {
     aiSdk: {

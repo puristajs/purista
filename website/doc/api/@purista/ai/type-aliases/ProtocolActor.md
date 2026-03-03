@@ -8,4 +8,4 @@
 
 > **ProtocolActor** = `z.infer`\<*typeof* [`protocolActorSchema`](../variables/protocolActorSchema.md)\>
 
-Defined in: protocol/types.ts:26
+Defined in: [ai/src/protocol/types.ts:26](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/types.ts#L26)

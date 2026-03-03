@@ -8,7 +8,7 @@
 
 > **getGeneralServiceConfigFileContent**(`input`): `string`
 
-Defined in: [content/service/getGeneralServiceConfigFileContent.ts:8](https://github.com/puristajs/purista/blob/643d8ae461234cbb142aca5f38526a7b04d6fea0/packages/cli/src/api/content/service/getGeneralServiceConfigFileContent.ts#L8)
+Defined in: [content/service/getGeneralServiceConfigFileContent.ts:8](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/cli/src/api/content/service/getGeneralServiceConfigFileContent.ts#L8)
 
 Generate the general service configuration file content.
 

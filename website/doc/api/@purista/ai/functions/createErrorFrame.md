@@ -8,7 +8,7 @@
 
 > **createErrorFrame**(`input`): `object`
 
-Defined in: protocol/helpers.ts:97
+Defined in: [ai/src/protocol/helpers.ts:120](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/helpers.ts#L120)
 
 ## Parameters
 

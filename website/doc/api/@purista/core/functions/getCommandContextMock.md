@@ -6,9 +6,9 @@
 
 # Function: getCommandContextMock()
 
-> **getCommandContextMock**\<`MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`\>(`input`): `object`
+> **getCommandContextMock**\<`MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `MetadataType`, `QueueInvokes`, `AgentInvokes`\>(`input`): `object`
 
-Defined in: [mocks/getCommandContext.mock.ts:24](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getCommandContext.mock.ts#L24)
+Defined in: [mocks/getCommandContext.mock.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getCommandContext.mock.ts#L26)
 
 A function that returns a mock object for command function context
 
@@ -46,9 +46,25 @@ A function that returns a mock object for command function context
 
 `EmitList` *extends* `Record`\<`string`, [`Schema`](../type-aliases/Schema.md)\>
 
+### MetadataType
+
+`MetadataType` *extends* [`CommandDefinitionMetadataBase`](../type-aliases/CommandDefinitionMetadataBase.md) = [`CommandDefinitionMetadataBase`](../type-aliases/CommandDefinitionMetadataBase.md)
+
+### QueueInvokes
+
+`QueueInvokes` *extends* [`QueueInvokeList`](../type-aliases/QueueInvokeList.md) = [`QueueInvokeList`](../type-aliases/QueueInvokeList.md)
+
+### AgentInvokes
+
+`AgentInvokes` *extends* [`AgentInvokeList`](../type-aliases/AgentInvokeList.md) = [`AgentInvokeList`](../type-aliases/AgentInvokeList.md)
+
 ## Parameters
 
 ### input
+
+#### agentInvokes?
+
+`AgentInvokes`
 
 #### emitList
 
@@ -132,6 +148,12 @@ set a config value in the config store
 
 emit a custom message
 
+#### mock.invokeAgent
+
+> **invokeAgent**: `AgentInvokes`
+
+Invokes an agent and returns the result.
+
 #### mock.logger
 
 > **logger**: [`Logger`](../classes/Logger.md)
@@ -146,7 +168,7 @@ the original message
 
 #### mock.queue
 
-> **queue**: [`QueueContext`](../type-aliases/QueueContext.md) & [`QueueContext`](../type-aliases/QueueContext.md)\<[`QueueInvokeList`](../type-aliases/QueueInvokeList.md)\>
+> **queue**: [`QueueContext`](../type-aliases/QueueContext.md) & [`QueueContext`](../type-aliases/QueueContext.md)\<`QueueInvokes`\>
 
 typed queue enqueue helpers
 
@@ -324,6 +346,10 @@ wrap given function in an opentelemetry span
 #### stubs.invoke
 
 > **invoke**: `SinonStub`\<`any`[], `any`\>
+
+#### stubs.invokeAgent
+
+> **invokeAgent**: `AgentInvokes`
 
 #### stubs.logger
 

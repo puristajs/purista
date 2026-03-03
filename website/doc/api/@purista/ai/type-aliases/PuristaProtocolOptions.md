@@ -8,7 +8,7 @@
 
 > **PuristaProtocolOptions** = `object`
 
-Defined in: protocol/purista.ts:17
+Defined in: [ai/src/protocol/purista.ts:17](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/purista.ts#L17)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: protocol/purista.ts:17
 
 > `optional` **actor**: [`ProtocolActor`](ProtocolActor.md)
 
-Defined in: protocol/purista.ts:20
+Defined in: [ai/src/protocol/purista.ts:20](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/purista.ts#L20)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: protocol/purista.ts:20
 
 > `optional` **conversationId**: `string`
 
-Defined in: protocol/purista.ts:18
+Defined in: [ai/src/protocol/purista.ts:18](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/purista.ts#L18)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: protocol/purista.ts:18
 
 > `optional` **inReplyTo**: `string`
 
-Defined in: protocol/purista.ts:19
+Defined in: [ai/src/protocol/purista.ts:19](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/purista.ts#L19)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: protocol/purista.ts:19
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: protocol/purista.ts:23
+Defined in: [ai/src/protocol/purista.ts:23](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/purista.ts#L23)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: protocol/purista.ts:23
 
 > `optional` **tenantId**: `string`
 
-Defined in: protocol/purista.ts:22
+Defined in: [ai/src/protocol/purista.ts:22](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/purista.ts#L22)
 
 ***
 
@@ -56,4 +56,4 @@ Defined in: protocol/purista.ts:22
 
 > `optional` **userId**: `string`
 
-Defined in: protocol/purista.ts:21
+Defined in: [ai/src/protocol/purista.ts:21](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/purista.ts#L21)

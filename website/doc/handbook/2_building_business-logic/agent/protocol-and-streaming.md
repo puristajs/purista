@@ -24,7 +24,7 @@ Agents communicate through the `agent_protocol_concept` format defined in `specs
 context.protocol.emitMessage({ content: 'Checking knowledge base…', partial: true })
 context.protocol.emitMessage({ content: answer, final: true })
 context.protocol.emitTelemetry({
-  provider: context.resources.model.name,
+  provider: context.models['openai:gpt-4o-mini'].name,
   durationMs: Date.now() - started,
   usage: {
     promptTokens: tokens?.prompt,
@@ -41,7 +41,7 @@ If you only `return { message: '...' }`, the runtime automatically emits a `mess
 When you expose an agent as an HTTP endpoint, the bridge forwards frames immediately. Server-Sent Events (SSE) is the recommended mode:
 
 ```ts
-export const supportAgentDefinition = AgentBuilder.create({ ... })
+export const supportAgentDefinition = new AgentBuilder({ ... })
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
   .setStreamingMode('sse')
   .build()

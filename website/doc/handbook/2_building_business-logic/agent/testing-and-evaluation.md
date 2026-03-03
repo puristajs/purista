@@ -25,7 +25,7 @@ describe('support agent', () => {
 
     const agent = await supportAgentDefinition.getInstance({
       eventBridge,
-      resources: { model: new EchoProvider() },
+      models: { 'openai:gpt-4o-mini': new EchoProvider() },
     })
     await agent.start()
 

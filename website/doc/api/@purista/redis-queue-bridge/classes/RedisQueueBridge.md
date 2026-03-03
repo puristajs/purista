@@ -6,7 +6,7 @@
 
 # Class: RedisQueueBridge\<M, F, S, RESP, TYPE_MAPPING\>
 
-Defined in: [RedisQueueBridge.impl.ts:35](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L35)
+Defined in: [RedisQueueBridge.impl.ts:36](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L36)
 
 ## Type Parameters
 
@@ -40,7 +40,7 @@ Defined in: [RedisQueueBridge.impl.ts:35](https://github.com/puristajs/purista/b
 
 > **new RedisQueueBridge**\<`M`, `F`, `S`, `RESP`, `TYPE_MAPPING`\>(`options?`): `RedisQueueBridge`\<`M`, `F`, `S`, `RESP`, `TYPE_MAPPING`\>
 
-Defined in: [RedisQueueBridge.impl.ts:68](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L68)
+Defined in: [RedisQueueBridge.impl.ts:69](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L69)
 
 #### Parameters
 
@@ -58,7 +58,7 @@ Defined in: [RedisQueueBridge.impl.ts:68](https://github.com/puristajs/purista/b
 
 > `readonly` **capabilities**: [`QueueBridgeCapabilities`](../../core/type-aliases/QueueBridgeCapabilities.md)
 
-Defined in: [RedisQueueBridge.impl.ts:45](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L45)
+Defined in: [RedisQueueBridge.impl.ts:46](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L46)
 
 #### Implementation of
 
@@ -70,7 +70,7 @@ Defined in: [RedisQueueBridge.impl.ts:45](https://github.com/puristajs/purista/b
 
 > `readonly` **instanceId**: `string`
 
-Defined in: [RedisQueueBridge.impl.ts:58](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L58)
+Defined in: [RedisQueueBridge.impl.ts:59](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L59)
 
 #### Implementation of
 
@@ -82,7 +82,7 @@ Defined in: [RedisQueueBridge.impl.ts:58](https://github.com/puristajs/purista/b
 
 > `readonly` **name**: `"RedisQueueBridge"` = `'RedisQueueBridge'`
 
-Defined in: [RedisQueueBridge.impl.ts:43](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L43)
+Defined in: [RedisQueueBridge.impl.ts:44](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L44)
 
 #### Implementation of
 
@@ -94,7 +94,7 @@ Defined in: [RedisQueueBridge.impl.ts:43](https://github.com/puristajs/purista/b
 
 > **ack**(`queueName`, `leaseId`): `Promise`\<`void`\>
 
-Defined in: [RedisQueueBridge.impl.ts:220](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L220)
+Defined in: [RedisQueueBridge.impl.ts:215](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L215)
 
 #### Parameters
 
@@ -120,7 +120,7 @@ Defined in: [RedisQueueBridge.impl.ts:220](https://github.com/puristajs/purista/
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [RedisQueueBridge.impl.ts:88](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L88)
+Defined in: [RedisQueueBridge.impl.ts:87](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L87)
 
 #### Returns
 
@@ -136,7 +136,7 @@ Defined in: [RedisQueueBridge.impl.ts:88](https://github.com/puristajs/purista/b
 
 > **enqueue**(`options`): `Promise`\<[`QueueEnqueueResult`](../../core/type-aliases/QueueEnqueueResult.md)\>
 
-Defined in: [RedisQueueBridge.impl.ts:107](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L107)
+Defined in: [RedisQueueBridge.impl.ts:106](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L106)
 
 #### Parameters
 
@@ -158,7 +158,7 @@ Defined in: [RedisQueueBridge.impl.ts:107](https://github.com/puristajs/purista/
 
 > **extendLease**(`queueName`, `leaseId`, `extensionMs`): `Promise`\<`void`\>
 
-Defined in: [RedisQueueBridge.impl.ts:200](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L200)
+Defined in: [RedisQueueBridge.impl.ts:195](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L195)
 
 #### Parameters
 
@@ -188,7 +188,7 @@ Defined in: [RedisQueueBridge.impl.ts:200](https://github.com/puristajs/purista/
 
 > **isHealthy**(): `Promise`\<`boolean`\>
 
-Defined in: [RedisQueueBridge.impl.ts:98](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L98)
+Defined in: [RedisQueueBridge.impl.ts:97](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L97)
 
 #### Returns
 
@@ -204,7 +204,7 @@ Defined in: [RedisQueueBridge.impl.ts:98](https://github.com/puristajs/purista/b
 
 > **isReady**(): `Promise`\<`boolean`\>
 
-Defined in: [RedisQueueBridge.impl.ts:94](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L94)
+Defined in: [RedisQueueBridge.impl.ts:93](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L93)
 
 #### Returns
 
@@ -220,7 +220,7 @@ Defined in: [RedisQueueBridge.impl.ts:94](https://github.com/puristajs/purista/b
 
 > **leaseNext**(`queueName`, `options?`): `Promise`\<[`QueueLease`](../../core/type-aliases/QueueLease.md) \| `undefined`\>
 
-Defined in: [RedisQueueBridge.impl.ts:148](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L148)
+Defined in: [RedisQueueBridge.impl.ts:147](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L147)
 
 #### Parameters
 
@@ -246,7 +246,7 @@ Defined in: [RedisQueueBridge.impl.ts:148](https://github.com/puristajs/purista/
 
 > **metrics**(`queueName`): `Promise`\<\{ `deadLetter`: `number`; `inflight`: `number`; `oldestAgeMs`: `number` \| `undefined`; `pending`: `number`; `retries`: `number`; \}\>
 
-Defined in: [RedisQueueBridge.impl.ts:265](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L265)
+Defined in: [RedisQueueBridge.impl.ts:260](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L260)
 
 #### Parameters
 
@@ -268,7 +268,7 @@ Defined in: [RedisQueueBridge.impl.ts:265](https://github.com/puristajs/purista/
 
 > **moveToDeadLetter**(`queueName`, `message`, `reason?`): `Promise`\<`void`\>
 
-Defined in: [RedisQueueBridge.impl.ts:253](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L253)
+Defined in: [RedisQueueBridge.impl.ts:248](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L248)
 
 #### Parameters
 
@@ -298,7 +298,7 @@ Defined in: [RedisQueueBridge.impl.ts:253](https://github.com/puristajs/purista/
 
 > **nack**(`queueName`, `leaseId`, `request`): `Promise`\<`void`\>
 
-Defined in: [RedisQueueBridge.impl.ts:236](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L236)
+Defined in: [RedisQueueBridge.impl.ts:231](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L231)
 
 #### Parameters
 
@@ -328,7 +328,7 @@ Defined in: [RedisQueueBridge.impl.ts:236](https://github.com/puristajs/purista/
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [RedisQueueBridge.impl.ts:82](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L82)
+Defined in: [RedisQueueBridge.impl.ts:81](https://github.com/puristajs/purista/blob/master/packages/redis-queue-bridge/src/RedisQueueBridge.impl.ts#L81)
 
 #### Returns
 

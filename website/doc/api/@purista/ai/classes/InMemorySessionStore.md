@@ -6,7 +6,7 @@
 
 # Class: InMemorySessionStore
 
-Defined in: memory/sessionStore.ts:35
+Defined in: [ai/src/memory/sessionStore.ts:35](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/memory/sessionStore.ts#L35)
 
 Simple development-friendly session store that keeps state in memory.
 
@@ -37,7 +37,7 @@ await store.save({ sessionId: 'demo', data: { lastOutput: 'hi' }, updatedAt: Dat
 
 > **delete**(`sessionId`): `Promise`\<`void`\>
 
-Defined in: memory/sessionStore.ts:46
+Defined in: [ai/src/memory/sessionStore.ts:46](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/memory/sessionStore.ts#L46)
 
 #### Parameters
 
@@ -59,7 +59,7 @@ Defined in: memory/sessionStore.ts:46
 
 > **load**(`sessionId`): `Promise`\<[`SessionRecord`](../type-aliases/SessionRecord.md) \| `undefined`\>
 
-Defined in: memory/sessionStore.ts:38
+Defined in: [ai/src/memory/sessionStore.ts:38](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/memory/sessionStore.ts#L38)
 
 #### Parameters
 
@@ -81,7 +81,7 @@ Defined in: memory/sessionStore.ts:38
 
 > **save**(`record`): `Promise`\<`void`\>
 
-Defined in: memory/sessionStore.ts:42
+Defined in: [ai/src/memory/sessionStore.ts:42](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/memory/sessionStore.ts#L42)
 
 #### Parameters
 

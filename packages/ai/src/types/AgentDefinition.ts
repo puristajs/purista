@@ -5,6 +5,7 @@ import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
 import type { SessionStore } from '../memory/sessionStore.js'
 import type { PoolManager } from '../pools/PoolManager.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
+import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import type { AgentManifest } from './AgentManifest.js'
 
 export type AgentInfo = {
@@ -43,6 +44,8 @@ export type AgentInstanceOptions = {
 	sessionStore?: SessionStore
 	knowledgeAdapters?: Record<string, KnowledgeAdapter>
 	poolManager?: PoolManager
+	models?: Record<string, ModelProvider>
+	/** @deprecated use `models` */
 	resources?: Record<string, unknown>
 	config?: Record<string, unknown>
 }

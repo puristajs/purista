@@ -6,7 +6,7 @@ order: 203702
 
 # Run & Invoke Agents
 
-An `AgentDefinition` is inert until you bind runtime dependencies (event bridge, stores, resources). This page shows how to create an instance, start/stop it alongside your services, and invoke it from anywhere in the application.
+An `AgentDefinition` is inert until you bind runtime dependencies (event bridge, stores, models). This page shows how to create an instance, start/stop it alongside your services, and invoke it from anywhere in the application.
 
 ## Bootstrap the instance
 
@@ -16,43 +16,72 @@ import { AiSdkProvider } from '@purista/ai'
 import { createOpenAI } from '@ai-sdk/openai'
 import { supportAgentDefinition } from './agents/supportAgent/v1/supportAgent.js'
 
-type Resources = { model: AiSdkProvider }
-
 const eventBridge = new DefaultEventBridge()
 await eventBridge.start()
 
 const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY! })
 const provider = new AiSdkProvider({
-  model: openai('gpt-4o-mini'),
+  model: openai('gpt-5.2-mini'),
   systemPrompt: 'You are a friendly support engineer.',
   defaults: { temperature: 0.2 },
 })
 
 const supportAgent = await supportAgentDefinition.getInstance({
   eventBridge,
-  resources: {
-    model: provider,
-  } satisfies Resources,
+  models: {
+    'openai:gpt-5.2-mini': provider,
+  },
 })
 
 await supportAgent.start()
 ```
 
-- `eventBridge` is mandatory; every agent registers an internal service (`agent.<name>.run`).
-- `resources` matches whatever aliases you declared with `.useResource`. Inject SDK clients, providers, caches, etc.
+- `eventBridge` is mandatory; every agent registers an internal service (`<agentName>.run`).
+- `models` must satisfy aliases declared via `.defineModel(...)` in the agent builder.
 - Session stores, knowledge adapters, and pool managers default to in-memory implementations. Override them per environment if you need Redis/PGVector or a shared pool.
 
 ## Invoke an agent programmatically
 
-The helper `invokeAgent` mirrors `invokeCommand` but automatically validates the agent protocol envelopes:
+### 1. Integrated Service Pattern (Recommended)
+
+When working inside Commands, Subscriptions, or Streams, use the `.canInvokeAgent` builder method. This integrates the agent into the functional context with full type safety.
+
+```ts
+export const notifyCommand = supportServiceBuilder
+  .getCommandBuilder('notifySupportAgent', 'Runs the support agent from a command')
+  .canInvokeAgent('supportAgent', '1', optionalParameterSchema) // Register dependency
+  .addPayloadSchema(supportInputSchema)
+  .setCommandFunction(async function (context, payload) {
+    // 1. Get the final result
+    const result = await context.invokeAgent.supportAgent['1']
+      .call({ message: payload.prompt })
+      .final()
+
+    // 2. Or stream frames manually
+    const invocation = context.invokeAgent.supportAgent['1']
+      .call({ message: payload.prompt })
+
+    for await (const frame of invocation) {
+      context.logger.info({ frame }, 'Agent frame received')
+    }
+
+    return result
+  })
+```
+
+The `.call()` method returns an `AgentInvocation` object which is an `AsyncIterable` yielding protocol frames and has a `.final()` helper returning a `Promise` for the full result.
+
+### 2. Standalone Invocation
+
+The helper `invokeAgent` (from `@purista/ai`) mirrors `invokeCommand` but automatically validates the agent protocol envelopes. This is ideal for scripts, manual triggers, or controllers where you don't have a Purista context.
 
 ```ts
 import { invokeAgent } from '@purista/ai'
 
 const result = await invokeAgent({
   eventBridge,
-  agentName: supportAgentDefinition.info.agentName,
-  agentVersion: supportAgentDefinition.info.agentVersion,
+  agentName: 'supportAgent',
+  agentVersion: '1',
   payload: { prompt: 'How do I reset my password?' },
   parameter: { locale: 'en' },
 })
@@ -64,37 +93,12 @@ for (const envelope of result) {
 
 Use the optional `stream` argument to attach a responder that processes frames as the agent emits them (ideal for WebSockets or web streams).
 
-### Inside commands, streams, or subscriptions
-
-Because agents register as internal services, you can reuse the existing invoke helpers:
-
-```ts
-import { invokeAgent } from '@purista/ai'
-
-export const notifyCommand = supportServiceBuilder
-  .getCommandBuilder('notifySupportAgent', 'Runs the support agent from a command')
-  .addPayloadSchema(supportInputSchema)
-  .setCommandFunction(async function (context, payload) {
-    const envelopes = await invokeAgent({
-      eventBridge: context.eventBridge,
-      agentName: 'supportAgent',
-      agentVersion: '1',
-      payload,
-      parameter: { channel: 'command' },
-    })
-
-    return envelopes
-  })
-```
-
-The helper keeps your command lean—no need to reimplement the protocol or envelope plumbing.
-
 ## HTTP exposure
 
 `.exposeAsHttpEndpoint('POST', 'agents/supportAgent')` automatically adds an endpoint to your generated OpenAPI spec. The endpoint behaves like any streaming command:
 
 ```ts
-export const supportAgentDefinition = AgentBuilder.create({ ... })
+export const supportAgentDefinition = new AgentBuilder({ ... })
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
   .setStreamingMode('sse')
   .setHandler(...)

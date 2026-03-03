@@ -8,4 +8,4 @@
 
 > **AgentProtocolFrame** = `z.infer`\<*typeof* [`agentProtocolFrameSchema`](../variables/agentProtocolFrameSchema.md)\>
 
-Defined in: protocol/types.ts:89
+Defined in: [ai/src/protocol/types.ts:97](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/types.ts#L97)

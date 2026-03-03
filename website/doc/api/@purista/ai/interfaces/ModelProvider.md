@@ -6,7 +6,7 @@
 
 # Interface: ModelProvider
 
-Defined in: providers/runtime/ModelProvider.ts:25
+Defined in: [ai/src/providers/runtime/ModelProvider.ts:26](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/ModelProvider.ts#L26)
 
 Minimal interface providers must satisfy so they can be swapped at runtime.
 
@@ -16,7 +16,7 @@ Minimal interface providers must satisfy so they can be swapped at runtime.
 
 > `readonly` **name**: `string`
 
-Defined in: providers/runtime/ModelProvider.ts:26
+Defined in: [ai/src/providers/runtime/ModelProvider.ts:27](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/ModelProvider.ts#L27)
 
 ## Methods
 
@@ -24,7 +24,7 @@ Defined in: providers/runtime/ModelProvider.ts:26
 
 > **generate**(`request`): `Promise`\<[`ProviderResponse`](../type-aliases/ProviderResponse.md)\>
 
-Defined in: providers/runtime/ModelProvider.ts:27
+Defined in: [ai/src/providers/runtime/ModelProvider.ts:28](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/ModelProvider.ts#L28)
 
 #### Parameters
 

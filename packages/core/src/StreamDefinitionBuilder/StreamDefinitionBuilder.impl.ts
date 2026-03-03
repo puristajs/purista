@@ -6,6 +6,7 @@ import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttp
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
 import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
+import type { AgentInvocation, AgentProtocolPayload, AgentProtocolResponse } from '../core/types/agent/AgentProtocol.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
 import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventBridgeConfig.js'
@@ -36,6 +37,7 @@ export class StreamDefinitionBuilder<
 
 	private invokes: C['Invokes'] = {}
 	private streamInvokes: C['StreamInvokes'] = {}
+	private agentInvokes: C['AgentInvokes'] = {}
 	private emitList: C['EmitList'] = {}
 	private queueInvokes: QueueInvokeList = {}
 
@@ -261,6 +263,74 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
+	/**
+	 * Define an agent which can be invoked by the current stream.
+	 * The agent must follow the PURISTA agent protocol.
+	 *
+	 * @param agentName The name of the agent service
+	 * @param agentVersion The version of the agent service
+	 * @param parameterSchema The optional parameter schema for the agent
+	 */
+	canInvokeAgent<Parameter extends Schema, SName extends string = string, Version extends string = string>(
+		agentName: SName,
+		agentVersion: Version,
+		parameterSchema?: Parameter,
+	) {
+		if (agentName.trim() === '' || agentVersion.trim() === '') {
+			throw new Error('canInvokeAgent requires non-empty agent name and version')
+		}
+
+		this.agentInvokes = {
+			...this.agentInvokes,
+			[agentName]: {
+				...(this.agentInvokes[agentName] as Record<string, any>),
+				[agentVersion]: {
+					parameterSchema,
+				},
+			},
+		} as unknown as C['AgentInvokes'] &
+			Record<
+				SName,
+				Record<
+					Version,
+					{
+						call: (
+							payload: AgentProtocolPayload,
+							parameter: InferIn<Parameter>,
+						) => AgentInvocation<AgentProtocolResponse>
+					}
+				>
+			>
+
+		return this as unknown as StreamDefinitionBuilder<
+			S,
+			StreamDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['ChunkSchema'],
+				C['FinalSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes'],
+				C['AgentInvokes'] &
+					Record<
+						SName,
+						Record<
+							Version,
+							{
+								call: (
+									payload: AgentProtocolPayload,
+									parameter: InferIn<Parameter>,
+								) => AgentInvocation<AgentProtocolResponse>
+							}
+						>
+					>
+			>
+		>
+	}
+
 	canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
 		this.emitList = { ...this.emitList, [eventName]: schema }
 		return this as unknown as StreamDefinitionBuilder<
@@ -439,7 +509,8 @@ export class StreamDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes']
+			C['QueueInvokes'],
+			C['AgentInvokes']
 		>,
 	) {
 		assertNonArrowFunction(fn, 'setStreamFunction')
@@ -466,7 +537,8 @@ export class StreamDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes']
+			C['QueueInvokes'],
+			C['AgentInvokes']
 		>
 	}
 
@@ -555,7 +627,9 @@ export class StreamDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes']
+			StreamDefinitionMetadataBase,
+			C['QueueInvokes'],
+			C['AgentInvokes']
 		> = {
 			streamName: this.streamName,
 			streamDescription: this.streamDescription,
@@ -570,6 +644,7 @@ export class StreamDefinitionBuilder<
 			aggregateChunks: this.aggregateChunks,
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
+			agentInvokes: this.agentInvokes,
 			emitList: this.emitList,
 			queueInvokes: this.queueInvokes,
 		}

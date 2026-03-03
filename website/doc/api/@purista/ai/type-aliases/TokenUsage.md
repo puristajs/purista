@@ -8,4 +8,4 @@
 
 > **TokenUsage** = `z.infer`\<`NonNullable`\<*typeof* [`tokenUsageSchema`](../variables/tokenUsageSchema.md)\>\>
 
-Defined in: protocol/types.ts:18
+Defined in: [ai/src/protocol/types.ts:18](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/protocol/types.ts#L18)

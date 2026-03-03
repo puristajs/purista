@@ -6,12 +6,12 @@ order: 203701
 
 # The Agent Builder
 
-`AgentBuilder.create` mirrors `ServiceBuilder`: you compose fluent methods to describe metadata, schemas, resources, tool allowlists, HTTP exposure, and the handler that runs inside the PURISTA runtime. The result of `.build()` is an `AgentDefinition` you can start multiple times (local + worker pools) just like a service definition.
+`new AgentBuilder(...)` mirrors `ServiceBuilder`: you compose fluent methods to describe metadata, schemas, models, tool allowlists, HTTP exposure, and the handler that runs inside the PURISTA runtime. The result of `.build()` is an `AgentDefinition` you can start multiple times (local + worker pools) just like a service definition.
 
 ## Full builder example
 
 ```ts title="src/agents/supportAgent/v1/supportAgent.ts"
-import { AgentBuilder, type AgentHandlerContext, type ModelProvider } from '@purista/ai'
+import { AgentBuilder } from '@purista/ai'
 import { extendApi } from '@purista/core'
 import { z } from 'zod/v4'
 
@@ -24,9 +24,7 @@ const supportInputSchema = extendApi(
   { title: 'Support Agent Input' },
 )
 
-type SupportAgentContext = AgentHandlerContext<z.infer<typeof supportInputSchema>, unknown, { model: ModelProvider }>
-
-export const supportAgentDefinition = AgentBuilder.create({
+export const supportAgentDefinition = new AgentBuilder({
   agentName: 'supportAgent',
   agentVersion: '1',
   description: 'Answers common help-desk questions',
@@ -37,26 +35,26 @@ export const supportAgentDefinition = AgentBuilder.create({
   )
   .persistHistory({ storeName: 'aiConversation', maxFrames: 40 })
   .useKnowledgeAdapter({ adapterName: 'supportFaq', options: { locale: 'en-US' } })
-  .setModelResource({ resourceName: 'openai:gpt-4o-mini' })
-  .useResource('model', { resourceName: 'openai:gpt-4o-mini' })
+  .defineModel('openai:gpt-4o-mini')
   .allowTool({ serviceName: 'support', serviceVersion: '1', commandName: 'createTicket' })
   .setConcurrency({ poolId: 'support', maxWorkers: 3 })
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
   .setStreamingMode('sse')
   .makeEndpointPublic()
   .setRetryPolicy({ maxAttempts: 2, initialIntervalMs: 1_000 })
-  .setHandler(async function handler(context: SupportAgentContext, payload) {
+  .setHandler(async function handler(context, payload) {
     const sessionId = payload.sessionId ?? context.message.id
 
     const knowledge = await context.knowledge.query('supportFaq', payload.prompt, 3)
-    const { output, tokens } = await context.resources.model.generate({
+    const model = context.models['openai:gpt-4o-mini']
+    const { output, tokens } = await model.generate({
       prompt: payload.prompt,
       context: [payload.context, knowledge.map(doc => doc.body).join('\n')].filter(Boolean).join('\n\n'),
     })
 
     context.protocol.emitMessage({ content: 'Checking your account…', partial: true })
     context.protocol.emitMessage({ content: output, final: true })
-    context.protocol.emitTelemetry({ provider: context.resources.model.name, usage: {
+    context.protocol.emitTelemetry({ provider: model.name, usage: {
       promptTokens: tokens?.prompt,
       completionTokens: tokens?.completion,
       totalTokens: (tokens?.prompt ?? 0) + (tokens?.completion ?? 0),
@@ -72,7 +70,7 @@ export const supportAgentDefinition = AgentBuilder.create({
 ### Key builder calls
 
 - `.addPayloadSchema` / `.addParameterSchema` / `.addOutputSchema` reuse the same schema primitives (`extendApi`, Zod, TypeBox, …) you already use in services.
-- `.useResource(alias, { resourceName })` registers a manifest dependency and gives the handler typed access through `context.resources[alias]`. Pass the actual implementation later when creating an instance.
+- `.defineModel(alias)` declares which model aliases the agent can use. Pass the actual provider implementation later through `getInstance({ models: { [alias]: provider } })`.
 - `.allowTool` works exactly like `.canInvoke`: only allowlisted service commands may be invoked by `context.tools.invoke()`.
 - `.persistHistory`, `.useSessionStore`, and `.useKnowledgeAdapter` describe how conversation history and shared knowledge should be stored. Defaults are in-memory, but you can plug in Redis/PGVector/etc. per agent.
 - `.exposeAsHttpEndpoint` + `.setStreamingMode` wires up an HTTP route in the OpenAPI spec. Use `buffered` for single-payload responses or `sse`/`chunked` for token streams.
@@ -90,6 +88,7 @@ The handler receives a familiar context object with agent-specific helpers:
 | `session` | Wrapper around the chosen session store. Use `.load`, `.save`, `.delete` for conversation state. |
 | `knowledge` | Fan-out to allowlisted knowledge adapters (vector stores, RAG indexes, etc.). |
 | `tools` | Invoke allowlisted PURISTA commands. Events appear as tool frames for tracing/debugging. |
-| `resources` | Typed access to the custom dependencies (model providers, caches, third-party SDK clients). |
+| `models` | Typed access to declared model aliases (`context.models[alias]`). |
+| `resources` | Optional custom dependencies for non-model integrations (caches, SDK clients, domain utilities). |
 
 Use these helpers instead of manually wiring protocol IDs, storing envelopes, or calling commands by hand. The builder/runtime ensure every handler runs with consistent tracing, retries, and validation.

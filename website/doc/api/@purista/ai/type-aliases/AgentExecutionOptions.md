@@ -8,7 +8,7 @@
 
 > **AgentExecutionOptions** = `object`
 
-Defined in: runtime/AgentExecutor.ts:21
+Defined in: [ai/src/runtime/AgentExecutor.ts:21](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentExecutor.ts#L21)
 
 Dependencies required for running an agent workload.
 
@@ -18,7 +18,7 @@ Dependencies required for running an agent workload.
 
 > **knowledgeAdapters**: `Record`\<`string`, [`KnowledgeAdapter`](../interfaces/KnowledgeAdapter.md)\>
 
-Defined in: runtime/AgentExecutor.ts:25
+Defined in: [ai/src/runtime/AgentExecutor.ts:25](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentExecutor.ts#L25)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: runtime/AgentExecutor.ts:25
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: runtime/AgentExecutor.ts:26
+Defined in: [ai/src/runtime/AgentExecutor.ts:26](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentExecutor.ts#L26)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: runtime/AgentExecutor.ts:26
 
 > **manifest**: [`AgentManifest`](AgentManifest.md)
 
-Defined in: runtime/AgentExecutor.ts:22
+Defined in: [ai/src/runtime/AgentExecutor.ts:22](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentExecutor.ts#L22)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: runtime/AgentExecutor.ts:22
 
 > **provider**: [`ModelProvider`](../interfaces/ModelProvider.md)
 
-Defined in: runtime/AgentExecutor.ts:23
+Defined in: [ai/src/runtime/AgentExecutor.ts:23](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentExecutor.ts#L23)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: runtime/AgentExecutor.ts:23
 
 > **sessionStore**: [`SessionStore`](../interfaces/SessionStore.md)
 
-Defined in: runtime/AgentExecutor.ts:24
+Defined in: [ai/src/runtime/AgentExecutor.ts:24](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentExecutor.ts#L24)
 
 ***
 
@@ -58,4 +58,4 @@ Defined in: runtime/AgentExecutor.ts:24
 
 > **startActiveSpan**: [`StartActiveSpanFunction`](StartActiveSpanFunction.md)
 
-Defined in: runtime/AgentExecutor.ts:27
+Defined in: [ai/src/runtime/AgentExecutor.ts:27](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentExecutor.ts#L27)

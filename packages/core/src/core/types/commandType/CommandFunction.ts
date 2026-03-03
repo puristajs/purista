@@ -1,4 +1,5 @@
 import type { Schema } from '../../../schema/index.js'
+import type { AgentInvokeList } from '../agent/AgentInvokeList.js'
 import type { EmptyObject } from '../EmptyObject.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { ServiceClass } from '../ServiceClass.js'
@@ -21,11 +22,21 @@ export type CommandFunction<
 	Invokes extends InvokeList = EmptyObject,
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
+	AgentInvokes extends AgentInvokeList = EmptyObject,
 > = (
 	/** the service class */
 	this: S,
 	/** the command function contest */
-	context: CommandFunctionContext<MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes, EmitList>,
+	context: CommandFunctionContext<
+		MessagePayloadType,
+		MessageParamsType,
+		Resources,
+		Invokes,
+		StreamInvokes,
+		EmitList,
+		any,
+		AgentInvokes
+	>,
 	/** the transformed and validated payload */
 	payload: Readonly<FunctionPayloadType>,
 	/** the transformed and validated parameter object */

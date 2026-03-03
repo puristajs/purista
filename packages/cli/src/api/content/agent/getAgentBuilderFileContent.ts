@@ -30,7 +30,7 @@ export const getAgentBuilderFileContent = (input: {
 	})
 	writer.writeLine(')').blankLine()
 
-	writer.writeLine(`export const ${definitionName} = AgentBuilder.create({`)
+	writer.writeLine(`export const ${definitionName} = new AgentBuilder({`)
 	writer.indent(() => {
 		writer.writeLine(`agentName: '${normalizedAgentName}',`)
 		writer.writeLine(`agentVersion: '${input.agentVersion}',`)
@@ -39,6 +39,7 @@ export const getAgentBuilderFileContent = (input: {
 	writer.writeLine('})')
 	writer.indent(() => {
 		writer.writeLine(`.addPayloadSchema(${schemaName})`)
+		writer.writeLine(".defineModel('openai:gpt-4o-mini')")
 		writer.writeLine(".persistHistory({ storeName: 'aiConversation', maxFrames: 20 })")
 		writer.writeLine(`.setConcurrency({ poolId: '${normalizedAgentName}', maxWorkers: 1 })`)
 		writer.writeLine(`.exposeAsHttpEndpoint('POST', 'agents/${normalizedAgentName}')`)
@@ -50,9 +51,13 @@ export const getAgentBuilderFileContent = (input: {
 			writer.writeLine('const startedAt = Date.now()')
 			writer.writeLine('const sessionId = payload.sessionId ?? context.message.id ?? (`session-` + Date.now())')
 			writer.writeLine("context.logger.info({ prompt: payload.prompt }, 'invoking agent')")
-			writer.writeLine('const answer = "Echo: " + payload.prompt')
+			writer.writeLine("const model = context.models['openai:gpt-4o-mini']")
+			writer.writeLine('const result = await model.generate({ prompt: payload.prompt, context: payload.context })')
+			writer.writeLine('const answer = result.output')
 			writer.writeLine('context.protocol.emitMessage({ content: answer, final: true })')
-			writer.writeLine('context.protocol.emitTelemetry({ durationMs: Date.now() - startedAt })')
+			writer.writeLine(
+				'context.protocol.emitTelemetry({ durationMs: Date.now() - startedAt, provider: model.name, usage: { promptTokens: result.tokens?.prompt, completionTokens: result.tokens?.completion, totalTokens: (result.tokens?.prompt ?? 0) + (result.tokens?.completion ?? 0) } })',
+			)
 			writer.writeLine('await context.session.save({ sessionId, data: { lastOutput: answer }, updatedAt: Date.now() })')
 			writer.writeLine('return { message: answer }')
 		})

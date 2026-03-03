@@ -5,6 +5,7 @@ import { z } from 'zod/v4'
 import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
 import type { SessionStore } from '../memory/sessionStore.js'
 import type { PoolManager } from '../pools/PoolManager.js'
+import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import { AgentInstance, type AgentInstanceDependencies } from '../runtime/AgentInstance.js'
 import type { AgentHandlerContext } from '../runtime/context.js'
 import { createAgentHandlerContext, createProtocolBuffer } from '../runtime/context.js'
@@ -34,8 +35,9 @@ export type AgentHandler<
 	Payload = unknown,
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
+	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
 > = (
-	context: AgentHandlerContext<Payload, Parameter, Resources>,
+	context: AgentHandlerContext<Payload, Parameter, Resources, Models>,
 	payload: Payload,
 	parameter: Parameter,
 ) => Promise<AgentHandlerResult> | AgentHandlerResult
@@ -47,6 +49,7 @@ type AgentRuntimeConfig = {
 	knowledgeAdapters: Record<string, KnowledgeAdapter>
 	poolManager: PoolManager
 	resources: Record<string, unknown>
+	models: Record<string, ModelProvider>
 }
 
 const agentRuntimeConfigSchema = extendApi(
@@ -80,14 +83,10 @@ export class AgentBuilder {
 	private outputSchema?: Schema
 	private contextSchema?: Schema
 
-	static create(info: AgentInfo) {
-		return new AgentBuilder(info)
-	}
-
 	constructor(info: AgentInfo) {
 		this.info = normalizeInfo(info)
 		this.serviceBuilder = new ServiceBuilder({
-			serviceName: `agent.${this.info.agentName}`,
+			serviceName: this.info.agentName,
 			serviceVersion: this.info.agentVersion,
 			serviceDescription: this.info.description ?? `Agent ${this.info.agentName}`,
 		})
@@ -118,6 +117,16 @@ export class AgentBuilder {
 			...(this.manifest.resources ?? {}),
 			[alias]: resource,
 		}
+		return this
+	}
+
+	defineModel(alias: string) {
+		if (!alias.trim()) {
+			throw new Error('Model alias must not be empty')
+		}
+		const models = new Set(this.manifest.models ?? [])
+		models.add(alias.trim())
+		this.manifest.models = [...models]
 		return this
 	}
 
@@ -269,7 +278,8 @@ export class AgentBuilder {
 		Payload = unknown,
 		Parameter = unknown,
 		Resources extends Record<string, unknown> = Record<string, unknown>,
-	>(fn: AgentHandler<Payload, Parameter, Resources>) {
+		Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
+	>(fn: AgentHandler<Payload, Parameter, Resources, Models>) {
 		this.handler = fn as AgentHandler
 		this.commandBuilder.setCommandFunction(async function commandImpl(
 			this: { config?: { runtime?: AgentRuntimeConfig } },
@@ -298,6 +308,7 @@ export class AgentBuilder {
 					knowledgeAdapters: runtime.knowledgeAdapters,
 					protocol: protocolBuffer.protocol,
 					resources: runtime.resources,
+					models: runtime.models,
 					manifest: runtime.manifest,
 				})
 

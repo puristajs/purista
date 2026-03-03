@@ -8,7 +8,7 @@
 
 > **StartActiveSpanFunction** = \<`T`\>(`name`, `options?`, `context?`, `fn?`) => `Promise`\<`T`\>
 
-Defined in: runtime/AgentExecutor.ts:11
+Defined in: [ai/src/runtime/AgentExecutor.ts:11](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentExecutor.ts#L11)
 
 ## Type Parameters
 

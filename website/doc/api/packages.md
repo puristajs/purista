@@ -6,6 +6,7 @@
 
 ## Packages
 
+- [@purista/ai](@purista/ai/README.md)
 - [@purista/amqpbridge - v2.2.0](@purista/amqpbridge/README.md)
 - [@purista/aws-config-store - v2.2.0](@purista/aws-config-store/README.md)
 - [@purista/aws-secret-store - v2.2.0](@purista/aws-secret-store/README.md)

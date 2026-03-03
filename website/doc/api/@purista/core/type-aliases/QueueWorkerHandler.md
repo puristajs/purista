@@ -6,7 +6,7 @@
 
 # Type Alias: QueueWorkerHandler()\<MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes\>
 
-> **QueueWorkerHandler**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`\> = (`context`, `message`) => `Promise`\<[`QueueHandlerResult`](QueueHandlerResult.md) \| `void`\>
+> **QueueWorkerHandler**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`\> = (`context`, `message`) => `Promise`\<[`QueueHandlerResult`](QueueHandlerResult.md) \| `undefined`\>
 
 Defined in: [core/types/queue/QueueWorkerDefinition.ts:14](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueWorkerDefinition.ts#L14)
 
@@ -44,4 +44,4 @@ Defined in: [core/types/queue/QueueWorkerDefinition.ts:14](https://github.com/pu
 
 ## Returns
 
-`Promise`\<[`QueueHandlerResult`](QueueHandlerResult.md) \| `void`\>
+`Promise`\<[`QueueHandlerResult`](QueueHandlerResult.md) \| `undefined`\>

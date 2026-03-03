@@ -42,6 +42,7 @@ After setup, generate services and business artifacts with the CLI:
 4. `purista add stream`
 5. `purista add queue`
 6. `purista add queue-worker`
+7. `purista add agent`
 
 ## Project structure
 
@@ -85,6 +86,10 @@ The blueprint creates a folder structure expected by PURISTA tooling and code ge
 | |               |- [workerName]/
 | |                   |- [workerName]QueueWorkerBuilder.ts
 | |                   |- [workerName]QueueWorkerBuilder.test.ts
+| |           |- agent/
+| |           |   |- [agentName]/
+| |           |       |- [agentName]AgentBuilder.ts
+| |           |       |- [agentName]AgentBuilder.test.ts
 | |- store/
 | |   |- config/
 | |   |- state/

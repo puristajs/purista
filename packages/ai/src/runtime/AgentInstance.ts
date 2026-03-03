@@ -18,6 +18,7 @@ import type { SessionStore } from '../memory/sessionStore.js'
 import { InMemorySessionStore } from '../memory/sessionStore.js'
 import { PoolManager } from '../pools/PoolManager.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
+import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import type {
 	AgentInfo,
 	AgentRuntimeInstance as AgentInstanceContract,
@@ -46,6 +47,7 @@ export type AgentRuntimeDependencies = {
 	sessionStore?: SessionStore
 	knowledgeAdapters?: Record<string, KnowledgeAdapter>
 	poolManager?: PoolManager
+	models?: Record<string, ModelProvider>
 	resources?: Record<string, unknown>
 	config?: Record<string, unknown>
 }
@@ -61,6 +63,7 @@ type ResolvedAgentRuntimeDependencies = {
 	sessionStore: SessionStore
 	knowledgeAdapters: Record<string, KnowledgeAdapter>
 	poolManager: PoolManager
+	models: Record<string, ModelProvider>
 	resources: Record<string, unknown>
 	config?: Record<string, unknown>
 }
@@ -72,6 +75,7 @@ type AgentServiceConfig = {
 		sessionStore: SessionStore
 		knowledgeAdapters: Record<string, KnowledgeAdapter>
 		poolManager: PoolManager
+		models: Record<string, ModelProvider>
 		resources: Record<string, unknown>
 	}
 }
@@ -100,7 +104,14 @@ export class AgentInstance implements AgentInstanceContract {
 				default: new InMemoryKnowledgeAdapter(),
 			},
 			poolManager: runtime.poolManager ?? new PoolManager(),
+			models: runtime.models ?? {},
 			resources: runtime.resources ?? {},
+		}
+
+		for (const alias of deps.manifest.models ?? []) {
+			if (!this.runtime.models[alias]) {
+				throw new Error(`Missing model provider for alias "${alias}"`)
+			}
 		}
 
 		const poolId = deps.manifest.concurrency?.poolId ?? `agent:${deps.info.agentName}`
@@ -120,6 +131,7 @@ export class AgentInstance implements AgentInstanceContract {
 				sessionStore: this.runtime.sessionStore,
 				knowledgeAdapters: this.runtime.knowledgeAdapters,
 				poolManager: this.runtime.poolManager,
+				models: this.runtime.models,
 				resources: this.runtime.resources,
 			},
 		}

@@ -7,7 +7,7 @@ import type { AgentDefinition } from '../types/AgentDefinition.js'
  *
  * @example
  * ```ts
- * const definition = defineAgent({ name: 'planner' }).build()
+ * const definition = new AgentBuilder({ agentName: 'planner', agentVersion: '1' }).build()
  * await publishAgentManifest(service.configs.setConfig.bind(service.configs), definition)
  * ```
  */

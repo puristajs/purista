@@ -1,3 +1,4 @@
+export * from './addPuristaAgent.js'
 export * from './addPuristaCommand.js'
 export * from './addPuristaQueue.js'
 export * from './addPuristaQueueWorker.js'

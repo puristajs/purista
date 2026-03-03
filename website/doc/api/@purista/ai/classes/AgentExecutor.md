@@ -6,7 +6,7 @@
 
 # Class: AgentExecutor
 
-Defined in: runtime/AgentExecutor.ts:70
+Defined in: [ai/src/runtime/AgentExecutor.ts:71](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentExecutor.ts#L71)
 
 Runs prompts against the configured [ModelProvider](../interfaces/ModelProvider.md), writes session state,
 and captures telemetry spans using the provided logger/span factory.
@@ -33,7 +33,7 @@ console.log(result.output)
 
 > **new AgentExecutor**(`options`): `AgentExecutor`
 
-Defined in: runtime/AgentExecutor.ts:73
+Defined in: [ai/src/runtime/AgentExecutor.ts:74](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentExecutor.ts#L74)
 
 #### Parameters
 
@@ -51,7 +51,7 @@ Defined in: runtime/AgentExecutor.ts:73
 
 > **run**(`input`): `Promise`\<[`AgentExecutionResult`](../type-aliases/AgentExecutionResult.md)\>
 
-Defined in: runtime/AgentExecutor.ts:75
+Defined in: [ai/src/runtime/AgentExecutor.ts:76](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentExecutor.ts#L76)
 
 #### Parameters
 

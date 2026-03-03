@@ -3,6 +3,7 @@ import { UnhandledError } from '../core/Error/UnhandledError.impl.js'
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
 import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
+import type { AgentInvocation, AgentProtocolPayload, AgentProtocolResponse } from '../core/types/agent/AgentProtocol.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
 import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventBridgeConfig.js'
@@ -99,6 +100,7 @@ export class SubscriptionDefinitionBuilder<
 
 	private invokes: C['Invokes'] = {}
 	private streamInvokes: C['StreamInvokes'] = {}
+	private agentInvokes: C['AgentInvokes'] = {}
 
 	private emitList: C['EmitList'] = {}
 	private queueInvokes: QueueInvokeList = {}
@@ -281,6 +283,76 @@ export class SubscriptionDefinitionBuilder<
 						>
 					>,
 				C['EmitList']
+			>
+		>
+	}
+
+	/**
+	 * Define an agent which can be invoked by the current subscription.
+	 * The agent must follow the PURISTA agent protocol.
+	 *
+	 * @param agentName The name of the agent service
+	 * @param agentVersion The version of the agent service
+	 * @param parameterSchema The optional parameter schema for the agent
+	 */
+	canInvokeAgent<Parameter extends Schema, SName extends string = string, Version extends string = string>(
+		agentName: SName,
+		agentVersion: Version,
+		parameterSchema?: Parameter,
+	) {
+		if (agentName.trim() === '' || agentVersion.trim() === '') {
+			throw new Error('canInvokeAgent requires non-empty agent name and version')
+		}
+
+		this.agentInvokes = {
+			...this.agentInvokes,
+			[agentName]: {
+				...(this.agentInvokes[agentName] as Record<string, any>),
+				[agentVersion]: {
+					parameterSchema,
+				},
+			},
+		} as unknown as C['AgentInvokes'] &
+			Record<
+				SName,
+				Record<
+					Version,
+					{
+						call: (
+							payload: AgentProtocolPayload,
+							parameter: InferIn<Parameter>,
+						) => AgentInvocation<AgentProtocolResponse>
+					}
+				>
+			>
+
+		return this as unknown as SubscriptionDefinitionBuilder<
+			S,
+			SubscriptionDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['OutputSchema'],
+				C['TransformInputPayloadSchema'],
+				C['TransformInputParamsSchema'],
+				C['TransformOutputSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes'],
+				C['AgentInvokes'] &
+					Record<
+						SName,
+						Record<
+							Version,
+							{
+								call: (
+									payload: AgentProtocolPayload,
+									parameter: InferIn<Parameter>,
+								) => AgentInvocation<AgentProtocolResponse>
+							}
+						>
+					>
 			>
 		>
 	}
@@ -835,7 +907,8 @@ export class SubscriptionDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes']
+			C['QueueInvokes'],
+			C['AgentInvokes']
 		>,
 	) {
 		assertNonArrowFunction(fn, 'setSubscriptionFunction')
@@ -872,7 +945,8 @@ export class SubscriptionDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes']
+			C['QueueInvokes'],
+			C['AgentInvokes']
 		>
 	}
 
@@ -897,7 +971,9 @@ export class SubscriptionDefinitionBuilder<
 			C['Resources'],
 			C['Invokes'],
 			C['StreamInvokes'],
-			C['EmitList']
+			C['EmitList'],
+			C['QueueInvokes'],
+			C['AgentInvokes']
 		>
 	}
 
@@ -942,8 +1018,9 @@ export class SubscriptionDefinitionBuilder<
 				C['Invokes'],
 				C['StreamInvokes'],
 				C['EmitList'],
+				SubscriptionDefinitionMetadataBase,
 				C['QueueInvokes'],
-				SubscriptionDefinitionMetadataBase
+				C['AgentInvokes']
 			>
 		> = {
 			subscriptionName: this.subscriptionName,
@@ -972,6 +1049,7 @@ export class SubscriptionDefinitionBuilder<
 			hooks: this.hooks,
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
+			agentInvokes: this.agentInvokes,
 			emitList: this.emitList,
 			queueInvokes: this.queueInvokes,
 		}
@@ -990,11 +1068,20 @@ export class SubscriptionDefinitionBuilder<
 		resources?: Partial<C['Resources']>
 		sandbox?: SinonSandbox
 	}) {
-		return getSubscriptionContextMock<C['Resources'], C['Invokes'], C['StreamInvokes'], C['EmitList']>({
+		return getSubscriptionContextMock<
+			C['Resources'],
+			C['Invokes'],
+			C['StreamInvokes'],
+			C['EmitList'],
+			SubscriptionDefinitionMetadataBase,
+			C['QueueInvokes'],
+			C['AgentInvokes']
+		>({
 			...input,
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
 			emitList: this.emitList,
+			agentInvokes: this.agentInvokes,
 		})
 	}
 

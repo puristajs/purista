@@ -23,7 +23,7 @@ export type InvokeAgentOptions = {
  */
 export const invokeAgent = async (options: InvokeAgentOptions) => {
 	const receiver = {
-		serviceName: `agent.${options.agentName}`,
+		serviceName: options.agentName,
 		serviceVersion: options.agentVersion,
 		serviceTarget: 'run',
 	} as const

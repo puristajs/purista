@@ -1,5 +1,7 @@
 import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
+import type { AgentInvokeList } from '../core/types/agent/AgentInvokeList.js'
+import type { AgentInvocation, AgentProtocolResponse } from '../core/types/agent/AgentProtocol.js'
 import type { EBMessage } from '../core/types/EBMessage.js'
 import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
@@ -10,6 +12,7 @@ import type { QueueInvokeFunction } from '../core/types/queue/QueueInvokeFunctio
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
 import type { QueueScheduleFunction } from '../core/types/queue/QueueScheduleFunction.js'
 import type { StreamInvokeList } from '../core/types/StreamInvokeList.js'
+import type { SubscriptionDefinitionMetadataBase } from '../core/types/subscription/SubscriptionDefinitionMetadataBase.js'
 import type { SubscriptionFunctionContext } from '../core/types/subscription/SubscriptionFunctionContext.js'
 import type { Schema } from '../schema/index.js'
 import { getLoggerMock } from './getLogger.mock.js'
@@ -24,11 +27,15 @@ export const getSubscriptionContextMock = <
 	Invokes extends InvokeList,
 	StreamInvokes extends StreamInvokeList,
 	EmitList extends Record<string, Schema>,
+	MetadataType extends SubscriptionDefinitionMetadataBase = SubscriptionDefinitionMetadataBase,
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 >(input: {
 	message: EBMessage
 	sandbox?: SinonSandbox
 	invokes: FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
 	streamInvokes?: StreamInvokes
+	agentInvokes?: AgentInvokes
 	emitList: FromEmitToOtherType<EmitList, Schema>
 	resources?: Partial<Resources>
 }) => {
@@ -59,6 +66,65 @@ export const getSubscriptionContextMock = <
 	}
 
 	const invokeMocks: Record<string, Record<string, Record<string, SinonStub>>> = {}
+	const agentInvokeMocks: Record<string, Record<string, SinonStub>> = {}
+
+	const getAgentInvokeProxy = <TFaux>(address?: EBMessageAddress, lvl = 0): TFaux => {
+		const adr = {
+			serviceName: '',
+			serviceTarget: 'run',
+			serviceVersion: '',
+			...address,
+		}
+
+		return new Proxy(() => {}, {
+			get(_obj: object, name) {
+				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
+					return undefined
+				}
+
+				if (lvl === 0) {
+					const na = {
+						...adr,
+						serviceName: name,
+					}
+					if (!agentInvokeMocks[na.serviceName]) {
+						agentInvokeMocks[na.serviceName] = {}
+					}
+					return getAgentInvokeProxy<unknown>(na, lvl + 1)
+				}
+				if (lvl === 1) {
+					const na = {
+						...adr,
+						serviceVersion: name,
+					}
+					if (!agentInvokeMocks[na.serviceName][na.serviceVersion]) {
+						agentInvokeMocks[na.serviceName][na.serviceVersion] = input.sandbox?.stub() ?? stub()
+
+						agentInvokeMocks[na.serviceName][na.serviceVersion].rejects(
+							new Error(`agent invocation of ${na.serviceName} version ${na.serviceVersion} is not stubbed`),
+						)
+					}
+					return getAgentInvokeProxy<unknown>(na, lvl + 1)
+				}
+
+				if (lvl === 2 && name === 'call') {
+					return (payload: unknown, parameter: unknown) => {
+						const promise = agentInvokeMocks[adr.serviceName]?.[adr.serviceVersion](
+							payload,
+							parameter,
+						) as Promise<AgentProtocolResponse>
+						return {
+							final: () => promise,
+							[Symbol.asyncIterator]: async function* () {
+								const result = await promise
+								yield result
+							},
+						} as AgentInvocation
+					}
+				}
+			},
+		}) as TFaux
+	}
 
 	const getInvokeProxy = <TFaux>(address?: EBMessageAddress, lvl = 0): TFaux => {
 		const adr = {
@@ -163,9 +229,10 @@ export const getSubscriptionContextMock = <
 		scheduleAt: input.sandbox?.stub() ?? stub().resolves(),
 		service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
 		resources: {} as Partial<Resources>,
+		invokeAgent: getAgentInvokeProxy<AgentInvokes>(),
 	}
 
-	const mock: SubscriptionFunctionContext<Resources, Invokes, StreamInvokes, EmitList> = {
+	const mock: SubscriptionFunctionContext<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes> = {
 		logger: logger.mock,
 		message: input.message,
 		emit: async <K extends keyof EmitList, Payload = EmitList[K]>(eventName: K, payload: Payload) => {
@@ -184,6 +251,7 @@ export const getSubscriptionContextMock = <
 		}),
 		service: getInvokeProxy<Invokes>(),
 		stream: getInvokeProxy<StreamInvokes>(),
+		invokeAgent: getAgentInvokeProxy<AgentInvokes>(),
 		secrets: {
 			getSecret: stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
@@ -201,9 +269,9 @@ export const getSubscriptionContextMock = <
 		},
 		queue: {
 			enqueue: stubs.enqueue.rejects(new Error('enqueue is not stubbed')) as unknown as QueueInvokeFunction &
-				QueueInvokeClientMap<QueueInvokeList>,
+				QueueInvokeClientMap<QueueInvokes>,
 			scheduleAt: stubs.scheduleAt.rejects(new Error('scheduleAt is not stubbed')) as unknown as QueueScheduleFunction &
-				QueueScheduleProxy<QueueInvokeClientMap<QueueInvokeList>>,
+				QueueScheduleProxy<QueueInvokeClientMap<QueueInvokes>>,
 		},
 		resources: resourcesProxy,
 	}
