@@ -370,13 +370,22 @@ const createSessionHelpers = (store: SessionStore, input: SessionIdentityInput):
 
 export type KnowledgeQueryInput = number | Omit<KnowledgeQueryRequest, 'query' | 'scope' | 'options'>
 
+type KnowledgeAliasAccessor = {
+	query(query: string, input?: KnowledgeQueryInput): Promise<KnowledgeDocument[]>
+	upsert(
+		document: KnowledgeDocument,
+		input?: Omit<KnowledgeUpsertRequest, 'document' | 'scope' | 'options'>,
+	): Promise<void>
+	delete(id: string, input?: Omit<KnowledgeDeleteRequest, 'id' | 'scope' | 'options'>): Promise<void>
+}
+
 /**
  * High-level knowledge helper API exposed to agent handlers.
  *
  * Supports both generic calls (`context.knowledge.query('faq', ...)`) and
  * alias-first calls (`context.knowledge.faq.query(...)`).
  */
-export type KnowledgeHelpers = {
+export type KnowledgeHelpers<KnowledgeAliases extends string = never> = {
 	query(adapterName: string, query: string, input?: KnowledgeQueryInput): Promise<KnowledgeDocument[]>
 	upsert(
 		adapterName: string,
@@ -388,14 +397,13 @@ export type KnowledgeHelpers = {
 		id: string,
 		input?: Omit<KnowledgeDeleteRequest, 'id' | 'scope' | 'options'>,
 	): Promise<void>
-	[adapterName: string]: any
-}
+} & { [Alias in KnowledgeAliases]: KnowledgeAliasAccessor }
 
 const createKnowledgeHelpers = (
 	adapters: Record<string, KnowledgeAdapter | undefined>,
 	manifest: AgentManifest,
 	session: SessionHelpers,
-): KnowledgeHelpers => {
+): KnowledgeHelpers<string> => {
 	const adapterConfigMap = new Map((manifest.knowledge ?? []).map(entry => [entry.adapterName, entry.options] as const))
 
 	const resolveAdapter = (adapterName: string) => {
@@ -488,7 +496,7 @@ const createKnowledgeHelpers = (
 				},
 			}
 		},
-	}) as KnowledgeHelpers
+	}) as KnowledgeHelpers<string>
 }
 
 export type AgentHandlerContext<
@@ -496,6 +504,7 @@ export type AgentHandlerContext<
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
+	KnowledgeAliases extends string = never,
 > = {
 	logger: Logger
 	payload: Payload
@@ -503,7 +512,7 @@ export type AgentHandlerContext<
 	message: CommandFunctionContext['message']
 	conversation: ConversationHelpers
 	session: SessionHelpers
-	knowledge: KnowledgeHelpers
+	knowledge: KnowledgeHelpers<KnowledgeAliases>
 	stream: AgentStreamEmitter
 	tools: ToolInvoker
 	resources: Resources
@@ -517,12 +526,13 @@ export type CreateAgentHandlerContextInput<
 	Parameter,
 	Resources extends Record<string, unknown>,
 	Models extends Record<string, ModelProvider>,
+	KnowledgeAliases extends string = string,
 > = {
 	serviceContext: CommandFunctionContext<Payload, Parameter>
 	payload: Payload
 	parameter: Parameter
 	sessionStore: SessionStore
-	knowledgeAdapters: Record<string, KnowledgeAdapter | undefined>
+	knowledgeAdapters: Record<KnowledgeAliases, KnowledgeAdapter | undefined>
 	protocol: ProtocolEmitter
 	resources: Resources
 	models: Models
@@ -534,9 +544,10 @@ export const createAgentHandlerContext = <
 	Parameter,
 	Resources extends Record<string, unknown>,
 	Models extends Record<string, ModelProvider>,
+	KnowledgeAliases extends string = string,
 >(
-	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models>,
-): AgentHandlerContext<Payload, Parameter, Resources, Models> => {
+	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models, KnowledgeAliases>,
+): AgentHandlerContext<Payload, Parameter, Resources, Models, KnowledgeAliases> => {
 	const sessionHelpers = createSessionHelpers(input.sessionStore, {
 		context: input.serviceContext,
 		manifest: input.manifest,
@@ -550,7 +561,11 @@ export const createAgentHandlerContext = <
 		message: input.serviceContext.message,
 		session: sessionHelpers,
 		conversation: createConversationHelpers(sessionHelpers, input.manifest),
-		knowledge: createKnowledgeHelpers(input.knowledgeAdapters, input.manifest, sessionHelpers),
+		knowledge: createKnowledgeHelpers(
+			input.knowledgeAdapters,
+			input.manifest,
+			sessionHelpers,
+		) as KnowledgeHelpers<KnowledgeAliases>,
 		stream: createStreamEmitter(input.protocol),
 		tools: createToolInvoker(input.serviceContext, input.manifest.allowedTools ?? [], input.protocol),
 		resources: input.resources,

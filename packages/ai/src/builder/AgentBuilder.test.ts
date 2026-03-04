@@ -145,6 +145,20 @@ describe('AgentBuilder', () => {
 		})
 	})
 
+	it('infers typed knowledge aliases in handler context', () => {
+		new AgentBuilder({ agentName: 'typedKnowledgeAgent', agentVersion: '1' })
+			.useKnowledgeAdapter('supportFaq')
+			.useKnowledgeAdapter('billingPolicy')
+			.setHandler(async context => {
+				await context.knowledge.supportFaq.query('reset password', { limit: 2 })
+				await context.knowledge.billingPolicy.query('invoice', 2)
+				// @ts-expect-error unknown adapter alias should fail at compile-time
+				await context.knowledge.unknownAdapter.query('x')
+				return { message: 'ok' }
+			})
+			.build()
+	})
+
 	it('fails fast when required model aliases are missing at getInstance()', async () => {
 		const definition = new AgentBuilder({ agentName: 'missingModelAgent', agentVersion: '1' })
 			.defineModel('missing')

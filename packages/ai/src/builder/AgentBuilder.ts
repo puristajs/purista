@@ -36,17 +36,18 @@ export type AgentHandler<
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
+	KnowledgeAliases extends string = never,
 > = (
-	context: AgentHandlerContext<Payload, Parameter, Resources, Models>,
+	context: AgentHandlerContext<Payload, Parameter, Resources, Models, KnowledgeAliases>,
 	payload: Payload,
 	parameter: Parameter,
 ) => Promise<AgentHandlerResult> | AgentHandlerResult
 
-type AgentRuntimeConfig = {
-	handler: AgentHandler
+type AgentRuntimeConfig<KnowledgeAliases extends string = string> = {
+	handler: AgentHandler<unknown, unknown, Record<string, unknown>, Record<string, ModelProvider>, KnowledgeAliases>
 	manifest: AgentManifest
 	sessionStore: SessionStore
-	knowledgeAdapters: Record<string, KnowledgeAdapter>
+	knowledgeAdapters: Record<KnowledgeAliases, KnowledgeAdapter>
 	poolManager: PoolManager
 	resources: Record<string, unknown>
 	models: Record<string, ModelProvider>
@@ -96,13 +97,19 @@ const resolveHistoryPresetConfig = (
 	}
 }
 
-export class AgentBuilder {
+export class AgentBuilder<KnowledgeAliases extends string = never> {
 	private readonly info: AgentInfo
 	private readonly serviceBuilder: ServiceBuilder
 	private readonly commandBuilder: ReturnType<ServiceBuilder['getCommandBuilder']>
 	private commandDefinitionAdded = false
 	private manifest: AgentManifest
-	private handler?: AgentHandler
+	private handler?: AgentHandler<
+		unknown,
+		unknown,
+		Record<string, unknown>,
+		Record<string, ModelProvider>,
+		KnowledgeAliases
+	>
 
 	private payloadSchema?: Schema
 	private parameterSchema?: Schema
@@ -161,8 +168,13 @@ export class AgentBuilder {
 		return this
 	}
 
-	useKnowledgeAdapter(adapterName: string, options?: Record<string, unknown>): this
-	useKnowledgeAdapter(adapter: { adapterName: string; options?: Record<string, unknown> }): this
+	useKnowledgeAdapter<const Alias extends string>(
+		adapterName: Alias,
+		options?: Record<string, unknown>,
+	): AgentBuilder<KnowledgeAliases | Alias>
+	useKnowledgeAdapter<const Adapter extends { adapterName: string; options?: Record<string, unknown> }>(
+		adapter: Adapter,
+	): AgentBuilder<KnowledgeAliases | Adapter['adapterName']>
 	useKnowledgeAdapter(
 		adapterOrName: string | { adapterName: string; options?: Record<string, unknown> },
 		options?: Record<string, unknown>,
@@ -173,7 +185,7 @@ export class AgentBuilder {
 		}
 		const existing = this.manifest.knowledge ?? []
 		this.manifest.knowledge = [...existing, { adapterName: adapter.adapterName.trim(), options: adapter.options }]
-		return this
+		return this as unknown as AgentBuilder<KnowledgeAliases | typeof adapter.adapterName>
 	}
 
 	/**
@@ -330,10 +342,16 @@ export class AgentBuilder {
 		Parameter = unknown,
 		Resources extends Record<string, unknown> = Record<string, unknown>,
 		Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
-	>(fn: AgentHandler<Payload, Parameter, Resources, Models>) {
-		this.handler = fn as AgentHandler
+	>(fn: AgentHandler<Payload, Parameter, Resources, Models, KnowledgeAliases>) {
+		this.handler = fn as AgentHandler<
+			unknown,
+			unknown,
+			Record<string, unknown>,
+			Record<string, ModelProvider>,
+			KnowledgeAliases
+		>
 		this.commandBuilder.setCommandFunction(async function commandImpl(
-			this: { config?: { runtime?: AgentRuntimeConfig } },
+			this: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
 			context: CommandFunctionContext,
 			payload: unknown,
 			parameter: unknown,
@@ -411,7 +429,17 @@ export class AgentBuilder {
 					manifest: runtime.manifest,
 				})
 
-				const result = await runtime.handler(agentContext as AgentHandlerContext, payload, parameter)
+				const result = await runtime.handler(
+					agentContext as AgentHandlerContext<
+						unknown,
+						unknown,
+						Record<string, unknown>,
+						Record<string, ModelProvider>,
+						KnowledgeAliases
+					>,
+					payload,
+					parameter,
+				)
 
 				const resultObject =
 					typeof result === 'object' && result && 'message' in result ? (result as AgentHandlerResultObject) : undefined
@@ -453,7 +481,7 @@ export class AgentBuilder {
 				runtime.poolManager.release(poolId)
 			}
 		})
-		return this
+		return this as AgentBuilder<KnowledgeAliases>
 	}
 
 	build(): AgentDefinition {
