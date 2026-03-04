@@ -25,7 +25,7 @@ export const supportAgent = new AgentBuilder({
 })
 	.addPayloadSchema(supportAgentInputSchema)
 	.defineModel('openai:gpt-5.2-mini')
-	.persistHistory('user', { maxFrames: 20 })
+	.persistConversation('user', { maxFrames: 20 })
 	.setConcurrency({ poolId: 'support' })
 	.allowTool({
 		serviceName: 'support',

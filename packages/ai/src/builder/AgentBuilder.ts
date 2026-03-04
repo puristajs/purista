@@ -11,8 +11,8 @@ import type { AgentHandlerContext } from '../runtime/context.js'
 import { createAgentHandlerContext, createProtocolBuffer } from '../runtime/context.js'
 import type { AgentDefinition, AgentInfo } from '../types/AgentDefinition.js'
 import type {
-	AgentManifest,
 	AgentHistoryPreset,
+	AgentManifest,
 	AgentSessionConfig,
 	AllowedToolDefinition,
 	ConcurrencyConfig,
@@ -169,21 +169,21 @@ export class AgentBuilder {
 	}
 
 	/**
-	 * Configure conversation/session persistence.
+	 * Configure conversation persistence.
 	 *
 	 * You can either pass a full config object or use presets:
-	 * - `persistHistory('user')` defaults to full strategy with a larger frame budget
-	 * - `persistHistory('agent')` defaults to summary strategy with a smaller frame budget
+	 * - `persistConversation('user')` defaults to full strategy with a larger frame budget
+	 * - `persistConversation('agent')` defaults to summary strategy with a smaller frame budget
 	 *
 	 * @example
 	 * ```ts
 	 * new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
-	 *   .persistHistory('user')
+	 *   .persistConversation('user')
 	 * ```
 	 */
-	persistHistory(config: AgentSessionConfig): this
-	persistHistory(preset: AgentHistoryPreset, overrides?: Partial<AgentSessionConfig>): this
-	persistHistory(
+	persistConversation(config: AgentSessionConfig): this
+	persistConversation(preset: AgentHistoryPreset, overrides?: Partial<AgentSessionConfig>): this
+	persistConversation(
 		configOrPreset: AgentSessionConfig | AgentHistoryPreset,
 		overrides?: Partial<AgentSessionConfig>,
 	): this {
@@ -191,6 +191,24 @@ export class AgentBuilder {
 			return this.useSessionStore(resolveHistoryPresetConfig(this.info, configOrPreset, overrides))
 		}
 		return this.useSessionStore(configOrPreset)
+	}
+
+	/**
+	 * @deprecated Use `persistConversation(...)` instead.
+	 */
+	persistHistory(config: AgentSessionConfig): this
+	/**
+	 * @deprecated Use `persistConversation(...)` instead.
+	 */
+	persistHistory(preset: AgentHistoryPreset, overrides?: Partial<AgentSessionConfig>): this
+	persistHistory(
+		configOrPreset: AgentSessionConfig | AgentHistoryPreset,
+		overrides?: Partial<AgentSessionConfig>,
+	): this {
+		if (typeof configOrPreset === 'string') {
+			return this.persistConversation(configOrPreset, overrides)
+		}
+		return this.persistConversation(configOrPreset)
 	}
 
 	setConcurrency(config: ConcurrencyConfig) {

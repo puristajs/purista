@@ -109,7 +109,7 @@ Only allowlisted commands are available to the handler.
 
 ```ts
 const supportAgent = new AgentBuilder({ ... })
-  .persistHistory('user', { maxFrames: 40 })
+  .persistConversation('user', { maxFrames: 40 })
   .setHandler(async function (context, payload) {
     await context.conversation.addUser(payload.prompt)
     const prompt = await context.conversation.buildPromptInput()

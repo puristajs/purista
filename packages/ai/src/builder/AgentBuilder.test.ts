@@ -83,7 +83,7 @@ describe('AgentBuilder', () => {
 				}),
 			)
 			.defineModel('echo')
-			.persistHistory({ storeName: 'aiConversation', maxFrames: 10 })
+			.persistConversation({ storeName: 'aiConversation', maxFrames: 10 })
 			.setConcurrency({ poolId: 'support' })
 			.exposeAsHttpEndpoint('POST', 'agents/supportAgent')
 			.setStreamingMode('chunked')
@@ -111,12 +111,12 @@ describe('AgentBuilder', () => {
 		expect(instance).toBeDefined()
 	})
 
-	it('supports persistHistory presets with optional overrides', () => {
+	it('supports persistConversation presets with optional overrides', () => {
 		const userPresetDefinition = new AgentBuilder({
 			agentName: 'presetAgent',
 			agentVersion: '1',
 		})
-			.persistHistory('user')
+			.persistConversation('user')
 			.setHandler(async () => ({ message: 'ok' }))
 			.build()
 
@@ -130,7 +130,7 @@ describe('AgentBuilder', () => {
 			agentName: 'presetAgent',
 			agentVersion: '1',
 		})
-			.persistHistory('agent', { maxFrames: 5, storeName: 'custom-agent-history' })
+			.persistConversation('agent', { maxFrames: 5, storeName: 'custom-agent-history' })
 			.setHandler(async () => ({ message: 'ok' }))
 			.build()
 
@@ -139,6 +139,18 @@ describe('AgentBuilder', () => {
 			strategy: 'summary',
 			maxFrames: 5,
 		})
+	})
+
+	it('keeps persistHistory as backward-compatible alias', () => {
+		const definition = new AgentBuilder({
+			agentName: 'legacyPresetAgent',
+			agentVersion: '1',
+		})
+			.persistHistory('user')
+			.setHandler(async () => ({ message: 'ok' }))
+			.build()
+
+		expect(definition.getManifest().session?.strategy).toBe('full')
 	})
 
 	it('fails fast when required model aliases are missing at getInstance()', async () => {

@@ -8,16 +8,22 @@ order: 203704
 
 Agents rarely operate statelessly. They need conversation history, scratchpads, and shared knowledge bases. `@purista/ai` ships pragmatic defaults plus adapter hooks so you can scale from in-memory experiments to production-grade stores.
 
-## Session store
+## Conversation persistence
 
-`persistHistory` (alias: `useSessionStore`) links an agent to a session store definition in the manifest:
+`persistConversation` configures how an agent stores and reuses conversation context.
+
+How these parts relate:
+
+- **Builder (`persistConversation`)** defines conversation retention strategy (`user` vs `agent`) and limits (`maxFrames`).
+- **Runtime (`getInstance(..., { sessionStore })`)** provides the actual storage adapter (in-memory by default, Redis/DB in production).
+- **Handler (`context.conversation`)** is what you use in business logic; it reads/writes using the configured strategy and store.
 
 ```ts
 import { HandledError } from '@purista/core'
 
 new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
   .defineModel('openai:gpt-4o-mini')
-  .persistHistory('user', { maxFrames: 40 })
+  .persistConversation('user', { maxFrames: 40 })
   .setHandler(async (context, payload) => {
     await context.conversation.addUser(payload.prompt)
     const prompt = await context.conversation.buildPromptInput()
@@ -36,7 +42,8 @@ new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
 
 - **Default implementation:** `AgentInstance` falls back to an in-memory session store, perfect for local development. Provide a custom store via `await supportAgent.getInstance(eventBridge, { sessionStore: new RedisSessionStore(...) })` when you need persistence.
 - **Conversation-first API:** prefer `context.conversation.*` in handlers. It uses a standard message shape (`role`, `content`, `createdAt`, metadata) and hides raw session plumbing.
-- **Presets:** use `persistHistory('user')` for full conversation focus, or `persistHistory('agent')` for compact summary-oriented memory. You can still override `maxFrames`, `strategy`, or `storeName`.
+- **Presets:** use `persistConversation('user')` for full conversation focus, or `persistConversation('agent')` for compact summary-oriented memory. You can still override `maxFrames`, `strategy`, or `storeName`.
+- **Compatibility:** `persistHistory(...)` remains available as a legacy alias.
 - **Auto summary:** in `strategy: 'summary'`, older messages are compressed automatically and prepended by `context.conversation.buildPromptInput()`. Developers do not need to manually maintain summaries in normal use cases.
 - **Retry-safe staging:** if model execution fails after adding the user prompt, call `context.conversation.revertLast({ role: 'user' })` before rethrowing to avoid duplicate user turns on retries.
 
@@ -115,4 +122,4 @@ const updatedHistory = appendMessage(conversation, {
 await context.conversation.setSummary(summarizeHistory(updatedHistory.slice(-10)))
 ```
 
-The in-memory helpers under `@purista/ai/memory` remain available for custom strategies, but most applications should start with `persistHistory('user' | 'agent')` + `context.conversation`.
+The in-memory helpers under `@purista/ai/memory` remain available for custom strategies, but most applications should start with `persistConversation('user' | 'agent')` + `context.conversation`.
