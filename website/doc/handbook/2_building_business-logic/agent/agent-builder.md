@@ -105,7 +105,7 @@ const supportAgent = new AgentBuilder({
 
 Only allowlisted commands are available to the handler.
 
-### 3.2 Add history persistence
+### 3.2 Add conversation persistence
 
 ```ts
 const supportAgent = new AgentBuilder({ ... })

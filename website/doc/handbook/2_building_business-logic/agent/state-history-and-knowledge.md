@@ -12,11 +12,22 @@ Agents rarely operate statelessly. They need conversation history, scratchpads, 
 
 `persistConversation` configures how an agent stores and reuses conversation context.
 
-How these parts relate:
+### How pieces fit together
 
 - **Builder (`persistConversation`)** defines conversation retention strategy (`user` vs `agent`) and limits (`maxFrames`).
 - **Runtime (`getInstance(..., { sessionStore })`)** provides the actual storage adapter (in-memory by default, Redis/DB in production).
 - **Handler (`context.conversation`)** is what you use in business logic; it reads/writes using the configured strategy and store.
+
+### Preset quick reference
+
+| Preset | Strategy | Default maxFrames | Typical use case |
+| --- | --- | --- | --- |
+| `persistConversation('user')` | `full` | `40` | interactive chat where recent turns matter most |
+| `persistConversation('agent')` | `summary` | `20` | long-running/background agents where token efficiency matters |
+
+You can always override via `persistConversation('user', { maxFrames: 80, strategy: 'summary' })`.
+
+### Minimal handler pattern (retry-safe)
 
 ```ts
 import { HandledError } from '@purista/core'
@@ -40,12 +51,24 @@ new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
   })
 ```
 
+### Behavior summary
+
 - **Default implementation:** `AgentInstance` falls back to an in-memory session store, perfect for local development. Provide a custom store via `await supportAgent.getInstance(eventBridge, { sessionStore: new RedisSessionStore(...) })` when you need persistence.
 - **Conversation-first API:** prefer `context.conversation.*` in handlers. It uses a standard message shape (`role`, `content`, `createdAt`, metadata) and hides raw session plumbing.
-- **Presets:** use `persistConversation('user')` for full conversation focus, or `persistConversation('agent')` for compact summary-oriented memory. You can still override `maxFrames`, `strategy`, or `storeName`.
 - **Compatibility:** `persistHistory(...)` remains available as a legacy alias.
 - **Auto summary:** in `strategy: 'summary'`, older messages are compressed automatically and prepended by `context.conversation.buildPromptInput()`. Developers do not need to manually maintain summaries in normal use cases.
 - **Retry-safe staging:** if model execution fails after adding the user prompt, call `context.conversation.revertLast({ role: 'user' })` before rethrowing to avoid duplicate user turns on retries.
+
+## How auto-summary works
+
+When `strategy: 'summary'` is active:
+
+1. new messages are appended to conversation
+2. if total frames exceed `maxFrames`, oldest overflow frames are removed
+3. removed frames are compacted into summary text and merged into existing summary
+4. `buildPromptInput()` prepends summary + recent frames
+
+This gives deterministic, framework-managed compression without requiring manual summary code in handlers.
 
 ### Tenant + principal aware session keys
 
@@ -123,3 +146,7 @@ await context.conversation.setSummary(summarizeHistory(updatedHistory.slice(-10)
 ```
 
 The in-memory helpers under `@purista/ai/memory` remain available for custom strategies, but most applications should start with `persistConversation('user' | 'agent')` + `context.conversation`.
+
+## Low-level escape hatch
+
+If your workload needs custom persistence beyond conversation frames, use `context.session` directly (`load/save/delete`) and keep additional app-specific fields in `data`.
