@@ -54,6 +54,7 @@ export type ConversationHelpers = {
 		options?: { toolName?: string; toolCallId?: string; metadata?: Record<string, unknown>; sessionId?: string },
 	): Promise<ConversationState>
 	setSummary(summary: string, sessionId?: string): Promise<ConversationState>
+	revertLast(options?: { sessionId?: string; role?: ConversationRole }): Promise<ConversationState>
 	buildPromptInput(options?: { includeSummary?: boolean; sessionId?: string }): Promise<string>
 }
 
@@ -211,6 +212,33 @@ export const createConversationHelpers = (
 					summary,
 				},
 				sessionId,
+			)
+		},
+		async revertLast(options) {
+			const { state } = await loadState(options?.sessionId)
+			const matchRole = options?.role
+			let index = -1
+			if (matchRole === undefined) {
+				index = state.messages.length - 1
+			} else {
+				for (let i = state.messages.length - 1; i >= 0; i -= 1) {
+					if (state.messages[i]?.role === matchRole) {
+						index = i
+						break
+					}
+				}
+			}
+			if (index < 0) {
+				return state
+			}
+			const nextMessages = [...state.messages]
+			nextMessages.splice(index, 1)
+			return saveState(
+				{
+					...state,
+					messages: nextMessages,
+				},
+				options?.sessionId,
 			)
 		},
 		async buildPromptInput(options) {

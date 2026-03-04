@@ -13,15 +13,24 @@ Agents rarely operate statelessly. They need conversation history, scratchpads, 
 `persistHistory` (alias: `useSessionStore`) links an agent to a session store definition in the manifest:
 
 ```ts
+import { HandledError } from '@purista/core'
+
 new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
   .defineModel('openai:gpt-4o-mini')
   .persistHistory('user', { maxFrames: 40 })
   .setHandler(async (context, payload) => {
     await context.conversation.addUser(payload.prompt)
     const prompt = await context.conversation.buildPromptInput()
-    const result = await context.models['openai:gpt-4o-mini'].generate({ prompt })
-    await context.conversation.addAssistant(result.output)
-    return { message: result.output }
+
+    try {
+      const result = await context.models['openai:gpt-4o-mini'].generate({ prompt })
+      await context.conversation.addAssistant(result.output)
+      return { message: result.output }
+    } catch (error) {
+      // Roll back staged user input so retries do not duplicate turns.
+      await context.conversation.revertLast({ role: 'user' })
+      throw HandledError.fromError(error)
+    }
   })
 ```
 
@@ -29,6 +38,7 @@ new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
 - **Conversation-first API:** prefer `context.conversation.*` in handlers. It uses a standard message shape (`role`, `content`, `createdAt`, metadata) and hides raw session plumbing.
 - **Presets:** use `persistHistory('user')` for full conversation focus, or `persistHistory('agent')` for compact summary-oriented memory. You can still override `maxFrames`, `strategy`, or `storeName`.
 - **Auto summary:** in `strategy: 'summary'`, older messages are compressed automatically and prepended by `context.conversation.buildPromptInput()`. Developers do not need to manually maintain summaries in normal use cases.
+- **Retry-safe staging:** if model execution fails after adding the user prompt, call `context.conversation.revertLast({ role: 'user' })` before rethrowing to avoid duplicate user turns on retries.
 
 ### Tenant + principal aware session keys
 

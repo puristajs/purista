@@ -61,4 +61,23 @@ describe('conversation helpers', () => {
 		expect(promptInput).toContain('assistant: B')
 		expect(promptInput).toContain('user: C')
 	})
+
+	it('can revert the last staged message to keep retries idempotent', async () => {
+		const manifest: AgentManifest = {
+			agentName: 'supportAgent',
+			agentVersion: '1',
+			eventBridge: 'default',
+			allowedTools: [],
+			session: { storeName: 'history', strategy: 'full', maxFrames: 10 },
+		}
+		const conversation = createConversationHelpers(createSessionHelpers(), manifest)
+
+		await conversation.addUser('first')
+		await conversation.addUser('second')
+		await conversation.revertLast({ role: 'user' })
+
+		const messages = await conversation.getMessages()
+		expect(messages).toHaveLength(1)
+		expect(messages[0]?.content).toBe('first')
+	})
 })
