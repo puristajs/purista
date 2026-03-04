@@ -27,7 +27,7 @@ export const getSubscriptionContextMock = <
 	Invokes extends InvokeList,
 	StreamInvokes extends StreamInvokeList,
 	EmitList extends Record<string, Schema>,
-	MetadataType extends SubscriptionDefinitionMetadataBase = SubscriptionDefinitionMetadataBase,
+	_MetadataType extends SubscriptionDefinitionMetadataBase = SubscriptionDefinitionMetadataBase,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 >(input: {

@@ -129,9 +129,9 @@ Use `'user'` for fuller transcript-style memory and `'agent'` for compact summar
 
 ```ts
 const supportAgent = new AgentBuilder({ ... })
-  .useKnowledgeAdapter({ adapterName: 'supportFaq' })
+  .useKnowledgeAdapter('supportFaq')
   .setHandler(async function (context, payload) {
-    const docs = await context.knowledge.query('supportFaq', payload.prompt, 3)
+    const docs = await context.knowledge.supportFaq.query(payload.prompt, 3)
     const contextBlock = docs.map(doc => doc.body).join('\n')
     const result = await context.models['openai:gpt-5.2-mini'].generate({
       prompt: `${payload.prompt}\n\nContext:\n${contextBlock}`,
@@ -183,7 +183,7 @@ Configure pool identity and worker count at runtime bootstrap (`getInstance(...,
 | --- | --- | --- | --- |
 | `persistConversation('user', overrides?)` | `maxFrames`, `strategy`, `storeName` | interactive chat memory | larger context can increase token usage |
 | `persistConversation('agent', overrides?)` | `maxFrames`, `strategy`, `storeName` | background/long workflows | summary compression may lose very fine detail |
-| `useKnowledgeAdapter({ adapterName, options? })` | adapter alias + backend options | RAG / FAQ / document lookup | requires adapter provisioning at runtime |
+| `useKnowledgeAdapter('alias', options?)` | adapter alias + backend options | RAG / FAQ / document lookup | requires adapter provisioning at runtime |
 
 ### Runtime behavior & exposure
 

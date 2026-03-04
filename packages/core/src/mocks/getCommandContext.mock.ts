@@ -32,7 +32,7 @@ export const getCommandContextMock = <
 	Invokes extends InvokeList,
 	StreamInvokes extends StreamInvokeList,
 	EmitList extends Record<string, Schema>,
-	MetadataType extends CommandDefinitionMetadataBase = CommandDefinitionMetadataBase,
+	_MetadataType extends CommandDefinitionMetadataBase = CommandDefinitionMetadataBase,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 >(input: {

@@ -25,6 +25,12 @@ describe('AgentBuilder', () => {
 		)
 	})
 
+	it('requires non-empty knowledge adapter names', () => {
+		expect(() => new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' }).useKnowledgeAdapter('')).toThrow(
+			'Knowledge adapter name must not be empty',
+		)
+	})
+
 	it('supports manifest mutation helpers and requires a handler before build()', () => {
 		const payloadSchema = z.object({ prompt: z.string() })
 		const parameterSchema = z.object({ locale: z.string().optional() })
@@ -36,7 +42,7 @@ describe('AgentBuilder', () => {
 			.useEventBridge('customBridge')
 			.useResource('llm', { resourceName: 'model' })
 			.useSessionStore({ storeName: 'sessions', maxFrames: 20 })
-			.useKnowledgeAdapter({ adapterName: 'knowledge', options: { topK: 3 } })
+			.useKnowledgeAdapter('knowledge', { topK: 3 })
 			.setRuntime('worker')
 			.setModelResource({ resourceName: 'modelResource', variant: 'mini' })
 			.setRetryPolicy({ maxAttempts: 2, strategy: 'fixed', delayMs: 100 })

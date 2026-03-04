@@ -362,19 +362,45 @@ const createSessionHelpers = (store: SessionStore, input: SessionIdentityInput):
 	}
 }
 
-type KnowledgeHelpers = {
+export type KnowledgeHelpers = {
 	query(adapterName: string, query: string, limit?: number): Promise<KnowledgeDocument[]>
+	[adapterName: string]:
+		| unknown
+		| ((adapterName: string, query: string, limit?: number) => Promise<KnowledgeDocument[]>)
+		| { query(query: string, limit?: number): Promise<KnowledgeDocument[]> }
 }
 
-const createKnowledgeHelpers = (adapters: Record<string, KnowledgeAdapter | undefined>): KnowledgeHelpers => ({
-	async query(adapterName, query, limit) {
+const createKnowledgeHelpers = (adapters: Record<string, KnowledgeAdapter | undefined>): KnowledgeHelpers => {
+	const resolveAdapter = (adapterName: string) => {
 		const adapter = adapters[adapterName]
 		if (!adapter) {
 			throw new HandledError(StatusCode.NotFound, `Knowledge adapter ${adapterName} not registered`)
 		}
-		return adapter.query(query, limit)
-	},
-})
+		return adapter
+	}
+
+	const base: Pick<KnowledgeHelpers, 'query'> = {
+		async query(adapterName, query, limit) {
+			return resolveAdapter(adapterName).query(query, limit)
+		},
+	}
+
+	return new Proxy(base, {
+		get(target, prop, receiver) {
+			if (typeof prop !== 'string') {
+				return Reflect.get(target, prop, receiver)
+			}
+			if (Reflect.has(target, prop)) {
+				return Reflect.get(target, prop, receiver)
+			}
+			return {
+				query: async (query: string, limit?: number) => {
+					return resolveAdapter(prop).query(query, limit)
+				},
+			}
+		},
+	}) as KnowledgeHelpers
+}
 
 export type AgentHandlerContext<
 	Payload = unknown,

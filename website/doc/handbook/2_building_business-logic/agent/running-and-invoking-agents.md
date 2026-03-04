@@ -76,12 +76,12 @@ await supportAgentInstance.start()
 // definition
 export const supportAgent = new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
   .defineModel('openai:gpt-5.2-mini')
-  .useKnowledgeAdapter({ adapterName: 'supportFaq' })
+  .useKnowledgeAdapter('supportFaq')
   .setHandler(async (context, payload) => {
     // from getInstance(..., { models })
     const model = context.models['openai:gpt-5.2-mini']
     // from getInstance(..., { knowledgeAdapters: { supportFaq: ... } })
-    const docs = await context.knowledge.query('supportFaq', payload.prompt, 3)
+    const docs = await context.knowledge.supportFaq.query(payload.prompt, 3)
     // from getInstance(..., { sessionStore })
     await context.conversation.addUser(payload.prompt)
     return { message: `${docs.length} docs` }

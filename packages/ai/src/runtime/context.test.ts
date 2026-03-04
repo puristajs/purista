@@ -94,6 +94,8 @@ describe('runtime context helpers', () => {
 
 		const docs = await context.knowledge.query('default', 'Reset')
 		expect(docs).toHaveLength(1)
+		const docsByAlias = await (context.knowledge.default as { query(query: string): Promise<unknown[]> }).query('Reset')
+		expect(docsByAlias).toHaveLength(1)
 
 		await context.conversation.addUser('Need password reset help')
 		await context.conversation.addAssistant('Use the forgot-password page.')

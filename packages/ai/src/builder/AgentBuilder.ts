@@ -161,9 +161,18 @@ export class AgentBuilder {
 		return this
 	}
 
-	useKnowledgeAdapter(adapter: { adapterName: string; options?: Record<string, unknown> }) {
+	useKnowledgeAdapter(adapterName: string, options?: Record<string, unknown>): this
+	useKnowledgeAdapter(adapter: { adapterName: string; options?: Record<string, unknown> }): this
+	useKnowledgeAdapter(
+		adapterOrName: string | { adapterName: string; options?: Record<string, unknown> },
+		options?: Record<string, unknown>,
+	) {
+		const adapter = typeof adapterOrName === 'string' ? { adapterName: adapterOrName, options } : adapterOrName
+		if (!adapter.adapterName?.trim()) {
+			throw new Error('Knowledge adapter name must not be empty')
+		}
 		const existing = this.manifest.knowledge ?? []
-		this.manifest.knowledge = [...existing, adapter]
+		this.manifest.knowledge = [...existing, { adapterName: adapter.adapterName.trim(), options: adapter.options }]
 		return this
 	}
 
