@@ -133,6 +133,38 @@ Operational rule of thumb:
 - `maxWorkers` controls how much work runs now
 - provider/API rate limits still apply downstream
 
+### Queue, pool, worker flow
+
+```mermaid
+flowchart LR
+  A["Caller (HTTP/Command/Subscription)"] --> B["Agent Invoke"]
+  B --> C["Queue (optional)"]
+  C --> D["PoolManager (poolId, maxWorkers)"]
+  D --> E["Worker Slot"]
+  E --> F["Agent Handler"]
+  F --> G["Model Provider"]
+  F --> H["Tools/Knowledge/Session"]
+  F --> I["Protocol Frames + Final Result"]
+```
+
+```mermaid
+sequenceDiagram
+  participant C as Caller
+  participant Q as Queue
+  participant P as PoolManager
+  participant A as Agent
+  participant M as Model
+
+  C->>Q: enqueue run (optional)
+  Q->>P: request slot
+  P-->>Q: slot granted
+  Q->>A: execute run
+  A->>M: generate / stream
+  M-->>A: tokens + output
+  A-->>C: protocol frames + final response
+  A->>P: release slot
+```
+
 ## Invoke an agent programmatically
 
 ### 1. Integrated Service Pattern (Recommended)

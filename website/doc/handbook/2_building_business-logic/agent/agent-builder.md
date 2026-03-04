@@ -212,12 +212,98 @@ Use these helpers instead of manually wiring protocol IDs, storing envelopes, or
 
 ## Guards and transforms with agents
 
-Agent handlers currently do not expose separate `beforeGuard/afterGuard` or input/output transform hooks on `AgentBuilder`.
+Agent handlers intentionally stay focused on AI business logic.  
+Guard and transform behavior should be applied on the invoking edge (`command`, `subscription`, `stream`) using the standard PURISTA APIs.
 
-Use the existing PURISTA patterns around the agent:
+## Why this pattern
 
-- apply guards/transforms on the command/subscription/stream that invokes the agent
-- keep agent handler focused on AI business logic and protocol streaming
-- if a specific response shape is required, map protocol frames in the caller before returning/emitting
+- keeps agent code transport-agnostic and reusable
+- reuses existing security model (authZ, tenancy, preconditions)
+- keeps input/output mapping close to the caller contract (HTTP, event payload, stream frame)
+- avoids duplicated guard logic when one agent is invoked from multiple entry points
 
-This keeps guard/transform behavior consistent with the rest of PURISTA while the agent runtime remains transport-agnostic.
+## Execution flow
+
+```mermaid
+flowchart LR
+  A["HTTP/Event Input"] --> B["Command/Subscription/Stream"]
+  B --> C["Input Guard + Transform"]
+  C --> D["context.invokeAgent.<name>.<version>.call(...)"]
+  D --> E["Agent Handler (AI logic only)"]
+  E --> F["Protocol Frames"]
+  F --> G["Output Transform"]
+  G --> H["HTTP Response / Event / Stream Out"]
+```
+
+## Practical examples
+
+### 1) Guard before invoking agent
+
+```ts
+export const runSupportAgentCommand = supportServiceBuilder
+  .getCommandBuilder('runSupportAgent', 'Runs support agent with entitlement guard')
+  .canInvokeAgent('supportAgent', '1', {
+    payloadSchema: supportInvokePayloadSchema,
+    parameterSchema: supportInvokeParameterSchema,
+  })
+  .addPayloadSchema(inputSchema)
+  .setCommandFunction(async function (context, payload) {
+    if (!context.message.principalId) {
+      throw new Error('Principal required')
+    }
+
+    return context.invokeAgent.supportAgent['1']
+      .call({ message: payload.prompt }, { channel: 'command', locale: payload.locale })
+      .final()
+  })
+```
+
+Use case: enforce tenant/user/security preconditions at the service edge.
+
+### 2) Transform caller input to agent payload
+
+```ts
+setCommandFunction(async function (context, payload) {
+  const normalizedPayload = {
+    message: payload.question.trim(),
+    context: payload.includeHistory ? payload.historySummary : undefined,
+  }
+
+  return context.invokeAgent.supportAgent['1']
+    .call(normalizedPayload, { channel: 'command' })
+    .final()
+})
+```
+
+Use case: keep agent payload stable while external API contracts evolve.
+
+### 3) Transform protocol frames for external consumers
+
+```ts
+setCommandFunction(async function (context, payload) {
+  const invocation = context.invokeAgent.supportAgent['1']
+    .call({ message: payload.prompt }, { channel: 'command' })
+
+  const chunks: string[] = []
+  for await (const envelope of invocation) {
+    if (envelope.frame.kind === 'message') {
+      chunks.push(envelope.frame.content)
+    }
+  }
+
+  return { answer: chunks.join('') }
+})
+```
+
+Use case: map protocol frames to REST/GraphQL/mobile-specific response shapes.
+
+## Suggested placement rules
+
+| Concern | Put it in |
+| --- | --- |
+| auth, tenancy, entitlement, business preconditions | invoking command/subscription/stream guard |
+| shape mapping between external contract and agent payload | invoking command/subscription/stream transform |
+| LLM prompt/tool/history orchestration | agent handler |
+| protocol-to-client mapping (REST/SSE/WebSocket/UI) | invoking edge / transport adapter |
+
+Following this split keeps the agent runtime generic while preserving the full PURISTA guard/transform model.
