@@ -24,7 +24,7 @@ export const supportAgent = new AgentBuilder({
 	description: 'Support agent using tool calls and optional delegation to triageAgent',
 })
 	.addPayloadSchema(supportAgentInputSchema)
-	.defineModel('openai:gpt-5.2-mini')
+	.defineModel('openai:gpt-4o-mini')
 	.persistConversation('user', { maxFrames: 20 })
 	.allowTool({
 		serviceName: 'support',
@@ -36,10 +36,10 @@ export const supportAgent = new AgentBuilder({
 		serviceVersion: '1',
 		commandName: 'run',
 	})
-	.exposeAsHttpEndpoint('POST', 'agents/supportAgent', 'application/json', undefined, 'text/event-stream')
+	.exposeAsHttpEndpoint('POST', 'agents/supportAgent')
 	.setHandler<SupportAgentInput>(async function (context: SupportAgentContext, payload) {
 		const userPrompt = payload.prompt ?? payload.message ?? ''
-		const model = context.models['openai:gpt-5.2-mini']
+		const model = context.models['openai:gpt-4o-mini']
 		await context.conversation.addUser(userPrompt)
 
 		context.stream.sendChunk('Checking FAQ knowledge...')

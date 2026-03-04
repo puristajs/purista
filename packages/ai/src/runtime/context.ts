@@ -1,4 +1,4 @@
-import type { CommandFunctionContext, Logger } from '@purista/core'
+import type { CommandFunctionContext, Logger, StreamFunctionContext } from '@purista/core'
 import { HandledError, StatusCode } from '@purista/core'
 
 import type {
@@ -63,6 +63,7 @@ export type AgentProtocolBuffer = {
 	protocol: ProtocolEmitter
 	toEnvelopes(): AgentProtocolEnvelope[]
 	frames(): AgentProtocolFrame[]
+	flush(): Promise<void>
 }
 
 export type AgentStreamEmitter = {
@@ -111,92 +112,127 @@ const stringifyResult = (result: unknown): string => {
 	}
 }
 
-export const createProtocolBuffer = (context: CommandFunctionContext): AgentProtocolBuffer => {
+type ProtocolBufferOptions = {
+	onEnvelope?: (envelope: AgentProtocolEnvelope) => void | Promise<void>
+}
+
+type ProtocolContext = CommandFunctionContext | StreamFunctionContext
+
+export const createProtocolBuffer = (
+	context: ProtocolContext,
+	config: ProtocolBufferOptions = {},
+): AgentProtocolBuffer => {
 	const frames: ProtocolFrameEntry[] = []
+	let flushPromise = Promise.resolve()
 
 	const protocol: ProtocolEmitter = {
-		emitMessage(content, options) {
+		emitMessage(content, messageOptions) {
 			const message =
 				typeof content === 'object' && content !== null && 'content' in content
 					? {
 							content: stringifyResult(content.content),
-							summary: content.summary ?? options?.summary,
-							partial: content.partial ?? options?.partial,
-							final: content.final ?? options?.final,
+							summary: content.summary ?? messageOptions?.summary,
+							partial: content.partial ?? messageOptions?.partial,
+							final: content.final ?? messageOptions?.final,
 						}
 					: {
 							content: stringifyResult(content),
-							summary: options?.summary,
-							partial: options?.partial,
-							final: options?.final,
+							summary: messageOptions?.summary,
+							partial: messageOptions?.partial,
+							final: messageOptions?.final,
 						}
-			frames.push({
-				frame: createMessageFrame({
-					role: 'assistant',
-					content: message.content,
-					summary: message.summary,
-					partial: message.partial,
-					final: message.final,
-				}),
+			const frame = createMessageFrame({
+				role: 'assistant',
+				content: message.content,
+				summary: message.summary,
+				partial: message.partial,
+				final: message.final,
 			})
+			frames.push({ frame })
+			if (config.onEnvelope) {
+				const envelope = createEnvelopeFromContext(context, frame)
+				flushPromise = flushPromise.then(async () => {
+					await config.onEnvelope?.(envelope)
+				})
+			}
 		},
 		emitArtifact(input) {
-			frames.push({
-				frame: createArtifactFrame({
-					artifactId: input.artifactId,
-					phase: input.final ? 'final' : 'chunk',
-					sequence: input.sequence,
-					total: input.total,
-					content: input.content,
-					mimeType: input.mimeType,
-					lastChunk: input.final,
-				}),
+			const frame = createArtifactFrame({
+				artifactId: input.artifactId,
+				phase: input.final ? 'final' : 'chunk',
+				sequence: input.sequence,
+				total: input.total,
+				content: input.content,
+				mimeType: input.mimeType,
+				lastChunk: input.final,
 			})
+			frames.push({ frame })
+			if (config.onEnvelope) {
+				const envelope = createEnvelopeFromContext(context, frame)
+				flushPromise = flushPromise.then(async () => {
+					await config.onEnvelope?.(envelope)
+				})
+			}
 		},
 		emitTelemetry(metrics) {
-			frames.push({
-				frame: createTelemetryFrame({
-					durationMs: metrics.durationMs,
-					waitTimeMs: metrics.waitTimeMs,
-					poolId: metrics.poolId,
-					provider: metrics.provider,
-					usage: metrics.usage
-						? {
-								promptTokens: metrics.usage.promptTokens,
-								completionTokens: metrics.usage.completionTokens,
-								totalTokens: metrics.usage.totalTokens,
-								costUsd: metrics.usage.costUsd,
-							}
-						: undefined,
-				}),
+			const frame = createTelemetryFrame({
+				durationMs: metrics.durationMs,
+				waitTimeMs: metrics.waitTimeMs,
+				poolId: metrics.poolId,
+				provider: metrics.provider,
+				usage: metrics.usage
+					? {
+							promptTokens: metrics.usage.promptTokens,
+							completionTokens: metrics.usage.completionTokens,
+							totalTokens: metrics.usage.totalTokens,
+							costUsd: metrics.usage.costUsd,
+						}
+					: undefined,
 			})
+			frames.push({ frame })
+			if (config.onEnvelope) {
+				const envelope = createEnvelopeFromContext(context, frame)
+				flushPromise = flushPromise.then(async () => {
+					await config.onEnvelope?.(envelope)
+				})
+			}
 		},
 		emitToolEvent(event) {
-			frames.push({
-				frame: createToolEventFrame({
-					toolName: event.toolName,
-					status: event.status,
-					args: event.input,
-					result: event.output,
-					message: event.message,
-					errorCode: event.errorCode,
-				}),
+			const frame = createToolEventFrame({
+				toolName: event.toolName,
+				status: event.status,
+				args: event.input,
+				result: event.output,
+				message: event.message,
+				errorCode: event.errorCode,
 			})
+			frames.push({ frame })
+			if (config.onEnvelope) {
+				const envelope = createEnvelopeFromContext(context, frame)
+				flushPromise = flushPromise.then(async () => {
+					await config.onEnvelope?.(envelope)
+				})
+			}
 		},
 		emitError(error, overrides) {
 			const err =
 				error instanceof Error ? error : new Error(typeof error === 'string' ? error : 'Agent error', { cause: error })
-			frames.push({
-				frame: createErrorFrame({
-					code: overrides?.code ?? 'AgentError',
-					message: err.message,
-					handled: overrides?.handled ?? error instanceof HandledError,
-					details: {
-						stack: err.stack,
-						cause: err.cause,
-					},
-				}),
+			const frame = createErrorFrame({
+				code: overrides?.code ?? 'AgentError',
+				message: err.message,
+				handled: overrides?.handled ?? error instanceof HandledError,
+				details: {
+					stack: err.stack,
+					cause: err.cause,
+				},
 			})
+			frames.push({ frame })
+			if (config.onEnvelope) {
+				const envelope = createEnvelopeFromContext(context, frame)
+				flushPromise = flushPromise.then(async () => {
+					await config.onEnvelope?.(envelope)
+				})
+			}
 		},
 		has(kind) {
 			return frames.some(entry => entry.frame.kind === kind)
@@ -211,6 +247,9 @@ export const createProtocolBuffer = (context: CommandFunctionContext): AgentProt
 		frames() {
 			return frames.map(entry => entry.frame)
 		},
+		async flush() {
+			await flushPromise
+		},
 	}
 }
 
@@ -220,7 +259,7 @@ type ToolInvoker = {
 }
 
 const createToolInvoker = (
-	serviceContext: CommandFunctionContext,
+	serviceContext: ProtocolContext,
 	tools: AllowedToolDefinition[],
 	protocol: ProtocolEmitter,
 ): ToolInvoker => {
@@ -330,7 +369,7 @@ export type SessionHelpers = {
 }
 
 type SessionIdentityInput = {
-	context: CommandFunctionContext
+	context: ProtocolContext
 	manifest: AgentManifest
 	payload: unknown
 }
@@ -509,7 +548,7 @@ export type AgentHandlerContext<
 	logger: Logger
 	payload: Payload
 	parameter: Parameter
-	message: CommandFunctionContext['message']
+	message: ProtocolContext['message']
 	conversation: ConversationHelpers
 	session: SessionHelpers
 	knowledge: KnowledgeHelpers<KnowledgeAliases>
@@ -517,7 +556,7 @@ export type AgentHandlerContext<
 	tools: ToolInvoker
 	resources: Resources
 	models: Models
-	serviceContext: CommandFunctionContext
+	serviceContext: ProtocolContext
 	manifest: AgentManifest
 }
 
@@ -528,7 +567,7 @@ export type CreateAgentHandlerContextInput<
 	Models extends Record<string, ModelProvider>,
 	KnowledgeAliases extends string = string,
 > = {
-	serviceContext: CommandFunctionContext<Payload, Parameter>
+	serviceContext: CommandFunctionContext<Payload, Parameter> | StreamFunctionContext<Payload, Parameter>
 	payload: Payload
 	parameter: Parameter
 	sessionStore: SessionStore

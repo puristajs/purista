@@ -9,7 +9,7 @@ import type { ModelProvider, ProviderRequest, ProviderResponse } from './ModelPr
  */
 export type AiSdkProviderOptions = {
 	/**
-	 * Language model instance (or provider id) created via the Vercel AI SDK (e.g. `openai('gpt-4o-mini')`).
+	 * Language model instance (or provider id) created via the Vercel AI SDK (e.g. `openai('')`).
 	 */
 	model: LanguageModel
 	/**
@@ -79,7 +79,7 @@ const composeSystemPrompt = (systemPrompt?: string, context?: string) => {
  * import { AiSdkProvider } from '@purista/ai'
  *
  * const provider = new AiSdkProvider({
- *   model: openai('gpt-4o-mini'),
+ *   model: openai(''),
  *   systemPrompt: 'You are a helpful support engineer',
  * })
  *

@@ -63,14 +63,14 @@ import { supportAgent } from './agents/supportAgent/v1/supportAgent.js'
 
 const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY! })
 const gpt4oMiniProvider = new AiSdkProvider({
-  model: openai('gpt-4o-mini'),
+  model: openai(''),
   systemPrompt: 'You are a concise support engineer.',
   defaults: { temperature: 0.2, maxOutputTokens: 512 },
 })
 
 const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   models: {
-    'openai:gpt-4o-mini': gpt4oMiniProvider,
+    'openai:': gpt4oMiniProvider,
   },
 })
 ```
@@ -88,7 +88,7 @@ Use the shared registry only when you intentionally want process-wide provider d
 
 | Option | Purpose | Typical usage |
 | --- | --- | --- |
-| `model` | underlying AI SDK language model | `openai('gpt-4o-mini')`, anthropic, ollama, etc. |
+| `model` | underlying AI SDK language model | `openai('')`, anthropic, ollama, etc. |
 | `systemPrompt` | static system instruction baseline | role/persona and guardrails |
 | `defaults.temperature` | response variability | lower for deterministic support flows |
 | `defaults.maxOutputTokens` | output length cap | control latency and token spend |
@@ -99,7 +99,7 @@ Use the shared registry only when you intentionally want process-wide provider d
 `AiSdkProvider` understands the `metadata.aiSdk` object to override call options without recreating the provider:
 
 ```ts
-await context.models['openai:gpt-4o-mini'].generate({
+await context.models['openai:'].generate({
   prompt: payload.prompt,
   metadata: {
     aiSdk: {

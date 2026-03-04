@@ -1,5 +1,5 @@
 import type { Command, EventBridge } from '@purista/core'
-import { EBMessageType, getNewEBMessageId, getNewTraceId } from '@purista/core'
+import { EBMessageType, getNewEBMessageId, getNewTraceId, StatusCode, UnhandledError } from '@purista/core'
 
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import type { AgentStreamResponder } from '../types/AgentDefinition.js'
@@ -54,16 +54,88 @@ export const invokeAgent = async (options: InvokeAgentOptions) => {
 		},
 	}
 
-	const envelopes = (await options.eventBridge.invoke(message, options.timeoutMs)) as AgentProtocolEnvelope[]
-	if (options.stream) {
-		try {
-			for (const envelope of envelopes) {
-				options.stream.onFrame(envelope)
+	const streamRequest = {
+		traceId: message.traceId,
+		sender: message.sender,
+		receiver: message.receiver,
+		contentType: message.contentType,
+		contentEncoding: message.contentEncoding,
+		principalId: message.principalId,
+		tenantId: message.tenantId,
+		payload: {
+			frameType: 'open' as const,
+			payload: message.payload.payload,
+			parameter: message.payload.parameter,
+		},
+	}
+
+	const emitFrame = (envelope: AgentProtocolEnvelope) => {
+		if (!options.stream) {
+			return
+		}
+		options.stream.onFrame(envelope)
+	}
+
+	try {
+		const handle = await options.eventBridge.openStream<AgentProtocolEnvelope, AgentProtocolEnvelope[]>(
+			streamRequest,
+			options.timeoutMs,
+		)
+		const envelopes: AgentProtocolEnvelope[] = []
+		for await (const frame of handle) {
+			if (frame.payload.frameType === 'chunk' && frame.payload.chunk) {
+				envelopes.push(frame.payload.chunk)
+				emitFrame(frame.payload.chunk)
+				continue
 			}
-			options.stream.onComplete()
-		} catch (error) {
-			options.stream.onError(error)
+
+			if (frame.payload.frameType === 'complete') {
+				if (Array.isArray(frame.payload.final)) {
+					if (!envelopes.length) {
+						for (const envelope of frame.payload.final) {
+							envelopes.push(envelope)
+							emitFrame(envelope)
+						}
+					}
+				}
+				options.stream?.onComplete()
+				return envelopes
+			}
+
+			if (frame.payload.frameType === 'error') {
+				throw new UnhandledError(
+					StatusCode.InternalServerError,
+					frame.payload.error?.message ?? 'agent stream failed',
+					frame.payload.error,
+				)
+			}
+		}
+
+		options.stream?.onComplete()
+		return envelopes
+	} catch (error) {
+		const isStreamUnavailable =
+			(error instanceof UnhandledError &&
+				(error.errorCode === StatusCode.NotImplemented || error.errorCode === StatusCode.BadGateway)) ||
+			(error instanceof Error &&
+				(error.message.includes('does not support streams') || error.message.includes('InvalidCommand')))
+
+		if (!isStreamUnavailable) {
+			options.stream?.onError(error)
+			throw error
+		}
+		try {
+			const envelopes = (await options.eventBridge.invoke(message, options.timeoutMs)) as AgentProtocolEnvelope[]
+			if (options.stream) {
+				for (const envelope of envelopes) {
+					options.stream.onFrame(envelope)
+				}
+				options.stream.onComplete()
+			}
+			return envelopes
+		} catch (fallbackError) {
+			options.stream?.onError(fallbackError)
+			throw fallbackError
 		}
 	}
-	return envelopes
 }

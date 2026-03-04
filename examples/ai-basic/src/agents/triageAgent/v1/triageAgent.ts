@@ -10,10 +10,10 @@ export const triageAgent = new AgentBuilder({
 	description: 'Escalation helper agent',
 })
 	.addPayloadSchema(triageAgentInputSchema)
-	.defineModel('openai:gpt-5.2-mini')
+	.defineModel('openai:gpt-4o-mini')
 	.persistConversation('agent', { maxFrames: 10 })
 	.setHandler<TriageAgentInput>(async function (context: TriageAgentContext, payload) {
-		const model = context.models['openai:gpt-5.2-mini']
+		const model = context.models['openai:gpt-4o-mini']
 
 		context.stream.sendChunk('Escalation check in progress...')
 		const result = await model.generate({

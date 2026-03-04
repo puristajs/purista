@@ -31,7 +31,7 @@ describe('AgentInstance', () => {
 	it('fails fast when a declared model alias is missing', () => {
 		const manifest: AgentManifest = {
 			...baseManifest,
-			models: ['openai:gpt-4o-mini'],
+			models: ['openai:'],
 		}
 
 		expect(
@@ -39,7 +39,7 @@ describe('AgentInstance', () => {
 				new AgentInstance({ ...baseDependencies, manifest }, { instanceId: 'bridge-1' } as any, {
 					models: {},
 				}),
-		).toThrow('Missing model provider for alias "openai:gpt-4o-mini"')
+		).toThrow('Missing model provider for alias "openai:"')
 	})
 
 	it('notifies stream responders for successful invocations', async () => {

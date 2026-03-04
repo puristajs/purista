@@ -482,7 +482,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			payload: PayloadType,
 			parameter: ParameterType,
 		) => {
-			const msg: Readonly<Omit<Command, 'correlationId' | 'id' | 'timestamp'>> = Object.freeze({
+			const commandMsg: Readonly<Omit<Command, 'correlationId' | 'id' | 'timestamp'>> = Object.freeze({
 				messageType: EBMessageType.Command,
 				traceId,
 				sender,
@@ -500,6 +500,133 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 			const descriptor = agentInvokes?.[receiver.serviceName]?.[receiver.serviceVersion]
 			const payloadSchema = descriptor?.payloadSchema
 			const parameterSchema = descriptor?.parameterSchema
+
+			let resolveNext: ((result: IteratorResult<unknown>) => void) | undefined
+			let rejectNext: ((error: unknown) => void) | undefined
+			const bufferedValues: unknown[] = []
+			let iteratorDone = false
+			let iteratorError: unknown
+
+			const emitValue = (value: unknown) => {
+				if (iteratorDone) {
+					return
+				}
+				if (resolveNext) {
+					const resolve = resolveNext
+					resolveNext = undefined
+					rejectNext = undefined
+					resolve({
+						value,
+						done: false,
+					})
+					return
+				}
+				bufferedValues.push(value)
+			}
+
+			const emitDone = () => {
+				if (iteratorDone) {
+					return
+				}
+				iteratorDone = true
+				if (resolveNext) {
+					const resolve = resolveNext
+					resolveNext = undefined
+					rejectNext = undefined
+					resolve({
+						value: undefined,
+						done: true,
+					})
+				}
+			}
+
+			const emitError = (error: unknown) => {
+				if (iteratorDone) {
+					return
+				}
+				iteratorDone = true
+				iteratorError = error
+				if (rejectNext) {
+					const reject = rejectNext
+					resolveNext = undefined
+					rejectNext = undefined
+					reject(error)
+				}
+			}
+
+			const streamOrInvoke = async () => {
+				let sawStreamChunk = false
+
+				const openRequest: Omit<StreamOpenRequest, 'id' | 'messageType' | 'timestamp' | 'correlationId'> = {
+					traceId,
+					sender,
+					receiver,
+					contentType: 'application/json',
+					contentEncoding: 'utf-8',
+					payload: {
+						frameType: 'open',
+						payload,
+						parameter,
+					},
+					principalId,
+					tenantId,
+				}
+
+				try {
+					const handle = await this.eventBridge.openStream<unknown, unknown>(openRequest)
+					let streamFinal: unknown
+					for await (const frame of handle) {
+						if (frame.payload.frameType === 'chunk') {
+							sawStreamChunk = true
+							emitValue(frame.payload.chunk)
+							continue
+						}
+
+						if (frame.payload.frameType === 'complete') {
+							streamFinal = frame.payload.final
+							break
+						}
+
+						if (frame.payload.frameType === 'error') {
+							throw new UnhandledError(
+								StatusCode.InternalServerError,
+								frame.payload.error?.message ?? 'agent stream failed',
+								frame.payload.error,
+							)
+						}
+					}
+
+					if (streamFinal === undefined) {
+						return [] as unknown[]
+					}
+					return streamFinal
+				} catch (error) {
+					if (sawStreamChunk) {
+						throw error
+					}
+
+					const isStreamUnavailable =
+						(error instanceof UnhandledError &&
+							(error.errorCode === StatusCode.NotImplemented || error.errorCode === StatusCode.BadGateway)) ||
+						(error instanceof Error &&
+							(error.message.includes('does not support streams') || error.message.includes('InvalidCommand')))
+
+					if (!isStreamUnavailable) {
+						throw error
+					}
+
+					const fallback = await this.eventBridge.invoke(commandMsg)
+					if (Array.isArray(fallback)) {
+						for (const value of fallback) {
+							emitValue(value)
+						}
+					} else {
+						emitValue(fallback)
+					}
+					return fallback
+				}
+			}
+
 			const invocationPromise = (async () => {
 				return await this.startActiveSpan(`${serviceTarget}.agentInvoke`, {}, undefined, async span => {
 					span.setAttributes({
@@ -546,15 +673,45 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						}
 					}
 
-					return this.eventBridge.invoke(msg)
+					try {
+						const result = await streamOrInvoke()
+						emitDone()
+						return result
+					} catch (error) {
+						emitError(error)
+						throw error
+					}
 				})
 			})()
 
 			return {
 				final: () => invocationPromise,
 				[Symbol.asyncIterator]: async function* () {
-					const result = await invocationPromise
-					yield result
+					while (true) {
+						if (bufferedValues.length > 0) {
+							yield bufferedValues.shift() as unknown
+							continue
+						}
+
+						if (iteratorError) {
+							throw iteratorError
+						}
+
+						if (iteratorDone) {
+							return
+						}
+
+						const next = await new Promise<IteratorResult<unknown>>((resolve, reject) => {
+							resolveNext = resolve
+							rejectNext = reject
+						})
+
+						if (next.done) {
+							return
+						}
+
+						yield next.value
+					}
 				},
 			} as unknown as AgentInvocation<InvokeResponseType>
 		}

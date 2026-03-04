@@ -24,7 +24,7 @@ describe('toAiSdkStreamEvents', () => {
 				frame: createTelemetryFrame({
 					usage: { promptTokens: 5, completionTokens: 7, totalTokens: 12 },
 					durationMs: 123,
-					provider: 'openai:gpt-4o-mini',
+					provider: 'openai:',
 				}),
 			}),
 		]
@@ -48,7 +48,7 @@ describe('toAiSdkStreamEvents', () => {
 			summary: 'done',
 			telemetry: {
 				usage: { promptTokens: 5, completionTokens: 7, totalTokens: 12 },
-				provider: 'openai:gpt-4o-mini',
+				provider: 'openai:',
 			},
 		})
 	})

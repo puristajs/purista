@@ -48,9 +48,9 @@ export const supportAgent = new AgentBuilder({
   description: 'Answers help-desk questions',
 })
   .addPayloadSchema(supportInputSchema)
-  .defineModel('openai:gpt-5.2-mini')
+  .defineModel('openai:gpt-4o-mini')
   .setHandler(async function (context, payload) {
-    const model = context.models['openai:gpt-5.2-mini']
+    const model = context.models['openai:gpt-4o-mini']
     const result = await model.generate({ prompt: payload.prompt, context: payload.context })
     context.stream.sendFinal(result.output)
     return { message: result.output }
@@ -98,7 +98,7 @@ const supportAgent = new AgentBuilder({ ... })
     await context.conversation.addUser(payload.prompt)
     const prompt = await context.conversation.buildPromptInput()
 
-    const result = await context.models['openai:gpt-5.2-mini'].generate({ prompt })
+    const result = await context.models['openai:gpt-4o-mini'].generate({ prompt })
     await context.conversation.addAssistant(result.output)
 
     context.stream.sendFinal(result.output)
@@ -117,7 +117,7 @@ const supportAgent = new AgentBuilder({ ... })
   .setHandler(async function (context, payload) {
     const docs = await context.knowledge.supportFaq.query(payload.prompt, { limit: 3 })
     const contextBlock = docs.map(doc => doc.content).join('\n')
-    const result = await context.models['openai:gpt-5.2-mini'].generate({
+    const result = await context.models['openai:gpt-4o-mini'].generate({
       prompt: `${payload.prompt}\n\nContext:\n${contextBlock}`,
     })
     context.stream.sendFinal(result.output)

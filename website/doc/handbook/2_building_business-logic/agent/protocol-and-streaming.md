@@ -70,6 +70,8 @@ export async function handler(req, res) {
 }
 ```
 
+`invokeAgent` is streaming-first: it opens an EventBridge stream and collects envelopes from that live session. `.final()` style behavior is collector sugar, not a separate buffering transport.
+
 UI teams using [`ai-sdk-ui`](https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol) can consume these events directly—no custom adapters required. The helper maps PURISTA frames to AI SDK events (`response.created`, `response.output_text.delta`, `response.completed`, etc.) and forwards telemetry (tokens, duration) as `response.metrics`.
 
 ## Background streaming

@@ -14,7 +14,7 @@ import { supportV1Service } from './service/support/v1/index.js'
 const buildOpenAiProvider = (apiKey: string) => {
 	const openai = createOpenAI({ apiKey })
 	return new AiSdkProvider({
-		model: openai('gpt-5.2-mini'),
+		model: openai('gpt-4o-mini'),
 		systemPrompt:
 			'You are a production support assistant. Keep answers concise, actionable, and mention next concrete steps.',
 		defaults: { temperature: 0.2 },
@@ -38,7 +38,7 @@ export async function main() {
 	const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
 		logger,
 		models: {
-			'openai:gpt-5.2-mini': provider,
+			'openai:gpt-4o-mini': provider,
 		},
 		poolConfig: {
 			maxWorkers: 1,
@@ -49,7 +49,7 @@ export async function main() {
 	const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 		logger,
 		models: {
-			'openai:gpt-5.2-mini': provider,
+			'openai:gpt-4o-mini': provider,
 		},
 		poolConfig: {
 			poolId: 'support',
@@ -82,7 +82,8 @@ export async function main() {
 	logger.info(`ai-basic example started on http://localhost:${port}`)
 	logger.info('UI: /index.html')
 	logger.info('Command endpoint: POST /api/v1/support/ask')
-	logger.info('Agent stream endpoint: POST /api/v1/agents/supportAgent')
+	logger.info('Agent stream endpoint: POST /api/v1/support/ask/stream')
+	logger.info('Direct agent endpoint: POST /api/v1/agents/supportAgent')
 	logger.info('Follow-up endpoint: POST /api/v1/support/follow-up')
 
 	gracefulShutdown(logger, [

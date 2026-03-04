@@ -73,7 +73,7 @@
 					<input id="prompt" value="How can I request a refund for my order?" />
 					<button id="sendSse" type="button">Send SSE</button>
 				</div>
-				<p>Endpoint: <code>POST /api/v1/agents/supportAgent</code></p>
+				<p>Endpoint: <code>POST /api/v1/support/ask/stream</code></p>
 				<div id="chatLog"></div>
 			</section>
 
@@ -120,6 +120,9 @@
 				let eventName = 'message'
 				let data = ''
 				for (const line of chunk.split('\n')) {
+					if (line.startsWith(':')) {
+						continue
+					}
 					if (line.startsWith('event:')) {
 						eventName = line.slice(6).trim()
 					}
@@ -130,45 +133,68 @@
 				if (!data) {
 					return
 				}
-				const parsed = JSON.parse(data)
-				if (eventName === 'chunk' && Array.isArray(parsed.chunk)) {
-					appendEnvelopeFrames(parsed.chunk)
+				let parsed
+				try {
+					parsed = JSON.parse(data)
+				} catch {
+					logLine(`unparseable stream payload: ${data}`)
+					return
 				}
-				if (eventName === 'complete' && Array.isArray(parsed.final)) {
-					appendEnvelopeFrames(parsed.final)
+				const frameType = parsed.frameType || eventName
+				if (frameType === 'chunk') {
+					if (Array.isArray(parsed.chunk)) {
+						appendEnvelopeFrames(parsed.chunk)
+					} else if (parsed.chunk && typeof parsed.chunk === 'object') {
+						appendEnvelopeFrames([parsed.chunk])
+					}
 				}
-				if (eventName === 'error') {
+				if (frameType === 'complete' && parsed.final) {
+					if (Array.isArray(parsed.final)) {
+						appendEnvelopeFrames(parsed.final)
+					} else if (Array.isArray(parsed.final.envelopes)) {
+						appendEnvelopeFrames(parsed.final.envelopes)
+					}
+				}
+				if (frameType === 'error') {
 					logLine(`stream error: ${JSON.stringify(parsed.error)}`)
 				}
 			}
 
 			const streamAgent = async prompt => {
 				chatLog.innerHTML = ''
-				const response = await fetch('/api/v1/agents/supportAgent', {
-					method: 'POST',
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ prompt }),
-				})
-				if (!response.ok) {
-					logLine(`HTTP ${response.status}`)
-					return
-				}
-				const reader = response.body.getReader()
-				const decoder = new TextDecoder()
-				let buffer = ''
-				while (true) {
-					const { done, value } = await reader.read()
-					if (done) {
-						break
+				try {
+					const response = await fetch('/api/v1/support/ask/stream', {
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify({ prompt }),
+					})
+					if (!response.ok) {
+						logLine(`HTTP ${response.status}`)
+						return
 					}
-					buffer += decoder.decode(value, { stream: true })
-					const parts = buffer.split('\n\n')
-					buffer = parts.pop() ?? ''
-					for (const part of parts) {
-						if (part.trim()) {
-							parseSseChunk(part)
+					if (!response.body) {
+						logLine('No response stream body available')
+						return
+					}
+					const reader = response.body.getReader()
+					const decoder = new TextDecoder()
+					let buffer = ''
+					while (true) {
+						const { done, value } = await reader.read()
+						if (done) {
+							break
+						}
+						buffer += decoder.decode(value, { stream: true })
+						const parts = buffer.split('\n\n')
+						buffer = parts.pop() ?? ''
+						for (const part of parts) {
+							if (part.trim()) {
+								parseSseChunk(part)
+							}
 						}
 					}
+				} catch (error) {
+					logLine(`stream request failed: ${error instanceof Error ? error.message : String(error)}`)
 				}
 			}
 
@@ -177,24 +203,36 @@
 				await streamAgent(prompt)
 			})
 
+			const runJsonRequest = async (path, payload, transform) => {
+				try {
+					const response = await fetch(path, {
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify(payload),
+					})
+					const body = await response.json()
+					const result = typeof transform === 'function' ? transform(body) : body
+					output.textContent = JSON.stringify(result, null, 2)
+				} catch (error) {
+					output.textContent = JSON.stringify(
+						{ error: error instanceof Error ? error.message : String(error) },
+						null,
+						2,
+					)
+				}
+			}
+
 			document.getElementById('runCommand').addEventListener('click', async () => {
 				const prompt = document.getElementById('prompt').value
-				const response = await fetch('/api/v1/support/ask', {
-					method: 'POST',
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ prompt }),
-				})
-				output.textContent = JSON.stringify(await response.json(), null, 2)
+				await runJsonRequest('/api/v1/support/ask', { prompt })
 			})
 
 			document.getElementById('triggerFollowUp').addEventListener('click', async () => {
 				const prompt = document.getElementById('prompt').value
-				const response = await fetch('/api/v1/support/follow-up', {
-					method: 'POST',
-					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ prompt }),
-				})
-				output.textContent = JSON.stringify(await response.json(), null, 2)
+				await runJsonRequest('/api/v1/support/follow-up', { prompt }, body => ({
+					...body,
+					note: 'Follow-up runs asynchronously via subscription. Check server logs for processed answer.',
+				}))
 			})
 		</script>
 	</body>

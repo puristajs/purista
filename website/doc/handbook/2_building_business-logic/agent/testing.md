@@ -61,7 +61,7 @@ describe('support agent', () => {
     await eventBridge.start()
 
     const agent = await supportAgent.getInstance(eventBridge, {
-      models: { 'openai:gpt-5.2-mini': new DeterministicProvider() },
+      models: { 'openai:gpt-4o-mini': new DeterministicProvider() },
     })
     await agent.start()
     await new Promise(resolve => setTimeout(resolve, 25))

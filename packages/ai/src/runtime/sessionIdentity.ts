@@ -1,4 +1,4 @@
-import type { CommandFunctionContext } from '@purista/core'
+import type { CommandFunctionContext, StreamFunctionContext } from '@purista/core'
 
 /**
  * Input required to build the canonical scoped session id used by agent session helpers.
@@ -46,6 +46,9 @@ export const getPayloadSessionId = (payload: unknown): string | undefined => {
 /**
  * Resolves the base session id used for implicit session helpers.
  */
-export const resolveBaseSessionId = (context: CommandFunctionContext, payload: unknown): string => {
+export const resolveBaseSessionId = (
+	context: CommandFunctionContext | StreamFunctionContext,
+	payload: unknown,
+): string => {
 	return getPayloadSessionId(payload) ?? context.message.id
 }

@@ -17,13 +17,13 @@ const supportAgent = new AgentBuilder({
   agentName: 'supportAgent',
   agentVersion: '1',
 })
-  .defineModel('openai:gpt-4o-mini')
+  .defineModel('openai:')
   .useKnowledgeAdapter('supportFaq', { locale: 'en-US' })
   .setHandler(async (context, payload) => {
     const docs = await context.knowledge.supportFaq.query(payload.prompt, { limit: 3 })
     const contextBlock = docs.map(doc => `- ${doc.content}`).join('\n')
 
-    const result = await context.models['openai:gpt-4o-mini'].generate({
+    const result = await context.models['openai:'].generate({
       prompt: `${payload.prompt}\n\nContext:\n${contextBlock}`,
     })
 
@@ -37,7 +37,7 @@ At runtime, provide the actual adapter instance:
 
 ```ts
 await supportAgent.getInstance(eventBridge, {
-  models: { 'openai:gpt-4o-mini': provider },
+  models: { 'openai:': provider },
   knowledgeAdapters: {
     supportFaq: new InMemoryKnowledgeAdapter(),
   },

@@ -41,14 +41,14 @@ await eventBridge.start()
 
 const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY! })
 const provider = new AiSdkProvider({
-  model: openai('gpt-5.2-mini'),
+  model: openai('gpt-4o-mini'),
   systemPrompt: 'You are a friendly support engineer.',
   defaults: { temperature: 0.2 },
 })
 
 const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   models: {
-    'openai:gpt-5.2-mini': provider,
+    'openai:gpt-4o-mini': provider,
   },
   sessionStore: aiConversationStore,
   knowledgeAdapters: {
@@ -76,11 +76,11 @@ await supportAgentInstance.start()
 ```ts
 // definition
 export const supportAgent = new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
-  .defineModel('openai:gpt-5.2-mini')
+  .defineModel('openai:gpt-4o-mini')
   .useKnowledgeAdapter('supportFaq')
   .setHandler(async (context, payload) => {
     // from getInstance(..., { models })
-    const model = context.models['openai:gpt-5.2-mini']
+    const model = context.models['openai:gpt-4o-mini']
     // from getInstance(..., { knowledgeAdapters: { supportFaq: ... } })
     const docs = await context.knowledge.supportFaq.query(payload.prompt, { limit: 3 })
     // from getInstance(..., { sessionStore })
@@ -113,7 +113,7 @@ Pool identity and parallelism are runtime/deploy settings:
 
 ```ts
 const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
-  models: { 'openai:gpt-5.2-mini': provider },
+  models: { 'openai:gpt-4o-mini': provider },
   poolConfig: {
     poolId: 'support', // optional; defaults to agent:<agentName>
     maxWorkers: 4,     // default is 1
@@ -206,7 +206,7 @@ export const notifyCommand = supportServiceBuilder
   })
 ```
 
-The `.call()` method returns an `AgentInvocation` object which is an `AsyncIterable` yielding protocol frames and has a `.final()` helper returning a `Promise` for the full result.
+The `.call()` method returns an `AgentInvocation` object which is an `AsyncIterable` yielding protocol frames as they arrive. `.final()` is collector sugar over the same stream session.
 
 ### What `.canInvokeAgent(...)` validates
 
@@ -266,7 +266,7 @@ If you need stricter payload typing per agent, enforce it at the agent boundary 
 
 ### 2. Standalone Invocation
 
-The helper `invokeAgent` (from `@purista/ai`) mirrors `invokeCommand` but automatically validates the agent protocol envelopes. This is ideal for scripts, manual triggers, or controllers where you don't have a Purista context.
+The helper `invokeAgent` (from `@purista/ai`) mirrors `invokeCommand` but opens a stream session first and collects protocol envelopes for you. It only falls back to command invoke when stream support is unavailable. This is ideal for scripts, manual triggers, or controllers where you don't have a Purista context.
 
 ```ts
 import { invokeAgent } from '@purista/ai'

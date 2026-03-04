@@ -29,7 +29,7 @@ export const getAgentTestFileContent = (input: {
 			writer.blankLine()
 			writer.writeLine(`const agent = await ${agentIdentifier}.getInstance(eventBridge, {`)
 			writer.indent(() => {
-				writer.writeLine("models: { 'openai:gpt-4o-mini': new EchoProvider() },")
+				writer.writeLine("models: { 'openai:': new EchoProvider() },")
 			})
 			writer.writeLine('})')
 			writer.writeLine('await agent.start()')

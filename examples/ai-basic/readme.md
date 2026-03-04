@@ -3,6 +3,7 @@
 This example demonstrates the current `@purista/ai` integration end-to-end:
 
 - Agent exposed as HTTP endpoint (`POST /api/v1/agents/supportAgent`)
+- Stream endpoint invoking an agent (`POST /api/v1/support/ask/stream`)
 - Tool calls (`support.lookupFaq` command used from `supportAgent`)
 - Agent-to-agent delegation (`supportAgent` invokes `triageAgent` as a tool)
 - Command invoking an agent (`POST /api/v1/support/ask`)
@@ -40,7 +41,7 @@ Key test files:
 
 ### Frontend/SSE consumer
 
-`public/index.html` demonstrates reading stream frames and routing by frame kind (`message`, `tool`, `telemetry`, `error`).
+`public/index.html` demonstrates reading SSE stream frames from `POST /api/v1/support/ask/stream` and routing by frame kind (`message`, `tool`, `telemetry`, `error`).
 For a reusable TypeScript utility you can copy into frontend libraries, see:
 
 - `src/client/protocolConsumer.ts`

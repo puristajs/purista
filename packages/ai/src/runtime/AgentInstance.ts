@@ -36,10 +36,12 @@ export type AgentInstanceDependencies = {
 	info: AgentInfo
 	manifest: AgentManifest
 	serviceBuilder: any
-	handler: AgentHandler
+	handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any>
 }
 
-export type AgentRuntimeDependencies<KnowledgeAliases extends string = never> = AgentInstanceOptions<KnowledgeAliases>
+export type AgentRuntimeDependencies = Omit<AgentInstanceOptions<any>, 'knowledgeAdapters'> & {
+	knowledgeAdapters?: Record<string, KnowledgeAdapter>
+}
 
 type ResolvedAgentRuntimeDependencies = {
 	eventBridge: EventBridge
@@ -61,7 +63,7 @@ type ResolvedAgentRuntimeDependencies = {
 
 type AgentServiceConfig = {
 	runtime: {
-		handler: AgentHandler
+		handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any>
 		manifest: AgentManifest
 		sessionStore: SessionStore
 		knowledgeAdapters: Record<string, KnowledgeAdapter>
@@ -78,11 +80,7 @@ export class AgentInstance implements AgentInstanceContract {
 	private readonly dependencies: AgentInstanceDependencies
 	private readonly runtime: ResolvedAgentRuntimeDependencies
 
-	constructor(
-		deps: AgentInstanceDependencies,
-		eventBridge: EventBridge,
-		runtime: AgentRuntimeDependencies<string> = {},
-	) {
+	constructor(deps: AgentInstanceDependencies, eventBridge: EventBridge, runtime: AgentRuntimeDependencies = {}) {
 		this.dependencies = deps
 		const poolId = runtime.poolConfig?.poolId ?? `agent:${deps.info.agentName}`
 		const maxWorkers = runtime.poolConfig?.maxWorkers ?? 1

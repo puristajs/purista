@@ -67,6 +67,17 @@ describe('runtime context helpers', () => {
 		expect(envelopes[2]?.frame.kind).toBe('tool')
 	})
 
+	it('forwards envelopes incrementally to onEnvelope callbacks', async () => {
+		const onEnvelope = vi.fn(async () => {})
+		const buffer = createProtocolBuffer(baseServiceContext, { onEnvelope })
+		buffer.protocol.emitMessage({ content: 'one', partial: true })
+		buffer.protocol.emitMessage({ content: 'two', final: true })
+		await buffer.flush()
+		expect(onEnvelope).toHaveBeenCalledTimes(2)
+		expect(onEnvelope.mock.calls[0]?.[0]?.frame.kind).toBe('message')
+		expect(onEnvelope.mock.calls[1]?.[0]?.frame.kind).toBe('message')
+	})
+
 	it('creates a handler context with tool/session/knowledge helpers', async () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const sessionStore = new InMemorySessionStore()

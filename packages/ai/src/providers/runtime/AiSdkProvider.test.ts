@@ -37,7 +37,7 @@ describe('AiSdkProvider', () => {
 
 	it('forwards prompt/context and merges defaults', async () => {
 		const provider = new AiSdkProvider({
-			model: 'openai:gpt-4o-mini',
+			model: 'openai:',
 			systemPrompt: 'You are helpful',
 			defaults: { temperature: 0.1 },
 		})
@@ -45,7 +45,7 @@ describe('AiSdkProvider', () => {
 		const result = await provider.generate({ prompt: 'Hello', context: 'user context' })
 
 		expect(mockGenerateText).toHaveBeenCalledWith({
-			model: 'openai:gpt-4o-mini',
+			model: 'openai:',
 			prompt: 'Hello',
 			system: 'You are helpful\n\nuser context',
 			temperature: 0.1,

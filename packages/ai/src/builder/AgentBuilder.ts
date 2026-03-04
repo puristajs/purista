@@ -1,10 +1,11 @@
-import type { CommandFunctionContext, Schema } from '@purista/core'
+import type { CommandFunctionContext, Schema, StreamFunctionContext, StreamWriter } from '@purista/core'
 import { extendApi, HandledError, ServiceBuilder, StatusCode } from '@purista/core'
 import { z } from 'zod/v4'
 
 import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
 import type { SessionStore } from '../memory/sessionStore.js'
 import type { PoolManager } from '../pools/PoolManager.js'
+import { agentProtocolEnvelopeSchema } from '../protocol/types.js'
 import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import { AgentInstance, type AgentInstanceDependencies } from '../runtime/AgentInstance.js'
 import type { AgentHandlerContext } from '../runtime/context.js'
@@ -101,7 +102,9 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 	private readonly info: AgentInfo
 	private readonly serviceBuilder: ServiceBuilder
 	private readonly commandBuilder: ReturnType<ServiceBuilder['getCommandBuilder']>
+	private readonly streamBuilder: ReturnType<ServiceBuilder['getStreamBuilder']>
 	private commandDefinitionAdded = false
+	private streamDefinitionAdded = false
 	private manifest: AgentManifest
 	private handler?: AgentHandler<
 		unknown,
@@ -125,6 +128,9 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 		})
 		this.serviceBuilder.setConfigSchema(agentRuntimeConfigSchema)
 		this.commandBuilder = this.serviceBuilder.getCommandBuilder('run', `Invoke ${this.info.agentName}`)
+		this.streamBuilder = this.serviceBuilder.getStreamBuilder('run', `Stream ${this.info.agentName}`)
+		this.streamBuilder.addChunkSchema(agentProtocolEnvelopeSchema)
+		this.streamBuilder.addFinalSchema(agentProtocolEnvelopeSchema.array())
 
 		this.manifest = {
 			agentName: this.info.agentName,
@@ -261,6 +267,7 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 	addPayloadSchema(schema: Schema) {
 		this.payloadSchema = schema
 		this.commandBuilder.addPayloadSchema(schema)
+		this.streamBuilder.addPayloadSchema(schema)
 		this.manifest.payloadSchema = schema
 		return this
 	}
@@ -272,6 +279,7 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 	addParameterSchema(schema: Schema) {
 		this.parameterSchema = schema
 		this.commandBuilder.addParameterSchema(schema)
+		this.streamBuilder.addParameterSchema(schema)
 		this.manifest.parameterSchema = schema
 		return this
 	}
@@ -350,13 +358,14 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 			Record<string, ModelProvider>,
 			KnowledgeAliases
 		>
-		this.commandBuilder.setCommandFunction(async function commandImpl(
-			this: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
-			context: CommandFunctionContext,
+		const executeAgent = async (
+			thisArg: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
+			context: CommandFunctionContext | StreamFunctionContext,
 			payload: unknown,
 			parameter: unknown,
-		) {
-			const runtime = this.config?.runtime
+			onEnvelope?: (envelope: unknown) => Promise<void>,
+		) => {
+			const runtime = thisArg.config?.runtime
 			if (!runtime?.handler) {
 				throw new HandledError(StatusCode.InternalServerError, 'Agent runtime not configured')
 			}
@@ -366,7 +375,9 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 			await runtime.poolManager.acquire(poolId)
 			const started = Date.now()
 
-			const protocolBuffer = createProtocolBuffer(context)
+			const protocolBuffer = createProtocolBuffer(context, {
+				onEnvelope,
+			})
 
 			try {
 				const usage = {
@@ -472,15 +483,40 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 					})
 				}
 
+				await protocolBuffer.flush()
 				return protocolBuffer.toEnvelopes()
 			} catch (error) {
 				context.logger.error({ err: error, agent: runtime.manifest.agentName }, 'agent handler failed')
 				protocolBuffer.protocol.emitError(error)
+				await protocolBuffer.flush()
 				return protocolBuffer.toEnvelopes()
 			} finally {
 				runtime.poolManager.release(poolId)
 			}
+		}
+
+		this.commandBuilder.setCommandFunction(async function commandImpl(
+			this: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
+			context: CommandFunctionContext,
+			payload: unknown,
+			parameter: unknown,
+		) {
+			return await executeAgent(this, context, payload, parameter)
 		})
+
+		this.streamBuilder.setStreamFunction(async function streamImpl(
+			this: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
+			context: StreamFunctionContext,
+			payload: unknown,
+			parameter: unknown,
+			writer: StreamWriter<unknown, unknown[]>,
+		) {
+			const final = (await executeAgent(this, context, payload, parameter, async envelope => {
+				await writer.write(envelope)
+			})) as unknown[]
+			await writer.close(final)
+		})
+
 		return this as AgentBuilder<KnowledgeAliases>
 	}
 
@@ -492,6 +528,10 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 		if (!this.commandDefinitionAdded) {
 			this.serviceBuilder.addCommandDefinition(this.commandBuilder.getDefinition())
 			this.commandDefinitionAdded = true
+		}
+		if (!this.streamDefinitionAdded) {
+			this.serviceBuilder.addStreamDefinition(this.streamBuilder.getDefinition())
+			this.streamDefinitionAdded = true
 		}
 
 		const manifest: AgentManifest = {

@@ -1,15 +1,24 @@
+import { StatusCode, UnhandledError } from '@purista/core'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import { invokeAgent } from './invokeAgent.js'
 
 describe('invokeAgent', () => {
-	it('invokes the agent command and returns envelopes', async () => {
+	it('opens an agent stream by default and returns collected envelopes', async () => {
 		const envelopes = [{ frame: { kind: 'message', content: 'hi', role: 'assistant' } }] as AgentProtocolEnvelope[]
-		const invoke = vi.fn().mockResolvedValue(envelopes)
+		const openStream = vi.fn().mockResolvedValue({
+			sessionId: 'stream-1',
+			cancel: vi.fn(),
+			async *[Symbol.asyncIterator]() {
+				yield { payload: { frameType: 'chunk', sequence: 1, chunk: envelopes[0] } }
+				yield { payload: { frameType: 'complete', sequence: 2, final: envelopes } }
+			},
+		})
 		const eventBridge = {
 			instanceId: 'instance-1',
-			invoke,
+			openStream,
+			invoke: vi.fn(),
 		} as any
 
 		const result = await invokeAgent({
@@ -21,20 +30,29 @@ describe('invokeAgent', () => {
 		})
 
 		expect(result).toEqual(envelopes)
-		expect(invoke).toHaveBeenCalledTimes(1)
-		const message = invoke.mock.calls[0][0]
+		expect(openStream).toHaveBeenCalledTimes(1)
+		const message = openStream.mock.calls[0][0]
 		expect(message.receiver).toEqual({ serviceName: 'supportAgent', serviceVersion: '1', serviceTarget: 'run' })
-		expect(message.payload).toEqual({ payload: { prompt: 'hello' }, parameter: { locale: 'en' } })
+		expect(message.payload).toEqual({ frameType: 'open', payload: { prompt: 'hello' }, parameter: { locale: 'en' } })
 	})
 
-	it('streams all envelopes when a stream responder is provided', async () => {
+	it('streams envelopes incrementally when a stream responder is provided', async () => {
 		const envelopes = [
 			{ frame: { kind: 'message', content: 'one', role: 'assistant' } },
 			{ frame: { kind: 'message', content: 'two', role: 'assistant' } },
 		] as AgentProtocolEnvelope[]
 		const eventBridge = {
 			instanceId: 'instance-1',
-			invoke: vi.fn().mockResolvedValue(envelopes),
+			openStream: vi.fn().mockResolvedValue({
+				sessionId: 'stream-1',
+				cancel: vi.fn(),
+				async *[Symbol.asyncIterator]() {
+					yield { payload: { frameType: 'chunk', sequence: 1, chunk: envelopes[0] } }
+					yield { payload: { frameType: 'chunk', sequence: 2, chunk: envelopes[1] } }
+					yield { payload: { frameType: 'complete', sequence: 3, final: envelopes } }
+				},
+			}),
+			invoke: vi.fn(),
 		} as any
 
 		const onFrame = vi.fn()
@@ -54,9 +72,32 @@ describe('invokeAgent', () => {
 		expect(onError).not.toHaveBeenCalled()
 	})
 
+	it('falls back to command invoke when stream is unavailable', async () => {
+		const envelopes = [
+			{ frame: { kind: 'message', content: 'fallback', role: 'assistant' } },
+		] as AgentProtocolEnvelope[]
+		const eventBridge = {
+			instanceId: 'instance-1',
+			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
+			invoke: vi.fn().mockResolvedValue(envelopes),
+		} as any
+
+		const result = await invokeAgent({
+			eventBridge,
+			agentName: 'supportAgent',
+			agentVersion: '1',
+			payload: { prompt: 'hello' },
+		})
+
+		expect(result).toEqual(envelopes)
+		expect(eventBridge.openStream).toHaveBeenCalledTimes(1)
+		expect(eventBridge.invoke).toHaveBeenCalledTimes(1)
+	})
+
 	it('injects sessionId into object payloads when provided', async () => {
 		const eventBridge = {
 			instanceId: 'instance-1',
+			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
 			invoke: vi.fn().mockResolvedValue([]),
 		} as any
 
@@ -78,6 +119,7 @@ describe('invokeAgent', () => {
 	it('does not override payload sessionId when already present', async () => {
 		const eventBridge = {
 			instanceId: 'instance-1',
+			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
 			invoke: vi.fn().mockResolvedValue([]),
 		} as any
 

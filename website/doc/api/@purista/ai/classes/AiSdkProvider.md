@@ -18,7 +18,7 @@ import { openai } from '@ai-sdk/openai'
 import { AiSdkProvider } from '@purista/ai'
 
 const provider = new AiSdkProvider({
-  model: openai('gpt-4o-mini'),
+  model: openai(''),
   systemPrompt: 'You are a helpful support engineer',
 })
 

@@ -1,12 +1,5 @@
 import type { ModelProvider, ProviderRequest } from '@purista/ai'
-import {
-	type Command,
-	DefaultEventBridge,
-	EBMessageType,
-	getNewEBMessageId,
-	getNewTraceId,
-	initLogger,
-} from '@purista/core'
+import { DefaultEventBridge, getNewTraceId, initLogger } from '@purista/core'
 import { describe, expect, it } from 'vitest'
 
 import { supportAgent } from '../../../../../agents/supportAgent/v1/supportAgent.js'
@@ -18,10 +11,10 @@ class DeterministicProvider implements ModelProvider {
 
 	async generate(request: ProviderRequest) {
 		return {
-			output: `COMMAND:${request.prompt}`,
+			output: `STREAM:${request.prompt}`,
 			tokens: {
 				prompt: request.prompt.length,
-				completion: 10,
+				completion: 12,
 			},
 			costUsd: 0,
 		}
@@ -32,35 +25,8 @@ const waitForRegistration = async () => {
 	await new Promise(resolve => setTimeout(resolve, 25))
 }
 
-const createRunSupportAgentMessage = (instanceId: string): Command => ({
-	id: getNewEBMessageId(),
-	timestamp: Date.now(),
-	traceId: getNewTraceId(),
-	correlationId: getNewEBMessageId(),
-	messageType: EBMessageType.Command,
-	contentType: 'application/json',
-	contentEncoding: 'utf-8',
-	sender: {
-		serviceName: 'testClient',
-		serviceVersion: '1',
-		serviceTarget: 'integration',
-		instanceId,
-	},
-	receiver: {
-		serviceName: 'support',
-		serviceVersion: '1',
-		serviceTarget: 'runSupportAgent',
-	},
-	payload: {
-		payload: {
-			prompt: 'How can I reset my password?',
-		},
-		parameter: {},
-	},
-})
-
-describe('runSupportAgentCommandBuilder', () => {
-	it('invokes supportAgent through context.invokeAgent and returns final message', async () => {
+describe('runSupportAgentStreamBuilder', () => {
+	it('streams agent protocol envelopes before final completion', async () => {
 		const logger = initLogger('error')
 		const eventBridge = new DefaultEventBridge({ logger })
 		await eventBridge.start()
@@ -84,12 +50,49 @@ describe('runSupportAgentCommandBuilder', () => {
 		await waitForRegistration()
 
 		try {
-			const response = await eventBridge.invoke(createRunSupportAgentMessage(eventBridge.instanceId))
-			expect(response).toEqual(
-				expect.objectContaining({
-					message: expect.stringContaining('COMMAND:'),
-				}),
-			)
+			const handle = await eventBridge.openStream({
+				traceId: getNewTraceId(),
+				sender: {
+					serviceName: 'testClient',
+					serviceVersion: '1',
+					serviceTarget: 'integration',
+					instanceId: eventBridge.instanceId,
+				},
+				receiver: {
+					serviceName: 'support',
+					serviceVersion: '1',
+					serviceTarget: 'runSupportAgentStream',
+				},
+				contentType: 'application/json',
+				contentEncoding: 'utf-8',
+				payload: {
+					frameType: 'open',
+					payload: {
+						prompt: 'How can I reset my password?',
+					},
+					parameter: {},
+				},
+			})
+
+			const frameTypes: string[] = []
+			let sawEnvelopeChunk = false
+			for await (const frame of handle) {
+				frameTypes.push(frame.payload.frameType)
+				if (frame.payload.frameType === 'chunk') {
+					expect(Array.isArray(frame.payload.chunk)).toBe(false)
+					expect(frame.payload.chunk).toMatchObject({
+						version: 'purista.ai/1.0',
+						frame: expect.objectContaining({
+							kind: expect.any(String),
+						}),
+					})
+					sawEnvelopeChunk = true
+				}
+			}
+
+			expect(sawEnvelopeChunk).toBe(true)
+			expect(frameTypes.at(0)).toBe('start')
+			expect(frameTypes.at(-1)).toBe('complete')
 		} finally {
 			await supportAgentInstance.stop()
 			await triageAgentInstance.stop()

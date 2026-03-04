@@ -30,7 +30,7 @@ Default call options forwarded to `generateText` (temperature, maxOutputTokens, 
 
 Defined in: [ai/src/providers/runtime/AiSdkProvider.ts:14](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/AiSdkProvider.ts#L14)
 
-Language model instance (or provider id) created via the Vercel AI SDK (e.g. `openai('gpt-4o-mini')`).
+Language model instance (or provider id) created via the Vercel AI SDK (e.g. `openai('')`).
 
 ***
 

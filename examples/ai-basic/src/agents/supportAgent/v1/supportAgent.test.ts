@@ -34,12 +34,12 @@ describe('supportAgent', () => {
 		const supportService = await supportV1Service.getInstance(eventBridge, { logger })
 		const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
 			logger,
-			models: { 'openai:gpt-5.2-mini': provider },
+			models: { 'openai:gpt-4o-mini': provider },
 			poolConfig: { maxWorkers: 1 },
 		})
 		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 			logger,
-			models: { 'openai:gpt-5.2-mini': provider },
+			models: { 'openai:gpt-4o-mini': provider },
 			poolConfig: { maxWorkers: 1 },
 		})
 
