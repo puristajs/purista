@@ -75,4 +75,37 @@ describe('AgentInstance', () => {
 		expect(onComplete).toHaveBeenCalledTimes(1)
 		expect(onError).not.toHaveBeenCalled()
 	})
+
+	it('injects sessionId into payload for runtime invokes', async () => {
+		const invoke = vi.fn().mockResolvedValue([])
+		const eventBridge = { instanceId: 'bridge-1', invoke } as any
+		const service = {
+			start: vi.fn().mockResolvedValue(undefined),
+			destroy: vi.fn().mockResolvedValue(undefined),
+		}
+		const getInstance = vi.fn().mockResolvedValue(service)
+
+		const instance = new AgentInstance(
+			{
+				...baseDependencies,
+				serviceBuilder: {
+					...baseDependencies.serviceBuilder,
+					getInstance,
+				},
+			},
+			eventBridge,
+			{ models: {} },
+		)
+
+		await instance.invoke({
+			payload: { prompt: 'hello' },
+			sessionId: 'chat-abc',
+		})
+
+		const message = invoke.mock.calls[0][0]
+		expect(message.payload).toEqual({
+			payload: { prompt: 'hello', sessionId: 'chat-abc' },
+			parameter: {},
+		})
+	})
 })

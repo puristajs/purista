@@ -2,7 +2,7 @@ import type { CommandFunctionContext, Logger } from '@purista/core'
 import { HandledError, StatusCode } from '@purista/core'
 
 import type { KnowledgeAdapter, KnowledgeDocument } from '../knowledge/adapters/inMemoryAdapter.js'
-import type { SessionRecord, SessionStore } from '../memory/sessionStore.js'
+import type { SessionRecord, SessionRecordData, SessionStore } from '../memory/sessionStore.js'
 import {
 	createArtifactFrame,
 	createEnvelopeFromContext,
@@ -14,6 +14,7 @@ import {
 import type { AgentProtocolEnvelope, AgentProtocolFrame } from '../protocol/types.js'
 import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import type { AgentManifest, AllowedToolDefinition } from '../types/AgentManifest.js'
+import { createScopedSessionId, resolveBaseSessionId } from './sessionIdentity.js'
 
 type ProtocolFrameEntry = {
 	frame: AgentProtocolFrame
@@ -293,16 +294,72 @@ const createToolInvoker = (
 }
 
 export type SessionHelpers = {
-	load(sessionId: string): Promise<SessionRecord | undefined>
-	save(record: SessionRecord): Promise<void>
-	delete(sessionId: string): Promise<void>
+	/**
+	 * Load the session record. If no id is provided, the default scoped id is used.
+	 */
+	load(sessionId?: string): Promise<SessionRecord | undefined>
+	/**
+	 * Save session data. If `sessionId` is omitted, the default scoped id is used.
+	 */
+	save(record: SessionRecord | { sessionId?: string; data: SessionRecordData; updatedAt?: number }): Promise<void>
+	/**
+	 * Delete a session. If no id is provided, the default scoped id is used.
+	 */
+	delete(sessionId?: string): Promise<void>
+	/**
+	 * Returns the effective scoped session id for explicit or implicit usage.
+	 */
+	resolveSessionId(sessionId?: string): string
+	/**
+	 * Identity metadata used to build scoped session ids.
+	 */
+	identity: {
+		agentName: string
+		agentVersion: string
+		tenantId?: string
+		principalId?: string
+		baseSessionId: string
+	}
 }
 
-const createSessionHelpers = (store: SessionStore): SessionHelpers => ({
-	load: sessionId => store.load(sessionId),
-	save: record => store.save(record),
-	delete: sessionId => store.delete(sessionId),
-})
+type SessionIdentityInput = {
+	context: CommandFunctionContext
+	manifest: AgentManifest
+	payload: unknown
+}
+
+const createSessionHelpers = (store: SessionStore, input: SessionIdentityInput): SessionHelpers => {
+	const baseSessionId = resolveBaseSessionId(input.context, input.payload)
+	const identity = {
+		agentName: input.manifest.agentName,
+		agentVersion: input.manifest.agentVersion,
+		tenantId: input.context.message.tenantId,
+		principalId: input.context.message.principalId,
+		baseSessionId,
+	}
+
+	const resolveId = (sessionId?: string) =>
+		createScopedSessionId({
+			agentName: identity.agentName,
+			agentVersion: identity.agentVersion,
+			baseSessionId: sessionId ?? identity.baseSessionId,
+			tenantId: identity.tenantId,
+			principalId: identity.principalId,
+		})
+
+	return {
+		load: sessionId => store.load(resolveId(sessionId)),
+		save: record =>
+			store.save({
+				sessionId: resolveId(record.sessionId),
+				data: record.data,
+				updatedAt: record.updatedAt ?? Date.now(),
+			}),
+		delete: sessionId => store.delete(resolveId(sessionId)),
+		resolveSessionId: resolveId,
+		identity,
+	}
+}
 
 type KnowledgeHelpers = {
 	query(adapterName: string, query: string, limit?: number): Promise<KnowledgeDocument[]>
@@ -368,7 +425,11 @@ export const createAgentHandlerContext = <
 		payload: input.payload,
 		parameter: input.parameter,
 		message: input.serviceContext.message,
-		session: createSessionHelpers(input.sessionStore),
+		session: createSessionHelpers(input.sessionStore, {
+			context: input.serviceContext,
+			manifest: input.manifest,
+			payload: input.payload,
+		}),
 		knowledge: createKnowledgeHelpers(input.knowledgeAdapters),
 		stream: createStreamEmitter(input.protocol),
 		tools: createToolInvoker(input.serviceContext, input.manifest.allowedTools ?? [], input.protocol),

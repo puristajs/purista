@@ -1,10 +1,7 @@
-import { randomUUID } from 'node:crypto'
-
 import { AgentBuilder, type AgentHandlerContext, agentProtocolEnvelopeSchema, type SessionRecord } from '@purista/ai'
 import { type SupportAgentInput, supportAgentInputSchema } from './schema.js'
 
-const buildSessionRecord = (sessionId: string, lastOutput: string): SessionRecord => ({
-	sessionId,
+const buildSessionRecord = (lastOutput: string): Omit<SessionRecord, 'sessionId'> => ({
 	data: {
 		lastOutput,
 	},
@@ -49,7 +46,6 @@ export const supportAgent = new AgentBuilder({
 	})
 	.exposeAsHttpEndpoint('POST', 'agents/supportAgent', 'application/json', undefined, 'text/event-stream')
 	.setHandler<SupportAgentInput>(async function (context: SupportAgentContext, payload) {
-		const sessionId = payload.sessionId ?? randomUUID()
 		const userPrompt = payload.prompt ?? payload.message ?? ''
 		const model = context.models['openai:gpt-5.2-mini']
 
@@ -63,9 +59,14 @@ export const supportAgent = new AgentBuilder({
 		let triageSummary = ''
 		if (/refund|enterprise|legal|urgent/i.test(userPrompt)) {
 			context.stream.sendChunk('Escalating to triage agent...')
-			const triageResult = await context.tools.invoke('triageAgent.1.run', {
+			const triagePayload: Record<string, unknown> = {
 				prompt: userPrompt,
-				sessionId,
+			}
+			if (payload.sessionId) {
+				triagePayload.sessionId = payload.sessionId
+			}
+			const triageResult = await context.tools.invoke('triageAgent.1.run', {
+				...triagePayload,
 			})
 			triageSummary = getFinalMessage(triageResult)
 		}
@@ -89,7 +90,7 @@ export const supportAgent = new AgentBuilder({
 		const answer = result.output
 		context.stream.sendFinal(answer)
 
-		await context.session.save(buildSessionRecord(sessionId, answer))
+		await context.session.save(buildSessionRecord(answer))
 
 		return {
 			message: answer,

@@ -29,6 +29,7 @@ import type {
 	AgentStreamResponder,
 } from '../types/AgentDefinition.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
+import { withSessionIdInPayload } from './sessionPayload.js'
 
 export type AgentInstanceDependencies = {
 	info: AgentInfo
@@ -195,6 +196,7 @@ export class AgentInstance implements AgentInstanceContract {
 			serviceVersion: this.dependencies.serviceBuilder.info.serviceVersion,
 			serviceTarget: 'run',
 		} as const
+		const payload = withSessionIdInPayload(request.payload, request.sessionId)
 
 		const commandMessage: Command = {
 			id: getNewEBMessageId(),
@@ -214,7 +216,7 @@ export class AgentInstance implements AgentInstanceContract {
 			},
 			receiver,
 			payload: {
-				payload: request.payload,
+				payload,
 				parameter: request.parameter ?? {},
 			},
 		}

@@ -21,18 +21,18 @@ new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
     retentionMs: 86_400_000,
   })
   .setHandler(async (context, payload) => {
-    const sessionId = payload.sessionId ?? context.message.id
-    const previous = await context.session.load(sessionId)
+    const previous = await context.session.load()
+    const scopedSessionId = context.session.resolveSessionId()
 
     const prompt = [previous?.data?.lastMessage, payload.prompt].filter(Boolean).join('\n')
     const result = await context.models['openai:gpt-4o-mini'].generate({ prompt })
 
     await context.session.save({
-      sessionId,
       data: { lastMessage: result.output },
       updatedAt: Date.now(),
     })
 
+    context.logger.debug({ scopedSessionId }, 'Saved session snapshot')
     return { message: result.output }
   })
 ```
@@ -54,12 +54,8 @@ const buildSessionKey = (context: AgentHandlerContext, payload: { sessionId?: st
 }
 ```
 
-Then use that key consistently with `context.session.load/save/delete`.
-
-### Current API note
-
-Today `context.session.load(...)` requires an explicit key.  
-A future ergonomic helper (`context.session.load()` resolving from protocol/message identity) is tracked in the AI spec backlog.
+Then use that key consistently with `context.session.load/save/delete`.  
+`context.session.resolveSessionId()` returns the exact scoped id used by implicit helpers.
 
 ## Knowledge adapters
 
@@ -100,7 +96,7 @@ import {
   type ConversationHistory,
 } from '@purista/ai/memory/historyHelpers'
 
-const history = await context.session.load(sessionId)
+const history = await context.session.load()
 const conversation = (history?.data.conversation ?? []) as ConversationHistory
 const transcript = summarizeHistory(conversation)
 
@@ -115,7 +111,6 @@ const updatedHistory = appendMessage(conversation, {
 })
 
 await context.session.save({
-  sessionId,
   data: {
     conversation: updatedHistory,
     lastSummary: summarizeHistory(updatedHistory.slice(-10)),

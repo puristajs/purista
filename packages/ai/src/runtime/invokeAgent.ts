@@ -3,6 +3,7 @@ import { EBMessageType, getNewEBMessageId, getNewTraceId } from '@purista/core'
 
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import type { AgentStreamResponder } from '../types/AgentDefinition.js'
+import { withSessionIdInPayload } from './sessionPayload.js'
 
 export type InvokeAgentOptions = {
 	eventBridge: EventBridge
@@ -28,6 +29,8 @@ export const invokeAgent = async (options: InvokeAgentOptions) => {
 		serviceTarget: 'run',
 	} as const
 
+	const payload = withSessionIdInPayload(options.payload, options.sessionId)
+
 	const message: Command = {
 		id: getNewEBMessageId(),
 		timestamp: Date.now(),
@@ -46,7 +49,7 @@ export const invokeAgent = async (options: InvokeAgentOptions) => {
 		},
 		receiver,
 		payload: {
-			payload: options.payload,
+			payload,
 			parameter: options.parameter ?? {},
 		},
 	}

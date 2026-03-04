@@ -53,4 +53,46 @@ describe('invokeAgent', () => {
 		expect(onComplete).toHaveBeenCalledTimes(1)
 		expect(onError).not.toHaveBeenCalled()
 	})
+
+	it('injects sessionId into object payloads when provided', async () => {
+		const eventBridge = {
+			instanceId: 'instance-1',
+			invoke: vi.fn().mockResolvedValue([]),
+		} as any
+
+		await invokeAgent({
+			eventBridge,
+			agentName: 'supportAgent',
+			agentVersion: '1',
+			payload: { prompt: 'hello' },
+			sessionId: 'chat-123',
+		})
+
+		const message = eventBridge.invoke.mock.calls[0][0]
+		expect(message.payload).toEqual({
+			payload: { prompt: 'hello', sessionId: 'chat-123' },
+			parameter: {},
+		})
+	})
+
+	it('does not override payload sessionId when already present', async () => {
+		const eventBridge = {
+			instanceId: 'instance-1',
+			invoke: vi.fn().mockResolvedValue([]),
+		} as any
+
+		await invokeAgent({
+			eventBridge,
+			agentName: 'supportAgent',
+			agentVersion: '1',
+			payload: { prompt: 'hello', sessionId: 'existing' },
+			sessionId: 'chat-123',
+		})
+
+		const message = eventBridge.invoke.mock.calls[0][0]
+		expect(message.payload).toEqual({
+			payload: { prompt: 'hello', sessionId: 'existing' },
+			parameter: {},
+		})
+	})
 })

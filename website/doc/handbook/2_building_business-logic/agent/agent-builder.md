@@ -111,13 +111,11 @@ Only allowlisted commands are available to the handler.
 const supportAgent = new AgentBuilder({ ... })
   .persistHistory({ storeName: 'aiConversation', maxFrames: 40 })
   .setHandler(async function (context, payload) {
-    const sessionId = payload.sessionId ?? context.message.id
-    const history = await context.session.load(sessionId)
+    const history = await context.session.load()
     const prompt = [history?.data?.last, payload.prompt].filter(Boolean).join('\n')
 
     const result = await context.models['openai:gpt-5.2-mini'].generate({ prompt })
     await context.session.save({
-      sessionId,
       data: { last: result.output },
       updatedAt: Date.now(),
     })

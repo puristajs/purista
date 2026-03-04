@@ -120,6 +120,7 @@ const result = await invokeAgent({
   agentName: 'supportAgent',
   agentVersion: '1',
   payload: { prompt: 'How do I reset my password?' },
+  sessionId: 'chat-123',
   parameter: { locale: 'en' },
 })
 
@@ -129,6 +130,7 @@ for (const envelope of result) {
 ```
 
 Use the optional `stream` argument to attach a responder that processes frames as the agent emits them (ideal for WebSockets or web streams).
+If `sessionId` is provided and payload is an object, `invokeAgent` injects it automatically when missing so implicit `context.session.load()` works without manual payload wiring.
 
 ## HTTP exposure
 

@@ -90,13 +90,51 @@ describe('runtime context helpers', () => {
 
 		await context.session.save({ sessionId: 's1', data: { value: 1 }, updatedAt: Date.now() })
 		const session = await context.session.load('s1')
-		expect(session?.sessionId).toBe('s1')
+		expect(session?.sessionId).toBe('supportAgent:1:tenant-1:principal-1:s1')
 
 		const docs = await context.knowledge.query('default', 'Reset')
 		expect(docs).toHaveLength(1)
 
 		const envelopes = buffer.toEnvelopes()
 		expect(envelopes.some(envelope => envelope.frame.kind === 'tool')).toBe(true)
+	})
+
+	it('resolves implicit scoped session id from payload and message metadata', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			payload: { prompt: 'hello', sessionId: 'chat-42' },
+			parameter: {},
+			sessionStore: new InMemorySessionStore(),
+			knowledgeAdapters: {},
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			manifest,
+		})
+
+		await context.session.save({ data: { value: 'implicit' } })
+		const session = await context.session.load()
+		expect(session?.sessionId).toBe('supportAgent:1:tenant-1:principal-1:chat-42')
+		expect(context.session.identity.baseSessionId).toBe('chat-42')
+		expect(context.session.resolveSessionId()).toBe('supportAgent:1:tenant-1:principal-1:chat-42')
+	})
+
+	it('uses message id when payload does not provide sessionId', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			sessionStore: new InMemorySessionStore(),
+			knowledgeAdapters: {},
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			manifest,
+		})
+
+		expect(context.session.resolveSessionId()).toBe('supportAgent:1:tenant-1:principal-1:msg-1')
 	})
 
 	it('creates structured error frames', () => {
