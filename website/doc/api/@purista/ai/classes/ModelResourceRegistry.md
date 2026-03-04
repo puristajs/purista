@@ -6,7 +6,7 @@
 
 # Class: ModelResourceRegistry
 
-Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:14](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/resources/ModelResourceRegistry.ts#L14)
+Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:14](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/resources/ModelResourceRegistry.ts#L14)
 
 Simple registry that maps resource names to provider implementations.
 
@@ -24,7 +24,7 @@ const provider = registry.get('anthropic:claude-3')
 
 > **new ModelResourceRegistry**(`defaultProvider`): `ModelResourceRegistry`
 
-Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:17](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/resources/ModelResourceRegistry.ts#L17)
+Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:17](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/resources/ModelResourceRegistry.ts#L17)
 
 #### Parameters
 
@@ -42,7 +42,7 @@ Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:17](https://git
 
 > **get**(`name`): [`ModelProvider`](../interfaces/ModelProvider.md) \| `undefined`
 
-Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:25](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/resources/ModelResourceRegistry.ts#L25)
+Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:25](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/resources/ModelResourceRegistry.ts#L25)
 
 #### Parameters
 
@@ -60,7 +60,7 @@ Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:25](https://git
 
 > **register**(`name`, `provider`): `void`
 
-Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:21](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/resources/ModelResourceRegistry.ts#L21)
+Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:21](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/resources/ModelResourceRegistry.ts#L21)
 
 #### Parameters
 
@@ -82,7 +82,7 @@ Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:21](https://git
 
 > **snapshot**(): `string`[]
 
-Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:29](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/resources/ModelResourceRegistry.ts#L29)
+Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:29](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/resources/ModelResourceRegistry.ts#L29)
 
 #### Returns
 

@@ -8,7 +8,7 @@
 
 > **ProviderRequest** = `object`
 
-Defined in: [ai/src/providers/runtime/ModelProvider.ts:4](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/ModelProvider.ts#L4)
+Defined in: [ai/src/providers/runtime/ModelProvider.ts:4](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/ModelProvider.ts#L4)
 
 Payload sent to a model provider.
 
@@ -18,7 +18,7 @@ Payload sent to a model provider.
 
 > `optional` **context**: `string`
 
-Defined in: [ai/src/providers/runtime/ModelProvider.ts:6](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/ModelProvider.ts#L6)
+Defined in: [ai/src/providers/runtime/ModelProvider.ts:6](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/ModelProvider.ts#L6)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [ai/src/providers/runtime/ModelProvider.ts:6](https://github.com/pur
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [ai/src/providers/runtime/ModelProvider.ts:7](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/ModelProvider.ts#L7)
+Defined in: [ai/src/providers/runtime/ModelProvider.ts:7](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/ModelProvider.ts#L7)
 
 ***
 
@@ -34,4 +34,4 @@ Defined in: [ai/src/providers/runtime/ModelProvider.ts:7](https://github.com/pur
 
 > **prompt**: `string`
 
-Defined in: [ai/src/providers/runtime/ModelProvider.ts:5](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/ModelProvider.ts#L5)
+Defined in: [ai/src/providers/runtime/ModelProvider.ts:5](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/ModelProvider.ts#L5)

@@ -84,7 +84,6 @@ describe('AgentBuilder', () => {
 			)
 			.defineModel('echo')
 			.persistConversation({ storeName: 'aiConversation', maxFrames: 10 })
-			.setConcurrency({ poolId: 'support' })
 			.exposeAsHttpEndpoint('POST', 'agents/supportAgent')
 			.setStreamingMode('chunked')
 			.setHandler<{ prompt: string }>(async (context, payload) => {
@@ -95,7 +94,6 @@ describe('AgentBuilder', () => {
 			.build()
 
 		expect(definition.getManifest().models).toEqual(['echo'])
-		expect(definition.getManifest().concurrency?.poolId).toBe('support')
 
 		const instance = await definition.getInstance(
 			{

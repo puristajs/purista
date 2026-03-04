@@ -8,7 +8,7 @@
 
 > **scanPuristaProject**(`puristaConfig`, `projectRootPath?`): `Promise`\<[`PuristaProjectInfo`](../type-aliases/PuristaProjectInfo.md)\>
 
-Defined in: [scanPuristaProject.ts:44](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/cli/src/api/scanPuristaProject.ts#L44)
+Defined in: [scanPuristaProject.ts:44](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/cli/src/api/scanPuristaProject.ts#L44)
 
 Walk through the file and folder structure and extract the existing services with their commands and subscriptions.
 

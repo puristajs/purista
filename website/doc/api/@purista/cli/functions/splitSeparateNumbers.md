@@ -8,7 +8,7 @@
 
 > **splitSeparateNumbers**(`value`): `string`[]
 
-Defined in: [change-case.ts:73](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/cli/src/api/change-case.ts#L73)
+Defined in: [change-case.ts:73](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/cli/src/api/change-case.ts#L73)
 
 Split the input string into an array of words, separating numbers.
 

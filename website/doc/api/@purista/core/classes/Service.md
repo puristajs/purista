@@ -321,7 +321,7 @@ Get service info
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [core/Service/Service.impl.ts:2455](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2455)
+Defined in: [core/Service/Service.impl.ts:2440](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2440)
 
 Stop and destroy the current service
 
@@ -415,7 +415,7 @@ Defined in: [core/Service/Service.impl.ts:1866](https://github.com/puristajs/pur
 
 > **executeSubscription**(`message`, `subscriptionName`): `Promise`\<`Omit`\<\{ `contentEncoding`: `string`; `contentType`: `string`; `correlationId?`: `string`; `eventName`: `string`; `id`: `string`; `messageType`: [`CustomMessage`](../enumerations/EBMessageType.md#custommessage); `otp?`: `string`; `payload?`: `unknown`; `principalId?`: `string`; `receiver?`: [`EBMessageAddress`](../type-aliases/EBMessageAddress.md); `sender`: \{ `instanceId`: `string`; `serviceName`: `string`; `serviceTarget`: `string`; `serviceVersion`: `string`; \}; `tenantId?`: `string`; `timestamp`: `number`; `traceId?`: `string`; \}, `"id"` \| `"timestamp"`\> \| `undefined`\>
 
-Defined in: [core/Service/Service.impl.ts:2141](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2141)
+Defined in: [core/Service/Service.impl.ts:2126](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2126)
 
 #### Parameters
 
@@ -951,7 +951,7 @@ Defined in: [core/Service/Service.impl.ts:2097](https://github.com/puristajs/pur
 
 > **registerSubscription**(`subscriptionDefinition`): `Promise`\<`void`\>
 
-Defined in: [core/Service/Service.impl.ts:2388](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2388)
+Defined in: [core/Service/Service.impl.ts:2373](https://github.com/puristajs/purista/blob/master/packages/core/src/core/Service/Service.impl.ts#L2373)
 
 #### Parameters
 

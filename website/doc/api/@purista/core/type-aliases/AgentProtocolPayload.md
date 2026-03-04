@@ -8,6 +8,6 @@
 
 > **AgentProtocolPayload** = `z.infer`\<*typeof* [`agentProtocolPayloadSchema`](../variables/agentProtocolPayloadSchema.md)\>
 
-Defined in: core/types/agent/AgentProtocol.ts:22
+Defined in: [core/types/agent/AgentProtocol.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/agent/AgentProtocol.ts#L22)
 
 The payload for an agent protocol request.

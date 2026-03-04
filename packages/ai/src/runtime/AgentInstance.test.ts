@@ -9,7 +9,6 @@ const baseManifest: AgentManifest = {
 	agentVersion: '1',
 	eventBridge: 'default',
 	allowedTools: [],
-	concurrency: { poolId: 'support' },
 }
 
 const baseDependencies = {

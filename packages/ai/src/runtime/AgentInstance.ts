@@ -97,7 +97,7 @@ export class AgentInstance implements AgentInstanceContract {
 
 	constructor(deps: AgentInstanceDependencies, eventBridge: EventBridge, runtime: AgentRuntimeDependencies = {}) {
 		this.dependencies = deps
-		const poolId = runtime.poolConfig?.poolId ?? deps.manifest.concurrency?.poolId ?? `agent:${deps.info.agentName}`
+		const poolId = runtime.poolConfig?.poolId ?? `agent:${deps.info.agentName}`
 		const maxWorkers = runtime.poolConfig?.maxWorkers ?? 1
 
 		this.runtime = {

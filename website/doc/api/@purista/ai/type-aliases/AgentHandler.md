@@ -8,7 +8,7 @@
 
 > **AgentHandler**\<`Payload`, `Parameter`, `Resources`, `Models`\> = (`context`, `payload`, `parameter`) => `Promise`\<[`AgentHandlerResult`](AgentHandlerResult.md)\> \| [`AgentHandlerResult`](AgentHandlerResult.md)
 
-Defined in: [ai/src/builder/AgentBuilder.ts:34](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L34)
+Defined in: [ai/src/builder/AgentBuilder.ts:34](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L34)
 
 ## Type Parameters
 

@@ -8,7 +8,7 @@
 
 > **AgentRuntimeInstance** = `object`
 
-Defined in: [ai/src/types/AgentDefinition.ts:30](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentDefinition.ts#L30)
+Defined in: [ai/src/types/AgentDefinition.ts:31](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentDefinition.ts#L31)
 
 ## Methods
 
@@ -16,7 +16,7 @@ Defined in: [ai/src/types/AgentDefinition.ts:30](https://github.com/puristajs/pu
 
 > **invoke**(`request`, `contextOverrides?`): `Promise`\<[`AgentInvokeResult`](AgentInvokeResult.md)\>
 
-Defined in: [ai/src/types/AgentDefinition.ts:33](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentDefinition.ts#L33)
+Defined in: [ai/src/types/AgentDefinition.ts:34](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentDefinition.ts#L34)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ Defined in: [ai/src/types/AgentDefinition.ts:33](https://github.com/puristajs/pu
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [ai/src/types/AgentDefinition.ts:31](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentDefinition.ts#L31)
+Defined in: [ai/src/types/AgentDefinition.ts:32](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentDefinition.ts#L32)
 
 #### Returns
 
@@ -50,7 +50,7 @@ Defined in: [ai/src/types/AgentDefinition.ts:31](https://github.com/puristajs/pu
 
 > **stop**(): `Promise`\<`void`\>
 
-Defined in: [ai/src/types/AgentDefinition.ts:32](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentDefinition.ts#L32)
+Defined in: [ai/src/types/AgentDefinition.ts:33](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentDefinition.ts#L33)
 
 #### Returns
 

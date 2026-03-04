@@ -32,10 +32,6 @@ export type KnowledgeAdapterConfig = {
 	options?: Record<string, unknown>
 }
 
-export type ConcurrencyConfig = {
-	poolId?: string
-}
-
 export type RetryPolicy = {
 	strategy?: 'fixed' | 'exponential'
 	maxAttempts: number
@@ -51,7 +47,6 @@ export type AgentManifest = {
 	modelResource?: { resourceName: string; variant?: string }
 	session?: AgentSessionConfig
 	knowledge?: KnowledgeAdapterConfig[]
-	concurrency?: ConcurrencyConfig
 	retryPolicy?: RetryPolicy
 	telemetry?: { attributes?: Record<string, string | number | boolean> }
 	allowedTools: AllowedToolDefinition[]

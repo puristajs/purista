@@ -8,7 +8,7 @@
 
 > **KnowledgeDocument** = `object`
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:4](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L4)
+Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:4](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L4)
 
 Minimal document structure understood by knowledge adapters.
 
@@ -18,7 +18,7 @@ Minimal document structure understood by knowledge adapters.
 
 > **content**: `string`
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:6](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L6)
+Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:6](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L6)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:6](https://github.com/
 
 > **id**: `string`
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:5](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L5)
+Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:5](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L5)
 
 ***
 
@@ -34,4 +34,4 @@ Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:5](https://github.com/
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:7](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L7)
+Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:7](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L7)

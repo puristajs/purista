@@ -24,10 +24,9 @@ export const executeWorkloadQueueWorkerBuilder = aiWorkerServiceBuilder
 			return undefined
 		}
 
-		const poolId = manifest.concurrency?.poolId ?? 'default'
-		if (manifest.concurrency) {
-			poolManager.registerPool(poolId, 1)
-		}
+		const poolId = typeof payload.metadata?.poolId === 'string' ? payload.metadata.poolId : 'default'
+		const maxWorkers = typeof payload.metadata?.maxWorkers === 'number' ? payload.metadata.maxWorkers : 1
+		poolManager.registerPool(poolId, maxWorkers)
 
 		await poolManager.acquire(poolId)
 

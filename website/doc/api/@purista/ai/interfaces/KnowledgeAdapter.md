@@ -6,7 +6,7 @@
 
 # Interface: KnowledgeAdapter
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:10](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L10)
+Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:10](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L10)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:10](https://github.com
 
 > **id**: `string`
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:11](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L11)
+Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:11](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L11)
 
 ## Methods
 
@@ -22,7 +22,7 @@ Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:11](https://github.com
 
 > **delete**(`id`): `Promise`\<`void`\>
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:14](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L14)
+Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:14](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L14)
 
 #### Parameters
 
@@ -40,7 +40,7 @@ Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:14](https://github.com
 
 > **query**(`query`, `limit?`): `Promise`\<[`KnowledgeDocument`](../type-aliases/KnowledgeDocument.md)[]\>
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:13](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L13)
+Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:13](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L13)
 
 #### Parameters
 
@@ -62,7 +62,7 @@ Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:13](https://github.com
 
 > **upsert**(`document`): `Promise`\<`void`\>
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:12](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L12)
+Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:12](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L12)
 
 #### Parameters
 

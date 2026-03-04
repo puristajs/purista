@@ -8,7 +8,7 @@
 
 > **snakeCase**(`input`, `options?`): `string`
 
-Defined in: [change-case.ts:198](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/cli/src/api/change-case.ts#L198)
+Defined in: [change-case.ts:198](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/cli/src/api/change-case.ts#L198)
 
 Convert a string to snake case (`foo_bar`).
 

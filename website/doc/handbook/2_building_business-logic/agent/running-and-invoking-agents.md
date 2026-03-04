@@ -65,8 +65,7 @@ await supportAgentInstance.start()
 
 ## Runtime pool config (important)
 
-Builder config only assigns a pool id.  
-Actual parallelism is runtime config:
+Pool identity and parallelism are runtime/deploy settings:
 
 ```ts
 const supportAgentInstance = await supportAgent.getInstance(eventBridge, {

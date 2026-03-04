@@ -8,7 +8,7 @@
 
 > **CreateAgentHandlerContextInput**\<`Payload`, `Parameter`, `Resources`, `Models`\> = `object`
 
-Defined in: [ai/src/runtime/context.ts:312](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/context.ts#L312)
+Defined in: [ai/src/runtime/context.ts:400](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L400)
 
 ## Type Parameters
 
@@ -34,7 +34,7 @@ Defined in: [ai/src/runtime/context.ts:312](https://github.com/puristajs/purista
 
 > **knowledgeAdapters**: `Record`\<`string`, [`KnowledgeAdapter`](../interfaces/KnowledgeAdapter.md) \| `undefined`\>
 
-Defined in: [ai/src/runtime/context.ts:322](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/context.ts#L322)
+Defined in: [ai/src/runtime/context.ts:410](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L410)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: [ai/src/runtime/context.ts:322](https://github.com/puristajs/purista
 
 > **manifest**: [`AgentManifest`](AgentManifest.md)
 
-Defined in: [ai/src/runtime/context.ts:326](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/context.ts#L326)
+Defined in: [ai/src/runtime/context.ts:414](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L414)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: [ai/src/runtime/context.ts:326](https://github.com/puristajs/purista
 
 > **models**: `Models`
 
-Defined in: [ai/src/runtime/context.ts:325](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/context.ts#L325)
+Defined in: [ai/src/runtime/context.ts:413](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L413)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: [ai/src/runtime/context.ts:325](https://github.com/puristajs/purista
 
 > **parameter**: `Parameter`
 
-Defined in: [ai/src/runtime/context.ts:320](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/context.ts#L320)
+Defined in: [ai/src/runtime/context.ts:408](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L408)
 
 ***
 
@@ -66,15 +66,15 @@ Defined in: [ai/src/runtime/context.ts:320](https://github.com/puristajs/purista
 
 > **payload**: `Payload`
 
-Defined in: [ai/src/runtime/context.ts:319](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/context.ts#L319)
+Defined in: [ai/src/runtime/context.ts:407](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L407)
 
 ***
 
 ### protocol
 
-> **protocol**: [`ProtocolEmitter`](ProtocolEmitter.md)
+> **protocol**: `ProtocolEmitter`
 
-Defined in: [ai/src/runtime/context.ts:323](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/context.ts#L323)
+Defined in: [ai/src/runtime/context.ts:411](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L411)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: [ai/src/runtime/context.ts:323](https://github.com/puristajs/purista
 
 > **resources**: `Resources`
 
-Defined in: [ai/src/runtime/context.ts:324](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/context.ts#L324)
+Defined in: [ai/src/runtime/context.ts:412](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L412)
 
 ***
 
@@ -90,7 +90,7 @@ Defined in: [ai/src/runtime/context.ts:324](https://github.com/puristajs/purista
 
 > **serviceContext**: [`CommandFunctionContext`](../../core/type-aliases/CommandFunctionContext.md)\<`Payload`, `Parameter`\>
 
-Defined in: [ai/src/runtime/context.ts:318](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/context.ts#L318)
+Defined in: [ai/src/runtime/context.ts:406](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L406)
 
 ***
 
@@ -98,4 +98,4 @@ Defined in: [ai/src/runtime/context.ts:318](https://github.com/puristajs/purista
 
 > **sessionStore**: [`SessionStore`](../interfaces/SessionStore.md)
 
-Defined in: [ai/src/runtime/context.ts:321](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/context.ts#L321)
+Defined in: [ai/src/runtime/context.ts:409](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L409)

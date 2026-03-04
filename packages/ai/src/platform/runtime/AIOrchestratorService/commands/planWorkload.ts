@@ -21,13 +21,6 @@ const allowedToolSchema = extendApi(
 	{ title: 'Allowed tool definition' },
 )
 
-const concurrencySchema = extendApi(
-	z.object({
-		poolId: extendApi(z.string().min(1).optional(), { title: 'Concurrency pool id' }),
-	}),
-	{ title: 'Concurrency pool reference' },
-)
-
 const planWorkloadPayloadSchema = extendApi(
 	z.object({
 		manifest: extendApi(
@@ -36,7 +29,6 @@ const planWorkloadPayloadSchema = extendApi(
 				description: extendApi(z.string().optional(), { title: 'Agent description' }),
 				modelResource: modelResourceSchema,
 				allowedTools: extendApi(z.array(allowedToolSchema).default([]), { title: 'Allowed tools' }),
-				concurrency: concurrencySchema.optional(),
 				agentVersion: extendApi(z.string().optional(), { title: 'Agent version' }),
 				eventBridge: extendApi(z.string().min(1).default('default'), { title: 'Event bridge name' }),
 			}),

@@ -8,6 +8,6 @@
 
 > `const` **agentProtocolPayloadSchema**: `ZodObject`\<\{ `attachments`: `ZodDefault`\<`ZodOptional`\<`ZodArray`\<`ZodAny`\>\>\>; `conversationId`: `ZodOptional`\<`ZodString`\>; `history`: `ZodDefault`\<`ZodOptional`\<`ZodArray`\<`ZodAny`\>\>\>; `message`: `ZodString`; \}, `$loose`\>
 
-Defined in: core/types/agent/AgentProtocol.ts:8
+Defined in: [core/types/agent/AgentProtocol.ts:8](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/agent/AgentProtocol.ts#L8)
 
 The payload for an agent protocol request.

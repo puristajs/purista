@@ -8,7 +8,7 @@
 
 > **AgentInfo** = `object`
 
-Defined in: [ai/src/types/AgentDefinition.ts:11](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentDefinition.ts#L11)
+Defined in: [ai/src/types/AgentDefinition.ts:12](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentDefinition.ts#L12)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [ai/src/types/AgentDefinition.ts:11](https://github.com/puristajs/pu
 
 > **agentName**: `string`
 
-Defined in: [ai/src/types/AgentDefinition.ts:12](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentDefinition.ts#L12)
+Defined in: [ai/src/types/AgentDefinition.ts:13](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentDefinition.ts#L13)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [ai/src/types/AgentDefinition.ts:12](https://github.com/puristajs/pu
 
 > **agentVersion**: `string`
 
-Defined in: [ai/src/types/AgentDefinition.ts:13](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentDefinition.ts#L13)
+Defined in: [ai/src/types/AgentDefinition.ts:14](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentDefinition.ts#L14)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [ai/src/types/AgentDefinition.ts:13](https://github.com/puristajs/pu
 
 > `optional` **description**: `string`
 
-Defined in: [ai/src/types/AgentDefinition.ts:14](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentDefinition.ts#L14)
+Defined in: [ai/src/types/AgentDefinition.ts:15](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentDefinition.ts#L15)

@@ -8,7 +8,7 @@
 
 > **MCPToolDescriptor** = `object`
 
-Defined in: [ai/src/mcp/exposeAgentAsMCP.ts:6](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/mcp/exposeAgentAsMCP.ts#L6)
+Defined in: [ai/src/mcp/exposeAgentAsMCP.ts:6](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/mcp/exposeAgentAsMCP.ts#L6)
 
 Descriptor emitted when an agent should be exposed as an MCP tool.
 
@@ -18,7 +18,7 @@ Descriptor emitted when an agent should be exposed as an MCP tool.
 
 > `optional` **description**: `string`
 
-Defined in: [ai/src/mcp/exposeAgentAsMCP.ts:8](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/mcp/exposeAgentAsMCP.ts#L8)
+Defined in: [ai/src/mcp/exposeAgentAsMCP.ts:8](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/mcp/exposeAgentAsMCP.ts#L8)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [ai/src/mcp/exposeAgentAsMCP.ts:8](https://github.com/puristajs/puri
 
 > **name**: `string`
 
-Defined in: [ai/src/mcp/exposeAgentAsMCP.ts:7](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/mcp/exposeAgentAsMCP.ts#L7)
+Defined in: [ai/src/mcp/exposeAgentAsMCP.ts:7](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/mcp/exposeAgentAsMCP.ts#L7)
 
 ***
 
@@ -34,4 +34,4 @@ Defined in: [ai/src/mcp/exposeAgentAsMCP.ts:7](https://github.com/puristajs/puri
 
 > `optional` **parameters**: `Record`\<`string`, `unknown`\>
 
-Defined in: [ai/src/mcp/exposeAgentAsMCP.ts:9](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/mcp/exposeAgentAsMCP.ts#L9)
+Defined in: [ai/src/mcp/exposeAgentAsMCP.ts:9](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/mcp/exposeAgentAsMCP.ts#L9)

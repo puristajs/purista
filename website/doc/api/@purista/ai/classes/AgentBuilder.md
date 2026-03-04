@@ -6,7 +6,7 @@
 
 # Class: AgentBuilder
 
-Defined in: [ai/src/builder/AgentBuilder.ts:74](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L74)
+Defined in: [ai/src/builder/AgentBuilder.ts:99](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L99)
 
 ## Constructors
 
@@ -14,7 +14,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:74](https://github.com/puristajs/pur
 
 > **new AgentBuilder**(`info`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:86](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L86)
+Defined in: [ai/src/builder/AgentBuilder.ts:112](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L112)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:86](https://github.com/puristajs/pur
 
 > **addContextSchema**(`schema`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:223](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L223)
+Defined in: [ai/src/builder/AgentBuilder.ts:265](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L265)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:223](https://github.com/puristajs/pu
 
 > **addOutputSchema**(`schema`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:216](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L216)
+Defined in: [ai/src/builder/AgentBuilder.ts:258](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L258)
 
 #### Parameters
 
@@ -68,7 +68,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:216](https://github.com/puristajs/pu
 
 > **addParameterSchema**(`schema`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:209](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L209)
+Defined in: [ai/src/builder/AgentBuilder.ts:251](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L251)
 
 #### Parameters
 
@@ -86,7 +86,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:209](https://github.com/puristajs/pu
 
 > **addPayloadSchema**(`schema`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:198](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L198)
+Defined in: [ai/src/builder/AgentBuilder.ts:240](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L240)
 
 #### Parameters
 
@@ -104,7 +104,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:198](https://github.com/puristajs/pu
 
 > **allowTool**(`tool`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:180](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L180)
+Defined in: [ai/src/builder/AgentBuilder.ts:222](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L222)
 
 #### Parameters
 
@@ -122,7 +122,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:180](https://github.com/puristajs/pu
 
 > **build**(): [`AgentDefinition`](../type-aliases/AgentDefinition.md)
 
-Defined in: [ai/src/builder/AgentBuilder.ts:354](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L354)
+Defined in: [ai/src/builder/AgentBuilder.ts:450](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L450)
 
 #### Returns
 
@@ -134,7 +134,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:354](https://github.com/puristajs/pu
 
 > **defineModel**(`alias`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:123](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L123)
+Defined in: [ai/src/builder/AgentBuilder.ts:149](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L149)
 
 #### Parameters
 
@@ -152,7 +152,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:123](https://github.com/puristajs/pu
 
 > **exposeAsHttpEndpoint**(`method`, `path`, `contentTypeRequest?`, `contentEncodingRequest?`, `contentTypeResponse?`, `contentEncodingResponse?`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:233](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L233)
+Defined in: [ai/src/builder/AgentBuilder.ts:275](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L275)
 
 #### Parameters
 
@@ -190,7 +190,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:233](https://github.com/puristajs/pu
 
 > **makeEndpointPublic**(): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:269](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L269)
+Defined in: [ai/src/builder/AgentBuilder.ts:311](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L311)
 
 #### Returns
 
@@ -198,39 +198,69 @@ Defined in: [ai/src/builder/AgentBuilder.ts:269](https://github.com/puristajs/pu
 
 ***
 
-### persistHistory()
+### persistConversation()
 
-> **persistHistory**(`config`): `AgentBuilder`
+#### Call Signature
 
-Defined in: [ai/src/builder/AgentBuilder.ts:144](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L144)
+> **persistConversation**(`config`): `this`
 
-#### Parameters
+Defined in: [ai/src/builder/AgentBuilder.ts:183](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L183)
 
-##### config
+Configure conversation persistence.
+
+You can either pass a full config object or use presets:
+- `persistConversation('user')` defaults to full strategy with a larger frame budget
+- `persistConversation('agent')` defaults to summary strategy with a smaller frame budget
+
+##### Parameters
+
+###### config
 
 [`AgentSessionConfig`](../type-aliases/AgentSessionConfig.md)
 
-#### Returns
+##### Returns
 
-`AgentBuilder`
+`this`
 
-***
+##### Example
 
-### setConcurrency()
+```ts
+new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
+  .persistConversation('user')
+```
 
-> **setConcurrency**(`config`): `AgentBuilder`
+#### Call Signature
 
-Defined in: [ai/src/builder/AgentBuilder.ts:148](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L148)
+> **persistConversation**(`preset`, `overrides?`): `this`
 
-#### Parameters
+Defined in: [ai/src/builder/AgentBuilder.ts:184](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L184)
 
-##### config
+Configure conversation persistence.
 
-[`ConcurrencyConfig`](../type-aliases/ConcurrencyConfig.md)
+You can either pass a full config object or use presets:
+- `persistConversation('user')` defaults to full strategy with a larger frame budget
+- `persistConversation('agent')` defaults to summary strategy with a smaller frame budget
 
-#### Returns
+##### Parameters
 
-`AgentBuilder`
+###### preset
+
+[`AgentHistoryPreset`](../type-aliases/AgentHistoryPreset.md)
+
+###### overrides?
+
+`Partial`\<[`AgentSessionConfig`](../type-aliases/AgentSessionConfig.md)\>
+
+##### Returns
+
+`this`
+
+##### Example
+
+```ts
+new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
+  .persistConversation('user')
+```
 
 ***
 
@@ -238,7 +268,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:148](https://github.com/puristajs/pu
 
 > **setContextSchema**(`schema`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:229](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L229)
+Defined in: [ai/src/builder/AgentBuilder.ts:271](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L271)
 
 #### Parameters
 
@@ -256,7 +286,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:229](https://github.com/puristajs/pu
 
 > **setDescription**(`description`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:105](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L105)
+Defined in: [ai/src/builder/AgentBuilder.ts:131](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L131)
 
 #### Parameters
 
@@ -274,7 +304,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:105](https://github.com/puristajs/pu
 
 > **setEvaluation**(`profile`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:190](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L190)
+Defined in: [ai/src/builder/AgentBuilder.ts:232](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L232)
 
 #### Parameters
 
@@ -292,7 +322,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:190](https://github.com/puristajs/pu
 
 > **setHandler**\<`Payload`, `Parameter`, `Resources`, `Models`\>(`fn`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:277](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L277)
+Defined in: [ai/src/builder/AgentBuilder.ts:319](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L319)
 
 #### Type Parameters
 
@@ -328,7 +358,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:277](https://github.com/puristajs/pu
 
 > **setInputSchema**(`schema`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:205](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L205)
+Defined in: [ai/src/builder/AgentBuilder.ts:247](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L247)
 
 #### Parameters
 
@@ -346,7 +376,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:205](https://github.com/puristajs/pu
 
 > **setKnowledge**(`adapters`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:175](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L175)
+Defined in: [ai/src/builder/AgentBuilder.ts:217](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L217)
 
 #### Parameters
 
@@ -364,7 +394,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:175](https://github.com/puristajs/pu
 
 > **setMemory**(`config`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:171](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L171)
+Defined in: [ai/src/builder/AgentBuilder.ts:213](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L213)
 
 #### Parameters
 
@@ -382,7 +412,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:171](https://github.com/puristajs/pu
 
 > **setModelResource**(`resource`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:161](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L161)
+Defined in: [ai/src/builder/AgentBuilder.ts:203](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L203)
 
 #### Parameters
 
@@ -400,7 +430,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:161](https://github.com/puristajs/pu
 
 > **setRetryPolicy**(`policy`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:166](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L166)
+Defined in: [ai/src/builder/AgentBuilder.ts:208](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L208)
 
 #### Parameters
 
@@ -418,7 +448,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:166](https://github.com/puristajs/pu
 
 > **setRuntime**(`mode`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:153](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L153)
+Defined in: [ai/src/builder/AgentBuilder.ts:195](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L195)
 
 #### Parameters
 
@@ -436,7 +466,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:153](https://github.com/puristajs/pu
 
 > **setStreamingMode**(`mode`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:261](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L261)
+Defined in: [ai/src/builder/AgentBuilder.ts:303](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L303)
 
 #### Parameters
 
@@ -454,7 +484,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:261](https://github.com/puristajs/pu
 
 > **setTelemetry**(`config`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:185](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L185)
+Defined in: [ai/src/builder/AgentBuilder.ts:227](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L227)
 
 #### Parameters
 
@@ -472,7 +502,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:185](https://github.com/puristajs/pu
 
 > **useEventBridge**(`name`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:110](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L110)
+Defined in: [ai/src/builder/AgentBuilder.ts:136](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L136)
 
 #### Parameters
 
@@ -490,7 +520,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:110](https://github.com/puristajs/pu
 
 > **useKnowledgeAdapter**(`adapter`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:138](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L138)
+Defined in: [ai/src/builder/AgentBuilder.ts:164](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L164)
 
 #### Parameters
 
@@ -514,7 +544,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:138](https://github.com/puristajs/pu
 
 > **useResource**(`alias`, `resource`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:115](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L115)
+Defined in: [ai/src/builder/AgentBuilder.ts:141](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L141)
 
 #### Parameters
 
@@ -538,7 +568,7 @@ Defined in: [ai/src/builder/AgentBuilder.ts:115](https://github.com/puristajs/pu
 
 > **useSessionStore**(`config`): `AgentBuilder`
 
-Defined in: [ai/src/builder/AgentBuilder.ts:133](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/builder/AgentBuilder.ts#L133)
+Defined in: [ai/src/builder/AgentBuilder.ts:159](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L159)
 
 #### Parameters
 

@@ -8,7 +8,7 @@
 
 > **AiSdkProviderOptions** = `object`
 
-Defined in: [ai/src/providers/runtime/AiSdkProvider.ts:9](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/AiSdkProvider.ts#L9)
+Defined in: [ai/src/providers/runtime/AiSdkProvider.ts:10](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/AiSdkProvider.ts#L10)
 
 Options accepted by [AiSdkProvider](../classes/AiSdkProvider.md).
 
@@ -18,7 +18,7 @@ Options accepted by [AiSdkProvider](../classes/AiSdkProvider.md).
 
 > `optional` **defaults**: [`AiSdkProviderOverrides`](AiSdkProviderOverrides.md)
 
-Defined in: [ai/src/providers/runtime/AiSdkProvider.ts:25](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/AiSdkProvider.ts#L25)
+Defined in: [ai/src/providers/runtime/AiSdkProvider.ts:26](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/AiSdkProvider.ts#L26)
 
 Default call options forwarded to `generateText` (temperature, maxOutputTokens, tools, ...).
 
@@ -28,7 +28,7 @@ Default call options forwarded to `generateText` (temperature, maxOutputTokens, 
 
 > **model**: `LanguageModel`
 
-Defined in: [ai/src/providers/runtime/AiSdkProvider.ts:13](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/AiSdkProvider.ts#L13)
+Defined in: [ai/src/providers/runtime/AiSdkProvider.ts:14](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/AiSdkProvider.ts#L14)
 
 Language model instance (or provider id) created via the Vercel AI SDK (e.g. `openai('gpt-4o-mini')`).
 
@@ -38,7 +38,7 @@ Language model instance (or provider id) created via the Vercel AI SDK (e.g. `op
 
 > `optional` **name**: `string`
 
-Defined in: [ai/src/providers/runtime/AiSdkProvider.ts:17](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/AiSdkProvider.ts#L17)
+Defined in: [ai/src/providers/runtime/AiSdkProvider.ts:18](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/AiSdkProvider.ts#L18)
 
 Optional readable name that shows up in telemetry. Defaults to the model identifier.
 
@@ -48,6 +48,16 @@ Optional readable name that shows up in telemetry. Defaults to the model identif
 
 > `optional` **systemPrompt**: `string`
 
-Defined in: [ai/src/providers/runtime/AiSdkProvider.ts:21](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/providers/runtime/AiSdkProvider.ts#L21)
+Defined in: [ai/src/providers/runtime/AiSdkProvider.ts:22](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/AiSdkProvider.ts#L22)
 
 Static system prompt prepended to every request.
+
+***
+
+### tracer?
+
+> `optional` **tracer**: `Tracer`
+
+Defined in: [ai/src/providers/runtime/AiSdkProvider.ts:30](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/runtime/AiSdkProvider.ts#L30)
+
+Optional tracer injected by the runtime. When set, AI SDK telemetry uses this tracer.

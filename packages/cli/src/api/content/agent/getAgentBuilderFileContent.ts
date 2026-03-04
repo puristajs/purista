@@ -45,7 +45,6 @@ export const getAgentBuilderFileContent = (input: {
 		writer.writeLine(`.addPayloadSchema(${schemaName})`)
 		writer.writeLine(".defineModel('openai:gpt-4o-mini')")
 		writer.writeLine(".persistConversation('user', { maxFrames: 20 })")
-		writer.writeLine(`.setConcurrency({ poolId: '${agentIdentifier}' })`)
 		writer.writeLine(`.exposeAsHttpEndpoint('POST', 'agents/${agentIdentifier}')`)
 		writer.writeLine(
 			'.setHandler<{ sessionId?: string; prompt: string; context?: string }>(async function (context, payload) {',

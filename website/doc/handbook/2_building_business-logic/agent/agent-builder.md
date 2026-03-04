@@ -1,6 +1,6 @@
 ---
 title: The Agent Builder
-description: Describe agents with the fluent builder API—schemas, resources, tools, concurrency, and HTTP exposure.
+description: Describe agents with the fluent builder API—schemas, resources, tools, and HTTP exposure.
 order: 203701
 ---
 
@@ -142,17 +142,16 @@ const supportAgent = new AgentBuilder({ ... })
   .build()
 ```
 
-### 3.4 Expose HTTP + configure runtime pool mapping
+### 3.4 Expose HTTP endpoint
 
 ```ts
 const supportAgent = new AgentBuilder({ ... })
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent') // SSE default
-  .setConcurrency({ poolId: 'support' })
   .setHandler(...)
   .build()
 ```
 
-Set actual worker count in runtime bootstrap (`getInstance(..., { poolConfig: { maxWorkers } })`).
+Configure pool identity and worker count at runtime bootstrap (`getInstance(..., { poolConfig: { poolId, maxWorkers } })`).
 
 ## 4) Quick method map
 
@@ -190,7 +189,6 @@ Set actual worker count in runtime bootstrap (`getInstance(..., { poolConfig: { 
 
 | Method | Options | Use when | Trade-off |
 | --- | --- | --- | --- |
-| `setConcurrency({ poolId })` | pool identifier | isolate workloads by pool | actual worker count still configured at runtime |
 | `setRetryPolicy({ maxAttempts, strategy, delayMs })` | retry policy | transient model/tool failures expected | retries improve resilience but can add latency |
 | `exposeAsHttpEndpoint(method, path, ...)` | HTTP config | endpoint should be reachable via API | public API stability commitment |
 | `setStreamingMode('sse' \| 'chunked' \| 'buffered')` | stream mode | non-default transport behavior needed | buffered hides incremental progress |

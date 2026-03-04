@@ -6,7 +6,7 @@
 
 # Interface: SessionStore
 
-Defined in: [ai/src/memory/sessionStore.ts:20](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/memory/sessionStore.ts#L20)
+Defined in: [ai/src/memory/sessionStore.ts:20](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/memory/sessionStore.ts#L20)
 
 ## Methods
 
@@ -14,7 +14,7 @@ Defined in: [ai/src/memory/sessionStore.ts:20](https://github.com/puristajs/puri
 
 > **delete**(`sessionId`): `Promise`\<`void`\>
 
-Defined in: [ai/src/memory/sessionStore.ts:23](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/memory/sessionStore.ts#L23)
+Defined in: [ai/src/memory/sessionStore.ts:23](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/memory/sessionStore.ts#L23)
 
 #### Parameters
 
@@ -32,7 +32,7 @@ Defined in: [ai/src/memory/sessionStore.ts:23](https://github.com/puristajs/puri
 
 > **load**(`sessionId`): `Promise`\<[`SessionRecord`](../type-aliases/SessionRecord.md) \| `undefined`\>
 
-Defined in: [ai/src/memory/sessionStore.ts:21](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/memory/sessionStore.ts#L21)
+Defined in: [ai/src/memory/sessionStore.ts:21](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/memory/sessionStore.ts#L21)
 
 #### Parameters
 
@@ -50,7 +50,7 @@ Defined in: [ai/src/memory/sessionStore.ts:21](https://github.com/puristajs/puri
 
 > **save**(`record`): `Promise`\<`void`\>
 
-Defined in: [ai/src/memory/sessionStore.ts:22](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/memory/sessionStore.ts#L22)
+Defined in: [ai/src/memory/sessionStore.ts:22](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/memory/sessionStore.ts#L22)
 
 #### Parameters
 

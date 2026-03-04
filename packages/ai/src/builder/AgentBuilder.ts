@@ -15,7 +15,6 @@ import type {
 	AgentManifest,
 	AgentSessionConfig,
 	AllowedToolDefinition,
-	ConcurrencyConfig,
 	RetryPolicy,
 } from '../types/AgentManifest.js'
 
@@ -191,11 +190,6 @@ export class AgentBuilder {
 			return this.useSessionStore(resolveHistoryPresetConfig(this.info, configOrPreset, overrides))
 		}
 		return this.useSessionStore(configOrPreset)
-	}
-
-	setConcurrency(config: ConcurrencyConfig) {
-		this.manifest.concurrency = config
-		return this
 	}
 
 	setRuntime(mode: string) {

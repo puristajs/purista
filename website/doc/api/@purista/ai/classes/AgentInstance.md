@@ -6,7 +6,7 @@
 
 # Class: AgentInstance
 
-Defined in: [ai/src/runtime/AgentInstance.ts:83](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentInstance.ts#L83)
+Defined in: [ai/src/runtime/AgentInstance.ts:93](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentInstance.ts#L93)
 
 ## Implements
 
@@ -16,9 +16,9 @@ Defined in: [ai/src/runtime/AgentInstance.ts:83](https://github.com/puristajs/pu
 
 ### Constructor
 
-> **new AgentInstance**(`deps`, `runtime`): `AgentInstance`
+> **new AgentInstance**(`deps`, `eventBridge`, `runtime?`): `AgentInstance`
 
-Defined in: [ai/src/runtime/AgentInstance.ts:88](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentInstance.ts#L88)
+Defined in: [ai/src/runtime/AgentInstance.ts:98](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentInstance.ts#L98)
 
 #### Parameters
 
@@ -26,9 +26,13 @@ Defined in: [ai/src/runtime/AgentInstance.ts:88](https://github.com/puristajs/pu
 
 [`AgentInstanceDependencies`](../type-aliases/AgentInstanceDependencies.md)
 
-##### runtime
+##### eventBridge
 
-[`AgentRuntimeDependencies`](../type-aliases/AgentRuntimeDependencies.md)
+[`EventBridge`](../../core/interfaces/EventBridge.md)
+
+##### runtime?
+
+[`AgentRuntimeDependencies`](../type-aliases/AgentRuntimeDependencies.md) = `{}`
 
 #### Returns
 
@@ -40,7 +44,7 @@ Defined in: [ai/src/runtime/AgentInstance.ts:88](https://github.com/puristajs/pu
 
 > **invoke**(`request`, `contextOverrides?`): `Promise`\<[`AgentInvokeResult`](../type-aliases/AgentInvokeResult.md)\>
 
-Defined in: [ai/src/runtime/AgentInstance.ts:174](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentInstance.ts#L174)
+Defined in: [ai/src/runtime/AgentInstance.ts:186](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentInstance.ts#L186)
 
 #### Parameters
 
@@ -66,7 +70,7 @@ Defined in: [ai/src/runtime/AgentInstance.ts:174](https://github.com/puristajs/p
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [ai/src/runtime/AgentInstance.ts:122](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentInstance.ts#L122)
+Defined in: [ai/src/runtime/AgentInstance.ts:132](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentInstance.ts#L132)
 
 #### Returns
 
@@ -82,7 +86,7 @@ Defined in: [ai/src/runtime/AgentInstance.ts:122](https://github.com/puristajs/p
 
 > **stop**(): `Promise`\<`void`\>
 
-Defined in: [ai/src/runtime/AgentInstance.ts:152](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/runtime/AgentInstance.ts#L152)
+Defined in: [ai/src/runtime/AgentInstance.ts:164](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentInstance.ts#L164)
 
 #### Returns
 

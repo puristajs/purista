@@ -8,7 +8,7 @@
 
 > **AgentStreamResponder** = `object`
 
-Defined in: [ai/src/types/AgentDefinition.ts:68](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentDefinition.ts#L68)
+Defined in: [ai/src/types/AgentDefinition.ts:73](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentDefinition.ts#L73)
 
 ## Methods
 
@@ -16,7 +16,7 @@ Defined in: [ai/src/types/AgentDefinition.ts:68](https://github.com/puristajs/pu
 
 > **onComplete**(): `void`
 
-Defined in: [ai/src/types/AgentDefinition.ts:70](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentDefinition.ts#L70)
+Defined in: [ai/src/types/AgentDefinition.ts:75](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentDefinition.ts#L75)
 
 #### Returns
 
@@ -28,7 +28,7 @@ Defined in: [ai/src/types/AgentDefinition.ts:70](https://github.com/puristajs/pu
 
 > **onError**(`error`): `void`
 
-Defined in: [ai/src/types/AgentDefinition.ts:71](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentDefinition.ts#L71)
+Defined in: [ai/src/types/AgentDefinition.ts:76](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentDefinition.ts#L76)
 
 #### Parameters
 
@@ -46,7 +46,7 @@ Defined in: [ai/src/types/AgentDefinition.ts:71](https://github.com/puristajs/pu
 
 > **onFrame**(`frame`): `void`
 
-Defined in: [ai/src/types/AgentDefinition.ts:69](https://github.com/puristajs/purista/blob/628eeaaef5a076ec8b551022566e701417e6c49c/packages/ai/src/types/AgentDefinition.ts#L69)
+Defined in: [ai/src/types/AgentDefinition.ts:74](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentDefinition.ts#L74)
 
 #### Parameters
 
