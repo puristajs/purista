@@ -44,20 +44,21 @@ export const getAgentBuilderFileContent = (input: {
 	writer.indent(() => {
 		writer.writeLine(`.addPayloadSchema(${schemaName})`)
 		writer.writeLine(".defineModel('openai:gpt-4o-mini')")
-		writer.writeLine(".persistHistory({ storeName: 'aiConversation', maxFrames: 20 })")
+		writer.writeLine(".persistConversation('user', { maxFrames: 20 })")
 		writer.writeLine(`.setConcurrency({ poolId: '${agentIdentifier}' })`)
 		writer.writeLine(`.exposeAsHttpEndpoint('POST', 'agents/${agentIdentifier}')`)
 		writer.writeLine(
 			'.setHandler<{ sessionId?: string; prompt: string; context?: string }>(async function (context, payload) {',
 		)
 		writer.indent(() => {
-			writer.writeLine('const sessionId = payload.sessionId ?? context.message.id ?? (`session-` + Date.now())')
 			writer.writeLine("context.logger.info({ prompt: payload.prompt }, 'invoking agent')")
+			writer.writeLine('await context.conversation.addUser(payload.prompt)')
+			writer.writeLine('const prompt = await context.conversation.buildPromptInput()')
 			writer.writeLine("const model = context.models['openai:gpt-4o-mini']")
-			writer.writeLine('const result = await model.generate({ prompt: payload.prompt, context: payload.context })')
+			writer.writeLine('const result = await model.generate({ prompt, context: payload.context })')
 			writer.writeLine('const answer = result.output')
+			writer.writeLine('await context.conversation.addAssistant(answer)')
 			writer.writeLine('context.stream.sendFinal(answer)')
-			writer.writeLine('await context.session.save({ sessionId, data: { lastOutput: answer }, updatedAt: Date.now() })')
 			writer.writeLine('return { message: answer }')
 		})
 		writer.writeLine('})')

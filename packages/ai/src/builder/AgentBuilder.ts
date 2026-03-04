@@ -193,24 +193,6 @@ export class AgentBuilder {
 		return this.useSessionStore(configOrPreset)
 	}
 
-	/**
-	 * @deprecated Use `persistConversation(...)` instead.
-	 */
-	persistHistory(config: AgentSessionConfig): this
-	/**
-	 * @deprecated Use `persistConversation(...)` instead.
-	 */
-	persistHistory(preset: AgentHistoryPreset, overrides?: Partial<AgentSessionConfig>): this
-	persistHistory(
-		configOrPreset: AgentSessionConfig | AgentHistoryPreset,
-		overrides?: Partial<AgentSessionConfig>,
-	): this {
-		if (typeof configOrPreset === 'string') {
-			return this.persistConversation(configOrPreset, overrides)
-		}
-		return this.persistConversation(configOrPreset)
-	}
-
 	setConcurrency(config: ConcurrencyConfig) {
 		this.manifest.concurrency = config
 		return this

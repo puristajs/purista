@@ -82,7 +82,6 @@ This is deterministic transcript compression, not semantic LLM summarization.
 Scoped session identity includes agent/version plus tenant/principal metadata from Purista messages.  
 `context.conversation` and `context.session` share the same scoped identity resolution automatically.
 
-## Compatibility and escape hatch
+## Low-level escape hatch
 
-- `persistHistory(...)` remains available as a legacy alias.
-- For non-conversation custom state, use low-level `context.session.load/save/delete`.
+For non-conversation custom state, use low-level `context.session.load/save/delete`.

@@ -141,18 +141,6 @@ describe('AgentBuilder', () => {
 		})
 	})
 
-	it('keeps persistHistory as backward-compatible alias', () => {
-		const definition = new AgentBuilder({
-			agentName: 'legacyPresetAgent',
-			agentVersion: '1',
-		})
-			.persistHistory('user')
-			.setHandler(async () => ({ message: 'ok' }))
-			.build()
-
-		expect(definition.getManifest().session?.strategy).toBe('full')
-	})
-
 	it('fails fast when required model aliases are missing at getInstance()', async () => {
 		const definition = new AgentBuilder({ agentName: 'missingModelAgent', agentVersion: '1' })
 			.defineModel('missing')
