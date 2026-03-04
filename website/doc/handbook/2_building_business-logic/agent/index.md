@@ -78,11 +78,12 @@ Recommended order for new users:
 1. [The Agent Builder](./agent-builder.md) — purpose, main methods, and first runnable agent.
 2. [Run & Invoke Agents](./running-and-invoking-agents.md) — bootstrap in `src/index.ts`, call from commands/subscriptions, expose HTTP.
 3. [Model Providers & OpenAI](./model-providers-and-openai.md) — wire provider instances at runtime.
-4. [State, History & Knowledge](./state-history-and-knowledge.md) — tenant/user-aware memory and shared knowledge.
-5. [AI Protocol](./ai-protocol.md) — envelope model, frame semantics, and interoperability references.
-6. [Protocol & Streaming](./protocol-and-streaming.md) — practical HTTP/SSE streaming and helper usage.
-7. [Testing Agents](./testing.md) — deterministic unit/integration tests.
-8. [Agent Evaluation](./evaluation.md) — dataset-driven evaluation output and CI comparison.
+4. [Conversation Persistence](./conversation-persistence.md) — memory strategies, summary behavior, and retry-safe staging.
+5. [Knowledge Adapters](./knowledge-adapters.md) — RAG/data-source integration and adapter options.
+6. [AI Protocol](./ai-protocol.md) — envelope model, frame semantics, and interoperability references.
+7. [Protocol & Streaming](./protocol-and-streaming.md) — practical HTTP/SSE streaming and helper usage.
+8. [Testing Agents](./testing.md) — deterministic unit/integration tests.
+9. [Agent Evaluation](./evaluation.md) — dataset-driven evaluation output and CI comparison.
 
 Advanced section still contains a protocol interoperability deep-dive entry point for operations teams.
 

@@ -1,7 +1,7 @@
 ---
 title: AI Protocol
 description: Core protocol concepts, frame semantics, and interoperability patterns for @purista/ai.
-order: 203705
+order: 203706
 ---
 
 # AI Protocol

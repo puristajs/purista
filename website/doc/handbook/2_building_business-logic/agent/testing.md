@@ -1,7 +1,7 @@
 ---
 title: Testing Agents
 description: Deterministic test patterns for agent handlers and command-to-agent integration.
-order: 203706
+order: 203708
 ---
 
 # Testing Agents

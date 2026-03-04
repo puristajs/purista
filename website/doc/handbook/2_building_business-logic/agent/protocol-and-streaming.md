@@ -1,7 +1,7 @@
 ---
 title: Protocol & Streaming
 description: Understand agent protocol frames, emit telemetry, and adapt them for HTTP/SSE or the Vercel AI SDK.
-order: 203705
+order: 203707
 ---
 
 # Protocol & Streaming
