@@ -81,7 +81,7 @@ export const supportAgent = new AgentBuilder({ agentName: 'supportAgent', agentV
     // from getInstance(..., { models })
     const model = context.models['openai:gpt-5.2-mini']
     // from getInstance(..., { knowledgeAdapters: { supportFaq: ... } })
-    const docs = await context.knowledge.supportFaq.query(payload.prompt, 3)
+    const docs = await context.knowledge.supportFaq.query(payload.prompt, { limit: 3 })
     // from getInstance(..., { sessionStore })
     await context.conversation.addUser(payload.prompt)
     return { message: `${docs.length} docs` }
@@ -90,6 +90,7 @@ export const supportAgent = new AgentBuilder({ agentName: 'supportAgent', agentV
 ```
 
 Definition decides aliases/capabilities; instance injection provides concrete implementations behind those aliases.
+Knowledge operations automatically receive scope metadata (`tenantId`, `principalId`, `agentName`, `agentVersion`, `sessionId`) from the current message/session context.
 
 ## Runtime options reference
 

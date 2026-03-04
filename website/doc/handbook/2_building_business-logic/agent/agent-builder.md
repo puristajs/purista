@@ -131,8 +131,8 @@ Use `'user'` for fuller transcript-style memory and `'agent'` for compact summar
 const supportAgent = new AgentBuilder({ ... })
   .useKnowledgeAdapter('supportFaq')
   .setHandler(async function (context, payload) {
-    const docs = await context.knowledge.supportFaq.query(payload.prompt, 3)
-    const contextBlock = docs.map(doc => doc.body).join('\n')
+    const docs = await context.knowledge.supportFaq.query(payload.prompt, { limit: 3 })
+    const contextBlock = docs.map(doc => doc.content).join('\n')
     const result = await context.models['openai:gpt-5.2-mini'].generate({
       prompt: `${payload.prompt}\n\nContext:\n${contextBlock}`,
     })
@@ -183,7 +183,7 @@ Configure pool identity and worker count at runtime bootstrap (`getInstance(...,
 | --- | --- | --- | --- |
 | `persistConversation('user', overrides?)` | `maxFrames`, `strategy`, `storeName` | interactive chat memory | larger context can increase token usage |
 | `persistConversation('agent', overrides?)` | `maxFrames`, `strategy`, `storeName` | background/long workflows | summary compression may lose very fine detail |
-| `useKnowledgeAdapter('alias', options?)` | adapter alias + backend options | RAG / FAQ / document lookup | requires adapter provisioning at runtime |
+| `useKnowledgeAdapter('alias', options?)` | adapter alias + adapter options | RAG / FAQ / document lookup | requires runtime adapter provisioning |
 
 ### Runtime behavior & exposure
 
@@ -203,7 +203,7 @@ The handler receives a familiar context object with agent-specific helpers:
 | `stream` | Action-oriented streaming helpers that map to the [agent protocol](./protocol-and-streaming.md): `sendChunk`, `sendFinal`, `sendArtifact`, `sendError`. |
 | `conversation` | High-level chat history API (`addUser`, `addAssistant`, `buildPromptInput`, `getMessages`) with automatic session scoping and optional summary support. |
 | `session` | Low-level session store wrapper (`load`, `save`, `delete`) for advanced/custom state handling. |
-| `knowledge` | Fan-out to allowlisted knowledge adapters (vector stores, RAG indexes, etc.). |
+| `knowledge` | Fan-out to configured knowledge adapters (`query/upsert/delete`), with automatic tenant/principal/session scope propagation. |
 | `tools` | Invoke allowlisted PURISTA commands. Events appear as tool frames for tracing/debugging. |
 | `models` | Typed access to declared model aliases (`context.models[alias]`). |
 | `resources` | Optional custom dependencies for non-model integrations (caches, SDK clients, domain utilities). |

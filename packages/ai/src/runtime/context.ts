@@ -1,7 +1,13 @@
 import type { CommandFunctionContext, Logger } from '@purista/core'
 import { HandledError, StatusCode } from '@purista/core'
 
-import type { KnowledgeAdapter, KnowledgeDocument } from '../knowledge/adapters/inMemoryAdapter.js'
+import type {
+	KnowledgeAdapter,
+	KnowledgeDeleteRequest,
+	KnowledgeDocument,
+	KnowledgeQueryRequest,
+	KnowledgeUpsertRequest,
+} from '../knowledge/adapters/inMemoryAdapter.js'
 import type { SessionRecord, SessionRecordData, SessionStore } from '../memory/sessionStore.js'
 import {
 	createArtifactFrame,
@@ -362,15 +368,36 @@ const createSessionHelpers = (store: SessionStore, input: SessionIdentityInput):
 	}
 }
 
+export type KnowledgeQueryInput = number | Omit<KnowledgeQueryRequest, 'query' | 'scope' | 'options'>
+
+/**
+ * High-level knowledge helper API exposed to agent handlers.
+ *
+ * Supports both generic calls (`context.knowledge.query('faq', ...)`) and
+ * alias-first calls (`context.knowledge.faq.query(...)`).
+ */
 export type KnowledgeHelpers = {
-	query(adapterName: string, query: string, limit?: number): Promise<KnowledgeDocument[]>
-	[adapterName: string]:
-		| unknown
-		| ((adapterName: string, query: string, limit?: number) => Promise<KnowledgeDocument[]>)
-		| { query(query: string, limit?: number): Promise<KnowledgeDocument[]> }
+	query(adapterName: string, query: string, input?: KnowledgeQueryInput): Promise<KnowledgeDocument[]>
+	upsert(
+		adapterName: string,
+		document: KnowledgeDocument,
+		input?: Omit<KnowledgeUpsertRequest, 'document' | 'scope' | 'options'>,
+	): Promise<void>
+	delete(
+		adapterName: string,
+		id: string,
+		input?: Omit<KnowledgeDeleteRequest, 'id' | 'scope' | 'options'>,
+	): Promise<void>
+	[adapterName: string]: any
 }
 
-const createKnowledgeHelpers = (adapters: Record<string, KnowledgeAdapter | undefined>): KnowledgeHelpers => {
+const createKnowledgeHelpers = (
+	adapters: Record<string, KnowledgeAdapter | undefined>,
+	manifest: AgentManifest,
+	session: SessionHelpers,
+): KnowledgeHelpers => {
+	const adapterConfigMap = new Map((manifest.knowledge ?? []).map(entry => [entry.adapterName, entry.options] as const))
+
 	const resolveAdapter = (adapterName: string) => {
 		const adapter = adapters[adapterName]
 		if (!adapter) {
@@ -379,9 +406,46 @@ const createKnowledgeHelpers = (adapters: Record<string, KnowledgeAdapter | unde
 		return adapter
 	}
 
-	const base: Pick<KnowledgeHelpers, 'query'> = {
-		async query(adapterName, query, limit) {
-			return resolveAdapter(adapterName).query(query, limit)
+	const parseInput = (input?: KnowledgeQueryInput) => {
+		if (typeof input === 'number') {
+			return { limit: input }
+		}
+		return input
+	}
+
+	const getScope = () => ({
+		agentName: session.identity.agentName,
+		agentVersion: session.identity.agentVersion,
+		tenantId: session.identity.tenantId,
+		principalId: session.identity.principalId,
+		sessionId: session.identity.baseSessionId,
+	})
+
+	const base: Pick<KnowledgeHelpers, 'query' | 'upsert' | 'delete'> = {
+		async query(adapterName, query, input) {
+			const parsedInput = parseInput(input)
+			return resolveAdapter(adapterName).query({
+				query,
+				...parsedInput,
+				scope: getScope(),
+				options: adapterConfigMap.get(adapterName),
+			})
+		},
+		async upsert(adapterName, document, input) {
+			await resolveAdapter(adapterName).upsert({
+				document,
+				...input,
+				scope: getScope(),
+				options: adapterConfigMap.get(adapterName),
+			})
+		},
+		async delete(adapterName, id, input) {
+			await resolveAdapter(adapterName).delete({
+				id,
+				...input,
+				scope: getScope(),
+				options: adapterConfigMap.get(adapterName),
+			})
 		},
 	}
 
@@ -394,8 +458,33 @@ const createKnowledgeHelpers = (adapters: Record<string, KnowledgeAdapter | unde
 				return Reflect.get(target, prop, receiver)
 			}
 			return {
-				query: async (query: string, limit?: number) => {
-					return resolveAdapter(prop).query(query, limit)
+				query: async (query: string, input?: KnowledgeQueryInput) => {
+					const parsedInput = parseInput(input)
+					return resolveAdapter(prop).query({
+						query,
+						...parsedInput,
+						scope: getScope(),
+						options: adapterConfigMap.get(prop),
+					})
+				},
+				upsert: async (
+					document: KnowledgeDocument,
+					input?: Omit<KnowledgeUpsertRequest, 'document' | 'scope' | 'options'>,
+				) => {
+					await resolveAdapter(prop).upsert({
+						document,
+						...input,
+						scope: getScope(),
+						options: adapterConfigMap.get(prop),
+					})
+				},
+				delete: async (id: string, input?: Omit<KnowledgeDeleteRequest, 'id' | 'scope' | 'options'>) => {
+					await resolveAdapter(prop).delete({
+						id,
+						...input,
+						scope: getScope(),
+						options: adapterConfigMap.get(prop),
+					})
 				},
 			}
 		},
@@ -461,7 +550,7 @@ export const createAgentHandlerContext = <
 		message: input.serviceContext.message,
 		session: sessionHelpers,
 		conversation: createConversationHelpers(sessionHelpers, input.manifest),
-		knowledge: createKnowledgeHelpers(input.knowledgeAdapters),
+		knowledge: createKnowledgeHelpers(input.knowledgeAdapters, input.manifest, sessionHelpers),
 		stream: createStreamEmitter(input.protocol),
 		tools: createToolInvoker(input.serviceContext, input.manifest.allowedTools ?? [], input.protocol),
 		resources: input.resources,

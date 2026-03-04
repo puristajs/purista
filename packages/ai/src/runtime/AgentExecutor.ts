@@ -136,7 +136,11 @@ export class AgentExecutor {
 				)
 				continue
 			}
-			const documents = await adapter.query(prompt, 5)
+			const documents = await adapter.query({
+				query: prompt,
+				limit: 5,
+				options: entry.options,
+			})
 			for (const doc of documents) {
 				snippets.push(`[${adapter.id}:${doc.id}] ${doc.content}`)
 			}

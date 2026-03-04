@@ -71,7 +71,7 @@ describe('runtime context helpers', () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const sessionStore = new InMemorySessionStore()
 		const knowledgeAdapter = new InMemoryKnowledgeAdapter()
-		await knowledgeAdapter.upsert({ id: 'doc-1', content: 'Reset password steps', metadata: {} })
+		await knowledgeAdapter.upsert({ document: { id: 'doc-1', content: 'Reset password steps', metadata: {} } })
 
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,
@@ -94,8 +94,14 @@ describe('runtime context helpers', () => {
 
 		const docs = await context.knowledge.query('default', 'Reset')
 		expect(docs).toHaveLength(1)
-		const docsByAlias = await (context.knowledge.default as { query(query: string): Promise<unknown[]> }).query('Reset')
+		const docsByAlias = await context.knowledge.default.query('Reset')
 		expect(docsByAlias).toHaveLength(1)
+		await context.knowledge.default.upsert({
+			id: 'doc-2',
+			content: 'Reset MFA settings',
+		})
+		const docsWithLimit = await context.knowledge.query('default', 'Reset', 1)
+		expect(docsWithLimit).toHaveLength(1)
 
 		await context.conversation.addUser('Need password reset help')
 		await context.conversation.addAssistant('Use the forgot-password page.')

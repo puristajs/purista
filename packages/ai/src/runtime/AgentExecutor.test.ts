@@ -18,12 +18,12 @@ describe('AgentExecutor', () => {
 	it('runs prompts through the provider and stores session state', async () => {
 		const adapter = new (class extends InMemoryKnowledgeAdapter {
 			queries: string[] = []
-			override async query(query: string, limit?: number) {
-				this.queries.push(query)
-				return super.query(query, limit)
+			override async query(input: { query: string; limit?: number }) {
+				this.queries.push(input.query)
+				return super.query(input)
 			}
 		})()
-		await adapter.upsert({ id: 'doc-1', content: 'hello world' })
+		await adapter.upsert({ document: { id: 'doc-1', content: 'hello world' } })
 
 		const sessionStore = new InMemorySessionStore()
 
