@@ -6,20 +6,43 @@ order: 203701
 
 # The Agent Builder
 
-`new AgentBuilder(...)` mirrors `ServiceBuilder`: you compose fluent methods to describe metadata, schemas, models, tool allowlists, HTTP exposure, and the handler that runs inside the PURISTA runtime. The result of `.build()` is an `AgentDefinition` you can start multiple times (local + worker pools) just like a service definition.
+`new AgentBuilder(...)` mirrors `ServiceBuilder`: you define one agent workload with typed input/output, allowlisted tools, model aliases, and runtime behavior.
 
-## Typical workflow
+Think of this page as the practical handbook entry:
 
-1. Scaffold a new agent with CLI:
-   ```bash
-   purista add agent supportAgent
-   ```
-2. Fill in schemas and handler logic in the generated agent file.
-3. Wire runtime dependencies in `src/index.ts` via `getInstance(eventBridge, options)`.
-4. Invoke the agent from command/subscription/stream contexts with `.canInvokeAgent(...)`.
-5. Add or extend the generated test file.
+1. create/scaffold
+2. define a minimal useful agent
+3. add features (tools/history/knowledge/http)
+4. wire runtime config in bootstrap
 
-## Full builder example
+## 1) Scaffold with CLI
+
+::: code-group
+
+```bash [npm]
+npx @purista/cli add agent supportAgent
+```
+
+```bash [pnpm]
+pnpm dlx @purista/cli add agent supportAgent
+```
+
+```bash [bun]
+bunx @purista/cli add agent supportAgent
+```
+
+```bash [yarn]
+yarn dlx @purista/cli add agent supportAgent
+```
+
+:::
+
+This creates:
+
+- `src/agents/supportAgent/v1/supportAgent.ts`
+- `src/agents/supportAgent/v1/supportAgent.test.ts`
+
+## 2) Minimal agent first
 
 ```ts title="src/agents/supportAgent/v1/supportAgent.ts"
 import { AgentBuilder } from '@purista/ai'
@@ -38,49 +61,107 @@ const supportInputSchema = extendApi(
 export const supportAgent = new AgentBuilder({
   agentName: 'supportAgent',
   agentVersion: '1',
-  description: 'Answers common help-desk questions',
+  description: 'Answers help-desk questions',
 })
   .addPayloadSchema(supportInputSchema)
-  .addOutputSchema(
-    extendApi(z.object({ message: z.string(), summary: z.string().optional() }), { title: 'Support Agent Output' }),
-  )
-  .persistHistory({ storeName: 'aiConversation', maxFrames: 40 })
-  .useKnowledgeAdapter({ adapterName: 'supportFaq', options: { locale: 'en-US' } })
-  .defineModel('openai:gpt-4o-mini')
-  .allowTool({ serviceName: 'support', serviceVersion: '1', commandName: 'createTicket' })
-  .setConcurrency({ poolId: 'support' })
-  .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
-  .makeEndpointPublic()
-  .setRetryPolicy({ maxAttempts: 2, initialIntervalMs: 1_000 })
-  .setHandler(async function handler(context, payload) {
-    const sessionId = payload.sessionId ?? context.message.id
-
-    const knowledge = await context.knowledge.query('supportFaq', payload.prompt, 3)
-    const model = context.models['openai:gpt-4o-mini']
-    const { output, tokens } = await model.generate({
-      prompt: payload.prompt,
-      context: [payload.context, knowledge.map(doc => doc.body).join('\n')].filter(Boolean).join('\n\n'),
-    })
-
-    context.stream.sendChunk('Checking your account…')
-    context.stream.sendFinal(output)
-
-    await context.session.save({ sessionId, data: { lastMessage: output }, updatedAt: Date.now() })
-
-    return { message: output }
+  .defineModel('openai:gpt-5.2-mini')
+  .setHandler(async function (context, payload) {
+    const model = context.models['openai:gpt-5.2-mini']
+    const result = await model.generate({ prompt: payload.prompt, context: payload.context })
+    context.stream.sendFinal(result.output)
+    return { message: result.output }
   })
   .build()
 ```
 
-### Key builder calls
+Start simple like this, then add advanced features incrementally.
 
-- `.addPayloadSchema` / `.addParameterSchema` / `.addOutputSchema` reuse the same schema primitives (`extendApi`, Zod, TypeBox, …) you already use in services.
-- `.defineModel(alias)` declares which model aliases the agent can use. Pass the actual provider implementation later through `getInstance(eventBridge, { models: { [alias]: provider } })`.
-- `.allowTool` works exactly like `.canInvoke`: only allowlisted service commands may be invoked by `context.tools.invoke()`.
-- `.persistHistory`, `.useSessionStore`, and `.useKnowledgeAdapter` describe how conversation history and shared knowledge should be stored. Defaults are in-memory, but you can plug in Redis/PGVector/etc. per agent.
-- `.exposeAsHttpEndpoint` wires up an HTTP route in the OpenAPI spec. SSE is the default mode; use `.setStreamingMode(...)` only when you need `buffered` or `chunked`.
-- `.setConcurrency` only declares a pool reference (`poolId`). Set actual worker counts via `getInstance(..., { poolConfig: { maxWorkers } })` so scaling stays environment-specific.
-- `.setRetryPolicy` mirrors queue/command retries. The runtime automatically replays transient failures and emits handled/unhandled error frames.
+## 3) Add one capability at a time
+
+After the minimal handler works, add only the features your workload needs.
+
+### 3.1 Allowlist command tools
+
+```ts
+const supportAgent = new AgentBuilder({
+  agentName: 'supportAgent',
+  agentVersion: '1',
+  description: 'Answers help-desk questions',
+})
+  .allowTool({
+    serviceName: 'ticketing',
+    serviceVersion: '1',
+    commandName: 'createTicket',
+  })
+  .setHandler(async function (context, payload) {
+    if (payload.prompt.includes('open ticket')) {
+      await context.tools.invoke('ticketing.1.createTicket', { reason: payload.prompt })
+    }
+    context.stream.sendFinal('Done')
+    return { message: 'Done' }
+  })
+  .build()
+```
+
+Only allowlisted commands are available to the handler.
+
+### 3.2 Add history persistence
+
+```ts
+const supportAgent = new AgentBuilder({ ... })
+  .persistHistory({ storeName: 'aiConversation', maxFrames: 40 })
+  .setHandler(async function (context, payload) {
+    const sessionId = payload.sessionId ?? context.message.id
+    const history = await context.session.load(sessionId)
+    const prompt = [history?.data?.last, payload.prompt].filter(Boolean).join('\n')
+
+    const result = await context.models['openai:gpt-5.2-mini'].generate({ prompt })
+    await context.session.save({
+      sessionId,
+      data: { last: result.output },
+      updatedAt: Date.now(),
+    })
+
+    context.stream.sendFinal(result.output)
+    return { message: result.output }
+  })
+  .build()
+```
+
+### 3.3 Connect a knowledge adapter
+
+```ts
+const supportAgent = new AgentBuilder({ ... })
+  .useKnowledgeAdapter({ adapterName: 'supportFaq' })
+  .setHandler(async function (context, payload) {
+    const docs = await context.knowledge.query('supportFaq', payload.prompt, 3)
+    const contextBlock = docs.map(doc => doc.body).join('\n')
+    const result = await context.models['openai:gpt-5.2-mini'].generate({
+      prompt: `${payload.prompt}\n\nContext:\n${contextBlock}`,
+    })
+    context.stream.sendFinal(result.output)
+    return { message: result.output }
+  })
+  .build()
+```
+
+### 3.4 Expose HTTP + configure runtime pool mapping
+
+```ts
+const supportAgent = new AgentBuilder({ ... })
+  .exposeAsHttpEndpoint('POST', 'agents/supportAgent') // SSE default
+  .setConcurrency({ poolId: 'support' })
+  .setHandler(...)
+  .build()
+```
+
+Set actual worker count in runtime bootstrap (`getInstance(..., { poolConfig: { maxWorkers } })`).
+
+## 4) Quick method map
+
+- schema methods (`.addPayloadSchema`, `.addParameterSchema`, `.addOutputSchema`) reuse normal Purista schema primitives.
+- `.defineModel(alias)` declares allowed model aliases; provider instances are injected at runtime.
+- `.setRetryPolicy(...)` mirrors command/queue retry behavior and emits handled/unhandled protocol errors automatically.
 
 ## Handler context breakdown
 

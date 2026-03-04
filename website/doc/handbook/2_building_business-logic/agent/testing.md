@@ -10,7 +10,27 @@ Treat agents like any other PURISTA business component: fast deterministic tests
 
 ## What the CLI gives you
 
-`purista add agent ...` creates a prepared `*.test.ts` beside the generated agent file.
+`add agent` creates a prepared `*.test.ts` beside the generated agent file.
+
+::: code-group
+
+```bash [npm]
+npx @purista/cli add agent supportAgent
+```
+
+```bash [pnpm]
+pnpm dlx @purista/cli add agent supportAgent
+```
+
+```bash [bun]
+bunx @purista/cli add agent supportAgent
+```
+
+```bash [yarn]
+yarn dlx @purista/cli add agent supportAgent
+```
+
+:::
 
 The scaffold already:
 

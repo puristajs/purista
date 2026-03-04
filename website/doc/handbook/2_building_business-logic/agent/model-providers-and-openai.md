@@ -1,6 +1,6 @@
 ---
 title: Model Providers & OpenAI
-description: Register AI SDK providers, share them through the resource registry, and call real OpenAI models.
+description: Use AI SDK providers with runtime model injection and optional shared registries.
 order: 203703
 ---
 
@@ -25,34 +25,57 @@ export interface ModelProvider {
 - `EchoProvider` — deterministic echo, perfect for tests and documentation
 - `AiSdkProvider` — wraps any [Vercel AI SDK](https://ai-sdk.dev/docs/introduction) `LanguageModel`, unlocking OpenAI, Anthropic, Google, Ollama, Azure OpenAI, etc.
 
-## Register OpenAI via the Vercel AI SDK
+## Install provider packages
 
-```ts title="src/providers/openai.ts"
-import { createOpenAI } from '@ai-sdk/openai'
-import { AiSdkProvider, defaultModelResourceRegistry } from '@purista/ai'
+::: code-group
 
-const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY! })
-
-const gpt4oMini = new AiSdkProvider({
-  model: openai('gpt-4o-mini'),
-  systemPrompt: 'You are a concise support engineer.',
-  defaults: {
-    temperature: 0.2,
-    maxOutputTokens: 512,
-  },
-})
-
-defaultModelResourceRegistry.register('openai:gpt-4o-mini', gpt4oMini)
+```bash [npm]
+npm install @ai-sdk/openai ai
 ```
 
-1. Install the SDK packages once (usually at the workspace root):
-   ```bash
-   pnpm add @ai-sdk/openai ai
-   ```
-2. Export a helper that registers each model with `defaultModelResourceRegistry`. The string key (`openai:gpt-4o-mini`) should match the alias declared by your agent builder via `.defineModel('openai:gpt-4o-mini')`.
-3. Load this module during bootstrap (before starting any agents or workers) so the registry knows how to resolve the resource name.
+```bash [pnpm]
+pnpm add @ai-sdk/openai ai
+```
 
-The registry is optional but handy when multiple agents share the same provider. For one-off setups you can also pass the provider instance directly through `getInstance(eventBridge, { models: { 'openai:gpt-4o-mini': provider } })`.
+```bash [bun]
+bun add @ai-sdk/openai ai
+```
+
+```bash [yarn]
+yarn add @ai-sdk/openai ai
+```
+
+:::
+
+## Recommended: inject provider via `getInstance(...)`
+
+```ts title="src/index.ts"
+import { createOpenAI } from '@ai-sdk/openai'
+import { AiSdkProvider } from '@purista/ai'
+import { supportAgent } from './agents/supportAgent/v1/supportAgent.js'
+
+const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY! })
+const gpt4oMiniProvider = new AiSdkProvider({
+  model: openai('gpt-4o-mini'),
+  systemPrompt: 'You are a concise support engineer.',
+  defaults: { temperature: 0.2, maxOutputTokens: 512 },
+})
+
+const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
+  models: {
+    'openai:gpt-4o-mini': gpt4oMiniProvider,
+  },
+})
+```
+
+This keeps dependencies explicit at bootstrap and matches the standard service `getInstance(...)` pattern.
+
+You do not need to call `defaultModelResourceRegistry.register(...)` for standard agent usage.  
+Runtime injection through `getInstance(..., { models })` is the default pattern and should be your first choice.
+
+## Optional: shared model registry
+
+Use the shared registry only when you intentionally want process-wide provider defaults reused across multiple runtimes.
 
 ## Per-run overrides with metadata
 

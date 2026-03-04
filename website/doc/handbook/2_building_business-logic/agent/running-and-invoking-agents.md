@@ -6,7 +6,13 @@ order: 203702
 
 # Run & Invoke Agents
 
-An `AgentDefinition` is inert until you bind runtime dependencies (event bridge, stores, models). This page shows how to create an instance, start/stop it alongside your services, and invoke it from anywhere in the application.
+An agent build result is inert until runtime dependencies are bound via `getInstance(...)`.
+
+This page focuses on three runtime concerns:
+
+1. bootstrap and start/stop
+2. invocation patterns (context + standalone)
+3. async queue execution and worker concurrency
 
 ## Bootstrap the instance
 
@@ -41,7 +47,35 @@ await supportAgentInstance.start()
 
 - `eventBridge` is mandatory; every agent registers an internal service (`<agentName>.run`).
 - `models` must satisfy aliases declared via `.defineModel(...)` in the agent builder.
-- Session stores, knowledge adapters, and pool managers default to in-memory implementations. Override them per environment if you need Redis/PGVector or a shared pool.
+- Session stores, knowledge adapters, and pool managers default to in-memory implementations.
+
+## Runtime pool config (important)
+
+Builder config only assigns a pool id.  
+Actual parallelism is runtime config:
+
+```ts
+const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
+  models: { 'openai:gpt-5.2-mini': provider },
+  poolConfig: {
+    poolId: 'support', // optional; defaults to agent:<agentName>
+    maxWorkers: 4,     // default is 1
+  },
+})
+```
+
+`maxWorkers` controls how many agent runs can execute in parallel for that agent instance.
+
+- default is `1` (safe baseline)
+- keep this low in local/dev
+- tune this in deployment config for production
+- use separate pools when different agent workloads need isolation
+
+Operational rule of thumb:
+
+- queue controls how much work is waiting
+- `maxWorkers` controls how much work runs now
+- provider/API rate limits still apply downstream
 
 ## Invoke an agent programmatically
 
@@ -113,10 +147,62 @@ If your API gateway already maps `POST /api/v1/agents/supportAgent` to the bridg
 
 ## Background & queues
 
-Agents can also run fully asynchronously:
+For production workloads, queue-driven execution is usually the default pattern.
+
+### Queue-driven pattern
+
+1. expose a command/subscription/event path that enqueues work
+2. queue worker invokes the agent
+3. pool settings protect concurrency and upstream APIs
+
+```ts
+// inside a queue worker / background handler
+const envelopes = await invokeAgent({
+  eventBridge,
+  agentName: 'supportAgent',
+  agentVersion: '1',
+  payload: { prompt: 'Summarize ticket #42' },
+})
+```
+
+If you already use Purista queues, keep that setup.  
+The AI package does not require a dedicated queue implementation.
+
+### Queue + pool sizing (must configure both)
+
+Example target profile:
+
+- queue worker concurrency: `10`
+- agent pool `maxWorkers`: `4`
+
+Result: up to 10 jobs may be leased from queue, but only 4 agent runs execute at once in this process.  
+This protects provider APIs from bursty parallelism while still keeping the queue busy.
+
+### Why this is the default operational mode
+
+- caller does not block on long LLM execution
+- retries/delivery semantics are handled by queue infrastructure
+- worker parallelism and `poolConfig.maxWorkers` together control throughput
+- easier cost/rate-limit control than unbounded sync invocations
+
+### What runs where
+
+- **Queue bridge** decides delivery/lease/retry mechanics
+- **Agent pool** decides in-process parallel execution cap (`maxWorkers`)
+- **Provider/LLM** executes model calls
+
+Both queue worker concurrency and agent pool size matter. Set both intentionally.
+
+### Built-in runtime helpers
 
 - `@purista/ai` ships reference services (`AIOrchestratorService`, `AIWorkerService`) that ingest manifests, enqueue runs, and execute them in isolated workers.
 - Queue bridges (Redis, NATS, AMQP, …) treat agents like any other workload—define a queue worker that calls `invokeAgent` internally, then rely on the queue bridge for delayed or batched execution.
 - Concurrency pools apply across sync and async invocations. Configure `poolConfig.maxWorkers` at runtime/deploy-time so each environment controls throughput independently.
+
+### Failure behavior in queue mode
+
+- transient failures are retried by your queue setup and/or agent retry policy
+- handled errors emit protocol error frames and can still be inspected in worker logs
+- telemetry frames include duration/token usage so operations can alert on degraded runs
 
 Pick the approach that matches your deployment. Local development usually starts agents inside the same process; production often combines HTTP exposure for real-time calls plus queue workers for heavy background chains.

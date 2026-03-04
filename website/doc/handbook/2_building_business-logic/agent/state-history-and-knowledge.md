@@ -40,6 +40,27 @@ new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
 - **Default implementation:** `AgentInstance` falls back to an in-memory session store, perfect for local development. Provide a custom store via `await supportAgent.getInstance(eventBridge, { sessionStore: new RedisSessionStore(...) })` when you need persistence.
 - **Session helpers:** `context.session.load/save/delete` abstracts the underlying store. Records are plain objects (`{ sessionId, data, updatedAt }`), so you can stash summarized history, embeddings, persona settings, etc.
 
+### Tenant + principal aware session keys
+
+For multi-tenant applications, include `tenantId` and `principalId` in your session key.  
+These values already exist on Purista messages and are propagated into the agent context.
+
+```ts
+const buildSessionKey = (context: AgentHandlerContext, payload: { sessionId?: string }) => {
+  const tenant = context.message.tenantId ?? 'global'
+  const principal = context.message.principalId ?? 'anonymous'
+  const base = payload.sessionId ?? context.message.id
+  return `${tenant}:${principal}:${base}`
+}
+```
+
+Then use that key consistently with `context.session.load/save/delete`.
+
+### Current API note
+
+Today `context.session.load(...)` requires an explicit key.  
+A future ergonomic helper (`context.session.load()` resolving from protocol/message identity) is tracked in the AI spec backlog.
+
 ## Knowledge adapters
 
 Knowledge adapters let you query external corpora (RAG, FAQ tables, product catalogs) and share them across agents.
@@ -62,6 +83,7 @@ new AgentBuilder({ ... })
 
 - The default adapter is in-memory; plug in Redis, PGVector, or any other backend by passing `knowledgeAdapters` to `getInstance`.
 - Adapter contracts are intentionally tiny (`query(name, query, limit)`), making it easy to wrap existing vector search clients.
+- A fluent alias-first DX (`.useKnowledgeAdapter('supportFaq')` with `context.knowledge.supportFaq.query(...)`) is tracked as a potential improvement in the AI spec backlog.
 
 ## Shared knowledge between agents
 
