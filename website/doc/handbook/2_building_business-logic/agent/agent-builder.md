@@ -209,3 +209,15 @@ The handler receives a familiar context object with agent-specific helpers:
 | `resources` | Optional custom dependencies for non-model integrations (caches, SDK clients, domain utilities). |
 
 Use these helpers instead of manually wiring protocol IDs, storing envelopes, or calling commands by hand. The builder/runtime ensure every handler runs with consistent tracing, retries, and validation.
+
+## Guards and transforms with agents
+
+Agent handlers currently do not expose separate `beforeGuard/afterGuard` or input/output transform hooks on `AgentBuilder`.
+
+Use the existing PURISTA patterns around the agent:
+
+- apply guards/transforms on the command/subscription/stream that invokes the agent
+- keep agent handler focused on AI business logic and protocol streaming
+- if a specific response shape is required, map protocol frames in the caller before returning/emitting
+
+This keeps guard/transform behavior consistent with the rest of PURISTA while the agent runtime remains transport-agnostic.

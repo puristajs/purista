@@ -190,6 +190,24 @@ commandBuilder
 
 If `parameterSchema` is not defined, parameter remains optional and unvalidated.
 
+### Payload vs parameter (short rule)
+
+Use this split consistently:
+
+- `payload`: business input for the agent run (prompt/message, domain fields)
+- `parameter`: invocation metadata controlled by caller (channel, locale, flags)
+
+For `context.invokeAgent...call(payload, parameter)` the payload type is currently the core `AgentProtocolPayload` shape (`message`, optional `history`, optional `attachments`, passthrough for extra fields).  
+That means you can keep calls minimal:
+
+```ts
+await context.invokeAgent.supportAgent['1']
+  .call({ message: payload.prompt }, { channel: 'command' })
+  .final()
+```
+
+If you need stricter payload typing per agent, enforce it at the agent boundary with the agent payload schema (`.addPayloadSchema(...)`) and keep caller-side TypeScript helpers local to your app.
+
 ### 2. Standalone Invocation
 
 The helper `invokeAgent` (from `@purista/ai`) mirrors `invokeCommand` but automatically validates the agent protocol envelopes. This is ideal for scripts, manual triggers, or controllers where you don't have a Purista context.

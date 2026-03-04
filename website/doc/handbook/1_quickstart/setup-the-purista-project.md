@@ -58,6 +58,12 @@ Rule of thumb:
 - queues/workers = durable async processing
 - agents = AI workloads invoked directly or from commands/queues/subscriptions
 
+See also:
+
+- [Streams](../2_building_business-logic/stream/index.md)
+- [Queues](../2_building_business-logic/queue/index.md)
+- [AI Agents](../2_building_business-logic/agent/index.md)
+
 If your app uses AI agents, add the package:
 
 ::: code-group
