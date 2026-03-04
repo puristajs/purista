@@ -41,6 +41,10 @@ Key test files:
 ### Frontend/SSE consumer
 
 `public/index.html` demonstrates reading stream frames and routing by frame kind (`message`, `tool`, `telemetry`, `error`).
+For a reusable TypeScript utility you can copy into frontend libraries, see:
+
+- `src/client/protocolConsumer.ts`
+- `src/client/protocolConsumer.test.ts`
 
 ### Reference Agent-to-Agent conversion
 

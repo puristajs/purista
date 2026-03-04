@@ -80,7 +80,14 @@ export async function main() {
 	logger.info('Agent stream endpoint: POST /api/v1/agents/supportAgent')
 	logger.info('Follow-up endpoint: POST /api/v1/support/follow-up')
 
-	gracefulShutdown(logger, [server, httpService, supportAgentInstance, triageAgentInstance, supportService, eventBridge])
+	gracefulShutdown(logger, [
+		server,
+		httpService,
+		supportAgentInstance,
+		triageAgentInstance,
+		supportService,
+		eventBridge,
+	])
 }
 
 void main()

@@ -113,6 +113,10 @@ for (const envelope of envelopes) {
 
 These are intentionally named **reference** adapters: they help bridge protocols but are not a full implementation of official external specs.
 
+You can find a copy-pasteable reference consumer implementation in:
+
+- `/Users/sebastianwessel/projekte/@purista/purista/examples/ai-basic/src/client/protocolConsumer.ts`
+
 ### Agent-to-Agent reference example
 
 ```ts
