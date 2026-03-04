@@ -61,7 +61,8 @@ export async function main() {
 	const httpService = await honoV1Service.getInstance(eventBridge, {
 		logger,
 		serviceConfig: {
-			services: [supportService, supportAgentInstance, triageAgentInstance],
+			// AgentRuntimeInstance wraps an internal Service; casting keeps the example concise.
+			services: [supportService, supportAgentInstance, triageAgentInstance] as any,
 		},
 	})
 
@@ -81,12 +82,24 @@ export async function main() {
 	logger.info('Follow-up endpoint: POST /api/v1/support/follow-up')
 
 	gracefulShutdown(logger, [
-		server,
-		httpService,
-		supportAgentInstance,
-		triageAgentInstance,
-		supportService,
-		eventBridge,
+		{
+			name: 'hono-http-server',
+			destroy: async () =>
+				await new Promise<void>((resolve, reject) => {
+					server.close(error => {
+						if (error) {
+							reject(error)
+							return
+						}
+						resolve()
+					})
+				}),
+		},
+		{ name: 'honoV1Service', destroy: () => httpService.destroy() },
+		{ name: 'supportAgent', destroy: () => supportAgentInstance.stop() },
+		{ name: 'triageAgent', destroy: () => triageAgentInstance.stop() },
+		{ name: 'supportService', destroy: () => supportService.destroy() },
+		{ name: eventBridge.name, destroy: () => eventBridge.destroy() },
 	])
 }
 

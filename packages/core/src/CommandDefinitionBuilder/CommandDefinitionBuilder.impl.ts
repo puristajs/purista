@@ -6,10 +6,10 @@ import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttp
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
 import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
-import {
+import type {
+	AgentInvocation,
+	AgentProtocolResponse,
 	agentProtocolPayloadSchema,
-	type AgentInvocation,
-	type AgentProtocolResponse,
 } from '../core/types/agent/AgentProtocol.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
@@ -402,10 +402,7 @@ export class CommandDefinitionBuilder<
 				Record<
 					Version,
 					{
-						call: (
-							payload: InferIn<Payload>,
-							parameter?: InferIn<Parameter>,
-						) => AgentInvocation<AgentProtocolResponse>
+						call: (payload: InferIn<Payload>, parameter?: InferIn<Parameter>) => AgentInvocation<AgentProtocolResponse>
 					}
 				>
 			>

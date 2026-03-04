@@ -140,7 +140,7 @@ export const getCommandContextMock = <
 				}
 
 				if (lvl === 2 && name === 'call') {
-					return (payload: unknown, parameter: unknown) => {
+					return (payload: unknown, parameter?: unknown) => {
 						const promise = agentInvokeMocks[adr.serviceName]?.[adr.serviceVersion](
 							payload,
 							parameter,
