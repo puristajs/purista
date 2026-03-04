@@ -4,7 +4,7 @@ import { createOpenAI } from '@ai-sdk/openai'
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
 import { AiSdkProvider } from '@purista/ai'
-import { DefaultEventBridge, gracefulShutdown, initLogger, type LogLevelName } from '@purista/core'
+import { DefaultEventBridge, gracefulShutdown, initLogger, type LogLevelName, type Service } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
 
 import { supportAgent } from './agents/supportAgent/v1/supportAgent.js'
@@ -58,11 +58,15 @@ export async function main() {
 	})
 	await supportAgentInstance.start()
 
+	const triageAgentService = (triageAgentInstance as unknown as { service?: Service }).service
+	const supportAgentService = (supportAgentInstance as unknown as { service?: Service }).service
+
 	const httpService = await honoV1Service.getInstance(eventBridge, {
 		logger,
 		serviceConfig: {
-			// AgentRuntimeInstance wraps an internal Service; casting keeps the example concise.
-			services: [supportService, supportAgentInstance, triageAgentInstance] as any,
+			services: [supportService, supportAgentService, triageAgentService].filter(
+				(service): service is Service => service !== undefined,
+			),
 		},
 	})
 
