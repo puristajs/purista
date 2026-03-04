@@ -44,6 +44,28 @@ After setup, generate services and business artifacts with the CLI:
 6. `purista add queue-worker`
 7. `purista add agent`
 
+If your app uses AI agents, add the package:
+
+::: code-group
+
+```bash [npm]
+npm install @purista/ai
+```
+
+```bash [pnpm]
+pnpm add @purista/ai
+```
+
+```bash [bun]
+bun add @purista/ai
+```
+
+```bash [yarn]
+yarn add @purista/ai
+```
+
+:::
+
 ## Project structure
 
 The blueprint creates a folder structure expected by PURISTA tooling and code generation.
@@ -52,44 +74,21 @@ The blueprint creates a folder structure expected by PURISTA tooling and code ge
 |-config/
 |-script/
 |-src/
-| |- service/
-| |   |- ServiceEvent.enum.ts
+| |-services/
 | |   |- [serviceName]/
-| |       |- [serviceName]ServiceInfo.ts
-| |       |- v[0-9]/
-| |           |- [serviceName]ServiceBuilder.ts
-| |           |- [serviceName]ServiceBuilder.test.ts
-| |           |- [serviceName]ServiceConfig.ts
-| |           |- [serviceName]Service.ts
+| |       |- v1/
+| |           |- [serviceName].ts
+| |           |- [serviceName].test.ts
 | |           |- command/
-| |           |   |- [commandName]CommandBuilder.ts
-| |           |   |- [commandName].test.ts
-| |           |   |- schema.ts
-| |           |   |- types.ts
 | |           |- subscription/
-| |           |   |- [subscriptionName]SubscriptionBuilder.ts
-| |           |   |- [subscriptionName].test.ts
-| |           |   |- schema.ts
-| |           |   |- types.ts
 | |           |- stream/
-| |               |- [streamName]StreamBuilder.ts
-| |               |- [streamName].test.ts
-| |               |- schema.ts
-| |               |- types.ts
 | |           |- queue/
-| |           |   |- [queueName]/
-| |           |       |- schema.ts
-| |           |       |- types.ts
-| |           |       |- [queueName]QueueBuilder.ts
-| |           |       |- [queueName]QueueBuilder.test.ts
 | |           |- queue-worker/
-| |               |- [workerName]/
-| |                   |- [workerName]QueueWorkerBuilder.ts
-| |                   |- [workerName]QueueWorkerBuilder.test.ts
-| |           |- agent/
-| |           |   |- [agentName]/
-| |           |       |- [agentName]AgentBuilder.ts
-| |           |       |- [agentName]AgentBuilder.test.ts
+| |-agents/
+| |   |- [agentName]/
+| |       |- v1/
+| |           |- [agentName].ts
+| |           |- [agentName].test.ts
 | |- store/
 | |   |- config/
 | |   |- state/

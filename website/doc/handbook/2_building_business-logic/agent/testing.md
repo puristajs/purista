@@ -139,5 +139,5 @@ This validates schema checks, `context.invokeAgent` wiring, and response mapping
 
 See the complete examples in:
 
-- `/Users/sebastianwessel/projekte/@purista/purista/examples/ai-basic/src/agents/supportAgent/v1/supportAgent.test.ts`
-- `/Users/sebastianwessel/projekte/@purista/purista/examples/ai-basic/src/service/support/v1/command/runSupportAgent/runSupportAgentCommandBuilder.test.ts`
+- `examples/ai-basic/src/agents/supportAgent/v1/supportAgent.test.ts`
+- `examples/ai-basic/src/service/support/v1/command/runSupportAgent/runSupportAgentCommandBuilder.test.ts`

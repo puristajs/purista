@@ -8,11 +8,25 @@ order: 203702
 
 An agent build result is inert until runtime dependencies are bound via `getInstance(...)`.
 
-This page focuses on three runtime concerns:
+This page focuses on four runtime concerns:
 
-1. bootstrap and start/stop
-2. invocation patterns (context + standalone)
-3. async queue execution and worker concurrency
+1. definition vs runtime instance
+2. bootstrap and start/stop
+3. invocation patterns (context + standalone)
+4. async queue execution and worker concurrency
+
+## Definition vs runtime instance
+
+An `AgentBuilder` result (`supportAgent`) is a definition only: schema contract, handler logic, allowed tools, and endpoint metadata.
+
+`getInstance(eventBridge, options)` is where runtime wiring happens:
+
+- concrete model provider instances
+- concrete session/knowledge adapters
+- logger/tracer integration
+- runtime pool size (`poolConfig`)
+
+This separation keeps business logic stable and moves deployment/runtime settings to startup code.
 
 ## Bootstrap the instance
 
@@ -36,6 +50,12 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   models: {
     'openai:gpt-5.2-mini': provider,
   },
+  sessionStore: aiConversationStore,
+  knowledgeAdapters: {
+    supportFaq: faqKnowledgeAdapter,
+  },
+  logger,
+  tracer,
   poolConfig: {
     poolId: 'support',
     maxWorkers: 4,
@@ -47,7 +67,29 @@ await supportAgentInstance.start()
 
 - `eventBridge` is mandatory; every agent registers an internal service (`<agentName>.run`).
 - `models` must satisfy aliases declared via `.defineModel(...)` in the agent builder.
-- Session stores, knowledge adapters, and pool managers default to in-memory implementations.
+- `sessionStore`/`knowledgeAdapters` define what `context.conversation`, `context.session`, and `context.knowledge` access in the handler.
+- When not provided, session stores, knowledge adapters, and pool managers default to in-memory implementations.
+
+## How runtime injection maps to handler access
+
+```ts
+// definition
+export const supportAgent = new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
+  .defineModel('openai:gpt-5.2-mini')
+  .useKnowledgeAdapter({ adapterName: 'supportFaq' })
+  .setHandler(async (context, payload) => {
+    // from getInstance(..., { models })
+    const model = context.models['openai:gpt-5.2-mini']
+    // from getInstance(..., { knowledgeAdapters: { supportFaq: ... } })
+    const docs = await context.knowledge.query('supportFaq', payload.prompt, 3)
+    // from getInstance(..., { sessionStore })
+    await context.conversation.addUser(payload.prompt)
+    return { message: `${docs.length} docs` }
+  })
+  .build()
+```
+
+Definition decides aliases/capabilities; instance injection provides concrete implementations behind those aliases.
 
 ## Runtime options reference
 
@@ -173,6 +215,8 @@ SSE is the default streaming mode for exposed agent endpoints. Call `.setStreami
 
 If your API gateway already maps `POST /api/v1/agents/supportAgent` to the bridge, clients can `fetch` it directly. For custom controllers, pipe the envelopes to SSE/chunked responses using the [Protocol & Streaming](./protocol-and-streaming.md) helpers.
 
+For protocol semantics and a client-side parser loop, see [AI Protocol](./ai-protocol.md).
+
 ## Background & queues
 
 For production workloads, queue-driven execution is usually the default pattern.
@@ -195,6 +239,17 @@ const envelopes = await invokeAgent({
 
 If you already use Purista queues, keep that setup.  
 The AI package does not require a dedicated queue implementation.
+
+### How queue settings and agent pool settings relate
+
+- queue worker concurrency (`queue-worker` setup) controls how many jobs are leased/processed
+- agent pool config (`poolConfig.maxWorkers`) controls how many agent runs execute in-process
+- effective parallel LLM calls are bounded by the lower of these limits in each process
+
+Use both knobs:
+
+- queue knobs for delivery throughput and retry timing
+- agent pool knobs for provider pressure and application-level backpressure
 
 ### Queue + pool sizing (must configure both)
 
@@ -220,6 +275,33 @@ This protects provider APIs from bursty parallelism while still keeping the queu
 - **Provider/LLM** executes model calls
 
 Both queue worker concurrency and agent pool size matter. Set both intentionally.
+
+### Bring your own queue setup
+
+You can keep full control over queue bridge, retry, visibility timeout, and scheduling. The agent layer only needs an invocation call in your worker.
+
+```ts
+// command handler -> enqueue
+await context.queue.publish.aiWorkloads({
+  agentName: 'supportAgent',
+  agentVersion: '1',
+  payload: { prompt: 'Summarize ticket #42' },
+})
+
+// queue worker handler -> invoke
+await invokeAgent({
+  eventBridge: context.eventBridge,
+  agentName: payload.agentName,
+  agentVersion: payload.agentVersion,
+  payload: payload.payload,
+})
+```
+
+Use normal queue builder/worker options for transport-level behavior:
+
+- [The Queue Builder](../queue/the-queue-builder.md)
+- [The Queue Worker Builder](../queue/the-queue-worker-builder.md)
+- [Async HTTP exposure](../queue/queue-http-exposure.md)
 
 ### Built-in runtime helpers
 
