@@ -25,6 +25,8 @@ export type AgentSessionConfig = {
 	maxFrames?: number
 }
 
+export type AgentHistoryPreset = 'user' | 'agent'
+
 export type KnowledgeAdapterConfig = {
 	adapterName: string
 	options?: Record<string, unknown>

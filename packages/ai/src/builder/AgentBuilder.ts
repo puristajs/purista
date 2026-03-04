@@ -12,6 +12,7 @@ import { createAgentHandlerContext, createProtocolBuffer } from '../runtime/cont
 import type { AgentDefinition, AgentInfo } from '../types/AgentDefinition.js'
 import type {
 	AgentManifest,
+	AgentHistoryPreset,
 	AgentSessionConfig,
 	AllowedToolDefinition,
 	ConcurrencyConfig,
@@ -70,6 +71,29 @@ const normalizeInfo = (info: AgentInfo): AgentInfo => {
 		agentName: info.agentName.trim(),
 		agentVersion: version,
 		description: info.description?.trim(),
+	}
+}
+
+const resolveHistoryPresetConfig = (
+	info: AgentInfo,
+	preset: AgentHistoryPreset,
+	overrides?: Partial<AgentSessionConfig>,
+): AgentSessionConfig => {
+	const defaults: Record<AgentHistoryPreset, Omit<AgentSessionConfig, 'storeName'>> = {
+		user: {
+			strategy: 'full',
+			maxFrames: 40,
+		},
+		agent: {
+			strategy: 'summary',
+			maxFrames: 20,
+		},
+	}
+	const storeName = overrides?.storeName ?? `${info.agentName}:${info.agentVersion}:${preset}:history`
+	return {
+		storeName,
+		...defaults[preset],
+		...overrides,
 	}
 }
 
@@ -144,8 +168,29 @@ export class AgentBuilder {
 		return this
 	}
 
-	persistHistory(config: AgentSessionConfig) {
-		return this.useSessionStore(config)
+	/**
+	 * Configure conversation/session persistence.
+	 *
+	 * You can either pass a full config object or use presets:
+	 * - `persistHistory('user')` defaults to full strategy with a larger frame budget
+	 * - `persistHistory('agent')` defaults to summary strategy with a smaller frame budget
+	 *
+	 * @example
+	 * ```ts
+	 * new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
+	 *   .persistHistory('user')
+	 * ```
+	 */
+	persistHistory(config: AgentSessionConfig): this
+	persistHistory(preset: AgentHistoryPreset, overrides?: Partial<AgentSessionConfig>): this
+	persistHistory(
+		configOrPreset: AgentSessionConfig | AgentHistoryPreset,
+		overrides?: Partial<AgentSessionConfig>,
+	): this {
+		if (typeof configOrPreset === 'string') {
+			return this.useSessionStore(resolveHistoryPresetConfig(this.info, configOrPreset, overrides))
+		}
+		return this.useSessionStore(configOrPreset)
 	}
 
 	setConcurrency(config: ConcurrencyConfig) {

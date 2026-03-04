@@ -15,11 +15,7 @@ Agents rarely operate statelessly. They need conversation history, scratchpads, 
 ```ts
 new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
   .defineModel('openai:gpt-4o-mini')
-  .persistHistory({
-    storeName: 'aiConversation',
-    maxFrames: 40,
-    retentionMs: 86_400_000,
-  })
+  .persistHistory('user', { maxFrames: 40 })
   .setHandler(async (context, payload) => {
     const previous = await context.session.load()
     const scopedSessionId = context.session.resolveSessionId()
@@ -39,6 +35,7 @@ new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
 
 - **Default implementation:** `AgentInstance` falls back to an in-memory session store, perfect for local development. Provide a custom store via `await supportAgent.getInstance(eventBridge, { sessionStore: new RedisSessionStore(...) })` when you need persistence.
 - **Session helpers:** `context.session.load/save/delete` abstracts the underlying store. Records are plain objects (`{ sessionId, data, updatedAt }`), so you can stash summarized history, embeddings, persona settings, etc.
+- **Presets:** use `persistHistory('user')` for full conversation focus, or `persistHistory('agent')` for compact summary-oriented memory. You can still override `maxFrames`, `strategy`, or `storeName`.
 
 ### Tenant + principal aware session keys
 

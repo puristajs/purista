@@ -111,6 +111,36 @@ describe('AgentBuilder', () => {
 		expect(instance).toBeDefined()
 	})
 
+	it('supports persistHistory presets with optional overrides', () => {
+		const userPresetDefinition = new AgentBuilder({
+			agentName: 'presetAgent',
+			agentVersion: '1',
+		})
+			.persistHistory('user')
+			.setHandler(async () => ({ message: 'ok' }))
+			.build()
+
+		expect(userPresetDefinition.getManifest().session).toEqual({
+			storeName: 'presetAgent:1:user:history',
+			strategy: 'full',
+			maxFrames: 40,
+		})
+
+		const agentPresetDefinition = new AgentBuilder({
+			agentName: 'presetAgent',
+			agentVersion: '1',
+		})
+			.persistHistory('agent', { maxFrames: 5, storeName: 'custom-agent-history' })
+			.setHandler(async () => ({ message: 'ok' }))
+			.build()
+
+		expect(agentPresetDefinition.getManifest().session).toEqual({
+			storeName: 'custom-agent-history',
+			strategy: 'summary',
+			maxFrames: 5,
+		})
+	})
+
 	it('fails fast when required model aliases are missing at getInstance()', async () => {
 		const definition = new AgentBuilder({ agentName: 'missingModelAgent', agentVersion: '1' })
 			.defineModel('missing')

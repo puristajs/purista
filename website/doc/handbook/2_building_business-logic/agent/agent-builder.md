@@ -109,7 +109,7 @@ Only allowlisted commands are available to the handler.
 
 ```ts
 const supportAgent = new AgentBuilder({ ... })
-  .persistHistory({ storeName: 'aiConversation', maxFrames: 40 })
+  .persistHistory('user', { maxFrames: 40 })
   .setHandler(async function (context, payload) {
     const history = await context.session.load()
     const prompt = [history?.data?.last, payload.prompt].filter(Boolean).join('\n')
@@ -125,6 +125,8 @@ const supportAgent = new AgentBuilder({ ... })
   })
   .build()
 ```
+
+Use `'user'` for fuller transcript-style memory and `'agent'` for compact summary-oriented memory.
 
 ### 3.3 Connect a knowledge adapter
 

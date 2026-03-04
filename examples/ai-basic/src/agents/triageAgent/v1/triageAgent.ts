@@ -11,7 +11,7 @@ export const triageAgent = new AgentBuilder({
 })
 	.addPayloadSchema(triageAgentInputSchema)
 	.defineModel('openai:gpt-5.2-mini')
-	.persistHistory({ storeName: 'triageConversation', maxFrames: 10 })
+	.persistHistory('agent', { maxFrames: 10 })
 	.setHandler<TriageAgentInput>(async function (context: TriageAgentContext, payload) {
 		const model = context.models['openai:gpt-5.2-mini']
 
