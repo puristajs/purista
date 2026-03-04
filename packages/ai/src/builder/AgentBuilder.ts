@@ -9,7 +9,7 @@ import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import { AgentInstance, type AgentInstanceDependencies } from '../runtime/AgentInstance.js'
 import type { AgentHandlerContext } from '../runtime/context.js'
 import { createAgentHandlerContext, createProtocolBuffer } from '../runtime/context.js'
-import type { AgentDefinition, AgentInfo } from '../types/AgentDefinition.js'
+import type { AgentDefinition, AgentInfo, AgentInstanceOptions } from '../types/AgentDefinition.js'
 import type {
 	AgentHistoryPreset,
 	AgentManifest,
@@ -484,7 +484,7 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 		return this as AgentBuilder<KnowledgeAliases>
 	}
 
-	build(): AgentDefinition {
+	build(): AgentDefinition<KnowledgeAliases> {
 		if (!this.handler) {
 			throw new Error('Agent handler is required. Call setHandler() before build().')
 		}
@@ -516,8 +516,14 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 				context: this.contextSchema,
 			},
 			getManifest: () => manifest,
-			getInstance: async (eventBridge, options) => {
-				const instance = new AgentInstance(dependencies, eventBridge, options)
+			getInstance: async (
+				eventBridge,
+				...options: [KnowledgeAliases] extends [never]
+					? [options?: AgentInstanceOptions<KnowledgeAliases>]
+					: [options: AgentInstanceOptions<KnowledgeAliases>]
+			) => {
+				const runtimeOptions = options[0] as AgentInstanceOptions<KnowledgeAliases> | undefined
+				const instance = new AgentInstance(dependencies, eventBridge, runtimeOptions)
 				return instance
 			},
 		}

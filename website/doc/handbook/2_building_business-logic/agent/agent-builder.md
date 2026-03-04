@@ -210,6 +210,8 @@ The handler receives a familiar context object with agent-specific helpers:
 
 Use these helpers instead of manually wiring protocol IDs, storing envelopes, or calling commands by hand. The builder/runtime ensure every handler runs with consistent tracing, retries, and validation.
 
+When you register aliases with `.useKnowledgeAdapter(...)`, handler access is strongly typed (`context.knowledge.<alias>`) and `getInstance(...)` requires matching `knowledgeAdapters` in TypeScript.
+
 ## Guards and transforms with agents
 
 Agent handlers intentionally stay focused on AI business logic.  

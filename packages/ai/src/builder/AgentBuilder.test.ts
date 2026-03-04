@@ -146,7 +146,7 @@ describe('AgentBuilder', () => {
 	})
 
 	it('infers typed knowledge aliases in handler context', () => {
-		new AgentBuilder({ agentName: 'typedKnowledgeAgent', agentVersion: '1' })
+		const definition = new AgentBuilder({ agentName: 'typedKnowledgeAgent', agentVersion: '1' })
 			.useKnowledgeAdapter('supportFaq')
 			.useKnowledgeAdapter('billingPolicy')
 			.setHandler(async context => {
@@ -157,6 +157,9 @@ describe('AgentBuilder', () => {
 				return { message: 'ok' }
 			})
 			.build()
+
+		// @ts-expect-error knowledgeAdapters become required once aliases are defined
+		void definition.getInstance({} as any)
 	})
 
 	it('fails fast when required model aliases are missing at getInstance()', async () => {

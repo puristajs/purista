@@ -23,6 +23,7 @@ import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import type {
 	AgentInfo,
 	AgentRuntimeInstance as AgentInstanceContract,
+	AgentInstanceOptions,
 	AgentInvokeContext,
 	AgentInvokeRequest,
 	AgentInvokeResult,
@@ -38,25 +39,7 @@ export type AgentInstanceDependencies = {
 	handler: AgentHandler
 }
 
-export type AgentRuntimeDependencies = {
-	logger?: Logger
-	spanProcessor?: SpanProcessor
-	tracer?: Tracer
-	secretStore?: SecretStore
-	configStore?: ConfigStore
-	stateStore?: StateStore
-	queueBridge?: QueueBridge
-	sessionStore?: SessionStore
-	knowledgeAdapters?: Record<string, KnowledgeAdapter>
-	poolManager?: PoolManager
-	models?: Record<string, ModelProvider>
-	resources?: Record<string, unknown>
-	poolConfig?: {
-		poolId?: string
-		maxWorkers?: number
-	}
-	config?: Record<string, unknown>
-}
+export type AgentRuntimeDependencies<KnowledgeAliases extends string = never> = AgentInstanceOptions<KnowledgeAliases>
 
 type ResolvedAgentRuntimeDependencies = {
 	eventBridge: EventBridge
@@ -95,7 +78,11 @@ export class AgentInstance implements AgentInstanceContract {
 	private readonly dependencies: AgentInstanceDependencies
 	private readonly runtime: ResolvedAgentRuntimeDependencies
 
-	constructor(deps: AgentInstanceDependencies, eventBridge: EventBridge, runtime: AgentRuntimeDependencies = {}) {
+	constructor(
+		deps: AgentInstanceDependencies,
+		eventBridge: EventBridge,
+		runtime: AgentRuntimeDependencies<string> = {},
+	) {
 		this.dependencies = deps
 		const poolId = runtime.poolConfig?.poolId ?? `agent:${deps.info.agentName}`
 		const maxWorkers = runtime.poolConfig?.maxWorkers ?? 1

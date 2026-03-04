@@ -12,7 +12,9 @@ export type MCPToolDescriptor = {
 /**
  * Converts an {@link AgentDefinition} into a Model Context Protocol descriptor.
  */
-export const exposeAgentAsMCP = (definition: AgentDefinition): MCPToolDescriptor => {
+export const exposeAgentAsMCP = <KnowledgeAliases extends string>(
+	definition: AgentDefinition<KnowledgeAliases>,
+): MCPToolDescriptor => {
 	return {
 		name: definition.manifest.agentName,
 		description: definition.manifest.description,

@@ -69,6 +69,7 @@ await supportAgentInstance.start()
 - `models` must satisfy aliases declared via `.defineModel(...)` in the agent builder.
 - `sessionStore`/`knowledgeAdapters` define what `context.conversation`, `context.session`, and `context.knowledge` access in the handler.
 - When not provided, session stores, knowledge adapters, and pool managers default to in-memory implementations.
+- If the agent definition declares knowledge aliases via `.useKnowledgeAdapter(...)`, TypeScript requires `knowledgeAdapters` in `getInstance(...)`.
 
 ## How runtime injection maps to handler access
 

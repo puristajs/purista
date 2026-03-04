@@ -15,26 +15,7 @@ export type AgentInfo = {
 	description?: string
 }
 
-export type AgentDefinition = {
-	info: AgentInfo
-	manifest: AgentManifest
-	schemas: {
-		payload?: Schema
-		parameter?: Schema
-		output?: Schema
-		context?: Schema
-	}
-	getManifest(): AgentManifest
-	getInstance(eventBridge: EventBridge, options?: AgentInstanceOptions): Promise<AgentRuntimeInstance>
-}
-
-export type AgentRuntimeInstance = {
-	start(): Promise<void>
-	stop(): Promise<void>
-	invoke(request: AgentInvokeRequest, contextOverrides?: Partial<AgentInvokeContext>): Promise<AgentInvokeResult>
-}
-
-export type AgentInstanceOptions = {
+type BaseAgentInstanceOptions = {
 	logger?: Logger
 	spanProcessor?: SpanProcessor
 	tracer?: Tracer
@@ -43,7 +24,6 @@ export type AgentInstanceOptions = {
 	stateStore?: StateStore
 	queueBridge?: QueueBridge
 	sessionStore?: SessionStore
-	knowledgeAdapters?: Record<string, KnowledgeAdapter>
 	poolManager?: PoolManager
 	models?: Record<string, ModelProvider>
 	/** @deprecated use `models` */
@@ -53,6 +33,39 @@ export type AgentInstanceOptions = {
 		maxWorkers?: number
 	}
 	config?: Record<string, unknown>
+}
+
+export type AgentInstanceOptions<KnowledgeAliases extends string = never> = BaseAgentInstanceOptions &
+	([KnowledgeAliases] extends [never]
+		? {
+				knowledgeAdapters?: Record<string, KnowledgeAdapter>
+			}
+		: {
+				knowledgeAdapters: Record<KnowledgeAliases, KnowledgeAdapter> & Record<string, KnowledgeAdapter>
+			})
+
+export type AgentDefinition<KnowledgeAliases extends string = never> = {
+	info: AgentInfo
+	manifest: AgentManifest
+	schemas: {
+		payload?: Schema
+		parameter?: Schema
+		output?: Schema
+		context?: Schema
+	}
+	getManifest(): AgentManifest
+	getInstance(
+		eventBridge: EventBridge,
+		...options: [KnowledgeAliases] extends [never]
+			? [options?: AgentInstanceOptions<KnowledgeAliases>]
+			: [options: AgentInstanceOptions<KnowledgeAliases>]
+	): Promise<AgentRuntimeInstance>
+}
+
+export type AgentRuntimeInstance = {
+	start(): Promise<void>
+	stop(): Promise<void>
+	invoke(request: AgentInvokeRequest, contextOverrides?: Partial<AgentInvokeContext>): Promise<AgentInvokeResult>
 }
 
 export type AgentInvokeRequest = {
