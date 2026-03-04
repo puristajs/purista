@@ -44,6 +44,20 @@ After setup, generate services and business artifacts with the CLI:
 6. `purista add queue-worker`
 7. `purista add agent`
 
+Recommended scaffold order for new projects:
+
+1. `purista add service` and first `purista add command`
+2. `purista add stream` if you need push/live updates
+3. `purista add queue` + `purista add queue-worker` for background jobs
+4. `purista add agent` when you need LLM-powered workloads
+
+Rule of thumb:
+
+- commands = request/response entrypoints
+- streams = live outbound updates
+- queues/workers = durable async processing
+- agents = AI workloads invoked directly or from commands/queues/subscriptions
+
 If your app uses AI agents, add the package:
 
 ::: code-group

@@ -141,17 +141,17 @@ When working inside Commands, Subscriptions, or Streams, use the `.canInvokeAgen
 ```ts
 export const notifyCommand = supportServiceBuilder
   .getCommandBuilder('notifySupportAgent', 'Runs the support agent from a command')
-  .canInvokeAgent('supportAgent', '1', optionalParameterSchema) // Register dependency
+  .canInvokeAgent('supportAgent', '1', optionalParameterSchema) // Register dependency + parameter schema
   .addPayloadSchema(supportInputSchema)
   .setCommandFunction(async function (context, payload) {
     // 1. Get the final result
     const result = await context.invokeAgent.supportAgent['1']
-      .call({ message: payload.prompt })
+      .call({ message: payload.prompt }, { channel: 'command' })
       .final()
 
     // 2. Or stream frames manually
     const invocation = context.invokeAgent.supportAgent['1']
-      .call({ message: payload.prompt })
+      .call({ message: payload.prompt }, { channel: 'command' })
 
     for await (const frame of invocation) {
       context.logger.info({ frame }, 'Agent frame received')
@@ -162,6 +162,33 @@ export const notifyCommand = supportServiceBuilder
 ```
 
 The `.call()` method returns an `AgentInvocation` object which is an `AsyncIterable` yielding protocol frames and has a `.final()` helper returning a `Promise` for the full result.
+
+### What the third argument in `.canInvokeAgent(...)` does
+
+`.canInvokeAgent(agentName, agentVersion, parameterSchema?)` has an optional `parameterSchema` to type and validate the **second argument** of `.call(payload, parameter)`.
+
+- `payload` is the agent input payload (primary business input)
+- `parameter` is side-channel metadata (for example channel/locale/feature flags)
+
+```ts
+const invokeParameterSchema = z.object({
+  channel: z.enum(['command', 'queue']),
+  locale: z.string().optional(),
+})
+
+commandBuilder
+  .canInvokeAgent('supportAgent', '1', invokeParameterSchema)
+  .setCommandFunction(async context => {
+    return context.invokeAgent.supportAgent['1']
+      .call(
+        { message: 'Need help with refund' },
+        { channel: 'command', locale: 'en-US' }, // validated against schema
+      )
+      .final()
+  })
+```
+
+If `parameterSchema` is not defined, parameter remains optional and unvalidated.
 
 ### 2. Standalone Invocation
 
@@ -220,6 +247,15 @@ For protocol semantics and a client-side parser loop, see [AI Protocol](./ai-pro
 ## Background & queues
 
 For production workloads, queue-driven execution is usually the default pattern.
+
+```mermaid
+flowchart LR
+  A["Producer (command/subscription/http)"] -->|enqueue| B["Queue Bridge"]
+  B --> C["Queue Worker"]
+  C -->|invokeAgent| D["Agent Runtime"]
+  D --> E["Agent Pool (maxWorkers)"]
+  E --> F["LLM Provider"]
+```
 
 ### Queue-driven pattern
 
