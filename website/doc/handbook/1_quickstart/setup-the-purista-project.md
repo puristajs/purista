@@ -95,15 +95,39 @@ The blueprint creates a folder structure expected by PURISTA tooling and code ge
 |-script/
 |-src/
 | |-services/
+| |   |- ServiceEvent.enum.ts
 | |   |- [serviceName]/
+| |       |- [serviceName]ServiceInfo.ts
 | |       |- v1/
-| |           |- [serviceName].ts
-| |           |- [serviceName].test.ts
+| |           |- [serviceName]ServiceBuilder.ts
+| |           |- [serviceName]ServiceBuilder.test.ts
+| |           |- [serviceName]ServiceConfig.ts
+| |           |- [serviceName]Service.ts
 | |           |- command/
+| |           |   |- [commandName]CommandBuilder.ts
+| |           |   |- [commandName]CommandBuilder.test.ts
+| |           |   |- schema.ts
+| |           |   |- types.ts
 | |           |- subscription/
+| |           |   |- [subscriptionName]SubscriptionBuilder.ts
+| |           |   |- [subscriptionName]SubscriptionBuilder.test.ts
+| |           |   |- schema.ts
+| |           |   |- types.ts
 | |           |- stream/
+| |           |   |- [streamName]StreamBuilder.ts
+| |           |   |- [streamName]StreamBuilder.test.ts
+| |           |   |- schema.ts
+| |           |   |- types.ts
 | |           |- queue/
+| |           |   |- [queueName]/
+| |           |       |- [queueName]QueueBuilder.ts
+| |           |       |- [queueName]QueueBuilder.test.ts
+| |           |       |- schema.ts
+| |           |       |- types.ts
 | |           |- queue-worker/
+| |               |- [workerName]/
+| |                   |- [workerName]QueueWorkerBuilder.ts
+| |                   |- [workerName]QueueWorkerBuilder.test.ts
 | |-agents/
 | |   |- [agentName]/
 | |       |- v1/
