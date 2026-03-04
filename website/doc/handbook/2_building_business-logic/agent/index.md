@@ -53,10 +53,11 @@ Recommended order for new users:
 2. [Run & Invoke Agents](./running-and-invoking-agents.md) — bootstrap in `src/index.ts`, call from commands/subscriptions, expose HTTP.
 3. [Model Providers & OpenAI](./model-providers-and-openai.md) — wire provider instances at runtime.
 4. [State, History & Knowledge](./state-history-and-knowledge.md) — tenant/user-aware memory and shared knowledge.
-5. [Protocol & Streaming](./protocol-and-streaming.md) — practical streaming and protocol helpers.
-6. [Testing Agents](./testing.md) — deterministic unit/integration tests.
-7. [Agent Evaluation](./evaluation.md) — dataset-driven evaluation output and CI comparison.
+5. [AI Protocol](./ai-protocol.md) — envelope model, frame semantics, and interoperability references.
+6. [Protocol & Streaming](./protocol-and-streaming.md) — practical HTTP/SSE streaming and helper usage.
+7. [Testing Agents](./testing.md) — deterministic unit/integration tests.
+8. [Agent Evaluation](./evaluation.md) — dataset-driven evaluation output and CI comparison.
 
-For protocol internals and semantics, continue with [Advanced → AI Protocol](../advanced/ai-protocol.md).
+Advanced section still contains a protocol interoperability deep-dive entry point for operations teams.
 
 If you are brand new to PURISTA, start with [Service](../service/index.md) and [Command](../command/index.md) first. The agent APIs intentionally reuse the same language.

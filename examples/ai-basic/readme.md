@@ -35,3 +35,27 @@ Key test files:
 
 - `src/agents/supportAgent/v1/supportAgent.test.ts` – verifies tool calls, agent-to-agent delegation, and protocol frames.
 - `src/service/support/v1/command/runSupportAgent/runSupportAgentCommandBuilder.test.ts` – verifies command-level `context.invokeAgent` integration.
+
+## Protocol consumer and interoperability snippets
+
+### Frontend/SSE consumer
+
+`public/index.html` demonstrates reading stream frames and routing by frame kind (`message`, `tool`, `telemetry`, `error`).
+
+### Reference Agent-to-Agent conversion
+
+```ts
+import { toAgent2AgentReferenceMessage } from '@purista/ai'
+
+const outgoing = envelopes.map(envelope => toAgent2AgentReferenceMessage(envelope))
+```
+
+### Reference MCP conversion
+
+```ts
+import { toMcpReferenceToolResult } from '@purista/ai'
+
+const mcpResult = toMcpReferenceToolResult(envelopes)
+```
+
+These helpers are reference adapters to simplify bridging; they are not a full official protocol implementation.

@@ -4,11 +4,13 @@ description: Envelope and frame contract used by @purista/ai for streaming, tele
 order: 299904
 ---
 
-# AI Protocol
+# AI Protocol (Advanced View)
 
-PURISTA AI uses a structured protocol on top of regular PURISTA messages/streams so UIs and external systems can understand complex agent flows consistently.
+For the main developer documentation, start with [AI Agents → AI Protocol](../agent/ai-protocol.md).
 
-## Why this protocol exists
+This advanced page highlights operational and interoperability concerns.
+
+## Operational focus
 
 The protocol is designed to:
 
@@ -59,9 +61,9 @@ This gives reliable traceability across services, agents, tools, and frontend ti
 Token usage and latency are emitted as telemetry frames and included in final response metadata.  
 This allows external observability stacks (Grafana/OTel backends) to alert without embedding budgeting logic into the framework.
 
-## How developers should use it
+## Practical rule
 
-Most developers should not create protocol objects manually.
+Most application developers should not create protocol objects manually.
 
 Use:
 

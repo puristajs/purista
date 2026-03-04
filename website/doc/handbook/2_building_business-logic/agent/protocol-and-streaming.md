@@ -81,9 +81,22 @@ await supportAgent.invoke(
 )
 ```
 
+## Interoperability bridge snippets
+
+`@purista/ai` includes reference interoperability helpers:
+
+```ts
+import { toAgent2AgentReferenceMessage, toMcpReferenceToolResult } from '@purista/ai'
+
+const a2aMessages = envelopes.map(env => toAgent2AgentReferenceMessage(env))
+const mcpToolResult = toMcpReferenceToolResult(envelopes)
+```
+
+Use them as adapter building blocks when exposing Purista agents through other ecosystems.
+
 You never need to populate protocol IDs manually—the runtime copies all required headers (`inReplyTo`, `conversationId`, `sender`) so the stream is valid whether it stays inside PURISTA or is forwarded to third parties.
 
-For the full protocol semantics, message contract, and field-level guidance, see [Advanced → AI Protocol](../advanced/ai-protocol.md).
+For the full protocol semantics, message contract, and interoperability guidance, see [AI Protocol](./ai-protocol.md).
 
 ## Error handling
 
