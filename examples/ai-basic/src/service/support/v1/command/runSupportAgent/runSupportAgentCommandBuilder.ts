@@ -1,10 +1,18 @@
 import { getFinalMessageFromEnvelopes } from '../../../../../utils/agentResponse.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
-import { runSupportAgentInputSchema, runSupportAgentOutputSchema } from './schema.js'
+import {
+	runSupportAgentInputSchema,
+	runSupportAgentOutputSchema,
+	supportAgentInvokeParameterSchema,
+	supportAgentInvokePayloadSchema,
+} from './schema.js'
 
 export const runSupportAgentCommandBuilder = supportV1ServiceBuilder
 	.getCommandBuilder('runSupportAgent', 'Runs the support agent through context.invokeAgent')
-	.canInvokeAgent('supportAgent', '1')
+	.canInvokeAgent('supportAgent', '1', {
+		payloadSchema: supportAgentInvokePayloadSchema,
+		parameterSchema: supportAgentInvokeParameterSchema,
+	})
 	.addPayloadSchema(runSupportAgentInputSchema)
 	.addOutputSchema(runSupportAgentOutputSchema)
 	.exposeAsHttpEndpoint('POST', 'support/ask')

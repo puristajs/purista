@@ -16,3 +16,23 @@ export const runSupportAgentOutputSchema = extendApi(
 	}),
 	{ title: 'Run support agent output' },
 )
+
+export const supportAgentInvokePayloadSchema = extendApi(
+	z.object({
+		message: z.string().min(1),
+		prompt: z.string().min(1).optional(),
+		sessionId: z.string().uuid().optional(),
+		context: z.string().optional(),
+		history: z.array(z.unknown()).optional().default([]),
+		attachments: z.array(z.unknown()).optional().default([]),
+	}),
+	{ title: 'Support agent invoke payload' },
+)
+
+export const supportAgentInvokeParameterSchema = extendApi(
+	z.object({
+		channel: z.enum(['command', 'subscription', 'queue', 'stream']),
+		locale: z.string().optional(),
+	}),
+	{ title: 'Support agent invoke parameter' },
+)

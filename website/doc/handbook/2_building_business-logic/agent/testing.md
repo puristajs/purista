@@ -135,6 +135,8 @@ expect(result).toEqual(expect.objectContaining({ message: expect.stringContainin
 
 This validates schema checks, `context.invokeAgent` wiring, and response mapping.
 
+If you use `.canInvokeAgent(..., { payloadSchema, parameterSchema })`, add one negative-path test that intentionally violates one of those schemas and assert that the invoke call does not reach EventBridge.
+
 ## Reference tests in repository
 
 See the complete examples in:

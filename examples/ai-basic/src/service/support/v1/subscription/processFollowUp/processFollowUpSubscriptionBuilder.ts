@@ -1,12 +1,19 @@
 import { getFinalMessageFromEnvelopes } from '../../../../../utils/agentResponse.js'
 import { ServiceEvent } from '../../../../ServiceEvent.enum.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
-import { processFollowUpInputSchema } from './schema.js'
+import {
+	processFollowUpInputSchema,
+	processFollowUpInvokeParameterSchema,
+	processFollowUpInvokePayloadSchema,
+} from './schema.js'
 
 export const processFollowUpSubscriptionBuilder = supportV1ServiceBuilder
 	.getSubscriptionBuilder('processFollowUp', 'Invokes supportAgent when support.requested is emitted')
 	.subscribeToEvent(ServiceEvent.SupportRequested)
-	.canInvokeAgent('supportAgent', '1')
+	.canInvokeAgent('supportAgent', '1', {
+		payloadSchema: processFollowUpInvokePayloadSchema,
+		parameterSchema: processFollowUpInvokeParameterSchema,
+	})
 	.addPayloadSchema(processFollowUpInputSchema)
 	.setSubscriptionFunction(async function (context, payload) {
 		const supportAgentInvoke = context.invokeAgent.supportAgent?.['1']
