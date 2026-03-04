@@ -139,9 +139,20 @@ Operational rule of thumb:
 When working inside Commands, Subscriptions, or Streams, use the `.canInvokeAgent` builder method. This integrates the agent into the functional context with full type safety.
 
 ```ts
+const supportInvokePayloadSchema = z.object({
+  message: z.string().min(1),
+})
+const supportInvokeParameterSchema = z.object({
+  channel: z.enum(['command', 'queue']),
+  locale: z.string().optional(),
+})
+
 export const notifyCommand = supportServiceBuilder
   .getCommandBuilder('notifySupportAgent', 'Runs the support agent from a command')
-  .canInvokeAgent('supportAgent', '1', optionalParameterSchema) // Register dependency + parameter schema
+  .canInvokeAgent('supportAgent', '1', {
+    payloadSchema: supportInvokePayloadSchema,
+    parameterSchema: supportInvokeParameterSchema,
+  })
   .addPayloadSchema(supportInputSchema)
   .setCommandFunction(async function (context, payload) {
     // 1. Get the final result
@@ -163,9 +174,12 @@ export const notifyCommand = supportServiceBuilder
 
 The `.call()` method returns an `AgentInvocation` object which is an `AsyncIterable` yielding protocol frames and has a `.final()` helper returning a `Promise` for the full result.
 
-### What the third argument in `.canInvokeAgent(...)` does
+### What `.canInvokeAgent(...)` validates
 
-`.canInvokeAgent(agentName, agentVersion, parameterSchema?)` has an optional `parameterSchema` to type and validate the **second argument** of `.call(payload, parameter)`.
+`.canInvokeAgent(agentName, agentVersion, config?)` supports:
+
+- `payloadSchema`: types + validates the first `.call(payload, parameter)` argument
+- `parameterSchema`: types + validates the second `.call(payload, parameter)` argument
 
 - `payload` is the agent input payload (primary business input)
 - `parameter` is side-channel metadata (for example channel/locale/feature flags)
@@ -177,7 +191,10 @@ const invokeParameterSchema = z.object({
 })
 
 commandBuilder
-  .canInvokeAgent('supportAgent', '1', invokeParameterSchema)
+  .canInvokeAgent('supportAgent', '1', {
+    payloadSchema: z.object({ message: z.string() }),
+    parameterSchema: invokeParameterSchema,
+  })
   .setCommandFunction(async context => {
     return context.invokeAgent.supportAgent['1']
       .call(
@@ -188,7 +205,13 @@ commandBuilder
   })
 ```
 
-If `parameterSchema` is not defined, parameter remains optional and unvalidated.
+Legacy shorthand still works:
+
+```ts
+.canInvokeAgent('supportAgent', '1', invokeParameterSchema)
+```
+
+That only configures `parameterSchema`.
 
 ### Payload vs parameter (short rule)
 
@@ -197,8 +220,7 @@ Use this split consistently:
 - `payload`: business input for the agent run (prompt/message, domain fields)
 - `parameter`: invocation metadata controlled by caller (channel, locale, flags)
 
-For `context.invokeAgent...call(payload, parameter)` the payload type is currently the core `AgentProtocolPayload` shape (`message`, optional `history`, optional `attachments`, passthrough for extra fields).  
-That means you can keep calls minimal:
+Without explicit `payloadSchema`, payload falls back to core `AgentProtocolPayload` shape (`message`, optional `history`, optional `attachments`, passthrough for extra fields). That means minimal calls still work:
 
 ```ts
 await context.invokeAgent.supportAgent['1']

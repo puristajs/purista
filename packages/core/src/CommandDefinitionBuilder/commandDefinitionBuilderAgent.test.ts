@@ -29,8 +29,9 @@ describe('CommandDefinitionBuilder Agent Integration', () => {
 
 	it('can register an agent dependency with canInvokeAgent', async () => {
 		const parameterSchema = z.object({ locale: z.string() })
+		const payloadSchema = z.object({ message: z.string(), locale: z.string().optional() })
 		const builder = new CommandDefinitionBuilder('testCommand', 'description')
-			.canInvokeAgent('MyAgent', '1', parameterSchema)
+			.canInvokeAgent('MyAgent', '1', { payloadSchema, parameterSchema })
 			.setCommandFunction(async function () {
 				return 'ok'
 			})
@@ -39,6 +40,8 @@ describe('CommandDefinitionBuilder Agent Integration', () => {
 		expect(definition.agentInvokes).toBeDefined()
 		expect(definition.agentInvokes.MyAgent).toBeDefined()
 		expect(definition.agentInvokes.MyAgent['1']).toBeDefined()
+		// @ts-expect-error
+		expect(definition.agentInvokes.MyAgent['1'].payloadSchema).toBe(payloadSchema)
 		// @ts-expect-error
 		expect(definition.agentInvokes.MyAgent['1'].parameterSchema).toBe(parameterSchema)
 	})

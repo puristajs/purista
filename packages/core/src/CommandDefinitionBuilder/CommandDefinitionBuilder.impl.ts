@@ -6,7 +6,11 @@ import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttp
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
 import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
-import type { AgentInvocation, AgentProtocolPayload, AgentProtocolResponse } from '../core/types/agent/AgentProtocol.js'
+import {
+	agentProtocolPayloadSchema,
+	type AgentInvocation,
+	type AgentProtocolResponse,
+} from '../core/types/agent/AgentProtocol.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
 import type { CommandAfterGuardHook } from '../core/types/commandType/CommandAfterGuardHook.js'
@@ -35,6 +39,15 @@ import { getCommandFunctionWithValidation } from './getCommandFunctionWithValida
 
 export type HttpExposureOptions = {
 	mode?: 'sync' | 'async'
+}
+
+type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
+	payloadSchema?: Payload
+	parameterSchema?: Parameter
+}
+
+const isAgentInvokeConfig = (value: unknown): value is AgentInvokeConfig<Schema, Schema> => {
+	return typeof value === 'object' && value !== null && ('payloadSchema' in value || 'parameterSchema' in value)
 }
 
 /**
@@ -349,22 +362,37 @@ export class CommandDefinitionBuilder<
 	 *
 	 * @param agentName The name of the agent service
 	 * @param agentVersion The version of the agent service
-	 * @param parameterSchema The optional parameter schema for the agent
+	 * @param invokeConfigOrParameterSchema Optional invoke configuration:
+	 * - `parameterSchema` (legacy shorthand) validates `.call(_, parameter)`
+	 * - `{ payloadSchema, parameterSchema }` validates both `.call(payload, parameter)` arguments
 	 */
-	canInvokeAgent<Parameter extends Schema, SName extends string = string, Version extends string = string>(
+	canInvokeAgent<
+		Payload extends Schema = typeof agentProtocolPayloadSchema,
+		Parameter extends Schema = Schema,
+		SName extends string = string,
+		Version extends string = string,
+	>(
 		agentName: SName,
 		agentVersion: Version,
-		parameterSchema?: Parameter,
+		invokeConfigOrParameterSchema?: Parameter | AgentInvokeConfig<Payload, Parameter>,
 	) {
 		if (agentName.trim() === '' || agentVersion.trim() === '') {
 			throw new Error('canInvokeAgent requires non-empty agent name and version')
 		}
+
+		const payloadSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
+			? invokeConfigOrParameterSchema.payloadSchema
+			: undefined
+		const parameterSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
+			? invokeConfigOrParameterSchema.parameterSchema
+			: invokeConfigOrParameterSchema
 
 		this.agentInvokes = {
 			...this.agentInvokes,
 			[agentName]: {
 				...(this.agentInvokes[agentName] as Record<string, any>),
 				[agentVersion]: {
+					payloadSchema,
 					parameterSchema,
 				},
 			},
@@ -375,8 +403,8 @@ export class CommandDefinitionBuilder<
 					Version,
 					{
 						call: (
-							payload: AgentProtocolPayload,
-							parameter: InferIn<Parameter>,
+							payload: InferIn<Payload>,
+							parameter?: InferIn<Parameter>,
 						) => AgentInvocation<AgentProtocolResponse>
 					}
 				>
@@ -403,8 +431,8 @@ export class CommandDefinitionBuilder<
 							Version,
 							{
 								call: (
-									payload: AgentProtocolPayload,
-									parameter: InferIn<Parameter>,
+									payload: InferIn<Payload>,
+									parameter?: InferIn<Parameter>,
 								) => AgentInvocation<AgentProtocolResponse>
 							}
 						>

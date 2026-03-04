@@ -12,6 +12,7 @@ export type AgentInvokeList = Record<
 		string,
 		{
 			call?: (payload: AgentProtocolPayload, parameter?: any) => AgentInvocation<AgentProtocolResponse>
+			payloadSchema?: Schema
 			parameterSchema?: Schema
 		}
 	>

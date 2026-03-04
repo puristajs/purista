@@ -497,7 +497,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 				tenantId,
 			})
 
-			const parameterSchema = agentInvokes?.[receiver.serviceName]?.[receiver.serviceVersion]?.parameterSchema
+			const descriptor = agentInvokes?.[receiver.serviceName]?.[receiver.serviceVersion]
+			const payloadSchema = descriptor?.payloadSchema
+			const parameterSchema = descriptor?.parameterSchema
 			const invocationPromise = (async () => {
 				return await this.startActiveSpan(`${serviceTarget}.agentInvoke`, {}, undefined, async span => {
 					span.setAttributes({
@@ -505,6 +507,25 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						[PuristaSpanTag.ReceiverServiceVersion]: receiver.serviceVersion,
 						[PuristaSpanTag.ReceiverServiceTarget]: receiver.serviceTarget,
 					})
+
+					if (payloadSchema) {
+						const res = await validate(payloadSchema, payload)
+						if (!res.success) {
+							const err = new UnhandledError(StatusCode.BadRequest, 'agent invoke payload schema validation failed', {
+								issues: res.issues,
+								invokedFrom: sender,
+								responseFrom: receiver,
+							})
+
+							span.recordException(err)
+							span.setStatus({
+								code: SpanStatusCode.ERROR,
+								message: err.message,
+							})
+
+							throw err
+						}
+					}
 
 					if (parameterSchema) {
 						const res = await validate(parameterSchema, parameter)
