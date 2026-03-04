@@ -8,6 +8,17 @@ order: 203701
 
 `new AgentBuilder(...)` mirrors `ServiceBuilder`: you compose fluent methods to describe metadata, schemas, models, tool allowlists, HTTP exposure, and the handler that runs inside the PURISTA runtime. The result of `.build()` is an `AgentDefinition` you can start multiple times (local + worker pools) just like a service definition.
 
+## Typical workflow
+
+1. Scaffold a new agent with CLI:
+   ```bash
+   purista add agent supportAgent
+   ```
+2. Fill in schemas and handler logic in the generated agent file.
+3. Wire runtime dependencies in `src/index.ts` via `getInstance(eventBridge, options)`.
+4. Invoke the agent from command/subscription/stream contexts with `.canInvokeAgent(...)`.
+5. Add or extend the generated test file.
+
 ## Full builder example
 
 ```ts title="src/agents/supportAgent/v1/supportAgent.ts"

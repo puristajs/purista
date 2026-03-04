@@ -6,7 +6,12 @@ order: 203705
 
 # Protocol & Streaming
 
-Agents communicate through the `agent_protocol_concept` format defined in `specs/agent_protocol_concept`. Every invocation returns an array of envelopes, each containing metadata copied from the PURISTA message (`id`, `correlationId`, `inReplyTo`) and a frame describing what happened.
+Every agent invocation returns protocol envelopes. Each envelope contains:
+
+- identity/correlation metadata (`messageId`, `conversationId`, `inReplyTo`, actor info)
+- one frame describing what happened (`message`, `tool`, `telemetry`, `artifact`, `error`)
+
+In daily usage you do not build envelopes manually; `context.stream` and runtime helpers do that for you.
 
 ## Frame types
 
@@ -15,7 +20,7 @@ Agents communicate through the `agent_protocol_concept` format defined in `specs
 | `message` | Assistant/user text. Supports `partial` streams and `final` completions. |
 | `artifact` | Binary or structured payloads (files, images, JSON) emitted incrementally. |
 | `telemetry` | Duration, wait time, concurrency pool, provider name, token usage, custom metrics. |
-| `toolEvent` | Trace allowlisted tool invocations (invoked/success/error plus arguments/results). |
+| `tool` | Trace allowlisted tool invocations (invoked/success/error plus arguments/results). |
 | `error` | Normalised error payload matching PURISTA handled/unhandled semantics. |
 
 `context.stream.sendX` helpers push message/artifact/error frames for you:
@@ -77,6 +82,8 @@ await supportAgent.invoke(
 ```
 
 You never need to populate protocol IDs manually—the runtime copies all required headers (`inReplyTo`, `conversationId`, `sender`) so the stream is valid whether it stays inside PURISTA or is forwarded to third parties.
+
+For the full protocol semantics, message contract, and field-level guidance, see [Advanced → AI Protocol](../advanced/ai-protocol.md).
 
 ## Error handling
 

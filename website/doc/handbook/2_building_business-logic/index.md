@@ -39,4 +39,4 @@ This section explains how to implement domain logic with strong types and clear 
 13. [Exposing Commands](./exposing_endpoints/index.md)
 14. [HTTP Client](./fetch_based_http_client.md)
 15. [Connect To PURISTA](./connect_to_a_purista_application/index.md)
-16. [Advanced](./advanced/index.md) → [JavaScript Events](./advanced/javascript_events.md), [Structure Of A Message](./advanced/structure_of_a_message.md), [Delivery Semantics And Reliability](./advanced/delivery-semantics-and-reliability.md)
+16. [Advanced](./advanced/index.md) → [JavaScript Events](./advanced/javascript_events.md), [Structure Of A Message](./advanced/structure_of_a_message.md), [AI Protocol](./advanced/ai-protocol.md), [Delivery Semantics And Reliability](./advanced/delivery-semantics-and-reliability.md)

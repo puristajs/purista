@@ -6,29 +6,32 @@ order: 203700
 
 # AI Agents in PURISTA
 
-`@purista/ai` brings multi-agent orchestration into an existing PURISTA application without changing the core runtime. Agents use the same builder/config patterns as services, run beside your domain services, and plug into EventBridge tracing, schemas, metrics, and managed config.
+`@purista/ai` adds agent workloads to a PURISTA application without changing PURISTA core primitives. Agents use the same builder pattern as services, run on the same EventBridge, and follow the same validation, logging, and tracing conventions.
 
-This overview explains when agents make sense, how they fit into the project layout, and where to go next in the handbook.
+This chapter is written as a learning path: start simple, then move to protocol/operations topics.
 
 ## When to reach for agents
 
-Use agents when you need one or more LLM-powered workers that must:
+Use agents when you need one or more LLM-powered workloads that must:
 
-- share infrastructure with the rest of your PURISTA services (EventBridge, tracing, config, logging)
-- stream intermediate results (token-by-token, tool telemetry, custom artifacts)
-- coordinate async & background work pools with strict concurrency limits
-- reuse existing commands as tools with the familiar `.canInvoke`-style allowlist
-- publish manifests/config just like services so CI/CD can promote revisions predictably
+- share infrastructure with existing services (EventBridge, tracing, config, logging)
+- stream progressive results to clients (chunks, artifacts, tool frames, telemetry)
+- control parallelism through runtime worker pool settings
+- reuse existing commands as tools with explicit allowlists
+- keep deployment/runtime configuration outside of business logic
 
 ## Project layout & scaffolding
 
-Generate your first agent with the CLI:
+Use the CLI first. It creates a runnable skeleton and test:
 
 ```bash
 purista add agent supportAgent
 ```
 
-The CLI mirrors the service generators: it creates the folder structure, builder file, schemas, and a Vitest spec under `src/agents/<agentName>/v<version>/`.
+The generator creates:
+
+- `src/agents/<agentName>/v<version>/<agentName>.ts` (builder + handler skeleton)
+- `src/agents/<agentName>/v<version>/<agentName>.test.ts` (deterministic test scaffold)
 
 ```
 src/
@@ -40,17 +43,20 @@ src/
              └─ supportAgent.test.ts
 ```
 
-Agents are first-class citizens in the repository: they have their own folder hierarchy, can be exposed via HTTP endpoints, scheduled through queues, or invoked ad hoc from commands and tests.
+From there, you can expose the agent over HTTP, invoke it from commands/subscriptions, or run it in background workers.
 
 ## Where to go next
 
-Each of the following handbook chapters dives into a focused aspect of the AI stack. Read them in order for a complete understanding or jump straight to the topic you need:
+Recommended order for new users:
 
-1. [The Agent Builder](./agent-builder.md) — define metadata, schemas, resources, tools, concurrency pools, and HTTP exposure.
-2. [Run & Invoke Agents](./running-and-invoking-agents.md) — start instances, wire dependencies, and call agents from commands, queues, or HTTP bridges.
-3. [Model Providers & OpenAI](./model-providers-and-openai.md) — register Vercel AI SDK providers (OpenAI, Anthropic, …) and reuse them across agents.
-4. [State, History & Knowledge](./state-history-and-knowledge.md) — persist conversations, plug in custom session/knowledge adapters, and share context between agents.
-5. [Protocol & Streaming](./protocol-and-streaming.md) — understand the agent protocol frames, emit telemetry, and transform streams for AI SDK UI clients.
-6. [Testing & Evaluation](./testing-and-evaluation.md) — scaffold Vitest specs, capture JSON eval outputs, and compare models/prompts safely.
+1. [The Agent Builder](./agent-builder.md) — purpose, main methods, and first runnable agent.
+2. [Run & Invoke Agents](./running-and-invoking-agents.md) — bootstrap in `src/index.ts`, call from commands/subscriptions, expose HTTP.
+3. [Model Providers & OpenAI](./model-providers-and-openai.md) — wire provider instances at runtime.
+4. [State, History & Knowledge](./state-history-and-knowledge.md) — tenant/user-aware memory and shared knowledge.
+5. [Protocol & Streaming](./protocol-and-streaming.md) — practical streaming and protocol helpers.
+6. [Testing Agents](./testing.md) — deterministic unit/integration tests.
+7. [Agent Evaluation](./evaluation.md) — dataset-driven evaluation output and CI comparison.
 
-If you are brand new to PURISTA, skim the [services](../service/index.md) chapter first—agents intentionally reuse the same vocabulary (builders, stores, managed config) so you never learn two mental models.
+For protocol internals and semantics, continue with [Advanced → AI Protocol](../advanced/ai-protocol.md).
+
+If you are brand new to PURISTA, start with [Service](../service/index.md) and [Command](../command/index.md) first. The agent APIs intentionally reuse the same language.
