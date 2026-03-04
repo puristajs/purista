@@ -24,25 +24,9 @@ Use agents when you need one or more LLM-powered workloads that must:
 
 Use the CLI first. It creates a runnable skeleton and test:
 
-::: code-group
-
-```bash [npm]
-npx @purista/cli add agent supportAgent
+```bash
+purista add agent SupportAgent
 ```
-
-```bash [pnpm]
-pnpm dlx @purista/cli add agent supportAgent
-```
-
-```bash [bun]
-bunx @purista/cli add agent supportAgent
-```
-
-```bash [yarn]
-yarn dlx @purista/cli add agent supportAgent
-```
-
-:::
 
 The generator creates:
 

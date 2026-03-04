@@ -17,25 +17,9 @@ Think of this page as the practical handbook entry:
 
 ## 1) Scaffold with CLI
 
-::: code-group
-
-```bash [npm]
-npx @purista/cli add agent supportAgent
+```bash
+purista add agent SupportAgent
 ```
-
-```bash [pnpm]
-pnpm dlx @purista/cli add agent supportAgent
-```
-
-```bash [bun]
-bunx @purista/cli add agent supportAgent
-```
-
-```bash [yarn]
-yarn dlx @purista/cli add agent supportAgent
-```
-
-:::
 
 This creates:
 
