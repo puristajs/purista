@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>PURISTA AI Example</title>
+		<style>
+			body {
+				font-family: Inter, system-ui, sans-serif;
+				margin: 0;
+				padding: 2rem;
+				background: #0f172a;
+				color: #e2e8f0;
+			}
+			main {
+				max-width: 920px;
+				margin: 0 auto;
+			}
+			.panel {
+				background: #111827;
+				border: 1px solid #1f2937;
+				border-radius: 0.75rem;
+				padding: 1rem;
+				margin-bottom: 1rem;
+			}
+			.row {
+				display: flex;
+				gap: 0.5rem;
+				flex-wrap: wrap;
+			}
+			input,
+			select,
+			button {
+				padding: 0.6rem 0.8rem;
+				border-radius: 0.5rem;
+				border: 1px solid #374151;
+				background: #0b1220;
+				color: #e2e8f0;
+			}
+			input {
+				flex: 1;
+				min-width: 260px;
+			}
+			button {
+				cursor: pointer;
+				background: #2563eb;
+				border-color: #2563eb;
+			}
+			pre {
+				background: #020617;
+				border: 1px solid #1e293b;
+				border-radius: 0.5rem;
+				padding: 0.75rem;
+				overflow: auto;
+				font-size: 0.8rem;
+			}
+			.log-line {
+				margin-bottom: 0.5rem;
+				padding: 0.4rem 0.5rem;
+				border-radius: 0.4rem;
+				background: #1e293b;
+			}
+		</style>
+	</head>
+	<body>
+		<main>
+			<h1>PURISTA AI Basic (extended)</h1>
+			<p>This demo shows agent HTTP streaming, tool calls, agent-to-agent delegation, command invocation, and event-driven follow-up.</p>
+
+			<section class="panel">
+				<h2>Chat with agent endpoint (SSE)</h2>
+				<div class="row">
+					<input id="prompt" value="How can I request a refund for my order?" />
+					<button id="sendSse" type="button">Send SSE</button>
+				</div>
+				<p>Endpoint: <code>POST /api/v1/agents/supportAgent</code></p>
+				<div id="chatLog"></div>
+			</section>
+
+			<section class="panel">
+				<h2>Invoke from command</h2>
+				<div class="row">
+					<button id="runCommand" type="button">POST /api/v1/support/ask</button>
+					<button id="triggerFollowUp" type="button">POST /api/v1/support/follow-up</button>
+				</div>
+				<pre id="jsonOutput"></pre>
+			</section>
+		</main>
+
+		<script>
+			const chatLog = document.getElementById('chatLog')
+			const output = document.getElementById('jsonOutput')
+
+			const logLine = text => {
+				const line = document.createElement('div')
+				line.className = 'log-line'
+				line.textContent = text
+				chatLog.appendChild(line)
+			}
+
+			const appendEnvelopeFrames = envelopes => {
+				for (const envelope of envelopes) {
+					const frame = envelope?.frame
+					if (!frame || typeof frame !== 'object') {
+						continue
+					}
+					if (frame.kind === 'message') {
+						logLine(`assistant: ${frame.content}`)
+					} else if (frame.kind === 'tool') {
+						logLine(`tool ${frame.status}: ${frame.toolName}`)
+					} else if (frame.kind === 'telemetry') {
+						logLine(`telemetry: ${JSON.stringify(frame)}`)
+					} else if (frame.kind === 'error') {
+						logLine(`error: ${frame.message}`)
+					}
+				}
+			}
+
+			const parseSseChunk = chunk => {
+				let eventName = 'message'
+				let data = ''
+				for (const line of chunk.split('\n')) {
+					if (line.startsWith('event:')) {
+						eventName = line.slice(6).trim()
+					}
+					if (line.startsWith('data:')) {
+						data += line.slice(5).trim()
+					}
+				}
+				if (!data) {
+					return
+				}
+				const parsed = JSON.parse(data)
+				if (eventName === 'chunk' && Array.isArray(parsed.chunk)) {
+					appendEnvelopeFrames(parsed.chunk)
+				}
+				if (eventName === 'complete' && Array.isArray(parsed.final)) {
+					appendEnvelopeFrames(parsed.final)
+				}
+				if (eventName === 'error') {
+					logLine(`stream error: ${JSON.stringify(parsed.error)}`)
+				}
+			}
+
+			const streamAgent = async prompt => {
+				chatLog.innerHTML = ''
+				const response = await fetch('/api/v1/agents/supportAgent', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ prompt }),
+				})
+				if (!response.ok) {
+					logLine(`HTTP ${response.status}`)
+					return
+				}
+				const reader = response.body.getReader()
+				const decoder = new TextDecoder()
+				let buffer = ''
+				while (true) {
+					const { done, value } = await reader.read()
+					if (done) {
+						break
+					}
+					buffer += decoder.decode(value, { stream: true })
+					const parts = buffer.split('\n\n')
+					buffer = parts.pop() ?? ''
+					for (const part of parts) {
+						if (part.trim()) {
+							parseSseChunk(part)
+						}
+					}
+				}
+			}
+
+			document.getElementById('sendSse').addEventListener('click', async () => {
+				const prompt = document.getElementById('prompt').value
+				await streamAgent(prompt)
+			})
+
+			document.getElementById('runCommand').addEventListener('click', async () => {
+				const prompt = document.getElementById('prompt').value
+				const response = await fetch('/api/v1/support/ask', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ prompt }),
+				})
+				output.textContent = JSON.stringify(await response.json(), null, 2)
+			})
+
+			document.getElementById('triggerFollowUp').addEventListener('click', async () => {
+				const prompt = document.getElementById('prompt').value
+				const response = await fetch('/api/v1/support/follow-up', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ prompt }),
+				})
+				output.textContent = JSON.stringify(await response.json(), null, 2)
+			})
+		</script>
+	</body>
+</html>

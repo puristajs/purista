@@ -30,6 +30,7 @@ __snapshots__
 
 .tshy-build
 .tshy
+*.tsbuildinfo
 
 gcloud-credentials.json
 .env
