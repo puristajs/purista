@@ -23,8 +23,8 @@ The goal is to allow developers to build AI components within a PURISTA-based ap
   - Message/artifact/telemetry/error frames consumable by any UI or external system.
 
 - [30-builder-integration.md](./30-builder-integration.md)
-  - `AgentBuilder.create` ergonomics, `.getInstance()`, and lifecycle management.
-  - CLI scaffolding for standalone agents plus invoke helpers (`invokeAgent`, `queueAgent`).
+  - `new AgentBuilder(...)` ergonomics, `.getInstance(eventBridge, options)`, and lifecycle management.
+  - CLI scaffolding for standalone agents with prepared agent test files.
   - HTTP/OpenAPI exposure that mirrors command configuration knobs.
 
 - [40-core-interfaces.md](./40-core-interfaces.md)
@@ -34,15 +34,17 @@ The goal is to allow developers to build AI components within a PURISTA-based ap
 - [50-observability-governance.md](./50-observability-governance.md)
   - Allowlisted tools, concurrency pools, OpenTelemetry spans surfaced by each agent runtime.
   - Telemetry frames for token usage/duration without a budgeting engine.
+- [99-review-feedback-tracker.md](./99-review-feedback-tracker.md)
+  - Active feedback checklist and alignment status.
+  - Includes tracking for naming, stream behavior, runtime pool config, and docs/example parity.
 
-- [60-memory-and-context.md](./60-memory-and-context.md)
-  - Session store defaults, conversation helpers, knowledge adapters.
-  - How manifests reference memory/knowledge resources.
+## Canonical example
 
-- [80-evaluation-testing.md](./80-evaluation-testing.md)
-  - JSON evaluation outputs + helper utilities for Vitest suites.
-  - Accuracy/duration/token metrics captured by default.
+`examples/ai-basic` is the mandatory, copy-pasteable reference implementation. It must continuously cover:
 
-- [90-specialized-tasks.md](./90-specialized-tasks.md)
-  - Common AI patterns: Classification, Extraction, Translation.
-  - Multimodal input support (Vision/Audio).
+- Agent endpoints exposed through HTTP/SSE
+- Command -> agent invocation using `canInvokeAgent` + `context.invokeAgent`
+- Allowlisted command tools
+- Agent-to-agent delegation
+- Event subscription -> agent invocation
+- Deterministic tests for both agents and integration command flow

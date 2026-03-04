@@ -1,3 +1,5 @@
+import { randomUUID } from 'node:crypto'
+
 import { AgentBuilder, type AgentHandlerContext, agentProtocolEnvelopeSchema, type SessionRecord } from '@purista/ai'
 import { type SupportAgentInput, supportAgentInputSchema } from './schema.js'
 
@@ -47,7 +49,7 @@ export const supportAgentDefinition = new AgentBuilder({
 	})
 	.exposeAsHttpEndpoint('POST', 'agents/supportAgent', 'application/json', undefined, 'text/event-stream')
 	.setHandler<SupportAgentInput>(async function (context: SupportAgentContext, payload) {
-		const sessionId = payload.sessionId ?? context.message.id ?? 'session'
+		const sessionId = payload.sessionId ?? randomUUID()
 		const userPrompt = payload.prompt ?? payload.message ?? ''
 		const model = context.models['openai:gpt-5.2-mini']
 

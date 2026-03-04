@@ -8,7 +8,7 @@
 		"start": "tsx src/index.ts",
 		"build": "tsc --noEmit",
 		"lint": "npx @biomejs/biome check --write",
-		"test": "tsc --noEmit"
+		"test": "vitest run && tsc --noEmit"
 	},
 	"dependencies": {
 		"@ai-sdk/openai": "^3.0.31",
@@ -24,6 +24,7 @@
 	"devDependencies": {
 		"@types/node": "^25.2.1",
 		"tsx": "^4.21.0",
-		"typescript": "^5.9.3"
+		"typescript": "^5.9.3",
+		"vitest": "^4.0.18"
 	}
 }

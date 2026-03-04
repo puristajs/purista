@@ -8,15 +8,37 @@ order: 203706
 
 Agents must remain deterministic enough to ship safely. Treat them like any other PURISTA component: write unit tests, capture evaluation metrics, and diff results in CI.
 
-## Vitest unit tests
+## Agent test scaffold from CLI
 
-The CLI generator creates `supportAgent.test.ts` beside the builder. A minimal test spins up the event bridge, injects a mock provider, and calls the agent handler:
+`purista add agent ...` generates a `*.test.ts` file beside the new builder. The scaffold is runnable out of the box and already includes:
+
+- in-memory `DefaultEventBridge` startup/shutdown
+- deterministic provider injection (`EchoProvider`)
+- one real agent invocation
+- assertions for final protocol message + telemetry frame
+
+Use that generated test as the baseline and extend with project-specific scenarios.
+
+## Unit test pattern (agent runtime)
+
+Use deterministic providers so tests stay stable and do not call external LLM APIs:
 
 ```ts
 import { describe, expect, it } from 'vitest'
 import { DefaultEventBridge } from '@purista/core'
-import { EchoProvider } from '@purista/ai'
+import type { ModelProvider, ProviderRequest } from '@purista/ai'
 import { supportAgentDefinition } from './supportAgent.js'
+
+class DeterministicProvider implements ModelProvider {
+  name = 'deterministic-test-provider'
+  async generate(request: ProviderRequest) {
+    return {
+      output: `MODEL:${request.prompt}`,
+      tokens: { prompt: request.prompt.length, completion: 12 },
+      costUsd: 0,
+    }
+  }
+}
 
 describe('support agent', () => {
   it('returns a friendly answer', async () => {
@@ -24,15 +46,22 @@ describe('support agent', () => {
     await eventBridge.start()
 
     const agent = await supportAgentDefinition.getInstance(eventBridge, {
-      models: { 'openai:gpt-4o-mini': new EchoProvider() },
+      models: { 'openai:gpt-5.2-mini': new DeterministicProvider() },
     })
     await agent.start()
+    await new Promise(resolve => setTimeout(resolve, 25))
 
     const { envelopes } = await agent.invoke({
-      payload: { prompt: 'reset password' },
+      payload: { prompt: 'reset password', message: 'reset password', history: [], attachments: [] },
     })
 
-    expect(envelopes.some(env => env.frame.kind === 'message')).toBe(true)
+    const hasFinalMessage = envelopes.some(
+      env => env.frame.kind === 'message' && env.frame.final === true,
+    )
+    const hasTelemetry = envelopes.some(env => env.frame.kind === 'telemetry')
+
+    expect(hasFinalMessage).toBe(true)
+    expect(hasTelemetry).toBe(true)
 
     await agent.stop()
     await eventBridge.destroy()
@@ -40,7 +69,46 @@ describe('support agent', () => {
 })
 ```
 
-Mock providers keep tests deterministic while still exercising session stores, protocol helpers, and tracing hooks.
+This executes the full runtime path (schema validation, tool guards, protocol framing, telemetry, session helpers) without network flakiness.
+
+## Integration test pattern (command -> agent)
+
+When commands invoke agents via `.canInvokeAgent(...).setCommandFunction(...)`, test the wiring through a real command invocation:
+
+```ts
+import { DefaultEventBridge, EBMessageType, getNewEBMessageId, getNewTraceId } from '@purista/core'
+
+const message = {
+  id: getNewEBMessageId(),
+  timestamp: Date.now(),
+  traceId: getNewTraceId(),
+  correlationId: getNewEBMessageId(),
+  messageType: EBMessageType.Command,
+  contentType: 'application/json',
+  contentEncoding: 'utf-8',
+  sender: {
+    serviceName: 'testClient',
+    serviceVersion: '1',
+    serviceTarget: 'integration',
+    instanceId: eventBridge.instanceId,
+  },
+  receiver: {
+    serviceName: 'support',
+    serviceVersion: '1',
+    serviceTarget: 'runSupportAgent',
+  },
+  payload: { payload: { prompt: 'How can I reset my password?' }, parameter: {} },
+}
+
+const result = await eventBridge.invoke(message)
+expect(result).toEqual(expect.objectContaining({ message: expect.stringContaining('MODEL:') }))
+```
+
+This validates:
+
+- command payload/parameter schemas
+- `context.invokeAgent` integration
+- agent output mapping back to command response contracts
 
 ## Evaluation helpers
 
@@ -107,6 +175,13 @@ Store the resulting JSON under `evaluations/<suite>/<timestamp>.json`. The struc
 - The dataset format is up to you—CSV, JSON, markdown—all work as long as the evaluator knows how to read it.
 - Outputs are always JSON so pipelines can diff and fail builds when regressions occur.
 - Because evaluation runs are regular Node scripts, you can integrate them into `pnpm test`, nightly cron jobs, or manual verification before deploying a new manifest.
+
+## Reference implementation
+
+`examples/ai-basic` includes runnable tests for both patterns:
+
+- `/examples/ai-basic/src/agents/supportAgent/v1/supportAgent.test.ts`
+- `/examples/ai-basic/src/service/support/v1/command/runSupportAgent/runSupportAgentCommandBuilder.test.ts`
 
 ## Document everything
 

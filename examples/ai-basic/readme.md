@@ -22,3 +22,16 @@ Set these environment variables:
 - `PORT` (optional, defaults to `3000`)
 
 Open [http://localhost:3000/index.html](http://localhost:3000/index.html).
+
+## Test
+
+The example contains deterministic tests (no real LLM calls):
+
+```bash
+pnpm --filter @purista/example-ai-basic test
+```
+
+Key test files:
+
+- `src/agents/supportAgent/v1/supportAgent.test.ts` – verifies tool calls, agent-to-agent delegation, and protocol frames.
+- `src/service/support/v1/command/runSupportAgent/runSupportAgentCommandBuilder.test.ts` – verifies command-level `context.invokeAgent` integration.

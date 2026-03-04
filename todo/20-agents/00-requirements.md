@@ -25,9 +25,9 @@ PURISTA already provides commands, queues, streams, managed config, and strict s
 
 ## 4. Developer Experience & DX boundaries
 - **Builders everywhere** – Agent manifests, pool configs, and adapters all use builder/config patterns identical to the existing `ServiceBuilder`. No hard-coded references to schema libraries: PURISTA’s `extendApi` + `Schema` abstractions remain the API.
-- **CLI integration** – `purista add agent` scaffolds builder + tests and shows how to execute an agent via `invokeAgent`/`queueAgent`. No separate `purista ai build/deploy` binaries exist.
+- **CLI integration** – `purista add agent` must always scaffold both the agent builder and a runnable `*.test.ts` beside it. The generated test must already boot an in-memory EventBridge, inject a deterministic model provider, execute one agent run, and assert protocol output. No separate `purista ai build/deploy` binaries exist.
 - **Testing/evaluation** – Agents are unit-testable (Vitest scaffolds run by default). Evaluation helpers describe structure, expected JSON output, and metrics (accuracy %, duration min/max/avg, token counts). Dataset formats remain user-defined; only the evaluation result schema is standardized.
-- **Documentation** – Specs must call out that every shipped package requires README/handbook/TypeDoc coverage, plus integration in the existing lint/test/build pipelines. Examples should mirror the recommended folder hierarchy so users can copy/paste.
+- **Documentation** – Specs must call out that every shipped package requires README/handbook/TypeDoc coverage, plus integration in the existing lint/test/build pipelines. `examples/ai-basic` is the canonical comprehensive reference and must keep: (1) command -> agent invocation, (2) agent-to-agent call, (3) tool invocation, (4) event subscription -> agent invocation, (5) HTTP/SSE frontend consumer, and (6) runnable tests for agents and command integration.
 
 ## 5. Non-Goals
 - No app-specific behavior or cross-application hacks inside the AI package. Any client can consume the protocol as a regular PURISTA payload.

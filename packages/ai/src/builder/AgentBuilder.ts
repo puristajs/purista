@@ -77,6 +77,7 @@ export class AgentBuilder {
 	private readonly info: AgentInfo
 	private readonly serviceBuilder: ServiceBuilder
 	private readonly commandBuilder: ReturnType<ServiceBuilder['getCommandBuilder']>
+	private commandDefinitionAdded = false
 	private manifest: AgentManifest
 	private handler?: AgentHandler
 
@@ -410,6 +411,11 @@ export class AgentBuilder {
 	build(): AgentDefinition {
 		if (!this.handler) {
 			throw new Error('Agent handler is required. Call setHandler() before build().')
+		}
+
+		if (!this.commandDefinitionAdded) {
+			this.serviceBuilder.addCommandDefinition(this.commandBuilder.getDefinition())
+			this.commandDefinitionAdded = true
 		}
 
 		const manifest: AgentManifest = {
