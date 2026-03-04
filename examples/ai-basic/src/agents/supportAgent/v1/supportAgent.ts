@@ -1,12 +1,5 @@
-import { AgentBuilder, type AgentHandlerContext, agentProtocolEnvelopeSchema, type SessionRecord } from '@purista/ai'
+import { AgentBuilder, type AgentHandlerContext, agentProtocolEnvelopeSchema } from '@purista/ai'
 import { type SupportAgentInput, supportAgentInputSchema } from './schema.js'
-
-const buildSessionRecord = (lastOutput: string): Omit<SessionRecord, 'sessionId'> => ({
-	data: {
-		lastOutput,
-	},
-	updatedAt: Date.now(),
-})
 
 type SupportAgentContext = AgentHandlerContext<SupportAgentInput, unknown>
 
@@ -48,6 +41,7 @@ export const supportAgent = new AgentBuilder({
 	.setHandler<SupportAgentInput>(async function (context: SupportAgentContext, payload) {
 		const userPrompt = payload.prompt ?? payload.message ?? ''
 		const model = context.models['openai:gpt-5.2-mini']
+		await context.conversation.addUser(userPrompt)
 
 		context.stream.sendChunk('Checking FAQ knowledge...')
 		const faqResult = await context.tools.invoke('support.1.lookupFaq', { question: userPrompt })
@@ -74,6 +68,7 @@ export const supportAgent = new AgentBuilder({
 		context.stream.sendChunk('Generating final answer...')
 		const result = await model.generate({
 			prompt: [
+				await context.conversation.buildPromptInput(),
 				`Customer prompt: ${userPrompt}`,
 				`FAQ answer: ${faqAnswer}`,
 				triageSummary ? `Triage summary: ${triageSummary}` : undefined,
@@ -88,9 +83,8 @@ export const supportAgent = new AgentBuilder({
 			},
 		})
 		const answer = result.output
+		await context.conversation.addAssistant(answer)
 		context.stream.sendFinal(answer)
-
-		await context.session.save(buildSessionRecord(answer))
 
 		return {
 			message: answer,

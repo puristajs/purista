@@ -95,6 +95,12 @@ describe('runtime context helpers', () => {
 		const docs = await context.knowledge.query('default', 'Reset')
 		expect(docs).toHaveLength(1)
 
+		await context.conversation.addUser('Need password reset help')
+		await context.conversation.addAssistant('Use the forgot-password page.')
+		const promptInput = await context.conversation.buildPromptInput()
+		expect(promptInput).toContain('user: Need password reset help')
+		expect(promptInput).toContain('assistant: Use the forgot-password page.')
+
 		const envelopes = buffer.toEnvelopes()
 		expect(envelopes.some(envelope => envelope.frame.kind === 'tool')).toBe(true)
 	})

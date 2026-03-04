@@ -14,6 +14,7 @@ import {
 import type { AgentProtocolEnvelope, AgentProtocolFrame } from '../protocol/types.js'
 import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import type { AgentManifest, AllowedToolDefinition } from '../types/AgentManifest.js'
+import { type ConversationHelpers, createConversationHelpers } from './conversation.js'
 import { createScopedSessionId, resolveBaseSessionId } from './sessionIdentity.js'
 
 type ProtocolFrameEntry = {
@@ -385,6 +386,7 @@ export type AgentHandlerContext<
 	payload: Payload
 	parameter: Parameter
 	message: CommandFunctionContext['message']
+	conversation: ConversationHelpers
 	session: SessionHelpers
 	knowledge: KnowledgeHelpers
 	stream: AgentStreamEmitter
@@ -420,16 +422,19 @@ export const createAgentHandlerContext = <
 >(
 	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models>,
 ): AgentHandlerContext<Payload, Parameter, Resources, Models> => {
+	const sessionHelpers = createSessionHelpers(input.sessionStore, {
+		context: input.serviceContext,
+		manifest: input.manifest,
+		payload: input.payload,
+	})
+
 	return {
 		logger: input.serviceContext.logger,
 		payload: input.payload,
 		parameter: input.parameter,
 		message: input.serviceContext.message,
-		session: createSessionHelpers(input.sessionStore, {
-			context: input.serviceContext,
-			manifest: input.manifest,
-			payload: input.payload,
-		}),
+		session: sessionHelpers,
+		conversation: createConversationHelpers(sessionHelpers, input.manifest),
 		knowledge: createKnowledgeHelpers(input.knowledgeAdapters),
 		stream: createStreamEmitter(input.protocol),
 		tools: createToolInvoker(input.serviceContext, input.manifest.allowedTools ?? [], input.protocol),

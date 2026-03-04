@@ -111,14 +111,11 @@ Only allowlisted commands are available to the handler.
 const supportAgent = new AgentBuilder({ ... })
   .persistHistory('user', { maxFrames: 40 })
   .setHandler(async function (context, payload) {
-    const history = await context.session.load()
-    const prompt = [history?.data?.last, payload.prompt].filter(Boolean).join('\n')
+    await context.conversation.addUser(payload.prompt)
+    const prompt = await context.conversation.buildPromptInput()
 
     const result = await context.models['openai:gpt-5.2-mini'].generate({ prompt })
-    await context.session.save({
-      data: { last: result.output },
-      updatedAt: Date.now(),
-    })
+    await context.conversation.addAssistant(result.output)
 
     context.stream.sendFinal(result.output)
     return { message: result.output }
@@ -171,7 +168,8 @@ The handler receives a familiar context object with agent-specific helpers:
 | --- | --- |
 | `logger`, `message`, `serviceContext` | Same observability handles you use inside services. |
 | `stream` | Action-oriented streaming helpers that map to the [agent protocol](./protocol-and-streaming.md): `sendChunk`, `sendFinal`, `sendArtifact`, `sendError`. |
-| `session` | Wrapper around the chosen session store. Use `.load`, `.save`, `.delete` for conversation state. |
+| `conversation` | High-level chat history API (`addUser`, `addAssistant`, `buildPromptInput`, `getMessages`) with automatic session scoping and optional summary support. |
+| `session` | Low-level session store wrapper (`load`, `save`, `delete`) for advanced/custom state handling. |
 | `knowledge` | Fan-out to allowlisted knowledge adapters (vector stores, RAG indexes, etc.). |
 | `tools` | Invoke allowlisted PURISTA commands. Events appear as tool frames for tracing/debugging. |
 | `models` | Typed access to declared model aliases (`context.models[alias]`). |

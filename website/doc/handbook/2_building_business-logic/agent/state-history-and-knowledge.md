@@ -17,25 +17,18 @@ new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
   .defineModel('openai:gpt-4o-mini')
   .persistHistory('user', { maxFrames: 40 })
   .setHandler(async (context, payload) => {
-    const previous = await context.session.load()
-    const scopedSessionId = context.session.resolveSessionId()
-
-    const prompt = [previous?.data?.lastMessage, payload.prompt].filter(Boolean).join('\n')
+    await context.conversation.addUser(payload.prompt)
+    const prompt = await context.conversation.buildPromptInput()
     const result = await context.models['openai:gpt-4o-mini'].generate({ prompt })
-
-    await context.session.save({
-      data: { lastMessage: result.output },
-      updatedAt: Date.now(),
-    })
-
-    context.logger.debug({ scopedSessionId }, 'Saved session snapshot')
+    await context.conversation.addAssistant(result.output)
     return { message: result.output }
   })
 ```
 
 - **Default implementation:** `AgentInstance` falls back to an in-memory session store, perfect for local development. Provide a custom store via `await supportAgent.getInstance(eventBridge, { sessionStore: new RedisSessionStore(...) })` when you need persistence.
-- **Session helpers:** `context.session.load/save/delete` abstracts the underlying store. Records are plain objects (`{ sessionId, data, updatedAt }`), so you can stash summarized history, embeddings, persona settings, etc.
+- **Conversation-first API:** prefer `context.conversation.*` in handlers. It uses a standard message shape (`role`, `content`, `createdAt`, metadata) and hides raw session plumbing.
 - **Presets:** use `persistHistory('user')` for full conversation focus, or `persistHistory('agent')` for compact summary-oriented memory. You can still override `maxFrames`, `strategy`, or `storeName`.
+- **Auto summary:** in `strategy: 'summary'`, older messages are compressed automatically and prepended by `context.conversation.buildPromptInput()`. Developers do not need to manually maintain summaries in normal use cases.
 
 ### Tenant + principal aware session keys
 
@@ -53,6 +46,8 @@ const buildSessionKey = (context: AgentHandlerContext, payload: { sessionId?: st
 
 Then use that key consistently with `context.session.load/save/delete`.  
 `context.session.resolveSessionId()` returns the exact scoped id used by implicit helpers.
+
+`context.conversation` uses the same scoped identity automatically.
 
 ## Knowledge adapters
 
@@ -84,7 +79,7 @@ Multiple agents can share the same adapter instance. For example, two domain-spe
 
 ## Conversation helpers & summaries
 
-Session stores often grow quickly. Combine `context.session.load` with helper utilities (e.g., summarize previous turns, persist only structured data) to keep prompts tiny:
+Session stores often grow quickly. The framework handles most of this through `context.conversation`, but you can still use lower-level helpers when needed:
 
 ```ts
 import {
@@ -93,8 +88,8 @@ import {
   type ConversationHistory,
 } from '@purista/ai/memory/historyHelpers'
 
-const history = await context.session.load()
-const conversation = (history?.data.conversation ?? []) as ConversationHistory
+const state = await context.conversation.get()
+const conversation = (state.messages ?? []) as ConversationHistory
 const transcript = summarizeHistory(conversation)
 
 const { output } = await context.models['openai:gpt-4o-mini'].generate({
@@ -107,13 +102,7 @@ const updatedHistory = appendMessage(conversation, {
   timestamp: Date.now(),
 })
 
-await context.session.save({
-  data: {
-    conversation: updatedHistory,
-    lastSummary: summarizeHistory(updatedHistory.slice(-10)),
-  },
-  updatedAt: Date.now(),
-})
+await context.conversation.setSummary(summarizeHistory(updatedHistory.slice(-10)))
 ```
 
-The in-memory helpers under `@purista/ai/memory` include ready-made utilities for rolling summaries and token budgets. Swap them out gradually as your application grows.
+The in-memory helpers under `@purista/ai/memory` remain available for custom strategies, but most applications should start with `persistHistory('user' | 'agent')` + `context.conversation`.
