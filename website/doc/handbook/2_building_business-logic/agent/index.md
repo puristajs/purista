@@ -61,6 +61,16 @@ src/
 
 From there, you can expose the agent over HTTP, invoke it from commands/subscriptions, or run it in background workers.
 
+## What you will configure (and why)
+
+| Area | Typical choice | Why it matters |
+| --- | --- | --- |
+| models | `defineModel(...)` + runtime provider injection | quality, latency, and provider flexibility |
+| conversation persistence | `persistConversation('user' | 'agent')` | memory quality vs token efficiency |
+| tools | explicit `allowTool(...)` list | security and predictable behavior |
+| pool/concurrency | runtime `poolConfig.maxWorkers` | throughput, rate-limit protection, cost control |
+| transport | HTTP SSE, command invoke, queue worker | caller UX and operational profile |
+
 ## Where to go next
 
 Recommended order for new users:

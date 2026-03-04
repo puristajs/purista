@@ -13,6 +13,15 @@ Testing and evaluation solve different problems:
 
 Use both.
 
+## What to evaluate and why
+
+| Metric | What it answers | Typical decision supported |
+| --- | --- | --- |
+| accuracy / success rate | does output match expected intent? | prompt/model regression checks |
+| duration (`min/max/avg`) | how fast is the agent? | sync vs async route suitability |
+| token usage | how expensive is context+output size? | memory strategy and model sizing |
+| failure rate | how often runs fail? | retry policy and guardrail tuning |
+
 ## Evaluation output contract
 
 Dataset shape is intentionally up to the application.  

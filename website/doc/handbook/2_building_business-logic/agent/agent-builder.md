@@ -160,6 +160,41 @@ Set actual worker count in runtime bootstrap (`getInstance(..., { poolConfig: { 
 - `.defineModel(alias)` declares allowed model aliases; provider instances are injected at runtime.
 - `.setRetryPolicy(...)` mirrors command/queue retry behavior and emits handled/unhandled protocol errors automatically.
 
+## 5) Builder configuration reference
+
+### Identity & schema
+
+| Method | Options | Use when | Trade-off |
+| --- | --- | --- | --- |
+| `new AgentBuilder({ agentName, agentVersion, description })` | strings | always | naming becomes public API surface |
+| `addPayloadSchema(schema)` | Purista schema | always | strict validation can reject malformed callers early |
+| `addParameterSchema(schema)` | Purista schema | optional | extra contract clarity vs additional schema maintenance |
+| `addOutputSchema(schema)` | Purista schema | optional | stronger guarantees for downstream callers |
+
+### Models & tools
+
+| Method | Options | Use when | Trade-off |
+| --- | --- | --- | --- |
+| `defineModel(alias)` | model alias string | agent should use model provider | aliases must be satisfied at runtime |
+| `allowTool({ serviceName, serviceVersion, commandName })` | command address | agent may call existing commands | explicit allowlists require setup but improve security |
+
+### Conversation & knowledge
+
+| Method | Options | Use when | Trade-off |
+| --- | --- | --- | --- |
+| `persistConversation('user', overrides?)` | `maxFrames`, `strategy`, `storeName` | interactive chat memory | larger context can increase token usage |
+| `persistConversation('agent', overrides?)` | `maxFrames`, `strategy`, `storeName` | background/long workflows | summary compression may lose very fine detail |
+| `useKnowledgeAdapter({ adapterName, options? })` | adapter alias + backend options | RAG / FAQ / document lookup | requires adapter provisioning at runtime |
+
+### Runtime behavior & exposure
+
+| Method | Options | Use when | Trade-off |
+| --- | --- | --- | --- |
+| `setConcurrency({ poolId })` | pool identifier | isolate workloads by pool | actual worker count still configured at runtime |
+| `setRetryPolicy({ maxAttempts, strategy, delayMs })` | retry policy | transient model/tool failures expected | retries improve resilience but can add latency |
+| `exposeAsHttpEndpoint(method, path, ...)` | HTTP config | endpoint should be reachable via API | public API stability commitment |
+| `setStreamingMode('sse' \| 'chunked' \| 'buffered')` | stream mode | non-default transport behavior needed | buffered hides incremental progress |
+
 ## Handler context breakdown
 
 The handler receives a familiar context object with agent-specific helpers:

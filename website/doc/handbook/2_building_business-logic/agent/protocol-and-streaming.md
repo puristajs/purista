@@ -44,6 +44,14 @@ export const supportAgent = new AgentBuilder({ ... })
 
 SSE is the default streaming mode for exposed agent endpoints. Use `.setStreamingMode(...)` only when you need `chunked` or `buffered`.
 
+### Streaming mode decision guide
+
+| Mode | Best for | Pros | Cons |
+| --- | --- | --- | --- |
+| `sse` (default) | browser/UI progressive rendering | native event model, simple client consumption | long-lived HTTP connections |
+| `chunked` | custom backend consumers | lightweight transport control | client parsing conventions required |
+| `buffered` | request/response APIs needing final-only payload | simplest client behavior | no progressive updates |
+
 On the server side you can reuse the helper that turns envelopes into Vercel AI SDK events:
 
 ```ts
@@ -103,6 +111,14 @@ For the full protocol semantics, message contract, and interoperability guidance
 - Throw a `HandledError` when the agent can recover or wants to inform the caller about user-facing issues. The runtime emits an `error` frame with `handled: true` and propagates the HTTP status code if the agent is exposed via HTTP.
 - Throwing anything else marks the frame as `handled: false`. The runtime still wraps it inside a structured error frame, preserving stack traces inside `details` for debugging.
 - Retries and concurrency guarantees happen before frames are emitted, so consumers see idempotent streams even when the agent internally retries a provider call.
+
+### Error handling choices
+
+| Choice | Use when | Result |
+| --- | --- | --- |
+| throw `HandledError` | expected/business errors | protocol `error` frame with `handled: true` |
+| throw unknown/Error | unexpected/system failures | protocol `error` frame with `handled: false` |
+| rollback staged conversation (`revertLast`) + throw | model call failed after staging input | avoids duplicated turns on retry |
 
 ## Token usage & costs
 

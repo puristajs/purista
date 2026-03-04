@@ -27,6 +27,15 @@ Agents rarely operate statelessly. They need conversation history, scratchpads, 
 
 You can always override via `persistConversation('user', { maxFrames: 80, strategy: 'summary' })`.
 
+### persistConversation options reference
+
+| Option | What it controls | Why/when to change |
+| --- | --- | --- |
+| preset (`'user' \| `'agent'`) | default strategy + frame budget | choose chat richness (`user`) vs token efficiency (`agent`) |
+| `maxFrames` | number of recent frames kept verbatim | increase for context-heavy conversations, decrease for lower token usage |
+| `strategy` (`full` \| `summary`) | overflow handling mode | `full` drops oldest frames; `summary` compacts overflow into summary |
+| `storeName` | logical store namespace in manifest | advanced multi-store setups or migration control |
+
 ### Minimal handler pattern (retry-safe)
 
 ```ts
@@ -108,6 +117,13 @@ new AgentBuilder({ ... })
     return { message: output }
   })
 ```
+
+### Knowledge adapter options reference
+
+| Option | Purpose | Typical example |
+| --- | --- | --- |
+| `adapterName` | alias used in handler lookup | `supportFaq`, `productCatalog`, `roadmap` |
+| `options` | adapter-specific tuning/config | `{ locale: 'en-US', topK: 5 }` |
 
 - The default adapter is in-memory; plug in Redis, PGVector, or any other backend by passing `knowledgeAdapters` to `getInstance`.
 - Adapter contracts are intentionally tiny (`query(name, query, limit)`), making it easy to wrap existing vector search clients.

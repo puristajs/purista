@@ -49,6 +49,20 @@ await supportAgentInstance.start()
 - `models` must satisfy aliases declared via `.defineModel(...)` in the agent builder.
 - Session stores, knowledge adapters, and pool managers default to in-memory implementations.
 
+## Runtime options reference
+
+`getInstance(eventBridge, options)` supports:
+
+| Option | Purpose | Typical choice | Notes |
+| --- | --- | --- | --- |
+| `models` | bind model aliases to provider instances | required in real workloads | fail-fast when a declared alias is missing |
+| `poolConfig.poolId` | select execution pool namespace | explicit per workload class | defaults to `agent:<agentName>` |
+| `poolConfig.maxWorkers` | cap parallel runs in-process | `1` locally, tuned in prod | runtime/deploy setting, not hardcoded |
+| `sessionStore` | persistence backend for conversation/session state | in-memory locally, Redis/DB in prod | `context.conversation` uses this backend |
+| `knowledgeAdapters` | RAG/document adapters by alias | in-memory or vector-store-backed | must match aliases used by builder |
+| `logger`, `tracer`, `spanProcessor` | observability integration | inherit app defaults | keeps agent telemetry aligned with services |
+| `config`, `resources` | custom app-specific dependencies | optional | use sparingly to keep handlers focused |
+
 ## Runtime pool config (important)
 
 Builder config only assigns a pool id.  
@@ -130,7 +144,20 @@ for (const envelope of result) {
 ```
 
 Use the optional `stream` argument to attach a responder that processes frames as the agent emits them (ideal for WebSockets or web streams).
-If `sessionId` is provided and payload is an object, `invokeAgent` injects it automatically when missing so implicit `context.session.load()` works without manual payload wiring.
+If `sessionId` is provided and payload is an object, `invokeAgent` injects it automatically when missing so implicit `context.conversation` / `context.session` resolution works without manual payload wiring.
+
+### invokeAgent options reference
+
+| Option | Purpose | Use case |
+| --- | --- | --- |
+| `agentName`, `agentVersion` | target agent | required for every invocation |
+| `payload` | main input | same shape as agent payload schema |
+| `parameter` | optional side-channel input | locale, channel, feature flags |
+| `sessionId` | stable conversation identity | continue existing conversation across invocations |
+| `principalId`, `tenantId` | identity/multi-tenant isolation | per-user or per-tenant memory partitioning |
+| `correlationId` | trace correlation | linking runs to upstream workflows |
+| `timeoutMs` | invoke timeout | fail faster for synchronous APIs |
+| `stream` | receive frames incrementally | websockets/custom transports |
 
 ## HTTP exposure
 

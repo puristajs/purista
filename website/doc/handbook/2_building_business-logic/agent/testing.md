@@ -41,6 +41,15 @@ The scaffold already:
 
 Start from that test and expand scenarios as your handler grows.
 
+## Recommended test matrix
+
+| Scope | What to assert | Why |
+| --- | --- | --- |
+| handler unit | message/tool/telemetry frames, conversation updates | protects core agent logic deterministically |
+| retry/error path | rollback behavior (`revertLast`) and handled errors | prevents duplicated turns and silent failures |
+| integration (command -> agent) | schema validation + `context.invokeAgent` wiring | verifies real app composition |
+| transport | SSE/chunk consumers parse protocol correctly | prevents frontend/runtime protocol drift |
+
 ## Unit test pattern (agent runtime)
 
 Use a deterministic test provider so no external LLM API is needed:

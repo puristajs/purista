@@ -25,6 +25,13 @@ export interface ModelProvider {
 - `EchoProvider` — deterministic echo, perfect for tests and documentation
 - `AiSdkProvider` — wraps any [Vercel AI SDK](https://ai-sdk.dev/docs/introduction) `LanguageModel`, unlocking OpenAI, Anthropic, Google, Ollama, Azure OpenAI, etc.
 
+## Provider choice guide
+
+| Provider | Best for | Pros | Cons |
+| --- | --- | --- | --- |
+| `EchoProvider` | tests/docs/local scaffolds | deterministic, zero external dependency | no real model behavior |
+| `AiSdkProvider` | production AI workloads | broad provider ecosystem, telemetry support, feature-rich options | needs external API/model runtime |
+
 ## Install provider packages
 
 ::: code-group
@@ -77,6 +84,16 @@ Runtime injection through `getInstance(..., { models })` is the default pattern 
 
 Use the shared registry only when you intentionally want process-wide provider defaults reused across multiple runtimes.
 
+## AiSdkProvider options reference
+
+| Option | Purpose | Typical usage |
+| --- | --- | --- |
+| `model` | underlying AI SDK language model | `openai('gpt-4o-mini')`, anthropic, ollama, etc. |
+| `systemPrompt` | static system instruction baseline | role/persona and guardrails |
+| `defaults.temperature` | response variability | lower for deterministic support flows |
+| `defaults.maxOutputTokens` | output length cap | control latency and token spend |
+| `defaults.topP`, `defaults.topK`, ... | provider-specific tuning | optional experimentation |
+
 ## Per-run overrides with metadata
 
 `AiSdkProvider` understands the `metadata.aiSdk` object to override call options without recreating the provider:
@@ -94,6 +111,12 @@ await context.models['openai:gpt-4o-mini'].generate({
 ```
 
 Background queues (or orchestration services) can set the same metadata field to experiment with temperature, max tokens, tool choices, JSON mode, and more.
+
+When deciding between static defaults and per-run overrides:
+
+- use defaults for stable baseline behavior
+- use per-run overrides for feature flags, A/B tests, or special routes
+- keep overrides explicit so evaluation/test comparisons stay reproducible
 
 ## Telemetry & tracing
 
