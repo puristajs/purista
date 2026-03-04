@@ -4,7 +4,7 @@ import { type TriageAgentInput, triageAgentInputSchema } from './schema.js'
 
 type TriageAgentContext = AgentHandlerContext<TriageAgentInput, unknown>
 
-export const triageAgentDefinition = new AgentBuilder({
+export const triageAgent = new AgentBuilder({
 	agentName: 'triageAgent',
 	agentVersion: '1',
 	description: 'Escalation helper agent',

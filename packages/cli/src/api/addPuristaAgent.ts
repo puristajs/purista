@@ -32,7 +32,10 @@ export const addPuristaAgent = async (input: {
 
 	await mkdir(agentPath, { recursive: true })
 
-	const builderFileBaseName = convertToProjectFileCasing(`${input.agentName} agent`, input.puristaConfig)
+	const builderFileBaseName = convertToProjectFileCasing(
+		/agent$/i.test(input.agentName) ? input.agentName : `${input.agentName} agent`,
+		input.puristaConfig,
+	)
 
 	await writeFile(
 		join(agentPath, `${builderFileBaseName}.ts`),

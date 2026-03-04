@@ -28,7 +28,7 @@ const getFinalMessage = (value: unknown): string => {
 	)
 }
 
-export const supportAgentDefinition = new AgentBuilder({
+export const supportAgent = new AgentBuilder({
 	agentName: 'supportAgent',
 	agentVersion: '1',
 	description: 'Support agent using tool calls and optional delegation to triageAgent',

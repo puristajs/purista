@@ -7,8 +7,8 @@ import { AiSdkProvider } from '@purista/ai'
 import { DefaultEventBridge, gracefulShutdown, initLogger, type LogLevelName } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
 
-import { supportAgentDefinition } from './agents/supportAgent/v1/supportAgent.js'
-import { triageAgentDefinition } from './agents/triageAgent/v1/triageAgent.js'
+import { supportAgent } from './agents/supportAgent/v1/supportAgent.js'
+import { triageAgent } from './agents/triageAgent/v1/triageAgent.js'
 import { supportV1Service } from './service/support/v1/index.js'
 
 const buildOpenAiProvider = (apiKey: string) => {
@@ -35,7 +35,7 @@ export async function main() {
 	const supportService = await supportV1Service.getInstance(eventBridge, { logger })
 	await supportService.start()
 
-	const triageAgent = await triageAgentDefinition.getInstance(eventBridge, {
+	const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
 		logger,
 		models: {
 			'openai:gpt-5.2-mini': provider,
@@ -44,9 +44,9 @@ export async function main() {
 			maxWorkers: 1,
 		},
 	})
-	await triageAgent.start()
+	await triageAgentInstance.start()
 
-	const supportAgent = await supportAgentDefinition.getInstance(eventBridge, {
+	const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 		logger,
 		models: {
 			'openai:gpt-5.2-mini': provider,
@@ -56,12 +56,12 @@ export async function main() {
 			maxWorkers: 2,
 		},
 	})
-	await supportAgent.start()
+	await supportAgentInstance.start()
 
 	const httpService = await honoV1Service.getInstance(eventBridge, {
 		logger,
 		serviceConfig: {
-			services: [supportService, supportAgent, triageAgent],
+			services: [supportService, supportAgentInstance, triageAgentInstance],
 		},
 	})
 
@@ -80,7 +80,7 @@ export async function main() {
 	logger.info('Agent stream endpoint: POST /api/v1/agents/supportAgent')
 	logger.info('Follow-up endpoint: POST /api/v1/support/follow-up')
 
-	gracefulShutdown(logger, [server, httpService, supportAgent, triageAgent, supportService, eventBridge])
+	gracefulShutdown(logger, [server, httpService, supportAgentInstance, triageAgentInstance, supportService, eventBridge])
 }
 
 void main()

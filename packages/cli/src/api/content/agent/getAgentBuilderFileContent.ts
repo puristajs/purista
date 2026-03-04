@@ -2,6 +2,11 @@ import type { Options } from 'code-block-writer'
 import CodeBlockWriter from 'code-block-writer'
 import { camelCase } from '../../change-case.js'
 
+const toAgentIdentifier = (name: string) => {
+	const normalized = camelCase(name)
+	return normalized.endsWith('Agent') ? normalized : `${normalized}Agent`
+}
+
 export const getAgentBuilderFileContent = (input: {
 	agentName: string
 	agentDescription: string
@@ -9,9 +14,8 @@ export const getAgentBuilderFileContent = (input: {
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
-	const normalizedAgentName = camelCase(input.agentName)
-	const schemaName = `${normalizedAgentName}InputSchema`
-	const definitionName = `${normalizedAgentName}AgentDefinition`
+	const agentIdentifier = toAgentIdentifier(input.agentName)
+	const schemaName = `${agentIdentifier}InputSchema`
 
 	writer.writeLine("import { AgentBuilder } from '@purista/ai'")
 	writer.writeLine("import { extendApi } from '@purista/core'")
@@ -30,9 +34,9 @@ export const getAgentBuilderFileContent = (input: {
 	})
 	writer.writeLine(')').blankLine()
 
-	writer.writeLine(`export const ${definitionName} = new AgentBuilder({`)
+	writer.writeLine(`export const ${agentIdentifier} = new AgentBuilder({`)
 	writer.indent(() => {
-		writer.writeLine(`agentName: '${normalizedAgentName}',`)
+		writer.writeLine(`agentName: '${agentIdentifier}',`)
 		writer.writeLine(`agentVersion: '${input.agentVersion}',`)
 		writer.writeLine(`description: '${input.agentDescription}',`)
 	})
@@ -41,8 +45,8 @@ export const getAgentBuilderFileContent = (input: {
 		writer.writeLine(`.addPayloadSchema(${schemaName})`)
 		writer.writeLine(".defineModel('openai:gpt-4o-mini')")
 		writer.writeLine(".persistHistory({ storeName: 'aiConversation', maxFrames: 20 })")
-		writer.writeLine(`.setConcurrency({ poolId: '${normalizedAgentName}' })`)
-		writer.writeLine(`.exposeAsHttpEndpoint('POST', 'agents/${normalizedAgentName}')`)
+		writer.writeLine(`.setConcurrency({ poolId: '${agentIdentifier}' })`)
+		writer.writeLine(`.exposeAsHttpEndpoint('POST', 'agents/${agentIdentifier}')`)
 		writer.writeLine(
 			'.setHandler<{ sessionId?: string; prompt: string; context?: string }>(async function (context, payload) {',
 		)

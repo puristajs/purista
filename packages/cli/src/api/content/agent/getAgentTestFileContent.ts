@@ -2,27 +2,32 @@ import type { Options } from 'code-block-writer'
 import CodeBlockWriter from 'code-block-writer'
 import { camelCase } from '../../change-case.js'
 
+const toAgentIdentifier = (name: string) => {
+	const normalized = camelCase(name)
+	return normalized.endsWith('Agent') ? normalized : `${normalized}Agent`
+}
+
 export const getAgentTestFileContent = (input: {
 	agentName: string
 	builderImportName: string
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
-	const normalizedAgentName = camelCase(input.agentName)
+	const agentIdentifier = toAgentIdentifier(input.agentName)
 
 	writer.writeLine("import { DefaultEventBridge } from '@purista/core'")
 	writer.writeLine("import { EchoProvider } from '@purista/ai'")
 	writer.writeLine("import { describe, expect, it } from 'vitest'")
-	writer.writeLine(`import { ${normalizedAgentName}AgentDefinition } from '${input.builderImportName}'`).blankLine()
+	writer.writeLine(`import { ${agentIdentifier} } from '${input.builderImportName}'`).blankLine()
 
-	writer.writeLine(`describe('${normalizedAgentName}AgentDefinition', () => {`)
+	writer.writeLine(`describe('${agentIdentifier}', () => {`)
 	writer.indent(() => {
 		writer.writeLine("it('runs with deterministic provider and emits protocol frames', async () => {")
 		writer.indent(() => {
 			writer.writeLine('const eventBridge = new DefaultEventBridge()')
 			writer.writeLine('await eventBridge.start()')
 			writer.blankLine()
-			writer.writeLine(`const agent = await ${normalizedAgentName}AgentDefinition.getInstance(eventBridge, {`)
+			writer.writeLine(`const agent = await ${agentIdentifier}.getInstance(eventBridge, {`)
 			writer.indent(() => {
 				writer.writeLine("models: { 'openai:gpt-4o-mini': new EchoProvider() },")
 			})

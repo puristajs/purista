@@ -1,5 +1,5 @@
-import { createActor, createProtocolEnvelope, protocolVersion } from './helpers.js'
-import type { AgentProtocolEnvelope, AgentProtocolFrame } from './types.js'
+import { createActor, createProtocolEnvelope } from './helpers.js'
+import { type AgentProtocolEnvelope, type AgentProtocolFrame, protocolVersion } from './types.js'
 
 /**
  * Reference shape that can be used as a bridge model for Agent-to-Agent style integrations.

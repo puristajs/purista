@@ -29,7 +29,7 @@ Use a deterministic test provider so no external LLM API is needed:
 import { describe, expect, it } from 'vitest'
 import { DefaultEventBridge } from '@purista/core'
 import type { ModelProvider, ProviderRequest } from '@purista/ai'
-import { supportAgentDefinition } from './supportAgent.js'
+import { supportAgent } from './supportAgent.js'
 
 class DeterministicProvider implements ModelProvider {
   readonly name = 'deterministic-test-provider'
@@ -47,7 +47,7 @@ describe('support agent', () => {
     const eventBridge = new DefaultEventBridge()
     await eventBridge.start()
 
-    const agent = await supportAgentDefinition.getInstance(eventBridge, {
+    const agent = await supportAgent.getInstance(eventBridge, {
       models: { 'openai:gpt-5.2-mini': new DeterministicProvider() },
     })
     await agent.start()

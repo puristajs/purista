@@ -9,8 +9,8 @@ import {
 } from '@purista/core'
 import { describe, expect, it } from 'vitest'
 
-import { supportAgentDefinition } from '../../../../../agents/supportAgent/v1/supportAgent.js'
-import { triageAgentDefinition } from '../../../../../agents/triageAgent/v1/triageAgent.js'
+import { supportAgent } from '../../../../../agents/supportAgent/v1/supportAgent.js'
+import { triageAgent } from '../../../../../agents/triageAgent/v1/triageAgent.js'
 import { supportV1Service } from '../../index.js'
 
 class DeterministicProvider implements ModelProvider {
@@ -67,20 +67,20 @@ describe('runSupportAgentCommandBuilder', () => {
 
 		const provider = new DeterministicProvider()
 		const supportService = await supportV1Service.getInstance(eventBridge, { logger })
-		const triageAgent = await triageAgentDefinition.getInstance(eventBridge, {
+		const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-5.2-mini': provider },
 			poolConfig: { maxWorkers: 1 },
 		})
-		const supportAgent = await supportAgentDefinition.getInstance(eventBridge, {
+		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-5.2-mini': provider },
 			poolConfig: { maxWorkers: 1 },
 		})
 
 		await supportService.start()
-		await triageAgent.start()
-		await supportAgent.start()
+		await triageAgentInstance.start()
+		await supportAgentInstance.start()
 		await waitForRegistration()
 
 		try {
@@ -91,8 +91,8 @@ describe('runSupportAgentCommandBuilder', () => {
 				}),
 			)
 		} finally {
-			await supportAgent.stop()
-			await triageAgent.stop()
+			await supportAgentInstance.stop()
+			await triageAgentInstance.stop()
 			await supportService.destroy()
 			await eventBridge.destroy()
 		}

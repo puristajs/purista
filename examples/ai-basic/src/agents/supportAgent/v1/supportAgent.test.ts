@@ -2,8 +2,8 @@ import type { ModelProvider, ProviderRequest } from '@purista/ai'
 import { DefaultEventBridge, initLogger } from '@purista/core'
 import { describe, expect, it } from 'vitest'
 import { supportV1Service } from '../../../service/support/v1/index.js'
-import { triageAgentDefinition } from '../../triageAgent/v1/triageAgent.js'
-import { supportAgentDefinition } from './supportAgent.js'
+import { triageAgent } from '../../triageAgent/v1/triageAgent.js'
+import { supportAgent } from './supportAgent.js'
 
 class DeterministicProvider implements ModelProvider {
 	readonly name = 'deterministic-test-provider'
@@ -24,7 +24,7 @@ const waitForRegistration = async () => {
 	await new Promise(resolve => setTimeout(resolve, 25))
 }
 
-describe('supportAgentDefinition', () => {
+describe('supportAgent', () => {
 	it('uses tool calls, optional agent delegation, and emits final/telemetry frames', async () => {
 		const logger = initLogger('error')
 		const eventBridge = new DefaultEventBridge({ logger })
@@ -32,24 +32,24 @@ describe('supportAgentDefinition', () => {
 
 		const provider = new DeterministicProvider()
 		const supportService = await supportV1Service.getInstance(eventBridge, { logger })
-		const triageAgent = await triageAgentDefinition.getInstance(eventBridge, {
+		const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-5.2-mini': provider },
 			poolConfig: { maxWorkers: 1 },
 		})
-		const supportAgent = await supportAgentDefinition.getInstance(eventBridge, {
+		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-5.2-mini': provider },
 			poolConfig: { maxWorkers: 1 },
 		})
 
 		await supportService.start()
-		await triageAgent.start()
-		await supportAgent.start()
+		await triageAgentInstance.start()
+		await supportAgentInstance.start()
 		await waitForRegistration()
 
 		try {
-			const { envelopes } = await supportAgent.invoke({
+			const { envelopes } = await supportAgentInstance.invoke({
 				payload: {
 					prompt: 'I need an urgent refund for enterprise billing',
 					message: 'I need an urgent refund for enterprise billing',
@@ -87,8 +87,8 @@ describe('supportAgentDefinition', () => {
 			expect(finalMessage).toContain('MODEL:')
 			expect(telemetryFrames.length).toBeGreaterThan(0)
 		} finally {
-			await supportAgent.stop()
-			await triageAgent.stop()
+			await supportAgentInstance.stop()
+			await triageAgentInstance.stop()
 			await supportService.destroy()
 			await eventBridge.destroy()
 		}

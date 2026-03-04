@@ -14,7 +14,7 @@ An `AgentDefinition` is inert until you bind runtime dependencies (event bridge,
 import { DefaultEventBridge } from '@purista/core'
 import { AiSdkProvider } from '@purista/ai'
 import { createOpenAI } from '@ai-sdk/openai'
-import { supportAgentDefinition } from './agents/supportAgent/v1/supportAgent.js'
+import { supportAgent } from './agents/supportAgent/v1/supportAgent.js'
 
 const eventBridge = new DefaultEventBridge()
 await eventBridge.start()
@@ -26,7 +26,7 @@ const provider = new AiSdkProvider({
   defaults: { temperature: 0.2 },
 })
 
-const supportAgent = await supportAgentDefinition.getInstance(eventBridge, {
+const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   models: {
     'openai:gpt-5.2-mini': provider,
   },
@@ -36,7 +36,7 @@ const supportAgent = await supportAgentDefinition.getInstance(eventBridge, {
   },
 })
 
-await supportAgent.start()
+await supportAgentInstance.start()
 ```
 
 - `eventBridge` is mandatory; every agent registers an internal service (`<agentName>.run`).
@@ -101,7 +101,7 @@ Use the optional `stream` argument to attach a responder that processes frames a
 `.exposeAsHttpEndpoint('POST', 'agents/supportAgent')` automatically adds an endpoint to your generated OpenAPI spec. The endpoint behaves like any streaming command:
 
 ```ts
-export const supportAgentDefinition = new AgentBuilder({ ... })
+export const supportAgent = new AgentBuilder({ ... })
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
   .setHandler(...)
   .build()

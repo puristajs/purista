@@ -37,7 +37,7 @@ If you only `return { message: '...' }`, the runtime automatically emits a final
 When you expose an agent as an HTTP endpoint, the bridge forwards frames immediately. Server-Sent Events (SSE) is the recommended mode:
 
 ```ts
-export const supportAgentDefinition = new AgentBuilder({ ... })
+export const supportAgent = new AgentBuilder({ ... })
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
   .build()
 ```
