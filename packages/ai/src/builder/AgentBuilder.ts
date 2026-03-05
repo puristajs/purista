@@ -804,6 +804,7 @@ export class AgentBuilder<
 
 					if (provider.embed) {
 						const embedProvider = provider.embed
+						const embedManyProvider = provider.embedMany
 						instrumentedEmbeddings[alias] = {
 							name: provider.name,
 							embed: async request => {
@@ -844,9 +845,8 @@ export class AgentBuilder<
 									throw error
 								}
 							},
-							embedMany: provider.embedMany
+							embedMany: embedManyProvider
 								? async request => {
-										const embedManyProvider = provider.embedMany
 										const requestStartedAt = Date.now()
 										try {
 											const metadata = request.metadata ?? {}
