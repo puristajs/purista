@@ -94,6 +94,86 @@ describe('invokeAgent', () => {
 		expect(eventBridge.invoke).toHaveBeenCalledTimes(1)
 	})
 
+	it('uses final envelopes when stream completes without chunk frames', async () => {
+		const envelopes = [{ frame: { kind: 'message', content: 'final-only', role: 'assistant' } }] as AgentProtocolEnvelope[]
+		const eventBridge = {
+			instanceId: 'instance-1',
+			openStream: vi.fn().mockResolvedValue({
+				sessionId: 'stream-1',
+				cancel: vi.fn(),
+				async *[Symbol.asyncIterator]() {
+					yield { payload: { frameType: 'complete', sequence: 1, final: envelopes } }
+				},
+			}),
+			invoke: vi.fn(),
+		} as any
+
+		const onFrame = vi.fn()
+		const onComplete = vi.fn()
+		const onError = vi.fn()
+
+		const result = await invokeAgent({
+			eventBridge,
+			agentName: 'supportAgent',
+			agentVersion: '1',
+			payload: { prompt: 'hello' },
+			stream: { onFrame, onComplete, onError },
+		})
+
+		expect(result).toEqual(envelopes)
+		expect(onFrame).toHaveBeenCalledTimes(1)
+		expect(onComplete).toHaveBeenCalledTimes(1)
+		expect(onError).not.toHaveBeenCalled()
+	})
+
+	it('throws stream error frames as UnhandledError', async () => {
+		const eventBridge = {
+			instanceId: 'instance-1',
+			openStream: vi.fn().mockResolvedValue({
+				sessionId: 'stream-1',
+				cancel: vi.fn(),
+				async *[Symbol.asyncIterator]() {
+					yield { payload: { frameType: 'error', sequence: 1, error: { message: 'stream broke' } } }
+				},
+			}),
+			invoke: vi.fn(),
+		} as any
+
+		const onError = vi.fn()
+
+		await expect(
+			invokeAgent({
+				eventBridge,
+				agentName: 'supportAgent',
+				agentVersion: '1',
+				payload: { prompt: 'hello' },
+				stream: { onFrame: vi.fn(), onComplete: vi.fn(), onError },
+			}),
+		).rejects.toThrow('stream broke')
+		expect(onError).toHaveBeenCalledTimes(1)
+	})
+
+	it('propagates fallback invoke failure to stream responder', async () => {
+		const fallbackError = new Error('fallback invoke failed')
+		const eventBridge = {
+			instanceId: 'instance-1',
+			openStream: vi.fn().mockRejectedValue(new UnhandledError(StatusCode.NotImplemented, 'stream unavailable')),
+			invoke: vi.fn().mockRejectedValue(fallbackError),
+		} as any
+
+		const onError = vi.fn()
+		await expect(
+			invokeAgent({
+				eventBridge,
+				agentName: 'supportAgent',
+				agentVersion: '1',
+				payload: { prompt: 'hello' },
+				stream: { onFrame: vi.fn(), onComplete: vi.fn(), onError },
+			}),
+		).rejects.toThrow('fallback invoke failed')
+		expect(onError).toHaveBeenCalledWith(fallbackError)
+	})
+
 	it('injects sessionId into object payloads when provided', async () => {
 		const eventBridge = {
 			instanceId: 'instance-1',

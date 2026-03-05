@@ -180,4 +180,78 @@ describe('AiSdkProvider', () => {
 		expect(ranked.rerankedDocuments).toEqual(['B', 'A'])
 		expect(ranked.ranking[0]?.score).toBe(0.95)
 	})
+
+	it('supports metadata overrides and no-schema JSON generation fallback', async () => {
+		generateTextMock.mockResolvedValueOnce({
+			text: 'override-ok',
+			usage: { inputTokens: 2, outputTokens: 1 },
+			request: { id: 'request' },
+			response: { id: 'response' },
+			providerMetadata: {},
+		})
+		generateObjectMock.mockResolvedValueOnce({
+			object: { route: 'support' },
+			reasoning: [{ text: 'chain ' }, { text: 'of thought' }],
+			usage: { inputTokens: 4, outputTokens: 2 },
+			request: { id: 'request' },
+			response: { id: 'response' },
+			providerMetadata: {},
+		})
+
+		const provider = new AiSdkProvider({
+			model: mockModel,
+			systemPrompt: 'system',
+			defaults: { temperature: 0.2 },
+		})
+
+		await provider.generate({
+			prompt: 'hello',
+			context: 'ctx',
+			metadata: {
+				aiSdk: {
+					generate: {
+						temperature: 0.4,
+					},
+				},
+			},
+		})
+		expect(generateTextMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				temperature: 0.4,
+				system: 'system\n\nctx',
+			}),
+		)
+
+		const jsonResult = await provider.generateJson({
+			prompt: 'route this',
+			metadata: {
+				aiSdk: {
+					generateJson: {
+						temperature: 0,
+					},
+				},
+			},
+		})
+		expect(generateObjectMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				output: 'no-schema',
+				temperature: 0,
+			}),
+		)
+		expect(jsonResult.reasoningText).toBe('chain of thought')
+	})
+
+	it('throws when embedding or reranking models are missing', async () => {
+		const provider = new AiSdkProvider({ model: mockModel })
+
+		await expect(provider.embed({ value: 'hello' })).rejects.toThrow(
+			'Embedding model is not configured for this provider',
+		)
+		await expect(provider.embedMany({ values: ['a', 'b'] })).rejects.toThrow(
+			'Embedding model is not configured for this provider',
+		)
+		await expect(provider.rerank({ query: 'q', documents: ['a', 'b'] })).rejects.toThrow(
+			'Reranking model is not configured for this provider',
+		)
+	})
 })

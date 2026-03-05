@@ -34,4 +34,27 @@ describe('InMemoryKnowledgeAdapter', () => {
 		})
 		expect(tenantBResults).toHaveLength(0)
 	})
+
+	it('deletes scoped and global documents', async () => {
+		const adapter = new InMemoryKnowledgeAdapter()
+		await adapter.upsert({ document: { id: 'global-1', content: 'Global FAQ entry' } })
+		await adapter.upsert({
+			document: { id: 'tenant-1', content: 'Tenant specific entry' },
+			scope: { tenantId: 'tenant-a', agentName: 'supportAgent', agentVersion: '1' },
+		})
+
+		await adapter.delete({
+			id: 'tenant-1',
+			scope: { tenantId: 'tenant-a', agentName: 'supportAgent', agentVersion: '1' },
+		})
+		const scopedResults = await adapter.query({
+			query: 'Tenant',
+			scope: { tenantId: 'tenant-a', agentName: 'supportAgent', agentVersion: '1' },
+		})
+		expect(scopedResults).toHaveLength(0)
+
+		await adapter.delete({ id: 'global-1' })
+		const globalResults = await adapter.query({ query: 'Global' })
+		expect(globalResults).toHaveLength(0)
+	})
 })
