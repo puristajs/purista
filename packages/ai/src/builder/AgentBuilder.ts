@@ -737,6 +737,7 @@ export class AgentBuilder<
 					}
 
 					if (provider.stream) {
+						const streamProvider = provider.stream
 						modelApi.stream = (request: { prompt: string; context?: string; metadata?: Record<string, unknown> }) => {
 							const requestStartedAt = Date.now()
 							let streamHandle: ReturnType<NonNullable<ModelProvider['stream']>> | undefined
@@ -747,7 +748,7 @@ export class AgentBuilder<
 										? (metadata.aiSdk as Record<string, unknown>)
 										: {}
 
-								streamHandle = provider.stream!({
+								streamHandle = streamProvider({
 									...request,
 									metadata: {
 										...metadata,
@@ -802,6 +803,7 @@ export class AgentBuilder<
 					}
 
 					if (provider.embed) {
+						const embedProvider = provider.embed
 						instrumentedEmbeddings[alias] = {
 							name: provider.name,
 							embed: async request => {
@@ -812,7 +814,7 @@ export class AgentBuilder<
 										typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
 											? (metadata.aiSdk as Record<string, unknown>)
 											: {}
-									const result = await provider.embed!({
+									const result = await embedProvider({
 										...request,
 										metadata: {
 											...metadata,
@@ -844,6 +846,7 @@ export class AgentBuilder<
 							},
 							embedMany: provider.embedMany
 								? async request => {
+										const embedManyProvider = provider.embedMany
 										const requestStartedAt = Date.now()
 										try {
 											const metadata = request.metadata ?? {}
@@ -851,7 +854,7 @@ export class AgentBuilder<
 												typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
 													? (metadata.aiSdk as Record<string, unknown>)
 													: {}
-											const result = await provider.embedMany!({
+											const result = await embedManyProvider({
 												...request,
 												metadata: {
 													...metadata,
@@ -886,6 +889,7 @@ export class AgentBuilder<
 					}
 
 					if (provider.rerank) {
+						const rerankProvider = provider.rerank
 						instrumentedRerankers[alias] = {
 							name: provider.name,
 							rerank: async request => {
@@ -896,7 +900,7 @@ export class AgentBuilder<
 										typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
 											? (metadata.aiSdk as Record<string, unknown>)
 											: {}
-									const result = (await provider.rerank!({
+									const result = (await rerankProvider({
 										...request,
 										metadata: {
 											...metadata,
