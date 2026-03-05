@@ -1,12 +1,4 @@
-import {
-	BotIcon,
-	CheckCircle2Icon,
-	MessageSquareIcon,
-	SparklesIcon,
-	WorkflowIcon,
-	WrenchIcon,
-	XCircleIcon,
-} from 'lucide-react'
+import { BotIcon, MessageSquareIcon, SparklesIcon, WorkflowIcon, WrenchIcon, XCircleIcon } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Streamdown } from 'streamdown'
 
@@ -17,7 +9,7 @@ import {
 	ConversationScrollButton,
 } from './components/ai-elements/conversation'
 import { getMcpTools, loadConversation, runSupportA2a, runSupportMcp, streamSupportAgent } from './lib/api'
-import type { AgentProtocolEnvelope, StreamPayload } from './lib/types'
+import type { AgentProtocolEnvelope, StreamPayload, WorkflowStep } from './lib/types'
 import { mapToWorkflow } from './lib/workflow'
 
 type Scenario = 'stream' | 'mcp' | 'a2a' | 'protocol'
@@ -131,31 +123,58 @@ const envelopeFingerprint = (envelope: AgentProtocolEnvelope): string => {
 	return `${envelope.conversationId ?? 'n/a'}|error|${stableJson(frame)}`
 }
 
-type FlowPhaseId = 'ingress' | 'faq' | 'triage' | 'generation' | 'result'
-type FlowPhaseStatus = 'idle' | 'running' | 'success' | 'error'
-
-type FlowPhase = {
-	id: FlowPhaseId
-	label: string
-	description: string
-	status: FlowPhaseStatus
-	isActive: boolean
-	icon: typeof WorkflowIcon
+const formatTime = (isoTimestamp?: string): string => {
+	if (!isoTimestamp) {
+		return '--:--:--'
+	}
+	try {
+		return new Date(isoTimestamp).toLocaleTimeString()
+	} catch {
+		return '--:--:--'
+	}
 }
 
-const phaseOrder: FlowPhaseId[] = ['ingress', 'faq', 'triage', 'generation', 'result']
-
-const latestPhaseByStatus = (
-	statuses: Record<FlowPhaseId, FlowPhaseStatus>,
-	matcher: (status: FlowPhaseStatus) => boolean,
-): FlowPhaseId | undefined => {
-	for (let index = phaseOrder.length - 1; index >= 0; index -= 1) {
-		const phaseId = phaseOrder[index]
-		if (phaseId && matcher(statuses[phaseId])) {
-			return phaseId
+const workflowMeta = (step: WorkflowStep): { icon: typeof WorkflowIcon; title: string; description: string } => {
+	if (step.type === 'tool') {
+		return {
+			icon: WrenchIcon,
+			title: step.label,
+			description: `${step.actor} · ${formatTime(step.timestamp)}`,
 		}
 	}
-	return undefined
+	if (step.type === 'telemetry') {
+		return {
+			icon: SparklesIcon,
+			title: 'Telemetry',
+			description: `${step.label} · ${step.actor}`,
+		}
+	}
+	if (step.type === 'error') {
+		return {
+			icon: XCircleIcon,
+			title: step.label,
+			description: `${step.actor} · ${formatTime(step.timestamp)}`,
+		}
+	}
+	if (step.category === 'ai') {
+		return {
+			icon: BotIcon,
+			title: step.label,
+			description: `${step.actor} · ${formatTime(step.timestamp)}`,
+		}
+	}
+	if (step.category === 'command') {
+		return {
+			icon: WrenchIcon,
+			title: step.label,
+			description: `${step.actor} · ${formatTime(step.timestamp)}`,
+		}
+	}
+	return {
+		icon: WorkflowIcon,
+		title: step.label,
+		description: `${step.actor} · ${formatTime(step.timestamp)}`,
+	}
 }
 
 export const App = () => {
@@ -173,61 +192,10 @@ export const App = () => {
 	const [streamPayloads, setStreamPayloads] = useState<StreamPayload[]>([])
 	const [conversationHistory, setConversationHistory] = useState<ConversationHistoryItem[]>(getStoredHistory)
 	const [mcpTools, setMcpTools] = useState<unknown[] | null>(null)
+	const [isGenerating, setIsGenerating] = useState(false)
 	const seenFramesRef = useRef<Set<string>>(new Set())
 
 	const workflow = useMemo(() => mapToWorkflow(envelopes), [envelopes])
-
-	const flowPhases = useMemo(() => {
-		const hasError = workflow.some(step => step.status === 'error' || step.type === 'error')
-		const hasTopLevelFinal = workflow.some(
-			step =>
-				step.depth === 0 &&
-				step.type === 'message' &&
-				(step.details as { final?: boolean } | undefined)?.final === true,
-		)
-		const lookupStep = [...workflow].reverse().find(step => step.label.includes('support.1.lookupFaq'))
-		const triageStep = [...workflow].reverse().find(step => step.label.includes('triageAgent.1.run'))
-		const generationStep = [...workflow]
-			.reverse()
-			.find(step => step.label.toLowerCase().includes('generating final answer'))
-
-		const phaseStatus: Record<FlowPhaseId, FlowPhaseStatus> = {
-			ingress: workflow.length > 0 ? 'success' : 'idle',
-			faq: lookupStep?.status ?? 'idle',
-			triage: triageStep?.status ?? 'idle',
-			generation: hasError ? 'error' : hasTopLevelFinal ? 'success' : (generationStep?.status ?? 'idle'),
-			result: hasError ? 'error' : hasTopLevelFinal ? 'success' : 'idle',
-		}
-
-		const activePhase =
-			latestPhaseByStatus(phaseStatus, value => value === 'running') ??
-			latestPhaseByStatus(phaseStatus, value => value !== 'idle')
-
-		const phaseConfig: Array<{ id: FlowPhaseId; label: string; icon: typeof WorkflowIcon; description: string }> = [
-			{
-				id: 'ingress',
-				label: 'PURISTA ingress',
-				icon: WorkflowIcon,
-				description: 'Request accepted in service/stream',
-			},
-			{ id: 'faq', label: 'Command tool', icon: WrenchIcon, description: 'Tool command invocation' },
-			{ id: 'triage', label: 'Agent delegation', icon: BotIcon, description: 'Agent-to-agent run inside app' },
-			{ id: 'generation', label: 'AI generation', icon: SparklesIcon, description: 'Final response generation' },
-			{ id: 'result', label: 'Stream result', icon: CheckCircle2Icon, description: 'Final chunk/telemetry emitted' },
-		]
-
-		return phaseConfig.map<FlowPhase>(phase => {
-			const statusValue = phaseStatus[phase.id]
-			return {
-				id: phase.id,
-				label: phase.label,
-				description: phase.description,
-				status: statusValue,
-				isActive: activePhase === phase.id,
-				icon: hasError && phase.id === 'result' ? XCircleIcon : phase.icon,
-			}
-		})
-	}, [workflow])
 
 	const chatTimeline = useMemo(() => {
 		const rows: Array<{ message: ChatMessage; tools: ChatMessage[] }> = []
@@ -468,6 +436,21 @@ export const App = () => {
 	}
 
 	const execute = async () => {
+		if (isGenerating) {
+			return
+		}
+		const question = prompt.trim()
+		if (!question) {
+			return
+		}
+		setPrompt('')
+		setAssistantDraft('')
+		setEnvelopes([])
+		setStreamPayloads([])
+		seenFramesRef.current = new Set()
+		setCommandOutput('{}')
+		setCanRetry(false)
+		setIsGenerating(true)
 		try {
 			if (scenario === 'mcp') {
 				await runMcp()
@@ -483,10 +466,15 @@ export const App = () => {
 			appendAssistantMessage(`Error: ${message}`)
 			setStatus('Error')
 			setCanRetry(true)
+		} finally {
+			setIsGenerating(false)
 		}
 	}
 
 	const applySuggestedPrompt = (nextPrompt: string) => {
+		if (isGenerating) {
+			return
+		}
 		setPrompt(nextPrompt)
 	}
 
@@ -519,6 +507,7 @@ export const App = () => {
 							setAssistantDraft('')
 							setStatus('Ready')
 							setCanRetry(false)
+							setIsGenerating(false)
 						}}
 					>
 						New chat
@@ -663,6 +652,7 @@ export const App = () => {
 										className={`button secondary suggestion-button ${
 											prompt.trim() === suggestion.trim() ? 'active' : ''
 										}`}
+										disabled={isGenerating}
 										onClick={() => applySuggestedPrompt(suggestion)}
 									>
 										{suggestion}
@@ -672,6 +662,7 @@ export const App = () => {
 							<div className="prompt-bar">
 								<textarea
 									value={prompt}
+									disabled={isGenerating}
 									onChange={event => setPrompt(event.target.value)}
 									onKeyDown={event => {
 										if (event.key !== 'Enter' || event.shiftKey) {
@@ -687,6 +678,7 @@ export const App = () => {
 								<button
 									type="button"
 									className="button primary-icon send-button"
+									disabled={isGenerating}
 									onClick={() => void execute()}
 									aria-label="Send message"
 								>
@@ -713,43 +705,47 @@ export const App = () => {
 							</div>
 						) : (
 							<div className="flow-wrap">
-								<div className="workflow-column">
-									{flowPhases.map((phase, index) => {
-										const Icon = phase.icon
-										const next = flowPhases[index + 1]
-										const edgeClass =
-											phase.status === 'running'
-												? 'flow-edge-active'
-												: phase.status === 'success'
-													? 'flow-edge-success'
-													: phase.status === 'error'
-														? 'flow-edge-error'
-														: 'flow-edge-idle'
-										return (
-											<div key={phase.id} className="workflow-step-wrap">
-												<div
-													className={`flow-node-card flow-status-${phase.status} ${phase.isActive ? 'flow-active' : ''}`}
-												>
-													<div className="flow-node-content">
-														<div className="flow-node-icon-wrap">
-															<Icon size={16} />
+								{workflow.length === 0 ? (
+									<div className="placeholder">No workflow frames yet.</div>
+								) : (
+									<div className="workflow-column">
+										{workflow.map((step, index) => {
+											const { icon: Icon, title, description } = workflowMeta(step)
+											const next = workflow[index + 1]
+											const edgeClass =
+												step.status === 'running'
+													? 'flow-edge-active'
+													: step.status === 'success'
+														? 'flow-edge-success'
+														: step.status === 'error'
+															? 'flow-edge-error'
+															: 'flow-edge-idle'
+											return (
+												<div key={`${step.id}-${index}`} className={`workflow-step-wrap depth-${step.depth}`}>
+													<div
+														className={`flow-node-card flow-status-${step.status} ${step.status === 'running' ? 'flow-active' : ''}`}
+													>
+														<div className="flow-node-content">
+															<div className="flow-node-icon-wrap">
+																<Icon size={16} />
+															</div>
+															<div className="flow-node-copy">
+																<div className="flow-title">{title}</div>
+																<div className="flow-meta">{description}</div>
+															</div>
+															<div className={`flow-status-pill flow-status-pill-${step.status}`}>{step.status}</div>
 														</div>
-														<div className="flow-node-copy">
-															<div className="flow-title">{phase.label}</div>
-															<div className="flow-meta">{phase.description}</div>
-														</div>
-														<div className={`flow-status-pill flow-status-pill-${phase.status}`}>{phase.status}</div>
 													</div>
+													{next && (
+														<div className={`workflow-edge ${edgeClass}`}>
+															<span className="workflow-edge-dot" />
+														</div>
+													)}
 												</div>
-												{next && (
-													<div className={`workflow-edge ${edgeClass}`}>
-														<span className="workflow-edge-dot" />
-													</div>
-												)}
-											</div>
-										)
-									})}
-								</div>
+											)
+										})}
+									</div>
+								)}
 							</div>
 						)}
 						<details className="output-details" open={scenario === 'mcp' || scenario === 'a2a'}>
