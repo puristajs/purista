@@ -1,0 +1,10 @@
+{
+	"extends": "./tsconfig.json",
+	"compilerOptions": {
+		"rootDir": "src/frontend",
+		"jsx": "react-jsx",
+		"types": ["vite/client", "vitest/globals"]
+	},
+	"include": ["src/frontend/**/*"],
+	"exclude": []
+}

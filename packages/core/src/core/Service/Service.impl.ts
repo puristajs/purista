@@ -635,45 +635,49 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 						[PuristaSpanTag.ReceiverServiceTarget]: receiver.serviceTarget,
 					})
 
-					if (payloadSchema) {
-						const res = await validate(payloadSchema, payload)
-						if (!res.success) {
-							const err = new UnhandledError(StatusCode.BadRequest, 'agent invoke payload schema validation failed', {
-								issues: res.issues,
-								invokedFrom: sender,
-								responseFrom: receiver,
-							})
-
-							span.recordException(err)
-							span.setStatus({
-								code: SpanStatusCode.ERROR,
-								message: err.message,
-							})
-
-							throw err
-						}
-					}
-
-					if (parameterSchema) {
-						const res = await validate(parameterSchema, parameter)
-						if (!res.success) {
-							const err = new UnhandledError(StatusCode.BadRequest, 'agent invoke parameter schema validation failed', {
-								issues: res.issues,
-								invokedFrom: sender,
-								responseFrom: receiver,
-							})
-
-							span.recordException(err)
-							span.setStatus({
-								code: SpanStatusCode.ERROR,
-								message: err.message,
-							})
-
-							throw err
-						}
-					}
-
 					try {
+						if (payloadSchema) {
+							const res = await validate(payloadSchema, payload)
+							if (!res.success) {
+								const err = new UnhandledError(StatusCode.BadRequest, 'agent invoke payload schema validation failed', {
+									issues: res.issues,
+									invokedFrom: sender,
+									responseFrom: receiver,
+								})
+
+								span.recordException(err)
+								span.setStatus({
+									code: SpanStatusCode.ERROR,
+									message: err.message,
+								})
+
+								throw err
+							}
+						}
+
+						if (parameterSchema) {
+							const res = await validate(parameterSchema, parameter)
+							if (!res.success) {
+								const err = new UnhandledError(
+									StatusCode.BadRequest,
+									'agent invoke parameter schema validation failed',
+									{
+										issues: res.issues,
+										invokedFrom: sender,
+										responseFrom: receiver,
+									},
+								)
+
+								span.recordException(err)
+								span.setStatus({
+									code: SpanStatusCode.ERROR,
+									message: err.message,
+								})
+
+								throw err
+							}
+						}
+
 						const result = await streamOrInvoke()
 						emitDone()
 						return result
@@ -683,6 +687,9 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 					}
 				})
 			})()
+			// The invocation starts eagerly so schema/bridge failures can happen before `.final()` is awaited.
+			// Attach an internal catch handler to prevent process-level unhandledRejection crashes.
+			void invocationPromise.catch(() => undefined)
 
 			return {
 				final: () => invocationPromise,

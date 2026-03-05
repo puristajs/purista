@@ -25,6 +25,7 @@ import { createScopedSessionId, resolveBaseSessionId } from './sessionIdentity.j
 
 type ProtocolFrameEntry = {
 	frame: AgentProtocolFrame
+	envelope: AgentProtocolEnvelope
 }
 
 type ProtocolEmitter = {
@@ -124,6 +125,15 @@ export const createProtocolBuffer = (
 ): AgentProtocolBuffer => {
 	const frames: ProtocolFrameEntry[] = []
 	let flushPromise = Promise.resolve()
+	const pushFrame = (frame: AgentProtocolFrame) => {
+		const envelope = createEnvelopeFromContext(context, frame)
+		frames.push({ frame, envelope })
+		if (config.onEnvelope) {
+			flushPromise = flushPromise.then(async () => {
+				await config.onEnvelope?.(envelope)
+			})
+		}
+	}
 
 	const protocol: ProtocolEmitter = {
 		emitMessage(content, messageOptions) {
@@ -148,13 +158,7 @@ export const createProtocolBuffer = (
 				partial: message.partial,
 				final: message.final,
 			})
-			frames.push({ frame })
-			if (config.onEnvelope) {
-				const envelope = createEnvelopeFromContext(context, frame)
-				flushPromise = flushPromise.then(async () => {
-					await config.onEnvelope?.(envelope)
-				})
-			}
+			pushFrame(frame)
 		},
 		emitArtifact(input) {
 			const frame = createArtifactFrame({
@@ -166,13 +170,7 @@ export const createProtocolBuffer = (
 				mimeType: input.mimeType,
 				lastChunk: input.final,
 			})
-			frames.push({ frame })
-			if (config.onEnvelope) {
-				const envelope = createEnvelopeFromContext(context, frame)
-				flushPromise = flushPromise.then(async () => {
-					await config.onEnvelope?.(envelope)
-				})
-			}
+			pushFrame(frame)
 		},
 		emitTelemetry(metrics) {
 			const frame = createTelemetryFrame({
@@ -189,13 +187,7 @@ export const createProtocolBuffer = (
 						}
 					: undefined,
 			})
-			frames.push({ frame })
-			if (config.onEnvelope) {
-				const envelope = createEnvelopeFromContext(context, frame)
-				flushPromise = flushPromise.then(async () => {
-					await config.onEnvelope?.(envelope)
-				})
-			}
+			pushFrame(frame)
 		},
 		emitToolEvent(event) {
 			const frame = createToolEventFrame({
@@ -206,13 +198,7 @@ export const createProtocolBuffer = (
 				message: event.message,
 				errorCode: event.errorCode,
 			})
-			frames.push({ frame })
-			if (config.onEnvelope) {
-				const envelope = createEnvelopeFromContext(context, frame)
-				flushPromise = flushPromise.then(async () => {
-					await config.onEnvelope?.(envelope)
-				})
-			}
+			pushFrame(frame)
 		},
 		emitError(error, overrides) {
 			const err =
@@ -226,13 +212,7 @@ export const createProtocolBuffer = (
 					cause: err.cause,
 				},
 			})
-			frames.push({ frame })
-			if (config.onEnvelope) {
-				const envelope = createEnvelopeFromContext(context, frame)
-				flushPromise = flushPromise.then(async () => {
-					await config.onEnvelope?.(envelope)
-				})
-			}
+			pushFrame(frame)
 		},
 		has(kind) {
 			return frames.some(entry => entry.frame.kind === kind)
@@ -242,7 +222,7 @@ export const createProtocolBuffer = (
 	return {
 		protocol,
 		toEnvelopes() {
-			return frames.map(entry => createEnvelopeFromContext(context, entry.frame))
+			return frames.map(entry => entry.envelope)
 		},
 		frames() {
 			return frames.map(entry => entry.frame)

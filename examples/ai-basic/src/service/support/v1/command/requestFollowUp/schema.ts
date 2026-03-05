@@ -3,7 +3,7 @@ import { z } from 'zod/v4'
 
 export const requestFollowUpInputSchema = extendApi(
 	z.object({
-		sessionId: z.string().uuid().optional(),
+		sessionId: z.string().min(1).optional(),
 		prompt: z.string().min(1),
 	}),
 	{ title: 'Request follow-up input' },

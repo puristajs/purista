@@ -76,6 +76,8 @@ describe('runSupportAgentStreamBuilder', () => {
 
 			const frameTypes: string[] = []
 			let sawEnvelopeChunk = false
+			const chunkMessageIds: string[] = []
+			let finalMessageIds: string[] = []
 			for await (const frame of handle) {
 				frameTypes.push(frame.payload.frameType)
 				if (frame.payload.frameType === 'chunk') {
@@ -87,12 +89,31 @@ describe('runSupportAgentStreamBuilder', () => {
 						}),
 					})
 					sawEnvelopeChunk = true
+					if (frame.payload.chunk && typeof frame.payload.chunk === 'object' && 'messageId' in frame.payload.chunk) {
+						chunkMessageIds.push(String(frame.payload.chunk.messageId))
+					}
+				}
+				if (frame.payload.frameType === 'complete') {
+					const finalPayload =
+						frame.payload.final && typeof frame.payload.final === 'object'
+							? (frame.payload.final as { envelopes?: unknown[] })
+							: undefined
+					finalMessageIds = Array.isArray(finalPayload?.envelopes)
+						? finalPayload.envelopes
+								.flatMap(envelope => {
+									if (!envelope || typeof envelope !== 'object' || !('messageId' in envelope)) {
+										return []
+									}
+									return [String(envelope.messageId)]
+								})
+						: []
 				}
 			}
 
 			expect(sawEnvelopeChunk).toBe(true)
 			expect(frameTypes.at(0)).toBe('start')
 			expect(frameTypes.at(-1)).toBe('complete')
+			expect(new Set(finalMessageIds)).toEqual(new Set(chunkMessageIds))
 		} finally {
 			await supportAgentInstance.stop()
 			await triageAgentInstance.stop()

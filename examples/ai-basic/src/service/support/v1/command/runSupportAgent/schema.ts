@@ -3,7 +3,7 @@ import { z } from 'zod/v4'
 
 export const runSupportAgentInputSchema = extendApi(
 	z.object({
-		sessionId: z.string().uuid().optional(),
+		sessionId: z.string().min(1).optional(),
 		prompt: z.string().min(1),
 		context: z.string().optional(),
 	}),
@@ -21,7 +21,7 @@ export const supportAgentInvokePayloadSchema = extendApi(
 	z.object({
 		message: z.string().min(1),
 		prompt: z.string().min(1).optional(),
-		sessionId: z.string().uuid().optional(),
+		sessionId: z.string().min(1).optional(),
 		context: z.string().optional(),
 		history: z.array(z.unknown()).optional().default([]),
 		attachments: z.array(z.unknown()).optional().default([]),

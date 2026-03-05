@@ -73,9 +73,12 @@ describe('runtime context helpers', () => {
 		buffer.protocol.emitMessage({ content: 'one', partial: true })
 		buffer.protocol.emitMessage({ content: 'two', final: true })
 		await buffer.flush()
+		const envelopes = buffer.toEnvelopes()
 		expect(onEnvelope).toHaveBeenCalledTimes(2)
 		expect(onEnvelope.mock.calls[0]?.[0]?.frame.kind).toBe('message')
 		expect(onEnvelope.mock.calls[1]?.[0]?.frame.kind).toBe('message')
+		expect(envelopes[0]?.messageId).toBe(onEnvelope.mock.calls[0]?.[0]?.messageId)
+		expect(envelopes[1]?.messageId).toBe(onEnvelope.mock.calls[1]?.[0]?.messageId)
 	})
 
 	it('creates a handler context with tool/session/knowledge helpers', async () => {

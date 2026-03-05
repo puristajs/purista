@@ -4,7 +4,7 @@ import { z } from 'zod/v4'
 export const supportAgentInputSchema = extendApi(
 	z
 		.object({
-			sessionId: extendApi(z.string().uuid().optional(), { title: 'Session identifier' }),
+			sessionId: extendApi(z.string().min(1).optional(), { title: 'Session identifier' }),
 			prompt: extendApi(z.string().min(1).optional(), { title: 'User prompt' }),
 			message: extendApi(z.string().min(1).optional(), { title: 'Agent protocol compatible message field' }),
 			context: extendApi(z.string().optional(), { title: 'Optional extra context' }),

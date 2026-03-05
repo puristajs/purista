@@ -1,3 +1,4 @@
+import { getConversationCommandBuilder } from './command/getConversation/getConversationCommandBuilder.js'
 import { lookupFaqCommandBuilder } from './command/lookupFaq/lookupFaqCommandBuilder.js'
 import { requestFollowUpCommandBuilder } from './command/requestFollowUp/requestFollowUpCommandBuilder.js'
 import { runSupportAgentCommandBuilder } from './command/runSupportAgent/runSupportAgentCommandBuilder.js'
@@ -10,6 +11,7 @@ type StreamDefinition = Parameters<typeof supportV1ServiceBuilder.addStreamDefin
 type SubscriptionDefinition = Parameters<typeof supportV1ServiceBuilder.addSubscriptionDefinition>[number]
 
 const commandDefinitions: CommandDefinition[] = [
+	getConversationCommandBuilder.getDefinition(),
 	lookupFaqCommandBuilder.getDefinition(),
 	runSupportAgentCommandBuilder.getDefinition(),
 	requestFollowUpCommandBuilder.getDefinition(),

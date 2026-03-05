@@ -51,6 +51,8 @@ import type { DefaultEventBridgeConfig } from './types/DefaultEventBridgeConfig.
 import type { PendigInvocation } from './types/PendingInvocations.js'
 import type { SubscriptionStorageEntry } from './types/SubscriptionStorageEntry.js'
 
+const TIMED_OUT_INVOCATION_RETENTION_MS = 60_000
+
 export type PendingStreamInvocation<Chunk = unknown, Final = unknown> = {
 	push: (frame: StreamFrame<Chunk, Final>) => void
 	reject: (error: unknown) => void
@@ -90,6 +92,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 	protected streamFunctions = new Map<string, (message: StreamMessage) => Promise<void>>()
 
 	protected pendingInvocations = new Map<EBMessageId, PendigInvocation>()
+	protected timedOutInvocations = new Map<EBMessageId, number>()
 	protected pendingStreams = new Map<string, PendingStreamInvocation<any, any>>()
 	protected runningSubscriptionCount = 0
 
@@ -97,6 +100,15 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 
 	protected hasStarted = false
 	protected healthy = false
+
+	protected cleanupTimedOutInvocations() {
+		const now = Date.now()
+		for (const [correlationId, timestamp] of this.timedOutInvocations) {
+			if (now - timestamp > TIMED_OUT_INVOCATION_RETENTION_MS) {
+				this.timedOutInvocations.delete(correlationId)
+			}
+		}
+	}
 
 	constructor(config?: EventBridgeConfig<DefaultEventBridgeConfig>) {
 		const conf = {
@@ -197,6 +209,14 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 						if (isCommandResponse(message)) {
 							const mapEntry = this.pendingInvocations.get(message.correlationId)
 							if (!mapEntry) {
+								if (this.timedOutInvocations.has(message.correlationId)) {
+									this.timedOutInvocations.delete(message.correlationId)
+									this.logger.warn(
+										{ correlationId: message.correlationId, customTraceId: message.traceId },
+										'Ignoring late command response after invocation timeout',
+									)
+									return next()
+								}
 								const err = new UnhandledError(
 									StatusCode.BadGateway,
 									'InvalidCommandResponse: received invalid command response',
@@ -459,6 +479,8 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 				const timeout = setTimeout(() => {
 					const err = new UnhandledError(StatusCode.GatewayTimeout, 'invocation timed out', undefined, command.traceId)
 					this.logger.warn({ err })
+					this.timedOutInvocations.set(correlationId, Date.now())
+					this.cleanupTimedOutInvocations()
 					rejectFn(err)
 				}, commandTimeout)
 
@@ -713,6 +735,7 @@ export class DefaultEventBridge extends EventBridgeBaseClass<DefaultEventBridgeC
 			value.reject(new UnhandledError(StatusCode.ServiceUnavailable))
 		}
 		this.pendingInvocations.clear()
+		this.timedOutInvocations.clear()
 
 		for (const [_, value] of Array.from(this.pendingStreams)) {
 			value.reject(new UnhandledError(StatusCode.ServiceUnavailable, 'stream closed'))

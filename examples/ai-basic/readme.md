@@ -8,25 +8,86 @@ This example demonstrates the current `@purista/ai` integration end-to-end:
 - Agent-to-agent delegation (`supportAgent` invokes `triageAgent` as a tool)
 - Command invoking an agent (`POST /api/v1/support/ask`)
 - Subscription invoking an agent after event emission (`POST /api/v1/support/follow-up`)
-- Static HTML consumer with SSE parsing (`/index.html`)
+- Conversation restore via command-owned retrieval (`POST /api/v1/support/conversation`)
+- React frontend showcase (stream, workflow, protocol inspector) built to `public/`
+- Workflow graph visualization powered by React Flow (`@xyflow/react`)
+- Rich markdown message rendering via Streamdown
 
-## Run
+## Install
+
+```bash
+npm install
+```
 
 ```bash
 pnpm install
+```
+
+```bash
+yarn install
+```
+
+```bash
+bun install
+```
+
+## Build frontend (to `public/`)
+
+```bash
+npm run frontend:build -w @purista/example-ai-basic
+```
+
+```bash
+pnpm --filter @purista/example-ai-basic frontend:build
+```
+
+```bash
+yarn workspace @purista/example-ai-basic frontend:build
+```
+
+```bash
+bun run --filter @purista/example-ai-basic frontend:build
+```
+
+## Run backend + UI
+
+```bash
+npm run start -w @purista/example-ai-basic
+```
+
+```bash
 pnpm --filter @purista/example-ai-basic start
 ```
 
-Set these environment variables:
+```bash
+yarn workspace @purista/example-ai-basic start
+```
+
+```bash
+bun run --filter @purista/example-ai-basic start
+```
+
+Environment variables:
 
 - `OPENAI_API_KEY` (required)
 - `PORT` (optional, defaults to `3000`)
 
 Open [http://localhost:3000/index.html](http://localhost:3000/index.html).
 
+## Frontend scripts
+
+- `frontend:dev` – runs Vite dev server for `src/frontend`
+- `frontend:build` – builds to `public/`
+- `frontend:test` – frontend Vitest suite
+- `frontend:check` – frontend typecheck + tests
+
 ## Test
 
 The example contains deterministic tests (no real LLM calls):
+
+```bash
+npm run test -w @purista/example-ai-basic
+```
 
 ```bash
 pnpm --filter @purista/example-ai-basic test
@@ -36,16 +97,20 @@ Key test files:
 
 - `src/agents/supportAgent/v1/supportAgent.test.ts` – verifies tool calls, agent-to-agent delegation, and protocol frames.
 - `src/service/support/v1/command/runSupportAgent/runSupportAgentCommandBuilder.test.ts` – verifies command-level `context.invokeAgent` integration.
+- `src/frontend/lib/api.test.ts` – verifies SSE dedupe behavior and command-owned conversation hydration endpoint usage.
+- `src/frontend/App.test.tsx` – verifies frontend dedupe and persisted theme behavior.
+
+## Frontend behavior
+
+The React frontend includes:
+
+- top navigation (`Stream Chat`, `Command Run`, `Follow-up`, `Protocol Inspector`)
+- split-pane layout (chat + workflow/protocol panel)
+- stream-safe rendering (`chunk` frames rendered once, `complete.final.envelopes` used as fallback only)
+- conversation restore by calling `POST /api/v1/support/conversation`
+- workflow graph with node/edge visualization for tool and nested agent execution
 
 ## Protocol consumer and interoperability snippets
-
-### Frontend/SSE consumer
-
-`public/index.html` demonstrates reading SSE stream frames from `POST /api/v1/support/ask/stream` and routing by frame kind (`message`, `tool`, `telemetry`, `error`).
-For a reusable TypeScript utility you can copy into frontend libraries, see:
-
-- `src/client/protocolConsumer.ts`
-- `src/client/protocolConsumer.test.ts`
 
 ### Reference Agent-to-Agent conversion
 

@@ -1,4 +1,4 @@
-import type { ModelProvider, ProviderRequest } from '@purista/ai'
+import type { ModelProvider, ProviderRequest, ProviderResponse } from '@purista/ai'
 import { DefaultEventBridge, initLogger } from '@purista/core'
 import { describe, expect, it } from 'vitest'
 import { supportV1Service } from '../../../service/support/v1/index.js'
@@ -17,6 +17,14 @@ class DeterministicProvider implements ModelProvider {
 			},
 			costUsd: 0,
 		}
+	}
+}
+
+class FailingProvider implements ModelProvider {
+	readonly name = 'failing-test-provider'
+
+	async generate(_request: ProviderRequest): Promise<ProviderResponse> {
+		throw new Error('upstream model unavailable')
 	}
 }
 
@@ -86,6 +94,72 @@ describe('supportAgent', () => {
 			expect(toolFrames.some(frame => frame.toolName === 'triageAgent.1.run' && frame.status === 'success')).toBe(true)
 			expect(finalMessage).toContain('MODEL:')
 			expect(telemetryFrames.length).toBeGreaterThan(0)
+		} finally {
+			await supportAgentInstance.stop()
+			await triageAgentInstance.stop()
+			await supportService.destroy()
+			await eventBridge.destroy()
+		}
+	})
+
+	it('continues with faq-only fallback when triage delegation fails', async () => {
+		const logger = initLogger('error')
+		const eventBridge = new DefaultEventBridge({ logger })
+		await eventBridge.start()
+
+		const supportProvider = new DeterministicProvider()
+		const triageProvider = new FailingProvider()
+		const supportService = await supportV1Service.getInstance(eventBridge, { logger })
+		const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
+			logger,
+			models: { 'openai:gpt-4o-mini': triageProvider },
+			poolConfig: { maxWorkers: 1 },
+		})
+		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
+			logger,
+			models: { 'openai:gpt-4o-mini': supportProvider },
+			poolConfig: { maxWorkers: 1 },
+		})
+
+		await supportService.start()
+		await triageAgentInstance.start()
+		await supportAgentInstance.start()
+		await waitForRegistration()
+
+		try {
+			const { envelopes } = await supportAgentInstance.invoke({
+				payload: {
+					prompt: 'urgent refund request',
+					message: 'urgent refund request',
+					history: [],
+					attachments: [],
+				},
+			})
+
+			const finalMessage = envelopes
+				.map(envelope => envelope.frame)
+				.filter(
+					(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'message' }> =>
+						frame.kind === 'message' && frame.final === true,
+				)
+				.map(frame => frame.content)
+				.at(-1)
+
+			const toolFrames = envelopes
+				.map(envelope => envelope.frame)
+				.filter(
+					(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'tool' }> => frame.kind === 'tool',
+				)
+
+			expect(toolFrames.some(frame => frame.toolName === 'triageAgent.1.run' && frame.status === 'success')).toBe(true)
+			expect(
+				envelopes.some(
+					envelope =>
+						envelope.frame.kind === 'message' &&
+						envelope.frame.content === 'Triage unavailable right now, continuing with FAQ guidance.',
+				),
+			).toBe(true)
+			expect(finalMessage).toContain('MODEL:')
 		} finally {
 			await supportAgentInstance.stop()
 			await triageAgentInstance.stop()

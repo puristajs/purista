@@ -83,6 +83,7 @@ export async function main() {
 	logger.info('UI: /index.html')
 	logger.info('Command endpoint: POST /api/v1/support/ask')
 	logger.info('Agent stream endpoint: POST /api/v1/support/ask/stream')
+	logger.info('Conversation endpoint: POST /api/v1/support/conversation')
 	logger.info('Direct agent endpoint: POST /api/v1/agents/supportAgent')
 	logger.info('Follow-up endpoint: POST /api/v1/support/follow-up')
 

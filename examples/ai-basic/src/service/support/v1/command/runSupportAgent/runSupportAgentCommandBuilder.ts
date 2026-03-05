@@ -1,4 +1,7 @@
+import { agentProtocolEnvelopeSchema } from '@purista/ai'
+
 import { getFinalMessageFromEnvelopes } from '../../../../../utils/agentResponse.js'
+import { saveConversationSnapshot } from '../../../../../utils/conversationSnapshotStore.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
 import {
 	runSupportAgentInputSchema,
@@ -38,6 +41,11 @@ export const runSupportAgentCommandBuilder = supportV1ServiceBuilder
 				channel: 'command',
 			},
 		).final()
+		const resolvedSessionId = payload.sessionId ?? context.message.id
+		if (resolvedSessionId) {
+			const history = Array.isArray(result) ? result : (result as { history?: unknown[] }).history
+			saveConversationSnapshot(resolvedSessionId, agentProtocolEnvelopeSchema.array().parse(history ?? []))
+		}
 
 		return {
 			message: getFinalMessageFromEnvelopes(result),

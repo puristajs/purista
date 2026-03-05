@@ -1,4 +1,5 @@
 import { AgentBuilder, type AgentHandlerContext, agentProtocolEnvelopeSchema } from '@purista/ai'
+import { HandledError, StatusCode } from '@purista/core'
 import { type SupportAgentInput, supportAgentInputSchema } from './schema.js'
 
 type SupportAgentContext = AgentHandlerContext<SupportAgentInput, unknown>
@@ -16,6 +17,15 @@ const getFinalMessage = (value: unknown): string => {
 			.at(-1)
 			?.trim() ?? ''
 	)
+}
+
+const hasErrorFrame = (value: unknown): boolean => {
+	try {
+		const envelopes = agentProtocolEnvelopeSchema.array().parse(value)
+		return envelopes.some(envelope => envelope.frame.kind === 'error')
+	} catch {
+		return false
+	}
 }
 
 export const supportAgent = new AgentBuilder({
@@ -58,35 +68,48 @@ export const supportAgent = new AgentBuilder({
 			if (payload.sessionId) {
 				triagePayload.sessionId = payload.sessionId
 			}
-			const triageResult = await context.tools.invoke('triageAgent.1.run', {
-				...triagePayload,
-			})
-			triageSummary = getFinalMessage(triageResult)
+			try {
+				const triageResult = await context.tools.invoke('triageAgent.1.run', {
+					...triagePayload,
+				})
+				if (hasErrorFrame(triageResult)) {
+					context.stream.sendChunk('Triage unavailable right now, continuing with FAQ guidance.')
+				}
+				triageSummary = getFinalMessage(triageResult)
+			} catch (error) {
+				context.logger.warn({ err: error }, 'triageAgent failed, continuing with faq-only fallback')
+				context.stream.sendChunk('Triage unavailable right now, continuing with FAQ guidance.')
+			}
 		}
 
 		context.stream.sendChunk('Generating final answer...')
-		const result = await model.generate({
-			prompt: [
-				await context.conversation.buildPromptInput(),
-				`Customer prompt: ${userPrompt}`,
-				`FAQ answer: ${faqAnswer}`,
-				triageSummary ? `Triage summary: ${triageSummary}` : undefined,
-			]
-				.filter(Boolean)
-				.join('\n'),
-			context: payload.context,
-			metadata: {
-				aiSdk: {
-					temperature: 0.2,
+		try {
+			const result = await model.generate({
+				prompt: [
+					await context.conversation.buildPromptInput(),
+					`Customer prompt: ${userPrompt}`,
+					`FAQ answer: ${faqAnswer}`,
+					triageSummary ? `Triage summary: ${triageSummary}` : undefined,
+				]
+					.filter(Boolean)
+					.join('\n'),
+				context: payload.context,
+				metadata: {
+					aiSdk: {
+						temperature: 0.2,
+					},
 				},
-			},
-		})
-		const answer = result.output
-		await context.conversation.addAssistant(answer)
-		context.stream.sendFinal(answer)
+			})
+			const answer = result.output
+			await context.conversation.addAssistant(answer)
+			context.stream.sendFinal(answer)
 
-		return {
-			message: answer,
+			return {
+				message: answer,
+			}
+		} catch (error) {
+			await context.conversation.revertLast({ role: 'user' })
+			throw HandledError.fromError(error, StatusCode.BadGateway)
 		}
 	})
 	.build()
