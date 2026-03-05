@@ -31,8 +31,12 @@ export const executeWorkloadQueueWorkerBuilder = aiWorkerServiceBuilder
 		await poolManager.acquire(poolId)
 
 		try {
-			const providerName = manifest.modelResource?.resourceName ?? 'echo'
-			const provider = defaultModelResourceRegistry.get(providerName) ?? defaultModelResourceRegistry.get('echo')
+			const providerName = manifest.modelResource?.resourceName
+			if (!providerName) {
+				await context.job.fail(`Manifest ${payload.manifestKey} does not define modelResource.resourceName`, true)
+				return undefined
+			}
+			const provider = defaultModelResourceRegistry.get(providerName)
 			if (!provider) {
 				await context.job.fail(`No provider registered under ${providerName}`, true)
 				return undefined

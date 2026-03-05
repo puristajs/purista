@@ -8,6 +8,7 @@ import { supportV1Service } from '../../index.js'
 
 class DeterministicProvider implements ModelProvider {
 	readonly name = 'deterministic-test-provider'
+	readonly capabilities = { text: true }
 
 	async generate(request: ProviderRequest) {
 		return {

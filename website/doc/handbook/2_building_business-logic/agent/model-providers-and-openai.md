@@ -11,26 +11,35 @@ Agents call models through the lightweight `ModelProvider` interface. Providers 
 ```ts
 export interface ModelProvider {
   readonly name: string
-  generate(request: { prompt: string; context?: string; metadata?: Record<string, unknown> }): Promise<{
+  readonly capabilities: {
+    text?: boolean
+    stream?: boolean
+    embedding?: boolean
+    rerank?: boolean
+  }
+  generate?(request: { prompt: string; context?: string; metadata?: Record<string, unknown> }): Promise<{
     output: string
     tokens?: { prompt: number; completion: number }
     costUsd?: number
     metadata?: Record<string, unknown>
   }>
+  stream?(request: { prompt: string; context?: string; metadata?: Record<string, unknown> }): ProviderStream
+  embed?(request: { value: string; metadata?: Record<string, unknown> }): Promise<{ embedding: number[] }>
+  embedMany?(request: { values: string[]; metadata?: Record<string, unknown> }): Promise<{ embeddings: number[][] }>
+  rerank?(request: { query: string; documents: unknown[]; topN?: number; metadata?: Record<string, unknown> }): Promise<{
+    ranking: Array<{ originalIndex: number; score: number; document: unknown }>
+    rerankedDocuments: unknown[]
+  }>
 }
 ```
 
-`@purista/ai` includes two ready-to-use implementations:
-
-- `EchoProvider` — deterministic echo, perfect for tests and documentation
-- `AiSdkProvider` — wraps any [Vercel AI SDK](https://ai-sdk.dev/docs/introduction) `LanguageModel`, unlocking OpenAI, Anthropic, Google, Ollama, Azure OpenAI, etc.
+`@purista/ai` includes `AiSdkProvider`, which wraps [Vercel AI SDK](https://ai-sdk.dev/docs/introduction) models for text/stream and optional embedding/rerank capabilities.
 
 ## Provider choice guide
 
 | Provider | Best for | Pros | Cons |
 | --- | --- | --- | --- |
-| `EchoProvider` | tests/docs/local scaffolds | deterministic, zero external dependency | no real model behavior |
-| `AiSdkProvider` | production AI workloads | broad provider ecosystem, telemetry support, feature-rich options | needs external API/model runtime |
+| `AiSdkProvider` | production workloads + realistic tests | broad provider ecosystem, telemetry support, text/stream/embed/rerank support | needs configured AI SDK models |
 
 ## Install provider packages
 
@@ -64,6 +73,9 @@ import { supportAgent } from './agents/supportAgent/v1/supportAgent.js'
 const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY! })
 const gpt4oMiniProvider = new AiSdkProvider({
   model: openai(''),
+  // optional capabilities:
+  // embeddingModel: openai.textEmbeddingModel('text-embedding-3-small'),
+  // rerankingModel: someProvider.rerankingModel('rerank-model'),
   systemPrompt: 'You are a concise support engineer.',
   defaults: { temperature: 0.2, maxOutputTokens: 512 },
 })
@@ -83,6 +95,23 @@ Runtime injection through `getInstance(..., { models })` is the default pattern 
 ## Optional: shared model registry
 
 Use the shared registry only when you intentionally want process-wide provider defaults reused across multiple runtimes.
+
+## Capability-aware declarations
+
+Declare required capabilities in the builder so Purista can fail fast at `getInstance(...)`:
+
+```ts
+new AgentBuilder({ agentName: 'searchAgent', agentVersion: '1' })
+  .defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream'] })
+  .defineModel('openai:embeddings', { capabilities: ['embedding'] })
+  .defineModel('openai:reranker', { capabilities: ['rerank'] })
+```
+
+In handlers:
+
+- `context.models.<alias>` is for text/stream
+- `context.embeddings.<alias>` is for embeddings
+- `context.rerankers.<alias>` is for reranking
 
 ## AiSdkProvider options reference
 

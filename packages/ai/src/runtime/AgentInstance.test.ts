@@ -31,7 +31,7 @@ describe('AgentInstance', () => {
 	it('fails fast when a declared model alias is missing', () => {
 		const manifest: AgentManifest = {
 			...baseManifest,
-			models: ['openai:'],
+			models: [{ alias: 'openai:', capabilities: ['text'] }],
 		}
 
 		expect(

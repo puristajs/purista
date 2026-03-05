@@ -2,8 +2,24 @@ import { DefaultEventBridge } from '@purista/core'
 import { afterEach, describe, expect, it } from 'vitest'
 import { z } from 'zod/v4'
 
-import { EchoProvider } from '../providers/runtime/ModelProvider.js'
+import type { ModelProvider, ProviderRequest } from '../providers/runtime/ModelProvider.js'
 import { AgentBuilder } from './AgentBuilder.js'
+
+class DeterministicTextProvider implements ModelProvider {
+	readonly name = 'deterministic-text'
+	readonly capabilities = { text: true }
+
+	async generate(request: ProviderRequest) {
+		return {
+			output: request.prompt,
+			tokens: {
+				prompt: request.prompt.length,
+				completion: request.prompt.length,
+			},
+			costUsd: 0,
+		}
+	}
+}
 
 const bridges: DefaultEventBridge[] = []
 
@@ -93,13 +109,21 @@ describe('AgentBuilder', () => {
 			.exposeAsHttpEndpoint('POST', 'agents/supportAgent')
 			.setStreamingMode('chunked')
 			.setHandler<{ prompt: string }>(async (context, payload) => {
-				const result = await context.models.echo.generate({ prompt: payload.prompt })
+				const result = await context.models.echo.generate?.({ prompt: payload.prompt })
+				if (!result) {
+					throw new Error('missing text model capability')
+				}
 				context.stream.sendFinal(result.output)
 				return { message: result.output }
 			})
 			.build()
 
-		expect(definition.getManifest().models).toEqual(['echo'])
+		expect(definition.getManifest().models).toEqual([
+			{
+				alias: 'echo',
+				capabilities: ['text'],
+			},
+		])
 
 		const instance = await definition.getInstance(
 			{
@@ -108,7 +132,7 @@ describe('AgentBuilder', () => {
 			} as any,
 			{
 				models: {
-					echo: new EchoProvider(),
+					echo: new DeterministicTextProvider(),
 				},
 			},
 		)
@@ -175,5 +199,41 @@ describe('AgentBuilder', () => {
 		await expect(definition.getInstance(eventBridge, { models: {} })).rejects.toThrow(
 			'Missing model provider for alias "missing"',
 		)
+	})
+
+	it('fails fast when a required model capability is missing', async () => {
+		const definition = new AgentBuilder({ agentName: 'embeddingAgent', agentVersion: '1' })
+			.defineModel('echo', { capabilities: ['embedding'] })
+			.setHandler(async () => ({ message: 'ok' }))
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+
+		await expect(
+			definition.getInstance(eventBridge, {
+				models: {
+					echo: new DeterministicTextProvider(),
+				},
+			}),
+		).rejects.toThrow('Model provider "echo" does not support required capability "embedding"')
+	})
+
+	it('infers model capabilities from defineModel into handler context', () => {
+		new AgentBuilder({ agentName: 'typedModelAgent', agentVersion: '1' })
+			.defineModel('textOnly')
+			.defineModel('embedder', { capabilities: ['embedding'] })
+			.defineModel('reranker', { capabilities: ['rerank'] })
+			.setHandler(async context => {
+				await context.models.textOnly.generate({ prompt: 'hello' })
+				await context.embeddings.embedder.embed({ value: 'hello' })
+				await context.rerankers.reranker.rerank({ query: 'q', documents: ['a', 'b'] })
+				// @ts-expect-error textOnly does not expose embedding capability
+				await context.embeddings.textOnly.embed({ value: 'x' })
+				// @ts-expect-error embedder does not expose text generation capability
+				await context.models.embedder.generate({ prompt: 'x' })
+				return { message: 'ok' }
+			})
 	})
 })

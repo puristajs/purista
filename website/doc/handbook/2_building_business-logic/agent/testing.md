@@ -19,7 +19,7 @@ purista add agent SupportAgent
 The scaffold already:
 
 - starts/stops an in-memory `DefaultEventBridge`
-- injects a deterministic provider (`EchoProvider`)
+- injects a deterministic provider stub (no external API calls)
 - executes one real agent invocation
 - asserts message and telemetry protocol frames
 
@@ -36,7 +36,9 @@ Start from that test and expand scenarios as your handler grows.
 
 ## Unit test pattern (agent runtime)
 
-Use a deterministic test provider so no external LLM API is needed:
+Use deterministic providers so no external LLM API is needed.
+
+For AI SDK-based provider tests, prefer [AI SDK testing mocks](https://ai-sdk.dev/docs/ai-sdk-core/testing) (`ai/test`) to avoid flaky network calls.
 
 ```ts
 import { describe, expect, it } from 'vitest'
@@ -46,6 +48,7 @@ import { supportAgent } from './supportAgent.js'
 
 class DeterministicProvider implements ModelProvider {
   readonly name = 'deterministic-test-provider'
+  readonly capabilities = { text: true }
   async generate(request: ProviderRequest) {
     return {
       output: `MODEL:${request.prompt}`,

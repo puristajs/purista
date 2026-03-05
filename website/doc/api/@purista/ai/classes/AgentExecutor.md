@@ -16,7 +16,7 @@ and captures telemetry spans using the provided logger/span factory.
 ```ts
 const executor = new AgentExecutor({
   manifest,
-  provider: new EchoProvider(),
+  provider: myModelProvider,
   sessionStore: new InMemorySessionStore(),
   knowledgeAdapters: { default: new InMemoryKnowledgeAdapter() },
   logger,

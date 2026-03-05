@@ -8,6 +8,32 @@ export type ProviderRequest = {
 }
 
 /**
+ * Payload sent to embedding-capable providers.
+ */
+export type ProviderEmbedRequest = {
+	value: string
+	metadata?: Record<string, unknown>
+}
+
+/**
+ * Payload sent to batch embedding-capable providers.
+ */
+export type ProviderEmbedManyRequest = {
+	values: string[]
+	metadata?: Record<string, unknown>
+}
+
+/**
+ * Payload sent to reranking-capable providers.
+ */
+export type ProviderRerankRequest<Document = string | Record<string, unknown>> = {
+	query: string
+	documents: Document[]
+	topN?: number
+	metadata?: Record<string, unknown>
+}
+
+/**
  * Response emitted by a model provider.
  */
 export type ProviderResponse = {
@@ -21,27 +47,85 @@ export type ProviderResponse = {
 }
 
 /**
+ * Response emitted by embedding-capable providers.
+ */
+export type ProviderEmbedResponse = {
+	embedding: number[]
+	usage?: {
+		tokens?: number
+	}
+	metadata?: Record<string, unknown>
+}
+
+/**
+ * Response emitted by batch embedding-capable providers.
+ */
+export type ProviderEmbedManyResponse = {
+	embeddings: number[][]
+	usage?: {
+		tokens?: number
+	}
+	metadata?: Record<string, unknown>
+}
+
+/**
+ * Response emitted by reranking-capable providers.
+ */
+export type ProviderRerankResponse<Document = string | Record<string, unknown>> = {
+	ranking: Array<{
+		originalIndex: number
+		score: number
+		document: Document
+	}>
+	rerankedDocuments: Document[]
+	metadata?: Record<string, unknown>
+}
+
+export type ModelProviderCapability =
+	| 'text'
+	| 'stream'
+	| 'embedding'
+	| 'rerank'
+	| 'objectGeneration'
+	| 'objectStreaming'
+	| 'image'
+	| 'audio'
+	| 'moderation'
+
+export type ModelProviderCapabilities = Partial<Record<ModelProviderCapability, boolean>>
+
+/**
+ * Incremental events emitted by {@link ModelProvider.stream}.
+ */
+export type ProviderStreamChunk =
+	| {
+			type: 'text-delta'
+			textDelta: string
+	  }
+	| {
+			type: 'error'
+			error: unknown
+	  }
+
+/**
+ * Stream handle returned by {@link ModelProvider.stream}.
+ * Consumers iterate chunks and call `final()` to obtain usage/metadata.
+ */
+export type ProviderStream = AsyncIterable<ProviderStreamChunk> & {
+	final(): Promise<ProviderResponse>
+}
+
+/**
  * Minimal interface providers must satisfy so they can be swapped at runtime.
  */
 export interface ModelProvider {
 	readonly name: string
-	generate(request: ProviderRequest): Promise<ProviderResponse>
-}
-
-/**
- * Deterministic provider useful for tests and docs; just echoes the prompt back.
- */
-export class EchoProvider implements ModelProvider {
-	readonly name = 'echo'
-
-	async generate(request: ProviderRequest): Promise<ProviderResponse> {
-		return {
-			output: request.prompt,
-			tokens: {
-				prompt: request.prompt.length,
-				completion: request.prompt.length,
-			},
-			costUsd: 0,
-		}
-	}
+	readonly capabilities: ModelProviderCapabilities
+	generate?(request: ProviderRequest): Promise<ProviderResponse>
+	stream?(request: ProviderRequest): ProviderStream
+	embed?(request: ProviderEmbedRequest): Promise<ProviderEmbedResponse>
+	embedMany?(request: ProviderEmbedManyRequest): Promise<ProviderEmbedManyResponse>
+	rerank?<Document = string | Record<string, unknown>>(
+		request: ProviderRerankRequest<Document>,
+	): Promise<ProviderRerankResponse<Document>>
 }

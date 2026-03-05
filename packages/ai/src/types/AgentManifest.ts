@@ -38,12 +38,19 @@ export type RetryPolicy = {
 	delayMs?: number
 }
 
+export type AgentModelCapability = 'text' | 'stream' | 'embedding' | 'rerank'
+
+export type AgentModelBinding = {
+	alias: string
+	capabilities?: AgentModelCapability[]
+}
+
 export type AgentManifest = {
 	agentName: string
 	agentVersion: string
 	description?: string
 	eventBridge: string
-	models?: string[]
+	models?: AgentModelBinding[]
 	modelResource?: { resourceName: string; variant?: string }
 	session?: AgentSessionConfig
 	knowledge?: KnowledgeAdapterConfig[]

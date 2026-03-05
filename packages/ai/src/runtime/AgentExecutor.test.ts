@@ -1,15 +1,31 @@
 import { describe, expect, it } from 'vitest'
 import { InMemoryKnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
 import { InMemorySessionStore } from '../memory/sessionStore.js'
-import { EchoProvider } from '../providers/runtime/ModelProvider.js'
+import type { ModelProvider, ProviderRequest } from '../providers/runtime/ModelProvider.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
 import { AgentExecutor } from './AgentExecutor.js'
+
+class DeterministicTextProvider implements ModelProvider {
+	readonly name = 'deterministic-text'
+	readonly capabilities = { text: true }
+
+	async generate(request: ProviderRequest) {
+		return {
+			output: request.prompt,
+			tokens: {
+				prompt: request.prompt.length,
+				completion: request.prompt.length,
+			},
+			costUsd: 0,
+		}
+	}
+}
 
 const manifest: AgentManifest = {
 	agentName: 'test',
 	agentVersion: '1',
 	eventBridge: 'default',
-	modelResource: { resourceName: 'echo' },
+	modelResource: { resourceName: 'deterministic-text' },
 	allowedTools: [],
 	knowledge: [{ adapterName: 'default' }],
 }
@@ -29,7 +45,7 @@ describe('AgentExecutor', () => {
 
 		const executor = new AgentExecutor({
 			manifest,
-			provider: new EchoProvider(),
+			provider: new DeterministicTextProvider(),
 			sessionStore,
 			knowledgeAdapters: { default: adapter },
 			logger: { debug: () => undefined, warn: () => undefined } as any,

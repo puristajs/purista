@@ -57,7 +57,7 @@ export type AgentExecutionResult = {
  * ```ts
  * const executor = new AgentExecutor({
  *   manifest,
- *   provider: new EchoProvider(),
+ *   provider: myModelProvider,
  *   sessionStore: new InMemorySessionStore(),
  *   knowledgeAdapters: { default: new InMemoryKnowledgeAdapter() },
  *   logger,
@@ -77,6 +77,10 @@ export class AgentExecutor {
 		const { manifest, provider, logger } = this.options
 
 		logger.debug({ manifest: manifest.agentName, sessionId: input.sessionId }, 'running agent workload')
+		if (!provider.generate) {
+			throw new Error(`Provider "${provider.name}" does not support text generation`)
+		}
+		const generate = provider.generate
 
 		const startedAt = Date.now()
 		const sessionRecord = await this.options.sessionStore.load(input.sessionId)
@@ -89,7 +93,7 @@ export class AgentExecutor {
 			PuristaSpanName.EventBridgeInvokeCommand,
 			{},
 			undefined,
-			async () => provider.generate({ prompt: input.prompt, context: providerContext, metadata: input.metadata }),
+			async () => generate({ prompt: input.prompt, context: providerContext, metadata: input.metadata }),
 		)
 
 		const userFrame = appendMessage(history, {

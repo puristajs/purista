@@ -13,7 +13,7 @@ Simple registry that maps resource names to provider implementations.
 ## Example
 
 ```ts
-const registry = new ModelResourceRegistry(new EchoProvider())
+const registry = new ModelResourceRegistry()
 registry.register('anthropic:claude-3', claudeProvider)
 const provider = registry.get('anthropic:claude-3')
 ```
@@ -22,15 +22,9 @@ const provider = registry.get('anthropic:claude-3')
 
 ### Constructor
 
-> **new ModelResourceRegistry**(`defaultProvider`): `ModelResourceRegistry`
+> **new ModelResourceRegistry**(): `ModelResourceRegistry`
 
 Defined in: [ai/src/providers/resources/ModelResourceRegistry.ts:17](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/providers/resources/ModelResourceRegistry.ts#L17)
-
-#### Parameters
-
-##### defaultProvider
-
-[`ModelProvider`](../interfaces/ModelProvider.md)
 
 #### Returns
 

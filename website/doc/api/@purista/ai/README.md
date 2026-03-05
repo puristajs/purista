@@ -12,7 +12,6 @@
 - [AgentExecutor](classes/AgentExecutor.md)
 - [AgentInstance](classes/AgentInstance.md)
 - [AiSdkProvider](classes/AiSdkProvider.md)
-- [EchoProvider](classes/EchoProvider.md)
 - [InMemoryKnowledgeAdapter](classes/InMemoryKnowledgeAdapter.md)
 - [InMemorySessionStore](classes/InMemorySessionStore.md)
 - [ModelResourceRegistry](classes/ModelResourceRegistry.md)

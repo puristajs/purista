@@ -18,7 +18,15 @@ import {
 	createToolEventFrame,
 } from '../protocol/index.js'
 import type { AgentProtocolEnvelope, AgentProtocolFrame } from '../protocol/types.js'
-import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
+import type {
+	ModelProvider,
+	ProviderEmbedManyRequest,
+	ProviderEmbedManyResponse,
+	ProviderEmbedRequest,
+	ProviderEmbedResponse,
+	ProviderRerankRequest,
+	ProviderRerankResponse,
+} from '../providers/runtime/ModelProvider.js'
 import type { AgentManifest, AllowedToolDefinition } from '../types/AgentManifest.js'
 import { type ConversationHelpers, createConversationHelpers } from './conversation.js'
 import { createScopedSessionId, resolveBaseSessionId } from './sessionIdentity.js'
@@ -536,6 +544,21 @@ export type AgentHandlerContext<
 	tools: ToolInvoker
 	resources: Resources
 	models: Models
+	embeddings: {
+		[Alias in keyof Models as Models[Alias] extends { embed: (...args: any[]) => any } ? Alias : never]: {
+			name: string
+			embed(request: ProviderEmbedRequest): Promise<ProviderEmbedResponse>
+			embedMany?(request: ProviderEmbedManyRequest): Promise<ProviderEmbedManyResponse>
+		}
+	}
+	rerankers: {
+		[Alias in keyof Models as Models[Alias] extends { rerank: (...args: any[]) => any } ? Alias : never]: {
+			name: string
+			rerank<Document = string | Record<string, unknown>>(
+				request: ProviderRerankRequest<Document>,
+			): Promise<ProviderRerankResponse<Document>>
+		}
+	}
 	serviceContext: ProtocolContext
 	manifest: AgentManifest
 }
@@ -555,6 +578,16 @@ export type CreateAgentHandlerContextInput<
 	protocol: ProtocolEmitter
 	resources: Resources
 	models: Models
+	embeddings: Record<string, { name: string; embed: (request: ProviderEmbedRequest) => Promise<ProviderEmbedResponse> }>
+	rerankers: Record<
+		string,
+		{
+			name: string
+			rerank: <Document = string | Record<string, unknown>>(
+				request: ProviderRerankRequest<Document>,
+			) => Promise<ProviderRerankResponse<Document>>
+		}
+	>
 	manifest: AgentManifest
 }
 
@@ -589,6 +622,20 @@ export const createAgentHandlerContext = <
 		tools: createToolInvoker(input.serviceContext, input.manifest.allowedTools ?? [], input.protocol),
 		resources: input.resources,
 		models: input.models,
+		embeddings: input.embeddings as AgentHandlerContext<
+			Payload,
+			Parameter,
+			Resources,
+			Models,
+			KnowledgeAliases
+		>['embeddings'],
+		rerankers: input.rerankers as AgentHandlerContext<
+			Payload,
+			Parameter,
+			Resources,
+			Models,
+			KnowledgeAliases
+		>['rerankers'],
 		serviceContext: input.serviceContext,
 		manifest: input.manifest,
 	}

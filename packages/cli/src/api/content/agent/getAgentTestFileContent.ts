@@ -16,9 +16,31 @@ export const getAgentTestFileContent = (input: {
 	const agentIdentifier = toAgentIdentifier(input.agentName)
 
 	writer.writeLine("import { DefaultEventBridge } from '@purista/core'")
-	writer.writeLine("import { EchoProvider } from '@purista/ai'")
+	writer.writeLine("import type { ModelProvider, ProviderRequest } from '@purista/ai'")
 	writer.writeLine("import { describe, expect, it } from 'vitest'")
 	writer.writeLine(`import { ${agentIdentifier} } from '${input.builderImportName}'`).blankLine()
+	writer.writeLine('class DeterministicTextProvider implements ModelProvider {')
+	writer.indent(() => {
+		writer.writeLine("readonly name = 'deterministic-text'")
+		writer.writeLine('readonly capabilities = { text: true }').blankLine()
+		writer.writeLine('async generate(request: ProviderRequest) {')
+		writer.indent(() => {
+			writer.writeLine('return {')
+			writer.indent(() => {
+				writer.writeLine('output: request.prompt,')
+				writer.writeLine('tokens: {')
+				writer.indent(() => {
+					writer.writeLine('prompt: request.prompt.length,')
+					writer.writeLine('completion: request.prompt.length,')
+				})
+				writer.writeLine('},')
+				writer.writeLine('costUsd: 0,')
+			})
+			writer.writeLine('}')
+		})
+		writer.writeLine('}')
+	})
+	writer.writeLine('}').blankLine()
 
 	writer.writeLine(`describe('${agentIdentifier}', () => {`)
 	writer.indent(() => {
@@ -29,7 +51,7 @@ export const getAgentTestFileContent = (input: {
 			writer.blankLine()
 			writer.writeLine(`const agent = await ${agentIdentifier}.getInstance(eventBridge, {`)
 			writer.indent(() => {
-				writer.writeLine("models: { 'openai:': new EchoProvider() },")
+				writer.writeLine("models: { 'openai:': new DeterministicTextProvider() },")
 			})
 			writer.writeLine('})')
 			writer.writeLine('await agent.start()')

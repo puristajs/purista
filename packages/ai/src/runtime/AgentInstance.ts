@@ -75,6 +75,25 @@ type AgentServiceConfig = {
 	}
 }
 
+const supportsCapability = (provider: ModelProvider, capability: 'text' | 'stream' | 'embedding' | 'rerank') => {
+	const declared = provider.capabilities?.[capability]
+	if (declared === true) {
+		return true
+	}
+	switch (capability) {
+		case 'text':
+			return typeof provider.generate === 'function'
+		case 'stream':
+			return typeof provider.stream === 'function'
+		case 'embedding':
+			return typeof provider.embed === 'function'
+		case 'rerank':
+			return typeof provider.rerank === 'function'
+		default:
+			return false
+	}
+}
+
 export class AgentInstance implements AgentInstanceContract {
 	private service: any
 	private readonly dependencies: AgentInstanceDependencies
@@ -105,9 +124,15 @@ export class AgentInstance implements AgentInstanceContract {
 			poolId,
 		}
 
-		for (const alias of deps.manifest.models ?? []) {
-			if (!this.runtime.models[alias]) {
-				throw new Error(`Missing model provider for alias "${alias}"`)
+		for (const model of deps.manifest.models ?? []) {
+			const provider = this.runtime.models[model.alias]
+			if (!provider) {
+				throw new Error(`Missing model provider for alias "${model.alias}"`)
+			}
+			for (const capability of model.capabilities ?? ['text']) {
+				if (!supportsCapability(provider, capability)) {
+					throw new Error(`Model provider "${model.alias}" does not support required capability "${capability}"`)
+				}
 			}
 		}
 

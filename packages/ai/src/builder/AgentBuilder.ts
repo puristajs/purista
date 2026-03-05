@@ -14,6 +14,7 @@ import type { AgentDefinition, AgentInfo, AgentInstanceOptions } from '../types/
 import type {
 	AgentHistoryPreset,
 	AgentManifest,
+	AgentModelCapability,
 	AgentSessionConfig,
 	AllowedToolDefinition,
 	RetryPolicy,
@@ -98,7 +99,58 @@ const resolveHistoryPresetConfig = (
 	}
 }
 
-export class AgentBuilder<KnowledgeAliases extends string = never> {
+const capabilityConfigDefaults: AgentModelCapability[] = ['text']
+
+type ResolveCapability<
+	Caps extends readonly AgentModelCapability[] | undefined,
+	Capability extends AgentModelCapability,
+> = Caps extends readonly AgentModelCapability[]
+	? Caps[number] extends never
+		? Capability extends 'text'
+			? true
+			: false
+		: Capability extends Caps[number]
+			? true
+			: false
+	: Capability extends 'text'
+		? true
+		: false
+
+type DeclaredModelAliasApi<
+	Alias extends string,
+	TextAliases extends string,
+	StreamAliases extends string,
+	EmbeddingAliases extends string,
+	RerankAliases extends string,
+> = Pick<ModelProvider, 'name' | 'capabilities'> &
+	(Alias extends TextAliases ? { generate: NonNullable<ModelProvider['generate']> } : Record<never, never>) &
+	(Alias extends StreamAliases ? { stream: NonNullable<ModelProvider['stream']> } : Record<never, never>) &
+	(Alias extends EmbeddingAliases
+		? {
+				embed: NonNullable<ModelProvider['embed']>
+				embedMany?: NonNullable<ModelProvider['embedMany']>
+			}
+		: Record<never, never>) &
+	(Alias extends RerankAliases ? { rerank: NonNullable<ModelProvider['rerank']> } : Record<never, never>)
+
+type DeclaredModelMap<
+	ModelAliases extends string,
+	TextAliases extends string,
+	StreamAliases extends string,
+	EmbeddingAliases extends string,
+	RerankAliases extends string,
+> = {
+	[Alias in ModelAliases]: DeclaredModelAliasApi<Alias, TextAliases, StreamAliases, EmbeddingAliases, RerankAliases>
+}
+
+export class AgentBuilder<
+	KnowledgeAliases extends string = never,
+	ModelAliases extends string = never,
+	TextAliases extends string = never,
+	StreamAliases extends string = never,
+	EmbeddingAliases extends string = never,
+	RerankAliases extends string = never,
+> {
 	private readonly info: AgentInfo
 	private readonly serviceBuilder: ServiceBuilder
 	private readonly commandBuilder: ReturnType<ServiceBuilder['getCommandBuilder']>
@@ -159,14 +211,47 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 		return this
 	}
 
-	defineModel(alias: string) {
+	defineModel<const Alias extends string, const Caps extends readonly AgentModelCapability[] | undefined = undefined>(
+		alias: Alias,
+		options?: { capabilities?: Caps },
+	): AgentBuilder<
+		KnowledgeAliases,
+		ModelAliases | Alias,
+		TextAliases | (ResolveCapability<Caps, 'text'> extends true ? Alias : never),
+		StreamAliases | (ResolveCapability<Caps, 'stream'> extends true ? Alias : never),
+		EmbeddingAliases | (ResolveCapability<Caps, 'embedding'> extends true ? Alias : never),
+		RerankAliases | (ResolveCapability<Caps, 'rerank'> extends true ? Alias : never)
+	> {
 		if (!alias.trim()) {
 			throw new Error('Model alias must not be empty')
 		}
-		const models = new Set(this.manifest.models ?? [])
-		models.add(alias.trim())
-		this.manifest.models = [...models]
-		return this
+		const normalizedAlias = alias.trim()
+		const capabilities =
+			options?.capabilities && options.capabilities.length > 0
+				? [...new Set(options.capabilities)]
+				: capabilityConfigDefaults
+		const models = [...(this.manifest.models ?? [])]
+		const existingIndex = models.findIndex(model => model.alias === normalizedAlias)
+		if (existingIndex >= 0) {
+			models[existingIndex] = {
+				alias: normalizedAlias,
+				capabilities,
+			}
+		} else {
+			models.push({
+				alias: normalizedAlias,
+				capabilities,
+			})
+		}
+		this.manifest.models = models
+		return this as unknown as AgentBuilder<
+			KnowledgeAliases,
+			ModelAliases | Alias,
+			TextAliases | (ResolveCapability<Caps, 'text'> extends true ? Alias : never),
+			StreamAliases | (ResolveCapability<Caps, 'stream'> extends true ? Alias : never),
+			EmbeddingAliases | (ResolveCapability<Caps, 'embedding'> extends true ? Alias : never),
+			RerankAliases | (ResolveCapability<Caps, 'rerank'> extends true ? Alias : never)
+		>
 	}
 
 	useSessionStore(config: AgentSessionConfig) {
@@ -177,10 +262,17 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 	useKnowledgeAdapter<const Alias extends string>(
 		adapterName: Alias,
 		options?: Record<string, unknown>,
-	): AgentBuilder<KnowledgeAliases | Alias>
+	): AgentBuilder<KnowledgeAliases | Alias, ModelAliases, TextAliases, StreamAliases, EmbeddingAliases, RerankAliases>
 	useKnowledgeAdapter<const Adapter extends { adapterName: string; options?: Record<string, unknown> }>(
 		adapter: Adapter,
-	): AgentBuilder<KnowledgeAliases | Adapter['adapterName']>
+	): AgentBuilder<
+		KnowledgeAliases | Adapter['adapterName'],
+		ModelAliases,
+		TextAliases,
+		StreamAliases,
+		EmbeddingAliases,
+		RerankAliases
+	>
 	useKnowledgeAdapter(
 		adapterOrName: string | { adapterName: string; options?: Record<string, unknown> },
 		options?: Record<string, unknown>,
@@ -191,7 +283,14 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 		}
 		const existing = this.manifest.knowledge ?? []
 		this.manifest.knowledge = [...existing, { adapterName: adapter.adapterName.trim(), options: adapter.options }]
-		return this as unknown as AgentBuilder<KnowledgeAliases | typeof adapter.adapterName>
+		return this as unknown as AgentBuilder<
+			KnowledgeAliases | typeof adapter.adapterName,
+			ModelAliases,
+			TextAliases,
+			StreamAliases,
+			EmbeddingAliases,
+			RerankAliases
+		>
 	}
 
 	/**
@@ -349,7 +448,13 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 		Payload = unknown,
 		Parameter = unknown,
 		Resources extends Record<string, unknown> = Record<string, unknown>,
-		Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
+		Models extends Record<string, ModelProvider> = DeclaredModelMap<
+			ModelAliases,
+			TextAliases,
+			StreamAliases,
+			EmbeddingAliases,
+			RerankAliases
+		>,
 	>(fn: AgentHandler<Payload, Parameter, Resources, Models, KnowledgeAliases>) {
 		this.handler = fn as AgentHandler<
 			unknown,
@@ -387,24 +492,66 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 					costUsd: 0,
 				}
 
-				const instrumentedModels = Object.fromEntries(
-					Object.entries(runtime.models).map(([alias, provider]) => [
-						alias,
-						{
-							name: provider.name,
-							generate: async (request: { prompt: string; context?: string; metadata?: Record<string, unknown> }) => {
-								const metadata = request.metadata ?? {}
-								const aiSdkMetadata =
-									typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
-										? (metadata.aiSdk as Record<string, unknown>)
-										: {}
+				const instrumentedModels: Record<string, ModelProvider> = {}
+				const instrumentedEmbeddings: Record<
+					string,
+					{
+						name: string
+						embed: (request: { value: string; metadata?: Record<string, unknown> }) => Promise<{
+							embedding: number[]
+							usage?: { tokens?: number }
+							metadata?: Record<string, unknown>
+						}>
+						embedMany?: (request: { values: string[]; metadata?: Record<string, unknown> }) => Promise<{
+							embeddings: number[][]
+							usage?: { tokens?: number }
+							metadata?: Record<string, unknown>
+						}>
+					}
+				> = {}
+				const instrumentedRerankers: Record<
+					string,
+					{
+						name: string
+						rerank: <Document = string | Record<string, unknown>>(request: {
+							query: string
+							documents: Document[]
+							topN?: number
+							metadata?: Record<string, unknown>
+						}) => Promise<{
+							ranking: Array<{ originalIndex: number; score: number; document: Document }>
+							rerankedDocuments: Document[]
+							metadata?: Record<string, unknown>
+						}>
+					}
+				> = {}
 
-								const result = await provider.generate({
-									...request,
-									metadata: {
-										...metadata,
-										aiSdk: {
-											...aiSdkMetadata,
+				for (const [alias, provider] of Object.entries(runtime.models)) {
+					const modelApi: ModelProvider = {
+						name: provider.name,
+						capabilities: provider.capabilities,
+					}
+
+					if (provider.generate) {
+						modelApi.generate = async (request: {
+							prompt: string
+							context?: string
+							metadata?: Record<string, unknown>
+						}) => {
+							const metadata = request.metadata ?? {}
+							const aiSdkMetadata =
+								typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
+									? (metadata.aiSdk as Record<string, unknown>)
+									: {}
+
+							const result = await provider.generate?.({
+								...request,
+								metadata: {
+									...metadata,
+									aiSdk: {
+										...(aiSdkMetadata.generate && typeof aiSdkMetadata.generate === 'object' ? aiSdkMetadata : {}),
+										generate: {
+											...((aiSdkMetadata.generate as Record<string, unknown> | undefined) ?? {}),
 											experimental_telemetry: {
 												isEnabled: true,
 												functionId: `${runtime.manifest.agentName}.model.generate`,
@@ -412,21 +559,191 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 													agentName: runtime.manifest.agentName,
 													agentVersion: runtime.manifest.agentVersion,
 													poolId,
+													modelAlias: alias,
 												},
 												tracer: runtime.tracer,
 											},
 										},
 									},
-								})
-								usage.provider = provider.name
-								usage.promptTokens += result.tokens?.prompt ?? 0
-								usage.completionTokens += result.tokens?.completion ?? 0
-								usage.costUsd += result.costUsd ?? 0
-								return result
+								},
+							})
+							if (!result) {
+								throw new HandledError(StatusCode.InternalServerError, 'Model generate provider unavailable')
+							}
+							usage.provider = provider.name
+							usage.promptTokens += result.tokens?.prompt ?? 0
+							usage.completionTokens += result.tokens?.completion ?? 0
+							usage.costUsd += result.costUsd ?? 0
+							return result
+						}
+					}
+
+					if (provider.stream) {
+						modelApi.stream = (request: { prompt: string; context?: string; metadata?: Record<string, unknown> }) => {
+							const metadata = request.metadata ?? {}
+							const aiSdkMetadata =
+								typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
+									? (metadata.aiSdk as Record<string, unknown>)
+									: {}
+
+							const streamHandle = provider.stream?.({
+								...request,
+								metadata: {
+									...metadata,
+									aiSdk: {
+										...(aiSdkMetadata.stream && typeof aiSdkMetadata.stream === 'object' ? aiSdkMetadata : {}),
+										generate: {
+											...((aiSdkMetadata.generate as Record<string, unknown> | undefined) ?? {}),
+											experimental_telemetry: {
+												isEnabled: true,
+												functionId: `${runtime.manifest.agentName}.model.stream`,
+												metadata: {
+													agentName: runtime.manifest.agentName,
+													agentVersion: runtime.manifest.agentVersion,
+													poolId,
+													modelAlias: alias,
+												},
+												tracer: runtime.tracer,
+											},
+										},
+									},
+								},
+							})
+
+							if (!streamHandle) {
+								throw new HandledError(StatusCode.InternalServerError, 'Model stream provider unavailable')
+							}
+
+							return {
+								final: async () => {
+									const result = await streamHandle.final()
+									usage.provider = provider.name
+									usage.promptTokens += result.tokens?.prompt ?? 0
+									usage.completionTokens += result.tokens?.completion ?? 0
+									usage.costUsd += result.costUsd ?? 0
+									return result
+								},
+								[Symbol.asyncIterator]: streamHandle[Symbol.asyncIterator].bind(streamHandle),
+							}
+						}
+					}
+
+					if (provider.embed) {
+						instrumentedEmbeddings[alias] = {
+							name: provider.name,
+							embed: request => {
+								const metadata = request.metadata ?? {}
+								const aiSdkMetadata =
+									typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
+										? (metadata.aiSdk as Record<string, unknown>)
+										: {}
+								return provider.embed?.({
+									...request,
+									metadata: {
+										...metadata,
+										aiSdk: {
+											...aiSdkMetadata,
+											embed: {
+												...((aiSdkMetadata.embed as Record<string, unknown> | undefined) ?? {}),
+												experimental_telemetry: {
+													isEnabled: true,
+													functionId: `${runtime.manifest.agentName}.model.embed`,
+													metadata: {
+														agentName: runtime.manifest.agentName,
+														agentVersion: runtime.manifest.agentVersion,
+														poolId,
+														modelAlias: alias,
+													},
+													tracer: runtime.tracer,
+												},
+											},
+										},
+									},
+								}) as Promise<{
+									embedding: number[]
+									usage?: { tokens?: number }
+									metadata?: Record<string, unknown>
+								}>
 							},
-						} satisfies ModelProvider,
-					]),
-				) as Record<string, ModelProvider>
+							embedMany: provider.embedMany
+								? request => {
+										const metadata = request.metadata ?? {}
+										const aiSdkMetadata =
+											typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
+												? (metadata.aiSdk as Record<string, unknown>)
+												: {}
+										return provider.embedMany?.({
+											...request,
+											metadata: {
+												...metadata,
+												aiSdk: {
+													...aiSdkMetadata,
+													embedMany: {
+														...((aiSdkMetadata.embedMany as Record<string, unknown> | undefined) ?? {}),
+														experimental_telemetry: {
+															isEnabled: true,
+															functionId: `${runtime.manifest.agentName}.model.embedMany`,
+															metadata: {
+																agentName: runtime.manifest.agentName,
+																agentVersion: runtime.manifest.agentVersion,
+																poolId,
+																modelAlias: alias,
+															},
+															tracer: runtime.tracer,
+														},
+													},
+												},
+											},
+										}) as Promise<{
+											embeddings: number[][]
+											usage?: { tokens?: number }
+											metadata?: Record<string, unknown>
+										}>
+									}
+								: undefined,
+						}
+					}
+
+					if (provider.rerank) {
+						instrumentedRerankers[alias] = {
+							name: provider.name,
+							rerank: request => {
+								const metadata = request.metadata ?? {}
+								const aiSdkMetadata =
+									typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
+										? (metadata.aiSdk as Record<string, unknown>)
+										: {}
+								return provider.rerank?.({
+									...request,
+									metadata: {
+										...metadata,
+										aiSdk: {
+											...aiSdkMetadata,
+											rerank: {
+												...((aiSdkMetadata.rerank as Record<string, unknown> | undefined) ?? {}),
+												experimental_telemetry: {
+													isEnabled: true,
+													functionId: `${runtime.manifest.agentName}.model.rerank`,
+													metadata: {
+														agentName: runtime.manifest.agentName,
+														agentVersion: runtime.manifest.agentVersion,
+														poolId,
+														modelAlias: alias,
+													},
+													tracer: runtime.tracer,
+												},
+											},
+										},
+									},
+								} as any) as any
+							},
+						}
+					}
+
+					if (modelApi.generate || modelApi.stream) {
+						instrumentedModels[alias] = modelApi
+					}
+				}
 
 				const agentContext = createAgentHandlerContext({
 					serviceContext: context,
@@ -437,6 +754,8 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 					protocol: protocolBuffer.protocol,
 					resources: runtime.resources,
 					models: instrumentedModels,
+					embeddings: instrumentedEmbeddings,
+					rerankers: instrumentedRerankers,
 					manifest: runtime.manifest,
 				})
 
@@ -517,7 +836,14 @@ export class AgentBuilder<KnowledgeAliases extends string = never> {
 			await writer.close(final)
 		})
 
-		return this as AgentBuilder<KnowledgeAliases>
+		return this as AgentBuilder<
+			KnowledgeAliases,
+			ModelAliases,
+			TextAliases,
+			StreamAliases,
+			EmbeddingAliases,
+			RerankAliases
+		>
 	}
 
 	build(): AgentDefinition<KnowledgeAliases> {

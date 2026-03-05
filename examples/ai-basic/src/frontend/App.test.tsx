@@ -15,6 +15,13 @@ vi.mock('streamdown', () => ({
 	Streamdown: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }))
 
+vi.mock('./components/ai-elements/conversation', () => ({
+	Conversation: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+	ConversationContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+	ConversationEmptyState: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+	ConversationScrollButton: () => <div />,
+}))
+
 beforeEach(() => {
 	const storage = new Map<string, string>()
 	Object.defineProperty(window, 'localStorage', {

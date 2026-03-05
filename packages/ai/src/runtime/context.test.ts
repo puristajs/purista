@@ -85,6 +85,11 @@ describe('runtime context helpers', () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const sessionStore = new InMemorySessionStore()
 		const knowledgeAdapter = new InMemoryKnowledgeAdapter()
+		const embed = vi.fn().mockResolvedValue({ embedding: [0.1, 0.2, 0.3] })
+		const rerank = vi.fn().mockResolvedValue({
+			ranking: [{ originalIndex: 0, score: 1, document: 'doc' }],
+			rerankedDocuments: ['doc'],
+		})
 		await knowledgeAdapter.upsert({ document: { id: 'doc-1', content: 'Reset password steps', metadata: {} } })
 
 		const context = createAgentHandlerContext({
@@ -96,6 +101,8 @@ describe('runtime context helpers', () => {
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
+			embeddings: { vector: { name: 'vector', embed } },
+			rerankers: { ranker: { name: 'ranker', rerank } },
 			manifest,
 		})
 
@@ -122,6 +129,10 @@ describe('runtime context helpers', () => {
 		const promptInput = await context.conversation.buildPromptInput()
 		expect(promptInput).toContain('user: Need password reset help')
 		expect(promptInput).toContain('assistant: Use the forgot-password page.')
+		await context.embeddings.vector.embed({ value: 'reset password' })
+		await context.rerankers.ranker.rerank({ query: 'reset', documents: ['doc'] })
+		expect(embed).toHaveBeenCalledOnce()
+		expect(rerank).toHaveBeenCalledOnce()
 
 		const envelopes = buffer.toEnvelopes()
 		expect(envelopes.some(envelope => envelope.frame.kind === 'tool')).toBe(true)
@@ -138,6 +149,8 @@ describe('runtime context helpers', () => {
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
+			embeddings: {},
+			rerankers: {},
 			manifest,
 		})
 
@@ -159,6 +172,8 @@ describe('runtime context helpers', () => {
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
+			embeddings: {},
+			rerankers: {},
 			manifest,
 		})
 
@@ -183,6 +198,8 @@ describe('runtime context helpers', () => {
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
+			embeddings: {},
+			rerankers: {},
 			manifest,
 		})
 

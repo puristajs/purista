@@ -1,14 +1,25 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-import { Background, Controls, MiniMap, ReactFlow } from '@xyflow/react'
+import { BotIcon, CheckCircle2Icon, MessageSquareIcon, SparklesIcon, WrenchIcon, WorkflowIcon, XCircleIcon } from 'lucide-react'
 import { Streamdown } from 'streamdown'
 
+import {
+	Conversation,
+	ConversationContent,
+	ConversationEmptyState,
+	ConversationScrollButton,
+} from './components/ai-elements/conversation'
 import { loadConversation, runSupportCommand, streamSupportAgent, triggerFollowUp } from './lib/api'
 import type { AgentProtocolEnvelope, StreamPayload } from './lib/types'
 import { mapToWorkflow } from './lib/workflow'
 
 type Scenario = 'stream' | 'command' | 'followup' | 'protocol'
 type Theme = 'dark' | 'light'
+type ConversationHistoryItem = {
+	sessionId: string
+	firstMessage: string
+	updatedAt: number
+}
 
 type ChatMessage = {
 	id: string
@@ -30,10 +41,33 @@ const scenarioOptions: Array<{ id: Scenario; label: string }> = [
 ]
 
 const THEME_KEY = 'purista.ai.theme'
+const HISTORY_KEY = 'purista.ai.history'
 
 const getStoredTheme = (): Theme => {
 	const stored = window.localStorage.getItem(THEME_KEY)
 	return stored === 'light' ? 'light' : 'dark'
+}
+
+const getStoredHistory = (): ConversationHistoryItem[] => {
+	try {
+		const value = window.localStorage.getItem(HISTORY_KEY)
+		if (!value) {
+			return []
+		}
+		const parsed = JSON.parse(value) as ConversationHistoryItem[]
+		if (!Array.isArray(parsed)) {
+			return []
+		}
+		return parsed
+			.filter(item => item && typeof item.sessionId === 'string' && typeof item.firstMessage === 'string')
+			.map(item => ({
+				sessionId: item.sessionId,
+				firstMessage: item.firstMessage,
+				updatedAt: typeof item.updatedAt === 'number' ? item.updatedAt : Date.now(),
+			}))
+	} catch {
+		return []
+	}
 }
 
 const uniqueEnvelopes = (
@@ -78,6 +112,42 @@ const stableJson = (value: unknown): string => {
 	}
 }
 
+type FlowPhaseId = 'ingress' | 'faq' | 'triage' | 'generation' | 'result'
+type FlowPhaseStatus = 'idle' | 'running' | 'success' | 'error'
+
+const phaseOrder: FlowPhaseId[] = ['ingress', 'faq', 'triage', 'generation', 'result']
+type FlowPhase = {
+	id: FlowPhaseId
+	label: string
+	description: string
+	status: FlowPhaseStatus
+	isActive: boolean
+	icon: typeof WorkflowIcon
+}
+
+const latestStepByMatch = (steps: ReturnType<typeof mapToWorkflow>, matcher: (label: string) => boolean) => {
+	for (let index = steps.length - 1; index >= 0; index -= 1) {
+		const step = steps[index]
+		if (matcher(step.label)) {
+			return step
+		}
+	}
+	return undefined
+}
+
+const latestPhaseByStatus = (
+	statuses: Record<FlowPhaseId, FlowPhaseStatus>,
+	matcher: (status: FlowPhaseStatus) => boolean,
+): FlowPhaseId | undefined => {
+	for (let index = phaseOrder.length - 1; index >= 0; index -= 1) {
+		const phaseId = phaseOrder[index]
+		if (phaseId && matcher(statuses[phaseId])) {
+			return phaseId
+		}
+	}
+	return undefined
+}
+
 export const App = () => {
 	const [scenario, setScenario] = useState<Scenario>('stream')
 	const [theme, setTheme] = useState<Theme>(getStoredTheme)
@@ -90,39 +160,52 @@ export const App = () => {
 	const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
 	const [envelopes, setEnvelopes] = useState<AgentProtocolEnvelope[]>([])
 	const [streamPayloads, setStreamPayloads] = useState<StreamPayload[]>([])
+	const [conversationHistory, setConversationHistory] = useState<ConversationHistoryItem[]>(getStoredHistory)
 	const seenFramesRef = useRef<Set<string>>(new Set())
-	const chatScrollRef = useRef<HTMLDivElement | null>(null)
 
 	const workflow = useMemo(() => mapToWorkflow(envelopes), [envelopes])
 
-	const flowGraph = useMemo(() => {
-		const nodes = workflow.map((step, index) => ({
-			id: `${step.id}-${index}`,
-			position: { x: step.depth * 250, y: index * 105 },
-			data: {
-				label: (
-					<div className="flow-node">
-						<div className="flow-title">{step.label.slice(0, 100)}</div>
-						<div className="flow-meta">{step.actor}</div>
-					</div>
-				),
-			},
-			style: {
-				background: 'var(--panel)',
-				color: 'var(--text)',
-				border: '1px solid var(--border)',
-				borderRadius: 12,
-				width: 240,
-				padding: 8,
-			},
-		}))
-		const edges = nodes.slice(1).map((node, index) => ({
-			id: `e-${index}`,
-			source: nodes[index].id,
-			target: node.id,
-		}))
-		return { nodes, edges }
-	}, [workflow])
+	const flowPhases = (() => {
+		const hasError = workflow.some(step => step.status === 'error' || step.type === 'error')
+		const hasTopLevelFinal = workflow.some(
+			step => step.depth === 0 && step.type === 'message' && (step.details as { final?: boolean } | undefined)?.final === true,
+		)
+		const lookupStep = latestStepByMatch(workflow, label => label.includes('support.1.lookupFaq'))
+		const triageStep = latestStepByMatch(workflow, label => label.includes('triageAgent.1.run'))
+		const generationStep = latestStepByMatch(workflow, label => label.toLowerCase().includes('generating final answer'))
+
+		const phaseStatus: Record<FlowPhaseId, FlowPhaseStatus> = {
+			ingress: workflow.length > 0 ? 'success' : 'idle',
+			faq: lookupStep?.status ?? 'idle',
+			triage: triageStep?.status ?? 'idle',
+			generation: hasError ? 'error' : hasTopLevelFinal ? 'success' : generationStep?.status ?? 'idle',
+			result: hasError ? 'error' : hasTopLevelFinal ? 'success' : 'idle',
+		}
+
+		const activePhase =
+			latestPhaseByStatus(phaseStatus, status => status === 'running') ??
+			latestPhaseByStatus(phaseStatus, status => status !== 'idle')
+
+		const phaseConfig: Array<{ id: FlowPhaseId; label: string; icon: typeof WorkflowIcon; description: string }> = [
+			{ id: 'ingress', label: 'PURISTA ingress', icon: WorkflowIcon, description: 'Request accepted in service/stream' },
+			{ id: 'faq', label: 'Command tool', icon: WrenchIcon, description: 'FAQ lookup command invocation' },
+			{ id: 'triage', label: 'AI delegation', icon: BotIcon, description: 'Optional triage agent run' },
+			{ id: 'generation', label: 'AI generation', icon: SparklesIcon, description: 'Final response generation' },
+			{ id: 'result', label: 'Stream result', icon: CheckCircle2Icon, description: 'Final chunk/telemetry emitted' },
+		]
+
+		return phaseConfig.map<FlowPhase>(phase => {
+			const statusValue = phaseStatus[phase.id]
+			return {
+				id: phase.id,
+				label: phase.label,
+				description: phase.description,
+				status: statusValue,
+				isActive: activePhase === phase.id,
+				icon: hasError && phase.id === 'result' ? XCircleIcon : phase.icon,
+			}
+		})
+	})()
 
 	const chatTimeline = useMemo(() => {
 		const rows: Array<{
@@ -152,16 +235,23 @@ export const App = () => {
 	}, [chatMessages])
 
 	useEffect(() => {
-		const element = chatScrollRef.current
-		if (!element) {
-			return
-		}
-		element.scrollTop = element.scrollHeight
-	}, [chatMessages, assistantDraft])
+		document.documentElement.setAttribute('data-theme', theme)
+	}, [theme])
 
 	const setThemeAndStore = (nextTheme: Theme) => {
 		window.localStorage.setItem(THEME_KEY, nextTheme)
 		setTheme(nextTheme)
+	}
+
+	const rememberConversation = (sessionKey: string, firstMessage: string) => {
+		setConversationHistory(previous => {
+			const next = [
+				{ sessionId: sessionKey, firstMessage: firstMessage.trim().slice(0, 200), updatedAt: Date.now() },
+				...previous.filter(item => item.sessionId !== sessionKey),
+			].slice(0, 40)
+			window.localStorage.setItem(HISTORY_KEY, JSON.stringify(next))
+			return next
+		})
 	}
 
 	const appendAssistantMessage = (content: string) => {
@@ -277,6 +367,11 @@ export const App = () => {
 		if (!question) {
 			return
 		}
+		const activeSessionId = sessionId.trim() || crypto.randomUUID()
+		if (activeSessionId !== sessionId) {
+			setSessionId(activeSessionId)
+		}
+		rememberConversation(activeSessionId, question)
 		appendUserMessage(question)
 		setAssistantDraft('')
 		setEnvelopes([])
@@ -289,7 +384,7 @@ export const App = () => {
 			await streamSupportAgent(
 				{
 					prompt: question,
-					sessionId: sessionId || undefined,
+					sessionId: activeSessionId,
 				},
 				{
 					onEnvelope: envelope => {
@@ -324,13 +419,18 @@ export const App = () => {
 		if (!question) {
 			return
 		}
+		const activeSessionId = sessionId.trim() || crypto.randomUUID()
+		if (activeSessionId !== sessionId) {
+			setSessionId(activeSessionId)
+		}
+		rememberConversation(activeSessionId, question)
 		appendUserMessage(question)
 		setStatus('Running command...')
 		setCanRetry(false)
 		try {
 			const result = await runSupportCommand({
 				prompt: question,
-				sessionId: sessionId || undefined,
+				sessionId: activeSessionId,
 			})
 			setCommandOutput(JSON.stringify(result, null, 2))
 			const message =
@@ -353,13 +453,18 @@ export const App = () => {
 		if (!question) {
 			return
 		}
+		const activeSessionId = sessionId.trim() || crypto.randomUUID()
+		if (activeSessionId !== sessionId) {
+			setSessionId(activeSessionId)
+		}
+		rememberConversation(activeSessionId, question)
 		appendUserMessage(question)
 		setStatus('Queueing follow-up...')
 		setCanRetry(false)
 		try {
 			const result = await triggerFollowUp({
 				prompt: question,
-				sessionId: sessionId || undefined,
+				sessionId: activeSessionId,
 			})
 			setCommandOutput(JSON.stringify(result, null, 2))
 			appendAssistantMessage('Follow-up queued. Final processing is async via subscription.')
@@ -373,13 +478,15 @@ export const App = () => {
 		}
 	}
 
-	const executeLoadConversation = async () => {
-		if (!sessionId) {
+	const executeLoadConversation = async (explicitSessionId?: string) => {
+		const targetSessionId = explicitSessionId ?? sessionId
+		if (!targetSessionId) {
 			setStatus('Set a session id first')
 			return
 		}
 		setStatus('Loading conversation...')
-		const result = await loadConversation(sessionId)
+		setSessionId(targetSessionId)
+		const result = await loadConversation(targetSessionId)
 		const hydrated = result.envelopes ?? []
 		seenFramesRef.current = new Set()
 		setEnvelopes([])
@@ -403,7 +510,45 @@ export const App = () => {
 	}
 
 	return (
-		<div className={`page ${theme === 'light' ? 'theme-light' : 'theme-dark'}`}>
+		<div className="page">
+			<aside className="sidebar">
+				<div className="sidebar-header">
+					<h2>History</h2>
+					<button
+						type="button"
+						className="button secondary"
+						onClick={() => {
+							setPrompt('How can I request a refund for my order?')
+							setChatMessages([])
+							setEnvelopes([])
+							setStreamPayloads([])
+							seenFramesRef.current = new Set()
+							setAssistantDraft('')
+							setStatus('Ready')
+							setCanRetry(false)
+						}}
+					>
+						New chat
+					</button>
+				</div>
+				<div className="sidebar-list">
+					{conversationHistory.map(item => (
+						<button
+							type="button"
+							key={item.sessionId}
+							className={`history-item ${sessionId.trim() === item.sessionId ? 'active' : ''}`}
+							onClick={() => void executeLoadConversation(item.sessionId)}
+						>
+							<div className="history-title">{item.firstMessage}</div>
+							<div className="history-meta">
+								<span>{new Date(item.updatedAt).toLocaleTimeString()}</span>
+							</div>
+						</button>
+					))}
+					{conversationHistory.length === 0 && <div className="placeholder">No conversations yet.</div>}
+				</div>
+			</aside>
+			<div className="main">
 			<header className="topbar">
 				<div>
 					<h1>PURISTA AI Showcase</h1>
@@ -438,103 +583,112 @@ export const App = () => {
 
 			<div className="layout">
 				<section className="card chat-card">
-					<div className="chat-scroll" ref={chatScrollRef}>
-						{chatTimeline.map(row => (
-							<div key={row.message.id} className="chat-turn">
-								{row.message.content && (
-									<div className={`bubble ${row.message.role === 'user' ? 'bubble-user' : 'bubble-assistant'}`}>
-										<Streamdown>{row.message.content}</Streamdown>
-									</div>
-								)}
-								{row.tools.length > 0 && (
-									<div className="tool-group">
-										{row.tools.map(tool => (
-											<div key={tool.id} className="bubble bubble-tool">
-												<div className="tool-card">
-													<details>
-														<summary className="tool-summary">
-															<div className="tool-head">
-																<div className="tool-title">{tool.content}</div>
-																<span className={`tool-chip tool-${String(tool.toolStatus ?? 'unknown')}`}>
-																	{String(tool.toolStatus ?? 'unknown').toUpperCase()}
-																</span>
-															</div>
-														</summary>
-														<div className="tool-meta">
-															<span>{tool.actor ?? 'tool'}</span>
-															{tool.timestamp && <span>{new Date(tool.timestamp).toLocaleTimeString()}</span>}
-														</div>
-														{tool.toolInput !== undefined && (
-															<details>
-																<summary>input</summary>
-																<pre>{JSON.stringify(tool.toolInput, null, 2)}</pre>
-															</details>
-														)}
-														{tool.toolOutput !== undefined && (
-															<details>
-																<summary>output</summary>
-																<pre>{JSON.stringify(tool.toolOutput, null, 2)}</pre>
-															</details>
-														)}
-													</details>
-												</div>
+					<Conversation className="chat-scroll">
+						<ConversationContent>
+							{chatTimeline.length === 0 && !assistantDraft ? (
+								<ConversationEmptyState
+									icon={<MessageSquareIcon size={40} />}
+									title="Start a conversation"
+									description="Ask a question to run the selected AI scenario."
+								/>
+							) : (
+								chatTimeline.map(row => (
+									<div key={row.message.id} className="chat-turn">
+										{row.message.content && (
+											<div className={`bubble ${row.message.role === 'user' ? 'bubble-user' : 'bubble-assistant'}`}>
+												<Streamdown>{row.message.content}</Streamdown>
 											</div>
-										))}
+										)}
+										{row.tools.length > 0 && (
+											<div className="tool-group">
+												{row.tools.map(tool => (
+													<div key={tool.id} className="bubble bubble-tool">
+														<div className="tool-card">
+															<details>
+																<summary className="tool-summary">
+																	<div className="tool-head">
+																		<div className="tool-title">{tool.content}</div>
+																		<span className={`tool-chip tool-${String(tool.toolStatus ?? 'unknown')}`}>
+																			{String(tool.toolStatus ?? 'unknown').toUpperCase()}
+																		</span>
+																	</div>
+																</summary>
+																<div className="tool-meta">
+																	<span>{tool.actor ?? 'tool'}</span>
+																	{tool.timestamp && <span>{new Date(tool.timestamp).toLocaleTimeString()}</span>}
+																</div>
+																{tool.toolInput !== undefined && (
+																	<details>
+																		<summary>input</summary>
+																		<pre>{JSON.stringify(tool.toolInput, null, 2)}</pre>
+																	</details>
+																)}
+																{tool.toolOutput !== undefined && (
+																	<details>
+																		<summary>output</summary>
+																		<pre>{JSON.stringify(tool.toolOutput, null, 2)}</pre>
+																	</details>
+																)}
+															</details>
+														</div>
+													</div>
+												))}
+											</div>
+										)}
 									</div>
-								)}
-							</div>
-						))}
-						{assistantDraft && (
-							<div className="bubble bubble-assistant bubble-draft">
-								<Streamdown>{assistantDraft}</Streamdown>
-							</div>
-						)}
-					</div>
+								))
+							)}
+							{assistantDraft && (
+								<div className="bubble bubble-assistant bubble-draft">
+									<Streamdown>{assistantDraft}</Streamdown>
+								</div>
+							)}
+						</ConversationContent>
+						<ConversationScrollButton />
+					</Conversation>
 					<div className="composer">
-						<textarea
-							value={prompt}
-							onChange={event => setPrompt(event.target.value)}
-							onKeyDown={event => {
-								if (event.key !== 'Enter' || event.shiftKey) {
-									return
-								}
-								event.preventDefault()
-								if (scenario === 'command') {
-									void executeCommand()
-									return
-								}
-								if (scenario === 'followup') {
-									void executeFollowUp()
-									return
-								}
-								void executeStream()
-							}}
-							placeholder="Ask the assistant..."
-						/>
-						<div className="composer-row">
-							<input
-								value={sessionId}
-								onChange={event => setSessionId(event.target.value)}
-								placeholder="Session id for restore (optional)"
+						<div className="prompt-bar">
+							<textarea
+								value={prompt}
+								onChange={event => setPrompt(event.target.value)}
+								onKeyDown={event => {
+									if (event.key !== 'Enter' || event.shiftKey) {
+										return
+									}
+									event.preventDefault()
+									if (scenario === 'command') {
+										void executeCommand()
+										return
+									}
+									if (scenario === 'followup') {
+										void executeFollowUp()
+										return
+									}
+									void executeStream()
+								}}
+								placeholder="Ask the assistant..."
+								className="prompt-input"
+								rows={1}
 							/>
-							<button type="button" className="button secondary" onClick={executeLoadConversation}>
-								Load
-							</button>
-						</div>
-						<div className="composer-row buttons">
 							{(scenario === 'stream' || scenario === 'protocol') && (
-								<button type="button" className="button" onClick={executeStream}>
-									Send
+								<button type="button" className="button primary-icon send-button" onClick={executeStream} aria-label="Send message">
+									<span className="button-icon" aria-hidden>
+										➤
+									</span>
 								</button>
 							)}
 							{scenario === 'command' && (
-								<button type="button" className="button" onClick={executeCommand}>
-									Run Command
+								<button type="button" className="button primary-icon send-button" onClick={executeCommand} aria-label="Run command">
+									<span className="button-icon" aria-hidden>
+										⚡
+									</span>
 								</button>
 							)}
 							{scenario === 'followup' && (
-								<button type="button" className="button" onClick={executeFollowUp}>
-									Queue Follow-up
+								<button type="button" className="button primary-icon send-button" onClick={executeFollowUp} aria-label="Queue follow-up">
+									<span className="button-icon" aria-hidden>
+										↺
+									</span>
 								</button>
 							)}
 						</div>
@@ -554,15 +708,45 @@ export const App = () => {
 							))}
 							{streamPayloads.length === 0 && <div className="placeholder">No protocol frames yet.</div>}
 						</div>
-					) : (
-						<div className="flow-wrap">
-							<ReactFlow nodes={flowGraph.nodes} edges={flowGraph.edges} fitView>
-								<MiniMap />
-								<Controls />
-								<Background />
-							</ReactFlow>
-						</div>
-					)}
+						) : (
+							<div className="flow-wrap">
+								<div className="workflow-column">
+									{flowPhases.map((phase, index) => {
+										const Icon = phase.icon
+										const next = flowPhases[index + 1]
+										const edgeClass =
+											phase.status === 'running'
+												? 'flow-edge-active'
+												: phase.status === 'success'
+													? 'flow-edge-success'
+													: phase.status === 'error'
+														? 'flow-edge-error'
+														: 'flow-edge-idle'
+										return (
+											<div key={phase.id} className="workflow-step-wrap">
+												<div className={`flow-node-card flow-status-${phase.status} ${phase.isActive ? 'flow-active' : ''}`}>
+													<div className="flow-node-content">
+														<div className="flow-node-icon-wrap">
+															<Icon size={16} />
+														</div>
+														<div className="flow-node-copy">
+															<div className="flow-title">{phase.label}</div>
+															<div className="flow-meta">{phase.description}</div>
+														</div>
+														<div className={`flow-status-pill flow-status-pill-${phase.status}`}>{phase.status}</div>
+													</div>
+												</div>
+												{next && (
+													<div className={`workflow-edge ${edgeClass}`}>
+														<span className="workflow-edge-dot" />
+													</div>
+												)}
+											</div>
+										)
+									})}
+								</div>
+							</div>
+						)}
 
 					{(scenario === 'command' || scenario === 'followup') && (
 						<details className="output-details">
@@ -571,6 +755,7 @@ export const App = () => {
 						</details>
 					)}
 				</section>
+			</div>
 			</div>
 		</div>
 	)

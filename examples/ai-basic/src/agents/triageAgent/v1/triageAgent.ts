@@ -1,4 +1,5 @@
 import { AgentBuilder, type AgentHandlerContext } from '@purista/ai'
+import { HandledError, StatusCode } from '@purista/core'
 
 import { type TriageAgentInput, triageAgentInputSchema } from './schema.js'
 
@@ -12,11 +13,14 @@ export const triageAgent = new AgentBuilder({
 	.addPayloadSchema(triageAgentInputSchema)
 	.defineModel('openai:gpt-4o-mini')
 	.persistConversation('agent', { maxFrames: 10 })
-	.setHandler<TriageAgentInput>(async function (context: TriageAgentContext, payload) {
-		const model = context.models['openai:gpt-4o-mini']
+		.setHandler<TriageAgentInput>(async function (context: TriageAgentContext, payload) {
+			const model = context.models['openai:gpt-4o-mini']
+			if (!model?.generate) {
+				throw new HandledError(StatusCode.InternalServerError, 'Text generation model is not configured')
+			}
 
-		context.stream.sendChunk('Escalation check in progress...')
-		const result = await model.generate({
+			context.stream.sendChunk('Escalation check in progress...')
+			const result = await model.generate({
 			prompt: `Classify this support ticket urgency and explain in one sentence: ${payload.prompt}`,
 			metadata: {
 				aiSdk: {

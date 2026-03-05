@@ -7,6 +7,7 @@ import { supportAgent } from './supportAgent.js'
 
 class DeterministicProvider implements ModelProvider {
 	readonly name = 'deterministic-test-provider'
+	readonly capabilities = { text: true, stream: true }
 
 	async generate(request: ProviderRequest) {
 		return {
@@ -22,6 +23,7 @@ class DeterministicProvider implements ModelProvider {
 
 class FailingProvider implements ModelProvider {
 	readonly name = 'failing-test-provider'
+	readonly capabilities = { text: true }
 
 	async generate(_request: ProviderRequest): Promise<ProviderResponse> {
 		throw new Error('upstream model unavailable')

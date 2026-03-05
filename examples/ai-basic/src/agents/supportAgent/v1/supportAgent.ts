@@ -28,6 +28,24 @@ const hasErrorFrame = (value: unknown): boolean => {
 	}
 }
 
+const splitTextIntoProgressiveChunks = (text: string, size = 120): string[] => {
+	const chunks: string[] = []
+	let current = ''
+	for (const token of text.split(/\s+/)) {
+		const candidate = current ? `${current} ${token}` : token
+		if (candidate.length > size && current) {
+			chunks.push(current)
+			current = token
+		} else {
+			current = candidate
+		}
+	}
+	if (current) {
+		chunks.push(current)
+	}
+	return chunks
+}
+
 export const supportAgent = new AgentBuilder({
 	agentName: 'supportAgent',
 	agentVersion: '1',
@@ -83,25 +101,69 @@ export const supportAgent = new AgentBuilder({
 		}
 
 		context.stream.sendChunk('Generating final answer...')
-		try {
-			const result = await model.generate({
-				prompt: [
-					await context.conversation.buildPromptInput(),
-					`Customer prompt: ${userPrompt}`,
-					`FAQ answer: ${faqAnswer}`,
-					triageSummary ? `Triage summary: ${triageSummary}` : undefined,
-				]
-					.filter(Boolean)
-					.join('\n'),
-				context: payload.context,
-				metadata: {
-					aiSdk: {
-						temperature: 0.2,
-					},
+		const modelRequest = {
+			prompt: [
+				await context.conversation.buildPromptInput(),
+				`Customer prompt: ${userPrompt}`,
+				`FAQ answer: ${faqAnswer}`,
+				triageSummary ? `Triage summary: ${triageSummary}` : undefined,
+			]
+				.filter(Boolean)
+				.join('\n'),
+			context: payload.context,
+			metadata: {
+				aiSdk: {
+					temperature: 0.2,
 				},
-			})
+			},
+		}
+
+		try {
+			const maybeStreamModel = model as typeof model & {
+				stream?: (
+					request: typeof modelRequest,
+				) => AsyncIterable<{ type: 'text-delta'; textDelta: string } | { type: 'error'; error: unknown }> & {
+					final(): Promise<{ output: string }>
+				}
+			}
+
+			if (typeof maybeStreamModel.stream === 'function') {
+				const stream = maybeStreamModel.stream(modelRequest)
+				let answer = ''
+
+				for await (const chunk of stream) {
+					if (chunk.type === 'error') {
+						throw chunk.error
+					}
+					if (chunk.type === 'text-delta') {
+						answer += chunk.textDelta
+						context.stream.sendChunk(answer)
+					}
+				}
+
+				const finalResult = await stream.final()
+				const finalAnswer = finalResult.output || answer
+				await context.conversation.addAssistant(finalAnswer)
+				context.stream.sendFinal(finalAnswer)
+
+				return {
+					message: finalAnswer,
+				}
+				}
+
+				if (!model.generate) {
+					throw new HandledError(StatusCode.InternalServerError, 'Text generation model is not configured')
+				}
+				const result = await model.generate(modelRequest)
 			const answer = result.output
 			await context.conversation.addAssistant(answer)
+			const progressiveChunks = splitTextIntoProgressiveChunks(answer)
+			let progressiveText = ''
+			for (const chunk of progressiveChunks) {
+				progressiveText = progressiveText ? `${progressiveText} ${chunk}` : chunk
+				context.stream.sendChunk(progressiveText)
+				await new Promise(resolve => setImmediate(resolve))
+			}
 			context.stream.sendFinal(answer)
 
 			return {
