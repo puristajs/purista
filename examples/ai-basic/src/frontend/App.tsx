@@ -177,6 +177,52 @@ const workflowMeta = (step: WorkflowStep): { icon: typeof WorkflowIcon; title: s
 	}
 }
 
+const workflowStepMessageKey = (step: WorkflowStep): string => `${step.actor}|${step.depth}`
+
+const workflowStepToolKey = (step: WorkflowStep): string => {
+	if (step.type !== 'tool') {
+		return ''
+	}
+	const details = (step.details ?? {}) as { toolName?: string; input?: unknown }
+	return `${step.actor}|${step.depth}|${String(details.toolName ?? '')}|${stableJson(details.input)}`
+}
+
+const coalesceWorkflowSteps = (steps: WorkflowStep[]): WorkflowStep[] => {
+	const next: WorkflowStep[] = []
+	for (const step of steps) {
+		if (step.type === 'message') {
+			const isFinal = (step.details as { final?: boolean } | undefined)?.final === true
+			const key = workflowStepMessageKey(step)
+			const existingIndex = next.findIndex(existing => {
+				if (existing.type !== 'message') {
+					return false
+				}
+				if (workflowStepMessageKey(existing) !== key) {
+					return false
+				}
+				const existingFinal = (existing.details as { final?: boolean } | undefined)?.final === true
+				return existingFinal === false || isFinal
+			})
+			if (existingIndex >= 0) {
+				next[existingIndex] = step
+				continue
+			}
+		}
+		if (step.type === 'tool') {
+			const key = workflowStepToolKey(step)
+			const existingIndex = next.findIndex(
+				existing => existing.type === 'tool' && workflowStepToolKey(existing) === key,
+			)
+			if (existingIndex >= 0) {
+				next[existingIndex] = step
+				continue
+			}
+		}
+		next.push(step)
+	}
+	return next
+}
+
 export const App = () => {
 	const [scenario, setScenario] = useState<Scenario>('stream')
 	const [theme, setTheme] = useState<Theme>(getStoredTheme)
@@ -196,6 +242,7 @@ export const App = () => {
 	const seenFramesRef = useRef<Set<string>>(new Set())
 
 	const workflow = useMemo(() => mapToWorkflow(envelopes), [envelopes])
+	const coalescedWorkflow = useMemo(() => coalesceWorkflowSteps(workflow), [workflow])
 
 	const chatTimeline = useMemo(() => {
 		const rows: Array<{ message: ChatMessage; tools: ChatMessage[] }> = []
@@ -705,13 +752,13 @@ export const App = () => {
 							</div>
 						) : (
 							<div className="flow-wrap">
-								{workflow.length === 0 ? (
+								{coalescedWorkflow.length === 0 ? (
 									<div className="placeholder">No workflow frames yet.</div>
 								) : (
 									<div className="workflow-column">
-										{workflow.map((step, index) => {
+										{coalescedWorkflow.map((step, index) => {
 											const { icon: Icon, title, description } = workflowMeta(step)
-											const next = workflow[index + 1]
+											const next = coalescedWorkflow[index + 1]
 											const edgeClass =
 												step.status === 'running'
 													? 'flow-edge-active'
