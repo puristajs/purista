@@ -66,8 +66,10 @@ Recommended order for new users:
 5. [Knowledge Adapters](./knowledge-adapters.md) — RAG/data-source integration and adapter options.
 6. [AI Protocol](./ai-protocol.md) — envelope model, frame semantics, and interoperability references.
 7. [Protocol & Streaming](./protocol-and-streaming.md) — practical HTTP/SSE streaming and helper usage.
-8. [Testing Agents](./testing.md) — deterministic unit/integration tests.
-9. [Agent Evaluation](./evaluation.md) — dataset-driven evaluation output and CI comparison.
+8. [MCP & A2A Expose](./mcp-and-a2a-expose.md) — adapter endpoint patterns for protocol-specific consumers.
+9. [Frontend Consumers](./frontend-consumers.md) — dedupe-safe streaming UIs and command-owned conversation restore.
+10. [Testing Agents](./testing.md) — deterministic unit/integration tests.
+11. [Agent Evaluation](./evaluation.md) — dataset-driven evaluation output and CI comparison.
 
 Advanced section still contains a protocol interoperability deep-dive entry point for operations teams.
 

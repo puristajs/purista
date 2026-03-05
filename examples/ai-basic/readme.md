@@ -113,6 +113,46 @@ The React frontend includes:
 - optional JSON response mode rendered inline in chat
 - workflow graph with node/edge visualization for tool and nested agent execution
 
+## API quick calls
+
+Stream (SSE):
+
+```bash
+curl -N -X POST http://localhost:3000/api/v1/support/ask/stream \
+  -H "content-type: application/json" \
+  -d '{"prompt":"How can I request a refund for my order?"}'
+```
+
+MCP descriptor list:
+
+```bash
+curl http://localhost:3000/api/v1/support/mcp/tools
+```
+
+MCP reference call:
+
+```bash
+curl -X POST http://localhost:3000/api/v1/support/mcp/call \
+  -H "content-type: application/json" \
+  -d '{"prompt":"How can I request a refund for my order?"}'
+```
+
+Agent2Agent reference call:
+
+```bash
+curl -X POST http://localhost:3000/api/v1/support/a2a/call \
+  -H "content-type: application/json" \
+  -d '{"prompt":"How can I request a refund for my order?"}'
+```
+
+Conversation restore (command-owned retrieval):
+
+```bash
+curl -X POST http://localhost:3000/api/v1/support/conversation \
+  -H "content-type: application/json" \
+  -d '{"sessionId":"<existing-session-id>"}'
+```
+
 ## Protocol consumer and interoperability snippets
 
 ### Reference Agent-to-Agent conversion
