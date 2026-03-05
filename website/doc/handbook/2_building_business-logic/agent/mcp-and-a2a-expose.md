@@ -28,6 +28,33 @@ Example route in `examples/ai-basic`:
 - `GET /api/v1/support/mcp/tools` returns tool descriptors
 - `POST /api/v1/support/mcp/call` invokes the agent and returns MCP-style tool result
 
+### Example MCP HTTP call
+
+Request:
+
+```json
+{
+  "prompt": "How can I request a refund for my order?",
+  "sessionId": "chat-123"
+}
+```
+
+Response shape:
+
+```json
+{
+  "content": [
+    { "type": "text", "text": "Final answer..." }
+  ],
+  "metadata": {
+    "telemetry": {
+      "usage": { "promptTokens": 120, "completionTokens": 90, "totalTokens": 210 },
+      "durationMs": 4100
+    }
+  }
+}
+```
+
 ### Implementation pattern
 
 ```ts
@@ -62,6 +89,33 @@ export const runSupportMcpCommandBuilder = supportV1ServiceBuilder
 Example route in `examples/ai-basic`:
 
 - `POST /api/v1/support/a2a/call` returns reference Agent2Agent messages
+
+### Example A2A HTTP call
+
+Request:
+
+```json
+{
+  "prompt": "How can I request a refund for my order?",
+  "sessionId": "chat-123"
+}
+```
+
+Response shape:
+
+```json
+{
+  "messages": [
+    {
+      "id": "msg-1",
+      "threadId": "conv-1",
+      "frameType": "message",
+      "sender": { "service": "support", "agent": "runSupportAgentStream" },
+      "payload": { "kind": "message", "content": "Checking FAQ..." }
+    }
+  ]
+}
+```
 
 ### Implementation pattern
 

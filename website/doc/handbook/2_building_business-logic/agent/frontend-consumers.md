@@ -70,6 +70,25 @@ curl -X POST http://localhost:3000/api/v1/support/conversation \
   -d '{"sessionId":"<existing-session-id>"}'
 ```
 
+Typical conversation response:
+
+```json
+{
+  "sessionId": "chat-123",
+  "conversationId": "conv-123",
+  "envelopes": [
+    {
+      "version": "purista.ai/1.0",
+      "conversationId": "conv-123",
+      "frame": {
+        "kind": "message",
+        "content": "How can I request a refund for my order?"
+      }
+    }
+  ]
+}
+```
+
 ## UI integration notes
 
 - Keep one source of truth per conversation (message list + workflow timeline derived from same envelopes).
