@@ -21,6 +21,15 @@ Adapter commands give you:
 - stable external contracts without polluting agent handlers
 - reuse of `context.invokeAgent...` and existing allowlists/guards/transforms
 
+## Decision matrix: native vs MCP vs A2A
+
+| Target consumer | Recommended contract | Why |
+| --- | --- | --- |
+| PURISTA command/subscription/stream inside same app | native `context.invokeAgent` + AI envelopes | strongest typing, no extra mapping |
+| Custom frontend/backend consuming your SSE stream | native AI envelopes (`frame.kind`) | keeps full tool/telemetry/error fidelity |
+| External MCP ecosystem | MCP adapter command (`toMcpReferenceToolResult`) | protocol-compatible boundary without leaking internals |
+| External A2A ecosystem | A2A adapter command (`toAgent2AgentReferenceMessage`) | message-oriented interoperability boundary |
+
 ## MCP-style expose endpoint
 
 Example route in `examples/ai-basic`:

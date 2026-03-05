@@ -109,7 +109,6 @@ export type ModelProviderCapability =
 	| 'embedding'
 	| 'rerank'
 	| 'json'
-	| 'objectStreaming'
 	| 'image'
 	| 'audio'
 	| 'moderation'

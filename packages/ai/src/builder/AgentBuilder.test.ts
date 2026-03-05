@@ -260,7 +260,7 @@ describe('AgentBuilder', () => {
 				await context.embeddings.textOnly.embed({ value: 'x' })
 				// @ts-expect-error embedder does not expose text generation capability
 				await context.models.embedder.generate({ prompt: 'x' })
-				// @ts-expect-error textOnly does not expose object generation capability
+				// @ts-expect-error textOnly does not expose JSON generation capability
 				await context.models.textOnly.generateJson({ prompt: 'x' })
 				return { message: 'ok' }
 			})
