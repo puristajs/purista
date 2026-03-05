@@ -106,6 +106,18 @@ Use them as adapter building blocks when exposing Purista agents through other e
 
 You never need to populate protocol IDs manually—the runtime copies all required headers (`inReplyTo`, `conversationId`, `sender`) so the stream is valid whether it stays inside PURISTA or is forwarded to third parties.
 
+### Adapter pipeline guidance
+
+Keep protocol conversion at integration boundaries:
+
+```text
+Agent handler -> AI envelopes -> adapter (A2A/MCP/UI protocol) -> external client
+```
+
+- inside the app: use native PURISTA AI envelopes
+- at protocol boundaries: map once with adapter helpers
+- in clients: consume mapped protocol without understanding internal runtime details
+
 For the full protocol semantics, message contract, and interoperability guidance, see [AI Protocol](./ai-protocol.md).
 
 ## Error handling
@@ -125,3 +137,9 @@ For the full protocol semantics, message contract, and interoperability guidance
 ## Token usage & costs
 
 Telemetry is emitted automatically. The runtime enables AI SDK telemetry by default, forwards trace context, and publishes usage/duration/provider metrics in protocol telemetry frames and the final response metadata.
+
+Warnings and failures are also logged automatically in PURISTA style:
+
+- no payload logging by default
+- provider warnings as structured warn logs
+- provider failures as structured error logs

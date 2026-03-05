@@ -6,33 +6,46 @@ order: 203706
 
 # AI Protocol
 
-The PURISTA AI protocol is the structured payload format used by `@purista/ai` for agent outputs.
+The PURISTA AI protocol is the frame format emitted by `@purista/ai` agent runtimes.
 
-It is designed for three things:
+It exists to solve three core problems:
 
-1. **Internal consistency** across command/stream/queue/HTTP flows.
-2. **Traceability** for nested tool and agent chains.
-3. **Interoperability** with external ecosystems (for example Agent-to-Agent and MCP) via adapters.
+1. **Consistent runtime output** for command, stream, queue, and HTTP paths.
+2. **Flow observability** for nested tool calls and agent-to-agent handoffs.
+3. **Interop readiness** for MCP / A2A style boundaries through explicit adapters.
 
 ## Design principles
 
 - Agent internals remain a black box (no protocol field can force tool execution decisions).
-- Protocol rides on top of standard PURISTA message transport.
+- Protocol rides on top of standard PURISTA message transport (it does not replace it).
 - Correlation and identity come from PURISTA metadata and are preserved in envelopes.
 - Consumers should usually parse and render envelopes, not construct them manually.
 
-## Envelope model
+## Layering model (PURISTA message + AI frame payload)
 
-Each emitted envelope contains metadata plus one frame.
+The runtime emits protocol envelopes as payload inside standard PURISTA messages:
 
-```mermaid
-flowchart LR
-  A["Purista Message (traceId, correlationId, sender)"] --> B["Agent Runtime"]
-  B --> C["Protocol Envelope"]
-  C --> D["Frame: message/tool/artifact/telemetry/error"]
+```text
+HTTP / EventBridge / Queue trigger
+        |
+        v
+PURISTA Message
+  - id / correlationId / traceId
+  - sender / receiver
+  - payload (AI protocol frame(s))
+        |
+        v
+PURISTA AI Envelope
+  - version / messageId / conversationId / inReplyTo
+  - actor / tenantId / userId
+  - frame { kind: message|tool|artifact|telemetry|error }
 ```
 
-Core envelope fields:
+This keeps transport concerns in PURISTA core while AI state and rendering concerns stay in the AI package.
+
+## Envelope fields
+
+Each emitted envelope contains metadata plus one frame. Core fields:
 
 - `version`
 - `messageId`
@@ -43,6 +56,15 @@ Core envelope fields:
 - `userId` / `tenantId` (when available)
 - `frame`
 
+### Correlation mapping
+
+| Concern | PURISTA message field | AI envelope field |
+| --- | --- | --- |
+| request identity | `id` | `inReplyTo` |
+| stream/thread grouping | `correlationId` | `conversationId` |
+| caller identity | `sender.*` | `actor.*` |
+| tenant / principal scope | optional message metadata | `tenantId` / `userId` |
+
 ## Frame kinds
 
 | Kind | Purpose | Typical consumer action |
@@ -52,6 +74,26 @@ Core envelope fields:
 | `artifact` | Structured output chunks | render JSON/file widgets |
 | `telemetry` | usage + duration + provider + pool | capture metrics/observability |
 | `error` | handled/unhandled error data | show failure UI + diagnostics |
+
+## Nested runs and why this protocol helps
+
+When an agent invokes tools and sub-agents, you get a timeline like:
+
+```text
+supportAgent.run
+ ├─ message(partial): "Checking FAQ..."
+ ├─ tool(invoked): support.lookupFaq
+ ├─ tool(success): support.lookupFaq
+ ├─ tool(invoked): triageAgent.run
+ │   ├─ message(partial): "Escalation check..."
+ │   ├─ message(final): "Urgency: low"
+ │   └─ telemetry: tokens + duration
+ ├─ tool(success): triageAgent.run
+ ├─ message(final): "Final answer..."
+ └─ telemetry: tokens + duration
+```
+
+This gives frontend and ops systems enough structure to visualize and trace the flow, while keeping model/tool selection logic internal to the agent implementation.
 
 ## How handlers emit protocol safely
 
@@ -69,7 +111,7 @@ Tool invocation should go through allowlisted helper calls:
 const ticket = await context.tools.invoke('support.1.createTicket', { title: 'Refund request' })
 ```
 
-The runtime automatically emits tool frames and telemetry.
+The runtime automatically emits tool frames, telemetry, and error frames.
 
 ## Frontend consumer reference flow
 
@@ -102,20 +144,37 @@ for (const envelope of envelopes) {
 }
 ```
 
-## Reference interoperability helpers
+## Interoperability adapters (MCP / A2A)
 
-`@purista/ai` exports reference adapters in `@purista/ai/protocol`:
+`@purista/ai` exports reference adapters:
 
 - `toAgent2AgentReferenceMessage(...)`
 - `fromAgent2AgentReferenceMessage(...)`
 - `toMcpReferenceToolResult(...)`
 - `fromMcpReferenceToolCall(...)`
 
-These are intentionally named **reference** adapters: they help bridge protocols but are not a full implementation of official external specs.
+These are intentionally named **reference** adapters: they provide deterministic mapping building blocks, not full external-protocol servers/clients.
 
 You can find a copy-pasteable reference consumer implementation in:
 
 - `examples/ai-basic/src/client/protocolConsumer.ts`
+
+### Adapter placement model
+
+```text
+PURISTA transport <-> PURISTA AI envelopes <-> adapter layer <-> external protocol endpoint
+                                 |                     |
+                                 |                     +-- A2A reference mapping
+                                 |                     +-- MCP reference mapping
+                                 v
+                         UI / monitoring consumers
+```
+
+Recommended boundary:
+
+- Keep business logic and agent handlers in PURISTA.
+- Keep protocol conversion in dedicated endpoint adapters.
+- Do not leak adapter-specific fields into agent handlers.
 
 ### Agent-to-Agent reference example
 
