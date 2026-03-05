@@ -16,7 +16,7 @@ const buildOpenAiProvider = (apiKey: string) => {
 	return new AiSdkProvider({
 		model: openai('gpt-4o-mini'),
 		systemPrompt:
-			'You are a production support assistant. Keep answers concise, actionable, and mention next concrete steps.',
+			'You are a pragmatic assistant for developers. Keep answers concise, use tools when helpful, and make next steps explicit.',
 		defaults: { temperature: 0.2 },
 	})
 }

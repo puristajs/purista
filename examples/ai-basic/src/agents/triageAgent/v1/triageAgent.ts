@@ -27,7 +27,7 @@ export const triageAgent = new AgentBuilder({
 
 		context.stream.sendChunk('Escalation check in progress...')
 		const result = await model.generateJson<z.infer<typeof triageJsonSchema>>({
-			prompt: `Classify this support ticket urgency and produce JSON with urgency, explanation, and nextSteps: ${payload.prompt}`,
+			prompt: `Classify this request urgency and produce JSON with urgency, explanation, and nextSteps: ${payload.prompt}`,
 			schema: triageJsonSchema,
 			metadata: {
 				aiSdk: {

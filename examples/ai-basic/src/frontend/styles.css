@@ -381,6 +381,23 @@ body,
 	gap: 0.4rem;
 }
 
+.suggested-prompts {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	display: flex;
+	gap: 0.45rem;
+	overflow-x: auto;
+	padding-bottom: 0.15rem;
+}
+
+.suggestion-button {
+	flex: 0 0 auto;
+	font-size: 0.78rem;
+	padding: 0.35rem 0.65rem;
+	white-space: nowrap;
+}
+
 .prompt-bar {
 	display: flex;
 	align-items: flex-end;
@@ -659,6 +676,18 @@ pre {
 	border: 1px dashed var(--border);
 	border-radius: 10px;
 	padding: 0.8rem;
+}
+
+.visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
 }
 
 @media (max-width: 1200px) {

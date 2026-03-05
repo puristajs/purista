@@ -130,7 +130,7 @@ describe('support interoperability commands', () => {
 
 			const mcpCall = await eventBridge.invoke(
 				createCommandMessage(eventBridge.instanceId, 'runSupportMcp', {
-					prompt: 'How can I request a refund for my order?',
+					prompt: 'Summarize https://purista.dev and calculate 12*(8+4).',
 				}),
 			)
 			expect(mcpCall).toEqual(
@@ -141,7 +141,7 @@ describe('support interoperability commands', () => {
 
 			const a2aCall = await eventBridge.invoke(
 				createCommandMessage(eventBridge.instanceId, 'runSupportA2a', {
-					prompt: 'How can I request a refund for my order?',
+					prompt: 'Fetch https://purista.dev and list key topics.',
 				}),
 			)
 			expect(a2aCall).toEqual(

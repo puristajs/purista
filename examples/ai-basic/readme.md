@@ -112,6 +112,7 @@ The React frontend includes:
 - conversation restore by calling `POST /api/v1/support/conversation`
 - optional JSON response mode rendered inline in chat
 - workflow graph with node/edge visualization for tool and nested agent execution
+- suggested starter prompts to onboard users into calculator/fetch/tool workflows
 
 ## API quick calls
 
@@ -120,7 +121,7 @@ Stream (SSE):
 ```bash
 curl -N -X POST http://localhost:3000/api/v1/support/ask/stream \
   -H "content-type: application/json" \
-  -d '{"prompt":"How can I request a refund for my order?"}'
+  -d '{"prompt":"Summarize https://purista.dev and calculate 12*(8+4)"}'
 ```
 
 MCP descriptor list:
@@ -134,7 +135,7 @@ MCP reference call:
 ```bash
 curl -X POST http://localhost:3000/api/v1/support/mcp/call \
   -H "content-type: application/json" \
-  -d '{"prompt":"How can I request a refund for my order?"}'
+  -d '{"prompt":"Fetch https://purista.dev and list the top topics"}'
 ```
 
 Agent2Agent reference call:
@@ -142,7 +143,7 @@ Agent2Agent reference call:
 ```bash
 curl -X POST http://localhost:3000/api/v1/support/a2a/call \
   -H "content-type: application/json" \
-  -d '{"prompt":"How can I request a refund for my order?"}'
+  -d '{"prompt":"Calculate 42*17 and explain when to use queue vs stream"}'
 ```
 
 Conversation restore (command-owned retrieval):

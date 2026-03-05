@@ -101,12 +101,12 @@ export const supportAgent = new AgentBuilder({
 		const model = context.models['openai:gpt-4o-mini']
 		await context.conversation.addUser(userPrompt)
 
-		context.stream.sendChunk('Checking FAQ knowledge...')
+		context.stream.sendChunk('Checking knowledge base...')
 		const faqResult = await context.tools.invoke('support.1.lookupFaq', { question: userPrompt })
 		const faqAnswer =
 			typeof faqResult === 'object' && faqResult && 'answer' in faqResult && typeof faqResult.answer === 'string'
 				? faqResult.answer
-				: 'No matching FAQ article was found.'
+				: 'No matching knowledge-base article was found.'
 
 		const extractedUrl = extractFirstUrl(userPrompt)
 		let websiteSummary = ''
@@ -151,12 +151,12 @@ export const supportAgent = new AgentBuilder({
 					...triagePayload,
 				})
 				if (hasErrorFrame(triageResult)) {
-					context.stream.sendChunk('Triage unavailable right now, continuing with FAQ guidance.')
+					context.stream.sendChunk('Triage unavailable right now, continuing with tool-based guidance.')
 				}
 				triageSummary = getFinalMessage(triageResult)
 			} catch (error) {
-				context.logger.warn({ err: error }, 'triageAgent failed, continuing with faq-only fallback')
-				context.stream.sendChunk('Triage unavailable right now, continuing with FAQ guidance.')
+				context.logger.warn({ err: error }, 'triageAgent failed, continuing with tool-based fallback')
+				context.stream.sendChunk('Triage unavailable right now, continuing with tool-based guidance.')
 			}
 		}
 
@@ -165,7 +165,7 @@ export const supportAgent = new AgentBuilder({
 			prompt: [
 				await context.conversation.buildPromptInput(),
 				`Customer prompt: ${userPrompt}`,
-				`FAQ answer: ${faqAnswer}`,
+				`Knowledge base answer: ${faqAnswer}`,
 				calculationResult ? `Calculation result: ${calculationResult}` : undefined,
 				websiteSummary ? `Website context: ${websiteSummary}` : undefined,
 				triageSummary ? `Triage summary: ${triageSummary}` : undefined,

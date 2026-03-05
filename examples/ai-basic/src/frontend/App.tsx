@@ -48,6 +48,14 @@ const scenarioOptions: Array<{ id: Scenario; label: string }> = [
 	{ id: 'protocol', label: 'Protocol Inspector' },
 ]
 
+const defaultPrompt = 'Summarize https://purista.dev and calculate 12 * (8 + 4).'
+const suggestedPrompts = [
+	'Tell me what PURISTA is and give me 3 practical use cases.',
+	'Summarize https://purista.dev and calculate 12 * (8 + 4).',
+	'Compare 345 * 17 and 2^10 (use calculator for arithmetic only).',
+	'Fetch https://purista.dev/handbook and list 5 key topics.',
+]
+
 const THEME_KEY = 'purista.ai.theme'
 const HISTORY_KEY = 'purista.ai.history'
 
@@ -153,7 +161,7 @@ const latestPhaseByStatus = (
 export const App = () => {
 	const [scenario, setScenario] = useState<Scenario>('stream')
 	const [theme, setTheme] = useState<Theme>(getStoredTheme)
-	const [prompt, setPrompt] = useState('How can I request a refund for my order?')
+	const [prompt, setPrompt] = useState(defaultPrompt)
 	const [sessionId, setSessionId] = useState('')
 	const [responseFormat, setResponseFormat] = useState<'text' | 'json'>('text')
 	const [status, setStatus] = useState('Ready')
@@ -478,6 +486,10 @@ export const App = () => {
 		}
 	}
 
+	const applySuggestedPrompt = (nextPrompt: string) => {
+		setPrompt(nextPrompt)
+	}
+
 	useEffect(() => {
 		void getMcpTools()
 			.then(result => {
@@ -499,7 +511,7 @@ export const App = () => {
 						type="button"
 						className="button secondary"
 						onClick={() => {
-							setPrompt('How can I request a refund for my order?')
+							setPrompt(defaultPrompt)
 							setChatMessages([])
 							setEnvelopes([])
 							setStreamPayloads([])
@@ -533,7 +545,7 @@ export const App = () => {
 				<header className="topbar">
 					<div>
 						<h1>PURISTA AI Showcase</h1>
-						<p>Stream, MCP, and Agent2Agent protocol exposure with practical tool orchestration.</p>
+						<p>General AI chat with tool calling, streaming, MCP/A2A interoperability, and protocol inspection.</p>
 					</div>
 					<button
 						type="button"
@@ -642,6 +654,21 @@ export const App = () => {
 							<ConversationScrollButton />
 						</Conversation>
 						<div className="composer">
+							<fieldset className="suggested-prompts">
+								<legend className="visually-hidden">Suggested prompts</legend>
+								{suggestedPrompts.map(suggestion => (
+									<button
+										key={suggestion}
+										type="button"
+										className={`button secondary suggestion-button ${
+											prompt.trim() === suggestion.trim() ? 'active' : ''
+										}`}
+										onClick={() => applySuggestedPrompt(suggestion)}
+									>
+										{suggestion}
+									</button>
+								))}
+							</fieldset>
 							<div className="prompt-bar">
 								<textarea
 									value={prompt}

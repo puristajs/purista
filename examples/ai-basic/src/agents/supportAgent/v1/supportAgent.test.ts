@@ -86,8 +86,8 @@ describe('supportAgent', () => {
 		try {
 			const { envelopes } = await supportAgentInstance.invoke({
 				payload: {
-					prompt: 'I need an urgent refund for enterprise billing',
-					message: 'I need an urgent refund for enterprise billing',
+					prompt: 'This is an urgent enterprise production incident, escalate if needed.',
+					message: 'This is an urgent enterprise production incident, escalate if needed.',
 					history: [],
 					attachments: [],
 				},
@@ -129,7 +129,7 @@ describe('supportAgent', () => {
 		}
 	})
 
-	it('continues with faq-only fallback when triage delegation fails', async () => {
+	it('continues with tool-based fallback when triage delegation fails', async () => {
 		const logger = initLogger('error')
 		const eventBridge = new DefaultEventBridge({ logger })
 		await eventBridge.start()
@@ -156,8 +156,8 @@ describe('supportAgent', () => {
 		try {
 			const { envelopes } = await supportAgentInstance.invoke({
 				payload: {
-					prompt: 'urgent refund request',
-					message: 'urgent refund request',
+					prompt: 'urgent enterprise incident',
+					message: 'urgent enterprise incident',
 					history: [],
 					attachments: [],
 				},
@@ -183,7 +183,7 @@ describe('supportAgent', () => {
 				envelopes.some(
 					envelope =>
 						envelope.frame.kind === 'message' &&
-						envelope.frame.content === 'Triage unavailable right now, continuing with FAQ guidance.',
+						envelope.frame.content === 'Triage unavailable right now, continuing with tool-based guidance.',
 				),
 			).toBe(true)
 			expect(finalMessage).toContain('MODEL:')
