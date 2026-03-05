@@ -101,6 +101,14 @@ const resolveHistoryPresetConfig = (
 
 const capabilityConfigDefaults: AgentModelCapability[] = ['text', 'stream']
 
+const getProviderWarnings = (metadata: Record<string, unknown> | undefined): unknown[] => {
+	if (!metadata || typeof metadata !== 'object' || !('warnings' in metadata)) {
+		return []
+	}
+	const warnings = (metadata as { warnings?: unknown }).warnings
+	return Array.isArray(warnings) ? warnings : []
+}
+
 type ResolveCapability<
 	Caps extends readonly AgentModelCapability[] | undefined,
 	Capability extends AgentModelCapability,
@@ -519,6 +527,49 @@ export class AgentBuilder<
 					completionTokens: 0,
 					costUsd: 0,
 				}
+				const logProviderWarnings = (
+					capability: 'generate' | 'generateJson' | 'stream' | 'embed' | 'embedMany' | 'rerank',
+					alias: string,
+					providerName: string,
+					metadata: Record<string, unknown> | undefined,
+				) => {
+					const warnings = getProviderWarnings(metadata)
+					if (warnings.length === 0) {
+						return
+					}
+					context.logger.warn(
+						{
+							agent: runtime.manifest.agentName,
+							agentVersion: runtime.manifest.agentVersion,
+							modelAlias: alias,
+							provider: providerName,
+							capability,
+							warningCount: warnings.length,
+							warnings,
+						},
+						'AI provider returned warnings',
+					)
+				}
+				const logProviderFailure = (
+					capability: 'generate' | 'generateJson' | 'stream' | 'embed' | 'embedMany' | 'rerank',
+					alias: string,
+					providerName: string,
+					startedAt: number,
+					error: unknown,
+				) => {
+					context.logger.error(
+						{
+							err: error,
+							agent: runtime.manifest.agentName,
+							agentVersion: runtime.manifest.agentVersion,
+							modelAlias: alias,
+							provider: providerName,
+							capability,
+							durationMs: Date.now() - startedAt,
+						},
+						'AI provider invocation failed',
+					)
+				}
 
 				const instrumentedModels: Record<string, ModelProvider> = {}
 				const instrumentedEmbeddings: Record<
@@ -566,43 +617,50 @@ export class AgentBuilder<
 							context?: string
 							metadata?: Record<string, unknown>
 						}) => {
-							const metadata = request.metadata ?? {}
-							const aiSdkMetadata =
-								typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
-									? (metadata.aiSdk as Record<string, unknown>)
-									: {}
+							const requestStartedAt = Date.now()
+							try {
+								const metadata = request.metadata ?? {}
+								const aiSdkMetadata =
+									typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
+										? (metadata.aiSdk as Record<string, unknown>)
+										: {}
 
-							const result = await provider.generate?.({
-								...request,
-								metadata: {
-									...metadata,
-									aiSdk: {
-										...(aiSdkMetadata.generate && typeof aiSdkMetadata.generate === 'object' ? aiSdkMetadata : {}),
-										generate: {
-											...((aiSdkMetadata.generate as Record<string, unknown> | undefined) ?? {}),
-											experimental_telemetry: {
-												isEnabled: true,
-												functionId: `${runtime.manifest.agentName}.model.generate`,
-												metadata: {
-													agentName: runtime.manifest.agentName,
-													agentVersion: runtime.manifest.agentVersion,
-													poolId,
-													modelAlias: alias,
+								const result = await provider.generate?.({
+									...request,
+									metadata: {
+										...metadata,
+										aiSdk: {
+											...(aiSdkMetadata.generate && typeof aiSdkMetadata.generate === 'object' ? aiSdkMetadata : {}),
+											generate: {
+												...((aiSdkMetadata.generate as Record<string, unknown> | undefined) ?? {}),
+												experimental_telemetry: {
+													isEnabled: true,
+													functionId: `${runtime.manifest.agentName}.model.generate`,
+													metadata: {
+														agentName: runtime.manifest.agentName,
+														agentVersion: runtime.manifest.agentVersion,
+														poolId,
+														modelAlias: alias,
+													},
+													tracer: runtime.tracer,
 												},
-												tracer: runtime.tracer,
 											},
 										},
 									},
-								},
-							})
-							if (!result) {
-								throw new HandledError(StatusCode.InternalServerError, 'Model generate provider unavailable')
+								})
+								if (!result) {
+									throw new HandledError(StatusCode.InternalServerError, 'Model generate provider unavailable')
+								}
+								logProviderWarnings('generate', alias, provider.name, result.metadata)
+								usage.provider = provider.name
+								usage.promptTokens += result.tokens?.prompt ?? 0
+								usage.completionTokens += result.tokens?.completion ?? 0
+								usage.costUsd += result.costUsd ?? 0
+								return result
+							} catch (error) {
+								logProviderFailure('generate', alias, provider.name, requestStartedAt, error)
+								throw error
 							}
-							usage.provider = provider.name
-							usage.promptTokens += result.tokens?.prompt ?? 0
-							usage.completionTokens += result.tokens?.completion ?? 0
-							usage.costUsd += result.costUsd ?? 0
-							return result
 						}
 					}
 
@@ -622,99 +680,122 @@ export class AgentBuilder<
 							}
 							metadata?: Record<string, unknown>
 						}> => {
-							const metadata = request.metadata ?? {}
-							const aiSdkMetadata =
-								typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
-									? (metadata.aiSdk as Record<string, unknown>)
-									: {}
-							const result = await provider.generateJson?.({
-								...request,
-								metadata: {
-									...metadata,
-									aiSdk: {
-										...(aiSdkMetadata.generateJson && typeof aiSdkMetadata.generateJson === 'object'
-											? aiSdkMetadata
-											: {}),
-										generateJson: {
-											...((aiSdkMetadata.generateJson as Record<string, unknown> | undefined) ?? {}),
-											experimental_telemetry: {
-												isEnabled: true,
-												functionId: `${runtime.manifest.agentName}.model.generateJson`,
-												metadata: {
-													agentName: runtime.manifest.agentName,
-													agentVersion: runtime.manifest.agentVersion,
-													poolId,
-													modelAlias: alias,
+							const requestStartedAt = Date.now()
+							try {
+								const metadata = request.metadata ?? {}
+								const aiSdkMetadata =
+									typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
+										? (metadata.aiSdk as Record<string, unknown>)
+										: {}
+								const result = await provider.generateJson?.({
+									...request,
+									metadata: {
+										...metadata,
+										aiSdk: {
+											...(aiSdkMetadata.generateJson && typeof aiSdkMetadata.generateJson === 'object'
+												? aiSdkMetadata
+												: {}),
+											generateJson: {
+												...((aiSdkMetadata.generateJson as Record<string, unknown> | undefined) ?? {}),
+												experimental_telemetry: {
+													isEnabled: true,
+													functionId: `${runtime.manifest.agentName}.model.generateJson`,
+													metadata: {
+														agentName: runtime.manifest.agentName,
+														agentVersion: runtime.manifest.agentVersion,
+														poolId,
+														modelAlias: alias,
+													},
+													tracer: runtime.tracer,
 												},
-												tracer: runtime.tracer,
 											},
 										},
 									},
-								},
-							})
-							if (!result) {
-								throw new HandledError(StatusCode.InternalServerError, 'Model JSON provider unavailable')
-							}
-							usage.provider = provider.name
-							usage.promptTokens += result.tokens?.prompt ?? 0
-							usage.completionTokens += result.tokens?.completion ?? 0
-							return result as {
-								data: T
-								text: string
-								reasoningText?: string
-								tokens?: {
-									prompt: number
-									completion: number
+								})
+								if (!result) {
+									throw new HandledError(StatusCode.InternalServerError, 'Model JSON provider unavailable')
 								}
-								metadata?: Record<string, unknown>
+								logProviderWarnings('generateJson', alias, provider.name, result.metadata)
+								usage.provider = provider.name
+								usage.promptTokens += result.tokens?.prompt ?? 0
+								usage.completionTokens += result.tokens?.completion ?? 0
+								return result as {
+									data: T
+									text: string
+									reasoningText?: string
+									tokens?: {
+										prompt: number
+										completion: number
+									}
+									metadata?: Record<string, unknown>
+								}
+							} catch (error) {
+								logProviderFailure('generateJson', alias, provider.name, requestStartedAt, error)
+								throw error
 							}
 						}
 					}
 
 					if (provider.stream) {
+						const streamProvider = provider.stream
 						modelApi.stream = (request: { prompt: string; context?: string; metadata?: Record<string, unknown> }) => {
-							const metadata = request.metadata ?? {}
-							const aiSdkMetadata =
-								typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
-									? (metadata.aiSdk as Record<string, unknown>)
-									: {}
+							const requestStartedAt = Date.now()
+							let streamHandle: ReturnType<NonNullable<ModelProvider['stream']>> | undefined
+							try {
+								const metadata = request.metadata ?? {}
+								const aiSdkMetadata =
+									typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
+										? (metadata.aiSdk as Record<string, unknown>)
+										: {}
 
-							const streamHandle = provider.stream?.({
-								...request,
-								metadata: {
-									...metadata,
-									aiSdk: {
-										...(aiSdkMetadata.stream && typeof aiSdkMetadata.stream === 'object' ? aiSdkMetadata : {}),
-										generate: {
-											...((aiSdkMetadata.generate as Record<string, unknown> | undefined) ?? {}),
-											experimental_telemetry: {
-												isEnabled: true,
-												functionId: `${runtime.manifest.agentName}.model.stream`,
-												metadata: {
-													agentName: runtime.manifest.agentName,
-													agentVersion: runtime.manifest.agentVersion,
-													poolId,
-													modelAlias: alias,
+								streamHandle = streamProvider({
+									...request,
+									metadata: {
+										...metadata,
+										aiSdk: {
+											...(aiSdkMetadata.stream && typeof aiSdkMetadata.stream === 'object' ? aiSdkMetadata : {}),
+											generate: {
+												...((aiSdkMetadata.generate as Record<string, unknown> | undefined) ?? {}),
+												experimental_telemetry: {
+													isEnabled: true,
+													functionId: `${runtime.manifest.agentName}.model.stream`,
+													metadata: {
+														agentName: runtime.manifest.agentName,
+														agentVersion: runtime.manifest.agentVersion,
+														poolId,
+														modelAlias: alias,
+													},
+													tracer: runtime.tracer,
 												},
-												tracer: runtime.tracer,
 											},
 										},
 									},
-								},
-							})
+								})
+							} catch (error) {
+								logProviderFailure('stream', alias, provider.name, requestStartedAt, error)
+								throw error
+							}
 
 							if (!streamHandle) {
-								throw new HandledError(StatusCode.InternalServerError, 'Model stream provider unavailable')
+								const error = new HandledError(StatusCode.InternalServerError, 'Model stream provider unavailable')
+								logProviderFailure('stream', alias, provider.name, requestStartedAt, error)
+								throw error
 							}
 
 							return {
 								final: async () => {
-									const result = await streamHandle.final()
-									usage.provider = provider.name
-									usage.promptTokens += result.tokens?.prompt ?? 0
-									usage.completionTokens += result.tokens?.completion ?? 0
-									usage.costUsd += result.costUsd ?? 0
-									return result
+									try {
+										const result = await streamHandle.final()
+										logProviderWarnings('stream', alias, provider.name, result.metadata)
+										usage.provider = provider.name
+										usage.promptTokens += result.tokens?.prompt ?? 0
+										usage.completionTokens += result.tokens?.completion ?? 0
+										usage.costUsd += result.costUsd ?? 0
+										return result
+									} catch (error) {
+										logProviderFailure('stream', alias, provider.name, requestStartedAt, error)
+										throw error
+									}
 								},
 								[Symbol.asyncIterator]: streamHandle[Symbol.asyncIterator].bind(streamHandle),
 							}
@@ -722,113 +803,132 @@ export class AgentBuilder<
 					}
 
 					if (provider.embed) {
+						const embedProvider = provider.embed
 						instrumentedEmbeddings[alias] = {
 							name: provider.name,
-							embed: request => {
-								const metadata = request.metadata ?? {}
-								const aiSdkMetadata =
-									typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
-										? (metadata.aiSdk as Record<string, unknown>)
-										: {}
-								return provider.embed?.({
-									...request,
-									metadata: {
-										...metadata,
-										aiSdk: {
-											...aiSdkMetadata,
-											embed: {
-												...((aiSdkMetadata.embed as Record<string, unknown> | undefined) ?? {}),
-												experimental_telemetry: {
-													isEnabled: true,
-													functionId: `${runtime.manifest.agentName}.model.embed`,
-													metadata: {
-														agentName: runtime.manifest.agentName,
-														agentVersion: runtime.manifest.agentVersion,
-														poolId,
-														modelAlias: alias,
+							embed: async request => {
+								const requestStartedAt = Date.now()
+								try {
+									const metadata = request.metadata ?? {}
+									const aiSdkMetadata =
+										typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
+											? (metadata.aiSdk as Record<string, unknown>)
+											: {}
+									const result = await embedProvider({
+										...request,
+										metadata: {
+											...metadata,
+											aiSdk: {
+												...aiSdkMetadata,
+												embed: {
+													...((aiSdkMetadata.embed as Record<string, unknown> | undefined) ?? {}),
+													experimental_telemetry: {
+														isEnabled: true,
+														functionId: `${runtime.manifest.agentName}.model.embed`,
+														metadata: {
+															agentName: runtime.manifest.agentName,
+															agentVersion: runtime.manifest.agentVersion,
+															poolId,
+															modelAlias: alias,
+														},
+														tracer: runtime.tracer,
 													},
-													tracer: runtime.tracer,
 												},
 											},
 										},
-									},
-								}) as Promise<{
-									embedding: number[]
-									usage?: { tokens?: number }
-									metadata?: Record<string, unknown>
-								}>
+									})
+									logProviderWarnings('embed', alias, provider.name, result?.metadata)
+									return result
+								} catch (error) {
+									logProviderFailure('embed', alias, provider.name, requestStartedAt, error)
+									throw error
+								}
 							},
 							embedMany: provider.embedMany
-								? request => {
-										const metadata = request.metadata ?? {}
-										const aiSdkMetadata =
-											typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
-												? (metadata.aiSdk as Record<string, unknown>)
-												: {}
-										return provider.embedMany?.({
-											...request,
-											metadata: {
-												...metadata,
-												aiSdk: {
-													...aiSdkMetadata,
-													embedMany: {
-														...((aiSdkMetadata.embedMany as Record<string, unknown> | undefined) ?? {}),
-														experimental_telemetry: {
-															isEnabled: true,
-															functionId: `${runtime.manifest.agentName}.model.embedMany`,
-															metadata: {
-																agentName: runtime.manifest.agentName,
-																agentVersion: runtime.manifest.agentVersion,
-																poolId,
-																modelAlias: alias,
+								? async request => {
+										const embedManyProvider = provider.embedMany as NonNullable<ModelProvider['embedMany']>
+										const requestStartedAt = Date.now()
+										try {
+											const metadata = request.metadata ?? {}
+											const aiSdkMetadata =
+												typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
+													? (metadata.aiSdk as Record<string, unknown>)
+													: {}
+											const result = await embedManyProvider({
+												...request,
+												metadata: {
+													...metadata,
+													aiSdk: {
+														...aiSdkMetadata,
+														embedMany: {
+															...((aiSdkMetadata.embedMany as Record<string, unknown> | undefined) ?? {}),
+															experimental_telemetry: {
+																isEnabled: true,
+																functionId: `${runtime.manifest.agentName}.model.embedMany`,
+																metadata: {
+																	agentName: runtime.manifest.agentName,
+																	agentVersion: runtime.manifest.agentVersion,
+																	poolId,
+																	modelAlias: alias,
+																},
+																tracer: runtime.tracer,
 															},
-															tracer: runtime.tracer,
 														},
 													},
 												},
-											},
-										}) as Promise<{
-											embeddings: number[][]
-											usage?: { tokens?: number }
-											metadata?: Record<string, unknown>
-										}>
+											})
+											logProviderWarnings('embedMany', alias, provider.name, result?.metadata)
+											return result
+										} catch (error) {
+											logProviderFailure('embedMany', alias, provider.name, requestStartedAt, error)
+											throw error
+										}
 									}
 								: undefined,
 						}
 					}
 
 					if (provider.rerank) {
+						const rerankProvider = provider.rerank as NonNullable<ModelProvider['rerank']>
 						instrumentedRerankers[alias] = {
 							name: provider.name,
-							rerank: request => {
-								const metadata = request.metadata ?? {}
-								const aiSdkMetadata =
-									typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
-										? (metadata.aiSdk as Record<string, unknown>)
-										: {}
-								return provider.rerank?.({
-									...request,
-									metadata: {
-										...metadata,
-										aiSdk: {
-											...aiSdkMetadata,
-											rerank: {
-												...((aiSdkMetadata.rerank as Record<string, unknown> | undefined) ?? {}),
-												experimental_telemetry: {
-													isEnabled: true,
-													functionId: `${runtime.manifest.agentName}.model.rerank`,
-													metadata: {
-														agentName: runtime.manifest.agentName,
-														agentVersion: runtime.manifest.agentVersion,
-														poolId,
-														modelAlias: alias,
+							rerank: async request => {
+								const requestStartedAt = Date.now()
+								try {
+									const metadata = request.metadata ?? {}
+									const aiSdkMetadata =
+										typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
+											? (metadata.aiSdk as Record<string, unknown>)
+											: {}
+									const result = (await rerankProvider({
+										...request,
+										metadata: {
+											...metadata,
+											aiSdk: {
+												...aiSdkMetadata,
+												rerank: {
+													...((aiSdkMetadata.rerank as Record<string, unknown> | undefined) ?? {}),
+													experimental_telemetry: {
+														isEnabled: true,
+														functionId: `${runtime.manifest.agentName}.model.rerank`,
+														metadata: {
+															agentName: runtime.manifest.agentName,
+															agentVersion: runtime.manifest.agentVersion,
+															poolId,
+															modelAlias: alias,
+														},
+														tracer: runtime.tracer,
 													},
-													tracer: runtime.tracer,
 												},
 											},
 										},
-									},
-								} as any) as any
+									} as any)) as any
+									logProviderWarnings('rerank', alias, provider.name, result?.metadata)
+									return result as any
+								} catch (error) {
+									logProviderFailure('rerank', alias, provider.name, requestStartedAt, error)
+									throw error
+								}
 							},
 						}
 					}

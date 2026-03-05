@@ -324,6 +324,7 @@ export class AiSdkProvider implements ModelProvider {
 				request: result.request,
 				response: result.response,
 				providerMetadata: result.providerMetadata,
+				warnings: (result as { warnings?: unknown }).warnings,
 			},
 		}
 	}
@@ -382,6 +383,7 @@ export class AiSdkProvider implements ModelProvider {
 				request: result.request,
 				response: result.response,
 				providerMetadata: result.providerMetadata,
+				warnings: (result as { warnings?: unknown }).warnings,
 			},
 		}
 	}
@@ -394,12 +396,13 @@ export class AiSdkProvider implements ModelProvider {
 		return {
 			async final() {
 				finalResponsePromise ??= (async () => {
-					const [usage, outputText, requestMetadata, responseMetadata, providerMetadata] = await Promise.all([
+					const [usage, outputText, requestMetadata, responseMetadata, providerMetadata, warnings] = await Promise.all([
 						result.usage,
 						result.text,
 						result.request,
 						result.response,
 						result.providerMetadata,
+						(result as { warnings?: Promise<unknown> | unknown }).warnings,
 					])
 
 					return {
@@ -413,6 +416,7 @@ export class AiSdkProvider implements ModelProvider {
 							request: requestMetadata,
 							response: responseMetadata,
 							providerMetadata,
+							warnings,
 						},
 					}
 				})()

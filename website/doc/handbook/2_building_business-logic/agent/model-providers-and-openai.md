@@ -239,16 +239,13 @@ When deciding between static defaults and per-run overrides:
 
 Every provider exposes its `name`, which flows into the agent telemetry frame and OpenTelemetry attributes. Use it to build dashboards per model, compare latency, or alert when a fallback kicks in. The AI SDK already reports token usage; `AiSdkProvider` forwards `inputTokens`/`outputTokens` so you can aggregate prompt/completion costs across agents.
 
-## Prompt debugging (AI SDK + Purista)
+## Logging and failures
 
-For local debugging of prompts and model I/O, use AI SDK debug output:
+`@purista/ai` keeps AI logging aligned with standard PURISTA behavior:
 
-```bash
-DEBUG=ai:* npm run start -w examples/ai-basic
-```
+- request payloads are **not** logged by default
+- provider warnings are logged automatically as structured warn entries (`AI provider returned warnings`)
+- provider failures are logged automatically as structured error entries (`AI provider invocation failed`)
+- OpenTelemetry correlation stays active through the same trace/span chain used by the rest of the app
 
-This complements Purista logs and OpenTelemetry spans:
-
-- AI SDK debug output: request/response-level model diagnostics
-- Purista logger: service/command/agent lifecycle + business context
-- OpenTelemetry: cross-service traces, timing, and correlation IDs
+This gives you operational visibility without leaking prompt content or tool input bodies by default.

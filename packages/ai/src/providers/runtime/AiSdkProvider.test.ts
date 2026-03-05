@@ -43,6 +43,7 @@ describe('AiSdkProvider', () => {
 			request: { id: 'request' },
 			response: { id: 'response' },
 			providerMetadata: { provider: 'mock' },
+			warnings: [{ type: 'unsupported-setting', setting: 'temperature' }],
 		})
 
 		const provider = new AiSdkProvider({ model: mockModel })
@@ -53,6 +54,7 @@ describe('AiSdkProvider', () => {
 			prompt: 11,
 			completion: 7,
 		})
+		expect(result.metadata?.warnings).toEqual([{ type: 'unsupported-setting', setting: 'temperature' }])
 		expect(provider.capabilities).toMatchObject({
 			text: true,
 			stream: true,
@@ -75,6 +77,7 @@ describe('AiSdkProvider', () => {
 			request: Promise.resolve({ id: 'request' }),
 			response: Promise.resolve({ id: 'response' }),
 			providerMetadata: Promise.resolve({ provider: 'mock' }),
+			warnings: Promise.resolve([{ type: 'other', message: 'stream warning' }]),
 		})
 
 		const provider = new AiSdkProvider({ model: mockModel })
@@ -97,6 +100,7 @@ describe('AiSdkProvider', () => {
 			prompt: 8,
 			completion: 4,
 		})
+		expect(final.metadata?.warnings).toEqual([{ type: 'other', message: 'stream warning' }])
 	})
 
 	it('supports structured json generation', async () => {
