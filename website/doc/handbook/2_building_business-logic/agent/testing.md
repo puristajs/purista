@@ -48,12 +48,27 @@ import { supportAgent } from './supportAgent.js'
 
 class DeterministicProvider implements ModelProvider {
   readonly name = 'deterministic-test-provider'
-  readonly capabilities = { text: true }
+  readonly capabilities = { text: true, stream: true }
   async generate(request: ProviderRequest) {
     return {
       output: `MODEL:${request.prompt}`,
       tokens: { prompt: request.prompt.length, completion: 12 },
       costUsd: 0,
+    }
+  }
+
+  stream(request: ProviderRequest) {
+    return {
+      async final() {
+        return {
+          output: `MODEL:${request.prompt}`,
+          tokens: { prompt: request.prompt.length, completion: 12 },
+          costUsd: 0,
+        }
+      },
+      async *[Symbol.asyncIterator]() {
+        yield { type: 'text-delta' as const, textDelta: `MODEL:${request.prompt}` }
+      },
     }
   }
 }

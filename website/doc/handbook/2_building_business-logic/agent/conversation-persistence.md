@@ -38,14 +38,14 @@ You can override defaults: `persistConversation('user', { maxFrames: 80, strateg
 import { HandledError } from '@purista/core'
 
 new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
-  .defineModel('openai:')
+  .defineModel('openai:gpt-4o-mini')
   .persistConversation('user', { maxFrames: 40 })
   .setHandler(async (context, payload) => {
     await context.conversation.addUser(payload.prompt)
     const prompt = await context.conversation.buildPromptInput()
 
     try {
-      const result = await context.models['openai:'].generate({ prompt })
+      const result = await context.models['openai:gpt-4o-mini'].generate({ prompt })
       await context.conversation.addAssistant(result.output)
       return { message: result.output }
     } catch (error) {

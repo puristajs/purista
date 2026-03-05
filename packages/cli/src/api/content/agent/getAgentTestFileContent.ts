@@ -22,7 +22,7 @@ export const getAgentTestFileContent = (input: {
 	writer.writeLine('class DeterministicTextProvider implements ModelProvider {')
 	writer.indent(() => {
 		writer.writeLine("readonly name = 'deterministic-text'")
-		writer.writeLine('readonly capabilities = { text: true }').blankLine()
+		writer.writeLine('readonly capabilities = { text: true, stream: true }').blankLine()
 		writer.writeLine('async generate(request: ProviderRequest) {')
 		writer.indent(() => {
 			writer.writeLine('return {')
@@ -39,6 +39,37 @@ export const getAgentTestFileContent = (input: {
 			writer.writeLine('}')
 		})
 		writer.writeLine('}')
+		writer.blankLine()
+		writer.writeLine('stream(request: ProviderRequest) {')
+		writer.indent(() => {
+			writer.writeLine('const output = request.prompt')
+			writer.writeLine('return {')
+			writer.indent(() => {
+				writer.writeLine('async final() {')
+				writer.indent(() => {
+					writer.writeLine('return {')
+					writer.indent(() => {
+						writer.writeLine('output,')
+						writer.writeLine('tokens: {')
+						writer.indent(() => {
+							writer.writeLine('prompt: request.prompt.length,')
+							writer.writeLine('completion: request.prompt.length,')
+						})
+						writer.writeLine('},')
+						writer.writeLine('costUsd: 0,')
+					})
+					writer.writeLine('}')
+				})
+				writer.writeLine('},')
+				writer.writeLine('async *[Symbol.asyncIterator]() {')
+				writer.indent(() => {
+					writer.writeLine("yield { type: 'text-delta' as const, textDelta: output }")
+				})
+				writer.writeLine('},')
+			})
+			writer.writeLine('}')
+		})
+		writer.writeLine('}')
 	})
 	writer.writeLine('}').blankLine()
 
@@ -51,7 +82,7 @@ export const getAgentTestFileContent = (input: {
 			writer.blankLine()
 			writer.writeLine(`const agent = await ${agentIdentifier}.getInstance(eventBridge, {`)
 			writer.indent(() => {
-				writer.writeLine("models: { 'openai:': new DeterministicTextProvider() },")
+				writer.writeLine("models: { 'openai:gpt-4o-mini': new DeterministicTextProvider() },")
 			})
 			writer.writeLine('})')
 			writer.writeLine('await agent.start()')

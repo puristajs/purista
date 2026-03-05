@@ -200,7 +200,7 @@ Reasoning is emitted as protocol artifact frames, so UI consumers can render it 
 `AiSdkProvider` understands the `metadata.aiSdk` object to override call options without recreating the provider:
 
 ```ts
-await context.models['openai:'].generate({
+await context.models['openai:gpt-4o-mini'].generate({
   prompt: payload.prompt,
   metadata: {
     aiSdk: {
