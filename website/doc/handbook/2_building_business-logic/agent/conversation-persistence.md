@@ -27,7 +27,7 @@ You can override defaults: `persistConversation('user', { maxFrames: 80, strateg
 
 | Option | What it controls | Why/when to change |
 | --- | --- | --- |
-| preset (`'user' \| `'agent'`) | default strategy + frame budget | choose richer context (`user`) vs stronger compression (`agent`) |
+| preset (`'user' \| 'agent'`) | default strategy + frame budget | choose richer context (`user`) vs stronger compression (`agent`) |
 | `maxFrames` | recent frames kept verbatim | increase for context-heavy flows; decrease for lower token usage |
 | `strategy` (`full` \| `summary`) | overflow behavior | `full` drops oldest; `summary` compacts overflow |
 | `storeName` | logical persistence namespace | advanced multi-store setups or migration control |
