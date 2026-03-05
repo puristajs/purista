@@ -133,9 +133,11 @@ describe('runtime context helpers', () => {
 		await context.rerankers.ranker.rerank({ query: 'reset', documents: ['doc'] })
 		expect(embed).toHaveBeenCalledOnce()
 		expect(rerank).toHaveBeenCalledOnce()
+		context.stream.sendReasoning('reasoning note')
 
 		const envelopes = buffer.toEnvelopes()
 		expect(envelopes.some(envelope => envelope.frame.kind === 'tool')).toBe(true)
+		expect(envelopes.some(envelope => envelope.frame.kind === 'artifact')).toBe(true)
 	})
 
 	it('resolves implicit scoped session id from payload and message metadata', async () => {

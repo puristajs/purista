@@ -1,6 +1,6 @@
 import type { Tracer } from '@opentelemetry/api'
-import type { EmbeddingModel, LanguageModel, RerankingModel } from 'ai'
-import { embed, embedMany, generateText, rerank, streamText } from 'ai'
+import type { EmbeddingModel, LanguageModel, LanguageModelMiddleware, RerankingModel } from 'ai'
+import { embed, embedMany, generateObject, generateText, rerank, streamText, wrapLanguageModel } from 'ai'
 
 import type {
 	ModelProvider,
@@ -9,6 +9,8 @@ import type {
 	ProviderEmbedManyResponse,
 	ProviderEmbedRequest,
 	ProviderEmbedResponse,
+	ProviderJsonRequest,
+	ProviderJsonResponse,
 	ProviderRequest,
 	ProviderRerankRequest,
 	ProviderRerankResponse,
@@ -48,6 +50,10 @@ export type AiSdkProviderOptions = {
 	 * Optional tracer injected by the runtime. When set, AI SDK telemetry uses this tracer.
 	 */
 	tracer?: Tracer
+	/**
+	 * Optional AI SDK language model middleware chain.
+	 */
+	middleware?: LanguageModelMiddleware | LanguageModelMiddleware[]
 }
 
 /**
@@ -74,6 +80,7 @@ export type AiSdkProviderMetadata = {
 				embed?: AiSdkEmbedOverrides
 				embedMany?: AiSdkEmbedManyOverrides
 				rerank?: AiSdkRerankOverrides
+				generateJson?: AiSdkGenerateJsonOverrides
 		  })
 		| undefined
 }
@@ -90,6 +97,9 @@ type RerankArgs = Parameters<typeof rerank>[0]
 export type AiSdkEmbedOverrides = Partial<Omit<EmbedArgs, 'model' | 'value'>>
 export type AiSdkEmbedManyOverrides = Partial<Omit<EmbedManyArgs, 'model' | 'values'>>
 export type AiSdkRerankOverrides = Partial<Omit<RerankArgs, 'model' | 'documents' | 'query' | 'topN'>>
+export type AiSdkGenerateJsonOverrides = Partial<
+	Omit<GenerateTextArgs, 'model' | 'prompt' | 'system' | 'messages' | 'output'>
+>
 
 const isMetadata = (value: Record<string, unknown> | undefined): value is AiSdkProviderMetadata => {
 	return !!value && typeof value === 'object' && 'aiSdk' in value
@@ -136,7 +146,16 @@ export class AiSdkProvider implements ModelProvider {
 	private readonly tracer?: Tracer
 
 	constructor(options: AiSdkProviderOptions) {
-		this.model = options.model
+		const shouldWrapModel =
+			typeof options.model !== 'string' &&
+			!!options.middleware &&
+			(Array.isArray(options.middleware) ? options.middleware.length > 0 : true)
+		this.model = shouldWrapModel
+			? (wrapLanguageModel({
+					model: options.model as any,
+					middleware: options.middleware as LanguageModelMiddleware | LanguageModelMiddleware[],
+				}) as LanguageModel)
+			: options.model
 		this.embeddingModel = options.embeddingModel
 		this.rerankingModel = options.rerankingModel
 		this.systemPrompt = options.systemPrompt
@@ -149,6 +168,7 @@ export class AiSdkProvider implements ModelProvider {
 		this.capabilities = {
 			text: true,
 			stream: true,
+			objectGeneration: true,
 			embedding: !!this.embeddingModel,
 			rerank: !!this.rerankingModel,
 		}
@@ -199,6 +219,17 @@ export class AiSdkProvider implements ModelProvider {
 			return {}
 		}
 		return typeof aiSdk.rerank === 'object' && aiSdk.rerank ? aiSdk.rerank : {}
+	}
+
+	private getGenerateJsonOverrides(metadata: Record<string, unknown> | undefined): AiSdkGenerateJsonOverrides {
+		if (!isMetadata(metadata)) {
+			return {}
+		}
+		const aiSdk = metadata.aiSdk
+		if (!aiSdk || typeof aiSdk !== 'object' || !('generateJson' in aiSdk)) {
+			return {}
+		}
+		return typeof aiSdk.generateJson === 'object' && aiSdk.generateJson ? aiSdk.generateJson : {}
 	}
 
 	private getCallInput(request: ProviderRequest): GenerateTextArgs {
@@ -284,6 +315,65 @@ export class AiSdkProvider implements ModelProvider {
 
 		return {
 			output: result.text,
+			reasoningText: result.reasoningText,
+			tokens: {
+				prompt: usage?.inputTokens ?? 0,
+				completion: usage?.outputTokens ?? 0,
+			},
+			metadata: {
+				request: result.request,
+				response: result.response,
+				providerMetadata: result.providerMetadata,
+			},
+		}
+	}
+
+	async generateJson<T = unknown>(request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>> {
+		const metadataOverrides = this.getGenerateJsonOverrides(request.metadata)
+		const { output: _ignoredOutput, ...defaultsWithoutOutput } = this.defaults as Record<string, unknown>
+		const { output: _ignoredOverrideOutput, ...metadataWithoutOutput } = metadataOverrides as Record<string, unknown>
+		const objectRequest = request.schema
+			? {
+					schema: request.schema as never,
+				}
+			: {
+					output: 'no-schema' as const,
+				}
+		const result = await generateObject({
+			...defaultsWithoutOutput,
+			...metadataWithoutOutput,
+			model: this.model,
+			prompt: request.prompt,
+			system: composeSystemPrompt(this.systemPrompt, request.context),
+			...objectRequest,
+			experimental_telemetry: {
+				isEnabled: true,
+				...(this.tracer ? { tracer: this.tracer } : {}),
+				...(this.defaults.experimental_telemetry ?? {}),
+				...(metadataOverrides.experimental_telemetry ?? {}),
+			},
+		})
+		const { usage } = result
+		const rawReasoning = (result as { reasoning?: unknown }).reasoning
+		const reasoningFromParts = Array.isArray(rawReasoning)
+			? rawReasoning
+					.map(part => {
+						if (!part || typeof part !== 'object') {
+							return ''
+						}
+						const text = (part as { text?: unknown }).text
+						return typeof text === 'string' ? text : ''
+					})
+					.join('')
+					.trim() || undefined
+			: undefined
+		const reasoningText =
+			(result as { reasoningText?: string }).reasoningText ??
+			(reasoningFromParts && reasoningFromParts.length > 0 ? reasoningFromParts : undefined)
+		return {
+			data: result.object as T,
+			text: JSON.stringify(result.object ?? {}),
+			reasoningText,
 			tokens: {
 				prompt: usage?.inputTokens ?? 0,
 				completion: usage?.outputTokens ?? 0,
@@ -314,6 +404,7 @@ export class AiSdkProvider implements ModelProvider {
 
 					return {
 						output: outputText,
+						reasoningText: undefined,
 						tokens: {
 							prompt: usage?.inputTokens ?? 0,
 							completion: usage?.outputTokens ?? 0,
@@ -334,6 +425,23 @@ export class AiSdkProvider implements ModelProvider {
 						yield {
 							type: 'text-delta',
 							textDelta: part.text,
+						}
+					}
+					const reasoningDelta = (() => {
+						if (part.type !== 'reasoning-delta') {
+							return ''
+						}
+						const withText = part as { text?: unknown }
+						if (typeof withText.text === 'string') {
+							return withText.text
+						}
+						const withDelta = part as unknown as { delta?: unknown }
+						return typeof withDelta.delta === 'string' ? withDelta.delta : ''
+					})()
+					if (part.type === 'reasoning-delta' && reasoningDelta.length > 0) {
+						yield {
+							type: 'reasoning-delta',
+							reasoningDelta,
 						}
 					}
 					if (part.type === 'error') {

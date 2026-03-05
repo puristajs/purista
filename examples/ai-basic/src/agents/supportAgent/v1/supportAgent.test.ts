@@ -1,4 +1,10 @@
-import type { ModelProvider, ProviderRequest, ProviderResponse } from '@purista/ai'
+import type {
+	ModelProvider,
+	ProviderJsonRequest,
+	ProviderJsonResponse,
+	ProviderRequest,
+	ProviderResponse,
+} from '@purista/ai'
 import { DefaultEventBridge, initLogger } from '@purista/core'
 import { describe, expect, it } from 'vitest'
 import { supportV1Service } from '../../../service/support/v1/index.js'
@@ -19,6 +25,21 @@ class DeterministicProvider implements ModelProvider {
 			costUsd: 0,
 		}
 	}
+
+	async generateJson<T = unknown>(_request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>> {
+		return {
+			data: {
+				urgency: 'low',
+				explanation: 'deterministic explanation',
+				nextSteps: 'deterministic next steps',
+			} as T,
+			text: '{"urgency":"low"}',
+			tokens: {
+				prompt: 1,
+				completion: 1,
+			},
+		}
+	}
 }
 
 class FailingProvider implements ModelProvider {
@@ -26,6 +47,10 @@ class FailingProvider implements ModelProvider {
 	readonly capabilities = { text: true }
 
 	async generate(_request: ProviderRequest): Promise<ProviderResponse> {
+		throw new Error('upstream model unavailable')
+	}
+
+	async generateJson<T = unknown>(_request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>> {
 		throw new Error('upstream model unavailable')
 	}
 }

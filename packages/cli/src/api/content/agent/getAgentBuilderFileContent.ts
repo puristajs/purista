@@ -43,7 +43,7 @@ export const getAgentBuilderFileContent = (input: {
 	writer.writeLine('})')
 	writer.indent(() => {
 		writer.writeLine(`.addPayloadSchema(${schemaName})`)
-		writer.writeLine(".defineModel('openai:')")
+		writer.writeLine(".defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream', 'objectGeneration'] })")
 		writer.writeLine(".persistConversation('user', { maxFrames: 20 })")
 		writer.writeLine(`.exposeAsHttpEndpoint('POST', 'agents/${agentIdentifier}')`)
 		writer.writeLine(
@@ -53,8 +53,18 @@ export const getAgentBuilderFileContent = (input: {
 			writer.writeLine("context.logger.info({ prompt: payload.prompt }, 'invoking agent')")
 			writer.writeLine('await context.conversation.addUser(payload.prompt)')
 			writer.writeLine('const prompt = await context.conversation.buildPromptInput()')
-			writer.writeLine("const model = context.models['openai:']")
+			writer.writeLine("const model = context.models['openai:gpt-4o-mini']")
+			writer.writeLine('if (!model.generate) {')
+			writer.indent(() => {
+				writer.writeLine("throw new Error('Model alias openai:gpt-4o-mini does not provide generate()')")
+			})
+			writer.writeLine('}')
 			writer.writeLine('const result = await model.generate({ prompt, context: payload.context })')
+			writer.writeLine('if (result.reasoningText?.trim()) {')
+			writer.indent(() => {
+				writer.writeLine('context.stream.sendReasoning(result.reasoningText)')
+			})
+			writer.writeLine('}')
 			writer.writeLine('const answer = result.output')
 			writer.writeLine('await context.conversation.addAssistant(answer)')
 			writer.writeLine('context.stream.sendFinal(answer)')

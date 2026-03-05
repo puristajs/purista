@@ -42,6 +42,26 @@ describe('AgentInstance', () => {
 		).toThrow('Missing model provider for alias "openai:"')
 	})
 
+	it('fails fast when a declared object generation capability is missing', () => {
+		const manifest: AgentManifest = {
+			...baseManifest,
+			models: [{ alias: 'openai:gpt-4o-mini', capabilities: ['objectGeneration'] }],
+		}
+
+		expect(
+			() =>
+				new AgentInstance({ ...baseDependencies, manifest }, { instanceId: 'bridge-1' } as any, {
+					models: {
+						'openai:gpt-4o-mini': {
+							name: 'test-provider',
+							capabilities: { text: true },
+							generate: vi.fn(),
+						},
+					},
+				}),
+		).toThrow('Model provider "openai:gpt-4o-mini" does not support required capability "objectGeneration"')
+	})
+
 	it('notifies stream responders for successful invocations', async () => {
 		const invoke = vi.fn().mockResolvedValue([{ frame: { kind: 'message', content: 'ok', role: 'assistant' } }])
 		const eventBridge = { instanceId: 'bridge-1', invoke } as any

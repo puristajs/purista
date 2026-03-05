@@ -1,9 +1,15 @@
 import { AgentBuilder, type AgentHandlerContext } from '@purista/ai'
 import { HandledError, StatusCode } from '@purista/core'
+import { z } from 'zod/v4'
 
 import { type TriageAgentInput, triageAgentInputSchema } from './schema.js'
 
 type TriageAgentContext = AgentHandlerContext<TriageAgentInput, unknown>
+const triageJsonSchema = z.object({
+	urgency: z.enum(['low', 'medium', 'high']),
+	explanation: z.string().min(1),
+	nextSteps: z.string().min(1),
+})
 
 export const triageAgent = new AgentBuilder({
 	agentName: 'triageAgent',
@@ -11,17 +17,18 @@ export const triageAgent = new AgentBuilder({
 	description: 'Escalation helper agent',
 })
 	.addPayloadSchema(triageAgentInputSchema)
-	.defineModel('openai:gpt-4o-mini')
+	.defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'objectGeneration'] })
 	.persistConversation('agent', { maxFrames: 10 })
-		.setHandler<TriageAgentInput>(async function (context: TriageAgentContext, payload) {
-			const model = context.models['openai:gpt-4o-mini']
-			if (!model?.generate) {
-				throw new HandledError(StatusCode.InternalServerError, 'Text generation model is not configured')
-			}
+	.setHandler<TriageAgentInput>(async function (context: TriageAgentContext, payload) {
+		const model = context.models['openai:gpt-4o-mini']
+		if (!model?.generateJson) {
+			throw new HandledError(StatusCode.InternalServerError, 'JSON generation model is not configured')
+		}
 
-			context.stream.sendChunk('Escalation check in progress...')
-			const result = await model.generate({
-			prompt: `Classify this support ticket urgency and explain in one sentence: ${payload.prompt}`,
+		context.stream.sendChunk('Escalation check in progress...')
+		const result = await model.generateJson<z.infer<typeof triageJsonSchema>>({
+			prompt: `Classify this support ticket urgency and produce JSON with urgency, explanation, and nextSteps: ${payload.prompt}`,
+			schema: triageJsonSchema,
 			metadata: {
 				aiSdk: {
 					temperature: 0,
@@ -29,7 +36,7 @@ export const triageAgent = new AgentBuilder({
 			},
 		})
 
-		const answer = result.output
+		const answer = `**Urgency Classification:** ${result.data.urgency}\n\n**Explanation:** ${result.data.explanation}\n\n**Next Steps:** ${result.data.nextSteps}`
 		context.stream.sendFinal(answer)
 		return {
 			message: answer,

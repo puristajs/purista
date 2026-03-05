@@ -184,7 +184,7 @@ The handler receives a familiar context object with agent-specific helpers:
 | Property | Description |
 | --- | --- |
 | `logger`, `message`, `serviceContext` | Same observability handles you use inside services. |
-| `stream` | Action-oriented streaming helpers that map to the [agent protocol](./protocol-and-streaming.md): `sendChunk`, `sendFinal`, `sendArtifact`, `sendError`. |
+| `stream` | Action-oriented streaming helpers that map to the [agent protocol](./protocol-and-streaming.md): `sendChunk`, `sendFinal`, `sendReasoning`, `sendArtifact`, `sendError`. |
 | `conversation` | High-level chat history API (`addUser`, `addAssistant`, `buildPromptInput`, `getMessages`) with automatic session scoping and optional summary support. |
 | `session` | Low-level session store wrapper (`load`, `save`, `delete`) for advanced/custom state handling. |
 | `knowledge` | Fan-out to configured knowledge adapters (`query/upsert/delete`), with automatic tenant/principal/session scope propagation. |

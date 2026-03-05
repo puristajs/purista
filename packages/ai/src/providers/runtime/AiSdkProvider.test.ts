@@ -4,22 +4,35 @@ import { describe, expect, it, vi } from 'vitest'
 import { AiSdkProvider } from './AiSdkProvider.js'
 
 const generateTextMock = vi.fn()
+const generateObjectMock = vi.fn()
 const streamTextMock = vi.fn()
 const embedMock = vi.fn()
 const embedManyMock = vi.fn()
 const rerankMock = vi.fn()
+const wrapLanguageModelMock = vi.fn()
 
 vi.mock('ai', () => ({
 	generateText: (...args: unknown[]) => generateTextMock(...args),
+	generateObject: (...args: unknown[]) => generateObjectMock(...args),
 	streamText: (...args: unknown[]) => streamTextMock(...args),
 	embed: (...args: unknown[]) => embedMock(...args),
 	embedMany: (...args: unknown[]) => embedManyMock(...args),
 	rerank: (...args: unknown[]) => rerankMock(...args),
+	wrapLanguageModel: (...args: unknown[]) => wrapLanguageModelMock(...args),
 }))
 
 const mockModel = {} as LanguageModel
 
 describe('AiSdkProvider', () => {
+	it('wraps language model when middleware is configured', () => {
+		wrapLanguageModelMock.mockReturnValueOnce(mockModel)
+		void new AiSdkProvider({
+			model: mockModel,
+			middleware: {} as any,
+		})
+		expect(wrapLanguageModelMock).toHaveBeenCalledOnce()
+	})
+
 	it('maps generateText responses into provider response', async () => {
 		generateTextMock.mockResolvedValueOnce({
 			text: 'hello',
@@ -35,6 +48,7 @@ describe('AiSdkProvider', () => {
 		const provider = new AiSdkProvider({ model: mockModel })
 		const result = await provider.generate({ prompt: 'test' })
 		expect(result.output).toBe('hello')
+		expect(result.reasoningText).toBeUndefined()
 		expect(result.tokens).toEqual({
 			prompt: 11,
 			completion: 7,
@@ -42,6 +56,7 @@ describe('AiSdkProvider', () => {
 		expect(provider.capabilities).toMatchObject({
 			text: true,
 			stream: true,
+			objectGeneration: true,
 			embedding: false,
 			rerank: false,
 		})
@@ -51,6 +66,7 @@ describe('AiSdkProvider', () => {
 		streamTextMock.mockReturnValueOnce({
 			fullStream: (async function* () {
 				yield { type: 'text-delta', text: 'Hello ' }
+				yield { type: 'reasoning-delta', delta: 'thinking...' }
 				yield { type: 'text-delta', text: 'world' }
 				yield { type: 'finish', finishReason: 'stop', totalUsage: { inputTokens: 8, outputTokens: 4 } }
 			})(),
@@ -64,18 +80,45 @@ describe('AiSdkProvider', () => {
 		const provider = new AiSdkProvider({ model: mockModel })
 		const stream = provider.stream({ prompt: 'test stream' })
 		const deltas: string[] = []
+		const reasoning: string[] = []
 		for await (const chunk of stream) {
 			if (chunk.type === 'text-delta') {
 				deltas.push(chunk.textDelta)
 			}
+			if (chunk.type === 'reasoning-delta') {
+				reasoning.push(chunk.reasoningDelta)
+			}
 		}
 		expect(deltas.join('')).toBe('Hello world')
+		expect(reasoning.join('')).toBe('thinking...')
 		const final = await stream.final()
 		expect(final.output).toBe('Hello world')
 		expect(final.tokens).toEqual({
 			prompt: 8,
 			completion: 4,
 		})
+	})
+
+	it('supports structured json generation', async () => {
+		generateObjectMock.mockResolvedValueOnce({
+			object: { urgency: 'low' },
+			reasoningText: 'reasoning',
+			usage: {
+				inputTokens: 3,
+				outputTokens: 2,
+			},
+			request: { id: 'request' },
+			response: { id: 'response' },
+			providerMetadata: { provider: 'mock' },
+		})
+
+		const provider = new AiSdkProvider({ model: mockModel })
+		const result = await provider.generateJson<{ urgency: string }>({
+			prompt: 'classify',
+		})
+		expect(result.data.urgency).toBe('low')
+		expect(result.reasoningText).toBe('reasoning')
+		expect(result.text).toContain('"urgency"')
 	})
 
 	it('supports embedding and reranking when models are configured', async () => {
@@ -112,6 +155,7 @@ describe('AiSdkProvider', () => {
 		expect(provider.capabilities).toMatchObject({
 			text: true,
 			stream: true,
+			objectGeneration: true,
 			embedding: true,
 			rerank: true,
 		})

@@ -122,8 +122,14 @@ type DeclaredModelAliasApi<
 	StreamAliases extends string,
 	EmbeddingAliases extends string,
 	RerankAliases extends string,
+	ObjectAliases extends string,
 > = Pick<ModelProvider, 'name' | 'capabilities'> &
-	(Alias extends TextAliases ? { generate: NonNullable<ModelProvider['generate']> } : Record<never, never>) &
+	(Alias extends TextAliases
+		? {
+				generate: NonNullable<ModelProvider['generate']>
+			}
+		: Record<never, never>) &
+	(Alias extends ObjectAliases ? { generateJson: NonNullable<ModelProvider['generateJson']> } : Record<never, never>) &
 	(Alias extends StreamAliases ? { stream: NonNullable<ModelProvider['stream']> } : Record<never, never>) &
 	(Alias extends EmbeddingAliases
 		? {
@@ -139,8 +145,16 @@ type DeclaredModelMap<
 	StreamAliases extends string,
 	EmbeddingAliases extends string,
 	RerankAliases extends string,
+	ObjectAliases extends string,
 > = {
-	[Alias in ModelAliases]: DeclaredModelAliasApi<Alias, TextAliases, StreamAliases, EmbeddingAliases, RerankAliases>
+	[Alias in ModelAliases]: DeclaredModelAliasApi<
+		Alias,
+		TextAliases,
+		StreamAliases,
+		EmbeddingAliases,
+		RerankAliases,
+		ObjectAliases
+	>
 }
 
 export class AgentBuilder<
@@ -150,6 +164,7 @@ export class AgentBuilder<
 	StreamAliases extends string = never,
 	EmbeddingAliases extends string = never,
 	RerankAliases extends string = never,
+	ObjectAliases extends string = never,
 > {
 	private readonly info: AgentInfo
 	private readonly serviceBuilder: ServiceBuilder
@@ -220,7 +235,8 @@ export class AgentBuilder<
 		TextAliases | (ResolveCapability<Caps, 'text'> extends true ? Alias : never),
 		StreamAliases | (ResolveCapability<Caps, 'stream'> extends true ? Alias : never),
 		EmbeddingAliases | (ResolveCapability<Caps, 'embedding'> extends true ? Alias : never),
-		RerankAliases | (ResolveCapability<Caps, 'rerank'> extends true ? Alias : never)
+		RerankAliases | (ResolveCapability<Caps, 'rerank'> extends true ? Alias : never),
+		ObjectAliases | (ResolveCapability<Caps, 'objectGeneration'> extends true ? Alias : never)
 	> {
 		if (!alias.trim()) {
 			throw new Error('Model alias must not be empty')
@@ -250,7 +266,8 @@ export class AgentBuilder<
 			TextAliases | (ResolveCapability<Caps, 'text'> extends true ? Alias : never),
 			StreamAliases | (ResolveCapability<Caps, 'stream'> extends true ? Alias : never),
 			EmbeddingAliases | (ResolveCapability<Caps, 'embedding'> extends true ? Alias : never),
-			RerankAliases | (ResolveCapability<Caps, 'rerank'> extends true ? Alias : never)
+			RerankAliases | (ResolveCapability<Caps, 'rerank'> extends true ? Alias : never),
+			ObjectAliases | (ResolveCapability<Caps, 'objectGeneration'> extends true ? Alias : never)
 		>
 	}
 
@@ -262,7 +279,15 @@ export class AgentBuilder<
 	useKnowledgeAdapter<const Alias extends string>(
 		adapterName: Alias,
 		options?: Record<string, unknown>,
-	): AgentBuilder<KnowledgeAliases | Alias, ModelAliases, TextAliases, StreamAliases, EmbeddingAliases, RerankAliases>
+	): AgentBuilder<
+		KnowledgeAliases | Alias,
+		ModelAliases,
+		TextAliases,
+		StreamAliases,
+		EmbeddingAliases,
+		RerankAliases,
+		ObjectAliases
+	>
 	useKnowledgeAdapter<const Adapter extends { adapterName: string; options?: Record<string, unknown> }>(
 		adapter: Adapter,
 	): AgentBuilder<
@@ -271,7 +296,8 @@ export class AgentBuilder<
 		TextAliases,
 		StreamAliases,
 		EmbeddingAliases,
-		RerankAliases
+		RerankAliases,
+		ObjectAliases
 	>
 	useKnowledgeAdapter(
 		adapterOrName: string | { adapterName: string; options?: Record<string, unknown> },
@@ -289,7 +315,8 @@ export class AgentBuilder<
 			TextAliases,
 			StreamAliases,
 			EmbeddingAliases,
-			RerankAliases
+			RerankAliases,
+			ObjectAliases
 		>
 	}
 
@@ -453,7 +480,8 @@ export class AgentBuilder<
 			TextAliases,
 			StreamAliases,
 			EmbeddingAliases,
-			RerankAliases
+			RerankAliases,
+			ObjectAliases
 		>,
 	>(fn: AgentHandler<Payload, Parameter, Resources, Models, KnowledgeAliases>) {
 		this.handler = fn as AgentHandler<
@@ -575,6 +603,71 @@ export class AgentBuilder<
 							usage.completionTokens += result.tokens?.completion ?? 0
 							usage.costUsd += result.costUsd ?? 0
 							return result
+						}
+					}
+
+					if (provider.generateJson) {
+						modelApi.generateJson = async <T = unknown>(request: {
+							prompt: string
+							context?: string
+							schema?: unknown
+							metadata?: Record<string, unknown>
+						}): Promise<{
+							data: T
+							text: string
+							reasoningText?: string
+							tokens?: {
+								prompt: number
+								completion: number
+							}
+							metadata?: Record<string, unknown>
+						}> => {
+							const metadata = request.metadata ?? {}
+							const aiSdkMetadata =
+								typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
+									? (metadata.aiSdk as Record<string, unknown>)
+									: {}
+							const result = await provider.generateJson?.({
+								...request,
+								metadata: {
+									...metadata,
+									aiSdk: {
+										...(aiSdkMetadata.generateJson && typeof aiSdkMetadata.generateJson === 'object'
+											? aiSdkMetadata
+											: {}),
+										generateJson: {
+											...((aiSdkMetadata.generateJson as Record<string, unknown> | undefined) ?? {}),
+											experimental_telemetry: {
+												isEnabled: true,
+												functionId: `${runtime.manifest.agentName}.model.generateJson`,
+												metadata: {
+													agentName: runtime.manifest.agentName,
+													agentVersion: runtime.manifest.agentVersion,
+													poolId,
+													modelAlias: alias,
+												},
+												tracer: runtime.tracer,
+											},
+										},
+									},
+								},
+							})
+							if (!result) {
+								throw new HandledError(StatusCode.InternalServerError, 'Model JSON provider unavailable')
+							}
+							usage.provider = provider.name
+							usage.promptTokens += result.tokens?.prompt ?? 0
+							usage.completionTokens += result.tokens?.completion ?? 0
+							return result as {
+								data: T
+								text: string
+								reasoningText?: string
+								tokens?: {
+									prompt: number
+									completion: number
+								}
+								metadata?: Record<string, unknown>
+							}
 						}
 					}
 
@@ -842,7 +935,8 @@ export class AgentBuilder<
 			TextAliases,
 			StreamAliases,
 			EmbeddingAliases,
-			RerankAliases
+			RerankAliases,
+			ObjectAliases
 		>
 	}
 

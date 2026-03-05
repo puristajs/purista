@@ -75,7 +75,10 @@ type AgentServiceConfig = {
 	}
 }
 
-const supportsCapability = (provider: ModelProvider, capability: 'text' | 'stream' | 'embedding' | 'rerank') => {
+const supportsCapability = (
+	provider: ModelProvider,
+	capability: 'text' | 'stream' | 'embedding' | 'rerank' | 'objectGeneration',
+) => {
 	const declared = provider.capabilities?.[capability]
 	if (declared === true) {
 		return true
@@ -89,6 +92,8 @@ const supportsCapability = (provider: ModelProvider, capability: 'text' | 'strea
 			return typeof provider.embed === 'function'
 		case 'rerank':
 			return typeof provider.rerank === 'function'
+		case 'objectGeneration':
+			return typeof provider.generateJson === 'function'
 		default:
 			return false
 	}

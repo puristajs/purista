@@ -8,6 +8,16 @@ export type ProviderRequest = {
 }
 
 /**
+ * Payload sent to structured JSON generation capable providers.
+ */
+export type ProviderJsonRequest = {
+	prompt: string
+	context?: string
+	schema?: unknown
+	metadata?: Record<string, unknown>
+}
+
+/**
  * Payload sent to embedding-capable providers.
  */
 export type ProviderEmbedRequest = {
@@ -38,11 +48,23 @@ export type ProviderRerankRequest<Document = string | Record<string, unknown>> =
  */
 export type ProviderResponse = {
 	output: string
+	reasoningText?: string
 	tokens?: {
 		prompt: number
 		completion: number
 	}
 	costUsd?: number
+	metadata?: Record<string, unknown>
+}
+
+export type ProviderJsonResponse<T = unknown> = {
+	data: T
+	text: string
+	reasoningText?: string
+	tokens?: {
+		prompt: number
+		completion: number
+	}
 	metadata?: Record<string, unknown>
 }
 
@@ -103,6 +125,10 @@ export type ProviderStreamChunk =
 			textDelta: string
 	  }
 	| {
+			type: 'reasoning-delta'
+			reasoningDelta: string
+	  }
+	| {
 			type: 'error'
 			error: unknown
 	  }
@@ -123,6 +149,7 @@ export interface ModelProvider {
 	readonly capabilities: ModelProviderCapabilities
 	generate?(request: ProviderRequest): Promise<ProviderResponse>
 	stream?(request: ProviderRequest): ProviderStream
+	generateJson?<T = unknown>(request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>>
 	embed?(request: ProviderEmbedRequest): Promise<ProviderEmbedResponse>
 	embedMany?(request: ProviderEmbedManyRequest): Promise<ProviderEmbedManyResponse>
 	rerank?<Document = string | Record<string, unknown>>(

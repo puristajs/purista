@@ -120,20 +120,29 @@ export const supportAgent = new AgentBuilder({
 
 		try {
 			const maybeStreamModel = model as typeof model & {
-				stream?: (
-					request: typeof modelRequest,
-				) => AsyncIterable<{ type: 'text-delta'; textDelta: string } | { type: 'error'; error: unknown }> & {
-					final(): Promise<{ output: string }>
+				stream?: (request: typeof modelRequest) => AsyncIterable<
+					| { type: 'text-delta'; textDelta: string }
+					| { type: 'reasoning-delta'; reasoningDelta: string }
+					| { type: 'error'; error: unknown }
+				> & {
+					final(): Promise<{ output: string; reasoningText?: string }>
 				}
 			}
 
 			if (typeof maybeStreamModel.stream === 'function') {
 				const stream = maybeStreamModel.stream(modelRequest)
 				let answer = ''
+				let reasoning = ''
 
 				for await (const chunk of stream) {
 					if (chunk.type === 'error') {
 						throw chunk.error
+					}
+					if (chunk.type === 'reasoning-delta') {
+						reasoning += chunk.reasoningDelta
+						if (reasoning.trim().length > 0) {
+							context.stream.sendReasoning(reasoning)
+						}
 					}
 					if (chunk.type === 'text-delta') {
 						answer += chunk.textDelta
@@ -143,18 +152,25 @@ export const supportAgent = new AgentBuilder({
 
 				const finalResult = await stream.final()
 				const finalAnswer = finalResult.output || answer
+				const finalReasoning = finalResult.reasoningText?.trim() ?? reasoning.trim()
+				if (finalReasoning) {
+					context.stream.sendReasoning(finalReasoning)
+				}
 				await context.conversation.addAssistant(finalAnswer)
 				context.stream.sendFinal(finalAnswer)
 
 				return {
 					message: finalAnswer,
 				}
-				}
+			}
 
-				if (!model.generate) {
-					throw new HandledError(StatusCode.InternalServerError, 'Text generation model is not configured')
-				}
-				const result = await model.generate(modelRequest)
+			if (!model.generate) {
+				throw new HandledError(StatusCode.InternalServerError, 'Text generation model is not configured')
+			}
+			const result = await model.generate(modelRequest)
+			if (result.reasoningText?.trim()) {
+				context.stream.sendReasoning(result.reasoningText)
+			}
 			const answer = result.output
 			await context.conversation.addAssistant(answer)
 			const progressiveChunks = splitTextIntoProgressiveChunks(answer)

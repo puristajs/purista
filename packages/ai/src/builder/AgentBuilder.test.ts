@@ -223,16 +223,20 @@ describe('AgentBuilder', () => {
 	it('infers model capabilities from defineModel into handler context', () => {
 		new AgentBuilder({ agentName: 'typedModelAgent', agentVersion: '1' })
 			.defineModel('textOnly')
+			.defineModel('jsoner', { capabilities: ['objectGeneration'] })
 			.defineModel('embedder', { capabilities: ['embedding'] })
 			.defineModel('reranker', { capabilities: ['rerank'] })
 			.setHandler(async context => {
 				await context.models.textOnly.generate({ prompt: 'hello' })
+				await context.models.jsoner.generateJson({ prompt: 'classify', schema: z.object({ ok: z.boolean() }) })
 				await context.embeddings.embedder.embed({ value: 'hello' })
 				await context.rerankers.reranker.rerank({ query: 'q', documents: ['a', 'b'] })
 				// @ts-expect-error textOnly does not expose embedding capability
 				await context.embeddings.textOnly.embed({ value: 'x' })
 				// @ts-expect-error embedder does not expose text generation capability
 				await context.models.embedder.generate({ prompt: 'x' })
+				// @ts-expect-error textOnly does not expose object generation capability
+				await context.models.textOnly.generateJson({ prompt: 'x' })
 				return { message: 'ok' }
 			})
 	})

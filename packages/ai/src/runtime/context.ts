@@ -78,6 +78,7 @@ export type AgentProtocolBuffer = {
 export type AgentStreamEmitter = {
 	sendChunk(content: string): void
 	sendFinal(content: string, options?: { summary?: string }): void
+	sendReasoning(content: string, options?: { artifactId?: string }): void
 	sendArtifact(input: {
 		artifactId: string
 		content: string | Record<string, unknown>
@@ -95,6 +96,14 @@ const createStreamEmitter = (protocol: ProtocolEmitter): AgentStreamEmitter => (
 	},
 	sendFinal(content, options) {
 		protocol.emitMessage({ content, summary: options?.summary, partial: false, final: true })
+	},
+	sendReasoning(content, options) {
+		protocol.emitArtifact({
+			artifactId: options?.artifactId ?? 'reasoning',
+			content,
+			mimeType: 'text/markdown',
+			final: false,
+		})
 	},
 	sendArtifact(input) {
 		protocol.emitArtifact(input)

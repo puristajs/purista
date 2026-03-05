@@ -16,11 +16,25 @@ export interface ModelProvider {
     stream?: boolean
     embedding?: boolean
     rerank?: boolean
+    objectGeneration?: boolean
   }
   generate?(request: { prompt: string; context?: string; metadata?: Record<string, unknown> }): Promise<{
     output: string
+    reasoningText?: string
     tokens?: { prompt: number; completion: number }
     costUsd?: number
+    metadata?: Record<string, unknown>
+  }>
+  generateJson?<T>(request: {
+    prompt: string
+    context?: string
+    schema?: unknown
+    metadata?: Record<string, unknown>
+  }): Promise<{
+    data: T
+    text: string
+    reasoningText?: string
+    tokens?: { prompt: number; completion: number }
     metadata?: Record<string, unknown>
   }>
   stream?(request: { prompt: string; context?: string; metadata?: Record<string, unknown> }): ProviderStream
@@ -67,6 +81,7 @@ yarn add @ai-sdk/openai ai
 
 ```ts title="src/index.ts"
 import { createOpenAI } from '@ai-sdk/openai'
+import { extractReasoningMiddleware } from 'ai'
 import { AiSdkProvider } from '@purista/ai'
 import { supportAgent } from './agents/supportAgent/v1/supportAgent.js'
 
@@ -78,6 +93,7 @@ const gpt4oMiniProvider = new AiSdkProvider({
   // rerankingModel: someProvider.rerankingModel('rerank-model'),
   systemPrompt: 'You are a concise support engineer.',
   defaults: { temperature: 0.2, maxOutputTokens: 512 },
+  middleware: extractReasoningMiddleware({ tagName: 'think' }),
 })
 
 const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
@@ -102,7 +118,7 @@ Declare required capabilities in the builder so Purista can fail fast at `getIns
 
 ```ts
 new AgentBuilder({ agentName: 'searchAgent', agentVersion: '1' })
-  .defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream'] })
+  .defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream', 'objectGeneration'] })
   .defineModel('openai:embeddings', { capabilities: ['embedding'] })
   .defineModel('openai:reranker', { capabilities: ['rerank'] })
 ```
@@ -110,8 +126,44 @@ new AgentBuilder({ agentName: 'searchAgent', agentVersion: '1' })
 In handlers:
 
 - `context.models.<alias>` is for text/stream
+- `context.models.<alias>.generateJson(...)` is for structured JSON output
 - `context.embeddings.<alias>` is for embeddings
 - `context.rerankers.<alias>` is for reranking
+
+## Structured JSON output
+
+Use `generateJson` when your agent needs validated structured data (routing, classification, extraction).
+
+```ts
+import { z } from 'zod/v4'
+
+const triageSchema = z.object({
+  urgency: z.enum(['low', 'medium', 'high']),
+  explanation: z.string().min(1),
+})
+
+const result = await context.models['openai:gpt-4o-mini'].generateJson<z.infer<typeof triageSchema>>({
+  prompt: `Classify this ticket: ${payload.prompt}`,
+  schema: triageSchema,
+})
+```
+
+If the provider cannot satisfy JSON generation, `getInstance(...)` fails fast when capability declarations require it.
+
+## Thinking / reasoning output
+
+`AiSdkProvider` forwards reasoning text where available:
+
+- `generate(...)` may return `reasoningText`
+- `stream(...)` may emit `reasoning-delta`
+
+Forward reasoning to the protocol/UI with:
+
+```ts
+context.stream.sendReasoning('model chain-of-thought summary')
+```
+
+Reasoning is emitted as protocol artifact frames, so UI consumers can render it separately from assistant text.
 
 ## AiSdkProvider options reference
 
@@ -134,6 +186,22 @@ await context.models['openai:'].generate({
     aiSdk: {
       temperature: 0.4,
       maxOutputTokens: 256,
+    },
+  },
+})
+```
+
+For structured JSON calls:
+
+```ts
+await context.models['openai:'].generateJson({
+  prompt: 'Extract SLA fields',
+  schema: extractionSchema,
+  metadata: {
+    aiSdk: {
+      generateJson: {
+        temperature: 0,
+      },
     },
   },
 })

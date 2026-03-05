@@ -1,4 +1,4 @@
-import type { ModelProvider, ProviderRequest } from '@purista/ai'
+import type { ModelProvider, ProviderJsonRequest, ProviderJsonResponse, ProviderRequest } from '@purista/ai'
 import {
 	type Command,
 	DefaultEventBridge,
@@ -25,6 +25,21 @@ class DeterministicProvider implements ModelProvider {
 				completion: 10,
 			},
 			costUsd: 0,
+		}
+	}
+
+	async generateJson<T = unknown>(_request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>> {
+		return {
+			data: {
+				urgency: 'low',
+				explanation: 'deterministic explanation',
+				nextSteps: 'deterministic next steps',
+			} as T,
+			text: '{"urgency":"low"}',
+			tokens: {
+				prompt: 1,
+				completion: 1,
+			},
 		}
 	}
 }
