@@ -34,6 +34,7 @@ export const runSupportAgentCommandBuilder = supportV1ServiceBuilder
 				message: payload.prompt,
 				prompt: payload.prompt,
 				context: payload.context,
+				responseFormat: payload.responseFormat,
 				history: [],
 				attachments: [],
 			},

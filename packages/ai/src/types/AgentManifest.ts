@@ -38,7 +38,7 @@ export type RetryPolicy = {
 	delayMs?: number
 }
 
-export type AgentModelCapability = 'text' | 'stream' | 'embedding' | 'rerank' | 'objectGeneration'
+export type AgentModelCapability = 'text' | 'stream' | 'embedding' | 'rerank' | 'json'
 
 export type AgentModelBinding = {
 	alias: string

@@ -99,20 +99,20 @@ const resolveHistoryPresetConfig = (
 	}
 }
 
-const capabilityConfigDefaults: AgentModelCapability[] = ['text']
+const capabilityConfigDefaults: AgentModelCapability[] = ['text', 'stream']
 
 type ResolveCapability<
 	Caps extends readonly AgentModelCapability[] | undefined,
 	Capability extends AgentModelCapability,
 > = Caps extends readonly AgentModelCapability[]
 	? Caps[number] extends never
-		? Capability extends 'text'
+		? Capability extends 'text' | 'stream'
 			? true
 			: false
 		: Capability extends Caps[number]
 			? true
 			: false
-	: Capability extends 'text'
+	: Capability extends 'text' | 'stream'
 		? true
 		: false
 
@@ -236,7 +236,7 @@ export class AgentBuilder<
 		StreamAliases | (ResolveCapability<Caps, 'stream'> extends true ? Alias : never),
 		EmbeddingAliases | (ResolveCapability<Caps, 'embedding'> extends true ? Alias : never),
 		RerankAliases | (ResolveCapability<Caps, 'rerank'> extends true ? Alias : never),
-		ObjectAliases | (ResolveCapability<Caps, 'objectGeneration'> extends true ? Alias : never)
+		ObjectAliases | (ResolveCapability<Caps, 'json'> extends true ? Alias : never)
 	> {
 		if (!alias.trim()) {
 			throw new Error('Model alias must not be empty')
@@ -267,7 +267,7 @@ export class AgentBuilder<
 			StreamAliases | (ResolveCapability<Caps, 'stream'> extends true ? Alias : never),
 			EmbeddingAliases | (ResolveCapability<Caps, 'embedding'> extends true ? Alias : never),
 			RerankAliases | (ResolveCapability<Caps, 'rerank'> extends true ? Alias : never),
-			ObjectAliases | (ResolveCapability<Caps, 'objectGeneration'> extends true ? Alias : never)
+			ObjectAliases | (ResolveCapability<Caps, 'json'> extends true ? Alias : never)
 		>
 	}
 

@@ -56,7 +56,7 @@ describe('AiSdkProvider', () => {
 		expect(provider.capabilities).toMatchObject({
 			text: true,
 			stream: true,
-			objectGeneration: true,
+			json: true,
 			embedding: false,
 			rerank: false,
 		})
@@ -155,7 +155,7 @@ describe('AiSdkProvider', () => {
 		expect(provider.capabilities).toMatchObject({
 			text: true,
 			stream: true,
-			objectGeneration: true,
+			json: true,
 			embedding: true,
 			rerank: true,
 		})

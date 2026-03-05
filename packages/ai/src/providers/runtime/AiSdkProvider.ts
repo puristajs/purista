@@ -168,7 +168,7 @@ export class AiSdkProvider implements ModelProvider {
 		this.capabilities = {
 			text: true,
 			stream: true,
-			objectGeneration: true,
+			json: true,
 			embedding: !!this.embeddingModel,
 			rerank: !!this.rerankingModel,
 		}

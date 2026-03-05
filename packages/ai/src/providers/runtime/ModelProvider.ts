@@ -108,7 +108,7 @@ export type ModelProviderCapability =
 	| 'stream'
 	| 'embedding'
 	| 'rerank'
-	| 'objectGeneration'
+	| 'json'
 	| 'objectStreaming'
 	| 'image'
 	| 'audio'

@@ -20,7 +20,7 @@
 		sans-serif;
 }
 
-:root[data-theme='light'] {
+:root[data-theme="light"] {
 	--bg: #ffffff;
 	--panel: #ffffff;
 	--panel-soft: #f7f7f7;
@@ -577,7 +577,7 @@ body,
 	margin-left: -3px;
 	border-radius: 999px;
 	background: currentColor;
-	animation: workflow-edge-travel 1.35s linear infinite;
+	animation: none;
 }
 
 .workflow-edge.flow-edge-idle {
@@ -587,6 +587,10 @@ body,
 .workflow-edge.flow-edge-active {
 	color: #3b82f6;
 	background: rgba(59, 130, 246, 0.35);
+}
+
+.workflow-edge.flow-edge-active .workflow-edge-dot {
+	animation: workflow-edge-travel 1.35s linear infinite;
 }
 
 .workflow-edge.flow-edge-success {
@@ -625,6 +629,15 @@ body,
 	border-radius: 10px;
 	padding: 0.55rem;
 	background: var(--panel-soft);
+}
+
+.response-format-select {
+	border: 1px solid var(--border);
+	background: var(--panel);
+	color: var(--text);
+	border-radius: 10px;
+	padding: 0.4rem 0.55rem;
+	font-size: 0.82rem;
 }
 
 .output-details {

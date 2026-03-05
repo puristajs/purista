@@ -1,6 +1,6 @@
 ---
 title: Model Providers & OpenAI
-description: Use AI SDK providers with runtime model injection and optional shared registries.
+description: Use AI SDK providers with runtime model injection, JSON generation, embeddings, and middleware.
 order: 203703
 ---
 
@@ -16,7 +16,7 @@ export interface ModelProvider {
     stream?: boolean
     embedding?: boolean
     rerank?: boolean
-    objectGeneration?: boolean
+    json?: boolean
   }
   generate?(request: { prompt: string; context?: string; metadata?: Record<string, unknown> }): Promise<{
     output: string
@@ -87,7 +87,7 @@ import { supportAgent } from './agents/supportAgent/v1/supportAgent.js'
 
 const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY! })
 const gpt4oMiniProvider = new AiSdkProvider({
-  model: openai(''),
+  model: openai('gpt-4o-mini'),
   // optional capabilities:
   // embeddingModel: openai.textEmbeddingModel('text-embedding-3-small'),
   // rerankingModel: someProvider.rerankingModel('rerank-model'),
@@ -98,7 +98,7 @@ const gpt4oMiniProvider = new AiSdkProvider({
 
 const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   models: {
-    'openai:': gpt4oMiniProvider,
+    'openai:gpt-4o-mini': gpt4oMiniProvider,
   },
 })
 ```
@@ -108,17 +108,14 @@ This keeps dependencies explicit at bootstrap and matches the standard service `
 You do not need to call `defaultModelResourceRegistry.register(...)` for standard agent usage.  
 Runtime injection through `getInstance(..., { models })` is the default pattern and should be your first choice.
 
-## Optional: shared model registry
-
-Use the shared registry only when you intentionally want process-wide provider defaults reused across multiple runtimes.
-
 ## Capability-aware declarations
 
 Declare required capabilities in the builder so Purista can fail fast at `getInstance(...)`:
 
 ```ts
 new AgentBuilder({ agentName: 'searchAgent', agentVersion: '1' })
-  .defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream', 'objectGeneration'] })
+  .defineModel('openai:gpt-4o-mini') // defaults: ['text', 'stream']
+  .defineModel('openai:gpt-4o-mini-json', { capabilities: ['text', 'stream', 'json'] })
   .defineModel('openai:embeddings', { capabilities: ['embedding'] })
   .defineModel('openai:reranker', { capabilities: ['rerank'] })
 ```
@@ -129,6 +126,29 @@ In handlers:
 - `context.models.<alias>.generateJson(...)` is for structured JSON output
 - `context.embeddings.<alias>` is for embeddings
 - `context.rerankers.<alias>` is for reranking
+
+## Embeddings in practice
+
+Use embedding aliases to build retrieval and semantic similarity pipelines:
+
+```ts
+const vector = await context.embeddings['openai:embeddings'].embed({
+  value: payload.prompt,
+})
+
+const candidates = await context.knowledge.supportFaq.query(payload.prompt, { limit: 8 })
+const reranked = await context.rerankers['openai:reranker'].rerank({
+  query: payload.prompt,
+  documents: candidates.map(candidate => candidate.content),
+  topN: 3,
+})
+```
+
+Recommended split:
+
+- embedding model alias for vector generation
+- reranker model alias for precise top-N selection
+- text/stream alias for final answer synthesis
 
 ## Structured JSON output
 
@@ -194,7 +214,7 @@ await context.models['openai:'].generate({
 For structured JSON calls:
 
 ```ts
-await context.models['openai:'].generateJson({
+await context.models['openai:gpt-4o-mini'].generateJson({
   prompt: 'Extract SLA fields',
   schema: extractionSchema,
   metadata: {
@@ -218,3 +238,17 @@ When deciding between static defaults and per-run overrides:
 ## Telemetry & tracing
 
 Every provider exposes its `name`, which flows into the agent telemetry frame and OpenTelemetry attributes. Use it to build dashboards per model, compare latency, or alert when a fallback kicks in. The AI SDK already reports token usage; `AiSdkProvider` forwards `inputTokens`/`outputTokens` so you can aggregate prompt/completion costs across agents.
+
+## Prompt debugging (AI SDK + Purista)
+
+For local debugging of prompts and model I/O, use AI SDK debug output:
+
+```bash
+DEBUG=ai:* npm run start -w examples/ai-basic
+```
+
+This complements Purista logs and OpenTelemetry spans:
+
+- AI SDK debug output: request/response-level model diagnostics
+- Purista logger: service/command/agent lifecycle + business context
+- OpenTelemetry: cross-service traces, timing, and correlation IDs

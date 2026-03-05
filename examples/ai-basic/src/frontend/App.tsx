@@ -1,6 +1,13 @@
+import {
+	BotIcon,
+	CheckCircle2Icon,
+	MessageSquareIcon,
+	SparklesIcon,
+	WorkflowIcon,
+	WrenchIcon,
+	XCircleIcon,
+} from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
-
-import { BotIcon, CheckCircle2Icon, MessageSquareIcon, SparklesIcon, WrenchIcon, WorkflowIcon, XCircleIcon } from 'lucide-react'
 import { Streamdown } from 'streamdown'
 
 import {
@@ -9,11 +16,11 @@ import {
 	ConversationEmptyState,
 	ConversationScrollButton,
 } from './components/ai-elements/conversation'
-import { loadConversation, runSupportCommand, streamSupportAgent, triggerFollowUp } from './lib/api'
+import { getMcpTools, loadConversation, runSupportA2a, runSupportMcp, streamSupportAgent } from './lib/api'
 import type { AgentProtocolEnvelope, StreamPayload } from './lib/types'
 import { mapToWorkflow } from './lib/workflow'
 
-type Scenario = 'stream' | 'command' | 'followup' | 'protocol'
+type Scenario = 'stream' | 'mcp' | 'a2a' | 'protocol'
 type Theme = 'dark' | 'light'
 type ConversationHistoryItem = {
 	sessionId: string
@@ -25,6 +32,7 @@ type ChatMessage = {
 	id: string
 	role: 'user' | 'assistant' | 'tool'
 	content: string
+	jsonContent?: unknown
 	toolStatus?: string
 	toolInput?: unknown
 	toolOutput?: unknown
@@ -35,8 +43,8 @@ type ChatMessage = {
 
 const scenarioOptions: Array<{ id: Scenario; label: string }> = [
 	{ id: 'stream', label: 'Stream Chat' },
-	{ id: 'command', label: 'Command Run' },
-	{ id: 'followup', label: 'Follow-up' },
+	{ id: 'mcp', label: 'MCP Expose' },
+	{ id: 'a2a', label: 'Agent2Agent Expose' },
 	{ id: 'protocol', label: 'Protocol Inspector' },
 ]
 
@@ -86,20 +94,6 @@ const uniqueEnvelopes = (
 	return result
 }
 
-const envelopeFingerprint = (envelope: AgentProtocolEnvelope): string => {
-	const frame = envelope.frame
-	if (frame.kind === 'message') {
-		return `${envelope.conversationId ?? 'n/a'}|message|${frame.final === true ? 'final' : 'partial'}|${String(frame.content ?? '')}`
-	}
-	if (frame.kind === 'tool') {
-		return `${envelope.conversationId ?? 'n/a'}|tool|${String(frame.toolName ?? '')}|${String(frame.status ?? '')}|${JSON.stringify(frame.input ?? null)}|${JSON.stringify(frame.output ?? null)}`
-	}
-	if (frame.kind === 'telemetry') {
-		return `${envelope.conversationId ?? 'n/a'}|telemetry|${JSON.stringify(frame.usage ?? null)}|${String(frame.durationMs ?? '')}`
-	}
-	return `${envelope.conversationId ?? 'n/a'}|error|${JSON.stringify(frame)}`
-}
-
 const actorLabel = (envelope: AgentProtocolEnvelope): string =>
 	[envelope.actor?.service, envelope.actor?.version, envelope.actor?.agent].filter(Boolean).join(':')
 
@@ -112,10 +106,26 @@ const stableJson = (value: unknown): string => {
 	}
 }
 
+const envelopeFingerprint = (envelope: AgentProtocolEnvelope): string => {
+	const frame = envelope.frame
+	if (frame.kind === 'message') {
+		return `${envelope.conversationId ?? 'n/a'}|message|${frame.final === true ? 'final' : 'partial'}|${String(frame.content ?? '')}`
+	}
+	if (frame.kind === 'artifact') {
+		return `${envelope.conversationId ?? 'n/a'}|artifact|${stableJson(frame.content)}`
+	}
+	if (frame.kind === 'tool') {
+		return `${envelope.conversationId ?? 'n/a'}|tool|${String(frame.toolName ?? '')}|${String(frame.status ?? '')}|${stableJson(frame.input)}|${stableJson(frame.output)}`
+	}
+	if (frame.kind === 'telemetry') {
+		return `${envelope.conversationId ?? 'n/a'}|telemetry|${stableJson(frame.usage)}|${String(frame.durationMs ?? '')}`
+	}
+	return `${envelope.conversationId ?? 'n/a'}|error|${stableJson(frame)}`
+}
+
 type FlowPhaseId = 'ingress' | 'faq' | 'triage' | 'generation' | 'result'
 type FlowPhaseStatus = 'idle' | 'running' | 'success' | 'error'
 
-const phaseOrder: FlowPhaseId[] = ['ingress', 'faq', 'triage', 'generation', 'result']
 type FlowPhase = {
 	id: FlowPhaseId
 	label: string
@@ -125,15 +135,7 @@ type FlowPhase = {
 	icon: typeof WorkflowIcon
 }
 
-const latestStepByMatch = (steps: ReturnType<typeof mapToWorkflow>, matcher: (label: string) => boolean) => {
-	for (let index = steps.length - 1; index >= 0; index -= 1) {
-		const step = steps[index]
-		if (matcher(step.label)) {
-			return step
-		}
-	}
-	return undefined
-}
+const phaseOrder: FlowPhaseId[] = ['ingress', 'faq', 'triage', 'generation', 'result']
 
 const latestPhaseByStatus = (
 	statuses: Record<FlowPhaseId, FlowPhaseStatus>,
@@ -153,6 +155,7 @@ export const App = () => {
 	const [theme, setTheme] = useState<Theme>(getStoredTheme)
 	const [prompt, setPrompt] = useState('How can I request a refund for my order?')
 	const [sessionId, setSessionId] = useState('')
+	const [responseFormat, setResponseFormat] = useState<'text' | 'json'>('text')
 	const [status, setStatus] = useState('Ready')
 	const [canRetry, setCanRetry] = useState(false)
 	const [commandOutput, setCommandOutput] = useState('{}')
@@ -161,35 +164,46 @@ export const App = () => {
 	const [envelopes, setEnvelopes] = useState<AgentProtocolEnvelope[]>([])
 	const [streamPayloads, setStreamPayloads] = useState<StreamPayload[]>([])
 	const [conversationHistory, setConversationHistory] = useState<ConversationHistoryItem[]>(getStoredHistory)
+	const [mcpTools, setMcpTools] = useState<unknown[] | null>(null)
 	const seenFramesRef = useRef<Set<string>>(new Set())
 
 	const workflow = useMemo(() => mapToWorkflow(envelopes), [envelopes])
 
-	const flowPhases = (() => {
+	const flowPhases = useMemo(() => {
 		const hasError = workflow.some(step => step.status === 'error' || step.type === 'error')
 		const hasTopLevelFinal = workflow.some(
-			step => step.depth === 0 && step.type === 'message' && (step.details as { final?: boolean } | undefined)?.final === true,
+			step =>
+				step.depth === 0 &&
+				step.type === 'message' &&
+				(step.details as { final?: boolean } | undefined)?.final === true,
 		)
-		const lookupStep = latestStepByMatch(workflow, label => label.includes('support.1.lookupFaq'))
-		const triageStep = latestStepByMatch(workflow, label => label.includes('triageAgent.1.run'))
-		const generationStep = latestStepByMatch(workflow, label => label.toLowerCase().includes('generating final answer'))
+		const lookupStep = [...workflow].reverse().find(step => step.label.includes('support.1.lookupFaq'))
+		const triageStep = [...workflow].reverse().find(step => step.label.includes('triageAgent.1.run'))
+		const generationStep = [...workflow]
+			.reverse()
+			.find(step => step.label.toLowerCase().includes('generating final answer'))
 
 		const phaseStatus: Record<FlowPhaseId, FlowPhaseStatus> = {
 			ingress: workflow.length > 0 ? 'success' : 'idle',
 			faq: lookupStep?.status ?? 'idle',
 			triage: triageStep?.status ?? 'idle',
-			generation: hasError ? 'error' : hasTopLevelFinal ? 'success' : generationStep?.status ?? 'idle',
+			generation: hasError ? 'error' : hasTopLevelFinal ? 'success' : (generationStep?.status ?? 'idle'),
 			result: hasError ? 'error' : hasTopLevelFinal ? 'success' : 'idle',
 		}
 
 		const activePhase =
-			latestPhaseByStatus(phaseStatus, status => status === 'running') ??
-			latestPhaseByStatus(phaseStatus, status => status !== 'idle')
+			latestPhaseByStatus(phaseStatus, value => value === 'running') ??
+			latestPhaseByStatus(phaseStatus, value => value !== 'idle')
 
 		const phaseConfig: Array<{ id: FlowPhaseId; label: string; icon: typeof WorkflowIcon; description: string }> = [
-			{ id: 'ingress', label: 'PURISTA ingress', icon: WorkflowIcon, description: 'Request accepted in service/stream' },
-			{ id: 'faq', label: 'Command tool', icon: WrenchIcon, description: 'FAQ lookup command invocation' },
-			{ id: 'triage', label: 'AI delegation', icon: BotIcon, description: 'Optional triage agent run' },
+			{
+				id: 'ingress',
+				label: 'PURISTA ingress',
+				icon: WorkflowIcon,
+				description: 'Request accepted in service/stream',
+			},
+			{ id: 'faq', label: 'Command tool', icon: WrenchIcon, description: 'Tool command invocation' },
+			{ id: 'triage', label: 'Agent delegation', icon: BotIcon, description: 'Agent-to-agent run inside app' },
 			{ id: 'generation', label: 'AI generation', icon: SparklesIcon, description: 'Final response generation' },
 			{ id: 'result', label: 'Stream result', icon: CheckCircle2Icon, description: 'Final chunk/telemetry emitted' },
 		]
@@ -205,27 +219,17 @@ export const App = () => {
 				icon: hasError && phase.id === 'result' ? XCircleIcon : phase.icon,
 			}
 		})
-	})()
+	}, [workflow])
 
 	const chatTimeline = useMemo(() => {
-		const rows: Array<{
-			message: ChatMessage
-			tools: ChatMessage[]
-		}> = []
+		const rows: Array<{ message: ChatMessage; tools: ChatMessage[] }> = []
 		for (const message of chatMessages) {
 			if (message.role === 'tool') {
 				const last = rows.at(-1)
 				if (last) {
 					last.tools.push(message)
 				} else {
-					rows.push({
-						message: {
-							id: nowId(),
-							role: 'assistant',
-							content: '',
-						},
-						tools: [message],
-					})
+					rows.push({ message: { id: nowId(), role: 'assistant', content: '' }, tools: [message] })
 				}
 				continue
 			}
@@ -254,29 +258,23 @@ export const App = () => {
 		})
 	}
 
-	const appendAssistantMessage = (content: string) => {
+	const appendAssistantMessage = (content: string, jsonContent?: unknown) => {
 		const text = content.trim()
-		if (!text) {
+		if (!text && jsonContent === undefined) {
 			return
 		}
-		setChatMessages(previous => {
-			const last = previous.at(-1)
-			if (last?.role === 'assistant' && last.content === text) {
-				return previous
-			}
-			return [...previous, { id: nowId(), role: 'assistant', content: text }]
-		})
+		setChatMessages(previous => [...previous, { id: nowId(), role: 'assistant', content: text, jsonContent }])
 	}
 
 	const appendToolMessage = (
 		toolName: string,
-		status: string,
+		statusValue: string,
 		input?: unknown,
 		output?: unknown,
 		actor?: string,
 		timestamp?: string,
 	) => {
-		const text = `${toolName} · ${status}`
+		const text = `${toolName} · ${statusValue}`
 		const toolKey = `${toolName}|${stableJson(input)}`
 		setChatMessages(previous => {
 			const existingIndex = [...previous]
@@ -289,7 +287,7 @@ export const App = () => {
 				next[index] = {
 					...current,
 					content: text,
-					toolStatus: status,
+					toolStatus: statusValue,
 					toolInput: input ?? current.toolInput,
 					toolOutput: output ?? current.toolOutput,
 					actor: actor ?? current.actor,
@@ -303,7 +301,7 @@ export const App = () => {
 					id: nowId(),
 					role: 'tool',
 					content: text,
-					toolStatus: status,
+					toolStatus: statusValue,
 					toolInput: input,
 					toolOutput: output,
 					toolKey,
@@ -343,6 +341,13 @@ export const App = () => {
 			}
 			return
 		}
+		if (frame.kind === 'artifact') {
+			if (frame.mimeType === 'application/json' && typeof frame.content === 'object' && frame.content !== null) {
+				appendAssistantMessage('Structured JSON response', frame.content)
+				setStatus('Structured JSON received')
+			}
+			return
+		}
 		if (frame.kind === 'error') {
 			setAssistantDraft('')
 			appendAssistantMessage(`Error: ${String(frame.message ?? 'Unknown error')}`)
@@ -358,11 +363,13 @@ export const App = () => {
 			return
 		}
 		if (frame.kind === 'telemetry') {
-			setStatus(`Telemetry · tokens ${String((frame.usage as { totalTokens?: number } | undefined)?.totalTokens ?? '-')}`)
+			setStatus(
+				`Telemetry · tokens ${String((frame.usage as { totalTokens?: number } | undefined)?.totalTokens ?? '-')}`,
+			)
 		}
 	}
 
-	const executeStream = async () => {
+	const runStream = async () => {
 		const question = prompt.trim()
 		if (!question) {
 			return
@@ -380,102 +387,57 @@ export const App = () => {
 		setStatus('Streaming...')
 		setCanRetry(false)
 
-		try {
-			await streamSupportAgent(
-				{
-					prompt: question,
-					sessionId: activeSessionId,
+		await streamSupportAgent(
+			{ prompt: question, sessionId: activeSessionId, responseFormat },
+			{
+				onEnvelope: processEnvelope,
+				onPayload: payload => setStreamPayloads(previous => [...previous, payload]),
+				onComplete: () => {
+					setAssistantDraft('')
+					setStatus('Completed')
 				},
-				{
-					onEnvelope: envelope => {
-						processEnvelope(envelope)
-					},
-					onPayload: payload => {
-						setStreamPayloads(previous => [...previous, payload])
-					},
-					onComplete: () => {
-						setAssistantDraft('')
-						setStatus('Completed')
-						setCanRetry(false)
-					},
-					onError: error => {
-						setAssistantDraft('')
-						appendAssistantMessage(`Error: ${error}`)
-						setStatus('Error')
-						setCanRetry(true)
-					},
+				onError: error => {
+					setAssistantDraft('')
+					appendAssistantMessage(`Error: ${error}`)
+					setStatus('Error')
+					setCanRetry(true)
 				},
-			)
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error)
-			appendAssistantMessage(`Error: ${message}`)
-			setStatus('Error')
-			setCanRetry(true)
-		}
+			},
+		)
 	}
 
-	const executeCommand = async () => {
+	const runMcp = async () => {
 		const question = prompt.trim()
 		if (!question) {
 			return
 		}
 		const activeSessionId = sessionId.trim() || crypto.randomUUID()
-		if (activeSessionId !== sessionId) {
-			setSessionId(activeSessionId)
-		}
+		setSessionId(activeSessionId)
 		rememberConversation(activeSessionId, question)
 		appendUserMessage(question)
-		setStatus('Running command...')
+		setStatus('Calling MCP endpoint...')
 		setCanRetry(false)
-		try {
-			const result = await runSupportCommand({
-				prompt: question,
-				sessionId: activeSessionId,
-			})
-			setCommandOutput(JSON.stringify(result, null, 2))
-			const message =
-				result && typeof result === 'object' && 'message' in result && typeof result.message === 'string'
-					? result.message
-					: JSON.stringify(result)
-			appendAssistantMessage(message)
-			setStatus('Command completed')
-			setCanRetry(false)
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error)
-			appendAssistantMessage(`Error: ${message}`)
-			setStatus('Error')
-			setCanRetry(true)
-		}
+		const result = await runSupportMcp({ prompt: question, sessionId: activeSessionId, responseFormat })
+		setCommandOutput(JSON.stringify(result, null, 2))
+		appendAssistantMessage('MCP call completed. See result panel for protocol-compatible response.')
+		setStatus('MCP call completed')
 	}
 
-	const executeFollowUp = async () => {
+	const runA2a = async () => {
 		const question = prompt.trim()
 		if (!question) {
 			return
 		}
 		const activeSessionId = sessionId.trim() || crypto.randomUUID()
-		if (activeSessionId !== sessionId) {
-			setSessionId(activeSessionId)
-		}
+		setSessionId(activeSessionId)
 		rememberConversation(activeSessionId, question)
 		appendUserMessage(question)
-		setStatus('Queueing follow-up...')
+		setStatus('Calling A2A endpoint...')
 		setCanRetry(false)
-		try {
-			const result = await triggerFollowUp({
-				prompt: question,
-				sessionId: activeSessionId,
-			})
-			setCommandOutput(JSON.stringify(result, null, 2))
-			appendAssistantMessage('Follow-up queued. Final processing is async via subscription.')
-			setStatus('Follow-up queued')
-			setCanRetry(false)
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error)
-			appendAssistantMessage(`Error: ${message}`)
-			setStatus('Error')
-			setCanRetry(true)
-		}
+		const result = await runSupportA2a({ prompt: question, sessionId: activeSessionId, responseFormat })
+		setCommandOutput(JSON.stringify(result, null, 2))
+		appendAssistantMessage('Agent2Agent endpoint completed. See result panel for message graph payload.')
+		setStatus('A2A call completed')
 	}
 
 	const executeLoadConversation = async (explicitSessionId?: string) => {
@@ -497,17 +459,36 @@ export const App = () => {
 		setCanRetry(false)
 	}
 
-	const executeRetry = async () => {
-		if (scenario === 'command') {
-			await executeCommand()
-			return
+	const execute = async () => {
+		try {
+			if (scenario === 'mcp') {
+				await runMcp()
+				return
+			}
+			if (scenario === 'a2a') {
+				await runA2a()
+				return
+			}
+			await runStream()
+		} catch (error) {
+			const message = error instanceof Error ? error.message : String(error)
+			appendAssistantMessage(`Error: ${message}`)
+			setStatus('Error')
+			setCanRetry(true)
 		}
-		if (scenario === 'followup') {
-			await executeFollowUp()
-			return
-		}
-		await executeStream()
 	}
+
+	useEffect(() => {
+		void getMcpTools()
+			.then(result => {
+				if (result && typeof result === 'object' && 'tools' in result && Array.isArray(result.tools)) {
+					setMcpTools(result.tools)
+				}
+			})
+			.catch(() => {
+				setMcpTools([])
+			})
+	}, [])
 
 	return (
 		<div className="page">
@@ -549,165 +530,160 @@ export const App = () => {
 				</div>
 			</aside>
 			<div className="main">
-			<header className="topbar">
-				<div>
-					<h1>PURISTA AI Showcase</h1>
-					<p>Conversation-first UI with stream workflow tracing.</p>
-				</div>
-				<button type="button" className="button secondary" onClick={() => setThemeAndStore(theme === 'dark' ? 'light' : 'dark')}>
-					Theme: {theme}
-				</button>
-			</header>
-
-			<nav className="tabs">
-				{scenarioOptions.map(option => (
+				<header className="topbar">
+					<div>
+						<h1>PURISTA AI Showcase</h1>
+						<p>Stream, MCP, and Agent2Agent protocol exposure with practical tool orchestration.</p>
+					</div>
 					<button
 						type="button"
-						key={option.id}
-						className={`button ${scenario === option.id ? 'active' : 'secondary'}`}
-						onClick={() => setScenario(option.id)}
+						className="button secondary"
+						onClick={() => setThemeAndStore(theme === 'dark' ? 'light' : 'dark')}
 					>
-						{option.label}
+						Theme: {theme}
 					</button>
-				))}
-			</nav>
+				</header>
 
-			<div className="status-row">
-				<span>{status}</span>
-				{canRetry && (
-					<button type="button" className="button secondary" onClick={() => void executeRetry()}>
-						Retry
-					</button>
-				)}
-			</div>
+				<nav className="tabs">
+					{scenarioOptions.map(option => (
+						<button
+							type="button"
+							key={option.id}
+							className={`button ${scenario === option.id ? 'active' : 'secondary'}`}
+							onClick={() => setScenario(option.id)}
+						>
+							{option.label}
+						</button>
+					))}
+					<select
+						value={responseFormat}
+						onChange={event => setResponseFormat(event.target.value as 'text' | 'json')}
+						className="response-format-select"
+					>
+						<option value="text">Text output</option>
+						<option value="json">JSON output</option>
+					</select>
+				</nav>
 
-			<div className="layout">
-				<section className="card chat-card">
-					<Conversation className="chat-scroll">
-						<ConversationContent>
-							{chatTimeline.length === 0 && !assistantDraft ? (
-								<ConversationEmptyState
-									icon={<MessageSquareIcon size={40} />}
-									title="Start a conversation"
-									description="Ask a question to run the selected AI scenario."
-								/>
-							) : (
-								chatTimeline.map(row => (
-									<div key={row.message.id} className="chat-turn">
-										{row.message.content && (
-											<div className={`bubble ${row.message.role === 'user' ? 'bubble-user' : 'bubble-assistant'}`}>
-												<Streamdown>{row.message.content}</Streamdown>
-											</div>
-										)}
-										{row.tools.length > 0 && (
-											<div className="tool-group">
-												{row.tools.map(tool => (
-													<div key={tool.id} className="bubble bubble-tool">
-														<div className="tool-card">
-															<details>
-																<summary className="tool-summary">
-																	<div className="tool-head">
-																		<div className="tool-title">{tool.content}</div>
-																		<span className={`tool-chip tool-${String(tool.toolStatus ?? 'unknown')}`}>
-																			{String(tool.toolStatus ?? 'unknown').toUpperCase()}
-																		</span>
-																	</div>
-																</summary>
-																<div className="tool-meta">
-																	<span>{tool.actor ?? 'tool'}</span>
-																	{tool.timestamp && <span>{new Date(tool.timestamp).toLocaleTimeString()}</span>}
-																</div>
-																{tool.toolInput !== undefined && (
-																	<details>
-																		<summary>input</summary>
-																		<pre>{JSON.stringify(tool.toolInput, null, 2)}</pre>
-																	</details>
-																)}
-																{tool.toolOutput !== undefined && (
-																	<details>
-																		<summary>output</summary>
-																		<pre>{JSON.stringify(tool.toolOutput, null, 2)}</pre>
-																	</details>
-																)}
-															</details>
+				<div className="status-row">
+					<span>{status}</span>
+					{canRetry && (
+						<button type="button" className="button secondary" onClick={() => void execute()}>
+							Retry
+						</button>
+					)}
+				</div>
+
+				<div className="layout">
+					<section className="card chat-card">
+						<Conversation className="chat-scroll">
+							<ConversationContent>
+								{chatTimeline.length === 0 && !assistantDraft ? (
+									<ConversationEmptyState
+										icon={<MessageSquareIcon size={40} />}
+										title="Start a conversation"
+										description="Ask a question to run the selected AI scenario."
+									/>
+								) : (
+									chatTimeline.map(row => (
+										<div key={row.message.id} className="chat-turn">
+											{row.message.content && (
+												<div className={`bubble ${row.message.role === 'user' ? 'bubble-user' : 'bubble-assistant'}`}>
+													<Streamdown>{row.message.content}</Streamdown>
+												</div>
+											)}
+											{row.message.jsonContent !== undefined && (
+												<details className="bubble bubble-assistant" open>
+													<summary>Structured JSON</summary>
+													<pre>{JSON.stringify(row.message.jsonContent, null, 2)}</pre>
+												</details>
+											)}
+											{row.tools.length > 0 && (
+												<div className="tool-group">
+													{row.tools.map(tool => (
+														<div key={tool.id} className="bubble bubble-tool">
+															<div className="tool-card">
+																<details>
+																	<summary className="tool-summary">
+																		<div className="tool-head">
+																			<div className="tool-title">{tool.content}</div>
+																			<span className={`tool-chip tool-${String(tool.toolStatus ?? 'unknown')}`}>
+																				{String(tool.toolStatus ?? 'unknown').toUpperCase()}
+																			</span>
+																		</div>
+																	</summary>
+																	{tool.toolInput !== undefined && (
+																		<details>
+																			<summary>input</summary>
+																			<pre>{JSON.stringify(tool.toolInput, null, 2)}</pre>
+																		</details>
+																	)}
+																	{tool.toolOutput !== undefined && (
+																		<details>
+																			<summary>output</summary>
+																			<pre>{JSON.stringify(tool.toolOutput, null, 2)}</pre>
+																		</details>
+																	)}
+																</details>
+															</div>
 														</div>
-													</div>
-												))}
-											</div>
-										)}
+													))}
+												</div>
+											)}
+										</div>
+									))
+								)}
+								{assistantDraft && (
+									<div className="bubble bubble-assistant bubble-draft">
+										<Streamdown>{assistantDraft}</Streamdown>
 									</div>
-								))
-							)}
-							{assistantDraft && (
-								<div className="bubble bubble-assistant bubble-draft">
-									<Streamdown>{assistantDraft}</Streamdown>
-								</div>
-							)}
-						</ConversationContent>
-						<ConversationScrollButton />
-					</Conversation>
-					<div className="composer">
-						<div className="prompt-bar">
-							<textarea
-								value={prompt}
-								onChange={event => setPrompt(event.target.value)}
-								onKeyDown={event => {
-									if (event.key !== 'Enter' || event.shiftKey) {
-										return
-									}
-									event.preventDefault()
-									if (scenario === 'command') {
-										void executeCommand()
-										return
-									}
-									if (scenario === 'followup') {
-										void executeFollowUp()
-										return
-									}
-									void executeStream()
-								}}
-								placeholder="Ask the assistant..."
-								className="prompt-input"
-								rows={1}
-							/>
-							{(scenario === 'stream' || scenario === 'protocol') && (
-								<button type="button" className="button primary-icon send-button" onClick={executeStream} aria-label="Send message">
+								)}
+							</ConversationContent>
+							<ConversationScrollButton />
+						</Conversation>
+						<div className="composer">
+							<div className="prompt-bar">
+								<textarea
+									value={prompt}
+									onChange={event => setPrompt(event.target.value)}
+									onKeyDown={event => {
+										if (event.key !== 'Enter' || event.shiftKey) {
+											return
+										}
+										event.preventDefault()
+										void execute()
+									}}
+									placeholder="Ask the assistant..."
+									className="prompt-input"
+									rows={1}
+								/>
+								<button
+									type="button"
+									className="button primary-icon send-button"
+									onClick={() => void execute()}
+									aria-label="Send message"
+								>
 									<span className="button-icon" aria-hidden>
 										➤
 									</span>
 								</button>
-							)}
-							{scenario === 'command' && (
-								<button type="button" className="button primary-icon send-button" onClick={executeCommand} aria-label="Run command">
-									<span className="button-icon" aria-hidden>
-										⚡
-									</span>
-								</button>
-							)}
-							{scenario === 'followup' && (
-								<button type="button" className="button primary-icon send-button" onClick={executeFollowUp} aria-label="Queue follow-up">
-									<span className="button-icon" aria-hidden>
-										↺
-									</span>
-								</button>
-							)}
+							</div>
 						</div>
-					</div>
-				</section>
+					</section>
 
-				<section className="card">
-					{scenario === 'protocol' ? (
-						<div className="protocol-list">
-							{streamPayloads.map((payload, index) => (
-								<details key={`${payload.event}-${index}`} open={index === streamPayloads.length - 1}>
-									<summary>
-										{payload.event} #{index + 1}
-									</summary>
-									<pre>{JSON.stringify(payload.parsed ?? payload.raw, null, 2)}</pre>
-								</details>
-							))}
-							{streamPayloads.length === 0 && <div className="placeholder">No protocol frames yet.</div>}
-						</div>
+					<section className="card">
+						{scenario === 'protocol' ? (
+							<div className="protocol-list">
+								{streamPayloads.map((payload, index) => (
+									<details key={`${payload.event}-${index}`} open={index === streamPayloads.length - 1}>
+										<summary>
+											{payload.event} #{index + 1}
+										</summary>
+										<pre>{JSON.stringify(payload.parsed ?? payload.raw, null, 2)}</pre>
+									</details>
+								))}
+								{streamPayloads.length === 0 && <div className="placeholder">No protocol frames yet.</div>}
+							</div>
 						) : (
 							<div className="flow-wrap">
 								<div className="workflow-column">
@@ -724,7 +700,9 @@ export const App = () => {
 														: 'flow-edge-idle'
 										return (
 											<div key={phase.id} className="workflow-step-wrap">
-												<div className={`flow-node-card flow-status-${phase.status} ${phase.isActive ? 'flow-active' : ''}`}>
+												<div
+													className={`flow-node-card flow-status-${phase.status} ${phase.isActive ? 'flow-active' : ''}`}
+												>
 													<div className="flow-node-content">
 														<div className="flow-node-icon-wrap">
 															<Icon size={16} />
@@ -747,15 +725,18 @@ export const App = () => {
 								</div>
 							</div>
 						)}
-
-					{(scenario === 'command' || scenario === 'followup') && (
-						<details className="output-details">
-							<summary>Command output</summary>
+						<details className="output-details" open={scenario === 'mcp' || scenario === 'a2a'}>
+							<summary>Protocol result output</summary>
 							<pre>{commandOutput}</pre>
 						</details>
-					)}
-				</section>
-			</div>
+						{scenario === 'mcp' && (
+							<details className="output-details" open>
+								<summary>MCP tool descriptors</summary>
+								<pre>{JSON.stringify(mcpTools ?? [], null, 2)}</pre>
+							</details>
+						)}
+					</section>
+				</div>
 			</div>
 		</div>
 	)

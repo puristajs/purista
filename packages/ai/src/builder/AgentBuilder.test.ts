@@ -7,7 +7,7 @@ import { AgentBuilder } from './AgentBuilder.js'
 
 class DeterministicTextProvider implements ModelProvider {
 	readonly name = 'deterministic-text'
-	readonly capabilities = { text: true }
+	readonly capabilities = { text: true, stream: true }
 
 	async generate(request: ProviderRequest) {
 		return {
@@ -17,6 +17,31 @@ class DeterministicTextProvider implements ModelProvider {
 				completion: request.prompt.length,
 			},
 			costUsd: 0,
+		}
+	}
+
+	stream(request: ProviderRequest) {
+		let done = false
+		return {
+			async final() {
+				return {
+					output: request.prompt,
+					tokens: {
+						prompt: request.prompt.length,
+						completion: request.prompt.length,
+					},
+				}
+			},
+			async *[Symbol.asyncIterator]() {
+				if (done) {
+					return
+				}
+				done = true
+				yield {
+					type: 'text-delta' as const,
+					textDelta: request.prompt,
+				}
+			},
 		}
 	}
 }
@@ -121,7 +146,7 @@ describe('AgentBuilder', () => {
 		expect(definition.getManifest().models).toEqual([
 			{
 				alias: 'echo',
-				capabilities: ['text'],
+				capabilities: ['text', 'stream'],
 			},
 		])
 
@@ -223,7 +248,7 @@ describe('AgentBuilder', () => {
 	it('infers model capabilities from defineModel into handler context', () => {
 		new AgentBuilder({ agentName: 'typedModelAgent', agentVersion: '1' })
 			.defineModel('textOnly')
-			.defineModel('jsoner', { capabilities: ['objectGeneration'] })
+			.defineModel('jsoner', { capabilities: ['json'] })
 			.defineModel('embedder', { capabilities: ['embedding'] })
 			.defineModel('reranker', { capabilities: ['rerank'] })
 			.setHandler(async context => {

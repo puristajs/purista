@@ -1,5 +1,6 @@
 import { AgentBuilder, type AgentHandlerContext, agentProtocolEnvelopeSchema } from '@purista/ai'
 import { HandledError, StatusCode } from '@purista/core'
+import { z } from 'zod/v4'
 import { type SupportAgentInput, supportAgentInputSchema } from './schema.js'
 
 type SupportAgentContext = AgentHandlerContext<SupportAgentInput, unknown>
@@ -46,18 +47,48 @@ const splitTextIntoProgressiveChunks = (text: string, size = 120): string[] => {
 	return chunks
 }
 
+const extractFirstUrl = (input: string): string | undefined => {
+	const match = input.match(/https?:\/\/[^\s)]+/i)
+	return match?.[0]
+}
+
+const extractCalculationExpression = (input: string): string | undefined => {
+	const calcPrompt = input.match(/(?:calculate|calc)\s*[:-]?\s*([0-9+\-*/().\s]+)/i)
+	if (calcPrompt?.[1]) {
+		return calcPrompt[1].trim()
+	}
+	const genericMath = input.match(/([0-9][0-9+\-*/().\s]{2,})/)
+	return genericMath?.[1]?.trim()
+}
+
+const jsonAnswerSchema = z.object({
+	answer: z.string().min(1),
+	nextActions: z.array(z.string()).default([]),
+	sources: z.array(z.string()).default([]),
+})
+
 export const supportAgent = new AgentBuilder({
 	agentName: 'supportAgent',
 	agentVersion: '1',
 	description: 'Support agent using tool calls and optional delegation to triageAgent',
 })
 	.addPayloadSchema(supportAgentInputSchema)
-	.defineModel('openai:gpt-4o-mini')
+	.defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream', 'json'] })
 	.persistConversation('user', { maxFrames: 20 })
 	.allowTool({
 		serviceName: 'support',
 		serviceVersion: '1',
 		commandName: 'lookupFaq',
+	})
+	.allowTool({
+		serviceName: 'support',
+		serviceVersion: '1',
+		commandName: 'calculate',
+	})
+	.allowTool({
+		serviceName: 'support',
+		serviceVersion: '1',
+		commandName: 'fetchWebsite',
 	})
 	.allowTool({
 		serviceName: 'triageAgent',
@@ -77,8 +108,37 @@ export const supportAgent = new AgentBuilder({
 				? faqResult.answer
 				: 'No matching FAQ article was found.'
 
+		const extractedUrl = extractFirstUrl(userPrompt)
+		let websiteSummary = ''
+		if (extractedUrl) {
+			context.stream.sendChunk(`Fetching website context from ${extractedUrl}...`)
+			const websiteResult = await context.tools.invoke('support.1.fetchWebsite', { url: extractedUrl })
+			if (
+				typeof websiteResult === 'object' &&
+				websiteResult &&
+				'text' in websiteResult &&
+				typeof websiteResult.text === 'string'
+			) {
+				websiteSummary = websiteResult.text.slice(0, 1_800)
+			}
+		}
+
+		const calculationExpression = extractCalculationExpression(userPrompt)
+		let calculationResult = ''
+		if (calculationExpression) {
+			context.stream.sendChunk(`Calculating: ${calculationExpression}`)
+			try {
+				const calc = await context.tools.invoke('support.1.calculate', { expression: calculationExpression })
+				if (typeof calc === 'object' && calc && 'result' in calc) {
+					calculationResult = String(calc.result)
+				}
+			} catch (error) {
+				context.logger.warn({ err: error, calculationExpression }, 'Calculation tool failed')
+			}
+		}
+
 		let triageSummary = ''
-		if (/refund|enterprise|legal|urgent/i.test(userPrompt)) {
+		if (/refund|enterprise|legal|urgent|escalate|priority|incident/i.test(userPrompt)) {
 			context.stream.sendChunk('Escalating to triage agent...')
 			const triagePayload: Record<string, unknown> = {
 				prompt: userPrompt,
@@ -106,6 +166,8 @@ export const supportAgent = new AgentBuilder({
 				await context.conversation.buildPromptInput(),
 				`Customer prompt: ${userPrompt}`,
 				`FAQ answer: ${faqAnswer}`,
+				calculationResult ? `Calculation result: ${calculationResult}` : undefined,
+				websiteSummary ? `Website context: ${websiteSummary}` : undefined,
 				triageSummary ? `Triage summary: ${triageSummary}` : undefined,
 			]
 				.filter(Boolean)
@@ -119,6 +181,28 @@ export const supportAgent = new AgentBuilder({
 		}
 
 		try {
+			if (payload.responseFormat === 'json' && model.generateJson) {
+				const jsonResult = await model.generateJson<z.infer<typeof jsonAnswerSchema>>({
+					...modelRequest,
+					prompt: `${modelRequest.prompt}\n\nReturn JSON that follows the provided schema.`,
+					schema: jsonAnswerSchema,
+				})
+				if (jsonResult.reasoningText?.trim()) {
+					context.stream.sendReasoning(jsonResult.reasoningText)
+				}
+				context.stream.sendArtifact({
+					artifactId: 'json-response',
+					content: jsonResult.data,
+					mimeType: 'application/json',
+					final: true,
+				})
+				await context.conversation.addAssistant(jsonResult.data.answer)
+				context.stream.sendFinal(jsonResult.data.answer)
+				return {
+					message: jsonResult.data.answer,
+				}
+			}
+
 			const maybeStreamModel = model as typeof model & {
 				stream?: (request: typeof modelRequest) => AsyncIterable<
 					| { type: 'text-delta'; textDelta: string }

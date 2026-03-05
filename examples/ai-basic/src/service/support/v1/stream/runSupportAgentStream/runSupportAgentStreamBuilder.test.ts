@@ -8,7 +8,7 @@ import { supportV1Service } from '../../index.js'
 
 class DeterministicProvider implements ModelProvider {
 	readonly name = 'deterministic-test-provider'
-	readonly capabilities = { text: true }
+	readonly capabilities = { text: true, stream: true, json: true }
 
 	async generate(request: ProviderRequest) {
 		return {
@@ -18,6 +18,26 @@ class DeterministicProvider implements ModelProvider {
 				completion: 12,
 			},
 			costUsd: 0,
+		}
+	}
+
+	stream(request: ProviderRequest) {
+		return {
+			async final() {
+				return {
+					output: `STREAM:${request.prompt}`,
+					tokens: {
+						prompt: request.prompt.length,
+						completion: 12,
+					},
+				}
+			},
+			async *[Symbol.asyncIterator]() {
+				yield {
+					type: 'text-delta' as const,
+					textDelta: `STREAM:${request.prompt}`,
+				}
+			},
 		}
 	}
 

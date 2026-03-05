@@ -45,7 +45,7 @@ describe('AgentInstance', () => {
 	it('fails fast when a declared object generation capability is missing', () => {
 		const manifest: AgentManifest = {
 			...baseManifest,
-			models: [{ alias: 'openai:gpt-4o-mini', capabilities: ['objectGeneration'] }],
+			models: [{ alias: 'openai:gpt-4o-mini', capabilities: ['json'] }],
 		}
 
 		expect(
@@ -59,7 +59,7 @@ describe('AgentInstance', () => {
 						},
 					},
 				}),
-		).toThrow('Model provider "openai:gpt-4o-mini" does not support required capability "objectGeneration"')
+		).toThrow('Model provider "openai:gpt-4o-mini" does not support required capability "json"')
 	})
 
 	it('notifies stream responders for successful invocations', async () => {

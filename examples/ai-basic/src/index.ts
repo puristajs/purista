@@ -84,8 +84,10 @@ export async function main() {
 	logger.info('Command endpoint: POST /api/v1/support/ask')
 	logger.info('Agent stream endpoint: POST /api/v1/support/ask/stream')
 	logger.info('Conversation endpoint: POST /api/v1/support/conversation')
+	logger.info('MCP endpoint: POST /api/v1/support/mcp/call')
+	logger.info('MCP tools endpoint: GET /api/v1/support/mcp/tools')
+	logger.info('Agent2Agent endpoint: POST /api/v1/support/a2a/call')
 	logger.info('Direct agent endpoint: POST /api/v1/agents/supportAgent')
-	logger.info('Follow-up endpoint: POST /api/v1/support/follow-up')
 
 	gracefulShutdown(logger, [
 		{

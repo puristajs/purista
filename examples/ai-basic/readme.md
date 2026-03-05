@@ -4,12 +4,14 @@ This example demonstrates the current `@purista/ai` integration end-to-end:
 
 - Agent exposed as HTTP endpoint (`POST /api/v1/agents/supportAgent`)
 - Stream endpoint invoking an agent (`POST /api/v1/support/ask/stream`)
-- Tool calls (`support.lookupFaq` command used from `supportAgent`)
+- Tool calls (`support.lookupFaq`, `support.calculate`, `support.fetchWebsite`)
 - Agent-to-agent delegation (`supportAgent` invokes `triageAgent` as a tool)
 - Command invoking an agent (`POST /api/v1/support/ask`)
-- Subscription invoking an agent after event emission (`POST /api/v1/support/follow-up`)
+- MCP-style endpoint invoking an agent (`POST /api/v1/support/mcp/call`)
+- MCP descriptor endpoint (`GET /api/v1/support/mcp/tools`)
+- Agent2Agent-style endpoint invoking an agent (`POST /api/v1/support/a2a/call`)
 - Conversation restore via command-owned retrieval (`POST /api/v1/support/conversation`)
-- React frontend showcase (stream, workflow, protocol inspector) built to `public/`
+- React frontend showcase (stream + MCP + Agent2Agent + protocol inspector) built to `public/`
 - Workflow graph visualization powered by React Flow (`@xyflow/react`)
 - Rich markdown message rendering via Streamdown
 
@@ -104,10 +106,11 @@ Key test files:
 
 The React frontend includes:
 
-- top navigation (`Stream Chat`, `Command Run`, `Follow-up`, `Protocol Inspector`)
+- top navigation (`Stream Chat`, `MCP Expose`, `Agent2Agent Expose`, `Protocol Inspector`)
 - split-pane layout (chat + workflow/protocol panel)
 - stream-safe rendering (`chunk` frames rendered once, `complete.final.envelopes` used as fallback only)
 - conversation restore by calling `POST /api/v1/support/conversation`
+- optional JSON response mode rendered inline in chat
 - workflow graph with node/edge visualization for tool and nested agent execution
 
 ## Protocol consumer and interoperability snippets

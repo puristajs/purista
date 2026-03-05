@@ -43,7 +43,7 @@ export const getAgentBuilderFileContent = (input: {
 	writer.writeLine('})')
 	writer.indent(() => {
 		writer.writeLine(`.addPayloadSchema(${schemaName})`)
-		writer.writeLine(".defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream', 'objectGeneration'] })")
+		writer.writeLine(".defineModel('openai:gpt-4o-mini')")
 		writer.writeLine(".persistConversation('user', { maxFrames: 20 })")
 		writer.writeLine(`.exposeAsHttpEndpoint('POST', 'agents/${agentIdentifier}')`)
 		writer.writeLine(

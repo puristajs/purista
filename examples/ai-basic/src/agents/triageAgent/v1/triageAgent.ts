@@ -17,7 +17,7 @@ export const triageAgent = new AgentBuilder({
 	description: 'Escalation helper agent',
 })
 	.addPayloadSchema(triageAgentInputSchema)
-	.defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'objectGeneration'] })
+	.defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'json'] })
 	.persistConversation('agent', { maxFrames: 10 })
 	.setHandler<TriageAgentInput>(async function (context: TriageAgentContext, payload) {
 		const model = context.models['openai:gpt-4o-mini']
