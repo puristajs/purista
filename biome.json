@@ -9,6 +9,7 @@
 			"!**/cookieconsent-config2.js",
 			"!**/package-lock.json",
 			"!**/dist/**/*",
+			"!**/examples/ai-basic/public/**/*",
 			"!**/*.d.ts",
 			"!**/coverage/**/*",
 			"!**/docs/**/*",

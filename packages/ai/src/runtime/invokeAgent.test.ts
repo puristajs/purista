@@ -95,7 +95,9 @@ describe('invokeAgent', () => {
 	})
 
 	it('uses final envelopes when stream completes without chunk frames', async () => {
-		const envelopes = [{ frame: { kind: 'message', content: 'final-only', role: 'assistant' } }] as AgentProtocolEnvelope[]
+		const envelopes = [
+			{ frame: { kind: 'message', content: 'final-only', role: 'assistant' } },
+		] as AgentProtocolEnvelope[]
 		const eventBridge = {
 			instanceId: 'instance-1',
 			openStream: vi.fn().mockResolvedValue({

@@ -118,9 +118,7 @@ describe('support interoperability commands', () => {
 		await waitForRegistration()
 
 		try {
-			const mcpTools = await eventBridge.invoke(
-				createCommandMessage(eventBridge.instanceId, 'getMcpTools', {}),
-			)
+			const mcpTools = await eventBridge.invoke(createCommandMessage(eventBridge.instanceId, 'getMcpTools', {}))
 			expect(mcpTools).toEqual(
 				expect.objectContaining({
 					tools: expect.arrayContaining([

@@ -1,6 +1,5 @@
-import type { ComponentProps, ReactNode } from 'react'
-
 import { ArrowDownIcon } from 'lucide-react'
+import type { ComponentProps, ReactNode } from 'react'
 import { useCallback } from 'react'
 import { StickToBottom, useStickToBottomContext } from 'use-stick-to-bottom'
 
@@ -9,7 +8,13 @@ const cn = (...parts: Array<string | undefined | false>) => parts.filter(Boolean
 export type ConversationProps = ComponentProps<typeof StickToBottom>
 
 export const Conversation = ({ className, ...props }: ConversationProps) => (
-	<StickToBottom className={cn('conversation-root', className)} initial="smooth" resize="smooth" role="log" {...props} />
+	<StickToBottom
+		className={cn('conversation-root', className)}
+		initial="smooth"
+		resize="smooth"
+		role="log"
+		{...props}
+	/>
 )
 
 export type ConversationContentProps = ComponentProps<typeof StickToBottom.Content>

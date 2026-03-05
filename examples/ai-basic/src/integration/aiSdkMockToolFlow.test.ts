@@ -1,7 +1,7 @@
+import { type AgentProtocolEnvelope, AiSdkProvider } from '@purista/ai'
+import { DefaultEventBridge, initLogger } from '@purista/core'
 import { simulateReadableStream } from 'ai'
 import { MockLanguageModelV3 } from 'ai/test'
-import { AiSdkProvider, type AgentProtocolEnvelope } from '@purista/ai'
-import { DefaultEventBridge, initLogger } from '@purista/core'
 import { describe, expect, it } from 'vitest'
 
 import { supportAgent } from '../agents/supportAgent/v1/supportAgent.js'
@@ -84,7 +84,9 @@ describe('ai-basic integration with ai/test mock model', () => {
 					(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'tool' }> => frame.kind === 'tool',
 				)
 
-			expect(toolFrames.some(frame => frame.toolName === 'support.1.lookupFaq' && frame.status === 'success')).toBe(true)
+			expect(toolFrames.some(frame => frame.toolName === 'support.1.lookupFaq' && frame.status === 'success')).toBe(
+				true,
+			)
 
 			const messageFrames = getMessageFrames(envelopes)
 			const partialFrames = messageFrames.filter(frame => frame.partial === true)
