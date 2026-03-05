@@ -46,6 +46,43 @@ class DeterministicTextProvider implements ModelProvider {
 	}
 }
 
+class ThisBoundStreamProvider implements ModelProvider {
+	readonly name = 'this-bound-stream'
+	readonly capabilities = { text: true, stream: true }
+	private readonly prefix = 'stream:'
+
+	async generate(request: ProviderRequest) {
+		return {
+			output: `${this.prefix}${request.prompt}`,
+			tokens: {
+				prompt: request.prompt.length,
+				completion: request.prompt.length,
+			},
+		}
+	}
+
+	stream(request: ProviderRequest) {
+		const output = `${this.prefix}${request.prompt}`
+		return {
+			async final() {
+				return {
+					output,
+					tokens: {
+						prompt: request.prompt.length,
+						completion: request.prompt.length,
+					},
+				}
+			},
+			async *[Symbol.asyncIterator]() {
+				yield {
+					type: 'text-delta' as const,
+					textDelta: output,
+				}
+			},
+		}
+	}
+}
+
 const bridges: DefaultEventBridge[] = []
 
 afterEach(async () => {
@@ -162,6 +199,55 @@ describe('AgentBuilder', () => {
 			},
 		)
 		expect(instance).toBeDefined()
+	})
+
+	it('keeps provider this-binding for stream capability wrappers', async () => {
+		const definition = new AgentBuilder({
+			agentName: 'bindingAgent',
+			agentVersion: '1',
+		})
+			.addPayloadSchema(
+				z.object({
+					prompt: z.string(),
+				}),
+			)
+			.defineModel('bound')
+			.setHandler<{ prompt: string }>(async (context, payload) => {
+				const stream = context.models.bound.stream?.({ prompt: payload.prompt })
+				if (!stream) {
+					throw new Error('missing stream provider')
+				}
+				const final = await stream.final()
+				context.stream.sendFinal(final.output)
+				return { message: final.output }
+			})
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+		const instance = await definition.getInstance(eventBridge, {
+			models: {
+				bound: new ThisBoundStreamProvider(),
+			},
+		})
+		await instance.start()
+		await new Promise(resolve => setTimeout(resolve, 25))
+		try {
+			const { envelopes } = await instance.invoke({
+				payload: { prompt: 'hello' },
+			})
+			const finalMessage = envelopes
+				.map(envelope => envelope.frame)
+				.filter(
+					(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'message' }> =>
+						frame.kind === 'message' && frame.final === true,
+				)
+				.at(-1)
+			expect(finalMessage?.content).toBe('stream:hello')
+		} finally {
+			await instance.stop()
+		}
 	})
 
 	it('supports persistConversation presets with optional overrides', () => {

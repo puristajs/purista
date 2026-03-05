@@ -737,7 +737,7 @@ export class AgentBuilder<
 					}
 
 					if (provider.stream) {
-						const streamProvider = provider.stream
+						const streamProvider = provider.stream.bind(provider)
 						modelApi.stream = (request: { prompt: string; context?: string; metadata?: Record<string, unknown> }) => {
 							const requestStartedAt = Date.now()
 							let streamHandle: ReturnType<NonNullable<ModelProvider['stream']>> | undefined
@@ -803,8 +803,8 @@ export class AgentBuilder<
 					}
 
 					if (provider.embed) {
-						const embedProvider = provider.embed
-						const embedManyProvider = provider.embedMany
+						const embedProvider = provider.embed.bind(provider)
+						const embedManyProvider = provider.embedMany?.bind(provider)
 						instrumentedEmbeddings[alias] = {
 							name: provider.name,
 							embed: async request => {
@@ -889,7 +889,7 @@ export class AgentBuilder<
 					}
 
 					if (provider.rerank) {
-						const rerankProvider = provider.rerank
+						const rerankProvider = provider.rerank.bind(provider)
 						instrumentedRerankers[alias] = {
 							name: provider.name,
 							rerank: async request => {
