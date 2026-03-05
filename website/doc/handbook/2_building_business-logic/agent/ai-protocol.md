@@ -25,20 +25,12 @@ It exists to solve three core problems:
 
 The runtime emits protocol envelopes as payload inside standard PURISTA messages:
 
-```text
-HTTP / EventBridge / Queue trigger
-        |
-        v
-PURISTA Message
-  - id / correlationId / traceId
-  - sender / receiver
-  - payload (AI protocol frame(s))
-        |
-        v
-PURISTA AI Envelope
-  - version / messageId / conversationId / inReplyTo
-  - actor / tenantId / userId
-  - frame { kind: message|tool|artifact|telemetry|error }
+```mermaid
+flowchart TB
+  trigger["Trigger (HTTP / EventBridge / Queue)"] --> message["PURISTA Message\nid / correlationId / traceId\nsender / receiver"]
+  message --> payload["payload: AI protocol envelope(s)"]
+  payload --> envelope["AI Envelope\nversion / messageId / conversationId / inReplyTo\nactor / tenantId / userId"]
+  envelope --> frame["frame.kind = message | tool | artifact | telemetry | error"]
 ```
 
 This keeps transport concerns in PURISTA core while AI state and rendering concerns stay in the AI package.
@@ -79,18 +71,24 @@ Each emitted envelope contains metadata plus one frame. Core fields:
 
 When an agent invokes tools and sub-agents, you get a timeline like:
 
-```text
-supportAgent.run
- ├─ message(partial): "Checking FAQ..."
- ├─ tool(invoked): support.lookupFaq
- ├─ tool(success): support.lookupFaq
- ├─ tool(invoked): triageAgent.run
- │   ├─ message(partial): "Escalation check..."
- │   ├─ message(final): "Urgency: low"
- │   └─ telemetry: tokens + duration
- ├─ tool(success): triageAgent.run
- ├─ message(final): "Final answer..."
- └─ telemetry: tokens + duration
+```mermaid
+sequenceDiagram
+  participant UI
+  participant SA as supportAgent
+  participant Tool as support.lookupFaq
+  participant TA as triageAgent
+
+  UI->>SA: invoke
+  SA-->>UI: message(partial) "Checking FAQ..."
+  SA->>Tool: tool(invoked)
+  Tool-->>SA: tool(success)
+  SA->>TA: tool(invoked)
+  TA-->>SA: message(partial)
+  TA-->>SA: message(final)
+  TA-->>SA: telemetry
+  SA-->>UI: tool(success triageAgent.run)
+  SA-->>UI: message(final)
+  SA-->>UI: telemetry
 ```
 
 This gives frontend and ops systems enough structure to visualize and trace the flow, while keeping model/tool selection logic internal to the agent implementation.
@@ -161,13 +159,14 @@ You can find a copy-pasteable reference consumer implementation in:
 
 ### Adapter placement model
 
-```text
-PURISTA transport <-> PURISTA AI envelopes <-> adapter layer <-> external protocol endpoint
-                                 |                     |
-                                 |                     +-- A2A reference mapping
-                                 |                     +-- MCP reference mapping
-                                 v
-                         UI / monitoring consumers
+```mermaid
+flowchart LR
+  transport["PURISTA transport"] <--> ai["PURISTA AI envelopes"]
+  ai <--> adapter["Adapter layer"]
+  adapter --> a2a["A2A reference mapping"]
+  adapter --> mcp["MCP reference mapping"]
+  ai --> ui["UI / monitoring consumers"]
+  adapter --> ext["External protocol endpoint"]
 ```
 
 Recommended boundary:
