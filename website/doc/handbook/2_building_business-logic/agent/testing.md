@@ -139,9 +139,24 @@ This validates schema checks, `context.invokeAgent` wiring, and response mapping
 
 If you use `.canInvokeAgent(..., { payloadSchema, parameterSchema })`, add one negative-path test that intentionally violates one of those schemas and assert that the invoke call does not reach EventBridge.
 
+## AI SDK mock integration pattern (`ai/test`)
+
+For end-to-end agent flows with streamed model output (without network calls), use `MockLanguageModelV3` from `ai/test` behind `AiSdkProvider`.
+
+This gives you deterministic tests for:
+
+- streamed deltas (`text-delta`) and final aggregation
+- allowlisted tool execution and protocol tool frames
+- telemetry and final message behavior
+
+Reference implementation:
+
+- `examples/ai-basic/src/integration/aiSdkMockToolFlow.test.ts`
+
 ## Reference tests in repository
 
 See the complete examples in:
 
 - `examples/ai-basic/src/agents/supportAgent/v1/supportAgent.test.ts`
 - `examples/ai-basic/src/service/support/v1/command/runSupportAgent/runSupportAgentCommandBuilder.test.ts`
+- `examples/ai-basic/src/integration/aiSdkMockToolFlow.test.ts`
