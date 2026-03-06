@@ -138,6 +138,23 @@ For the full protocol semantics, message contract, and interoperability guidance
 
 Telemetry is emitted automatically. The runtime enables AI SDK telemetry by default, forwards trace context, and publishes usage/duration/provider metrics in protocol telemetry frames and the final response metadata.
 
+In addition to token usage, telemetry frames expose pool pressure fields:
+
+- `poolId`
+- `maxWorkersPerInstance`
+- `activeWorkers`
+- `waitingWorkers`
+- `waitTimeMs`
+
+Optional host hints can be attached:
+
+- `replicaCountHint`
+- `effectiveMaxConcurrencyHint`
+
+`maxWorkersPerInstance` is always per process/instance. Cluster-level throughput is host-controlled and estimated as:
+
+`effectiveMaxConcurrency = replicas * maxWorkersPerInstance`
+
 Warnings and failures are also logged automatically in PURISTA style:
 
 - no payload logging by default

@@ -53,6 +53,11 @@ type ProtocolEmitter = {
 		durationMs?: number
 		waitTimeMs?: number
 		poolId?: string
+		maxWorkersPerInstance?: number
+		activeWorkers?: number
+		waitingWorkers?: number
+		replicaCountHint?: number
+		effectiveMaxConcurrencyHint?: number
 		provider?: string
 		usage?: { promptTokens?: number; completionTokens?: number; totalTokens?: number; costUsd?: number }
 	}): void
@@ -194,6 +199,11 @@ export const createProtocolBuffer = (
 				durationMs: metrics.durationMs,
 				waitTimeMs: metrics.waitTimeMs,
 				poolId: metrics.poolId,
+				maxWorkersPerInstance: metrics.maxWorkersPerInstance,
+				activeWorkers: metrics.activeWorkers,
+				waitingWorkers: metrics.waitingWorkers,
+				replicaCountHint: metrics.replicaCountHint,
+				effectiveMaxConcurrencyHint: metrics.effectiveMaxConcurrencyHint,
 				provider: metrics.provider,
 				usage: metrics.usage
 					? {

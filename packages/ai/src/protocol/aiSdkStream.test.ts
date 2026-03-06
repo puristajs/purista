@@ -24,6 +24,13 @@ describe('toAiSdkStreamEvents', () => {
 				frame: createTelemetryFrame({
 					usage: { promptTokens: 5, completionTokens: 7, totalTokens: 12 },
 					durationMs: 123,
+					waitTimeMs: 5,
+					poolId: 'support',
+					maxWorkersPerInstance: 4,
+					activeWorkers: 2,
+					waitingWorkers: 1,
+					replicaCountHint: 3,
+					effectiveMaxConcurrencyHint: 12,
 					provider: 'openai:',
 				}),
 			}),
@@ -48,6 +55,9 @@ describe('toAiSdkStreamEvents', () => {
 			summary: 'done',
 			telemetry: {
 				usage: { promptTokens: 5, completionTokens: 7, totalTokens: 12 },
+				poolId: 'support',
+				maxWorkersPerInstance: 4,
+				effectiveMaxConcurrencyHint: 12,
 				provider: 'openai:',
 			},
 		})

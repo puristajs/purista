@@ -106,6 +106,11 @@ export const createTelemetryFrame = (input: {
 	durationMs?: number
 	waitTimeMs?: number
 	poolId?: string
+	maxWorkersPerInstance?: number
+	activeWorkers?: number
+	waitingWorkers?: number
+	replicaCountHint?: number
+	effectiveMaxConcurrencyHint?: number
 	provider?: string
 }) =>
 	({
@@ -114,6 +119,11 @@ export const createTelemetryFrame = (input: {
 		durationMs: input.durationMs,
 		waitTimeMs: input.waitTimeMs,
 		poolId: input.poolId,
+		maxWorkersPerInstance: input.maxWorkersPerInstance,
+		activeWorkers: input.activeWorkers,
+		waitingWorkers: input.waitingWorkers,
+		replicaCountHint: input.replicaCountHint,
+		effectiveMaxConcurrencyHint: input.effectiveMaxConcurrencyHint,
 		provider: input.provider,
 	}) as const satisfies AgentProtocolFrame
 

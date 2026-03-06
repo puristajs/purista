@@ -101,7 +101,8 @@ Knowledge operations automatically receive scope metadata (`tenantId`, `principa
 | --- | --- | --- | --- |
 | `models` | bind model aliases to provider instances | required in real workloads | fail-fast when a declared alias is missing |
 | `poolConfig.poolId` | select execution pool namespace | explicit per workload class | defaults to `agent:<agentName>` |
-| `poolConfig.maxWorkers` | cap parallel runs in-process | `1` locally, tuned in prod | runtime/deploy setting, not hardcoded |
+| `poolConfig.maxWorkers` | cap parallel runs per process/instance | `1` locally, tuned in prod | runtime/deploy setting, not hardcoded |
+| `concurrencyHints.replicaCountHint` | optional host replica hint for telemetry | set by deployment bootstrap | informational only (no runtime admission control) |
 | `sessionStore` | persistence backend for conversation/session state | in-memory locally, Redis/DB in prod | `context.conversation` uses this backend |
 | `knowledgeAdapters` | RAG/document adapters by alias | in-memory or vector-store-backed | must match aliases used by builder |
 | `logger`, `tracer`, `spanProcessor` | observability integration | inherit app defaults | keeps agent telemetry aligned with services |
@@ -123,6 +124,12 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 
 `maxWorkers` controls how many agent runs can execute in parallel for that agent instance.
 
+`maxWorkers` is always **per instance/process**.
+
+System-wide estimate:
+
+`effectiveMaxConcurrency = replicas * maxWorkersPerInstance`
+
 - default is `1` (safe baseline)
 - keep this low in local/dev
 - tune this in deployment config for production
@@ -132,6 +139,7 @@ Operational rule of thumb:
 
 - queue controls how much work is waiting
 - `maxWorkers` controls how much work runs now
+- deployment replicas multiply the total available agent slots
 - provider/API rate limits still apply downstream
 
 ### Queue, pool, worker flow
@@ -423,6 +431,6 @@ Use normal queue builder/worker options for transport-level behavior:
 
 - transient failures are retried by your queue setup and/or agent retry policy
 - handled errors emit protocol error frames and can still be inspected in worker logs
-- telemetry frames include duration/token usage so operations can alert on degraded runs
+- telemetry frames include duration/token usage and pool metrics (`activeWorkers`, `waitingWorkers`, `maxWorkersPerInstance`, `waitTimeMs`) so operations can alert on degraded runs
 
 Pick the approach that matches your deployment. Local development usually starts agents inside the same process; production often combines HTTP exposure for real-time calls plus queue workers for heavy background chains.

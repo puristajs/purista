@@ -113,6 +113,12 @@ The React frontend includes:
 - optional JSON response mode rendered inline in chat
 - workflow graph with node/edge visualization for tool and nested agent execution
 - suggested starter prompts to onboard users into calculator/fetch/tool workflows
+- telemetry includes pool pressure (`activeWorkers`, `waitingWorkers`, `maxWorkersPerInstance`, `waitTimeMs`) for external dashboards
+
+Concurrency note:
+
+- `poolConfig.maxWorkers` is per running process/instance.
+- Estimated total slots in deployment: `replicas * maxWorkersPerInstance`.
 
 ## API quick calls
 

@@ -30,7 +30,19 @@ type BaseAgentInstanceOptions = {
 	resources?: Record<string, unknown>
 	poolConfig?: {
 		poolId?: string
+		/**
+		 * Maximum number of concurrent agent runs per process/instance.
+		 * Total system throughput is derived by deployment replicas:
+		 * `effectiveMaxConcurrency = replicas * maxWorkers`.
+		 */
 		maxWorkers?: number
+	}
+	/**
+	 * Optional host-provided hints for dashboards and alerts.
+	 * These values are informational only and never used for runtime admission control.
+	 */
+	concurrencyHints?: {
+		replicaCountHint?: number
 	}
 	config?: Record<string, unknown>
 }

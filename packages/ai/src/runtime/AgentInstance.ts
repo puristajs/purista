@@ -58,6 +58,10 @@ type ResolvedAgentRuntimeDependencies = {
 	models: Record<string, ModelProvider>
 	resources: Record<string, unknown>
 	poolId: string
+	maxWorkersPerInstance: number
+	concurrencyHints?: {
+		replicaCountHint?: number
+	}
 	config?: Record<string, unknown>
 }
 
@@ -72,6 +76,10 @@ type AgentServiceConfig = {
 		tracer?: Tracer
 		resources: Record<string, unknown>
 		poolId: string
+		maxWorkersPerInstance: number
+		concurrencyHints?: {
+			replicaCountHint?: number
+		}
 	}
 }
 
@@ -127,6 +135,8 @@ export class AgentInstance implements AgentInstanceContract {
 			models: runtime.models ?? {},
 			resources: runtime.resources ?? {},
 			poolId,
+			maxWorkersPerInstance: maxWorkers,
+			concurrencyHints: runtime.concurrencyHints,
 		}
 
 		for (const model of deps.manifest.models ?? []) {
@@ -160,6 +170,8 @@ export class AgentInstance implements AgentInstanceContract {
 				tracer: this.runtime.tracer,
 				resources: this.runtime.resources,
 				poolId: this.runtime.poolId,
+				maxWorkersPerInstance: this.runtime.maxWorkersPerInstance,
+				concurrencyHints: this.runtime.concurrencyHints,
 			},
 		}
 

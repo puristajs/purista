@@ -124,6 +124,11 @@ export const toAiSdkStreamEvents = async function* (
 					durationMs: envelope.frame.durationMs,
 					waitTimeMs: envelope.frame.waitTimeMs,
 					poolId: envelope.frame.poolId,
+					maxWorkersPerInstance: envelope.frame.maxWorkersPerInstance,
+					activeWorkers: envelope.frame.activeWorkers,
+					waitingWorkers: envelope.frame.waitingWorkers,
+					replicaCountHint: envelope.frame.replicaCountHint,
+					effectiveMaxConcurrencyHint: envelope.frame.effectiveMaxConcurrencyHint,
 					provider: envelope.frame.provider,
 				}
 				yield {

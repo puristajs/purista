@@ -43,7 +43,18 @@ describe('protocol helpers', () => {
 			phase: 'final',
 			lastChunk: true,
 		})
-		const telemetry = createTelemetryFrame({ usage, durationMs: 100, provider: 'echo' })
+		const telemetry = createTelemetryFrame({
+			usage,
+			durationMs: 100,
+			waitTimeMs: 3,
+			poolId: 'support',
+			maxWorkersPerInstance: 4,
+			activeWorkers: 2,
+			waitingWorkers: 1,
+			replicaCountHint: 3,
+			effectiveMaxConcurrencyHint: 12,
+			provider: 'echo',
+		})
 		const tool = createToolEventFrame({
 			toolName: 'svc.v1.cmd',
 			status: 'success',
@@ -57,5 +68,7 @@ describe('protocol helpers', () => {
 		expect(tool.kind).toBe('tool')
 		expect(error.kind).toBe('error')
 		expect(telemetry.usage?.totalTokens).toBe(3)
+		expect(telemetry.maxWorkersPerInstance).toBe(4)
+		expect(telemetry.effectiveMaxConcurrencyHint).toBe(12)
 	})
 })

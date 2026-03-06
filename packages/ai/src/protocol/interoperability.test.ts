@@ -59,6 +59,13 @@ describe('protocol interoperability helpers', () => {
 			frame: {
 				kind: 'telemetry',
 				durationMs: 42,
+				waitTimeMs: 4,
+				poolId: 'support',
+				maxWorkersPerInstance: 2,
+				activeWorkers: 1,
+				waitingWorkers: 0,
+				replicaCountHint: 3,
+				effectiveMaxConcurrencyHint: 6,
 				usage: {
 					promptTokens: 10,
 					completionTokens: 20,
@@ -70,7 +77,11 @@ describe('protocol interoperability helpers', () => {
 		const result = toMcpReferenceToolResult([messageEnvelope, telemetryEnvelope])
 		expect(result.isError).toBeUndefined()
 		expect(result.content).toEqual([{ type: 'text', text: 'final answer' }])
-		expect(result.metadata?.telemetry).toBeDefined()
+		expect(result.metadata?.telemetry).toMatchObject({
+			poolId: 'support',
+			maxWorkersPerInstance: 2,
+			effectiveMaxConcurrencyHint: 6,
+		})
 	})
 
 	it('maps mcp-style tool call input to minimal invoke payload', () => {

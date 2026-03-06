@@ -113,6 +113,11 @@ export const toMcpReferenceToolResult = (envelopes: AgentProtocolEnvelope[]): Mc
 				usage: frame.usage,
 				provider: frame.provider,
 				poolId: frame.poolId,
+				maxWorkersPerInstance: frame.maxWorkersPerInstance,
+				activeWorkers: frame.activeWorkers,
+				waitingWorkers: frame.waitingWorkers,
+				replicaCountHint: frame.replicaCountHint,
+				effectiveMaxConcurrencyHint: frame.effectiveMaxConcurrencyHint,
 			}
 		}
 	}

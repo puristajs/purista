@@ -230,6 +230,13 @@ describe('AgentBuilder', () => {
 			models: {
 				bound: new ThisBoundStreamProvider(),
 			},
+			poolConfig: {
+				poolId: 'binding',
+				maxWorkers: 2,
+			},
+			concurrencyHints: {
+				replicaCountHint: 3,
+			},
 		})
 		await instance.start()
 		await new Promise(resolve => setTimeout(resolve, 25))
@@ -244,7 +251,17 @@ describe('AgentBuilder', () => {
 						frame.kind === 'message' && frame.final === true,
 				)
 				.at(-1)
+			const telemetry = envelopes
+				.map(envelope => envelope.frame)
+				.filter(
+					(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'telemetry' }> =>
+						frame.kind === 'telemetry',
+				)
+				.at(-1)
 			expect(finalMessage?.content).toBe('stream:hello')
+			expect(telemetry?.poolId).toBe('binding')
+			expect(telemetry?.maxWorkersPerInstance).toBe(2)
+			expect(telemetry?.effectiveMaxConcurrencyHint).toBe(6)
 		} finally {
 			await instance.stop()
 		}

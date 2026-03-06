@@ -67,6 +67,20 @@ Each emitted envelope contains metadata plus one frame. Core fields:
 | `telemetry` | usage + duration + provider + pool | capture metrics/observability |
 | `error` | handled/unhandled error data | show failure UI + diagnostics |
 
+### Telemetry frame fields
+
+`telemetry` frames include:
+
+- `usage` (`promptTokens`, `completionTokens`, `totalTokens`, optional `costUsd`)
+- `durationMs`
+- `waitTimeMs`
+- `poolId`
+- `maxWorkersPerInstance`
+- `activeWorkers`
+- `waitingWorkers`
+- optional host hints: `replicaCountHint`, `effectiveMaxConcurrencyHint`
+- `provider`
+
 ## Nested runs and why this protocol helps
 
 When an agent invokes tools and sub-agents, you get a timeline like:

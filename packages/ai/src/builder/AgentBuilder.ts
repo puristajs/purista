@@ -55,6 +55,10 @@ type AgentRuntimeConfig<KnowledgeAliases extends string = string> = {
 	models: Record<string, ModelProvider>
 	tracer?: import('@opentelemetry/api').Tracer
 	poolId: string
+	maxWorkersPerInstance: number
+	concurrencyHints?: {
+		replicaCountHint?: number
+	}
 }
 
 const agentRuntimeConfigSchema = extendApi(
@@ -513,8 +517,14 @@ export class AgentBuilder<
 
 			const poolId = runtime.poolId
 			const enqueuedAt = Date.now()
-			await runtime.poolManager.acquire(poolId)
+			const acquireResult = await runtime.poolManager.acquire(poolId)
 			const started = Date.now()
+			const replicaCountHint =
+				typeof runtime.concurrencyHints?.replicaCountHint === 'number' && runtime.concurrencyHints.replicaCountHint > 0
+					? Math.trunc(runtime.concurrencyHints.replicaCountHint)
+					: undefined
+			const effectiveMaxConcurrencyHint =
+				typeof replicaCountHint === 'number' ? replicaCountHint * runtime.maxWorkersPerInstance : undefined
 
 			const protocolBuffer = createProtocolBuffer(context, {
 				onEnvelope,
@@ -640,6 +650,11 @@ export class AgentBuilder<
 														agentName: runtime.manifest.agentName,
 														agentVersion: runtime.manifest.agentVersion,
 														poolId,
+														maxWorkersPerInstance: runtime.maxWorkersPerInstance,
+														activeWorkers: acquireResult.activeWorkers,
+														waitingWorkers: acquireResult.waitingWorkers,
+														replicaCountHint,
+														effectiveMaxConcurrencyHint,
 														modelAlias: alias,
 													},
 													tracer: runtime.tracer,
@@ -704,6 +719,11 @@ export class AgentBuilder<
 														agentName: runtime.manifest.agentName,
 														agentVersion: runtime.manifest.agentVersion,
 														poolId,
+														maxWorkersPerInstance: runtime.maxWorkersPerInstance,
+														activeWorkers: acquireResult.activeWorkers,
+														waitingWorkers: acquireResult.waitingWorkers,
+														replicaCountHint,
+														effectiveMaxConcurrencyHint,
 														modelAlias: alias,
 													},
 													tracer: runtime.tracer,
@@ -763,6 +783,11 @@ export class AgentBuilder<
 														agentName: runtime.manifest.agentName,
 														agentVersion: runtime.manifest.agentVersion,
 														poolId,
+														maxWorkersPerInstance: runtime.maxWorkersPerInstance,
+														activeWorkers: acquireResult.activeWorkers,
+														waitingWorkers: acquireResult.waitingWorkers,
+														replicaCountHint,
+														effectiveMaxConcurrencyHint,
 														modelAlias: alias,
 													},
 													tracer: runtime.tracer,
@@ -830,6 +855,11 @@ export class AgentBuilder<
 															agentName: runtime.manifest.agentName,
 															agentVersion: runtime.manifest.agentVersion,
 															poolId,
+															maxWorkersPerInstance: runtime.maxWorkersPerInstance,
+															activeWorkers: acquireResult.activeWorkers,
+															waitingWorkers: acquireResult.waitingWorkers,
+															replicaCountHint,
+															effectiveMaxConcurrencyHint,
 															modelAlias: alias,
 														},
 														tracer: runtime.tracer,
@@ -869,6 +899,11 @@ export class AgentBuilder<
 																	agentName: runtime.manifest.agentName,
 																	agentVersion: runtime.manifest.agentVersion,
 																	poolId,
+																	maxWorkersPerInstance: runtime.maxWorkersPerInstance,
+																	activeWorkers: acquireResult.activeWorkers,
+																	waitingWorkers: acquireResult.waitingWorkers,
+																	replicaCountHint,
+																	effectiveMaxConcurrencyHint,
 																	modelAlias: alias,
 																},
 																tracer: runtime.tracer,
@@ -915,6 +950,11 @@ export class AgentBuilder<
 															agentName: runtime.manifest.agentName,
 															agentVersion: runtime.manifest.agentVersion,
 															poolId,
+															maxWorkersPerInstance: runtime.maxWorkersPerInstance,
+															activeWorkers: acquireResult.activeWorkers,
+															waitingWorkers: acquireResult.waitingWorkers,
+															replicaCountHint,
+															effectiveMaxConcurrencyHint,
 															modelAlias: alias,
 														},
 														tracer: runtime.tracer,
@@ -982,8 +1022,13 @@ export class AgentBuilder<
 				if (!protocolBuffer.protocol.has('telemetry')) {
 					protocolBuffer.protocol.emitTelemetry({
 						durationMs: Date.now() - started,
-						waitTimeMs: started - enqueuedAt,
+						waitTimeMs: acquireResult.waitTimeMs || started - enqueuedAt,
 						poolId,
+						maxWorkersPerInstance: runtime.maxWorkersPerInstance,
+						activeWorkers: acquireResult.activeWorkers,
+						waitingWorkers: acquireResult.waitingWorkers,
+						replicaCountHint,
+						effectiveMaxConcurrencyHint,
 						provider: usage.provider ?? runtime.manifest.modelResource?.resourceName,
 						usage: resultObject?.usage ?? {
 							promptTokens: usage.promptTokens || undefined,
