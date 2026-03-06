@@ -1,8 +1,5 @@
-import { exposeAgentAsMCP } from '@purista/ai'
-
-import { supportAgent } from '../../../../../agents/supportAgent/v1/supportAgent.js'
-import { triageAgent } from '../../../../../agents/triageAgent/v1/triageAgent.js'
 import { supportV1ServiceBuilder } from '../../supportV1ServiceBuilder.js'
+import { supportMcpTools } from '../mcpTools.js'
 import { getMcpToolsOutputSchema } from './schema.js'
 
 export const getMcpToolsCommandBuilder = supportV1ServiceBuilder
@@ -12,6 +9,6 @@ export const getMcpToolsCommandBuilder = supportV1ServiceBuilder
 	.makeEndpointPublic()
 	.setCommandFunction(async function () {
 		return {
-			tools: [exposeAgentAsMCP(supportAgent), exposeAgentAsMCP(triageAgent)],
+			tools: supportMcpTools,
 		}
 	})

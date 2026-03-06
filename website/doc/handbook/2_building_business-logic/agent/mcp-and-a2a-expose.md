@@ -35,7 +35,7 @@ Adapter commands give you:
 Example route in `examples/ai-basic`:
 
 - `GET /api/v1/support/mcp/tools` returns tool descriptors
-- `POST /api/v1/support/mcp/call` invokes the agent and returns MCP-style tool result
+- `POST /api/v1/support/mcp/call` invokes an allowlisted MCP tool (agent or command) and returns MCP-style tool result
 
 ### Example MCP HTTP call
 
@@ -43,8 +43,11 @@ Request:
 
 ```json
 {
-  "prompt": "How can I request a refund for my order?",
-  "sessionId": "chat-123"
+  "name": "supportAgent",
+  "arguments": {
+    "prompt": "How can I request a refund for my order?",
+    "sessionId": "chat-123"
+  }
 }
 ```
 
@@ -67,28 +70,39 @@ Response shape:
 ### Implementation pattern
 
 ```ts
+const tools = exposeToolsAsMCP({
+  agents: [supportAgent, triageAgent],
+  commands: [
+    {
+      serviceName: 'support',
+      serviceVersion: '1',
+      commandName: 'lookupFaq',
+      description: 'Looks up support FAQ entries by question',
+      payloadSchema: lookupFaqInputSchema,
+    },
+  ],
+})
+```
+
+```ts
 export const runSupportMcpCommandBuilder = supportV1ServiceBuilder
-  .getCommandBuilder('runSupportMcp', 'Invokes support agent and returns MCP-style result payload')
+  .getCommandBuilder('runSupportMcp', 'Invokes MCP tools and returns MCP-style result payload')
+  .canInvoke('support', '1', 'lookupFaq', lookupFaqOutputSchema, lookupFaqInputSchema)
   .canInvokeAgent('supportAgent', '1', {
     payloadSchema: runSupportMcpInvokePayloadSchema,
     parameterSchema: runSupportMcpInvokeParameterSchema,
   })
   .exposeAsHttpEndpoint('POST', 'support/mcp/call')
   .setCommandFunction(async function (context, payload) {
-    const envelopes = await context.invokeAgent.supportAgent['1']
-      .call(
-        {
-          message: payload.prompt,
-          prompt: payload.prompt,
-          sessionId: payload.sessionId,
-          responseFormat: payload.responseFormat,
-          history: [],
-          attachments: [],
-        },
-        { channel: 'command' },
-      )
-      .final()
+    if (payload.name === 'support.1.lookupFaq') {
+      const faq = await context.service.support['1'].lookupFaq(payload.arguments as { question: string })
+      return { content: [{ type: 'json', json: faq }] }
+    }
 
+    const prompt = String(payload.arguments?.prompt ?? '')
+    const envelopes = await context.invokeAgent.supportAgent['1']
+      .call({ message: prompt, prompt, history: [], attachments: [] }, { channel: 'command' })
+      .final()
     return toMcpReferenceToolResult(agentProtocolEnvelopeSchema.array().parse(envelopes))
   })
 ```

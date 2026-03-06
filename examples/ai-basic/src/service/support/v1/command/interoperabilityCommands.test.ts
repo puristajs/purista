@@ -124,18 +124,40 @@ describe('support interoperability commands', () => {
 					tools: expect.arrayContaining([
 						expect.objectContaining({ name: 'supportAgent' }),
 						expect.objectContaining({ name: 'triageAgent' }),
+						expect.objectContaining({ name: 'support.1.lookupFaq' }),
 					]),
 				}),
 			)
 
 			const mcpCall = await eventBridge.invoke(
 				createCommandMessage(eventBridge.instanceId, 'runSupportMcp', {
-					prompt: 'Summarize https://purista.dev and calculate 12*(8+4).',
+					name: 'supportAgent',
+					arguments: {
+						prompt: 'Summarize https://purista.dev and calculate 12*(8+4).',
+					},
 				}),
 			)
 			expect(mcpCall).toEqual(
 				expect.objectContaining({
 					content: expect.any(Array),
+				}),
+			)
+
+			const mcpCommandCall = await eventBridge.invoke(
+				createCommandMessage(eventBridge.instanceId, 'runSupportMcp', {
+					name: 'support.1.calculate',
+					arguments: {
+						expression: '6*7',
+					},
+				}),
+			)
+			expect(mcpCommandCall).toEqual(
+				expect.objectContaining({
+					content: expect.arrayContaining([
+						expect.objectContaining({
+							type: 'json',
+						}),
+					]),
 				}),
 			)
 

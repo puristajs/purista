@@ -108,6 +108,21 @@ Knowledge operations automatically receive scope metadata (`tenantId`, `principa
 | `logger`, `tracer`, `spanProcessor` | observability integration | inherit app defaults | keeps agent telemetry aligned with services |
 | `config`, `resources` | custom app-specific dependencies | optional | use sparingly to keep handlers focused |
 
+## Read-only runtime status snapshot
+
+Agent instances expose read-only pool status for ops endpoints and dashboards:
+
+```ts
+import { getAgentRuntimeStatuses } from '@purista/ai'
+
+const status = supportAgentInstance.getStatus()
+// { poolId, maxWorkersPerInstance, activeWorkers, waitingWorkers, ... }
+
+const all = getAgentRuntimeStatuses([supportAgentInstance, triageAgentInstance])
+```
+
+This is informational only. Admission control still happens through per-instance pool limits (`poolConfig.maxWorkers`).
+
 ## Runtime pool config (important)
 
 Pool identity and parallelism are runtime/deploy settings:

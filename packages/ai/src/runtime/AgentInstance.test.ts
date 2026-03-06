@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import type { AgentHandler } from '../builder/AgentBuilder.js'
+import { PoolManager } from '../pools/PoolManager.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
 import { AgentInstance } from './AgentInstance.js'
 
@@ -125,6 +126,38 @@ describe('AgentInstance', () => {
 		expect(message.payload).toEqual({
 			payload: { prompt: 'hello', sessionId: 'chat-abc' },
 			parameter: {},
+		})
+	})
+
+	it('exposes read-only runtime concurrency status', async () => {
+		const poolManager = new PoolManager()
+		const instance = new AgentInstance({ ...baseDependencies }, { instanceId: 'bridge-1' } as any, {
+			models: {},
+			poolManager,
+			poolConfig: {
+				poolId: 'support-pool',
+				maxWorkers: 2,
+			},
+			concurrencyHints: {
+				replicaCountHint: 3,
+			},
+		})
+
+		await poolManager.acquire('support-pool')
+		const status = instance.getStatus()
+		poolManager.release('support-pool')
+
+		expect(status).toEqual({
+			agentName: 'supportAgent',
+			agentVersion: '1',
+			poolId: 'support-pool',
+			maxWorkersPerInstance: 2,
+			activeWorkers: 1,
+			waitingWorkers: 0,
+			concurrencyHints: {
+				replicaCountHint: 3,
+				effectiveMaxConcurrencyHint: 6,
+			},
 		})
 	})
 })

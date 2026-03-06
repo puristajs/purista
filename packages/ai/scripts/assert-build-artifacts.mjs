@@ -20,6 +20,6 @@ const checkArtifacts = async () => {
 }
 
 checkArtifacts().catch(error => {
-	console.error(error instanceof Error ? error.message : String(error))
+	process.stderr.write(`${error instanceof Error ? error.message : String(error)}\n`)
 	process.exitCode = 1
 })

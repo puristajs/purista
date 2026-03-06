@@ -440,7 +440,14 @@ export const App = () => {
 		appendUserMessage(question)
 		setStatus('Calling MCP endpoint...')
 		setCanRetry(false)
-		const result = await runSupportMcp({ prompt: question, sessionId: activeSessionId, responseFormat })
+		const result = await runSupportMcp({
+			name: 'supportAgent',
+			arguments: {
+				prompt: question,
+				sessionId: activeSessionId,
+				responseFormat,
+			},
+		})
 		setCommandOutput(JSON.stringify(result, null, 2))
 		appendAssistantMessage('MCP call completed. See result panel for protocol-compatible response.')
 		setStatus('MCP call completed')

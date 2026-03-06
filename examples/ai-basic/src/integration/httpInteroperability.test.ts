@@ -114,18 +114,34 @@ describe('ai-basic http interoperability flows', () => {
 			const mcpToolsResponse = await httpService.app.fetch(new Request('http://localhost/api/v1/support/mcp/tools'))
 			expect(mcpToolsResponse.status).toBe(200)
 			const mcpTools = (await mcpToolsResponse.json()) as { tools: Array<{ name: string }> }
-			expect(mcpTools.tools.map(tool => tool.name)).toEqual(expect.arrayContaining(['supportAgent', 'triageAgent']))
+			expect(mcpTools.tools.map(tool => tool.name)).toEqual(
+				expect.arrayContaining(['supportAgent', 'triageAgent', 'support.1.lookupFaq']),
+			)
 
 			const mcpCallResponse = await httpService.app.fetch(
 				new Request('http://localhost/api/v1/support/mcp/call', {
 					method: 'POST',
 					headers: { 'content-type': 'application/json' },
-					body: JSON.stringify({ prompt: 'hello' }),
+					body: JSON.stringify({ name: 'supportAgent', arguments: { prompt: 'hello' } }),
 				}),
 			)
 			expect(mcpCallResponse.status).toBe(200)
 			const mcpCall = (await mcpCallResponse.json()) as { content: unknown[] }
 			expect(Array.isArray(mcpCall.content)).toBe(true)
+
+			const mcpCommandCallResponse = await httpService.app.fetch(
+				new Request('http://localhost/api/v1/support/mcp/call', {
+					method: 'POST',
+					headers: { 'content-type': 'application/json' },
+					body: JSON.stringify({ name: 'support.1.calculate', arguments: { expression: '6*7' } }),
+				}),
+			)
+			expect(mcpCommandCallResponse.status).toBe(200)
+			const mcpCommandCall = (await mcpCommandCallResponse.json()) as {
+				content: Array<{ type: string; json?: { result?: number } }>
+			}
+			expect(mcpCommandCall.content[0]?.type).toBe('json')
+			expect(mcpCommandCall.content[0]?.json?.result).toBe(42)
 
 			const a2aCallResponse = await httpService.app.fetch(
 				new Request('http://localhost/api/v1/support/a2a/call', {

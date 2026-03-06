@@ -27,6 +27,7 @@ import type {
 	AgentInvokeContext,
 	AgentInvokeRequest,
 	AgentInvokeResult,
+	AgentRuntimeStatus,
 	AgentStreamResponder,
 } from '../types/AgentDefinition.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
@@ -194,6 +195,31 @@ export class AgentInstance implements AgentInstanceContract {
 		}
 		await this.service.destroy()
 		this.service = undefined
+	}
+
+	getStatus(): AgentRuntimeStatus {
+		const pool = this.runtime.poolManager.getPoolStats(this.runtime.poolId)
+		const replicaCountHint =
+			typeof this.runtime.concurrencyHints?.replicaCountHint === 'number' &&
+			this.runtime.concurrencyHints.replicaCountHint > 0
+				? Math.trunc(this.runtime.concurrencyHints.replicaCountHint)
+				: undefined
+
+		return {
+			agentName: this.dependencies.info.agentName,
+			agentVersion: this.dependencies.info.agentVersion,
+			poolId: this.runtime.poolId,
+			maxWorkersPerInstance: this.runtime.maxWorkersPerInstance,
+			activeWorkers: pool.activeWorkers,
+			waitingWorkers: pool.waitingWorkers,
+			concurrencyHints:
+				replicaCountHint !== undefined
+					? {
+							replicaCountHint,
+							effectiveMaxConcurrencyHint: this.runtime.maxWorkersPerInstance * replicaCountHint,
+						}
+					: undefined,
+		}
 	}
 
 	private notifyStream(stream: AgentStreamResponder | undefined, envelopes: AgentProtocolEnvelope[]) {

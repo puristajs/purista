@@ -136,12 +136,20 @@ MCP descriptor list:
 curl http://localhost:3000/api/v1/support/mcp/tools
 ```
 
-MCP reference call:
+MCP reference call (agent tool):
 
 ```bash
 curl -X POST http://localhost:3000/api/v1/support/mcp/call \
   -H "content-type: application/json" \
-  -d '{"prompt":"Fetch https://purista.dev and list the top topics"}'
+  -d '{"name":"supportAgent","arguments":{"prompt":"Fetch https://purista.dev and list the top topics"}}'
+```
+
+MCP reference call (command tool):
+
+```bash
+curl -X POST http://localhost:3000/api/v1/support/mcp/call \
+  -H "content-type: application/json" \
+  -d '{"name":"support.1.calculate","arguments":{"expression":"42*17"}}'
 ```
 
 Agent2Agent reference call:

@@ -1,13 +1,18 @@
 import { extendApi } from '@purista/core'
 import { z } from 'zod/v4'
+import { supportMcpToolTargets } from '../mcpTools.js'
+import { supportAgentInvokeParameterSchema, supportAgentInvokePayloadSchema } from '../runSupportAgent/schema.js'
 
-import {
-	runSupportAgentInputSchema,
-	supportAgentInvokeParameterSchema,
-	supportAgentInvokePayloadSchema,
-} from '../runSupportAgent/schema.js'
-
-export const runSupportMcpInputSchema = runSupportAgentInputSchema
+export const runSupportMcpInputSchema = extendApi(
+	z.object({
+		name: z
+			.string()
+			.min(1)
+			.refine(value => value in supportMcpToolTargets, 'Unknown MCP tool name'),
+		arguments: z.record(z.string(), z.unknown()).optional(),
+	}),
+	{ title: 'Run support MCP input' },
+)
 
 export const runSupportMcpOutputSchema = extendApi(
 	z.object({

@@ -78,6 +78,7 @@ export type AgentRuntimeInstance = {
 	start(): Promise<void>
 	stop(): Promise<void>
 	invoke(request: AgentInvokeRequest, contextOverrides?: Partial<AgentInvokeContext>): Promise<AgentInvokeResult>
+	getStatus(): AgentRuntimeStatus
 }
 
 export type AgentInvokeRequest = {
@@ -103,4 +104,17 @@ export type AgentStreamResponder = {
 
 export type AgentInvokeResult = {
 	envelopes: AgentProtocolEnvelope[]
+}
+
+export type AgentRuntimeStatus = {
+	agentName: string
+	agentVersion: string
+	poolId: string
+	maxWorkersPerInstance: number
+	activeWorkers: number
+	waitingWorkers: number
+	concurrencyHints?: {
+		replicaCountHint?: number
+		effectiveMaxConcurrencyHint?: number
+	}
 }
