@@ -1,3 +1,5 @@
+/* @jsxRuntime automatic */
+
 import { BotIcon, MessageSquareIcon, SparklesIcon, WorkflowIcon, WrenchIcon, XCircleIcon } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Streamdown } from 'streamdown'

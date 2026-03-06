@@ -21,6 +21,42 @@ It exists to solve three core problems:
 - Correlation and identity come from PURISTA metadata and are preserved in envelopes.
 - Consumers should usually parse and render envelopes, not construct them manually.
 
+## Protocol relationship model
+
+PURISTA has one canonical runtime protocol for AI flows. MCP and Agent2Agent are boundary views derived from it.
+
+```mermaid
+flowchart TD
+  core["PURISTA core message transport\n(id, correlationId, traceId, sender/receiver)"]
+  ai["PURISTA AI envelope (canonical)\n(message/tool/artifact/telemetry/error)"]
+  adapters["Adapter layer\n(reference mappers)"]
+  mcp["MCP-shaped payloads"]
+  a2a["A2A-shaped payloads"]
+  ui["UI/analytics consumers"]
+
+  core --> ai
+  ai --> ui
+  ai --> adapters
+  adapters --> mcp
+  adapters --> a2a
+```
+
+### Why this layering exists
+
+- canonical runtime truth stays in one schema (`AgentProtocolEnvelope`)
+- external protocol contracts can evolve without changing agent handlers
+- nested tool/agent execution remains inspectable even when mapped to MCP/A2A
+- protocol mappers are pure transforms (no tool execution control)
+
+### Mapping ownership
+
+| Concern | Owner |
+| --- | --- |
+| transport reliability, routing, auth, correlation IDs | PURISTA core |
+| frame semantics (`message/tool/error/telemetry`) | PURISTA AI protocol |
+| external protocol shape (MCP/A2A) | adapter commands/endpoints |
+| rendering decisions (chat/workflow dashboards) | frontend/consumer |
+
 ## Layering model (PURISTA message + AI frame payload)
 
 The runtime emits protocol envelopes as payload inside standard PURISTA messages:

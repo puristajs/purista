@@ -1,5 +1,8 @@
+// @vitest-environment jsdom
+
 import { fireEvent, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
+import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { App, getStoredTheme, THEME_KEY, uniqueEnvelopes } from './App'
@@ -63,7 +66,7 @@ describe('App helpers', () => {
 
 describe('App theme toggle', () => {
 	it('persists theme changes', () => {
-		render(<App />)
+		render(React.createElement(App))
 		const button = screen.getByRole('button', { name: /Theme:/i })
 		fireEvent.click(button)
 		expect(window.localStorage.getItem(THEME_KEY)).toBe('light')

@@ -106,6 +106,16 @@ Use them as adapter building blocks when exposing Purista agents through other e
 
 You never need to populate protocol IDs manually—the runtime copies all required headers (`inReplyTo`, `conversationId`, `sender`) so the stream is valid whether it stays inside PURISTA or is forwarded to third parties.
 
+### Canonical-to-boundary direction
+
+Interop mapping should always flow in this direction:
+
+```text
+PURISTA message -> PURISTA AI envelope (canonical) -> MCP/A2A adapter payload
+```
+
+Do not run business logic directly on MCP/A2A payloads inside handlers. Keep handlers protocol-agnostic and convert only at endpoint boundaries.
+
 ### Adapter pipeline guidance
 
 Keep protocol conversion at integration boundaries:
