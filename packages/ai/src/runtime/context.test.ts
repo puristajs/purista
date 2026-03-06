@@ -68,17 +68,22 @@ describe('runtime context helpers', () => {
 	})
 
 	it('forwards envelopes incrementally to onEnvelope callbacks', async () => {
-		const onEnvelope = vi.fn(async () => {})
+		const observed: Array<{ frame?: { kind?: string }; messageId?: string }> = []
+		const onEnvelope = async (envelope: { frame?: { kind?: string }; messageId?: string }) => {
+			observed.push(envelope)
+		}
 		const buffer = createProtocolBuffer(baseServiceContext, { onEnvelope })
 		buffer.protocol.emitMessage({ content: 'one', partial: true })
 		buffer.protocol.emitMessage({ content: 'two', final: true })
 		await buffer.flush()
 		const envelopes = buffer.toEnvelopes()
-		expect(onEnvelope).toHaveBeenCalledTimes(2)
-		expect(onEnvelope.mock.calls[0]?.[0]?.frame.kind).toBe('message')
-		expect(onEnvelope.mock.calls[1]?.[0]?.frame.kind).toBe('message')
-		expect(envelopes[0]?.messageId).toBe(onEnvelope.mock.calls[0]?.[0]?.messageId)
-		expect(envelopes[1]?.messageId).toBe(onEnvelope.mock.calls[1]?.[0]?.messageId)
+		expect(observed).toHaveLength(2)
+		const first = observed[0]
+		const second = observed[1]
+		expect(first?.frame?.kind).toBe('message')
+		expect(second?.frame?.kind).toBe('message')
+		expect(envelopes[0]?.messageId).toBe(first?.messageId)
+		expect(envelopes[1]?.messageId).toBe(second?.messageId)
 	})
 
 	it('creates a handler context with tool/session/knowledge helpers', async () => {
@@ -129,8 +134,17 @@ describe('runtime context helpers', () => {
 		const promptInput = await context.conversation.buildPromptInput()
 		expect(promptInput).toContain('user: Need password reset help')
 		expect(promptInput).toContain('assistant: Use the forgot-password page.')
-		await context.embeddings.vector.embed({ value: 'reset password' })
-		await context.rerankers.ranker.rerank({ query: 'reset', documents: ['doc'] })
+		await (
+			context.embeddings as Record<string, { embed: (request: { value: string }) => Promise<unknown> }>
+		).vector.embed({
+			value: 'reset password',
+		})
+		await (
+			context.rerankers as Record<
+				string,
+				{ rerank: (request: { query: string; documents: string[] }) => Promise<unknown> }
+			>
+		).ranker.rerank({ query: 'reset', documents: ['doc'] })
 		expect(embed).toHaveBeenCalledOnce()
 		expect(rerank).toHaveBeenCalledOnce()
 		context.stream.sendReasoning('reasoning note')

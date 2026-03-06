@@ -1,0 +1,11 @@
+{
+	"extends": "./tsconfig.json",
+	"exclude": [
+		"node_modules",
+		"dist",
+		"examples/ai-basic/src/frontend/**/*",
+		"examples/ai-basic/frontend.vite.config.ts",
+		"examples/ai-basic/frontend.vitest.config.ts"
+	]
+}
+
