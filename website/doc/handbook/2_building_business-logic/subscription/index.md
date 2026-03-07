@@ -18,6 +18,7 @@ The subscription does not have any knowledge if the custom message has a consume
 Subscriptions can access service resources (for example database clients/connections) via `context.resources`.
 Resources are provided when creating the service instance with `serviceBuilder.getInstance(eventBridge, { resources: ... })`.
 Subscriptions can also consume stream endpoints via `context.stream` when declared with `.canConsumeStream(...)`.
+Subscriptions can invoke AI agents via `.canInvokeAgent(...)` and `context.invokeAgent...call(payload, parameter)`.
 
 Typical use cases:
 
@@ -37,6 +38,7 @@ Continue with:
 
 - [The Subscription Builder](./the-subscription-builder.md)
 - [Unit test a subscription](./unit-test-a-subscription.md)
+- [Run & Invoke Agents](../agent/running-and-invoking-agents.md)
 
 ## When to use
 

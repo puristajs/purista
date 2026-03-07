@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/core](../README.md) / CommandFunctionContextEnhancements
 
-# Type Alias: CommandFunctionContextEnhancements\<MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes\>
+# Type Alias: CommandFunctionContextEnhancements\<MessagePayloadType, MessageParamsType, Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes\>
 
-> **CommandFunctionContextEnhancements**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`\> = `object`
+> **CommandFunctionContextEnhancements**\<`MessagePayloadType`, `MessageParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `QueueInvokes`, `AgentInvokes`\> = `object`
 
-Defined in: [core/types/commandType/CommandFunctionContext.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L22)
+Defined in: [core/types/commandType/CommandFunctionContext.ts:23](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L23)
 
 It provides the original command message with types for payload and parameter.
 Also, the methods:
@@ -46,15 +46,29 @@ Also, the methods:
 
 `QueueInvokes` *extends* [`QueueInvokeList`](QueueInvokeList.md) = [`QueueInvokeList`](QueueInvokeList.md)
 
+### AgentInvokes
+
+`AgentInvokes` *extends* [`AgentInvokeList`](AgentInvokeList.md) = [`EmptyObject`](EmptyObject.md)
+
 ## Properties
 
 ### emit
 
 > **emit**: [`EmitCustomMessageFunction`](EmitCustomMessageFunction.md)\<`EmitList`\>
 
-Defined in: [core/types/commandType/CommandFunctionContext.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L34)
+Defined in: [core/types/commandType/CommandFunctionContext.ts:36](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L36)
 
 emit a custom message
+
+***
+
+### invokeAgent
+
+> **invokeAgent**: `AgentInvokes`
+
+Defined in: [core/types/commandType/CommandFunctionContext.ts:64](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L64)
+
+Invokes an agent and returns the result.
 
 ***
 
@@ -62,7 +76,7 @@ emit a custom message
 
 > **message**: `Readonly`\<[`Command`](Command.md)\<`MessagePayloadType`, `MessageParamsType`\>\>
 
-Defined in: [core/types/commandType/CommandFunctionContext.ts:32](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L32)
+Defined in: [core/types/commandType/CommandFunctionContext.ts:34](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L34)
 
 the original message
 
@@ -72,7 +86,7 @@ the original message
 
 > **queue**: [`QueueContext`](QueueContext.md)\<`QueueInvokes`\>
 
-Defined in: [core/types/commandType/CommandFunctionContext.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L54)
+Defined in: [core/types/commandType/CommandFunctionContext.ts:56](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L56)
 
 typed queue enqueue helpers
 
@@ -82,7 +96,7 @@ typed queue enqueue helpers
 
 > **resources**: `Resources`
 
-Defined in: [core/types/commandType/CommandFunctionContext.ts:58](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L58)
+Defined in: [core/types/commandType/CommandFunctionContext.ts:60](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L60)
 
 Provides resources defined in service builder and set via config during service creation
 
@@ -92,7 +106,7 @@ Provides resources defined in service builder and set via config during service 
 
 > **service**: `Invokes`
 
-Defined in: [core/types/commandType/CommandFunctionContext.ts:50](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L50)
+Defined in: [core/types/commandType/CommandFunctionContext.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L52)
 
 Invokes a command and returns the result.
 It is recommended to validate the result against a schema which only contains the data you actually need.
@@ -115,6 +129,6 @@ It is recommended to validate the result against a schema which only contains th
 
 > **stream**: `StreamInvokes`
 
-Defined in: [core/types/commandType/CommandFunctionContext.ts:52](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L52)
+Defined in: [core/types/commandType/CommandFunctionContext.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/commandType/CommandFunctionContext.ts#L54)
 
 consumes stream responses from other service stream endpoints

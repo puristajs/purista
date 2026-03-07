@@ -48,7 +48,7 @@ Defined in: [core/types/queue/QueueWorkerAfterGuardHook.ts:9](https://github.com
 
 ### result
 
-`Readonly`\<[`QueueHandlerResult`](QueueHandlerResult.md) \| `void`\>
+`Readonly`\<[`QueueHandlerResult`](QueueHandlerResult.md) \| `undefined`\>
 
 ### message
 

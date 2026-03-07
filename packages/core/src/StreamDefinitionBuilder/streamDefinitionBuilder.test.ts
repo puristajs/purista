@@ -171,4 +171,27 @@ describe('StreamDefinitionBuilder', () => {
 		const builder = new StreamDefinitionBuilder('searchUsers', 'stream users')
 		expect(() => builder.getStreamFunction()).toThrow('No function implementation for searchUsers')
 	})
+
+	it('can register an agent dependency with payload and parameter schemas', async () => {
+		const agentPayloadSchema = z.object({ message: z.string(), topic: z.string() })
+		const agentParameterSchema = z.object({ channel: z.enum(['stream']) })
+
+		const definition = await new StreamDefinitionBuilder('agentStream', 'agent stream test')
+			.canInvokeAgent('MyAgent', '1', {
+				payloadSchema: agentPayloadSchema,
+				parameterSchema: agentParameterSchema,
+			})
+			.setStreamFunction(async function (_context, _payload, _parameter, writer) {
+				await writer.close()
+			})
+			.getDefinition()
+
+		expect(definition.agentInvokes).toBeDefined()
+		expect(definition.agentInvokes.MyAgent).toBeDefined()
+		expect(definition.agentInvokes.MyAgent['1']).toBeDefined()
+		// @ts-expect-error
+		expect(definition.agentInvokes.MyAgent['1'].payloadSchema).toBe(agentPayloadSchema)
+		// @ts-expect-error
+		expect(definition.agentInvokes.MyAgent['1'].parameterSchema).toBe(agentParameterSchema)
+	})
 })

@@ -312,6 +312,15 @@ Learn PURIST at [purista.dev](https://purista.dev)
 - [validate](functions/validate.md)
 - [validationToSchema](functions/validationToSchema.md)
 
+## Agent
+
+- [AgentInvocation](interfaces/AgentInvocation.md)
+- [AgentInvokeList](type-aliases/AgentInvokeList.md)
+- [AgentProtocolPayload](type-aliases/AgentProtocolPayload.md)
+- [AgentProtocolResponse](type-aliases/AgentProtocolResponse.md)
+- [agentProtocolPayloadSchema](variables/agentProtocolPayloadSchema.md)
+- [agentProtocolResponseSchema](variables/agentProtocolResponseSchema.md)
+
 ## Command
 
 - [CommandDefinitionBuilder](classes/CommandDefinitionBuilder.md)

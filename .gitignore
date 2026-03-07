@@ -2,7 +2,7 @@ node_modules
 
 .DS_Store
 
-lib
+/lib
 dist
 
 .eslintcache
@@ -30,6 +30,7 @@ __snapshots__
 
 .tshy-build
 .tshy
+*.tsbuildinfo
 
 gcloud-credentials.json
 .env

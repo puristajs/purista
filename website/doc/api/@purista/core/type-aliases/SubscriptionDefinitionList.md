@@ -6,9 +6,9 @@
 
 # Type Alias: SubscriptionDefinitionList\<ServiceClassType\>
 
-> **SubscriptionDefinitionList**\<`ServiceClassType`\> = `Promise`\<[`SubscriptionDefinition`](SubscriptionDefinition.md)\<`ServiceClassType`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`\>\>[]
+> **SubscriptionDefinitionList**\<`ServiceClassType`\> = `Promise`\<[`SubscriptionDefinition`](SubscriptionDefinition.md)\<`ServiceClassType`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, `any`, [`SubscriptionDefinitionMetadataBase`](SubscriptionDefinitionMetadataBase.md)\>\>[]
 
-Defined in: [core/types/subscription/SubscriptionDefinitionList.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinitionList.ts#L11)
+Defined in: [core/types/subscription/SubscriptionDefinitionList.ts:12](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/subscription/SubscriptionDefinitionList.ts#L12)
 
 Helper type for creating list of service commands to be passed as input to service class
 

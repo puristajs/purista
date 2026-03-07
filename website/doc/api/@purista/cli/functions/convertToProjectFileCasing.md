@@ -8,7 +8,7 @@
 
 > **convertToProjectFileCasing**(`input`, `puristaProjectConfig`): `string`
 
-Defined in: [convertToProjectFileCasing.ts:4](https://github.com/puristajs/purista/blob/643d8ae461234cbb142aca5f38526a7b04d6fea0/packages/cli/src/api/convertToProjectFileCasing.ts#L4)
+Defined in: [convertToProjectFileCasing.ts:4](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/cli/src/api/convertToProjectFileCasing.ts#L4)
 
 ## Parameters
 
@@ -19,6 +19,10 @@ Defined in: [convertToProjectFileCasing.ts:4](https://github.com/puristajs/puris
 ### puristaProjectConfig
 
 #### $schema
+
+`string` = `...`
+
+#### agentPath
 
 `string` = `...`
 

@@ -6,6 +6,11 @@ import type { SupportedHttpMethod } from '../core/HttpServer/types/SupportedHttp
 import { assertNonArrowFunction } from '../core/helper/assertNonArrowFunction.impl.js'
 import type { QueueEnqueueResult } from '../core/QueueBridge/types/QueueEnqueueResult.js'
 import type { Service } from '../core/Service/Service.impl.js'
+import type {
+	AgentInvocation,
+	AgentProtocolResponse,
+	agentProtocolPayloadSchema,
+} from '../core/types/agent/AgentProtocol.js'
 import type { Complete } from '../core/types/Complete.js'
 import type { ContentType } from '../core/types/ContentType.js'
 import type { DefinitionEventBridgeConfig } from '../core/types/DefinitionEventBridgeConfig.js'
@@ -20,6 +25,15 @@ import type { NonEmptyString } from '../helper/types/NonEmptyString.js'
 import type { Infer, InferIn, Schema } from '../schema/index.js'
 import { validationToSchema } from '../zodOpenApi/validationToSchema.js'
 import type { StreamDefinitionBuilderTypes } from './StreamDefinitionBuilderTypes.js'
+
+type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
+	payloadSchema?: Payload
+	parameterSchema?: Parameter
+}
+
+const isAgentInvokeConfig = (value: unknown): value is AgentInvokeConfig<Schema, Schema> => {
+	return typeof value === 'object' && value !== null && ('payloadSchema' in value || 'parameterSchema' in value)
+}
 
 export class StreamDefinitionBuilder<
 	S extends Service,
@@ -36,6 +50,7 @@ export class StreamDefinitionBuilder<
 
 	private invokes: C['Invokes'] = {}
 	private streamInvokes: C['StreamInvokes'] = {}
+	private agentInvokes: C['AgentInvokes'] = {}
 	private emitList: C['EmitList'] = {}
 	private queueInvokes: QueueInvokeList = {}
 
@@ -261,6 +276,86 @@ export class StreamDefinitionBuilder<
 		>
 	}
 
+	/**
+	 * Define an agent which can be invoked by the current stream.
+	 * The agent must follow the PURISTA agent protocol.
+	 *
+	 * @param agentName The name of the agent service
+	 * @param agentVersion The version of the agent service
+	 * @param invokeConfigOrParameterSchema Optional invoke configuration:
+	 * - `parameterSchema` (legacy shorthand) validates `.call(_, parameter)`
+	 * - `{ payloadSchema, parameterSchema }` validates both `.call(payload, parameter)` arguments
+	 */
+	canInvokeAgent<
+		Payload extends Schema = typeof agentProtocolPayloadSchema,
+		Parameter extends Schema = Schema,
+		SName extends string = string,
+		Version extends string = string,
+	>(
+		agentName: SName,
+		agentVersion: Version,
+		invokeConfigOrParameterSchema?: Parameter | AgentInvokeConfig<Payload, Parameter>,
+	) {
+		if (agentName.trim() === '' || agentVersion.trim() === '') {
+			throw new Error('canInvokeAgent requires non-empty agent name and version')
+		}
+
+		const payloadSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
+			? invokeConfigOrParameterSchema.payloadSchema
+			: undefined
+		const parameterSchema = isAgentInvokeConfig(invokeConfigOrParameterSchema)
+			? invokeConfigOrParameterSchema.parameterSchema
+			: invokeConfigOrParameterSchema
+
+		this.agentInvokes = {
+			...this.agentInvokes,
+			[agentName]: {
+				...(this.agentInvokes[agentName] as Record<string, any>),
+				[agentVersion]: {
+					payloadSchema,
+					parameterSchema,
+				},
+			},
+		} as unknown as C['AgentInvokes'] &
+			Record<
+				SName,
+				Record<
+					Version,
+					{
+						call: (payload: InferIn<Payload>, parameter?: InferIn<Parameter>) => AgentInvocation<AgentProtocolResponse>
+					}
+				>
+			>
+
+		return this as unknown as StreamDefinitionBuilder<
+			S,
+			StreamDefinitionBuilderTypes<
+				C['PayloadSchema'],
+				C['ParamsSchema'],
+				C['ChunkSchema'],
+				C['FinalSchema'],
+				C['Resources'],
+				C['Invokes'],
+				C['StreamInvokes'],
+				C['EmitList'],
+				C['QueueInvokes'],
+				C['AgentInvokes'] &
+					Record<
+						SName,
+						Record<
+							Version,
+							{
+								call: (
+									payload: InferIn<Payload>,
+									parameter?: InferIn<Parameter>,
+								) => AgentInvocation<AgentProtocolResponse>
+							}
+						>
+					>
+			>
+		>
+	}
+
 	canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
 		this.emitList = { ...this.emitList, [eventName]: schema }
 		return this as unknown as StreamDefinitionBuilder<
@@ -439,7 +534,8 @@ export class StreamDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes']
+			C['QueueInvokes'],
+			C['AgentInvokes']
 		>,
 	) {
 		assertNonArrowFunction(fn, 'setStreamFunction')
@@ -466,7 +562,8 @@ export class StreamDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes']
+			C['QueueInvokes'],
+			C['AgentInvokes']
 		>
 	}
 
@@ -555,7 +652,9 @@ export class StreamDefinitionBuilder<
 			C['Invokes'],
 			C['StreamInvokes'],
 			C['EmitList'],
-			C['QueueInvokes']
+			StreamDefinitionMetadataBase,
+			C['QueueInvokes'],
+			C['AgentInvokes']
 		> = {
 			streamName: this.streamName,
 			streamDescription: this.streamDescription,
@@ -570,6 +669,7 @@ export class StreamDefinitionBuilder<
 			aggregateChunks: this.aggregateChunks,
 			invokes: this.invokes,
 			streamInvokes: this.streamInvokes,
+			agentInvokes: this.agentInvokes,
 			emitList: this.emitList,
 			queueInvokes: this.queueInvokes,
 		}

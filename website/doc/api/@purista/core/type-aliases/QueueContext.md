@@ -8,7 +8,7 @@
 
 > **QueueContext**\<`Queues`\> = `object`
 
-Defined in: [core/types/queue/QueueContext.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueContext.ts#L39)
+Defined in: [core/types/queue/QueueContext.ts:37](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueContext.ts#L37)
 
 ## Type Parameters
 
@@ -22,7 +22,7 @@ Defined in: [core/types/queue/QueueContext.ts:39](https://github.com/puristajs/p
 
 > **enqueue**: [`QueueInvokeFunction`](QueueInvokeFunction.md) & [`QueueInvokeClientMap`](QueueInvokeClientMap.md)\<`Queues`\>
 
-Defined in: [core/types/queue/QueueContext.ts:40](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueContext.ts#L40)
+Defined in: [core/types/queue/QueueContext.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueContext.ts#L38)
 
 ***
 
@@ -30,4 +30,4 @@ Defined in: [core/types/queue/QueueContext.ts:40](https://github.com/puristajs/p
 
 > **scheduleAt**: [`QueueScheduleFunction`](QueueScheduleFunction.md) & [`QueueScheduleProxy`](QueueScheduleProxy.md)\<[`QueueInvokeClientMap`](QueueInvokeClientMap.md)\<`Queues`\>\>
 
-Defined in: [core/types/queue/QueueContext.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueContext.ts#L41)
+Defined in: [core/types/queue/QueueContext.ts:39](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueContext.ts#L39)

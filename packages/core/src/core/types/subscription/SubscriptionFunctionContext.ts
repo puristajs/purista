@@ -1,4 +1,5 @@
 import type { Schema } from '../../../schema/index.js'
+import type { AgentInvokeList } from '../agent/AgentInvokeList.js'
 import type { ContextBase } from '../ContextBase.js'
 import type { EBMessage } from '../EBMessage.js'
 import type { EmitCustomMessageFunction } from '../EmitCustomMessageFunction.js'
@@ -24,6 +25,7 @@ export type SubscriptionFunctionContextEnhancements<
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
+	AgentInvokes extends AgentInvokeList = EmptyObject,
 > = {
 	/** the original message */
 	message: Readonly<EBMessage>
@@ -52,6 +54,10 @@ export type SubscriptionFunctionContextEnhancements<
 	 * Provides resources defined in service builder and set via config during service creation
 	 */
 	resources: Resources
+	/**
+	 * Invokes an agent and returns the result.
+	 */
+	invokeAgent: AgentInvokes
 }
 
 /**
@@ -65,6 +71,8 @@ export type SubscriptionFunctionContext<
 	StreamInvokes extends StreamInvokeList = EmptyObject,
 	EmitList extends Record<string, Schema> = EmptyObject,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
+	AgentInvokes extends AgentInvokeList = EmptyObject,
 > = Prettify<
-	ContextBase & SubscriptionFunctionContextEnhancements<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes>
+	ContextBase &
+		SubscriptionFunctionContextEnhancements<Resources, Invokes, StreamInvokes, EmitList, QueueInvokes, AgentInvokes>
 >

@@ -13,6 +13,7 @@ import type { ConfigSetterFunction } from '../ConfigStore/types/ConfigSetterFunc
 
 import { HandledError } from '../Error/HandledError.impl.js'
 import { UnhandledError } from '../Error/UnhandledError.impl.js'
+import { createAgentInvokeFunctionProxy } from '../helper/createAgentInvokeFunctionProxy.impl.js'
 import { createErrorResponse } from '../helper/createErrorResponse.impl.js'
 import { createInfoMessage } from '../helper/createInfoMessage.impl.js'
 import { createInvokeFunctionProxy } from '../helper/createInvokeFunctionProxy.impl.js'
@@ -31,6 +32,12 @@ import type { SecretSetterFunction } from '../SecretStore/types/SecretSetterFunc
 import type { StateDeleteFunction } from '../StateStore/types/StateDeleteFunction.js'
 import type { StateGetterFunction } from '../StateStore/types/StateGetterFunction.js'
 import type { StateSetterFunction } from '../StateStore/types/StateSetterFunction.js'
+import type {
+	AgentInvocation,
+	AgentInvokeList,
+	AgentProtocolPayload,
+	AgentProtocolResponse,
+} from '../types/agent/index.js'
 import type { ContextBase } from '../types/ContextBase.js'
 import type { CustomMessage } from '../types/CustomMessage.js'
 import type { Command } from '../types/commandType/Command.js'
@@ -124,15 +131,15 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 {
 	protected subscriptions = new Map<
 		string,
-		SubscriptionDefinition<any, any, any, any, any, any, any, any, S['Resources'], any, any, any>
+		SubscriptionDefinition<any, any, any, any, any, any, any, any, S['Resources'], any, any, any, any, any, any>
 	>()
 	protected commands = new Map<
 		string,
-		CommandDefinition<any, any, any, any, any, any, any, any, any, any, S['Resources'], any, any, any>
+		CommandDefinition<any, any, any, any, any, any, any, any, any, any, S['Resources'], any, any, any, any, any, any>
 	>()
 	protected streams = new Map<
 		string,
-		StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any, QueueInvokeList>
+		StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any, any, any, any>
 	>()
 	protected queueDefinitionList: QueueDefinitionListResolved<any>
 	protected queueWorkerDefinitionList: QueueWorkerDefinitionListResolved<any>
@@ -450,6 +457,273 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 		}
 
 		return invokeCommand.bind(this)
+	}
+
+	protected getAgentInvokeFunction<Invokes extends AgentInvokeList>(
+		serviceTarget: string,
+		traceId?: TraceId,
+		principalId?: PrincipalId,
+		tenantId?: TenantId,
+		agentInvokes?: Invokes,
+	) {
+		const sender: EBMessageSenderAddress = {
+			serviceName: this.info.serviceName,
+			serviceVersion: this.info.serviceVersion,
+			serviceTarget,
+			instanceId: this.eventBridge.instanceId,
+		}
+
+		const agentInvoke = <
+			InvokeResponseType = AgentProtocolResponse,
+			PayloadType = AgentProtocolPayload,
+			ParameterType = EmptyObject,
+		>(
+			receiver: EBMessageAddress,
+			payload: PayloadType,
+			parameter: ParameterType,
+		) => {
+			const commandMsg: Readonly<Omit<Command, 'correlationId' | 'id' | 'timestamp'>> = Object.freeze({
+				messageType: EBMessageType.Command,
+				traceId,
+				sender,
+				receiver,
+				contentType: 'application/json',
+				contentEncoding: 'utf-8',
+				payload: {
+					payload,
+					parameter,
+				},
+				principalId,
+				tenantId,
+			})
+
+			const descriptor = agentInvokes?.[receiver.serviceName]?.[receiver.serviceVersion]
+			const payloadSchema = descriptor?.payloadSchema
+			const parameterSchema = descriptor?.parameterSchema
+
+			let resolveNext: ((result: IteratorResult<unknown>) => void) | undefined
+			let rejectNext: ((error: unknown) => void) | undefined
+			const bufferedValues: unknown[] = []
+			let iteratorDone = false
+			let iteratorError: unknown
+
+			const emitValue = (value: unknown) => {
+				if (iteratorDone) {
+					return
+				}
+				if (resolveNext) {
+					const resolve = resolveNext
+					resolveNext = undefined
+					rejectNext = undefined
+					resolve({
+						value,
+						done: false,
+					})
+					return
+				}
+				bufferedValues.push(value)
+			}
+
+			const emitDone = () => {
+				if (iteratorDone) {
+					return
+				}
+				iteratorDone = true
+				if (resolveNext) {
+					const resolve = resolveNext
+					resolveNext = undefined
+					rejectNext = undefined
+					resolve({
+						value: undefined,
+						done: true,
+					})
+				}
+			}
+
+			const emitError = (error: unknown) => {
+				if (iteratorDone) {
+					return
+				}
+				iteratorDone = true
+				iteratorError = error
+				if (rejectNext) {
+					const reject = rejectNext
+					resolveNext = undefined
+					rejectNext = undefined
+					reject(error)
+				}
+			}
+
+			const streamOrInvoke = async () => {
+				let sawStreamChunk = false
+
+				const openRequest: Omit<StreamOpenRequest, 'id' | 'messageType' | 'timestamp' | 'correlationId'> = {
+					traceId,
+					sender,
+					receiver,
+					contentType: 'application/json',
+					contentEncoding: 'utf-8',
+					payload: {
+						frameType: 'open',
+						payload,
+						parameter,
+					},
+					principalId,
+					tenantId,
+				}
+
+				try {
+					const handle = await this.eventBridge.openStream<unknown, unknown>(openRequest)
+					let streamFinal: unknown
+					for await (const frame of handle) {
+						if (frame.payload.frameType === 'chunk') {
+							sawStreamChunk = true
+							emitValue(frame.payload.chunk)
+							continue
+						}
+
+						if (frame.payload.frameType === 'complete') {
+							streamFinal = frame.payload.final
+							break
+						}
+
+						if (frame.payload.frameType === 'error') {
+							throw new UnhandledError(
+								StatusCode.InternalServerError,
+								frame.payload.error?.message ?? 'agent stream failed',
+								frame.payload.error,
+							)
+						}
+					}
+
+					if (streamFinal === undefined) {
+						return [] as unknown[]
+					}
+					return streamFinal
+				} catch (error) {
+					if (sawStreamChunk) {
+						throw error
+					}
+
+					const isStreamUnavailable =
+						(error instanceof UnhandledError &&
+							(error.errorCode === StatusCode.NotImplemented || error.errorCode === StatusCode.BadGateway)) ||
+						(error instanceof Error &&
+							(error.message.includes('does not support streams') || error.message.includes('InvalidCommand')))
+
+					if (!isStreamUnavailable) {
+						throw error
+					}
+
+					const fallback = await this.eventBridge.invoke(commandMsg)
+					if (Array.isArray(fallback)) {
+						for (const value of fallback) {
+							emitValue(value)
+						}
+					} else {
+						emitValue(fallback)
+					}
+					return fallback
+				}
+			}
+
+			const invocationPromise = (async () => {
+				return await this.startActiveSpan(`${serviceTarget}.agentInvoke`, {}, undefined, async span => {
+					span.setAttributes({
+						[PuristaSpanTag.ReceiverServiceName]: receiver.serviceName,
+						[PuristaSpanTag.ReceiverServiceVersion]: receiver.serviceVersion,
+						[PuristaSpanTag.ReceiverServiceTarget]: receiver.serviceTarget,
+					})
+
+					try {
+						if (payloadSchema) {
+							const res = await validate(payloadSchema, payload)
+							if (!res.success) {
+								const err = new UnhandledError(StatusCode.BadRequest, 'agent invoke payload schema validation failed', {
+									issues: res.issues,
+									invokedFrom: sender,
+									responseFrom: receiver,
+								})
+
+								span.recordException(err)
+								span.setStatus({
+									code: SpanStatusCode.ERROR,
+									message: err.message,
+								})
+
+								throw err
+							}
+						}
+
+						if (parameterSchema) {
+							const res = await validate(parameterSchema, parameter)
+							if (!res.success) {
+								const err = new UnhandledError(
+									StatusCode.BadRequest,
+									'agent invoke parameter schema validation failed',
+									{
+										issues: res.issues,
+										invokedFrom: sender,
+										responseFrom: receiver,
+									},
+								)
+
+								span.recordException(err)
+								span.setStatus({
+									code: SpanStatusCode.ERROR,
+									message: err.message,
+								})
+
+								throw err
+							}
+						}
+
+						const result = await streamOrInvoke()
+						emitDone()
+						return result
+					} catch (error) {
+						emitError(error)
+						throw error
+					}
+				})
+			})()
+			// The invocation starts eagerly so schema/bridge failures can happen before `.final()` is awaited.
+			// Attach an internal catch handler to prevent process-level unhandledRejection crashes.
+			void invocationPromise.catch(() => undefined)
+
+			return {
+				final: () => invocationPromise,
+				[Symbol.asyncIterator]: async function* () {
+					while (true) {
+						if (bufferedValues.length > 0) {
+							yield bufferedValues.shift() as unknown
+							continue
+						}
+
+						if (iteratorError) {
+							throw iteratorError
+						}
+
+						if (iteratorDone) {
+							return
+						}
+
+						const next = await new Promise<IteratorResult<unknown>>((resolve, reject) => {
+							resolveNext = resolve
+							rejectNext = reject
+						})
+
+						if (next.done) {
+							return
+						}
+
+						yield next.value
+					}
+				},
+			} as unknown as AgentInvocation<InvokeResponseType>
+		}
+
+		return agentInvoke
 	}
 
 	protected getQueueNamespace(
@@ -1325,6 +1599,15 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 									command.streamInvokes,
 								),
 							),
+							invokeAgent: createAgentInvokeFunctionProxy(
+								this.getAgentInvokeFunction(
+									command.commandName,
+									traceId,
+									message.principalId,
+									message.tenantId,
+									command.agentInvokes,
+								),
+							),
 							resources: this.resources,
 						} as unknown as CommandFunctionContext
 						const call = command.call.bind(this, context)
@@ -1366,6 +1649,15 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 										message.principalId,
 										message.tenantId,
 										command.streamInvokes,
+									),
+								),
+								invokeAgent: createAgentInvokeFunctionProxy(
+									this.getAgentInvokeFunction(
+										command.commandName,
+										traceId,
+										message.principalId,
+										message.tenantId,
+										command.agentInvokes,
 									),
 								),
 								resources: this.resources,
@@ -1952,6 +2244,15 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 							stream.streamInvokes,
 						),
 					),
+					invokeAgent: createAgentInvokeFunctionProxy(
+						this.getAgentInvokeFunction(
+							stream.streamName,
+							traceId,
+							message.principalId,
+							message.tenantId,
+							stream.agentInvokes,
+						),
+					),
 					resources: this.resources,
 				}
 
@@ -1979,20 +2280,7 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 	}
 
 	public async registerStream(
-		streamDefinition: StreamDefinition<
-			any,
-			any,
-			any,
-			any,
-			any,
-			any,
-			any,
-			S['Resources'],
-			any,
-			any,
-			any,
-			QueueInvokeList
-		>,
+		streamDefinition: StreamDefinition<any, any, any, any, any, any, any, S['Resources'], any, any, any, any, any, any>,
 	): Promise<void> {
 		return this.startActiveSpan('purista.registerStream', {}, undefined, async span => {
 			this.logger.debug({ ...this.serviceInfo, ...span.spanContext() }, 'register stream')
@@ -2104,6 +2392,15 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 										subscription.streamInvokes,
 									),
 								),
+								invokeAgent: createAgentInvokeFunctionProxy(
+									this.getAgentInvokeFunction(
+										subscriptionName,
+										traceId,
+										message.principalId,
+										message.tenantId,
+										subscription.agentInvokes,
+									),
+								),
 								resources: this.resources,
 							} as unknown as SubscriptionFunctionContext
 							const call2 = subscription.call.bind(this, context)
@@ -2144,6 +2441,15 @@ export class Service<S extends ServiceClassTypes = ServiceClassTypes>
 											message.principalId,
 											message.tenantId,
 											subscription.streamInvokes,
+										),
+									),
+									invokeAgent: createAgentInvokeFunctionProxy(
+										this.getAgentInvokeFunction(
+											subscription.subscriptionName,
+											traceId,
+											message.principalId,
+											message.tenantId,
+											subscription.agentInvokes,
 										),
 									),
 									resources: this.resources,

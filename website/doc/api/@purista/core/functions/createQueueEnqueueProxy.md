@@ -8,7 +8,7 @@
 
 > **createQueueEnqueueProxy**\<`TQueues`\>(`enqueueFn`, `queues?`): [`QueueInvokeFunction`](../type-aliases/QueueInvokeFunction.md) & [`QueueInvokeClientMap`](../type-aliases/QueueInvokeClientMap.md)\<`TQueues`\>
 
-Defined in: [core/helper/createQueueEnqueueProxy.impl.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createQueueEnqueueProxy.impl.ts#L11)
+Defined in: [core/helper/createQueueEnqueueProxy.impl.ts:7](https://github.com/puristajs/purista/blob/master/packages/core/src/core/helper/createQueueEnqueueProxy.impl.ts#L7)
 
 ## Type Parameters
 

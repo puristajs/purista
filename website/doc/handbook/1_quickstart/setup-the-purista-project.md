@@ -42,6 +42,49 @@ After setup, generate services and business artifacts with the CLI:
 4. `purista add stream`
 5. `purista add queue`
 6. `purista add queue-worker`
+7. `purista add agent`
+
+Recommended scaffold order for new projects:
+
+1. `purista add service` and first `purista add command`
+2. `purista add stream` if you need push/live updates
+3. `purista add queue` + `purista add queue-worker` for background jobs
+4. `purista add agent` when you need LLM-powered workloads
+
+Rule of thumb:
+
+- commands = request/response entrypoints
+- streams = live outbound updates
+- queues/workers = durable async processing
+- agents = AI workloads invoked directly or from commands/queues/subscriptions
+
+See also:
+
+- [Streams](../2_building_business-logic/stream/index.md)
+- [Queues](../2_building_business-logic/queue/index.md)
+- [AI Agents](../2_building_business-logic/agent/index.md)
+
+If your app uses AI agents, add the package:
+
+::: code-group
+
+```bash [npm]
+npm install @purista/ai
+```
+
+```bash [pnpm]
+pnpm add @purista/ai
+```
+
+```bash [bun]
+bun add @purista/ai
+```
+
+```bash [yarn]
+yarn add @purista/ai
+```
+
+:::
 
 ## Project structure
 
@@ -51,40 +94,45 @@ The blueprint creates a folder structure expected by PURISTA tooling and code ge
 |-config/
 |-script/
 |-src/
-| |- service/
+| |-services/
 | |   |- ServiceEvent.enum.ts
 | |   |- [serviceName]/
 | |       |- [serviceName]ServiceInfo.ts
-| |       |- v[0-9]/
+| |       |- v1/
 | |           |- [serviceName]ServiceBuilder.ts
 | |           |- [serviceName]ServiceBuilder.test.ts
 | |           |- [serviceName]ServiceConfig.ts
 | |           |- [serviceName]Service.ts
 | |           |- command/
 | |           |   |- [commandName]CommandBuilder.ts
-| |           |   |- [commandName].test.ts
+| |           |   |- [commandName]CommandBuilder.test.ts
 | |           |   |- schema.ts
 | |           |   |- types.ts
 | |           |- subscription/
 | |           |   |- [subscriptionName]SubscriptionBuilder.ts
-| |           |   |- [subscriptionName].test.ts
+| |           |   |- [subscriptionName]SubscriptionBuilder.test.ts
 | |           |   |- schema.ts
 | |           |   |- types.ts
 | |           |- stream/
-| |               |- [streamName]StreamBuilder.ts
-| |               |- [streamName].test.ts
-| |               |- schema.ts
-| |               |- types.ts
+| |           |   |- [streamName]StreamBuilder.ts
+| |           |   |- [streamName]StreamBuilder.test.ts
+| |           |   |- schema.ts
+| |           |   |- types.ts
 | |           |- queue/
 | |           |   |- [queueName]/
-| |           |       |- schema.ts
-| |           |       |- types.ts
 | |           |       |- [queueName]QueueBuilder.ts
 | |           |       |- [queueName]QueueBuilder.test.ts
+| |           |       |- schema.ts
+| |           |       |- types.ts
 | |           |- queue-worker/
 | |               |- [workerName]/
 | |                   |- [workerName]QueueWorkerBuilder.ts
 | |                   |- [workerName]QueueWorkerBuilder.test.ts
+| |-agents/
+| |   |- [agentName]/
+| |       |- v1/
+| |           |- [agentName].ts
+| |           |- [agentName].test.ts
 | |- store/
 | |   |- config/
 | |   |- state/

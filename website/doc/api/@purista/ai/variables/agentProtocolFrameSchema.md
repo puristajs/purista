@@ -1,0 +1,11 @@
+[**PURISTA API**](../../../README.md)
+
+***
+
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / agentProtocolFrameSchema
+
+# Variable: agentProtocolFrameSchema
+
+> `const` **agentProtocolFrameSchema**: `ZodDiscriminatedUnion`\<\[`ZodObject`\<\{ `content`: `ZodString`; `final`: `ZodOptional`\<`ZodBoolean`\>; `kind`: `ZodLiteral`\<`"message"`\>; `partial`: `ZodOptional`\<`ZodBoolean`\>; `role`: `ZodEnum`\<\{ `assistant`: `"assistant"`; `system`: `"system"`; `tool`: `"tool"`; `user`: `"user"`; \}\>; `summary`: `ZodOptional`\<`ZodString`\>; \}, `$strip`\>, `ZodObject`\<\{ `artifactId`: `ZodString`; `content`: `ZodUnion`\<readonly \[`ZodString`, `ZodRecord`\<`ZodString`, `ZodUnknown`\>\]\>; `kind`: `ZodLiteral`\<`"artifact"`\>; `lastChunk`: `ZodOptional`\<`ZodBoolean`\>; `mimeType`: `ZodOptional`\<`ZodString`\>; `phase`: `ZodEnum`\<\{ `chunk`: `"chunk"`; `final`: `"final"`; \}\>; `sequence`: `ZodOptional`\<`ZodNumber`\>; `total`: `ZodOptional`\<`ZodNumber`\>; \}, `$strip`\>, `ZodObject`\<\{ `errorCode`: `ZodOptional`\<`ZodString`\>; `input`: `ZodOptional`\<`ZodUnknown`\>; `kind`: `ZodLiteral`\<`"tool"`\>; `message`: `ZodOptional`\<`ZodString`\>; `output`: `ZodOptional`\<`ZodUnknown`\>; `status`: `ZodEnum`\<\{ `error`: `"error"`; `invoked`: `"invoked"`; `success`: `"success"`; \}\>; `toolName`: `ZodString`; \}, `$strip`\>, `ZodObject`\<\{ `durationMs`: `ZodOptional`\<`ZodNumber`\>; `kind`: `ZodLiteral`\<`"telemetry"`\>; `poolId`: `ZodOptional`\<`ZodString`\>; `provider`: `ZodOptional`\<`ZodString`\>; `usage`: `ZodOptional`\<`ZodObject`\<\{ `completionTokens`: `ZodOptional`\<`ZodNumber`\>; `costUsd`: `ZodOptional`\<`ZodNumber`\>; `promptTokens`: `ZodOptional`\<`ZodNumber`\>; `totalTokens`: `ZodOptional`\<`ZodNumber`\>; \}, `$strip`\>\>; `waitTimeMs`: `ZodOptional`\<`ZodNumber`\>; \}, `$strip`\>, `ZodObject`\<\{ `code`: `ZodString`; `details`: `ZodOptional`\<`ZodUnknown`\>; `handled`: `ZodDefault`\<`ZodBoolean`\>; `kind`: `ZodLiteral`\<`"error"`\>; `message`: `ZodString`; \}, `$strip`\>\], `"kind"`\>
+
+Defined in: [ai/src/protocol/types.ts:90](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/types.ts#L90)

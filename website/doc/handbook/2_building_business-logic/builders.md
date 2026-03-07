@@ -43,4 +43,5 @@ The following builders are available:
 - [Subscription Builder](subscription/the-subscription-builder.md)
 - [Queue Builder](queue/the-queue-builder.md)
 - [Queue Worker Builder](queue/the-queue-worker-builder.md)
+- [Agent Builder](agent/agent-builder.md)
 - [Client Builder](connect_to_a_purista_application/index.md)

@@ -74,6 +74,7 @@ purista add command user
 
 ## Functions
 
+- [addPuristaAgent](functions/addPuristaAgent.md)
 - [addPuristaCommand](functions/addPuristaCommand.md)
 - [addPuristaQueue](functions/addPuristaQueue.md)
 - [addPuristaQueueWorker](functions/addPuristaQueueWorker.md)

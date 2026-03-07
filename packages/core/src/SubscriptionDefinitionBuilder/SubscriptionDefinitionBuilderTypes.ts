@@ -1,3 +1,4 @@
+import type { AgentInvokeList } from '../core/types/agent/AgentInvokeList.js'
 import type { EmptyObject } from '../core/types/EmptyObject.js'
 import type { InvokeList } from '../core/types/InvokeList.js'
 import type { QueueInvokeList } from '../core/types/queue/QueueInvokeList.js'
@@ -16,6 +17,7 @@ export type SubscriptionDefinitionBuilderTypes<
 	StreamInvokes extends StreamInvokeList = StreamInvokeList,
 	EmitList extends Record<string, Schema> = Record<string, Schema>,
 	QueueInvokes extends QueueInvokeList = QueueInvokeList,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > = {
 	PayloadSchema: PayloadSchema
 	ParamsSchema: ParamsSchema
@@ -28,4 +30,5 @@ export type SubscriptionDefinitionBuilderTypes<
 	StreamInvokes: StreamInvokes
 	EmitList: EmitList
 	QueueInvokes: QueueInvokes
+	AgentInvokes: AgentInvokes
 }

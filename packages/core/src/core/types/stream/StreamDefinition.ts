@@ -1,4 +1,5 @@
 import type { Schema } from '../../../schema/index.js'
+import type { AgentInvokeList } from '../agent/AgentInvokeList.js'
 import type { DefinitionEventBridgeConfig } from '../DefinitionEventBridgeConfig.js'
 import type { InvokeList } from '../InvokeList.js'
 import type { QueueInvokeList } from '../queue/QueueInvokeList.js'
@@ -19,8 +20,9 @@ export type StreamDefinition<
 	Invokes extends InvokeList,
 	StreamInvokes extends StreamInvokeList,
 	EmitList extends Record<string, Schema>,
-	QueueInvokes extends QueueInvokeList = QueueInvokeList,
 	MetadataType extends StreamDefinitionMetadataBase = StreamDefinitionMetadataBase,
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > = {
 	streamName: string
 	streamDescription: string
@@ -40,7 +42,8 @@ export type StreamDefinition<
 		Invokes,
 		StreamInvokes,
 		EmitList,
-		QueueInvokes
+		QueueInvokes,
+		AgentInvokes
 	>
 	finalEventName?: string
 	chunkValidationEnabled: boolean
@@ -48,6 +51,7 @@ export type StreamDefinition<
 	aggregateChunks: boolean
 	invokes: Invokes
 	streamInvokes: StreamInvokes
+	agentInvokes: AgentInvokes
 	emitList: EmitList
 	queueInvokes: QueueInvokes
 }

@@ -130,7 +130,7 @@ Defined in: [core/types/queue/QueueDefinition.ts:32](https://github.com/puristaj
 
 > `optional` **transformBeforeExecute**: [`QueueTransformHook`](QueueTransformHook.md)\<[`ServiceClass`](../interfaces/ServiceClass.md), [`Infer`](Infer.md)\<`PayloadSchema`\>, [`Infer`](Infer.md)\<`ParamsSchema`\>, `Resources`\>
 
-Defined in: [core/types/queue/QueueDefinition.ts:38](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L38)
+Defined in: [core/types/queue/QueueDefinition.ts:33](https://github.com/puristajs/purista/blob/master/packages/core/src/core/types/queue/QueueDefinition.ts#L33)
 
 ***
 

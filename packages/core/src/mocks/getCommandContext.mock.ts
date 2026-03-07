@@ -2,6 +2,9 @@ import type { SinonSandbox, SinonStub } from 'sinon'
 import { stub } from 'sinon'
 import { createQueueEnqueueProxy } from '../core/helper/createQueueEnqueueProxy.impl.js'
 import { createQueueScheduleProxy } from '../core/helper/createQueueScheduleProxy.impl.js'
+import type { AgentInvokeList } from '../core/types/agent/AgentInvokeList.js'
+import type { AgentInvocation, AgentProtocolResponse } from '../core/types/agent/AgentProtocol.js'
+import type { CommandDefinitionMetadataBase } from '../core/types/commandType/CommandDefinitionMetadataBase.js'
 import type { CommandFunctionContext } from '../core/types/commandType/CommandFunctionContext.js'
 import type { EBMessageAddress } from '../core/types/EBMessageAddress.js'
 import type { FromEmitToOtherType } from '../core/types/FromEmitToOtherType.js'
@@ -29,12 +32,16 @@ export const getCommandContextMock = <
 	Invokes extends InvokeList,
 	StreamInvokes extends StreamInvokeList,
 	EmitList extends Record<string, Schema>,
+	_MetadataType extends CommandDefinitionMetadataBase = CommandDefinitionMetadataBase,
+	QueueInvokes extends QueueInvokeList = QueueInvokeList,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 >(input: {
 	payload: FunctionPayloadType
 	parameter: FunctionParamsType
 	sandbox?: SinonSandbox
 	invokes: FromInvokeToOtherType<Invokes, { outputSchema?: Schema; payloadSchema?: Schema; parameterSchema?: Schema }>
 	streamInvokes?: StreamInvokes
+	agentInvokes?: AgentInvokes
 	emitList: FromEmitToOtherType<EmitList, Schema>
 	queueInvokes?: QueueInvokeList
 	resources?: Partial<Resources>
@@ -91,6 +98,65 @@ export const getCommandContextMock = <
 	) as Resources
 
 	const invokeMocks: Record<string, Record<string, Record<string, SinonStub>>> = {}
+	const agentInvokeMocks: Record<string, Record<string, SinonStub>> = {}
+
+	const getAgentInvokeProxy = <TFaux>(address?: EBMessageAddress, lvl = 0): TFaux => {
+		const adr = {
+			serviceName: '',
+			serviceTarget: 'run',
+			serviceVersion: '',
+			...address,
+		}
+
+		return new Proxy(() => {}, {
+			get(_obj: object, name) {
+				if (typeof name !== 'string' || name === 'then' || name === 'catch' || name === 'finally') {
+					return undefined
+				}
+
+				if (lvl === 0) {
+					const na = {
+						...adr,
+						serviceName: name,
+					}
+					if (!agentInvokeMocks[na.serviceName]) {
+						agentInvokeMocks[na.serviceName] = {}
+					}
+					return getAgentInvokeProxy<unknown>(na, lvl + 1)
+				}
+				if (lvl === 1) {
+					const na = {
+						...adr,
+						serviceVersion: name,
+					}
+					if (!agentInvokeMocks[na.serviceName][na.serviceVersion]) {
+						agentInvokeMocks[na.serviceName][na.serviceVersion] = input.sandbox?.stub() ?? stub()
+
+						agentInvokeMocks[na.serviceName][na.serviceVersion].rejects(
+							new Error(`agent invocation of ${na.serviceName} version ${na.serviceVersion} is not stubbed`),
+						)
+					}
+					return getAgentInvokeProxy<unknown>(na, lvl + 1)
+				}
+
+				if (lvl === 2 && name === 'call') {
+					return (payload: unknown, parameter?: unknown) => {
+						const promise = agentInvokeMocks[adr.serviceName]?.[adr.serviceVersion](
+							payload,
+							parameter,
+						) as Promise<AgentProtocolResponse>
+						return {
+							final: () => promise,
+							[Symbol.asyncIterator]: async function* () {
+								const result = await promise
+								yield result
+							},
+						} as AgentInvocation
+					}
+				}
+			},
+		}) as TFaux
+	}
 
 	const getInvokeProxy = <TFaux>(address?: EBMessageAddress, lvl = 0): TFaux => {
 		const adr = {
@@ -174,6 +240,7 @@ export const getCommandContextMock = <
 		scheduleAt: input.sandbox?.stub() ?? stub().resolves(),
 		service: getInvokeProxy<FromInvokeToOtherType<Invokes, SinonStub>>(),
 		resources: {} as Partial<Resources>,
+		invokeAgent: getAgentInvokeProxy<AgentInvokes>(),
 	}
 
 	const message = getCommandMessageMock<MessagePayloadType, MessageParamsType>(
@@ -192,8 +259,10 @@ export const getCommandContextMock = <
 		MessageParamsType,
 		Resources,
 		Invokes,
-		StreamInvokes,
-		EmitList
+		StreamInvokeList,
+		EmitList,
+		QueueInvokes,
+		AgentInvokes
 	> = {
 		logger: logger.mock,
 		message,
@@ -213,6 +282,7 @@ export const getCommandContextMock = <
 		}),
 		service: getInvokeProxy<Invokes>(),
 		stream: getInvokeProxy<StreamInvokes>(),
+		invokeAgent: getAgentInvokeProxy<AgentInvokes>(),
 		secrets: {
 			getSecret: stubs.getSecret.rejects(new Error('getSecret is not stubbed')),
 			setSecret: stubs.setSecret.rejects(new Error('setSecret is not stubbed')),
@@ -229,15 +299,15 @@ export const getCommandContextMock = <
 			removeState: stubs.removeState.rejects(new Error('removeState is not stubbed')),
 		},
 		queue: {
-			enqueue: createQueueEnqueueProxy<QueueInvokeList>(
+			enqueue: createQueueEnqueueProxy<QueueInvokes>(
 				(async (queueName, payload, parameter, options) =>
 					stubs.enqueue(queueName, payload, parameter, options)) as QueueInvokeFunction,
-				input.queueInvokes,
+				input.queueInvokes as any,
 			),
-			scheduleAt: createQueueScheduleProxy(
+			scheduleAt: createQueueScheduleProxy<QueueInvokes>(
 				(async (queueName, runAt, payload, parameter, options) =>
 					stubs.scheduleAt(queueName, runAt, payload, parameter, options)) as QueueScheduleFunction,
-				input.queueInvokes,
+				input.queueInvokes as any,
 			),
 		},
 		resources: resourcesProxy,

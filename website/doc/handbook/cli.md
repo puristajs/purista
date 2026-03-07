@@ -37,7 +37,7 @@ The CLI tool will guide you through all the necessary steps.
 
 ## PURISTA CLI
 
-PURISTA provides a command line interface (CLI) that allows you to create new services and add commands, subscriptions, streams, and queues to existing services.
+PURISTA provides a command line interface (CLI) that allows you to create new services and add commands, subscriptions, streams, queues, queue workers, and AI agents to existing services.
 
 You can either install the CLI globally, or run it with `npx`.
 
@@ -66,13 +66,13 @@ pnpm add -g @purista/cli
 In your project root run:
 
 ```bash
-purista add [service|command|subscription|stream|queue|queue-worker]
+purista add [service|command|subscription|stream|queue|queue-worker|agent]
 ```
 
 Or without global install:
 
 ```bash
-npx @purista/cli add [service|command|subscription|stream|queue|queue-worker]
+npx @purista/cli add [service|command|subscription|stream|queue|queue-worker|agent]
 ```
 
 Generated command, subscription, and queue schema stubs default to `z.unknown()` for payloads.
@@ -155,6 +155,12 @@ This configuration file follows the [JSON Schema](https://json-schema.org/) spec
 - __**__Default:__**__ `src/service`
 - __**__Description:__**__ Defines the relative path where services are located in the project.
 
+#### `agentPath`
+
+- __**__Type:__**__ `string`
+- __**__Default:__**__ `src/agents`
+- __**__Description:__**__ Defines the relative path where agents are located in the project.
+
 ### Example `purista.json` Configuration
 
 ```json
@@ -169,3 +175,4 @@ This configuration file follows the [JSON Schema](https://json-schema.org/) spec
   "servicePath": "src/services"
 }
 ```
+Use `purista add agent` to scaffold an AI workload manifest powered by `@purista/ai`. The generator creates an `AgentBuilder` under `src/agents/<name>/v<version>/` plus a prepared Vitest spec that already boots an in-memory event bridge, injects a deterministic provider, executes one agent run, and checks protocol frames. Agents run beside services—no helper command is required. After filling in the handler, call `<yourAgent>.getInstance(eventBridge, options)` inside your bootstrap and invoke from commands/subscriptions via `.canInvokeAgent(...)/context.invokeAgent` (or use `invokeAgent` for scripts/tests outside a Purista context).

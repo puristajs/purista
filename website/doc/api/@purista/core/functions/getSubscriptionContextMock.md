@@ -6,9 +6,9 @@
 
 # Function: getSubscriptionContextMock()
 
-> **getSubscriptionContextMock**\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`\>(`input`): `object`
+> **getSubscriptionContextMock**\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `MetadataType`, `QueueInvokes`, `AgentInvokes`\>(`input`): `object`
 
-Defined in: [mocks/getSubscriptionContext.mock.ts:22](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionContext.mock.ts#L22)
+Defined in: [mocks/getSubscriptionContext.mock.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionContext.mock.ts#L25)
 
 A function that returns a mock object for subscription function context
 
@@ -30,9 +30,25 @@ A function that returns a mock object for subscription function context
 
 `EmitList` *extends* `Record`\<`string`, [`Schema`](../type-aliases/Schema.md)\>
 
+### MetadataType
+
+`MetadataType` *extends* [`SubscriptionDefinitionMetadataBase`](../type-aliases/SubscriptionDefinitionMetadataBase.md) = [`SubscriptionDefinitionMetadataBase`](../type-aliases/SubscriptionDefinitionMetadataBase.md)
+
+### QueueInvokes
+
+`QueueInvokes` *extends* [`QueueInvokeList`](../type-aliases/QueueInvokeList.md) = [`QueueInvokeList`](../type-aliases/QueueInvokeList.md)
+
+### AgentInvokes
+
+`AgentInvokes` *extends* [`AgentInvokeList`](../type-aliases/AgentInvokeList.md) = [`AgentInvokeList`](../type-aliases/AgentInvokeList.md)
+
 ## Parameters
 
 ### input
+
+#### agentInvokes?
+
+`AgentInvokes`
 
 #### emitList
 
@@ -96,6 +112,12 @@ set a config value in the config store
 
 emit a custom message
 
+#### mock.invokeAgent
+
+> **invokeAgent**: `AgentInvokes`
+
+Invokes an agent and returns the result.
+
 #### mock.logger
 
 > **logger**: [`Logger`](../classes/Logger.md)
@@ -110,7 +132,7 @@ the original message
 
 #### mock.queue
 
-> **queue**: [`QueueContext`](../type-aliases/QueueContext.md) & [`QueueContext`](../type-aliases/QueueContext.md)\<[`QueueInvokeList`](../type-aliases/QueueInvokeList.md)\>
+> **queue**: [`QueueContext`](../type-aliases/QueueContext.md) & [`QueueContext`](../type-aliases/QueueContext.md)\<`QueueInvokes`\>
 
 #### mock.resources
 
@@ -286,6 +308,10 @@ wrap given function in an opentelemetry span
 #### stubs.invoke
 
 > **invoke**: `SinonStub`\<`any`[], `any`\>
+
+#### stubs.invokeAgent
+
+> **invokeAgent**: `AgentInvokes`
 
 #### stubs.logger
 
