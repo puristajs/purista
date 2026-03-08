@@ -8,6 +8,15 @@ export type ProviderRequest = {
 }
 
 /**
+ * Request input for high-level text generation that auto-selects streaming
+ * or non-streaming provider capabilities.
+ */
+export type ProviderGenerateTextRequest = ProviderRequest & {
+	onReasoning?: (text: string) => void | Promise<void>
+	onTextDelta?: (delta: string) => void | Promise<void>
+}
+
+/**
  * Payload sent to structured JSON generation capable providers.
  */
 export type ProviderJsonRequest = {
@@ -148,6 +157,11 @@ export interface ModelProvider {
 	readonly capabilities: ModelProviderCapabilities
 	generate?(request: ProviderRequest): Promise<ProviderResponse>
 	stream?(request: ProviderRequest): ProviderStream
+	/**
+	 * High-level helper that yields one final text output while automatically
+	 * preferring `stream()` and falling back to `generate()`.
+	 */
+	generateText?(request: ProviderGenerateTextRequest): Promise<string>
 	generateJson?<T = unknown>(request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>>
 	embed?(request: ProviderEmbedRequest): Promise<ProviderEmbedResponse>
 	embedMany?(request: ProviderEmbedManyRequest): Promise<ProviderEmbedManyResponse>

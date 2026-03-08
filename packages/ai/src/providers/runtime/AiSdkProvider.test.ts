@@ -241,6 +241,42 @@ describe('AiSdkProvider', () => {
 		expect(jsonResult.reasoningText).toBe('chain of thought')
 	})
 
+	it('preserves top-level aiSdk options when aiSdk.generate is present', async () => {
+		generateTextMock.mockResolvedValueOnce({
+			text: 'with-tools',
+			usage: { inputTokens: 1, outputTokens: 1 },
+			request: { id: 'request' },
+			response: { id: 'response' },
+			providerMetadata: {},
+		})
+
+		const provider = new AiSdkProvider({ model: mockModel })
+		const tools = { writeSpecFile: { description: 'writes spec', inputSchema: {}, execute: vi.fn() } }
+
+		await provider.generate({
+			prompt: 'apply updates',
+			metadata: {
+				aiSdk: {
+					tools,
+					toolChoice: 'required',
+					maxSteps: 20,
+					generate: {
+						temperature: 0.1,
+					},
+				},
+			},
+		})
+
+		expect(generateTextMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				tools,
+				toolChoice: 'required',
+				maxSteps: 20,
+				temperature: 0.1,
+			}),
+		)
+	})
+
 	it('throws when embedding or reranking models are missing', async () => {
 		const provider = new AiSdkProvider({ model: mockModel })
 

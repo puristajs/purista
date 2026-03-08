@@ -32,7 +32,7 @@ describe('PoolManager', () => {
 			id: 'default',
 			activeWorkers: 0,
 			waitingWorkers: 0,
-			maxWorkersPerInstance: 1,
+			maxConcurrencyPerInstance: 1,
 		})
 	})
 })

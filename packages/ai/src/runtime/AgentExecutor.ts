@@ -2,9 +2,9 @@ import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 import type { Logger } from '@purista/core'
 import { PuristaSpanName } from '@purista/core'
 import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
+import type { ConversationStore } from '../memory/conversationStore.js'
 import type { ConversationHistory } from '../memory/historyHelpers.js'
 import { appendMessage, summarizeHistory, trimHistory } from '../memory/historyHelpers.js'
-import type { SessionStore } from '../memory/sessionStore.js'
 import type { ModelProvider, ProviderRequest } from '../providers/runtime/ModelProvider.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
 
@@ -21,7 +21,7 @@ export type StartActiveSpanFunction = <T>(
 export type AgentExecutionOptions = {
 	manifest: AgentManifest
 	provider: ModelProvider
-	sessionStore: SessionStore
+	conversationStore: ConversationStore
 	knowledgeAdapters: Record<string, KnowledgeAdapter>
 	logger: Logger
 	startActiveSpan: StartActiveSpanFunction
@@ -58,7 +58,7 @@ export type AgentExecutionResult = {
  * const executor = new AgentExecutor({
  *   manifest,
  *   provider: myModelProvider,
- *   sessionStore: new InMemorySessionStore(),
+ *   conversationStore: new InMemoryConversationStore(),
  *   knowledgeAdapters: { default: new InMemoryKnowledgeAdapter() },
  *   logger,
  *   startActiveSpan: startActiveSpanFn,
@@ -83,7 +83,7 @@ export class AgentExecutor {
 		const generate = provider.generate
 
 		const startedAt = Date.now()
-		const sessionRecord = await this.options.sessionStore.load(input.sessionId)
+		const sessionRecord = await this.options.conversationStore.load(input.sessionId)
 		const existingHistory = (sessionRecord?.data.history as ConversationHistory | undefined) ?? []
 		const history = trimHistory(existingHistory, this.maxHistoryFrames)
 		const knowledgeContext = await this.collectKnowledge(manifest, input.prompt)
@@ -107,8 +107,8 @@ export class AgentExecutor {
 			timestamp: Date.now(),
 		})
 
-		await this.options.sessionStore.save({
-			sessionId: input.sessionId,
+		await this.options.conversationStore.save({
+			conversationId: input.sessionId,
 			data: {
 				...(sessionRecord?.data ?? {}),
 				lastOutput: response.output,

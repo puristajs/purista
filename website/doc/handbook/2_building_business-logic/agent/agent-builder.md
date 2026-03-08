@@ -51,9 +51,14 @@ export const supportAgent = new AgentBuilder({
   .defineModel('openai:gpt-4o-mini')
   .setHandler(async function (context, payload) {
     const model = context.models['openai:gpt-4o-mini']
-    const result = await model.generate({ prompt: payload.prompt, context: payload.context })
-    context.stream.sendFinal(result.output)
-    return { message: result.output }
+    const answer = await model.generateText?.({
+      prompt: payload.prompt,
+      context: payload.context,
+      onTextDelta: chunk => context.stream.sendChunk(chunk),
+    })
+    const final = answer ?? (await model.generate!({ prompt: payload.prompt, context: payload.context })).output
+    context.stream.sendFinal(final)
+    return { message: final }
   })
   .build()
 ```
@@ -135,7 +140,43 @@ const supportAgent = new AgentBuilder({ ... })
   .build()
 ```
 
-Configure pool identity and worker count at runtime bootstrap (`getInstance(..., { poolConfig: { poolId, maxWorkers } })`).
+Configure pool identity and worker count at runtime bootstrap (`getInstance(..., { poolConfig: { poolId, maxConcurrencyPerInstance } })`).
+
+### 3.5 Configure dynamic model call options (`prepareCall` / `prepareStep`)
+
+Use these hooks when model options must be derived per invocation step (for example temperature ramps, max token limits, or provider metadata tags).
+
+```ts
+const supportAgent = new AgentBuilder({ ... })
+  .defineModel('openai:gpt-4o-mini')
+  .setCallOptionsSchema(
+    z.object({
+      metadata: z.record(z.string(), z.unknown()).optional(),
+      aiSdk: z.record(z.string(), z.unknown()).optional(),
+    }),
+  )
+  .prepareStep(({ step, callKind }) => ({
+    metadata: { callKind, step },
+    aiSdk: {
+      generate: {
+        temperature: step <= 1 ? 0.1 : 0.3,
+      },
+    },
+  }))
+  .setHandler(async context => {
+    const answer = await context.models['openai:gpt-4o-mini'].generateText?.({
+      prompt: 'Summarize this ticket',
+    })
+    return { message: answer ?? '' }
+  })
+  .build()
+```
+
+Notes:
+
+- `prepareCall` and `prepareStep` both run before each provider call.
+- `setCallOptionsSchema(...)` validates hook output before it is merged into request metadata.
+- `step` is 1-based and increments for every model call in the current agent run.
 
 ## 4) Quick method map
 
@@ -160,6 +201,9 @@ Configure pool identity and worker count at runtime bootstrap (`getInstance(...,
 | --- | --- | --- | --- |
 | `defineModel(alias)` | model alias string | agent should use model provider | aliases must be satisfied at runtime |
 | `allowTool({ serviceName, serviceVersion, commandName })` | command address | agent may call existing commands | explicit allowlists require setup but improve security |
+| `setCallOptionsSchema(schema)` | zod schema for hook output | enforce validated model call options | strict schemas reject malformed hook output at runtime |
+| `prepareCall(fn)` | call hook | adjust metadata/options per model call | extra indirection if static defaults would be enough |
+| `prepareStep(fn)` | step-aware call hook | implement iterative call-option policies | step logic can become hard to reason about if overused |
 
 ### Conversation & knowledge
 
@@ -176,6 +220,7 @@ Configure pool identity and worker count at runtime bootstrap (`getInstance(...,
 | `setRetryPolicy({ maxAttempts, strategy, delayMs })` | retry policy | transient model/tool failures expected | retries improve resilience but can add latency |
 | `exposeAsHttpEndpoint(method, path, ...)` | HTTP config | endpoint should be reachable via API | public API stability commitment |
 | `setStreamingMode('sse' \| 'chunked' \| 'buffered')` | stream mode | non-default transport behavior needed | buffered hides incremental progress |
+| `setSseProtocol('purista' \| 'ai-sdk-responses' \| 'ai-sdk-ui-message' \| 'ai-sdk-data' \| 'ai-sdk-json-render' \| 'agent2agent' \| 'mcp')` | SSE wire protocol | endpoint consumer expects a specific protocol shape | protocol-specific stream shape may reduce generic client compatibility |
 
 ## Handler context breakdown
 
@@ -186,10 +231,11 @@ The handler receives a familiar context object with agent-specific helpers:
 | `logger`, `message`, `serviceContext` | Same observability handles you use inside services. |
 | `stream` | Action-oriented streaming helpers that map to the [agent protocol](./protocol-and-streaming.md): `sendChunk`, `sendFinal`, `sendReasoning`, `sendArtifact`, `sendError`. |
 | `conversation` | High-level chat history API (`addUser`, `addAssistant`, `buildPromptInput`, `getMessages`) with automatic session scoping and optional summary support. |
-| `session` | Low-level session store wrapper (`load`, `save`, `delete`) for advanced/custom state handling. |
+| `session` | Low-level conversation store wrapper (`load`, `save`, `delete`) for advanced/custom state handling. |
 | `knowledge` | Fan-out to configured knowledge adapters (`query/upsert/delete`), with automatic tenant/principal/session scope propagation. |
 | `tools` | Invoke allowlisted PURISTA commands. Events appear as tool frames for tracing/debugging. |
-| `models` | Typed access to declared model aliases (`context.models[alias]`). |
+| `models` | Typed access to declared model aliases (`context.models[alias]`). Prefer `model.generateText(...)` for one normalized stream-or-generate path. |
+| `agents` | Subagent helpers (`invoke`, `runText`) for agent-to-agent orchestration without manual event bridge wiring. |
 | `resources` | Optional custom dependencies for non-model integrations (caches, SDK clients, domain utilities). |
 
 Use these helpers instead of manually wiring protocol IDs, storing envelopes, or calling commands by hand. The builder/runtime ensure every handler runs with consistent tracing, retries, and validation.

@@ -1,15 +1,15 @@
 import { describe, expect, it } from 'vitest'
-import { InMemorySessionStore } from '../memory/sessionStore.js'
+import { InMemoryConversationStore } from '../memory/conversationStore.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
 import { createConversationHelpers } from './conversation.js'
 
 const createSessionHelpers = (sessionId = 'session-1') => {
-	const store = new InMemorySessionStore()
+	const store = new InMemoryConversationStore()
 	return {
 		load: () => store.load(sessionId),
 		save: async (record: { data: Record<string, unknown>; updatedAt?: number }) =>
 			store.save({
-				sessionId,
+				conversationId: sessionId,
 				data: record.data,
 				updatedAt: record.updatedAt ?? Date.now(),
 			}),

@@ -1,11 +1,14 @@
-import type { CommandFunctionContext, Schema, StreamFunctionContext, StreamWriter } from '@purista/core'
+import type { CommandFunctionContext, EventBridge, Schema, StreamFunctionContext, StreamWriter } from '@purista/core'
 import { extendApi, HandledError, ServiceBuilder, StatusCode } from '@purista/core'
 import { z } from 'zod/v4'
 
 import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
-import type { SessionStore } from '../memory/sessionStore.js'
+import type { ConversationStore } from '../memory/conversationStore.js'
 import type { PoolManager } from '../pools/PoolManager.js'
+import { toProtocolSseEvents } from '../protocol/sse.js'
+import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import { agentProtocolEnvelopeSchema } from '../protocol/types.js'
+import { generateText } from '../providers/runtime/generateText.js'
 import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import { AgentInstance, type AgentInstanceDependencies } from '../runtime/AgentInstance.js'
 import type { AgentHandlerContext } from '../runtime/context.js'
@@ -16,9 +19,68 @@ import type {
 	AgentManifest,
 	AgentModelCapability,
 	AgentSessionConfig,
+	AgentSseProtocol,
 	AllowedToolDefinition,
 	RetryPolicy,
 } from '../types/AgentManifest.js'
+
+/**
+ * Supported model call kinds emitted by the AgentBuilder runtime wrappers.
+ */
+export type AgentModelCallKind =
+	| 'generate'
+	| 'generateJson'
+	| 'stream'
+	| 'embed'
+	| 'embedMany'
+	| 'rerank'
+	| 'generateText'
+
+/**
+ * Normalized call options that can be prepared by hooks and merged into provider request metadata.
+ */
+export type AgentModelCallOptions = {
+	/**
+	 * Additional request metadata merged into `request.metadata`.
+	 */
+	metadata?: Record<string, unknown>
+	/**
+	 * AI SDK specific call options merged into `request.metadata.aiSdk`.
+	 */
+	aiSdk?: Record<string, unknown>
+}
+
+/**
+ * Input passed to model call preparation hooks.
+ */
+export type AgentModelCallPrepareInput = {
+	alias: string
+	callKind: AgentModelCallKind
+	/**
+	 * 1-based sequential index of model invocations in the current agent run.
+	 */
+	step: number
+	/**
+	 * 1-based index scoped by model alias + call kind.
+	 */
+	stepByAliasAndKind: number
+	/**
+	 * Original request metadata provided by handler code for this call.
+	 */
+	requestMetadata?: Record<string, unknown>
+}
+
+/**
+ * Hook executed before each model call (generate/stream/embed/...).
+ */
+export type AgentPrepareCallHook = (
+	input: AgentModelCallPrepareInput,
+) => Promise<AgentModelCallOptions | undefined> | AgentModelCallOptions | undefined
+
+/**
+ * Step-level hook similar to AI SDK `prepareStep`, invoked for each model call with deterministic step indexes.
+ */
+export type AgentPrepareStepHook = AgentPrepareCallHook
 
 type AgentHandlerResultObject = {
 	message: string
@@ -48,14 +110,18 @@ export type AgentHandler<
 type AgentRuntimeConfig<KnowledgeAliases extends string = string> = {
 	handler: AgentHandler<unknown, unknown, Record<string, unknown>, Record<string, ModelProvider>, KnowledgeAliases>
 	manifest: AgentManifest
-	sessionStore: SessionStore
+	conversationStore: ConversationStore
 	knowledgeAdapters: Record<KnowledgeAliases, KnowledgeAdapter>
 	poolManager: PoolManager
 	resources: Record<string, unknown>
 	models: Record<string, ModelProvider>
+	eventBridge: EventBridge
+	callOptionsSchema?: z.ZodType<AgentModelCallOptions>
+	prepareCall?: AgentPrepareCallHook
+	prepareStep?: AgentPrepareStepHook
 	tracer?: import('@opentelemetry/api').Tracer
 	poolId: string
-	maxWorkersPerInstance: number
+	maxConcurrencyPerInstance: number
 	concurrencyHints?: {
 		replicaCountHint?: number
 	}
@@ -66,6 +132,14 @@ const agentRuntimeConfigSchema = extendApi(
 		runtime: z.record(z.string(), z.any()).optional(),
 	}),
 	{ title: 'AgentRuntimeConfig' },
+)
+
+const sseProtocolEventSchema = extendApi(
+	z.object({
+		event: z.string(),
+		data: z.unknown(),
+	}),
+	{ title: 'AgentSseProtocolEvent' },
 )
 
 const normalizeInfo = (info: AgentInfo): AgentInfo => {
@@ -111,6 +185,39 @@ const getProviderWarnings = (metadata: Record<string, unknown> | undefined): unk
 	}
 	const warnings = (metadata as { warnings?: unknown }).warnings
 	return Array.isArray(warnings) ? warnings : []
+}
+
+const getSseProtocolDocumentationUrl = (protocol: AgentSseProtocol): string | undefined => {
+	if (protocol === 'ai-sdk-responses') {
+		return 'https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol#openai-compatible-stream'
+	}
+	if (protocol === 'ai-sdk-ui-message' || protocol === 'ai-sdk-data' || protocol === 'ai-sdk-json-render') {
+		return 'https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol'
+	}
+	if (protocol === 'agent2agent') {
+		return 'https://google.github.io/A2A/'
+	}
+	if (protocol === 'mcp') {
+		return 'https://modelcontextprotocol.io/specification/2025-06-18/'
+	}
+	return undefined
+}
+
+const isTerminalProtocolEvent = (event: { event: string; data: unknown }): boolean => {
+	if (event.event === 'data') {
+		if (event.data === '[DONE]') {
+			return true
+		}
+		if (event.data && typeof event.data === 'object') {
+			const maybeType = (event.data as { type?: unknown }).type
+			return maybeType === 'finish' || maybeType === 'abort'
+		}
+		return false
+	}
+	if (event.event === 'response.completed' || event.event === 'response.error') {
+		return true
+	}
+	return false
 }
 
 type ResolveCapability<
@@ -197,6 +304,9 @@ export class AgentBuilder<
 	private parameterSchema?: Schema
 	private outputSchema?: Schema
 	private contextSchema?: Schema
+	private callOptionsSchema?: z.ZodType<AgentModelCallOptions>
+	private prepareCallHook?: AgentPrepareCallHook
+	private prepareStepHook?: AgentPrepareStepHook
 
 	constructor(info: AgentInfo) {
 		this.info = normalizeInfo(info)
@@ -208,7 +318,7 @@ export class AgentBuilder<
 		this.serviceBuilder.setConfigSchema(agentRuntimeConfigSchema)
 		this.commandBuilder = this.serviceBuilder.getCommandBuilder('run', `Invoke ${this.info.agentName}`)
 		this.streamBuilder = this.serviceBuilder.getStreamBuilder('run', `Stream ${this.info.agentName}`)
-		this.streamBuilder.addChunkSchema(agentProtocolEnvelopeSchema)
+		this.streamBuilder.addChunkSchema(z.union([agentProtocolEnvelopeSchema, sseProtocolEventSchema]))
 		this.streamBuilder.addFinalSchema(agentProtocolEnvelopeSchema.array())
 
 		this.manifest = {
@@ -283,7 +393,7 @@ export class AgentBuilder<
 		>
 	}
 
-	useSessionStore(config: AgentSessionConfig) {
+	useConversationStore(config: AgentSessionConfig) {
 		this.manifest.session = config
 		return this
 	}
@@ -352,9 +462,9 @@ export class AgentBuilder<
 		overrides?: Partial<AgentSessionConfig>,
 	): this {
 		if (typeof configOrPreset === 'string') {
-			return this.useSessionStore(resolveHistoryPresetConfig(this.info, configOrPreset, overrides))
+			return this.useConversationStore(resolveHistoryPresetConfig(this.info, configOrPreset, overrides))
 		}
-		return this.useSessionStore(configOrPreset)
+		return this.useConversationStore(configOrPreset)
 	}
 
 	setRuntime(mode: string) {
@@ -376,7 +486,7 @@ export class AgentBuilder<
 	}
 
 	setMemory(config: AgentManifest['session']) {
-		return this.useSessionStore(config as AgentSessionConfig)
+		return this.useConversationStore(config as AgentSessionConfig)
 	}
 
 	setKnowledge(adapters: AgentManifest['knowledge']) {
@@ -439,6 +549,34 @@ export class AgentBuilder<
 		return this.addContextSchema(schema)
 	}
 
+	/**
+	 * Sets a validation schema for model call options returned by {@link prepareCall} / {@link prepareStep}.
+	 *
+	 * The schema is validated for every hook result before metadata is merged into model requests.
+	 */
+	setCallOptionsSchema(schema: z.ZodType<AgentModelCallOptions>) {
+		this.callOptionsSchema = schema
+		return this
+	}
+
+	/**
+	 * Registers a per-model-call hook that can inject metadata and AI SDK call options dynamically.
+	 */
+	prepareCall(hook: AgentPrepareCallHook) {
+		this.prepareCallHook = hook
+		return this
+	}
+
+	/**
+	 * Registers a step-aware hook invoked for each model call.
+	 *
+	 * Use this when call options need to change across iterative refinement passes.
+	 */
+	prepareStep(hook: AgentPrepareStepHook) {
+		this.prepareStepHook = hook
+		return this
+	}
+
 	exposeAsHttpEndpoint(
 		method: string,
 		path: string,
@@ -447,14 +585,13 @@ export class AgentBuilder<
 		contentTypeResponse?: string,
 		contentEncodingResponse?: string,
 	) {
-		this.commandBuilder.exposeAsHttpEndpoint(
+		this.streamBuilder.exposeAsHttpStreamEndpoint(
 			method as never,
 			path,
 			contentTypeRequest as never,
 			contentEncodingRequest,
-			contentTypeResponse as never,
-			contentEncodingResponse,
 		)
+		this.streamBuilder.setHttpStreamProtocol('purista')
 		this.manifest.httpExposure = {
 			method,
 			path,
@@ -475,8 +612,23 @@ export class AgentBuilder<
 		return this
 	}
 
+	/**
+	 * Selects the SSE wire protocol for exposed stream endpoints.
+	 *
+	 * Defaults to `purista` when not set.
+	 * This setting is only relevant when `streamingMode` is `sse`.
+	 */
+	setSseProtocol(protocol: AgentSseProtocol) {
+		if (!this.manifest.httpExposure) {
+			throw new Error('Call exposeAsHttpEndpoint before configuring the SSE protocol')
+		}
+		this.manifest.httpExposure.sseProtocol = protocol
+		this.streamBuilder.setHttpStreamProtocol(protocol, getSseProtocolDocumentationUrl(protocol))
+		return this
+	}
+
 	makeEndpointPublic() {
-		this.commandBuilder.makeEndpointPublic()
+		this.streamBuilder.makeEndpointPublic()
 		if (this.manifest.httpExposure) {
 			this.manifest.httpExposure.public = true
 		}
@@ -524,7 +676,7 @@ export class AgentBuilder<
 					? Math.trunc(runtime.concurrencyHints.replicaCountHint)
 					: undefined
 			const effectiveMaxConcurrencyHint =
-				typeof replicaCountHint === 'number' ? replicaCountHint * runtime.maxWorkersPerInstance : undefined
+				typeof replicaCountHint === 'number' ? replicaCountHint * runtime.maxConcurrencyPerInstance : undefined
 
 			const protocolBuffer = createProtocolBuffer(context, {
 				onEnvelope,
@@ -614,6 +766,133 @@ export class AgentBuilder<
 						}>
 					}
 				> = {}
+				const stepCounters = {
+					global: 0,
+					byAliasAndKind: new Map<string, number>(),
+				}
+
+				const mergeAiSdkMetadata = (
+					base: Record<string, unknown> | undefined,
+					patch: Record<string, unknown> | undefined,
+				) => {
+					const next: Record<string, unknown> = {
+						...(base ?? {}),
+					}
+					for (const [key, value] of Object.entries(patch ?? {})) {
+						const existing = next[key]
+						if (
+							existing &&
+							typeof existing === 'object' &&
+							!Array.isArray(existing) &&
+							value &&
+							typeof value === 'object' &&
+							!Array.isArray(value)
+						) {
+							next[key] = {
+								...(existing as Record<string, unknown>),
+								...(value as Record<string, unknown>),
+							}
+							continue
+						}
+						next[key] = value
+					}
+					return next
+				}
+
+				const mergeMetadata = (
+					base: Record<string, unknown> | undefined,
+					options: AgentModelCallOptions | undefined,
+				): Record<string, unknown> => {
+					const merged: Record<string, unknown> = {
+						...(base ?? {}),
+						...(options?.metadata ?? {}),
+					}
+					const baseAiSdk =
+						merged.aiSdk && typeof merged.aiSdk === 'object' && !Array.isArray(merged.aiSdk)
+							? (merged.aiSdk as Record<string, unknown>)
+							: undefined
+					const mergedAiSdk = mergeAiSdkMetadata(baseAiSdk, options?.aiSdk)
+					if (Object.keys(mergedAiSdk).length > 0) {
+						merged.aiSdk = mergedAiSdk
+					}
+					return merged
+				}
+
+				const addAiSdkTelemetry = (
+					metadata: Record<string, unknown> | undefined,
+					callKind: 'generate' | 'generateJson' | 'embed' | 'embedMany' | 'rerank' | 'stream',
+					alias: string,
+				): Record<string, unknown> => {
+					const current = metadata ?? {}
+					const aiSdk =
+						current.aiSdk && typeof current.aiSdk === 'object' && !Array.isArray(current.aiSdk)
+							? (current.aiSdk as Record<string, unknown>)
+							: {}
+					const aiSdkTargetKey = callKind === 'stream' ? 'generate' : callKind
+					const aiSdkTarget =
+						aiSdk[aiSdkTargetKey] && typeof aiSdk[aiSdkTargetKey] === 'object' && !Array.isArray(aiSdk[aiSdkTargetKey])
+							? (aiSdk[aiSdkTargetKey] as Record<string, unknown>)
+							: {}
+
+					return {
+						...current,
+						aiSdk: {
+							...aiSdk,
+							[aiSdkTargetKey]: {
+								...aiSdkTarget,
+								experimental_telemetry: {
+									isEnabled: true,
+									functionId: `${runtime.manifest.agentName}.model.${callKind}`,
+									metadata: {
+										agentName: runtime.manifest.agentName,
+										agentVersion: runtime.manifest.agentVersion,
+										poolId,
+										maxConcurrencyPerInstance: runtime.maxConcurrencyPerInstance,
+										activeWorkers: acquireResult.activeWorkers,
+										waitingWorkers: acquireResult.waitingWorkers,
+										replicaCountHint,
+										effectiveMaxConcurrencyHint,
+										modelAlias: alias,
+									},
+									tracer: runtime.tracer,
+								},
+							},
+						},
+					}
+				}
+
+				const resolvePreparedMetadata = async (input: {
+					alias: string
+					callKind: AgentModelCallKind
+					requestMetadata?: Record<string, unknown>
+				}): Promise<Record<string, unknown> | undefined> => {
+					const key = `${input.alias}:${input.callKind}`
+					stepCounters.global += 1
+					const kindStep = (stepCounters.byAliasAndKind.get(key) ?? 0) + 1
+					stepCounters.byAliasAndKind.set(key, kindStep)
+
+					const hookInput: AgentModelCallPrepareInput = {
+						alias: input.alias,
+						callKind: input.callKind,
+						step: stepCounters.global,
+						stepByAliasAndKind: kindStep,
+						requestMetadata: input.requestMetadata,
+					}
+
+					const parseOptions = (value: AgentModelCallOptions | undefined): AgentModelCallOptions | undefined => {
+						if (!value) {
+							return undefined
+						}
+						if (runtime.callOptionsSchema) {
+							return runtime.callOptionsSchema.parse(value)
+						}
+						return value
+					}
+
+					const preparedCall = parseOptions(await runtime.prepareCall?.(hookInput))
+					const preparedStep = parseOptions(await runtime.prepareStep?.(hookInput))
+					return mergeMetadata(mergeMetadata(input.requestMetadata, preparedCall), preparedStep)
+				}
 
 				for (const [alias, provider] of Object.entries(runtime.models)) {
 					const modelApi: ModelProvider = {
@@ -629,39 +908,19 @@ export class AgentBuilder<
 						}) => {
 							const requestStartedAt = Date.now()
 							try {
-								const metadata = request.metadata ?? {}
-								const aiSdkMetadata =
-									typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
-										? (metadata.aiSdk as Record<string, unknown>)
-										: {}
+								const metadata = addAiSdkTelemetry(
+									await resolvePreparedMetadata({
+										alias,
+										callKind: 'generate',
+										requestMetadata: request.metadata,
+									}),
+									'generate',
+									alias,
+								)
 
 								const result = await provider.generate?.({
 									...request,
-									metadata: {
-										...metadata,
-										aiSdk: {
-											...(aiSdkMetadata.generate && typeof aiSdkMetadata.generate === 'object' ? aiSdkMetadata : {}),
-											generate: {
-												...((aiSdkMetadata.generate as Record<string, unknown> | undefined) ?? {}),
-												experimental_telemetry: {
-													isEnabled: true,
-													functionId: `${runtime.manifest.agentName}.model.generate`,
-													metadata: {
-														agentName: runtime.manifest.agentName,
-														agentVersion: runtime.manifest.agentVersion,
-														poolId,
-														maxWorkersPerInstance: runtime.maxWorkersPerInstance,
-														activeWorkers: acquireResult.activeWorkers,
-														waitingWorkers: acquireResult.waitingWorkers,
-														replicaCountHint,
-														effectiveMaxConcurrencyHint,
-														modelAlias: alias,
-													},
-													tracer: runtime.tracer,
-												},
-											},
-										},
-									},
+									metadata,
 								})
 								if (!result) {
 									throw new HandledError(StatusCode.InternalServerError, 'Model generate provider unavailable')
@@ -697,40 +956,18 @@ export class AgentBuilder<
 						}> => {
 							const requestStartedAt = Date.now()
 							try {
-								const metadata = request.metadata ?? {}
-								const aiSdkMetadata =
-									typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
-										? (metadata.aiSdk as Record<string, unknown>)
-										: {}
+								const metadata = addAiSdkTelemetry(
+									await resolvePreparedMetadata({
+										alias,
+										callKind: 'generateJson',
+										requestMetadata: request.metadata,
+									}),
+									'generateJson',
+									alias,
+								)
 								const result = await provider.generateJson?.({
 									...request,
-									metadata: {
-										...metadata,
-										aiSdk: {
-											...(aiSdkMetadata.generateJson && typeof aiSdkMetadata.generateJson === 'object'
-												? aiSdkMetadata
-												: {}),
-											generateJson: {
-												...((aiSdkMetadata.generateJson as Record<string, unknown> | undefined) ?? {}),
-												experimental_telemetry: {
-													isEnabled: true,
-													functionId: `${runtime.manifest.agentName}.model.generateJson`,
-													metadata: {
-														agentName: runtime.manifest.agentName,
-														agentVersion: runtime.manifest.agentVersion,
-														poolId,
-														maxWorkersPerInstance: runtime.maxWorkersPerInstance,
-														activeWorkers: acquireResult.activeWorkers,
-														waitingWorkers: acquireResult.waitingWorkers,
-														replicaCountHint,
-														effectiveMaxConcurrencyHint,
-														modelAlias: alias,
-													},
-													tracer: runtime.tracer,
-												},
-											},
-										},
-									},
+									metadata,
 								})
 								if (!result) {
 									throw new HandledError(StatusCode.InternalServerError, 'Model JSON provider unavailable')
@@ -760,56 +997,39 @@ export class AgentBuilder<
 						const streamProvider = provider.stream.bind(provider)
 						modelApi.stream = (request: { prompt: string; context?: string; metadata?: Record<string, unknown> }) => {
 							const requestStartedAt = Date.now()
-							let streamHandle: ReturnType<NonNullable<ModelProvider['stream']>> | undefined
-							try {
-								const metadata = request.metadata ?? {}
-								const aiSdkMetadata =
-									typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
-										? (metadata.aiSdk as Record<string, unknown>)
-										: {}
-
-								streamHandle = streamProvider({
-									...request,
-									metadata: {
-										...metadata,
-										aiSdk: {
-											...(aiSdkMetadata.stream && typeof aiSdkMetadata.stream === 'object' ? aiSdkMetadata : {}),
-											generate: {
-												...((aiSdkMetadata.generate as Record<string, unknown> | undefined) ?? {}),
-												experimental_telemetry: {
-													isEnabled: true,
-													functionId: `${runtime.manifest.agentName}.model.stream`,
-													metadata: {
-														agentName: runtime.manifest.agentName,
-														agentVersion: runtime.manifest.agentVersion,
-														poolId,
-														maxWorkersPerInstance: runtime.maxWorkersPerInstance,
-														activeWorkers: acquireResult.activeWorkers,
-														waitingWorkers: acquireResult.waitingWorkers,
-														replicaCountHint,
-														effectiveMaxConcurrencyHint,
-														modelAlias: alias,
-													},
-													tracer: runtime.tracer,
-												},
-											},
-										},
-									},
-								})
-							} catch (error) {
-								logProviderFailure('stream', alias, provider.name, requestStartedAt, error)
-								throw error
-							}
-
-							if (!streamHandle) {
-								const error = new HandledError(StatusCode.InternalServerError, 'Model stream provider unavailable')
-								logProviderFailure('stream', alias, provider.name, requestStartedAt, error)
-								throw error
+							let streamHandlePromise: Promise<ReturnType<NonNullable<ModelProvider['stream']>>> | undefined
+							const resolveStream = async () => {
+								streamHandlePromise ??= (async () => {
+									try {
+										const metadata = addAiSdkTelemetry(
+											await resolvePreparedMetadata({
+												alias,
+												callKind: 'stream',
+												requestMetadata: request.metadata,
+											}),
+											'stream',
+											alias,
+										)
+										const streamHandle = streamProvider({
+											...request,
+											metadata,
+										})
+										if (!streamHandle) {
+											throw new HandledError(StatusCode.InternalServerError, 'Model stream provider unavailable')
+										}
+										return streamHandle
+									} catch (error) {
+										logProviderFailure('stream', alias, provider.name, requestStartedAt, error)
+										throw error
+									}
+								})()
+								return await streamHandlePromise
 							}
 
 							return {
 								final: async () => {
 									try {
+										const streamHandle = await resolveStream()
 										const result = await streamHandle.final()
 										logProviderWarnings('stream', alias, provider.name, result.metadata)
 										usage.provider = provider.name
@@ -822,7 +1042,12 @@ export class AgentBuilder<
 										throw error
 									}
 								},
-								[Symbol.asyncIterator]: streamHandle[Symbol.asyncIterator].bind(streamHandle),
+								async *[Symbol.asyncIterator]() {
+									const streamHandle = await resolveStream()
+									for await (const chunk of streamHandle) {
+										yield chunk
+									}
+								},
 							}
 						}
 					}
@@ -835,38 +1060,18 @@ export class AgentBuilder<
 							embed: async request => {
 								const requestStartedAt = Date.now()
 								try {
-									const metadata = request.metadata ?? {}
-									const aiSdkMetadata =
-										typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
-											? (metadata.aiSdk as Record<string, unknown>)
-											: {}
+									const metadata = addAiSdkTelemetry(
+										await resolvePreparedMetadata({
+											alias,
+											callKind: 'embed',
+											requestMetadata: request.metadata,
+										}),
+										'embed',
+										alias,
+									)
 									const result = await embedProvider({
 										...request,
-										metadata: {
-											...metadata,
-											aiSdk: {
-												...aiSdkMetadata,
-												embed: {
-													...((aiSdkMetadata.embed as Record<string, unknown> | undefined) ?? {}),
-													experimental_telemetry: {
-														isEnabled: true,
-														functionId: `${runtime.manifest.agentName}.model.embed`,
-														metadata: {
-															agentName: runtime.manifest.agentName,
-															agentVersion: runtime.manifest.agentVersion,
-															poolId,
-															maxWorkersPerInstance: runtime.maxWorkersPerInstance,
-															activeWorkers: acquireResult.activeWorkers,
-															waitingWorkers: acquireResult.waitingWorkers,
-															replicaCountHint,
-															effectiveMaxConcurrencyHint,
-															modelAlias: alias,
-														},
-														tracer: runtime.tracer,
-													},
-												},
-											},
-										},
+										metadata,
 									})
 									logProviderWarnings('embed', alias, provider.name, result?.metadata)
 									return result
@@ -879,38 +1084,18 @@ export class AgentBuilder<
 								? async request => {
 										const requestStartedAt = Date.now()
 										try {
-											const metadata = request.metadata ?? {}
-											const aiSdkMetadata =
-												typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
-													? (metadata.aiSdk as Record<string, unknown>)
-													: {}
+											const metadata = addAiSdkTelemetry(
+												await resolvePreparedMetadata({
+													alias,
+													callKind: 'embedMany',
+													requestMetadata: request.metadata,
+												}),
+												'embedMany',
+												alias,
+											)
 											const result = await embedManyProvider({
 												...request,
-												metadata: {
-													...metadata,
-													aiSdk: {
-														...aiSdkMetadata,
-														embedMany: {
-															...((aiSdkMetadata.embedMany as Record<string, unknown> | undefined) ?? {}),
-															experimental_telemetry: {
-																isEnabled: true,
-																functionId: `${runtime.manifest.agentName}.model.embedMany`,
-																metadata: {
-																	agentName: runtime.manifest.agentName,
-																	agentVersion: runtime.manifest.agentVersion,
-																	poolId,
-																	maxWorkersPerInstance: runtime.maxWorkersPerInstance,
-																	activeWorkers: acquireResult.activeWorkers,
-																	waitingWorkers: acquireResult.waitingWorkers,
-																	replicaCountHint,
-																	effectiveMaxConcurrencyHint,
-																	modelAlias: alias,
-																},
-																tracer: runtime.tracer,
-															},
-														},
-													},
-												},
+												metadata,
 											})
 											logProviderWarnings('embedMany', alias, provider.name, result?.metadata)
 											return result
@@ -930,38 +1115,18 @@ export class AgentBuilder<
 							rerank: async request => {
 								const requestStartedAt = Date.now()
 								try {
-									const metadata = request.metadata ?? {}
-									const aiSdkMetadata =
-										typeof metadata.aiSdk === 'object' && metadata.aiSdk !== null
-											? (metadata.aiSdk as Record<string, unknown>)
-											: {}
+									const metadata = addAiSdkTelemetry(
+										await resolvePreparedMetadata({
+											alias,
+											callKind: 'rerank',
+											requestMetadata: request.metadata,
+										}),
+										'rerank',
+										alias,
+									)
 									const result = (await rerankProvider({
 										...request,
-										metadata: {
-											...metadata,
-											aiSdk: {
-												...aiSdkMetadata,
-												rerank: {
-													...((aiSdkMetadata.rerank as Record<string, unknown> | undefined) ?? {}),
-													experimental_telemetry: {
-														isEnabled: true,
-														functionId: `${runtime.manifest.agentName}.model.rerank`,
-														metadata: {
-															agentName: runtime.manifest.agentName,
-															agentVersion: runtime.manifest.agentVersion,
-															poolId,
-															maxWorkersPerInstance: runtime.maxWorkersPerInstance,
-															activeWorkers: acquireResult.activeWorkers,
-															waitingWorkers: acquireResult.waitingWorkers,
-															replicaCountHint,
-															effectiveMaxConcurrencyHint,
-															modelAlias: alias,
-														},
-														tracer: runtime.tracer,
-													},
-												},
-											},
-										},
+										metadata,
 									} as any)) as any
 									logProviderWarnings('rerank', alias, provider.name, result?.metadata)
 									return result as any
@@ -974,15 +1139,30 @@ export class AgentBuilder<
 					}
 
 					if (modelApi.generate || modelApi.stream) {
+						modelApi.generateText = async request =>
+							await generateText({
+								model: modelApi,
+								request: {
+									prompt: request.prompt,
+									context: request.context,
+									metadata: request.metadata,
+								},
+								onReasoning: request.onReasoning,
+								onTextDelta: request.onTextDelta,
+							})
+					}
+
+					if (modelApi.generate || modelApi.stream) {
 						instrumentedModels[alias] = modelApi
 					}
 				}
 
 				const agentContext = createAgentHandlerContext({
 					serviceContext: context,
+					eventBridge: runtime.eventBridge,
 					payload,
 					parameter,
-					sessionStore: runtime.sessionStore,
+					conversationStore: runtime.conversationStore,
 					knowledgeAdapters: runtime.knowledgeAdapters,
 					protocol: protocolBuffer.protocol,
 					resources: runtime.resources,
@@ -1024,7 +1204,7 @@ export class AgentBuilder<
 						durationMs: Date.now() - started,
 						waitTimeMs: acquireResult.waitTimeMs || started - enqueuedAt,
 						poolId,
-						maxWorkersPerInstance: runtime.maxWorkersPerInstance,
+						maxConcurrencyPerInstance: runtime.maxConcurrencyPerInstance,
 						activeWorkers: acquireResult.activeWorkers,
 						waitingWorkers: acquireResult.waitingWorkers,
 						replicaCountHint,
@@ -1068,9 +1248,47 @@ export class AgentBuilder<
 			parameter: unknown,
 			writer: StreamWriter<unknown, unknown[]>,
 		) {
-			const final = (await executeAgent(this, context, payload, parameter, async envelope => {
-				await writer.write(envelope)
-			})) as unknown[]
+			const protocol = this.config?.runtime?.manifest.httpExposure?.sseProtocol ?? 'purista'
+			const streamedEnvelopes: AgentProtocolEnvelope[] = []
+			let emittedEventCount = 0
+			const flushConvertedEvents = async (includeTerminal = false) => {
+				const allEvents: Array<{ event: string; data: unknown }> = []
+				for await (const event of toProtocolSseEvents(
+					streamedEnvelopes,
+					protocol as Exclude<AgentSseProtocol, 'purista'>,
+				)) {
+					allEvents.push(event)
+				}
+				const visibleEvents = includeTerminal ? allEvents : allEvents.filter(event => !isTerminalProtocolEvent(event))
+				if (visibleEvents.length <= emittedEventCount) {
+					return
+				}
+				for (const event of visibleEvents.slice(emittedEventCount)) {
+					await writer.write(event as unknown)
+				}
+				emittedEventCount = visibleEvents.length
+			}
+			const final = (await executeAgent(
+				this,
+				context,
+				payload,
+				parameter,
+				protocol === 'purista'
+					? async envelope => {
+							await writer.write(envelope)
+						}
+					: async envelope => {
+							streamedEnvelopes.push(agentProtocolEnvelopeSchema.parse(envelope))
+							await flushConvertedEvents(false)
+						},
+			)) as unknown[]
+
+			if (protocol !== 'purista') {
+				const finalEnvelopes = agentProtocolEnvelopeSchema.array().parse(final)
+				streamedEnvelopes.splice(0, streamedEnvelopes.length, ...finalEnvelopes)
+				await flushConvertedEvents(true)
+			}
+
 			await writer.close(final)
 		})
 
@@ -1109,6 +1327,9 @@ export class AgentBuilder<
 			manifest,
 			serviceBuilder: this.serviceBuilder,
 			handler: this.handler,
+			callOptionsSchema: this.callOptionsSchema,
+			prepareCall: this.prepareCallHook,
+			prepareStep: this.prepareStepHook,
 		}
 
 		return {

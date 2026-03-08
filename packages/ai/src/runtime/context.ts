@@ -1,4 +1,4 @@
-import type { CommandFunctionContext, Logger, StreamFunctionContext } from '@purista/core'
+import type { CommandFunctionContext, EventBridge, Logger, StreamFunctionContext } from '@purista/core'
 import { HandledError, StatusCode } from '@purista/core'
 
 import type {
@@ -8,7 +8,11 @@ import type {
 	KnowledgeQueryRequest,
 	KnowledgeUpsertRequest,
 } from '../knowledge/adapters/inMemoryAdapter.js'
-import type { SessionRecord, SessionRecordData, SessionStore } from '../memory/sessionStore.js'
+import type {
+	ConversationStore,
+	ConversationStoreRecord,
+	ConversationStoreRecordData,
+} from '../memory/conversationStore.js'
 import {
 	createArtifactFrame,
 	createEnvelopeFromContext,
@@ -29,6 +33,7 @@ import type {
 } from '../providers/runtime/ModelProvider.js'
 import type { AgentManifest, AllowedToolDefinition } from '../types/AgentManifest.js'
 import { type ConversationHelpers, createConversationHelpers } from './conversation.js'
+import { invokeAgent } from './invokeAgent.js'
 import { createScopedSessionId, resolveBaseSessionId } from './sessionIdentity.js'
 
 type ProtocolFrameEntry = {
@@ -53,7 +58,7 @@ type ProtocolEmitter = {
 		durationMs?: number
 		waitTimeMs?: number
 		poolId?: string
-		maxWorkersPerInstance?: number
+		maxConcurrencyPerInstance?: number
 		activeWorkers?: number
 		waitingWorkers?: number
 		replicaCountHint?: number
@@ -97,9 +102,15 @@ export type AgentStreamEmitter = {
 
 const createStreamEmitter = (protocol: ProtocolEmitter): AgentStreamEmitter => ({
 	sendChunk(content) {
+		if (content.length === 0) {
+			return
+		}
 		protocol.emitMessage({ content, partial: true, final: false })
 	},
 	sendFinal(content, options) {
+		if (content.length === 0) {
+			return
+		}
 		protocol.emitMessage({ content, summary: options?.summary, partial: false, final: true })
 	},
 	sendReasoning(content, options) {
@@ -180,6 +191,9 @@ export const createProtocolBuffer = (
 				partial: message.partial,
 				final: message.final,
 			})
+			if (frame.content.length === 0) {
+				return
+			}
 			pushFrame(frame)
 		},
 		emitArtifact(input) {
@@ -199,7 +213,7 @@ export const createProtocolBuffer = (
 				durationMs: metrics.durationMs,
 				waitTimeMs: metrics.waitTimeMs,
 				poolId: metrics.poolId,
-				maxWorkersPerInstance: metrics.maxWorkersPerInstance,
+				maxConcurrencyPerInstance: metrics.maxConcurrencyPerInstance,
 				activeWorkers: metrics.activeWorkers,
 				waitingWorkers: metrics.waitingWorkers,
 				replicaCountHint: metrics.replicaCountHint,
@@ -350,11 +364,15 @@ export type SessionHelpers = {
 	/**
 	 * Load the session record. If no id is provided, the default scoped id is used.
 	 */
-	load(sessionId?: string): Promise<SessionRecord | undefined>
+	load(sessionId?: string): Promise<ConversationStoreRecord | undefined>
 	/**
 	 * Save session data. If `sessionId` is omitted, the default scoped id is used.
 	 */
-	save(record: SessionRecord | { sessionId?: string; data: SessionRecordData; updatedAt?: number }): Promise<void>
+	save(
+		record:
+			| ConversationStoreRecord
+			| { conversationId?: string; data: ConversationStoreRecordData; updatedAt?: number },
+	): Promise<void>
 	/**
 	 * Delete a session. If no id is provided, the default scoped id is used.
 	 */
@@ -381,7 +399,7 @@ type SessionIdentityInput = {
 	payload: unknown
 }
 
-const createSessionHelpers = (store: SessionStore, input: SessionIdentityInput): SessionHelpers => {
+const createSessionHelpers = (store: ConversationStore, input: SessionIdentityInput): SessionHelpers => {
 	const baseSessionId = resolveBaseSessionId(input.context, input.payload)
 	const identity = {
 		agentName: input.manifest.agentName,
@@ -404,7 +422,7 @@ const createSessionHelpers = (store: SessionStore, input: SessionIdentityInput):
 		load: sessionId => store.load(resolveId(sessionId)),
 		save: record =>
 			store.save({
-				sessionId: resolveId(record.sessionId),
+				conversationId: resolveId(record.conversationId),
 				data: record.data,
 				updatedAt: record.updatedAt ?? Date.now(),
 			}),
@@ -563,6 +581,16 @@ export type AgentHandlerContext<
 	tools: ToolInvoker
 	resources: Resources
 	models: Models
+	agents: {
+		/**
+		 * Invokes another agent via EventBridge and returns its emitted envelopes.
+		 */
+		invoke(options: AgentInvocationOptions): Promise<AgentProtocolEnvelope[]>
+		/**
+		 * Invokes another agent and extracts a best-effort assistant text output from message frames.
+		 */
+		runText(options: AgentInvocationOptions): Promise<string>
+	}
 	embeddings: {
 		[Alias in keyof Models as Models[Alias] extends { embed: (...args: any[]) => any } ? Alias : never]: {
 			name: string
@@ -590,9 +618,10 @@ export type CreateAgentHandlerContextInput<
 	KnowledgeAliases extends string = string,
 > = {
 	serviceContext: CommandFunctionContext<Payload, Parameter> | StreamFunctionContext<Payload, Parameter>
+	eventBridge: EventBridge
 	payload: Payload
 	parameter: Parameter
-	sessionStore: SessionStore
+	conversationStore: ConversationStore
 	knowledgeAdapters: Record<KnowledgeAliases, KnowledgeAdapter | undefined>
 	protocol: ProtocolEmitter
 	resources: Resources
@@ -610,6 +639,75 @@ export type CreateAgentHandlerContextInput<
 	manifest: AgentManifest
 }
 
+export type AgentInvocationOptions = {
+	agentName: string
+	agentVersion: string
+	payload: unknown
+	parameter?: unknown
+	timeoutMs?: number
+	correlationId?: string
+	sessionId?: string
+	/**
+	 * Controls whether protocol `error` envelopes from the invoked sub-agent throw immediately.
+	 * Defaults to `true`.
+	 */
+	failOnErrorFrame?: boolean
+	stream?: import('../types/AgentDefinition.js').AgentStreamResponder
+}
+
+const createAgentInvocationHelpers = (input: {
+	eventBridge: EventBridge
+	serviceContext: CommandFunctionContext | StreamFunctionContext
+	session: SessionHelpers
+}) => {
+	const invoke = async (options: AgentInvocationOptions) => {
+		return await invokeAgent({
+			eventBridge: input.eventBridge,
+			agentName: options.agentName,
+			agentVersion: options.agentVersion,
+			payload: options.payload,
+			parameter: options.parameter,
+			timeoutMs: options.timeoutMs,
+			stream: options.stream,
+			correlationId: options.correlationId ?? input.serviceContext.message.correlationId,
+			principalId: input.serviceContext.message.principalId,
+			tenantId: input.serviceContext.message.tenantId,
+			sessionId: options.sessionId ?? input.session.identity.baseSessionId,
+			failOnErrorFrame: options.failOnErrorFrame ?? true,
+		})
+	}
+
+	const runText = async (options: Parameters<typeof invoke>[0]) => {
+		const envelopes = await invoke(options)
+		const assistantMessageFrames = envelopes
+			.map(envelope => envelope.frame)
+			.filter(
+				(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'message' }> =>
+					frame.kind === 'message' && frame.role === 'assistant',
+			)
+		let finalMessage: string | undefined
+		for (let index = assistantMessageFrames.length - 1; index >= 0; index -= 1) {
+			const frame = assistantMessageFrames[index]
+			if (frame?.final === true) {
+				finalMessage = frame.content
+				break
+			}
+		}
+		if (typeof finalMessage === 'string' && finalMessage.trim().length > 0) {
+			return finalMessage
+		}
+		return assistantMessageFrames
+			.map(frame => frame.content)
+			.filter((content): content is string => typeof content === 'string' && content.length > 0)
+			.join('')
+	}
+
+	return {
+		invoke,
+		runText,
+	}
+}
+
 export const createAgentHandlerContext = <
 	Payload,
 	Parameter,
@@ -619,7 +717,7 @@ export const createAgentHandlerContext = <
 >(
 	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models, KnowledgeAliases>,
 ): AgentHandlerContext<Payload, Parameter, Resources, Models, KnowledgeAliases> => {
-	const sessionHelpers = createSessionHelpers(input.sessionStore, {
+	const sessionHelpers = createSessionHelpers(input.conversationStore, {
 		context: input.serviceContext,
 		manifest: input.manifest,
 		payload: input.payload,
@@ -641,6 +739,11 @@ export const createAgentHandlerContext = <
 		tools: createToolInvoker(input.serviceContext, input.manifest.allowedTools ?? [], input.protocol),
 		resources: input.resources,
 		models: input.models,
+		agents: createAgentInvocationHelpers({
+			eventBridge: input.eventBridge,
+			serviceContext: input.serviceContext,
+			session: sessionHelpers,
+		}),
 		embeddings: input.embeddings as AgentHandlerContext<
 			Payload,
 			Parameter,

@@ -1,5 +1,5 @@
 import { InMemoryKnowledgeAdapter } from '../../../../knowledge/adapters/inMemoryAdapter.js'
-import { InMemorySessionStore } from '../../../../memory/sessionStore.js'
+import { InMemoryConversationStore } from '../../../../memory/conversationStore.js'
 import { PoolManager } from '../../../../pools/PoolManager.js'
 import { defaultModelResourceRegistry } from '../../../../providers/resources/ModelResourceRegistry.js'
 import { AgentExecutor } from '../../../../runtime/AgentExecutor.js'
@@ -8,15 +8,44 @@ import { aiWorkerServiceBuilder } from '../info/info.js'
 import { aiWorkloadsQueueBuilder } from './aiWorkloads/aiWorkloadsQueueBuilder.js'
 import { aiWorkloadQueuePayloadSchema } from './aiWorkloads/schema.js'
 
-const sessionStore = new InMemorySessionStore()
+const conversationStore = new InMemoryConversationStore()
 const knowledgeAdapter = new InMemoryKnowledgeAdapter()
 const poolManager = new PoolManager({ default: 2 })
+
+/**
+ * Worker queue payload metadata must stay JSON-serializable.
+ * Function-based AI SDK tools cannot be transported/executed by the worker runtime yet.
+ */
+export const getUnsupportedWorkerAiSdkReason = (metadata: unknown): string | null => {
+	if (!metadata || typeof metadata !== 'object' || Array.isArray(metadata)) {
+		return null
+	}
+	const aiSdk = (metadata as { aiSdk?: unknown }).aiSdk
+	if (!aiSdk || typeof aiSdk !== 'object' || Array.isArray(aiSdk)) {
+		return null
+	}
+	const aiSdkRecord = aiSdk as Record<string, unknown>
+	const generate =
+		aiSdkRecord.generate && typeof aiSdkRecord.generate === 'object' && !Array.isArray(aiSdkRecord.generate)
+			? (aiSdkRecord.generate as Record<string, unknown>)
+			: undefined
+	if ('tools' in aiSdkRecord || (generate && 'tools' in generate)) {
+		return 'AIWorkerService queue runtime does not support function-based aiSdk.tools yet. Run this agent in-process or use command allowlist tools via context.tools.'
+	}
+	return null
+}
 
 export const executeWorkloadQueueWorkerBuilder = aiWorkerServiceBuilder
 	.getQueueWorkerBuilder('aiWorkloads', 'Executes AI workloads using the registered model providers')
 	.setMode('continuous')
 	.setHandler(async function (context, message) {
 		const payload = aiWorkloadQueuePayloadSchema.parse(message.payload)
+		const unsupportedReason = getUnsupportedWorkerAiSdkReason(payload.metadata)
+		if (unsupportedReason) {
+			context.logger.warn({ jobId: message.id, unsupportedReason }, 'AI workload rejected due to unsupported metadata')
+			await context.job.fail(unsupportedReason, true)
+			return undefined
+		}
 		const manifest = (await context.configs.getConfig(payload.manifestKey)) as AgentManifest | undefined
 
 		if (!manifest) {
@@ -25,8 +54,9 @@ export const executeWorkloadQueueWorkerBuilder = aiWorkerServiceBuilder
 		}
 
 		const poolId = typeof payload.metadata?.poolId === 'string' ? payload.metadata.poolId : 'default'
-		const maxWorkers = typeof payload.metadata?.maxWorkers === 'number' ? payload.metadata.maxWorkers : 1
-		poolManager.registerPool(poolId, maxWorkers)
+		const maxConcurrencyPerInstance =
+			typeof payload.metadata?.maxConcurrencyPerInstance === 'number' ? payload.metadata.maxConcurrencyPerInstance : 1
+		poolManager.registerPool(poolId, maxConcurrencyPerInstance)
 
 		await poolManager.acquire(poolId)
 
@@ -45,7 +75,7 @@ export const executeWorkloadQueueWorkerBuilder = aiWorkerServiceBuilder
 			const executor = new AgentExecutor({
 				manifest,
 				provider,
-				sessionStore,
+				conversationStore,
 				knowledgeAdapters: { default: knowledgeAdapter },
 				logger: context.logger,
 				startActiveSpan: (name, options, spanContext, fn) =>

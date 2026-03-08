@@ -48,7 +48,7 @@ describe('protocol helpers', () => {
 			durationMs: 100,
 			waitTimeMs: 3,
 			poolId: 'support',
-			maxWorkersPerInstance: 4,
+			maxConcurrencyPerInstance: 4,
 			activeWorkers: 2,
 			waitingWorkers: 1,
 			replicaCountHint: 3,
@@ -68,7 +68,7 @@ describe('protocol helpers', () => {
 		expect(tool.kind).toBe('tool')
 		expect(error.kind).toBe('error')
 		expect(telemetry.usage?.totalTokens).toBe(3)
-		expect(telemetry.maxWorkersPerInstance).toBe(4)
+		expect(telemetry.maxConcurrencyPerInstance).toBe(4)
 		expect(telemetry.effectiveMaxConcurrencyHint).toBe(12)
 	})
 })

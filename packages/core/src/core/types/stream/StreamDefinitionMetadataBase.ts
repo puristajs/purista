@@ -18,6 +18,10 @@ export type StreamDefinitionMetadataBase = {
 		http?: {
 			method: SupportedHttpMethod
 			path: string
+			stream?: {
+				protocol: string
+				documentationUrl?: string
+			}
 			openApi?: {
 				isSecure: boolean
 				description: string

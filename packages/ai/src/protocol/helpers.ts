@@ -106,7 +106,7 @@ export const createTelemetryFrame = (input: {
 	durationMs?: number
 	waitTimeMs?: number
 	poolId?: string
-	maxWorkersPerInstance?: number
+	maxConcurrencyPerInstance?: number
 	activeWorkers?: number
 	waitingWorkers?: number
 	replicaCountHint?: number
@@ -119,7 +119,7 @@ export const createTelemetryFrame = (input: {
 		durationMs: input.durationMs,
 		waitTimeMs: input.waitTimeMs,
 		poolId: input.poolId,
-		maxWorkersPerInstance: input.maxWorkersPerInstance,
+		maxConcurrencyPerInstance: input.maxConcurrencyPerInstance,
 		activeWorkers: input.activeWorkers,
 		waitingWorkers: input.waitingWorkers,
 		replicaCountHint: input.replicaCountHint,

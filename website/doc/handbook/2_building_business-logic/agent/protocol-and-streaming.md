@@ -13,6 +13,8 @@ Every agent invocation returns protocol envelopes. Each envelope contains:
 
 In daily usage you do not build envelopes manually; `context.stream` and runtime helpers do that for you.
 
+PURISTA envelopes are the native canonical protocol. External wire formats should be derived from envelopes at boundaries.
+
 ## Frame types
 
 | Kind | Purpose |
@@ -44,6 +46,26 @@ export const supportAgent = new AgentBuilder({ ... })
 
 SSE is the default streaming mode for exposed agent endpoints. Use `.setStreamingMode(...)` only when you need `chunked` or `buffered`.
 
+For SSE endpoints, you can also pick a protocol shape explicitly:
+
+```ts
+export const supportAgent = new AgentBuilder({ ... })
+  .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
+  .setSseProtocol('ai-sdk-ui-message') // or 'purista' | 'ai-sdk-data' | 'ai-sdk-json-render' | 'ai-sdk-responses' | 'agent2agent' | 'mcp'
+  .build()
+```
+
+### SSE protocol choices
+
+| Protocol | Intended consumer |
+| --- | --- |
+| `purista` | native PURISTA clients/tools |
+| `ai-sdk-ui-message` / `ai-sdk-data` | Vercel AI SDK UI stream consumers |
+| `ai-sdk-json-render` | AI SDK UI + `@json-render/react` (`data-spec` parts) |
+| `ai-sdk-responses` | OpenAI Responses-style stream consumers |
+| `agent2agent` | A2A adapter boundaries |
+| `mcp` | MCP adapter boundaries |
+
 ### Streaming mode decision guide
 
 | Mode | Best for | Pros | Cons |
@@ -73,6 +95,8 @@ export async function handler(req, res) {
 `invokeAgent` is streaming-first: it opens an EventBridge stream and collects envelopes from that live session. `.final()` style behavior is collector sugar, not a separate buffering transport.
 
 UI teams using [`ai-sdk-ui`](https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol) can consume these events directly—no custom adapters required. The helper maps PURISTA frames to AI SDK events (`response.created`, `response.output_text.delta`, `response.completed`, etc.) and forwards telemetry (tokens, duration) as `response.metrics`.
+
+If you use [`json-render`](https://json-render.dev/docs), choose `ai-sdk-json-render`: artifact frames are emitted as `data-spec` parts (`patch` / `flat` / `nested`) so frontend renderers can reconstruct specs progressively.
 
 ## Background streaming
 
@@ -135,6 +159,7 @@ For the full protocol semantics, message contract, and interoperability guidance
 - Throw a `HandledError` when the agent can recover or wants to inform the caller about user-facing issues. The runtime emits an `error` frame with `handled: true` and propagates the HTTP status code if the agent is exposed via HTTP.
 - Throwing anything else marks the frame as `handled: false`. The runtime still wraps it inside a structured error frame, preserving stack traces inside `details` for debugging.
 - Retries and concurrency guarantees happen before frames are emitted, so consumers see idempotent streams even when the agent internally retries a provider call.
+- `invokeAgent` and `context.agents.invoke/runText` fail fast on protocol `error` envelopes by default (`failOnErrorFrame: true`). Opt out only when you need to inspect error frames as data.
 
 ### Error handling choices
 
@@ -151,7 +176,7 @@ Telemetry is emitted automatically. The runtime enables AI SDK telemetry by defa
 In addition to token usage, telemetry frames expose pool pressure fields:
 
 - `poolId`
-- `maxWorkersPerInstance`
+- `maxConcurrencyPerInstance`
 - `activeWorkers`
 - `waitingWorkers`
 - `waitTimeMs`
@@ -161,9 +186,9 @@ Optional host hints can be attached:
 - `replicaCountHint`
 - `effectiveMaxConcurrencyHint`
 
-`maxWorkersPerInstance` is always per process/instance. Cluster-level throughput is host-controlled and estimated as:
+`maxConcurrencyPerInstance` is always per process/instance. Cluster-level throughput is host-controlled and estimated as:
 
-`effectiveMaxConcurrency = replicas * maxWorkersPerInstance`
+`effectiveMaxConcurrency = replicas * maxConcurrencyPerInstance`
 
 Warnings and failures are also logged automatically in PURISTA style:
 

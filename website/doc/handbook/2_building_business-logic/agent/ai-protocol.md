@@ -111,7 +111,7 @@ Each emitted envelope contains metadata plus one frame. Core fields:
 - `durationMs`
 - `waitTimeMs`
 - `poolId`
-- `maxWorkersPerInstance`
+- `maxConcurrencyPerInstance`
 - `activeWorkers`
 - `waitingWorkers`
 - optional host hints: `replicaCountHint`, `effectiveMaxConcurrencyHint`

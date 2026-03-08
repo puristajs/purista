@@ -11,7 +11,7 @@ order: 203704
 ## How pieces fit together
 
 - **Builder (`persistConversation`)** defines retention behavior (`user` vs `agent`) and limits (`maxFrames`).
-- **Runtime (`getInstance(..., { sessionStore })`)** provides the persistence backend (in-memory by default; Redis/DB in production).
+- **Runtime (`getInstance(..., { conversationStore })`)** provides the persistence backend (in-memory by default; Redis/DB in production).
 - **Handler (`context.conversation`)** is the main API used in business logic.
 
 ## Preset quick reference

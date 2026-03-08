@@ -65,6 +65,7 @@ export class StreamDefinitionBuilder<
 	private operationId?: string
 	private isSecure = true
 	private errorStatusCodes: StatusCode[] = []
+	private httpStreamProtocol?: { protocol: string; documentationUrl?: string }
 
 	private durable = false
 	private autoacknowledge = true
@@ -486,6 +487,14 @@ export class StreamDefinitionBuilder<
 		return this
 	}
 
+	setHttpStreamProtocol(protocol: string, documentationUrl?: string) {
+		this.httpStreamProtocol = {
+			protocol,
+			documentationUrl,
+		}
+		return this
+	}
+
 	makeEndpointPublic() {
 		this.isSecure = false
 		return this
@@ -628,6 +637,9 @@ export class StreamDefinitionBuilder<
 		if (this.httpMetadata) {
 			metadata.expose.http = this.httpMetadata.expose.http
 			if (metadata.expose.http) {
+				if (this.httpStreamProtocol) {
+					metadata.expose.http.stream = this.httpStreamProtocol
+				}
 				metadata.expose.http.openApi = {
 					description: this.streamDescription,
 					summary: this.summary ?? this.streamName,

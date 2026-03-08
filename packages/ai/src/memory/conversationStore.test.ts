@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { InMemorySessionStore } from './sessionStore.js'
+import { InMemoryConversationStore } from './conversationStore.js'
 
-describe('InMemorySessionStore', () => {
+describe('InMemoryConversationStore', () => {
 	it('saves and loads sessions', async () => {
-		const store = new InMemorySessionStore()
-		await store.save({ sessionId: 's1', data: { foo: 'bar' }, updatedAt: Date.now() })
+		const store = new InMemoryConversationStore()
+		await store.save({ conversationId: 's1', data: { foo: 'bar' }, updatedAt: Date.now() })
 		const record = await store.load('s1')
 		expect(record?.data.foo).toBe('bar')
 		await store.delete('s1')

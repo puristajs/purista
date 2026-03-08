@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
+import type { ConversationStoreRecord, ConversationStoreRecordData } from '../memory/conversationStore.js'
 import { type ConversationFrame, summarizeHistory } from '../memory/historyHelpers.js'
-import type { SessionRecord, SessionRecordData } from '../memory/sessionStore.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
 
 const DEFAULT_MAX_FRAMES = 40
@@ -24,8 +24,8 @@ export type ConversationState = {
 }
 
 type ConversationSessionHelpers = {
-	load(sessionId?: string): Promise<SessionRecord | undefined>
-	save(record: { sessionId?: string; data: SessionRecordData; updatedAt?: number }): Promise<void>
+	load(sessionId?: string): Promise<ConversationStoreRecord | undefined>
+	save(record: { conversationId?: string; data: ConversationStoreRecordData; updatedAt?: number }): Promise<void>
 }
 
 export type ConversationHelpers = {
@@ -64,7 +64,7 @@ const toSummaryFrame = (message: ConversationMessage): ConversationFrame => ({
 	timestamp: message.createdAt,
 })
 
-const normalizeState = (data: SessionRecordData | undefined): ConversationState => {
+const normalizeState = (data: ConversationStoreRecordData | undefined): ConversationState => {
 	const raw = data?.conversation
 	if (!raw) {
 		return { messages: [] }
@@ -131,7 +131,7 @@ export const createConversationHelpers = (
 	const saveState = async (state: ConversationState, sessionId?: string) => {
 		const { record } = await loadState(sessionId)
 		await session.save({
-			sessionId,
+			conversationId: sessionId,
 			data: {
 				...(record?.data ?? {}),
 				conversation: state,

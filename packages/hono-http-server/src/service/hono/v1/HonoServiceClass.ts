@@ -49,6 +49,30 @@ import type { HealthFunction } from '../../../types/HealthFunction.js'
 import type { VariablesBase } from '../../../types/VariablesBase.js'
 import type { HonoServiceV1Config } from './honoServiceConfig.js'
 
+type ProtocolSseEvent = {
+	event: string
+	data: unknown
+}
+
+const isProtocolSseEvent = (value: unknown): value is ProtocolSseEvent => {
+	if (!value || typeof value !== 'object') {
+		return false
+	}
+	const candidate = value as Partial<ProtocolSseEvent>
+	return typeof candidate.event === 'string' && 'data' in candidate
+}
+
+const encodeProtocolSseEvent = (encoder: TextEncoder, event: ProtocolSseEvent): Uint8Array => {
+	if (event.event === 'data' && event.data === '[DONE]') {
+		return encoder.encode('data: [DONE]\n\n')
+	}
+	return encoder.encode(`event: ${event.event}\ndata: ${JSON.stringify(event.data)}\n\n`)
+}
+
+const isTransportControlFrame = (frameType: unknown): boolean =>
+	typeof frameType === 'string' &&
+	(frameType === 'open' || frameType === 'close' || frameType === 'start' || frameType === 'complete')
+
 /**
  * A service which creates a Hono server, adds the command endpoints of given services.
  * The webserver needs to be started programmatically, after the `.start` method.
@@ -422,8 +446,35 @@ export class HonoServiceClass<
 						const stream = new ReadableStream<Uint8Array>({
 							start: controller => {
 								const run = async (activeHandle: StreamHandle) => {
+									let protocolPassthrough = false
 									try {
 										for await (const frame of activeHandle) {
+											const payload = frame.payload as {
+												frameType?: string
+												chunk?: unknown
+												error?: unknown
+											}
+											if (isTransportControlFrame(payload.frameType)) {
+												continue
+											}
+
+											if (payload.frameType === 'chunk' && isProtocolSseEvent(payload.chunk)) {
+												protocolPassthrough = true
+												controller.enqueue(encodeProtocolSseEvent(encoder, payload.chunk))
+												continue
+											}
+
+											if (protocolPassthrough) {
+												if (payload.frameType === 'error') {
+													controller.enqueue(
+														encoder.encode(
+															`event: error\ndata: ${JSON.stringify(payload.error ?? { message: 'stream error' })}\n\n`,
+														),
+													)
+												}
+												continue
+											}
+
 											controller.enqueue(
 												encoder.encode(`event: ${frame.payload.frameType}\ndata: ${JSON.stringify(frame.payload)}\n\n`),
 											)

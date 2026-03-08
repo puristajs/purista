@@ -21,6 +21,7 @@ Use both.
 | duration (`min/max/avg`) | how fast is the agent? | sync vs async route suitability |
 | token usage | how expensive is context+output size? | memory strategy and model sizing |
 | failure rate | how often runs fail? | retry policy and guardrail tuning |
+| call-option stability | do dynamic `prepareCall` / `prepareStep` policies stay within expected bounds? | safe rollout of adaptive temperature/max-token policies |
 
 ## Evaluation output contract
 
@@ -34,6 +35,19 @@ Typical fields:
 - duration statistics (min/max/avg/total)
 - token usage statistics (prompt/completion/total)
 - aggregate accuracy/failure rate
+- optional call-option trace (step, callKind, selected options) for debugging adaptive policies
+
+## Evaluating dynamic call-option hooks
+
+If the agent uses `prepareCall(...)` or `prepareStep(...)`, include that behavior in your evaluation assertions.
+
+Recommended checks:
+
+- step policy correctness (for example `temperature` ramps down after N steps)
+- safety bounds (for example `maxOutputTokens` never exceeds policy ceiling)
+- drift detection (same dataset + same seed should keep option traces stable enough)
+
+You can capture this by writing hook metadata and/or explicit step tags into the evaluation sample.
 
 ## Example flow
 
@@ -53,6 +67,7 @@ const datasetSchema = extendApi(
 
 const dataset = await validateDataset(datasetSchema.array(), await loadJson('support-regression.json'))
 
+const optionTrace = []
 const samples = []
 for (const row of dataset) {
   const started = performance.now()
@@ -82,6 +97,9 @@ const current = createEvaluationResult({
   manifestVersion: '1',
   dataset: 'support-regression',
   samples,
+  metadata: {
+    dynamicCallOptions: optionTrace,
+  },
 })
 
 const diff = diffEvaluationResults(previousRun, current)

@@ -1,7 +1,15 @@
 import type { Tracer } from '@opentelemetry/api'
 import type { EmbeddingModel, LanguageModel, LanguageModelMiddleware, RerankingModel } from 'ai'
-import { embed, embedMany, generateObject, generateText, rerank, streamText, wrapLanguageModel } from 'ai'
-
+import {
+	generateText as aiGenerateText,
+	embed,
+	embedMany,
+	generateObject,
+	rerank,
+	streamText,
+	wrapLanguageModel,
+} from 'ai'
+import { generateText as generateTextWithFallback } from './generateText.js'
 import type {
 	ModelProvider,
 	ModelProviderCapabilities,
@@ -9,6 +17,7 @@ import type {
 	ProviderEmbedManyResponse,
 	ProviderEmbedRequest,
 	ProviderEmbedResponse,
+	ProviderGenerateTextRequest,
 	ProviderJsonRequest,
 	ProviderJsonResponse,
 	ProviderRequest,
@@ -88,7 +97,7 @@ export type AiSdkProviderMetadata = {
 /**
  * Supported overrides extracted from the AI SDK `generateText` call signature.
  */
-type GenerateTextArgs = Parameters<typeof generateText>[0]
+type GenerateTextArgs = Parameters<typeof aiGenerateText>[0]
 export type AiSdkProviderOverrides = Partial<Omit<GenerateTextArgs, 'model' | 'prompt' | 'system' | 'messages'>>
 type EmbedArgs = Parameters<typeof embed>[0]
 type EmbedManyArgs = Parameters<typeof embedMany>[0]
@@ -182,8 +191,15 @@ export class AiSdkProvider implements ModelProvider {
 		if (!aiSdk || typeof aiSdk !== 'object') {
 			return {}
 		}
-		if ('generate' in aiSdk && typeof aiSdk.generate === 'object' && aiSdk.generate) {
-			return aiSdk.generate
+		if ('generate' in aiSdk) {
+			const { generate, ...topLevel } = aiSdk as Record<string, unknown>
+			if (generate && typeof generate === 'object') {
+				return {
+					...topLevel,
+					...(generate as Record<string, unknown>),
+				}
+			}
+			return topLevel
 		}
 		return aiSdk
 	}
@@ -310,7 +326,7 @@ export class AiSdkProvider implements ModelProvider {
 
 	async generate(request: ProviderRequest): Promise<ProviderResponse> {
 		const callInput = this.getCallInput(request)
-		const result = await generateText(callInput)
+		const result = await aiGenerateText(callInput)
 		const { usage } = result
 
 		return {
@@ -457,6 +473,19 @@ export class AiSdkProvider implements ModelProvider {
 				}
 			},
 		}
+	}
+
+	async generateText(request: ProviderGenerateTextRequest): Promise<string> {
+		return await generateTextWithFallback({
+			model: this,
+			request: {
+				prompt: request.prompt,
+				context: request.context,
+				metadata: request.metadata,
+			},
+			onReasoning: request.onReasoning,
+			onTextDelta: request.onTextDelta,
+		})
 	}
 
 	async embed(request: ProviderEmbedRequest): Promise<ProviderEmbedResponse> {

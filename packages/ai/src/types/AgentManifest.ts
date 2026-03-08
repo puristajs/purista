@@ -4,6 +4,7 @@ export type AgentHttpExposure = {
 	method: string
 	path: string
 	streamingMode?: 'sse' | 'chunked' | 'buffered'
+	sseProtocol?: AgentSseProtocol
 	requestContentType?: string
 	requestEncoding?: string
 	responseContentType?: string
@@ -11,6 +12,25 @@ export type AgentHttpExposure = {
 	public?: boolean
 	queryParameters?: Array<{ name: string; required: boolean }>
 }
+
+/**
+ * Controls how agent stream chunks should be serialized when the endpoint uses SSE.
+ * - `purista`: native PURISTA stream frames (canonical source protocol)
+ * - `ai-sdk-responses`: OpenAI Responses-style stream events
+ * - `ai-sdk-ui-message`: Vercel AI SDK UI message stream protocol
+ * - `ai-sdk-data`: alias for AI SDK UI message data stream protocol
+ * - `ai-sdk-json-render`: AI SDK UI message stream with `data-spec` parts for json-render
+ * - `agent2agent`: reference Agent-to-Agent message events
+ * - `mcp`: reference MCP tool-result events
+ */
+export type AgentSseProtocol =
+	| 'purista'
+	| 'ai-sdk-responses'
+	| 'ai-sdk-ui-message'
+	| 'ai-sdk-data'
+	| 'ai-sdk-json-render'
+	| 'agent2agent'
+	| 'mcp'
 
 export type AllowedToolDefinition = {
 	serviceName: string

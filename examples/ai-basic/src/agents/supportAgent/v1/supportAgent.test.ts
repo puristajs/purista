@@ -70,12 +70,12 @@ describe('supportAgent', () => {
 		const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
-			poolConfig: { maxWorkers: 1 },
+			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
-			poolConfig: { maxWorkers: 1 },
+			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 
 		await supportService.start()
@@ -140,12 +140,12 @@ describe('supportAgent', () => {
 		const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': triageProvider },
-			poolConfig: { maxWorkers: 1 },
+			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': supportProvider },
-			poolConfig: { maxWorkers: 1 },
+			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 
 		await supportService.start()

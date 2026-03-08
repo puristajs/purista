@@ -58,9 +58,9 @@ Defined in: [ai/src/types/AgentDefinition.ts:48](https://github.com/puristajs/pu
 
 Defined in: [ai/src/types/AgentDefinition.ts:51](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentDefinition.ts#L51)
 
-#### maxWorkers?
+#### maxConcurrencyPerInstance?
 
-> `optional` **maxWorkers**: `number`
+> `optional` **maxConcurrencyPerInstance**: `number`
 
 #### poolId?
 

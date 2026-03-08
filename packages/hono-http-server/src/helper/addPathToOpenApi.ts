@@ -54,6 +54,8 @@ export const addPathToOpenApi = (
 	}))
 
 	const isStreamResponse = expose.contentTypeResponse === 'text/event-stream'
+	const streamProtocol = expose.http.stream?.protocol
+	const streamProtocolDoc = expose.http.stream?.documentationUrl
 	const okCode = isStreamResponse
 		? StatusCode.OK
 		: (exposeWithSchemas.outputPayload as { type?: unknown } | undefined)?.type
@@ -115,39 +117,74 @@ export const addPathToOpenApi = (
 		},
 		responses: {
 			[`${okCode}`]: {
-				description: getErrorName(okCode),
+				description: isStreamResponse
+					? [
+							getErrorName(okCode),
+							streamProtocol ? `SSE protocol: ${streamProtocol}.` : undefined,
+							streamProtocolDoc ? `Protocol docs: ${streamProtocolDoc}` : undefined,
+						]
+							.filter(Boolean)
+							.join(' ')
+					: getErrorName(okCode),
 				content:
 					okCode === StatusCode.NoContent
 						? undefined
 						: {
 								[responseContentType]: {
 									schema: isStreamResponse
-										? {
-												type: 'object',
-												properties: {
-													frameType: {
-														type: 'string',
-														enum: ['start', 'chunk', 'complete', 'error', 'cancel'],
+										? streamProtocol && streamProtocol !== 'purista'
+											? {
+													type: 'object',
+													properties: {
+														event: { type: 'string' },
+														data: {},
 													},
-													sequence: {
-														type: 'integer',
-													},
-													chunk: exposeWithSchemas.chunkPayload,
-													final: exposeWithSchemas.finalPayload,
-													error: {
-														type: 'object',
-														properties: {
-															status: { type: 'integer' },
-															message: { type: 'string' },
-															isHandledError: { type: 'boolean' },
-															traceId: { type: 'string' },
+													required: ['event', 'data'],
+												}
+											: {
+													oneOf: [
+														{
+															type: 'object',
+															properties: {
+																frameType: {
+																	type: 'string',
+																	enum: ['start', 'chunk', 'complete', 'error', 'cancel'],
+																},
+																sequence: {
+																	type: 'integer',
+																},
+																chunk: exposeWithSchemas.chunkPayload,
+																final: exposeWithSchemas.finalPayload,
+																error: {
+																	type: 'object',
+																	properties: {
+																		status: { type: 'integer' },
+																		message: { type: 'string' },
+																		isHandledError: { type: 'boolean' },
+																		traceId: { type: 'string' },
+																	},
+																},
+																reason: { type: 'string' },
+															},
 														},
-													},
-													reason: { type: 'string' },
-												},
-											}
+														{
+															type: 'object',
+															properties: {
+																event: { type: 'string' },
+																data: {},
+															},
+															required: ['event', 'data'],
+														},
+													],
+												}
 										: exposeWithSchemas.outputPayload,
 									encoding: responseEncodingType,
+									...(isStreamResponse && streamProtocol
+										? ({ 'x-purista-stream-protocol': streamProtocol } as Record<string, unknown>)
+										: {}),
+									...(isStreamResponse && streamProtocolDoc
+										? ({ 'x-purista-stream-protocol-docs': streamProtocolDoc } as Record<string, unknown>)
+										: {}),
 								},
 							},
 			},

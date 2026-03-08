@@ -41,7 +41,7 @@ export async function main() {
 			'openai:gpt-4o-mini': provider,
 		},
 		poolConfig: {
-			maxWorkers: 1,
+			maxConcurrencyPerInstance: 1,
 		},
 	})
 	await triageAgentInstance.start()
@@ -53,7 +53,7 @@ export async function main() {
 		},
 		poolConfig: {
 			poolId: 'support',
-			maxWorkers: 2,
+			maxConcurrencyPerInstance: 2,
 		},
 	})
 	await supportAgentInstance.start()

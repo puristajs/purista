@@ -50,7 +50,7 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   models: {
     'openai:gpt-4o-mini': provider,
   },
-  sessionStore: aiConversationStore,
+  conversationStore: aiConversationStore,
   knowledgeAdapters: {
     supportFaq: faqKnowledgeAdapter,
   },
@@ -58,7 +58,7 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   tracer,
   poolConfig: {
     poolId: 'support',
-    maxWorkers: 4,
+    maxConcurrencyPerInstance: 4,
   },
 })
 
@@ -67,8 +67,8 @@ await supportAgentInstance.start()
 
 - `eventBridge` is mandatory; every agent registers an internal service (`<agentName>.run`).
 - `models` must satisfy aliases declared via `.defineModel(...)` in the agent builder.
-- `sessionStore`/`knowledgeAdapters` define what `context.conversation`, `context.session`, and `context.knowledge` access in the handler.
-- When not provided, session stores, knowledge adapters, and pool managers default to in-memory implementations.
+- `conversationStore`/`knowledgeAdapters` define what `context.conversation`, `context.session`, and `context.knowledge` access in the handler.
+- When not provided, conversation stores, knowledge adapters, and pool managers default to in-memory implementations.
 - If the agent definition declares knowledge aliases via `.useKnowledgeAdapter(...)`, TypeScript requires `knowledgeAdapters` in `getInstance(...)`.
 
 ## How runtime injection maps to handler access
@@ -81,17 +81,39 @@ export const supportAgent = new AgentBuilder({ agentName: 'supportAgent', agentV
   .setHandler(async (context, payload) => {
     // from getInstance(..., { models })
     const model = context.models['openai:gpt-4o-mini']
+    const answer = await model.generateText?.({ prompt: payload.prompt })
     // from getInstance(..., { knowledgeAdapters: { supportFaq: ... } })
     const docs = await context.knowledge.supportFaq.query(payload.prompt, { limit: 3 })
-    // from getInstance(..., { sessionStore })
+    // from getInstance(..., { conversationStore })
     await context.conversation.addUser(payload.prompt)
-    return { message: `${docs.length} docs` }
+    return { message: answer ?? `${docs.length} docs` }
   })
   .build()
 ```
 
 Definition decides aliases/capabilities; instance injection provides concrete implementations behind those aliases.
 Knowledge operations automatically receive scope metadata (`tenantId`, `principalId`, `agentName`, `agentVersion`, `sessionId`) from the current message/session context.
+
+### Subagent orchestration from inside handlers
+
+`context.agents` provides first-class helpers for invoking other agents:
+
+```ts
+setHandler(async context => {
+  const triageSummary = await context.agents.runText({
+    agentName: 'triageAgent',
+    agentVersion: '1',
+    payload: { prompt: 'Classify this support request' },
+  })
+
+  return { message: `Triage says: ${triageSummary}` }
+})
+```
+
+- `context.agents.invoke(...)` returns full protocol envelopes.
+- `context.agents.runText(...)` returns best-effort final assistant text.
+- principal/tenant/correlation/session metadata is forwarded automatically from the current invocation.
+- by default, sub-agent protocol `error` envelopes fail fast (throw). Set `failOnErrorFrame: false` only when you intentionally inspect/route error envelopes manually.
 
 ## Runtime options reference
 
@@ -101,12 +123,37 @@ Knowledge operations automatically receive scope metadata (`tenantId`, `principa
 | --- | --- | --- | --- |
 | `models` | bind model aliases to provider instances | required in real workloads | fail-fast when a declared alias is missing |
 | `poolConfig.poolId` | select execution pool namespace | explicit per workload class | defaults to `agent:<agentName>` |
-| `poolConfig.maxWorkers` | cap parallel runs per process/instance | `1` locally, tuned in prod | runtime/deploy setting, not hardcoded |
+| `poolConfig.maxConcurrencyPerInstance` | cap parallel runs per process/instance | `1` locally, tuned in prod | runtime/deploy setting, not hardcoded |
 | `concurrencyHints.replicaCountHint` | optional host replica hint for telemetry | set by deployment bootstrap | informational only (no runtime admission control) |
-| `sessionStore` | persistence backend for conversation/session state | in-memory locally, Redis/DB in prod | `context.conversation` uses this backend |
+| `conversationStore` | persistence backend for conversation/session state | in-memory locally, Redis/DB in prod | `context.conversation` uses this backend |
 | `knowledgeAdapters` | RAG/document adapters by alias | in-memory or vector-store-backed | must match aliases used by builder |
 | `logger`, `tracer`, `spanProcessor` | observability integration | inherit app defaults | keeps agent telemetry aligned with services |
 | `config`, `resources` | custom app-specific dependencies | optional | use sparingly to keep handlers focused |
+
+## Dynamic per-step model call options
+
+When you need adaptive call options (for example step-wise temperature, token caps, or provider tags), configure this on the builder:
+
+```ts
+new AgentBuilder({ agentName: 'plannerAgent', agentVersion: '1' })
+  .defineModel('openai:gpt-4o-mini')
+  .setCallOptionsSchema(
+    z.object({
+      aiSdk: z.record(z.string(), z.unknown()).optional(),
+      metadata: z.record(z.string(), z.unknown()).optional(),
+    }),
+  )
+  .prepareStep(({ step }) => ({
+    aiSdk: {
+      generate: {
+        temperature: step < 3 ? 0.2 : 0.1,
+      },
+    },
+    metadata: { refinementStep: step },
+  }))
+```
+
+The hook runs before each model/provider call and merges into `request.metadata` / `request.metadata.aiSdk`.
 
 ## Read-only runtime status snapshot
 
@@ -116,12 +163,12 @@ Agent instances expose read-only pool status for ops endpoints and dashboards:
 import { getAgentRuntimeStatuses } from '@purista/ai'
 
 const status = supportAgentInstance.getStatus()
-// { poolId, maxWorkersPerInstance, activeWorkers, waitingWorkers, ... }
+// { poolId, maxConcurrencyPerInstance, activeWorkers, waitingWorkers, ... }
 
 const all = getAgentRuntimeStatuses([supportAgentInstance, triageAgentInstance])
 ```
 
-This is informational only. Admission control still happens through per-instance pool limits (`poolConfig.maxWorkers`).
+This is informational only. Admission control still happens through per-instance pool limits (`poolConfig.maxConcurrencyPerInstance`).
 
 ## Runtime pool config (important)
 
@@ -132,18 +179,18 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   models: { 'openai:gpt-4o-mini': provider },
   poolConfig: {
     poolId: 'support', // optional; defaults to agent:<agentName>
-    maxWorkers: 4,     // default is 1
+    maxConcurrencyPerInstance: 4,     // default is 1
   },
 })
 ```
 
-`maxWorkers` controls how many agent runs can execute in parallel for that agent instance.
+`maxConcurrencyPerInstance` controls how many agent runs can execute in parallel for that agent instance.
 
-`maxWorkers` is always **per instance/process**.
+`maxConcurrencyPerInstance` is always **per instance/process**.
 
 System-wide estimate:
 
-`effectiveMaxConcurrency = replicas * maxWorkersPerInstance`
+`effectiveMaxConcurrency = replicas * maxConcurrencyPerInstance`
 
 - default is `1` (safe baseline)
 - keep this low in local/dev
@@ -153,7 +200,7 @@ System-wide estimate:
 Operational rule of thumb:
 
 - queue controls how much work is waiting
-- `maxWorkers` controls how much work runs now
+- `maxConcurrencyPerInstance` controls how much work runs now
 - deployment replicas multiply the total available agent slots
 - provider/API rate limits still apply downstream
 
@@ -163,7 +210,7 @@ Operational rule of thumb:
 flowchart LR
   A["Caller (HTTP/Command/Subscription)"] --> B["Agent Invoke"]
   B --> C["Queue (optional)"]
-  C --> D["PoolManager (poolId, maxWorkers)"]
+  C --> D["PoolManager (poolId, maxConcurrencyPerInstance)"]
   D --> E["Worker Slot"]
   E --> F["Agent Handler"]
   F --> G["Model Provider"]
@@ -188,6 +235,13 @@ sequenceDiagram
   A-->>C: protocol frames + final response
   A->>P: release slot
 ```
+
+### Worker runtime tool support
+
+- `AIWorkerService` queue execution currently supports JSON-serializable `metadata.aiSdk` call options.
+- Function-based `aiSdk.tools` are rejected in worker mode with a clear job failure reason.
+- If your agent relies on function tools (for example local file writers), run it in-process.
+- Command allowlist tools via `context.tools.invoke(...)` remain fully supported.
 
 ## Invoke an agent programmatically
 
@@ -323,6 +377,7 @@ If `sessionId` is provided and payload is an object, `invokeAgent` injects it au
 | `correlationId` | trace correlation | linking runs to upstream workflows |
 | `timeoutMs` | invoke timeout | fail faster for synchronous APIs |
 | `stream` | receive frames incrementally | websockets/custom transports |
+| `failOnErrorFrame` | fail fast on protocol `error` envelopes | defaults to `true`; set to `false` only for manual error-envelope handling |
 
 ## HTTP exposure
 
@@ -331,11 +386,26 @@ If `sessionId` is provided and payload is an object, `invokeAgent` injects it au
 ```ts
 export const supportAgent = new AgentBuilder({ ... })
   .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
+  .setSseProtocol('purista') // default; optional explicitness
   .setHandler(...)
   .build()
 ```
 
 SSE is the default streaming mode for exposed agent endpoints. Call `.setStreamingMode(...)` only when you need a non-default mode.
+
+When the client expects a specific wire protocol, set `.setSseProtocol(...)`:
+
+- `purista` (native/canonical envelopes)
+- `ai-sdk-ui-message` / `ai-sdk-data`
+- `ai-sdk-json-render`
+- `ai-sdk-responses`
+- `agent2agent`
+- `mcp`
+
+OpenAPI generation reflects the selected protocol for exposed agent SSE endpoints:
+- response description includes the selected stream protocol
+- media type extensions include `x-purista-stream-protocol`
+- when known, `x-purista-stream-protocol-docs` points to protocol documentation
 
 If your API gateway already maps `POST /api/v1/agents/supportAgent` to the bridge, clients can `fetch` it directly. For custom controllers, pipe the envelopes to SSE/chunked responses using the [Protocol & Streaming](./protocol-and-streaming.md) helpers.
 
@@ -350,7 +420,7 @@ flowchart LR
   A["Producer (command/subscription/http)"] -->|enqueue| B["Queue Bridge"]
   B --> C["Queue Worker"]
   C -->|invokeAgent| D["Agent Runtime"]
-  D --> E["Agent Pool (maxWorkers)"]
+  D --> E["Agent Pool (maxConcurrencyPerInstance)"]
   E --> F["LLM Provider"]
 ```
 
@@ -376,7 +446,7 @@ The AI package does not require a dedicated queue implementation.
 ### How queue settings and agent pool settings relate
 
 - queue worker concurrency (`queue-worker` setup) controls how many jobs are leased/processed
-- agent pool config (`poolConfig.maxWorkers`) controls how many agent runs execute in-process
+- agent pool config (`poolConfig.maxConcurrencyPerInstance`) controls how many agent runs execute in-process
 - effective parallel LLM calls are bounded by the lower of these limits in each process
 
 Use both knobs:
@@ -389,7 +459,7 @@ Use both knobs:
 Example target profile:
 
 - queue worker concurrency: `10`
-- agent pool `maxWorkers`: `4`
+- agent pool `maxConcurrencyPerInstance`: `4`
 
 Result: up to 10 jobs may be leased from queue, but only 4 agent runs execute at once in this process.  
 This protects provider APIs from bursty parallelism while still keeping the queue busy.
@@ -398,13 +468,13 @@ This protects provider APIs from bursty parallelism while still keeping the queu
 
 - caller does not block on long LLM execution
 - retries/delivery semantics are handled by queue infrastructure
-- worker parallelism and `poolConfig.maxWorkers` together control throughput
+- worker parallelism and `poolConfig.maxConcurrencyPerInstance` together control throughput
 - easier cost/rate-limit control than unbounded sync invocations
 
 ### What runs where
 
 - **Queue bridge** decides delivery/lease/retry mechanics
-- **Agent pool** decides in-process parallel execution cap (`maxWorkers`)
+- **Agent pool** decides in-process parallel execution cap (`maxConcurrencyPerInstance`)
 - **Provider/LLM** executes model calls
 
 Both queue worker concurrency and agent pool size matter. Set both intentionally.
@@ -440,12 +510,12 @@ Use normal queue builder/worker options for transport-level behavior:
 
 - `@purista/ai` ships reference services (`AIOrchestratorService`, `AIWorkerService`) that ingest manifests, enqueue runs, and execute them in isolated workers.
 - Queue bridges (Redis, NATS, AMQP, …) treat agents like any other workload—define a queue worker that calls `invokeAgent` internally, then rely on the queue bridge for delayed or batched execution.
-- Concurrency pools apply across sync and async invocations. Configure `poolConfig.maxWorkers` at runtime/deploy-time so each environment controls throughput independently.
+- Concurrency pools apply across sync and async invocations. Configure `poolConfig.maxConcurrencyPerInstance` at runtime/deploy-time so each environment controls throughput independently.
 
 ### Failure behavior in queue mode
 
 - transient failures are retried by your queue setup and/or agent retry policy
 - handled errors emit protocol error frames and can still be inspected in worker logs
-- telemetry frames include duration/token usage and pool metrics (`activeWorkers`, `waitingWorkers`, `maxWorkersPerInstance`, `waitTimeMs`) so operations can alert on degraded runs
+- telemetry frames include duration/token usage and pool metrics (`activeWorkers`, `waitingWorkers`, `maxConcurrencyPerInstance`, `waitTimeMs`) so operations can alert on degraded runs
 
 Pick the approach that matches your deployment. Local development usually starts agents inside the same process; production often combines HTTP exposure for real-time calls plus queue workers for heavy background chains.

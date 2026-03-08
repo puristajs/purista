@@ -83,6 +83,32 @@ class ThisBoundStreamProvider implements ModelProvider {
 	}
 }
 
+class RecordingProvider implements ModelProvider {
+	readonly name = 'recording-provider'
+	readonly capabilities = { text: true, stream: true }
+	readonly calls: Array<{ kind: 'generate' | 'stream'; metadata?: Record<string, unknown> }> = []
+
+	async generate(request: ProviderRequest) {
+		this.calls.push({ kind: 'generate', metadata: request.metadata })
+		return {
+			output: request.prompt,
+			tokens: { prompt: 1, completion: 1 },
+		}
+	}
+
+	stream(request: ProviderRequest) {
+		this.calls.push({ kind: 'stream', metadata: request.metadata })
+		return {
+			async final() {
+				return { output: request.prompt, tokens: { prompt: 1, completion: 1 } }
+			},
+			async *[Symbol.asyncIterator]() {
+				yield { type: 'text-delta' as const, textDelta: request.prompt }
+			},
+		}
+	}
+}
+
 const bridges: DefaultEventBridge[] = []
 
 afterEach(async () => {
@@ -103,6 +129,13 @@ describe('AgentBuilder', () => {
 		)
 	})
 
+	it('requires exposeAsHttpEndpoint before setSseProtocol', () => {
+		const builder = new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
+		expect(() => builder.setSseProtocol('ai-sdk-ui-message')).toThrow(
+			'Call exposeAsHttpEndpoint before configuring the SSE protocol',
+		)
+	})
+
 	it('requires non-empty knowledge adapter names', () => {
 		expect(() => new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' }).useKnowledgeAdapter('')).toThrow(
 			'Knowledge adapter name must not be empty',
@@ -119,7 +152,7 @@ describe('AgentBuilder', () => {
 			.setDescription('helper description')
 			.useEventBridge('customBridge')
 			.useResource('llm', { resourceName: 'model' })
-			.useSessionStore({ storeName: 'sessions', maxFrames: 20 })
+			.useConversationStore({ storeName: 'sessions', maxFrames: 20 })
 			.useKnowledgeAdapter('knowledge', { topK: 3 })
 			.setRuntime('worker')
 			.setModelResource({ resourceName: 'modelResource', variant: 'mini' })
@@ -136,6 +169,7 @@ describe('AgentBuilder', () => {
 			.addContextSchema(contextSchema)
 			.setContextSchema(contextSchema)
 			.exposeAsHttpEndpoint('POST', 'agents/helperAgent')
+			.setSseProtocol('ai-sdk-responses')
 			.makeEndpointPublic()
 
 		expect(() => builder.build()).toThrow('Agent handler is required. Call setHandler() before build().')
@@ -153,6 +187,8 @@ describe('AgentBuilder', () => {
 		expect(manifest.metadata?.runtime).toBe('worker')
 		expect(manifest.metadata?.evaluation).toEqual({ suite: 'smoke' })
 		expect(manifest.httpExposure?.public).toBe(true)
+		expect(manifest.httpExposure?.sseProtocol).toBe('ai-sdk-responses')
+		expect(manifest.httpExposure?.path).toBe('agents/helperAgent')
 	})
 
 	it('builds a definition with model aliases and creates an instance', async () => {
@@ -232,7 +268,7 @@ describe('AgentBuilder', () => {
 			},
 			poolConfig: {
 				poolId: 'binding',
-				maxWorkers: 2,
+				maxConcurrencyPerInstance: 2,
 			},
 			concurrencyHints: {
 				replicaCountHint: 3,
@@ -260,7 +296,7 @@ describe('AgentBuilder', () => {
 				.at(-1)
 			expect(finalMessage?.content).toBe('stream:hello')
 			expect(telemetry?.poolId).toBe('binding')
-			expect(telemetry?.maxWorkersPerInstance).toBe(2)
+			expect(telemetry?.maxConcurrencyPerInstance).toBe(2)
 			expect(telemetry?.effectiveMaxConcurrencyHint).toBe(6)
 		} finally {
 			await instance.stop()
@@ -367,5 +403,137 @@ describe('AgentBuilder', () => {
 				await context.models.textOnly.generateJson({ prompt: 'x' })
 				return { message: 'ok' }
 			})
+	})
+
+	it('applies prepareStep hooks and validates call options schema', async () => {
+		const provider = new RecordingProvider()
+		const steps: Array<{ step: number; stepByAliasAndKind: number; kind: string }> = []
+
+		const definition = new AgentBuilder({ agentName: 'prepareStepAgent', agentVersion: '1' })
+			.defineModel('echo')
+			.setCallOptionsSchema(
+				z.object({
+					metadata: z.record(z.string(), z.unknown()).optional(),
+					aiSdk: z.record(z.string(), z.unknown()).optional(),
+				}),
+			)
+			.prepareStep(input => {
+				steps.push({
+					step: input.step,
+					stepByAliasAndKind: input.stepByAliasAndKind,
+					kind: input.callKind,
+				})
+				return {
+					metadata: { hook: 'ok' },
+					aiSdk: { generate: { temperature: 0.2 } },
+				}
+			})
+			.setHandler(async context => {
+				await context.models.echo.generate?.({ prompt: 'first' })
+				await context.models.echo.generate?.({ prompt: 'second' })
+				return { message: 'done' }
+			})
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+		const instance = await definition.getInstance(eventBridge, {
+			models: {
+				echo: provider,
+			},
+		})
+		await instance.start()
+		try {
+			await instance.invoke({ payload: {} })
+		} finally {
+			await instance.stop()
+		}
+
+		expect(steps).toEqual([
+			{ step: 1, stepByAliasAndKind: 1, kind: 'generate' },
+			{ step: 2, stepByAliasAndKind: 2, kind: 'generate' },
+		])
+		expect(provider.calls[0]?.metadata?.hook).toBe('ok')
+		expect((provider.calls[0]?.metadata?.aiSdk as any)?.generate?.temperature).toBe(0.2)
+	})
+
+	it('fails agent run when call option hooks return invalid schema payload', async () => {
+		const definition = new AgentBuilder({ agentName: 'invalidCallOptionsAgent', agentVersion: '1' })
+			.defineModel('echo')
+			.setCallOptionsSchema(
+				z.object({
+					aiSdk: z.object({
+						generate: z.object({
+							temperature: z.number(),
+						}),
+					}),
+				}),
+			)
+			.prepareCall(() => ({
+				aiSdk: {
+					generate: {
+						temperature: 'not-a-number',
+					},
+				},
+			}))
+			.setHandler(async context => {
+				await context.models.echo.generate?.({ prompt: 'hello' })
+				return { message: 'ok' }
+			})
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+		const instance = await definition.getInstance(eventBridge, {
+			models: {
+				echo: new DeterministicTextProvider(),
+			},
+		})
+		await instance.start()
+		try {
+			const result = await instance.invoke({ payload: {} })
+			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
+			expect(errorFrame).toBeDefined()
+		} finally {
+			await instance.stop()
+		}
+	})
+
+	it('supports subagent orchestration through context.agents helpers', async () => {
+		const childDefinition = new AgentBuilder({ agentName: 'childAgent', agentVersion: '1' })
+			.setHandler(async () => ({ message: 'child-response' }))
+			.build()
+
+		const parentDefinition = new AgentBuilder({ agentName: 'parentAgent', agentVersion: '1' })
+			.setHandler(async context => {
+				const text = await context.agents.runText({
+					agentName: 'childAgent',
+					agentVersion: '1',
+					payload: { prompt: 'from-parent' },
+				})
+				return { message: `parent:${text}` }
+			})
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+
+		const childInstance = await childDefinition.getInstance(eventBridge, { models: {} })
+		const parentInstance = await parentDefinition.getInstance(eventBridge, { models: {} })
+		await childInstance.start()
+		await parentInstance.start()
+		try {
+			const result = await parentInstance.invoke({ payload: {} })
+			const finalMessage = result.envelopes
+				.map(envelope => envelope.frame)
+				.findLast(frame => frame.kind === 'message' && frame.final === true)
+			expect(finalMessage && 'content' in finalMessage ? finalMessage.content : '').toBe('parent:child-response')
+		} finally {
+			await parentInstance.stop()
+			await childInstance.stop()
+		}
 	})
 })

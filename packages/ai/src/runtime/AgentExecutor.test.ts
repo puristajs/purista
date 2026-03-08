@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { InMemoryKnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
-import { InMemorySessionStore } from '../memory/sessionStore.js'
+import { InMemoryConversationStore } from '../memory/conversationStore.js'
 import type { ModelProvider, ProviderRequest } from '../providers/runtime/ModelProvider.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
 import { AgentExecutor } from './AgentExecutor.js'
@@ -41,12 +41,12 @@ describe('AgentExecutor', () => {
 		})()
 		await adapter.upsert({ document: { id: 'doc-1', content: 'hello world' } })
 
-		const sessionStore = new InMemorySessionStore()
+		const conversationStore = new InMemoryConversationStore()
 
 		const executor = new AgentExecutor({
 			manifest,
 			provider: new DeterministicTextProvider(),
-			sessionStore,
+			conversationStore,
 			knowledgeAdapters: { default: adapter },
 			logger: { debug: () => undefined, warn: () => undefined } as any,
 			startActiveSpan: async (_name, _attrs, _ctx, fn) => (fn ? fn({} as any) : Promise.resolve(undefined as never)),
@@ -55,7 +55,7 @@ describe('AgentExecutor', () => {
 		const result = await executor.run({ sessionId: 's1', prompt: 'Hello', context: undefined })
 		expect(result.output).toBe('Hello')
 		expect(adapter.queries).toContain('Hello')
-		const record = await sessionStore.load('s1')
+		const record = await conversationStore.load('s1')
 		expect(record?.data.history).toHaveLength(2)
 	})
 })
