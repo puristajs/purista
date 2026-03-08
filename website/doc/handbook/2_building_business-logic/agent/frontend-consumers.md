@@ -56,6 +56,33 @@ Render by `frame.kind`:
 - `telemetry`: token/duration badges
 - `error`: inline error state + retry action
 
+For `ai-sdk-ui-message` consumers, also handle typed data parts:
+
+- `data-<artifactId>` (for example `data-voyage-status`) for live status/artifact state
+- `data-agent-error` for handled/recoverable agent errors
+
+`message-metadata` may also be present in the same stream for compatibility.  
+Prefer `data-*` parts for UI behavior and keep metadata as optional fallback.
+
+## AI SDK UI (`useChat`) mapping
+
+Define explicit schemas for app data parts so stream payloads are type-validated in the browser:
+
+```ts
+const { messages } = useChat({
+  dataPartSchemas: {
+    'voyage-status': voyageStatusSchema,
+    'agent-error': voyageAgentErrorSchema,
+  },
+})
+```
+
+Recommended UX:
+
+- render `data-agent-error` inline inside the assistant turn (non-blocking warning)
+- keep streaming text rendering active
+- reserve terminal stream failure UI for `error` events
+
 ## Example endpoints to test quickly
 
 ```bash

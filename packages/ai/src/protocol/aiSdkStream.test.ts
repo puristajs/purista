@@ -3,6 +3,7 @@ import { toAiSdkStreamEvents } from './aiSdkStream.js'
 import {
 	createActor,
 	createArtifactFrame,
+	createErrorFrame,
 	createMessageFrame,
 	createProtocolEnvelope,
 	createTelemetryFrame,
@@ -142,6 +143,46 @@ describe('toAiSdkStreamEvents', () => {
 		expect(dataTypes).toContain('finish')
 	})
 
+	it('emits default data-* parts for artifact frames in ui-message mode', async () => {
+		const envelopes = [
+			createProtocolEnvelope({
+				conversationId: 'conv-status',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createArtifactFrame({
+					artifactId: 'voyage-status',
+					phase: 'chunk',
+					content: JSON.stringify({
+						phase: 'spec-update',
+						status: 'active',
+						message: 'Tool writeFile',
+					}),
+					mimeType: 'application/json',
+				}),
+			}),
+			createProtocolEnvelope({
+				conversationId: 'conv-status',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createMessageFrame({ role: 'assistant', content: 'done', final: true }),
+			}),
+		]
+
+		const events: Array<{ event: string; data: Record<string, unknown> }> = []
+		for await (const event of toAiSdkStreamEvents(envelopes, { mode: 'ui-message' })) {
+			events.push(event)
+		}
+
+		const statusEvent = events.find(item => item.event === 'data' && item.data.type === 'data-voyage-status')
+		expect(statusEvent).toBeDefined()
+		expect(statusEvent?.data).toMatchObject({
+			type: 'data-voyage-status',
+			data: {
+				phase: 'spec-update',
+				status: 'active',
+				message: 'Tool writeFile',
+			},
+		})
+	})
+
 	it('maps reasoning artifacts to reasoning-* ui-message events', async () => {
 		const envelopes = [
 			createProtocolEnvelope({
@@ -250,6 +291,53 @@ describe('toAiSdkStreamEvents', () => {
 		expect(dataEvents.some(data => data.type === 'source-url' && data.url === 'https://example.com/spec')).toBe(true)
 		expect(dataEvents.some(data => data.type === 'source-document' && data.title === 'Spec source')).toBe(true)
 		expect(dataEvents.some(data => data.type === 'file' && data.url === 'https://example.com/image.png')).toBe(true)
+	})
+
+	it('maps handled errors to data-agent-error in ui-message mode by default', async () => {
+		const envelopes = [
+			createProtocolEnvelope({
+				conversationId: 'conv-e1',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createErrorFrame({
+					code: 'HandledError',
+					message: 'validation needs clarification',
+					handled: true,
+				}),
+			}),
+		]
+
+		const events: Array<{ event: string; data: Record<string, unknown> }> = []
+		for await (const event of toAiSdkStreamEvents(envelopes, { mode: 'ui-message' })) {
+			events.push(event)
+		}
+
+		const dataTypes = events.filter(item => item.event === 'data').map(item => item.data.type)
+		expect(dataTypes).toContain('data-agent-error')
+		expect(dataTypes).toContain('finish')
+		expect(dataTypes).not.toContain('error')
+	})
+
+	it('maps unhandled errors to error event in ui-message mode', async () => {
+		const envelopes = [
+			createProtocolEnvelope({
+				conversationId: 'conv-e2',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createErrorFrame({
+					code: 'UnhandledError',
+					message: 'fatal execution error',
+					handled: false,
+				}),
+			}),
+		]
+
+		const events: Array<{ event: string; data: Record<string, unknown> }> = []
+		for await (const event of toAiSdkStreamEvents(envelopes, { mode: 'ui-message' })) {
+			events.push(event)
+		}
+
+		const dataTypes = events.filter(item => item.event === 'data').map(item => item.data.type)
+		expect(dataTypes).toContain('error')
+		expect(dataTypes).not.toContain('finish')
 	})
 
 	it('emits error event and stops processing', async () => {

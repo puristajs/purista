@@ -379,6 +379,8 @@ If `sessionId` is provided and payload is an object, `invokeAgent` injects it au
 | `stream` | receive frames incrementally | websockets/custom transports |
 | `failOnErrorFrame` | fail fast on protocol `error` envelopes | defaults to `true`; set to `false` only for manual error-envelope handling |
 
+When exposing as `ai-sdk-ui-message`/`ai-sdk-data`, handled error frames are mapped to `data-agent-error` parts (recoverable UI signal), while unhandled errors are emitted as terminal `error` events.
+
 ## HTTP exposure
 
 `.exposeAsHttpEndpoint('POST', 'agents/supportAgent')` automatically adds an endpoint to your generated OpenAPI spec. The endpoint behaves like any streaming command:

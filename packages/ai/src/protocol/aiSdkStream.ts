@@ -56,6 +56,14 @@ export type ToAiSdkUiMessageOptions = {
 	 * using the built-in protocol conversion for text/error lifecycle events.
 	 */
 	mapDataParts?: AiSdkUiDataPartMapper
+	/**
+	 * Controls how protocol `error` frames are represented in UI-message streams.
+	 *
+	 * - `auto` (default): handled errors become `data-agent-error` parts; unhandled errors emit `error`.
+	 * - `error-event`: always emit `error` and terminate stream.
+	 * - `data-part`: always emit `data-agent-error` and keep stream lifecycle events.
+	 */
+	errorMode?: 'auto' | 'error-event' | 'data-part'
 }
 
 export type ToAiSdkStreamOptions = {
@@ -136,6 +144,29 @@ const getString = (value: unknown): string | undefined =>
 
 const isLikelyUrl = (value: string) => /^https?:\/\/\S+$/i.test(value)
 
+const toUiDataType = (artifactId: string) => {
+	const normalized = artifactId
+		.trim()
+		.toLowerCase()
+		.replace(/[^a-z0-9-]+/g, '-')
+		.replace(/^-+|-+$/g, '')
+	return `data-${normalized || 'artifact'}` as const
+}
+
+const toArtifactDataPayload = (frame: Extract<AgentProtocolFrame, { kind: 'artifact' }>) => {
+	if (typeof frame.content === 'object' && frame.content !== null) {
+		return frame.content
+	}
+	if (typeof frame.content === 'string' && frame.mimeType?.includes('json')) {
+		try {
+			return JSON.parse(frame.content) as Record<string, unknown>
+		} catch {
+			return frame.content
+		}
+	}
+	return frame.content
+}
+
 /**
  * Converts PURISTA protocol envelopes into SSE events compatible with AI SDK transports.
  *
@@ -149,6 +180,7 @@ export const toAiSdkStreamEvents = async function* (
 ): AsyncGenerator<AiSdkStreamEvent> {
 	const mode = options.mode ?? 'responses'
 	const emitMessageMetadata = options.uiMessage?.emitMessageMetadata ?? true
+	const uiErrorMode = options.uiMessage?.errorMode ?? 'auto'
 	let responseMeta: ResponseMeta | undefined
 	let created = false
 	let finalText = ''
@@ -366,6 +398,13 @@ export const toAiSdkStreamEvents = async function* (
 							startedReasoning = false
 						}
 					}
+					const defaultArtifactDataPart = {
+						type: toUiDataType(envelope.frame.artifactId),
+						data: toArtifactDataPayload(envelope.frame),
+					}
+					for (const mapped of mapUiDataPartEvents(defaultArtifactDataPart)) {
+						yield mapped
+					}
 					for (const mapped of mapUiDataPartEvents(
 						options.uiMessage?.mapDataParts?.({
 							envelope,
@@ -558,6 +597,32 @@ export const toAiSdkStreamEvents = async function* (
 						},
 					}
 				} else {
+					const errorAsDataPart = {
+						type: 'data-agent-error' as const,
+						data: {
+							code: envelope.frame.code,
+							message: envelope.frame.message,
+							handled: envelope.frame.handled ?? false,
+							details: envelope.frame.details,
+						},
+					}
+					const shouldEmitErrorEvent =
+						uiErrorMode === 'error-event' || (uiErrorMode === 'auto' && (envelope.frame.handled ?? false) !== true)
+					if (!shouldEmitErrorEvent) {
+						for (const mapped of mapUiDataPartEvents(errorAsDataPart)) {
+							yield mapped
+						}
+						if (emitMessageMetadata) {
+							yield {
+								event: 'data',
+								data: {
+									type: 'message-metadata',
+									messageMetadata: envelope.frame,
+								},
+							}
+						}
+						break
+					}
 					yield {
 						event: 'data',
 						data: {
@@ -565,6 +630,7 @@ export const toAiSdkStreamEvents = async function* (
 							errorText: envelope.frame.message,
 						},
 					}
+					return
 				}
 				return
 		}

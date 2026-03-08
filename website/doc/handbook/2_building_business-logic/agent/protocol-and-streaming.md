@@ -98,6 +98,14 @@ UI teams using [`ai-sdk-ui`](https://ai-sdk.dev/docs/ai-sdk-ui/stream-protocol) 
 
 If you use [`json-render`](https://json-render.dev/docs), choose `ai-sdk-json-render`: artifact frames are emitted as `data-spec` parts (`patch` / `flat` / `nested`) so frontend renderers can reconstruct specs progressively.
 
+### UI-message specifics
+
+When using `ai-sdk-ui-message`/`ai-sdk-data`, artifact frames are exposed as typed `data-*` parts (for example `artifactId: "voyage-status"` -> `type: "data-voyage-status"`).  
+The stream also includes `message-metadata` by default for compatibility and debugging.
+
+Handled protocol errors (`frame.kind === "error"` with `handled: true`) are emitted as `data-agent-error` so consumers can render inline non-blocking warnings.
+Unhandled errors are emitted as `type: "error"` and terminate the stream.
+
 ## Background streaming
 
 Queues, WebSockets, or custom transports can opt into the same experience by passing a `stream` responder when invoking the agent:
@@ -168,6 +176,12 @@ For the full protocol semantics, message contract, and interoperability guidance
 | throw `HandledError` | expected/business errors | protocol `error` frame with `handled: true` |
 | throw unknown/Error | unexpected/system failures | protocol `error` frame with `handled: false` |
 | rollback staged conversation (`revertLast`) + throw | model call failed after staging input | avoids duplicated turns on retry |
+
+### Consumer recommendation
+
+- Treat `data-agent-error` as recoverable UI state (warning card, retry affordance).
+- Treat `error` as terminal transport/application failure for that stream.
+- Prefer `data-*` parts as primary UI signals; keep `message-metadata` as optional fallback/inspection data.
 
 ## Token usage & costs
 

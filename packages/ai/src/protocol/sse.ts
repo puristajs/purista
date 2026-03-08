@@ -70,7 +70,7 @@ export const toProtocolSseEvents = async function* (
 							mapDataParts: ({ envelope }) => mapJsonRenderDataPart(envelope),
 						}
 					: {
-							emitMessageMetadata: true,
+							emitMessageMetadata: false,
 						},
 		})) {
 			yield event
