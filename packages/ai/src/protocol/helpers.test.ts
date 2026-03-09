@@ -35,6 +35,16 @@ describe('protocol helpers', () => {
 		expect(envelope.frame.kind).toBe('message')
 	})
 
+	it('accepts developer role in message frames', () => {
+		const frame = createMessageFrame({
+			role: 'developer',
+			content: 'always ask for persistence constraints',
+			final: false,
+		})
+
+		expect(frame.role).toBe('developer')
+	})
+
 	it('creates all supported frame kinds', () => {
 		const usage = createTokenUsage({ promptTokens: 1, completionTokens: 2, totalTokens: 3, costUsd: 0.01 })
 		const artifact = createArtifactFrame({

@@ -66,6 +66,45 @@ export const supportAgent = new AgentBuilder({ ... })
 | `agent2agent` | A2A adapter boundaries |
 | `mcp` | MCP adapter boundaries |
 
+### Protocol exposure examples
+
+```ts
+// Native PURISTA envelopes over SSE
+new AgentBuilder({ ... })
+  .exposeAsHttpEndpoint('POST', 'agents/support/native')
+  .setSseProtocol('purista')
+  .build()
+```
+
+```ts
+// Vercel AI SDK UI message/data protocol
+new AgentBuilder({ ... })
+  .exposeAsHttpEndpoint('POST', 'agents/support/ui')
+  .setSseProtocol('ai-sdk-ui-message')
+  .build()
+```
+
+```ts
+// OpenAI Responses-style events
+new AgentBuilder({ ... })
+  .exposeAsHttpEndpoint('POST', 'agents/support/responses')
+  .setSseProtocol('ai-sdk-responses')
+  .build()
+```
+
+```ts
+// Boundary adapters for ecosystem protocols
+new AgentBuilder({ ... })
+  .exposeAsHttpEndpoint('POST', 'agents/support/mcp')
+  .setSseProtocol('mcp')
+  .build()
+
+new AgentBuilder({ ... })
+  .exposeAsHttpEndpoint('POST', 'agents/support/a2a')
+  .setSseProtocol('agent2agent')
+  .build()
+```
+
 ### Streaming mode decision guide
 
 | Mode | Best for | Pros | Cons |

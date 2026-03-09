@@ -1,5 +1,5 @@
 {
-	"name": "@purista/sandbox-service-example",
+	"name": "@purista/sandbox-example",
 	"version": "2.2.0",
 	"private": true,
 	"type": "module",
@@ -10,7 +10,7 @@
 	},
 	"dependencies": {
 		"@purista/core": "*",
-		"@purista/sandbox-service": "file:../../packages/sandbox-service"
+		"@purista/sandbox": "file:../../packages/sandbox-service"
 	},
 	"devDependencies": {
 		"@types/node": "^25.2.1",

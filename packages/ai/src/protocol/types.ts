@@ -3,7 +3,7 @@ import { z } from 'zod/v4'
 
 export const protocolVersion = 'purista.ai/1.0' as const
 
-export const agentRoleSchema = z.enum(['user', 'assistant', 'tool', 'system'])
+export const agentRoleSchema = z.enum(['user', 'assistant', 'tool', 'system', 'developer'])
 export type AgentRole = z.infer<typeof agentRoleSchema>
 
 export const tokenUsageSchema = z

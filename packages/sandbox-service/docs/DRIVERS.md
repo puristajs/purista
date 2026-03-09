@@ -1,6 +1,6 @@
 # Sandbox Driver Selection Guide
 
-This guide helps you choose the right virtualization backend for your `@purista/sandbox-service` implementation.
+This guide helps you choose the right virtualization backend for your `@purista/sandbox` implementation.
 
 ## Comparison Table
 

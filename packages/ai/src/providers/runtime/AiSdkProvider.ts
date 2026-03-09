@@ -1,5 +1,5 @@
 import type { Tracer } from '@opentelemetry/api'
-import type { EmbeddingModel, LanguageModel, LanguageModelMiddleware, RerankingModel } from 'ai'
+import type { EmbeddingModel, LanguageModel, LanguageModelMiddleware, RerankingModel, SystemModelMessage } from 'ai'
 import {
 	generateText as aiGenerateText,
 	embed,
@@ -120,6 +120,59 @@ const composeSystemPrompt = (systemPrompt?: string, context?: string) => {
 		return undefined
 	}
 	return parts.join('\n\n')
+}
+
+const normalizeDeveloperInstructions = (developerInstruction?: string | string[]) => {
+	if (typeof developerInstruction === 'string') {
+		const value = developerInstruction.trim()
+		return value.length > 0 ? [value] : []
+	}
+	if (!Array.isArray(developerInstruction)) {
+		return []
+	}
+	return developerInstruction
+		.filter((entry): entry is string => typeof entry === 'string')
+		.map(entry => entry.trim())
+		.filter(entry => entry.length > 0)
+}
+
+const composeSystemMessages = (
+	systemPrompt?: string,
+	context?: string,
+	developerInstruction?: string | string[],
+): string | SystemModelMessage[] | undefined => {
+	const developerMessages = normalizeDeveloperInstructions(developerInstruction)
+	if (developerMessages.length === 0) {
+		return composeSystemPrompt(systemPrompt, context)
+	}
+
+	const systemMessages: SystemModelMessage[] = []
+	const systemContent = composeSystemPrompt(systemPrompt, context)
+	if (systemContent) {
+		systemMessages.push({
+			role: 'system',
+			content: systemContent,
+			providerOptions: {
+				openai: {
+					systemMessageMode: 'system',
+				},
+			},
+		})
+	}
+
+	for (const instruction of developerMessages) {
+		systemMessages.push({
+			role: 'system',
+			content: instruction,
+			providerOptions: {
+				openai: {
+					systemMessageMode: 'developer',
+				},
+			},
+		})
+	}
+
+	return systemMessages.length > 0 ? systemMessages : undefined
 }
 
 /**
@@ -255,7 +308,7 @@ export class AiSdkProvider implements ModelProvider {
 			...metadataOverrides,
 			model: this.model,
 			prompt: request.prompt,
-			system: composeSystemPrompt(this.systemPrompt, request.context),
+			system: composeSystemMessages(this.systemPrompt, request.context, request.developerInstruction),
 			experimental_telemetry: {
 				isEnabled: true,
 				...(this.tracer ? { tracer: this.tracer } : {}),
@@ -361,7 +414,7 @@ export class AiSdkProvider implements ModelProvider {
 			...metadataWithoutOutput,
 			model: this.model,
 			prompt: request.prompt,
-			system: composeSystemPrompt(this.systemPrompt, request.context),
+			system: composeSystemMessages(this.systemPrompt, request.context, request.developerInstruction),
 			...objectRequest,
 			experimental_telemetry: {
 				isEnabled: true,
@@ -481,6 +534,7 @@ export class AiSdkProvider implements ModelProvider {
 			request: {
 				prompt: request.prompt,
 				context: request.context,
+				developerInstruction: request.developerInstruction,
 				metadata: request.metadata,
 			},
 			onReasoning: request.onReasoning,

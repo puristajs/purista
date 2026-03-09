@@ -18,7 +18,12 @@ export interface ModelProvider {
     rerank?: boolean
     json?: boolean
   }
-  generate?(request: { prompt: string; context?: string; metadata?: Record<string, unknown> }): Promise<{
+  generate?(request: {
+    prompt: string
+    context?: string
+    developerInstruction?: string | string[]
+    metadata?: Record<string, unknown>
+  }): Promise<{
     output: string
     reasoningText?: string
     tokens?: { prompt: number; completion: number }
@@ -28,6 +33,7 @@ export interface ModelProvider {
   generateJson?<T>(request: {
     prompt: string
     context?: string
+    developerInstruction?: string | string[]
     schema?: unknown
     metadata?: Record<string, unknown>
   }): Promise<{
@@ -37,7 +43,12 @@ export interface ModelProvider {
     tokens?: { prompt: number; completion: number }
     metadata?: Record<string, unknown>
   }>
-  stream?(request: { prompt: string; context?: string; metadata?: Record<string, unknown> }): ProviderStream
+  stream?(request: {
+    prompt: string
+    context?: string
+    developerInstruction?: string | string[]
+    metadata?: Record<string, unknown>
+  }): ProviderStream
   embed?(request: { value: string; metadata?: Record<string, unknown> }): Promise<{ embedding: number[] }>
   embedMany?(request: { values: string[]; metadata?: Record<string, unknown> }): Promise<{ embeddings: number[][] }>
   rerank?(request: { query: string; documents: unknown[]; topN?: number; metadata?: Record<string, unknown> }): Promise<{
@@ -234,6 +245,28 @@ When deciding between static defaults and per-run overrides:
 - use defaults for stable baseline behavior
 - use per-run overrides for feature flags, A/B tests, or special routes
 - keep overrides explicit so evaluation/test comparisons stay reproducible
+
+## Role mapping: system + developer
+
+`AiSdkProvider` supports explicit per-call developer instructions:
+
+```ts
+await context.models['openai:gpt-4o-mini'].generateText?.({
+  prompt: payload.prompt,
+  developerInstruction: [
+    'Never invent requirements.',
+    'Ask for missing persistence details explicitly.',
+  ],
+})
+```
+
+Precedence is deterministic:
+
+- provider `systemPrompt` stays `system`
+- call `developerInstruction` is injected on every call
+- `prompt` remains user content
+
+When chaining responses (`previous_response_id` style flows), resend your system/developer instructions each turn. Do not assume the provider carries them forward automatically.
 
 ## Telemetry & tracing
 

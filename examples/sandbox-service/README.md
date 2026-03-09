@@ -1,6 +1,6 @@
-# Sandbox Service Example
+# Sandbox Example
 
-This example shows how to wire `@purista/sandbox-service` into a PURISTA service runtime.
+This example shows how to wire `@purista/sandbox` into a PURISTA service runtime.
 
 ## Build sandbox image
 
@@ -17,4 +17,4 @@ npm install
 npm run start -w examples/sandbox-service
 ```
 
-The example boots a local in-memory PURISTA runtime and starts the sandbox service using `DockerSandboxDriver`.
+The example boots a local in-memory PURISTA runtime and starts the sandbox using `DockerSandboxDriver`.

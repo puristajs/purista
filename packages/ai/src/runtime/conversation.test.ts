@@ -28,12 +28,14 @@ describe('conversation helpers', () => {
 		const conversation = createConversationHelpers(createSessionHelpers(), manifest)
 
 		await conversation.addUser('hello')
+		await conversation.addDeveloper('keep answers concise')
 		await conversation.addAssistant('hi there')
 
 		const messages = await conversation.getMessages()
-		expect(messages).toHaveLength(2)
+		expect(messages).toHaveLength(3)
 		expect(messages[0]?.role).toBe('user')
-		expect(messages[1]?.role).toBe('assistant')
+		expect(messages[1]?.role).toBe('developer')
+		expect(messages[2]?.role).toBe('assistant')
 		expect(messages[0]?.id).toBeTruthy()
 		expect(messages[0]?.createdAt).toBeTypeOf('number')
 	})

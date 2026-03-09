@@ -1,6 +1,6 @@
 # Secure Git and GitHub Authentication
 
-The `@purista/sandbox-service` provider implements a security-first approach to handling Git credentials for AI agents and users.
+The `@purista/sandbox` provider implements a security-first approach to handling Git credentials for AI agents and users.
 
 ## How it Works
 

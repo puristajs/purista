@@ -1,11 +1,11 @@
 # Architecture Overview
 
-The `@purista/sandbox-service` service is designed as a decoupled, message-driven component within the PURISTA ecosystem.
+The `@purista/sandbox` package is designed as a decoupled, message-driven component within the PURISTA ecosystem.
 
 ## Core Components
 
-### 1. The Sandbox Service
-A standard PURISTA service that exposes commands for sandbox lifecycle management (`createSandbox`, `destroySandbox`) and execution (`executeBash`).
+### 1. Sandbox Runtime
+A standard PURISTA service that exposes commands for sandbox lifecycle management (`createSandbox`, `ensureSandbox`, `destroySandbox`) and execution (`executeBash`).
 
 ### 2. Sandbox Drivers
 The service is driver-agnostic. It interacts with virtualization technologies via a common `SandboxDriver` interface. This allows the same business logic to run against Docker, Podman, Lima, or Firecracker.

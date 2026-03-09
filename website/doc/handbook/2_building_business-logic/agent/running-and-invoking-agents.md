@@ -241,7 +241,7 @@ sequenceDiagram
 - `AIWorkerService` queue execution currently supports JSON-serializable `metadata.aiSdk` call options.
 - Function-based `aiSdk.tools` are rejected in worker mode with a clear job failure reason.
 - If your agent relies on function tools (for example local file writers), run it in-process.
-- Command allowlist tools via `context.tools.invoke(...)` remain fully supported.
+- Command invocations via `context.tools.invoke.<service>['<version>'].<command>(payload, parameter?)` remain fully supported.
 
 ## Invoke an agent programmatically
 
@@ -315,14 +315,6 @@ commandBuilder
       .final()
   })
 ```
-
-Legacy shorthand still works:
-
-```ts
-.canInvokeAgent('supportAgent', '1', invokeParameterSchema)
-```
-
-That only configures `parameterSchema`.
 
 ### Payload vs parameter (short rule)
 
@@ -433,17 +425,28 @@ flowchart LR
 3. pool settings protect concurrency and upstream APIs
 
 ```ts
-// inside a queue worker / background handler
-const envelopes = await invokeAgent({
-  eventBridge,
-  agentName: 'supportAgent',
-  agentVersion: '1',
-  payload: { prompt: 'Summarize ticket #42' },
+const queuePayloadSchema = z.object({
+  prompt: z.string().min(1),
 })
-```
 
-If you already use Purista queues, keep that setup.  
-The AI package does not require a dedicated queue implementation.
+const queueParameterSchema = z.object({
+  channel: z.literal('queue'),
+})
+
+queueWorkerBuilder
+  .canInvokeAgent('supportAgent', '1', {
+    payloadSchema: supportInvokePayloadSchema,
+    parameterSchema: supportInvokeParameterSchema,
+  })
+  .addPayloadSchema(queuePayloadSchema)
+  .setQueueWorkerFunction(async (context, payload) => {
+    const result = await context.invokeAgent.supportAgent['1']
+      .call({ message: payload.prompt }, { channel: 'queue' })
+      .final()
+
+    return result
+  })
+```
 
 ### How queue settings and agent pool settings relate
 
@@ -488,18 +491,13 @@ You can keep full control over queue bridge, retry, visibility timeout, and sche
 ```ts
 // command handler -> enqueue
 await context.queue.publish.aiWorkloads({
-  agentName: 'supportAgent',
-  agentVersion: '1',
   payload: { prompt: 'Summarize ticket #42' },
 })
 
 // queue worker handler -> invoke
-await invokeAgent({
-  eventBridge: context.eventBridge,
-  agentName: payload.agentName,
-  agentVersion: payload.agentVersion,
-  payload: payload.payload,
-})
+await context.invokeAgent.supportAgent['1']
+  .call({ message: payload.prompt }, { channel: 'queue' })
+  .final()
 ```
 
 Use normal queue builder/worker options for transport-level behavior:
@@ -511,7 +509,7 @@ Use normal queue builder/worker options for transport-level behavior:
 ### Built-in runtime helpers
 
 - `@purista/ai` ships reference services (`AIOrchestratorService`, `AIWorkerService`) that ingest manifests, enqueue runs, and execute them in isolated workers.
-- Queue bridges (Redis, NATS, AMQP, …) treat agents like any other workload—define a queue worker that calls `invokeAgent` internally, then rely on the queue bridge for delayed or batched execution.
+- Queue bridges (Redis, NATS, AMQP, …) treat agents like any other workload—define a queue worker with `.canInvokeAgent(...)` and call `context.invokeAgent.<agent>['<version>'].call(...).final()` inside the worker, then rely on the queue bridge for delayed or batched execution.
 - Concurrency pools apply across sync and async invocations. Configure `poolConfig.maxConcurrencyPerInstance` at runtime/deploy-time so each environment controls throughput independently.
 
 ### Failure behavior in queue mode

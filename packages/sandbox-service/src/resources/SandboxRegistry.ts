@@ -11,6 +11,7 @@ import { type SandboxMetadata, SandboxMetadataSchema } from '../types/SandboxDri
 export class SandboxRegistry {
 	private store: StateStore
 	private prefix = 'sandbox:registry:'
+	private ownerPrefix = 'sandbox:owner:'
 
 	/**
 	 * @param store The PURISTA StateStore instance to use for persistence.
@@ -23,6 +24,10 @@ export class SandboxRegistry {
 		return `${this.prefix}${sandboxId}`
 	}
 
+	private getOwnerIndexKey(owner: { organizationId: string; projectId: string; userId: string }): string {
+		return `${this.ownerPrefix}${owner.organizationId}:${owner.projectId}:${owner.userId}`
+	}
+
 	/**
 	 * Registers a new sandbox in the persistent state store.
 	 *
@@ -30,6 +35,7 @@ export class SandboxRegistry {
 	 */
 	async register(metadata: SandboxMetadata): Promise<void> {
 		await this.store.setState(this.getKey(metadata.sandboxId), metadata)
+		await this.store.setState(this.getOwnerIndexKey(metadata), metadata.sandboxId)
 	}
 
 	/**
@@ -38,7 +44,15 @@ export class SandboxRegistry {
 	 * @param sandboxId Unique ID of the sandbox to unregister.
 	 */
 	async unregister(sandboxId: string): Promise<void> {
+		const metadata = await this.getMetadata(sandboxId)
 		await this.store.removeState(this.getKey(sandboxId))
+		if (metadata) {
+			const ownerKey = this.getOwnerIndexKey(metadata)
+			const ownerEntry = await this.store.getState(ownerKey)
+			if (ownerEntry[ownerKey] === sandboxId) {
+				await this.store.removeState(ownerKey)
+			}
+		}
 	}
 
 	/**
@@ -57,6 +71,24 @@ export class SandboxRegistry {
 
 		const result = SandboxMetadataSchema.safeParse(rawMetadata)
 		return result.success ? result.data : undefined
+	}
+
+	/**
+	 * Returns metadata for an existing sandbox bound to the same owner tuple.
+	 */
+	async findByOwner(owner: { organizationId: string; projectId: string; userId: string }): Promise<SandboxMetadata | undefined> {
+		const ownerKey = this.getOwnerIndexKey(owner)
+		const ownerEntry = await this.store.getState(ownerKey)
+		const sandboxId = ownerEntry[ownerKey]
+		if (typeof sandboxId !== 'string' || sandboxId.length < 1) {
+			return undefined
+		}
+		const metadata = await this.getMetadata(sandboxId)
+		if (!metadata) {
+			await this.store.removeState(ownerKey)
+			return undefined
+		}
+		return metadata
 	}
 
 	/**

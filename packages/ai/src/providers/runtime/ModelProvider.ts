@@ -4,6 +4,11 @@
 export type ProviderRequest = {
 	prompt: string
 	context?: string
+	/**
+	 * Optional high-priority app/developer instruction(s) injected on every call.
+	 * Providers may map these to dedicated instruction roles when supported.
+	 */
+	developerInstruction?: string | string[]
 	metadata?: Record<string, unknown>
 }
 
@@ -22,6 +27,7 @@ export type ProviderGenerateTextRequest = ProviderRequest & {
 export type ProviderJsonRequest = {
 	prompt: string
 	context?: string
+	developerInstruction?: string | string[]
 	schema?: unknown
 	metadata?: Record<string, unknown>
 }

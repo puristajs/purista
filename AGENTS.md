@@ -61,5 +61,5 @@ All contributors are expected to follow the Code of Conduct in `CODE_OF_CONDUCT.
 ## AI Context Files
 - Start with repository-level context in `llms.txt`.
 - Public published files are under `website/doc/public/llms/`.
-- For sandbox implementation work, also load `website/doc/public/llms/sandbox-service.txt`.
-- Sandbox skills are available under `skills/sandbox-service/` and should be used selectively (load only what is required for the current task).
+- For sandbox implementation work, also load `website/doc/public/llms/sandbox.txt`.
+- Sandbox skills are available under `skills/sandbox/` and should be used selectively (load only what is required for the current task).

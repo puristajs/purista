@@ -1,4 +1,4 @@
-# @purista/sandbox-service
+# @purista/sandbox
 
 A professional, multi-tenant sandboxing provider built for the **PURISTA** framework. It enables secure, isolated execution environments for autonomous agents and human users.
 
@@ -6,6 +6,7 @@ A professional, multi-tenant sandboxing provider built for the **PURISTA** frame
 
 - **Multi-tenancy**: Native support for Organizations, Projects, and Users.
 - **Pluggable Drivers**:
+  - `AppleContainerSandboxDriver`: macOS-focused local dev driver for Docker-compatible runtimes (OrbStack/Colima).
   - `DockerSandboxDriver`: Works with Docker Desktop, **OrbStack**, and **Colima**.
   - `PodmanSandboxDriver`: Secure, daemonless, and rootless containers.
   - `LimaSandboxDriver`: **Open-source** native Apple Silicon virtualization (via `vz`).
@@ -18,7 +19,7 @@ A professional, multi-tenant sandboxing provider built for the **PURISTA** frame
 ## Installation
 
 ```bash
-npm install @purista/sandbox-service
+npm install @purista/sandbox
 ```
 
 ## Quick Start
@@ -29,10 +30,16 @@ npm install @purista/sandbox-service
 docker build -t purista-sandbox-agent:latest -f Dockerfile.sandbox .
 ```
 
+Optional Alpine variant (smaller image, stricter compatibility constraints):
+
+```bash
+docker build -t purista-sandbox-agent:alpine -f Dockerfile.sandbox.alpine .
+```
+
 ### 2. Configure the Service
 
 ```typescript
-import { sandboxServiceBuilder, DockerSandboxDriver } from '@purista/sandbox-service'
+import { sandboxServiceBuilder, DockerSandboxDriver } from '@purista/sandbox'
 
 const driver = new DockerSandboxDriver({
   imageName: 'purista-sandbox-agent:latest',
@@ -47,13 +54,20 @@ const sandboxService = await sandboxServiceBuilder.getInstance(eventBridge, {
 })
 ```
 
+For Apple local development (OrbStack/Colima), you can also use:
+
+```typescript
+import { AppleContainerSandboxDriver } from '@purista/sandbox'
+```
+
 ## Documentation
 
 - [Architecture Overview](./docs/ARCHITECTURE.md)
 - [Driver Selection Guide](./docs/DRIVERS.md)
 - [Secure Git Integration](./docs/GIT_AUTH.md)
 - [Sandbox Dockerfile](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/Dockerfile.sandbox)
-- [Repository skills (sandbox)](https://github.com/puristajs/purista/blob/master/skills/sandbox-service/META-SKILL.md)
+- [Sandbox Alpine Dockerfile](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/Dockerfile.sandbox.alpine)
+- [Repository skills (sandbox)](https://github.com/puristajs/purista/blob/master/skills/sandbox/META-SKILL.md)
 
 ## Development
 

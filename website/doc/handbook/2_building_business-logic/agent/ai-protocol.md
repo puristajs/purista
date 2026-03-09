@@ -156,7 +156,7 @@ context.stream.sendArtifact({ artifactId: 'citations', content: { ids: ['doc-1']
 Tool invocation should go through allowlisted helper calls:
 
 ```ts
-const ticket = await context.tools.invoke('support.1.createTicket', { title: 'Refund request' })
+const ticket = await context.tools.invoke.support['1'].createTicket({ title: 'Refund request' })
 ```
 
 The runtime automatically emits tool frames, telemetry, and error frames.

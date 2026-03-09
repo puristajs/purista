@@ -2,7 +2,7 @@
  * A single frame in a conversation history.
  */
 export type ConversationFrame = {
-	role: 'user' | 'assistant' | 'system'
+	role: 'user' | 'assistant' | 'system' | 'developer'
 	content: string
 	timestamp: number
 }

@@ -1,7 +1,7 @@
 {
-	"name": "@purista/sandbox-service",
+	"name": "@purista/sandbox",
 	"version": "2.2.0",
-	"description": "Reusable multi-tenant sandbox service and drivers for PURISTA",
+	"description": "Reusable multi-tenant sandbox and drivers for PURISTA",
 	"homepage": "https://purista.dev",
 	"repository": {
 		"type": "git",
@@ -29,7 +29,8 @@
 	"files": [
 		"dist/**/*",
 		"docs/**/*",
-		"Dockerfile.sandbox"
+		"Dockerfile.sandbox",
+		"Dockerfile.sandbox.alpine"
 	],
 	"publishConfig": {
 		"access": "public"

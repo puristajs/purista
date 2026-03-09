@@ -68,7 +68,7 @@ Most application developers should not create protocol objects manually.
 Use:
 
 - `context.stream.sendChunk/sendFinal/sendArtifact/sendError` in handlers
-- `context.tools.invoke(...)` for allowlisted command/agent tools
+- `context.tools.invoke.<service>['<version>'].<command>(...)` for command access registered via `canInvoke(...)`
 - helpers like `toAiSdkStreamEvents(...)` when exposing streams to UI clients
 
 Manual envelope creation is only for advanced adapters/integrations.

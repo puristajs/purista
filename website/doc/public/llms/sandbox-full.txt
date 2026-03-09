@@ -1,4 +1,4 @@
-# @purista/sandbox-service Full Context
+# @purista/sandbox Full Context
 
 ## Architecture
 - https://github.com/puristajs/purista/blob/master/packages/sandbox-service/docs/ARCHITECTURE.md
@@ -17,11 +17,11 @@
 - https://github.com/puristajs/purista/blob/master/packages/sandbox-service/Dockerfile.sandbox
 
 ## Skills
-- https://github.com/puristajs/purista/blob/master/skills/sandbox-service/META-SKILL.md
-- https://github.com/puristajs/purista/blob/master/skills/sandbox-service/PURISTA-Architect.md
-- https://github.com/puristajs/purista/blob/master/skills/sandbox-service/PURISTA-Developer.md
-- https://github.com/puristajs/purista/blob/master/skills/sandbox-service/PURISTA-Advanced-Developer.md
-- https://github.com/puristajs/purista/blob/master/skills/sandbox-service/PURISTA-Infrastructure.md
-- https://github.com/puristajs/purista/blob/master/skills/sandbox-service/PURISTA-Infrastructure-Messaging.md
-- https://github.com/puristajs/purista/blob/master/skills/sandbox-service/PURISTA-Service-Developer.md
-- https://github.com/puristajs/purista/blob/master/skills/sandbox-service/PURISTA-Testing.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/META-SKILL.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Architect.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Developer.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Advanced-Developer.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Infrastructure.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Infrastructure-Messaging.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Service-Developer.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Testing.md

@@ -71,11 +71,23 @@ This is deterministic transcript compression, not semantic LLM summarization.
 
 | Method | Purpose |
 | --- | --- |
+| `addSystem(content)` / `addDeveloper(content)` | append policy/instruction turns |
 | `addUser(content)` / `addAssistant(content)` | append standard turns |
 | `addTool(...)` / `addToolResult(...)` | record tool lifecycle context |
 | `getMessages()` / `getSummary()` | inspect current state |
 | `buildPromptInput()` | build model-ready transcript (`summary + recent`) |
 | `revertLast({ role })` | rollback staged frames on failure/retry |
+
+Supported persisted roles are:
+
+- `system`
+- `developer`
+- `user`
+- `assistant`
+- `tool`
+- `tool_result`
+
+For robust policy enforcement, inject `system`/`developer` every turn, then persist them for replay/debug visibility.
 
 ## Session identity and tenancy
 

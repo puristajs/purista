@@ -5,7 +5,7 @@ import type { AgentManifest } from '../types/AgentManifest.js'
 
 const DEFAULT_MAX_FRAMES = 40
 
-export type ConversationRole = 'system' | 'user' | 'assistant' | 'tool' | 'tool_result'
+export type ConversationRole = 'system' | 'developer' | 'user' | 'assistant' | 'tool' | 'tool_result'
 
 export type ConversationMessage = {
 	id: string
@@ -34,6 +34,10 @@ export type ConversationHelpers = {
 	getSummary(sessionId?: string): Promise<string | undefined>
 	append(message: Omit<ConversationMessage, 'id' | 'createdAt'>, sessionId?: string): Promise<ConversationState>
 	addSystem(
+		content: string,
+		options?: { metadata?: Record<string, unknown>; sessionId?: string },
+	): Promise<ConversationState>
+	addDeveloper(
 		content: string,
 		options?: { metadata?: Record<string, unknown>; sessionId?: string },
 	): Promise<ConversationState>
@@ -191,6 +195,9 @@ export const createConversationHelpers = (
 		append,
 		addSystem(content, options) {
 			return addByRole('system', content, options)
+		},
+		addDeveloper(content, options) {
+			return addByRole('developer', content, options)
 		},
 		addUser(content, options) {
 			return addByRole('user', content, options)
