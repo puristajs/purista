@@ -13,7 +13,7 @@ sandboxServiceBuilder
 	.addCommandDefinition(writeFilesCommandBuilder.getDefinition())
 	.addCommandDefinition(executeBashCommandBuilder.getDefinition())
 
-export * from './resources/SandboxRegistry.js'
+export * from '../../../resources/SandboxRegistry.js'
 // Export all components
 export * from './SandboxService.js'
 export * from './SandboxServiceBuilder.js'

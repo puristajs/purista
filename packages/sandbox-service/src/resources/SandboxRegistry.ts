@@ -1,5 +1,5 @@
 import type { StateStore } from '@purista/core'
-import { type SandboxMetadata, SandboxMetadataSchema } from '../../../../types/SandboxDriver.js'
+import { type SandboxMetadata, SandboxMetadataSchema } from '../types/SandboxDriver.js'
 
 /**
  * SandboxRegistry - A state-store backed registry for tracking active sandboxes.

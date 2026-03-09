@@ -1,6 +1,6 @@
 import { Service } from '@purista/core'
 import type { SandboxDriver } from '../../../types/SandboxDriver.js'
-import type { SandboxRegistry } from './resources/SandboxRegistry.js'
+import type { SandboxRegistry } from '../../../resources/SandboxRegistry.js'
 
 /**
  * Custom Sandbox service with startup reconciliation.
