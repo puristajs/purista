@@ -10,7 +10,7 @@
 	},
 	"dependencies": {
 		"@purista/core": "*",
-		"@purista/sandbox-service": "*"
+		"@purista/sandbox-service": "file:../../packages/sandbox-service"
 	},
 	"devDependencies": {
 		"@types/node": "^25.2.1",

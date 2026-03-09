@@ -1,11 +1,7 @@
 {
 	"extends": "../../tsconfig.json",
 	"compilerOptions": {
-		"outDir": "./build",
-		"baseUrl": ".",
-		"paths": {
-			"@purista/sandbox-service": ["../../packages/sandbox-service/src/index.ts"]
-		}
+		"outDir": "./build"
 	},
 	"files": ["src/index.ts"]
 }
