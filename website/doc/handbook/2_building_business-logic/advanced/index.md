@@ -14,6 +14,9 @@ This section covers internals and production-grade operating patterns.
 - [Queues – internals & delivery tuning](./queues.md): lifecycle configuration, leases, retries, DLQs.
 - [Delivery semantics and reliability](./delivery-semantics-and-reliability.md): at-most-once vs at-least-once and idempotency patterns.
 - [AI Protocol](./ai-protocol.md): envelope/frame contract for agent streaming, telemetry, and nested flows.
+- [AI Knowledge & RAG](./ai-knowledge.md): deep dive into vector stores, document adapters, and multi-tenant scoping.
+- [Custom AI Stores](./ai-custom-stores.md): building custom conversation memory and knowledge adapters.
+- [Standard AI Protocols (MCP & A2A)](./ai-mcp-and-a2a.md): interoperability via Model Context Protocol and Agent2Agent.
 - [JavaScript Events](./javascript_events.md): integrating framework events with native JS events.
 
 ## When to read this section
@@ -21,3 +24,5 @@ This section covers internals and production-grade operating patterns.
 - you debug cross-service routing and message metadata
 - you define production delivery/retry expectations
 - you need stronger observability and operational safety controls
+- you build custom storage adapters for AI memory or knowledge
+- you need deep interoperability with standard AI protocols
