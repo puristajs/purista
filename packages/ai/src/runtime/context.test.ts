@@ -44,6 +44,7 @@ const baseServiceContext = {
 			},
 		},
 	},
+	emit: vi.fn().mockResolvedValue(undefined),
 } as any
 
 const baseEventBridge = {
@@ -118,8 +119,10 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		const toolResult = await context.tools.invoke('ToolService.1.createTicket', { title: 'Need help' })
-		expect(toolResult).toEqual({ id: 'ticket-1' })
+			const toolResult = await context.tools.invoke.ToolService['1'].createTicket({ title: 'Need help' })
+			expect(toolResult).toEqual({ id: 'ticket-1' })
+			const toolResultViaPath = await context.tools.invoke.ToolService['1'].createTicket({ title: 'Need help (path)' })
+			expect(toolResultViaPath).toEqual({ id: 'ticket-1' })
 
 		await context.session.save({ conversationId: 's1', data: { value: 1 }, updatedAt: Date.now() })
 		const session = await context.session.load('s1')
@@ -155,6 +158,8 @@ describe('runtime context helpers', () => {
 		expect(embed).toHaveBeenCalledOnce()
 		expect(rerank).toHaveBeenCalledOnce()
 		context.stream.sendReasoning('reasoning note')
+		await context.emit('agent.updated', { status: 'ok' })
+		expect(baseServiceContext.emit).toHaveBeenCalledWith('agent.updated', { status: 'ok' })
 
 		const envelopes = buffer.toEnvelopes()
 		expect(envelopes.some(envelope => envelope.frame.kind === 'tool')).toBe(true)
@@ -229,7 +234,7 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await expect(context.tools.invoke('Unknown.1.run', {})).rejects.toBeInstanceOf(HandledError)
+			await expect(context.tools.invoke.Unknown['1'].run({})).rejects.toBeInstanceOf(HandledError)
 		await expect(context.knowledge.query('missing', 'test')).rejects.toMatchObject({
 			errorCode: StatusCode.NotFound,
 		})

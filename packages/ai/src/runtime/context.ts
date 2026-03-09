@@ -276,7 +276,7 @@ export const createProtocolBuffer = (
 
 type ToolInvoker = {
 	list(): AllowedToolDefinition[]
-	invoke(definition: AllowedToolDefinition | string, payload: unknown, parameter?: unknown): Promise<unknown>
+	invoke: Record<string, Record<string, Record<string, (payload: unknown, parameter?: unknown) => Promise<unknown>>>>
 }
 
 const createToolInvoker = (
@@ -295,17 +295,6 @@ const createToolInvoker = (
 		map.set(key, tool)
 	}
 
-	const resolve = (definition: AllowedToolDefinition | string) => {
-		if (typeof definition !== 'string') {
-			return definition
-		}
-		const found = map.get(definition)
-		if (!found) {
-			throw new HandledError(StatusCode.BadRequest, `Tool ${definition} not allowlisted`)
-		}
-		return found
-	}
-
 	const emitStatus = (
 		tool: AllowedToolDefinition,
 		status: 'invoked' | 'success' | 'error',
@@ -322,8 +311,7 @@ const createToolInvoker = (
 		})
 	}
 
-	const invoke = async (definition: AllowedToolDefinition | string, payload: unknown, parameter?: unknown) => {
-		const tool = resolve(definition)
+	const invoke = async (tool: AllowedToolDefinition, payload: unknown, parameter?: unknown) => {
 		const serviceApi = services[tool.serviceName]
 		if (!serviceApi) {
 			throw new HandledError(StatusCode.BadRequest, `Service ${tool.serviceName} not available for tool invocation`)
@@ -354,9 +342,55 @@ const createToolInvoker = (
 		}
 	}
 
+	const getAllowedTool = (serviceName: string, serviceVersion: string, commandName: string) => {
+		const key = `${serviceName}.${serviceVersion}.${commandName}`
+		return map.get(key)
+	}
+
+	const invokeProxy = new Proxy(
+		{},
+		{
+			get: (_target, serviceProp) => {
+				if (typeof serviceProp !== 'string') {
+					return undefined
+				}
+				return new Proxy(
+					{},
+					{
+						get: (_targetVersion, versionProp) => {
+							if (typeof versionProp !== 'string') {
+								return undefined
+							}
+							return new Proxy(
+								{},
+								{
+									get: (_targetCommand, commandProp) => {
+										if (typeof commandProp !== 'string') {
+											return undefined
+										}
+										return async (payload: unknown, parameter?: unknown) => {
+											const tool = getAllowedTool(serviceProp, versionProp, commandProp)
+											if (!tool) {
+												throw new HandledError(
+													StatusCode.BadRequest,
+													`Tool ${serviceProp}.${versionProp}.${commandProp} not allowlisted`,
+												)
+											}
+											return await invoke(tool, payload, parameter)
+										}
+									},
+								},
+							)
+						},
+					},
+				)
+			},
+		},
+	) as ToolInvoker['invoke']
+
 	return {
 		list: () => [...tools],
-		invoke,
+		invoke: invokeProxy,
 	}
 }
 
@@ -574,6 +608,7 @@ export type AgentHandlerContext<
 	payload: Payload
 	parameter: Parameter
 	message: ProtocolContext['message']
+	emit: ProtocolContext['emit']
 	conversation: ConversationHelpers
 	session: SessionHelpers
 	knowledge: KnowledgeHelpers<KnowledgeAliases>
@@ -728,6 +763,7 @@ export const createAgentHandlerContext = <
 		payload: input.payload,
 		parameter: input.parameter,
 		message: input.serviceContext.message,
+		emit: input.serviceContext.emit.bind(input.serviceContext) as ProtocolContext['emit'],
 		session: sessionHelpers,
 		conversation: createConversationHelpers(sessionHelpers, input.manifest),
 		knowledge: createKnowledgeHelpers(

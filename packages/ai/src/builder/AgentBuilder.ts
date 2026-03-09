@@ -20,7 +20,6 @@ import type {
 	AgentModelCapability,
 	AgentSessionConfig,
 	AgentSseProtocol,
-	AllowedToolDefinition,
 	RetryPolicy,
 } from '../types/AgentManifest.js'
 
@@ -151,6 +150,7 @@ const normalizeInfo = (info: AgentInfo): AgentInfo => {
 		agentName: info.agentName.trim(),
 		agentVersion: version,
 		description: info.description?.trim(),
+		successEventName: info.successEventName?.trim(),
 	}
 }
 
@@ -317,6 +317,9 @@ export class AgentBuilder<
 		})
 		this.serviceBuilder.setConfigSchema(agentRuntimeConfigSchema)
 		this.commandBuilder = this.serviceBuilder.getCommandBuilder('run', `Invoke ${this.info.agentName}`)
+		if (this.info.successEventName) {
+			this.commandBuilder.setSuccessEventName(this.info.successEventName)
+		}
 		this.streamBuilder = this.serviceBuilder.getStreamBuilder('run', `Stream ${this.info.agentName}`)
 		this.streamBuilder.addChunkSchema(z.union([agentProtocolEnvelopeSchema, sseProtocolEventSchema]))
 		this.streamBuilder.addFinalSchema(agentProtocolEnvelopeSchema.array())
@@ -494,8 +497,46 @@ export class AgentBuilder<
 		return this
 	}
 
-	allowTool(tool: AllowedToolDefinition) {
-		this.manifest.allowedTools = [...this.manifest.allowedTools, tool]
+	canInvoke(
+		serviceName: string,
+		serviceVersion: string,
+		commandName: string,
+		outputSchema?: Schema,
+		payloadSchema?: Schema,
+		parameterSchema?: Schema,
+	) {
+		this.commandBuilder.canInvoke(serviceName, serviceVersion, commandName, outputSchema, payloadSchema, parameterSchema)
+		this.streamBuilder.canInvoke(serviceName, serviceVersion, commandName, outputSchema, payloadSchema, parameterSchema)
+
+		const alreadyRegistered = this.manifest.allowedTools.some(
+			tool =>
+				tool.serviceName === serviceName &&
+				tool.serviceVersion === serviceVersion &&
+				tool.commandName === commandName,
+		)
+
+		if (!alreadyRegistered) {
+			this.manifest.allowedTools = [
+				...this.manifest.allowedTools,
+				{
+					serviceName,
+					serviceVersion,
+					commandName,
+				},
+			]
+		}
+
+		return this
+	}
+
+	canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
+		this.commandBuilder.canEmit(eventName, schema)
+		this.streamBuilder.canEmit(eventName, schema)
+		return this
+	}
+
+	setSuccessEventName(eventName: string) {
+		this.commandBuilder.setSuccessEventName(eventName)
 		return this
 	}
 
@@ -904,6 +945,7 @@ export class AgentBuilder<
 						modelApi.generate = async (request: {
 							prompt: string
 							context?: string
+							developerInstruction?: string | string[]
 							metadata?: Record<string, unknown>
 						}) => {
 							const requestStartedAt = Date.now()
@@ -942,6 +984,7 @@ export class AgentBuilder<
 						modelApi.generateJson = async <T = unknown>(request: {
 							prompt: string
 							context?: string
+							developerInstruction?: string | string[]
 							schema?: unknown
 							metadata?: Record<string, unknown>
 						}): Promise<{
@@ -995,7 +1038,12 @@ export class AgentBuilder<
 
 					if (provider.stream) {
 						const streamProvider = provider.stream.bind(provider)
-						modelApi.stream = (request: { prompt: string; context?: string; metadata?: Record<string, unknown> }) => {
+						modelApi.stream = (request: {
+							prompt: string
+							context?: string
+							developerInstruction?: string | string[]
+							metadata?: Record<string, unknown>
+						}) => {
 							const requestStartedAt = Date.now()
 							let streamHandlePromise: Promise<ReturnType<NonNullable<ModelProvider['stream']>>> | undefined
 							const resolveStream = async () => {
@@ -1145,6 +1193,7 @@ export class AgentBuilder<
 								request: {
 									prompt: request.prompt,
 									context: request.context,
+									developerInstruction: request.developerInstruction,
 									metadata: request.metadata,
 								},
 								onReasoning: request.onReasoning,

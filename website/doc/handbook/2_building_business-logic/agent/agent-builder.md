@@ -6,7 +6,7 @@ order: 203701
 
 # The Agent Builder
 
-`new AgentBuilder(...)` mirrors `ServiceBuilder`: you define one agent workload with typed input/output, allowlisted tools, model aliases, and runtime behavior.
+`new AgentBuilder(...)` mirrors `ServiceBuilder`: you define one agent workload with typed input/output, invoked commands, model aliases, and runtime behavior.
 
 Think of this page as the practical handbook entry:
 
@@ -29,7 +29,7 @@ This creates:
 ## 2) Minimal agent first
 
 ```ts title="src/agents/supportAgent/v1/supportAgent.ts"
-import { AgentBuilder } from '@purista/ai'
+import { AgentBuilder, generateText } from '@purista/ai'
 import { extendApi } from '@purista/core'
 import { z } from 'zod/v4'
 
@@ -51,14 +51,20 @@ export const supportAgent = new AgentBuilder({
   .defineModel('openai:gpt-4o-mini')
   .setHandler(async function (context, payload) {
     const model = context.models['openai:gpt-4o-mini']
-    const answer = await model.generateText?.({
-      prompt: payload.prompt,
-      context: payload.context,
-      onTextDelta: chunk => context.stream.sendChunk(chunk),
+    const answer = await generateText({
+      model,
+      request: {
+        prompt: payload.prompt,
+        context: payload.context,
+      },
+      onTextDelta: delta => {
+        if (delta.length > 0) {
+          context.stream.sendChunk(delta)
+        }
+      },
     })
-    const final = answer ?? (await model.generate!({ prompt: payload.prompt, context: payload.context })).output
-    context.stream.sendFinal(final)
-    return { message: final }
+    context.stream.sendFinal(answer)
+    return { message: answer }
   })
   .build()
 ```
@@ -69,32 +75,138 @@ Start simple like this, then add advanced features incrementally.
 
 After the minimal handler works, add only the features your workload needs.
 
-### 3.1 Allowlist command tools
+### 3.1 Invoke commands and expose AI SDK tools
 
 ```ts
+import { tool } from 'ai'
+import { z } from 'zod/v4'
+
+const createTicketPayloadSchema = z.object({
+  reason: z.string().min(1),
+})
+
+const createTicketOutputSchema = z.object({
+  ticketId: z.string().min(1),
+  status: z.enum(['created']),
+})
+
 const supportAgent = new AgentBuilder({
   agentName: 'supportAgent',
   agentVersion: '1',
   description: 'Answers help-desk questions',
 })
-  .allowTool({
-    serviceName: 'ticketing',
-    serviceVersion: '1',
-    commandName: 'createTicket',
-  })
+  .canInvoke('ticketing', '1', 'createTicket', createTicketOutputSchema, createTicketPayloadSchema)
   .setHandler(async function (context, payload) {
-    if (payload.prompt.includes('open ticket')) {
-      await context.tools.invoke('ticketing.1.createTicket', { reason: payload.prompt })
-    }
-    context.stream.sendFinal('Done')
-    return { message: 'Done' }
+    const ticketTool = tool({
+      description: 'Create a support ticket',
+      inputSchema: createTicketPayloadSchema.extend({
+        reason: z.string().min(1).describe('Why the ticket should be opened'),
+      }),
+      execute: async ({ reason }) =>
+        await context.tools.invoke.ticketing['1'].createTicket({ reason }),
+    })
+
+    const answer = await context.models['openai:gpt-4o-mini'].generateText({
+      prompt: payload.prompt,
+      metadata: {
+        aiSdk: {
+          tools: { createTicket: ticketTool },
+          toolChoice: 'auto',
+        },
+      },
+    })
+
+    return { message: answer }
   })
   .build()
 ```
 
-Only allowlisted commands are available to the handler.
+Use `canInvoke(...)` for typed invoke contracts and AI SDK `tool(...)` for model-facing tools.
+`tool({ inputSchema })` already validates/parses tool input for `execute`.
+Tool results stay structured in the normal AI SDK loop; manual `JSON.stringify(...)` is only needed for custom logging/display channels.
 
-### 3.2 Add conversation persistence
+If you stream manually with `context.stream.sendChunk(...)`, call `context.stream.sendFinal(...)` at the end of the turn.
+If you do not stream manual chunks, returning `{ message: ... }` is sufficient.
+
+### 3.1b Emit typed custom events from an agent
+
+```ts
+import { z } from 'zod/v4'
+
+const supportAgent = new AgentBuilder({ ... })
+  .canEmit(
+    'support.ticket.classified',
+    z.object({
+      ticketId: z.string().min(1),
+      urgency: z.enum(['low', 'medium', 'high']),
+    }),
+  )
+  .setHandler(async function (context, payload) {
+    await context.emit('support.ticket.classified', {
+      ticketId: payload.ticketId,
+      urgency: 'high',
+    })
+    return { message: 'Classification emitted.' }
+  })
+  .build()
+```
+
+### 3.1c Mark agent command result as an event (command pattern)
+
+If you want the agent command response itself to be emitted as an event (same pattern as command builder “result as an event”), set a success event name:
+
+```ts
+const supportAgent = new AgentBuilder({
+  agentName: 'supportAgent',
+  agentVersion: '1',
+  successEventName: 'support.agent.completed',
+})
+  .setHandler(async function () {
+    return { message: 'Done.' }
+  })
+  .build()
+```
+
+Alternative:
+
+```ts
+const supportAgent = new AgentBuilder({ ... })
+  .setSuccessEventName('support.agent.completed')
+  .setHandler(async function () {
+    return { message: 'Done.' }
+  })
+  .build()
+```
+
+### 3.2 Add structured `generateJson` path
+
+```ts
+import { z } from 'zod/v4'
+
+const triageSchema = z.object({
+  urgency: z.enum(['low', 'medium', 'high']),
+  explanation: z.string().min(1),
+})
+
+const supportAgent = new AgentBuilder({ ... })
+  .defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream', 'json'] })
+  .setHandler(async function (context, payload) {
+    const result = await context.models['openai:gpt-4o-mini'].generateJson?.({
+      prompt: `Classify: ${payload.prompt}`,
+      schema: triageSchema,
+    })
+
+    const message = result
+      ? `Urgency: ${result.data.urgency}\n${result.data.explanation}`
+      : 'No classification available'
+
+    context.stream.sendFinal(message)
+    return { message }
+  })
+  .build()
+```
+
+### 3.3 Add conversation persistence
 
 ```ts
 const supportAgent = new AgentBuilder({ ... })
@@ -114,7 +226,7 @@ const supportAgent = new AgentBuilder({ ... })
 
 Use `'user'` for fuller transcript-style memory and `'agent'` for compact summary-oriented memory.
 
-### 3.3 Connect a knowledge adapter
+### 3.4 Connect a knowledge adapter
 
 ```ts
 const supportAgent = new AgentBuilder({ ... })
@@ -131,7 +243,7 @@ const supportAgent = new AgentBuilder({ ... })
   .build()
 ```
 
-### 3.4 Expose HTTP endpoint
+### 3.5 Expose HTTP endpoint
 
 ```ts
 const supportAgent = new AgentBuilder({ ... })
@@ -142,7 +254,7 @@ const supportAgent = new AgentBuilder({ ... })
 
 Configure pool identity and worker count at runtime bootstrap (`getInstance(..., { poolConfig: { poolId, maxConcurrencyPerInstance } })`).
 
-### 3.5 Configure dynamic model call options (`prepareCall` / `prepareStep`)
+### 3.6 Configure dynamic model call options (`prepareCall` / `prepareStep`)
 
 Use these hooks when model options must be derived per invocation step (for example temperature ramps, max token limits, or provider metadata tags).
 
@@ -190,7 +302,7 @@ Notes:
 
 | Method | Options | Use when | Trade-off |
 | --- | --- | --- | --- |
-| `new AgentBuilder({ agentName, agentVersion, description })` | strings | always | naming becomes public API surface |
+| `new AgentBuilder({ agentName, agentVersion, description, successEventName? })` | strings | always | naming becomes public API surface |
 | `addPayloadSchema(schema)` | Purista schema | always | strict validation can reject malformed callers early |
 | `addParameterSchema(schema)` | Purista schema | optional | extra contract clarity vs additional schema maintenance |
 | `addOutputSchema(schema)` | Purista schema | optional | stronger guarantees for downstream callers |
@@ -200,7 +312,9 @@ Notes:
 | Method | Options | Use when | Trade-off |
 | --- | --- | --- | --- |
 | `defineModel(alias)` | model alias string | agent should use model provider | aliases must be satisfied at runtime |
-| `allowTool({ serviceName, serviceVersion, commandName })` | command address | agent may call existing commands | explicit allowlists require setup but improve security |
+| `canInvoke(serviceName, serviceVersion, commandName, outputSchema?, payloadSchema?, parameterSchema?)` | invoke target + optional schemas | agent should call other commands with typed access | clearer contracts require keeping invoke schemas aligned |
+| `canEmit(eventName, payloadSchema)` | custom event name + payload schema | agent should emit typed domain events | event contracts must stay aligned with subscribers |
+| `setSuccessEventName(eventName)` | event name for command success response | agent result should be consumable as event | this ties response semantics to event contract |
 | `setCallOptionsSchema(schema)` | zod schema for hook output | enforce validated model call options | strict schemas reject malformed hook output at runtime |
 | `prepareCall(fn)` | call hook | adjust metadata/options per model call | extra indirection if static defaults would be enough |
 | `prepareStep(fn)` | step-aware call hook | implement iterative call-option policies | step logic can become hard to reason about if overused |
@@ -229,12 +343,13 @@ The handler receives a familiar context object with agent-specific helpers:
 | Property | Description |
 | --- | --- |
 | `logger`, `message`, `serviceContext` | Same observability handles you use inside services. |
+| `emit` | Typed custom-event emitter for events declared via `canEmit(...)`. |
 | `stream` | Action-oriented streaming helpers that map to the [agent protocol](./protocol-and-streaming.md): `sendChunk`, `sendFinal`, `sendReasoning`, `sendArtifact`, `sendError`. |
 | `conversation` | High-level chat history API (`addUser`, `addAssistant`, `buildPromptInput`, `getMessages`) with automatic session scoping and optional summary support. |
 | `session` | Low-level conversation store wrapper (`load`, `save`, `delete`) for advanced/custom state handling. |
 | `knowledge` | Fan-out to configured knowledge adapters (`query/upsert/delete`), with automatic tenant/principal/session scope propagation. |
-| `tools` | Invoke allowlisted PURISTA commands. Events appear as tool frames for tracing/debugging. |
-| `models` | Typed access to declared model aliases (`context.models[alias]`). Prefer `model.generateText(...)` for one normalized stream-or-generate path. |
+| `tools` | Typed command invocations registered through `canInvoke(...)` and available as `context.tools.invoke.<service>['<version>'].<command>(...)`. |
+| `models` | Typed access to declared model aliases (`context.models[alias]`). Prefer `generateText({ model, request, ... })` for one normalized stream-or-generate path. |
 | `agents` | Subagent helpers (`invoke`, `runText`) for agent-to-agent orchestration without manual event bridge wiring. |
 | `resources` | Optional custom dependencies for non-model integrations (caches, SDK clients, domain utilities). |
 
@@ -335,6 +450,7 @@ Use case: map protocol frames to REST/GraphQL/mobile-specific response shapes.
 | --- | --- |
 | auth, tenancy, entitlement, business preconditions | invoking command/subscription/stream guard |
 | shape mapping between external contract and agent payload | invoking command/subscription/stream transform |
+| custom event emission (`canEmit`, domain events) | wherever domain truth is produced (agent handler via `context.emit(...)` or invoking edge) |
 | LLM prompt/tool/history orchestration | agent handler |
 | protocol-to-client mapping (REST/SSE/WebSocket/UI) | invoking edge / transport adapter |
 

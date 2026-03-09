@@ -159,7 +159,7 @@ describe('AgentBuilder', () => {
 			.setRetryPolicy({ maxAttempts: 2, strategy: 'fixed', delayMs: 100 })
 			.setMemory({ storeName: 'memoryStore', maxFrames: 10 })
 			.setKnowledge([{ adapterName: 'knowledge2', options: { topK: 1 } }])
-			.allowTool({ serviceName: 'ToolService', serviceVersion: '1', commandName: 'run' })
+			.canInvoke('Ticketing', '1', 'createTicket')
 			.setTelemetry({ attributes: { team: 'support' } })
 			.setEvaluation({ suite: 'smoke' })
 			.addPayloadSchema(payloadSchema)
@@ -183,6 +183,7 @@ describe('AgentBuilder', () => {
 		expect(manifest.knowledge?.[0]?.adapterName).toBe('knowledge2')
 		expect(manifest.modelResource?.variant).toBe('mini')
 		expect(manifest.allowedTools).toHaveLength(1)
+		expect(manifest.allowedTools.some(t => t.serviceName === 'Ticketing' && t.serviceVersion === '1' && t.commandName === 'createTicket')).toBe(true)
 		expect(manifest.telemetry?.attributes?.team).toBe('support')
 		expect(manifest.metadata?.runtime).toBe('worker')
 		expect(manifest.metadata?.evaluation).toEqual({ suite: 'smoke' })
@@ -534,6 +535,84 @@ describe('AgentBuilder', () => {
 		} finally {
 			await parentInstance.stop()
 			await childInstance.stop()
+		}
+	})
+
+	it('supports canEmit declarations with context.emit in agent handlers', async () => {
+		const definition = new AgentBuilder({ agentName: 'emitAgent', agentVersion: '1' })
+			.canEmit('agent.finished', z.object({ ok: z.boolean() }))
+			.setHandler(async context => {
+				await context.emit('agent.finished', { ok: true })
+				return { message: 'done' }
+			})
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+		const instance = await definition.getInstance(eventBridge, { models: {} })
+		await instance.start()
+		try {
+			const result = await instance.invoke({ payload: {} })
+			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
+			const finalMessage = result.envelopes
+				.map(envelope => envelope.frame)
+				.findLast(frame => frame.kind === 'message' && frame.final === true)
+			expect(errorFrame).toBeUndefined()
+			expect(finalMessage && 'content' in finalMessage ? finalMessage.content : '').toBe('done')
+		} finally {
+			await instance.stop()
+		}
+	})
+
+	it('supports command-style result-as-event via setSuccessEventName', async () => {
+		const definition = new AgentBuilder({ agentName: 'resultEventAgent', agentVersion: '1' })
+			.setSuccessEventName('resultEventAgent.finished')
+			.setHandler(async () => ({ message: 'done' }))
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+		const instance = await definition.getInstance(eventBridge, { models: {} })
+		await instance.start()
+		try {
+			const result = await instance.invoke({ payload: {} })
+			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
+			const finalMessage = result.envelopes
+				.map(envelope => envelope.frame)
+				.findLast(frame => frame.kind === 'message' && frame.final === true)
+			expect(errorFrame).toBeUndefined()
+			expect(finalMessage && 'content' in finalMessage ? finalMessage.content : '').toBe('done')
+		} finally {
+			await instance.stop()
+		}
+	})
+
+	it('supports command-style result-as-event configured in constructor', async () => {
+		const definition = new AgentBuilder({
+			agentName: 'constructorResultEventAgent',
+			agentVersion: '1',
+			successEventName: 'constructorResultEventAgent.finished',
+		})
+			.setHandler(async () => ({ message: 'done' }))
+			.build()
+
+		const eventBridge = new DefaultEventBridge()
+		bridges.push(eventBridge)
+		await eventBridge.start()
+		const instance = await definition.getInstance(eventBridge, { models: {} })
+		await instance.start()
+		try {
+			const result = await instance.invoke({ payload: {} })
+			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
+			const finalMessage = result.envelopes
+				.map(envelope => envelope.frame)
+				.findLast(frame => frame.kind === 'message' && frame.final === true)
+			expect(errorFrame).toBeUndefined()
+			expect(finalMessage && 'content' in finalMessage ? finalMessage.content : '').toBe('done')
+		} finally {
+			await instance.stop()
 		}
 	})
 })

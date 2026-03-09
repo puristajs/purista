@@ -13,6 +13,7 @@ export type AgentInfo = {
 	agentName: string
 	agentVersion: string
 	description?: string
+	successEventName?: string
 }
 
 type BaseAgentInstanceOptions = {

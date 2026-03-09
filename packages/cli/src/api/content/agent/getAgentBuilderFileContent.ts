@@ -1,6 +1,8 @@
 import type { Options } from 'code-block-writer'
 import CodeBlockWriter from 'code-block-writer'
 import { camelCase } from '../../change-case.js'
+import { convertToProjectEventCasing } from '../../convertToProjectEventCasing.js'
+import type { PuristaConfig } from '../../loadPuristaConfig.js'
 
 const toAgentIdentifier = (name: string) => {
 	const normalized = camelCase(name)
@@ -11,11 +13,14 @@ export const getAgentBuilderFileContent = (input: {
 	agentName: string
 	agentDescription: string
 	agentVersion: string
+	responseEventName?: string
+	puristaConfig: PuristaConfig
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
 	const agentIdentifier = toAgentIdentifier(input.agentName)
 	const schemaName = `${agentIdentifier}InputSchema`
+	const addSuccessEvent = !!input.responseEventName?.trim()
 
 	writer.writeLine("import { AgentBuilder } from '@purista/ai'")
 	writer.writeLine("import { extendApi } from '@purista/core'")
@@ -42,6 +47,11 @@ export const getAgentBuilderFileContent = (input: {
 	})
 	writer.writeLine('})')
 	writer.indent(() => {
+		if (addSuccessEvent) {
+			writer.writeLine(
+				`.setSuccessEventName('${convertToProjectEventCasing(input.responseEventName as string, input.puristaConfig)}')`,
+			)
+		}
 		writer.writeLine(`.addPayloadSchema(${schemaName})`)
 		writer.writeLine(".defineModel('openai:gpt-4o-mini')")
 		writer.writeLine(".persistConversation('user', { maxFrames: 20 })")
