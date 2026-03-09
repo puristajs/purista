@@ -6,47 +6,50 @@ order: 303500
 
 # Sandbox Service
 
-`@purista/sandbox-service` provides a reusable multi-tenant runtime for isolated command execution, file I/O, and agent tooling.
+`@purista/sandbox-service` provides isolated execution environments for agent and tool workloads.
 
-Use it when you need:
+It adds:
 
-- sandboxed code execution per project/user
-- strict ownership tracking by organization, project, and user
-- driver-based portability (Docker, Podman, Lima, Tart, Firecracker)
-- integration with AI tool layers through adapters
+- tenant-aware sandbox lifecycle (`organizationId`, `projectId`, `userId`)
+- command execution and file read/write inside isolated runtimes
+- pluggable backends (Docker, Podman, Lima, Tart, Firecracker)
+- registry reconciliation on service startup
 
-## Start Here
+## When To Use
 
-- Package API docs: [@purista/sandbox-service](https://github.com/puristajs/purista/blob/master/website/doc/api/@purista/sandbox-service/README.md)
-- Package README: [packages/sandbox-service/README.md](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/README.md)
-- Architecture: [packages/sandbox-service/docs/ARCHITECTURE.md](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/docs/ARCHITECTURE.md)
-- Driver guide: [packages/sandbox-service/docs/DRIVERS.md](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/docs/DRIVERS.md)
-- Git auth model: [packages/sandbox-service/docs/GIT_AUTH.md](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/docs/GIT_AUTH.md)
+Use sandbox service when:
 
-## How It Works
+- agents need shell access, but not full host access
+- each project/user must run in isolated workspaces
+- you want one execution abstraction while switching infra backends
+- you need audit-friendly metadata around runtime ownership
 
-The service exposes commands to:
+## Runtime Backends
 
-- create/destroy sandboxes
-- execute shell commands
-- read/write files
-- reconcile runtime state on service startup
+| Backend | Good default for | Platform notes | External docs |
+| --- | --- | --- | --- |
+| Docker | most teams starting out | widely available, broad ecosystem | [Docker Docs](https://docs.docker.com/) |
+| Podman | rootless/container-security setups | daemonless model | [Podman Docs](https://podman.io/docs) |
+| Lima | open-source VM approach on macOS | good Apple Silicon path | [Lima Docs](https://lima-vm.io/docs/) |
+| Tart | Apple virtualization heavy setups | macOS-focused VM workflows | [Tart Docs](https://tart.run/) |
+| Firecracker | high-isolation Linux microVMs | requires Linux + KVM ops maturity | [Firecracker Docs](https://firecracker-microvm.github.io/) |
 
-At startup, it reconciles running sandboxes into the registry automatically via service lifecycle, not via subscriptions.
+Related runtimes often used with Docker driver:
+
+- [OrbStack](https://orbstack.dev/)
+- [Colima](https://github.com/abiosoft/colima)
 
 ## Quick Start
 
 ### 1. Build a sandbox image
 
-Use the provided hardened Dockerfile:
-
-- [packages/sandbox-service/Dockerfile.sandbox](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/Dockerfile.sandbox)
+Use a hardened image with `bash`, `git`, `gh`, and tooling required by your agents.
 
 ```bash
 docker build -t purista-sandbox-agent:latest -f packages/sandbox-service/Dockerfile.sandbox .
 ```
 
-### 2. Configure and start the service
+### 2. Wire the service into PURISTA
 
 ```ts
 import { DefaultEventBridge, DefaultStateStore, initLogger } from '@purista/core'
@@ -72,86 +75,139 @@ await eventBridge.start()
 await sandboxService.start()
 ```
 
-Runnable example:
+### 3. Use it from your app/agent layer
 
-- [examples/sandbox-service/README.md](https://github.com/puristajs/purista/blob/master/examples/sandbox-service/README.md)
+Typical flow:
+
+1. Create sandbox once per user/project work session
+2. Run one or more commands (`executeBash`)
+3. Read/write generated artifacts
+4. Destroy sandbox on completion or idle timeout
 
 ## Configuration Model
 
-You provide two core resources:
+You configure two required resources:
 
-- `driver`: implementation of `SandboxDriver`
-- `registry`: `SandboxRegistry` backed by a `StateStore`
+- `driver`: runtime implementation (Docker, Podman, Lima, Tart, Firecracker)
+- `registry`: metadata persistence (backed by your state store)
 
-`SandboxRegistry` source:
+The registry is used for:
 
-- [src/resources/SandboxRegistry.ts](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/resources/SandboxRegistry.ts)
+- ownership checks before command/file execution
+- crash/restart recovery via startup reconciliation
+- lifecycle cleanup
 
-## Driver Options and Tradeoffs
+## Driver Selection Guidance
 
-| Driver | Best for | Key config | Notes |
-| --- | --- | --- | --- |
-| `DockerSandboxDriver` | default local/dev and broad compatibility | `imageName`, `memory`, `cpus`, `networkDisabled` | Works with Docker Desktop, OrbStack, Colima |
-| `PodmanSandboxDriver` | rootless/container-security focused setups | `imageName`, `memory`, `cpus`, `networkDisabled` | Good daemonless option |
-| `LimaSandboxDriver` | open-source VM runtime on Apple Silicon | `template`, `memory`, `cpus`, `useVz` | Uses `limactl`; good Mac-focused option |
-| `TartSandboxDriver` | native Apple virtualization workflows | `baseImage`, `memory`, `cpus`, `display` | Specialized; useful when Tart is already standard |
-| `FirecrackerSandboxDriver` | Linux microVM strategy | `firecrackerBinary`, `kernelImagePath`, `rootfsImagePath`, `workspaceDir` | Advanced path; requires Linux/KVM and deeper infra setup |
+- Start with **Docker** unless you already have a stronger infra requirement.
+- Move to **Podman** when rootless/container hardening is a priority.
+- Use **Lima** or **Tart** for Apple-Silicon-heavy VM workflows.
+- Use **Firecracker** only when you need microVM-level isolation and can operate Linux/KVM infrastructure.
 
-Driver implementations:
+## Service Operations
 
-- [DockerSandboxDriver.ts](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts)
-- [PodmanSandboxDriver.ts](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts)
-- [LimaSandboxDriver.ts](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/driver/LimaSandboxDriver/LimaSandboxDriver.ts)
-- [TartSandboxDriver.ts](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts)
-- [FirecrackerSandboxDriver.ts](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts)
+The sandbox service provides these capabilities:
 
-## Adapters (How to Consume the Service)
+- create runtime (`createSandbox`)
+- destroy runtime (`destroySandbox`)
+- execute command (`executeBash`)
+- read file (`readFile`)
+- write files (`writeFiles`)
 
-Two adapters are available depending on your integration strategy.
+Example invocation pattern (event bridge):
 
-| Adapter | Purpose | Use when |
-| --- | --- | --- |
-| `createPuristaSandboxAdapter` | Talks to sandbox service through event bridge commands | You run sandbox as a PURISTA service and want remote sandbox I/O/exec |
-| `createLocalFilesystemSandboxAdapter` | Local filesystem + bash adapter rooted at one project path | You need local dev/testing tooling without provisioning a sandbox runtime |
+```ts
+const created = await eventBridge.invoke({
+  sender: { serviceName: 'app', serviceVersion: '1', serviceTarget: 'create', instanceId: '1' },
+  receiver: { serviceName: 'Sandbox', serviceVersion: '1', serviceTarget: 'createSandbox' },
+  payload: {
+    payload: {
+      organizationId: 'org-1',
+      projectId: 'project-1',
+      userId: 'user-1',
+    },
+    parameter: {},
+  },
+  contentType: 'application/json',
+  contentEncoding: 'utf-8',
+})
 
-Adapter sources:
+const result = await eventBridge.invoke({
+  sender: { serviceName: 'app', serviceVersion: '1', serviceTarget: 'exec', instanceId: '1' },
+  receiver: { serviceName: 'Sandbox', serviceVersion: '1', serviceTarget: 'executeBash' },
+  payload: {
+    payload: {
+      sandboxId: created.sandboxId,
+      command: 'ls -la',
+    },
+    parameter: {},
+  },
+  contentType: 'application/json',
+  contentEncoding: 'utf-8',
+})
+```
 
-- [createPuristaSandboxAdapter.ts](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/adapter/BashTool/createPuristaSandboxAdapter.ts)
-- [createLocalFilesystemSandboxAdapter.ts](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/adapter/local/createLocalFilesystemSandboxAdapter.ts)
+## Git and GitHub Auth in Sandboxes
 
-## Command Surface
+When `gitConfig` is provided at creation time, sandbox setup can:
 
-The service exposes these operations:
+- configure git identity (`user.name`, `user.email`)
+- authenticate GitHub CLI (`gh auth login --with-token`)
+- configure secure git credential helper via `gh`
 
-- `createSandbox` (`POST sandbox`)
-- `destroySandbox`
-- `executeBash` (`POST sandbox/:sandboxId/bash`)
-- `readFile`
-- `writeFiles`
+Reference:
 
-Command schemas and builders:
+- [GitHub CLI manual](https://cli.github.com/manual/)
 
-- [createSandbox](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/service/Sandbox/v1/command/createSandbox/createSandboxCommandBuilder.ts)
-- [executeBash](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/service/Sandbox/v1/command/executeBash/executeBashCommandBuilder.ts)
-- [readFile](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/service/Sandbox/v1/command/readFile/readFileCommandBuilder.ts)
-- [writeFiles](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/service/Sandbox/v1/command/writeFiles/writeFilesCommandBuilder.ts)
-- [destroySandbox](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/service/Sandbox/v1/command/destroySandbox/destroySandboxCommandBuilder.ts)
+## Adapters
 
-## Security and Identity
+Use adapters based on deployment mode:
 
-If `gitConfig` is provided at sandbox creation:
+- **Service adapter** (`createPuristaSandboxAdapter`): use when sandbox runtime is provided by a running PURISTA service.
+- **Local filesystem adapter** (`createLocalFilesystemSandboxAdapter`): use for local dev/testing where direct workspace operations are acceptable.
 
-- git identity is configured inside the sandbox
-- GitHub CLI auth can be initialized via token
-- credential helper is configured to avoid storing raw token in `.gitconfig`
+## Hardened Dockerfile (Reference)
 
-Details:
+The package includes a hardened Debian-based image for agent workloads.
 
-- [GIT_AUTH.md](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/docs/GIT_AUTH.md)
+```dockerfile
+FROM debian:bookworm-slim
+ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash curl wget git jq unzip zip tar ca-certificates build-essential \
+    python3 python3-pip diffutils patch sed grep gawk findutils rsync \
+    procps net-tools hostname nano vim-tiny \
+    && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+    && apt-get install -y nodejs \
+    && rm -rf /var/lib/apt/lists/*
+RUN curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg \
+    | dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && chmod go+r /usr/share/keyrings/githubcli-archive-keyring.gpg \
+    && echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" \
+    | tee /etc/apt/sources.list.d/github-cli.list > /dev/null \
+    && apt-get update \
+    && apt-get install gh -y \
+    && rm -rf /var/lib/apt/lists/*
+RUN useradd -m -s /bin/bash agent
+WORKDIR /home/agent/workspace
+RUN chown -R agent:agent /home/agent
+USER agent
+ENTRYPOINT ["/bin/bash"]
+```
 
-## Recommended Rollout Path
+## Typical Implementation Order
 
-1. Start with `DockerSandboxDriver`.
-2. Validate registry reconciliation and cleanup behavior.
-3. Add command and file operation limits in your own calling layer.
-4. Move to Podman/Lima/Tart/Firecracker only when your infra standards require it.
+1. Choose driver by target environment and security posture.
+2. Build/publish sandbox image used by that driver.
+3. Instantiate `SandboxRegistry` with your chosen state store.
+4. Start sandbox service with injected `driver` + `registry`.
+5. Integrate from app/agent layer using sandbox commands.
+6. Add cleanup policy (idle timeout or explicit teardown).
+
+## Common Pitfalls
+
+- forgetting to destroy sandboxes after use
+- using one shared sandbox across multiple users/tenants
+- skipping ownership checks in caller workflows
+- jumping to Firecracker before Linux/KVM operations are in place
