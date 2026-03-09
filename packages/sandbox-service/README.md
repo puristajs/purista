@@ -52,6 +52,8 @@ const sandboxService = await sandboxServiceBuilder.getInstance(eventBridge, {
 - [Architecture Overview](./docs/ARCHITECTURE.md)
 - [Driver Selection Guide](./docs/DRIVERS.md)
 - [Secure Git Integration](./docs/GIT_AUTH.md)
+- [Sandbox Dockerfile](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/Dockerfile.sandbox)
+- [Repository skills (sandbox)](https://github.com/puristajs/purista/blob/master/skills/sandbox-service/META-SKILL.md)
 
 ## Development
 

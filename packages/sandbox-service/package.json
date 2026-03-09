@@ -29,9 +29,6 @@
 	"files": [
 		"dist/**/*",
 		"docs/**/*",
-		"skills/**/*",
-		"llms.txt",
-		"llms-full.txt",
 		"Dockerfile.sandbox"
 	],
 	"publishConfig": {

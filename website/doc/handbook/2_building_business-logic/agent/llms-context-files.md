@@ -5,13 +5,15 @@ order: 90
 
 # LLM Context Files
 
-PURISTA now ships `llms.txt` files to provide compact, machine-readable guidance for coding agents.
+PURISTA ships published `llms` context files to provide compact, machine-readable guidance for coding agents.
 
 ## Where to find them
 
-- Repository root: [`/llms.txt`](https://github.com/puristajs/purista/blob/master/llms.txt)
-- Sandbox package: [`/packages/sandbox-service/llms.txt`](https://github.com/puristajs/purista/blob/master/packages/sandbox-service/llms.txt)
-- Extended context (sandbox): `packages/sandbox-service/llms-full.txt`
+- Public root context: [`/llms/llms.txt`](/llms/llms.txt)
+- Public root deep context: [`/llms/llms-full.txt`](/llms/llms-full.txt)
+- Public sandbox context: [`/llms/sandbox-service.txt`](/llms/sandbox-service.txt)
+- Public sandbox deep context: [`/llms/sandbox-service-full.txt`](/llms/sandbox-service-full.txt)
+- Repository source: [`/llms.txt`](https://github.com/puristajs/purista/blob/master/llms.txt)
 
 ## When to use which file
 
@@ -20,9 +22,9 @@ PURISTA now ships `llms.txt` files to provide compact, machine-readable guidance
 
 ## Skills
 
-The sandbox package also includes curated skill docs under:
+Sandbox-related curated skills are in:
 
-- `packages/sandbox-service/skills/`
+- [`/skills/sandbox-service/`](https://github.com/puristajs/purista/blob/master/skills/sandbox-service/META-SKILL.md)
 
 These files are optimized for agent execution workflows (architecture, service implementation, infra, and testing).
 
@@ -30,6 +32,6 @@ These files are optimized for agent execution workflows (architecture, service i
 
 When building or updating AI agents in PURISTA:
 
-1. Start with root `llms.txt`.
-2. Add package-specific `llms.txt` for the target package.
+1. Start with `/llms/llms.txt`.
+2. Add `/llms/sandbox-service.txt` for sandbox work.
 3. Load only the required skill file(s) for the current task.

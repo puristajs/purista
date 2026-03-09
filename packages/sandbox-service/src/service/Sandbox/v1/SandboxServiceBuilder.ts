@@ -1,6 +1,7 @@
 import { ServiceBuilder } from '@purista/core'
 import type { SandboxDriver } from '../../../types/SandboxDriver.js'
 import type { SandboxRegistry } from './resources/SandboxRegistry.js'
+import { SandboxService } from './SandboxService.js'
 import { SandboxServiceConfigSchema } from './SandboxServiceConfig.js'
 
 /**
@@ -18,6 +19,7 @@ export const sandboxServiceBuilder = new ServiceBuilder({
 	serviceVersion: '1',
 	serviceDescription: 'A secure sandboxing service for agents and users',
 })
+	.setCustomClass(SandboxService)
 	.setConfigSchema(SandboxServiceConfigSchema)
 	.defineResource<'driver', SandboxDriver>()
 	.defineResource<'registry', SandboxRegistry>()
