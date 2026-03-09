@@ -1,0 +1,21 @@
+# @purista/sandbox-service
+
+> A professional, multi-tenant sandboxing provider built for the PURISTA framework, enabling secure, isolated execution environments for autonomous agents and human users.
+
+## Documentation
+- [Architecture Overview](./docs/ARCHITECTURE.md): Message flow and resource-based dependency injection.
+- [Driver Selection Guide](./docs/DRIVERS.md): Comparison of Docker, Lima, Tart, and Firecracker backends.
+- [Secure Git Integration](./docs/GIT_AUTH.md): How GitHub CLI auth and Git credential helpers are managed securely.
+
+## AI Agent Skills
+If you are an AI agent tasked with working on this repository, you must consult these skills:
+- [META-SKILL](./skills/META-SKILL.md): The primary orchestrator and constraints.
+- [PURISTA Architect](./skills/PURISTA-Architect.md): Pluggable drivers and self-healing registries.
+- [PURISTA Developer](./skills/PURISTA-Developer.md): Command and Subscription implementation blueprints.
+- [PURISTA Infrastructure](./skills/PURISTA-Infrastructure.md): Event Bridge and Queues.
+- [PURISTA Testing](./skills/PURISTA-Testing.md): Unit testing blueprints.
+
+## External Context
+- [PURISTA Official Documentation](https://purista.dev)
+- [PURISTA GitHub Repository](https://github.com/sebastianwessel/purista)
+- [Model Context Protocol (MCP)](https://modelcontextprotocol.io/)

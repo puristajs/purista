@@ -57,3 +57,8 @@ PRs should include:
 ## Security & Conduct
 Security issues should follow `SECURITY.md`.
 All contributors are expected to follow the Code of Conduct in `CODE_OF_CONDUCT.md`.
+
+## AI Context Files
+- Start with repository-level context in `llms.txt`.
+- For sandbox implementation work, also load `packages/sandbox-service/llms.txt`.
+- Sandbox package skills are available under `packages/sandbox-service/skills/` and should be used selectively (load only what is required for the current task).

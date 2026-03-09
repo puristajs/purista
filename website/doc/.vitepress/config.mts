@@ -159,6 +159,10 @@ export default defineConfig({
 							text: '@purista/httpserver',
 							link: '/api/@purista/httpserver/README.md',
 						},
+						{
+							text: '@purista/sandbox-service',
+							link: '/api/@purista/sandbox-service/README.md',
+						},
 					],
 				},
 				{
