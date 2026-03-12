@@ -27,6 +27,14 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { OpenApiBuilder } from 'openapi3-ts/oas31'
 
 import { addPathToOpenApi } from '../../../helper/addPathToOpenApi.js'
+import {
+	collectAggregateStreamResult,
+	encodeProtocolSseEvent,
+	isProtocolSseEvent,
+	isTransportControlFrame,
+	resolveHttpStreamingMode,
+	type StreamTransportFramePayload,
+} from '../../../helper/streamTransport.js'
 import type { BindingsBase } from '../../../types/BindingsBase.js'
 import type { EndpointProtectMiddleware } from '../../../types/EndpointProtectMiddleware.js'
 
@@ -48,58 +56,6 @@ const assertAsyncHttpResult = (result: unknown): QueueEnqueueResult => {
 import type { HealthFunction } from '../../../types/HealthFunction.js'
 import type { VariablesBase } from '../../../types/VariablesBase.js'
 import type { HonoServiceV1Config } from './honoServiceConfig.js'
-
-type ProtocolSseEvent = {
-	event: string
-	data: unknown
-}
-
-type StreamTransportFramePayload = {
-	frameType?: string
-	sequence?: number
-	chunk?: unknown
-	final?: unknown
-	error?: {
-		status?: number
-		message?: string
-		isHandledError?: boolean
-		data?: unknown
-		traceId?: string
-	}
-}
-
-const isProtocolSseEvent = (value: unknown): value is ProtocolSseEvent => {
-	if (!value || typeof value !== 'object') {
-		return false
-	}
-	const candidate = value as Partial<ProtocolSseEvent>
-	return typeof candidate.event === 'string' && 'data' in candidate
-}
-
-const encodeProtocolSseEvent = (encoder: TextEncoder, event: ProtocolSseEvent): Uint8Array => {
-	if (event.event === 'data' && event.data === '[DONE]') {
-		return encoder.encode('data: [DONE]\n\n')
-	}
-	return encoder.encode(`event: ${event.event}\ndata: ${JSON.stringify(event.data)}\n\n`)
-}
-
-const isTransportControlFrame = (frameType: unknown): boolean =>
-	typeof frameType === 'string' &&
-	(frameType === 'open' || frameType === 'close' || frameType === 'start' || frameType === 'complete')
-
-const isAgentEnvelopeLike = (value: unknown): value is { frame: { kind?: string } } => {
-	if (!value || typeof value !== 'object') {
-		return false
-	}
-	const candidate = value as { version?: unknown; frame?: unknown }
-	return typeof candidate.version === 'string' && !!candidate.frame && typeof candidate.frame === 'object'
-}
-
-const isStreamErrorPayload = (
-	payload: StreamTransportFramePayload,
-): payload is StreamTransportFramePayload & { error: { status?: number; message?: string } } => {
-	return payload.frameType === 'error' && !!payload.error && typeof payload.error === 'object'
-}
 
 /**
  * A service which creates a Hono server, adds the command endpoints of given services.
@@ -230,19 +186,6 @@ export class HonoServiceClass<
 				},
 			})
 
-			this.app.use('*', async (c, next) => {
-				if (!this.isAvailable) {
-					throw new HandledError(StatusCode.ServiceUnavailable, 'server not available')
-				}
-
-				const traceId = c.req.header(this.config.traceHeaderField)
-				c.set('traceId', traceId)
-				await next()
-				if (traceId) {
-					c.header(this.config.traceHeaderField, traceId)
-				}
-			})
-
 			this.app.get(this.config.healthPath, async c => {
 				const con = propagation.extract(context.active(), c.req.raw.headers)
 				return await this.startActiveSpan('healthHandler', { kind: SpanKind.SERVER }, con, async span => {
@@ -251,7 +194,9 @@ export class HonoServiceClass<
 					const isEventBridgeReady = await this.eventBridge.isHealthy()
 
 					const traceId = c.req.header(this.config.traceHeaderField)
-					c.header(this.config.traceHeaderField, traceId)
+					if (traceId) {
+						c.header(this.config.traceHeaderField, traceId)
+					}
 
 					if (!isEventBridgeReady) {
 						const err = new HandledError(StatusCode.InternalServerError, 'event bridge not ready')
@@ -286,6 +231,19 @@ export class HonoServiceClass<
 				})
 			})
 		}
+
+		this.app.use('*', async (c, next) => {
+			if (!this.isAvailable) {
+				throw new HandledError(StatusCode.ServiceUnavailable, 'server not available')
+			}
+
+			const traceId = c.req.header(this.config.traceHeaderField)
+			c.set('traceId', traceId)
+			await next()
+			if (traceId) {
+				c.header(this.config.traceHeaderField, traceId)
+			}
+		})
 
 		if (this.config.openApi?.enabled) {
 			this.app.get(posix.join(this.config.apiMountPath, 'openapi.json'), async c => c.json(this.openApi.getSpec()))
@@ -407,9 +365,11 @@ export class HonoServiceClass<
 			finalPayload?: unknown
 		}
 		const isDeclaredStreamDefinition = 'chunkPayload' in exposeAsStream || 'finalPayload' in exposeAsStream
-		const streamMode =
-			expose.http.stream?.mode ??
-			(isDeclaredStreamDefinition && responseContentType.toLowerCase() !== 'text/event-stream' ? 'aggregate' : 'stream')
+		const streamMode = resolveHttpStreamingMode({
+			explicitMode: expose.http.stream?.mode,
+			isDeclaredStreamDefinition,
+			responseContentType,
+		})
 
 		addPathToOpenApi(this.openApi, metadata as unknown as HttpExposedServiceMeta, path, this.config)
 
@@ -479,46 +439,16 @@ export class HonoServiceClass<
 						)
 
 						if (streamMode === 'aggregate') {
-							const envelopes: unknown[] = []
-							let lastCompleteFinal: unknown
-							for await (const frame of handle) {
-								const payload = frame.payload as StreamTransportFramePayload
-								if (payload.frameType === 'chunk' && payload.chunk !== undefined) {
-									envelopes.push(payload.chunk)
-									continue
-								}
-								if (payload.frameType === 'complete') {
-									lastCompleteFinal = payload.final
-									if (Array.isArray(payload.final)) {
-										envelopes.splice(0, envelopes.length, ...payload.final)
-									}
-									break
-								}
-								if (isStreamErrorPayload(payload)) {
-									const statusCode =
-										typeof payload.error.status === 'number'
-											? (payload.error.status as ContentfulStatusCode)
-											: StatusCode.InternalServerError
-									span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, statusCode)
-									return c.json(payload.error, statusCode)
-								}
+							const aggregateResult = await collectAggregateStreamResult(handle)
+							span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, aggregateResult.statusCode)
+							if (aggregateResult.status === 'error') {
+								span.setStatus({ code: SpanStatusCode.ERROR })
+								return c.json(aggregateResult.payload, aggregateResult.statusCode as ContentfulStatusCode)
 							}
 
-							const agentEnvelopes = Array.isArray(lastCompleteFinal)
-								? lastCompleteFinal.filter(isAgentEnvelopeLike)
-								: envelopes.filter(isAgentEnvelopeLike)
-							const finalEnvelope = agentEnvelopes.at(-1)
-							if (finalEnvelope?.frame?.kind === 'error') {
-								const statusCode = StatusCode.InternalServerError
-								span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, statusCode)
-								return c.json(lastCompleteFinal ?? finalEnvelope, statusCode as ContentfulStatusCode)
-							}
-
-							const responsePayload = lastCompleteFinal ?? null
 							span.setStatus({ code: SpanStatusCode.OK })
-							span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.OK)
 							c.header('content-type', `${responseContentType}; charset=${responseEncodingType}`)
-							return c.json(responsePayload, StatusCode.OK)
+							return c.json(aggregateResult.payload, aggregateResult.statusCode)
 						}
 
 						const encoder = new TextEncoder()

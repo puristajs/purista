@@ -6,6 +6,7 @@ import { getErrorName } from './getErrorName.js'
 import { getErrorResponseSchema } from './getErrorResponseSchema.js'
 import { getParameterDefinition } from './getParameterDefinition.js'
 import { getQueryDefinition } from './getQueryDefinition.js'
+import { resolveHttpStreamingMode } from './streamTransport.js'
 
 export type Config = {
 	traceHeaderField?: string
@@ -53,7 +54,11 @@ export const addPathToOpenApi = (
 		[name]: [],
 	}))
 
-	const streamMode = expose.http.stream?.mode ?? 'stream'
+	const streamMode = resolveHttpStreamingMode({
+		explicitMode: expose.http.stream?.mode,
+		isDeclaredStreamDefinition: 'chunkPayload' in exposeWithSchemas || 'finalPayload' in exposeWithSchemas,
+		responseContentType,
+	})
 	const isStreamResponse = expose.contentTypeResponse === 'text/event-stream' && streamMode === 'stream'
 	const isAggregateStream = streamMode === 'aggregate'
 	const streamProtocol = expose.http.stream?.protocol
@@ -111,13 +116,16 @@ export const addPathToOpenApi = (
 			traceIdParameter,
 			traceParent,
 		],
-		requestBody: {
-			content: {
-				[requestContentType]: {
-					schema: method !== 'get' ? expose.inputPayload : undefined,
-				},
-			},
-		},
+		requestBody:
+			method === 'get' || method === 'delete'
+				? undefined
+				: {
+						content: {
+							[requestContentType]: {
+								schema: expose.inputPayload,
+							},
+						},
+					},
 		responses: {
 			[`${okCode}`]: {
 				description: isStreamResponse
