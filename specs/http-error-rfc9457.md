@@ -41,6 +41,7 @@ Cloudflare's recent work is a useful reference point: agent- and machine-friendl
 - Do not change internal event-bridge `CommandErrorResponse` in phase 1.
 - Do not redesign `HandledError` / `UnhandledError` semantics in phase 1.
 - Do not add HTML or Markdown error representations in phase 1.
+- Do not couple JSON problem normalization to representation-specific rendering concerns in phase 1.
 - Do not expose raw stack traces or unsafe internals in production HTTP responses.
 
 ## Current State
@@ -228,7 +229,70 @@ Reason:
 ### Phase 2
 - Evaluate whether core should expose a reusable `ProblemDetails` type for adapters.
 - Consider aligning internal error helpers with a shared normalization layer, while still preserving event-bridge contracts.
+- Add negotiated alternate renderers for the same normalized problem model.
 - Optionally add HTML and Markdown error representations for browser and agent-facing scenarios.
+
+## Phase 2: Negotiated Markdown Problem Rendering
+After RFC 9457 JSON is stable, PURISTA can adopt the useful part of the Cloudflare approach: content-negotiated alternate error renderers driven by the same normalized problem-details object.
+
+### Recommendation
+Keep `application/problem+json` as the canonical machine contract and add optional renderers for:
+- `text/markdown` for agent- and LLM-friendly error explanations
+- later `text/html` for browser-facing error pages
+
+The important design rule is that JSON remains the source contract. Markdown is a rendering of the same semantic error, not a separate error model.
+
+### Why Markdown is useful
+Markdown can be valuable for agent workflows because it can:
+- reduce prompt-side reformatting work
+- make remediation guidance more legible to humans and agents
+- allow compact sections like summary, likely cause, next step, and trace identifier
+
+Example shape:
+
+```md
+# Bad Request
+
+Input validation failed.
+
+## Validation errors
+- `username`: String must contain at least 3 character(s)
+
+## Trace
+- `traceId`: d5dbb17eec16e3c9fce9cf8adc766999
+```
+
+### Negotiation model
+Recommended response negotiation order:
+- `Accept: application/problem+json` -> RFC 9457 JSON
+- `Accept: text/markdown` -> Markdown rendering of the same problem
+- later `Accept: text/html` -> browser-oriented rendering
+- fallback -> `application/problem+json`
+
+### Architectural rule
+The implementation should normalize once and render many times:
+
+```text
+Thrown error
+  -> normalize to ProblemDetails
+  -> render as application/problem+json | text/markdown | later text/html
+```
+
+This keeps behavior coherent across representations and avoids duplicating mapping logic.
+
+### Scope boundary
+Phase 2 should live in the HTTP adapter layer, not in core event-bridge types. The adapter is the right place for:
+- `Accept` negotiation
+- renderer selection
+- representation-specific headers
+
+### Risks
+- representation negotiation increases testing surface
+- Markdown responses must remain deterministic and compact
+- Markdown must not expose more internal data than JSON does
+
+### Recommendation
+Capture Markdown rendering as a follow-up after RFC 9457 JSON lands. The Cloudflare idea is worth adopting, but only after PURISTA has one stable normalized HTTP problem model in place.
 
 ## Implementation Notes
 ### Recommended package boundaries
