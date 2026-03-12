@@ -13,22 +13,35 @@ PURISTA provides abstract interfaces for memory and knowledge, allowing you to p
 A `ConversationStore` is responsible for persisting the chat transcript. To build your own, implement the `ConversationStore` interface.
 
 ```ts
-import { ConversationStore, ConversationStoreRecord } from '@purista/ai'
+import {
+  ConversationStore,
+  ConversationStoreRecord,
+  type ConversationStoreScope,
+} from '@purista/ai'
 
 export class MyCustomStore implements ConversationStore {
-  async load(conversationId: string): Promise<ConversationStoreRecord | undefined> {
-    // 1. Fetch from your database
+  async load(
+    conversationId: string,
+    scope?: ConversationStoreScope,
+  ): Promise<ConversationStoreRecord | undefined> {
+    // 1. conversationId is the logical session id, for example "chat-42"
+    // 2. scope carries tenant/principal/agent isolation metadata
   }
 
-  async save(record: ConversationStoreRecord): Promise<void> {
-    // 2. Persist to your database
+  async save(record: ConversationStoreRecord, scope?: ConversationStoreScope): Promise<void> {
+    // 3. Persist using record.conversationId + scope as your compound key
   }
 
-  async delete(conversationId: string): Promise<void> {
-    // 3. Cleanup
+  async delete(conversationId: string, scope?: ConversationStoreScope): Promise<void> {
+    // 4. Cleanup using the same logical id + scope
   }
 }
 ```
+
+Important:
+- `conversationId` is no longer pre-scoped by the runtime. It is the raw logical conversation/session id.
+- The runtime passes isolation metadata in `scope`, currently `tenantId`, `principalId`, `agentName`, and `agentVersion`.
+- Custom stores should either use that full scope as part of their compound key or ignore only the fields they intentionally do not support.
 
 ## 2. Custom Knowledge Adapter
 
@@ -40,7 +53,7 @@ import { KnowledgeAdapter, KnowledgeQueryRequest, KnowledgeDocument } from '@pur
 export class MyVectorStoreAdapter implements KnowledgeAdapter {
   async query(request: KnowledgeQueryRequest): Promise<KnowledgeDocument[]> {
     const { query, limit, scope } = request
-    // 1. Filter by scope (tenantId, principalId, sessionId)
+    // 1. Filter by scope (tenantId, principalId, agentName, agentVersion, sessionId)
     // 2. Perform vector search
     // 3. Return top-N documents
   }
@@ -56,4 +69,4 @@ export class MyVectorStoreAdapter implements KnowledgeAdapter {
 By following the interface pattern:
 - Your business logic (agent handler) remains independent of the storage engine.
 - You can switch from an in-memory test store to a production-grade database with a single line of code in your bootstrap.
-- PURISTA handles the complex metadata forwarding (tenancy, tracing) automatically before calling your adapter.
+- PURISTA handles the scope metadata forwarding automatically before calling your store or adapter.

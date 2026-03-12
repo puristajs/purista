@@ -53,7 +53,7 @@ setHandler(async (context, payload) => {
 })
 ```
 
-PURISTA automatically scopes queries by `tenantId`, `principalId`, and `sessionId` to ensure data separation.
+PURISTA automatically scopes queries by `tenantId`, `principalId`, `agentName`, `agentVersion`, and `sessionId` to ensure data separation.
 
 ## 3. Configuration at Runtime
 
@@ -67,6 +67,8 @@ const instance = await supportAgent.getInstance(eventBridge, {
   }
 })
 ```
+
+Conversation stores follow the same pattern: the runtime keeps the logical `conversationId` stable and passes tenant/user/agent metadata separately to the store implementation so custom backends can build their own compound keys without guessing how PURISTA scoped the id.
 
 ---
 

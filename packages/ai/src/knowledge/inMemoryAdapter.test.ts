@@ -57,4 +57,52 @@ describe('InMemoryKnowledgeAdapter', () => {
 		const globalResults = await adapter.query({ query: 'Global' })
 		expect(globalResults).toHaveLength(0)
 	})
+
+	it('isolates session-scoped documents within the same tenant and agent scope', async () => {
+		const adapter = new InMemoryKnowledgeAdapter()
+		await adapter.upsert({
+			document: { id: 'session-a', content: 'Chat A reset steps' },
+			scope: {
+				tenantId: 'tenant-a',
+				principalId: 'user-1',
+				agentName: 'supportAgent',
+				agentVersion: '1',
+				sessionId: 'session-a',
+			},
+		})
+		await adapter.upsert({
+			document: { id: 'session-b', content: 'Chat B reset steps' },
+			scope: {
+				tenantId: 'tenant-a',
+				principalId: 'user-1',
+				agentName: 'supportAgent',
+				agentVersion: '1',
+				sessionId: 'session-b',
+			},
+		})
+
+		const sessionAResults = await adapter.query({
+			query: 'reset',
+			scope: {
+				tenantId: 'tenant-a',
+				principalId: 'user-1',
+				agentName: 'supportAgent',
+				agentVersion: '1',
+				sessionId: 'session-a',
+			},
+		})
+		const sessionBResults = await adapter.query({
+			query: 'reset',
+			scope: {
+				tenantId: 'tenant-a',
+				principalId: 'user-1',
+				agentName: 'supportAgent',
+				agentVersion: '1',
+				sessionId: 'session-b',
+			},
+		})
+
+		expect(sessionAResults.map(doc => doc.id)).toEqual(['session-a'])
+		expect(sessionBResults.map(doc => doc.id)).toEqual(['session-b'])
+	})
 })

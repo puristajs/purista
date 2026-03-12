@@ -89,6 +89,8 @@ export const executeWorkloadQueueWorkerBuilder = aiWorkerServiceBuilder
 				prompt: payload.prompt,
 				context: payload.context,
 				metadata: payload.metadata,
+				tenantId: payload.tenantId,
+				principalId: payload.principalId,
 			})
 
 			context.logger.info({ jobId: message.id, manifest: manifest.agentName }, 'AI workload completed', result)

@@ -17,10 +17,17 @@ export type ConversationStoreRecord = {
 	updatedAt: number
 }
 
+export type ConversationStoreScope = {
+	tenantId?: string
+	principalId?: string
+	agentName?: string
+	agentVersion?: string
+}
+
 export interface ConversationStore {
-	load(conversationId: string): Promise<ConversationStoreRecord | undefined>
-	save(record: ConversationStoreRecord): Promise<void>
-	delete(conversationId: string): Promise<void>
+	load(conversationId: string, scope?: ConversationStoreScope): Promise<ConversationStoreRecord | undefined>
+	save(record: ConversationStoreRecord, scope?: ConversationStoreScope): Promise<void>
+	delete(conversationId: string, scope?: ConversationStoreScope): Promise<void>
 }
 
 /**
@@ -35,15 +42,27 @@ export interface ConversationStore {
 export class InMemoryConversationStore implements ConversationStore {
 	private readonly store = new Map<string, ConversationStoreRecord>()
 
-	async load(conversationId: string) {
-		return this.store.get(conversationId)
+	private getScopeKey(scope?: ConversationStoreScope) {
+		if (!scope?.tenantId && !scope?.principalId && !scope?.agentName && !scope?.agentVersion) {
+			return undefined
+		}
+		return [scope.tenantId ?? '', scope.principalId ?? '', scope.agentName ?? '', scope.agentVersion ?? ''].join(':')
 	}
 
-	async save(record: ConversationStoreRecord) {
-		this.store.set(record.conversationId, { ...record, updatedAt: Date.now() })
+	private getKey(conversationId: string, scope?: ConversationStoreScope) {
+		const scopeKey = this.getScopeKey(scope)
+		return `${scopeKey ?? 'global'}::${conversationId}`
 	}
 
-	async delete(conversationId: string) {
-		this.store.delete(conversationId)
+	async load(conversationId: string, scope?: ConversationStoreScope) {
+		return this.store.get(this.getKey(conversationId, scope))
+	}
+
+	async save(record: ConversationStoreRecord, scope?: ConversationStoreScope) {
+		this.store.set(this.getKey(record.conversationId, scope), { ...record, updatedAt: Date.now() })
+	}
+
+	async delete(conversationId: string, scope?: ConversationStoreScope) {
+		this.store.delete(this.getKey(conversationId, scope))
 	}
 }
