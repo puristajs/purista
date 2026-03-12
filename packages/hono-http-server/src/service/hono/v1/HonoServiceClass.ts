@@ -185,6 +185,7 @@ export class HonoServiceClass<
 			statusCode,
 			traceId: c.get('traceId') ?? c.req.header(this.config.traceHeaderField),
 			instance: c.req.path,
+			problemTypeConfig: this.config.problemDetails,
 		})
 		const representation = negotiateProblemRepresentation(c.req.header('accept'))
 		c.header('vary', 'accept')

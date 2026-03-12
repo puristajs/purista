@@ -63,12 +63,15 @@ Example HTTP response from the Hono server:
 
 ```json
 {
-  "type": "https://purista.dev/problems/not-found",
+  "type": "about:blank",
   "title": "Not Found",
   "status": 404,
   "detail": "entity not found"
 }
 ```
+
+By default, the Hono adapter uses `about:blank` for the problem `type` to avoid emitting dead framework-owned URLs.
+If your application publishes problem type documentation, configure `problemDetails.typeBaseUri` in the Hono service to emit stable application-specific URIs instead.
 
 You can provide additional data to that error response:
 
@@ -204,7 +207,7 @@ If the same validation error is returned through the Hono HTTP adapter, it is ex
 
 ```json
 {
-  "type": "https://purista.dev/problems/validation-error",
+  "type": "about:blank",
   "title": "Bad Request",
   "status": 400,
   "detail": "Bad Request",
@@ -219,6 +222,8 @@ If the same validation error is returned through the Hono HTTP adapter, it is ex
   ]
 }
 ```
+
+With explicit problem type configuration, the same response can expose application-owned URIs such as `https://api.example.com/problems/validation-error`.
 
 ## HTTP representation in `@purista/hono-http-server`
 

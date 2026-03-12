@@ -18,7 +18,7 @@ describe('problemDetails helpers', () => {
 		const result = toProblemDetails(error, { traceId: 'trace-1', instance: '/api/v1/users' })
 
 		expect(result).toEqual({
-			type: 'https://purista.dev/problems/validation-error',
+			type: 'about:blank',
 			title: 'Bad Request',
 			status: 400,
 			detail: 'Input validation failed',
@@ -34,7 +34,7 @@ describe('problemDetails helpers', () => {
 		const result = toProblemDetails(error, { instance: '/api/v1/users' })
 
 		expect(result).toEqual({
-			type: 'https://purista.dev/problems/internal-server-error',
+			type: 'about:blank',
 			title: 'Internal Server Error',
 			status: 500,
 			detail: 'Internal Server Error',
@@ -45,7 +45,7 @@ describe('problemDetails helpers', () => {
 
 	it('renders markdown representation from normalized problem details', () => {
 		const markdown = renderProblemDetailsMarkdown({
-			type: 'https://purista.dev/problems/not-found',
+			type: 'about:blank',
 			title: 'Not Found',
 			status: 404,
 			detail: 'Route not found',
@@ -70,10 +70,16 @@ describe('problemDetails helpers', () => {
 	it('creates RFC 9457 schema and problem type URIs', () => {
 		const schema = getProblemDetailsSchema(StatusCode.NotFound, 'Route not found')
 		expect(schema.required).toEqual(['type', 'title', 'status', 'detail'])
-		expect(getProblemTypeUri(StatusCode.NotFound)).toBe('https://purista.dev/problems/not-found')
-		expect(getProblemTypeUri(StatusCode.BadRequest, [{ code: 'invalid', message: 'broken' }])).toBe(
-			'https://purista.dev/problems/validation-error',
+		expect(getProblemTypeUri(StatusCode.NotFound)).toBe('about:blank')
+		expect(getProblemTypeUri(StatusCode.BadRequest, [{ code: 'invalid', message: 'broken' }])).toBe('about:blank')
+		expect(getProblemTypeUri(StatusCode.NotFound, undefined, { typeBaseUri: 'https://api.example.com/problems' })).toBe(
+			'https://api.example.com/problems/not-found',
 		)
+		expect(
+			getProblemTypeUri(StatusCode.BadRequest, [{ code: 'invalid', message: 'broken' }], {
+				typeBaseUri: 'https://api.example.com/problems/',
+			}),
+		).toBe('https://api.example.com/problems/validation-error')
 	})
 
 	it('passes through existing problem details and maps handled details payloads', () => {
@@ -98,7 +104,7 @@ describe('problemDetails helpers', () => {
 
 		const handled = new HandledError(StatusCode.Conflict, 'duplicate', { id: '123' }, 'trace-handled')
 		expect(toProblemDetails(handled, { instance: '/resource' })).toEqual({
-			type: 'https://purista.dev/problems/conflict',
+			type: 'about:blank',
 			title: 'Conflict',
 			status: 409,
 			detail: 'duplicate',
@@ -127,7 +133,7 @@ describe('problemDetails helpers', () => {
 		expect(
 			toProblemDetails({ status: 400, data: { field: 'name' }, traceId: 'trace-obj' }, { instance: '/object-error' }),
 		).toEqual({
-			type: 'https://purista.dev/problems/bad-request',
+			type: 'about:blank',
 			title: 'Bad Request',
 			status: 400,
 			detail: 'Bad Request',
@@ -137,12 +143,36 @@ describe('problemDetails helpers', () => {
 		})
 
 		expect(toProblemDetails('oops', { statusCode: StatusCode.BadRequest })).toEqual({
-			type: 'https://purista.dev/problems/bad-request',
+			type: 'about:blank',
 			title: 'Bad Request',
 			status: 400,
 			detail: 'oops',
 			instance: undefined,
 			traceId: undefined,
+		})
+	})
+
+	it('uses configured problem type base URI in normalized problem details and schemas', () => {
+		const handled = new HandledError(StatusCode.NotFound, 'missing')
+		expect(
+			toProblemDetails(handled, {
+				instance: '/resource',
+				problemTypeConfig: { typeBaseUri: 'https://api.example.com/problems' },
+			}),
+		).toEqual({
+			type: 'https://api.example.com/problems/not-found',
+			title: 'Not Found',
+			status: 404,
+			detail: 'missing',
+			instance: '/resource',
+			traceId: undefined,
+		})
+
+		const schema = getProblemDetailsSchema(StatusCode.NotFound, 'Route not found', undefined, {
+			typeBaseUri: 'https://api.example.com/problems',
+		})
+		expect(schema.properties?.type).toMatchObject({
+			example: 'https://api.example.com/problems/not-found',
 		})
 	})
 

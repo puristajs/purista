@@ -137,6 +137,34 @@ describe('HonoServiceClass', () => {
 		}
 	})
 
+	it('uses configured problem type base URI in HTTP problem responses', async () => {
+		const server = await honoV1Service.getInstance(getEventBridgeMock().mock, {
+			logger: getLoggerMock().mock,
+			serviceConfig: {
+				enableHealth: false,
+				enableDynamicRoutes: false,
+				apiMountPath: '/api',
+				services: [],
+				problemDetails: {
+					typeBaseUri: 'https://api.example.com/problems',
+				},
+			},
+		})
+		await server.start()
+
+		try {
+			const response = await server.app.fetch(new Request('http://localhost/unknown'))
+			expect(response.status).toBe(404)
+			await expect(response.json()).resolves.toMatchObject({
+				type: 'https://api.example.com/problems/not-found',
+				title: 'Not Found',
+				status: 404,
+			})
+		} finally {
+			await server.destroy()
+		}
+	})
+
 	it('throws when openStream is used without stream-capable event bridge', async () => {
 		const server = await createServer()
 		;(server as unknown as { eventBridge: { openStream?: unknown } }).eventBridge.openStream = undefined

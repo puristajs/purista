@@ -111,7 +111,10 @@ describe('openapi helpers', () => {
 			},
 		} as unknown as HttpExposedServiceMeta
 
-		addPathToOpenApi(builder, metadata, '/api/v1/aggregate', { traceHeaderField: 'x-trace-id' })
+		addPathToOpenApi(builder, metadata, '/api/v1/aggregate', {
+			traceHeaderField: 'x-trace-id',
+			problemDetails: { typeBaseUri: 'https://api.example.com/problems' },
+		})
 		const spec = builder.getSpec()
 		const endpoint = spec.paths?.['/api/v1/aggregate']?.get
 		const okResponse = endpoint?.responses?.['200'] as { content?: Record<string, { schema?: unknown }> }
@@ -127,6 +130,11 @@ describe('openapi helpers', () => {
 			$ref: '#/components/schemas/error_401_schema',
 		})
 		expect(errorResponse.content?.['text/markdown']?.schema).toEqual({ type: 'string' })
+		expect(spec.components?.schemas?.error_401_schema).toMatchObject({
+			properties: {
+				type: { example: 'https://api.example.com/problems/unauthorized' },
+			},
+		})
 	})
 
 	it('adds streaming SSE response schema with protocol metadata', () => {

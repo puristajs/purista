@@ -62,3 +62,17 @@ This applies to framework-generated HTTP errors such as:
 - handled and unhandled command execution errors
 
 OpenAPI output documents the canonical JSON error contract as `application/problem+json` and also declares the optional Markdown representation.
+
+If you want dereferenceable problem `type` URIs, configure the Hono service with `problemDetails.typeBaseUri`.
+Without that setting, the adapter uses `about:blank` instead of hardcoded framework URLs.
+
+```typescript
+const server = await honoV1Service.getInstance(eventBridge, {
+  serviceConfig: {
+    services: [myService],
+    problemDetails: {
+      typeBaseUri: 'https://api.example.com/problems',
+    },
+  },
+})
+```

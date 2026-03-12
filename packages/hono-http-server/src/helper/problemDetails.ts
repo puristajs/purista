@@ -14,18 +14,22 @@ export type ProblemDetails = {
 	details?: unknown
 }
 
+export type ProblemTypeConfig = {
+	typeBaseUri?: string
+}
+
 const problemTypeMap = new Map<number, string>([
-	[StatusCode.BadRequest, 'https://purista.dev/problems/bad-request'],
-	[StatusCode.Unauthorized, 'https://purista.dev/problems/unauthorized'],
-	[StatusCode.Forbidden, 'https://purista.dev/problems/forbidden'],
-	[StatusCode.NotFound, 'https://purista.dev/problems/not-found'],
-	[StatusCode.Conflict, 'https://purista.dev/problems/conflict'],
-	[StatusCode.TooManyRequests, 'https://purista.dev/problems/rate-limit'],
-	[StatusCode.InternalServerError, 'https://purista.dev/problems/internal-server-error'],
-	[StatusCode.InvalidToken, 'https://purista.dev/problems/invalid-token'],
+	[StatusCode.BadRequest, 'bad-request'],
+	[StatusCode.Unauthorized, 'unauthorized'],
+	[StatusCode.Forbidden, 'forbidden'],
+	[StatusCode.NotFound, 'not-found'],
+	[StatusCode.Conflict, 'conflict'],
+	[StatusCode.TooManyRequests, 'rate-limit'],
+	[StatusCode.InternalServerError, 'internal-server-error'],
+	[StatusCode.InvalidToken, 'invalid-token'],
 ])
 
-const validationErrorType = 'https://purista.dev/problems/validation-error'
+const validationErrorType = 'validation-error'
 
 const isRecord = (value: unknown): value is Record<string, unknown> => !!value && typeof value === 'object'
 
@@ -44,11 +48,21 @@ const isProblemDetails = (value: unknown): value is ProblemDetails =>
 
 const stringifyPretty = (value: unknown) => JSON.stringify(value, null, 2)
 
-export const getProblemTypeUri = (status: number, data?: unknown): string => {
-	if (isValidationIssueList(data)) {
-		return validationErrorType
+const normalizeProblemTypeBaseUri = (value: string) => value.replace(/\/+$/, '')
+
+const buildProblemTypeUri = (slug: string, config?: ProblemTypeConfig): string => {
+	if (!config?.typeBaseUri) {
+		return 'about:blank'
 	}
-	return problemTypeMap.get(status) ?? 'about:blank'
+	return `${normalizeProblemTypeBaseUri(config.typeBaseUri)}/${slug}`
+}
+
+export const getProblemTypeUri = (status: number, data?: unknown, config?: ProblemTypeConfig): string => {
+	if (isValidationIssueList(data)) {
+		return buildProblemTypeUri(validationErrorType, config)
+	}
+	const slug = problemTypeMap.get(status)
+	return slug ? buildProblemTypeUri(slug, config) : 'about:blank'
 }
 
 export const toProblemDetails = (
@@ -58,6 +72,7 @@ export const toProblemDetails = (
 		traceId?: string
 		instance?: string
 		safeInternalDetails?: boolean
+		problemTypeConfig?: ProblemTypeConfig
 	} = {},
 ): ProblemDetails => {
 	if (isProblemDetails(error)) {
@@ -73,7 +88,7 @@ export const toProblemDetails = (
 		const data = error.data
 		const detail = error.message || getErrorName(status)
 		const problem: ProblemDetails = {
-			type: getProblemTypeUri(status, data),
+			type: getProblemTypeUri(status, data, input.problemTypeConfig),
 			title: getErrorName(status),
 			status,
 			detail,
@@ -92,7 +107,7 @@ export const toProblemDetails = (
 		const status = input.statusCode ?? error.errorCode
 		const isServerError = status >= 500
 		return {
-			type: getProblemTypeUri(status),
+			type: getProblemTypeUri(status, undefined, input.problemTypeConfig),
 			title: getErrorName(status),
 			status,
 			detail: isServerError ? getErrorName(status) : error.message || getErrorName(status),
@@ -113,7 +128,7 @@ export const toProblemDetails = (
 		const traceId = typeof error.traceId === 'string' ? error.traceId : input.traceId
 		const detail = typeof error.message === 'string' ? error.message : getErrorName(status)
 		const problem: ProblemDetails = {
-			type: getProblemTypeUri(status, data),
+			type: getProblemTypeUri(status, data, input.problemTypeConfig),
 			title: getErrorName(status),
 			status,
 			detail: status >= 500 && typeof error.message !== 'string' ? getErrorName(status) : detail,
@@ -130,7 +145,7 @@ export const toProblemDetails = (
 
 	const status = input.statusCode ?? StatusCode.InternalServerError
 	return {
-		type: getProblemTypeUri(status),
+		type: getProblemTypeUri(status, undefined, input.problemTypeConfig),
 		title: getErrorName(status),
 		status,
 		detail: status >= 500 ? getErrorName(status) : String(error),
@@ -211,7 +226,12 @@ export const negotiateProblemRepresentation = (acceptHeader?: string): 'json' | 
 	return 'json'
 }
 
-export const getProblemDetailsSchema = (code: StatusCode, message: string, schema?: SchemaObject): SchemaObject => {
+export const getProblemDetailsSchema = (
+	code: StatusCode,
+	message: string,
+	schema?: SchemaObject,
+	problemTypeConfig?: ProblemTypeConfig,
+): SchemaObject => {
 	const detailsSchema: SchemaObject = {
 		type: 'object',
 		properties: {
@@ -221,6 +241,7 @@ export const getProblemDetailsSchema = (code: StatusCode, message: string, schem
 				example: getProblemTypeUri(
 					code,
 					code === StatusCode.BadRequest ? [{ code: 'invalid_type', message: 'invalid' }] : undefined,
+					problemTypeConfig,
 				),
 			},
 			title: {

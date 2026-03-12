@@ -10,6 +10,9 @@ import { resolveHttpStreamingMode } from './streamTransport.js'
 
 export type Config = {
 	traceHeaderField?: string
+	problemDetails?: {
+		typeBaseUri?: string
+	}
 }
 
 export const addPathToOpenApi = (
@@ -83,7 +86,10 @@ export const addPathToOpenApi = (
 	const errArray = Array.from(errorCodes).sort((a, b) => a - b)
 
 	for (const code of errArray) {
-		openApiBuilder.addSchema(`error_${code}_schema`, getErrorResponseSchema(code, getErrorName(code)))
+		openApiBuilder.addSchema(
+			`error_${code}_schema`,
+			getErrorResponseSchema(code, getErrorName(code), undefined, config.problemDetails),
+		)
 	}
 
 	const errResponses = errArray.reduce((prev, code) => {
