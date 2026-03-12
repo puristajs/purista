@@ -48,6 +48,11 @@ export const ServerObjectSchema = z.object({
 	// Keep `any`: OpenAPI `variables` shape is external and passed through without narrowing.
 	variables: z.any().optional(),
 })
+
+export const ProblemDetailsObjectSchema = z.object({
+	typeBaseUri: z.string().min(1).optional(),
+})
+
 export const honoServiceV1ConfigSchema = z.object({
 	logLevel: z.enum(['info', 'error', 'warn', 'debug', 'trace', 'fatal']).optional().default('warn'),
 	enableDynamicRoutes: z.boolean().default(false),
@@ -59,6 +64,7 @@ export const honoServiceV1ConfigSchema = z.object({
 	protectHandler: z.any().optional(),
 	services: z.array(z.instanceof(Service)).optional().default([]),
 	traceHeaderField: z.string().default('x-trace-id'),
+	problemDetails: ProblemDetailsObjectSchema.optional(),
 	openApi: z
 		.object({
 			openapi: z.string().default('3.1.0'),

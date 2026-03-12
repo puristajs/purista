@@ -55,7 +55,7 @@ type ProtocolFrameEntry = {
 	envelope: AgentProtocolEnvelope
 }
 
-type ProtocolEmitter = {
+export type ProtocolEmitter = {
 	emitMessage(
 		content: string | { content: string; summary?: string; partial?: boolean; final?: boolean },
 		options?: { summary?: string; partial?: boolean; final?: boolean },
@@ -628,6 +628,7 @@ export type AgentHandlerContext<
 	session: SessionHelpers
 	knowledge: KnowledgeHelpers<KnowledgeAliases>
 	stream: AgentStreamEmitter
+	protocol: ProtocolEmitter
 	tools: ToolInvoker
 	resources: Resources
 	models: Models
@@ -1054,6 +1055,7 @@ export const createAgentHandlerContext = <
 			sessionHelpers,
 		) as KnowledgeHelpers<KnowledgeAliases>,
 		stream: createStreamEmitter(input.protocol),
+		protocol: input.protocol,
 		tools: createToolInvoker(input.serviceContext, input.manifest.allowedTools ?? [], input.protocol),
 		resources: input.resources,
 		models: input.models,

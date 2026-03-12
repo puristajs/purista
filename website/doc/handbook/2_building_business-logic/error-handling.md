@@ -56,6 +56,23 @@ This will give the client who has called the API endpoint a response with HTTP s
 }
 ```
 
+When you expose commands through the Hono HTTP server, PURISTA does not return this internal framework payload directly.  
+`@purista/hono-http-server` maps framework errors to [RFC 9457 Problem Details](https://www.rfc-editor.org/rfc/rfc9457.html) at the HTTP boundary.
+
+Example HTTP response from the Hono server:
+
+```json
+{
+  "type": "about:blank",
+  "title": "Not Found",
+  "status": 404,
+  "detail": "entity not found"
+}
+```
+
+By default, the Hono adapter uses `about:blank` for the problem `type` to avoid emitting dead framework-owned URLs.
+If your application publishes problem type documentation, configure `problemDetails.typeBaseUri` in the Hono service to emit stable application-specific URIs instead.
+
 You can provide additional data to that error response:
 
 ```typescript
@@ -185,6 +202,37 @@ PURISTA is passing the `issues` property if Zod error instances into the `data` 
   ]
 }
 ```
+
+If the same validation error is returned through the Hono HTTP adapter, it is exposed as RFC 9457 Problem Details with the validation entries in `errors`:
+
+```json
+{
+  "type": "about:blank",
+  "title": "Bad Request",
+  "status": 400,
+  "detail": "Bad Request",
+  "errors": [
+    {
+      "code": "invalid_type",
+      "expected": "string",
+      "received": "number",
+      "path": ["name"],
+      "message": "Expected string, received number"
+    }
+  ]
+}
+```
+
+With explicit problem type configuration, the same response can expose application-owned URIs such as `https://api.example.com/problems/validation-error`.
+
+## HTTP representation in `@purista/hono-http-server`
+
+The Hono adapter exposes framework-generated HTTP errors as:
+
+- `application/problem+json` as the canonical machine-readable format
+- `text/markdown` when the client explicitly sends `Accept: text/markdown`
+
+The Markdown representation is rendered from the same normalized problem object. It is useful for agents and debugging tools, but JSON remains the source HTTP contract.
 
 ### Output validation
 

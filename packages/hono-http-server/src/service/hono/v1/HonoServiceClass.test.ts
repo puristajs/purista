@@ -76,6 +76,11 @@ describe('HonoServiceClass', () => {
 		try {
 			const response = await server.app.fetch(new Request('http://localhost/unknown'))
 			expect(response.status).toBe(503)
+			expect(response.headers.get('content-type')).toContain('application/problem+json')
+			await expect(response.json()).resolves.toMatchObject({
+				title: 'Service Unavailable',
+				status: 503,
+			})
 		} finally {
 			await server.destroy()
 		}
@@ -94,9 +99,67 @@ describe('HonoServiceClass', () => {
 		try {
 			const httpError = await server.app.fetch(new Request('http://localhost/http-error'))
 			expect(httpError.status).toBe(418)
+			expect(httpError.headers.get('content-type')).toContain('application/problem+json')
+			await expect(httpError.json()).resolves.toMatchObject({
+				title: 'Im A Teapot',
+				status: 418,
+				detail: 'teapot',
+			})
 
 			const unhandled = await server.app.fetch(new Request('http://localhost/boom'))
 			expect(unhandled.status).toBe(500)
+			expect(unhandled.headers.get('content-type')).toContain('application/problem+json')
+			await expect(unhandled.json()).resolves.toMatchObject({
+				title: 'Internal Server Error',
+				status: 500,
+				detail: 'Internal Server Error',
+			})
+		} finally {
+			await server.destroy()
+		}
+	})
+
+	it('returns markdown problem details when the client prefers text/markdown', async () => {
+		const server = await createServer()
+		await server.start()
+
+		try {
+			const response = await server.app.fetch(
+				new Request('http://localhost/unknown', {
+					headers: { accept: 'text/markdown' },
+				}),
+			)
+			expect(response.status).toBe(404)
+			expect(response.headers.get('content-type')).toContain('text/markdown')
+			await expect(response.text()).resolves.toContain('# Not Found')
+		} finally {
+			await server.destroy()
+		}
+	})
+
+	it('uses configured problem type base URI in HTTP problem responses', async () => {
+		const server = await honoV1Service.getInstance(getEventBridgeMock().mock, {
+			logger: getLoggerMock().mock,
+			serviceConfig: {
+				enableHealth: false,
+				enableDynamicRoutes: false,
+				apiMountPath: '/api',
+				services: [],
+				problemDetails: {
+					typeBaseUri: 'https://api.example.com/problems',
+				},
+			},
+		})
+		await server.start()
+
+		try {
+			const response = await server.app.fetch(new Request('http://localhost/unknown'))
+			expect(response.status).toBe(404)
+			await expect(response.json()).resolves.toMatchObject({
+				type: 'https://api.example.com/problems/not-found',
+				title: 'Not Found',
+				status: 404,
+			})
 		} finally {
 			await server.destroy()
 		}
@@ -207,6 +270,11 @@ describe('HonoServiceClass', () => {
 				}),
 			)
 			expect(badContentType.status).toBe(400)
+			expect(badContentType.headers.get('content-type')).toContain('application/problem+json')
+			await expect(badContentType.json()).resolves.toMatchObject({
+				title: 'Bad Request',
+				status: 400,
+			})
 
 			const invalidJson = await server.app.fetch(
 				new Request('http://localhost/api/v1/echo', {
@@ -216,6 +284,11 @@ describe('HonoServiceClass', () => {
 				}),
 			)
 			expect(invalidJson.status).toBe(400)
+			expect(invalidJson.headers.get('content-type')).toContain('application/problem+json')
+			await expect(invalidJson.json()).resolves.toMatchObject({
+				title: 'Bad Request',
+				status: 400,
+			})
 
 			const secured = await server.app.fetch(new Request('http://localhost/api/v1/secure'))
 			expect(secured.status).toBe(200)
