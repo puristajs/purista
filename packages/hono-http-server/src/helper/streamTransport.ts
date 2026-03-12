@@ -1,6 +1,6 @@
-import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import type { StreamHandle } from '@purista/core'
 import { StatusCode } from '@purista/core'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 export type ProtocolSseEvent = {
 	event: string

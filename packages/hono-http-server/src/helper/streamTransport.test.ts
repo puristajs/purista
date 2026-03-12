@@ -67,7 +67,9 @@ describe('streamTransport helpers', () => {
 		const result = await collectAggregateStreamResult({
 			async *[Symbol.asyncIterator]() {
 				yield { payload: { frameType: 'chunk', chunk: { version: 'purista.ai/1.0', frame: { kind: 'message' } } } }
-				yield { payload: { frameType: 'complete', final: { message: 'ok', envelopes: [{ frame: { kind: 'message' } }] } } }
+				yield {
+					payload: { frameType: 'complete', final: { message: 'ok', envelopes: [{ frame: { kind: 'message' } }] } },
+				}
 			},
 		} as any)
 
