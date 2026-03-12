@@ -42,8 +42,6 @@ const isProblemDetails = (value: unknown): value is ProblemDetails =>
 	typeof value.status === 'number' &&
 	typeof value.detail === 'string'
 
-const escapeInline = (input: string) => input.replace(/`/g, '\\`')
-
 const stringifyPretty = (value: unknown) => JSON.stringify(value, null, 2)
 
 export const getProblemTypeUri = (status: number, data?: unknown): string => {
@@ -149,7 +147,7 @@ export const renderProblemDetailsMarkdown = (problem: ProblemDetails): string =>
 			if (isRecord(issue)) {
 				const path = Array.isArray(issue.path) ? issue.path.join('.') : undefined
 				const message = typeof issue.message === 'string' ? issue.message : 'Validation error'
-				lines.push(`- ${path ? `\`${escapeInline(path)}\`` : 'input'}: ${message}`)
+				lines.push(`- ${path ?? 'input'}: ${message}`)
 			} else {
 				lines.push(`- ${String(issue)}`)
 			}
