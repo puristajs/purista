@@ -1,5 +1,6 @@
 import { HandledError, StatusCode } from '@purista/core'
 import type { z } from 'zod'
+import { assertSandboxAccess } from '../../helper/ownership.js'
 import { sandboxServiceBuilder } from '../../SandboxServiceBuilder.js'
 import { ExecuteBashInputSchema, ExecuteBashOutputSchema } from './schema.js'
 
@@ -26,6 +27,7 @@ export const executeBashCommandBuilder: any = sandboxServiceBuilder
 		if (!metadata) {
 			throw new HandledError(StatusCode.NotFound, `Sandbox ${payload.sandboxId} not found in registry`)
 		}
+		assertSandboxAccess(context, metadata)
 
 		// 2. Execute command via driver
 		return await context.resources.driver.executeBash(payload)

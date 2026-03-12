@@ -3,7 +3,7 @@
  *
  * Public API entry point for the PURISTA Sandbox provider.
  * This package provides multi-tenant sandboxing capabilities with support for
- * Docker, Lima, Tart, and Firecracker.
+ * supported Docker-compatible backends plus experimental VM and microVM drivers.
  */
 
 export * from './adapter/BashTool/createPuristaSandboxAdapter.js'

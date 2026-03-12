@@ -7,6 +7,12 @@ export type SandboxAdapter = {
 	writeFiles: (files: Array<{ path: string; content: string | Buffer }>) => Promise<void>
 }
 
+export type SandboxAdapterIdentity = {
+	sandboxId: string
+	tenantId: string
+	principalId: string
+}
+
 /**
  * Creates a generic sandbox adapter for bash-tool compatible runtimes.
  *
@@ -14,9 +20,10 @@ export type SandboxAdapter = {
  */
 export const createPuristaSandboxAdapter = (
 	eventBridge: EventBridge,
-	projectId: string,
-	sandboxId: string,
+	identity: SandboxAdapterIdentity,
 ): SandboxAdapter => {
+	const { sandboxId, principalId, tenantId } = identity
+
 	return {
 		async executeCommand(command: string) {
 			return await eventBridge.invoke<ExecuteBashOutput>({
@@ -32,9 +39,11 @@ export const createPuristaSandboxAdapter = (
 					serviceTarget: 'executeBash',
 				},
 				payload: {
-					payload: { sandboxId, projectId, command },
+					payload: { sandboxId, command },
 					parameter: {},
 				},
+				principalId,
+				tenantId,
 				contentType: 'application/json',
 				contentEncoding: 'utf-8',
 			})
@@ -57,6 +66,8 @@ export const createPuristaSandboxAdapter = (
 					payload: { sandboxId, path },
 					parameter: {},
 				},
+				principalId,
+				tenantId,
 				contentType: 'application/json',
 				contentEncoding: 'utf-8',
 			})
@@ -84,6 +95,8 @@ export const createPuristaSandboxAdapter = (
 					payload: { sandboxId, files: filesRecord },
 					parameter: {},
 				},
+				principalId,
+				tenantId,
 				contentType: 'application/json',
 				contentEncoding: 'utf-8',
 			})

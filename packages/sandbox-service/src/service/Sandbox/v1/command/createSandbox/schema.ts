@@ -1,9 +1,9 @@
 import { z } from 'zod'
 
 export const CreateSandboxInputSchema = z.object({
-	organizationId: z.string(),
 	projectId: z.string(),
-	userId: z.string(),
+	organizationId: z.string().optional(),
+	userId: z.string().optional(),
 	/** Optional Git and GitHub configuration */
 	gitConfig: z
 		.object({

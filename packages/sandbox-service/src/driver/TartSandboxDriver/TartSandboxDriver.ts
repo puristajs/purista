@@ -158,22 +158,8 @@ export class TartSandboxDriver implements SandboxDriver {
 	}
 
 	async scanRunningSandboxes(): Promise<Array<SandboxMetadata>> {
-		try {
-			const { stdout } = await execa('tart', ['list', '--format', 'json'])
-			const vms = JSON.parse(stdout)
-			// Filter for purista- prefix and recover metadata (if stored)
-			return vms
-				.filter((vm: any) => vm.name.startsWith('purista-'))
-				.map((vm: any) => ({
-					sandboxId: vm.name.replace('purista-', ''),
-					containerName: vm.name,
-					organizationId: '', // Would need a way to store/retrieve this
-					projectId: '',
-					userId: '',
-					createdAt: Date.now(),
-				}))
-		} catch (_error) {
-			return []
-		}
+		// Tart does not currently persist recoverable owner metadata for restart reconciliation.
+		// Returning incomplete metadata would create invalid registry entries.
+		return []
 	}
 }

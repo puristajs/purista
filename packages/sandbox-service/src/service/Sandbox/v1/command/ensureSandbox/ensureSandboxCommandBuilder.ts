@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto'
-import { HandledError, StatusCode } from '@purista/core'
 import { z } from 'zod'
+import { resolveSandboxOwnerFromMessage } from '../../helper/ownership.js'
 import { sandboxServiceBuilder } from '../../SandboxServiceBuilder.js'
 import { EnsureSandboxInputSchema, EnsureSandboxOutputSchema } from './schema.js'
 
@@ -18,49 +18,54 @@ export const ensureSandboxCommandBuilder: any = sandboxServiceBuilder
 	.canEmit('SandboxStarted', SandboxStartedEventSchema)
 	.exposeAsHttpEndpoint('POST', 'sandbox/ensure')
 	.setCommandFunction(async function (context: any, payload: z.infer<typeof EnsureSandboxInputSchema>) {
-		const existing = await context.resources.registry.findByOwner({
-			organizationId: payload.organizationId,
-			projectId: payload.projectId,
-			userId: payload.userId,
-		})
+		const owner = resolveSandboxOwnerFromMessage(context, payload)
+		const existing = await context.resources.registry.findByOwner(owner)
 
 		if (existing) {
 			const health = await context.resources.driver.executeBash({
 				sandboxId: existing.sandboxId,
 				command: 'echo "__purista_health__"',
 			})
-			if (health.exitCode !== 0) {
-				throw new HandledError(
-					StatusCode.InternalServerError,
-					`Sandbox ${existing.sandboxId} exists but health check failed`,
-					{ stderr: health.stderr, exitCode: health.exitCode },
-				)
+			if (health.exitCode === 0) {
+				return {
+					sandboxId: existing.sandboxId,
+					status: 'ready',
+					created: false,
+				}
 			}
-			return {
-				sandboxId: existing.sandboxId,
-				status: 'ready',
-				created: false,
+
+			context.logger.warn(
+				{ sandboxId: existing.sandboxId, stderr: health.stderr, exitCode: health.exitCode },
+				'Sandbox health check failed, recreating sandbox.',
+			)
+			try {
+				await context.resources.driver.destroySandbox({ sandboxId: existing.sandboxId })
+			} catch (error) {
+				context.logger.warn({ err: error, sandboxId: existing.sandboxId }, 'Failed to destroy unhealthy sandbox.')
 			}
+			await context.resources.registry.unregister(existing.sandboxId)
 		}
 
 		const sandboxId = randomUUID()
 		const created = await context.resources.driver.createSandbox({
-			...payload,
+			...owner,
+			gitConfig: payload.gitConfig,
 			sandboxId,
 		})
 
 		await context.resources.registry.register({
-			...payload,
+			...owner,
 			sandboxId,
 			containerName: created.containerName,
 			createdAt: Date.now(),
+			gitConfigured: !!payload.gitConfig,
 		})
 
 		await context.emit('SandboxStarted', {
 			sandboxId,
-			organizationId: payload.organizationId,
-			projectId: payload.projectId,
-			userId: payload.userId,
+			organizationId: owner.organizationId,
+			projectId: owner.projectId,
+			userId: owner.userId,
 		})
 
 		return {

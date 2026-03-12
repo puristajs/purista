@@ -1,5 +1,7 @@
 import { randomUUID } from 'node:crypto'
+import { HandledError, StatusCode } from '@purista/core'
 import { z } from 'zod'
+import { resolveSandboxOwnerFromMessage } from '../../helper/ownership.js'
 import { sandboxServiceBuilder } from '../../SandboxServiceBuilder.js'
 import { CreateSandboxInputSchema, CreateSandboxOutputSchema } from './schema.js'
 
@@ -32,28 +34,40 @@ export const createSandboxCommandBuilder: any = sandboxServiceBuilder
 	.canEmit('SandboxStarted', SandboxStartedEventSchema)
 	.exposeAsHttpEndpoint('POST', 'sandbox')
 	.setCommandFunction(async function (context: any, payload: z.infer<typeof CreateSandboxInputSchema>) {
+		const owner = resolveSandboxOwnerFromMessage(context, payload)
+		const existing = await context.resources.registry.findByOwner(owner)
+		if (existing) {
+			throw new HandledError(
+				StatusCode.Conflict,
+				`Sandbox ${existing.sandboxId} already exists for this owner. Use ensureSandbox to reuse it.`,
+				{ sandboxId: existing.sandboxId },
+			)
+		}
+
 		const sandboxId = randomUUID()
 
 		// Create the container using the driver resource
 		const result = await context.resources.driver.createSandbox({
-			...payload,
+			...owner,
+			gitConfig: payload.gitConfig,
 			sandboxId,
 		})
 
 		// Register the sandbox in our registry resource
 		await context.resources.registry.register({
-			...payload,
+			...owner,
 			sandboxId,
 			containerName: result.containerName,
 			createdAt: Date.now(),
+			gitConfigured: !!payload.gitConfig,
 		})
 
 		// The emit expects a payload that matches the schema
 		await context.emit('SandboxStarted', {
 			sandboxId,
-			organizationId: payload.organizationId,
-			projectId: payload.projectId,
-			userId: payload.userId,
+			organizationId: owner.organizationId,
+			projectId: owner.projectId,
+			userId: owner.userId,
 		})
 
 		return {

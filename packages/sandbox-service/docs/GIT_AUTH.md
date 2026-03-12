@@ -28,14 +28,14 @@ const sandbox = await eventBridge.invoke({
   serviceName: 'Sandbox',
   serviceTarget: 'createSandbox',
   payload: {
-    organizationId: 'my-org',
     projectId: 'my-project',
-    userId: 'user-123',
     gitConfig: {
       username: 'agent-bot',
       email: 'bot@example.com',
       token: process.env.GITHUB_TOKEN // Securely passed from your vault
     }
-  }
+  },
+  tenantId: 'my-org',
+  principalId: 'user-123'
 })
 ```
