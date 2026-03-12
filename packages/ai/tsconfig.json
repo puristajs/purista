@@ -6,7 +6,10 @@
 		"sourceMap": false,
 		"declarationMap": true,
 		"baseUrl": ".",
-		"paths": {}
+		"paths": {
+			"@purista/ai": ["./src/index.ts"]
+		},
+		"types": ["vitest/globals", "node"]
 	},
 	"include": ["./src/**/*"],
 	"exclude": ["./src/**/*.test.ts", "./dist/*", "./**/*.d.ts"]
