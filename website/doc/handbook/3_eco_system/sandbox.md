@@ -10,7 +10,7 @@ order: 303500
 
 It adds:
 
-- tenant-aware sandbox lifecycle (`organizationId`, `projectId`, `userId`)
+- tenant-aware sandbox lifecycle (`tenantId` + `principalId` from PURISTA message metadata, plus `projectId`)
 - command execution and file read/write inside isolated runtimes
 - pluggable backends (Docker, Podman, Lima, Tart, Firecracker)
 - registry reconciliation on service startup
@@ -26,14 +26,14 @@ Use sandbox when:
 
 ## Runtime Backends
 
-| Backend | Good default for | Platform notes | External docs |
-| --- | --- | --- | --- |
-| AppleContainerSandboxDriver | local macOS developer setups | Docker-compatible runtimes such as OrbStack/Colima | [OrbStack](https://orbstack.dev/), [Colima](https://github.com/abiosoft/colima) |
-| Docker | most teams starting out | widely available, broad ecosystem | [Docker Docs](https://docs.docker.com/) |
-| Podman | rootless/container-security setups | daemonless model | [Podman Docs](https://podman.io/docs) |
-| Lima | open-source VM approach on macOS | good Apple Silicon path | [Lima Docs](https://lima-vm.io/docs/) |
-| Tart | Apple virtualization heavy setups | macOS-focused VM workflows | [Tart Docs](https://tart.run/) |
-| Firecracker | high-isolation Linux microVMs | requires Linux + KVM ops maturity | [Firecracker Docs](https://firecracker-microvm.github.io/) |
+| Backend | Status | Good default for | Platform notes | External docs |
+| --- | --- | --- | --- | --- |
+| AppleContainerSandboxDriver | supported | local macOS developer setups | Docker-compatible runtimes such as OrbStack/Colima | [OrbStack](https://orbstack.dev/), [Colima](https://github.com/abiosoft/colima) |
+| Docker | supported | most teams starting out | widely available, broad ecosystem | [Docker Docs](https://docs.docker.com/) |
+| Podman | supported | rootless/container-security setups | daemonless model | [Podman Docs](https://podman.io/docs) |
+| Lima | experimental | open-source VM approach on macOS | VM workflow works, but startup reconciliation is disabled because owner metadata cannot be recovered safely | [Lima Docs](https://lima-vm.io/docs/) |
+| Tart | experimental | Apple virtualization heavy setups | VM workflow works, but startup reconciliation is disabled because owner metadata cannot be recovered safely | [Tart Docs](https://tart.run/) |
+| Firecracker | experimental | high-isolation Linux microVMs | requires Linux + KVM ops maturity; execution/file operations are incomplete | [Firecracker Docs](https://firecracker-microvm.github.io/) |
 
 Related runtimes often used with Docker driver:
 
@@ -121,13 +121,21 @@ The registry is used for:
 - crash/restart recovery via startup reconciliation
 - lifecycle cleanup
 
+Ownership rule:
+
+- `tenantId` from the PURISTA message is treated as `organizationId`
+- `principalId` from the PURISTA message is treated as `userId`
+- `projectId` stays explicit in the command payload
+
+Sandbox access commands (`executeBash`, `readFile`, `writeFiles`, `destroySandbox`) require caller identity metadata so the service can enforce ownership.
+
 ## Driver Selection Guidance
 
 - Start with **Docker** unless you already have a stronger infra requirement.
 - On macOS local dev, prefer **AppleContainerSandboxDriver** (OrbStack/Colima).
 - Move to **Podman** when rootless/container hardening is a priority.
-- Use **Lima** or **Tart** for Apple-Silicon-heavy VM workflows.
-- Use **Firecracker** only when you need microVM-level isolation and can operate Linux/KVM infrastructure.
+- Use **Lima** or **Tart** only if you accept the current experimental status and do not rely on restart reconciliation yet.
+- Use **Firecracker** only if you plan to finish the missing execution/file-transfer parts yourself.
 
 ## Service Operations
 
@@ -148,12 +156,12 @@ const created = await eventBridge.invoke({
   receiver: { serviceName: 'Sandbox', serviceVersion: '1', serviceTarget: 'ensureSandbox' },
   payload: {
     payload: {
-      organizationId: 'org-1',
       projectId: 'project-1',
-      userId: 'user-1',
     },
     parameter: {},
   },
+  tenantId: 'org-1',
+  principalId: 'user-1',
   contentType: 'application/json',
   contentEncoding: 'utf-8',
 })
@@ -168,6 +176,8 @@ const result = await eventBridge.invoke({
     },
     parameter: {},
   },
+  tenantId: 'org-1',
+  principalId: 'user-1',
   contentType: 'application/json',
   contentEncoding: 'utf-8',
 })
@@ -191,6 +201,8 @@ Use adapters based on deployment mode:
 
 - **Service adapter** (`createPuristaSandboxAdapter`): use when sandbox runtime is provided by a running PURISTA service.
 - **Local filesystem adapter** (`createLocalFilesystemSandboxAdapter`): use for local dev/testing where direct workspace operations are acceptable.
+
+When using the service adapter, always forward `tenantId` and `principalId`. The sandbox service uses those message fields for access control.
 
 ## Create a New Adapter
 
@@ -248,7 +260,7 @@ After implementing your driver:
 
 1. Instantiate it in bootstrap.
 2. Pass it to `sandboxServiceBuilder` as `resources.driver`.
-3. Keep `scanRunningSandboxes()` accurate so restart reconciliation works.
+3. Only return sandboxes from `scanRunningSandboxes()` when you can recover the full owner tuple (`organizationId`, `projectId`, `userId`). Incomplete recovery must return `[]` instead of partial metadata.
 
 ## Use Sandbox In A PURISTA AI Agent
 
@@ -283,15 +295,9 @@ export const codingAgent = new AgentBuilder({
     if (!model?.generateText) {
       throw new Error('Model alias openai:primary is not configured')
     }
-    // Sandbox currently keys ownership as organization/project/user.
-    // Map tenant/principal from the message context into that owner tuple.
-    const sandboxOwner = {
-      organizationId: context.message.tenantId ?? 'global',
+    const ensured = await context.tools.invoke.Sandbox['1'].ensureSandbox({
       projectId: payload.projectId,
-      userId: context.message.principalId ?? 'anonymous',
-    }
-
-    const ensured = await context.tools.invoke.Sandbox['1'].ensureSandbox(sandboxOwner)
+    })
 
     try {
       const sandbox = {

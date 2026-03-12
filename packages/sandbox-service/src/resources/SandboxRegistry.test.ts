@@ -59,4 +59,58 @@ describe('SandboxRegistry', () => {
 		})
 		expect(result).toBeUndefined()
 	})
+
+	it('rejects invalid metadata on register', async () => {
+		const registry = new SandboxRegistry(store)
+
+		await expect(
+			registry.register({
+				sandboxId: '',
+				organizationId: 'org',
+				projectId: 'proj',
+				userId: 'user',
+				containerName: 'purista-sb-1',
+				createdAt: Date.now(),
+			} as any),
+		).rejects.toThrow()
+	})
+
+	it('cleans stale owner index entries pointing to mismatched metadata', async () => {
+		const registry = new SandboxRegistry(store)
+		await store.setState('sandbox:owner:org:proj:user', 'sb-1')
+		await store.setState('sandbox:registry:sb-1', {
+			sandboxId: 'sb-1',
+			organizationId: 'other-org',
+			projectId: 'proj',
+			userId: 'user',
+			containerName: 'purista-sb-1',
+			createdAt: Date.now(),
+		})
+
+		const result = await registry.findByOwner({
+			organizationId: 'org',
+			projectId: 'proj',
+			userId: 'user',
+		})
+
+		expect(result).toBeUndefined()
+		expect((await store.getState('sandbox:owner:org:proj:user'))['sandbox:owner:org:proj:user']).toBeUndefined()
+	})
+
+	it('skips incomplete recovered sandboxes during reconcile', async () => {
+		const registry = new SandboxRegistry(store)
+
+		await registry.reconcile([
+			{
+				sandboxId: 'sb-1',
+				organizationId: '',
+				projectId: 'proj',
+				userId: 'user',
+				containerName: 'purista-sb-1',
+				createdAt: Date.now(),
+			} as any,
+		])
+
+		expect(await registry.getMetadata('sb-1')).toBeUndefined()
+	})
 })

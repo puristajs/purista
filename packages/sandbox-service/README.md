@@ -9,9 +9,9 @@ A professional, multi-tenant sandboxing provider built for the **PURISTA** frame
   - `AppleContainerSandboxDriver`: macOS-focused local dev driver for Docker-compatible runtimes (OrbStack/Colima).
   - `DockerSandboxDriver`: Works with Docker Desktop, **OrbStack**, and **Colima**.
   - `PodmanSandboxDriver`: Secure, daemonless, and rootless containers.
-  - `LimaSandboxDriver`: **Open-source** native Apple Silicon virtualization (via `vz`).
-  - `TartSandboxDriver`: OCI-compatible native macOS/Linux VMs for Apple Silicon.
-  - `FirecrackerSandboxDriver`: Production-grade AWS Firecracker MicroVMs.
+  - `LimaSandboxDriver`: Experimental open-source native Apple Silicon virtualization (no restart reconciliation).
+  - `TartSandboxDriver`: Experimental Apple virtualization backend (no restart reconciliation).
+  - `FirecrackerSandboxDriver`: Experimental Linux microVM backend with incomplete execution/file operations.
 - **Secure Authentication**: Automated GitHub CLI (`gh`) and Git authentication using secure piping (no tokens in logs).
 - **Resilient Registry**: State-store based registry with automatic recovery from container labels on service startup.
 - **AI-Agent Ready**: Pre-built hardened Docker image with `node`, `git`, `gh`, `jq`, and essential build tools.
@@ -53,6 +53,14 @@ const sandboxService = await sandboxServiceBuilder.getInstance(eventBridge, {
   },
 })
 ```
+
+Sandbox ownership is derived from the PURISTA message:
+
+- `tenantId` -> `organizationId`
+- `principalId` -> `userId`
+- `projectId` stays in the command payload
+
+Callers must therefore forward `tenantId` and `principalId` on sandbox commands.
 
 For Apple local development (OrbStack/Colima), you can also use:
 

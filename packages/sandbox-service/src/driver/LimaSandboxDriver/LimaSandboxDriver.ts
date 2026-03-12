@@ -144,22 +144,8 @@ export class LimaSandboxDriver implements SandboxDriver {
 	}
 
 	async scanRunningSandboxes(): Promise<Array<SandboxMetadata>> {
-		try {
-			const { stdout } = await execa('limactl', ['list', '--format', 'json'])
-			const lines = stdout.split('\n').filter(Boolean)
-			return lines
-				.map(line => JSON.parse(line))
-				.filter(vm => vm.name.startsWith('purista-'))
-				.map(vm => ({
-					sandboxId: vm.name.replace('purista-', ''),
-					containerName: vm.name,
-					organizationId: '',
-					projectId: '',
-					userId: '',
-					createdAt: Date.now(),
-				}))
-		} catch (_error) {
-			return []
-		}
+		// Lima instances do not currently expose owner metadata in a recoverable form.
+		// Returning incomplete metadata would poison the registry owner index after restart.
+		return []
 	}
 }

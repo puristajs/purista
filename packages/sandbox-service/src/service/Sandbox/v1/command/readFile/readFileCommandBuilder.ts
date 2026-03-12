@@ -1,4 +1,5 @@
 import { HandledError, StatusCode } from '@purista/core'
+import { assertSandboxAccess } from '../../helper/ownership.js'
 import { sandboxServiceBuilder } from '../../SandboxServiceBuilder.js'
 import { ReadFileInputSchema, ReadFileOutputSchema } from './schema.js'
 
@@ -12,5 +13,6 @@ export const readFileCommandBuilder = sandboxServiceBuilder
 		if (!metadata) {
 			throw new HandledError(StatusCode.NotFound, `Sandbox ${payload.sandboxId} not found in registry`)
 		}
+		assertSandboxAccess(context, metadata)
 		return await context.resources.driver.readFile(payload)
 	})

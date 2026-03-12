@@ -3,7 +3,12 @@ import * as os from 'node:os'
 import * as path from 'node:path'
 import { execa } from 'execa'
 import type { z } from 'zod'
-import type { BashResultSchema, SandboxDriver, SandboxMetadata } from '../../types/SandboxDriver.js'
+import {
+	type BashResultSchema,
+	type SandboxDriver,
+	type SandboxMetadata,
+	SandboxMetadataSchema,
+} from '../../types/SandboxDriver.js'
 
 /**
  * Configuration for the DockerSandboxDriver.
@@ -254,7 +259,7 @@ export class DockerSandboxDriver implements SandboxDriver {
 					const labels = JSON.parse(line)
 
 					if (labels['purista.sandboxId']) {
-						sandboxes.push({
+						const parsed = SandboxMetadataSchema.safeParse({
 							sandboxId: labels['purista.sandboxId'],
 							organizationId: labels['purista.organizationId'] || '',
 							projectId: labels['purista.projectId'] || '',
@@ -263,6 +268,9 @@ export class DockerSandboxDriver implements SandboxDriver {
 							createdAt: Number.parseInt(labels['purista.createdAt'] || '0', 10),
 							gitConfigured: labels['purista.gitConfigured'] === 'true',
 						})
+						if (parsed.success) {
+							sandboxes.push(parsed.data)
+						}
 					}
 				} catch (_e) {
 					// Handle cases where label parsing fails

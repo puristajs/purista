@@ -1,11 +1,13 @@
 import { z } from 'zod'
 
+const NonEmptyIdentifierSchema = z.string().min(1)
+
 /**
  * Common payload for sandbox operations requiring a specific sandbox reference.
  * @group Schemas
  */
 export const SandboxPayloadSchema = z.object({
-	sandboxId: z.string().describe('The unique identifier of the sandbox'),
+	sandboxId: NonEmptyIdentifierSchema.describe('The unique identifier of the sandbox'),
 })
 
 /**
@@ -23,20 +25,31 @@ export const BashResultSchema = z.object({
  * @group Schemas
  */
 export const SandboxMetadataSchema = z.object({
-	sandboxId: z.string().describe('The unique identifier of the sandbox'),
-	organizationId: z.string().describe('The organization owning this sandbox'),
-	projectId: z.string().describe('The project reference'),
-	userId: z.string().describe('The user who created the sandbox'),
-	containerName: z.string().describe('The underlying container or VM name'),
-	createdAt: z.number().describe('Timestamp of creation'),
+	sandboxId: NonEmptyIdentifierSchema.describe('The unique identifier of the sandbox'),
+	organizationId: NonEmptyIdentifierSchema.describe('The organization owning this sandbox'),
+	projectId: NonEmptyIdentifierSchema.describe('The project reference'),
+	userId: NonEmptyIdentifierSchema.describe('The user who created the sandbox'),
+	containerName: NonEmptyIdentifierSchema.describe('The underlying container or VM name'),
+	createdAt: z.number().int().nonnegative().describe('Timestamp of creation'),
 	/** Indicates if Git/GitHub was configured */
 	gitConfigured: z.boolean().optional().describe('Flag indicating if Git was initialized'),
+})
+
+/**
+ * Owner tuple for sandbox access control and lookup.
+ * @group Schemas
+ */
+export const SandboxOwnerSchema = z.object({
+	organizationId: NonEmptyIdentifierSchema.describe('The organization owning this sandbox'),
+	projectId: NonEmptyIdentifierSchema.describe('The project reference'),
+	userId: NonEmptyIdentifierSchema.describe('The user who created the sandbox'),
 })
 
 /**
  * Inferred type for Sandbox metadata.
  */
 export type SandboxMetadata = z.infer<typeof SandboxMetadataSchema>
+export type SandboxOwner = z.infer<typeof SandboxOwnerSchema>
 
 /**
  * Interface for sandbox drivers.

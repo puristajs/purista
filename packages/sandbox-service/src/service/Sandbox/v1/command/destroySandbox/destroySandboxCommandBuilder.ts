@@ -1,4 +1,5 @@
 import { HandledError, StatusCode } from '@purista/core'
+import { assertSandboxAccess } from '../../helper/ownership.js'
 import { sandboxServiceBuilder } from '../../SandboxServiceBuilder.js'
 import { DestroySandboxInputSchema, DestroySandboxOutputSchema } from './schema.js'
 
@@ -12,6 +13,7 @@ export const destroySandboxCommandBuilder = sandboxServiceBuilder
 		if (!metadata) {
 			throw new HandledError(StatusCode.NotFound, `Sandbox ${payload.sandboxId} not found in registry`)
 		}
+		assertSandboxAccess(context, metadata)
 		await context.resources.driver.destroySandbox(payload)
 		await context.resources.registry.unregister(payload.sandboxId)
 		return { sandboxId: payload.sandboxId, destroyed: true }

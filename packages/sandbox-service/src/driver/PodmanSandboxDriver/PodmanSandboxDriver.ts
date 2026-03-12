@@ -1,6 +1,11 @@
 import { execa } from 'execa'
 import type { z } from 'zod'
-import type { BashResultSchema, SandboxDriver, SandboxMetadata } from '../../types/SandboxDriver.js'
+import {
+	type BashResultSchema,
+	type SandboxDriver,
+	type SandboxMetadata,
+	SandboxMetadataSchema,
+} from '../../types/SandboxDriver.js'
 
 export interface PodmanSandboxDriverConfig {
 	/** The name of the Podman image to use */
@@ -169,16 +174,17 @@ export class PodmanSandboxDriver implements SandboxDriver {
 		try {
 			const { stdout } = await execa('podman', ['ps', '--filter', 'name=purista-', '--format', '{{json .Labels}}'])
 			const lines = stdout.split('\n').filter(Boolean)
-			return lines.map(line => {
+			return lines.flatMap(line => {
 				const labels = JSON.parse(line)
-				return {
+				const parsed = SandboxMetadataSchema.safeParse({
 					sandboxId: labels['purista.sandboxId'] || '',
 					organizationId: labels['purista.organizationId'] || '',
 					projectId: labels['purista.projectId'] || '',
 					userId: labels['purista.userId'] || '',
 					containerName: this.getContainerName(labels['purista.sandboxId']),
 					createdAt: Number.parseInt(labels['purista.createdAt'] || '0', 10),
-				}
+				})
+				return parsed.success ? [parsed.data] : []
 			})
 		} catch (_error) {
 			return []

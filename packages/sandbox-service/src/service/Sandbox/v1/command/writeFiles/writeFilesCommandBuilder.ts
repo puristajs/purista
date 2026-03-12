@@ -1,4 +1,5 @@
 import { HandledError, StatusCode } from '@purista/core'
+import { assertSandboxAccess } from '../../helper/ownership.js'
 import { sandboxServiceBuilder } from '../../SandboxServiceBuilder.js'
 import { WriteFilesInputSchema, WriteFilesOutputSchema } from './schema.js'
 
@@ -12,6 +13,7 @@ export const writeFilesCommandBuilder = sandboxServiceBuilder
 		if (!metadata) {
 			throw new HandledError(StatusCode.NotFound, `Sandbox ${payload.sandboxId} not found in registry`)
 		}
+		assertSandboxAccess(context, metadata)
 		await context.resources.driver.writeFiles(payload)
 		return { updated: Object.keys(payload.files).length }
 	})

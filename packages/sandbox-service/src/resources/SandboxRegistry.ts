@@ -34,8 +34,9 @@ export class SandboxRegistry {
 	 * @param metadata Full metadata of the sandbox to register.
 	 */
 	async register(metadata: SandboxMetadata): Promise<void> {
-		await this.store.setState(this.getKey(metadata.sandboxId), metadata)
-		await this.store.setState(this.getOwnerIndexKey(metadata), metadata.sandboxId)
+		const parsedMetadata = SandboxMetadataSchema.parse(metadata)
+		await this.store.setState(this.getKey(parsedMetadata.sandboxId), parsedMetadata)
+		await this.store.setState(this.getOwnerIndexKey(parsedMetadata), parsedMetadata.sandboxId)
 	}
 
 	/**
@@ -92,6 +93,14 @@ export class SandboxRegistry {
 			await this.store.removeState(ownerKey)
 			return undefined
 		}
+		if (
+			metadata.organizationId !== owner.organizationId ||
+			metadata.projectId !== owner.projectId ||
+			metadata.userId !== owner.userId
+		) {
+			await this.store.removeState(ownerKey)
+			return undefined
+		}
 		return metadata
 	}
 
@@ -103,10 +112,15 @@ export class SandboxRegistry {
 	 */
 	async reconcile(sandboxes: Array<SandboxMetadata>): Promise<void> {
 		for (const sandbox of sandboxes) {
-			const existing = await this.getMetadata(sandbox.sandboxId)
+			const parsed = SandboxMetadataSchema.safeParse(sandbox)
+			if (!parsed.success) {
+				continue
+			}
+
+			const existing = await this.getMetadata(parsed.data.sandboxId)
 			if (!existing) {
 				// Recovered from infrastructure metadata
-				await this.register(sandbox)
+				await this.register(parsed.data)
 			}
 		}
 	}
