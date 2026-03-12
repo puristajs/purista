@@ -48,7 +48,13 @@ const isProblemDetails = (value: unknown): value is ProblemDetails =>
 
 const stringifyPretty = (value: unknown) => JSON.stringify(value, null, 2)
 
-const normalizeProblemTypeBaseUri = (value: string) => value.replace(/\/+$/, '')
+const normalizeProblemTypeBaseUri = (value: string) => {
+	let end = value.length
+	while (end > 0 && value[end - 1] === '/') {
+		end -= 1
+	}
+	return value.slice(0, end)
+}
 
 const buildProblemTypeUri = (slug: string, config?: ProblemTypeConfig): string => {
 	if (!config?.typeBaseUri) {
