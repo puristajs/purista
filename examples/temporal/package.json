@@ -18,7 +18,7 @@
 		"purista": "purista add"
 	},
 	"dependencies": {
-		"@hono/node-server": "^1.19.9",
+		"@hono/node-server": "^1.19.11",
 		"@hono/swagger-ui": "^0.5.3",
 		"@opentelemetry/exporter-trace-otlp-http": "^0.211.0",
 		"@opentelemetry/sdk-node": "^0.211.0",

@@ -29,7 +29,7 @@
 		"vitest": "^4.0.18"
 	},
 	"dependencies": {
-		"@hono/node-server": "^1.19.9",
+		"@hono/node-server": "^1.19.11",
 		"@opentelemetry/exporter-zipkin": "^2.5.0",
 		"@opentelemetry/sdk-trace-node": "^2.5.0",
 		"@purista/core": "*",
