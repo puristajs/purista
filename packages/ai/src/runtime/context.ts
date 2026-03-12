@@ -748,6 +748,18 @@ type DeclaredAgentBinding = {
 	parameterSchema?: Schema
 }
 
+type ResolvedAgentBinding = {
+	call: (
+		payload: unknown,
+		parameter?: unknown,
+	) => {
+		final(): Promise<unknown>
+		[Symbol.asyncIterator](): AsyncIterator<unknown>
+	}
+	payloadSchema?: Schema
+	parameterSchema?: Schema
+}
+
 const hasErrorEnvelope = (envelopes: AgentProtocolEnvelope[]): boolean =>
 	envelopes.some(envelope => envelope.frame.kind === 'error')
 
@@ -778,7 +790,7 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 	session: SessionHelpers
 	manifest: AgentManifest
 }) => {
-	const resolveDeclaredBinding = (agentName: string, agentVersion: string): DeclaredAgentBinding => {
+	const resolveDeclaredBinding = (agentName: string, agentVersion: string): ResolvedAgentBinding => {
 		const allowed = input.manifest.allowedAgents?.some(
 			agent => agent.agentName === agentName && agent.agentVersion === agentVersion,
 		)
@@ -799,7 +811,11 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 				`Agent ${agentName}.${agentVersion} is declared but no invoke binding is available in the current context`,
 			)
 		}
-		return binding
+		return {
+			call: binding.call,
+			payloadSchema: binding.payloadSchema,
+			parameterSchema: binding.parameterSchema,
+		}
 	}
 
 	const emitStatus = (
