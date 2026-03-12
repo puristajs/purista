@@ -39,7 +39,7 @@ Reference:
 - [Stores](./2_building_business-logic/stores/index.md)
 - [Define resources](./2_building_business-logic/service/define-resources.md)
 - [Exposing commands](./2_building_business-logic/exposing_endpoints/index.md)
-- [Run & Invoke Agents](./2_building_business-logic/agent/running-and-invoking-agents.md)
+- [Run & Invoke Agents](./2_building_business-logic/agent/invocation.md)
 
 ## Phase 3: Runtime architecture
 
@@ -54,7 +54,7 @@ Reference:
 - [Event bridges](./3_eco_system/eventbridges/index.md)
 - [Queue bridges](./3_eco_system/queue_bridges/index.md)
 - [Deploy & Scale](./5_deploy_and_scale/index.md)
-- [Run & Invoke Agents](./2_building_business-logic/agent/running-and-invoking-agents.md)
+- [Run & Invoke Agents](./2_building_business-logic/agent/invocation.md)
 
 ## Phase 4: Production readiness
 
@@ -68,7 +68,7 @@ Reference:
 
 - [OpenTelemetry](./4_open_telemetry/index.md)
 - [Error handling](./2_building_business-logic/error-handling.md)
-- [AI Protocol](./2_building_business-logic/agent/ai-protocol.md)
+- [AI Protocol](./2_building_business-logic/advanced/ai-protocol.md)
 
 ## Release checklist
 

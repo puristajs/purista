@@ -59,8 +59,8 @@ describe('openapi helpers', () => {
 
 	it('creates bad-request error schemas with validation data by default', () => {
 		const schema = getErrorResponseSchema(StatusCode.BadRequest, 'Bad Request')
-		expect(schema.properties?.data).toBeDefined()
-		expect(schema.required).toEqual(['status', 'message'])
+		expect(schema.properties?.errors).toBeDefined()
+		expect(schema.required).toEqual(['type', 'title', 'status', 'detail'])
 	})
 
 	it('adds aggregate stream responses to openapi without request bodies for GET', () => {
@@ -122,6 +122,11 @@ describe('openapi helpers', () => {
 		expect(endpoint?.responses?.['401']).toBeDefined()
 		expect(endpoint?.responses?.['409']).toBeDefined()
 		expect(okResponse.content?.['application/json']?.schema).toEqual(finalPayload)
+		const errorResponse = endpoint?.responses?.['401'] as { content?: Record<string, { schema?: unknown }> }
+		expect(errorResponse.content?.['application/problem+json']?.schema).toEqual({
+			$ref: '#/components/schemas/error_401_schema',
+		})
+		expect(errorResponse.content?.['text/markdown']?.schema).toEqual({ type: 'string' })
 	})
 
 	it('adds streaming SSE response schema with protocol metadata', () => {

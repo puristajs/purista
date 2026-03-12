@@ -166,6 +166,24 @@ describe('httpserver integration test', () => {
 			await expect(client.get(`${apiMountPath}/v1/aggregate-error`)).rejects.toThrowError('Internal Server Error')
 		})
 
+		it('returns RFC 9457 JSON and negotiated markdown for HTTP errors', async () => {
+			const jsonResponse = await fetch(`http://127.0.0.1:${port}${apiMountPath}/v1/unknown`)
+			expect(jsonResponse.status).toBe(404)
+			expect(jsonResponse.headers.get('content-type')).toContain('application/problem+json')
+			await expect(jsonResponse.json()).resolves.toMatchObject({
+				title: 'Not Found',
+				status: 404,
+				detail: 'Route not found',
+			})
+
+			const markdownResponse = await fetch(`http://127.0.0.1:${port}${apiMountPath}/v1/unknown`, {
+				headers: { accept: 'text/markdown' },
+			})
+			expect(markdownResponse.status).toBe(404)
+			expect(markdownResponse.headers.get('content-type')).toContain('text/markdown')
+			await expect(markdownResponse.text()).resolves.toContain('# Not Found')
+		})
+
 		it('documents aggregate stream endpoint as application/json', async () => {
 			const openApi = await client.get<OpenAPIObject>(`${apiMountPath}/openapi.json`)
 			const endpoint = openApi.paths?.[`${apiMountPath}/v1/aggregate-success`]
@@ -177,6 +195,15 @@ describe('httpserver integration test', () => {
 					: undefined
 			expect(responseContent?.['application/json']).toBeDefined()
 			expect(responseContent?.['text/event-stream']).toBeUndefined()
+			const pingEndpoint = openApi.paths?.[`${apiMountPath}/v1/ping`]
+			const pingGetOp = pingEndpoint?.get
+			const errorResponse = pingGetOp?.responses?.['400']
+			const errorContent =
+				errorResponse && typeof errorResponse === 'object' && 'content' in errorResponse
+					? (errorResponse.content as any)
+					: undefined
+			expect(errorContent?.['application/problem+json']).toBeDefined()
+			expect(errorContent?.['text/markdown']).toBeDefined()
 		})
 	})
 })

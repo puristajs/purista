@@ -28,6 +28,11 @@ import { OpenApiBuilder } from 'openapi3-ts/oas31'
 
 import { addPathToOpenApi } from '../../../helper/addPathToOpenApi.js'
 import {
+	negotiateProblemRepresentation,
+	renderProblemDetailsMarkdown,
+	toProblemDetails,
+} from '../../../helper/problemDetails.js'
+import {
 	collectAggregateStreamResult,
 	encodeProtocolSseEvent,
 	isProtocolSseEvent,
@@ -171,6 +176,26 @@ export class HonoServiceClass<
 		return this
 	}
 
+	private sendProblemResponse(
+		c: Parameters<Handler>[0],
+		error: unknown,
+		statusCode?: StatusCode | ContentfulStatusCode,
+	) {
+		const problem = toProblemDetails(error, {
+			statusCode,
+			traceId: c.get('traceId') ?? c.req.header(this.config.traceHeaderField),
+			instance: c.req.path,
+		})
+		const representation = negotiateProblemRepresentation(c.req.header('accept'))
+		c.header('vary', 'accept')
+		if (representation === 'markdown') {
+			c.header('content-type', 'text/markdown; charset=utf-8')
+			return c.body(renderProblemDetailsMarkdown(problem), problem.status as ContentfulStatusCode)
+		}
+		c.header('content-type', 'application/problem+json; charset=utf-8')
+		return c.body(JSON.stringify(problem), problem.status as ContentfulStatusCode)
+	}
+
 	async start() {
 		if (this.config.enableHealth) {
 			this.openApi.addPath(this.config.healthPath, {
@@ -201,13 +226,13 @@ export class HonoServiceClass<
 					if (!isEventBridgeReady) {
 						const err = new HandledError(StatusCode.InternalServerError, 'event bridge not ready')
 						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, err.errorCode)
-						return c.json(err.getErrorResponse(), StatusCode.InternalServerError)
+						return this.sendProblemResponse(c, err, StatusCode.InternalServerError)
 					}
 
 					if (!this.isAvailable) {
 						const err = new HandledError(StatusCode.ServiceUnavailable, 'server not available')
 						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, err.errorCode)
-						return c.json(err.getErrorResponse(), StatusCode.ServiceUnavailable)
+						return this.sendProblemResponse(c, err, StatusCode.ServiceUnavailable)
 					}
 
 					try {
@@ -226,7 +251,7 @@ export class HonoServiceClass<
 							message: (err as Error).message,
 						})
 						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.InternalServerError)
-						return c.json(HandledError.fromError(err).getErrorResponse(), StatusCode.InternalServerError)
+						return this.sendProblemResponse(c, HandledError.fromError(err), StatusCode.InternalServerError)
 					}
 				})
 			})
@@ -272,7 +297,7 @@ export class HonoServiceClass<
 				})
 
 				this.logger.debug({ path: c.req.path, ...span.spanContext(), customTraceId: c.get('traceId') }, 'not found')
-				return c.json(err.getErrorResponse(), StatusCode.NotFound)
+				return this.sendProblemResponse(c, err, StatusCode.NotFound)
 			})
 		})
 
@@ -290,18 +315,18 @@ export class HonoServiceClass<
 
 				if (err instanceof HandledError) {
 					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, err.errorCode)
-					return c.json(err.getErrorResponse(), err.errorCode as ContentfulStatusCode)
+					return this.sendProblemResponse(c, err, err.errorCode as ContentfulStatusCode)
 				}
 
 				this.logger.error({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, 'General error handler')
 
 				if (err instanceof HTTPException) {
 					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, err.status)
-					return c.json(HandledError.fromError(err, err.status as StatusCode).getErrorResponse(), err.status)
+					return this.sendProblemResponse(c, HandledError.fromError(err, err.status as StatusCode), err.status)
 				}
 
 				span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.InternalServerError)
-				return c.json(new UnhandledError().getErrorResponse(), StatusCode.InternalServerError)
+				return this.sendProblemResponse(c, new UnhandledError(), StatusCode.InternalServerError)
 			})
 		})
 
@@ -415,7 +440,7 @@ export class HonoServiceClass<
 						} catch (error) {
 							const err = HandledError.fromError(error, StatusCode.BadRequest)
 							this.logger.error({ err, contentType, path: c.req.path, method }, 'Failed to decode body')
-							return c.json(err.getErrorResponse(), err.errorCode as ContentfulStatusCode)
+							return this.sendProblemResponse(c, err, err.errorCode as ContentfulStatusCode)
 						}
 					}
 
@@ -443,7 +468,11 @@ export class HonoServiceClass<
 							span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, aggregateResult.statusCode)
 							if (aggregateResult.status === 'error') {
 								span.setStatus({ code: SpanStatusCode.ERROR })
-								return c.json(aggregateResult.payload, aggregateResult.statusCode as ContentfulStatusCode)
+								return this.sendProblemResponse(
+									c,
+									aggregateResult.payload,
+									aggregateResult.statusCode as ContentfulStatusCode,
+								)
 							}
 
 							span.setStatus({ code: SpanStatusCode.OK })
@@ -565,7 +594,7 @@ export class HonoServiceClass<
 						this.logger.debug({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, err.message)
 
 						span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, err.errorCode)
-						return c.json(err.getErrorResponse(), err.errorCode as ContentfulStatusCode)
+						return this.sendProblemResponse(c, err, err.errorCode as ContentfulStatusCode)
 					}
 
 					const unhandledError = new UnhandledError()
@@ -573,7 +602,7 @@ export class HonoServiceClass<
 					span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, unhandledError.errorCode)
 
 					this.logger.error({ err, ...span.spanContext(), customTraceId: c.get('traceId') }, 'unhandled error')
-					return c.json(unhandledError.getErrorResponse(), unhandledError.errorCode)
+					return this.sendProblemResponse(c, unhandledError, unhandledError.errorCode)
 				}
 			})
 		}

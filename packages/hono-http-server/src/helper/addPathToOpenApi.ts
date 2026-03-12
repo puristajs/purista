@@ -93,9 +93,14 @@ export const addPathToOpenApi = (
 			[`${code}`]: {
 				description: getErrorName(code),
 				content: {
-					'application/json': {
+					'application/problem+json': {
 						schema: {
 							$ref: `#/components/schemas/error_${code}_schema`,
+						},
+					},
+					'text/markdown': {
+						schema: {
+							type: 'string',
 						},
 					},
 				},
