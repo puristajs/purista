@@ -1,6 +1,6 @@
 import type { z } from 'zod'
-import { DockerSandboxDriver, type DockerSandboxDriverConfig } from '../DockerSandboxDriver/DockerSandboxDriver.js'
 import type { BashResultSchema, SandboxDriver, SandboxMetadata } from '../../types/SandboxDriver.js'
+import { DockerSandboxDriver, type DockerSandboxDriverConfig } from '../DockerSandboxDriver/DockerSandboxDriver.js'
 
 /**
  * Configuration for AppleContainerSandboxDriver.
@@ -44,7 +44,11 @@ export class AppleContainerSandboxDriver implements SandboxDriver {
 		await this.dockerCompatDriver.destroySandbox(params)
 	}
 
-	async executeBash(params: { sandboxId: string; command: string; cwd?: string }): Promise<z.infer<typeof BashResultSchema>> {
+	async executeBash(params: {
+		sandboxId: string
+		command: string
+		cwd?: string
+	}): Promise<z.infer<typeof BashResultSchema>> {
 		return await this.dockerCompatDriver.executeBash(params)
 	}
 
@@ -60,4 +64,3 @@ export class AppleContainerSandboxDriver implements SandboxDriver {
 		return await this.dockerCompatDriver.scanRunningSandboxes()
 	}
 }
-

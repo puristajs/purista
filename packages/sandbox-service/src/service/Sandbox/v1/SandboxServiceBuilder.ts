@@ -1,6 +1,6 @@
 import { ServiceBuilder } from '@purista/core'
-import type { SandboxDriver } from '../../../types/SandboxDriver.js'
 import type { SandboxRegistry } from '../../../resources/SandboxRegistry.js'
+import type { SandboxDriver } from '../../../types/SandboxDriver.js'
 import { SandboxService } from './SandboxService.js'
 import { SandboxServiceConfigSchema } from './SandboxServiceConfig.js'
 

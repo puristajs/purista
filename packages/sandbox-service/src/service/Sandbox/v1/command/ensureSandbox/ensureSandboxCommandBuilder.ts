@@ -12,10 +12,7 @@ const SandboxStartedEventSchema = z.object({
 })
 
 export const ensureSandboxCommandBuilder: any = sandboxServiceBuilder
-	.getCommandBuilder(
-		'ensureSandbox',
-		'Returns an existing healthy sandbox for owner tuple or creates one if missing',
-	)
+	.getCommandBuilder('ensureSandbox', 'Returns an existing healthy sandbox for owner tuple or creates one if missing')
 	.addPayloadSchema(EnsureSandboxInputSchema)
 	.addOutputSchema(EnsureSandboxOutputSchema)
 	.canEmit('SandboxStarted', SandboxStartedEventSchema)
@@ -72,4 +69,3 @@ export const ensureSandboxCommandBuilder: any = sandboxServiceBuilder
 			created: true,
 		}
 	})
-

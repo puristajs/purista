@@ -1,7 +1,7 @@
 import type {
 	AgentInvocation,
-	AgentProtocolResponse,
 	AgentInvokeList,
+	AgentProtocolResponse,
 	CommandFunctionContext,
 	EventBridge,
 	InferIn,
@@ -9,7 +9,7 @@ import type {
 	StreamFunctionContext,
 	StreamWriter,
 } from '@purista/core'
-import { agentProtocolPayloadSchema, extendApi, HandledError, ServiceBuilder, StatusCode } from '@purista/core'
+import { type agentProtocolPayloadSchema, extendApi, HandledError, ServiceBuilder, StatusCode } from '@purista/core'
 import { z } from 'zod/v4'
 
 import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
@@ -37,9 +37,6 @@ type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
 	payloadSchema?: Payload
 	parameterSchema?: Parameter
 }
-
-const isAgentInvokeConfig = (value: unknown): value is AgentInvokeConfig<Schema, Schema> =>
-	typeof value === 'object' && value !== null && ('payloadSchema' in value || 'parameterSchema' in value)
 
 /**
  * Supported model call kinds emitted by the AgentBuilder runtime wrappers.
@@ -578,10 +575,7 @@ export class AgentBuilder<
 				Record<
 					Version,
 					{
-						call: (
-							payload: InferIn<Payload>,
-							parameter?: InferIn<Parameter>,
-						) => AgentInvocation<AgentProtocolResponse>
+						call: (payload: InferIn<Payload>, parameter?: InferIn<Parameter>) => AgentInvocation<AgentProtocolResponse>
 					}
 				>
 			>

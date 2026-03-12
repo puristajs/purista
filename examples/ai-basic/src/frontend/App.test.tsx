@@ -29,9 +29,7 @@ vi.mock('@ai-sdk/react', () => ({
 }))
 
 vi.mock('ai', () => ({
-	DefaultChatTransport: class DefaultChatTransport {
-		constructor(_options?: unknown) {}
-	},
+	DefaultChatTransport: class DefaultChatTransport {},
 }))
 
 vi.mock('./components/ai-elements/conversation', () => ({

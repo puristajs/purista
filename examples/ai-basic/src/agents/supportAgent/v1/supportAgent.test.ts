@@ -121,12 +121,6 @@ describe('supportAgent', () => {
 				.map(frame => frame.content)
 				.at(-1)
 
-			const toolFrames = envelopes
-				.map(envelope => envelope.frame)
-				.filter(
-					(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'tool' }> => frame.kind === 'tool',
-				)
-
 			expect(
 				envelopes.some(
 					envelope =>

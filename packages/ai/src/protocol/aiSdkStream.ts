@@ -144,12 +144,24 @@ const getString = (value: unknown): string | undefined =>
 
 const isLikelyUrl = (value: string) => /^https?:\/\/\S+$/i.test(value)
 
+const trimDash = (value: string): string => {
+	let start = 0
+	let end = value.length
+	while (start < end && value[start] === '-') {
+		start += 1
+	}
+	while (end > start && value[end - 1] === '-') {
+		end -= 1
+	}
+	return value.slice(start, end)
+}
+
 const toUiDataType = (artifactId: string) => {
-	const normalized = artifactId
+	const collapsed = artifactId
 		.trim()
 		.toLowerCase()
-		.replace(/[^a-z0-9-]+/g, '-')
-		.replace(/^-+|-+$/g, '')
+		.replaceAll(/[^a-z0-9-]+/g, '-')
+	const normalized = trimDash(collapsed)
 	return `data-${normalized || 'artifact'}` as const
 }
 

@@ -1,10 +1,10 @@
 /* @jsxRuntime automatic */
 
+import { type UIMessage, useChat } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
 import { BotIcon, MessageSquareIcon, SparklesIcon, WorkflowIcon, WrenchIcon, XCircleIcon } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Streamdown } from 'streamdown'
-import { useChat, type UIMessage } from '@ai-sdk/react'
-import { DefaultChatTransport } from 'ai'
 
 import {
 	Conversation,
@@ -328,7 +328,13 @@ export const App = () => {
 	const sessionIdRef = useRef(sessionId)
 	const responseFormatRef = useRef(responseFormat)
 
-	const { messages: uiMessages, status: uiStatus, error: uiError, sendMessage, setMessages: setUiMessages } = useChat({
+	const {
+		messages: uiMessages,
+		status: uiStatus,
+		error: uiError,
+		sendMessage,
+		setMessages: setUiMessages,
+	} = useChat({
 		transport: new DefaultChatTransport({
 			api: '/api/v1/agents/supportAgent',
 			prepareSendMessagesRequest: ({ messages, body }) => {

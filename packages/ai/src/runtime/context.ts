@@ -737,7 +737,10 @@ export type AgentInvocationOptions = {
 }
 
 type DeclaredAgentBinding = {
-	call?: (payload: unknown, parameter?: unknown) => {
+	call?: (
+		payload: unknown,
+		parameter?: unknown,
+	) => {
 		final(): Promise<unknown>
 		[Symbol.asyncIterator](): AsyncIterator<unknown>
 	}
@@ -786,10 +789,8 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 			)
 		}
 
-		const invokeAgentApi = (input.serviceContext.invokeAgent ?? ({} as EmptyObject)) as AgentInvokes & Record<
-			string,
-			Record<string, DeclaredAgentBinding> | undefined
-		>
+		const invokeAgentApi = (input.serviceContext.invokeAgent ?? ({} as EmptyObject)) as AgentInvokes &
+			Record<string, Record<string, DeclaredAgentBinding> | undefined>
 		const versionApi = invokeAgentApi[agentName]
 		const binding = versionApi?.[agentVersion]
 		if (!binding?.call) {
@@ -973,6 +974,7 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 							return undefined
 						}
 						const binding = resolveDeclaredBinding(prop, versionProp)
+						const call = binding.call
 						return {
 							call: (payload: InferIn<Schema>, parameter?: InferIn<Schema>) =>
 								instrumentInvocation(
@@ -981,10 +983,7 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 										agentVersion: versionProp,
 										payload,
 									},
-									binding.call!(
-										withSessionIdInPayload(payload, input.session.identity.baseSessionId),
-										parameter ?? {},
-									),
+									call(withSessionIdInPayload(payload, input.session.identity.baseSessionId), parameter ?? {}),
 								),
 							payloadSchema: binding.payloadSchema,
 							parameterSchema: binding.parameterSchema,

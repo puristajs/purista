@@ -76,7 +76,11 @@ export class SandboxRegistry {
 	/**
 	 * Returns metadata for an existing sandbox bound to the same owner tuple.
 	 */
-	async findByOwner(owner: { organizationId: string; projectId: string; userId: string }): Promise<SandboxMetadata | undefined> {
+	async findByOwner(owner: {
+		organizationId: string
+		projectId: string
+		userId: string
+	}): Promise<SandboxMetadata | undefined> {
 		const ownerKey = this.getOwnerIndexKey(owner)
 		const ownerEntry = await this.store.getState(ownerKey)
 		const sandboxId = ownerEntry[ownerKey]
