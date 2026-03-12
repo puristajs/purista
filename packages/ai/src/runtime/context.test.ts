@@ -220,7 +220,7 @@ describe('runtime context helpers', () => {
 
 		await context.session.save({ conversationId: 's1', data: { value: 1 }, updatedAt: Date.now() })
 		const session = await context.session.load('s1')
-		expect(session?.conversationId).toBe('supportAgent:1:tenant-1:principal-1:s1')
+		expect(session?.conversationId).toBe('s1')
 
 		const docs = await context.knowledge.query('default', 'Reset')
 		expect(docs).toHaveLength(1)
@@ -281,7 +281,7 @@ describe('runtime context helpers', () => {
 
 		await context.session.save({ data: { value: 'implicit' } })
 		const session = await context.session.load()
-		expect(session?.conversationId).toBe('supportAgent:1:tenant-1:principal-1:chat-42')
+		expect(session?.conversationId).toBe('chat-42')
 		expect(context.session.identity.baseSessionId).toBe('chat-42')
 		expect(context.session.resolveSessionId()).toBe('supportAgent:1:tenant-1:principal-1:chat-42')
 	})
@@ -675,5 +675,104 @@ describe('runtime context helpers', () => {
 			expect(messageFrames[0].content).toBe('chunk')
 			expect(messageFrames[1].content).toBe('final')
 		}
+	})
+
+	it('passes tenantId and principalId to conversation store', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const conversationStore = {
+			load: vi.fn().mockResolvedValue(undefined),
+			save: vi.fn().mockResolvedValue(undefined),
+			delete: vi.fn().mockResolvedValue(undefined),
+		}
+		const knowledgeAdapter = new InMemoryKnowledgeAdapter()
+
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: conversationStore as any,
+			knowledgeAdapters: { default: knowledgeAdapter },
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await context.session.save({ conversationId: 's1', data: { value: 1 } })
+		expect(conversationStore.save).toHaveBeenCalledWith(expect.objectContaining({ conversationId: 's1' }), {
+			agentName: 'supportAgent',
+			agentVersion: '1',
+			tenantId: 'tenant-1',
+			principalId: 'principal-1',
+		})
+
+		await context.session.load('s1')
+		expect(conversationStore.load).toHaveBeenCalledWith('s1', {
+			agentName: 'supportAgent',
+			agentVersion: '1',
+			tenantId: 'tenant-1',
+			principalId: 'principal-1',
+		})
+
+		await context.session.delete('s1')
+		expect(conversationStore.delete).toHaveBeenCalledWith('s1', {
+			agentName: 'supportAgent',
+			agentVersion: '1',
+			tenantId: 'tenant-1',
+			principalId: 'principal-1',
+		})
+	})
+
+	it('isolates session state by tenant while keeping the same logical conversation id', async () => {
+		const store = new InMemoryConversationStore()
+		const tenantAContext = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello', sessionId: 'shared' },
+			parameter: {},
+			conversationStore: store,
+			knowledgeAdapters: {},
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+		const tenantBContext = createAgentHandlerContext({
+			serviceContext: {
+				...baseServiceContext,
+				message: {
+					...baseMessage,
+					tenantId: 'tenant-2',
+				},
+			},
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello', sessionId: 'shared' },
+			parameter: {},
+			conversationStore: store,
+			knowledgeAdapters: {},
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await tenantAContext.session.save({ data: { owner: 'tenant-a' } })
+		await tenantBContext.session.save({ data: { owner: 'tenant-b' } })
+
+		await expect(tenantAContext.session.load()).resolves.toMatchObject({
+			conversationId: 'shared',
+			data: { owner: 'tenant-a' },
+		})
+		await expect(tenantBContext.session.load()).resolves.toMatchObject({
+			conversationId: 'shared',
+			data: { owner: 'tenant-b' },
+		})
 	})
 })

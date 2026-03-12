@@ -76,10 +76,16 @@ export class InMemoryKnowledgeAdapter implements KnowledgeAdapter {
 	private readonly documents = new Map<string, { document: KnowledgeDocument; scopeKey?: string }>()
 
 	private getScopeKey(scope?: KnowledgeScope) {
-		if (!scope?.tenantId && !scope?.principalId && !scope?.agentName && !scope?.agentVersion) {
+		if (!scope?.tenantId && !scope?.principalId && !scope?.agentName && !scope?.agentVersion && !scope?.sessionId) {
 			return undefined
 		}
-		return [scope.tenantId ?? '', scope.principalId ?? '', scope.agentName ?? '', scope.agentVersion ?? ''].join(':')
+		return [
+			scope.tenantId ?? '',
+			scope.principalId ?? '',
+			scope.agentName ?? '',
+			scope.agentVersion ?? '',
+			scope.sessionId ?? '',
+		].join(':')
 	}
 
 	async upsert(request: KnowledgeUpsertRequest) {

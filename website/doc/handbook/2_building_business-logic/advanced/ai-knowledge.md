@@ -19,6 +19,7 @@ const docs = await context.knowledge.supportFaq.query(payload.prompt, 3)
 The query is automatically scoped by:
 - `tenantId` (Multi-tenancy separation)
 - `principalId` (User separation)
+- `agentName` and `agentVersion` (Agent-level separation)
 - `sessionId` (Conversation separation)
 
 This ensures that one user's private data is never "leaked" to another user's LLM prompt.
@@ -30,12 +31,15 @@ The scope is automatically resolved by the agent runtime before calling the adap
 ```ts
 async query(request: KnowledgeQueryRequest): Promise<KnowledgeDocument[]> {
   const { query, limit, scope } = request
-  // scope contains tenantId, principalId, sessionId
+  // scope contains tenantId, principalId, agentName, agentVersion, sessionId
   return this.vectorDb.search(query, {
     limit,
     filter: {
       tenantId: scope.tenantId,
-      principalId: scope.principalId
+      principalId: scope.principalId,
+      agentName: scope.agentName,
+      agentVersion: scope.agentVersion,
+      sessionId: scope.sessionId,
     }
   })
 }

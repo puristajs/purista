@@ -24,6 +24,7 @@ import type {
 	ConversationStore,
 	ConversationStoreRecord,
 	ConversationStoreRecordData,
+	ConversationStoreScope,
 } from '../memory/conversationStore.js'
 import {
 	agentProtocolEnvelopeSchema,
@@ -457,6 +458,13 @@ const createSessionHelpers = (store: ConversationStore, input: SessionIdentityIn
 		baseSessionId,
 	}
 
+	const storeScope: ConversationStoreScope = {
+		agentName: identity.agentName,
+		agentVersion: identity.agentVersion,
+		tenantId: identity.tenantId,
+		principalId: identity.principalId,
+	}
+
 	const resolveId = (sessionId?: string) =>
 		createScopedSessionId({
 			agentName: identity.agentName,
@@ -467,14 +475,17 @@ const createSessionHelpers = (store: ConversationStore, input: SessionIdentityIn
 		})
 
 	return {
-		load: sessionId => store.load(resolveId(sessionId)),
+		load: sessionId => store.load(sessionId ?? identity.baseSessionId, storeScope),
 		save: record =>
-			store.save({
-				conversationId: resolveId(record.conversationId),
-				data: record.data,
-				updatedAt: record.updatedAt ?? Date.now(),
-			}),
-		delete: sessionId => store.delete(resolveId(sessionId)),
+			store.save(
+				{
+					conversationId: record.conversationId || identity.baseSessionId,
+					data: record.data,
+					updatedAt: record.updatedAt ?? Date.now(),
+				},
+				storeScope,
+			),
+		delete: sessionId => store.delete(sessionId ?? identity.baseSessionId, storeScope),
 		resolveSessionId: resolveId,
 		identity,
 	}

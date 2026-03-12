@@ -1,8 +1,8 @@
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 import type { Logger } from '@purista/core'
 import { PuristaSpanName } from '@purista/core'
-import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
-import type { ConversationStore } from '../memory/conversationStore.js'
+import type { KnowledgeAdapter, KnowledgeScope } from '../knowledge/adapters/inMemoryAdapter.js'
+import type { ConversationStore, ConversationStoreScope } from '../memory/conversationStore.js'
 import type { ConversationHistory } from '../memory/historyHelpers.js'
 import { appendMessage, summarizeHistory, trimHistory } from '../memory/historyHelpers.js'
 import type { ModelProvider, ProviderRequest } from '../providers/runtime/ModelProvider.js'
@@ -35,6 +35,8 @@ export type AgentExecutionInput = {
 	prompt: string
 	context?: string
 	metadata?: ProviderRequest['metadata']
+	tenantId?: string
+	principalId?: string
 }
 
 /**
@@ -83,10 +85,11 @@ export class AgentExecutor {
 		const generate = provider.generate
 
 		const startedAt = Date.now()
-		const sessionRecord = await this.options.conversationStore.load(input.sessionId)
+		const conversationScope = this.createConversationScope(input)
+		const sessionRecord = await this.options.conversationStore.load(input.sessionId, conversationScope)
 		const existingHistory = (sessionRecord?.data.history as ConversationHistory | undefined) ?? []
 		const history = trimHistory(existingHistory, this.maxHistoryFrames)
-		const knowledgeContext = await this.collectKnowledge(manifest, input.prompt)
+		const knowledgeContext = await this.collectKnowledge(manifest, input)
 		const providerContext = this.composeContext(input.context, history, knowledgeContext)
 
 		const response = await this.options.startActiveSpan(
@@ -107,15 +110,18 @@ export class AgentExecutor {
 			timestamp: Date.now(),
 		})
 
-		await this.options.conversationStore.save({
-			conversationId: input.sessionId,
-			data: {
-				...(sessionRecord?.data ?? {}),
-				lastOutput: response.output,
-				history: updatedHistory,
+		await this.options.conversationStore.save(
+			{
+				conversationId: input.sessionId,
+				data: {
+					...(sessionRecord?.data ?? {}),
+					lastOutput: response.output,
+					history: updatedHistory,
+				},
+				updatedAt: Date.now(),
 			},
-			updatedAt: Date.now(),
-		})
+			conversationScope,
+		)
 
 		return {
 			output: response.output,
@@ -124,12 +130,32 @@ export class AgentExecutor {
 		}
 	}
 
-	private async collectKnowledge(manifest: AgentManifest, prompt: string) {
+	private createConversationScope(input: AgentExecutionInput): ConversationStoreScope {
+		return {
+			agentName: this.options.manifest.agentName,
+			agentVersion: this.options.manifest.agentVersion,
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+		}
+	}
+
+	private createKnowledgeScope(input: AgentExecutionInput): KnowledgeScope {
+		return {
+			agentName: this.options.manifest.agentName,
+			agentVersion: this.options.manifest.agentVersion,
+			tenantId: input.tenantId,
+			principalId: input.principalId,
+			sessionId: input.sessionId,
+		}
+	}
+
+	private async collectKnowledge(manifest: AgentManifest, input: AgentExecutionInput) {
 		if (!manifest.knowledge?.length) {
 			return []
 		}
 
 		const snippets: string[] = []
+		const knowledgeScope = this.createKnowledgeScope(input)
 
 		for (const entry of manifest.knowledge) {
 			const adapter = this.options.knowledgeAdapters[entry.adapterName]
@@ -141,8 +167,9 @@ export class AgentExecutor {
 				continue
 			}
 			const documents = await adapter.query({
-				query: prompt,
+				query: input.prompt,
 				limit: 5,
+				scope: knowledgeScope,
 				options: entry.options,
 			})
 			for (const doc of documents) {

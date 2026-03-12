@@ -36,6 +36,8 @@ export const enqueueRunCommandBuilder = aiOrchestratorServiceBuilder
 				prompt: payload.prompt,
 				sessionId: payload.sessionId ?? context.message.id ?? `session-${Date.now()}`,
 				context: payload.context,
+				tenantId: context.message.tenantId,
+				principalId: context.message.principalId,
 				metadata: payload.metadata,
 			},
 			{},
