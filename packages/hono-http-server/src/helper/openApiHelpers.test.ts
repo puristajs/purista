@@ -69,6 +69,10 @@ describe('openapi helpers', () => {
 			info: { title: 'test', version: '1.0.0' },
 			components: { securitySchemes: { bearer: { type: 'http', scheme: 'bearer' } } },
 		})
+		const finalPayload = {
+			type: 'object',
+			properties: { message: { type: 'string' } },
+		} as const
 
 		const metadata = {
 			expose: {
@@ -86,10 +90,7 @@ describe('openapi helpers', () => {
 					type: 'object',
 					properties: { partial: { type: 'string' } },
 				},
-				finalPayload: {
-					type: 'object',
-					properties: { message: { type: 'string' } },
-				},
+				finalPayload,
 				http: {
 					method: 'GET',
 					path: 'aggregate',
@@ -120,7 +121,7 @@ describe('openapi helpers', () => {
 		expect(endpoint?.parameters?.some(param => 'name' in param && param.name === 'x-trace-id')).toBe(true)
 		expect(endpoint?.responses?.['401']).toBeDefined()
 		expect(endpoint?.responses?.['409']).toBeDefined()
-		expect(okResponse.content?.['application/json']?.schema).toEqual(metadata.expose.finalPayload)
+		expect(okResponse.content?.['application/json']?.schema).toEqual(finalPayload)
 	})
 
 	it('adds streaming SSE response schema with protocol metadata', () => {

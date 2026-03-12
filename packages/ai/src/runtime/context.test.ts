@@ -6,6 +6,13 @@ import { createProtocolEnvelope } from '../protocol/helpers.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
 import { createAgentHandlerContext, createProtocolBuffer } from './context.js'
 
+const childPayload = (prompt: string) => ({
+	message: prompt,
+	history: [],
+	attachments: [],
+	prompt,
+})
+
 const baseMessage = {
 	id: 'msg-1',
 	correlationId: 'corr-1',
@@ -245,7 +252,9 @@ describe('runtime context helpers', () => {
 		expect(embed).toHaveBeenCalledOnce()
 		expect(rerank).toHaveBeenCalledOnce()
 		context.stream.sendReasoning('reasoning note')
-		await context.emit('agent.updated', { status: 'ok' })
+		await (context.emit as (eventName: string, payload: { status: string }) => Promise<void>)('agent.updated', {
+			status: 'ok',
+		})
 		expect(baseServiceContext.emit).toHaveBeenCalledWith('agent.updated', { status: 'ok' })
 
 		const envelopes = buffer.toEnvelopes()
@@ -385,19 +394,23 @@ describe('runtime context helpers', () => {
 		const envelopes = await context.agents.invoke({
 			agentName: 'childAgent',
 			agentVersion: '1',
-			payload: { prompt: 'go' },
+			payload: childPayload('go'),
 		})
 		expect(envelopes).toHaveLength(1)
 
-		const chainedInvocation = context.agents.invoke.childAgent?.['1']?.call({ prompt: 'go-again' })
-		expect(chainedInvocation).toBeDefined()
-		const chainedEnvelopes = await chainedInvocation?.final()
+		const childAgentApi = context.agents.invoke.childAgent?.['1']
+		expect(childAgentApi).toBeDefined()
+		if (!childAgentApi || typeof childAgentApi.call !== 'function') {
+			throw new Error('expected child agent api to be defined')
+		}
+		const chainedInvocation = childAgentApi.call(childPayload('go-again'))
+		const chainedEnvelopes = await chainedInvocation.final()
 		expect(chainedEnvelopes).toHaveLength(1)
 
 		const text = await context.agents.runText({
 			agentName: 'childAgent',
 			agentVersion: '1',
-			payload: { prompt: 'go' },
+			payload: childPayload('go'),
 		})
 		expect(text).toBe('child result')
 
@@ -411,7 +424,7 @@ describe('runtime context helpers', () => {
 		const obj = await context.agents.runObject<{ ok: boolean }>({
 			agentName: 'childAgent',
 			agentVersion: '1',
-			payload: { prompt: 'go' },
+			payload: childPayload('go'),
 		})
 		expect(obj).toEqual({ ok: true })
 		expect(baseEventBridge.invoke).toHaveBeenCalled()
@@ -489,7 +502,12 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		const invocation = context.agents.invoke.childAgent['1'].call({ prompt: 'typed' })
+		const childAgentApi = context.agents.invoke.childAgent['1']
+		expect(childAgentApi).toBeDefined()
+		if (!childAgentApi || typeof childAgentApi.call !== 'function') {
+			throw new Error('expected child agent api to be defined')
+		}
+		const invocation = childAgentApi.call(childPayload('typed'))
 		await invocation.final()
 
 		const toolFrames = buffer

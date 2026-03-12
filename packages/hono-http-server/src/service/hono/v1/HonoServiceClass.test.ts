@@ -104,7 +104,7 @@ describe('HonoServiceClass', () => {
 
 	it('throws when openStream is used without stream-capable event bridge', async () => {
 		const server = await createServer()
-		;(server.eventBridge as { openStream?: unknown }).openStream = undefined
+		;(server as unknown as { eventBridge: { openStream?: unknown } }).eventBridge.openStream = undefined
 
 		await expect(
 			server.openStream(

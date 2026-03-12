@@ -31,7 +31,7 @@ export const aggregateSuccessStreamBuilder = theServiceServiceBuilder
 		}),
 	)
 	.setStreamFunction(async function (_context, _payload, _parameter, writer) {
-		const envelope = {
+		const envelope: z.infer<typeof envelopeSchema> = {
 			version: 'purista.ai/1.0',
 			messageId: 'msg-success',
 			conversationId: 'conversation-success',

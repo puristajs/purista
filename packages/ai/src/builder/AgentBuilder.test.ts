@@ -5,6 +5,16 @@ import { z } from 'zod/v4'
 import type { ModelProvider, ProviderRequest } from '../providers/runtime/ModelProvider.js'
 import { AgentBuilder } from './AgentBuilder.js'
 
+const findLastFinalMessage = (frames: Array<{ kind: string; final?: boolean; content?: unknown }>) => {
+	for (let index = frames.length - 1; index >= 0; index -= 1) {
+		const frame = frames[index]
+		if (frame?.kind === 'message' && frame.final === true) {
+			return frame
+		}
+	}
+	return undefined
+}
+
 class DeterministicTextProvider implements ModelProvider {
 	readonly name = 'deterministic-text'
 	readonly capabilities = { text: true, stream: true }
@@ -548,9 +558,7 @@ describe('AgentBuilder', () => {
 		await parentInstance.start()
 		try {
 			const result = await parentInstance.invoke({ payload: {} })
-			const finalMessage = result.envelopes
-				.map(envelope => envelope.frame)
-				.findLast(frame => frame.kind === 'message' && frame.final === true)
+			const finalMessage = findLastFinalMessage(result.envelopes.map(envelope => envelope.frame))
 			expect(finalMessage && 'content' in finalMessage ? finalMessage.content : '').toBe('parent:child-response')
 		} finally {
 			await parentInstance.stop()
@@ -562,7 +570,9 @@ describe('AgentBuilder', () => {
 		const definition = new AgentBuilder({ agentName: 'emitAgent', agentVersion: '1' })
 			.canEmit('agent.finished', z.object({ ok: z.boolean() }))
 			.setHandler(async context => {
-				await context.emit('agent.finished', { ok: true })
+				await (context.emit as (eventName: string, payload: { ok: boolean }) => Promise<void>)('agent.finished', {
+					ok: true,
+				})
 				return { message: 'done' }
 			})
 			.build()
@@ -575,9 +585,7 @@ describe('AgentBuilder', () => {
 		try {
 			const result = await instance.invoke({ payload: {} })
 			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
-			const finalMessage = result.envelopes
-				.map(envelope => envelope.frame)
-				.findLast(frame => frame.kind === 'message' && frame.final === true)
+			const finalMessage = findLastFinalMessage(result.envelopes.map(envelope => envelope.frame))
 			expect(errorFrame).toBeUndefined()
 			expect(finalMessage && 'content' in finalMessage ? finalMessage.content : '').toBe('done')
 		} finally {
@@ -599,9 +607,7 @@ describe('AgentBuilder', () => {
 		try {
 			const result = await instance.invoke({ payload: {} })
 			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
-			const finalMessage = result.envelopes
-				.map(envelope => envelope.frame)
-				.findLast(frame => frame.kind === 'message' && frame.final === true)
+			const finalMessage = findLastFinalMessage(result.envelopes.map(envelope => envelope.frame))
 			expect(errorFrame).toBeUndefined()
 			expect(finalMessage && 'content' in finalMessage ? finalMessage.content : '').toBe('done')
 		} finally {
@@ -626,9 +632,7 @@ describe('AgentBuilder', () => {
 		try {
 			const result = await instance.invoke({ payload: {} })
 			const errorFrame = result.envelopes.map(envelope => envelope.frame).find(frame => frame.kind === 'error')
-			const finalMessage = result.envelopes
-				.map(envelope => envelope.frame)
-				.findLast(frame => frame.kind === 'message' && frame.final === true)
+			const finalMessage = findLastFinalMessage(result.envelopes.map(envelope => envelope.frame))
 			expect(errorFrame).toBeUndefined()
 			expect(finalMessage && 'content' in finalMessage ? finalMessage.content : '').toBe('done')
 		} finally {
