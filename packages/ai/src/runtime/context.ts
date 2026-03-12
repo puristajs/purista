@@ -1,5 +1,17 @@
-import type { CommandFunctionContext, EventBridge, Logger, StreamFunctionContext } from '@purista/core'
-import { HandledError, StatusCode } from '@purista/core'
+import type {
+	AgentInvokeList,
+	CommandFunctionContext,
+	EmptyObject,
+	EventBridge,
+	InferIn,
+	InvokeList,
+	Logger,
+	QueueInvokeList,
+	Schema,
+	StreamFunctionContext,
+	StreamInvokeList,
+} from '@purista/core'
+import { HandledError, StatusCode, validate } from '@purista/core'
 
 import type {
 	KnowledgeAdapter,
@@ -14,6 +26,7 @@ import type {
 	ConversationStoreRecordData,
 } from '../memory/conversationStore.js'
 import {
+	agentProtocolEnvelopeSchema,
 	createArtifactFrame,
 	createEnvelopeFromContext,
 	createErrorFrame,
@@ -35,6 +48,7 @@ import type { AgentManifest, AllowedToolDefinition } from '../types/AgentManifes
 import { type ConversationHelpers, createConversationHelpers } from './conversation.js'
 import { invokeAgent } from './invokeAgent.js'
 import { createScopedSessionId, resolveBaseSessionId } from './sessionIdentity.js'
+import { withSessionIdInPayload } from './sessionPayload.js'
 
 type ProtocolFrameEntry = {
 	frame: AgentProtocolFrame
@@ -603,6 +617,7 @@ export type AgentHandlerContext<
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
 	KnowledgeAliases extends string = never,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > = {
 	logger: Logger
 	payload: Payload
@@ -619,12 +634,19 @@ export type AgentHandlerContext<
 	agents: {
 		/**
 		 * Invokes another agent via EventBridge and returns its emitted envelopes.
+		 * Supports both direct options-based calls and typed chained access:
+		 * `context.agents.invoke({ agentName, agentVersion, payload })`
+		 * and `context.agents.invoke.someAgent['1'].call(payload, parameter)`.
 		 */
-		invoke(options: AgentInvocationOptions): Promise<AgentProtocolEnvelope[]>
+		invoke: AgentInvokes & ((options: AgentInvocationOptions) => Promise<AgentProtocolEnvelope[]>)
 		/**
 		 * Invokes another agent and extracts a best-effort assistant text output from message frames.
 		 */
 		runText(options: AgentInvocationOptions): Promise<string>
+		/**
+		 * Invokes another agent and parses the final assistant message as JSON.
+		 */
+		runObject<T = unknown>(options: AgentInvocationOptions): Promise<T>
 	}
 	embeddings: {
 		[Alias in keyof Models as Models[Alias] extends { embed: (...args: any[]) => any } ? Alias : never]: {
@@ -642,6 +664,9 @@ export type AgentHandlerContext<
 		}
 	}
 	serviceContext: ProtocolContext
+	secrets: ProtocolContext['secrets']
+	configs: ProtocolContext['configs']
+	states: ProtocolContext['states']
 	manifest: AgentManifest
 }
 
@@ -651,8 +676,29 @@ export type CreateAgentHandlerContextInput<
 	Resources extends Record<string, unknown>,
 	Models extends Record<string, ModelProvider>,
 	KnowledgeAliases extends string = string,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > = {
-	serviceContext: CommandFunctionContext<Payload, Parameter> | StreamFunctionContext<Payload, Parameter>
+	serviceContext:
+		| CommandFunctionContext<
+				Payload,
+				Parameter,
+				Resources,
+				InvokeList,
+				StreamInvokeList,
+				Record<string, Schema>,
+				QueueInvokeList,
+				AgentInvokes
+		  >
+		| StreamFunctionContext<
+				Payload,
+				Parameter,
+				Resources,
+				InvokeList,
+				StreamInvokeList,
+				Record<string, Schema>,
+				QueueInvokeList,
+				AgentInvokes
+		  >
 	eventBridge: EventBridge
 	payload: Payload
 	parameter: Parameter
@@ -690,26 +736,185 @@ export type AgentInvocationOptions = {
 	stream?: import('../types/AgentDefinition.js').AgentStreamResponder
 }
 
-const createAgentInvocationHelpers = (input: {
+type DeclaredAgentBinding = {
+	call?: (payload: unknown, parameter?: unknown) => {
+		final(): Promise<unknown>
+		[Symbol.asyncIterator](): AsyncIterator<unknown>
+	}
+	payloadSchema?: Schema
+	parameterSchema?: Schema
+}
+
+const hasErrorEnvelope = (envelopes: AgentProtocolEnvelope[]): boolean =>
+	envelopes.some(envelope => envelope.frame.kind === 'error')
+
+const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(input: {
 	eventBridge: EventBridge
-	serviceContext: CommandFunctionContext | StreamFunctionContext
+	protocol: ProtocolEmitter
+	serviceContext:
+		| CommandFunctionContext<
+				unknown,
+				unknown,
+				Record<string, unknown>,
+				InvokeList,
+				StreamInvokeList,
+				Record<string, Schema>,
+				QueueInvokeList,
+				AgentInvokes
+		  >
+		| StreamFunctionContext<
+				unknown,
+				unknown,
+				Record<string, unknown>,
+				InvokeList,
+				StreamInvokeList,
+				Record<string, Schema>,
+				QueueInvokeList,
+				AgentInvokes
+		  >
 	session: SessionHelpers
+	manifest: AgentManifest
 }) => {
-	const invoke = async (options: AgentInvocationOptions) => {
-		return await invokeAgent({
-			eventBridge: input.eventBridge,
-			agentName: options.agentName,
-			agentVersion: options.agentVersion,
-			payload: options.payload,
-			parameter: options.parameter,
-			timeoutMs: options.timeoutMs,
-			stream: options.stream,
-			correlationId: options.correlationId ?? input.serviceContext.message.correlationId,
-			principalId: input.serviceContext.message.principalId,
-			tenantId: input.serviceContext.message.tenantId,
-			sessionId: options.sessionId ?? input.session.identity.baseSessionId,
-			failOnErrorFrame: options.failOnErrorFrame ?? true,
+	const resolveDeclaredBinding = (agentName: string, agentVersion: string): DeclaredAgentBinding => {
+		const allowed = input.manifest.allowedAgents?.some(
+			agent => agent.agentName === agentName && agent.agentVersion === agentVersion,
+		)
+		if (!allowed) {
+			throw new HandledError(
+				StatusCode.BadRequest,
+				`Agent ${agentName}.${agentVersion} is not declared via canInvokeAgent(...)`,
+			)
+		}
+
+		const invokeAgentApi = (input.serviceContext.invokeAgent ?? ({} as EmptyObject)) as AgentInvokes & Record<
+			string,
+			Record<string, DeclaredAgentBinding> | undefined
+		>
+		const versionApi = invokeAgentApi[agentName]
+		const binding = versionApi?.[agentVersion]
+		if (!binding?.call) {
+			throw new HandledError(
+				StatusCode.BadRequest,
+				`Agent ${agentName}.${agentVersion} is declared but no invoke binding is available in the current context`,
+			)
+		}
+		return binding
+	}
+
+	const emitStatus = (
+		options: Pick<AgentInvocationOptions, 'agentName' | 'agentVersion' | 'payload'>,
+		status: 'invoked' | 'success' | 'error',
+		output?: unknown,
+		errorCode?: string,
+	) => {
+		input.protocol.emitToolEvent({
+			toolName: `${options.agentName}.${options.agentVersion}.run`,
+			status,
+			input: options.payload,
+			output,
+			errorCode,
 		})
+	}
+
+	const validateInvocationInput = async (binding: DeclaredAgentBinding, payload: unknown, parameter: unknown) => {
+		if (binding.payloadSchema) {
+			const result = await validate(binding.payloadSchema, payload)
+			if (!result.success) {
+				throw new HandledError(StatusCode.BadRequest, 'Agent invoke payload schema validation failed', {
+					issues: result.issues,
+				})
+			}
+		}
+		if (binding.parameterSchema) {
+			const result = await validate(binding.parameterSchema, parameter)
+			if (!result.success) {
+				throw new HandledError(StatusCode.BadRequest, 'Agent invoke parameter schema validation failed', {
+					issues: result.issues,
+				})
+			}
+		}
+	}
+
+	const instrumentInvocation = (
+		options: Pick<AgentInvocationOptions, 'agentName' | 'agentVersion' | 'payload'>,
+		invocation: {
+			final(): Promise<unknown>
+			[Symbol.asyncIterator](): AsyncIterator<unknown>
+		},
+	) => {
+		emitStatus(options, 'invoked')
+		const finalPromise = invocation
+			.final()
+			.then(result => {
+				const envelopes = Array.isArray(result) ? agentProtocolEnvelopeSchema.array().safeParse(result) : undefined
+				if (envelopes?.success && hasErrorEnvelope(envelopes.data)) {
+					emitStatus(options, 'error', envelopes.data, 'AgentErrorEnvelope')
+				} else {
+					emitStatus(options, 'success', result)
+				}
+				return result
+			})
+			.catch(error => {
+				emitStatus(
+					options,
+					'error',
+					undefined,
+					error instanceof HandledError ? String(error.errorCode) : 'UnhandledError',
+				)
+				throw error
+			})
+
+		return {
+			final: async () => await finalPromise,
+			[Symbol.asyncIterator]: async function* () {
+				const iterator = invocation[Symbol.asyncIterator]()
+				while (true) {
+					const next = await iterator.next()
+					if (next.done) {
+						return
+					}
+					yield next.value
+				}
+			},
+		}
+	}
+
+	const invoke = async (options: AgentInvocationOptions) => {
+		const binding = resolveDeclaredBinding(options.agentName, options.agentVersion)
+		const payload = withSessionIdInPayload(options.payload, options.sessionId ?? input.session.identity.baseSessionId)
+		const parameter = options.parameter ?? {}
+		await validateInvocationInput(binding, payload, parameter)
+		emitStatus(options, 'invoked')
+		try {
+			const envelopes = await invokeAgent({
+				eventBridge: input.eventBridge,
+				agentName: options.agentName,
+				agentVersion: options.agentVersion,
+				payload,
+				parameter,
+				timeoutMs: options.timeoutMs,
+				stream: options.stream,
+				correlationId: options.correlationId ?? input.serviceContext.message.correlationId,
+				principalId: input.serviceContext.message.principalId,
+				tenantId: input.serviceContext.message.tenantId,
+				sessionId: options.sessionId ?? input.session.identity.baseSessionId,
+				failOnErrorFrame: options.failOnErrorFrame ?? true,
+			})
+			if (hasErrorEnvelope(envelopes)) {
+				emitStatus(options, 'error', envelopes, 'AgentErrorEnvelope')
+			} else {
+				emitStatus(options, 'success', envelopes)
+			}
+			return envelopes
+		} catch (error) {
+			emitStatus(
+				options,
+				'error',
+				undefined,
+				error instanceof HandledError ? String(error.errorCode) : 'UnhandledError',
+			)
+			throw error
+		}
 	}
 
 	const runText = async (options: Parameters<typeof invoke>[0]) => {
@@ -737,9 +942,70 @@ const createAgentInvocationHelpers = (input: {
 			.join('')
 	}
 
+	const runObject = async <T = unknown>(options: Parameters<typeof invoke>[0]): Promise<T> => {
+		const text = await runText(options)
+		try {
+			return JSON.parse(text) as T
+		} catch (error) {
+			throw new HandledError(StatusCode.BadGateway, 'Invoked agent did not return valid JSON in final message', {
+				text,
+				error: error instanceof Error ? error.message : String(error),
+			})
+		}
+	}
+
+	const invokeProxy = new Proxy(invoke, {
+		apply(target, thisArg, argArray) {
+			return Reflect.apply(target, thisArg, argArray)
+		},
+		get(_target, prop) {
+			if (prop === 'then' || prop === 'catch' || prop === 'finally') {
+				return undefined
+			}
+			if (typeof prop !== 'string') {
+				return undefined
+			}
+			return new Proxy(
+				{},
+				{
+					get(_versionTarget, versionProp) {
+						if (typeof versionProp !== 'string') {
+							return undefined
+						}
+						const binding = resolveDeclaredBinding(prop, versionProp)
+						return {
+							call: (payload: InferIn<Schema>, parameter?: InferIn<Schema>) =>
+								instrumentInvocation(
+									{
+										agentName: prop,
+										agentVersion: versionProp,
+										payload,
+									},
+									binding.call!(
+										withSessionIdInPayload(payload, input.session.identity.baseSessionId),
+										parameter ?? {},
+									),
+								),
+							payloadSchema: binding.payloadSchema,
+							parameterSchema: binding.parameterSchema,
+						}
+					},
+				},
+			)
+		},
+	}) as AgentHandlerContext<
+		unknown,
+		unknown,
+		Record<string, unknown>,
+		Record<string, ModelProvider>,
+		string,
+		AgentInvokes
+	>['agents']['invoke']
+
 	return {
-		invoke,
+		invoke: invokeProxy,
 		runText,
+		runObject,
 	}
 }
 
@@ -749,9 +1015,10 @@ export const createAgentHandlerContext = <
 	Resources extends Record<string, unknown>,
 	Models extends Record<string, ModelProvider>,
 	KnowledgeAliases extends string = string,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 >(
-	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models, KnowledgeAliases>,
-): AgentHandlerContext<Payload, Parameter, Resources, Models, KnowledgeAliases> => {
+	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models, KnowledgeAliases, AgentInvokes>,
+): AgentHandlerContext<Payload, Parameter, Resources, Models, KnowledgeAliases, AgentInvokes> => {
 	const sessionHelpers = createSessionHelpers(input.conversationStore, {
 		context: input.serviceContext,
 		manifest: input.manifest,
@@ -777,24 +1044,31 @@ export const createAgentHandlerContext = <
 		models: input.models,
 		agents: createAgentInvocationHelpers({
 			eventBridge: input.eventBridge,
+			protocol: input.protocol,
 			serviceContext: input.serviceContext,
 			session: sessionHelpers,
+			manifest: input.manifest,
 		}),
 		embeddings: input.embeddings as AgentHandlerContext<
 			Payload,
 			Parameter,
 			Resources,
 			Models,
-			KnowledgeAliases
+			KnowledgeAliases,
+			AgentInvokes
 		>['embeddings'],
 		rerankers: input.rerankers as AgentHandlerContext<
 			Payload,
 			Parameter,
 			Resources,
 			Models,
-			KnowledgeAliases
+			KnowledgeAliases,
+			AgentInvokes
 		>['rerankers'],
 		serviceContext: input.serviceContext,
+		secrets: input.serviceContext.secrets,
+		configs: input.serviceContext.configs,
+		states: input.serviceContext.states,
 		manifest: input.manifest,
 	}
 }

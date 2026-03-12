@@ -124,7 +124,7 @@ describe('AgentBuilder', () => {
 
 	it('requires exposeAsHttpEndpoint before setStreamingMode', () => {
 		const builder = new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' })
-		expect(() => builder.setStreamingMode('sse')).toThrow(
+		expect(() => builder.setStreamingMode('stream')).toThrow(
 			'Call exposeAsHttpEndpoint before configuring the streaming mode',
 		)
 	})
@@ -160,6 +160,7 @@ describe('AgentBuilder', () => {
 			.setMemory({ storeName: 'memoryStore', maxFrames: 10 })
 			.setKnowledge([{ adapterName: 'knowledge2', options: { topK: 1 } }])
 			.canInvoke('Ticketing', '1', 'createTicket')
+			.canInvokeAgent('triageAgent', '1')
 			.setTelemetry({ attributes: { team: 'support' } })
 			.setEvaluation({ suite: 'smoke' })
 			.addPayloadSchema(payloadSchema)
@@ -183,13 +184,31 @@ describe('AgentBuilder', () => {
 		expect(manifest.knowledge?.[0]?.adapterName).toBe('knowledge2')
 		expect(manifest.modelResource?.variant).toBe('mini')
 		expect(manifest.allowedTools).toHaveLength(1)
-		expect(manifest.allowedTools.some(t => t.serviceName === 'Ticketing' && t.serviceVersion === '1' && t.commandName === 'createTicket')).toBe(true)
+		expect(
+			manifest.allowedTools.some(
+				t => t.serviceName === 'Ticketing' && t.serviceVersion === '1' && t.commandName === 'createTicket',
+			),
+		).toBe(true)
+		expect(manifest.allowedAgents).toEqual([{ agentName: 'triageAgent', agentVersion: '1' }])
 		expect(manifest.telemetry?.attributes?.team).toBe('support')
 		expect(manifest.metadata?.runtime).toBe('worker')
 		expect(manifest.metadata?.evaluation).toEqual({ suite: 'smoke' })
 		expect(manifest.httpExposure?.public).toBe(true)
 		expect(manifest.httpExposure?.sseProtocol).toBe('ai-sdk-responses')
 		expect(manifest.httpExposure?.path).toBe('agents/helperAgent')
+		expect(manifest.httpExposure?.streamingMode).toBe('stream')
+	})
+
+	it('supports aggregate streaming mode for unary HTTP responses', () => {
+		const manifest = new AgentBuilder({ agentName: 'aggregateAgent', agentVersion: '1' })
+			.addPayloadSchema(z.object({ prompt: z.string() }))
+			.exposeAsHttpEndpoint('POST', 'agents/aggregateAgent')
+			.setStreamingMode('aggregate')
+			.setHandler(async () => ({ message: 'ok' }))
+			.build()
+			.getManifest()
+
+		expect(manifest.httpExposure?.streamingMode).toBe('aggregate')
 	})
 
 	it('builds a definition with model aliases and creates an instance', async () => {
@@ -206,7 +225,7 @@ describe('AgentBuilder', () => {
 			.defineModel('echo')
 			.persistConversation({ storeName: 'aiConversation', maxFrames: 10 })
 			.exposeAsHttpEndpoint('POST', 'agents/supportAgent')
-			.setStreamingMode('chunked')
+			.setStreamingMode('stream')
 			.setHandler<{ prompt: string }>(async (context, payload) => {
 				const result = await context.models.echo.generate?.({ prompt: payload.prompt })
 				if (!result) {
@@ -508,6 +527,7 @@ describe('AgentBuilder', () => {
 			.build()
 
 		const parentDefinition = new AgentBuilder({ agentName: 'parentAgent', agentVersion: '1' })
+			.canInvokeAgent('childAgent', '1')
 			.setHandler(async context => {
 				const text = await context.agents.runText({
 					agentName: 'childAgent',

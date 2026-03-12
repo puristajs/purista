@@ -3,7 +3,7 @@ import type { Schema } from '@purista/core'
 export type AgentHttpExposure = {
 	method: string
 	path: string
-	streamingMode?: 'sse' | 'chunked' | 'buffered'
+	streamingMode?: 'stream' | 'aggregate'
 	sseProtocol?: AgentSseProtocol
 	requestContentType?: string
 	requestEncoding?: string
@@ -37,6 +37,11 @@ export type AllowedToolDefinition = {
 	serviceVersion: string
 	commandName: string
 	description?: string
+}
+
+export type AllowedAgentDefinition = {
+	agentName: string
+	agentVersion: string
 }
 
 export type AgentSessionConfig = {
@@ -77,6 +82,7 @@ export type AgentManifest = {
 	retryPolicy?: RetryPolicy
 	telemetry?: { attributes?: Record<string, string | number | boolean> }
 	allowedTools: AllowedToolDefinition[]
+	allowedAgents?: AllowedAgentDefinition[]
 	resources?: Record<string, { resourceName: string }>
 	payloadSchema?: Schema
 	parameterSchema?: Schema

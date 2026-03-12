@@ -13,15 +13,15 @@ Here is a list of principles and goals of the PURISTA TypeScript framework.
 In the realm of PURISTA, one principle reigns supreme: **Focus on business logic**.
 Our unwavering commitment is to swiftly deliver tangible business value with unwavering reliability and unparalleled flexibility.
 
-## Isolation & separation
+## Strict Separation
 
 In the realm of PURISTA, our ethos revolves around a set of fundamental principles, ensuring the robust implementation of business logic:
 
-1. **Isolation and Separation**: Business logic implementation adheres strictly to the principles of isolation and separation. The "outside world" is viewed as a black box with well-defined interfaces.
+1. **Strict Separation**: Business logic implementation adheres strictly to the principles of separation. The "outside world" is viewed as a black box with well-defined interfaces.
 
-2. **Service Specificity**: Each service is dedicated to a single entity, maintaining clarity and focus within its domain.
+2. **Service Specificity**: Each service is dedicated to a single entity, maintaining clarity and focus within its business area.
 
-3. **Isolated Commands and Subscriptions**: Commands and subscriptions operate in isolation, interacting with the external environment solely through known interfaces. This ensures a clear separation of concerns and minimizes dependencies.
+3. **Separated Commands and Subscriptions**: Commands and subscriptions operate in separation, interacting with the external environment solely through known interfaces. This ensures a clear separation of concerns and minimizes dependencies.
 
 4. **Runtime Validation**: Every input and output exchanged with a command or subscription undergoes rigorous validation during runtime, enhancing system reliability and security.
 

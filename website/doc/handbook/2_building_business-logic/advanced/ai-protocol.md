@@ -20,7 +20,7 @@ Every piece of communication from an agent is wrapped in an `AgentProtocolEnvelo
 
 - **`agentName` / `agentVersion`**: The source of the frame.
 - **`sessionId`**: The stable conversation identity.
-- **`tenantId` / `principalId`**: Security and isolation metadata.
+- **`tenantId` / `principalId`**: Security and separation metadata.
 - **`frame`**: The actual payload of the communication.
 
 ## 2. Frame Kinds

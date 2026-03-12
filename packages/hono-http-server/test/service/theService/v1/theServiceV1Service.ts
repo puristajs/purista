@@ -4,6 +4,8 @@ import { patchCommandBuilder } from './command/patch/patchCommandBuilder.js'
 import { pingCommandBuilder } from './command/ping/pingCommandBuilder.js'
 import { postCommandBuilder } from './command/post/postCommandBuilder.js'
 import { putCommandBuilder } from './command/put/putCommandBuilder.js'
+import { aggregateErrorStreamBuilder } from './stream/aggregateError/aggregateErrorStreamBuilder.js'
+import { aggregateSuccessStreamBuilder } from './stream/aggregateSuccess/aggregateSuccessStreamBuilder.js'
 import { theServiceServiceBuilder } from './theServiceServiceBuilder.js'
 
 // bring service config definition, command definitions and subscription definitions together in the service
@@ -11,6 +13,7 @@ import { theServiceServiceBuilder } from './theServiceServiceBuilder.js'
 // other service config should be done in ./theServiceServiceBuilder.ts file
 
 type CommandDefinition = Parameters<typeof theServiceServiceBuilder.addCommandDefinition>[number]
+type StreamDefinition = Parameters<typeof theServiceServiceBuilder.addStreamDefinition>[number]
 type SubscriptionDefinition = Parameters<typeof theServiceServiceBuilder.addSubscriptionDefinition>[number]
 
 const commandDefinitions: CommandDefinition[] = [
@@ -23,7 +26,12 @@ const commandDefinitions: CommandDefinition[] = [
 ]
 
 const subscriptionDefinitions: SubscriptionDefinition[] = []
+const streamDefinitions: StreamDefinition[] = [
+	aggregateSuccessStreamBuilder.getDefinition(),
+	aggregateErrorStreamBuilder.getDefinition(),
+]
 
 export const theServiceV1Service = theServiceServiceBuilder
 	.addCommandDefinition(...commandDefinitions)
+	.addStreamDefinition(...streamDefinitions)
 	.addSubscriptionDefinition(...subscriptionDefinitions)

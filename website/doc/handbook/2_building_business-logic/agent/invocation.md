@@ -49,21 +49,39 @@ Agents can call other agents directly using `context.agents`. This is useful for
 
 ```ts
 setHandler(async (context, payload) => {
+  const triageInvocation = context.agents.invoke.triageAgent['1'].call({
+    prompt: payload.prompt,
+  })
+
+  const triageEnvelopes = await triageInvocation.final()
+
   const triage = await context.agents.runText({
     agentName: 'triageAgent',
     agentVersion: '1',
-    payload: { prompt: payload.prompt }
+    payload: { prompt: payload.prompt },
   })
 
   if (triage === 'urgent') {
     return context.agents.runText({
       agentName: 'expertAgent',
       agentVersion: '1',
-      payload
+      payload,
     })
   }
 
   return 'Standard response.'
+})
+```
+
+Use the chained `context.agents.invoke.<agent>['version'].call(...)` form when you want the full protocol envelopes. Use `runText(...)` or `runObject<T>(...)` when you only want the final assistant result.
+
+For JSON-first orchestration:
+
+```ts
+const triage = await context.agents.runObject<{ urgency: string; nextSteps: string[] }>({
+  agentName: 'triageAgent',
+  agentVersion: '1',
+  payload: { prompt: payload.prompt },
 })
 ```
 
@@ -81,6 +99,18 @@ const result = await invokeAgent({
   payload: { prompt: '...' },
   sessionId: 'manual-session'
 })
+```
+
+## 4. HTTP Exposure Modes (`stream` vs `aggregate`)
+
+Agent HTTP endpoints can be exposed in two transport modes:
+
+- `stream` (default): SSE (`text/event-stream`), incremental frames.
+- `aggregate`: unary JSON response (`application/json`) containing the final envelope.
+
+```ts
+.exposeAsHttpEndpoint('POST', 'agents/support')
+.setStreamingMode('aggregate')
 ```
 
 ---

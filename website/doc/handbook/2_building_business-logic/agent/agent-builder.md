@@ -75,11 +75,19 @@ Agents can maintain history automatically using `persistConversation`. This is t
 
 ## 6. HTTP Exposure
 
-You can expose your agent as a direct HTTP SSE endpoint with a single call.
+You can expose your agent as either SSE (`stream`) or unary JSON (`aggregate`) with a single endpoint path.
 
 ```ts
 .exposeAsHttpEndpoint('POST', 'agents/support')
+.setStreamingMode('stream') // default: SSE
 .setSseProtocol('ai-sdk-ui-message') // Optimize for Vercel AI SDK
+```
+
+Unary aggregate mode:
+
+```ts
+.exposeAsHttpEndpoint('POST', 'agents/support')
+.setStreamingMode('aggregate') // returns final envelope json
 ```
 
 ## 7. Dynamic Call Options (Advanced)

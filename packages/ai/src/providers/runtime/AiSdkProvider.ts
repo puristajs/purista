@@ -26,6 +26,7 @@ import type {
 	ProviderResponse,
 	ProviderStream,
 } from './ModelProvider.js'
+import { normalizeReasoningDelta, reasoningDelta, textDelta } from './streamNormalization.js'
 
 /**
  * Options accepted by {@link AiSdkProvider}.
@@ -495,27 +496,11 @@ export class AiSdkProvider implements ModelProvider {
 			async *[Symbol.asyncIterator]() {
 				for await (const part of result.fullStream) {
 					if (part.type === 'text-delta' && part.text.length > 0) {
-						yield {
-							type: 'text-delta',
-							textDelta: part.text,
-						}
+						yield textDelta(part.text)
 					}
-					const reasoningDelta = (() => {
-						if (part.type !== 'reasoning-delta') {
-							return ''
-						}
-						const withText = part as { text?: unknown }
-						if (typeof withText.text === 'string') {
-							return withText.text
-						}
-						const withDelta = part as unknown as { delta?: unknown }
-						return typeof withDelta.delta === 'string' ? withDelta.delta : ''
-					})()
-					if (part.type === 'reasoning-delta' && reasoningDelta.length > 0) {
-						yield {
-							type: 'reasoning-delta',
-							reasoningDelta,
-						}
+					const normalizedReasoningDelta = part.type === 'reasoning-delta' ? normalizeReasoningDelta(part) : ''
+					if (part.type === 'reasoning-delta' && normalizedReasoningDelta.length > 0) {
+						yield reasoningDelta(normalizedReasoningDelta)
 					}
 					if (part.type === 'error') {
 						yield {

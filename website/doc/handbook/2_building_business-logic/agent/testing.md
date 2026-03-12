@@ -14,20 +14,17 @@ When you use `purista add agent`, a test file is automatically generated. The go
 
 ```ts title="src/agents/supportAgent/v1/supportAgent.test.ts"
 import { supportAgent } from './supportAgent.js'
-import { testAgent } from '@purista/ai'
+import { MockModel, testAgent } from '@purista/ai'
 
 describe('Support Agent', () => {
   it('should call the ticketing tool if the user reports a bug', async () => {
-    // 1. Setup a deterministic mock for the model
-    const { instance, eventBridge } = await testAgent(supportAgent, {
+    const model = new MockModel()
+      .on(/broken laptop/i)
+      .reply('I have created a ticket for you.')
+
+    const { instance, eventBridge, destroy } = await testAgent(supportAgent, {
       models: {
-        'openai:gpt-4o-mini': {
-          generate: async () => ({
-            output: 'I have created a ticket for you.',
-            // Mock a tool call in the background
-            metadata: { toolCalls: [{ name: 'createTicket', args: { reason: 'Broken laptop' } }] }
-          })
-        }
+        'openai:gpt-4o-mini': model
       }
     })
 
@@ -36,13 +33,14 @@ describe('Support Agent', () => {
     eventBridge.registerCommand('ticketing', '1', 'createTicket', createTicketMock)
 
     // 3. Run the agent
-    const result = await instance.run({ prompt: 'My laptop is broken' })
+    const result = await instance.invoke({ payload: { prompt: 'My laptop is broken' } })
 
     // 4. Verify assertions
     expect(createTicketMock).toHaveBeenCalledWith(
       expect.objectContaining({ reason: 'Broken laptop' })
     )
-    expect(result.message).toBe('I have created a ticket for you.')
+    expect(result.envelopes.some(e => e.frame.kind === 'message')).toBe(true)
+    await destroy()
   })
 })
 ```
@@ -54,6 +52,12 @@ The `testAgent` helper is your best friend. It:
 - Creates a runtime instance of your agent.
 - Injects mock models and providers.
 - Provides a clean way to register mock commands.
+- Returns `destroy()` to cleanly stop the instance and bridge.
+
+`MockModel` gives deterministic scripting:
+
+- `.on(string | RegExp).reply(string | fn)`
+- `.onJson(matcher).reply(object | fn)`
 
 ## 3. Strategies for Reliable Tests
 

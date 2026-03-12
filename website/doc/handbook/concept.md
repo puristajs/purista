@@ -8,7 +8,7 @@ order: 10
 
 PURISTA operates on a straightforward message-based system. In this system, there are message senders and receivers. Messages are passed through an event bridge, which connects to a message broker.
 
-The heart of PURISTA's logic lies in its Services, which follow the principles of Domain-Driven Design (DDD). Each Service represents a logical grouping of commands and subscriptions that pertain to a specific domain.
+The heart of PURISTA's logic lies in its Services, which follow the principles of Business-Driven Design. Each Service represents a logical grouping of commands and subscriptions that pertain to a specific business area.
 
 Commands are active actions triggered by an external source. When a command is invoked, the caller expects a response. Think of commands as similar to functions in traditional programming languages. The caller knows about the command's existence, its input and output formats, and potentially error responses. However, the caller doesn't need to understand how the command is implemented or executed, nor does it need to know which instance of the service is handling the request.
 

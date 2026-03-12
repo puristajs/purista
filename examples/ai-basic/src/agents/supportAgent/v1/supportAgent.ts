@@ -1,4 +1,4 @@
-import { AgentBuilder, agentProtocolEnvelopeSchema, generateText } from '@purista/ai'
+import { AgentBuilder, generateText } from '@purista/ai'
 import { HandledError, StatusCode } from '@purista/core'
 import { z } from 'zod/v4'
 
@@ -11,29 +11,6 @@ const jsonAnswerSchema = z.object({
 	nextActions: z.array(z.string()).default([]),
 	sources: z.array(z.string()).default([]),
 })
-
-const getFinalMessage = (value: unknown): string => {
-	const envelopes = agentProtocolEnvelopeSchema.array().parse(value)
-	const final = envelopes
-		.map(envelope => envelope.frame)
-		.filter(
-			(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'message' }> =>
-				frame.kind === 'message' && frame.final === true,
-		)
-		.map(frame => frame.content)
-		.at(-1)
-
-	return final ?? ''
-}
-
-const hasErrorFrame = (value: unknown): boolean => {
-	try {
-		const envelopes = agentProtocolEnvelopeSchema.array().parse(value)
-		return envelopes.some(envelope => envelope.frame.kind === 'error')
-	} catch {
-		return false
-	}
-}
 
 const extractFirstUrl = (input: string): string | undefined => {
 	const match = input.match(/https?:\/\/[^\s)]+/i)
@@ -61,8 +38,9 @@ export const supportAgent = new AgentBuilder({
 	.canInvoke('support', '1', 'lookupFaq')
 	.canInvoke('support', '1', 'calculate')
 	.canInvoke('support', '1', 'fetchWebsite')
-	.canInvoke('triageAgent', '1', 'run')
+	.canInvokeAgent('triageAgent', '1')
 	.exposeAsHttpEndpoint('POST', 'agents/supportAgent')
+	.setSseProtocol('ai-sdk-ui-message')
 	.setHandler<SupportAgentInput>(async function (context, payload) {
 		const userPrompt = payload.prompt ?? payload.message ?? ''
 		const model = context.models['openai:gpt-4o-mini']
@@ -109,15 +87,15 @@ export const supportAgent = new AgentBuilder({
 		if (escalationPattern.test(userPrompt)) {
 			context.stream.sendChunk('Escalating to triage agent...')
 			try {
-				const triageResult = await context.tools.invoke.triageAgent['1'].run({
-					prompt: userPrompt,
+				triageSummary = await context.agents.runText({
+					agentName: 'triageAgent',
+					agentVersion: '1',
+					payload: {
+						prompt: userPrompt,
+						sessionId: payload.sessionId,
+					},
 					sessionId: payload.sessionId,
 				})
-				if (hasErrorFrame(triageResult)) {
-					context.stream.sendChunk('Triage unavailable right now, continuing with tool-based guidance.')
-				} else {
-					triageSummary = getFinalMessage(triageResult)
-				}
 			} catch (error) {
 				context.logger.warn({ err: error }, 'triageAgent failed, continuing with tool-based fallback')
 				context.stream.sendChunk('Triage unavailable right now, continuing with tool-based guidance.')

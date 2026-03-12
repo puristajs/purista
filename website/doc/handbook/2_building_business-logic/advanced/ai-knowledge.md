@@ -17,9 +17,9 @@ When you query knowledge in a handler:
 const docs = await context.knowledge.supportFaq.query(payload.prompt, 3)
 ```
 The query is automatically scoped by:
-- `tenantId` (Multi-tenancy isolation)
-- `principalId` (User isolation)
-- `sessionId` (Conversation isolation)
+- `tenantId` (Multi-tenancy separation)
+- `principalId` (User separation)
+- `sessionId` (Conversation separation)
 
 This ensures that one user's private data is never "leaked" to another user's LLM prompt.
 

@@ -6,7 +6,7 @@ order: 200000
 
 # Building business logic
 
-This section explains how to implement domain logic with strong types and clear boundaries.
+This section explains how to implement business logic with strong types and clear boundaries.
 
 ## Core flow
 

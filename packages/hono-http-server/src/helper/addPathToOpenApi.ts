@@ -53,14 +53,17 @@ export const addPathToOpenApi = (
 		[name]: [],
 	}))
 
-	const isStreamResponse = expose.contentTypeResponse === 'text/event-stream'
+	const streamMode = expose.http.stream?.mode ?? 'stream'
+	const isStreamResponse = expose.contentTypeResponse === 'text/event-stream' && streamMode === 'stream'
+	const isAggregateStream = streamMode === 'aggregate'
 	const streamProtocol = expose.http.stream?.protocol
 	const streamProtocolDoc = expose.http.stream?.documentationUrl
-	const okCode = isStreamResponse
-		? StatusCode.OK
-		: (exposeWithSchemas.outputPayload as { type?: unknown } | undefined)?.type
+	const okCode =
+		isStreamResponse || isAggregateStream
 			? StatusCode.OK
-			: StatusCode.NoContent
+			: (exposeWithSchemas.outputPayload as { type?: unknown } | undefined)?.type
+				? StatusCode.OK
+				: StatusCode.NoContent
 
 	const errorCodes: Set<StatusCode> = new Set([...(expose.http.openApi?.additionalStatusCodes ?? [])])
 
@@ -177,7 +180,12 @@ export const addPathToOpenApi = (
 														},
 													],
 												}
-										: exposeWithSchemas.outputPayload,
+										: isAggregateStream
+											? (exposeWithSchemas.finalPayload ?? {
+													type: 'object',
+													additionalProperties: true,
+												})
+											: exposeWithSchemas.outputPayload,
 									encoding: responseEncodingType,
 									...(isStreamResponse && streamProtocol
 										? ({ 'x-purista-stream-protocol': streamProtocol } as Record<string, unknown>)

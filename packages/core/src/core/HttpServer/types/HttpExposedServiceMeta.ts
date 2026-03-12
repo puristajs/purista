@@ -15,6 +15,7 @@ export type HttpExposedServiceMeta<ParameterType = EmptyObject> = Prettify<
 				stream?: {
 					protocol: string
 					documentationUrl?: string
+					mode?: 'stream' | 'aggregate'
 				}
 				openApi?: {
 					isSecure: boolean

@@ -72,11 +72,19 @@ This structural overview helps you identify which parts of the API handle **Defi
 │   ├── 🔧 context.tools.invoke        // Typed access to allowed commands
 │   ├── 📜 context.conversation        // High-level: .addUser(), .buildPromptInput()
 │   ├── 🔎 context.knowledge           // Typed: .query(), .upsert()
-│   └── 🤖 context.agents              // Orchestration: .runText() for sub-agents
+│   └── 🤖 context.agents              // Orchestration: .runText() / .runObject()
 │
 └── 📤 Background & Workers
     └── 📥 QueueBridge / AIWorker      // Async job orchestration
 ```
+
+## Architecture Guidance: Agent-as-a-Service
+
+Use **services** for deterministic/fast domain logic and **agents** for LLM-powered, slower, cost-sensitive workloads.
+
+- Service: validation, persistence, domain events, strict SLAs.
+- Agent: reasoning, tool orchestration, adaptive responses.
+- Bridge them through `canInvokeAgent(...)` and `context.invokeAgent...` to keep observability and policy boundaries explicit.
 
 ## 3. Bootstrap
 

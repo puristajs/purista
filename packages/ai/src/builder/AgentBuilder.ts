@@ -1,5 +1,15 @@
-import type { CommandFunctionContext, EventBridge, Schema, StreamFunctionContext, StreamWriter } from '@purista/core'
-import { extendApi, HandledError, ServiceBuilder, StatusCode } from '@purista/core'
+import type {
+	AgentInvocation,
+	AgentProtocolResponse,
+	AgentInvokeList,
+	CommandFunctionContext,
+	EventBridge,
+	InferIn,
+	Schema,
+	StreamFunctionContext,
+	StreamWriter,
+} from '@purista/core'
+import { agentProtocolPayloadSchema, extendApi, HandledError, ServiceBuilder, StatusCode } from '@purista/core'
 import { z } from 'zod/v4'
 
 import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
@@ -22,6 +32,14 @@ import type {
 	AgentSseProtocol,
 	RetryPolicy,
 } from '../types/AgentManifest.js'
+
+type AgentInvokeConfig<Payload extends Schema, Parameter extends Schema> = {
+	payloadSchema?: Payload
+	parameterSchema?: Parameter
+}
+
+const isAgentInvokeConfig = (value: unknown): value is AgentInvokeConfig<Schema, Schema> =>
+	typeof value === 'object' && value !== null && ('payloadSchema' in value || 'parameterSchema' in value)
 
 /**
  * Supported model call kinds emitted by the AgentBuilder runtime wrappers.
@@ -100,8 +118,9 @@ export type AgentHandler<
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
 	KnowledgeAliases extends string = never,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > = (
-	context: AgentHandlerContext<Payload, Parameter, Resources, Models, KnowledgeAliases>,
+	context: AgentHandlerContext<Payload, Parameter, Resources, Models, KnowledgeAliases, AgentInvokes>,
 	payload: Payload,
 	parameter: Parameter,
 ) => Promise<AgentHandlerResult> | AgentHandlerResult
@@ -284,6 +303,7 @@ export class AgentBuilder<
 	EmbeddingAliases extends string = never,
 	RerankAliases extends string = never,
 	ObjectAliases extends string = never,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > {
 	private readonly info: AgentInfo
 	private readonly serviceBuilder: ServiceBuilder
@@ -330,6 +350,7 @@ export class AgentBuilder<
 			description: this.info.description,
 			eventBridge: 'default',
 			allowedTools: [],
+			allowedAgents: [],
 		}
 	}
 
@@ -505,14 +526,19 @@ export class AgentBuilder<
 		payloadSchema?: Schema,
 		parameterSchema?: Schema,
 	) {
-		this.commandBuilder.canInvoke(serviceName, serviceVersion, commandName, outputSchema, payloadSchema, parameterSchema)
+		this.commandBuilder.canInvoke(
+			serviceName,
+			serviceVersion,
+			commandName,
+			outputSchema,
+			payloadSchema,
+			parameterSchema,
+		)
 		this.streamBuilder.canInvoke(serviceName, serviceVersion, commandName, outputSchema, payloadSchema, parameterSchema)
 
 		const alreadyRegistered = this.manifest.allowedTools.some(
 			tool =>
-				tool.serviceName === serviceName &&
-				tool.serviceVersion === serviceVersion &&
-				tool.commandName === commandName,
+				tool.serviceName === serviceName && tool.serviceVersion === serviceVersion && tool.commandName === commandName,
 		)
 
 		if (!alreadyRegistered) {
@@ -527,6 +553,79 @@ export class AgentBuilder<
 		}
 
 		return this
+	}
+
+	canInvokeAgent<
+		Payload extends Schema = typeof agentProtocolPayloadSchema,
+		Parameter extends Schema = Schema,
+		SName extends string = string,
+		Version extends string = string,
+	>(
+		agentName: SName,
+		agentVersion: Version,
+		invokeConfigOrParameterSchema?: Parameter | AgentInvokeConfig<Payload, Parameter>,
+	): AgentBuilder<
+		KnowledgeAliases,
+		ModelAliases,
+		TextAliases,
+		StreamAliases,
+		EmbeddingAliases,
+		RerankAliases,
+		ObjectAliases,
+		AgentInvokes &
+			Record<
+				SName,
+				Record<
+					Version,
+					{
+						call: (
+							payload: InferIn<Payload>,
+							parameter?: InferIn<Parameter>,
+						) => AgentInvocation<AgentProtocolResponse>
+					}
+				>
+			>
+	> {
+		this.commandBuilder.canInvokeAgent(agentName, agentVersion, invokeConfigOrParameterSchema)
+		this.streamBuilder.canInvokeAgent(agentName, agentVersion, invokeConfigOrParameterSchema)
+
+		const alreadyRegistered =
+			this.manifest.allowedAgents?.some(
+				agent => agent.agentName === agentName && agent.agentVersion === agentVersion,
+			) ?? false
+
+		if (!alreadyRegistered) {
+			this.manifest.allowedAgents = [
+				...(this.manifest.allowedAgents ?? []),
+				{
+					agentName,
+					agentVersion,
+				},
+			]
+		}
+
+		return this as unknown as AgentBuilder<
+			KnowledgeAliases,
+			ModelAliases,
+			TextAliases,
+			StreamAliases,
+			EmbeddingAliases,
+			RerankAliases,
+			ObjectAliases,
+			AgentInvokes &
+				Record<
+					SName,
+					Record<
+						Version,
+						{
+							call: (
+								payload: InferIn<Payload>,
+								parameter?: InferIn<Parameter>,
+							) => AgentInvocation<AgentProtocolResponse>
+						}
+					>
+				>
+		>
 	}
 
 	canEmit<EventName extends string, T extends Schema>(eventName: EventName, schema: T) {
@@ -632,11 +731,12 @@ export class AgentBuilder<
 			contentTypeRequest as never,
 			contentEncodingRequest,
 		)
+		this.streamBuilder.setHttpStreamingMode('stream')
 		this.streamBuilder.setHttpStreamProtocol('purista')
 		this.manifest.httpExposure = {
 			method,
 			path,
-			streamingMode: 'sse',
+			streamingMode: 'stream',
 			requestContentType: contentTypeRequest,
 			requestEncoding: contentEncodingRequest,
 			responseContentType: contentTypeResponse,
@@ -645,11 +745,12 @@ export class AgentBuilder<
 		return this
 	}
 
-	setStreamingMode(mode: 'sse' | 'chunked' | 'buffered') {
+	setStreamingMode(mode: 'stream' | 'aggregate') {
 		if (!this.manifest.httpExposure) {
 			throw new Error('Call exposeAsHttpEndpoint before configuring the streaming mode')
 		}
 		this.manifest.httpExposure.streamingMode = mode
+		this.streamBuilder.setHttpStreamingMode(mode)
 		return this
 	}
 
@@ -657,7 +758,7 @@ export class AgentBuilder<
 	 * Selects the SSE wire protocol for exposed stream endpoints.
 	 *
 	 * Defaults to `purista` when not set.
-	 * This setting is only relevant when `streamingMode` is `sse`.
+	 * This setting is only relevant when `streamingMode` is `stream`.
 	 */
 	setSseProtocol(protocol: AgentSseProtocol) {
 		if (!this.manifest.httpExposure) {
@@ -688,13 +789,14 @@ export class AgentBuilder<
 			RerankAliases,
 			ObjectAliases
 		>,
-	>(fn: AgentHandler<Payload, Parameter, Resources, Models, KnowledgeAliases>) {
+	>(fn: AgentHandler<Payload, Parameter, Resources, Models, KnowledgeAliases, AgentInvokes>) {
 		this.handler = fn as AgentHandler<
 			unknown,
 			unknown,
 			Record<string, unknown>,
 			Record<string, ModelProvider>,
-			KnowledgeAliases
+			KnowledgeAliases,
+			AgentInvokeList
 		>
 		const executeAgent = async (
 			thisArg: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
@@ -1227,7 +1329,8 @@ export class AgentBuilder<
 						unknown,
 						Record<string, unknown>,
 						Record<string, ModelProvider>,
-						KnowledgeAliases
+						KnowledgeAliases,
+						AgentInvokes
 					>,
 					payload,
 					parameter,
@@ -1348,7 +1451,8 @@ export class AgentBuilder<
 			StreamAliases,
 			EmbeddingAliases,
 			RerankAliases,
-			ObjectAliases
+			ObjectAliases,
+			AgentInvokes
 		>
 	}
 
@@ -1371,6 +1475,7 @@ export class AgentBuilder<
 		}
 
 		manifest.allowedTools = manifest.allowedTools ?? []
+		manifest.allowedAgents = manifest.allowedAgents ?? []
 		const dependencies: AgentInstanceDependencies = {
 			info: this.info,
 			manifest,

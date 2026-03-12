@@ -49,9 +49,13 @@ export const runSupportAgentStreamBuilder = supportV1ServiceBuilder
 		try {
 			for await (const frame of invocation) {
 				const envelopes = Array.isArray(frame)
-					? agentProtocolEnvelopeSchema.array().parse(frame)
-					: [agentProtocolEnvelopeSchema.parse(frame)]
-				for (const envelope of envelopes) {
+					? agentProtocolEnvelopeSchema.array().safeParse(frame)
+					: agentProtocolEnvelopeSchema.safeParse(frame)
+				if (!envelopes.success) {
+					continue
+				}
+				const normalizedEnvelopes = Array.isArray(frame) ? envelopes.data : [envelopes.data]
+				for (const envelope of normalizedEnvelopes) {
 					streamedEnvelopes.push(envelope)
 					await writer.write(envelope)
 				}

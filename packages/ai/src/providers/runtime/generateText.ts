@@ -1,5 +1,6 @@
 import { StatusCode, UnhandledError } from '@purista/core'
 import type { ModelProvider, ProviderRequest } from './ModelProvider.js'
+import { collectStreamText } from './streamNormalization.js'
 
 export type GenerateTextOptions = {
 	model: Pick<ModelProvider, 'generate' | 'stream'>
@@ -19,27 +20,11 @@ export const generateText = async (input: GenerateTextOptions): Promise<string> 
 	const { model, request, onReasoning, onTextDelta } = input
 
 	if (typeof model.stream === 'function') {
-		const stream = model.stream(request)
-		let answer = ''
-		for await (const chunk of stream) {
-			if (chunk.type === 'error') {
-				throw chunk.error
-			}
-			if (chunk.type === 'reasoning-delta') {
-				if (chunk.reasoningDelta.trim()) {
-					await onReasoning?.(chunk.reasoningDelta)
-				}
-				continue
-			}
-			answer += chunk.textDelta
-			await onTextDelta?.(chunk.textDelta)
-		}
-
-		const final = await stream.final()
-		if (final.reasoningText?.trim()) {
-			await onReasoning?.(final.reasoningText)
-		}
-		return final.output || answer
+		const final = await collectStreamText(model.stream(request), {
+			onReasoning,
+			onTextDelta,
+		})
+		return final.output
 	}
 
 	if (typeof model.generate === 'function') {

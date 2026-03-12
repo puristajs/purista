@@ -15,6 +15,7 @@
 		"test": "vitest run -c vitest.config.ts && npm run frontend:test && tsc --noEmit && tsc -p tsconfig.frontend.json --noEmit"
 	},
 	"dependencies": {
+		"@ai-sdk/react": "^3.0.103",
 		"@ai-sdk/openai": "^3.0.31",
 		"@hono/node-server": "^1.19.6",
 		"@mozilla/readability": "^0.6.0",

@@ -18,6 +18,22 @@ vi.mock('streamdown', () => ({
 	Streamdown: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 }))
 
+vi.mock('@ai-sdk/react', () => ({
+	useChat: () => ({
+		messages: [],
+		status: 'ready',
+		error: undefined,
+		sendMessage: vi.fn(async () => undefined),
+		setMessages: vi.fn(),
+	}),
+}))
+
+vi.mock('ai', () => ({
+	DefaultChatTransport: class DefaultChatTransport {
+		constructor(_options?: unknown) {}
+	},
+}))
+
 vi.mock('./components/ai-elements/conversation', () => ({
 	Conversation: ({ children }: { children: ReactNode }) => <div>{children}</div>,
 	ConversationContent: ({ children }: { children: ReactNode }) => <div>{children}</div>,

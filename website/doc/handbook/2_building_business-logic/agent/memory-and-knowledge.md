@@ -53,7 +53,7 @@ setHandler(async (context, payload) => {
 })
 ```
 
-PURISTA automatically scopes queries by `tenantId`, `principalId`, and `sessionId` to ensure data isolation.
+PURISTA automatically scopes queries by `tenantId`, `principalId`, and `sessionId` to ensure data separation.
 
 ## 3. Configuration at Runtime
 

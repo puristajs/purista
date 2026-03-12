@@ -54,6 +54,20 @@ type ProtocolSseEvent = {
 	data: unknown
 }
 
+type StreamTransportFramePayload = {
+	frameType?: string
+	sequence?: number
+	chunk?: unknown
+	final?: unknown
+	error?: {
+		status?: number
+		message?: string
+		isHandledError?: boolean
+		data?: unknown
+		traceId?: string
+	}
+}
+
 const isProtocolSseEvent = (value: unknown): value is ProtocolSseEvent => {
 	if (!value || typeof value !== 'object') {
 		return false
@@ -72,6 +86,20 @@ const encodeProtocolSseEvent = (encoder: TextEncoder, event: ProtocolSseEvent): 
 const isTransportControlFrame = (frameType: unknown): boolean =>
 	typeof frameType === 'string' &&
 	(frameType === 'open' || frameType === 'close' || frameType === 'start' || frameType === 'complete')
+
+const isAgentEnvelopeLike = (value: unknown): value is { frame: { kind?: string } } => {
+	if (!value || typeof value !== 'object') {
+		return false
+	}
+	const candidate = value as { version?: unknown; frame?: unknown }
+	return typeof candidate.version === 'string' && !!candidate.frame && typeof candidate.frame === 'object'
+}
+
+const isStreamErrorPayload = (
+	payload: StreamTransportFramePayload,
+): payload is StreamTransportFramePayload & { error: { status?: number; message?: string } } => {
+	return payload.frameType === 'error' && !!payload.error && typeof payload.error === 'object'
+}
 
 /**
  * A service which creates a Hono server, adds the command endpoints of given services.
@@ -374,10 +402,18 @@ export class HonoServiceClass<
 
 		const responseContentType = expose.contentTypeResponse ?? 'application/json'
 		const responseEncodingType = expose.contentEncodingResponse ?? 'utf-8'
+		const exposeAsStream = expose as typeof expose & {
+			chunkPayload?: unknown
+			finalPayload?: unknown
+		}
+		const isDeclaredStreamDefinition = 'chunkPayload' in exposeAsStream || 'finalPayload' in exposeAsStream
+		const streamMode =
+			expose.http.stream?.mode ??
+			(isDeclaredStreamDefinition && responseContentType.toLowerCase() !== 'text/event-stream' ? 'aggregate' : 'stream')
 
 		addPathToOpenApi(this.openApi, metadata as unknown as HttpExposedServiceMeta, path, this.config)
 
-		const isStreamEndpoint = responseContentType.toLowerCase() === 'text/event-stream'
+		const isStreamEndpoint = isDeclaredStreamDefinition || responseContentType.toLowerCase() === 'text/event-stream'
 
 		const handler: Handler = async c => {
 			const parentContext = propagation.extract(context.active(), c.req.raw.headers)
@@ -442,6 +478,49 @@ export class HonoServiceClass<
 							`${method}:${path}`,
 						)
 
+						if (streamMode === 'aggregate') {
+							const envelopes: unknown[] = []
+							let lastCompleteFinal: unknown
+							for await (const frame of handle) {
+								const payload = frame.payload as StreamTransportFramePayload
+								if (payload.frameType === 'chunk' && payload.chunk !== undefined) {
+									envelopes.push(payload.chunk)
+									continue
+								}
+								if (payload.frameType === 'complete') {
+									lastCompleteFinal = payload.final
+									if (Array.isArray(payload.final)) {
+										envelopes.splice(0, envelopes.length, ...payload.final)
+									}
+									break
+								}
+								if (isStreamErrorPayload(payload)) {
+									const statusCode =
+										typeof payload.error.status === 'number'
+											? (payload.error.status as ContentfulStatusCode)
+											: StatusCode.InternalServerError
+									span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, statusCode)
+									return c.json(payload.error, statusCode)
+								}
+							}
+
+							const agentEnvelopes = Array.isArray(lastCompleteFinal)
+								? lastCompleteFinal.filter(isAgentEnvelopeLike)
+								: envelopes.filter(isAgentEnvelopeLike)
+							const finalEnvelope = agentEnvelopes.at(-1)
+							if (finalEnvelope?.frame?.kind === 'error') {
+								const statusCode = StatusCode.InternalServerError
+								span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, statusCode)
+								return c.json(lastCompleteFinal ?? finalEnvelope, statusCode as ContentfulStatusCode)
+							}
+
+							const responsePayload = lastCompleteFinal ?? null
+							span.setStatus({ code: SpanStatusCode.OK })
+							span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, StatusCode.OK)
+							c.header('content-type', `${responseContentType}; charset=${responseEncodingType}`)
+							return c.json(responsePayload, StatusCode.OK)
+						}
+
 						const encoder = new TextEncoder()
 						const stream = new ReadableStream<Uint8Array>({
 							start: controller => {
@@ -449,11 +528,7 @@ export class HonoServiceClass<
 									let protocolPassthrough = false
 									try {
 										for await (const frame of activeHandle) {
-											const payload = frame.payload as {
-												frameType?: string
-												chunk?: unknown
-												error?: unknown
-											}
+											const payload = frame.payload as StreamTransportFramePayload
 											if (isTransportControlFrame(payload.frameType)) {
 												continue
 											}
