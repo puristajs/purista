@@ -18,6 +18,7 @@ export const addPuristaAgent = async (input: {
 	serviceVersion: string
 	agentName: string
 	agentDescription: string
+	responseEventName?: string
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const projectPath = input.projectRootPath ?? process.cwd()
@@ -43,6 +44,8 @@ export const addPuristaAgent = async (input: {
 			agentName: input.agentName,
 			agentDescription: input.agentDescription,
 			agentVersion: input.serviceVersion,
+			responseEventName: input.responseEventName,
+			puristaConfig: input.puristaConfig,
 			codeWriterOptions: input.codeWriterOptions,
 		}),
 	)

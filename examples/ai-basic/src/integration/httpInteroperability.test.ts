@@ -73,12 +73,12 @@ describe('ai-basic http interoperability flows', () => {
 		const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
-			poolConfig: { maxWorkers: 1 },
+			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
-			poolConfig: { maxWorkers: 2, poolId: 'support' },
+			poolConfig: { maxConcurrencyPerInstance: 2, poolId: 'support' },
 		})
 
 		await supportService.start()
@@ -109,7 +109,8 @@ describe('ai-basic http interoperability flows', () => {
 			expect(streamResponse.status).toBe(200)
 			const streamText = await streamResponse.text()
 			expect(streamText).toContain('event: chunk')
-			expect(streamText).toContain('"frameType":"complete"')
+			expect(streamText).toContain('"kind":"message"')
+			expect(streamText).toContain('"final":true')
 
 			const mcpToolsResponse = await httpService.app.fetch(new Request('http://localhost/api/v1/support/mcp/tools'))
 			expect(mcpToolsResponse.status).toBe(200)

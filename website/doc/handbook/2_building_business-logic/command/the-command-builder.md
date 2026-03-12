@@ -413,3 +413,33 @@ const builder = myServiceBuilder
 ```
 
 `canConsumeStream(...)` preserves full type inference for payload, parameter, chunk, and final frame payloads.
+
+## Invoke AI agents
+
+Commands can invoke AI agents by declaring them as a dependency.
+
+::: info Dependency required
+To use agent invocation, the optional **`@purista/ai`** package must be installed in your project.
+:::
+
+```typescript
+const builder = myServiceBuilder
+  .getCommandBuilder('ask', '...')
+  .canInvokeAgent('supportAgent', '1', {
+    payloadSchema: z.object({ prompt: z.string() }),
+    parameterSchema: z.object({ locale: z.string() })
+  })
+  .setCommandFunction(async function (context, payload, parameter) {
+    const result = await context.invokeAgent.supportAgent['1']
+      .call({ prompt: payload.prompt }, { locale: 'en-US' })
+      .final()
+
+    return result.message
+  })
+```
+
+By using `.canInvokeAgent(...)`, you get:
+- **Type Safety**: Full inference for payload and parameters.
+- **Traceability**: Traces and correlation IDs flow automatically into the agent.
+- **Metadata**: `principalId` and `tenantId` are forwarded to the agent.
+- **Session**: `sessionId` is managed for conversation history.

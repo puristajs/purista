@@ -4,7 +4,21 @@
 export type ProviderRequest = {
 	prompt: string
 	context?: string
+	/**
+	 * Optional high-priority app/developer instruction(s) injected on every call.
+	 * Providers may map these to dedicated instruction roles when supported.
+	 */
+	developerInstruction?: string | string[]
 	metadata?: Record<string, unknown>
+}
+
+/**
+ * Request input for high-level text generation that auto-selects streaming
+ * or non-streaming provider capabilities.
+ */
+export type ProviderGenerateTextRequest = ProviderRequest & {
+	onReasoning?: (text: string) => void | Promise<void>
+	onTextDelta?: (delta: string) => void | Promise<void>
 }
 
 /**
@@ -13,6 +27,7 @@ export type ProviderRequest = {
 export type ProviderJsonRequest = {
 	prompt: string
 	context?: string
+	developerInstruction?: string | string[]
 	schema?: unknown
 	metadata?: Record<string, unknown>
 }
@@ -148,6 +163,11 @@ export interface ModelProvider {
 	readonly capabilities: ModelProviderCapabilities
 	generate?(request: ProviderRequest): Promise<ProviderResponse>
 	stream?(request: ProviderRequest): ProviderStream
+	/**
+	 * High-level helper that yields one final text output while automatically
+	 * preferring `stream()` and falling back to `generate()`.
+	 */
+	generateText?(request: ProviderGenerateTextRequest): Promise<string>
 	generateJson?<T = unknown>(request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>>
 	embed?(request: ProviderEmbedRequest): Promise<ProviderEmbedResponse>
 	embedMany?(request: ProviderEmbedManyRequest): Promise<ProviderEmbedManyResponse>

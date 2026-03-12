@@ -15,8 +15,8 @@ import {
 import type { AgentHandler } from '../builder/AgentBuilder.js'
 import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
 import { InMemoryKnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
-import type { SessionStore } from '../memory/sessionStore.js'
-import { InMemorySessionStore } from '../memory/sessionStore.js'
+import type { ConversationStore } from '../memory/conversationStore.js'
+import { InMemoryConversationStore } from '../memory/conversationStore.js'
 import { PoolManager } from '../pools/PoolManager.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
@@ -38,6 +38,9 @@ export type AgentInstanceDependencies = {
 	manifest: AgentManifest
 	serviceBuilder: any
 	handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any>
+	callOptionsSchema?: import('zod/v4').ZodType<import('../builder/AgentBuilder.js').AgentModelCallOptions>
+	prepareCall?: import('../builder/AgentBuilder.js').AgentPrepareCallHook
+	prepareStep?: import('../builder/AgentBuilder.js').AgentPrepareStepHook
 }
 
 export type AgentRuntimeDependencies = Omit<AgentInstanceOptions<any>, 'knowledgeAdapters'> & {
@@ -53,13 +56,13 @@ type ResolvedAgentRuntimeDependencies = {
 	configStore?: ConfigStore
 	stateStore?: StateStore
 	queueBridge?: QueueBridge
-	sessionStore: SessionStore
+	conversationStore: ConversationStore
 	knowledgeAdapters: Record<string, KnowledgeAdapter>
 	poolManager: PoolManager
 	models: Record<string, ModelProvider>
 	resources: Record<string, unknown>
 	poolId: string
-	maxWorkersPerInstance: number
+	maxConcurrencyPerInstance: number
 	concurrencyHints?: {
 		replicaCountHint?: number
 	}
@@ -70,14 +73,18 @@ type AgentServiceConfig = {
 	runtime: {
 		handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any>
 		manifest: AgentManifest
-		sessionStore: SessionStore
+		conversationStore: ConversationStore
 		knowledgeAdapters: Record<string, KnowledgeAdapter>
 		poolManager: PoolManager
 		models: Record<string, ModelProvider>
+		eventBridge: EventBridge
+		callOptionsSchema?: import('zod/v4').ZodType<import('../builder/AgentBuilder.js').AgentModelCallOptions>
+		prepareCall?: import('../builder/AgentBuilder.js').AgentPrepareCallHook
+		prepareStep?: import('../builder/AgentBuilder.js').AgentPrepareStepHook
 		tracer?: Tracer
 		resources: Record<string, unknown>
 		poolId: string
-		maxWorkersPerInstance: number
+		maxConcurrencyPerInstance: number
 		concurrencyHints?: {
 			replicaCountHint?: number
 		}
@@ -116,7 +123,7 @@ export class AgentInstance implements AgentInstanceContract {
 	constructor(deps: AgentInstanceDependencies, eventBridge: EventBridge, runtime: AgentRuntimeDependencies = {}) {
 		this.dependencies = deps
 		const poolId = runtime.poolConfig?.poolId ?? `agent:${deps.info.agentName}`
-		const maxWorkers = runtime.poolConfig?.maxWorkers ?? 1
+		const maxConcurrencyPerInstance = runtime.poolConfig?.maxConcurrencyPerInstance ?? 1
 
 		this.runtime = {
 			eventBridge,
@@ -128,7 +135,7 @@ export class AgentInstance implements AgentInstanceContract {
 			stateStore: runtime.stateStore,
 			queueBridge: runtime.queueBridge,
 			config: runtime.config,
-			sessionStore: runtime.sessionStore ?? new InMemorySessionStore(),
+			conversationStore: runtime.conversationStore ?? new InMemoryConversationStore(),
 			knowledgeAdapters: runtime.knowledgeAdapters ?? {
 				default: new InMemoryKnowledgeAdapter(),
 			},
@@ -136,7 +143,7 @@ export class AgentInstance implements AgentInstanceContract {
 			models: runtime.models ?? {},
 			resources: runtime.resources ?? {},
 			poolId,
-			maxWorkersPerInstance: maxWorkers,
+			maxConcurrencyPerInstance,
 			concurrencyHints: runtime.concurrencyHints,
 		}
 
@@ -152,7 +159,7 @@ export class AgentInstance implements AgentInstanceContract {
 			}
 		}
 
-		this.runtime.poolManager.registerPool(poolId, maxWorkers)
+		this.runtime.poolManager.registerPool(poolId, maxConcurrencyPerInstance)
 	}
 
 	async start() {
@@ -164,14 +171,18 @@ export class AgentInstance implements AgentInstanceContract {
 			runtime: {
 				handler: this.dependencies.handler,
 				manifest: this.dependencies.manifest,
-				sessionStore: this.runtime.sessionStore,
+				conversationStore: this.runtime.conversationStore,
 				knowledgeAdapters: this.runtime.knowledgeAdapters,
 				poolManager: this.runtime.poolManager,
 				models: this.runtime.models,
+				eventBridge: this.runtime.eventBridge,
+				callOptionsSchema: this.dependencies.callOptionsSchema,
+				prepareCall: this.dependencies.prepareCall,
+				prepareStep: this.dependencies.prepareStep,
 				tracer: this.runtime.tracer,
 				resources: this.runtime.resources,
 				poolId: this.runtime.poolId,
-				maxWorkersPerInstance: this.runtime.maxWorkersPerInstance,
+				maxConcurrencyPerInstance: this.runtime.maxConcurrencyPerInstance,
 				concurrencyHints: this.runtime.concurrencyHints,
 			},
 		}
@@ -209,14 +220,14 @@ export class AgentInstance implements AgentInstanceContract {
 			agentName: this.dependencies.info.agentName,
 			agentVersion: this.dependencies.info.agentVersion,
 			poolId: this.runtime.poolId,
-			maxWorkersPerInstance: this.runtime.maxWorkersPerInstance,
+			maxConcurrencyPerInstance: this.runtime.maxConcurrencyPerInstance,
 			activeWorkers: pool.activeWorkers,
 			waitingWorkers: pool.waitingWorkers,
 			concurrencyHints:
 				replicaCountHint !== undefined
 					? {
 							replicaCountHint,
-							effectiveMaxConcurrencyHint: this.runtime.maxWorkersPerInstance * replicaCountHint,
+							effectiveMaxConcurrencyHint: this.runtime.maxConcurrencyPerInstance * replicaCountHint,
 						}
 					: undefined,
 		}

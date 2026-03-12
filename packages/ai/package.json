@@ -35,7 +35,7 @@
 	},
 	"scripts": {
 		"lint": "npx @biomejs/biome check --write",
-		"test": "vitest",
+		"test": "vitest -c ./vitest.config.ts",
 		"test:coverage": "vitest run -c ./vitest.config.ts --coverage",
 		"build": "rimraf dist tsconfig.tsbuildinfo && tshy && node ./scripts/assert-build-artifacts.mjs"
 	},

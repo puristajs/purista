@@ -241,6 +241,130 @@ describe('AiSdkProvider', () => {
 		expect(jsonResult.reasoningText).toBe('chain of thought')
 	})
 
+	it('preserves top-level aiSdk options when aiSdk.generate is present', async () => {
+		generateTextMock.mockResolvedValueOnce({
+			text: 'with-tools',
+			usage: { inputTokens: 1, outputTokens: 1 },
+			request: { id: 'request' },
+			response: { id: 'response' },
+			providerMetadata: {},
+		})
+
+		const provider = new AiSdkProvider({ model: mockModel })
+		const tools = { writeSpecFile: { description: 'writes spec', inputSchema: {}, execute: vi.fn() } }
+
+		await provider.generate({
+			prompt: 'apply updates',
+			metadata: {
+				aiSdk: {
+					tools,
+					toolChoice: 'required',
+					maxSteps: 20,
+					generate: {
+						temperature: 0.1,
+					},
+				},
+			},
+		})
+
+		expect(generateTextMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				tools,
+				toolChoice: 'required',
+				maxSteps: 20,
+				temperature: 0.1,
+			}),
+		)
+	})
+
+	it('maps per-call developer instructions to provider system messages in generate/stream/generateJson', async () => {
+		generateTextMock.mockResolvedValueOnce({
+			text: 'ok',
+			usage: { inputTokens: 1, outputTokens: 1 },
+			request: { id: 'request' },
+			response: { id: 'response' },
+			providerMetadata: {},
+		})
+		streamTextMock.mockReturnValueOnce({
+			fullStream: (async function* () {
+				yield { type: 'text-delta', text: 'done' }
+			})(),
+			usage: Promise.resolve({ inputTokens: 2, outputTokens: 1 }),
+			text: Promise.resolve('done'),
+			request: Promise.resolve({ id: 'stream-request' }),
+			response: Promise.resolve({ id: 'stream-response' }),
+			providerMetadata: Promise.resolve({}),
+		})
+		generateObjectMock.mockResolvedValueOnce({
+			object: { ok: true },
+			usage: { inputTokens: 1, outputTokens: 1 },
+			request: { id: 'json-request' },
+			response: { id: 'json-response' },
+			providerMetadata: {},
+		})
+
+		const provider = new AiSdkProvider({ model: mockModel, systemPrompt: 'static-system' })
+
+		await provider.generate({
+			prompt: 'hello',
+			context: 'ctx',
+			developerInstruction: 'always ask for persistence details',
+		})
+		expect(generateTextMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				system: expect.arrayContaining([
+					expect.objectContaining({
+						role: 'system',
+						providerOptions: { openai: { systemMessageMode: 'system' } },
+					}),
+					expect.objectContaining({
+						role: 'system',
+						content: 'always ask for persistence details',
+						providerOptions: { openai: { systemMessageMode: 'developer' } },
+					}),
+				]),
+			}),
+		)
+
+		const stream = provider.stream({
+			prompt: 'stream please',
+			developerInstruction: ['developer rule 1', 'developer rule 2'],
+		})
+		for await (const _chunk of stream) {
+			// consume stream
+		}
+		await stream.final()
+		expect(streamTextMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				system: expect.arrayContaining([
+					expect.objectContaining({
+						content: 'developer rule 1',
+						providerOptions: { openai: { systemMessageMode: 'developer' } },
+					}),
+					expect.objectContaining({
+						content: 'developer rule 2',
+						providerOptions: { openai: { systemMessageMode: 'developer' } },
+					}),
+				]),
+			}),
+		)
+
+		await provider.generateJson({
+			prompt: 'json please',
+			developerInstruction: 'developer-json',
+		})
+		expect(generateObjectMock).toHaveBeenCalledWith(
+			expect.objectContaining({
+				system: expect.arrayContaining([
+					expect.objectContaining({
+						content: 'developer-json',
+						providerOptions: { openai: { systemMessageMode: 'developer' } },
+					}),
+				]),
+			}),
+		)
+	})
+
 	it('throws when embedding or reranking models are missing', async () => {
 		const provider = new AiSdkProvider({ model: mockModel })
 

@@ -1,5 +1,17 @@
-import type { CommandFunctionContext, Logger, StreamFunctionContext } from '@purista/core'
-import { HandledError, StatusCode } from '@purista/core'
+import type {
+	AgentInvokeList,
+	CommandFunctionContext,
+	EmptyObject,
+	EventBridge,
+	InferIn,
+	InvokeList,
+	Logger,
+	QueueInvokeList,
+	Schema,
+	StreamFunctionContext,
+	StreamInvokeList,
+} from '@purista/core'
+import { HandledError, StatusCode, validate } from '@purista/core'
 
 import type {
 	KnowledgeAdapter,
@@ -8,8 +20,13 @@ import type {
 	KnowledgeQueryRequest,
 	KnowledgeUpsertRequest,
 } from '../knowledge/adapters/inMemoryAdapter.js'
-import type { SessionRecord, SessionRecordData, SessionStore } from '../memory/sessionStore.js'
+import type {
+	ConversationStore,
+	ConversationStoreRecord,
+	ConversationStoreRecordData,
+} from '../memory/conversationStore.js'
 import {
+	agentProtocolEnvelopeSchema,
 	createArtifactFrame,
 	createEnvelopeFromContext,
 	createErrorFrame,
@@ -29,7 +46,9 @@ import type {
 } from '../providers/runtime/ModelProvider.js'
 import type { AgentManifest, AllowedToolDefinition } from '../types/AgentManifest.js'
 import { type ConversationHelpers, createConversationHelpers } from './conversation.js'
+import { invokeAgent } from './invokeAgent.js'
 import { createScopedSessionId, resolveBaseSessionId } from './sessionIdentity.js'
+import { withSessionIdInPayload } from './sessionPayload.js'
 
 type ProtocolFrameEntry = {
 	frame: AgentProtocolFrame
@@ -53,7 +72,7 @@ type ProtocolEmitter = {
 		durationMs?: number
 		waitTimeMs?: number
 		poolId?: string
-		maxWorkersPerInstance?: number
+		maxConcurrencyPerInstance?: number
 		activeWorkers?: number
 		waitingWorkers?: number
 		replicaCountHint?: number
@@ -97,9 +116,15 @@ export type AgentStreamEmitter = {
 
 const createStreamEmitter = (protocol: ProtocolEmitter): AgentStreamEmitter => ({
 	sendChunk(content) {
+		if (content.length === 0) {
+			return
+		}
 		protocol.emitMessage({ content, partial: true, final: false })
 	},
 	sendFinal(content, options) {
+		if (content.length === 0) {
+			return
+		}
 		protocol.emitMessage({ content, summary: options?.summary, partial: false, final: true })
 	},
 	sendReasoning(content, options) {
@@ -180,6 +205,9 @@ export const createProtocolBuffer = (
 				partial: message.partial,
 				final: message.final,
 			})
+			if (frame.content.length === 0) {
+				return
+			}
 			pushFrame(frame)
 		},
 		emitArtifact(input) {
@@ -199,7 +227,7 @@ export const createProtocolBuffer = (
 				durationMs: metrics.durationMs,
 				waitTimeMs: metrics.waitTimeMs,
 				poolId: metrics.poolId,
-				maxWorkersPerInstance: metrics.maxWorkersPerInstance,
+				maxConcurrencyPerInstance: metrics.maxConcurrencyPerInstance,
 				activeWorkers: metrics.activeWorkers,
 				waitingWorkers: metrics.waitingWorkers,
 				replicaCountHint: metrics.replicaCountHint,
@@ -262,7 +290,7 @@ export const createProtocolBuffer = (
 
 type ToolInvoker = {
 	list(): AllowedToolDefinition[]
-	invoke(definition: AllowedToolDefinition | string, payload: unknown, parameter?: unknown): Promise<unknown>
+	invoke: Record<string, Record<string, Record<string, (payload: unknown, parameter?: unknown) => Promise<unknown>>>>
 }
 
 const createToolInvoker = (
@@ -281,17 +309,6 @@ const createToolInvoker = (
 		map.set(key, tool)
 	}
 
-	const resolve = (definition: AllowedToolDefinition | string) => {
-		if (typeof definition !== 'string') {
-			return definition
-		}
-		const found = map.get(definition)
-		if (!found) {
-			throw new HandledError(StatusCode.BadRequest, `Tool ${definition} not allowlisted`)
-		}
-		return found
-	}
-
 	const emitStatus = (
 		tool: AllowedToolDefinition,
 		status: 'invoked' | 'success' | 'error',
@@ -308,8 +325,7 @@ const createToolInvoker = (
 		})
 	}
 
-	const invoke = async (definition: AllowedToolDefinition | string, payload: unknown, parameter?: unknown) => {
-		const tool = resolve(definition)
+	const invoke = async (tool: AllowedToolDefinition, payload: unknown, parameter?: unknown) => {
 		const serviceApi = services[tool.serviceName]
 		if (!serviceApi) {
 			throw new HandledError(StatusCode.BadRequest, `Service ${tool.serviceName} not available for tool invocation`)
@@ -340,9 +356,55 @@ const createToolInvoker = (
 		}
 	}
 
+	const getAllowedTool = (serviceName: string, serviceVersion: string, commandName: string) => {
+		const key = `${serviceName}.${serviceVersion}.${commandName}`
+		return map.get(key)
+	}
+
+	const invokeProxy = new Proxy(
+		{},
+		{
+			get: (_target, serviceProp) => {
+				if (typeof serviceProp !== 'string') {
+					return undefined
+				}
+				return new Proxy(
+					{},
+					{
+						get: (_targetVersion, versionProp) => {
+							if (typeof versionProp !== 'string') {
+								return undefined
+							}
+							return new Proxy(
+								{},
+								{
+									get: (_targetCommand, commandProp) => {
+										if (typeof commandProp !== 'string') {
+											return undefined
+										}
+										return async (payload: unknown, parameter?: unknown) => {
+											const tool = getAllowedTool(serviceProp, versionProp, commandProp)
+											if (!tool) {
+												throw new HandledError(
+													StatusCode.BadRequest,
+													`Tool ${serviceProp}.${versionProp}.${commandProp} not allowlisted`,
+												)
+											}
+											return await invoke(tool, payload, parameter)
+										}
+									},
+								},
+							)
+						},
+					},
+				)
+			},
+		},
+	) as ToolInvoker['invoke']
+
 	return {
 		list: () => [...tools],
-		invoke,
+		invoke: invokeProxy,
 	}
 }
 
@@ -350,11 +412,15 @@ export type SessionHelpers = {
 	/**
 	 * Load the session record. If no id is provided, the default scoped id is used.
 	 */
-	load(sessionId?: string): Promise<SessionRecord | undefined>
+	load(sessionId?: string): Promise<ConversationStoreRecord | undefined>
 	/**
 	 * Save session data. If `sessionId` is omitted, the default scoped id is used.
 	 */
-	save(record: SessionRecord | { sessionId?: string; data: SessionRecordData; updatedAt?: number }): Promise<void>
+	save(
+		record:
+			| ConversationStoreRecord
+			| { conversationId?: string; data: ConversationStoreRecordData; updatedAt?: number },
+	): Promise<void>
 	/**
 	 * Delete a session. If no id is provided, the default scoped id is used.
 	 */
@@ -381,7 +447,7 @@ type SessionIdentityInput = {
 	payload: unknown
 }
 
-const createSessionHelpers = (store: SessionStore, input: SessionIdentityInput): SessionHelpers => {
+const createSessionHelpers = (store: ConversationStore, input: SessionIdentityInput): SessionHelpers => {
 	const baseSessionId = resolveBaseSessionId(input.context, input.payload)
 	const identity = {
 		agentName: input.manifest.agentName,
@@ -404,7 +470,7 @@ const createSessionHelpers = (store: SessionStore, input: SessionIdentityInput):
 		load: sessionId => store.load(resolveId(sessionId)),
 		save: record =>
 			store.save({
-				sessionId: resolveId(record.sessionId),
+				conversationId: resolveId(record.conversationId),
 				data: record.data,
 				updatedAt: record.updatedAt ?? Date.now(),
 			}),
@@ -551,11 +617,13 @@ export type AgentHandlerContext<
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
 	KnowledgeAliases extends string = never,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > = {
 	logger: Logger
 	payload: Payload
 	parameter: Parameter
 	message: ProtocolContext['message']
+	emit: ProtocolContext['emit']
 	conversation: ConversationHelpers
 	session: SessionHelpers
 	knowledge: KnowledgeHelpers<KnowledgeAliases>
@@ -563,6 +631,23 @@ export type AgentHandlerContext<
 	tools: ToolInvoker
 	resources: Resources
 	models: Models
+	agents: {
+		/**
+		 * Invokes another agent via EventBridge and returns its emitted envelopes.
+		 * Supports both direct options-based calls and typed chained access:
+		 * `context.agents.invoke({ agentName, agentVersion, payload })`
+		 * and `context.agents.invoke.someAgent['1'].call(payload, parameter)`.
+		 */
+		invoke: AgentInvokes & ((options: AgentInvocationOptions) => Promise<AgentProtocolEnvelope[]>)
+		/**
+		 * Invokes another agent and extracts a best-effort assistant text output from message frames.
+		 */
+		runText(options: AgentInvocationOptions): Promise<string>
+		/**
+		 * Invokes another agent and parses the final assistant message as JSON.
+		 */
+		runObject<T = unknown>(options: AgentInvocationOptions): Promise<T>
+	}
 	embeddings: {
 		[Alias in keyof Models as Models[Alias] extends { embed: (...args: any[]) => any } ? Alias : never]: {
 			name: string
@@ -579,6 +664,9 @@ export type AgentHandlerContext<
 		}
 	}
 	serviceContext: ProtocolContext
+	secrets: ProtocolContext['secrets']
+	configs: ProtocolContext['configs']
+	states: ProtocolContext['states']
 	manifest: AgentManifest
 }
 
@@ -588,11 +676,33 @@ export type CreateAgentHandlerContextInput<
 	Resources extends Record<string, unknown>,
 	Models extends Record<string, ModelProvider>,
 	KnowledgeAliases extends string = string,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > = {
-	serviceContext: CommandFunctionContext<Payload, Parameter> | StreamFunctionContext<Payload, Parameter>
+	serviceContext:
+		| CommandFunctionContext<
+				Payload,
+				Parameter,
+				Resources,
+				InvokeList,
+				StreamInvokeList,
+				Record<string, Schema>,
+				QueueInvokeList,
+				AgentInvokes
+		  >
+		| StreamFunctionContext<
+				Payload,
+				Parameter,
+				Resources,
+				InvokeList,
+				StreamInvokeList,
+				Record<string, Schema>,
+				QueueInvokeList,
+				AgentInvokes
+		  >
+	eventBridge: EventBridge
 	payload: Payload
 	parameter: Parameter
-	sessionStore: SessionStore
+	conversationStore: ConversationStore
 	knowledgeAdapters: Record<KnowledgeAliases, KnowledgeAdapter | undefined>
 	protocol: ProtocolEmitter
 	resources: Resources
@@ -610,16 +720,321 @@ export type CreateAgentHandlerContextInput<
 	manifest: AgentManifest
 }
 
+export type AgentInvocationOptions = {
+	agentName: string
+	agentVersion: string
+	payload: unknown
+	parameter?: unknown
+	timeoutMs?: number
+	correlationId?: string
+	sessionId?: string
+	/**
+	 * Controls whether protocol `error` envelopes from the invoked sub-agent throw immediately.
+	 * Defaults to `true`.
+	 */
+	failOnErrorFrame?: boolean
+	stream?: import('../types/AgentDefinition.js').AgentStreamResponder
+}
+
+type DeclaredAgentBinding = {
+	call?: (
+		payload: unknown,
+		parameter?: unknown,
+	) => {
+		final(): Promise<unknown>
+		[Symbol.asyncIterator](): AsyncIterator<unknown>
+	}
+	payloadSchema?: Schema
+	parameterSchema?: Schema
+}
+
+type ResolvedAgentBinding = {
+	call: (
+		payload: unknown,
+		parameter?: unknown,
+	) => {
+		final(): Promise<unknown>
+		[Symbol.asyncIterator](): AsyncIterator<unknown>
+	}
+	payloadSchema?: Schema
+	parameterSchema?: Schema
+}
+
+const hasErrorEnvelope = (envelopes: AgentProtocolEnvelope[]): boolean =>
+	envelopes.some(envelope => envelope.frame.kind === 'error')
+
+const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(input: {
+	eventBridge: EventBridge
+	protocol: ProtocolEmitter
+	serviceContext:
+		| CommandFunctionContext<
+				unknown,
+				unknown,
+				Record<string, unknown>,
+				InvokeList,
+				StreamInvokeList,
+				Record<string, Schema>,
+				QueueInvokeList,
+				AgentInvokes
+		  >
+		| StreamFunctionContext<
+				unknown,
+				unknown,
+				Record<string, unknown>,
+				InvokeList,
+				StreamInvokeList,
+				Record<string, Schema>,
+				QueueInvokeList,
+				AgentInvokes
+		  >
+	session: SessionHelpers
+	manifest: AgentManifest
+}) => {
+	const resolveDeclaredBinding = (agentName: string, agentVersion: string): ResolvedAgentBinding => {
+		const allowed = input.manifest.allowedAgents?.some(
+			agent => agent.agentName === agentName && agent.agentVersion === agentVersion,
+		)
+		if (!allowed) {
+			throw new HandledError(
+				StatusCode.BadRequest,
+				`Agent ${agentName}.${agentVersion} is not declared via canInvokeAgent(...)`,
+			)
+		}
+
+		const invokeAgentApi = (input.serviceContext.invokeAgent ?? ({} as EmptyObject)) as AgentInvokes &
+			Record<string, Record<string, DeclaredAgentBinding> | undefined>
+		const versionApi = invokeAgentApi[agentName]
+		const binding = versionApi?.[agentVersion]
+		if (!binding?.call) {
+			throw new HandledError(
+				StatusCode.BadRequest,
+				`Agent ${agentName}.${agentVersion} is declared but no invoke binding is available in the current context`,
+			)
+		}
+		return {
+			call: binding.call,
+			payloadSchema: binding.payloadSchema,
+			parameterSchema: binding.parameterSchema,
+		}
+	}
+
+	const emitStatus = (
+		options: Pick<AgentInvocationOptions, 'agentName' | 'agentVersion' | 'payload'>,
+		status: 'invoked' | 'success' | 'error',
+		output?: unknown,
+		errorCode?: string,
+	) => {
+		input.protocol.emitToolEvent({
+			toolName: `${options.agentName}.${options.agentVersion}.run`,
+			status,
+			input: options.payload,
+			output,
+			errorCode,
+		})
+	}
+
+	const validateInvocationInput = async (binding: DeclaredAgentBinding, payload: unknown, parameter: unknown) => {
+		if (binding.payloadSchema) {
+			const result = await validate(binding.payloadSchema, payload)
+			if (!result.success) {
+				throw new HandledError(StatusCode.BadRequest, 'Agent invoke payload schema validation failed', {
+					issues: result.issues,
+				})
+			}
+		}
+		if (binding.parameterSchema) {
+			const result = await validate(binding.parameterSchema, parameter)
+			if (!result.success) {
+				throw new HandledError(StatusCode.BadRequest, 'Agent invoke parameter schema validation failed', {
+					issues: result.issues,
+				})
+			}
+		}
+	}
+
+	const instrumentInvocation = (
+		options: Pick<AgentInvocationOptions, 'agentName' | 'agentVersion' | 'payload'>,
+		invocation: {
+			final(): Promise<unknown>
+			[Symbol.asyncIterator](): AsyncIterator<unknown>
+		},
+	) => {
+		emitStatus(options, 'invoked')
+		const finalPromise = invocation
+			.final()
+			.then(result => {
+				const envelopes = Array.isArray(result) ? agentProtocolEnvelopeSchema.array().safeParse(result) : undefined
+				if (envelopes?.success && hasErrorEnvelope(envelopes.data)) {
+					emitStatus(options, 'error', envelopes.data, 'AgentErrorEnvelope')
+				} else {
+					emitStatus(options, 'success', result)
+				}
+				return result
+			})
+			.catch(error => {
+				emitStatus(
+					options,
+					'error',
+					undefined,
+					error instanceof HandledError ? String(error.errorCode) : 'UnhandledError',
+				)
+				throw error
+			})
+
+		return {
+			final: async () => await finalPromise,
+			[Symbol.asyncIterator]: async function* () {
+				const iterator = invocation[Symbol.asyncIterator]()
+				while (true) {
+					const next = await iterator.next()
+					if (next.done) {
+						return
+					}
+					yield next.value
+				}
+			},
+		}
+	}
+
+	const invoke = async (options: AgentInvocationOptions) => {
+		const binding = resolveDeclaredBinding(options.agentName, options.agentVersion)
+		const payload = withSessionIdInPayload(options.payload, options.sessionId ?? input.session.identity.baseSessionId)
+		const parameter = options.parameter ?? {}
+		await validateInvocationInput(binding, payload, parameter)
+		emitStatus(options, 'invoked')
+		try {
+			const envelopes = await invokeAgent({
+				eventBridge: input.eventBridge,
+				agentName: options.agentName,
+				agentVersion: options.agentVersion,
+				payload,
+				parameter,
+				timeoutMs: options.timeoutMs,
+				stream: options.stream,
+				correlationId: options.correlationId ?? input.serviceContext.message.correlationId,
+				principalId: input.serviceContext.message.principalId,
+				tenantId: input.serviceContext.message.tenantId,
+				sessionId: options.sessionId ?? input.session.identity.baseSessionId,
+				failOnErrorFrame: options.failOnErrorFrame ?? true,
+			})
+			if (hasErrorEnvelope(envelopes)) {
+				emitStatus(options, 'error', envelopes, 'AgentErrorEnvelope')
+			} else {
+				emitStatus(options, 'success', envelopes)
+			}
+			return envelopes
+		} catch (error) {
+			emitStatus(
+				options,
+				'error',
+				undefined,
+				error instanceof HandledError ? String(error.errorCode) : 'UnhandledError',
+			)
+			throw error
+		}
+	}
+
+	const runText = async (options: Parameters<typeof invoke>[0]) => {
+		const envelopes = await invoke(options)
+		const assistantMessageFrames = envelopes
+			.map(envelope => envelope.frame)
+			.filter(
+				(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'message' }> =>
+					frame.kind === 'message' && frame.role === 'assistant',
+			)
+		let finalMessage: string | undefined
+		for (let index = assistantMessageFrames.length - 1; index >= 0; index -= 1) {
+			const frame = assistantMessageFrames[index]
+			if (frame?.final === true) {
+				finalMessage = frame.content
+				break
+			}
+		}
+		if (typeof finalMessage === 'string' && finalMessage.trim().length > 0) {
+			return finalMessage
+		}
+		return assistantMessageFrames
+			.map(frame => frame.content)
+			.filter((content): content is string => typeof content === 'string' && content.length > 0)
+			.join('')
+	}
+
+	const runObject = async <T = unknown>(options: Parameters<typeof invoke>[0]): Promise<T> => {
+		const text = await runText(options)
+		try {
+			return JSON.parse(text) as T
+		} catch (error) {
+			throw new HandledError(StatusCode.BadGateway, 'Invoked agent did not return valid JSON in final message', {
+				text,
+				error: error instanceof Error ? error.message : String(error),
+			})
+		}
+	}
+
+	const invokeProxy = new Proxy(invoke, {
+		apply(target, thisArg, argArray) {
+			return Reflect.apply(target, thisArg, argArray)
+		},
+		get(_target, prop) {
+			if (prop === 'then' || prop === 'catch' || prop === 'finally') {
+				return undefined
+			}
+			if (typeof prop !== 'string') {
+				return undefined
+			}
+			return new Proxy(
+				{},
+				{
+					get(_versionTarget, versionProp) {
+						if (typeof versionProp !== 'string') {
+							return undefined
+						}
+						const binding = resolveDeclaredBinding(prop, versionProp)
+						const call = binding.call
+						return {
+							call: (payload: InferIn<Schema>, parameter?: InferIn<Schema>) =>
+								instrumentInvocation(
+									{
+										agentName: prop,
+										agentVersion: versionProp,
+										payload,
+									},
+									call(withSessionIdInPayload(payload, input.session.identity.baseSessionId), parameter ?? {}),
+								),
+							payloadSchema: binding.payloadSchema,
+							parameterSchema: binding.parameterSchema,
+						}
+					},
+				},
+			)
+		},
+	}) as AgentHandlerContext<
+		unknown,
+		unknown,
+		Record<string, unknown>,
+		Record<string, ModelProvider>,
+		string,
+		AgentInvokes
+	>['agents']['invoke']
+
+	return {
+		invoke: invokeProxy,
+		runText,
+		runObject,
+	}
+}
+
 export const createAgentHandlerContext = <
 	Payload,
 	Parameter,
 	Resources extends Record<string, unknown>,
 	Models extends Record<string, ModelProvider>,
 	KnowledgeAliases extends string = string,
+	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 >(
-	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models, KnowledgeAliases>,
-): AgentHandlerContext<Payload, Parameter, Resources, Models, KnowledgeAliases> => {
-	const sessionHelpers = createSessionHelpers(input.sessionStore, {
+	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models, KnowledgeAliases, AgentInvokes>,
+): AgentHandlerContext<Payload, Parameter, Resources, Models, KnowledgeAliases, AgentInvokes> => {
+	const sessionHelpers = createSessionHelpers(input.conversationStore, {
 		context: input.serviceContext,
 		manifest: input.manifest,
 		payload: input.payload,
@@ -630,6 +1045,7 @@ export const createAgentHandlerContext = <
 		payload: input.payload,
 		parameter: input.parameter,
 		message: input.serviceContext.message,
+		emit: input.serviceContext.emit.bind(input.serviceContext) as ProtocolContext['emit'],
 		session: sessionHelpers,
 		conversation: createConversationHelpers(sessionHelpers, input.manifest),
 		knowledge: createKnowledgeHelpers(
@@ -641,21 +1057,33 @@ export const createAgentHandlerContext = <
 		tools: createToolInvoker(input.serviceContext, input.manifest.allowedTools ?? [], input.protocol),
 		resources: input.resources,
 		models: input.models,
+		agents: createAgentInvocationHelpers({
+			eventBridge: input.eventBridge,
+			protocol: input.protocol,
+			serviceContext: input.serviceContext,
+			session: sessionHelpers,
+			manifest: input.manifest,
+		}),
 		embeddings: input.embeddings as AgentHandlerContext<
 			Payload,
 			Parameter,
 			Resources,
 			Models,
-			KnowledgeAliases
+			KnowledgeAliases,
+			AgentInvokes
 		>['embeddings'],
 		rerankers: input.rerankers as AgentHandlerContext<
 			Payload,
 			Parameter,
 			Resources,
 			Models,
-			KnowledgeAliases
+			KnowledgeAliases,
+			AgentInvokes
 		>['rerankers'],
 		serviceContext: input.serviceContext,
+		secrets: input.serviceContext.secrets,
+		configs: input.serviceContext.configs,
+		states: input.serviceContext.states,
 		manifest: input.manifest,
 	}
 }

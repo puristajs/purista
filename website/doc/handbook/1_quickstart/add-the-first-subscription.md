@@ -16,7 +16,7 @@ Subscriptions do not need to return a value.
 If a subscription is returning a value, it will be emitted as custom message to the event bridge.
 The subscription does not have any knowledge if the custom message has a consumer.
 
-In our example, the subscription will be part of the "Email" domain.
+In our example, the subscription will be part of the "Email" business area.
 Because of this, we will first create another service called "Email".
 
 ```bash

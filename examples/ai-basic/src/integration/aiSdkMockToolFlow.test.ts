@@ -61,7 +61,7 @@ describe('ai-basic integration with ai/test mock model', () => {
 			models: {
 				'openai:gpt-4o-mini': provider,
 			},
-			poolConfig: { maxWorkers: 1 },
+			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 
 		await supportService.start()

@@ -1,5 +1,4 @@
 import { AgentBuilder, type AgentHandlerContext } from '@purista/ai'
-import { HandledError, StatusCode } from '@purista/core'
 import { z } from 'zod/v4'
 
 import { type TriageAgentInput, triageAgentInputSchema } from './schema.js'
@@ -21,12 +20,13 @@ export const triageAgent = new AgentBuilder({
 	.persistConversation('agent', { maxFrames: 10 })
 	.setHandler<TriageAgentInput>(async function (context: TriageAgentContext, payload) {
 		const model = context.models['openai:gpt-4o-mini']
-		if (!model?.generateJson) {
-			throw new HandledError(StatusCode.InternalServerError, 'JSON generation model is not configured')
+		const generateJson = model.generateJson
+		if (typeof generateJson !== 'function') {
+			throw new Error('Configured triage model does not support JSON generation')
 		}
 
 		context.stream.sendChunk('Escalation check in progress...')
-		const result = await model.generateJson<z.infer<typeof triageJsonSchema>>({
+		const result = await generateJson<z.infer<typeof triageJsonSchema>>({
 			prompt: `Classify this request urgency and produce JSON with urgency, explanation, and nextSteps: ${payload.prompt}`,
 			schema: triageJsonSchema,
 			metadata: {

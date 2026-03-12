@@ -8,7 +8,7 @@ export type StreamDefinitionMetadataBase = {
 	expose: {
 		contentTypeRequest?: ContentType
 		contentEncodingRequest?: string
-		contentTypeResponse?: 'text/event-stream'
+		contentTypeResponse?: 'text/event-stream' | 'application/json'
 		contentEncodingResponse?: string
 		inputPayload?: SchemaObject
 		parameter?: SchemaObject
@@ -18,6 +18,11 @@ export type StreamDefinitionMetadataBase = {
 		http?: {
 			method: SupportedHttpMethod
 			path: string
+			stream?: {
+				protocol: string
+				documentationUrl?: string
+				mode?: 'stream' | 'aggregate'
+			}
 			openApi?: {
 				isSecure: boolean
 				description: string

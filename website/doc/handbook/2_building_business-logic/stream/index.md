@@ -8,6 +8,8 @@ order: 202500
 
 Streams are long-running request/response functions that return multiple frames (`start`, `chunk`, `complete`, `error`, `cancel`) instead of a single payload. Use them for incremental delivery, token-by-token AI responses, progress feeds, or any flow that maps well to Server-Sent Events (SSE).
 
+Streams can also invoke AI agents via `.canInvokeAgent(...)` (requires optional `@purista/ai` package).
+
 ## Add a stream with the CLI
 
 ```bash
@@ -78,3 +80,4 @@ export const pingStreamBuilder = pingV1ServiceBuilder
 - [The stream builder](./the-stream-builder.md)
 - [Expose REST endpoints](../exposing_endpoints/rest_api_http_endpoints.md)
 - [Subscription builder](../subscription/the-subscription-builder.md)
+- [AI Agents](../agent/index.md)

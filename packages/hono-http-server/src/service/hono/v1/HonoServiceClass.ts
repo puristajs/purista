@@ -27,6 +27,14 @@ import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { OpenApiBuilder } from 'openapi3-ts/oas31'
 
 import { addPathToOpenApi } from '../../../helper/addPathToOpenApi.js'
+import {
+	collectAggregateStreamResult,
+	encodeProtocolSseEvent,
+	isProtocolSseEvent,
+	isTransportControlFrame,
+	resolveHttpStreamingMode,
+	type StreamTransportFramePayload,
+} from '../../../helper/streamTransport.js'
 import type { BindingsBase } from '../../../types/BindingsBase.js'
 import type { EndpointProtectMiddleware } from '../../../types/EndpointProtectMiddleware.js'
 
@@ -178,19 +186,6 @@ export class HonoServiceClass<
 				},
 			})
 
-			this.app.use('*', async (c, next) => {
-				if (!this.isAvailable) {
-					throw new HandledError(StatusCode.ServiceUnavailable, 'server not available')
-				}
-
-				const traceId = c.req.header(this.config.traceHeaderField)
-				c.set('traceId', traceId)
-				await next()
-				if (traceId) {
-					c.header(this.config.traceHeaderField, traceId)
-				}
-			})
-
 			this.app.get(this.config.healthPath, async c => {
 				const con = propagation.extract(context.active(), c.req.raw.headers)
 				return await this.startActiveSpan('healthHandler', { kind: SpanKind.SERVER }, con, async span => {
@@ -199,7 +194,9 @@ export class HonoServiceClass<
 					const isEventBridgeReady = await this.eventBridge.isHealthy()
 
 					const traceId = c.req.header(this.config.traceHeaderField)
-					c.header(this.config.traceHeaderField, traceId)
+					if (traceId) {
+						c.header(this.config.traceHeaderField, traceId)
+					}
 
 					if (!isEventBridgeReady) {
 						const err = new HandledError(StatusCode.InternalServerError, 'event bridge not ready')
@@ -234,6 +231,19 @@ export class HonoServiceClass<
 				})
 			})
 		}
+
+		this.app.use('*', async (c, next) => {
+			if (!this.isAvailable) {
+				throw new HandledError(StatusCode.ServiceUnavailable, 'server not available')
+			}
+
+			const traceId = c.req.header(this.config.traceHeaderField)
+			c.set('traceId', traceId)
+			await next()
+			if (traceId) {
+				c.header(this.config.traceHeaderField, traceId)
+			}
+		})
 
 		if (this.config.openApi?.enabled) {
 			this.app.get(posix.join(this.config.apiMountPath, 'openapi.json'), async c => c.json(this.openApi.getSpec()))
@@ -350,10 +360,20 @@ export class HonoServiceClass<
 
 		const responseContentType = expose.contentTypeResponse ?? 'application/json'
 		const responseEncodingType = expose.contentEncodingResponse ?? 'utf-8'
+		const exposeAsStream = expose as typeof expose & {
+			chunkPayload?: unknown
+			finalPayload?: unknown
+		}
+		const isDeclaredStreamDefinition = 'chunkPayload' in exposeAsStream || 'finalPayload' in exposeAsStream
+		const streamMode = resolveHttpStreamingMode({
+			explicitMode: expose.http.stream?.mode,
+			isDeclaredStreamDefinition,
+			responseContentType,
+		})
 
 		addPathToOpenApi(this.openApi, metadata as unknown as HttpExposedServiceMeta, path, this.config)
 
-		const isStreamEndpoint = responseContentType.toLowerCase() === 'text/event-stream'
+		const isStreamEndpoint = isDeclaredStreamDefinition || responseContentType.toLowerCase() === 'text/event-stream'
 
 		const handler: Handler = async c => {
 			const parentContext = propagation.extract(context.active(), c.req.raw.headers)
@@ -418,12 +438,48 @@ export class HonoServiceClass<
 							`${method}:${path}`,
 						)
 
+						if (streamMode === 'aggregate') {
+							const aggregateResult = await collectAggregateStreamResult(handle)
+							span.setAttribute(ATTR_HTTP_RESPONSE_STATUS_CODE, aggregateResult.statusCode)
+							if (aggregateResult.status === 'error') {
+								span.setStatus({ code: SpanStatusCode.ERROR })
+								return c.json(aggregateResult.payload, aggregateResult.statusCode as ContentfulStatusCode)
+							}
+
+							span.setStatus({ code: SpanStatusCode.OK })
+							c.header('content-type', `${responseContentType}; charset=${responseEncodingType}`)
+							return c.json(aggregateResult.payload, aggregateResult.statusCode)
+						}
+
 						const encoder = new TextEncoder()
 						const stream = new ReadableStream<Uint8Array>({
 							start: controller => {
 								const run = async (activeHandle: StreamHandle) => {
+									let protocolPassthrough = false
 									try {
 										for await (const frame of activeHandle) {
+											const payload = frame.payload as StreamTransportFramePayload
+											if (isTransportControlFrame(payload.frameType)) {
+												continue
+											}
+
+											if (payload.frameType === 'chunk' && isProtocolSseEvent(payload.chunk)) {
+												protocolPassthrough = true
+												controller.enqueue(encodeProtocolSseEvent(encoder, payload.chunk))
+												continue
+											}
+
+											if (protocolPassthrough) {
+												if (payload.frameType === 'error') {
+													controller.enqueue(
+														encoder.encode(
+															`event: error\ndata: ${JSON.stringify(payload.error ?? { message: 'stream error' })}\n\n`,
+														),
+													)
+												}
+												continue
+											}
+
 											controller.enqueue(
 												encoder.encode(`event: ${frame.payload.frameType}\ndata: ${JSON.stringify(frame.payload)}\n\n`),
 											)

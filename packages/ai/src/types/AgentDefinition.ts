@@ -3,7 +3,7 @@ import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import type { ConfigStore, EventBridge, Logger, QueueBridge, Schema, SecretStore, StateStore } from '@purista/core'
 
 import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
-import type { SessionStore } from '../memory/sessionStore.js'
+import type { ConversationStore } from '../memory/conversationStore.js'
 import type { PoolManager } from '../pools/PoolManager.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
 import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
@@ -13,6 +13,7 @@ export type AgentInfo = {
 	agentName: string
 	agentVersion: string
 	description?: string
+	successEventName?: string
 }
 
 type BaseAgentInstanceOptions = {
@@ -23,7 +24,7 @@ type BaseAgentInstanceOptions = {
 	configStore?: ConfigStore
 	stateStore?: StateStore
 	queueBridge?: QueueBridge
-	sessionStore?: SessionStore
+	conversationStore?: ConversationStore
 	poolManager?: PoolManager
 	models?: Record<string, ModelProvider>
 	/** @deprecated use `models` */
@@ -33,9 +34,9 @@ type BaseAgentInstanceOptions = {
 		/**
 		 * Maximum number of concurrent agent runs per process/instance.
 		 * Total system throughput is derived by deployment replicas:
-		 * `effectiveMaxConcurrency = replicas * maxWorkers`.
+		 * `effectiveMaxConcurrency = replicas * maxConcurrencyPerInstance`.
 		 */
-		maxWorkers?: number
+		maxConcurrencyPerInstance?: number
 	}
 	/**
 	 * Optional host-provided hints for dashboards and alerts.
@@ -110,11 +111,16 @@ export type AgentRuntimeStatus = {
 	agentName: string
 	agentVersion: string
 	poolId: string
-	maxWorkersPerInstance: number
+	/** Per-process/per-replica execution cap for this pool. */
+	maxConcurrencyPerInstance: number
+	/** Current number of running agent executions in this process/replica. */
 	activeWorkers: number
+	/** Current number of queued executions waiting for a local pool slot. */
 	waitingWorkers: number
 	concurrencyHints?: {
+		/** Optional host-provided replica count hint for observability only. */
 		replicaCountHint?: number
+		/** Optional estimated global concurrency: replicaCountHint * maxConcurrencyPerInstance. */
 		effectiveMaxConcurrencyHint?: number
 	}
 }

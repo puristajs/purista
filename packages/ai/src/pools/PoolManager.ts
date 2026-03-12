@@ -8,7 +8,7 @@ export type PoolStats = {
 	id: string
 	activeWorkers: number
 	waitingWorkers: number
-	maxWorkersPerInstance: number
+	maxConcurrencyPerInstance: number
 }
 
 export type PoolAcquireResult = PoolStats & {
@@ -84,7 +84,7 @@ export class PoolManager {
 			id,
 			activeWorkers: state.active,
 			waitingWorkers: state.waiting.length,
-			maxWorkersPerInstance: state.max,
+			maxConcurrencyPerInstance: state.max,
 		}
 	}
 

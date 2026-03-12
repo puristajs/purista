@@ -1,10 +1,17 @@
 import { HandledError, StatusCode } from '@purista/core'
 import { describe, expect, it, vi } from 'vitest'
 import { InMemoryKnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
-import { InMemorySessionStore } from '../memory/sessionStore.js'
+import { InMemoryConversationStore } from '../memory/conversationStore.js'
 import { createProtocolEnvelope } from '../protocol/helpers.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
 import { createAgentHandlerContext, createProtocolBuffer } from './context.js'
+
+const childPayload = (prompt: string) => ({
+	message: prompt,
+	history: [],
+	attachments: [],
+	prompt,
+})
 
 const baseMessage = {
 	id: 'msg-1',
@@ -18,6 +25,73 @@ const baseMessage = {
 	principalId: 'principal-1',
 	tenantId: 'tenant-1',
 } as any
+
+const baseAgentInvoke = {
+	childAgent: {
+		'1': {
+			call: vi.fn((payload: unknown) => ({
+				async *[Symbol.asyncIterator]() {
+					yield createProtocolEnvelope({
+						conversationId: 'sub-chain-1',
+						actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+						frame: {
+							kind: 'message',
+							role: 'assistant',
+							content: `chained:${JSON.stringify(payload)}`,
+							partial: true,
+						},
+					})
+				},
+				async final() {
+					return [
+						createProtocolEnvelope({
+							conversationId: 'sub-chain-1',
+							actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+							frame: {
+								kind: 'message',
+								role: 'assistant',
+								content: `chained:${JSON.stringify(payload)}`,
+								final: true,
+							},
+						}),
+					]
+				},
+			})),
+		},
+	},
+	typedAgent: {
+		'1': {
+			payloadSchema: {
+				'~standard': {
+					vendor: 'test',
+					version: 1,
+					validate: async (value: unknown) =>
+						typeof (value as { prompt?: unknown })?.prompt === 'string'
+							? { value }
+							: { issues: [{ message: 'prompt required', path: ['prompt'] }] },
+				},
+			},
+			call: vi.fn((payload: unknown) => ({
+				async *[Symbol.asyncIterator]() {
+					yield createProtocolEnvelope({
+						conversationId: 'typed-1',
+						actor: { service: 'typed', version: '1', agent: 'typedAgent', instanceId: 'i1' },
+						frame: { kind: 'message', role: 'assistant', content: `typed:${JSON.stringify(payload)}`, partial: true },
+					})
+				},
+				async final() {
+					return [
+						createProtocolEnvelope({
+							conversationId: 'typed-1',
+							actor: { service: 'typed', version: '1', agent: 'typedAgent', instanceId: 'i1' },
+							frame: { kind: 'message', role: 'assistant', content: 'typed result', final: true },
+						}),
+					]
+				},
+			})),
+		},
+	},
+} as const
 
 const baseServiceContext = {
 	logger: {
@@ -44,6 +118,29 @@ const baseServiceContext = {
 			},
 		},
 	},
+	emit: vi.fn().mockResolvedValue(undefined),
+	invokeAgent: baseAgentInvoke,
+	secrets: {
+		getSecret: vi.fn(),
+		setSecret: vi.fn(),
+		removeSecret: vi.fn(),
+	},
+	configs: {
+		getConfig: vi.fn(),
+		setConfig: vi.fn(),
+		removeConfig: vi.fn(),
+	},
+	states: {
+		getState: vi.fn(),
+		setState: vi.fn(),
+		removeState: vi.fn(),
+	},
+} as any
+
+const baseEventBridge = {
+	instanceId: 'bridge-1',
+	invoke: vi.fn(),
+	openStream: vi.fn(),
 } as any
 
 const manifest: AgentManifest = {
@@ -51,6 +148,10 @@ const manifest: AgentManifest = {
 	agentVersion: '1',
 	eventBridge: 'default',
 	allowedTools: [{ serviceName: 'ToolService', serviceVersion: '1', commandName: 'createTicket' }],
+	allowedAgents: [
+		{ agentName: 'childAgent', agentVersion: '1' },
+		{ agentName: 'typedAgent', agentVersion: '1' },
+	],
 }
 
 describe('runtime context helpers', () => {
@@ -88,7 +189,7 @@ describe('runtime context helpers', () => {
 
 	it('creates a handler context with tool/session/knowledge helpers', async () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
-		const sessionStore = new InMemorySessionStore()
+		const conversationStore = new InMemoryConversationStore()
 		const knowledgeAdapter = new InMemoryKnowledgeAdapter()
 		const embed = vi.fn().mockResolvedValue({ embedding: [0.1, 0.2, 0.3] })
 		const rerank = vi.fn().mockResolvedValue({
@@ -99,9 +200,10 @@ describe('runtime context helpers', () => {
 
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
 			payload: { prompt: 'hello' },
 			parameter: { locale: 'en' },
-			sessionStore,
+			conversationStore,
 			knowledgeAdapters: { default: knowledgeAdapter },
 			protocol: buffer.protocol,
 			resources: {},
@@ -111,12 +213,14 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		const toolResult = await context.tools.invoke('ToolService.1.createTicket', { title: 'Need help' })
+		const toolResult = await context.tools.invoke.ToolService['1'].createTicket({ title: 'Need help' })
 		expect(toolResult).toEqual({ id: 'ticket-1' })
+		const toolResultViaPath = await context.tools.invoke.ToolService['1'].createTicket({ title: 'Need help (path)' })
+		expect(toolResultViaPath).toEqual({ id: 'ticket-1' })
 
-		await context.session.save({ sessionId: 's1', data: { value: 1 }, updatedAt: Date.now() })
+		await context.session.save({ conversationId: 's1', data: { value: 1 }, updatedAt: Date.now() })
 		const session = await context.session.load('s1')
-		expect(session?.sessionId).toBe('supportAgent:1:tenant-1:principal-1:s1')
+		expect(session?.conversationId).toBe('supportAgent:1:tenant-1:principal-1:s1')
 
 		const docs = await context.knowledge.query('default', 'Reset')
 		expect(docs).toHaveLength(1)
@@ -148,6 +252,10 @@ describe('runtime context helpers', () => {
 		expect(embed).toHaveBeenCalledOnce()
 		expect(rerank).toHaveBeenCalledOnce()
 		context.stream.sendReasoning('reasoning note')
+		await (context.emit as (eventName: string, payload: { status: string }) => Promise<void>)('agent.updated', {
+			status: 'ok',
+		})
+		expect(baseServiceContext.emit).toHaveBeenCalledWith('agent.updated', { status: 'ok' })
 
 		const envelopes = buffer.toEnvelopes()
 		expect(envelopes.some(envelope => envelope.frame.kind === 'tool')).toBe(true)
@@ -158,9 +266,10 @@ describe('runtime context helpers', () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
 			payload: { prompt: 'hello', sessionId: 'chat-42' },
 			parameter: {},
-			sessionStore: new InMemorySessionStore(),
+			conversationStore: new InMemoryConversationStore(),
 			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
@@ -172,7 +281,7 @@ describe('runtime context helpers', () => {
 
 		await context.session.save({ data: { value: 'implicit' } })
 		const session = await context.session.load()
-		expect(session?.sessionId).toBe('supportAgent:1:tenant-1:principal-1:chat-42')
+		expect(session?.conversationId).toBe('supportAgent:1:tenant-1:principal-1:chat-42')
 		expect(context.session.identity.baseSessionId).toBe('chat-42')
 		expect(context.session.resolveSessionId()).toBe('supportAgent:1:tenant-1:principal-1:chat-42')
 	})
@@ -181,9 +290,10 @@ describe('runtime context helpers', () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
 			payload: { prompt: 'hello' },
 			parameter: {},
-			sessionStore: new InMemorySessionStore(),
+			conversationStore: new InMemoryConversationStore(),
 			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
@@ -207,9 +317,10 @@ describe('runtime context helpers', () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
 			payload: { prompt: 'hello' },
 			parameter: {},
-			sessionStore: new InMemorySessionStore(),
+			conversationStore: new InMemoryConversationStore(),
 			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
@@ -219,7 +330,7 @@ describe('runtime context helpers', () => {
 			manifest,
 		})
 
-		await expect(context.tools.invoke('Unknown.1.run', {})).rejects.toBeInstanceOf(HandledError)
+		await expect(context.tools.invoke.Unknown['1'].run({})).rejects.toBeInstanceOf(HandledError)
 		await expect(context.knowledge.query('missing', 'test')).rejects.toMatchObject({
 			errorCode: StatusCode.NotFound,
 		})
@@ -232,6 +343,20 @@ describe('runtime context helpers', () => {
 		expect(buffer.protocol.has('message')).toBe(true)
 	})
 
+	it('ignores empty message content to keep message frame validation robust', () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		buffer.protocol.emitMessage('')
+		buffer.protocol.emitMessage({ content: '' })
+		buffer.protocol.emitMessage({ content: 'ok', final: true })
+
+		const envelopes = buffer.toEnvelopes()
+		expect(envelopes).toHaveLength(1)
+		expect(envelopes[0]?.frame.kind).toBe('message')
+		if (envelopes[0]?.frame.kind === 'message') {
+			expect(envelopes[0].frame.content).toBe('ok')
+		}
+	})
+
 	it('envelope helper builds valid envelopes for direct protocol tests', () => {
 		const envelope = createProtocolEnvelope({
 			conversationId: 'c1',
@@ -239,5 +364,316 @@ describe('runtime context helpers', () => {
 			frame: { kind: 'message', role: 'assistant', content: 'hello' },
 		})
 		expect(envelope.conversationId).toBe('c1')
+	})
+
+	it('provides subagent invocation helpers on context.agents', async () => {
+		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
+		baseEventBridge.invoke.mockResolvedValue([
+			createProtocolEnvelope({
+				conversationId: 'sub-1',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: { kind: 'message', role: 'assistant', content: 'child result', final: true },
+			}),
+		])
+
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello', sessionId: 'chat-7' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const envelopes = await context.agents.invoke({
+			agentName: 'childAgent',
+			agentVersion: '1',
+			payload: childPayload('go'),
+		})
+		expect(envelopes).toHaveLength(1)
+
+		const childAgentApi = context.agents.invoke.childAgent?.['1']
+		expect(childAgentApi).toBeDefined()
+		if (!childAgentApi || typeof childAgentApi.call !== 'function') {
+			throw new Error('expected child agent api to be defined')
+		}
+		const chainedInvocation = childAgentApi.call(childPayload('go-again'))
+		const chainedEnvelopes = await chainedInvocation.final()
+		expect(chainedEnvelopes).toHaveLength(1)
+
+		const text = await context.agents.runText({
+			agentName: 'childAgent',
+			agentVersion: '1',
+			payload: childPayload('go'),
+		})
+		expect(text).toBe('child result')
+
+		baseEventBridge.invoke.mockResolvedValueOnce([
+			createProtocolEnvelope({
+				conversationId: 'sub-4',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: { kind: 'message', role: 'assistant', content: '{"ok":true}', final: true },
+			}),
+		])
+		const obj = await context.agents.runObject<{ ok: boolean }>({
+			agentName: 'childAgent',
+			agentVersion: '1',
+			payload: childPayload('go'),
+		})
+		expect(obj).toEqual({ ok: true })
+		expect(baseEventBridge.invoke).toHaveBeenCalled()
+	})
+
+	it('enforces declared agent dependencies for direct helper invocations', async () => {
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await expect(
+			context.agents.invoke({
+				agentName: 'missingAgent',
+				agentVersion: '1',
+				payload: { prompt: 'go' },
+			}),
+		).rejects.toMatchObject({
+			errorCode: StatusCode.BadRequest,
+		})
+	})
+
+	it('validates direct helper payloads against declared agent schemas', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await expect(
+			context.agents.invoke({
+				agentName: 'typedAgent',
+				agentVersion: '1',
+				payload: { wrong: true },
+			}),
+		).rejects.toMatchObject({
+			errorCode: StatusCode.BadRequest,
+		})
+	})
+
+	it('emits tool frames for chained agent invocations', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const childAgentApi = context.agents.invoke.childAgent['1']
+		expect(childAgentApi).toBeDefined()
+		if (!childAgentApi || typeof childAgentApi.call !== 'function') {
+			throw new Error('expected child agent api to be defined')
+		}
+		const invocation = childAgentApi.call(childPayload('typed'))
+		await invocation.final()
+
+		const toolFrames = buffer
+			.toEnvelopes()
+			.map(envelope => envelope.frame)
+			.filter(frame => frame.kind === 'tool')
+		expect(toolFrames.some(frame => frame.toolName === 'childAgent.1.run' && frame.status === 'invoked')).toBe(true)
+		expect(toolFrames.some(frame => frame.toolName === 'childAgent.1.run' && frame.status === 'success')).toBe(true)
+	})
+
+	it('exposes secrets/configs/states directly on agent context', async () => {
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		expect(context.secrets).toBe(baseServiceContext.secrets)
+		expect(context.configs).toBe(baseServiceContext.configs)
+		expect(context.states).toBe(baseServiceContext.states)
+	})
+
+	it('fails subagent invocation on protocol error envelopes by default', async () => {
+		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
+		baseEventBridge.invoke.mockResolvedValue([
+			createProtocolEnvelope({
+				conversationId: 'sub-2',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: { kind: 'error', code: 'ChildFailed', message: 'child failed', handled: true },
+			}),
+		])
+
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello', sessionId: 'chat-8' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await expect(
+			context.agents.invoke({
+				agentName: 'childAgent',
+				agentVersion: '1',
+				payload: { prompt: 'go' },
+			}),
+		).rejects.toThrow('child failed')
+	})
+
+	it('allows protocol error envelopes when failOnErrorFrame is false', async () => {
+		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
+		baseEventBridge.invoke.mockResolvedValue([
+			createProtocolEnvelope({
+				conversationId: 'sub-3',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: { kind: 'error', code: 'Expected', message: 'expected domain result', handled: true },
+			}),
+		])
+
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello', sessionId: 'chat-9' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const envelopes = await context.agents.invoke({
+			agentName: 'childAgent',
+			agentVersion: '1',
+			payload: { prompt: 'go' },
+			failOnErrorFrame: false,
+		})
+		expect(envelopes).toHaveLength(1)
+		expect(envelopes[0]?.frame.kind).toBe('error')
+	})
+
+	it('fails runObject when final assistant text is not valid JSON', async () => {
+		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
+		baseEventBridge.invoke.mockResolvedValue([
+			createProtocolEnvelope({
+				conversationId: 'sub-5',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: { kind: 'message', role: 'assistant', content: 'not json', final: true },
+			}),
+		])
+
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: createProtocolBuffer(baseServiceContext).protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await expect(
+			context.agents.runObject({
+				agentName: 'childAgent',
+				agentVersion: '1',
+				payload: { prompt: 'go' },
+			}),
+		).rejects.toMatchObject({
+			errorCode: StatusCode.BadGateway,
+		})
+	})
+
+	it('ignores empty stream chunks and finals', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		context.stream.sendChunk('')
+		context.stream.sendFinal('')
+		context.stream.sendChunk('chunk')
+		context.stream.sendFinal('final')
+
+		const messageFrames = buffer
+			.toEnvelopes()
+			.map(envelope => envelope.frame)
+			.filter(frame => frame.kind === 'message')
+		expect(messageFrames).toHaveLength(2)
+		if (messageFrames[0]?.kind === 'message' && messageFrames[1]?.kind === 'message') {
+			expect(messageFrames[0].content).toBe('chunk')
+			expect(messageFrames[1].content).toBe('final')
+		}
 	})
 })

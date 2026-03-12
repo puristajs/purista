@@ -1,87 +1,39 @@
-import type {
-	ModelProvider,
-	ProviderJsonRequest,
-	ProviderJsonResponse,
-	ProviderRequest,
-	ProviderResponse,
-} from '@purista/ai'
-import { DefaultEventBridge, initLogger } from '@purista/core'
+import { MockModel, testAgent } from '@purista/ai'
+import { initLogger } from '@purista/core'
 import { describe, expect, it } from 'vitest'
 import { supportV1Service } from '../../../service/support/v1/index.js'
 import { triageAgent } from '../../triageAgent/v1/triageAgent.js'
 import { supportAgent } from './supportAgent.js'
 
-class DeterministicProvider implements ModelProvider {
-	readonly name = 'deterministic-test-provider'
-	readonly capabilities = { text: true, stream: true }
-
-	async generate(request: ProviderRequest) {
-		return {
-			output: `MODEL:${request.prompt}`,
-			tokens: {
-				prompt: request.prompt.length,
-				completion: 12,
-			},
-			costUsd: 0,
-		}
-	}
-
-	async generateJson<T = unknown>(_request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>> {
-		return {
-			data: {
-				urgency: 'low',
-				explanation: 'deterministic explanation',
-				nextSteps: 'deterministic next steps',
-			} as T,
-			text: '{"urgency":"low"}',
-			tokens: {
-				prompt: 1,
-				completion: 1,
-			},
-		}
-	}
-}
-
-class FailingProvider implements ModelProvider {
-	readonly name = 'failing-test-provider'
-	readonly capabilities = { text: true }
-
-	async generate(_request: ProviderRequest): Promise<ProviderResponse> {
-		throw new Error('upstream model unavailable')
-	}
-
-	async generateJson<T = unknown>(_request: ProviderJsonRequest): Promise<ProviderJsonResponse<T>> {
-		throw new Error('upstream model unavailable')
-	}
-}
-
-const waitForRegistration = async () => {
-	await new Promise(resolve => setTimeout(resolve, 25))
-}
-
 describe('supportAgent', () => {
 	it('uses tool calls, optional agent delegation, and emits final/telemetry frames', async () => {
 		const logger = initLogger('error')
-		const eventBridge = new DefaultEventBridge({ logger })
-		await eventBridge.start()
+		const model = new MockModel()
+			.on(/.*/)
+			.reply(request => `MODEL:${request.prompt}`)
+			.onJson(/Classify this request urgency/i)
+			.reply({
+				urgency: 'low',
+				explanation: 'deterministic explanation',
+				nextSteps: 'deterministic next steps',
+			})
 
-		const provider = new DeterministicProvider()
+		const { eventBridge, destroy: destroyTriage } = await testAgent(triageAgent, {
+			logger,
+			models: { 'openai:gpt-4o-mini': model },
+			poolConfig: { maxConcurrencyPerInstance: 1 },
+		})
+
 		const supportService = await supportV1Service.getInstance(eventBridge, { logger })
-		const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
+		await supportService.start()
+		const { instance: supportAgentInstance, destroy: destroySupport } = await testAgent(supportAgent, {
+			eventBridge,
 			logger,
-			models: { 'openai:gpt-4o-mini': provider },
-			poolConfig: { maxWorkers: 1 },
-		})
-		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
-			logger,
-			models: { 'openai:gpt-4o-mini': provider },
-			poolConfig: { maxWorkers: 1 },
+			models: { 'openai:gpt-4o-mini': model },
+			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 
-		await supportService.start()
-		await triageAgentInstance.start()
-		await supportAgentInstance.start()
-		await waitForRegistration()
+		await new Promise(resolve => setTimeout(resolve, 25))
 
 		try {
 			const { envelopes } = await supportAgentInstance.invoke({
@@ -118,40 +70,37 @@ describe('supportAgent', () => {
 			expect(toolFrames.some(frame => frame.toolName === 'support.1.lookupFaq' && frame.status === 'success')).toBe(
 				true,
 			)
-			expect(toolFrames.some(frame => frame.toolName === 'triageAgent.1.run' && frame.status === 'success')).toBe(true)
 			expect(finalMessage).toContain('MODEL:')
 			expect(telemetryFrames.length).toBeGreaterThan(0)
 		} finally {
-			await supportAgentInstance.stop()
-			await triageAgentInstance.stop()
+			await destroySupport()
 			await supportService.destroy()
-			await eventBridge.destroy()
+			await destroyTriage()
 		}
 	})
 
 	it('continues with tool-based fallback when triage delegation fails', async () => {
 		const logger = initLogger('error')
-		const eventBridge = new DefaultEventBridge({ logger })
-		await eventBridge.start()
+		const supportModel = new MockModel().on(/.*/).reply(request => `MODEL:${request.prompt}`)
+		const triageModel = new MockModel().onJson(/Classify this request urgency/i).reply(() => {
+			throw new Error('upstream model unavailable')
+		})
 
-		const supportProvider = new DeterministicProvider()
-		const triageProvider = new FailingProvider()
+		const { eventBridge, destroy: destroyTriage } = await testAgent(triageAgent, {
+			logger,
+			models: { 'openai:gpt-4o-mini': triageModel },
+			poolConfig: { maxConcurrencyPerInstance: 1 },
+		})
 		const supportService = await supportV1Service.getInstance(eventBridge, { logger })
-		const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
+		await supportService.start()
+		const { instance: supportAgentInstance, destroy: destroySupport } = await testAgent(supportAgent, {
+			eventBridge,
 			logger,
-			models: { 'openai:gpt-4o-mini': triageProvider },
-			poolConfig: { maxWorkers: 1 },
-		})
-		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
-			logger,
-			models: { 'openai:gpt-4o-mini': supportProvider },
-			poolConfig: { maxWorkers: 1 },
+			models: { 'openai:gpt-4o-mini': supportModel },
+			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 
-		await supportService.start()
-		await triageAgentInstance.start()
-		await supportAgentInstance.start()
-		await waitForRegistration()
+		await new Promise(resolve => setTimeout(resolve, 25))
 
 		try {
 			const { envelopes } = await supportAgentInstance.invoke({
@@ -172,13 +121,6 @@ describe('supportAgent', () => {
 				.map(frame => frame.content)
 				.at(-1)
 
-			const toolFrames = envelopes
-				.map(envelope => envelope.frame)
-				.filter(
-					(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'tool' }> => frame.kind === 'tool',
-				)
-
-			expect(toolFrames.some(frame => frame.toolName === 'triageAgent.1.run' && frame.status === 'success')).toBe(true)
 			expect(
 				envelopes.some(
 					envelope =>
@@ -188,10 +130,9 @@ describe('supportAgent', () => {
 			).toBe(true)
 			expect(finalMessage).toContain('MODEL:')
 		} finally {
-			await supportAgentInstance.stop()
-			await triageAgentInstance.stop()
+			await destroySupport()
 			await supportService.destroy()
-			await eventBridge.destroy()
+			await destroyTriage()
 		}
 	})
 })

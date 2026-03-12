@@ -4,6 +4,7 @@
 	"compilerOptions": {
 		"strictNullChecks": true,
 		"outDir": "dist",
+		"baseUrl": ".",
 		"strict": true,
 		"module": "es2022",
 		"declaration": true,
@@ -23,7 +24,10 @@
 		"declarationMap": true,
 		"types": ["vitest/globals", "node"],
 		"noFallthroughCasesInSwitch": true,
-		"useUnknownInCatchVariables": true
+		"useUnknownInCatchVariables": true,
+		"paths": {
+			"@purista/sandbox": ["./packages/sandbox-service/src/index.ts"]
+		}
 	},
 	"exclude": ["node_modules", "dist"]
 }

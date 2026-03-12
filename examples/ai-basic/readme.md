@@ -1,128 +1,94 @@
-# AI basic example
+# AI Basic Example
 
-This example demonstrates the current `@purista/ai` integration end-to-end:
+Minimal but complete PURISTA AI reference:
 
-- Agent exposed as HTTP endpoint (`POST /api/v1/agents/supportAgent`)
-- Stream endpoint invoking an agent (`POST /api/v1/support/ask/stream`)
-- Tool calls (`support.lookupFaq`, `support.calculate`, `support.fetchWebsite`)
-- Agent-to-agent delegation (`supportAgent` invokes `triageAgent` as a tool)
-- Command invoking an agent (`POST /api/v1/support/ask`)
-- MCP-style endpoint invoking an agent (`POST /api/v1/support/mcp/call`)
-- MCP descriptor endpoint (`GET /api/v1/support/mcp/tools`)
-- Agent2Agent-style endpoint invoking an agent (`POST /api/v1/support/a2a/call`)
-- Conversation restore via command-owned retrieval (`POST /api/v1/support/conversation`)
-- React frontend showcase (stream + MCP + Agent2Agent + protocol inspector) built to `public/`
-- Workflow graph visualization powered by React Flow (`@xyflow/react`)
-- Rich markdown message rendering via Streamdown
+- typed `canInvoke(...)` command wiring
+- agent `generateText` and `generateJson` flows
+- streaming over HTTP with protocol interoperability
+- command, stream, MCP, and Agent2Agent entry points
+- React UI for chat + protocol inspection
 
-## Install
+## Quick Start
+
+Install:
 
 ```bash
 npm install
 ```
 
-```bash
-pnpm install
-```
-
-```bash
-yarn install
-```
-
-```bash
-bun install
-```
-
-## Build frontend (to `public/`)
-
-```bash
-npm run frontend:build -w @purista/example-ai-basic
-```
-
-```bash
-pnpm --filter @purista/example-ai-basic frontend:build
-```
-
-```bash
-yarn workspace @purista/example-ai-basic frontend:build
-```
-
-```bash
-bun run --filter @purista/example-ai-basic frontend:build
-```
-
-## Run backend + UI
+Run backend:
 
 ```bash
 npm run start -w @purista/example-ai-basic
 ```
 
-```bash
-pnpm --filter @purista/example-ai-basic start
-```
+Build frontend to `public/`:
 
 ```bash
-yarn workspace @purista/example-ai-basic start
+npm run frontend:build -w @purista/example-ai-basic
 ```
 
-```bash
-bun run --filter @purista/example-ai-basic start
-```
+Required env:
 
-Environment variables:
+- `OPENAI_API_KEY`
+- `PORT` (optional, default `3000`)
 
-- `OPENAI_API_KEY` (required)
-- `PORT` (optional, defaults to `3000`)
+Open [http://localhost:3000/index.html](http://localhost:3000/index.html)
 
-Open [http://localhost:3000/index.html](http://localhost:3000/index.html).
+## Architecture Map
 
-## Frontend scripts
+### Runtime bootstrap
 
-- `frontend:dev` – runs Vite dev server for `src/frontend`
-- `frontend:build` – builds to `public/`
-- `frontend:test` – frontend Vitest suite
-- `frontend:check` – frontend typecheck + tests
+- `src/index.ts`
+  - builds `AiSdkProvider`
+  - starts support service
+  - starts `triageAgent`
+  - starts `supportAgent`
+  - exposes all over `honoV1Service`
 
-## Test
+### Agents
 
-The example contains deterministic tests (no real LLM calls):
+- `src/agents/triageAgent/v1/triageAgent.ts`
+  - strict structured classification via `generateJson`
+- `src/agents/supportAgent/v1/supportAgent.ts`
+  - tool-assisted support flow
+  - optional delegation to `triageAgent`
+  - final answer via `generateText` with streaming deltas
+  - optional JSON response path via `generateJson`
 
-```bash
-npm run test -w @purista/example-ai-basic
-```
+### Service commands/streams
 
-```bash
-pnpm --filter @purista/example-ai-basic test
-```
+- `src/service/support/v1/command/runSupportAgent/*`
+  - command entry point invoking `supportAgent`
+- `src/service/support/v1/stream/runSupportAgentStream/*`
+  - streaming endpoint
+- `src/service/support/v1/command/runSupportMcp/*`
+  - MCP-style invocation
+- `src/service/support/v1/command/runSupportA2a/*`
+  - Agent2Agent-style invocation
 
-Key test files:
+## Model Usage Patterns In This Example
 
-- `src/agents/supportAgent/v1/supportAgent.test.ts` – verifies tool calls, agent-to-agent delegation, and protocol frames.
-- `src/service/support/v1/command/runSupportAgent/runSupportAgentCommandBuilder.test.ts` – verifies command-level `context.invokeAgent` integration.
-- `src/frontend/lib/api.test.ts` – verifies SSE dedupe behavior and command-owned conversation hydration endpoint usage.
-- `src/frontend/App.test.tsx` – verifies frontend dedupe and persisted theme behavior.
+### `generateText` (stream-aware)
 
-## Frontend behavior
+Used in `supportAgent` for the normal text answer path:
 
-The React frontend includes:
+- sends progressive deltas via `onTextDelta`
+- forwards reasoning via `onReasoning`
+- persists assistant turn to conversation store
 
-- top navigation (`Stream Chat`, `MCP Expose`, `Agent2Agent Expose`, `Protocol Inspector`)
-- split-pane layout (chat + workflow/protocol panel)
-- stream-safe rendering (`chunk` frames rendered once, `complete.final.envelopes` used as fallback only)
-- conversation restore by calling `POST /api/v1/support/conversation`
-- optional JSON response mode rendered inline in chat
-- workflow graph with node/edge visualization for tool and nested agent execution
-- suggested starter prompts to onboard users into calculator/fetch/tool workflows
-- telemetry includes pool pressure (`activeWorkers`, `waitingWorkers`, `maxWorkersPerInstance`, `waitTimeMs`) for external dashboards
+### `generateJson` (structured output)
 
-Concurrency note:
+Used in:
 
-- `poolConfig.maxWorkers` is per running process/instance.
-- Estimated total slots in deployment: `replicas * maxWorkersPerInstance`.
+- `triageAgent` for urgency classification
+- `supportAgent` optional `responseFormat=json` path
 
-## API quick calls
+## Streaming & Protocol Endpoints
 
-Stream (SSE):
+### Native support stream endpoint
+
+`POST /api/v1/support/ask/stream`
 
 ```bash
 curl -N -X POST http://localhost:3000/api/v1/support/ask/stream \
@@ -130,60 +96,67 @@ curl -N -X POST http://localhost:3000/api/v1/support/ask/stream \
   -d '{"prompt":"Summarize https://purista.dev and calculate 12*(8+4)"}'
 ```
 
-MCP descriptor list:
+### Agent HTTP endpoint
 
-```bash
-curl http://localhost:3000/api/v1/support/mcp/tools
-```
+`POST /api/v1/agents/supportAgent`
 
-MCP reference call (agent tool):
-
-```bash
-curl -X POST http://localhost:3000/api/v1/support/mcp/call \
-  -H "content-type: application/json" \
-  -d '{"name":"supportAgent","arguments":{"prompt":"Fetch https://purista.dev and list the top topics"}}'
-```
-
-MCP reference call (command tool):
-
-```bash
-curl -X POST http://localhost:3000/api/v1/support/mcp/call \
-  -H "content-type: application/json" \
-  -d '{"name":"support.1.calculate","arguments":{"expression":"42*17"}}'
-```
-
-Agent2Agent reference call:
-
-```bash
-curl -X POST http://localhost:3000/api/v1/support/a2a/call \
-  -H "content-type: application/json" \
-  -d '{"prompt":"Calculate 42*17 and explain when to use queue vs stream"}'
-```
-
-Conversation restore (command-owned retrieval):
-
-```bash
-curl -X POST http://localhost:3000/api/v1/support/conversation \
-  -H "content-type: application/json" \
-  -d '{"sessionId":"<existing-session-id>"}'
-```
-
-## Protocol consumer and interoperability snippets
-
-### Reference Agent-to-Agent conversion
+### Expose different SSE protocols
 
 ```ts
-import { toAgent2AgentReferenceMessage } from '@purista/ai'
-
-const outgoing = envelopes.map(envelope => toAgent2AgentReferenceMessage(envelope))
+new AgentBuilder({ ... })
+  .exposeAsHttpEndpoint('POST', 'agents/support/native')
+  .setSseProtocol('purista')
+  .build()
 ```
-
-### Reference MCP conversion
 
 ```ts
-import { toMcpReferenceToolResult } from '@purista/ai'
-
-const mcpResult = toMcpReferenceToolResult(envelopes)
+new AgentBuilder({ ... })
+  .exposeAsHttpEndpoint('POST', 'agents/support/ui')
+  .setSseProtocol('ai-sdk-ui-message')
+  .build()
 ```
 
-These helpers are reference adapters to simplify bridging; they are not a full official protocol implementation.
+```ts
+new AgentBuilder({ ... })
+  .exposeAsHttpEndpoint('POST', 'agents/support/responses')
+  .setSseProtocol('ai-sdk-responses')
+  .build()
+```
+
+### MCP reference endpoints
+
+- `GET /api/v1/support/mcp/tools`
+- `POST /api/v1/support/mcp/call`
+
+### Agent2Agent reference endpoint
+
+- `POST /api/v1/support/a2a/call`
+
+### Conversation restore endpoint
+
+- `POST /api/v1/support/conversation`
+
+## Frontend Scripts
+
+- `frontend:dev` - Vite dev server for `src/frontend`
+- `frontend:build` - build frontend into `public/`
+- `frontend:test` - frontend Vitest
+- `frontend:check` - frontend typecheck + tests
+
+## Tests
+
+```bash
+npm run test -w @purista/example-ai-basic
+```
+
+Key tests:
+
+- `src/agents/supportAgent/v1/supportAgent.test.ts`
+- `src/service/support/v1/command/runSupportAgent/runSupportAgentCommandBuilder.test.ts`
+- `src/integration/httpInteroperability.test.ts`
+- `src/frontend/lib/api.test.ts`
+
+## Notes
+
+- This example intentionally uses deterministic tests (no live model calls).
+- Protocol adapters (`MCP`, `Agent2Agent`) are reference interoperability layers, not full protocol implementations.

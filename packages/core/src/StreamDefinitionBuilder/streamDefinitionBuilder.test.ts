@@ -194,4 +194,17 @@ describe('StreamDefinitionBuilder', () => {
 		// @ts-expect-error
 		expect(definition.agentInvokes.MyAgent['1'].parameterSchema).toBe(agentParameterSchema)
 	})
+
+	it('supports aggregate HTTP response mode for streams', async () => {
+		const definition = await new StreamDefinitionBuilder('aggregate', 'aggregate stream')
+			.exposeAsHttpStreamEndpoint('GET', '/aggregate')
+			.setHttpStreamingMode('aggregate')
+			.setStreamFunction(async function (_context, _payload, _parameter, writer) {
+				await writer.close({ done: true })
+			})
+			.getDefinition()
+
+		expect(definition.metadata.expose.contentTypeResponse).toBe('application/json')
+		expect(definition.metadata.expose.http?.stream?.mode).toBe('aggregate')
+	})
 })

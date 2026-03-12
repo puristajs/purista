@@ -1,0 +1,27 @@
+# @purista/sandbox Full Context
+
+## Architecture
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/docs/ARCHITECTURE.md
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/service/Sandbox/v1/SandboxServiceBuilder.ts
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/service/Sandbox/v1/SandboxService.ts
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/service/Sandbox/v1/resources/SandboxRegistry.ts
+
+## Drivers
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/driver/LimaSandboxDriver/LimaSandboxDriver.ts
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/src/driver/FirecrackerSandboxDriver/FirecrackerSandboxDriver.ts
+
+## Docker image
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/Dockerfile.sandbox
+
+## Skills
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/META-SKILL.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Architect.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Developer.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Advanced-Developer.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Infrastructure.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Infrastructure-Messaging.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Service-Developer.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Testing.md

@@ -185,6 +185,25 @@ const main = async () => {
 				}
 
 				if (data.component === 'agent') {
+					const responseEventName = await input({
+						message: 'Name of the response event (optional)',
+						required: false,
+					})
+
+					if (responseEventName?.trim().length) {
+						const description = `Emitted by ${data.serviceName} v${data.serviceVersion} agent ${camelCase(
+							data.name,
+						)}:\n${data.description}`
+
+						await ensureServiceEvent({
+							projectRootPath,
+							puristaProjectConfig: puristaConfig,
+							puristaProject,
+							eventName: responseEventName,
+							description,
+						})
+					}
+
 					await addPuristaAgent({
 						projectRootPath,
 						puristaConfig,
@@ -193,6 +212,7 @@ const main = async () => {
 						serviceVersion: data.serviceVersion,
 						agentName: data.name,
 						agentDescription: data.description,
+						responseEventName: responseEventName?.trim() ? responseEventName : undefined,
 						codeWriterOptions,
 					})
 					return

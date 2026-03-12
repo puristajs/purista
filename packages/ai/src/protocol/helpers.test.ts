@@ -35,6 +35,16 @@ describe('protocol helpers', () => {
 		expect(envelope.frame.kind).toBe('message')
 	})
 
+	it('accepts developer role in message frames', () => {
+		const frame = createMessageFrame({
+			role: 'developer',
+			content: 'always ask for persistence constraints',
+			final: false,
+		})
+
+		expect(frame.role).toBe('developer')
+	})
+
 	it('creates all supported frame kinds', () => {
 		const usage = createTokenUsage({ promptTokens: 1, completionTokens: 2, totalTokens: 3, costUsd: 0.01 })
 		const artifact = createArtifactFrame({
@@ -48,7 +58,7 @@ describe('protocol helpers', () => {
 			durationMs: 100,
 			waitTimeMs: 3,
 			poolId: 'support',
-			maxWorkersPerInstance: 4,
+			maxConcurrencyPerInstance: 4,
 			activeWorkers: 2,
 			waitingWorkers: 1,
 			replicaCountHint: 3,
@@ -68,7 +78,7 @@ describe('protocol helpers', () => {
 		expect(tool.kind).toBe('tool')
 		expect(error.kind).toBe('error')
 		expect(telemetry.usage?.totalTokens).toBe(3)
-		expect(telemetry.maxWorkersPerInstance).toBe(4)
+		expect(telemetry.maxConcurrencyPerInstance).toBe(4)
 		expect(telemetry.effectiveMaxConcurrencyHint).toBe(12)
 	})
 })

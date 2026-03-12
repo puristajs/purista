@@ -1,162 +1,87 @@
 ---
-title: Testing Agents
-description: Deterministic test patterns for agent handlers and command-to-agent integration.
+title: Testing
+description: How to ensure your agents are reliable, deterministic, and high-quality.
 order: 203708
 ---
 
-# Testing Agents
+# Testing
 
-Treat agents like any other PURISTA business component: fast deterministic tests first, then integration tests for wiring.
+Testing LLM-based applications is notoriously difficult because of their non-deterministic nature. PURISTA provides tools to make your agent tests **reliable**, **fast**, and **deterministic**.
 
-## What the CLI gives you
+## 1. Unit Testing Agents
 
-`add agent` creates a prepared `*.test.ts` beside the generated agent file.
+When you use `purista add agent`, a test file is automatically generated. The goal of a unit test is to verify your agent's logic (tool calls, state changes, schema validation) without making real LLM calls.
 
-```bash
-purista add agent SupportAgent
-```
-
-The scaffold already:
-
-- starts/stops an in-memory `DefaultEventBridge`
-- injects a deterministic provider stub (no external API calls)
-- executes one real agent invocation
-- asserts message and telemetry protocol frames
-
-Start from that test and expand scenarios as your handler grows.
-
-## Recommended test matrix
-
-| Scope | What to assert | Why |
-| --- | --- | --- |
-| handler unit | message/tool/telemetry frames, conversation updates | protects core agent logic deterministically |
-| retry/error path | rollback behavior (`revertLast`) and handled errors | prevents duplicated turns and silent failures |
-| integration (command -> agent) | schema validation + `context.invokeAgent` wiring | verifies real app composition |
-| transport | SSE/chunk consumers parse protocol correctly | prevents frontend/runtime protocol drift |
-
-## Unit test pattern (agent runtime)
-
-Use deterministic providers so no external LLM API is needed.
-
-For AI SDK-based provider tests, prefer [AI SDK testing mocks](https://ai-sdk.dev/docs/ai-sdk-core/testing) (`ai/test`) to avoid flaky network calls.
-
-```ts
-import { describe, expect, it } from 'vitest'
-import { DefaultEventBridge } from '@purista/core'
-import type { ModelProvider, ProviderRequest } from '@purista/ai'
+```ts title="src/agents/supportAgent/v1/supportAgent.test.ts"
 import { supportAgent } from './supportAgent.js'
+import { MockModel, testAgent } from '@purista/ai'
 
-class DeterministicProvider implements ModelProvider {
-  readonly name = 'deterministic-test-provider'
-  readonly capabilities = { text: true, stream: true }
-  async generate(request: ProviderRequest) {
-    return {
-      output: `MODEL:${request.prompt}`,
-      tokens: { prompt: request.prompt.length, completion: 12 },
-      costUsd: 0,
-    }
-  }
+describe('Support Agent', () => {
+  it('should call the ticketing tool if the user reports a bug', async () => {
+    const model = new MockModel()
+      .on(/broken laptop/i)
+      .reply('I have created a ticket for you.')
 
-  stream(request: ProviderRequest) {
-    return {
-      async final() {
-        return {
-          output: `MODEL:${request.prompt}`,
-          tokens: { prompt: request.prompt.length, completion: 12 },
-          costUsd: 0,
-        }
-      },
-      async *[Symbol.asyncIterator]() {
-        yield { type: 'text-delta' as const, textDelta: `MODEL:${request.prompt}` }
-      },
-    }
-  }
-}
-
-describe('support agent', () => {
-  it('emits final message and telemetry', async () => {
-    const eventBridge = new DefaultEventBridge()
-    await eventBridge.start()
-
-    const agent = await supportAgent.getInstance(eventBridge, {
-      models: { 'openai:gpt-4o-mini': new DeterministicProvider() },
+    const { instance, eventBridge, destroy } = await testAgent(supportAgent, {
+      models: {
+        'openai:gpt-4o-mini': model
+      }
     })
-    await agent.start()
-    await new Promise(resolve => setTimeout(resolve, 25))
 
-    try {
-      const { envelopes } = await agent.invoke({
-        payload: { prompt: 'reset password', message: 'reset password', history: [], attachments: [] },
-      })
+    // 2. Mock the service command
+    const createTicketMock = vi.fn().mockResolvedValue({ id: 'ticket-123' })
+    eventBridge.registerCommand('ticketing', '1', 'createTicket', createTicketMock)
 
-      const hasFinalMessage = envelopes.some(
-        env => env.frame.kind === 'message' && env.frame.final === true,
-      )
-      const hasTelemetry = envelopes.some(env => env.frame.kind === 'telemetry')
+    // 3. Run the agent
+    const result = await instance.invoke({ payload: { prompt: 'My laptop is broken' } })
 
-      expect(hasFinalMessage).toBe(true)
-      expect(hasTelemetry).toBe(true)
-    } finally {
-      await agent.stop()
-      await eventBridge.destroy()
-    }
+    // 4. Verify assertions
+    expect(createTicketMock).toHaveBeenCalledWith(
+      expect.objectContaining({ reason: 'Broken laptop' })
+    )
+    expect(result.envelopes.some(e => e.frame.kind === 'message')).toBe(true)
+    await destroy()
   })
 })
 ```
 
-## Integration test pattern (command -> agent)
+## 2. Using the Test Helper (`testAgent`)
 
-If commands call agents via `.canInvokeAgent(...)`, test that route with a real command invoke:
+The `testAgent` helper is your best friend. It:
+- Sets up an in-memory EventBridge.
+- Creates a runtime instance of your agent.
+- Injects mock models and providers.
+- Provides a clean way to register mock commands.
+- Returns `destroy()` to cleanly stop the instance and bridge.
+
+`MockModel` gives deterministic scripting:
+
+- `.on(string | RegExp).reply(string | fn)`
+- `.onJson(matcher).reply(object | fn)`
+
+## 3. Strategies for Reliable Tests
+
+### A. Schema Validation
+Verify that your agent correctly handles malformed input. Because you've defined `addPayloadSchema`, PURISTA will automatically throw a `HandledError` before the agent even starts.
+
+### B. State/History Checks
+If your agent uses `persistConversation`, you can verify the history state after a run:
 
 ```ts
-const message = {
-  id: getNewEBMessageId(),
-  timestamp: Date.now(),
-  traceId: getNewTraceId(),
-  correlationId: getNewEBMessageId(),
-  messageType: EBMessageType.Command,
-  contentType: 'application/json',
-  contentEncoding: 'utf-8',
-  sender: {
-    serviceName: 'testClient',
-    serviceVersion: '1',
-    serviceTarget: 'integration',
-    instanceId: eventBridge.instanceId,
-  },
-  receiver: {
-    serviceName: 'support',
-    serviceVersion: '1',
-    serviceTarget: 'runSupportAgent',
-  },
-  payload: { payload: { prompt: 'How can I reset my password?' }, parameter: {} },
-}
-
-const result = await eventBridge.invoke(message)
-expect(result).toEqual(expect.objectContaining({ message: expect.stringContaining('MODEL:') }))
+const session = await instance.session.load('test-session')
+expect(session.data.messages).toHaveLength(2)
 ```
 
-This validates schema checks, `context.invokeAgent` wiring, and response mapping.
+### C. Deterministic Output
+Mock the model output to verify how your agent handler processes it (e.g., extracting values from JSON or formatting a string).
 
-If you use `.canInvokeAgent(..., { payloadSchema, parameterSchema })`, add one negative-path test that intentionally violates one of those schemas and assert that the invoke call does not reach EventBridge.
+## 4. Evaluation Datasets (Advanced)
 
-## AI SDK mock integration pattern (`ai/test`)
+For production-ready agents, unit tests are not enough. You need to evaluate the **quality** of the LLM responses.
 
-For end-to-end agent flows with streamed model output (without network calls), use `MockLanguageModelV3` from `ai/test` behind `AiSdkProvider`.
+PURISTA supports an "Evaluation Mode" where you can run your agent against a dataset of "Golden Questions" and "Expected Answers."
 
-This gives you deterministic tests for:
+- **Metrics**: BLEU, ROUGE, or LLM-as-a-judge scoring.
+- **CI/CD**: Block deployments if the evaluation score drops below a certain threshold.
 
-- streamed deltas (`text-delta`) and final aggregation
-- allowlisted tool execution and protocol tool frames
-- telemetry and final message behavior
-
-Reference implementation:
-
-- `examples/ai-basic/src/integration/aiSdkMockToolFlow.test.ts`
-
-## Reference tests in repository
-
-See the complete examples in:
-
-- `examples/ai-basic/src/agents/supportAgent/v1/supportAgent.test.ts`
-- `examples/ai-basic/src/service/support/v1/command/runSupportAgent/runSupportAgentCommandBuilder.test.ts`
-- `examples/ai-basic/src/integration/aiSdkMockToolFlow.test.ts`
+See the [AI Basic Example](https://github.com/purista-js/purista/tree/main/examples/ai-basic) for a complete reference on evaluation datasets.

@@ -65,6 +65,8 @@ export class StreamDefinitionBuilder<
 	private operationId?: string
 	private isSecure = true
 	private errorStatusCodes: StatusCode[] = []
+	private httpStreamProtocol?: { protocol: string; documentationUrl?: string }
+	private httpStreamingMode: 'stream' | 'aggregate' = 'stream'
 
 	private durable = false
 	private autoacknowledge = true
@@ -486,6 +488,19 @@ export class StreamDefinitionBuilder<
 		return this
 	}
 
+	setHttpStreamProtocol(protocol: string, documentationUrl?: string) {
+		this.httpStreamProtocol = {
+			protocol,
+			documentationUrl,
+		}
+		return this
+	}
+
+	setHttpStreamingMode(mode: 'stream' | 'aggregate') {
+		this.httpStreamingMode = mode
+		return this
+	}
+
 	makeEndpointPublic() {
 		this.isSecure = false
 		return this
@@ -615,7 +630,11 @@ export class StreamDefinitionBuilder<
 			expose: {
 				contentTypeRequest: this.inputContentType ?? 'application/json',
 				contentEncodingRequest: this.inputContentEncoding ?? 'utf-8',
-				contentTypeResponse: this.httpMetadata ? 'text/event-stream' : undefined,
+				contentTypeResponse: this.httpMetadata
+					? this.httpStreamingMode === 'aggregate'
+						? 'application/json'
+						: 'text/event-stream'
+					: undefined,
 				contentEncodingResponse: this.outputContentEncoding ?? 'utf-8',
 				inputPayload,
 				parameter,
@@ -628,6 +647,17 @@ export class StreamDefinitionBuilder<
 		if (this.httpMetadata) {
 			metadata.expose.http = this.httpMetadata.expose.http
 			if (metadata.expose.http) {
+				if (this.httpStreamProtocol) {
+					metadata.expose.http.stream = this.httpStreamProtocol
+				}
+				if (!metadata.expose.http.stream) {
+					metadata.expose.http.stream = {
+						protocol: 'purista',
+					}
+				}
+				if (metadata.expose.http.stream) {
+					metadata.expose.http.stream.mode = this.httpStreamingMode
+				}
 				metadata.expose.http.openApi = {
 					description: this.streamDescription,
 					summary: this.summary ?? this.streamName,

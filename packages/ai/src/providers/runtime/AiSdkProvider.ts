@@ -1,7 +1,15 @@
 import type { Tracer } from '@opentelemetry/api'
-import type { EmbeddingModel, LanguageModel, LanguageModelMiddleware, RerankingModel } from 'ai'
-import { embed, embedMany, generateObject, generateText, rerank, streamText, wrapLanguageModel } from 'ai'
-
+import type { EmbeddingModel, LanguageModel, LanguageModelMiddleware, RerankingModel, SystemModelMessage } from 'ai'
+import {
+	generateText as aiGenerateText,
+	embed,
+	embedMany,
+	generateObject,
+	rerank,
+	streamText,
+	wrapLanguageModel,
+} from 'ai'
+import { generateText as generateTextWithFallback } from './generateText.js'
 import type {
 	ModelProvider,
 	ModelProviderCapabilities,
@@ -9,6 +17,7 @@ import type {
 	ProviderEmbedManyResponse,
 	ProviderEmbedRequest,
 	ProviderEmbedResponse,
+	ProviderGenerateTextRequest,
 	ProviderJsonRequest,
 	ProviderJsonResponse,
 	ProviderRequest,
@@ -17,6 +26,7 @@ import type {
 	ProviderResponse,
 	ProviderStream,
 } from './ModelProvider.js'
+import { normalizeReasoningDelta, reasoningDelta, textDelta } from './streamNormalization.js'
 
 /**
  * Options accepted by {@link AiSdkProvider}.
@@ -88,7 +98,7 @@ export type AiSdkProviderMetadata = {
 /**
  * Supported overrides extracted from the AI SDK `generateText` call signature.
  */
-type GenerateTextArgs = Parameters<typeof generateText>[0]
+type GenerateTextArgs = Parameters<typeof aiGenerateText>[0]
 export type AiSdkProviderOverrides = Partial<Omit<GenerateTextArgs, 'model' | 'prompt' | 'system' | 'messages'>>
 type EmbedArgs = Parameters<typeof embed>[0]
 type EmbedManyArgs = Parameters<typeof embedMany>[0]
@@ -111,6 +121,59 @@ const composeSystemPrompt = (systemPrompt?: string, context?: string) => {
 		return undefined
 	}
 	return parts.join('\n\n')
+}
+
+const normalizeDeveloperInstructions = (developerInstruction?: string | string[]) => {
+	if (typeof developerInstruction === 'string') {
+		const value = developerInstruction.trim()
+		return value.length > 0 ? [value] : []
+	}
+	if (!Array.isArray(developerInstruction)) {
+		return []
+	}
+	return developerInstruction
+		.filter((entry): entry is string => typeof entry === 'string')
+		.map(entry => entry.trim())
+		.filter(entry => entry.length > 0)
+}
+
+const composeSystemMessages = (
+	systemPrompt?: string,
+	context?: string,
+	developerInstruction?: string | string[],
+): string | SystemModelMessage[] | undefined => {
+	const developerMessages = normalizeDeveloperInstructions(developerInstruction)
+	if (developerMessages.length === 0) {
+		return composeSystemPrompt(systemPrompt, context)
+	}
+
+	const systemMessages: SystemModelMessage[] = []
+	const systemContent = composeSystemPrompt(systemPrompt, context)
+	if (systemContent) {
+		systemMessages.push({
+			role: 'system',
+			content: systemContent,
+			providerOptions: {
+				openai: {
+					systemMessageMode: 'system',
+				},
+			},
+		})
+	}
+
+	for (const instruction of developerMessages) {
+		systemMessages.push({
+			role: 'system',
+			content: instruction,
+			providerOptions: {
+				openai: {
+					systemMessageMode: 'developer',
+				},
+			},
+		})
+	}
+
+	return systemMessages.length > 0 ? systemMessages : undefined
 }
 
 /**
@@ -182,8 +245,15 @@ export class AiSdkProvider implements ModelProvider {
 		if (!aiSdk || typeof aiSdk !== 'object') {
 			return {}
 		}
-		if ('generate' in aiSdk && typeof aiSdk.generate === 'object' && aiSdk.generate) {
-			return aiSdk.generate
+		if ('generate' in aiSdk) {
+			const { generate, ...topLevel } = aiSdk as Record<string, unknown>
+			if (generate && typeof generate === 'object') {
+				return {
+					...topLevel,
+					...(generate as Record<string, unknown>),
+				}
+			}
+			return topLevel
 		}
 		return aiSdk
 	}
@@ -239,7 +309,7 @@ export class AiSdkProvider implements ModelProvider {
 			...metadataOverrides,
 			model: this.model,
 			prompt: request.prompt,
-			system: composeSystemPrompt(this.systemPrompt, request.context),
+			system: composeSystemMessages(this.systemPrompt, request.context, request.developerInstruction),
 			experimental_telemetry: {
 				isEnabled: true,
 				...(this.tracer ? { tracer: this.tracer } : {}),
@@ -310,7 +380,7 @@ export class AiSdkProvider implements ModelProvider {
 
 	async generate(request: ProviderRequest): Promise<ProviderResponse> {
 		const callInput = this.getCallInput(request)
-		const result = await generateText(callInput)
+		const result = await aiGenerateText(callInput)
 		const { usage } = result
 
 		return {
@@ -345,7 +415,7 @@ export class AiSdkProvider implements ModelProvider {
 			...metadataWithoutOutput,
 			model: this.model,
 			prompt: request.prompt,
-			system: composeSystemPrompt(this.systemPrompt, request.context),
+			system: composeSystemMessages(this.systemPrompt, request.context, request.developerInstruction),
 			...objectRequest,
 			experimental_telemetry: {
 				isEnabled: true,
@@ -426,27 +496,11 @@ export class AiSdkProvider implements ModelProvider {
 			async *[Symbol.asyncIterator]() {
 				for await (const part of result.fullStream) {
 					if (part.type === 'text-delta' && part.text.length > 0) {
-						yield {
-							type: 'text-delta',
-							textDelta: part.text,
-						}
+						yield textDelta(part.text)
 					}
-					const reasoningDelta = (() => {
-						if (part.type !== 'reasoning-delta') {
-							return ''
-						}
-						const withText = part as { text?: unknown }
-						if (typeof withText.text === 'string') {
-							return withText.text
-						}
-						const withDelta = part as unknown as { delta?: unknown }
-						return typeof withDelta.delta === 'string' ? withDelta.delta : ''
-					})()
-					if (part.type === 'reasoning-delta' && reasoningDelta.length > 0) {
-						yield {
-							type: 'reasoning-delta',
-							reasoningDelta,
-						}
+					const normalizedReasoningDelta = part.type === 'reasoning-delta' ? normalizeReasoningDelta(part) : ''
+					if (part.type === 'reasoning-delta' && normalizedReasoningDelta.length > 0) {
+						yield reasoningDelta(normalizedReasoningDelta)
 					}
 					if (part.type === 'error') {
 						yield {
@@ -457,6 +511,20 @@ export class AiSdkProvider implements ModelProvider {
 				}
 			},
 		}
+	}
+
+	async generateText(request: ProviderGenerateTextRequest): Promise<string> {
+		return await generateTextWithFallback({
+			model: this,
+			request: {
+				prompt: request.prompt,
+				context: request.context,
+				developerInstruction: request.developerInstruction,
+				metadata: request.metadata,
+			},
+			onReasoning: request.onReasoning,
+			onTextDelta: request.onTextDelta,
+		})
 	}
 
 	async embed(request: ProviderEmbedRequest): Promise<ProviderEmbedResponse> {

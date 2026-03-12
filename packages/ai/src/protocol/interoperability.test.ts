@@ -61,7 +61,7 @@ describe('protocol interoperability helpers', () => {
 				durationMs: 42,
 				waitTimeMs: 4,
 				poolId: 'support',
-				maxWorkersPerInstance: 2,
+				maxConcurrencyPerInstance: 2,
 				activeWorkers: 1,
 				waitingWorkers: 0,
 				replicaCountHint: 3,
@@ -79,7 +79,7 @@ describe('protocol interoperability helpers', () => {
 		expect(result.content).toEqual([{ type: 'text', text: 'final answer' }])
 		expect(result.metadata?.telemetry).toMatchObject({
 			poolId: 'support',
-			maxWorkersPerInstance: 2,
+			maxConcurrencyPerInstance: 2,
 			effectiveMaxConcurrencyHint: 6,
 		})
 	})

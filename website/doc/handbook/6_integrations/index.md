@@ -17,6 +17,6 @@ In the following section, we'll illustrate how you can seamlessly integrate PURI
 
 ## Integration pattern
 
-1. Keep domain logic in commands/subscriptions.
+1. Keep business logic in commands/subscriptions.
 2. Add adapters around it (workers, gateways, schedulers, orchestrators).
 3. Pass only the required data through typed payload/parameter schemas.

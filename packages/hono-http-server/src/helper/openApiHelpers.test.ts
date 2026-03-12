@@ -1,0 +1,187 @@
+import type { HttpExposedServiceMeta } from '@purista/core'
+import { StatusCode } from '@purista/core'
+import { OpenApiBuilder } from 'openapi3-ts/oas31'
+import { describe, expect, it } from 'vitest'
+
+import { addPathToOpenApi } from './addPathToOpenApi.js'
+import { getErrorResponseSchema } from './getErrorResponseSchema.js'
+import { getParameterDefinition } from './getParameterDefinition.js'
+import { getQueryDefinition, getQueryDefintion } from './getQueryDefinition.js'
+
+describe('openapi helpers', () => {
+	it('extracts path parameter definitions including optional and referenced params', () => {
+		const params = getParameterDefinition('/users/:userId/orders/:orderId?', {
+			type: 'object',
+			properties: {
+				userId: { $ref: '#/components/schemas/UserId' },
+				orderId: { type: 'string', description: 'order id' },
+			},
+		})
+
+		expect(params).toEqual([
+			{
+				in: 'path',
+				name: 'userId',
+				required: true,
+				$ref: '#/components/schemas/UserId',
+			},
+			{
+				in: 'path',
+				name: 'orderId',
+				required: false,
+				schema: { type: 'string', description: 'order id' },
+				description: 'order id',
+			},
+		])
+	})
+
+	it('creates query definitions and keeps deprecated alias aligned', () => {
+		const input = [{ name: 'search', required: true }] as const
+		const schema = {
+			type: 'object',
+			properties: {
+				search: { type: 'string', title: 'Search term' },
+			},
+		} as const
+
+		expect(getQueryDefinition(undefined, schema as any)).toEqual([])
+		expect(getQueryDefinition(input as any, schema as any)).toEqual([
+			{
+				in: 'query',
+				name: 'search',
+				required: true,
+				schema: { type: 'string', title: 'Search term' },
+				description: 'Search term',
+			},
+		])
+		expect(getQueryDefintion(input as any, schema as any)).toEqual(getQueryDefinition(input as any, schema as any))
+	})
+
+	it('creates bad-request error schemas with validation data by default', () => {
+		const schema = getErrorResponseSchema(StatusCode.BadRequest, 'Bad Request')
+		expect(schema.properties?.data).toBeDefined()
+		expect(schema.required).toEqual(['status', 'message'])
+	})
+
+	it('adds aggregate stream responses to openapi without request bodies for GET', () => {
+		const builder = new OpenApiBuilder({
+			openapi: '3.1.0',
+			info: { title: 'test', version: '1.0.0' },
+			components: { securitySchemes: { bearer: { type: 'http', scheme: 'bearer' } } },
+		})
+		const finalPayload = {
+			type: 'object',
+			properties: { message: { type: 'string' } },
+		} as const
+
+		const metadata = {
+			expose: {
+				contentTypeRequest: 'application/json',
+				contentEncodingRequest: 'utf-8',
+				contentTypeResponse: 'application/json',
+				contentEncodingResponse: 'utf-8',
+				parameter: {
+					type: 'object',
+					properties: {
+						search: { type: 'string', description: 'search text' },
+					},
+				},
+				chunkPayload: {
+					type: 'object',
+					properties: { partial: { type: 'string' } },
+				},
+				finalPayload,
+				http: {
+					method: 'GET',
+					path: 'aggregate',
+					stream: {
+						mode: 'aggregate',
+						protocol: 'purista',
+						documentationUrl: 'https://example.com/stream-protocol',
+					},
+					openApi: {
+						isSecure: true,
+						description: 'aggregate endpoint',
+						summary: 'Aggregate',
+						query: [{ name: 'search', required: false }],
+						additionalStatusCodes: [StatusCode.Conflict],
+						operationId: 'aggregateExample',
+					},
+				},
+			},
+		} as unknown as HttpExposedServiceMeta
+
+		addPathToOpenApi(builder, metadata, '/api/v1/aggregate', { traceHeaderField: 'x-trace-id' })
+		const spec = builder.getSpec()
+		const endpoint = spec.paths?.['/api/v1/aggregate']?.get
+		const okResponse = endpoint?.responses?.['200'] as { content?: Record<string, { schema?: unknown }> }
+
+		expect(endpoint?.requestBody).toBeUndefined()
+		expect(endpoint?.security).toEqual([{ bearer: [] }])
+		expect(endpoint?.parameters?.some(param => 'name' in param && param.name === 'x-trace-id')).toBe(true)
+		expect(endpoint?.responses?.['401']).toBeDefined()
+		expect(endpoint?.responses?.['409']).toBeDefined()
+		expect(okResponse.content?.['application/json']?.schema).toEqual(finalPayload)
+	})
+
+	it('adds streaming SSE response schema with protocol metadata', () => {
+		const builder = new OpenApiBuilder({
+			openapi: '3.1.0',
+			info: { title: 'test', version: '1.0.0' },
+		})
+
+		const metadata = {
+			expose: {
+				contentTypeRequest: 'application/json',
+				contentEncodingRequest: 'utf-8',
+				contentTypeResponse: 'text/event-stream',
+				contentEncodingResponse: 'utf-8',
+				inputPayload: {
+					type: 'object',
+					properties: {
+						prompt: { type: 'string' },
+					},
+				},
+				chunkPayload: {
+					type: 'object',
+					properties: { partial: { type: 'string' } },
+				},
+				finalPayload: {
+					type: 'object',
+					properties: { message: { type: 'string' } },
+				},
+				http: {
+					method: 'POST',
+					path: 'stream',
+					stream: {
+						mode: 'stream',
+						protocol: 'ai-sdk-ui-message',
+						documentationUrl: 'https://example.com/ui-message',
+					},
+					openApi: {
+						isSecure: false,
+						description: 'stream endpoint',
+						summary: 'Stream',
+					},
+				},
+			},
+		} as unknown as HttpExposedServiceMeta
+
+		addPathToOpenApi(builder, metadata, '/api/v1/stream', {})
+		const spec = builder.getSpec()
+		const endpoint = spec.paths?.['/api/v1/stream']?.post
+		const okResponse = endpoint?.responses?.['200'] as {
+			content?: Record<string, { schema?: Record<string, unknown>; [key: string]: unknown }>
+		}
+
+		expect(endpoint?.requestBody).toBeDefined()
+		expect(okResponse.content?.['text/event-stream']?.schema).toMatchObject({
+			type: 'object',
+			required: ['event', 'data'],
+		})
+		expect(okResponse.content?.['text/event-stream']?.['x-purista-stream-protocol']).toBe('ai-sdk-ui-message')
+		expect(okResponse.content?.['text/event-stream']?.['x-purista-stream-protocol-docs']).toBe(
+			'https://example.com/ui-message',
+		)
+	})
+})

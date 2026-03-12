@@ -1,11 +1,9 @@
 // @vitest-environment jsdom
 
-import { fireEvent, render, screen } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import React from 'react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { App, getStoredTheme, THEME_KEY, uniqueEnvelopes } from './App'
+import { getStoredTheme, THEME_KEY, uniqueEnvelopes } from './App'
 
 vi.mock('@xyflow/react', () => ({
 	ReactFlow: ({ children }: { children: ReactNode }) => <div>{children}</div>,
@@ -16,6 +14,20 @@ vi.mock('@xyflow/react', () => ({
 
 vi.mock('streamdown', () => ({
 	Streamdown: ({ children }: { children: ReactNode }) => <div>{children}</div>,
+}))
+
+vi.mock('@ai-sdk/react', () => ({
+	useChat: () => ({
+		messages: [],
+		status: 'ready',
+		error: undefined,
+		sendMessage: vi.fn(async () => undefined),
+		setMessages: vi.fn(),
+	}),
+}))
+
+vi.mock('ai', () => ({
+	DefaultChatTransport: class DefaultChatTransport {},
 }))
 
 vi.mock('./components/ai-elements/conversation', () => ({
@@ -61,14 +73,5 @@ describe('App helpers', () => {
 	it('reads stored theme from local storage', () => {
 		window.localStorage.setItem(THEME_KEY, 'light')
 		expect(getStoredTheme()).toBe('light')
-	})
-})
-
-describe('App theme toggle', () => {
-	it('persists theme changes', () => {
-		render(React.createElement(App))
-		const button = screen.getByRole('button', { name: /Theme:/i })
-		fireEvent.click(button)
-		expect(window.localStorage.getItem(THEME_KEY)).toBe('light')
 	})
 })

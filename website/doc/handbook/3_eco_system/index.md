@@ -13,5 +13,6 @@ PURISTA is highly modular and functionality is separated into multiple packages.
 | Event bridges | Push-based transports (Default, AMQP, MQTT, NATS, Dapr) for commands/subscriptions/streams. | [Event bridges](./eventbridges/index.md) |
 | Queue bridges | Pull-based queue providers (Default in-memory, Redis, future adapters) for worker pools and async HTTP workflows. | [Queue bridges](./queue_bridges/index.md) |
 | Stores | Config, secret, and state stores (AWS, Azure, Redis, Dapr, etc.) with unified abstractions. | [Stores](./stores.md) |
+| Sandbox runtime | Reusable multi-tenant sandbox and drivers for secure agent/tool execution. | [Sandbox](./sandbox.md) |
 | Servers | HTTP server adapters (Hono, native HTTP) and exposure helpers. | [Servers](./http_server.md) |
 | Tools | CLI, generators, deployment helpers, and supporting SDKs. | [Tools](./tools.md) |

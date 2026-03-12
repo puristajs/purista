@@ -136,7 +136,7 @@ describe('AgentInstance', () => {
 			poolManager,
 			poolConfig: {
 				poolId: 'support-pool',
-				maxWorkers: 2,
+				maxConcurrencyPerInstance: 2,
 			},
 			concurrencyHints: {
 				replicaCountHint: 3,
@@ -151,7 +151,7 @@ describe('AgentInstance', () => {
 			agentName: 'supportAgent',
 			agentVersion: '1',
 			poolId: 'support-pool',
-			maxWorkersPerInstance: 2,
+			maxConcurrencyPerInstance: 2,
 			activeWorkers: 1,
 			waitingWorkers: 0,
 			concurrencyHints: {

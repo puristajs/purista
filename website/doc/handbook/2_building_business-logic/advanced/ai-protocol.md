@@ -1,74 +1,95 @@
 ---
 title: AI Protocol
-description: Envelope and frame contract used by @purista/ai for streaming, telemetry, and tool traces.
+description: Deep dive into the PURISTA Agent Protocol, frame semantics, and envelopes.
 order: 299904
 ---
 
 # AI Protocol (Advanced View)
 
-For the main developer documentation, start with [AI Agents → AI Protocol](../agent/ai-protocol.md).
+The PURISTA Agent Protocol is a structured way for agents and callers to communicate over the EventBridge. It uses a series of **Frames** wrapped in **Envelopes**.
 
-This advanced page highlights operational and interoperability concerns.
+This protocol is designed to:
+- Keep agents as "black boxes" (decoupling implementation from interface).
+- Capture nested flows (agent-to-agent calls, tool chains).
+- Be transformable to other ecosystems (MCP, A2A, Vercel AI SDK).
+- Preserve PURISTA transport semantics (trace IDs, tenant/principal propagation).
 
-## Operational focus
+## 1. The Envelope
 
-The protocol is designed to:
+Every piece of communication from an agent is wrapped in an `AgentProtocolEnvelope`.
 
-- keep agents as black boxes (no external caller forcing internal tool choices)
-- capture nested flows (agent-to-agent, tool chains, retries) in a UI-friendly format
-- be transformable to other ecosystems (for example AI SDK stream events, MCP, agent-to-agent connectors)
-- preserve PURISTA transport semantics (correlation IDs, trace IDs, tenant/principal propagation)
+- **`agentName` / `agentVersion`**: The source of the frame.
+- **`sessionId`**: The stable conversation identity.
+- **`tenantId` / `principalId`**: Security and separation metadata.
+- **`frame`**: The actual payload of the communication.
 
-## Envelope shape (conceptual)
+## 2. Frame Kinds
 
-Each emitted item is an **envelope**:
+The `frame` property of the envelope defines **what** is being communicated.
 
-- `version` protocol version
-- `messageId` unique id for this envelope
-- `conversationId` conversation/thread identifier
-- `inReplyTo` previous message id when this envelope is a response
-- `timestamp` ISO timestamp
-- `actor` sender identity (`service`, `version`, optional `agent`, `instanceId`)
-- `userId` / `tenantId` for isolation-aware consumers
-- `frame` one of the frame kinds listed below
+### A. Message Frame (`kind: 'message'`)
+Carries the actual text response from the LLM.
+- **`role`**: `assistant` or `user`.
+- **`content`**: The text content (can be a delta or full).
+- **`partial`**: `true` if this is a chunk of a larger message.
+- **`final`**: `true` if this completes the turn.
 
-## Frame kinds
+### B. Artifact Frame (`kind: 'artifact'`)
+Used for non-textual data, like structured JSON, code snippets, or UI hints.
+- **`artifactId`**: Unique ID for this artifact.
+- **`mimeType`**: e.g., `application/json` or `text/javascript`.
+- **`content`**: The raw artifact data.
 
-- `message`: text content, supports partial chunks and final message
-- `tool`: tool invocation lifecycle (`invoked`, `success`, `error`) with input/output
-- `telemetry`: duration, wait time, provider, token usage metrics
-- `artifact`: non-text outputs (JSON artifacts, files, structured payloads)
-- `error`: handled/unhandled error information in normalized form
+### C. Tool Event Frame (`kind: 'tool'`)
+Automatically emitted when an agent calls a PURISTA command.
+- **`toolName`**: The full path to the command.
+- **`status`**: `invoked`, `success`, or `error`.
+- **`args`**: The input payload to the tool.
+- **`result`**: The output of the tool (on success).
 
-## Identity and correlation
+### D. Telemetry Frame (`kind: 'telemetry'`)
+Sent at the end of a run to provide operational insights.
+- **`durationMs`**: Total time taken.
+- **`usage`**: Token counts (`prompt`, `completion`, `total`).
+- **`poolMetrics`**: Concurrency data (`activeWorkers`, `waitingWorkers`).
 
-The protocol intentionally reuses PURISTA identity metadata:
+### E. Error Frame (`kind: 'error'`)
+Sent when something goes wrong (LLM failure, tool failure, schema violation).
+- **`code`**: A machine-readable error code.
+- **`message`**: A human-readable description.
+- **`handled`**: `true` if the error was expected.
 
-- `traceId` and correlation chain come from PURISTA message transport
-- actor identity comes from service + version + instance
-- `inReplyTo` links follow-up frames and nested invocations
+## 3. The Stream Life-cycle
 
-This gives reliable traceability across services, agents, tools, and frontend timelines.
+When you call an agent, you receive a stream of these frames.
 
-## Error semantics
+```mermaid
+sequenceDiagram
+    Caller->>Agent: Invoke(payload)
+    Agent->>Caller: Message Frame (partial: true)
+    Agent->>Caller: Tool Frame (status: invoked)
+    Agent->>Caller: Tool Frame (status: success)
+    Agent->>Caller: Message Frame (partial: true)
+    Agent->>Caller: Message Frame (final: true)
+    Agent->>Caller: Telemetry Frame
+```
 
-- `HandledError` becomes an `error` frame with handled semantics.
-- Unexpected exceptions become unhandled `error` frames.
-- The stream still stays structurally valid for consumers.
+## 4. Custom Transforms
 
-## Token usage and telemetry
+If you need to transform these frames for a non-PURISTA client (e.g., a legacy mobile app), you can iterate through the invocation:
 
-Token usage and latency are emitted as telemetry frames and included in final response metadata.  
-This allows external observability stacks (Grafana/OTel backends) to alert without embedding budgeting logic into the framework.
+```ts
+const invocation = context.invokeAgent.supportAgent['1'].call(payload)
 
-## Practical rule
+for await (const envelope of invocation) {
+  const frame = envelope.frame
+  if (frame.kind === 'message') {
+    // Transform message frame to your custom format
+  }
+}
+```
 
-Most application developers should not create protocol objects manually.
+---
 
-Use:
-
-- `context.stream.sendChunk/sendFinal/sendArtifact/sendError` in handlers
-- `context.tools.invoke(...)` for allowlisted command/agent tools
-- helpers like `toAiSdkStreamEvents(...)` when exposing streams to UI clients
-
-Manual envelope creation is only for advanced adapters/integrations.
+### Why a custom protocol?
+By using a structured, frame-based protocol instead of a raw text stream, PURISTA allows your agents to be **observational** (telemetry), **action-oriented** (tools), and **rich** (artifacts), all while maintaining a single, consistent communication channel.

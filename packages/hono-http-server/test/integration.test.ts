@@ -153,5 +153,30 @@ describe('httpserver integration test', () => {
 		it('exposes http delete endpoint', async () => {
 			await expect(client.delete(`${apiMountPath}/v1/delete`)).resolves.toBeUndefined()
 		})
+
+		it('returns aggregate stream endpoint using the declared final schema', async () => {
+			const result = await client.get<{ message?: string; envelopes?: Array<{ frame?: { kind?: string } }> }>(
+				`${apiMountPath}/v1/aggregate-success`,
+			)
+			expect(result?.message).toBe('aggregate ok')
+			expect(result?.envelopes?.[0]?.frame?.kind).toBe('message')
+		})
+
+		it('maps aggregate stream final error envelope to 500', async () => {
+			await expect(client.get(`${apiMountPath}/v1/aggregate-error`)).rejects.toThrowError('Internal Server Error')
+		})
+
+		it('documents aggregate stream endpoint as application/json', async () => {
+			const openApi = await client.get<OpenAPIObject>(`${apiMountPath}/openapi.json`)
+			const endpoint = openApi.paths?.[`${apiMountPath}/v1/aggregate-success`]
+			const getOp = endpoint?.get
+			const okResponse = getOp?.responses?.['200']
+			const responseContent =
+				okResponse && typeof okResponse === 'object' && 'content' in okResponse
+					? (okResponse.content as any)
+					: undefined
+			expect(responseContent?.['application/json']).toBeDefined()
+			expect(responseContent?.['text/event-stream']).toBeUndefined()
+		})
 	})
 })

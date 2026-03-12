@@ -20,6 +20,7 @@
 		"./packages/nats-config-store",
 		"./packages/nats-state-store",
 		"./packages/natsbridge",
+		"./packages/sandbox-service",
 		"./packages/redis-queue-bridge",
 		"./packages/redis-config-store",
 		"./packages/redis-state-store",

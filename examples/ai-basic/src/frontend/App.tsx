@@ -1,5 +1,7 @@
 /* @jsxRuntime automatic */
 
+import { type UIMessage, useChat } from '@ai-sdk/react'
+import { DefaultChatTransport } from 'ai'
 import { BotIcon, MessageSquareIcon, SparklesIcon, WorkflowIcon, WrenchIcon, XCircleIcon } from 'lucide-react'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { Streamdown } from 'streamdown'
@@ -10,7 +12,7 @@ import {
 	ConversationEmptyState,
 	ConversationScrollButton,
 } from './components/ai-elements/conversation'
-import { getMcpTools, loadConversation, runSupportA2a, runSupportMcp, streamSupportAgent } from './lib/api'
+import { getMcpTools, loadConversation, runSupportA2a, runSupportMcp } from './lib/api'
 import type { AgentProtocolEnvelope, StreamPayload, WorkflowStep } from './lib/types'
 import { mapToWorkflow } from './lib/workflow'
 
@@ -33,6 +35,87 @@ type ChatMessage = {
 	toolKey?: string
 	actor?: string
 	timestamp?: string
+}
+
+const isTextPart = (part: { type?: unknown; text?: unknown }): part is { type: 'text'; text: string } =>
+	part.type === 'text' && typeof part.text === 'string'
+
+const isReasoningPart = (part: { type?: unknown; text?: unknown }): part is { type: 'reasoning'; text: string } =>
+	part.type === 'reasoning' && typeof part.text === 'string'
+
+const isToolPart = (part: { type?: unknown }): boolean =>
+	part.type === 'dynamic-tool' || (typeof part.type === 'string' && part.type.startsWith('tool-'))
+
+const getLastUserPrompt = (messages: UIMessage[]): string => {
+	for (let index = messages.length - 1; index >= 0; index -= 1) {
+		const message = messages[index]
+		if (message.role !== 'user') {
+			continue
+		}
+		const text = message.parts
+			.filter(isTextPart)
+			.map(part => part.text)
+			.join('\n')
+			.trim()
+		if (text.length > 0) {
+			return text
+		}
+	}
+	return ''
+}
+
+const mapUiMessagesToChatMessages = (messages: UIMessage[]): ChatMessage[] => {
+	const mapped: ChatMessage[] = []
+	for (const message of messages) {
+		const textContent = message.parts
+			.filter(part => isTextPart(part) || isReasoningPart(part))
+			.map(part => part.text)
+			.join('\n')
+			.trim()
+		if (message.role === 'user') {
+			if (textContent.length > 0) {
+				mapped.push({
+					id: message.id,
+					role: 'user',
+					content: textContent,
+				})
+			}
+			continue
+		}
+
+		if (textContent.length > 0) {
+			mapped.push({
+				id: message.id,
+				role: 'assistant',
+				content: textContent,
+			})
+		}
+
+		message.parts.forEach((part, index) => {
+			if (!isToolPart(part)) {
+				return
+			}
+			const toolName = part.type === 'dynamic-tool' ? String(part.toolName ?? 'tool') : part.type.slice(5)
+			const toolState = 'state' in part ? String(part.state ?? 'unknown') : 'unknown'
+			const toolInput = 'input' in part ? part.input : undefined
+			let toolOutput: unknown
+			if ('output' in part && part.output !== undefined) {
+				toolOutput = part.output
+			} else if ('errorText' in part && typeof part.errorText === 'string') {
+				toolOutput = part.errorText
+			}
+			mapped.push({
+				id: `${message.id}-tool-${index}`,
+				role: 'tool',
+				content: `${toolName} · ${toolState}`,
+				toolStatus: toolState,
+				toolInput,
+				toolOutput,
+				toolKey: `${toolName}|${stableJson(toolInput)}`,
+			})
+		})
+	}
+	return mapped
 }
 
 const scenarioOptions: Array<{ id: Scenario; label: string }> = [
@@ -242,6 +325,41 @@ export const App = () => {
 	const [mcpTools, setMcpTools] = useState<unknown[] | null>(null)
 	const [isGenerating, setIsGenerating] = useState(false)
 	const seenFramesRef = useRef<Set<string>>(new Set())
+	const sessionIdRef = useRef(sessionId)
+	const responseFormatRef = useRef(responseFormat)
+
+	const {
+		messages: uiMessages,
+		status: uiStatus,
+		error: uiError,
+		sendMessage,
+		setMessages: setUiMessages,
+	} = useChat({
+		transport: new DefaultChatTransport({
+			api: '/api/v1/agents/supportAgent',
+			prepareSendMessagesRequest: ({ messages, body }) => {
+				const prompt = getLastUserPrompt(messages)
+				return {
+					body: {
+						...(body ?? {}),
+						sessionId: sessionIdRef.current || undefined,
+						responseFormat: responseFormatRef.current,
+						message: prompt,
+						prompt,
+					},
+				}
+			},
+		}),
+		onData: dataPart => {
+			setStreamPayloads(previous => [
+				...previous,
+				{
+					event: 'data',
+					raw: JSON.stringify(dataPart),
+				},
+			])
+		},
+	})
 
 	const workflow = useMemo(() => mapToWorkflow(envelopes), [envelopes])
 	const coalescedWorkflow = useMemo(() => coalesceWorkflowSteps(workflow), [workflow])
@@ -266,6 +384,47 @@ export const App = () => {
 	useEffect(() => {
 		document.documentElement.setAttribute('data-theme', theme)
 	}, [theme])
+
+	useEffect(() => {
+		sessionIdRef.current = sessionId
+	}, [sessionId])
+
+	useEffect(() => {
+		responseFormatRef.current = responseFormat
+	}, [responseFormat])
+
+	useEffect(() => {
+		if (scenario !== 'stream') {
+			return
+		}
+		setChatMessages(mapUiMessagesToChatMessages(uiMessages))
+	}, [scenario, uiMessages])
+
+	useEffect(() => {
+		if (scenario !== 'stream') {
+			return
+		}
+		if (uiStatus === 'submitted') {
+			setStatus('Submitting...')
+			setCanRetry(false)
+			setIsGenerating(true)
+			return
+		}
+		if (uiStatus === 'streaming') {
+			setStatus('Streaming...')
+			setCanRetry(false)
+			setIsGenerating(true)
+			return
+		}
+		if (uiStatus === 'error') {
+			setStatus(uiError?.message ? `Error: ${uiError.message}` : 'Error')
+			setCanRetry(true)
+			setIsGenerating(false)
+			return
+		}
+		setStatus('Completed')
+		setIsGenerating(false)
+	}, [scenario, uiStatus, uiError])
 
 	const setThemeAndStore = (nextTheme: Theme) => {
 		window.localStorage.setItem(THEME_KEY, nextTheme)
@@ -404,28 +563,20 @@ export const App = () => {
 			setSessionId(activeSessionId)
 		}
 		rememberConversation(activeSessionId, question)
-		appendUserMessage(question)
 		setAssistantDraft('')
 		setEnvelopes([])
 		setStreamPayloads([])
 		seenFramesRef.current = new Set()
-		setStatus('Streaming...')
+		setStatus('Submitting...')
 		setCanRetry(false)
-
-		await streamSupportAgent(
-			{ prompt: question, sessionId: activeSessionId, responseFormat },
+		await sendMessage(
+			{ text: question },
 			{
-				onEnvelope: processEnvelope,
-				onPayload: payload => setStreamPayloads(previous => [...previous, payload]),
-				onComplete: () => {
-					setAssistantDraft('')
-					setStatus('Completed')
-				},
-				onError: error => {
-					setAssistantDraft('')
-					appendAssistantMessage(`Error: ${error}`)
-					setStatus('Error')
-					setCanRetry(true)
+				body: {
+					sessionId: activeSessionId,
+					responseFormat,
+					prompt: question,
+					message: question,
 				},
 			},
 		)
@@ -557,6 +708,7 @@ export const App = () => {
 						onClick={() => {
 							setPrompt(defaultPrompt)
 							setChatMessages([])
+							setUiMessages([])
 							setEnvelopes([])
 							setStreamPayloads([])
 							seenFramesRef.current = new Set()

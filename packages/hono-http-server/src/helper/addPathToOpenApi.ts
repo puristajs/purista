@@ -6,6 +6,7 @@ import { getErrorName } from './getErrorName.js'
 import { getErrorResponseSchema } from './getErrorResponseSchema.js'
 import { getParameterDefinition } from './getParameterDefinition.js'
 import { getQueryDefinition } from './getQueryDefinition.js'
+import { resolveHttpStreamingMode } from './streamTransport.js'
 
 export type Config = {
 	traceHeaderField?: string
@@ -53,12 +54,21 @@ export const addPathToOpenApi = (
 		[name]: [],
 	}))
 
-	const isStreamResponse = expose.contentTypeResponse === 'text/event-stream'
-	const okCode = isStreamResponse
-		? StatusCode.OK
-		: (exposeWithSchemas.outputPayload as { type?: unknown } | undefined)?.type
+	const streamMode = resolveHttpStreamingMode({
+		explicitMode: expose.http.stream?.mode,
+		isDeclaredStreamDefinition: 'chunkPayload' in exposeWithSchemas || 'finalPayload' in exposeWithSchemas,
+		responseContentType,
+	})
+	const isStreamResponse = expose.contentTypeResponse === 'text/event-stream' && streamMode === 'stream'
+	const isAggregateStream = streamMode === 'aggregate'
+	const streamProtocol = expose.http.stream?.protocol
+	const streamProtocolDoc = expose.http.stream?.documentationUrl
+	const okCode =
+		isStreamResponse || isAggregateStream
 			? StatusCode.OK
-			: StatusCode.NoContent
+			: (exposeWithSchemas.outputPayload as { type?: unknown } | undefined)?.type
+				? StatusCode.OK
+				: StatusCode.NoContent
 
 	const errorCodes: Set<StatusCode> = new Set([...(expose.http.openApi?.additionalStatusCodes ?? [])])
 
@@ -106,48 +116,91 @@ export const addPathToOpenApi = (
 			traceIdParameter,
 			traceParent,
 		],
-		requestBody: {
-			content: {
-				[requestContentType]: {
-					schema: method !== 'get' ? expose.inputPayload : undefined,
-				},
-			},
-		},
+		requestBody:
+			method === 'get' || method === 'delete'
+				? undefined
+				: {
+						content: {
+							[requestContentType]: {
+								schema: expose.inputPayload,
+							},
+						},
+					},
 		responses: {
 			[`${okCode}`]: {
-				description: getErrorName(okCode),
+				description: isStreamResponse
+					? [
+							getErrorName(okCode),
+							streamProtocol ? `SSE protocol: ${streamProtocol}.` : undefined,
+							streamProtocolDoc ? `Protocol docs: ${streamProtocolDoc}` : undefined,
+						]
+							.filter(Boolean)
+							.join(' ')
+					: getErrorName(okCode),
 				content:
 					okCode === StatusCode.NoContent
 						? undefined
 						: {
 								[responseContentType]: {
 									schema: isStreamResponse
-										? {
-												type: 'object',
-												properties: {
-													frameType: {
-														type: 'string',
-														enum: ['start', 'chunk', 'complete', 'error', 'cancel'],
+										? streamProtocol && streamProtocol !== 'purista'
+											? {
+													type: 'object',
+													properties: {
+														event: { type: 'string' },
+														data: {},
 													},
-													sequence: {
-														type: 'integer',
-													},
-													chunk: exposeWithSchemas.chunkPayload,
-													final: exposeWithSchemas.finalPayload,
-													error: {
-														type: 'object',
-														properties: {
-															status: { type: 'integer' },
-															message: { type: 'string' },
-															isHandledError: { type: 'boolean' },
-															traceId: { type: 'string' },
+													required: ['event', 'data'],
+												}
+											: {
+													oneOf: [
+														{
+															type: 'object',
+															properties: {
+																frameType: {
+																	type: 'string',
+																	enum: ['start', 'chunk', 'complete', 'error', 'cancel'],
+																},
+																sequence: {
+																	type: 'integer',
+																},
+																chunk: exposeWithSchemas.chunkPayload,
+																final: exposeWithSchemas.finalPayload,
+																error: {
+																	type: 'object',
+																	properties: {
+																		status: { type: 'integer' },
+																		message: { type: 'string' },
+																		isHandledError: { type: 'boolean' },
+																		traceId: { type: 'string' },
+																	},
+																},
+																reason: { type: 'string' },
+															},
 														},
-													},
-													reason: { type: 'string' },
-												},
-											}
-										: exposeWithSchemas.outputPayload,
+														{
+															type: 'object',
+															properties: {
+																event: { type: 'string' },
+																data: {},
+															},
+															required: ['event', 'data'],
+														},
+													],
+												}
+										: isAggregateStream
+											? (exposeWithSchemas.finalPayload ?? {
+													type: 'object',
+													additionalProperties: true,
+												})
+											: exposeWithSchemas.outputPayload,
 									encoding: responseEncodingType,
+									...(isStreamResponse && streamProtocol
+										? ({ 'x-purista-stream-protocol': streamProtocol } as Record<string, unknown>)
+										: {}),
+									...(isStreamResponse && streamProtocolDoc
+										? ({ 'x-purista-stream-protocol-docs': streamProtocolDoc } as Record<string, unknown>)
+										: {}),
 								},
 							},
 			},

@@ -47,7 +47,7 @@ Reference:
 2. Choose queue bridge (default in-memory vs Redis or other providers) for pull-based workloads.
 3. Choose deployment model (monolith, microservice style, edge, serverless).
 4. Configure graceful shutdown and startup ordering.
-5. If using AI, tune both queue worker concurrency and agent `poolConfig.maxWorkers` together.
+5. If using AI, tune both queue worker concurrency and agent `poolConfig.maxConcurrencyPerInstance` together.
 
 Reference:
 

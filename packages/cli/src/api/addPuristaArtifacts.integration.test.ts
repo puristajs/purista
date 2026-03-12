@@ -166,6 +166,7 @@ describe('CLI artifact generation (e2e)', () => {
 			serviceVersion: '1',
 			agentName: 'triage',
 			agentDescription: 'Review tickets',
+			responseEventName: 'user.triage_completed',
 		})
 
 		const serviceDir = join(TEST_DIR, 'src', 'service', 'user', 'v1')
@@ -219,6 +220,7 @@ describe('CLI artifact generation (e2e)', () => {
 		const agentDirPath = join(TEST_DIR, 'src', 'agents', 'triage', 'v1')
 		const agentBuilder = readFileSync(join(agentDirPath, 'triageAgent.ts'), 'utf-8')
 		expect(agentBuilder).toContain("import { AgentBuilder } from '@purista/ai'")
+		expect(agentBuilder).toContain(".setSuccessEventName('user.triage.completed')")
 		expect(agentBuilder).toContain(
 			'.setHandler<{ sessionId?: string; prompt: string; context?: string }>(async function (context, payload) {',
 		)
