@@ -609,6 +609,100 @@ describe('runtime context helpers', () => {
 		expect(toolFrames).toHaveLength(0)
 	})
 
+	it('can forward another agent with orchestration defaults', async () => {
+		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
+		baseEventBridge.invoke.mockResolvedValue([
+			createProtocolEnvelope({
+				conversationId: 'sub-forward-defaults',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: { kind: 'tool', toolName: 'readSpec', status: 'invoked', input: { path: 'specs/spec.md' } },
+			}),
+			createProtocolEnvelope({
+				conversationId: 'sub-forward-defaults',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: { kind: 'message', role: 'assistant', content: 'forwarded text', final: true },
+			}),
+		])
+
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await context.agents.forward({
+			agentName: 'childAgent',
+			agentVersion: '1',
+			payload: childPayload('go'),
+		})
+
+		const frames = buffer.toEnvelopes().map(envelope => envelope.frame)
+		const assistantFrames = frames.filter(
+			(frame): frame is Extract<(typeof frames)[number], { kind: 'message' }> =>
+				frame.kind === 'message' && frame.role === 'assistant',
+		)
+		const toolFrames = frames.filter(frame => frame.kind === 'tool')
+
+		expect(assistantFrames.map(frame => frame.content)).toEqual(['forwarded text'])
+		expect(toolFrames).toHaveLength(0)
+	})
+
+	it('can forward nested tool events when requested explicitly', async () => {
+		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
+		baseEventBridge.invoke.mockResolvedValue([
+			createProtocolEnvelope({
+				conversationId: 'sub-forward-tool-events',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: { kind: 'tool', toolName: 'readSpec', status: 'invoked', input: { path: 'specs/spec.md' } },
+			}),
+		])
+
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await context.agents.forward({
+			agentName: 'childAgent',
+			agentVersion: '1',
+			payload: childPayload('go'),
+			forward: {
+				toolEvents: true,
+			},
+		})
+
+		const toolFrames = buffer
+			.toEnvelopes()
+			.map(envelope => envelope.frame)
+			.filter(frame => frame.kind === 'tool')
+		expect(toolFrames).toHaveLength(1)
+		expect(toolFrames[0]).toMatchObject({
+			toolName: 'readSpec',
+			status: 'invoked',
+		})
+	})
+
 	it('exposes secrets/configs/states directly on agent context', async () => {
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,

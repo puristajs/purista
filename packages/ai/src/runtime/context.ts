@@ -656,6 +656,12 @@ export type AgentHandlerContext<
 		 */
 		runText(options: AgentInvocationOptions): Promise<string>
 		/**
+		 * Invokes another agent and forwards its live output into the current stream.
+		 * Defaults to forwarding assistant text, reasoning, artifacts, and errors while suppressing
+		 * synthetic outer `agent.run` tool telemetry.
+		 */
+		forward(options: AgentForwardInvocationOptions): Promise<AgentProtocolEnvelope[]>
+		/**
 		 * Invokes another agent and parses the final assistant message as JSON.
 		 */
 		runObject<T = unknown>(options: AgentInvocationOptions): Promise<T>
@@ -758,6 +764,20 @@ export type AgentInvocationOptions = {
 	stream?: import('../types/AgentDefinition.js').AgentStreamResponder
 }
 
+export type AgentForwardingOptions =
+	| true
+	| {
+			assistant?: boolean
+			reasoning?: boolean
+			artifacts?: boolean
+			errors?: boolean
+			toolEvents?: boolean
+	  }
+
+export type AgentForwardInvocationOptions = Omit<AgentInvocationOptions, 'forwardToCurrentStream'> & {
+	forward?: AgentForwardingOptions
+}
+
 type DeclaredAgentBinding = {
 	call?: (
 		payload: unknown,
@@ -768,14 +788,6 @@ type DeclaredAgentBinding = {
 	}
 	payloadSchema?: Schema
 	parameterSchema?: Schema
-}
-
-type AgentForwardingOptions = true | {
-	assistant?: boolean
-	reasoning?: boolean
-	artifacts?: boolean
-	errors?: boolean
-	toolEvents?: boolean
 }
 
 type ResolvedAgentBinding = {
@@ -1122,6 +1134,13 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 		}
 	}
 
+	const forward = async (options: AgentForwardInvocationOptions) =>
+		await invoke({
+			...options,
+			forwardToCurrentStream: options.forward ?? true,
+			emitInvocationToolEvents: options.emitInvocationToolEvents ?? false,
+		})
+
 	const invokeProxy = new Proxy(invoke, {
 		apply(target, thisArg, argArray) {
 			return Reflect.apply(target, thisArg, argArray)
@@ -1171,6 +1190,7 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 	return {
 		invoke: invokeProxy,
 		runText,
+		forward,
 		runObject,
 	}
 }

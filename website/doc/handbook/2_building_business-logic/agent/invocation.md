@@ -95,6 +95,33 @@ await context.agents.invoke({
 
 `emitInvocationToolEvents: false` is useful when the sub-agent is an internal orchestration step and you do not want the outer stream to show synthetic `childAgent.run` tool telemetry.
 
+For the common orchestration case, use the convenience helper instead:
+
+```ts
+await context.agents.forward({
+  agentName: 'triageAgent',
+  agentVersion: '1',
+  payload: { prompt: payload.prompt },
+})
+```
+
+`context.agents.forward(...)` defaults to:
+- forwarding assistant text, reasoning, artifacts, and errors into the current stream
+- suppressing synthetic outer `agent.run` tool telemetry
+
+Override the forwarding shape only when you need to:
+
+```ts
+await context.agents.forward({
+  agentName: 'triageAgent',
+  agentVersion: '1',
+  payload: { prompt: payload.prompt },
+  forward: {
+    toolEvents: true,
+  },
+})
+```
+
 For JSON-first orchestration:
 
 ```ts
