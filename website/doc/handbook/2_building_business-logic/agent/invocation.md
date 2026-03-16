@@ -75,6 +75,20 @@ setHandler(async (context, payload) => {
 
 Use the chained `context.agents.invoke.<agent>['version'].call(...)` form when you want the full protocol envelopes. Use `runText(...)` or `runObject<T>(...)` when you only want the final assistant result.
 
+### Which Helper To Use
+
+| Need | Helper |
+| --- | --- |
+| Final assistant text only | `context.agents.runText(...)` |
+| Final assistant JSON object | `context.agents.runObject<T>(...)` |
+| Full envelope stream and final envelopes | `context.agents.invoke(...)` or `context.agents.invoke.agent['1'].call(...)` |
+| Forward child agent output into the current client stream | `context.agents.forward(...)` |
+
+Rule of thumb:
+- Use `runText(...)` when the child agent is an internal reasoning step.
+- Use `forward(...)` when the child agent is the user-visible part of the current turn.
+- Use `invoke(...)` only when you actually need raw frames or custom stream handling.
+
 If the parent agent should expose the child agent's live output directly to the current client stream, use `forwardToCurrentStream`. This avoids hand-written frame bridging in orchestration agents.
 
 ```ts
@@ -108,6 +122,42 @@ await context.agents.forward({
 `context.agents.forward(...)` defaults to:
 - forwarding assistant text, reasoning, artifacts, and errors into the current stream
 - suppressing synthetic outer `agent.run` tool telemetry
+
+This is the right choice for orchestration agents that mainly act as routers:
+
+```ts
+export const supervisorAgent = new AgentBuilder({
+  agentName: 'supervisorAgent',
+  agentVersion: '1',
+  description: 'Routes urgent issues to triageAgent and exposes triage output directly',
+})
+  .addPayloadSchema(z.object({ prompt: z.string().min(1) }))
+  .defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream'] })
+  .canInvokeAgent('triageAgent', '1')
+  .setHandler(async function (context, payload) {
+    await context.conversation.addUser(payload.prompt)
+
+    const envelopes = await context.agents.forward({
+      agentName: 'triageAgent',
+      agentVersion: '1',
+      payload: { prompt: payload.prompt },
+    })
+
+    const finalText = envelopes
+      .map(envelope => envelope.frame)
+      .filter(
+        (frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'message' }> =>
+          frame.kind === 'message' && frame.role === 'assistant',
+      )
+      .map(frame => frame.content)
+      .filter(Boolean)
+      .at(-1) ?? 'No response'
+
+    await context.conversation.addAssistant(finalText)
+    return { message: finalText }
+  })
+  .build()
+```
 
 Override the forwarding shape only when you need to:
 

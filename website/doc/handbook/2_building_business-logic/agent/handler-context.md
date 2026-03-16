@@ -81,6 +81,13 @@ Then choose the level you need in the handler:
 - `forwardToCurrentStream`: Optional invocation flag that forwards a child agent's assistant/reasoning/artifact/error frames into the current stream.
 - `emitInvocationToolEvents`: Optional invocation flag to suppress synthetic `agent.run` tool telemetry for internal orchestration calls.
 
+Choose them like this:
+
+- `runText(...)`: child agent is an internal classifier, planner, or summarizer
+- `runObject<T>(...)`: child agent returns structured JSON in its final assistant message
+- `forward(...)`: child agent should be visible to the current end user
+- `invoke(...)`: you need raw envelopes or custom stream merging
+
 ```ts
 const triageResult = await context.agents.runText({
   agentName: 'triageAgent',

@@ -84,6 +84,56 @@ Used in:
 - `triageAgent` for urgency classification
 - `supportAgent` optional `responseFormat=json` path
 
+## Nested Agent Orchestration
+
+The example already shows the internal orchestration case in:
+
+- `src/agents/supportAgent/v1/supportAgent.ts`
+  - `supportAgent` calls `triageAgent` with `context.agents.runText(...)`
+  - the triage result stays internal and is folded into the final support answer
+
+Use that pattern when the child agent is only a hidden reasoning step.
+
+If you want the child agent output to become the visible response for the current turn, use `context.agents.forward(...)` instead:
+
+```ts
+.canInvokeAgent('triageAgent', '1')
+.setHandler(async function (context, payload) {
+  await context.conversation.addUser(payload.prompt)
+
+  const envelopes = await context.agents.forward({
+    agentName: 'triageAgent',
+    agentVersion: '1',
+    payload: { prompt: payload.prompt },
+  })
+
+  const finalText = envelopes
+    .map(envelope => envelope.frame)
+    .filter(
+      (frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'message' }> =>
+        frame.kind === 'message' && frame.role === 'assistant',
+    )
+    .map(frame => frame.content)
+    .filter(Boolean)
+    .at(-1) ?? 'No response'
+
+  await context.conversation.addAssistant(finalText)
+  return { message: finalText }
+})
+```
+
+Use `forward(...)` when:
+
+- the parent agent mainly acts as a router
+- the child agent should stream directly to the UI
+- synthetic outer `childAgent.run` tool telemetry would be noise
+
+Use `runText(...)` when:
+
+- the child agent is an internal planner/classifier
+- only the final text matters
+- the parent agent still owns the user-visible reply
+
 ## Streaming & Protocol Endpoints
 
 ### Native support stream endpoint
