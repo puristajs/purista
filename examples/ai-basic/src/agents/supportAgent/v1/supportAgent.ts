@@ -1,6 +1,6 @@
 import { AgentBuilder, generateText } from '@purista/ai'
 import { HandledError, StatusCode } from '@purista/core'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import { type SupportAgentInput, supportAgentInputSchema } from './schema.js'
 

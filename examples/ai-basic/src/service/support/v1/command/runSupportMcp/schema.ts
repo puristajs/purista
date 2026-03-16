@@ -1,5 +1,5 @@
 import { extendApi } from '@purista/core'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 import { supportMcpToolTargets } from '../mcpTools.js'
 import { supportAgentInvokeParameterSchema, supportAgentInvokePayloadSchema } from '../runSupportAgent/schema.js'
 

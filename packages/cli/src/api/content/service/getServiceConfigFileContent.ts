@@ -11,7 +11,7 @@ export const getServiceConfigFileContent = (input: {
 	codeWriterOptions?: Partial<Options>
 }) => {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
-	writer.writeLine("import { z } from 'zod/v4'")
+	writer.writeLine("import { z } from 'zod'")
 	writer.newLine()
 	const schemaName = camelCase(`${input.serviceName} service v${input.serviceVersion} config schema`)
 	writer.writeLine(`export const ${schemaName} = z.object({})`)

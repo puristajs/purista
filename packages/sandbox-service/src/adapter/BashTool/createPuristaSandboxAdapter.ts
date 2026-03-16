@@ -14,7 +14,7 @@ export type SandboxAdapterIdentity = {
 }
 
 /**
- * Creates a generic sandbox adapter for bash-tool compatible runtimes.
+ * Creates a generic sandbox adapter for command-based bash runtimes.
  *
  * The adapter forwards operations to the PURISTA sandbox service commands.
  */

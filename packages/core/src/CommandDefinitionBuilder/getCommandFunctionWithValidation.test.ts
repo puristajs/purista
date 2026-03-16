@@ -1,5 +1,5 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import { HandledError } from '../core/Error/HandledError.impl.js'
 import { UnhandledError } from '../core/Error/UnhandledError.impl.js'

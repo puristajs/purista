@@ -1,7 +1,7 @@
 import { getEventBridgeMock, getLoggerMock, ServiceBuilder, StatusCode } from '@purista/core'
 import { HTTPException } from 'hono/http-exception'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import { honoV1Service } from './honoV1Service.js'
 

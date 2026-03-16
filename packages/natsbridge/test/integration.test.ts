@@ -3,7 +3,7 @@ import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock, Ser
 import type { StartedNatsContainer } from '@testcontainers/nats'
 import { NatsContainer } from '@testcontainers/nats'
 import { createSandbox } from 'sinon'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import { NatsBridge } from '../src/index.js'
 

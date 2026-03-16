@@ -1,4 +1,4 @@
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 export const eventBridgeClientConfigSchema = z.object({
 	clientName: z.string().default('EventBridgeClient'),

@@ -22,7 +22,7 @@ We define a simple agent that uses OpenAI to answer questions.
 
 ```ts title="src/agents/supportAgent/v1/supportAgent.ts"
 import { AgentBuilder, generateText } from '@purista/ai'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 export const supportAgent = new AgentBuilder({
   agentName: 'supportAgent',

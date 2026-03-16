@@ -1,5 +1,5 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import { Service } from '../core/index.js'
 import { safeBind } from '../helper/index.js'

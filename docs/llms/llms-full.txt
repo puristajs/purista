@@ -1,0 +1,27 @@
+# PURISTA LLM Full Context
+
+## Primary reading order
+1. https://github.com/puristajs/purista/blob/master/AGENTS.md
+2. https://github.com/puristajs/purista/blob/master/website/doc/handbook/index.md
+3. https://github.com/puristajs/purista/blob/master/website/doc/handbook/2_building_business-logic/agent/index.md
+4. https://github.com/puristajs/purista/blob/master/website/doc/handbook/3_eco_system/index.md
+
+## Service design rules
+- Use Builder APIs and Zod schemas.
+- Keep command/subscription handlers thin and resource-driven.
+- Keep versioned service directories.
+- Prefer explicit event contracts.
+- Keep tests adjacent to behavior.
+
+## Sandbox references
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/README.md
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/docs/ARCHITECTURE.md
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/docs/DRIVERS.md
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/docs/GIT_AUTH.md
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/Dockerfile.sandbox
+
+## Skills
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/META-SKILL.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Architect.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Developer.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Testing.md

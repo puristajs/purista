@@ -1,7 +1,7 @@
 import type { StandardJSONSchemaV1, StandardSchemaV1 } from '@standard-schema/spec'
 import type { SchemaObject } from 'openapi3-ts/oas31'
 import type { AnySchema } from 'yup'
-import type { ZodType } from 'zod/v4'
+import type { ZodType } from 'zod'
 
 /**
  * Common schema abstraction used across PURISTA.
@@ -31,6 +31,33 @@ const isStandardJsonSchema = (
 
 const isYupSchema = (schema: unknown): schema is AnySchema =>
 	!!schema && typeof schema === 'object' && '__isYupSchema__' in schema
+
+type ZodModuleShape = {
+	z?: {
+		ZodUndefined?: unknown
+		ZodVoid?: unknown
+		toJSONSchema?: (
+			schema: ZodType,
+			options: {
+				target: StandardJSONSchemaV1.Target
+				io: 'input' | 'output'
+				unrepresentable: 'any'
+			},
+		) => unknown
+	}
+	toJSONSchema?: (
+		schema: ZodType,
+		options: {
+			target: StandardJSONSchemaV1.Target
+			io: 'input' | 'output'
+			unrepresentable: 'any'
+		},
+	) => unknown
+}
+
+const isInstanceOf = (value: unknown, ctor: unknown) => typeof ctor === 'function' && value instanceof ctor
+
+const getZodToJSONSchema = (zodModule: ZodModuleShape) => zodModule.z?.toJSONSchema ?? zodModule.toJSONSchema
 
 /**
  * Validates input data with a Standard Schema compatible validator.
@@ -70,13 +97,17 @@ export const toJSONSchema = async (schema: Schema, options?: JsonSchemaOptions):
 	}
 
 	if (standardProps.vendor === 'zod') {
-		const zodModule = await import('zod/v4')
+		const zodModule = (await import('zod')) as ZodModuleShape
 		const maybeZod = schema as ZodType
-		if (maybeZod instanceof zodModule.z.ZodUndefined || maybeZod instanceof zodModule.z.ZodVoid) {
+		if (isInstanceOf(maybeZod, zodModule.z?.ZodUndefined) || isInstanceOf(maybeZod, zodModule.z?.ZodVoid)) {
 			return { type: 'null' } as SchemaObject
 		}
 		try {
-			return zodModule.z.toJSONSchema(maybeZod, {
+			const toZodJsonSchema = getZodToJSONSchema(zodModule)
+			if (typeof toZodJsonSchema !== 'function') {
+				throw new TypeError('zod does not expose a toJSONSchema function')
+			}
+			return toZodJsonSchema(maybeZod, {
 				target,
 				io: mode,
 				unrepresentable: 'any',
@@ -87,7 +118,7 @@ export const toJSONSchema = async (schema: Schema, options?: JsonSchemaOptions):
 			if (message.includes('Void cannot be represented') || message.includes('Undefined cannot be represented')) {
 				return { type: 'null' } as SchemaObject
 			}
-			const err = new Error('Zod JSON schema conversion requires the optional dependency `zod` to be installed.')
+			const err = new Error('Zod JSON schema conversion requires zod@^4 to be installed.')
 			;(err as { cause?: unknown }).cause = error
 			throw err
 		}

@@ -1,5 +1,5 @@
 import type { SchemaObject } from 'openapi3-ts/oas31'
-import type { ZodType } from 'zod/v4'
+import type { ZodType } from 'zod'
 
 export type OpenApiZodAny = ZodType & {
 	metaOpenApi?: SchemaObject | SchemaObject[]

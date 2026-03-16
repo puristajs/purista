@@ -1,6 +1,6 @@
 import { stub } from 'sinon'
 import { vi } from 'vitest'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 import { getEventBridgeMock, getLoggerMock } from '../../mocks/index.js'
 import { getCustomMessageMessageMock } from '../../mocks/messages/getCustomMessage.mock.js'
 import { QueueDefinitionBuilder } from '../../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'

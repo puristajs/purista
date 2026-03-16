@@ -5,7 +5,7 @@ import { getCommandMessageMock, getCommandSuccessMessageMock, getLoggerMock } fr
 import { createSandbox } from 'sinon'
 import type { StartedTestContainer } from 'testcontainers'
 import { GenericContainer } from 'testcontainers'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import { theServiceServiceBuilder, theServiceV1Service } from '../../../test/service/theService/v1/index.js'
 import { MqttBridge } from '../src/index.js'

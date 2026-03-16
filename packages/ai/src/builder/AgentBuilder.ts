@@ -10,7 +10,7 @@ import type {
 	StreamWriter,
 } from '@purista/core'
 import { type agentProtocolPayloadSchema, extendApi, HandledError, ServiceBuilder, StatusCode } from '@purista/core'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
 import type { ConversationStore } from '../memory/conversationStore.js'

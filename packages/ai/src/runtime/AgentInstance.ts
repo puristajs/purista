@@ -38,7 +38,7 @@ export type AgentInstanceDependencies = {
 	manifest: AgentManifest
 	serviceBuilder: any
 	handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any>
-	callOptionsSchema?: import('zod/v4').ZodType<import('../builder/AgentBuilder.js').AgentModelCallOptions>
+	callOptionsSchema?: import('zod').ZodType<import('../builder/AgentBuilder.js').AgentModelCallOptions>
 	prepareCall?: import('../builder/AgentBuilder.js').AgentPrepareCallHook
 	prepareStep?: import('../builder/AgentBuilder.js').AgentPrepareStepHook
 }
@@ -78,7 +78,7 @@ type AgentServiceConfig = {
 		poolManager: PoolManager
 		models: Record<string, ModelProvider>
 		eventBridge: EventBridge
-		callOptionsSchema?: import('zod/v4').ZodType<import('../builder/AgentBuilder.js').AgentModelCallOptions>
+		callOptionsSchema?: import('zod').ZodType<import('../builder/AgentBuilder.js').AgentModelCallOptions>
 		prepareCall?: import('../builder/AgentBuilder.js').AgentPrepareCallHook
 		prepareStep?: import('../builder/AgentBuilder.js').AgentPrepareStepHook
 		tracer?: Tracer

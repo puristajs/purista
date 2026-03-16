@@ -1,6 +1,6 @@
 import { DefaultEventBridge } from '@purista/core'
 import { afterEach, describe, expect, it } from 'vitest'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import type { ModelProvider, ProviderRequest } from '../providers/runtime/ModelProvider.js'
 import { AgentBuilder } from './AgentBuilder.js'

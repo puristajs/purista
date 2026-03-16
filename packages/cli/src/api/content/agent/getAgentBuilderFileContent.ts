@@ -24,7 +24,7 @@ export const getAgentBuilderFileContent = (input: {
 
 	writer.writeLine("import { AgentBuilder } from '@purista/ai'")
 	writer.writeLine("import { extendApi } from '@purista/core'")
-	writer.writeLine("import { z } from 'zod/v4'").blankLine()
+	writer.writeLine("import { z } from 'zod'").blankLine()
 
 	writer.writeLine(`const ${schemaName} = extendApi(`)
 	writer.indent(() => {

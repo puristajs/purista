@@ -1,5 +1,5 @@
 import { AgentBuilder, type AgentHandlerContext } from '@purista/ai'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import { type TriageAgentInput, triageAgentInputSchema } from './schema.js'
 

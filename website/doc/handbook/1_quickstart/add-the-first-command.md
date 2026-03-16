@@ -133,7 +133,7 @@ The schema file contains the schemas for input and output validation.
 
 ```typescript [schema.ts]
 import { extendApi } from '@purista/core'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 // define the input parameters
 export const userV1SignUpInputParameterSchema = extendApi(z.object({}), { title: 'sign up input parameter schema' })
@@ -160,7 +160,7 @@ The types are not used by PURISTA or one of the builders. The types can be used 
 ::: code-group
 
 ```typescript [types.ts]
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import {
   userV1SignUpInputParameterSchema,

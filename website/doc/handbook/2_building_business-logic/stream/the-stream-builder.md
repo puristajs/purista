@@ -17,7 +17,7 @@ purista add stream
 ## Minimal example
 
 ```ts
-import { z } from 'zod/v4'
+import { z } from 'zod'
 import { serviceBuilder } from '../yourServiceBuilder.js'
 
 const chunkSchema = z.object({

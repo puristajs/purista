@@ -1,0 +1,14 @@
+# @purista/sandbox LLM Context
+
+## Purpose
+Reusable multi-tenant sandbox runtime for PURISTA, with pluggable virtualization drivers and state-backed registry.
+
+## Key docs
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/README.md
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/docs/ARCHITECTURE.md
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/docs/DRIVERS.md
+- https://github.com/puristajs/purista/blob/master/packages/sandbox-service/docs/GIT_AUTH.md
+
+## Skills
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/META-SKILL.md
+- https://github.com/puristajs/purista/blob/master/skills/sandbox/PURISTA-Service-Developer.md

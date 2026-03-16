@@ -271,7 +271,7 @@ Use `ensureSandbox` as default and derive identity from `context.message` instea
 import { stepCountIs } from 'ai'
 import { AgentBuilder } from '@purista/ai'
 import { createBashTool } from 'just-bash'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 export const codingAgent = new AgentBuilder({
   agentName: 'codingAgent',

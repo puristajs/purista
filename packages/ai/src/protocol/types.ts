@@ -1,5 +1,5 @@
 import { extendApi } from '@purista/core'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 export const protocolVersion = 'purista.ai/1.0' as const
 

@@ -96,7 +96,7 @@ If you want to expose another agent to the model as a tool, keep the same AI SDK
 
 ```ts
 import { tool } from 'ai'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 const triageTool = tool({
   description: 'Classify urgency for a support request',

@@ -1,5 +1,5 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 import { Service } from '../core/index.js'
 import { StatusCode } from '../core/types/StatusCode.enum.js'
 import { getEventBridgeMock, getLoggerMock } from '../mocks/index.js'

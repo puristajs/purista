@@ -1,5 +1,6 @@
 import type { StandardSchemaV1 } from '@standard-schema/spec'
-import { validate } from './standardSchema.js'
+import { z } from 'zod'
+import { toJSONSchema, validate } from './standardSchema.js'
 
 describe('standardSchema.validate', () => {
 	it('treats empty issues as successful validation', async () => {
@@ -34,5 +35,27 @@ describe('standardSchema.validate', () => {
 		if (!result.success) {
 			expect(result.issues).toHaveLength(1)
 		}
+	})
+
+	it('converts zod schemas to JSON schema', async () => {
+		const schema = z.object({
+			name: z.string(),
+			enabled: z.boolean().optional(),
+		})
+
+		const result = await toJSONSchema(schema)
+
+		expect(result).toMatchObject({
+			type: 'object',
+			properties: {
+				name: { type: 'string' },
+				enabled: { type: 'boolean' },
+			},
+		})
+	})
+
+	it('converts zod undefined and void schemas to null json schema', async () => {
+		await expect(toJSONSchema(z.undefined())).resolves.toStrictEqual({ type: 'null' })
+		await expect(toJSONSchema(z.void())).resolves.toStrictEqual({ type: 'null' })
 	})
 })

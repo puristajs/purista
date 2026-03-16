@@ -1,5 +1,5 @@
 import { createSandbox } from 'sinon'
-import { z } from 'zod/v4'
+import { z } from 'zod'
 
 import { CommandDefinitionBuilder } from '../../CommandDefinitionBuilder/CommandDefinitionBuilder.impl.js'
 import { getCommandMessageMock, getEventBridgeMock, getLoggerMock } from '../../mocks/index.js'
