@@ -518,6 +518,97 @@ describe('runtime context helpers', () => {
 		expect(toolFrames.some(frame => frame.toolName === 'childAgent.1.run' && frame.status === 'success')).toBe(true)
 	})
 
+	it('can forward sub-agent frames into the current agent stream', async () => {
+		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
+		baseEventBridge.invoke.mockResolvedValue([
+			createProtocolEnvelope({
+				conversationId: 'sub-forward',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: { kind: 'message', role: 'assistant', content: 'hello ', partial: true, final: false },
+			}),
+			createProtocolEnvelope({
+				conversationId: 'sub-forward',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: { kind: 'artifact', artifactId: 'reasoning', content: 'thinking', mimeType: 'text/markdown', phase: 'chunk' },
+			}),
+			createProtocolEnvelope({
+				conversationId: 'sub-forward',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: { kind: 'message', role: 'assistant', content: 'world', final: true },
+			}),
+		])
+
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await context.agents.invoke({
+			agentName: 'childAgent',
+			agentVersion: '1',
+			payload: childPayload('go'),
+			forwardToCurrentStream: true,
+			emitInvocationToolEvents: false,
+		})
+
+		const frames = buffer.toEnvelopes().map(envelope => envelope.frame)
+		const assistantFrames = frames.filter(
+			(frame): frame is Extract<(typeof frames)[number], { kind: 'message' }> =>
+				frame.kind === 'message' && frame.role === 'assistant',
+		)
+		const reasoningFrames = frames.filter(
+			(frame): frame is Extract<(typeof frames)[number], { kind: 'artifact' }> =>
+				frame.kind === 'artifact' && frame.artifactId === 'reasoning',
+		)
+		const toolFrames = frames.filter(frame => frame.kind === 'tool')
+
+		expect(assistantFrames.map(frame => frame.content)).toEqual(['hello ', 'world'])
+		expect(reasoningFrames).toHaveLength(1)
+		expect(toolFrames).toHaveLength(0)
+	})
+
+	it('can suppress invocation telemetry while still returning envelopes', async () => {
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await context.agents.invoke({
+			agentName: 'childAgent',
+			agentVersion: '1',
+			payload: childPayload('typed'),
+			emitInvocationToolEvents: false,
+		})
+
+		const toolFrames = buffer
+			.toEnvelopes()
+			.map(envelope => envelope.frame)
+			.filter(frame => frame.kind === 'tool')
+		expect(toolFrames).toHaveLength(0)
+	})
+
 	it('exposes secrets/configs/states directly on agent context', async () => {
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,

@@ -740,6 +740,16 @@ export type AgentInvocationOptions = {
 	timeoutMs?: number
 	correlationId?: string
 	sessionId?: string
+	forwardToCurrentStream?:
+		| boolean
+		| {
+				assistant?: boolean
+				reasoning?: boolean
+				artifacts?: boolean
+				errors?: boolean
+				toolEvents?: boolean
+		  }
+	emitInvocationToolEvents?: boolean
 	/**
 	 * Controls whether protocol `error` envelopes from the invoked sub-agent throw immediately.
 	 * Defaults to `true`.
@@ -758,6 +768,14 @@ type DeclaredAgentBinding = {
 	}
 	payloadSchema?: Schema
 	parameterSchema?: Schema
+}
+
+type AgentForwardingOptions = true | {
+	assistant?: boolean
+	reasoning?: boolean
+	artifacts?: boolean
+	errors?: boolean
+	toolEvents?: boolean
 }
 
 type ResolvedAgentBinding = {
@@ -845,6 +863,109 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 		})
 	}
 
+	const shouldForward = (
+		options: AgentForwardingOptions,
+		key: 'assistant' | 'reasoning' | 'artifacts' | 'errors' | 'toolEvents',
+	) => {
+		if (options === true) {
+			return key !== 'toolEvents'
+		}
+		return options[key] ?? (key !== 'toolEvents')
+	}
+
+	const createForwardingResponder = (options: AgentForwardingOptions): import('../types/AgentDefinition.js').AgentStreamResponder => ({
+		onFrame: async envelope => {
+			const frame = envelope.frame
+			if (
+				frame.kind === 'message' &&
+				frame.role === 'assistant' &&
+				typeof frame.content === 'string' &&
+				frame.content.length > 0 &&
+				shouldForward(options, 'assistant')
+			) {
+				input.protocol.emitMessage({
+					content: frame.content,
+					partial: frame.final !== true,
+					final: frame.final === true,
+				})
+				return
+			}
+
+			if (frame.kind === 'artifact' && typeof frame.content === 'string') {
+				const isReasoning = frame.artifactId === 'reasoning'
+				if (isReasoning && shouldForward(options, 'reasoning')) {
+					input.protocol.emitArtifact({
+						artifactId: frame.artifactId,
+						content: frame.content,
+						mimeType: frame.mimeType,
+						sequence: frame.sequence,
+						total: frame.total,
+						final: frame.phase === 'final',
+					})
+					return
+				}
+				if (!isReasoning && shouldForward(options, 'artifacts')) {
+					input.protocol.emitArtifact({
+						artifactId: frame.artifactId,
+						content: frame.content,
+						mimeType: frame.mimeType,
+						sequence: frame.sequence,
+						total: frame.total,
+						final: frame.phase === 'final',
+					})
+					return
+				}
+			}
+
+			if (frame.kind === 'tool' && shouldForward(options, 'toolEvents')) {
+				input.protocol.emitToolEvent({
+					toolName: frame.toolName,
+					status: frame.status,
+					input: frame.input,
+					output: frame.output,
+					message: frame.message,
+					errorCode: frame.errorCode,
+				})
+				return
+			}
+
+			if (frame.kind === 'error' && shouldForward(options, 'errors')) {
+				input.protocol.emitError(new Error(frame.message), {
+					code: frame.code,
+					handled: frame.handled,
+				})
+			}
+		},
+		onComplete: () => {},
+		onError: () => {},
+	})
+
+	const mergeStreamResponders = (
+		forwarder: import('../types/AgentDefinition.js').AgentStreamResponder | undefined,
+		custom: import('../types/AgentDefinition.js').AgentStreamResponder | undefined,
+	): import('../types/AgentDefinition.js').AgentStreamResponder | undefined => {
+		if (!forwarder) {
+			return custom
+		}
+		if (!custom) {
+			return forwarder
+		}
+		return {
+			onFrame: async envelope => {
+				await forwarder.onFrame?.(envelope)
+				await custom.onFrame?.(envelope)
+			},
+			onComplete: () => {
+				forwarder.onComplete?.()
+				custom.onComplete?.()
+			},
+			onError: error => {
+				forwarder.onError?.(error)
+				custom.onError?.(error)
+			},
+		}
+	}
+
 	const validateInvocationInput = async (binding: DeclaredAgentBinding, payload: unknown, parameter: unknown) => {
 		if (binding.payloadSchema) {
 			const result = await validate(binding.payloadSchema, payload)
@@ -865,31 +986,39 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 	}
 
 	const instrumentInvocation = (
-		options: Pick<AgentInvocationOptions, 'agentName' | 'agentVersion' | 'payload'>,
+		options: Pick<AgentInvocationOptions, 'agentName' | 'agentVersion' | 'payload' | 'emitInvocationToolEvents'>,
 		invocation: {
 			final(): Promise<unknown>
 			[Symbol.asyncIterator](): AsyncIterator<unknown>
 		},
 	) => {
-		emitStatus(options, 'invoked')
+		if (options.emitInvocationToolEvents !== false) {
+			emitStatus(options, 'invoked')
+		}
 		const finalPromise = invocation
 			.final()
 			.then(result => {
 				const envelopes = Array.isArray(result) ? agentProtocolEnvelopeSchema.array().safeParse(result) : undefined
 				if (envelopes?.success && hasErrorEnvelope(envelopes.data)) {
-					emitStatus(options, 'error', envelopes.data, 'AgentErrorEnvelope')
+					if (options.emitInvocationToolEvents !== false) {
+						emitStatus(options, 'error', envelopes.data, 'AgentErrorEnvelope')
+					}
 				} else {
-					emitStatus(options, 'success', result)
+					if (options.emitInvocationToolEvents !== false) {
+						emitStatus(options, 'success', result)
+					}
 				}
 				return result
 			})
 			.catch(error => {
-				emitStatus(
-					options,
-					'error',
-					undefined,
-					error instanceof HandledError ? String(error.errorCode) : 'UnhandledError',
-				)
+				if (options.emitInvocationToolEvents !== false) {
+					emitStatus(
+						options,
+						'error',
+						undefined,
+						error instanceof HandledError ? String(error.errorCode) : 'UnhandledError',
+					)
+				}
 				throw error
 			})
 
@@ -913,8 +1042,12 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 		const payload = withSessionIdInPayload(options.payload, options.sessionId ?? input.session.identity.baseSessionId)
 		const parameter = options.parameter ?? {}
 		await validateInvocationInput(binding, payload, parameter)
-		emitStatus(options, 'invoked')
+		if (options.emitInvocationToolEvents !== false) {
+			emitStatus(options, 'invoked')
+		}
 		try {
+			const forwardingResponder =
+				options.forwardToCurrentStream ? createForwardingResponder(options.forwardToCurrentStream) : undefined
 			const envelopes = await invokeAgent({
 				eventBridge: input.eventBridge,
 				agentName: options.agentName,
@@ -922,7 +1055,7 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 				payload,
 				parameter,
 				timeoutMs: options.timeoutMs,
-				stream: options.stream,
+				stream: mergeStreamResponders(forwardingResponder, options.stream),
 				correlationId: options.correlationId ?? input.serviceContext.message.correlationId,
 				principalId: input.serviceContext.message.principalId,
 				tenantId: input.serviceContext.message.tenantId,
@@ -930,18 +1063,24 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 				failOnErrorFrame: options.failOnErrorFrame ?? true,
 			})
 			if (hasErrorEnvelope(envelopes)) {
-				emitStatus(options, 'error', envelopes, 'AgentErrorEnvelope')
+				if (options.emitInvocationToolEvents !== false) {
+					emitStatus(options, 'error', envelopes, 'AgentErrorEnvelope')
+				}
 			} else {
-				emitStatus(options, 'success', envelopes)
+				if (options.emitInvocationToolEvents !== false) {
+					emitStatus(options, 'success', envelopes)
+				}
 			}
 			return envelopes
 		} catch (error) {
-			emitStatus(
-				options,
-				'error',
-				undefined,
-				error instanceof HandledError ? String(error.errorCode) : 'UnhandledError',
-			)
+			if (options.emitInvocationToolEvents !== false) {
+				emitStatus(
+					options,
+					'error',
+					undefined,
+					error instanceof HandledError ? String(error.errorCode) : 'UnhandledError',
+				)
+			}
 			throw error
 		}
 	}

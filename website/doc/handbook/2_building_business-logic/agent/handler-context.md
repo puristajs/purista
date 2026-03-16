@@ -77,6 +77,8 @@ Then choose the level you need in the handler:
 - `context.agents.invoke.triageAgent['1'].call(...)`: Uses the same typed chained invocation style as regular PURISTA service-to-service agent calls.
 - `context.agents.runText(...)`: Simplified helper that returns the final text result.
 - `context.agents.runObject<T>(...)`: Parses final assistant text as JSON and returns typed object `T`.
+- `forwardToCurrentStream`: Optional invocation flag that forwards a child agent's assistant/reasoning/artifact/error frames into the current stream.
+- `emitInvocationToolEvents`: Optional invocation flag to suppress synthetic `agent.run` tool telemetry for internal orchestration calls.
 
 ```ts
 const triageResult = await context.agents.runText({
@@ -89,6 +91,14 @@ const triageJson = await context.agents.runObject<{ urgency: 'low' | 'medium' | 
   agentName: 'triageAgent',
   agentVersion: '1',
   payload: { prompt: payload.prompt }
+})
+
+await context.agents.invoke({
+  agentName: 'triageAgent',
+  agentVersion: '1',
+  payload: { prompt: payload.prompt },
+  forwardToCurrentStream: true,
+  emitInvocationToolEvents: false,
 })
 ```
 

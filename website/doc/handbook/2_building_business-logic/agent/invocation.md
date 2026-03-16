@@ -75,6 +75,26 @@ setHandler(async (context, payload) => {
 
 Use the chained `context.agents.invoke.<agent>['version'].call(...)` form when you want the full protocol envelopes. Use `runText(...)` or `runObject<T>(...)` when you only want the final assistant result.
 
+If the parent agent should expose the child agent's live output directly to the current client stream, use `forwardToCurrentStream`. This avoids hand-written frame bridging in orchestration agents.
+
+```ts
+await context.agents.invoke({
+  agentName: 'triageAgent',
+  agentVersion: '1',
+  payload: { prompt: payload.prompt },
+  forwardToCurrentStream: {
+    assistant: true,
+    reasoning: true,
+    artifacts: true,
+    errors: true,
+    toolEvents: false,
+  },
+  emitInvocationToolEvents: false,
+})
+```
+
+`emitInvocationToolEvents: false` is useful when the sub-agent is an internal orchestration step and you do not want the outer stream to show synthetic `childAgent.run` tool telemetry.
+
 For JSON-first orchestration:
 
 ```ts
