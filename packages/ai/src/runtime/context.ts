@@ -882,10 +882,12 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 		if (options === true) {
 			return key !== 'toolEvents'
 		}
-		return options[key] ?? (key !== 'toolEvents')
+		return options[key] ?? key !== 'toolEvents'
 	}
 
-	const createForwardingResponder = (options: AgentForwardingOptions): import('../types/AgentDefinition.js').AgentStreamResponder => ({
+	const createForwardingResponder = (
+		options: AgentForwardingOptions,
+	): import('../types/AgentDefinition.js').AgentStreamResponder => ({
 		onFrame: async envelope => {
 			const frame = envelope.frame
 			if (
@@ -1058,8 +1060,9 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 			emitStatus(options, 'invoked')
 		}
 		try {
-			const forwardingResponder =
-				options.forwardToCurrentStream ? createForwardingResponder(options.forwardToCurrentStream) : undefined
+			const forwardingResponder = options.forwardToCurrentStream
+				? createForwardingResponder(options.forwardToCurrentStream)
+				: undefined
 			const envelopes = await invokeAgent({
 				eventBridge: input.eventBridge,
 				agentName: options.agentName,

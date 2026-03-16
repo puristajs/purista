@@ -529,7 +529,13 @@ describe('runtime context helpers', () => {
 			createProtocolEnvelope({
 				conversationId: 'sub-forward',
 				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
-				frame: { kind: 'artifact', artifactId: 'reasoning', content: 'thinking', mimeType: 'text/markdown', phase: 'chunk' },
+				frame: {
+					kind: 'artifact',
+					artifactId: 'reasoning',
+					content: 'thinking',
+					mimeType: 'text/markdown',
+					phase: 'chunk',
+				},
 			}),
 			createProtocolEnvelope({
 				conversationId: 'sub-forward',
