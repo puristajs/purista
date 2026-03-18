@@ -62,6 +62,9 @@ export const getAgentBuilderFileContent = (input: {
 		writer.indent(() => {
 			writer.writeLine("context.logger.info({ prompt: payload.prompt }, 'invoking agent')")
 			writer.writeLine('await context.conversation.addUser(payload.prompt)')
+			writer.writeLine('// For long-running workflows prefer durable run state instead of in-memory progress flags.')
+			writer.writeLine("// Example: const run = await context.runState.start({ title: 'My long-running agent task' })")
+			writer.writeLine("// await run.plan([{ id: 'step-1', title: 'Collect input' }])")
 			writer.writeLine('const prompt = await context.conversation.buildPromptInput()')
 			writer.writeLine("const model = context.models['openai:gpt-4o-mini']")
 			writer.writeLine('if (!model.generate) {')

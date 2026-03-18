@@ -198,6 +198,37 @@ body,
 	display: flex;
 	align-items: center;
 	gap: 0.6rem;
+	flex-wrap: wrap;
+}
+
+.run-status-chip {
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	padding: 0.18rem 0.55rem;
+	font-size: 0.72rem;
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+}
+
+.run-status-planning,
+.run-status-running,
+.run-status-summarizing {
+	color: #f6c65b;
+	border-color: rgba(246, 198, 91, 0.35);
+	background: rgba(246, 198, 91, 0.08);
+}
+
+.run-status-completed {
+	color: #7fe6a2;
+	border-color: rgba(127, 230, 162, 0.35);
+	background: rgba(127, 230, 162, 0.08);
+}
+
+.run-status-failed,
+.run-status-cancelled {
+	color: #ff9a9a;
+	border-color: rgba(255, 154, 154, 0.35);
+	background: rgba(255, 154, 154, 0.08);
 }
 
 .layout {
@@ -217,6 +248,82 @@ body,
 	border-radius: 14px;
 	padding: 0.8rem;
 	overflow: hidden;
+}
+
+.run-state-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+	padding: 0.1rem 0 1rem;
+	border-bottom: 1px solid var(--border);
+	margin-bottom: 0.9rem;
+}
+
+.run-state-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.8rem;
+}
+
+.run-state-header h3 {
+	margin: 0;
+	font-size: 0.95rem;
+}
+
+.run-state-header p {
+	margin: 0.22rem 0 0;
+	color: var(--muted);
+	font-size: 0.82rem;
+}
+
+.run-task-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+}
+
+.run-task-item {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 0.8rem;
+	padding: 0.6rem 0.7rem;
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	background: var(--panel-soft);
+}
+
+.run-task-item strong {
+	display: block;
+	font-size: 0.84rem;
+}
+
+.run-task-item p {
+	margin: 0.18rem 0 0;
+	font-size: 0.76rem;
+	color: var(--muted);
+}
+
+.run-task-item span {
+	font-size: 0.72rem;
+	text-transform: uppercase;
+	color: var(--muted);
+}
+
+.run-task-running {
+	border-color: rgba(246, 198, 91, 0.35);
+}
+
+.run-task-completed {
+	border-color: rgba(127, 230, 162, 0.28);
+}
+
+.run-task-failed {
+	border-color: rgba(255, 154, 154, 0.32);
 }
 
 .chat-scroll {

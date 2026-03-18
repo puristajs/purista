@@ -148,6 +148,41 @@ await context.conversation.addUser(payload.prompt)
 const messages = await context.conversation.getMessages()
 ```
 
+## 5.1 Durable Execution State (`context.runState`)
+
+Use `context.runState` for long-running agent execution state such as plans, task lists, progress, and resumable status. It is backed by `context.states`, so it survives beyond the current in-memory instance and can be read again after reconnects or handoffs.
+
+Use it for:
+
+- planner/todo state
+- active run locks
+- resumable progress for distributed workers
+- UI-facing execution status
+
+Do not use conversation memory for this. Conversation memory is for LLM context. Run state is operational workflow state.
+
+```ts
+const run = await context.runState.start({
+  title: 'Architecture synthesis',
+  extraScope: { projectId: payload.projectId },
+  lock: { key: 'architecture' },
+})
+
+await run.plan([
+  { id: 'review-spec', title: 'Review specification' },
+  { id: 'write-files', title: 'Write architecture artifacts' },
+  { id: 'verify', title: 'Verify persisted outputs' },
+])
+
+await run.task('write-files', async () => {
+  // write files here
+})
+
+await run.finishSuccess('Architecture artifacts are ready.')
+```
+
+Every persisted update emits a standard `run-state` artifact. In `ai-sdk-ui-message` mode this becomes a `data-run-state` part for the frontend.
+
 ## 6. Knowledge / RAG (context.knowledge)
 
 Typed access to your vector stores or document adapters.

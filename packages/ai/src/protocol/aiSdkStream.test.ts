@@ -183,6 +183,48 @@ describe('toAiSdkStreamEvents', () => {
 		})
 	})
 
+	it('maps run-state artifacts to data-run-state parts', async () => {
+		const envelopes = [
+			createProtocolEnvelope({
+				conversationId: 'conv-run',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createArtifactFrame({
+					artifactId: 'run-state',
+					phase: 'chunk',
+					content: {
+						runId: 'run-1',
+						title: 'Architecture Draft',
+						status: 'running',
+						phase: 'workspace-analysis',
+						tasks: [{ id: 'scan', title: 'Scan workspace', status: 'running', order: 0 }],
+					},
+					mimeType: 'application/json',
+				}),
+			}),
+			createProtocolEnvelope({
+				conversationId: 'conv-run',
+				actor: createActor({ service: 'agent.demo', version: '1' }),
+				frame: createMessageFrame({ role: 'assistant', content: 'done', final: true }),
+			}),
+		]
+
+		const events: Array<{ event: string; data: Record<string, unknown> }> = []
+		for await (const event of toAiSdkStreamEvents(envelopes, { mode: 'ui-message' })) {
+			events.push(event)
+		}
+
+		const runStateEvent = events.find(item => item.event === 'data' && item.data.type === 'data-run-state')
+		expect(runStateEvent?.data).toMatchObject({
+			type: 'data-run-state',
+			data: {
+				runId: 'run-1',
+				title: 'Architecture Draft',
+				status: 'running',
+				phase: 'workspace-analysis',
+			},
+		})
+	})
+
 	it('maps reasoning artifacts to reasoning-* ui-message events', async () => {
 		const envelopes = [
 			createProtocolEnvelope({

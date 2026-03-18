@@ -13,7 +13,7 @@ import {
 	ConversationScrollButton,
 } from './components/ai-elements/conversation'
 import { getMcpTools, loadConversation, runSupportA2a, runSupportMcp } from './lib/api'
-import type { AgentProtocolEnvelope, StreamPayload, WorkflowStep } from './lib/types'
+import type { AgentProtocolEnvelope, AgentRunState, StreamPayload, WorkflowStep } from './lib/types'
 import { mapToWorkflow } from './lib/workflow'
 
 type Scenario = 'stream' | 'mcp' | 'a2a' | 'protocol'
@@ -45,6 +45,18 @@ const isReasoningPart = (part: { type?: unknown; text?: unknown }): part is { ty
 
 const isToolPart = (part: { type?: unknown }): boolean =>
 	part.type === 'dynamic-tool' || (typeof part.type === 'string' && part.type.startsWith('tool-'))
+
+const isRunStateDataPart = (value: unknown): value is { type: 'data-run-state'; data: AgentRunState } =>
+	typeof value === 'object' &&
+	value !== null &&
+	'type' in value &&
+	value.type === 'data-run-state' &&
+	'data' in value &&
+	typeof value.data === 'object' &&
+	value.data !== null
+
+const isRunActive = (runState: AgentRunState | null) =>
+	Boolean(runState && ['planning', 'running', 'summarizing'].includes(runState.status))
 
 const getLastUserPrompt = (messages: UIMessage[]): string => {
 	for (let index = messages.length - 1; index >= 0; index -= 1) {
@@ -321,6 +333,7 @@ export const App = () => {
 	const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
 	const [envelopes, setEnvelopes] = useState<AgentProtocolEnvelope[]>([])
 	const [streamPayloads, setStreamPayloads] = useState<StreamPayload[]>([])
+	const [activeRunState, setActiveRunState] = useState<AgentRunState | null>(null)
 	const [conversationHistory, setConversationHistory] = useState<ConversationHistoryItem[]>(getStoredHistory)
 	const [mcpTools, setMcpTools] = useState<unknown[] | null>(null)
 	const [isGenerating, setIsGenerating] = useState(false)
@@ -351,6 +364,9 @@ export const App = () => {
 			},
 		}),
 		onData: dataPart => {
+			if (isRunStateDataPart(dataPart)) {
+				setActiveRunState(dataPart.data)
+			}
 			setStreamPayloads(previous => [
 				...previous,
 				{
@@ -363,6 +379,7 @@ export const App = () => {
 
 	const workflow = useMemo(() => mapToWorkflow(envelopes), [envelopes])
 	const coalescedWorkflow = useMemo(() => coalesceWorkflowSteps(workflow), [workflow])
+	const inputLocked = isGenerating || isRunActive(activeRunState)
 
 	const chatTimeline = useMemo(() => {
 		const rows: Array<{ message: ChatMessage; tools: ChatMessage[] }> = []
@@ -566,6 +583,7 @@ export const App = () => {
 		setAssistantDraft('')
 		setEnvelopes([])
 		setStreamPayloads([])
+		setActiveRunState(null)
 		seenFramesRef.current = new Set()
 		setStatus('Submitting...')
 		setCanRetry(false)
@@ -643,7 +661,7 @@ export const App = () => {
 	}
 
 	const execute = async () => {
-		if (isGenerating) {
+		if (inputLocked) {
 			return
 		}
 		const question = prompt.trim()
@@ -654,6 +672,7 @@ export const App = () => {
 		setAssistantDraft('')
 		setEnvelopes([])
 		setStreamPayloads([])
+		setActiveRunState(null)
 		seenFramesRef.current = new Set()
 		setCommandOutput('{}')
 		setCanRetry(false)
@@ -679,7 +698,7 @@ export const App = () => {
 	}
 
 	const applySuggestedPrompt = (nextPrompt: string) => {
-		if (isGenerating) {
+		if (inputLocked) {
 			return
 		}
 		setPrompt(nextPrompt)
@@ -776,8 +795,13 @@ export const App = () => {
 
 				<div className="status-row">
 					<span>{status}</span>
+					{activeRunState ? (
+						<span className={`run-status-chip run-status-${activeRunState.status}`}>
+							{activeRunState.title} · {activeRunState.phase}
+						</span>
+					) : null}
 					{canRetry && (
-						<button type="button" className="button secondary" onClick={() => void execute()}>
+						<button type="button" className="button secondary" disabled={inputLocked} onClick={() => void execute()}>
 							Retry
 						</button>
 					)}
@@ -860,7 +884,7 @@ export const App = () => {
 										className={`button secondary suggestion-button ${
 											prompt.trim() === suggestion.trim() ? 'active' : ''
 										}`}
-										disabled={isGenerating}
+										disabled={inputLocked}
 										onClick={() => applySuggestedPrompt(suggestion)}
 									>
 										{suggestion}
@@ -870,7 +894,7 @@ export const App = () => {
 							<div className="prompt-bar">
 								<textarea
 									value={prompt}
-									disabled={isGenerating}
+									disabled={inputLocked}
 									onChange={event => setPrompt(event.target.value)}
 									onKeyDown={event => {
 										if (event.key !== 'Enter' || event.shiftKey) {
@@ -879,14 +903,14 @@ export const App = () => {
 										event.preventDefault()
 										void execute()
 									}}
-									placeholder="Ask the assistant..."
+									placeholder={inputLocked ? 'Run in progress...' : 'Ask the assistant...'}
 									className="prompt-input"
 									rows={1}
 								/>
 								<button
 									type="button"
 									className="button primary-icon send-button"
-									disabled={isGenerating}
+									disabled={inputLocked}
 									onClick={() => void execute()}
 									aria-label="Send message"
 								>
@@ -899,6 +923,30 @@ export const App = () => {
 					</section>
 
 					<section className="card">
+						{activeRunState ? (
+							<div className="run-state-panel">
+								<div className="run-state-header">
+									<div>
+										<h3>{activeRunState.title}</h3>
+										<p>{activeRunState.summary ?? `Current phase: ${activeRunState.phase}`}</p>
+									</div>
+									<span className={`run-status-chip run-status-${activeRunState.status}`}>{activeRunState.status}</span>
+								</div>
+								<ul className="run-task-list">
+									{[...activeRunState.tasks]
+										.sort((left, right) => left.order - right.order)
+										.map(task => (
+											<li key={task.id} className={`run-task-item run-task-${task.status}`}>
+												<div>
+													<strong>{task.title}</strong>
+													{task.detail ? <p>{task.detail}</p> : null}
+												</div>
+												<span>{task.status}</span>
+											</li>
+										))}
+								</ul>
+							</div>
+						) : null}
 						{scenario === 'protocol' ? (
 							<div className="protocol-list">
 								{streamPayloads.map((payload, index) => (

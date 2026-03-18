@@ -44,11 +44,26 @@ export const supportAgent = new AgentBuilder({
 	.setHandler<SupportAgentInput>(async function (context, payload) {
 		const userPrompt = payload.prompt ?? payload.message ?? ''
 		const model = context.models['openai:gpt-4o-mini']
+		const run = await context.runState.start({
+			title: 'Support orchestration',
+			extraScope: {
+				sessionId: payload.sessionId ?? context.message.id,
+			},
+		})
 
 		await context.conversation.addUser(userPrompt)
+		await run.plan([
+			{ id: 'faq', title: 'Check knowledge base' },
+			{ id: 'website', title: 'Fetch website context when needed' },
+			{ id: 'calculation', title: 'Evaluate calculations when requested' },
+			{ id: 'triage', title: 'Escalate to triage when needed' },
+			{ id: 'answer', title: 'Compose final answer' },
+		])
 
 		context.stream.sendChunk('Checking knowledge base...')
+		await run.startTask('faq', 'Searching the knowledge base')
 		const faqResult = await context.tools.invoke.support['1'].lookupFaq({ question: userPrompt })
+		await run.completeTask('faq', 'Knowledge base lookup completed')
 		const faqAnswer =
 			typeof faqResult === 'object' && faqResult && 'answer' in faqResult && typeof faqResult.answer === 'string'
 				? faqResult.answer
@@ -57,6 +72,7 @@ export const supportAgent = new AgentBuilder({
 		let websiteSummary = ''
 		const extractedUrl = extractFirstUrl(userPrompt)
 		if (extractedUrl) {
+			await run.startTask('website', `Fetching ${extractedUrl}`)
 			context.stream.sendChunk(`Fetching website context from ${extractedUrl}...`)
 			const websiteResult = await context.tools.invoke.support['1'].fetchWebsite({ url: extractedUrl })
 			if (
@@ -67,24 +83,33 @@ export const supportAgent = new AgentBuilder({
 			) {
 				websiteSummary = websiteResult.text.slice(0, 1_800)
 			}
+			await run.completeTask('website', 'Website context captured')
+		} else {
+			await run.completeTask('website', 'No URL requested')
 		}
 
 		let calculationResult = ''
 		const calculationExpression = extractCalculationExpression(userPrompt)
 		if (calculationExpression) {
+			await run.startTask('calculation', `Evaluating ${calculationExpression}`)
 			context.stream.sendChunk(`Calculating: ${calculationExpression}`)
 			try {
 				const calc = await context.tools.invoke.support['1'].calculate({ expression: calculationExpression })
 				if (typeof calc === 'object' && calc && 'result' in calc) {
 					calculationResult = String(calc.result)
 				}
+				await run.completeTask('calculation', `Calculation result: ${calculationResult || 'done'}`)
 			} catch (error) {
 				context.logger.warn({ err: error, calculationExpression }, 'Calculation tool failed')
+				await run.failTask('calculation', error instanceof Error ? error.message : String(error))
 			}
+		} else {
+			await run.completeTask('calculation', 'No calculation requested')
 		}
 
 		let triageSummary = ''
 		if (escalationPattern.test(userPrompt)) {
+			await run.startTask('triage', 'Escalating to the triage agent')
 			context.stream.sendChunk('Escalating to triage agent...')
 			try {
 				triageSummary = await context.agents.runText({
@@ -96,10 +121,14 @@ export const supportAgent = new AgentBuilder({
 					},
 					sessionId: payload.sessionId,
 				})
+				await run.completeTask('triage', 'Triage agent returned guidance')
 			} catch (error) {
 				context.logger.warn({ err: error }, 'triageAgent failed, continuing with tool-based fallback')
 				context.stream.sendChunk('Triage unavailable right now, continuing with tool-based guidance.')
+				await run.failTask('triage', error instanceof Error ? error.message : String(error))
 			}
+		} else {
+			await run.completeTask('triage', 'No escalation needed')
 		}
 
 		const prompt = [
@@ -114,6 +143,8 @@ export const supportAgent = new AgentBuilder({
 			.join('\n')
 
 		try {
+			await run.phase('answer-generation', 'summarizing')
+			await run.startTask('answer', 'Generating final answer')
 			if (payload.responseFormat === 'json' && model.generateJson) {
 				const jsonResult = await model.generateJson<z.infer<typeof jsonAnswerSchema>>({
 					prompt: `${prompt}\n\nReturn JSON that follows the provided schema.`,
@@ -132,6 +163,8 @@ export const supportAgent = new AgentBuilder({
 					final: true,
 				})
 				await context.conversation.addAssistant(jsonResult.data.answer)
+				await run.completeTask('answer', 'JSON answer generated')
+				await run.finishSuccess(jsonResult.data.answer)
 				context.stream.sendFinal(jsonResult.data.answer)
 				return { message: jsonResult.data.answer }
 			}
@@ -157,10 +190,14 @@ export const supportAgent = new AgentBuilder({
 			})
 
 			await context.conversation.addAssistant(answer)
+			await run.completeTask('answer', 'Final answer generated')
+			await run.finishSuccess(answer)
 			context.stream.sendFinal(answer)
 			return { message: answer }
 		} catch (error) {
 			await context.conversation.revertLast({ role: 'user' })
+			await run.failTask('answer', error instanceof Error ? error.message : String(error))
+			await run.finishFailure(error instanceof Error ? error.message : String(error))
 			throw HandledError.fromError(error, StatusCode.BadGateway)
 		}
 	})

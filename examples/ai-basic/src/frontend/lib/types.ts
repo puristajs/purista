@@ -51,6 +51,23 @@ export type StreamPayload = {
 	parsed?: StreamFrameEvent
 }
 
+export type AgentRunTask = {
+	id: string
+	title: string
+	status: 'pending' | 'running' | 'completed' | 'failed'
+	order: number
+	detail?: string
+}
+
+export type AgentRunState = {
+	runId: string
+	title: string
+	status: 'idle' | 'planning' | 'running' | 'summarizing' | 'completed' | 'failed' | 'cancelled'
+	phase: string
+	tasks: AgentRunTask[]
+	summary?: string
+}
+
 export type WorkflowStep = {
 	id: string
 	type: 'message' | 'tool' | 'telemetry' | 'artifact' | 'error'

@@ -2,7 +2,7 @@ import { HandledError, StatusCode } from '@purista/core'
 import { describe, expect, it, vi } from 'vitest'
 import { InMemoryKnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
 import { InMemoryConversationStore } from '../memory/conversationStore.js'
-import { createProtocolEnvelope } from '../protocol/helpers.js'
+import { createArtifactFrame, createProtocolEnvelope } from '../protocol/helpers.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
 import { createAgentHandlerContext, createProtocolBuffer } from './context.js'
 
@@ -260,6 +260,61 @@ describe('runtime context helpers', () => {
 		const envelopes = buffer.toEnvelopes()
 		expect(envelopes.some(envelope => envelope.frame.kind === 'tool')).toBe(true)
 		expect(envelopes.some(envelope => envelope.frame.kind === 'artifact')).toBe(true)
+	})
+
+	it('exposes durable run state helpers on the handler context', async () => {
+		const stateStore = new Map<string, unknown>()
+		const buffer = createProtocolBuffer({
+			...baseServiceContext,
+			states: {
+				getState: vi.fn(async (...stateNames: string[]) =>
+					Object.fromEntries(stateNames.map(stateName => [stateName, stateStore.get(stateName)])),
+				),
+				setState: vi.fn(async (stateName: string, value: unknown) => {
+					stateStore.set(stateName, value)
+				}),
+				removeState: vi.fn(async (stateName: string) => {
+					stateStore.delete(stateName)
+				}),
+			},
+		} as typeof baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: {
+				...baseServiceContext,
+				states: {
+					getState: async (...stateNames: string[]) =>
+						Object.fromEntries(stateNames.map(stateName => [stateName, stateStore.get(stateName)])),
+					setState: async (stateName: string, value: unknown) => {
+						stateStore.set(stateName, value)
+					},
+					removeState: async (stateName: string) => {
+						stateStore.delete(stateName)
+					},
+				},
+			} as typeof baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'plan' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		const run = await context.runState.start({
+			title: 'Example run',
+			extraScope: { projectId: 'demo' },
+		})
+		await run.plan([{ id: 'step-1', title: 'Collect facts' }])
+		const persisted = await context.runState.get({ extraScope: { projectId: 'demo' } })
+
+		expect(persisted?.title).toBe('Example run')
+		expect(persisted?.tasks[0]?.title).toBe('Collect facts')
+		expect(buffer.toEnvelopes().some(envelope => envelope.frame.kind === 'artifact')).toBe(true)
 	})
 
 	it('resolves implicit scoped session id from payload and message metadata', async () => {
@@ -706,6 +761,63 @@ describe('runtime context helpers', () => {
 		expect(toolFrames[0]).toMatchObject({
 			toolName: 'readSpec',
 			status: 'invoked',
+		})
+	})
+
+	it('forwards structured artifact payloads such as run-state by default', async () => {
+		baseEventBridge.openStream.mockRejectedValue(new Error('does not support streams'))
+		baseEventBridge.invoke.mockResolvedValue([
+			createProtocolEnvelope({
+				conversationId: 'sub-forward-run-state',
+				actor: { service: 'child', version: '1', agent: 'childAgent', instanceId: 'i1' },
+				frame: createArtifactFrame({
+					artifactId: 'run-state',
+					mimeType: 'application/json',
+					content: {
+						runId: 'run-1',
+						title: 'Architecture draft',
+						status: 'running',
+					},
+				}),
+			}),
+		])
+
+		const buffer = createProtocolBuffer(baseServiceContext)
+		const context = createAgentHandlerContext({
+			serviceContext: baseServiceContext,
+			eventBridge: baseEventBridge,
+			payload: { prompt: 'hello' },
+			parameter: {},
+			conversationStore: new InMemoryConversationStore(),
+			knowledgeAdapters: {},
+			protocol: buffer.protocol,
+			resources: {},
+			models: {},
+			embeddings: {},
+			rerankers: {},
+			manifest,
+		})
+
+		await context.agents.forward({
+			agentName: 'childAgent',
+			agentVersion: '1',
+			payload: childPayload('go'),
+		})
+
+		const artifactFrames = buffer
+			.toEnvelopes()
+			.map(envelope => envelope.frame)
+			.filter(frame => frame.kind === 'artifact')
+
+		expect(artifactFrames).toHaveLength(1)
+		expect(artifactFrames[0]).toMatchObject({
+			artifactId: 'run-state',
+			mimeType: 'application/json',
+		})
+		expect(artifactFrames[0].content).toMatchObject({
+			runId: 'run-1',
+			title: 'Architecture draft',
+			status: 'running',
 		})
 	})
 

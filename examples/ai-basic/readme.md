@@ -51,10 +51,11 @@ Open [http://localhost:3000/index.html](http://localhost:3000/index.html)
 - `src/agents/triageAgent/v1/triageAgent.ts`
   - strict structured classification via `generateJson`
 - `src/agents/supportAgent/v1/supportAgent.ts`
-  - tool-assisted support flow
-  - optional delegation to `triageAgent`
-  - final answer via `generateText` with streaming deltas
-  - optional JSON response path via `generateJson`
+- tool-assisted support flow
+- optional delegation to `triageAgent`
+- final answer via `generateText` with streaming deltas
+- optional JSON response path via `generateJson`
+- durable run-state planning/tasks via `context.runState`
 
 ### Service commands/streams
 
@@ -134,6 +135,19 @@ Use `runText(...)` when:
 - only the final text matters
 - the parent agent still owns the user-visible reply
 
+## Durable Run State
+
+`supportAgent` also demonstrates the recommended pattern for long-running work:
+
+- persist execution progress with `context.runState`
+- expose tasks in the frontend through `data-run-state`
+- keep the final answer in chat
+- disable the input while the run is active
+
+That gives you a UI that stays readable while still showing live execution progress.
+
+The source of truth is the state store, not in-memory component state and not conversation history.
+
 ## Streaming & Protocol Endpoints
 
 ### Native support stream endpoint
@@ -210,3 +224,4 @@ Key tests:
 
 - This example intentionally uses deterministic tests (no live model calls).
 - Protocol adapters (`MCP`, `Agent2Agent`) are reference interoperability layers, not full protocol implementations.
+- The React UI listens for `data-run-state` and renders execution tasks separately from chat messages.

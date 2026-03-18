@@ -70,6 +70,40 @@ const instance = await supportAgent.getInstance(eventBridge, {
 
 Conversation stores follow the same pattern: the runtime keeps the logical `conversationId` stable and passes tenant/user/agent metadata separately to the store implementation so custom backends can build their own compound keys without guessing how PURISTA scoped the id.
 
+## 4. Durable Execution State
+
+Conversation memory is not the right place for operational workflow state.
+
+Use:
+
+- `context.conversation` for LLM-visible history
+- `context.runState` for durable execution progress, plans, task lists, and resumable status
+- `context.states` directly only when you need lower-level custom persistence
+
+`context.runState` is backed by the PURISTA state store, so it works across reconnects, retries, and multiple replicas.
+
+```ts
+const run = await context.runState.start({
+  title: 'Simulation review',
+  extraScope: { projectId: payload.projectId },
+  lock: { key: 'simulation' },
+})
+
+await run.plan([
+  { id: 'review', title: 'Review architecture inputs' },
+  { id: 'simulate', title: 'Run simulation artifacts' },
+  { id: 'verify', title: 'Verify simulation result' },
+])
+
+await run.task('simulate', async () => {
+  // do the long-running work
+})
+
+await run.finishSuccess('Simulation completed successfully.')
+```
+
+Every update persists first and then emits a `run-state` artifact into the stream. In `ai-sdk-ui-message` mode that appears as `data-run-state` for the frontend.
+
 ---
 
 ### Need something custom?

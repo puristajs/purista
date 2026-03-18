@@ -123,6 +123,8 @@ await context.agents.forward({
 - forwarding assistant text, reasoning, artifacts, and errors into the current stream
 - suppressing synthetic outer `agent.run` tool telemetry
 
+That includes durable `run-state` artifacts. If the child agent uses `context.runState`, the parent can forward those progress updates to the current frontend without custom bridging.
+
 This is the right choice for orchestration agents that mainly act as routers:
 
 ```ts
@@ -181,6 +183,20 @@ const triage = await context.agents.runObject<{ urgency: string; nextSteps: stri
   payload: { prompt: payload.prompt },
 })
 ```
+
+## 2.1 Forwarding Child Progress
+
+For long-running child agents, keep execution progress out of chat text. Let the child persist and emit run state, then forward it:
+
+```ts
+await context.agents.forward({
+  agentName: 'architectureAgent',
+  agentVersion: '1',
+  payload: { prompt: payload.prompt, projectId: payload.projectId },
+})
+```
+
+If the child emits `run-state`, the current HTTP stream will contain `data-run-state` in `ai-sdk-ui-message` mode. The frontend can then render a task panel and temporarily disable the composer while the run is active.
 
 ## 3. Standalone API
 

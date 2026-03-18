@@ -62,7 +62,36 @@ PURISTA supports several wire protocols out-of-the-box. Choose the one that fits
 - **`ai-sdk-data`**: Optimized for data-only streams.
 - **`ai-sdk-json-render`**: Best for structured output rendering.
 
-## 4. Why use this instead of a custom controller?
+## 4. Durable Run State In The UI
+
+Long-running agents should stream durable execution state through the standard `run-state` artifact. In `ai-sdk-ui-message` mode PURISTA maps that automatically to `data-run-state`.
+
+This lets the frontend render:
+
+- current phase
+- task checklist
+- completion or failure summary
+- input locking while a run is active
+
+```tsx title="frontend/ChatComponent.tsx"
+const { messages, sendMessage } = useChat({
+  api: '/api/v1/agents/support',
+  onData: part => {
+    if (part.type === 'data-run-state') {
+      setRunState(part.data)
+    }
+  },
+})
+
+const inputLocked =
+  runState?.status === 'planning' ||
+  runState?.status === 'running' ||
+  runState?.status === 'summarizing'
+```
+
+Use this for execution UX. Keep the final assistant summary in chat, and keep progress/tasks in a separate run-status panel.
+
+## 5. Why use this instead of a custom controller?
 
 1. **Automatic Transformation**: PURISTA handles the mapping between its rich protocol frames and the simpler client-side formats.
 2. **OpenAPI Generation**: The exposed endpoint is automatically included in your generated OpenAPI spec, complete with protocol documentation.

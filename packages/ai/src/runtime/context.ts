@@ -48,6 +48,7 @@ import type {
 import type { AgentManifest, AllowedToolDefinition } from '../types/AgentManifest.js'
 import { type ConversationHelpers, createConversationHelpers } from './conversation.js'
 import { invokeAgent } from './invokeAgent.js'
+import { type AgentRunStateHelpers, createAgentRunStateHelpers } from './runState.js'
 import { createScopedSessionId, resolveBaseSessionId } from './sessionIdentity.js'
 import { withSessionIdInPayload } from './sessionPayload.js'
 
@@ -685,6 +686,7 @@ export type AgentHandlerContext<
 	secrets: ProtocolContext['secrets']
 	configs: ProtocolContext['configs']
 	states: ProtocolContext['states']
+	runState: AgentRunStateHelpers
 	manifest: AgentManifest
 }
 
@@ -905,7 +907,7 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 				return
 			}
 
-			if (frame.kind === 'artifact' && typeof frame.content === 'string') {
+			if (frame.kind === 'artifact') {
 				const isReasoning = frame.artifactId === 'reasoning'
 				if (isReasoning && shouldForward(options, 'reasoning')) {
 					input.protocol.emitArtifact({
@@ -1259,6 +1261,13 @@ export const createAgentHandlerContext = <
 		secrets: input.serviceContext.secrets,
 		configs: input.serviceContext.configs,
 		states: input.serviceContext.states,
+		runState: createAgentRunStateHelpers({
+			states: input.serviceContext.states,
+			protocol: input.protocol,
+			manifest: input.manifest,
+			payload: input.payload,
+			message: input.serviceContext.message,
+		}),
 		manifest: input.manifest,
 	}
 }
