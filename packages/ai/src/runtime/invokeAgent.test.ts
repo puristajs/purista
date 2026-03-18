@@ -72,6 +72,46 @@ describe('invokeAgent', () => {
 		expect(onError).not.toHaveBeenCalled()
 	})
 
+	it('awaits async stream responders before completing the invocation', async () => {
+		const callOrder: string[] = []
+		const envelopes = [
+			{ frame: { kind: 'message', content: 'final', role: 'assistant', final: true } },
+		] as AgentProtocolEnvelope[]
+		const eventBridge = {
+			instanceId: 'instance-1',
+			openStream: vi.fn().mockResolvedValue({
+				sessionId: 'stream-1',
+				cancel: vi.fn(),
+				async *[Symbol.asyncIterator]() {
+					yield { payload: { frameType: 'chunk', sequence: 1, chunk: envelopes[0] } }
+					yield { payload: { frameType: 'complete', sequence: 2, final: envelopes } }
+				},
+			}),
+			invoke: vi.fn(),
+		} as any
+
+		await invokeAgent({
+			eventBridge,
+			agentName: 'supportAgent',
+			agentVersion: '1',
+			payload: { prompt: 'stream' },
+			stream: {
+				onFrame: async envelope => {
+					await new Promise(resolve => setTimeout(resolve, 5))
+					callOrder.push(`frame:${envelope.frame.kind}`)
+				},
+				onComplete: async () => {
+					callOrder.push('complete')
+				},
+				onError: async () => {
+					callOrder.push('error')
+				},
+			},
+		})
+
+		expect(callOrder).toEqual(['frame:message', 'complete'])
+	})
+
 	it('falls back to command invoke when stream is unavailable', async () => {
 		const envelopes = [
 			{ frame: { kind: 'message', content: 'fallback', role: 'assistant' } },

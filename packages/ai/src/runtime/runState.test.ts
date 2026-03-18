@@ -115,4 +115,25 @@ describe('agent run state helpers', () => {
 			second.helper.lock({ extraScope: { projectId: 'voyage' }, key: 'architecture', ttlMs: 50 }),
 		).resolves.toBeDefined()
 	})
+
+	it('clears completed timestamps when a task is restarted', async () => {
+		const { helper } = createRunState(createInMemoryStates().api)
+		const run = await helper.start({
+			title: 'Architecture Draft',
+			extraScope: { projectId: 'voyage' },
+		})
+
+		await run.plan([{ id: 'write', title: 'Write artifacts' }])
+		await run.startTask('write', 'Initial write')
+		await run.completeTask('write', 'Primary write done')
+		const completed = run.state.tasks[0]
+		expect(completed.status).toBe('completed')
+		expect(completed.completedAt).toBeDefined()
+
+		await run.startTask('write', 'Retrying write')
+		const restarted = run.state.tasks[0]
+		expect(restarted.status).toBe('running')
+		expect(restarted.detail).toBe('Retrying write')
+		expect(restarted.completedAt).toBeUndefined()
+	})
 })

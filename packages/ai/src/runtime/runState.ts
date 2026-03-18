@@ -416,10 +416,19 @@ export const createAgentRunStateHelpers = (context: RunStateContext): AgentRunSt
 								...task,
 								status,
 								detail: input?.detail ?? task.detail,
-								startedAt: status === 'running' ? (task.startedAt ?? timestamp) : task.startedAt,
+								startedAt:
+									status === 'running'
+										? task.status === 'completed' || task.status === 'failed'
+											? timestamp
+											: (task.startedAt ?? timestamp)
+										: task.startedAt,
 								updatedAt: timestamp,
 								completedAt:
-									status === 'completed' || status === 'failed' ? (task.completedAt ?? timestamp) : task.completedAt,
+									status === 'completed' || status === 'failed'
+										? (task.completedAt ?? timestamp)
+										: status === 'running' || status === 'pending'
+											? undefined
+											: task.completedAt,
 							},
 				),
 				updatedAt: timestamp,

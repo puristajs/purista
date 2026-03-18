@@ -98,9 +98,9 @@ export type AgentInvokeContext = {
 }
 
 export type AgentStreamResponder = {
-	onFrame(frame: AgentProtocolEnvelope): void
-	onComplete(): void
-	onError(error: unknown): void
+	onFrame(frame: AgentProtocolEnvelope): void | Promise<void>
+	onComplete(): void | Promise<void>
+	onError(error: unknown): void | Promise<void>
 }
 
 export type AgentInvokeResult = {

@@ -100,11 +100,11 @@ export const invokeAgent = async (options: InvokeAgentOptions) => {
 		},
 	}
 
-	const emitFrame = (envelope: AgentProtocolEnvelope) => {
+	const emitFrame = async (envelope: AgentProtocolEnvelope) => {
 		if (!options.stream) {
 			return
 		}
-		options.stream.onFrame(envelope)
+		await options.stream.onFrame(envelope)
 	}
 
 	try {
@@ -117,7 +117,7 @@ export const invokeAgent = async (options: InvokeAgentOptions) => {
 			if (frame.payload.frameType === 'chunk' && frame.payload.chunk) {
 				throwIfErrorEnvelope(frame.payload.chunk, options.failOnErrorFrame ?? true)
 				envelopes.push(frame.payload.chunk)
-				emitFrame(frame.payload.chunk)
+				await emitFrame(frame.payload.chunk)
 				continue
 			}
 
@@ -127,11 +127,11 @@ export const invokeAgent = async (options: InvokeAgentOptions) => {
 						for (const envelope of frame.payload.final) {
 							throwIfErrorEnvelope(envelope, options.failOnErrorFrame ?? true)
 							envelopes.push(envelope)
-							emitFrame(envelope)
+							await emitFrame(envelope)
 						}
 					}
 				}
-				options.stream?.onComplete()
+				await options.stream?.onComplete?.()
 				return envelopes
 			}
 
@@ -144,7 +144,7 @@ export const invokeAgent = async (options: InvokeAgentOptions) => {
 			}
 		}
 
-		options.stream?.onComplete()
+		await options.stream?.onComplete?.()
 		return envelopes
 	} catch (error) {
 		const isStreamUnavailable =
@@ -154,7 +154,7 @@ export const invokeAgent = async (options: InvokeAgentOptions) => {
 				(error.message.includes('does not support streams') || error.message.includes('InvalidCommand')))
 
 		if (!isStreamUnavailable) {
-			options.stream?.onError(error)
+			await options.stream?.onError?.(error)
 			throw error
 		}
 		try {
@@ -166,13 +166,13 @@ export const invokeAgent = async (options: InvokeAgentOptions) => {
 			}
 			if (options.stream) {
 				for (const envelope of envelopes) {
-					options.stream.onFrame(envelope)
+					await options.stream.onFrame(envelope)
 				}
-				options.stream.onComplete()
+				await options.stream.onComplete()
 			}
 			return envelopes
 		} catch (fallbackError) {
-			options.stream?.onError(fallbackError)
+			await options.stream?.onError?.(fallbackError)
 			throw fallbackError
 		}
 	}
