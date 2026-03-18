@@ -1,6 +1,6 @@
 ---
-title: Overview
-description: Architecture, core components and patterns of @purista/ai.
+title: AI agents
+description: Architecture, core components, and patterns of @purista/ai.
 order: 203700
 ---
 
@@ -98,10 +98,11 @@ flowchart TB
 1.  **[Quick Start](./getting-started.md)** — CLI scaffolding and your first "Hello World" agent.
 2.  **[Builder](./agent-builder.md)** — Defining tools, memory, and capabilities.
 3.  **[Context](./handler-context.md)** — Exploring the `context` toolbox.
-4.  **[Runtime](./runtime.md)** — Managing instances and concurrency.
-5.  **[Invocation](./invocation.md)** — Calling agents from commands or scripts.
-6.  **[Web & SDK](./frontend.md)** — Connecting your agent to a modern UI.
-7.  **[Memory & Knowledge](./memory-and-knowledge.md)** — Managing history and RAG.
-8.  **[Testing](./testing.md)** — Ensuring reliability with deterministic tests.
+4.  **[Durable Run State](./run-state.md)** — Persisting long-running execution state, tasks, and locks.
+5.  **[Runtime](./runtime.md)** — Managing instances and concurrency.
+6.  **[Invocation](./invocation.md)** — Calling agents from commands or scripts.
+7.  **[Web & SDK](./frontend.md)** — Connecting your agent to a modern UI.
+8.  **[Memory & Knowledge](./memory-and-knowledge.md)** — Managing history and RAG.
+9.  **[Testing](./testing.md)** — Ensuring reliability with deterministic tests.
 
 For deep dives into Custom Stores, MCP/A2A, or protocol internals, see the **[Advanced Section](../advanced/index.md)**.
