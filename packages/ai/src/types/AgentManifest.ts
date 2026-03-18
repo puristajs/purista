@@ -13,6 +13,33 @@ export type AgentHttpExposure = {
 	queryParameters?: Array<{ name: string; required: boolean }>
 }
 
+export type AgentExecutionMode = 'inline' | 'queued'
+
+export type AgentExecutionRecoveryPolicy = 'resume-from-checkpoints' | 'retry-from-start' | 'fail-stale'
+
+export type AgentExecutionHttpBehavior = 'attach-and-stream' | 'accept'
+
+export type AgentExecutionCleanupPolicy = {
+	transientStateTtlMs?: number
+	keepFinalRunRecord?: boolean
+	finalRunRecordTtlMs?: number
+}
+
+export type AgentExecutionPolicy = {
+	leaseTtlMs?: number
+	heartbeatIntervalMs?: number
+	maxAttempts?: number
+	maxDurationMs?: number
+	maxModelSteps?: number
+	maxToolCalls?: number
+	maxNoopPersistenceCycles?: number
+	maxRepeatedFailures?: number
+	recovery?: AgentExecutionRecoveryPolicy
+	httpBehavior?: AgentExecutionHttpBehavior
+	cleanup?: AgentExecutionCleanupPolicy
+	scopeFromPayload?: string[]
+}
+
 /**
  * Controls how agent stream chunks should be serialized when the endpoint uses SSE.
  * - `purista`: native PURISTA stream frames (canonical source protocol)
@@ -75,6 +102,8 @@ export type AgentManifest = {
 	agentVersion: string
 	description?: string
 	eventBridge: string
+	executionMode?: AgentExecutionMode
+	executionPolicy?: AgentExecutionPolicy
 	models?: AgentModelBinding[]
 	modelResource?: { resourceName: string; variant?: string }
 	session?: AgentSessionConfig

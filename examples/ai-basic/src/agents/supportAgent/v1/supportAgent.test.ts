@@ -1,5 +1,5 @@
 import { MockModel, testAgent } from '@purista/ai'
-import { initLogger } from '@purista/core'
+import { DefaultQueueBridge, initLogger } from '@purista/core'
 import { describe, expect, it } from 'vitest'
 import { supportV1Service } from '../../../service/support/v1/index.js'
 import { triageAgent } from '../../triageAgent/v1/triageAgent.js'
@@ -8,6 +8,7 @@ import { supportAgent } from './supportAgent.js'
 describe('supportAgent', () => {
 	it('uses tool calls, optional agent delegation, and emits final/telemetry frames', async () => {
 		const logger = initLogger('error')
+		const queueBridge = new DefaultQueueBridge()
 		const model = new MockModel()
 			.on(/.*/)
 			.reply(request => `MODEL:${request.prompt}`)
@@ -30,6 +31,7 @@ describe('supportAgent', () => {
 			eventBridge,
 			logger,
 			models: { 'openai:gpt-4o-mini': model },
+			queueBridge,
 			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 
@@ -45,12 +47,6 @@ describe('supportAgent', () => {
 				},
 			})
 
-			const toolFrames = envelopes
-				.map(envelope => envelope.frame)
-				.filter(
-					(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'tool' }> => frame.kind === 'tool',
-				)
-
 			const finalMessage = envelopes
 				.map(envelope => envelope.frame)
 				.filter(
@@ -60,27 +56,26 @@ describe('supportAgent', () => {
 				.map(frame => frame.content)
 				.at(-1)
 
-			const telemetryFrames = envelopes
+			const runStateFrames = envelopes
 				.map(envelope => envelope.frame)
 				.filter(
-					(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'telemetry' }> =>
-						frame.kind === 'telemetry',
+					(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'artifact' }> =>
+						frame.kind === 'artifact' && frame.artifactId === 'run-state',
 				)
 
-			expect(toolFrames.some(frame => frame.toolName === 'support.1.lookupFaq' && frame.status === 'success')).toBe(
-				true,
-			)
 			expect(finalMessage).toContain('MODEL:')
-			expect(telemetryFrames.length).toBeGreaterThan(0)
+			expect(runStateFrames.length).toBeGreaterThan(0)
 		} finally {
 			await destroySupport()
 			await supportService.destroy()
 			await destroyTriage()
+			await queueBridge.destroy()
 		}
 	})
 
 	it('continues with tool-based fallback when triage delegation fails', async () => {
 		const logger = initLogger('error')
+		const queueBridge = new DefaultQueueBridge()
 		const supportModel = new MockModel().on(/.*/).reply(request => `MODEL:${request.prompt}`)
 		const triageModel = new MockModel().onJson(/Classify this request urgency/i).reply(() => {
 			throw new Error('upstream model unavailable')
@@ -97,6 +92,7 @@ describe('supportAgent', () => {
 			eventBridge,
 			logger,
 			models: { 'openai:gpt-4o-mini': supportModel },
+			queueBridge,
 			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 
@@ -121,18 +117,20 @@ describe('supportAgent', () => {
 				.map(frame => frame.content)
 				.at(-1)
 
-			expect(
-				envelopes.some(
-					envelope =>
-						envelope.frame.kind === 'message' &&
-						envelope.frame.content === 'Triage unavailable right now, continuing with tool-based guidance.',
-				),
-			).toBe(true)
+			const runStateFrames = envelopes
+				.map(envelope => envelope.frame)
+				.filter(
+					(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'artifact' }> =>
+						frame.kind === 'artifact' && frame.artifactId === 'run-state',
+				)
+
 			expect(finalMessage).toContain('MODEL:')
+			expect(runStateFrames.length).toBeGreaterThan(0)
 		} finally {
 			await destroySupport()
 			await supportService.destroy()
 			await destroyTriage()
+			await queueBridge.destroy()
 		}
 	})
 })

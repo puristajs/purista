@@ -30,11 +30,21 @@ const extractCalculationExpression = (input: string): string | undefined => {
 export const supportAgent = new AgentBuilder({
 	agentName: 'supportAgent',
 	agentVersion: '1',
-	description: 'Support agent using tool calls and optional delegation to triageAgent',
+	description: 'Queued durable support agent with checkpoints and optional delegation to triageAgent',
 })
 	.addPayloadSchema(supportAgentInputSchema)
 	.defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream', 'json'] })
 	.persistConversation('user', { maxFrames: 20 })
+	.setExecutionMode('queued')
+	.setExecutionPolicy({
+		httpBehavior: 'attach-and-stream',
+		recovery: 'resume-from-checkpoints',
+		scopeFromPayload: ['sessionId'],
+		leaseTtlMs: 30_000,
+		heartbeatIntervalMs: 10_000,
+		maxAttempts: 3,
+		maxDurationMs: 15 * 60_000,
+	})
 	.canInvoke('support', '1', 'lookupFaq')
 	.canInvoke('support', '1', 'calculate')
 	.canInvoke('support', '1', 'fetchWebsite')
@@ -44,10 +54,18 @@ export const supportAgent = new AgentBuilder({
 	.setHandler<SupportAgentInput>(async function (context, payload) {
 		const userPrompt = payload.prompt ?? payload.message ?? ''
 		const model = context.models['openai:gpt-4o-mini']
+		const sessionId = payload.sessionId ?? context.message.id
 		const run = await context.runState.start({
 			title: 'Support orchestration',
+			phase: 'planning',
 			extraScope: {
-				sessionId: payload.sessionId ?? context.message.id,
+				sessionId,
+			},
+			lock: {
+				key: 'support',
+				extraScope: {
+					sessionId,
+				},
 			},
 		})
 
@@ -59,77 +77,108 @@ export const supportAgent = new AgentBuilder({
 			{ id: 'triage', title: 'Escalate to triage when needed' },
 			{ id: 'answer', title: 'Compose final answer' },
 		])
+		await run.checkpoint(
+			'request',
+			{
+				prompt: userPrompt,
+				responseFormat: payload.responseFormat ?? 'text',
+			},
+			{ completed: true },
+		)
+		await run.update({ phase: 'running', status: 'running' })
 
-		context.stream.sendChunk('Checking knowledge base...')
-		await run.startTask('faq', 'Searching the knowledge base')
-		const faqResult = await context.tools.invoke.support['1'].lookupFaq({ question: userPrompt })
-		await run.completeTask('faq', 'Knowledge base lookup completed')
-		const faqAnswer =
-			typeof faqResult === 'object' && faqResult && 'answer' in faqResult && typeof faqResult.answer === 'string'
-				? faqResult.answer
-				: 'No matching knowledge-base article was found.'
+		const faqAnswer = await run.step(
+			'faq',
+			async () => {
+				context.stream.sendChunk('Checking knowledge base...')
+				const faqResult = await context.tools.invoke.support['1'].lookupFaq({ question: userPrompt })
+				return typeof faqResult === 'object' &&
+					faqResult &&
+					'answer' in faqResult &&
+					typeof faqResult.answer === 'string'
+					? faqResult.answer
+					: 'No matching knowledge-base article was found.'
+			},
+			{ detail: 'Searching the knowledge base', checkpoint: 'faq-answer' },
+		)
 
-		let websiteSummary = ''
 		const extractedUrl = extractFirstUrl(userPrompt)
-		if (extractedUrl) {
-			await run.startTask('website', `Fetching ${extractedUrl}`)
-			context.stream.sendChunk(`Fetching website context from ${extractedUrl}...`)
-			const websiteResult = await context.tools.invoke.support['1'].fetchWebsite({ url: extractedUrl })
-			if (
-				typeof websiteResult === 'object' &&
-				websiteResult &&
-				'text' in websiteResult &&
-				typeof websiteResult.text === 'string'
-			) {
-				websiteSummary = websiteResult.text.slice(0, 1_800)
-			}
-			await run.completeTask('website', 'Website context captured')
-		} else {
-			await run.completeTask('website', 'No URL requested')
-		}
-
-		let calculationResult = ''
-		const calculationExpression = extractCalculationExpression(userPrompt)
-		if (calculationExpression) {
-			await run.startTask('calculation', `Evaluating ${calculationExpression}`)
-			context.stream.sendChunk(`Calculating: ${calculationExpression}`)
-			try {
-				const calc = await context.tools.invoke.support['1'].calculate({ expression: calculationExpression })
-				if (typeof calc === 'object' && calc && 'result' in calc) {
-					calculationResult = String(calc.result)
+		const websiteSummary = await run.step(
+			'website',
+			async () => {
+				if (!extractedUrl) {
+					return ''
 				}
-				await run.completeTask('calculation', `Calculation result: ${calculationResult || 'done'}`)
-			} catch (error) {
-				context.logger.warn({ err: error, calculationExpression }, 'Calculation tool failed')
-				await run.failTask('calculation', error instanceof Error ? error.message : String(error))
-			}
-		} else {
-			await run.completeTask('calculation', 'No calculation requested')
-		}
+				context.stream.sendChunk(`Fetching website context from ${extractedUrl}...`)
+				const websiteResult = await context.tools.invoke.support['1'].fetchWebsite({ url: extractedUrl })
+				if (
+					typeof websiteResult === 'object' &&
+					websiteResult &&
+					'text' in websiteResult &&
+					typeof websiteResult.text === 'string'
+				) {
+					return websiteResult.text.slice(0, 1_800)
+				}
+				return ''
+			},
+			{
+				detail: extractedUrl ? `Fetching ${extractedUrl}` : 'No URL requested',
+				checkpoint: 'website-summary',
+			},
+		)
 
-		let triageSummary = ''
-		if (escalationPattern.test(userPrompt)) {
-			await run.startTask('triage', 'Escalating to the triage agent')
-			context.stream.sendChunk('Escalating to triage agent...')
-			try {
-				triageSummary = await context.agents.runText({
-					agentName: 'triageAgent',
-					agentVersion: '1',
-					payload: {
-						prompt: userPrompt,
-						sessionId: payload.sessionId,
-					},
-					sessionId: payload.sessionId,
-				})
-				await run.completeTask('triage', 'Triage agent returned guidance')
-			} catch (error) {
-				context.logger.warn({ err: error }, 'triageAgent failed, continuing with tool-based fallback')
-				context.stream.sendChunk('Triage unavailable right now, continuing with tool-based guidance.')
-				await run.failTask('triage', error instanceof Error ? error.message : String(error))
-			}
-		} else {
-			await run.completeTask('triage', 'No escalation needed')
-		}
+		const calculationExpression = extractCalculationExpression(userPrompt)
+		const calculationResult = await run.step(
+			'calculation',
+			async () => {
+				if (!calculationExpression) {
+					return ''
+				}
+				context.stream.sendChunk(`Calculating: ${calculationExpression}`)
+				try {
+					const calc = await context.tools.invoke.support['1'].calculate({ expression: calculationExpression })
+					if (typeof calc === 'object' && calc && 'result' in calc) {
+						return String(calc.result)
+					}
+				} catch (error) {
+					context.logger.warn({ err: error, calculationExpression }, 'Calculation tool failed')
+				}
+				return ''
+			},
+			{
+				detail: calculationExpression ? `Evaluating ${calculationExpression}` : 'No calculation requested',
+				checkpoint: 'calculation-result',
+			},
+		)
+
+		const triageSummary = await run.step(
+			'triage',
+			async () => {
+				if (!escalationPattern.test(userPrompt)) {
+					return ''
+				}
+				context.stream.sendChunk('Escalating to triage agent...')
+				try {
+					return await context.agents.runText({
+						agentName: 'triageAgent',
+						agentVersion: '1',
+						payload: {
+							prompt: userPrompt,
+							sessionId,
+						},
+						sessionId,
+					})
+				} catch (error) {
+					context.logger.warn({ err: error }, 'triageAgent failed, continuing with tool-based fallback')
+					context.stream.sendChunk('Triage unavailable right now, continuing with tool-based guidance.')
+					return ''
+				}
+			},
+			{
+				detail: escalationPattern.test(userPrompt) ? 'Escalating to the triage agent' : 'No escalation needed',
+				checkpoint: 'triage-summary',
+			},
+		)
 
 		const prompt = [
 			await context.conversation.buildPromptInput(),
@@ -143,61 +192,68 @@ export const supportAgent = new AgentBuilder({
 			.join('\n')
 
 		try {
-			await run.phase('answer-generation', 'summarizing')
-			await run.startTask('answer', 'Generating final answer')
-			if (payload.responseFormat === 'json' && model.generateJson) {
-				const jsonResult = await model.generateJson<z.infer<typeof jsonAnswerSchema>>({
-					prompt: `${prompt}\n\nReturn JSON that follows the provided schema.`,
-					schema: jsonAnswerSchema,
-					context: payload.context,
-					metadata: { aiSdk: { temperature: 0.2 } },
-				})
+			await run.update({ phase: 'summarizing', status: 'summarizing' })
+			const answer = await run.step(
+				'answer',
+				async () => {
+					if (payload.responseFormat === 'json' && model.generateJson) {
+						const jsonResult = await model.generateJson<z.infer<typeof jsonAnswerSchema>>({
+							prompt: `${prompt}\n\nReturn JSON that follows the provided schema.`,
+							schema: jsonAnswerSchema,
+							context: payload.context,
+							metadata: { aiSdk: { temperature: 0.2 } },
+						})
 
-				if (jsonResult.reasoningText?.trim()) {
-					context.stream.sendReasoning(jsonResult.reasoningText)
-				}
-				context.stream.sendArtifact({
-					artifactId: 'json-response',
-					content: jsonResult.data,
-					mimeType: 'application/json',
-					final: true,
-				})
-				await context.conversation.addAssistant(jsonResult.data.answer)
-				await run.completeTask('answer', 'JSON answer generated')
-				await run.finishSuccess(jsonResult.data.answer)
-				context.stream.sendFinal(jsonResult.data.answer)
-				return { message: jsonResult.data.answer }
-			}
-
-			if (!model.generate && !model.stream) {
-				throw new HandledError(StatusCode.InternalServerError, 'Text generation model is not configured')
-			}
-
-			context.stream.sendChunk('Generating final answer...')
-			const answer = await generateText({
-				model,
-				request: {
-					prompt,
-					context: payload.context,
-					metadata: { aiSdk: { temperature: 0.2 } },
-				},
-				onReasoning: text => context.stream.sendReasoning(text),
-				onTextDelta: delta => {
-					if (delta.length > 0) {
-						context.stream.sendChunk(delta)
+						if (jsonResult.reasoningText?.trim()) {
+							context.stream.sendReasoning(jsonResult.reasoningText)
+						}
+						context.stream.sendArtifact({
+							artifactId: 'json-response',
+							content: jsonResult.data,
+							mimeType: 'application/json',
+							final: true,
+						})
+						await context.conversation.addAssistant(jsonResult.data.answer)
+						return jsonResult.data.answer
 					}
-				},
-			})
 
-			await context.conversation.addAssistant(answer)
-			await run.completeTask('answer', 'Final answer generated')
+					if (!model.generate && !model.stream) {
+						throw new HandledError(StatusCode.InternalServerError, 'Text generation model is not configured')
+					}
+
+					context.stream.sendChunk('Generating final answer...')
+					const answer = await generateText({
+						model,
+						request: {
+							prompt,
+							context: payload.context,
+							metadata: { aiSdk: { temperature: 0.2 } },
+						},
+						onReasoning: text => context.stream.sendReasoning(text),
+						onTextDelta: delta => {
+							if (delta.length > 0) {
+								context.stream.sendChunk(delta)
+							}
+						},
+					})
+					await context.conversation.addAssistant(answer)
+					return answer
+				},
+				{ detail: 'Generating final answer', checkpoint: 'final-answer' },
+			)
+
+			await run.setFinalMessage(answer)
 			await run.finishSuccess(answer)
 			context.stream.sendFinal(answer)
 			return { message: answer }
 		} catch (error) {
 			await context.conversation.revertLast({ role: 'user' })
 			await run.failTask('answer', error instanceof Error ? error.message : String(error))
-			await run.finishFailure(error instanceof Error ? error.message : String(error))
+			await run.finishFailure(error instanceof Error ? error.message : String(error), {
+				code: error instanceof HandledError ? String(error.errorCode) : 'UnhandledError',
+				message: error instanceof Error ? error.message : String(error),
+				handled: error instanceof HandledError,
+			})
 			throw HandledError.fromError(error, StatusCode.BadGateway)
 		}
 	})

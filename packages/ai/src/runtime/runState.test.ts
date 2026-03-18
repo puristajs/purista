@@ -136,4 +136,38 @@ describe('agent run state helpers', () => {
 		expect(restarted.detail).toBe('Retrying write')
 		expect(restarted.completedAt).toBeUndefined()
 	})
+
+	it('derives implicit run scope keys from execution policy payload config', async () => {
+		const shared = createInMemoryStates()
+		const helper = createAgentRunStateHelpers({
+			states: shared.api,
+			protocol: {
+				emitArtifact() {},
+			},
+			manifest: {
+				...manifest,
+				executionPolicy: {
+					scopeFromPayload: ['projectId'],
+				},
+			},
+			payload: { sessionId: 'session-1', projectId: 'voyage' },
+			message: {
+				id: 'message-1',
+				principalId: 'principal-1',
+				tenantId: 'tenant-1',
+			},
+		})
+		const run = await helper.start({
+			title: 'Architecture Draft',
+		})
+
+		await helper.update({
+			phase: 'running',
+			status: 'running',
+		})
+
+		expect(run.state.scope.extra).toEqual({ projectId: 'voyage' })
+		const persisted = await helper.get()
+		expect(persisted?.scope.extra).toEqual({ projectId: 'voyage' })
+	})
 })

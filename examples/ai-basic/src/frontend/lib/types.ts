@@ -62,10 +62,43 @@ export type AgentRunTask = {
 export type AgentRunState = {
 	runId: string
 	title: string
-	status: 'idle' | 'planning' | 'running' | 'summarizing' | 'completed' | 'failed' | 'cancelled'
+	status: 'queued' | 'idle' | 'planning' | 'running' | 'recovering' | 'retrying' | 'summarizing' | 'completed' | 'failed' | 'cancelled'
 	phase: string
 	tasks: AgentRunTask[]
 	summary?: string
+	finalMessage?: string
+	checkpoints?: Record<string, {
+		name: string
+		completed: boolean
+		value?: unknown
+		updatedAt: string
+	}>
+	attempt?: number
+	owner?: {
+		workerId: string
+		queueName?: string
+		leaseId?: string
+		attachedAt: string
+	}
+	recovery?: {
+		status: 'fresh' | 'resumed' | 'retrying' | 'recovered-stale'
+		reason?: string
+		checkpoint?: string
+		resumedAt?: string
+	}
+	lock?: {
+		lockId: string
+		key: string
+		runId?: string
+		scopeKey: string
+		acquiredAt: string
+		heartbeatAt: string
+		expiresAt: string
+	}
+	heartbeatAt?: string
+	startedAt?: string
+	updatedAt?: string
+	completedAt?: string
 }
 
 export type WorkflowStep = {

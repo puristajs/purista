@@ -13,10 +13,11 @@ const triageJsonSchema = z.object({
 export const triageAgent = new AgentBuilder({
 	agentName: 'triageAgent',
 	agentVersion: '1',
-	description: 'Escalation helper agent',
+	description: 'Inline escalation helper agent',
 })
 	.addPayloadSchema(triageAgentInputSchema)
 	.defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'json'] })
+	.setExecutionMode('inline')
 	.persistConversation('agent', { maxFrames: 10 })
 	.setHandler<TriageAgentInput>(async function (context: TriageAgentContext, payload) {
 		const model = context.models['openai:gpt-4o-mini']

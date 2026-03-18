@@ -63,6 +63,26 @@ describe('AgentInstance', () => {
 		).toThrow('Model provider "openai:gpt-4o-mini" does not support required capability "json"')
 	})
 
+	it('requires a queue bridge for queued execution mode', async () => {
+		const manifest: AgentManifest = {
+			...baseManifest,
+			executionMode: 'queued',
+		}
+		const eventBridge = { instanceId: 'bridge-1', invoke: vi.fn() } as any
+		const instance = new AgentInstance(
+			{
+				...baseDependencies,
+				manifest,
+			},
+			eventBridge,
+			{ models: {} },
+		)
+
+		await expect(instance.start()).rejects.toThrow(
+			'Agent "supportAgent" is configured for queued execution but no queueBridge was provided',
+		)
+	})
+
 	it('notifies stream responders for successful invocations', async () => {
 		const invoke = vi.fn().mockResolvedValue([{ frame: { kind: 'message', content: 'ok', role: 'assistant' } }])
 		const eventBridge = { instanceId: 'bridge-1', invoke } as any

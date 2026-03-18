@@ -8,6 +8,8 @@ order: 203705
 
 PURISTA follows a strict dependency pattern. Agents should be invoked using the **Context API** inside your services for full observability and type safety.
 
+Inline agents execute immediately. Queued durable agents keep the same public entrypoint, but internally the request is handled by queue-backed work and the caller attaches to the live run stream.
+
 ## 1. Context API (Recommended)
 
 When working inside a command, subscription, or stream, register your agent dependency using `.canInvokeAgent(...)`.
@@ -123,7 +125,7 @@ await context.agents.forward({
 - forwarding assistant text, reasoning, artifacts, and errors into the current stream
 - suppressing synthetic outer `agent.run` tool telemetry
 
-That includes durable `run-state` artifacts. If the child agent uses `context.runState`, the parent can forward those progress updates to the current frontend without custom bridging.
+That includes durable `run-state` artifacts. If the child agent uses `context.runState`, the parent can forward those progress updates to the current frontend without custom bridging. In `ai-sdk-ui-message` mode the frontend will receive `data-run-state` and can keep input locked while the run is active.
 
 This is the right choice for orchestration agents that mainly act as routers:
 
@@ -196,7 +198,7 @@ await context.agents.forward({
 })
 ```
 
-If the child emits `run-state`, the current HTTP stream will contain `data-run-state` in `ai-sdk-ui-message` mode. The frontend can then render a task panel and temporarily disable the composer while the run is active.
+If the child emits `run-state`, the current HTTP stream will contain `data-run-state` in `ai-sdk-ui-message` mode. The frontend can then render a task panel, show recovery metadata, and temporarily disable the composer while the run is active.
 
 ## 3. Standalone API
 
@@ -225,6 +227,8 @@ Agent HTTP endpoints can be exposed in two transport modes:
 .exposeAsHttpEndpoint('POST', 'agents/support')
 .setStreamingMode('aggregate')
 ```
+
+Queued durable agents still use these transport modes, but execution stays queue-backed. For long-running work, prefer `stream` with attach-and-stream so the caller can observe progress while the worker runs.
 
 ---
 

@@ -56,7 +56,27 @@ const isRunStateDataPart = (value: unknown): value is { type: 'data-run-state'; 
 	value.data !== null
 
 const isRunActive = (runState: AgentRunState | null) =>
-	Boolean(runState && ['planning', 'running', 'summarizing'].includes(runState.status))
+	Boolean(
+		runState && ['queued', 'planning', 'running', 'recovering', 'retrying', 'summarizing'].includes(runState.status),
+	)
+
+const formatRunStatus = (status: string): string =>
+	({
+		queued: 'Queued',
+		idle: 'Idle',
+		planning: 'Planning',
+		running: 'Running',
+		recovering: 'Recovering',
+		retrying: 'Retrying',
+		summarizing: 'Summarizing',
+		completed: 'Completed',
+		failed: 'Failed',
+		cancelled: 'Cancelled',
+		pending: 'Pending',
+		fresh: 'Fresh',
+		resumed: 'Resumed',
+		'recovered-stale': 'Recovered stale',
+	})[status] ?? status
 
 const getLastUserPrompt = (messages: UIMessage[]): string => {
 	for (let index = messages.length - 1; index >= 0; index -= 1) {
@@ -797,7 +817,7 @@ export const App = () => {
 					<span>{status}</span>
 					{activeRunState ? (
 						<span className={`run-status-chip run-status-${activeRunState.status}`}>
-							{activeRunState.title} · {activeRunState.phase}
+							{activeRunState.title} · {formatRunStatus(activeRunState.status)}
 						</span>
 					) : null}
 					{canRetry && (
@@ -928,9 +948,29 @@ export const App = () => {
 								<div className="run-state-header">
 									<div>
 										<h3>{activeRunState.title}</h3>
-										<p>{activeRunState.summary ?? `Current phase: ${activeRunState.phase}`}</p>
+										<p>
+											{activeRunState.summary ??
+												activeRunState.finalMessage ??
+												`Current phase: ${activeRunState.phase}`}
+										</p>
 									</div>
-									<span className={`run-status-chip run-status-${activeRunState.status}`}>{activeRunState.status}</span>
+									<span className={`run-status-chip run-status-${activeRunState.status}`}>
+										{formatRunStatus(activeRunState.status)}
+									</span>
+								</div>
+								<div className="run-state-meta">
+									{typeof activeRunState.attempt === 'number' ? <span>Attempt {activeRunState.attempt}</span> : null}
+									{activeRunState.recovery ? (
+										<span>Recovery {formatRunStatus(activeRunState.recovery.status)}</span>
+									) : null}
+									{activeRunState.owner?.workerId ? <span>Worker {activeRunState.owner.workerId}</span> : null}
+									{activeRunState.lock ? <span>Lock {activeRunState.lock.key}</span> : null}
+									{activeRunState.checkpoints ? (
+										<span>
+											{Object.values(activeRunState.checkpoints).filter(checkpoint => checkpoint.completed).length}{' '}
+											checkpoints
+										</span>
+									) : null}
 								</div>
 								<ul className="run-task-list">
 									{[...activeRunState.tasks]
@@ -941,7 +981,7 @@ export const App = () => {
 													<strong>{task.title}</strong>
 													{task.detail ? <p>{task.detail}</p> : null}
 												</div>
-												<span>{task.status}</span>
+												<span>{formatRunStatus(task.status)}</span>
 											</li>
 										))}
 								</ul>

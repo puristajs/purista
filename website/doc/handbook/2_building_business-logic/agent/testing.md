@@ -51,6 +51,7 @@ The `testAgent` helper is your best friend. It:
 - Sets up an in-memory EventBridge.
 - Creates a runtime instance of your agent.
 - Injects mock models and providers.
+- Accepts a `queueBridge` when you are testing a queued durable agent.
 - Provides a clean way to register mock commands.
 - Returns `destroy()` to cleanly stop the instance and bridge.
 
@@ -74,6 +75,23 @@ expect(session.data.messages).toHaveLength(2)
 
 ### C. Deterministic Output
 Mock the model output to verify how your agent handler processes it (e.g., extracting values from JSON or formatting a string).
+
+### D. Queued Durable Runs
+When the agent uses `setExecutionMode('queued')`, inject a queue bridge in the test and assert the emitted `run-state` artifact or final message:
+
+```ts
+import { DefaultQueueBridge } from '@purista/core'
+
+const queueBridge = new DefaultQueueBridge()
+const { instance, destroy } = await testAgent(supportAgent, {
+  queueBridge,
+  models: {
+    'openai:gpt-4o-mini': model,
+  },
+})
+```
+
+This keeps the test deterministic while still covering the durable execution path.
 
 ## 4. Evaluation Datasets (Advanced)
 

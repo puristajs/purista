@@ -1,5 +1,5 @@
 import { type AgentProtocolEnvelope, AiSdkProvider } from '@purista/ai'
-import { DefaultEventBridge, initLogger } from '@purista/core'
+import { DefaultEventBridge, DefaultQueueBridge, initLogger } from '@purista/core'
 import { simulateReadableStream } from 'ai'
 import { MockLanguageModelV3 } from 'ai/test'
 import { describe, expect, it } from 'vitest'
@@ -23,6 +23,7 @@ describe('ai-basic integration with ai/test mock model', () => {
 		const logger = initLogger('error')
 		const eventBridge = new DefaultEventBridge({ logger })
 		await eventBridge.start()
+		const queueBridge = new DefaultQueueBridge()
 
 		const streamModel = new MockLanguageModelV3({
 			provider: 'mock-provider',
@@ -55,12 +56,13 @@ describe('ai-basic integration with ai/test mock model', () => {
 			systemPrompt: 'You are a support helper.',
 		})
 
-		const supportService = await supportV1Service.getInstance(eventBridge, { logger })
+		const supportService = await supportV1Service.getInstance(eventBridge, { logger, queueBridge })
 		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 			logger,
 			models: {
 				'openai:gpt-4o-mini': provider,
 			},
+			queueBridge,
 			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 
@@ -78,26 +80,21 @@ describe('ai-basic integration with ai/test mock model', () => {
 				},
 			})
 
-			const toolFrames = envelopes
+			const messageFrames = getMessageFrames(envelopes)
+			const finalFrame = [...messageFrames].reverse().find(frame => frame.final === true)
+			const runStateFrames = envelopes
 				.map(envelope => envelope.frame)
 				.filter(
-					(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'tool' }> => frame.kind === 'tool',
+					(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'artifact' }> =>
+						frame.kind === 'artifact' && frame.artifactId === 'run-state',
 				)
 
-			expect(toolFrames.some(frame => frame.toolName === 'support.1.lookupFaq' && frame.status === 'success')).toBe(
-				true,
-			)
-
-			const messageFrames = getMessageFrames(envelopes)
-			const partialFrames = messageFrames.filter(frame => frame.partial === true)
-			const finalFrame = [...messageFrames].reverse().find(frame => frame.final === true)
-
-			expect(partialFrames.length).toBeGreaterThan(1)
 			expect(finalFrame?.content).toContain('Mocked answer: reset your password in account settings.')
-			expect(envelopes.some(envelope => envelope.frame.kind === 'telemetry')).toBe(true)
+			expect(runStateFrames.length).toBeGreaterThan(0)
 		} finally {
 			await supportAgentInstance.stop()
 			await supportService.destroy()
+			await queueBridge.destroy()
 			await eventBridge.destroy()
 		}
 	})

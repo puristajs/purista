@@ -150,13 +150,13 @@ const messages = await context.conversation.getMessages()
 
 ## 5.1 Durable Execution State (`context.runState`)
 
-Use `context.runState` for long-running agent execution state such as plans, task lists, progress, and resumable status. It is backed by `context.states`, so it survives beyond the current in-memory instance and can be read again after reconnects or handoffs.
+Use `context.runState` for long-running agent execution state such as plans, task lists, checkpoints, locks, and resumable status. It is backed by `context.states`, so it survives beyond the current in-memory instance and can be read again after reconnects or handoffs.
 
 Use it for:
 
 - planner/todo state
 - active run locks
-- resumable progress for distributed workers
+- checkpoints for resumed work
 - UI-facing execution status
 
 Do not use conversation memory for this. Conversation memory is for LLM context. Run state is operational workflow state.
@@ -174,14 +174,18 @@ await run.plan([
   { id: 'verify', title: 'Verify persisted outputs' },
 ])
 
-await run.task('write-files', async () => {
+await run.checkpoint('spec-snapshot', { projectId: payload.projectId }, { completed: true })
+await run.update({ phase: 'running', status: 'running' })
+
+await run.step('write-files', async () => {
   // write files here
-})
+  return 'Architecture artifacts are ready.'
+}, { checkpoint: 'write-files-summary' })
 
 await run.finishSuccess('Architecture artifacts are ready.')
 ```
 
-Every persisted update emits a standard `run-state` artifact. In `ai-sdk-ui-message` mode this becomes a `data-run-state` part for the frontend.
+Every persisted update emits a standard `run-state` artifact. In `ai-sdk-ui-message` mode this becomes a `data-run-state` part for the frontend. That is the contract that lets the UI render live progress and lock the composer while a queued durable agent is active.
 
 ## 6. Knowledge / RAG (context.knowledge)
 

@@ -13,6 +13,8 @@ An agent definition (`AgentBuilder`) is inert. To run it, you must create an **i
 `getInstance(eventBridge, options)` is where you inject your production-ready tools.
 
 ```ts
+import { DefaultQueueBridge } from '@purista/core'
+
 const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   models: {
     'openai:gpt-4o-mini': new AiSdkProvider({ model: openai('gpt-4o-mini') })
@@ -21,6 +23,7 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
   knowledgeAdapters: {
     supportFaq: new VectorStoreAdapter()
   },
+  queueBridge: new DefaultQueueBridge(),
   poolConfig: {
     poolId: 'support',
     maxConcurrencyPerInstance: 5
@@ -42,6 +45,8 @@ LLM calls are expensive and can be slow. To protect your application and manage 
 - **Rate Limit Protection**: Keeps your outgoing LLM requests within your provider's quota.
 - **Fairness**: Ensures that high-priority agents still have "slots" to run even during peak traffic.
 
+Queued durable agents also need a `queueBridge`. The queue bridge decides which worker owns the job, and the pool decides how many jobs a process may execute at once. Inline agents do not need a queue bridge.
+
 ## 3. Deployment Patterns
 
 ### Pattern A: In-Process (Monolith/Service)
@@ -49,6 +54,9 @@ Run the agent in the same process as your API or Service. Good for low-to-medium
 
 ### Pattern B: Isolated Workers (Microservice)
 Deploy a dedicated process that only runs agents. This allows you to scale AI workloads independently from your web traffic.
+
+### Pattern C: Queued Durable Workers
+Expose the agent over HTTP or SSE, but execute heavy work through queue workers. This is the preferred pattern for architecture synthesis, simulation, planning, and validation because it supports attach-and-stream frontends and recovery after restarts.
 
 ## 4. Health & Monitoring
 

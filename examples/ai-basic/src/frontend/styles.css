@@ -212,7 +212,10 @@ body,
 
 .run-status-planning,
 .run-status-running,
-.run-status-summarizing {
+.run-status-summarizing,
+.run-status-queued,
+.run-status-recovering,
+.run-status-retrying {
 	color: #f6c65b;
 	border-color: rgba(246, 198, 91, 0.35);
 	background: rgba(246, 198, 91, 0.08);
@@ -275,6 +278,21 @@ body,
 	margin: 0.22rem 0 0;
 	color: var(--muted);
 	font-size: 0.82rem;
+}
+
+.run-state-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4rem;
+	color: var(--muted);
+	font-size: 0.72rem;
+}
+
+.run-state-meta span {
+	border: 1px solid var(--border);
+	border-radius: 999px;
+	padding: 0.14rem 0.42rem;
+	background: var(--panel-soft);
 }
 
 .run-task-list {

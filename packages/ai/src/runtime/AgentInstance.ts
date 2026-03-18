@@ -166,6 +166,11 @@ export class AgentInstance implements AgentInstanceContract {
 		if (this.service) {
 			return
 		}
+		if (this.dependencies.manifest.executionMode === 'queued' && !this.runtime.queueBridge) {
+			throw new Error(
+				`Agent "${this.dependencies.info.agentName}" is configured for queued execution but no queueBridge was provided`,
+			)
+		}
 
 		const serviceConfig: AgentServiceConfig = {
 			runtime: {

@@ -1,20 +1,24 @@
 ---
 title: AI agents
-description: Architecture, core components, and patterns of @purista/ai.
+description: Architecture, execution modes, and runtime patterns of @purista/ai.
 order: 203700
 ---
 
-# AI Agents
+# AI agents
 
-`@purista/ai` integrates agents as first-class citizens into the PURISTA ecosystem. They share the same EventBridge, observability, and security models as your services, allowing for a unified architecture.
+`@purista/ai` integrates agents as first-class citizens into the PURISTA ecosystem. Agents share the same EventBridge, observability, security, queue, and store concepts as the rest of PURISTA.
+
+Agents can run in two modes:
+
+- **Inline** for short, fast interactions such as classification or a single response turn.
+- **Queued durable** for long-running work that should survive restarts, expose live progress, and resume from checkpoints.
+
+The transport is separate from the execution model. You can expose either mode over HTTP, SSE, commands, or sub-agent calls. A queued durable agent still looks like a normal HTTP endpoint from the outside, but internally it runs through a queue-backed worker pool.
 
 ## System Map
 
-The following map illustrates how the **Builder** defines the agent, how the **Runtime** executes it, and how it interacts with **Stores** and the **Ecosystem**.
-
 ```mermaid
 flowchart TB
-    %% Style Definitions
     classDef builder fill:#f59e0b,color:#fff,stroke:#d97706
     classDef runtime fill:#4f46e5,color:#fff,stroke:#3730a3
     classDef bridge fill:#10b981,color:#fff,stroke:#059669
@@ -25,84 +29,63 @@ flowchart TB
         B[AgentBuilder]:::builder
     end
 
-    subgraph Transport ["2. Transport & Flow Control"]
+    subgraph Transport ["2. Transport"]
         EB((EventBridge)):::bridge
         QB[QueueBridge]:::bridge
-        WP[Worker Pool]:::transport
+        HTTP[HTTP / SSE / Commands]:::transport
     end
 
-    subgraph Runtime ["3. The Agent Instance"]
-        direction TB
+    subgraph Runtime ["3. Execution"]
         AI[Agent Runtime]:::runtime
-        AH[Handler Logic]:::runtime
+        W[Worker Pool]:::transport
+        RUN[Run State + Checkpoints]:::storage
     end
 
     subgraph Deps ["4. Injected Dependencies"]
-        direction LR
         P[AiSdkProvider]:::storage
         CS[Conversation Store]:::storage
         KA[Knowledge Adapter]:::storage
+        ST[State Store]:::storage
     end
 
-    subgraph Ecosystem ["5. PURISTA Ecosystem"]
-        direction LR
-        CMD[Commands]
-        SUB[Subscriptions]
-        STR[Streams]
-    end
-
-    %% Connection Logic
-    B -- ".getInstance()" --> AI
-    
-    CMD & SUB & STR -- "invoke" --> EB
-    CMD & SUB -- "enqueue" --> QB
-    
-    EB & QB --> WP
-    WP --> AI
-    
-    AI <--> AH
-    
-    AH -- "Models" --> P
-    AH -- "Memory" --> CS
-    AH -- "RAG" --> KA
-    
-    AH -- "Tool Calls" --> EB
-    AH -- "Emit Events" --> EB
-    
-    EB -- "execute" --> CMD
-    EB -- "trigger" --> SUB
+    B --> AI
+    HTTP --> EB
+    HTTP --> QB
+    EB --> AI
+    QB --> W --> AI
+    AI --> RUN
+    AI <--> P
+    AI <--> CS
+    AI <--> KA
+    AI <--> ST
 ```
 
 ## Conceptual Mapping
 
-- **AgentBuilder**: Your **Blueprint**. It defines "what" an agent is.
-- **AgentInstance**: Your **Worker**. The runtime object that handles requests.
-- **Worker Pools**: Your **Brakes**. They prevent resource exhaustion and rate limit hits.
-- **Memory & RAG**: Your **Context**. Conversation Stores handle short-term history; Knowledge Adapters handle long-term domain data.
+- **AgentBuilder**: defines what the agent is, what it can call, and how it executes.
+- **AgentInstance**: binds the definition to providers, stores, and queue bridges.
+- **Queued durable run**: durable execution state plus queue ownership plus checkpoints.
+- **Conversation memory**: LLM context for chat history.
+- **Run state**: operational workflow state, progress, and recovery.
 
----
+## Pattern Cheat Sheet
 
-## Pattern Cheat-Sheet
-
-| Feature | Primary Purpose | Best For... |
+| Mode | Best for | Notes |
 | :--- | :--- | :--- |
-| **Streaming (SSE)** | Instant Feedback | User-facing chat interfaces. |
-| **Async Queues** | Resilience | Background analysis of large documents. |
-| **Event-Driven** | Decoupling | Automated auditing, triage, or classification. |
-| **A2A (Agent-to-Agent)** | Specialization | Complex workflows where one agent delegates to another. |
+| **Inline agent** | Fast classification, simple routing, short answers | Executes directly in the current request/turn. |
+| **Queued durable agent** | Architecture synthesis, simulation, planning, validation | Needs `queueBridge`, run-state, and checkpoints. HTTP typically uses attach-and-stream. |
+| **A2A / nested invocation** | Parent/child orchestration | Use `forward(...)` when the child should be visible to the user. |
 
----
+## Learning Path
 
-## Learning path
+1. **[Quick Start](./getting-started.md)** — Build one inline agent and one queued durable agent.
+2. **[Builder](./agent-builder.md)** — Define capabilities, execution mode, and HTTP exposure.
+3. **[Context](./handler-context.md)** — Use tools, models, orchestration, and durable run state.
+4. **[Durable Run State](./run-state.md)** — Plans, tasks, checkpoints, locks, and recovery.
+5. **[Runtime](./runtime.md)** — Inject providers, queue bridges, and concurrency limits.
+6. **[Invocation](./invocation.md)** — Call agents from commands, services, and scripts.
+7. **[Web & SDK](./frontend.md)** — Attach durable progress to a React UI.
+8. **[Memory & Knowledge](./memory-and-knowledge.md)** — Keep chat memory separate from workflow state.
+9. **[Testing](./testing.md)** — Test inline and queued agents deterministically.
 
-1.  **[Quick Start](./getting-started.md)** — CLI scaffolding and your first "Hello World" agent.
-2.  **[Builder](./agent-builder.md)** — Defining tools, memory, and capabilities.
-3.  **[Context](./handler-context.md)** — Exploring the `context` toolbox.
-4.  **[Durable Run State](./run-state.md)** — Persisting long-running execution state, tasks, and locks.
-5.  **[Runtime](./runtime.md)** — Managing instances and concurrency.
-6.  **[Invocation](./invocation.md)** — Calling agents from commands or scripts.
-7.  **[Web & SDK](./frontend.md)** — Connecting your agent to a modern UI.
-8.  **[Memory & Knowledge](./memory-and-knowledge.md)** — Managing history and RAG.
-9.  **[Testing](./testing.md)** — Ensuring reliability with deterministic tests.
-
-For deep dives into Custom Stores, MCP/A2A, or protocol internals, see the **[Advanced Section](../advanced/index.md)**.
+For deeper queue bridge, store, or protocol details, see the advanced handbook.

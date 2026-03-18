@@ -4,7 +4,14 @@ import { createOpenAI } from '@ai-sdk/openai'
 import { serve } from '@hono/node-server'
 import { serveStatic } from '@hono/node-server/serve-static'
 import { AiSdkProvider } from '@purista/ai'
-import { DefaultEventBridge, gracefulShutdown, initLogger, type LogLevelName, type Service } from '@purista/core'
+import {
+	DefaultEventBridge,
+	DefaultQueueBridge,
+	gracefulShutdown,
+	initLogger,
+	type LogLevelName,
+	type Service,
+} from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
 
 import { supportAgent } from './agents/supportAgent/v1/supportAgent.js'
@@ -32,7 +39,8 @@ export async function main() {
 	}
 
 	const provider = buildOpenAiProvider(apiKey)
-	const supportService = await supportV1Service.getInstance(eventBridge, { logger })
+	const queueBridge = new DefaultQueueBridge()
+	const supportService = await supportV1Service.getInstance(eventBridge, { logger, queueBridge })
 	await supportService.start()
 
 	const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
@@ -48,6 +56,7 @@ export async function main() {
 
 	const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 		logger,
+		queueBridge,
 		models: {
 			'openai:gpt-4o-mini': provider,
 		},
@@ -107,6 +116,7 @@ export async function main() {
 		{ name: 'supportAgent', destroy: () => supportAgentInstance.stop() },
 		{ name: 'triageAgent', destroy: () => triageAgentInstance.stop() },
 		{ name: 'supportService', destroy: () => supportService.destroy() },
+		{ name: 'queueBridge', destroy: () => queueBridge.destroy() },
 		{ name: eventBridge.name, destroy: () => eventBridge.destroy() },
 	])
 }

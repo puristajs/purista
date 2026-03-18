@@ -1,5 +1,5 @@
 import type { ModelProvider, ProviderJsonRequest, ProviderJsonResponse, ProviderRequest } from '@purista/ai'
-import { DefaultEventBridge, getNewTraceId, initLogger } from '@purista/core'
+import { DefaultEventBridge, DefaultQueueBridge, getNewTraceId, initLogger } from '@purista/core'
 import { describe, expect, it } from 'vitest'
 
 import { supportAgent } from '../../../../../agents/supportAgent/v1/supportAgent.js'
@@ -66,9 +66,10 @@ describe('runSupportAgentStreamBuilder', () => {
 		const logger = initLogger('error')
 		const eventBridge = new DefaultEventBridge({ logger })
 		await eventBridge.start()
+		const queueBridge = new DefaultQueueBridge()
 
 		const provider = new DeterministicProvider()
-		const supportService = await supportV1Service.getInstance(eventBridge, { logger })
+		const supportService = await supportV1Service.getInstance(eventBridge, { logger, queueBridge })
 		const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
@@ -77,6 +78,7 @@ describe('runSupportAgentStreamBuilder', () => {
 		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
+			queueBridge,
 			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 
@@ -153,6 +155,7 @@ describe('runSupportAgentStreamBuilder', () => {
 			await supportAgentInstance.stop()
 			await triageAgentInstance.stop()
 			await supportService.destroy()
+			await queueBridge.destroy()
 			await eventBridge.destroy()
 		}
 	})

@@ -1,5 +1,5 @@
 import type { ModelProvider, ProviderJsonRequest, ProviderJsonResponse, ProviderRequest } from '@purista/ai'
-import { DefaultEventBridge, initLogger, type Service } from '@purista/core'
+import { DefaultEventBridge, DefaultQueueBridge, initLogger, type Service } from '@purista/core'
 import { honoV1Service } from '@purista/hono-http-server'
 import { describe, expect, it } from 'vitest'
 
@@ -67,9 +67,10 @@ describe('ai-basic http interoperability flows', () => {
 		const logger = initLogger('error')
 		const eventBridge = new DefaultEventBridge({ logger })
 		await eventBridge.start()
+		const queueBridge = new DefaultQueueBridge()
 
 		const provider = new DeterministicProvider()
-		const supportService = await supportV1Service.getInstance(eventBridge, { logger })
+		const supportService = await supportV1Service.getInstance(eventBridge, { logger, queueBridge })
 		const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
@@ -78,6 +79,7 @@ describe('ai-basic http interoperability flows', () => {
 		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
+			queueBridge,
 			poolConfig: { maxConcurrencyPerInstance: 2, poolId: 'support' },
 		})
 
@@ -159,6 +161,7 @@ describe('ai-basic http interoperability flows', () => {
 			await supportAgentInstance.stop()
 			await triageAgentInstance.stop()
 			await supportService.destroy()
+			await queueBridge.destroy()
 			await eventBridge.destroy()
 		}
 	})

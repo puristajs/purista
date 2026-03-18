@@ -1,31 +1,35 @@
 ---
 title: Durable Run State
-description: Persisting long-running agent execution state, progress, and locks.
+description: Persisting long-running execution state, checkpoints, and locks.
 order: 203704
 ---
 
 # Durable Run State
 
-Use `context.runState` when an agent performs work that should survive beyond one in-memory process:
+Use `context.runState` when the work must survive beyond one in-memory process:
 
 - execution plans
-- todo/task lists
-- current phase and summary
+- task lists
+- checkpoints
+- recovery metadata
 - single-active-run locks
-- resumable progress for reconnecting frontends or distributed workers
 
-`context.runState` is backed by `context.states`, so it is durable application state, not transient instance memory.
+`context.runState` is backed by `context.states`, so it is durable application state, not transient memory.
 
-## When To Use It
+## Why It Exists
 
-Use conversation memory for LLM context. Use durable run state for operational workflow state.
+Conversation memory is for LLM context. Run state is for operational workflow state.
 
-Examples:
+Use run state for:
 
-- architecture generation with multiple steps
+- architecture synthesis
 - simulation or validation passes
-- long-running background review jobs
+- background planning
 - child-agent orchestration where the UI should show progress
+
+Queued durable agents should use `context.runState` together with a queue bridge and checkpoints. Run state alone is not the full recovery model.
+
+For queued durable agents, PURISTA creates the run record before the handler starts. The handler should read the existing run with `context.runState.get()` and then mutate it with `update()`, `replaceTasks()`, `step()`, `checkpoint()`, and `finish(...)`.
 
 ## Core Lifecycle
 
@@ -42,13 +46,20 @@ await run.plan([
   { id: 'verify', title: 'Verify persisted outputs' },
 ])
 
-await run.phase('running', 'Generating architecture artifacts')
+await run.checkpoint('spec-snapshot', { projectId: payload.projectId }, { completed: true })
+await run.update({ phase: 'running', status: 'running' })
 
-await run.task('write-files', async () => {
-  // persist files here
-})
+const summary = await run.step(
+  'write-files',
+  async () => {
+    // write files here
+    return 'Architecture artifacts written'
+  },
+  { checkpoint: 'write-files-summary' },
+)
 
-await run.finishSuccess('Architecture artifacts are ready.')
+await run.update({ phase: 'summarizing', status: 'summarizing' })
+await run.finishSuccess(summary)
 ```
 
 Available operations:
@@ -60,21 +71,27 @@ Available operations:
 - `context.runState.startTask(taskId, detail?)`
 - `context.runState.completeTask(taskId, detail?)`
 - `context.runState.failTask(taskId, detail?)`
-- `context.runState.finish({ summary, status })`
+- `context.runState.checkpoint(name, value?, options?)`
+- `context.runState.getCheckpoint(name)`
+- `context.runState.finish({ summary, status, finalMessage, error })`
 - `context.runState.emit()`
 - `context.runState.lock(...)`
 
 The handle returned by `start(...)` adds convenience helpers:
 
 - `run.plan(tasks)`
-- `run.phase(status, detail?)`
+- `run.update(patch)`
+- `run.phase(phase, status?)`
 - `run.task(taskId, async () => ...)`
+- `run.step(id, async () => ..., { checkpoint })`
+- `run.checkpoint(name, value, { completed })`
 - `run.finishSuccess(summary)`
-- `run.finishFailure(summary)`
+- `run.finishFailure(summary, error)`
+- `run.setFinalMessage(message)`
 
-## Locking
+## Locking and Recovery
 
-If only one run should be active for a given scope, acquire a lock when the run starts:
+If only one run should be active for a scope, acquire a lock when the run starts.
 
 ```ts
 const run = await context.runState.start({
@@ -87,32 +104,32 @@ const run = await context.runState.start({
 })
 ```
 
-If another instance already owns the lock, PURISTA throws a handled conflict instead of silently running duplicate work.
+If another instance already owns the lock, PURISTA throws a handled conflict instead of silently starting duplicate work.
 
-Use this for:
+Queued durable agents should combine:
 
-- validation queues
-- architecture generation
-- simulation
-- implementation runs
+- `executionMode: 'queued'`
+- `executionPolicy.recovery: 'resume-from-checkpoints'`
+- `queueBridge` at runtime
+- run-state locks for single active work per scope
+
+The queue worker owns run creation, heartbeats, and final release. The handler should not start a second run inside the queued path.
 
 ## Streaming To The Frontend
 
-Every persisted update emits the standard `run-state` artifact.
-
-In `ai-sdk-ui-message` mode PURISTA automatically maps that to `data-run-state`.
+Every persisted update emits the standard `run-state` artifact. In `ai-sdk-ui-message` mode PURISTA maps that to `data-run-state`.
 
 That allows the UI to render:
 
-- current run title
-- current phase
+- title and current phase
 - ordered tasks with statuses
-- final summary
-- input locking while work is still active
+- checkpoints and recovery metadata
+- completion or failure summary
+- input locking while work is active
 
 ```tsx
-const { messages } = useChat({
-  api: '/api/v1/agents/support',
+const { messages, data } = useChat({
+  api: '/api/v1/agents/supportAgent',
   onData: part => {
     if (part.type === 'data-run-state') {
       setRunState(part.data)
@@ -121,7 +138,7 @@ const { messages } = useChat({
 })
 ```
 
-Keep the execution panel separate from the chat transcript. The chat should usually contain only the final human-facing summary.
+Keep execution progress separate from the chat transcript. The chat should usually contain the final human-facing summary only.
 
 ## Forwarding Child-Agent Progress
 
@@ -135,15 +152,13 @@ await context.agents.forward({
 })
 ```
 
-then child `run-state` artifacts are forwarded too. That lets an orchestrator agent expose real sub-agent progress to the frontend without custom bridging code.
+then child `run-state` artifacts are forwarded too. That lets an orchestrator expose real sub-agent progress to the frontend without custom bridging code.
 
 ## Design Guidance
 
-Treat run state as workflow state, not prompt state.
-
 Good:
 
-- stable ids for tasks
+- stable ids for tasks and checkpoints
 - explicit titles and short status details
 - verified completion only after persistence succeeds
 - one lock scope per business operation
@@ -153,7 +168,7 @@ Bad:
 - storing todo lists only in local variables
 - duplicating run state in conversation history
 - marking tasks complete before outputs are verified
-- using chat transcript as the source of truth for execution progress
+- using chat transcript as the source of truth for progress
 
 ## Related Pages
 

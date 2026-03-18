@@ -1,119 +1,112 @@
 ---
 title: Builder
-description: Fluent API to define agent workloads, tools, and behavior.
+description: Fluent API to define agent workloads, execution mode, and exposure.
 order: 203702
 ---
 
 # Builder
 
-The `AgentBuilder` is a fluent API similar to the `ServiceBuilder`. It defines **how** an agent works, **what** it can access, and **how** it is exposed.
+`AgentBuilder` defines what an agent can do and how it runs. Keep the definition small and push runtime concerns into injected providers, stores, and queue bridges.
 
 ## 1. Minimal Setup
-
-Start by defining the agent's identity and input/output schema.
 
 ```ts
 export const supportAgent = new AgentBuilder({
   agentName: 'supportAgent',
   agentVersion: '1',
-  description: 'Answers help-desk questions',
+  description: 'Answers support questions',
 })
   .addPayloadSchema(z.object({ prompt: z.string() }))
   .defineModel('openai:gpt-4o-mini')
 ```
 
-## 2. Model Capabilities
+## 2. Execution Mode
 
-When you define a model, you can specify its capabilities. This allows for type-safe access in the handler and validation at runtime.
+Choose the execution model explicitly:
+
+- `inline`: executes immediately in the current request/turn
+- `queued`: converts the request into a queue-backed durable run
+
+```ts
+.setExecutionMode('queued')
+.setExecutionPolicy({
+  httpBehavior: 'attach-and-stream',
+  recovery: 'resume-from-checkpoints',
+  scopeFromPayload: ['sessionId'],
+  maxAttempts: 3,
+  leaseTtlMs: 60_000,
+})
+```
+
+Queued durable agents should use:
+
+- a `queueBridge` at runtime
+- `context.runState` for plans, tasks, checkpoints, and locks
+- attach-and-stream HTTP behavior so the caller can keep observing progress
+
+## 3. Model Capabilities
 
 ```ts
 .defineModel('openai:gpt-4o-mini', { capabilities: ['text', 'stream', 'json', 'embedding', 'rerank'] })
 ```
 
 Supported capabilities:
-- `text` / `stream`: Normal conversational text and incremental deltas.
-- `json`: Structured output generation.
-- `embedding`: Vector generation for RAG/search.
-- `rerank`: Scoring and re-ordering search results.
 
-## 3. Tool Access (canInvoke)
+- `text` / `stream`: conversational text and deltas
+- `json`: structured output
+- `embedding`: vector generation
+- `rerank`: scoring and sorting candidate results
 
-An agent is more powerful when it can "act." Use `.canInvoke(...)` to allow an agent to call any PURISTA command as a tool.
+## 4. Tool Access
+
+Use `.canInvoke(...)` to allow an agent to call a PURISTA command as a tool.
 
 ```ts
 .canInvoke('ticketing', '1', 'createTicket')
 ```
 
-This ensures the agent is granted the correct permissions and provides typed access via `context.tools.invoke`.
-
-## 4. Event-Driven Logic (canEmit)
-
-Agents can trigger downstream workflows by emitting domain events.
+## 5. Event-Driven Logic
 
 ```ts
 .canEmit('ticket.classified', z.object({ urgency: z.enum(['high', 'low']) }))
 ```
 
-In the handler, you call `context.emit('ticket.classified', { urgency: 'high' })`.
+## 6. Conversation Memory
 
-## 5. Conversation Persistence
-
-Agents can maintain history automatically using `persistConversation`. This is the easiest way to give your agent memory.
+Use `persistConversation` for LLM-visible chat history, not operational state.
 
 ```ts
-// Using presets:
-.persistConversation('user')  // Detailed transcript memory (40 frames)
-.persistConversation('agent') // Compressed summary memory (20 frames)
-
-// Custom config:
-.persistConversation({
-  maxFrames: 50,
-  strategy: 'full',
-  storeName: 'support_history'
-})
+.persistConversation('user')
+.persistConversation('agent', { maxFrames: 20 })
 ```
 
-## 6. HTTP Exposure
-
-You can expose your agent as either SSE (`stream`) or unary JSON (`aggregate`) with a single endpoint path.
+## 7. HTTP Exposure
 
 ```ts
 .exposeAsHttpEndpoint('POST', 'agents/support')
-.setStreamingMode('stream') // default: SSE
-.setSseProtocol('ai-sdk-ui-message') // Optimize for Vercel AI SDK
+.setSseProtocol('ai-sdk-ui-message')
 ```
 
-Unary aggregate mode:
+For queued durable agents, `ai-sdk-ui-message` maps `run-state` to `data-run-state`, so the frontend can render live progress and lock input while the run is active.
+
+Unary mode is still available when you want a final JSON response:
 
 ```ts
 .exposeAsHttpEndpoint('POST', 'agents/support')
-.setStreamingMode('aggregate') // returns final envelope json
-```
-
-## 7. Dynamic Call Options (Advanced)
-
-If you need to change model settings per step (e.g., increase temperature as the conversation progresses), use hooks.
-
-```ts
-.setCallOptionsSchema(z.object({ aiSdk: z.record(z.any()) }))
-.prepareStep(({ step }) => ({
-  aiSdk: {
-    generate: { temperature: step > 3 ? 0.7 : 0.2 }
-  }
-}))
+.setStreamingMode('aggregate')
 ```
 
 ## 8. Builder Method Map
 
 | Area | Methods |
 | :--- | :--- |
-| **Schema** | `addPayloadSchema`, `addParameterSchema`, `addOutputSchema` |
-| **Capabilities** | `defineModel`, `canInvoke`, `canEmit` |
-| **Memory/RAG** | `persistConversation`, `useKnowledgeAdapter` |
-| **Behavior** | `setRetryPolicy`, `setSuccessEventName` |
-| **Transport** | `exposeAsHttpEndpoint`, `setSseProtocol`, `setStreamingMode` |
+| Schema | `addPayloadSchema`, `addParameterSchema`, `addOutputSchema`, `addContextSchema` |
+| Execution | `setExecutionMode`, `setExecutionPolicy` |
+| Capabilities | `defineModel`, `canInvoke`, `canEmit`, `canInvokeAgent` |
+| Memory / RAG | `persistConversation`, `useKnowledgeAdapter` |
+| Transport | `exposeAsHttpEndpoint`, `setSseProtocol`, `setStreamingMode` |
+| Behavior | `setRetryPolicy`, `setSuccessEventName`, `setRuntime` |
 
----
+## Why This Pattern?
 
-### Why this pattern?
-The builder keeps your agent's **definition** separate from its **runtime instance**. This allows you to test the logic with mock models and deploy it in different environments (dev/prod) with different provider configurations without changing the business logic.
+The builder keeps definition separate from runtime wiring. That makes the same agent easy to run inline in tests and queued in production without changing business logic.

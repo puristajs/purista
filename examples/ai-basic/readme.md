@@ -1,211 +1,76 @@
 # AI Basic Example
 
-Minimal but complete PURISTA AI reference:
+This example shows the two agent execution styles side by side:
 
-- typed `canInvoke(...)` command wiring
-- agent `generateText` and `generateJson` flows
-- streaming over HTTP with protocol interoperability
-- command, stream, MCP, and Agent2Agent entry points
-- React UI for chat + protocol inspection
+- `triageAgent` runs **inline** for fast classification.
+- `supportAgent` runs as a **queued durable agent** with `run-state`, checkpoints, recovery, and attach-and-stream HTTP behavior.
+
+The React UI renders `data-run-state` separately from chat so the composer can be locked while a durable run is active.
 
 ## Quick Start
 
-Install:
+Install dependencies:
 
 ```bash
 npm install
 ```
 
-Run backend:
+Run the backend:
 
 ```bash
 npm run start -w @purista/example-ai-basic
 ```
 
-Build frontend to `public/`:
+Build the frontend into `public/`:
 
 ```bash
 npm run frontend:build -w @purista/example-ai-basic
 ```
 
-Required env:
+Required environment:
 
 - `OPENAI_API_KEY`
 - `PORT` (optional, default `3000`)
 
 Open [http://localhost:3000/index.html](http://localhost:3000/index.html)
 
-## Architecture Map
+## What The Example Demonstrates
 
 ### Runtime bootstrap
 
 - `src/index.ts`
-  - builds `AiSdkProvider`
-  - starts support service
-  - starts `triageAgent`
-  - starts `supportAgent`
-  - exposes all over `honoV1Service`
+  - creates the shared `EventBridge`
+  - creates a `DefaultQueueBridge`
+  - starts `triageAgent` inline
+  - starts `supportAgent` in queued durable mode
+  - exposes both agents and service endpoints through `honoV1Service`
 
 ### Agents
 
 - `src/agents/triageAgent/v1/triageAgent.ts`
-  - strict structured classification via `generateJson`
-- `src/agents/supportAgent/v1/supportAgent.ts`
-- tool-assisted support flow
-- optional delegation to `triageAgent`
-- final answer via `generateText` with streaming deltas
-- optional JSON response path via `generateJson`
-- durable run-state planning/tasks via `context.runState`
-
-### Service commands/streams
-
-- `src/service/support/v1/command/runSupportAgent/*`
-  - command entry point invoking `supportAgent`
-- `src/service/support/v1/stream/runSupportAgentStream/*`
-  - streaming endpoint
-- `src/service/support/v1/command/runSupportMcp/*`
-  - MCP-style invocation
-- `src/service/support/v1/command/runSupportA2a/*`
-  - Agent2Agent-style invocation
-
-## Model Usage Patterns In This Example
-
-### `generateText` (stream-aware)
-
-Used in `supportAgent` for the normal text answer path:
-
-- sends progressive deltas via `onTextDelta`
-- forwards reasoning via `onReasoning`
-- persists assistant turn to conversation store
-
-### `generateJson` (structured output)
-
-Used in:
-
-- `triageAgent` for urgency classification
-- `supportAgent` optional `responseFormat=json` path
-
-## Nested Agent Orchestration
-
-The example already shows the internal orchestration case in:
+  - inline JSON classification
+  - best for quick, deterministic routing
 
 - `src/agents/supportAgent/v1/supportAgent.ts`
-  - `supportAgent` calls `triageAgent` with `context.agents.runText(...)`
-  - the triage result stays internal and is folded into the final support answer
+  - queued durable execution
+  - `context.runState` planning, checkpoints, and task updates
+  - attach-and-stream HTTP behavior
+  - optional delegation to `triageAgent`
 
-Use that pattern when the child agent is only a hidden reasoning step.
+### Frontend
 
-If you want the child agent output to become the visible response for the current turn, use `context.agents.forward(...)` instead:
+- `src/frontend/App.tsx`
+  - listens for `data-run-state`
+  - renders progress tasks and recovery metadata
+  - disables input while the durable run is active
+  - keeps the final assistant answer in chat
 
-```ts
-.canInvokeAgent('triageAgent', '1')
-.setHandler(async function (context, payload) {
-  await context.conversation.addUser(payload.prompt)
+## Execution Modes
 
-  const envelopes = await context.agents.forward({
-    agentName: 'triageAgent',
-    agentVersion: '1',
-    payload: { prompt: payload.prompt },
-  })
+Use the simplest mode that fits the job:
 
-  const finalText = envelopes
-    .map(envelope => envelope.frame)
-    .filter(
-      (frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'message' }> =>
-        frame.kind === 'message' && frame.role === 'assistant',
-    )
-    .map(frame => frame.content)
-    .filter(Boolean)
-    .at(-1) ?? 'No response'
-
-  await context.conversation.addAssistant(finalText)
-  return { message: finalText }
-})
-```
-
-Use `forward(...)` when:
-
-- the parent agent mainly acts as a router
-- the child agent should stream directly to the UI
-- synthetic outer `childAgent.run` tool telemetry would be noise
-
-Use `runText(...)` when:
-
-- the child agent is an internal planner/classifier
-- only the final text matters
-- the parent agent still owns the user-visible reply
-
-## Durable Run State
-
-`supportAgent` also demonstrates the recommended pattern for long-running work:
-
-- persist execution progress with `context.runState`
-- expose tasks in the frontend through `data-run-state`
-- keep the final answer in chat
-- disable the input while the run is active
-
-That gives you a UI that stays readable while still showing live execution progress.
-
-The source of truth is the state store, not in-memory component state and not conversation history.
-
-## Streaming & Protocol Endpoints
-
-### Native support stream endpoint
-
-`POST /api/v1/support/ask/stream`
-
-```bash
-curl -N -X POST http://localhost:3000/api/v1/support/ask/stream \
-  -H "content-type: application/json" \
-  -d '{"prompt":"Summarize https://purista.dev and calculate 12*(8+4)"}'
-```
-
-### Agent HTTP endpoint
-
-`POST /api/v1/agents/supportAgent`
-
-### Expose different SSE protocols
-
-```ts
-new AgentBuilder({ ... })
-  .exposeAsHttpEndpoint('POST', 'agents/support/native')
-  .setSseProtocol('purista')
-  .build()
-```
-
-```ts
-new AgentBuilder({ ... })
-  .exposeAsHttpEndpoint('POST', 'agents/support/ui')
-  .setSseProtocol('ai-sdk-ui-message')
-  .build()
-```
-
-```ts
-new AgentBuilder({ ... })
-  .exposeAsHttpEndpoint('POST', 'agents/support/responses')
-  .setSseProtocol('ai-sdk-responses')
-  .build()
-```
-
-### MCP reference endpoints
-
-- `GET /api/v1/support/mcp/tools`
-- `POST /api/v1/support/mcp/call`
-
-### Agent2Agent reference endpoint
-
-- `POST /api/v1/support/a2a/call`
-
-### Conversation restore endpoint
-
-- `POST /api/v1/support/conversation`
-
-## Frontend Scripts
-
-- `frontend:dev` - Vite dev server for `src/frontend`
-- `frontend:build` - build frontend into `public/`
-- `frontend:test` - frontend Vitest
-- `frontend:check` - frontend typecheck + tests
+- **Inline**: short, fast, user-facing classification or formatting.
+- **Queued durable**: long-running work that should survive restarts, support checkpoints, and keep progress visible in the UI.
 
 ## Tests
 
@@ -222,6 +87,6 @@ Key tests:
 
 ## Notes
 
-- This example intentionally uses deterministic tests (no live model calls).
-- Protocol adapters (`MCP`, `Agent2Agent`) are reference interoperability layers, not full protocol implementations.
-- The React UI listens for `data-run-state` and renders execution tasks separately from chat messages.
+- The example intentionally uses deterministic tests and mock model replies.
+- `attach-and-stream` keeps the HTTP endpoint responsive while the queue worker does the durable work.
+- Progress belongs in run-state, not in the chat transcript.

@@ -77,7 +77,7 @@ Conversation memory is not the right place for operational workflow state.
 Use:
 
 - `context.conversation` for LLM-visible history
-- `context.runState` for durable execution progress, plans, task lists, and resumable status
+- `context.runState` for durable execution progress, plans, task lists, checkpoints, and resumable status
 - `context.states` directly only when you need lower-level custom persistence
 
 `context.runState` is backed by the PURISTA state store, so it works across reconnects, retries, and multiple replicas.
@@ -95,14 +95,18 @@ await run.plan([
   { id: 'verify', title: 'Verify simulation result' },
 ])
 
-await run.task('simulate', async () => {
+await run.checkpoint('input-snapshot', { projectId: payload.projectId }, { completed: true })
+await run.update({ phase: 'running', status: 'running' })
+
+await run.step('simulate', async () => {
   // do the long-running work
-})
+  return 'Simulation completed'
+}, { checkpoint: 'simulation-result' })
 
 await run.finishSuccess('Simulation completed successfully.')
 ```
 
-Every update persists first and then emits a `run-state` artifact into the stream. In `ai-sdk-ui-message` mode that appears as `data-run-state` for the frontend.
+Every update persists first and then emits a `run-state` artifact into the stream. In `ai-sdk-ui-message` mode that appears as `data-run-state` for the frontend. That is the right place for progress, checkpoints, and recovery metadata; conversation memory should stay focused on the chat transcript.
 
 ---
 

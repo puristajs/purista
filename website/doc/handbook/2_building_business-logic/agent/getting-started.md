@@ -1,24 +1,54 @@
 ---
 title: Quick Start
-description: Fast-track guide to building and running your first PURISTA agent.
+description: Build one inline agent and one queued durable agent.
 order: 203701
 ---
 
 # Quick Start
 
-Get from zero to a running agent in 5 minutes.
+This guide shows the decision boundary:
+
+- use an **inline** agent for a short classification or answer step
+- use a **queued durable** agent when the work should survive restarts, expose progress, and support checkpoints
 
 ## 1. Scaffold
-
-Use the CLI to create a new agent skeleton.
 
 ```bash
 purista add agent SupportAgent
 ```
 
-## 2. Define
+## 2. Define An Inline Agent
 
-We define a simple agent that uses OpenAI to answer questions.
+This agent classifies a request and returns a small JSON result. It is fast enough to run inline.
+
+```ts title="src/agents/triageAgent/v1/triageAgent.ts"
+import { AgentBuilder } from '@purista/ai'
+import { z } from 'zod'
+
+export const triageAgent = new AgentBuilder({
+  agentName: 'triageAgent',
+  agentVersion: '1',
+  description: 'Classifies requests quickly',
+})
+  .setExecutionMode('inline')
+  .addPayloadSchema(z.object({ prompt: z.string() }))
+  .defineModel('openai:gpt-4o-mini', { capabilities: ['json'] })
+  .setHandler(async (context, payload) => {
+    const result = await context.models['openai:gpt-4o-mini'].generateJson({
+      prompt: `Classify this request: ${payload.prompt}`,
+      schema: z.object({
+        urgency: z.enum(['low', 'medium', 'high']),
+      }),
+    })
+
+    return { message: JSON.stringify(result.data) }
+  })
+  .build()
+```
+
+## 3. Define A Queued Durable Agent
+
+This agent performs longer work, keeps a task list in `context.runState`, and uses checkpoints so it can resume after interruption.
 
 ```ts title="src/agents/supportAgent/v1/supportAgent.ts"
 import { AgentBuilder, generateText } from '@purista/ai'
@@ -27,99 +57,97 @@ import { z } from 'zod'
 export const supportAgent = new AgentBuilder({
   agentName: 'supportAgent',
   agentVersion: '1',
-  description: 'A helpful assistant'
+  description: 'Support assistant with durable progress tracking',
 })
-  .addPayloadSchema(z.object({ prompt: z.string() }))
+  .setExecutionMode('queued')
+  .setExecutionPolicy({
+    httpBehavior: 'attach-and-stream',
+    recovery: 'resume-from-checkpoints',
+    scopeFromPayload: ['sessionId'],
+  })
+  .addPayloadSchema(z.object({ prompt: z.string(), sessionId: z.string().optional() }))
   .defineModel('openai:gpt-4o-mini')
+  .canInvoke('support', '1', 'lookupFaq')
+  .exposeAsHttpEndpoint('POST', 'agents/supportAgent')
+  .setSseProtocol('ai-sdk-ui-message')
   .setHandler(async (context, payload) => {
-    const model = context.models['openai:gpt-4o-mini']
+    if (!(await context.runState.get())) {
+      throw new Error('Queued support run state is not initialized')
+    }
 
-    const answer = await generateText({
-      model,
-      request: { prompt: payload.prompt },
-      onTextDelta: (delta) => context.stream.sendChunk(delta)
+    await context.runState.replaceTasks([
+      { id: 'faq', title: 'Check knowledge base' },
+      { id: 'answer', title: 'Write final answer' },
+    ])
+    await context.runState.checkpoint('request', { prompt: payload.prompt }, { completed: true })
+    await context.runState.update({ phase: 'running', status: 'running' })
+
+    const faqAnswer = await context.runState.step(
+      'faq',
+      async () => {
+        const lookup = await context.tools.invoke.support['1'].lookupFaq({ question: payload.prompt })
+        return typeof lookup === 'object' && lookup && 'answer' in lookup ? String(lookup.answer) : ''
+      },
+      { detail: 'Searching the knowledge base', checkpoint: 'faq-answer' },
+    )
+
+    await context.runState.update({ phase: 'summarizing', status: 'summarizing' })
+    const answer = await context.runState.step(
+      'answer',
+      async () =>
+        await generateText({
+          model: context.models['openai:gpt-4o-mini'],
+          request: {
+            prompt: `Question: ${payload.prompt}\nKnowledge base: ${faqAnswer}`,
+          },
+      }),
+      { checkpoint: 'final-answer' },
+    )
+
+    await context.runState.finish({
+      status: 'completed',
+      summary: answer,
+      finalMessage: answer,
     })
-
+    context.stream.sendFinal(answer)
     return { message: answer }
   })
   .build()
 ```
 
-### Developer's Map
+## 4. Bootstrap
 
-This structural overview helps you identify which parts of the API handle **Definition** vs. **Runtime Injection**.
-
-```text
-📦 Agent Lifecycle & Architecture
-├── 🏗️ AgentBuilder (Design Time / "The Blueprint")
-│   ├── 📝 .addPayloadSchema()         // The input data contract (Zod)
-│   ├── 🤖 .defineModel()              // Required capabilities (text, json, RAG)
-│   ├── 🛠️ .canInvoke()                // Commands allowed as tools
-│   ├── 📢 .canEmit()                  // Events this agent can trigger
-│   ├── 🧠 .persistConversation()      // Memory strategy (Presets: user/agent)
-│   ├── 📚 .useKnowledgeAdapter()      // RAG source aliases
-│   ├── 📡 .exposeAsHttpEndpoint()     // REST/SSE bridge for Frontend
-│   └── 🔗 .canInvokeAgent()           // Dependency link in Command/Subscription
-│
-├── 🚀 .getInstance() (Runtime / "The Injection")
-│   ├── 🔌 models: { ... }             // Concrete AiSdkProviders (OpenAI, etc.)
-│   ├── 💾 conversationStore:          // Persistence backend (Redis, In-Memory)
-│   ├── 📖 knowledgeAdapters: { ... }  // Concrete RAG backends (Pinecone, etc.)
-│   └── 🏎️ poolConfig:                 // Concurrency & Rate limiting per pool
-│
-├── ⚡ Handler Context (Inside the Handler / "The Toolbox")
-│   ├── 📡 context.stream              // Helpers: .sendChunk(), .sendReasoning()
-│   ├── 🔧 context.tools.invoke        // Typed access to allowed commands
-│   ├── 📜 context.conversation        // High-level: .addUser(), .buildPromptInput()
-│   ├── 🔎 context.knowledge           // Typed: .query(), .upsert()
-│   └── 🤖 context.agents              // Orchestration: .runText() / .runObject()
-│
-└── 📤 Background & Workers
-    └── 📥 QueueBridge / AIWorker      // Async job orchestration
-```
-
-## Architecture Guidance: Agent-as-a-Service
-
-Use **services** for deterministic/fast domain logic and **agents** for LLM-powered, slower, cost-sensitive workloads.
-
-- Service: validation, persistence, domain events, strict SLAs.
-- Agent: reasoning, tool orchestration, adaptive responses.
-- Bridge them through `canInvokeAgent(...)` and `context.invokeAgent...` to keep observability and policy boundaries explicit.
-
-## 3. Bootstrap
-
-Provide the concrete model provider and start the instance in your entry point.
+Queued durable agents need a `queueBridge` at runtime.
 
 ```ts title="src/index.ts"
-const openai = createOpenAI({ apiKey: process.env.OPENAI_API_KEY! })
-const provider = new AiSdkProvider({
-  model: openai('gpt-4o-mini'),
-  systemPrompt: 'You are a professional support engineer.'
-})
+import { DefaultEventBridge, DefaultQueueBridge } from '@purista/core'
+
+const eventBridge = new DefaultEventBridge()
+const queueBridge = new DefaultQueueBridge()
 
 const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
-  models: { 'openai:gpt-4o-mini': provider }
+  queueBridge,
+  models: { 'openai:gpt-4o-mini': provider },
 })
-
-await supportAgentInstance.start()
 ```
 
-## 4. Invoke via Command
+For queued agents, PURISTA creates the durable run record before the handler starts. The handler should update the existing run with `context.runState.get()`, `update()`, `replaceTasks()`, `step()`, and `finish(...)` instead of starting a second run manually.
 
-Following the PURISTA pattern, you typically call your agent from within a command.
+## 5. Invoke Via Command
+
+Use the normal PURISTA dependency pattern for both inline and queued agents.
 
 ```ts title="src/services/support/v1/command/ask.ts"
 export const askCommand = supportServiceBuilder
   .getCommandBuilder('ask', 'Asks the agent')
-  .canInvokeAgent('supportAgent', '1') // Register the agent dependency
+  .canInvokeAgent('supportAgent', '1')
   .setCommandFunction(async (context, payload) => {
-    // Call the agent and wait for the final result
     const result = await context.invokeAgent.supportAgent['1']
-      .call({ prompt: payload.prompt })
+      .call({ prompt: payload.prompt, sessionId: payload.sessionId })
       .final()
 
     return result.message
   })
 ```
 
-By using `canInvokeAgent`, PURISTA handles the event bridge routing and traces automatically.
+When `supportAgent` is queued, the HTTP/SSE endpoint attaches to the active run, streams `data-run-state`, and keeps the composer locked until the run finishes.

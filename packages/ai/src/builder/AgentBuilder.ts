@@ -1,15 +1,23 @@
-import type {
-	AgentInvocation,
-	AgentInvokeList,
-	AgentProtocolResponse,
-	CommandFunctionContext,
-	EventBridge,
-	InferIn,
-	Schema,
-	StreamFunctionContext,
-	StreamWriter,
+import {
+	type AgentInvocation,
+	type AgentInvokeList,
+	type AgentProtocolResponse,
+	type agentProtocolPayloadSchema,
+	type CommandFunctionContext,
+	EBMessageType,
+	type EmptyObject,
+	type EventBridge,
+	extendApi,
+	HandledError,
+	type InferIn,
+	type QueueJobContext,
+	type QueueMessage,
+	type Schema,
+	ServiceBuilder,
+	StatusCode,
+	type StreamFunctionContext,
+	type StreamWriter,
 } from '@purista/core'
-import { type agentProtocolPayloadSchema, extendApi, HandledError, ServiceBuilder, StatusCode } from '@purista/core'
 import { z } from 'zod'
 
 import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
@@ -23,8 +31,11 @@ import type { ModelProvider } from '../providers/runtime/ModelProvider.js'
 import { AgentInstance, type AgentInstanceDependencies } from '../runtime/AgentInstance.js'
 import type { AgentHandlerContext } from '../runtime/context.js'
 import { createAgentHandlerContext, createProtocolBuffer } from '../runtime/context.js'
+import type { AgentRunError, AgentRunState } from '../runtime/runState.js'
 import type { AgentDefinition, AgentInfo, AgentInstanceOptions } from '../types/AgentDefinition.js'
 import type {
+	AgentExecutionMode,
+	AgentExecutionPolicy,
 	AgentHistoryPreset,
 	AgentManifest,
 	AgentModelCapability,
@@ -142,6 +153,37 @@ type AgentRuntimeConfig<KnowledgeAliases extends string = string> = {
 	}
 }
 
+type DurableAgentQueuePayload = {
+	runId: string
+	sessionId?: string
+	payload: unknown
+	parameter: unknown
+	correlationId?: string
+	principalId?: string
+	tenantId?: string
+	extraScope?: Record<string, string>
+}
+
+type DurableAgentQueueResult = {
+	runId: string
+	status: 'completed' | 'failed' | 'cancelled'
+	finalMessage?: string
+}
+
+const durableAgentQueuePayloadSchema = extendApi(
+	z.object({
+		runId: z.string().min(1),
+		sessionId: z.string().optional(),
+		payload: z.unknown(),
+		parameter: z.unknown().optional(),
+		correlationId: z.string().optional(),
+		principalId: z.string().optional(),
+		tenantId: z.string().optional(),
+		extraScope: z.record(z.string(), z.string()).optional(),
+	}),
+	{ title: 'DurableAgentQueuePayload' },
+)
+
 const agentRuntimeConfigSchema = extendApi(
 	z.object({
 		runtime: z.record(z.string(), z.any()).optional(),
@@ -169,6 +211,8 @@ const normalizeInfo = (info: AgentInfo): AgentInfo => {
 		successEventName: info.successEventName?.trim(),
 	}
 }
+
+const sleep = async (durationMs: number) => await new Promise(resolve => setTimeout(resolve, durationMs))
 
 const resolveHistoryPresetConfig = (
 	info: AgentInfo,
@@ -306,6 +350,8 @@ export class AgentBuilder<
 	private readonly serviceBuilder: ServiceBuilder
 	private readonly commandBuilder: ReturnType<ServiceBuilder['getCommandBuilder']>
 	private readonly streamBuilder: ReturnType<ServiceBuilder['getStreamBuilder']>
+	private queueDefinitionAdded = false
+	private queueWorkerDefinitionAdded = false
 	private commandDefinitionAdded = false
 	private streamDefinitionAdded = false
 	private manifest: AgentManifest
@@ -492,6 +538,23 @@ export class AgentBuilder<
 		this.manifest.metadata = {
 			...this.manifest.metadata,
 			runtime: mode,
+		}
+		return this
+	}
+
+	setExecutionMode(mode: AgentExecutionMode) {
+		this.manifest.executionMode = mode
+		return this
+	}
+
+	setExecutionPolicy(policy: AgentExecutionPolicy) {
+		this.manifest.executionPolicy = {
+			...(this.manifest.executionPolicy ?? {}),
+			...policy,
+			cleanup: {
+				...(this.manifest.executionPolicy?.cleanup ?? {}),
+				...(policy.cleanup ?? {}),
+			},
 		}
 		return this
 	}
@@ -792,6 +855,86 @@ export class AgentBuilder<
 			KnowledgeAliases,
 			AgentInvokeList
 		>
+		const queueName = `agent:${this.info.agentName}:${this.info.agentVersion}:run`
+		const workerName = 'execute'
+		this.commandBuilder.canEnqueue(queueName, durableAgentQueuePayloadSchema)
+		this.streamBuilder.canEnqueue(queueName, durableAgentQueuePayloadSchema)
+		const resolveExecutionPolicy = () => ({
+			leaseTtlMs: this.manifest.executionPolicy?.leaseTtlMs ?? 30_000,
+			heartbeatIntervalMs: this.manifest.executionPolicy?.heartbeatIntervalMs ?? 10_000,
+			maxAttempts: this.manifest.executionPolicy?.maxAttempts ?? 3,
+			maxDurationMs: this.manifest.executionPolicy?.maxDurationMs ?? 15 * 60_000,
+			recovery: this.manifest.executionPolicy?.recovery ?? 'resume-from-checkpoints',
+			httpBehavior: this.manifest.executionPolicy?.httpBehavior ?? 'attach-and-stream',
+			cleanup: this.manifest.executionPolicy?.cleanup ?? {},
+			scopeFromPayload: this.manifest.executionPolicy?.scopeFromPayload ?? [],
+		})
+		const deriveExtraScope = (payload: unknown) => {
+			const keys = resolveExecutionPolicy().scopeFromPayload
+			if (!payload || typeof payload !== 'object' || keys.length === 0) {
+				return undefined
+			}
+			const entries = keys
+				.map(key => {
+					const value = (payload as Record<string, unknown>)[key]
+					return typeof value === 'string' && value.trim().length > 0 ? [key, value.trim()] : undefined
+				})
+				.filter((entry): entry is [string, string] => Array.isArray(entry))
+			return entries.length > 0 ? Object.fromEntries(entries) : undefined
+		}
+		const normalizeAgentError = (error: unknown): AgentRunError => {
+			if (error instanceof HandledError) {
+				return {
+					code: String(error.errorCode),
+					message: error.message,
+					handled: true,
+				}
+			}
+			if (error instanceof Error) {
+				return {
+					code: 'UnhandledError',
+					message: error.message,
+					handled: false,
+				}
+			}
+			return {
+				code: 'UnhandledError',
+				message: typeof error === 'string' ? error : 'Unknown queued agent error',
+				handled: false,
+			}
+		}
+		const createQueuedProtocolContext = (
+			runtime: AgentRuntimeConfig<KnowledgeAliases>,
+			context: QueueJobContext<DurableAgentQueuePayload>,
+			message: QueueMessage<DurableAgentQueuePayload>,
+		) =>
+			({
+				...context,
+				message: {
+					...message,
+					messageType: EBMessageType.Command,
+					receiver: {
+						serviceName: runtime.manifest.agentName,
+						serviceVersion: runtime.manifest.agentVersion,
+						serviceTarget: 'run',
+						instanceId: `queued-worker:${process.pid}`,
+					},
+					timestamp: message.createdAt,
+					contentType: 'application/json',
+					contentEncoding: 'utf-8',
+					id: message.payload.sessionId ?? message.id,
+					correlationId: message.correlationId ?? message.id,
+					principalId: message.payload.principalId,
+					tenantId: message.payload.tenantId,
+					sender: {
+						serviceName: runtime.manifest.agentName,
+						serviceVersion: runtime.manifest.agentVersion,
+						serviceTarget: 'run',
+						instanceId: `queued-worker:${process.pid}`,
+					},
+				},
+				invokeAgent: (context as { invokeAgent?: EmptyObject }).invokeAgent ?? ({} as EmptyObject),
+			}) as unknown as CommandFunctionContext
 		const executeAgent = async (
 			thisArg: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
 			context: CommandFunctionContext | StreamFunctionContext,
@@ -1378,12 +1521,157 @@ export class AgentBuilder<
 			}
 		}
 
+		const observeQueuedRun = async (
+			thisArg: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
+			context: CommandFunctionContext | StreamFunctionContext,
+			payload: unknown,
+			parameter: unknown,
+			runId: string,
+			extraScope: Record<string, string> | undefined,
+			onEnvelope?: (envelope: unknown) => Promise<void>,
+		) => {
+			const runtime = thisArg.config?.runtime
+			if (!runtime) {
+				throw new HandledError(StatusCode.InternalServerError, 'Agent runtime not configured')
+			}
+			const protocolBuffer = createProtocolBuffer(context, { onEnvelope })
+			const pollIntervalMs = 250
+			const maxDurationMs = resolveExecutionPolicy().maxDurationMs
+			const startedAt = Date.now()
+			let lastStateSignature = ''
+			let finalState: AgentRunState | undefined
+
+			while (Date.now() - startedAt <= maxDurationMs) {
+				const snapshot = createAgentHandlerContext({
+					payload,
+					parameter,
+					serviceContext: context,
+					protocol: protocolBuffer.protocol,
+					conversationStore: runtime.conversationStore,
+					knowledgeAdapters: runtime.knowledgeAdapters,
+					resources: runtime.resources,
+					models: runtime.models,
+					eventBridge: runtime.eventBridge,
+					embeddings: {},
+					rerankers: {},
+					manifest: runtime.manifest,
+				})
+				const current = await snapshot.runState.get({ runId, extraScope })
+				if (current) {
+					const signature = JSON.stringify({
+						status: current.status,
+						phase: current.phase,
+						tasks: current.tasks,
+						summary: current.summary,
+						finalMessage: current.finalMessage,
+						recovery: current.recovery,
+						error: current.error,
+					})
+					if (signature !== lastStateSignature) {
+						lastStateSignature = signature
+						protocolBuffer.protocol.emitArtifact({
+							artifactId: 'run-state',
+							content: current,
+							mimeType: 'application/json',
+							final: ['completed', 'failed', 'cancelled'].includes(current.status),
+						})
+					}
+					if (['completed', 'failed', 'cancelled'].includes(current.status)) {
+						finalState = current
+						break
+					}
+				}
+				await protocolBuffer.flush()
+				await sleep(pollIntervalMs)
+			}
+
+			if (!finalState) {
+				throw new HandledError(StatusCode.GatewayTimeout, 'Queued agent did not finish before attach timeout', {
+					runId,
+					agentName: runtime.manifest.agentName,
+				})
+			}
+
+			if (finalState.finalMessage) {
+				protocolBuffer.protocol.emitMessage({
+					content: finalState.finalMessage,
+					final: true,
+					summary: finalState.summary,
+				})
+			}
+			if (finalState.error) {
+				protocolBuffer.protocol.emitError(new Error(finalState.error.message), {
+					code: finalState.error.code,
+					handled: finalState.error.handled,
+				})
+			}
+			await protocolBuffer.flush()
+			return protocolBuffer.toEnvelopes()
+		}
+
+		const executeQueuedAgent = async (
+			thisArg: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
+			context: CommandFunctionContext | StreamFunctionContext,
+			payload: unknown,
+			parameter: unknown,
+			onEnvelope?: (envelope: unknown) => Promise<void>,
+		) => {
+			const runtime = thisArg.config?.runtime
+			if (!runtime) {
+				throw new HandledError(StatusCode.InternalServerError, 'Agent runtime not configured')
+			}
+			const extraScope = deriveExtraScope(payload)
+			const helperContext = createAgentHandlerContext({
+				payload,
+				parameter,
+				serviceContext: context,
+				protocol: createProtocolBuffer(context).protocol,
+				conversationStore: runtime.conversationStore,
+				knowledgeAdapters: runtime.knowledgeAdapters,
+				resources: runtime.resources,
+				models: runtime.models,
+				eventBridge: runtime.eventBridge,
+				embeddings: {},
+				rerankers: {},
+				manifest: runtime.manifest,
+			})
+			const existing = await helperContext.runState.get({ extraScope })
+			if (existing && !['completed', 'failed', 'cancelled'].includes(existing.status)) {
+				return await observeQueuedRun(thisArg, context, payload, parameter, existing.runId, extraScope, onEnvelope)
+			}
+
+			const run = await helperContext.runState.start({
+				title: runtime.manifest.description ?? `${runtime.manifest.agentName} execution`,
+				phase: 'queued',
+				status: 'queued',
+				extraScope,
+				metadata: {
+					queuedAt: new Date().toISOString(),
+				},
+				retention: runtime.manifest.executionPolicy?.cleanup,
+			})
+			await context.queue.enqueue(queueName, {
+				runId: run.state.runId,
+				sessionId: context.message.id,
+				payload,
+				parameter,
+				correlationId: context.message.correlationId,
+				principalId: context.message.principalId,
+				tenantId: context.message.tenantId,
+				extraScope,
+			} satisfies DurableAgentQueuePayload)
+			return await observeQueuedRun(thisArg, context, payload, parameter, run.state.runId, extraScope, onEnvelope)
+		}
+
 		this.commandBuilder.setCommandFunction(async function commandImpl(
 			this: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
 			context: CommandFunctionContext,
 			payload: unknown,
 			parameter: unknown,
 		) {
+			if (this.config?.runtime?.manifest.executionMode === 'queued') {
+				return await executeQueuedAgent(this, context, payload, parameter)
+			}
 			return await executeAgent(this, context, payload, parameter)
 		})
 
@@ -1414,7 +1702,7 @@ export class AgentBuilder<
 				}
 				emittedEventCount = visibleEvents.length
 			}
-			const final = (await executeAgent(
+			const final = (this.config?.runtime?.manifest.executionMode === 'queued' ? executeQueuedAgent : executeAgent)(
 				this,
 				context,
 				payload,
@@ -1427,16 +1715,162 @@ export class AgentBuilder<
 							streamedEnvelopes.push(agentProtocolEnvelopeSchema.parse(envelope))
 							await flushConvertedEvents(false)
 						},
-			)) as unknown[]
+			) as Promise<unknown[]>
+			const finalEnvelopesResult = await final
 
 			if (protocol !== 'purista') {
-				const finalEnvelopes = agentProtocolEnvelopeSchema.array().parse(final)
+				const finalEnvelopes = agentProtocolEnvelopeSchema.array().parse(finalEnvelopesResult)
 				streamedEnvelopes.splice(0, streamedEnvelopes.length, ...finalEnvelopes)
 				await flushConvertedEvents(true)
 			}
 
-			await writer.close(final)
+			await writer.close(finalEnvelopesResult)
 		})
+
+		if (!this.queueDefinitionAdded || !this.queueWorkerDefinitionAdded) {
+			const queueBuilder = this.serviceBuilder.getQueueBuilder(
+				queueName as never,
+				`Queued durable execution for ${this.info.agentName}`,
+			)
+			queueBuilder
+				.addPayloadSchema(durableAgentQueuePayloadSchema)
+				.setLifecycleConfig({
+					visibilityTimeoutMs: resolveExecutionPolicy().leaseTtlMs,
+					heartbeatIntervalMs: resolveExecutionPolicy().heartbeatIntervalMs,
+					maxAttempts: resolveExecutionPolicy().maxAttempts,
+				})
+				.setQueueBridgeConfig({
+					durable: true,
+					shared: true,
+					prefetch: 1,
+					orderingGuarantee: 'fifo',
+				})
+
+			const workerBuilder = this.serviceBuilder.getQueueWorkerBuilder(queueName as never, workerName)
+			workerBuilder
+				.setMode('continuous')
+				.setMaxParallelHandlers(1)
+				.setHandler(async function durableWorker(
+					this: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
+					context: QueueJobContext<DurableAgentQueuePayload>,
+					message: QueueMessage<DurableAgentQueuePayload>,
+				) {
+					const runtime = this.config?.runtime
+					if (!runtime) {
+						await context.job.fail('Agent runtime not configured', true)
+						return { status: 'fail', reason: 'Agent runtime not configured', fatal: true }
+					}
+
+					const serviceContext = createQueuedProtocolContext(runtime, context, message)
+					const protocolBuffer = createProtocolBuffer(serviceContext)
+					const helperContext = createAgentHandlerContext({
+						payload: message.payload.payload,
+						parameter: message.payload.parameter,
+						serviceContext,
+						protocol: protocolBuffer.protocol,
+						conversationStore: runtime.conversationStore,
+						knowledgeAdapters: runtime.knowledgeAdapters,
+						resources: runtime.resources,
+						models: runtime.models,
+						eventBridge: runtime.eventBridge,
+						embeddings: {},
+						rerankers: {},
+						manifest: runtime.manifest,
+					})
+					const run = await helperContext.runState.start({
+						runId: message.payload.runId,
+						title: runtime.manifest.description ?? `${runtime.manifest.agentName} execution`,
+						phase: 'recovering',
+						status: 'recovering',
+						extraScope: message.payload.extraScope,
+						lock: {
+							key: 'execution',
+							ttlMs: resolveExecutionPolicy().leaseTtlMs,
+							extraScope: message.payload.extraScope,
+							runId: message.payload.runId,
+						},
+						owner: {
+							workerId: `${runtime.manifest.agentName}:${process.pid}`,
+							queueName,
+							leaseId: message.id,
+							attachedAt: new Date().toISOString(),
+						},
+						recovery: {
+							status: 'resumed',
+							reason: 'queued-worker-start',
+							resumedAt: new Date().toISOString(),
+						},
+						retention: runtime.manifest.executionPolicy?.cleanup,
+					})
+
+					const heartbeatIntervalMs = resolveExecutionPolicy().heartbeatIntervalMs
+					const heartbeatTimer = setInterval(async () => {
+						try {
+							await run.update({ heartbeat: true })
+						} catch {}
+					}, heartbeatIntervalMs)
+
+					try {
+						await run.update({ phase: 'running', status: 'running', heartbeat: true })
+						const envelopes = (await executeAgent(
+							{ config: { runtime } },
+							serviceContext,
+							message.payload.payload,
+							message.payload.parameter,
+						)) as AgentProtocolEnvelope[]
+						const finalMessage =
+							envelopes
+								.map(envelope => envelope.frame)
+								.filter(
+									(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'message' }> =>
+										frame.kind === 'message' && frame.role === 'assistant',
+								)
+								.filter(frame => frame.final)
+								.at(-1)?.content ??
+							envelopes
+								.map(envelope => envelope.frame)
+								.filter(
+									(frame): frame is Extract<(typeof envelopes)[number]['frame'], { kind: 'message' }> =>
+										frame.kind === 'message' && frame.role === 'assistant',
+								)
+								.map(frame => frame.content)
+								.join('')
+
+						await run.finish({
+							status: 'completed',
+							finalMessage,
+							summary: finalMessage,
+						})
+						await context.job.complete({
+							runId: message.payload.runId,
+							status: 'completed',
+							finalMessage,
+						} satisfies DurableAgentQueueResult)
+						return { status: 'success' as const }
+					} catch (error) {
+						const normalizedError = normalizeAgentError(error)
+						await run.finish({
+							status: 'failed',
+							summary: normalizedError.message,
+							error: normalizedError,
+						})
+						if ((message.attempt ?? 1) < resolveExecutionPolicy().maxAttempts) {
+							await context.job.retry({ reason: normalizedError.message })
+							return { status: 'retry' as const, reason: normalizedError.message }
+						}
+						await context.job.fail(normalizedError.message, normalizedError.handled)
+						return { status: 'fail' as const, reason: normalizedError.message, fatal: normalizedError.handled }
+					} finally {
+						clearInterval(heartbeatTimer)
+						await run.release()
+					}
+				} as any)
+
+			this.serviceBuilder.addQueueDefinition(queueBuilder.getDefinition())
+			this.serviceBuilder.addQueueWorkerDefinition(workerBuilder.getDefinition())
+			this.queueDefinitionAdded = true
+			this.queueWorkerDefinitionAdded = true
+		}
 
 		return this as AgentBuilder<
 			KnowledgeAliases,

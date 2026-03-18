@@ -37,9 +37,12 @@ export const agentRunTaskStatusSchema = z.enum(['pending', 'running', 'completed
 export type AgentRunTaskStatus = z.infer<typeof agentRunTaskStatusSchema>
 
 export const agentRunStatusSchema = z.enum([
+	'queued',
 	'idle',
 	'planning',
 	'running',
+	'recovering',
+	'retrying',
 	'summarizing',
 	'completed',
 	'failed',
@@ -76,6 +79,59 @@ export const agentRunLockSchema = extendApi(
 )
 export type AgentRunLock = z.infer<typeof agentRunLockSchema>
 
+export const agentRunCheckpointSchema = extendApi(
+	z.object({
+		name: z.string().min(1),
+		completed: z.boolean().default(false),
+		value: z.unknown().optional(),
+		updatedAt: z.string().min(1),
+	}),
+	{ title: 'Agent run checkpoint' },
+)
+export type AgentRunCheckpoint = z.infer<typeof agentRunCheckpointSchema>
+
+export const agentRunOwnerSchema = extendApi(
+	z.object({
+		workerId: z.string().min(1),
+		queueName: z.string().min(1).optional(),
+		leaseId: z.string().min(1).optional(),
+		attachedAt: z.string().min(1),
+	}),
+	{ title: 'Agent run owner' },
+)
+export type AgentRunOwner = z.infer<typeof agentRunOwnerSchema>
+
+export const agentRunRecoverySchema = extendApi(
+	z.object({
+		status: z.enum(['fresh', 'resumed', 'retrying', 'recovered-stale']),
+		reason: z.string().optional(),
+		checkpoint: z.string().optional(),
+		resumedAt: z.string().optional(),
+	}),
+	{ title: 'Agent run recovery' },
+)
+export type AgentRunRecovery = z.infer<typeof agentRunRecoverySchema>
+
+export const agentRunRetentionSchema = extendApi(
+	z.object({
+		transientStateTtlMs: z.number().int().positive().optional(),
+		keepFinalRunRecord: z.boolean().optional(),
+		finalRunRecordTtlMs: z.number().int().positive().optional(),
+	}),
+	{ title: 'Agent run retention' },
+)
+export type AgentRunRetention = z.infer<typeof agentRunRetentionSchema>
+
+export const agentRunErrorSchema = extendApi(
+	z.object({
+		code: z.string().min(1),
+		message: z.string().min(1),
+		handled: z.boolean().default(false),
+	}),
+	{ title: 'Agent run error' },
+)
+export type AgentRunError = z.infer<typeof agentRunErrorSchema>
+
 export const agentRunStateScopeSchema = extendApi(
 	z.object({
 		tenantId: z.string().optional(),
@@ -98,12 +154,20 @@ export const agentRunStateSchema = extendApi(
 		status: agentRunStatusSchema,
 		phase: z.string().min(1),
 		title: z.string().min(1),
+		attempt: z.number().int().positive().default(1),
 		tasks: z.array(agentRunTaskSchema).default([]),
+		checkpoints: z.record(z.string(), agentRunCheckpointSchema).default({}),
 		summary: z.string().optional(),
+		finalMessage: z.string().optional(),
+		owner: agentRunOwnerSchema.optional(),
+		recovery: agentRunRecoverySchema.optional(),
+		retention: agentRunRetentionSchema.optional(),
+		error: agentRunErrorSchema.optional(),
 		lock: agentRunLockSchema.optional(),
 		metadata: z.record(z.string(), z.unknown()).optional(),
 		startedAt: z.string().min(1),
 		updatedAt: z.string().min(1),
+		heartbeatAt: z.string().optional(),
 		completedAt: z.string().optional(),
 	}),
 	{ title: 'Agent run state' },
@@ -126,13 +190,23 @@ export type AgentRunStartInput = {
 	metadata?: Record<string, unknown>
 	extraScope?: Record<string, string>
 	lock?: boolean | AgentRunLockInput
+	owner?: AgentRunOwner
+	retention?: AgentRunRetention
+	recovery?: AgentRunRecovery
 }
 
 export type AgentRunUpdateInput = {
 	phase?: string
 	status?: AgentRunStatus
 	summary?: string
+	finalMessage?: string
 	metadata?: Record<string, unknown>
+	owner?: AgentRunOwner
+	recovery?: AgentRunRecovery
+	retention?: AgentRunRetention
+	error?: AgentRunError
+	attempt?: number
+	heartbeat?: boolean
 }
 
 export type AgentRunGetInput = {
@@ -159,18 +233,24 @@ export type AgentRunHandle = {
 	update(patch: AgentRunUpdateInput): Promise<AgentRunState>
 	phase(phase: string, status?: AgentRunStatus): Promise<AgentRunState>
 	summary(summary: string): Promise<AgentRunState>
+	setFinalMessage(message: string): Promise<AgentRunState>
 	replaceTasks(tasks: AgentRunTaskInput[]): Promise<AgentRunState>
 	plan(tasks: AgentRunTaskInput[]): Promise<AgentRunState>
 	startTask(taskId: string, detail?: string): Promise<AgentRunState>
 	completeTask(taskId: string, detail?: string): Promise<AgentRunState>
 	failTask(taskId: string, detail?: string): Promise<AgentRunState>
+	checkpoint<T = unknown>(name: string, value?: T, options?: { completed?: boolean }): Promise<AgentRunState>
+	getCheckpoint<T = unknown>(name: string): Promise<T | undefined>
+	step<T>(id: string, fn: () => Promise<T>, options?: { detail?: string; checkpoint?: string }): Promise<T>
 	task<T>(taskId: string, fn: () => Promise<T>, detail?: string): Promise<T>
 	finish(input: {
 		summary?: string
 		status: Extract<AgentRunStatus, 'completed' | 'failed' | 'cancelled'>
+		finalMessage?: string
+		error?: AgentRunError
 	}): Promise<AgentRunState>
 	finishSuccess(summary?: string): Promise<AgentRunState>
-	finishFailure(summary?: string): Promise<AgentRunState>
+	finishFailure(summary?: string, error?: AgentRunError): Promise<AgentRunState>
 	release(): Promise<void>
 }
 
@@ -182,10 +262,18 @@ export type AgentRunStateHelpers = {
 	startTask(taskId: string, input?: AgentRunGetInput & { detail?: string }): Promise<AgentRunState>
 	completeTask(taskId: string, input?: AgentRunGetInput & { detail?: string }): Promise<AgentRunState>
 	failTask(taskId: string, input?: AgentRunGetInput & { detail?: string }): Promise<AgentRunState>
+	checkpoint<T = unknown>(
+		name: string,
+		value?: T,
+		input?: AgentRunGetInput & { completed?: boolean },
+	): Promise<AgentRunState>
+	getCheckpoint<T = unknown>(name: string, input?: AgentRunGetInput): Promise<T | undefined>
 	finish(
 		input: AgentRunGetInput & {
 			summary?: string
 			status: Extract<AgentRunStatus, 'completed' | 'failed' | 'cancelled'>
+			finalMessage?: string
+			error?: AgentRunError
 		},
 	): Promise<AgentRunState>
 	emit(input?: AgentRunGetInput): Promise<AgentRunState | undefined>
@@ -205,6 +293,21 @@ const encodeKey = (value: string) =>
 
 const nowIso = () => new Date().toISOString()
 
+const derivePayloadScope = (context: RunStateContext) => {
+	const keys = context.manifest.executionPolicy?.scopeFromPayload ?? []
+	if (!context.payload || typeof context.payload !== 'object' || keys.length === 0) {
+		return {}
+	}
+	return Object.fromEntries(
+		keys
+			.map(key => {
+				const value = (context.payload as Record<string, unknown>)[key]
+				return typeof value === 'string' && value.trim().length > 0 ? [key, value.trim()] : undefined
+			})
+			.filter((entry): entry is [string, string] => Array.isArray(entry)),
+	)
+}
+
 const defaultScope = (context: RunStateContext, extraScope?: Record<string, string>): AgentRunStateScope => ({
 	tenantId: context.message.tenantId,
 	principalId: context.message.principalId,
@@ -212,7 +315,10 @@ const defaultScope = (context: RunStateContext, extraScope?: Record<string, stri
 	agentName: context.manifest.agentName,
 	agentVersion: context.manifest.agentVersion,
 	extra: Object.fromEntries(
-		Object.entries(extraScope ?? {})
+		Object.entries({
+			...derivePayloadScope(context),
+			...(extraScope ?? {}),
+		})
 			.filter(([, value]) => typeof value === 'string' && value.trim().length > 0)
 			.map(([key, value]) => [key, value.trim()]),
 	),
@@ -261,6 +367,13 @@ const parseRunState = (value: unknown) => {
 const parseLockState = (value: unknown) => {
 	const parsed = agentRunLockSchema.safeParse(value)
 	return parsed.success ? parsed.data : undefined
+}
+
+const normalizeError = (error: AgentRunError | undefined) => {
+	if (!error) {
+		return undefined
+	}
+	return agentRunErrorSchema.parse(error)
 }
 
 const getStoredValue = async <T>(states: StateStoreHelpers, key: string, parser: (value: unknown) => T | undefined) => {
@@ -384,8 +497,15 @@ export const createAgentRunStateHelpers = (context: RunStateContext): AgentRunSt
 			phase: input.phase ?? current.phase,
 			status: input.status ?? current.status,
 			summary: input.summary ?? current.summary,
+			finalMessage: input.finalMessage ?? current.finalMessage,
 			metadata: input.metadata === undefined ? current.metadata : input.metadata,
+			owner: input.owner === undefined ? current.owner : input.owner,
+			recovery: input.recovery === undefined ? current.recovery : input.recovery,
+			retention: input.retention === undefined ? current.retention : input.retention,
+			error: input.error === undefined ? current.error : normalizeError(input.error),
+			attempt: input.attempt ?? current.attempt,
 			updatedAt: nowIso(),
+			heartbeatAt: input.heartbeat ? nowIso() : current.heartbeatAt,
 			completedAt:
 				input.status && FINAL_STATUSES.includes(input.status) ? (current.completedAt ?? nowIso()) : current.completedAt,
 		}))
@@ -439,6 +559,8 @@ export const createAgentRunStateHelpers = (context: RunStateContext): AgentRunSt
 		input: AgentRunGetInput & {
 			summary?: string
 			status: Extract<AgentRunStatus, 'completed' | 'failed' | 'cancelled'>
+			finalMessage?: string
+			error?: AgentRunError
 		},
 	) => {
 		const state = await updateInternal(input, current => ({
@@ -446,7 +568,10 @@ export const createAgentRunStateHelpers = (context: RunStateContext): AgentRunSt
 			status: input.status,
 			phase: input.status,
 			summary: input.summary ?? current.summary,
+			finalMessage: input.finalMessage ?? current.finalMessage,
+			error: input.error === undefined ? current.error : normalizeError(input.error),
 			updatedAt: nowIso(),
+			heartbeatAt: nowIso(),
 			completedAt: current.completedAt ?? nowIso(),
 		}))
 		const currentKey = currentRunKey(state.scope)
@@ -466,6 +591,26 @@ export const createAgentRunStateHelpers = (context: RunStateContext): AgentRunSt
 			emitRunState(context.protocol, state)
 		}
 		return state
+	}
+
+	const checkpoint = async <T = unknown>(name: string, value?: T, input?: AgentRunGetInput & { completed?: boolean }) =>
+		await updateInternal(input ?? {}, current => ({
+			...current,
+			checkpoints: {
+				...current.checkpoints,
+				[name]: {
+					name,
+					value,
+					completed: input?.completed ?? false,
+					updatedAt: nowIso(),
+				},
+			},
+			updatedAt: nowIso(),
+		}))
+
+	const getCheckpoint = async <T = unknown>(name: string, input?: AgentRunGetInput) => {
+		const state = await get(input)
+		return state?.checkpoints[name]?.value as T | undefined
 	}
 
 	const start = async (input: AgentRunStartInput): Promise<AgentRunHandle> => {
@@ -489,12 +634,20 @@ export const createAgentRunStateHelpers = (context: RunStateContext): AgentRunSt
 				status: input.status ?? 'planning',
 				phase: input.phase ?? 'planning',
 				title: input.title,
+				attempt: 1,
 				tasks: [],
+				checkpoints: {},
 				summary: undefined,
+				finalMessage: undefined,
+				owner: input.owner,
+				recovery: input.recovery ?? { status: 'fresh' },
+				retention: input.retention,
+				error: undefined,
 				lock: lockHandle?.lock,
 				metadata: input.metadata,
 				startedAt: timestamp,
 				updatedAt: timestamp,
+				heartbeatAt: timestamp,
 			},
 		)
 		let currentState = await save(state)
@@ -519,6 +672,10 @@ export const createAgentRunStateHelpers = (context: RunStateContext): AgentRunSt
 				currentState = await update({ summary, ...resolver })
 				return currentState
 			},
+			setFinalMessage: async finalMessage => {
+				currentState = await update({ finalMessage, ...resolver })
+				return currentState
+			},
 			replaceTasks: async tasks => {
 				currentState = await replaceTasks(tasks, resolver)
 				return currentState
@@ -539,6 +696,30 @@ export const createAgentRunStateHelpers = (context: RunStateContext): AgentRunSt
 			failTask: async (taskId, detail) => {
 				currentState = await updateTaskStatus(taskId, 'failed', { ...resolver, detail })
 				return currentState
+			},
+			checkpoint: async (name, value, options) => {
+				currentState = await checkpoint(name, value, { ...resolver, completed: options?.completed })
+				return currentState
+			},
+			getCheckpoint: async name => await getCheckpoint(name, resolver),
+			step: async <T>(id: string, fn: () => Promise<T>, options?: { detail?: string; checkpoint?: string }) => {
+				const checkpointName = options?.checkpoint ?? id
+				if (currentState.checkpoints[checkpointName]?.completed) {
+					return currentState.checkpoints[checkpointName]?.value as T | undefined as T
+				}
+				currentState = await updateTaskStatus(id, 'running', { ...resolver, detail: options?.detail })
+				try {
+					const result = await fn()
+					currentState = await checkpoint(checkpointName, result, { ...resolver, completed: true })
+					currentState = await updateTaskStatus(id, 'completed', { ...resolver })
+					return result
+				} catch (error) {
+					currentState = await updateTaskStatus(id, 'failed', {
+						...resolver,
+						detail: error instanceof Error ? error.message : String(error),
+					})
+					throw error
+				}
 			},
 			task: async <T>(taskId: string, fn: () => Promise<T>, detail?: string) => {
 				currentState = await updateTaskStatus(taskId, 'running', { ...resolver, detail })
@@ -562,8 +743,8 @@ export const createAgentRunStateHelpers = (context: RunStateContext): AgentRunSt
 				currentState = await finish({ status: 'completed', summary, ...resolver })
 				return currentState
 			},
-			finishFailure: async summary => {
-				currentState = await finish({ status: 'failed', summary, ...resolver })
+			finishFailure: async (summary, error) => {
+				currentState = await finish({ status: 'failed', summary, error, ...resolver })
 				return currentState
 			},
 			release: async () => {
@@ -583,6 +764,8 @@ export const createAgentRunStateHelpers = (context: RunStateContext): AgentRunSt
 		startTask: async (taskId, input) => await updateTaskStatus(taskId, 'running', input),
 		completeTask: async (taskId, input) => await updateTaskStatus(taskId, 'completed', input),
 		failTask: async (taskId, input) => await updateTaskStatus(taskId, 'failed', input),
+		checkpoint,
+		getCheckpoint,
 		finish,
 		emit,
 		lock,

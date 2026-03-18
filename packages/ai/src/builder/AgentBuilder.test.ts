@@ -1,4 +1,4 @@
-import { DefaultEventBridge } from '@purista/core'
+import { DefaultEventBridge, DefaultQueueBridge } from '@purista/core'
 import { afterEach, describe, expect, it } from 'vitest'
 import { z } from 'zod'
 
@@ -165,6 +165,8 @@ describe('AgentBuilder', () => {
 			.useConversationStore({ storeName: 'sessions', maxFrames: 20 })
 			.useKnowledgeAdapter('knowledge', { topK: 3 })
 			.setRuntime('worker')
+			.setExecutionMode('queued')
+			.setExecutionPolicy({ maxAttempts: 4, scopeFromPayload: ['projectId'] })
 			.setModelResource({ resourceName: 'modelResource', variant: 'mini' })
 			.setRetryPolicy({ maxAttempts: 2, strategy: 'fixed', delayMs: 100 })
 			.setMemory({ storeName: 'memoryStore', maxFrames: 10 })
@@ -202,6 +204,9 @@ describe('AgentBuilder', () => {
 		expect(manifest.allowedAgents).toEqual([{ agentName: 'triageAgent', agentVersion: '1' }])
 		expect(manifest.telemetry?.attributes?.team).toBe('support')
 		expect(manifest.metadata?.runtime).toBe('worker')
+		expect(manifest.executionMode).toBe('queued')
+		expect(manifest.executionPolicy?.maxAttempts).toBe(4)
+		expect(manifest.executionPolicy?.scopeFromPayload).toEqual(['projectId'])
 		expect(manifest.metadata?.evaluation).toEqual({ suite: 'smoke' })
 		expect(manifest.httpExposure?.public).toBe(true)
 		expect(manifest.httpExposure?.sseProtocol).toBe('ai-sdk-responses')
@@ -219,6 +224,62 @@ describe('AgentBuilder', () => {
 			.getManifest()
 
 		expect(manifest.httpExposure?.streamingMode).toBe('aggregate')
+	})
+
+	it('runs queued durable agents through the internal queue and emits run-state artifacts', async () => {
+		const bridge = new DefaultEventBridge()
+		bridges.push(bridge)
+		await bridge.start()
+		const queueBridge = new DefaultQueueBridge()
+		const definition = new AgentBuilder({
+			agentName: 'queuedAgent',
+			agentVersion: '1',
+			description: 'Queued durable agent',
+		})
+			.addPayloadSchema(z.object({ prompt: z.string(), projectId: z.string() }))
+			.setExecutionMode('queued')
+			.setExecutionPolicy({
+				maxDurationMs: 3_000,
+				leaseTtlMs: 100,
+				heartbeatIntervalMs: 10,
+				scopeFromPayload: ['projectId'],
+			})
+			.setHandler(async (context, payload) => {
+				await context.runState.update({ phase: 'planning', status: 'planning' })
+				await context.runState.replaceTasks([
+					{ id: 'plan', title: 'Plan work' },
+					{ id: 'deliver', title: 'Deliver answer' },
+				])
+				await context.runState.checkpoint('plan', { prompt: payload.prompt }, { completed: true })
+				await context.runState.startTask('plan')
+				await context.runState.completeTask('plan')
+				await context.runState.startTask('deliver')
+				await context.runState.completeTask('deliver', payload.prompt.toUpperCase())
+				context.stream.sendFinal(`queued:${payload.prompt}`)
+				return { message: `queued:${payload.prompt}` }
+			})
+			.build()
+
+		const instance = await definition.getInstance(bridge, {
+			queueBridge,
+		})
+		await instance.start()
+
+		try {
+			const result = await instance.invoke({
+				payload: { prompt: 'hello', projectId: 'voyage' },
+			})
+			const finalMessage = findLastFinalMessage(result.envelopes.map(envelope => envelope.frame))
+			expect(finalMessage?.content).toBe('queued:hello')
+			expect(
+				result.envelopes.some(
+					envelope => envelope.frame.kind === 'artifact' && envelope.frame.artifactId === 'run-state',
+				),
+			).toBe(true)
+		} finally {
+			await instance.stop()
+			await queueBridge.destroy()
+		}
 	})
 
 	it('builds a definition with model aliases and creates an instance', async () => {

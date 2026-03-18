@@ -2,6 +2,7 @@ import type { ModelProvider, ProviderJsonRequest, ProviderJsonResponse, Provider
 import {
 	type Command,
 	DefaultEventBridge,
+	DefaultQueueBridge,
 	EBMessageType,
 	getNewEBMessageId,
 	getNewTraceId,
@@ -100,9 +101,10 @@ describe('runSupportAgentCommandBuilder', () => {
 		const logger = initLogger('error')
 		const eventBridge = new DefaultEventBridge({ logger })
 		await eventBridge.start()
+		const queueBridge = new DefaultQueueBridge()
 
 		const provider = new DeterministicProvider()
-		const supportService = await supportV1Service.getInstance(eventBridge, { logger })
+		const supportService = await supportV1Service.getInstance(eventBridge, { logger, queueBridge })
 		const triageAgentInstance = await triageAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
@@ -111,6 +113,7 @@ describe('runSupportAgentCommandBuilder', () => {
 		const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
 			logger,
 			models: { 'openai:gpt-4o-mini': provider },
+			queueBridge,
 			poolConfig: { maxConcurrencyPerInstance: 1 },
 		})
 
@@ -130,6 +133,7 @@ describe('runSupportAgentCommandBuilder', () => {
 			await supportAgentInstance.stop()
 			await triageAgentInstance.stop()
 			await supportService.destroy()
+			await queueBridge.destroy()
 			await eventBridge.destroy()
 		}
 	})
