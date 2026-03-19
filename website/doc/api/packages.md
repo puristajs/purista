@@ -27,4 +27,5 @@
 - [@purista/redis-config-store - v2.2.0](@purista/redis-config-store/README.md)
 - [@purista/redis-queue-bridge - v2.2.0](@purista/redis-queue-bridge/README.md)
 - [@purista/redis-state-store - v2.2.0](@purista/redis-state-store/README.md)
+- [@purista/sandbox](@purista/sandbox/README.md)
 - [@purista/vault-secret-store - v2.2.0](@purista/vault-secret-store/README.md)

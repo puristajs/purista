@@ -56,7 +56,20 @@ When you set an SSE protocol other than `purista`, the internal agent frames are
 | **`error`** | Tool error code | Agent error frame |
 | **`telemetry`** | Ignored | Agent metadata |
 
-## 4. When to use which?
+## 4. External Runtime Bindings vs Standard Protocols
+
+MCP and A2A are wire protocols for exposing PURISTA capabilities to other systems.
+
+External runtime bindings are different:
+
+- it runs inside your agent handler
+- it turns allowlisted PURISTA commands and child agents into neutral bindings first
+- adapters then turn those bindings into external SDK tools
+- it keeps execution local to PURISTA runtime instead of publishing a public wire protocol
+
+Use external runtime bindings plus an adapter for Vercel AI SDK style tool loops. Use MCP or A2A when another process or organization should consume your capabilities over a standard protocol.
+
+## 5. When to use which?
 
 | Use Case | Recommended Protocol |
 | :--- | :--- |

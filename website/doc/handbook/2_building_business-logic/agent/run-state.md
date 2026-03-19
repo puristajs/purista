@@ -112,6 +112,7 @@ Queued durable agents should combine:
 - `executionPolicy.recovery: 'resume-from-checkpoints'`
 - `queueBridge` at runtime
 - run-state locks for single active work per scope
+- bridge tools that resolve only to PURISTA commands or child agents
 
 The queue worker owns run creation, heartbeats, and final release. The handler should not start a second run inside the queued path.
 

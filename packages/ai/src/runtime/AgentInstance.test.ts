@@ -180,4 +180,15 @@ describe('AgentInstance', () => {
 			},
 		})
 	})
+
+	it('exposes external runtime metadata', () => {
+		const instance = new AgentInstance({ ...baseDependencies }, { instanceId: 'bridge-1' } as any, {
+			models: {},
+		})
+
+		expect(instance.getExternalRuntimeMetadata()).toEqual({
+			commands: [],
+			agents: [],
+		})
+	})
 })

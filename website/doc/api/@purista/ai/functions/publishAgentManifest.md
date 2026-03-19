@@ -6,11 +6,17 @@
 
 # Function: publishAgentManifest()
 
-> **publishAgentManifest**(`configSetter`, `definition`): `Promise`\<\{ `configKey`: `string`; `manifest`: [`AgentManifest`](../type-aliases/AgentManifest.md); \}\>
+> **publishAgentManifest**\<`KnowledgeAliases`\>(`configSetter`, `definition`): `Promise`\<\{ `configKey`: `string`; `manifest`: [`AgentManifest`](../type-aliases/AgentManifest.md); \}\>
 
-Defined in: [ai/src/manifest/publisher.ts:14](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/manifest/publisher.ts#L14)
+Defined in: [packages/ai/src/manifest/publisher.ts:14](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/manifest/publisher.ts#L14)
 
 Publishes a built agent manifest to a managed config store.
+
+## Type Parameters
+
+### KnowledgeAliases
+
+`KnowledgeAliases` *extends* `string`
 
 ## Parameters
 
@@ -20,7 +26,7 @@ Publishes a built agent manifest to a managed config store.
 
 ### definition
 
-[`AgentDefinition`](../type-aliases/AgentDefinition.md)
+[`AgentDefinition`](../type-aliases/AgentDefinition.md)\<`KnowledgeAliases`\>
 
 ## Returns
 

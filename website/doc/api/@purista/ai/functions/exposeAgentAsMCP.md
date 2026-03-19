@@ -6,17 +6,23 @@
 
 # Function: exposeAgentAsMCP()
 
-> **exposeAgentAsMCP**(`definition`): [`MCPToolDescriptor`](../type-aliases/MCPToolDescriptor.md)
+> **exposeAgentAsMCP**\<`KnowledgeAliases`\>(`definition`): [`MCPToolDescriptor`](../type-aliases/MCPToolDescriptor.md)
 
-Defined in: [ai/src/mcp/exposeAgentAsMCP.ts:15](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/mcp/exposeAgentAsMCP.ts#L15)
+Defined in: [packages/ai/src/mcp/exposeAgentAsMCP.ts:15](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/mcp/exposeAgentAsMCP.ts#L15)
 
 Converts an [AgentDefinition](../type-aliases/AgentDefinition.md) into a Model Context Protocol descriptor.
+
+## Type Parameters
+
+### KnowledgeAliases
+
+`KnowledgeAliases` *extends* `string`
 
 ## Parameters
 
 ### definition
 
-[`AgentDefinition`](../type-aliases/AgentDefinition.md)
+[`AgentDefinition`](../type-aliases/AgentDefinition.md)\<`KnowledgeAliases`\>
 
 ## Returns
 

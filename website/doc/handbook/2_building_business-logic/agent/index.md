@@ -80,12 +80,14 @@ flowchart TB
 
 1. **[Quick Start](./getting-started.md)** — Build one inline agent and one queued durable agent.
 2. **[Builder](./agent-builder.md)** — Define capabilities, execution mode, and HTTP exposure.
-3. **[Context](./handler-context.md)** — Use tools, models, orchestration, and durable run state.
-4. **[Durable Run State](./run-state.md)** — Plans, tasks, checkpoints, locks, and recovery.
-5. **[Runtime](./runtime.md)** — Inject providers, queue bridges, and concurrency limits.
-6. **[Invocation](./invocation.md)** — Call agents from commands, services, and scripts.
-7. **[Web & SDK](./frontend.md)** — Attach durable progress to a React UI.
-8. **[Memory & Knowledge](./memory-and-knowledge.md)** — Keep chat memory separate from workflow state.
-9. **[Testing](./testing.md)** — Test inline and queued agents deterministically.
+3. **[External Runtime Bindings](./external-runtime-bridge.md)** — Define provider-neutral bindings for external tool loops.
+4. **[AI SDK Adapter](./ai-sdk-adapter.md)** — Convert neutral bindings into Vercel AI SDK tools.
+5. **[Context](./handler-context.md)** — Use tools, models, orchestration, and durable run state.
+6. **[Durable Run State](./run-state.md)** — Plans, tasks, checkpoints, locks, and recovery.
+7. **[Runtime](./runtime.md)** — Inject providers, queue bridges, and concurrency limits.
+8. **[Invocation](./invocation.md)** — Call agents from commands, services, and scripts.
+9. **[Web & SDK](./frontend.md)** — Attach durable progress to a React UI.
+10. **[Memory & Knowledge](./memory-and-knowledge.md)** — Keep chat memory separate from workflow state.
+11. **[Testing](./testing.md)** — Test inline and queued agents deterministically.
 
 For deeper queue bridge, store, or protocol details, see the advanced handbook.

@@ -11,8 +11,10 @@
 		"frontend:test": "vitest run -c frontend.vitest.config.ts",
 		"frontend:check": "tsc -p tsconfig.frontend.json --noEmit && npm run frontend:test",
 		"build": "tsc --noEmit",
-		"lint": "npx @biomejs/biome check --write",
-		"test": "vitest run -c vitest.config.ts && npm run frontend:test && tsc --noEmit && tsc -p tsconfig.frontend.json --noEmit"
+		"lint": "npx @biomejs/biome check .",
+		"lint:fix": "npx @biomejs/biome check --write .",
+		"test": "vitest run -c vitest.config.ts && npm run frontend:test && tsc --noEmit && tsc -p tsconfig.frontend.json --noEmit",
+		"test:coverage": "vitest run -c vitest.config.ts --coverage"
 	},
 	"dependencies": {
 		"@ai-sdk/react": "^3.0.103",

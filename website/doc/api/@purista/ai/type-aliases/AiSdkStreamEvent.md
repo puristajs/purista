@@ -8,7 +8,7 @@
 
 > **AiSdkStreamEvent** = `object`
 
-Defined in: [ai/src/protocol/aiSdkStream.ts:5](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/aiSdkStream.ts#L5)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:5](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/aiSdkStream.ts#L5)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [ai/src/protocol/aiSdkStream.ts:5](https://github.com/puristajs/puri
 
 > **data**: `Record`\<`string`, `unknown`\>
 
-Defined in: [ai/src/protocol/aiSdkStream.ts:7](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/aiSdkStream.ts#L7)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:7](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/aiSdkStream.ts#L7)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [ai/src/protocol/aiSdkStream.ts:7](https://github.com/puristajs/puri
 
 > **event**: `string`
 
-Defined in: [ai/src/protocol/aiSdkStream.ts:6](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/aiSdkStream.ts#L6)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:6](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/aiSdkStream.ts#L6)

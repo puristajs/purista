@@ -8,7 +8,7 @@
 
 > **InvokeAgentOptions** = `object`
 
-Defined in: [ai/src/runtime/invokeAgent.ts:8](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/invokeAgent.ts#L8)
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:8](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/invokeAgent.ts#L8)
 
 ## Properties
 
@@ -16,7 +16,9 @@ Defined in: [ai/src/runtime/invokeAgent.ts:8](https://github.com/puristajs/puris
 
 > **agentName**: `string`
 
-Defined in: [ai/src/runtime/invokeAgent.ts:10](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/invokeAgent.ts#L10)
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:12](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/invokeAgent.ts#L12)
+
+Target agent service name.
 
 ***
 
@@ -24,7 +26,9 @@ Defined in: [ai/src/runtime/invokeAgent.ts:10](https://github.com/puristajs/puri
 
 > **agentVersion**: `string`
 
-Defined in: [ai/src/runtime/invokeAgent.ts:11](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/invokeAgent.ts#L11)
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:14](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/invokeAgent.ts#L14)
+
+Target agent service version.
 
 ***
 
@@ -32,7 +36,9 @@ Defined in: [ai/src/runtime/invokeAgent.ts:11](https://github.com/puristajs/puri
 
 > `optional` **correlationId**: `string`
 
-Defined in: [ai/src/runtime/invokeAgent.ts:17](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/invokeAgent.ts#L17)
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:26](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/invokeAgent.ts#L26)
+
+Optional correlation id used for distributed trace chaining.
 
 ***
 
@@ -40,7 +46,20 @@ Defined in: [ai/src/runtime/invokeAgent.ts:17](https://github.com/puristajs/puri
 
 > **eventBridge**: [`EventBridge`](../../core/interfaces/EventBridge.md)
 
-Defined in: [ai/src/runtime/invokeAgent.ts:9](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/invokeAgent.ts#L9)
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:10](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/invokeAgent.ts#L10)
+
+EventBridge instance used to reach the target agent service.
+
+***
+
+### failOnErrorFrame?
+
+> `optional` **failOnErrorFrame**: `boolean`
+
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:35](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/invokeAgent.ts#L35)
+
+When true (default), protocol `error` envelopes emitted by the target agent
+are treated as invocation failures and throw immediately.
 
 ***
 
@@ -48,7 +67,9 @@ Defined in: [ai/src/runtime/invokeAgent.ts:9](https://github.com/puristajs/puris
 
 > `optional` **parameter**: `unknown`
 
-Defined in: [ai/src/runtime/invokeAgent.ts:13](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/invokeAgent.ts#L13)
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:18](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/invokeAgent.ts#L18)
+
+Optional invoke parameter metadata passed alongside payload.
 
 ***
 
@@ -56,7 +77,9 @@ Defined in: [ai/src/runtime/invokeAgent.ts:13](https://github.com/puristajs/puri
 
 > **payload**: `unknown`
 
-Defined in: [ai/src/runtime/invokeAgent.ts:12](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/invokeAgent.ts#L12)
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:16](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/invokeAgent.ts#L16)
+
+Payload delivered to the target agent run command.
 
 ***
 
@@ -64,7 +87,9 @@ Defined in: [ai/src/runtime/invokeAgent.ts:12](https://github.com/puristajs/puri
 
 > `optional` **principalId**: `string`
 
-Defined in: [ai/src/runtime/invokeAgent.ts:14](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/invokeAgent.ts#L14)
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:20](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/invokeAgent.ts#L20)
+
+Optional principal id forwarded for scoped memory and auditing.
 
 ***
 
@@ -72,7 +97,9 @@ Defined in: [ai/src/runtime/invokeAgent.ts:14](https://github.com/puristajs/puri
 
 > `optional` **sessionId**: `string`
 
-Defined in: [ai/src/runtime/invokeAgent.ts:18](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/invokeAgent.ts#L18)
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:28](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/invokeAgent.ts#L28)
+
+Optional session id injected into object payloads when missing.
 
 ***
 
@@ -80,7 +107,9 @@ Defined in: [ai/src/runtime/invokeAgent.ts:18](https://github.com/puristajs/puri
 
 > `optional` **stream**: [`AgentStreamResponder`](AgentStreamResponder.md)
 
-Defined in: [ai/src/runtime/invokeAgent.ts:19](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/invokeAgent.ts#L19)
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:30](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/invokeAgent.ts#L30)
+
+Optional live frame responder for streaming consumption.
 
 ***
 
@@ -88,7 +117,9 @@ Defined in: [ai/src/runtime/invokeAgent.ts:19](https://github.com/puristajs/puri
 
 > `optional` **tenantId**: `string`
 
-Defined in: [ai/src/runtime/invokeAgent.ts:15](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/invokeAgent.ts#L15)
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:22](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/invokeAgent.ts#L22)
+
+Optional tenant id forwarded for scoped memory and auditing.
 
 ***
 
@@ -96,4 +127,6 @@ Defined in: [ai/src/runtime/invokeAgent.ts:15](https://github.com/puristajs/puri
 
 > `optional` **timeoutMs**: `number`
 
-Defined in: [ai/src/runtime/invokeAgent.ts:16](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/invokeAgent.ts#L16)
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:24](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/invokeAgent.ts#L24)
+
+Optional timeout passed to stream open/invoke calls.

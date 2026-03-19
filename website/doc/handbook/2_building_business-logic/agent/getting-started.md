@@ -10,6 +10,7 @@ This guide shows the decision boundary:
 
 - use an **inline** agent for a short classification or answer step
 - use a **queued durable** agent when the work should survive restarts, expose progress, and support checkpoints
+- use **external runtime bindings** when you want a Vercel AI SDK loop but the tools must still execute as PURISTA commands or child agents
 
 ## 1. Scaffold
 
@@ -151,3 +152,28 @@ export const askCommand = supportServiceBuilder
 ```
 
 When `supportAgent` is queued, the HTTP/SSE endpoint attaches to the active run, streams `data-run-state`, and keeps the composer locked until the run finishes.
+
+## 6. Add An External Runtime Loop
+
+If you want the reasoning loop in Vercel AI SDK while keeping execution inside PURISTA, create provider-neutral bindings first and adapt them at the AI SDK boundary:
+
+```ts
+const bindings = context.expose.tools({
+  commands: [{ serviceName: 'support', serviceVersion: '1', commandName: 'lookupFaq' }],
+  agents: [{ agentName: 'triageAgent', agentVersion: '1', name: 'triageEscalation', resultMode: 'text' }],
+})
+
+await generateText({
+  model: context.models['openai:gpt-4o-mini'],
+  request: {
+    prompt: payload.prompt,
+    metadata: {
+      aiSdk: {
+        tools: toAiSdkTools(bindings),
+      },
+    },
+  },
+})
+```
+
+This keeps PURISTA framework-agnostic: the external SDK handles reasoning, PURISTA handles commands, agent invocation, tracing, and queue-backed execution through one neutral binding contract.

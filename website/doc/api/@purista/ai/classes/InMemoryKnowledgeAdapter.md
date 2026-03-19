@@ -6,7 +6,7 @@
 
 # Class: InMemoryKnowledgeAdapter
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:21](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L21)
+Defined in: [packages/ai/src/knowledge/adapters/inMemoryAdapter.ts:74](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L74)
 
 Reference knowledge adapter that keeps documents in memory.
 Useful for tests and local development.
@@ -31,7 +31,9 @@ Useful for tests and local development.
 
 > `readonly` **id**: `"in-memory-knowledge"` = `'in-memory-knowledge'`
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:22](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L22)
+Defined in: [packages/ai/src/knowledge/adapters/inMemoryAdapter.ts:75](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L75)
+
+Stable identifier used in logs/telemetry.
 
 #### Implementation of
 
@@ -41,15 +43,17 @@ Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:22](https://github.com
 
 ### delete()
 
-> **delete**(`id`): `Promise`\<`void`\>
+> **delete**(`request`): `Promise`\<`void`\>
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:36](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L36)
+Defined in: [packages/ai/src/knowledge/adapters/inMemoryAdapter.ts:109](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L109)
+
+Remove one document by id.
 
 #### Parameters
 
-##### id
+##### request
 
-`string`
+[`KnowledgeDeleteRequest`](../type-aliases/KnowledgeDeleteRequest.md)
 
 #### Returns
 
@@ -63,19 +67,17 @@ Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:36](https://github.com
 
 ### query()
 
-> **query**(`query`, `limit?`): `Promise`\<[`KnowledgeDocument`](../type-aliases/KnowledgeDocument.md)[]\>
+> **query**(`request`): `Promise`\<[`KnowledgeDocument`](../type-aliases/KnowledgeDocument.md)[]\>
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:29](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L29)
+Defined in: [packages/ai/src/knowledge/adapters/inMemoryAdapter.ts:97](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L97)
+
+Search documents for a natural-language query.
 
 #### Parameters
 
-##### query
+##### request
 
-`string`
-
-##### limit?
-
-`number` = `5`
+[`KnowledgeQueryRequest`](../type-aliases/KnowledgeQueryRequest.md)
 
 #### Returns
 
@@ -89,15 +91,17 @@ Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:29](https://github.com
 
 ### upsert()
 
-> **upsert**(`document`): `Promise`\<`void`\>
+> **upsert**(`request`): `Promise`\<`void`\>
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:25](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L25)
+Defined in: [packages/ai/src/knowledge/adapters/inMemoryAdapter.ts:91](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L91)
+
+Insert or update one document.
 
 #### Parameters
 
-##### document
+##### request
 
-[`KnowledgeDocument`](../type-aliases/KnowledgeDocument.md)
+[`KnowledgeUpsertRequest`](../type-aliases/KnowledgeUpsertRequest.md)
 
 #### Returns
 

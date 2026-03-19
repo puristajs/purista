@@ -1,3 +1,5 @@
+export * from './bridge/aiSdk.js'
+export * from './bridge/externalRuntime.js'
 export * from './builder/AgentBuilder.js'
 export * from './evaluation/index.js'
 export * from './knowledge/adapters/inMemoryAdapter.js'

@@ -8,7 +8,7 @@
 
 > **SessionHelpers** = `object`
 
-Defined in: [ai/src/runtime/context.ts:297](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L297)
+Defined in: [packages/ai/src/runtime/context.ts:414](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L414)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [ai/src/runtime/context.ts:297](https://github.com/puristajs/purista
 
 > **identity**: `object`
 
-Defined in: [ai/src/runtime/context.ts:317](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L317)
+Defined in: [packages/ai/src/runtime/context.ts:438](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L438)
 
 Identity metadata used to build scoped session ids.
 
@@ -46,7 +46,7 @@ Identity metadata used to build scoped session ids.
 
 > **delete**(`sessionId?`): `Promise`\<`void`\>
 
-Defined in: [ai/src/runtime/context.ts:309](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L309)
+Defined in: [packages/ai/src/runtime/context.ts:430](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L430)
 
 Delete a session. If no id is provided, the default scoped id is used.
 
@@ -64,9 +64,9 @@ Delete a session. If no id is provided, the default scoped id is used.
 
 ### load()
 
-> **load**(`sessionId?`): `Promise`\<[`SessionRecord`](SessionRecord.md) \| `undefined`\>
+> **load**(`sessionId?`): `Promise`\<[`ConversationStoreRecord`](ConversationStoreRecord.md) \| `undefined`\>
 
-Defined in: [ai/src/runtime/context.ts:301](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L301)
+Defined in: [packages/ai/src/runtime/context.ts:418](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L418)
 
 Load the session record. If no id is provided, the default scoped id is used.
 
@@ -78,7 +78,7 @@ Load the session record. If no id is provided, the default scoped id is used.
 
 #### Returns
 
-`Promise`\<[`SessionRecord`](SessionRecord.md) \| `undefined`\>
+`Promise`\<[`ConversationStoreRecord`](ConversationStoreRecord.md) \| `undefined`\>
 
 ***
 
@@ -86,7 +86,7 @@ Load the session record. If no id is provided, the default scoped id is used.
 
 > **resolveSessionId**(`sessionId?`): `string`
 
-Defined in: [ai/src/runtime/context.ts:313](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L313)
+Defined in: [packages/ai/src/runtime/context.ts:434](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L434)
 
 Returns the effective scoped session id for explicit or implicit usage.
 
@@ -106,7 +106,7 @@ Returns the effective scoped session id for explicit or implicit usage.
 
 > **save**(`record`): `Promise`\<`void`\>
 
-Defined in: [ai/src/runtime/context.ts:305](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L305)
+Defined in: [packages/ai/src/runtime/context.ts:422](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L422)
 
 Save session data. If `sessionId` is omitted, the default scoped id is used.
 
@@ -114,7 +114,7 @@ Save session data. If `sessionId` is omitted, the default scoped id is used.
 
 ##### record
 
-[`SessionRecord`](SessionRecord.md) | \{ `data`: [`SessionRecordData`](SessionRecordData.md); `sessionId?`: `string`; `updatedAt?`: `number`; \}
+[`ConversationStoreRecord`](ConversationStoreRecord.md) | \{ `conversationId?`: `string`; `data`: [`ConversationStoreRecordData`](ConversationStoreRecordData.md); `updatedAt?`: `number`; \}
 
 #### Returns
 

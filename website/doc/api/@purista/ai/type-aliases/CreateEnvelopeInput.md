@@ -8,7 +8,7 @@
 
 > **CreateEnvelopeInput** = `object`
 
-Defined in: [ai/src/protocol/helpers.ts:13](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/helpers.ts#L13)
+Defined in: [packages/ai/src/protocol/helpers.ts:13](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/helpers.ts#L13)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [ai/src/protocol/helpers.ts:13](https://github.com/puristajs/purista
 
 > **actor**: [`ProtocolActor`](ProtocolActor.md)
 
-Defined in: [ai/src/protocol/helpers.ts:16](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/helpers.ts#L16)
+Defined in: [packages/ai/src/protocol/helpers.ts:16](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/helpers.ts#L16)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [ai/src/protocol/helpers.ts:16](https://github.com/puristajs/purista
 
 > **conversationId**: `string`
 
-Defined in: [ai/src/protocol/helpers.ts:14](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/helpers.ts#L14)
+Defined in: [packages/ai/src/protocol/helpers.ts:14](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/helpers.ts#L14)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [ai/src/protocol/helpers.ts:14](https://github.com/puristajs/purista
 
 > **frame**: [`AgentProtocolFrame`](AgentProtocolFrame.md)
 
-Defined in: [ai/src/protocol/helpers.ts:15](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/helpers.ts#L15)
+Defined in: [packages/ai/src/protocol/helpers.ts:15](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/helpers.ts#L15)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [ai/src/protocol/helpers.ts:15](https://github.com/puristajs/purista
 
 > `optional` **inReplyTo**: `string`
 
-Defined in: [ai/src/protocol/helpers.ts:18](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/helpers.ts#L18)
+Defined in: [packages/ai/src/protocol/helpers.ts:18](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/helpers.ts#L18)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [ai/src/protocol/helpers.ts:18](https://github.com/puristajs/purista
 
 > `optional` **messageId**: `string`
 
-Defined in: [ai/src/protocol/helpers.ts:17](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/helpers.ts#L17)
+Defined in: [packages/ai/src/protocol/helpers.ts:17](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/helpers.ts#L17)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [ai/src/protocol/helpers.ts:17](https://github.com/puristajs/purista
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [ai/src/protocol/helpers.ts:20](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/helpers.ts#L20)
+Defined in: [packages/ai/src/protocol/helpers.ts:20](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/helpers.ts#L20)
 
 ***
 
@@ -64,7 +64,7 @@ Defined in: [ai/src/protocol/helpers.ts:20](https://github.com/puristajs/purista
 
 > `optional` **role**: [`AgentProtocolEnvelope`](AgentProtocolEnvelope.md)\[`"role"`\]
 
-Defined in: [ai/src/protocol/helpers.ts:21](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/helpers.ts#L21)
+Defined in: [packages/ai/src/protocol/helpers.ts:21](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/helpers.ts#L21)
 
 ***
 
@@ -72,7 +72,7 @@ Defined in: [ai/src/protocol/helpers.ts:21](https://github.com/puristajs/purista
 
 > `optional` **tenantId**: `string`
 
-Defined in: [ai/src/protocol/helpers.ts:23](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/helpers.ts#L23)
+Defined in: [packages/ai/src/protocol/helpers.ts:23](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/helpers.ts#L23)
 
 ***
 
@@ -80,7 +80,7 @@ Defined in: [ai/src/protocol/helpers.ts:23](https://github.com/puristajs/purista
 
 > `optional` **timestamp**: `string`
 
-Defined in: [ai/src/protocol/helpers.ts:19](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/helpers.ts#L19)
+Defined in: [packages/ai/src/protocol/helpers.ts:19](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/helpers.ts#L19)
 
 ***
 
@@ -88,4 +88,4 @@ Defined in: [ai/src/protocol/helpers.ts:19](https://github.com/puristajs/purista
 
 > `optional` **userId**: `string`
 
-Defined in: [ai/src/protocol/helpers.ts:22](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/helpers.ts#L22)
+Defined in: [packages/ai/src/protocol/helpers.ts:22](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/helpers.ts#L22)

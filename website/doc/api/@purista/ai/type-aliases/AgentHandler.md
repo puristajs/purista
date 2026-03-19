@@ -4,11 +4,11 @@
 
 [PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentHandler
 
-# Type Alias: AgentHandler()\<Payload, Parameter, Resources, Models\>
+# Type Alias: AgentHandler()\<Payload, Parameter, Resources, Models, KnowledgeAliases, AgentInvokes\>
 
-> **AgentHandler**\<`Payload`, `Parameter`, `Resources`, `Models`\> = (`context`, `payload`, `parameter`) => `Promise`\<[`AgentHandlerResult`](AgentHandlerResult.md)\> \| [`AgentHandlerResult`](AgentHandlerResult.md)
+> **AgentHandler**\<`Payload`, `Parameter`, `Resources`, `Models`, `KnowledgeAliases`, `AgentInvokes`\> = (`context`, `payload`, `parameter`) => `Promise`\<[`AgentHandlerResult`](AgentHandlerResult.md)\> \| [`AgentHandlerResult`](AgentHandlerResult.md)
 
-Defined in: [ai/src/builder/AgentBuilder.ts:34](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/builder/AgentBuilder.ts#L34)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:123](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/builder/AgentBuilder.ts#L123)
 
 ## Type Parameters
 
@@ -28,11 +28,19 @@ Defined in: [ai/src/builder/AgentBuilder.ts:34](https://github.com/puristajs/pur
 
 `Models` *extends* `Record`\<`string`, [`ModelProvider`](../interfaces/ModelProvider.md)\> = `Record`\<`string`, [`ModelProvider`](../interfaces/ModelProvider.md)\>
 
+### KnowledgeAliases
+
+`KnowledgeAliases` *extends* `string` = `never`
+
+### AgentInvokes
+
+`AgentInvokes` *extends* [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md) = [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)
+
 ## Parameters
 
 ### context
 
-[`AgentHandlerContext`](AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`\>
+[`AgentHandlerContext`](AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`, `KnowledgeAliases`, `AgentInvokes`\>
 
 ### payload
 

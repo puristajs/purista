@@ -6,9 +6,9 @@
 
 # Function: createAgentHandlerContext()
 
-> **createAgentHandlerContext**\<`Payload`, `Parameter`, `Resources`, `Models`\>(`input`): [`AgentHandlerContext`](../type-aliases/AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`\>
+> **createAgentHandlerContext**\<`Payload`, `Parameter`, `Resources`, `Models`, `KnowledgeAliases`, `AgentInvokes`\>(`input`): [`AgentHandlerContext`](../type-aliases/AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`, `KnowledgeAliases`, `AgentInvokes`\>
 
-Defined in: [ai/src/runtime/context.ts:417](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/context.ts#L417)
+Defined in: [packages/ai/src/runtime/context.ts:1205](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L1205)
 
 ## Type Parameters
 
@@ -28,12 +28,20 @@ Defined in: [ai/src/runtime/context.ts:417](https://github.com/puristajs/purista
 
 `Models` *extends* `Record`\<`string`, [`ModelProvider`](../interfaces/ModelProvider.md)\>
 
+### KnowledgeAliases
+
+`KnowledgeAliases` *extends* `string` = `string`
+
+### AgentInvokes
+
+`AgentInvokes` *extends* [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md) = [`AgentInvokeList`](../../core/type-aliases/AgentInvokeList.md)
+
 ## Parameters
 
 ### input
 
-[`CreateAgentHandlerContextInput`](../type-aliases/CreateAgentHandlerContextInput.md)\<`Payload`, `Parameter`, `Resources`, `Models`\>
+[`CreateAgentHandlerContextInput`](../type-aliases/CreateAgentHandlerContextInput.md)\<`Payload`, `Parameter`, `Resources`, `Models`, `KnowledgeAliases`, `AgentInvokes`\>
 
 ## Returns
 
-[`AgentHandlerContext`](../type-aliases/AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`\>
+[`AgentHandlerContext`](../type-aliases/AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`, `KnowledgeAliases`, `AgentInvokes`\>

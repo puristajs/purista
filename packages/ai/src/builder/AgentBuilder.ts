@@ -608,6 +608,9 @@ export class AgentBuilder<
 					serviceName,
 					serviceVersion,
 					commandName,
+					outputSchema,
+					payloadSchema,
+					parameterSchema,
 				},
 			]
 		}
@@ -645,6 +648,17 @@ export class AgentBuilder<
 	> {
 		this.commandBuilder.canInvokeAgent(agentName, agentVersion, invokeConfigOrParameterSchema)
 		this.streamBuilder.canInvokeAgent(agentName, agentVersion, invokeConfigOrParameterSchema)
+		const invokeConfig =
+			invokeConfigOrParameterSchema &&
+			typeof invokeConfigOrParameterSchema === 'object' &&
+			!('~standard' in invokeConfigOrParameterSchema) &&
+			('payloadSchema' in invokeConfigOrParameterSchema || 'parameterSchema' in invokeConfigOrParameterSchema)
+				? (invokeConfigOrParameterSchema as AgentInvokeConfig<Payload, Parameter>)
+				: undefined
+		const payloadSchema = invokeConfig?.payloadSchema
+		const parameterSchema = invokeConfig
+			? invokeConfig.parameterSchema
+			: (invokeConfigOrParameterSchema as Parameter | undefined)
 
 		const alreadyRegistered =
 			this.manifest.allowedAgents?.some(
@@ -657,6 +671,8 @@ export class AgentBuilder<
 				{
 					agentName,
 					agentVersion,
+					payloadSchema,
+					parameterSchema,
 				},
 			]
 		}
@@ -1924,6 +1940,10 @@ export class AgentBuilder<
 				context: this.contextSchema,
 			},
 			getManifest: () => manifest,
+			getExternalRuntimeMetadata: () => ({
+				commands: manifest.allowedTools,
+				agents: manifest.allowedAgents ?? [],
+			}),
 			getInstance: async (
 				eventBridge,
 				...options: [KnowledgeAliases] extends [never]

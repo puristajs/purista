@@ -13,6 +13,7 @@ import type {
 } from '@purista/core'
 import { HandledError, StatusCode, validate } from '@purista/core'
 
+import { createExposeHelpers, type ExposeHelpers } from '../bridge/externalRuntime.js'
 import type {
 	KnowledgeAdapter,
 	KnowledgeDeleteRequest,
@@ -642,6 +643,7 @@ export type AgentHandlerContext<
 	stream: AgentStreamEmitter
 	protocol: ProtocolEmitter
 	tools: ToolInvoker
+	expose: ExposeHelpers
 	resources: Resources
 	models: Models
 	agents: {
@@ -1215,6 +1217,14 @@ export const createAgentHandlerContext = <
 		manifest: input.manifest,
 		payload: input.payload,
 	})
+	const tools = createToolInvoker(input.serviceContext, input.manifest.allowedTools ?? [], input.protocol)
+	const agents = createAgentInvocationHelpers({
+		eventBridge: input.eventBridge,
+		protocol: input.protocol,
+		serviceContext: input.serviceContext,
+		session: sessionHelpers,
+		manifest: input.manifest,
+	})
 
 	return {
 		logger: input.serviceContext.logger,
@@ -1231,16 +1241,16 @@ export const createAgentHandlerContext = <
 		) as KnowledgeHelpers<KnowledgeAliases>,
 		stream: createStreamEmitter(input.protocol),
 		protocol: input.protocol,
-		tools: createToolInvoker(input.serviceContext, input.manifest.allowedTools ?? [], input.protocol),
+		tools,
+		expose: createExposeHelpers({
+			manifest: input.manifest,
+			tools,
+			agents,
+			protocol: input.protocol,
+		}),
 		resources: input.resources,
 		models: input.models,
-		agents: createAgentInvocationHelpers({
-			eventBridge: input.eventBridge,
-			protocol: input.protocol,
-			serviceContext: input.serviceContext,
-			session: sessionHelpers,
-			manifest: input.manifest,
-		}),
+		agents,
 		embeddings: input.embeddings as AgentHandlerContext<
 			Payload,
 			Parameter,

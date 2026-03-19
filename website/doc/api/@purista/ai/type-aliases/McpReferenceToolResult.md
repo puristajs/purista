@@ -8,7 +8,7 @@
 
 > **McpReferenceToolResult** = `object`
 
-Defined in: [ai/src/protocol/interoperability.ts:75](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/interoperability.ts#L75)
+Defined in: [packages/ai/src/protocol/interoperability.ts:75](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/interoperability.ts#L75)
 
 Reference MCP-style tool result.
 This follows common MCP response semantics but remains transport-agnostic.
@@ -19,7 +19,7 @@ This follows common MCP response semantics but remains transport-agnostic.
 
 > **content**: [`McpReferenceContent`](McpReferenceContent.md)[]
 
-Defined in: [ai/src/protocol/interoperability.ts:76](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/interoperability.ts#L76)
+Defined in: [packages/ai/src/protocol/interoperability.ts:76](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/interoperability.ts#L76)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: [ai/src/protocol/interoperability.ts:76](https://github.com/puristaj
 
 > `optional` **isError**: `boolean`
 
-Defined in: [ai/src/protocol/interoperability.ts:77](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/interoperability.ts#L77)
+Defined in: [packages/ai/src/protocol/interoperability.ts:77](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/interoperability.ts#L77)
 
 ***
 
@@ -35,4 +35,4 @@ Defined in: [ai/src/protocol/interoperability.ts:77](https://github.com/puristaj
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [ai/src/protocol/interoperability.ts:78](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/interoperability.ts#L78)
+Defined in: [packages/ai/src/protocol/interoperability.ts:78](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/interoperability.ts#L78)

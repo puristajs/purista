@@ -64,11 +64,25 @@ export type AllowedToolDefinition = {
 	serviceVersion: string
 	commandName: string
 	description?: string
+	payloadSchema?: Schema
+	parameterSchema?: Schema
+	outputSchema?: Schema
+	toolName?: string
 }
 
 export type AllowedAgentDefinition = {
 	agentName: string
 	agentVersion: string
+	description?: string
+	payloadSchema?: Schema
+	parameterSchema?: Schema
+	outputSchema?: Schema
+	toolName?: string
+}
+
+export type ExternalRuntimeMetadata = {
+	commands: AllowedToolDefinition[]
+	agents: AllowedAgentDefinition[]
 }
 
 export type AgentSessionConfig = {

@@ -116,6 +116,10 @@ const _serverInstance = serve({
 - [HonoServiceV1Config](type-aliases/HonoServiceV1Config.md)
 - [HonoServiceV1ConfigPartial](type-aliases/HonoServiceV1ConfigPartial.md)
 - [HonoV1ServiceCommandsToRestApiInputPayload](type-aliases/HonoV1ServiceCommandsToRestApiInputPayload.md)
+- [ProblemDetails](type-aliases/ProblemDetails.md)
+- [ProblemTypeConfig](type-aliases/ProblemTypeConfig.md)
+- [ProtocolSseEvent](type-aliases/ProtocolSseEvent.md)
+- [StreamTransportFramePayload](type-aliases/StreamTransportFramePayload.md)
 - [VariablesBase](type-aliases/VariablesBase.md)
 
 ## Variables
@@ -130,6 +134,7 @@ const _serverInstance = serve({
 - [honoV1ServiceCommandsToRestApiInputPayloadSchema](variables/honoV1ServiceCommandsToRestApiInputPayloadSchema.md)
 - [InfoObjectSchema](variables/InfoObjectSchema.md)
 - [OPENAPI\_DEFAULT\_INFO](variables/OPENAPI_DEFAULT_INFO.md)
+- [ProblemDetailsObjectSchema](variables/ProblemDetailsObjectSchema.md)
 - [puristaVersion](variables/puristaVersion.md)
 - [ServerObjectSchema](variables/ServerObjectSchema.md)
 - [serviceCommandsToRestApiSubscriptionBuilder](variables/serviceCommandsToRestApiSubscriptionBuilder.md)
@@ -139,7 +144,19 @@ const _serverInstance = serve({
 ## Functions
 
 - [addPathToOpenApi](functions/addPathToOpenApi.md)
+- [collectAggregateStreamResult](functions/collectAggregateStreamResult.md)
+- [encodeProtocolSseEvent](functions/encodeProtocolSseEvent.md)
 - [getErrorName](functions/getErrorName.md)
 - [getErrorResponseSchema](functions/getErrorResponseSchema.md)
 - [getParameterDefinition](functions/getParameterDefinition.md)
+- [getProblemDetailsSchema](functions/getProblemDetailsSchema.md)
+- [getProblemTypeUri](functions/getProblemTypeUri.md)
 - [getQueryDefinition](functions/getQueryDefinition.md)
+- [isAgentEnvelopeLike](functions/isAgentEnvelopeLike.md)
+- [isProtocolSseEvent](functions/isProtocolSseEvent.md)
+- [isStreamErrorPayload](functions/isStreamErrorPayload.md)
+- [isTransportControlFrame](functions/isTransportControlFrame.md)
+- [negotiateProblemRepresentation](functions/negotiateProblemRepresentation.md)
+- [renderProblemDetailsMarkdown](functions/renderProblemDetailsMarkdown.md)
+- [resolveHttpStreamingMode](functions/resolveHttpStreamingMode.md)
+- [toProblemDetails](functions/toProblemDetails.md)

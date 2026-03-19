@@ -8,7 +8,7 @@
 
 > **ConversationMessage** = `object`
 
-Defined in: [ai/src/runtime/conversation.ts:10](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L10)
+Defined in: [packages/ai/src/runtime/conversation.ts:10](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L10)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [ai/src/runtime/conversation.ts:10](https://github.com/puristajs/pur
 
 > **content**: `string`
 
-Defined in: [ai/src/runtime/conversation.ts:13](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L13)
+Defined in: [packages/ai/src/runtime/conversation.ts:13](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L13)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [ai/src/runtime/conversation.ts:13](https://github.com/puristajs/pur
 
 > **createdAt**: `number`
 
-Defined in: [ai/src/runtime/conversation.ts:14](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L14)
+Defined in: [packages/ai/src/runtime/conversation.ts:14](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L14)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [ai/src/runtime/conversation.ts:14](https://github.com/puristajs/pur
 
 > **id**: `string`
 
-Defined in: [ai/src/runtime/conversation.ts:11](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L11)
+Defined in: [packages/ai/src/runtime/conversation.ts:11](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L11)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [ai/src/runtime/conversation.ts:11](https://github.com/puristajs/pur
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [ai/src/runtime/conversation.ts:17](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L17)
+Defined in: [packages/ai/src/runtime/conversation.ts:17](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L17)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [ai/src/runtime/conversation.ts:17](https://github.com/puristajs/pur
 
 > **role**: [`ConversationRole`](ConversationRole.md)
 
-Defined in: [ai/src/runtime/conversation.ts:12](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L12)
+Defined in: [packages/ai/src/runtime/conversation.ts:12](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L12)
 
 ***
 
@@ -56,7 +56,7 @@ Defined in: [ai/src/runtime/conversation.ts:12](https://github.com/puristajs/pur
 
 > `optional` **toolCallId**: `string`
 
-Defined in: [ai/src/runtime/conversation.ts:16](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L16)
+Defined in: [packages/ai/src/runtime/conversation.ts:16](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L16)
 
 ***
 
@@ -64,4 +64,4 @@ Defined in: [ai/src/runtime/conversation.ts:16](https://github.com/puristajs/pur
 
 > `optional` **toolName**: `string`
 
-Defined in: [ai/src/runtime/conversation.ts:15](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L15)
+Defined in: [packages/ai/src/runtime/conversation.ts:15](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L15)

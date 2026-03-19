@@ -47,7 +47,34 @@ LLM calls are expensive and can be slow. To protect your application and manage 
 
 Queued durable agents also need a `queueBridge`. The queue bridge decides which worker owns the job, and the pool decides how many jobs a process may execute at once. Inline agents do not need a queue bridge.
 
-## 3. Deployment Patterns
+## 3. External Runtime Bindings
+
+If you want to keep the reasoning loop in Vercel AI SDK but execute tools through PURISTA, create neutral bindings inside the handler and adapt them at the SDK boundary:
+
+```ts
+import { generateText, toAiSdkTools } from '@purista/ai'
+
+const bindings = context.expose.tools({
+  commands: [{ serviceName: 'support', serviceVersion: '1', commandName: 'lookupFaq' }],
+  agents: [{ agentName: 'triageAgent', agentVersion: '1', name: 'triageEscalation', resultMode: 'text' }],
+})
+
+await generateText({
+  model: context.models['openai:gpt-4o-mini'],
+  request: {
+    prompt: payload.prompt,
+    metadata: {
+      aiSdk: {
+        tools: toAiSdkTools(bindings),
+      },
+    },
+  },
+})
+```
+
+For queued durable runs, keep the bindings limited to PURISTA commands and child agents. In-memory closures are not part of the durable contract.
+
+## 4. Deployment Patterns
 
 ### Pattern A: In-Process (Monolith/Service)
 Run the agent in the same process as your API or Service. Good for low-to-medium volume or real-time streaming needs.
@@ -58,7 +85,7 @@ Deploy a dedicated process that only runs agents. This allows you to scale AI wo
 ### Pattern C: Queued Durable Workers
 Expose the agent over HTTP or SSE, but execute heavy work through queue workers. This is the preferred pattern for architecture synthesis, simulation, planning, and validation because it supports attach-and-stream frontends and recovery after restarts.
 
-## 4. Health & Monitoring
+## 5. Health & Monitoring
 
 Every agent instance provides a read-only status snapshot:
 

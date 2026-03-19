@@ -1,0 +1,29 @@
+[**PURISTA API**](../../../README.md)
+
+***
+
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / ProviderEmbedManyRequest
+
+# Type Alias: ProviderEmbedManyRequest
+
+> **ProviderEmbedManyRequest** = `object`
+
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:46](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/providers/runtime/ModelProvider.ts#L46)
+
+Payload sent to batch embedding-capable providers.
+
+## Properties
+
+### metadata?
+
+> `optional` **metadata**: `Record`\<`string`, `unknown`\>
+
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:48](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/providers/runtime/ModelProvider.ts#L48)
+
+***
+
+### values
+
+> **values**: `string`[]
+
+Defined in: [packages/ai/src/providers/runtime/ModelProvider.ts:47](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/providers/runtime/ModelProvider.ts#L47)

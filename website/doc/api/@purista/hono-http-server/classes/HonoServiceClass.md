@@ -6,7 +6,7 @@
 
 # Class: HonoServiceClass\<Bindings, Variables\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:86](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L86)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:99](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L99)
 
 A service which creates a Hono server, adds the command endpoints of given services.
 The webserver needs to be started programmatically, after the `.start` method.
@@ -62,13 +62,13 @@ const _serverInstance = serve({
 
 > **new HonoServiceClass**\<`Bindings`, `Variables`\>(`config`): `HonoServiceClass`\<`Bindings`, `Variables`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:104](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L104)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:117](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L117)
 
 #### Parameters
 
 ##### config
 
-[`ServiceConstructorInput`](../../core/type-aliases/ServiceConstructorInput.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\<\{ `apiMountPath`: `string`; `enableDynamicRoutes`: `boolean`; `enableHealth`: `boolean`; `healthFunction?`: `any`; `healthPath`: `string`; `logLevel`: `"error"` \| `"info"` \| `"warn"` \| `"debug"` \| `"trace"` \| `"fatal"`; `openApi?`: \{ `components?`: `any`; `enabled`: `boolean`; `externalDocs?`: \{ `description?`: `string`; `url`: `string`; \}; `info`: \{ `contact?`: \{ `email?`: `string`; `name?`: `string`; `url?`: `string`; \}; `description`: `string`; `license?`: \{ `name`: `string`; `url?`: `string`; \}; `termsOfService?`: `string`; `title`: `string`; `version`: `string`; \}; `openapi`: `string`; `paths?`: `Record`\<`string`, `Record`\<`string`, `any`\>\>; `security?`: `any`[]; `servers?`: `object`[]; `tags?`: `object`[]; \}; `protectHandler?`: `any`; `services`: [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\>[]; `traceHeaderField`: `string`; \}, [`EmptyObject`](../../core/type-aliases/EmptyObject.md)\>\>
+[`ServiceConstructorInput`](../../core/type-aliases/ServiceConstructorInput.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\<\{ `apiMountPath`: `string`; `enableDynamicRoutes`: `boolean`; `enableHealth`: `boolean`; `healthFunction?`: `any`; `healthPath`: `string`; `logLevel`: `"error"` \| `"info"` \| `"warn"` \| `"debug"` \| `"trace"` \| `"fatal"`; `openApi?`: \{ `components?`: `any`; `enabled`: `boolean`; `externalDocs?`: \{ `description?`: `string`; `url`: `string`; \}; `info`: \{ `contact?`: \{ `email?`: `string`; `name?`: `string`; `url?`: `string`; \}; `description`: `string`; `license?`: \{ `name`: `string`; `url?`: `string`; \}; `termsOfService?`: `string`; `title`: `string`; `version`: `string`; \}; `openapi`: `string`; `paths?`: `Record`\<`string`, `Record`\<`string`, `any`\>\>; `security?`: `any`[]; `servers?`: `object`[]; `tags?`: `object`[]; \}; `problemDetails?`: \{ `typeBaseUri?`: `string`; \}; `protectHandler?`: `any`; `services`: [`Service`](../../core/classes/Service.md)\<[`ServiceClassTypes`](../../core/type-aliases/ServiceClassTypes.md)\>[]; `traceHeaderField`: `string`; \}, [`EmptyObject`](../../core/type-aliases/EmptyObject.md)\>\>
 
 #### Returns
 
@@ -96,7 +96,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:65
 
 > **app**: `Hono`\<\{ `Bindings`: `Bindings`; `Variables`: `Variables`; \}, `BlankSchema`, `"/"`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:93](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L93)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:106](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L106)
 
 The Hono instance
 
@@ -248,6 +248,14 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:79
 
 > `optional` **tags**: `object`[]
 
+#### problemDetails?
+
+> `optional` **problemDetails**: `object`
+
+##### problemDetails.typeBaseUri?
+
+> `optional` **typeBaseUri**: `string`
+
 #### protectHandler?
 
 > `optional` **protectHandler**: `any`
@@ -342,7 +350,7 @@ Defined in: core/dist/commonjs/core/Service/ServiceBaseClass/ServiceBaseClass.im
 
 > **openApi**: `OpenApiBuilder`
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:98](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L98)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:111](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L111)
 
 The OpenApiBuilder instance
 
@@ -522,7 +530,7 @@ Get service info
 
 > **addEndpoint**(`metadata`, `service`): `void`
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:332](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L332)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:368](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L368)
 
 Adds a single service command endpoint to the Hono router
 
@@ -550,7 +558,7 @@ Address of the service hosting the command
 
 > **destroy**(): `Promise`\<`void`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:611](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L611)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:697](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L697)
 
 Stop and destroy the current service
 
@@ -1112,7 +1120,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:92
 
 > **invoke**\<`T`\>(`input`, `endpoint`): `Promise`\<`T`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:534](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L534)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:620](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L620)
 
 #### Type Parameters
 
@@ -1204,7 +1212,7 @@ Defined in: core/dist/commonjs/core/types/GenericEventEmitter.d.ts:14
 
 > **openStream**(`input`, `endpoint`): `Promise`\<[`StreamHandle`](../../core/interfaces/StreamHandle.md)\<`unknown`, `unknown`\>\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:549](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L549)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:635](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L635)
 
 #### Parameters
 
@@ -1226,7 +1234,7 @@ Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:549](https
 
 > **prepareDestroy**(): `object`
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:604](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L604)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:690](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L690)
 
 Helper function to be used in gracefulShutdown.
 It prevents to handle new requests during shut down.
@@ -1288,7 +1296,7 @@ Defined in: core/dist/commonjs/core/Service/Service.impl.d.ts:176
 
 > **registerService**(...`services`): `HonoServiceClass`\<`Bindings`, `Variables`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:311](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L311)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:347](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L347)
 
 Register a service instance.
 Must be called before `.start`.
@@ -1406,7 +1414,7 @@ function name is need in messages like InfoServiceFunctionAdded
 
 > **setHealthFunction**(`fn`): `HonoServiceClass`\<`Bindings`, `Variables`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:141](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L141)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:154](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L154)
 
 Set a custom health function
 
@@ -1426,7 +1434,7 @@ Set a custom health function
 
 > **setHonoTypes**\<`E`\>(): `HonoServiceClass`\<`Bindings` & `E`\[`"Bindings"`\], `Variables` & `E`\[`"Variables"`\]\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:128](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L128)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:141](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L141)
 
 Set the Hono types for Variables and Bindings.
 
@@ -1448,7 +1456,7 @@ The service instance with propper types
 
 > **setProtectMiddleware**(`fn`): `HonoServiceClass`\<`Bindings`, `Variables`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:161](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L161)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:174](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L174)
 
 Set the middleware which will be executed on all endpoints which are marked as secured/protected.
 It can also be used to enhance input information.
@@ -1479,7 +1487,7 @@ return auth(c, next)
 
 > **setServiceAvailable**(): `Promise`\<`void`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:584](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L584)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:670](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L670)
 
 Set the service available
 Request will be processed.
@@ -1494,7 +1502,7 @@ Request will be processed.
 
 > **setServiceUnavailable**(): `Promise`\<`void`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:576](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L576)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:662](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L662)
 
 Set the service unavailable
 The webserver will return 503 Service Unavailable
@@ -1509,7 +1517,7 @@ The webserver will return 503 Service Unavailable
 
 > **start**(): `Promise`\<`void`\>
 
-Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:166](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L166)
+Defined in: [hono-http-server/src/service/hono/v1/HonoServiceClass.ts:200](https://github.com/puristajs/purista/blob/master/packages/hono-http-server/src/service/hono/v1/HonoServiceClass.ts#L200)
 
 It connects to the event bridge and subscribes to the topics that are in the subscription list.
 

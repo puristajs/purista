@@ -21,6 +21,8 @@ export const supportAgent = new AgentBuilder({ ... })
 
 Queued durable agents still use the same endpoint, but the transport attaches to the live run instead of assuming the work finishes in the request itself.
 
+If the handler uses external runtime bindings plus an adapter such as `toAiSdkTools(...)`, the frontend does not change. Tool events, `run-state`, and final assistant messages are still mapped into the same SSE protocol.
+
 ## 2. Frontend Integration
 
 ```tsx title="frontend/ChatComponent.tsx"
@@ -91,6 +93,7 @@ The execution panel should stay separate from the chat transcript. Keep:
 2. The exposed endpoint is included in OpenAPI generation.
 3. Tracing, logs, queue ownership, and run state stay connected end to end.
 4. The composer can be locked using durable run state instead of local UI-only flags.
+5. External AI SDK loops still inherit PURISTA tool telemetry and durable progress updates.
 
 ## 5. Practical Rule
 

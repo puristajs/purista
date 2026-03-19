@@ -8,7 +8,7 @@
 
 > **AllowedToolDefinition** = `object`
 
-Defined in: [ai/src/types/AgentManifest.ts:15](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L15)
+Defined in: [packages/ai/src/types/AgentManifest.ts:62](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L62)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [ai/src/types/AgentManifest.ts:15](https://github.com/puristajs/puri
 
 > **commandName**: `string`
 
-Defined in: [ai/src/types/AgentManifest.ts:18](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L18)
+Defined in: [packages/ai/src/types/AgentManifest.ts:65](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L65)
 
 ***
 
@@ -24,7 +24,31 @@ Defined in: [ai/src/types/AgentManifest.ts:18](https://github.com/puristajs/puri
 
 > `optional` **description**: `string`
 
-Defined in: [ai/src/types/AgentManifest.ts:19](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L19)
+Defined in: [packages/ai/src/types/AgentManifest.ts:66](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L66)
+
+***
+
+### outputSchema?
+
+> `optional` **outputSchema**: [`Schema`](../../core/type-aliases/Schema.md)
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:69](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L69)
+
+***
+
+### parameterSchema?
+
+> `optional` **parameterSchema**: [`Schema`](../../core/type-aliases/Schema.md)
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:68](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L68)
+
+***
+
+### payloadSchema?
+
+> `optional` **payloadSchema**: [`Schema`](../../core/type-aliases/Schema.md)
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:67](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L67)
 
 ***
 
@@ -32,7 +56,7 @@ Defined in: [ai/src/types/AgentManifest.ts:19](https://github.com/puristajs/puri
 
 > **serviceName**: `string`
 
-Defined in: [ai/src/types/AgentManifest.ts:16](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L16)
+Defined in: [packages/ai/src/types/AgentManifest.ts:63](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L63)
 
 ***
 
@@ -40,4 +64,12 @@ Defined in: [ai/src/types/AgentManifest.ts:16](https://github.com/puristajs/puri
 
 > **serviceVersion**: `string`
 
-Defined in: [ai/src/types/AgentManifest.ts:17](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L17)
+Defined in: [packages/ai/src/types/AgentManifest.ts:64](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L64)
+
+***
+
+### toolName?
+
+> `optional` **toolName**: `string`
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:70](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L70)

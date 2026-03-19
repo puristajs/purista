@@ -8,7 +8,7 @@
 
 > **AgentSessionConfig** = `object`
 
-Defined in: [ai/src/types/AgentManifest.ts:22](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L22)
+Defined in: [packages/ai/src/types/AgentManifest.ts:88](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L88)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [ai/src/types/AgentManifest.ts:22](https://github.com/puristajs/puri
 
 > `optional` **maxFrames**: `number`
 
-Defined in: [ai/src/types/AgentManifest.ts:25](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L25)
+Defined in: [packages/ai/src/types/AgentManifest.ts:91](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L91)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [ai/src/types/AgentManifest.ts:25](https://github.com/puristajs/puri
 
 > **storeName**: `string`
 
-Defined in: [ai/src/types/AgentManifest.ts:23](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L23)
+Defined in: [packages/ai/src/types/AgentManifest.ts:89](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L89)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [ai/src/types/AgentManifest.ts:23](https://github.com/puristajs/puri
 
 > `optional` **strategy**: `"full"` \| `"summary"`
 
-Defined in: [ai/src/types/AgentManifest.ts:24](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L24)
+Defined in: [packages/ai/src/types/AgentManifest.ts:90](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L90)

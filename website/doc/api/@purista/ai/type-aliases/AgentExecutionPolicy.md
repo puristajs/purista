@@ -1,0 +1,107 @@
+[**PURISTA API**](../../../README.md)
+
+***
+
+[PURISTA API](../../../packages.md) / [@purista/ai](../README.md) / AgentExecutionPolicy
+
+# Type Alias: AgentExecutionPolicy
+
+> **AgentExecutionPolicy** = `object`
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:28](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L28)
+
+## Properties
+
+### cleanup?
+
+> `optional` **cleanup**: [`AgentExecutionCleanupPolicy`](AgentExecutionCleanupPolicy.md)
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:39](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L39)
+
+***
+
+### heartbeatIntervalMs?
+
+> `optional` **heartbeatIntervalMs**: `number`
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:30](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L30)
+
+***
+
+### httpBehavior?
+
+> `optional` **httpBehavior**: [`AgentExecutionHttpBehavior`](AgentExecutionHttpBehavior.md)
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:38](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L38)
+
+***
+
+### leaseTtlMs?
+
+> `optional` **leaseTtlMs**: `number`
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:29](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L29)
+
+***
+
+### maxAttempts?
+
+> `optional` **maxAttempts**: `number`
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:31](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L31)
+
+***
+
+### maxDurationMs?
+
+> `optional` **maxDurationMs**: `number`
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:32](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L32)
+
+***
+
+### maxModelSteps?
+
+> `optional` **maxModelSteps**: `number`
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:33](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L33)
+
+***
+
+### maxNoopPersistenceCycles?
+
+> `optional` **maxNoopPersistenceCycles**: `number`
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:35](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L35)
+
+***
+
+### maxRepeatedFailures?
+
+> `optional` **maxRepeatedFailures**: `number`
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:36](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L36)
+
+***
+
+### maxToolCalls?
+
+> `optional` **maxToolCalls**: `number`
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:34](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L34)
+
+***
+
+### recovery?
+
+> `optional` **recovery**: [`AgentExecutionRecoveryPolicy`](AgentExecutionRecoveryPolicy.md)
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:37](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L37)
+
+***
+
+### scopeFromPayload?
+
+> `optional` **scopeFromPayload**: `string`[]
+
+Defined in: [packages/ai/src/types/AgentManifest.ts:40](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L40)

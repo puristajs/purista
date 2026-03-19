@@ -6,7 +6,7 @@
 
 # Function: getCommandContextMock()
 
-> **getCommandContextMock**\<`MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `MetadataType`, `QueueInvokes`, `AgentInvokes`\>(`input`): `object`
+> **getCommandContextMock**\<`MessagePayloadType`, `MessageParamsType`, `FunctionPayloadType`, `FunctionParamsType`, `Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `_MetadataType`, `QueueInvokes`, `AgentInvokes`\>(`input`): `object`
 
 Defined in: [mocks/getCommandContext.mock.ts:26](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getCommandContext.mock.ts#L26)
 
@@ -46,9 +46,9 @@ A function that returns a mock object for command function context
 
 `EmitList` *extends* `Record`\<`string`, [`Schema`](../type-aliases/Schema.md)\>
 
-### MetadataType
+### _MetadataType
 
-`MetadataType` *extends* [`CommandDefinitionMetadataBase`](../type-aliases/CommandDefinitionMetadataBase.md) = [`CommandDefinitionMetadataBase`](../type-aliases/CommandDefinitionMetadataBase.md)
+`_MetadataType` *extends* [`CommandDefinitionMetadataBase`](../type-aliases/CommandDefinitionMetadataBase.md) = [`CommandDefinitionMetadataBase`](../type-aliases/CommandDefinitionMetadataBase.md)
 
 ### QueueInvokes
 

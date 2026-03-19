@@ -7,41 +7,22 @@ All notable changes to this project will be documented in this file.
 ### Bug Fixes
 
 - Escape changelog angle brackets for api docs build ([#240](https://github.com/orhun/git-cliff/issues/240))
-- Point api nav to existing readme
 
 ### Documentation
 
-- Expand queue coverage and pin test containers
-- Clarify queue bridge navigation and injection
-- Refresh queue docs and api output
+- Sync generated site and api artifacts
+- Clarify nested agent orchestration
 
 ### Features
 
-- Showcase async queue http contract
-- Add bridge contract tests, redis bridge polish, and docs
-- Introduce builders, CLI scaffolding, and specs
+- Add Queue Handling to PURISTA ([#248](https://github.com/orhun/git-cliff/issues/248))
+- Add @purista/ai package ([#250](https://github.com/orhun/git-cliff/issues/250))
+- Forward nested agent streams
+- Add nested agent forwarding helper
 
-### Miscellaneous Tasks
+### Styling
 
-- Add context snapshot
-- Inherit root tsconfig
-
-### Core
-
-- Lazy start queue bridge
-- Add queue bridge config
-
-### Examples
-
-- Wire queue bridge in quickstart
-
-### Redis-queue-bridge
-
-- Normalize redis types
-
-### Spec
-
-- Document queue bridge separation
+- Format nested agent forwarding helpers
 
 ## [2.2.0] - 2026-02-13
 

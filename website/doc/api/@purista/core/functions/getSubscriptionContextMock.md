@@ -6,7 +6,7 @@
 
 # Function: getSubscriptionContextMock()
 
-> **getSubscriptionContextMock**\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `MetadataType`, `QueueInvokes`, `AgentInvokes`\>(`input`): `object`
+> **getSubscriptionContextMock**\<`Resources`, `Invokes`, `StreamInvokes`, `EmitList`, `_MetadataType`, `QueueInvokes`, `AgentInvokes`\>(`input`): `object`
 
 Defined in: [mocks/getSubscriptionContext.mock.ts:25](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getSubscriptionContext.mock.ts#L25)
 
@@ -30,9 +30,9 @@ A function that returns a mock object for subscription function context
 
 `EmitList` *extends* `Record`\<`string`, [`Schema`](../type-aliases/Schema.md)\>
 
-### MetadataType
+### _MetadataType
 
-`MetadataType` *extends* [`SubscriptionDefinitionMetadataBase`](../type-aliases/SubscriptionDefinitionMetadataBase.md) = [`SubscriptionDefinitionMetadataBase`](../type-aliases/SubscriptionDefinitionMetadataBase.md)
+`_MetadataType` *extends* [`SubscriptionDefinitionMetadataBase`](../type-aliases/SubscriptionDefinitionMetadataBase.md) = [`SubscriptionDefinitionMetadataBase`](../type-aliases/SubscriptionDefinitionMetadataBase.md)
 
 ### QueueInvokes
 

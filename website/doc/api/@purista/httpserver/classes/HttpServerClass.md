@@ -306,6 +306,22 @@ Defined in: [httpserver/src/service/httpServer/v1/HttpServerClass.impl.ts:44](ht
 
 > **path**: `string`
 
+###### http.stream?
+
+> `optional` **stream**: `object`
+
+###### http.stream.documentationUrl?
+
+> `optional` **documentationUrl**: `string`
+
+###### http.stream.mode?
+
+> `optional` **mode**: `"stream"` \| `"aggregate"`
+
+###### http.stream.protocol
+
+> **protocol**: `string`
+
 ***
 
 ### ~~routes~~

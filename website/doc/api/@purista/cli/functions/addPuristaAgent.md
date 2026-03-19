@@ -8,7 +8,7 @@
 
 > **addPuristaAgent**(`input`): `Promise`\<`void`\>
 
-Defined in: [addPuristaAgent.ts:13](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/cli/src/api/addPuristaAgent.ts#L13)
+Defined in: [addPuristaAgent.ts:13](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/cli/src/api/addPuristaAgent.ts#L13)
 
 ## Parameters
 
@@ -73,6 +73,10 @@ Defined in: [addPuristaAgent.ts:13](https://github.com/puristajs/purista/blob/79
 #### puristaProject
 
 [`PuristaProjectInfo`](../type-aliases/PuristaProjectInfo.md)
+
+#### responseEventName?
+
+`string`
 
 #### serviceName
 

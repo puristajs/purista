@@ -25,12 +25,34 @@ export const getUnsupportedWorkerAiSdkReason = (metadata: unknown): string | nul
 		return null
 	}
 	const aiSdkRecord = aiSdk as Record<string, unknown>
+	const hasSupportedPuristaBridgeTools = (value: unknown) => {
+		if (!value || typeof value !== 'object' || Array.isArray(value)) {
+			return false
+		}
+		return Object.values(value as Record<string, unknown>).every(toolEntry => {
+			if (!toolEntry || typeof toolEntry !== 'object' || Array.isArray(toolEntry)) {
+				return false
+			}
+			const binding = (toolEntry as { externalRuntime?: { kind?: unknown; descriptor?: unknown } }).externalRuntime
+			return (
+				binding !== undefined &&
+				(binding.kind === 'command' || binding.kind === 'agent') &&
+				typeof binding.descriptor === 'object' &&
+				binding.descriptor !== null
+			)
+		})
+	}
 	const generate =
 		aiSdkRecord.generate && typeof aiSdkRecord.generate === 'object' && !Array.isArray(aiSdkRecord.generate)
 			? (aiSdkRecord.generate as Record<string, unknown>)
 			: undefined
-	if ('tools' in aiSdkRecord || (generate && 'tools' in generate)) {
-		return 'AIWorkerService queue runtime does not support function-based aiSdk.tools yet. Run this agent in-process or use command allowlist tools via context.tools.'
+	const topLevelTools = 'tools' in aiSdkRecord ? aiSdkRecord.tools : undefined
+	const nestedTools = generate && 'tools' in generate ? generate.tools : undefined
+	if (
+		(topLevelTools && !hasSupportedPuristaBridgeTools(topLevelTools)) ||
+		(nestedTools && !hasSupportedPuristaBridgeTools(nestedTools))
+	) {
+		return 'AIWorkerService queue runtime only supports external bindings that resolve to PURISTA commands or agents. Run this agent in-process or bind tools through the external runtime bridge.'
 	}
 	return null
 }

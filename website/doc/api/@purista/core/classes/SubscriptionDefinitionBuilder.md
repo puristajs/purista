@@ -6,7 +6,7 @@
 
 # Class: SubscriptionDefinitionBuilder\<S, C\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:41](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L41)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:54](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L54)
 
 Subscription definition builder is a helper to create and define a subscriptions for a service.
 It helps to set all needed filters.
@@ -29,7 +29,7 @@ A working schema definition needs at least a subscription name, a short descript
 
 > **new SubscriptionDefinitionBuilder**\<`S`, `C`\>(`subscriptionName`, `subscriptionDescription`, `deprecated?`): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:110](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L110)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:123](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L123)
 
 #### Parameters
 
@@ -55,7 +55,7 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts
 
 > **addOutputSchema**\<`OutputSchema`\>(`eventName`, `outputSchema`, `outputContentType?`, `outputContentEncoding?`): `SubscriptionDefinitionBuilder`\<`S`, [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `OutputSchema`, `C`\[`"TransformInputPayloadSchema"`\], `C`\[`"TransformInputParamsSchema"`\], `C`\[`"TransformOutputSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\]\>\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:646](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L646)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:671](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L671)
 
 Add a schema for output payload validation.
 Types for payload of message and function payload output are generated from given schema.
@@ -104,7 +104,7 @@ SubscriptionDefinitionBuilder
 
 > **addParameterSchema**\<`ParamsSchema`\>(`parameterSchema`): `SubscriptionDefinitionBuilder`\<`S`, [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `ParamsSchema`, `C`\[`"OutputSchema"`\], `C`\[`"TransformInputPayloadSchema"`\], `C`\[`"TransformInputParamsSchema"`\], `C`\[`"TransformOutputSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\]\>\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:679](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L679)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:704](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L704)
 
 Add a schema for output parameter validation.
 Types for parameter of message and function parameter output are generated from given schema.
@@ -135,7 +135,7 @@ SubscriptionDefinitionBuilder
 
 > **addPayloadSchema**\<`PayloadSchema`\>(`inputSchema`, `inputContentType?`, `inputContentEncoding?`): `SubscriptionDefinitionBuilder`\<`S`, [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`PayloadSchema`, `C`\[`"ParamsSchema"`\], `C`\[`"OutputSchema"`\], `C`\[`"TransformInputPayloadSchema"`\], `C`\[`"TransformInputParamsSchema"`\], `C`\[`"TransformOutputSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\]\>\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:611](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L611)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:636](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L636)
 
 Add a schema for input payload validation.
 Types for payload of message and function payload input are generated from given schema.
@@ -178,7 +178,7 @@ SubscriptionDefinitionBuilder
 
 > **adviceAutoacknowledgeMessage**(`acknowledge?`): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:491](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L491)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:516](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L516)
 
 Instruct the event bridge message broker to autoacknowledge messages as soon as they arrive.
 This means, a message will not be resent, if the subscription execution fails unexpected.
@@ -208,7 +208,7 @@ SubscriptionDefinition
 
 > **adviceDurable**(`durable`): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:516](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L516)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:541](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L541)
 
 False: defines the subscription as a live-subscription, which is only able to process messages while the subscription itself is running.
 
@@ -231,7 +231,7 @@ As soon as the subscription is back again, all missed messages will be sent firs
 
 > **canConsumeStream**\<`Chunk`, `Final`, `Payload`, `Parameter`, `SName`, `Version`, `Fname`\>(`serviceName`, `serviceVersion`, `serviceTarget`, `chunkSchema?`, `payloadSchema?`, `parameterSchema?`, `finalSchema?`, `validateChunk?`, `validateFinal?`): `SubscriptionDefinitionBuilder`\<`S`, [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"OutputSchema"`\], `C`\[`"TransformInputPayloadSchema"`\], `C`\[`"TransformInputParamsSchema"`\], `C`\[`"TransformOutputSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\] & `Record`\<`SName`, `Record`\<`Version`, `Record`\<`Fname`, (`payload`, `parameter`) => `Promise`\<\{ `sessionId`: `string`; `[asyncIterator]`: `AsyncIterator`\<\{ `payload`: ...; \}\>; `cancel`: `Promise`\<`void`\>; \}\>\>\>\>, `C`\[`"EmitList"`\]\>\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:199](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L199)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:212](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L212)
 
 #### Type Parameters
 
@@ -311,7 +311,7 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts
 
 > **canEmit**\<`EventName`, `T`\>(`eventName`, `schema`): `SubscriptionDefinitionBuilder`\<`S`, [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"OutputSchema"`\], `C`\[`"TransformInputPayloadSchema"`\], `C`\[`"TransformInputParamsSchema"`\], `C`\[`"TransformOutputSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\] & `Record`\<`EventName`, [`InferIn`](../type-aliases/InferIn.md)\<`T`\>\>\>\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:410](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L410)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:435](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L435)
 
 Define which custom events the subscription can emit.
 
@@ -349,7 +349,7 @@ the payload schema
 
 > **canEnqueue**\<`Payload`, `Parameter`, `QueueName`\>(`queueName`, `payloadSchema?`, `parameterSchema?`): `SubscriptionDefinitionBuilder`\<`S`, [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"OutputSchema"`\], `C`\[`"TransformInputPayloadSchema"`\], `C`\[`"TransformInputParamsSchema"`\], `C`\[`"TransformOutputSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\] & `Record`\<`QueueName`, (`payload`, `parameter`, `options?`) => `Promise`\<[`QueueEnqueueResult`](../type-aliases/QueueEnqueueResult.md)\>\>\>\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:360](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L360)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:385](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L385)
 
 #### Type Parameters
 
@@ -389,7 +389,7 @@ Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts
 
 > **canInvoke**\<`Output`, `Payload`, `Parameter`, `SName`, `Version`, `Fname`\>(`serviceName`, `serviceVersion`, `serviceTarget`, `outputSchema?`, `payloadSchema?`, `parameterSchema?`): `SubscriptionDefinitionBuilder`\<`S`, [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"OutputSchema"`\], `C`\[`"TransformInputPayloadSchema"`\], `C`\[`"TransformInputParamsSchema"`\], `C`\[`"TransformOutputSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\] & `Record`\<`SName`, `Record`\<`Version`, `Record`\<`Fname`, (`payload`, `parameter`) => `Promise`\<[`Infer`](../type-aliases/Infer.md)\<`Output`\>\>\>\>\>, `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\]\>\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:129](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L129)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:142](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L142)
 
 Define a command which can be invoked by the current subscription
 
@@ -453,18 +453,22 @@ Define a command which can be invoked by the current subscription
 
 ### canInvokeAgent()
 
-> **canInvokeAgent**\<`Parameter`, `SName`, `Version`\>(`agentName`, `agentVersion`, `parameterSchema?`): `SubscriptionDefinitionBuilder`\<`S`, [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"OutputSchema"`\], `C`\[`"TransformInputPayloadSchema"`\], `C`\[`"TransformInputParamsSchema"`\], `C`\[`"TransformOutputSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\], `C`\[`"AgentInvokes"`\] & `Record`\<`SName`, `Record`\<`Version`, \{ `call`: (`payload`, `parameter`) => [`AgentInvocation`](../interfaces/AgentInvocation.md)\<\{ `history`: `any`[]; `message`: `any`; \}\>; \}\>\>\>\>
+> **canInvokeAgent**\<`Payload`, `Parameter`, `SName`, `Version`\>(`agentName`, `agentVersion`, `invokeConfigOrParameterSchema?`): `SubscriptionDefinitionBuilder`\<`S`, [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"OutputSchema"`\], `C`\[`"TransformInputPayloadSchema"`\], `C`\[`"TransformInputParamsSchema"`\], `C`\[`"TransformOutputSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\], `C`\[`"AgentInvokes"`\] & `Record`\<`SName`, `Record`\<`Version`, \{ `call`: (`payload`, `parameter?`) => [`AgentInvocation`](../interfaces/AgentInvocation.md)\<\{ `history`: `any`[]; `message`: `any`; \}\>; \}\>\>\>\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:298](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L298)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:313](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L313)
 
 Define an agent which can be invoked by the current subscription.
 The agent must follow the PURISTA agent protocol.
 
 #### Type Parameters
 
+##### Payload
+
+`Payload` *extends* [`Schema`](../type-aliases/Schema.md) = `ZodObject`\<\{ `attachments`: `ZodDefault`\<`ZodOptional`\<`ZodArray`\<`ZodAny`\>\>\>; `conversationId`: `ZodOptional`\<`ZodString`\>; `history`: `ZodDefault`\<`ZodOptional`\<`ZodArray`\<`ZodAny`\>\>\>; `message`: `ZodString`; \}, `$loose`\>
+
 ##### Parameter
 
-`Parameter` *extends* [`Schema`](../type-aliases/Schema.md)
+`Parameter` *extends* [`Schema`](../type-aliases/Schema.md) = [`Schema`](../type-aliases/Schema.md)
 
 ##### SName
 
@@ -488,15 +492,17 @@ The name of the agent service
 
 The version of the agent service
 
-##### parameterSchema?
+##### invokeConfigOrParameterSchema?
 
-`Parameter`
+Optional invoke configuration:
+- `parameterSchema` (legacy shorthand) validates `.call(_, parameter)`
+- `{ payloadSchema, parameterSchema }` validates both `.call(payload, parameter)` arguments
 
-The optional parameter schema for the agent
+`Parameter` | `AgentInvokeConfig`\<`Payload`, `Parameter`\>
 
 #### Returns
 
-`SubscriptionDefinitionBuilder`\<`S`, [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"OutputSchema"`\], `C`\[`"TransformInputPayloadSchema"`\], `C`\[`"TransformInputParamsSchema"`\], `C`\[`"TransformOutputSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\], `C`\[`"AgentInvokes"`\] & `Record`\<`SName`, `Record`\<`Version`, \{ `call`: (`payload`, `parameter`) => [`AgentInvocation`](../interfaces/AgentInvocation.md)\<\{ `history`: `any`[]; `message`: `any`; \}\>; \}\>\>\>\>
+`SubscriptionDefinitionBuilder`\<`S`, [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"OutputSchema"`\], `C`\[`"TransformInputPayloadSchema"`\], `C`\[`"TransformInputParamsSchema"`\], `C`\[`"TransformOutputSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\], `C`\[`"AgentInvokes"`\] & `Record`\<`SName`, `Record`\<`Version`, \{ `call`: (`payload`, `parameter?`) => [`AgentInvocation`](../interfaces/AgentInvocation.md)\<\{ `history`: `any`[]; `message`: `any`; \}\>; \}\>\>\>\>
 
 ***
 
@@ -504,7 +510,7 @@ The optional parameter schema for the agent
 
 > **filterForMessageType**(`messageType`): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:597](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L597)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:622](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L622)
 
 Adds a filter to match specific message type.
 
@@ -530,7 +536,7 @@ the type of message
 
 > **filterPrincipalId**\<`T`\>(`principalId`): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:464](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L464)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:489](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L489)
 
 Filter messages only for principalId
 
@@ -558,7 +564,7 @@ the principal id to subscribe
 
 > **filterReceivedBy**\<`N`, `V`, `T`, `I`\>(`serviceName`, `serviceVersion`, `serviceTarget`, `instanceId`): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:572](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L572)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:597](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L597)
 
 Add filter to only match messages received by given service function & version.
 Set one or more parameters to undefined means "do not filter by this criteria".
@@ -625,7 +631,7 @@ the event bridge instance id which should receive the message
 
 > **filterSentFrom**\<`N`, `V`, `T`, `I`\>(`serviceName`, `serviceVersion`, `serviceTarget`, `instanceId`): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:539](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L539)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:564](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L564)
 
 Add filter to only match messages send by given service function & version.
 Set one or more parameters to undefined means "do not filter by this criteria".
@@ -692,7 +698,7 @@ the event bridge instance id which was publishing the message
 
 > **filterTenantId**\<`T`\>(`tenantId`): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:474](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L474)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:499](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L499)
 
 Filter messages only for tenantId
 
@@ -720,7 +726,7 @@ the principal id to subscribe
 
 > **getDefinition**(): `Promise`\<[`Complete`](../type-aliases/Complete.md)\<[`SubscriptionDefinition`](../type-aliases/SubscriptionDefinition.md)\<`S`, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"TransformInputPayloadSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"TransformInputParamsSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"PayloadSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"ParamsSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"OutputSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"OutputSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"TransformOutputSchema"`\]\>, `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], [`SubscriptionDefinitionMetadataBase`](../type-aliases/SubscriptionDefinitionMetadataBase.md), `C`\[`"QueueInvokes"`\], `C`\[`"AgentInvokes"`\]\>\>\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:984](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L984)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:1009](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L1009)
 
 Returns the final subscription definition which will be passed into the service class.
 
@@ -736,7 +742,7 @@ SubscriptionDefinition
 
 > **getSubscriptionContextMock**(`input`): `object`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:1066](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L1066)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:1091](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L1091)
 
 Returns a mocked command function context, which can be used in unit tests.
 
@@ -1077,7 +1083,7 @@ wrap given function in an opentelemetry span
 
 > **getSubscriptionFunction**(): [`SubscriptionFunction`](../type-aliases/SubscriptionFunction.md)\<`S`, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"PayloadSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"ParamsSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"OutputSchema"`\]\>, `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\], `C`\[`"AgentInvokes"`\]\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:926](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L926)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:951](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L951)
 
 Get the function implementation including input and output validation.
 Also, before and after hooks are triggered during execution.
@@ -1094,7 +1100,7 @@ the subscription function
 
 > **getSubscriptionFunctionPlain**(): [`SubscriptionFunction`](../type-aliases/SubscriptionFunction.md)\<`S`, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"PayloadSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"ParamsSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"OutputSchema"`\]\>, `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\], `C`\[`"QueueInvokes"`\], `C`\[`"AgentInvokes"`\]\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:959](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L959)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:984](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L984)
 
 Get the function implementation without input and output validation.
 No hooks are triggered during execution.
@@ -1111,7 +1117,7 @@ the subscription function
 
 > **getSubscriptionTransformContextMock**(`input`): `object`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:1094](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L1094)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:1119](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L1119)
 
 Returns a mocked transform function context, which can be used in unit tests.
 
@@ -1397,7 +1403,7 @@ wrap given function in an opentelemetry span
 
 > **getTransformInputFunction**(): [`SubscriptionTransformInputHook`](../type-aliases/SubscriptionTransformInputHook.md)\<`S`, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"TransformInputPayloadSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"TransformInputParamsSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"PayloadSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"ParamsSchema"`\]\>\> \| `undefined`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:752](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L752)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:777](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L777)
 
 Return the transform input function
 
@@ -1413,7 +1419,7 @@ the input transform function if defined
 
 > **getTransformOutputFunction**(): [`SubscriptionTransformOutputHook`](../type-aliases/SubscriptionTransformOutputHook.md)\<`S`, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"OutputSchema"`\]\>, [`Infer`](../type-aliases/Infer.md)\<`C`\[`"ParamsSchema"`\]\>, [`InferIn`](../type-aliases/InferIn.md)\<`C`\[`"TransformOutputSchema"`\]\>\> \| `undefined`
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:816](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L816)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:841](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L841)
 
 Return the transform output function
 
@@ -1429,7 +1435,7 @@ the transform output function if defined
 
 > **markAsDeprecated**(): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:438](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L438)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:463](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L463)
 
 Mark this subscription as deprecated
 
@@ -1445,7 +1451,7 @@ SubscriptionDefinitionBuilder
 
 > **receiveMessageOnEveryInstance**(`enforce?`): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:505](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L505)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:530](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L530)
 
 Instruct the event bridge message broker to send the matching message to every running instance.
 The underlaying message broker must support this functionality.
@@ -1472,7 +1478,7 @@ SubscriptionDefinition
 
 > **setAfterGuardHooks**(`afterGuards`): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:862](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L862)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:887](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L887)
 
 Set one or more after guard hook(s).
 If there are multiple after guard hooks, they are executed in parallel
@@ -1497,7 +1503,7 @@ SubscriptionDefinitionBuilder
 
 > **setBeforeGuardHooks**(`beforeGuards`): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:835](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L835)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:860](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L860)
 
 Set one or more before guard hook(s).
 If there are multiple before guard hooks, they are executed in parallel
@@ -1522,7 +1528,7 @@ SubscriptionDefinitionBuilder
 
 > **setSubscriptionFunction**(`fn`): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:900](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L900)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:925](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L925)
 
 Required: Set the function implementation.
 The types should be automatically set as soon as schemas previously defined.
@@ -1558,7 +1564,7 @@ async function (context, payload, parameter) {
 
 > **setTransformInput**\<`TransformInputPayloadSchema`, `TransformInputParamsSchema`\>(`transformInputSchema`, `transformParameterSchema`, `transformFunction`, `inputContentType?`, `inputContentEncoding?`): `SubscriptionDefinitionBuilder`\<`S`, [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"OutputSchema"`\], `TransformInputPayloadSchema`, `TransformInputParamsSchema`, `C`\[`"TransformOutputSchema"`\], `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\]\>\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:709](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L709)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:734](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L734)
 
 Set a transform input hook which will encode or transform the input payload and parameters.
 Will be executed as first step before input validation, before guard and the function itself.
@@ -1618,7 +1624,7 @@ SubscriptionDefinitionBuilder
 
 > **setTransformOutput**\<`TransformOutputSchema`\>(`transformOutputSchema`, `transformFunction`, `outputContentType?`, `outputContentEncoding?`): `SubscriptionDefinitionBuilder`\<`S`, [`SubscriptionDefinitionBuilderTypes`](../type-aliases/SubscriptionDefinitionBuilderTypes.md)\<`C`\[`"PayloadSchema"`\], `C`\[`"ParamsSchema"`\], `C`\[`"OutputSchema"`\], `C`\[`"TransformInputPayloadSchema"`\], `C`\[`"TransformInputParamsSchema"`\], `TransformOutputSchema`, `C`\[`"Resources"`\], `C`\[`"Invokes"`\], `C`\[`"StreamInvokes"`\], `C`\[`"EmitList"`\]\>\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:776](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L776)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:801](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L801)
 
 Set a transform output hook which will encode or transform the response payload.
 Will be executed at very last step after function execution, output validation and after guard hooks.
@@ -1668,7 +1674,7 @@ SubscriptionDefinitionBuilder
 
 > **subscribeToEvent**\<`N`, `V`\>(`eventName`, `serviceVersion?`): `SubscriptionDefinitionBuilder`\<`S`, `C`\>
 
-Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:449](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L449)
+Defined in: [SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts:474](https://github.com/puristajs/purista/blob/master/packages/core/src/SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.ts#L474)
 
 Add a filter to only subscribe to messages with matching event name
 

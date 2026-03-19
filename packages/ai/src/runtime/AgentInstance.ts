@@ -238,6 +238,13 @@ export class AgentInstance implements AgentInstanceContract {
 		}
 	}
 
+	getExternalRuntimeMetadata() {
+		return {
+			commands: this.dependencies.manifest.allowedTools,
+			agents: this.dependencies.manifest.allowedAgents ?? [],
+		}
+	}
+
 	private notifyStream(stream: AgentStreamResponder | undefined, envelopes: AgentProtocolEnvelope[]) {
 		if (!stream) {
 			return

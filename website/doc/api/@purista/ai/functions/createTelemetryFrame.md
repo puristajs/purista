@@ -8,13 +8,25 @@
 
 > **createTelemetryFrame**(`input`): `object`
 
-Defined in: [ai/src/protocol/helpers.ts:104](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/helpers.ts#L104)
+Defined in: [packages/ai/src/protocol/helpers.ts:104](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/helpers.ts#L104)
 
 ## Parameters
 
 ### input
 
+#### activeWorkers?
+
+`number`
+
 #### durationMs?
+
+`number`
+
+#### effectiveMaxConcurrencyHint?
+
+`number`
+
+#### maxConcurrencyPerInstance?
 
 `number`
 
@@ -25,6 +37,10 @@ Defined in: [ai/src/protocol/helpers.ts:104](https://github.com/puristajs/purist
 #### provider?
 
 `string`
+
+#### replicaCountHint?
+
+`number`
 
 #### usage?
 
@@ -46,6 +62,10 @@ Defined in: [ai/src/protocol/helpers.ts:104](https://github.com/puristajs/purist
 
 `number` = `...`
 
+#### waitingWorkers?
+
+`number`
+
 #### waitTimeMs?
 
 `number`
@@ -54,13 +74,25 @@ Defined in: [ai/src/protocol/helpers.ts:104](https://github.com/puristajs/purist
 
 `object`
 
+### activeWorkers
+
+> `readonly` **activeWorkers**: `number` \| `undefined` = `input.activeWorkers`
+
 ### durationMs
 
 > `readonly` **durationMs**: `number` \| `undefined` = `input.durationMs`
 
+### effectiveMaxConcurrencyHint
+
+> `readonly` **effectiveMaxConcurrencyHint**: `number` \| `undefined` = `input.effectiveMaxConcurrencyHint`
+
 ### kind
 
 > `readonly` **kind**: `"telemetry"` = `'telemetry'`
+
+### maxConcurrencyPerInstance
+
+> `readonly` **maxConcurrencyPerInstance**: `number` \| `undefined` = `input.maxConcurrencyPerInstance`
 
 ### poolId
 
@@ -70,9 +102,17 @@ Defined in: [ai/src/protocol/helpers.ts:104](https://github.com/puristajs/purist
 
 > `readonly` **provider**: `string` \| `undefined` = `input.provider`
 
+### replicaCountHint
+
+> `readonly` **replicaCountHint**: `number` \| `undefined` = `input.replicaCountHint`
+
 ### usage
 
 > `readonly` **usage**: \{ `completionTokens?`: `number`; `costUsd?`: `number`; `promptTokens?`: `number`; `totalTokens?`: `number`; \} \| `undefined` = `input.usage`
+
+### waitingWorkers
+
+> `readonly` **waitingWorkers**: `number` \| `undefined` = `input.waitingWorkers`
 
 ### waitTimeMs
 

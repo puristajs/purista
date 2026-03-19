@@ -8,7 +8,7 @@
 
 > **ConversationHelpers** = `object`
 
-Defined in: [ai/src/runtime/conversation.ts:31](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L31)
+Defined in: [packages/ai/src/runtime/conversation.ts:31](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L31)
 
 ## Methods
 
@@ -16,7 +16,35 @@ Defined in: [ai/src/runtime/conversation.ts:31](https://github.com/puristajs/pur
 
 > **addAssistant**(`content`, `options?`): `Promise`\<[`ConversationState`](ConversationState.md)\>
 
-Defined in: [ai/src/runtime/conversation.ts:44](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L44)
+Defined in: [packages/ai/src/runtime/conversation.ts:48](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L48)
+
+#### Parameters
+
+##### content
+
+`string`
+
+##### options?
+
+###### metadata?
+
+`Record`\<`string`, `unknown`\>
+
+###### sessionId?
+
+`string`
+
+#### Returns
+
+`Promise`\<[`ConversationState`](ConversationState.md)\>
+
+***
+
+### addDeveloper()
+
+> **addDeveloper**(`content`, `options?`): `Promise`\<[`ConversationState`](ConversationState.md)\>
+
+Defined in: [packages/ai/src/runtime/conversation.ts:40](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L40)
 
 #### Parameters
 
@@ -44,7 +72,7 @@ Defined in: [ai/src/runtime/conversation.ts:44](https://github.com/puristajs/pur
 
 > **addSystem**(`content`, `options?`): `Promise`\<[`ConversationState`](ConversationState.md)\>
 
-Defined in: [ai/src/runtime/conversation.ts:36](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L36)
+Defined in: [packages/ai/src/runtime/conversation.ts:36](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L36)
 
 #### Parameters
 
@@ -72,7 +100,7 @@ Defined in: [ai/src/runtime/conversation.ts:36](https://github.com/puristajs/pur
 
 > **addTool**(`content`, `options?`): `Promise`\<[`ConversationState`](ConversationState.md)\>
 
-Defined in: [ai/src/runtime/conversation.ts:48](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L48)
+Defined in: [packages/ai/src/runtime/conversation.ts:52](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L52)
 
 #### Parameters
 
@@ -108,7 +136,7 @@ Defined in: [ai/src/runtime/conversation.ts:48](https://github.com/puristajs/pur
 
 > **addToolResult**(`content`, `options?`): `Promise`\<[`ConversationState`](ConversationState.md)\>
 
-Defined in: [ai/src/runtime/conversation.ts:52](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L52)
+Defined in: [packages/ai/src/runtime/conversation.ts:56](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L56)
 
 #### Parameters
 
@@ -144,7 +172,7 @@ Defined in: [ai/src/runtime/conversation.ts:52](https://github.com/puristajs/pur
 
 > **addUser**(`content`, `options?`): `Promise`\<[`ConversationState`](ConversationState.md)\>
 
-Defined in: [ai/src/runtime/conversation.ts:40](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L40)
+Defined in: [packages/ai/src/runtime/conversation.ts:44](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L44)
 
 #### Parameters
 
@@ -172,7 +200,7 @@ Defined in: [ai/src/runtime/conversation.ts:40](https://github.com/puristajs/pur
 
 > **append**(`message`, `sessionId?`): `Promise`\<[`ConversationState`](ConversationState.md)\>
 
-Defined in: [ai/src/runtime/conversation.ts:35](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L35)
+Defined in: [packages/ai/src/runtime/conversation.ts:35](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L35)
 
 #### Parameters
 
@@ -194,7 +222,7 @@ Defined in: [ai/src/runtime/conversation.ts:35](https://github.com/puristajs/pur
 
 > **buildPromptInput**(`options?`): `Promise`\<`string`\>
 
-Defined in: [ai/src/runtime/conversation.ts:58](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L58)
+Defined in: [packages/ai/src/runtime/conversation.ts:62](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L62)
 
 #### Parameters
 
@@ -218,7 +246,7 @@ Defined in: [ai/src/runtime/conversation.ts:58](https://github.com/puristajs/pur
 
 > **get**(`sessionId?`): `Promise`\<[`ConversationState`](ConversationState.md)\>
 
-Defined in: [ai/src/runtime/conversation.ts:32](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L32)
+Defined in: [packages/ai/src/runtime/conversation.ts:32](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L32)
 
 #### Parameters
 
@@ -236,7 +264,7 @@ Defined in: [ai/src/runtime/conversation.ts:32](https://github.com/puristajs/pur
 
 > **getMessages**(`sessionId?`): `Promise`\<[`ConversationMessage`](ConversationMessage.md)[]\>
 
-Defined in: [ai/src/runtime/conversation.ts:33](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L33)
+Defined in: [packages/ai/src/runtime/conversation.ts:33](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L33)
 
 #### Parameters
 
@@ -254,7 +282,7 @@ Defined in: [ai/src/runtime/conversation.ts:33](https://github.com/puristajs/pur
 
 > **getSummary**(`sessionId?`): `Promise`\<`string` \| `undefined`\>
 
-Defined in: [ai/src/runtime/conversation.ts:34](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L34)
+Defined in: [packages/ai/src/runtime/conversation.ts:34](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L34)
 
 #### Parameters
 
@@ -272,7 +300,7 @@ Defined in: [ai/src/runtime/conversation.ts:34](https://github.com/puristajs/pur
 
 > **revertLast**(`options?`): `Promise`\<[`ConversationState`](ConversationState.md)\>
 
-Defined in: [ai/src/runtime/conversation.ts:57](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L57)
+Defined in: [packages/ai/src/runtime/conversation.ts:61](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L61)
 
 #### Parameters
 
@@ -296,7 +324,7 @@ Defined in: [ai/src/runtime/conversation.ts:57](https://github.com/puristajs/pur
 
 > **setSummary**(`summary`, `sessionId?`): `Promise`\<[`ConversationState`](ConversationState.md)\>
 
-Defined in: [ai/src/runtime/conversation.ts:56](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/conversation.ts#L56)
+Defined in: [packages/ai/src/runtime/conversation.ts:60](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/conversation.ts#L60)
 
 #### Parameters
 

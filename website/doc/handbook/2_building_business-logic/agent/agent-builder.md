@@ -65,6 +65,23 @@ Use `.canInvoke(...)` to allow an agent to call a PURISTA command as a tool.
 .canInvoke('ticketing', '1', 'createTicket')
 ```
 
+Use `.canInvokeAgent(...)` when an external tool loop should be able to delegate into another PURISTA agent through the external runtime bindings.
+
+```ts
+.canInvokeAgent('triageAgent', '1')
+```
+
+These declarations are the allowlist for both:
+
+- native `context.tools` / `context.agents` usage
+- external runtime helpers such as `context.expose.tools(...)`
+
+You can inspect the exported external runtime metadata from the built definition:
+
+```ts
+const metadata = supportAgent.getExternalRuntimeMetadata()
+```
+
 ## 5. Event-Driven Logic
 
 ```ts
@@ -110,3 +127,5 @@ Unary mode is still available when you want a final JSON response:
 ## Why This Pattern?
 
 The builder keeps definition separate from runtime wiring. That makes the same agent easy to run inline in tests and queued in production without changing business logic.
+
+It also keeps external SDK integration honest: PURISTA remains the execution and observability layer, while the external runtime stays just a reasoning loop.

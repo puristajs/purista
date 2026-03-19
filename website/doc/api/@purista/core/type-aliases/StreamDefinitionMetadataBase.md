@@ -36,7 +36,7 @@ Defined in: [core/types/stream/StreamDefinitionMetadataBase.ts:8](https://github
 
 #### contentTypeResponse?
 
-> `optional` **contentTypeResponse**: `"text/event-stream"`
+> `optional` **contentTypeResponse**: `"text/event-stream"` \| `"application/json"`
 
 #### deprecated?
 
@@ -89,6 +89,22 @@ Defined in: [core/types/stream/StreamDefinitionMetadataBase.ts:8](https://github
 ##### http.path
 
 > **path**: `string`
+
+##### http.stream?
+
+> `optional` **stream**: `object`
+
+##### http.stream.documentationUrl?
+
+> `optional` **documentationUrl**: `string`
+
+##### http.stream.mode?
+
+> `optional` **mode**: `"stream"` \| `"aggregate"`
+
+##### http.stream.protocol
+
+> **protocol**: `string`
 
 #### inputPayload?
 

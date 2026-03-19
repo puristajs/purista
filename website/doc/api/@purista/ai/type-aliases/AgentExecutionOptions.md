@@ -8,17 +8,25 @@
 
 > **AgentExecutionOptions** = `object`
 
-Defined in: [ai/src/runtime/AgentExecutor.ts:21](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentExecutor.ts#L21)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:21](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L21)
 
 Dependencies required for running an agent workload.
 
 ## Properties
 
+### conversationStore
+
+> **conversationStore**: [`ConversationStore`](../interfaces/ConversationStore.md)
+
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:24](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L24)
+
+***
+
 ### knowledgeAdapters
 
 > **knowledgeAdapters**: `Record`\<`string`, [`KnowledgeAdapter`](../interfaces/KnowledgeAdapter.md)\>
 
-Defined in: [ai/src/runtime/AgentExecutor.ts:25](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentExecutor.ts#L25)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:25](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L25)
 
 ***
 
@@ -26,7 +34,7 @@ Defined in: [ai/src/runtime/AgentExecutor.ts:25](https://github.com/puristajs/pu
 
 > **logger**: [`Logger`](../../core/classes/Logger.md)
 
-Defined in: [ai/src/runtime/AgentExecutor.ts:26](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentExecutor.ts#L26)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:26](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L26)
 
 ***
 
@@ -34,7 +42,7 @@ Defined in: [ai/src/runtime/AgentExecutor.ts:26](https://github.com/puristajs/pu
 
 > **manifest**: [`AgentManifest`](AgentManifest.md)
 
-Defined in: [ai/src/runtime/AgentExecutor.ts:22](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentExecutor.ts#L22)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:22](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L22)
 
 ***
 
@@ -42,15 +50,7 @@ Defined in: [ai/src/runtime/AgentExecutor.ts:22](https://github.com/puristajs/pu
 
 > **provider**: [`ModelProvider`](../interfaces/ModelProvider.md)
 
-Defined in: [ai/src/runtime/AgentExecutor.ts:23](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentExecutor.ts#L23)
-
-***
-
-### sessionStore
-
-> **sessionStore**: [`SessionStore`](../interfaces/SessionStore.md)
-
-Defined in: [ai/src/runtime/AgentExecutor.ts:24](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentExecutor.ts#L24)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:23](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L23)
 
 ***
 
@@ -58,4 +58,4 @@ Defined in: [ai/src/runtime/AgentExecutor.ts:24](https://github.com/puristajs/pu
 
 > **startActiveSpan**: [`StartActiveSpanFunction`](StartActiveSpanFunction.md)
 
-Defined in: [ai/src/runtime/AgentExecutor.ts:27](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentExecutor.ts#L27)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:27](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L27)

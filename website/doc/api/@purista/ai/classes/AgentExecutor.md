@@ -6,7 +6,7 @@
 
 # Class: AgentExecutor
 
-Defined in: [ai/src/runtime/AgentExecutor.ts:71](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentExecutor.ts#L71)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:73](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L73)
 
 Runs prompts against the configured [ModelProvider](../interfaces/ModelProvider.md), writes session state,
 and captures telemetry spans using the provided logger/span factory.
@@ -17,7 +17,7 @@ and captures telemetry spans using the provided logger/span factory.
 const executor = new AgentExecutor({
   manifest,
   provider: myModelProvider,
-  sessionStore: new InMemorySessionStore(),
+  conversationStore: new InMemoryConversationStore(),
   knowledgeAdapters: { default: new InMemoryKnowledgeAdapter() },
   logger,
   startActiveSpan: startActiveSpanFn,
@@ -33,7 +33,7 @@ console.log(result.output)
 
 > **new AgentExecutor**(`options`): `AgentExecutor`
 
-Defined in: [ai/src/runtime/AgentExecutor.ts:74](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentExecutor.ts#L74)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:76](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L76)
 
 #### Parameters
 
@@ -51,7 +51,7 @@ Defined in: [ai/src/runtime/AgentExecutor.ts:74](https://github.com/puristajs/pu
 
 > **run**(`input`): `Promise`\<[`AgentExecutionResult`](../type-aliases/AgentExecutionResult.md)\>
 
-Defined in: [ai/src/runtime/AgentExecutor.ts:76](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/runtime/AgentExecutor.ts#L76)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:78](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L78)
 
 #### Parameters
 

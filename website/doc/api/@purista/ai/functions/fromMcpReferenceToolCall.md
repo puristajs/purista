@@ -8,7 +8,7 @@
 
 > **fromMcpReferenceToolCall**(`input`): `object`
 
-Defined in: [ai/src/protocol/interoperability.ts:135](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/protocol/interoperability.ts#L135)
+Defined in: [packages/ai/src/protocol/interoperability.ts:140](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/interoperability.ts#L140)
 
 Converts an MCP-style tool call input to a minimal agent invoke payload.
 Consumers can extend this shape with domain-specific fields.

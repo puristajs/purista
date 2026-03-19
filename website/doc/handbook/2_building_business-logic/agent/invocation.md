@@ -77,6 +77,8 @@ setHandler(async (context, payload) => {
 
 Use the chained `context.agents.invoke.<agent>['version'].call(...)` form when you want the full protocol envelopes. Use `runText(...)` or `runObject<T>(...)` when you only want the final assistant result.
 
+If the child agent must appear as a Vercel AI SDK tool inside an external loop, use `context.expose.agent(...)` plus `toAiSdkTool(...)` instead of hand-writing the adapter. The neutral binding preserves allowlists, schemas, tool telemetry, and queue-safe execution boundaries.
+
 ### Which Helper To Use
 
 | Need | Helper |

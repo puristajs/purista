@@ -6,7 +6,7 @@
 
 # Interface: KnowledgeAdapter
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:10](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L10)
+Defined in: [packages/ai/src/knowledge/adapters/inMemoryAdapter.ts:51](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L51)
 
 ## Properties
 
@@ -14,21 +14,25 @@ Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:10](https://github.com
 
 > **id**: `string`
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:11](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L11)
+Defined in: [packages/ai/src/knowledge/adapters/inMemoryAdapter.ts:55](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L55)
+
+Stable identifier used in logs/telemetry.
 
 ## Methods
 
 ### delete()
 
-> **delete**(`id`): `Promise`\<`void`\>
+> **delete**(`request`): `Promise`\<`void`\>
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:14](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L14)
+Defined in: [packages/ai/src/knowledge/adapters/inMemoryAdapter.ts:67](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L67)
+
+Remove one document by id.
 
 #### Parameters
 
-##### id
+##### request
 
-`string`
+[`KnowledgeDeleteRequest`](../type-aliases/KnowledgeDeleteRequest.md)
 
 #### Returns
 
@@ -38,19 +42,17 @@ Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:14](https://github.com
 
 ### query()
 
-> **query**(`query`, `limit?`): `Promise`\<[`KnowledgeDocument`](../type-aliases/KnowledgeDocument.md)[]\>
+> **query**(`request`): `Promise`\<[`KnowledgeDocument`](../type-aliases/KnowledgeDocument.md)[]\>
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:13](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L13)
+Defined in: [packages/ai/src/knowledge/adapters/inMemoryAdapter.ts:63](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L63)
+
+Search documents for a natural-language query.
 
 #### Parameters
 
-##### query
+##### request
 
-`string`
-
-##### limit?
-
-`number`
+[`KnowledgeQueryRequest`](../type-aliases/KnowledgeQueryRequest.md)
 
 #### Returns
 
@@ -60,15 +62,17 @@ Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:13](https://github.com
 
 ### upsert()
 
-> **upsert**(`document`): `Promise`\<`void`\>
+> **upsert**(`request`): `Promise`\<`void`\>
 
-Defined in: [ai/src/knowledge/adapters/inMemoryAdapter.ts:12](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L12)
+Defined in: [packages/ai/src/knowledge/adapters/inMemoryAdapter.ts:59](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/knowledge/adapters/inMemoryAdapter.ts#L59)
+
+Insert or update one document.
 
 #### Parameters
 
-##### document
+##### request
 
-[`KnowledgeDocument`](../type-aliases/KnowledgeDocument.md)
+[`KnowledgeUpsertRequest`](../type-aliases/KnowledgeUpsertRequest.md)
 
 #### Returns
 

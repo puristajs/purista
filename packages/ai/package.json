@@ -34,7 +34,8 @@
 		"node": ">=18.15"
 	},
 	"scripts": {
-		"lint": "npx @biomejs/biome check --write",
+		"lint": "npx @biomejs/biome check src/bridge src/builder src/evaluation src/knowledge src/manifest src/mcp src/memory src/platform src/pools src/protocol src/providers src/runtime src/testing src/types scripts package.json vitest.config.ts",
+		"lint:fix": "npx @biomejs/biome check --write src/bridge src/builder src/evaluation src/knowledge src/manifest src/mcp src/memory src/platform src/pools src/protocol src/providers src/runtime src/testing src/types scripts package.json vitest.config.ts",
 		"test": "vitest -c ./vitest.config.ts",
 		"test:coverage": "vitest run -c ./vitest.config.ts --coverage",
 		"build": "rimraf dist tsconfig.tsbuildinfo && tshy && node ./scripts/assert-build-artifacts.mjs"

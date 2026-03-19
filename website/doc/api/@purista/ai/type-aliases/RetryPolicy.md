@@ -8,7 +8,7 @@
 
 > **RetryPolicy** = `object`
 
-Defined in: [ai/src/types/AgentManifest.ts:35](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L35)
+Defined in: [packages/ai/src/types/AgentManifest.ts:101](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L101)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [ai/src/types/AgentManifest.ts:35](https://github.com/puristajs/puri
 
 > `optional` **delayMs**: `number`
 
-Defined in: [ai/src/types/AgentManifest.ts:38](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L38)
+Defined in: [packages/ai/src/types/AgentManifest.ts:104](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L104)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [ai/src/types/AgentManifest.ts:38](https://github.com/puristajs/puri
 
 > **maxAttempts**: `number`
 
-Defined in: [ai/src/types/AgentManifest.ts:37](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L37)
+Defined in: [packages/ai/src/types/AgentManifest.ts:103](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L103)
 
 ***
 
@@ -32,4 +32,4 @@ Defined in: [ai/src/types/AgentManifest.ts:37](https://github.com/puristajs/puri
 
 > `optional` **strategy**: `"fixed"` \| `"exponential"`
 
-Defined in: [ai/src/types/AgentManifest.ts:36](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L36)
+Defined in: [packages/ai/src/types/AgentManifest.ts:102](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L102)

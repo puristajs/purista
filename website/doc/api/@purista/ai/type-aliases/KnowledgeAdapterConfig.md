@@ -8,7 +8,7 @@
 
 > **KnowledgeAdapterConfig** = `object`
 
-Defined in: [ai/src/types/AgentManifest.ts:30](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L30)
+Defined in: [packages/ai/src/types/AgentManifest.ts:96](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L96)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [ai/src/types/AgentManifest.ts:30](https://github.com/puristajs/puri
 
 > **adapterName**: `string`
 
-Defined in: [ai/src/types/AgentManifest.ts:31](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L31)
+Defined in: [packages/ai/src/types/AgentManifest.ts:97](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L97)
 
 ***
 
@@ -24,4 +24,4 @@ Defined in: [ai/src/types/AgentManifest.ts:31](https://github.com/puristajs/puri
 
 > `optional` **options**: `Record`\<`string`, `unknown`\>
 
-Defined in: [ai/src/types/AgentManifest.ts:32](https://github.com/puristajs/purista/blob/7988debc1eccfdec7e3fa06b061b5907d3f2eb40/packages/ai/src/types/AgentManifest.ts#L32)
+Defined in: [packages/ai/src/types/AgentManifest.ts:98](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/types/AgentManifest.ts#L98)
