@@ -8,7 +8,7 @@
 
 > **createAgentContextMock**\<`Payload`, `Parameter`, `Resources`, `Models`\>(`input`): [`AgentContextMockResult`](../type-aliases/AgentContextMockResult.md)\<`Payload`, `Parameter`, `Resources`, `Models`\>
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:104
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:104](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L104)
 
 ## Type Parameters
 

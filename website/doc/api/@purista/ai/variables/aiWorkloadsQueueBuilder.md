@@ -8,4 +8,4 @@
 
 > `const` **aiWorkloadsQueueBuilder**: [`QueueDefinitionBuilder`](../../core/classes/QueueDefinitionBuilder.md)
 
-Defined in: [packages/ai/src/platform/runtime/AIWorkerService/queue/aiWorkloads/aiWorkloadsQueueBuilder.ts:4](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/platform/runtime/AIWorkerService/queue/aiWorkloads/aiWorkloadsQueueBuilder.ts#L4)
+Defined in: [packages/ai/src/platform/runtime/AIWorkerService/queue/aiWorkloads/aiWorkloadsQueueBuilder.ts:4](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/platform/runtime/AIWorkerService/queue/aiWorkloads/aiWorkloadsQueueBuilder.ts#L4)

@@ -8,7 +8,7 @@
 
 > **invokeAgent**(`options`): `Promise`\<`object`[]\>
 
-Defined in: [packages/ai/src/runtime/invokeAgent.ts:56](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/invokeAgent.ts#L56)
+Defined in: [packages/ai/src/runtime/invokeAgent.ts:56](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/runtime/invokeAgent.ts#L56)
 
 Convenience helper for invoking an agent command via an EventBridge.
 

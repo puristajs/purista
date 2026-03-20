@@ -43,6 +43,10 @@ export class DockerSandboxDriver implements SandboxDriver {
 		}
 	}
 
+	public getImageName(): string {
+		return this.config.imageName
+	}
+
 	/**
 	 * Generates the standardized container name for a sandbox.
 	 * @param sandboxId Unique sandbox ID

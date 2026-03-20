@@ -8,7 +8,7 @@
 
 > **toAiSdkStreamEvents**(`source`, `options?`): `AsyncGenerator`\<[`AiSdkStreamEvent`](../type-aliases/AiSdkStreamEvent.md)\>
 
-Defined in: [packages/ai/src/protocol/aiSdkStream.ts:189](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/aiSdkStream.ts#L189)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:189](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/protocol/aiSdkStream.ts#L189)
 
 Converts PURISTA protocol envelopes into SSE events compatible with AI SDK transports.
 

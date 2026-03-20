@@ -8,7 +8,7 @@
 
 > **createProtocolEnvelope**(`input`): `object`
 
-Defined in: [packages/ai/src/protocol/helpers.ts:29](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/helpers.ts#L29)
+Defined in: [packages/ai/src/protocol/helpers.ts:29](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/protocol/helpers.ts#L29)
 
 Creates a protocol-compliant envelope. Input is validated via zod, so invalid metadata throws with helpful errors.
 

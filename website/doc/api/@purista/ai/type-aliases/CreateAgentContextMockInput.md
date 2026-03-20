@@ -8,7 +8,7 @@
 
 > **CreateAgentContextMockInput**\<`Payload`, `Parameter`, `Resources`, `Models`\> = `object`
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:33
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:33](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L33)
 
 ## Type Parameters
 
@@ -34,7 +34,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:33
 
 > `optional` **agents**: `AgentMap`
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:43
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:43](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L43)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:43
 
 > `optional` **commands**: `CommandMap`
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:42
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:42](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L42)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:42
 
 > `optional` **configs**: `Record`\<`string`, `unknown`\>
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:50
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:50](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L50)
 
 ***
 
@@ -58,7 +58,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:50
 
 > `optional` **conversationStore**: [`ConversationStore`](../interfaces/ConversationStore.md)
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:46
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:46](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L46)
 
 ***
 
@@ -66,7 +66,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:46
 
 > `optional` **initialStates**: `Record`\<`string`, `unknown`\>
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:51
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:51](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L51)
 
 ***
 
@@ -74,7 +74,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:51
 
 > `optional` **manifest**: `Partial`\<[`AgentManifest`](AgentManifest.md)\> & `Pick`\<[`AgentManifest`](AgentManifest.md), `"agentName"` \| `"agentVersion"`\>
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:41
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:41](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L41)
 
 ***
 
@@ -82,7 +82,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:41
 
 > `optional` **message**: `Partial`\<`ReturnType`\<*typeof* `createDefaultMessage`\>\>
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:47
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:47](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L47)
 
 ***
 
@@ -90,7 +90,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:47
 
 > `optional` **models**: `Models`
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:45
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:45](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L45)
 
 ***
 
@@ -98,7 +98,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:45
 
 > `optional` **onEnvelope**: (`envelope`) => `void` \| `Promise`\<`void`\>
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:48
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:48](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L48)
 
 #### Parameters
 
@@ -116,7 +116,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:48
 
 > `optional` **parameter**: `Parameter`
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:40
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:40](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L40)
 
 ***
 
@@ -124,7 +124,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:40
 
 > **payload**: `Payload`
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:39
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:39](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L39)
 
 ***
 
@@ -132,7 +132,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:39
 
 > `optional` **resources**: `Partial`\<`Resources`\>
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:44
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:44](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L44)
 
 ***
 
@@ -140,4 +140,4 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:44
 
 > `optional` **secrets**: `Record`\<`string`, `unknown`\>
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:49
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:49](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L49)

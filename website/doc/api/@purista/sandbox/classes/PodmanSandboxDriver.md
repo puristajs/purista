@@ -6,7 +6,7 @@
 
 # Class: PodmanSandboxDriver
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:26](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L26)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:26](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L26)
 
 PodmanSandboxDriver - A driver for Podman (daemonless, rootless containers).
 Podman is Docker-CLI compatible but has nuances in connection management
@@ -22,7 +22,7 @@ and user-mode networking.
 
 > **new PodmanSandboxDriver**(`config`): `PodmanSandboxDriver`
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:30](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L30)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:30](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L30)
 
 #### Parameters
 
@@ -40,7 +40,7 @@ Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.
 
 > **name**: `string` = `'PodmanSandboxDriver'`
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:27](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L27)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:27](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L27)
 
 The unique name of the driver implementation
 
@@ -54,7 +54,7 @@ The unique name of the driver implementation
 
 > **createSandbox**(`params`): `Promise`\<\{ `containerName`: `string`; `sandboxId`: `string`; \}\>
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:38](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L38)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:38](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L38)
 
 Provisions and starts a new sandbox environment.
 
@@ -112,7 +112,7 @@ The sandbox ID and underlying container name
 
 > **destroySandbox**(`params`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:124](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L124)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:124](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L124)
 
 Permanently removes a sandbox and its resources.
 
@@ -140,7 +140,7 @@ Reference to the sandbox to destroy
 
 > **executeBash**(`params`): `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:135](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L135)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:135](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L135)
 
 Executes a bash command within the specified sandbox.
 
@@ -178,7 +178,7 @@ The result of the command execution
 
 > **readFile**(`params`): `Promise`\<`string`\>
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:157](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L157)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:157](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L157)
 
 Reads the content of a file from the sandbox.
 
@@ -210,7 +210,7 @@ Path to the file
 
 > **scanRunningSandboxes**(): `Promise`\<`object`[]\>
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:173](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L173)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:173](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L173)
 
 Scans the underlying system for running sandboxes and recovers their metadata.
 This is used for self-healing and service restarts.
@@ -229,7 +229,7 @@ This is used for self-healing and service restarts.
 
 > **writeFiles**(`params`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:163](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L163)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:163](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L163)
 
 Writes one or more files to the sandbox workspace.
 

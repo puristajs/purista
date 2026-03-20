@@ -8,7 +8,7 @@
 
 > **createTelemetryFrame**(`input`): `object`
 
-Defined in: [packages/ai/src/protocol/helpers.ts:104](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/helpers.ts#L104)
+Defined in: [packages/ai/src/protocol/helpers.ts:104](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/protocol/helpers.ts#L104)
 
 ## Parameters
 

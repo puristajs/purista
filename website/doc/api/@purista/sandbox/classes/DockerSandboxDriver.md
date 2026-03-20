@@ -6,7 +6,7 @@
 
 # Class: DockerSandboxDriver
 
-Defined in: [sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:33](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L33)
+Defined in: [packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:33](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L33)
 
 DockerSandboxDriver - A robust driver for Docker, OrbStack, and Colima.
 It provides secure execution environments using Docker containers.
@@ -21,7 +21,7 @@ It provides secure execution environments using Docker containers.
 
 > **new DockerSandboxDriver**(`config`): `DockerSandboxDriver`
 
-Defined in: [sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:40](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L40)
+Defined in: [packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:40](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L40)
 
 #### Parameters
 
@@ -41,7 +41,7 @@ Driver configuration
 
 > **name**: `string` = `'DockerSandboxDriver'`
 
-Defined in: [sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:34](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L34)
+Defined in: [packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:34](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L34)
 
 The unique name of the driver implementation
 
@@ -55,7 +55,7 @@ The unique name of the driver implementation
 
 > **createSandbox**(`params`): `Promise`\<\{ `containerName`: `string`; `sandboxId`: `string`; \}\>
 
-Defined in: [sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:58](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L58)
+Defined in: [packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:62](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L62)
 
 Provisions and starts a new Docker container.
 Securely configures Git identity and GitHub CLI inside the container.
@@ -110,7 +110,7 @@ Securely configures Git identity and GitHub CLI inside the container.
 
 > **destroySandbox**(`params`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:165](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L165)
+Defined in: [packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:169](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L169)
 
 Forcefully removes the Docker container.
 
@@ -136,7 +136,7 @@ Forcefully removes the Docker container.
 
 > **executeBash**(`params`): `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
 
-Defined in: [sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:179](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L179)
+Defined in: [packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:183](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L183)
 
 Executes a command via 'docker exec'.
 
@@ -170,7 +170,7 @@ Executes a command via 'docker exec'.
 
 > **getContainerName**(`sandboxId`): `string`
 
-Defined in: [sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:50](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L50)
+Defined in: [packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:54](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L54)
 
 Generates the standardized container name for a sandbox.
 
@@ -188,11 +188,23 @@ Unique sandbox ID
 
 ***
 
+### getImageName()
+
+> **getImageName**(): `string`
+
+Defined in: [packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:46](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L46)
+
+#### Returns
+
+`string`
+
+***
+
 ### readFile()
 
 > **readFile**(`params`): `Promise`\<`string`\>
 
-Defined in: [sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:212](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L212)
+Defined in: [packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:216](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L216)
 
 Reads a file from the container using 'cat'.
 
@@ -222,7 +234,7 @@ Reads a file from the container using 'cat'.
 
 > **scanRunningSandboxes**(): `Promise`\<`object`[]\>
 
-Defined in: [sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:250](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L250)
+Defined in: [packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:254](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L254)
 
 Scans for running containers and recovers metadata from labels.
 
@@ -240,7 +252,7 @@ Scans for running containers and recovers metadata from labels.
 
 > **writeFiles**(`params`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:225](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L225)
+Defined in: [packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts:229](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/DockerSandboxDriver/DockerSandboxDriver.ts#L229)
 
 Writes files to the container by creating a local temp file and using 'docker cp'.
 

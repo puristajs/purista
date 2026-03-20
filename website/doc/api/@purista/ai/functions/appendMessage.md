@@ -8,7 +8,7 @@
 
 > **appendMessage**(`history`, `frame`): [`ConversationHistory`](../type-aliases/ConversationHistory.md)
 
-Defined in: [packages/ai/src/memory/historyHelpers.ts:13](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/memory/historyHelpers.ts#L13)
+Defined in: [packages/ai/src/memory/historyHelpers.ts:13](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/memory/historyHelpers.ts#L13)
 
 Append a new message to the history immutably.
 

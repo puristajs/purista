@@ -45,17 +45,24 @@ docker build -t purista-sandbox-agent:alpine -f Dockerfile.sandbox.alpine .
 ### 2. Configure the Service
 
 ```typescript
-import { sandboxServiceBuilder, DockerSandboxDriver } from '@purista/sandbox'
+import {
+  createInMemorySandboxRegistry,
+  DockerSandboxDriver,
+  sandboxServiceBuilder,
+} from '@purista/sandbox'
 
 const driver = new DockerSandboxDriver({
   imageName: 'purista-sandbox-agent:latest',
   memory: '2g'
 })
 
+const registry = createInMemorySandboxRegistry()
+
 // In your PURISTA setup, inject resources at service instantiation:
 const sandboxService = await sandboxServiceBuilder.getInstance(eventBridge, {
   resources: {
     driver,
+    registry,
   },
 })
 ```
@@ -66,7 +73,8 @@ Sandbox ownership is derived from the PURISTA message:
 - `principalId` -> `userId`
 - `projectId` stays in the command payload
 
-Callers must therefore forward `tenantId` and `principalId` on sandbox commands.
+Callers should forward `tenantId` and `principalId` on sandbox commands when available.
+For local or unauthenticated app flows, you can intentionally fall back to stable defaults such as `"default"` so owner scoping remains deterministic.
 
 For Apple local development (OrbStack/Colima), you can also use:
 
@@ -98,6 +106,7 @@ MIT
 - [FirecrackerSandboxDriver](classes/FirecrackerSandboxDriver.md)
 - [LimaSandboxDriver](classes/LimaSandboxDriver.md)
 - [PodmanSandboxDriver](classes/PodmanSandboxDriver.md)
+- [SandboxRuntimeUnavailableError](classes/SandboxRuntimeUnavailableError.md)
 - [SandboxService](classes/SandboxService.md)
 - [TartSandboxDriver](classes/TartSandboxDriver.md)
 
@@ -117,6 +126,8 @@ MIT
 - [SandboxAdapterIdentity](type-aliases/SandboxAdapterIdentity.md)
 - [SandboxMetadata](type-aliases/SandboxMetadata.md)
 - [SandboxOwner](type-aliases/SandboxOwner.md)
+- [SandboxRuntimeDiagnostics](type-aliases/SandboxRuntimeDiagnostics.md)
+- [SandboxScope](type-aliases/SandboxScope.md)
 - [SandboxServiceConfig](type-aliases/SandboxServiceConfig.md)
 
 ## Variables
@@ -125,8 +136,11 @@ MIT
 
 ## Functions
 
+- [assertSandboxRuntimeAvailable](functions/assertSandboxRuntimeAvailable.md)
+- [createInMemorySandboxRegistry](functions/createInMemorySandboxRegistry.md)
 - [createLocalFilesystemSandboxAdapter](functions/createLocalFilesystemSandboxAdapter.md)
 - [createPuristaSandboxAdapter](functions/createPuristaSandboxAdapter.md)
+- [getSandboxRuntimeDiagnostics](functions/getSandboxRuntimeDiagnostics.md)
 
 ## Drivers
 
@@ -144,4 +158,5 @@ MIT
 - [SandboxMetadataSchema](variables/SandboxMetadataSchema.md)
 - [SandboxOwnerSchema](variables/SandboxOwnerSchema.md)
 - [SandboxPayloadSchema](variables/SandboxPayloadSchema.md)
+- [SandboxScopeSchema](variables/SandboxScopeSchema.md)
 - [SandboxServiceConfigSchema](variables/SandboxServiceConfigSchema.md)

@@ -8,7 +8,7 @@
 
 > **AppleContainerSandboxDriverConfig** = [`DockerSandboxDriverConfig`](../interfaces/DockerSandboxDriverConfig.md)
 
-Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:11](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L11)
+Defined in: [packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:11](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L11)
 
 Configuration for AppleContainerSandboxDriver.
 

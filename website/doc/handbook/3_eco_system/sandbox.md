@@ -11,6 +11,7 @@ order: 303500
 It adds:
 
 - tenant-aware sandbox lifecycle (`tenantId` + `principalId` from PURISTA message metadata, plus `projectId`)
+- optional scope-based sandbox isolation for parallel runs
 - command execution and file read/write inside isolated runtimes
 - pluggable backends (Docker, Podman, Lima, Tart, Firecracker)
 - registry reconciliation on service startup
@@ -21,6 +22,7 @@ Use sandbox when:
 
 - agents need shell access, but not full host access
 - each project/user must run in isolated workspaces
+- parallel agents may need either a shared workspace or isolated sandboxes per run
 - you want one execution abstraction while switching infra backends
 - you need audit-friendly metadata around runtime ownership
 
@@ -88,6 +90,14 @@ await eventBridge.start()
 await sandboxService.start()
 ```
 
+For fast local or test setups, you can also use the built-in in-memory registry helper:
+
+```ts
+import { createInMemorySandboxRegistry } from '@purista/sandbox'
+
+const registry = createInMemorySandboxRegistry()
+```
+
 For Apple local development (OrbStack/Colima), use the macOS-focused adapter:
 
 ```ts
@@ -99,11 +109,30 @@ const driver = new AppleContainerSandboxDriver({
 })
 ```
 
+You can preflight the local runtime and image before starting your app:
+
+```ts
+import {
+  AppleContainerSandboxDriver,
+  assertSandboxRuntimeAvailable,
+} from '@purista/sandbox'
+
+const driver = new AppleContainerSandboxDriver({
+  imageName: 'purista-sandbox-agent:latest',
+})
+
+await assertSandboxRuntimeAvailable(driver)
+```
+
+If the runtime is missing or the image is not available locally,
+`assertSandboxRuntimeAvailable(...)` throws a typed
+`SandboxRuntimeUnavailableError` with diagnostics you can surface in your app.
+
 ### 3. Use it from your app/agent layer
 
 Typical flow:
 
-1. Create sandbox once per user/project work session
+1. Ensure sandbox once per user/project work session or per explicit scope
 2. Run one or more commands (`executeBash`)
 3. Read/write generated artifacts
 4. Destroy sandbox on completion or idle timeout
@@ -126,6 +155,28 @@ Ownership rule:
 - `tenantId` from the PURISTA message is treated as `organizationId`
 - `principalId` from the PURISTA message is treated as `userId`
 - `projectId` stays explicit in the command payload
+- `scope` is optional and controls reuse versus isolation
+
+If your app does not always have authenticated message metadata, use stable fallback values such as `"default"` for `tenantId` and `principalId` at the application boundary. That keeps sandbox ownership deterministic without forcing every local or prototype flow to provide auth context.
+
+If `scope` is omitted, the sandbox is shared per:
+
+- `organizationId`
+- `projectId`
+- `userId`
+
+If `scope` is set, the effective ownership key becomes:
+
+- `organizationId`
+- `projectId`
+- `userId`
+- `scope`
+
+That lets the same user/project run either:
+
+- one shared sandbox for iterative work
+- one isolated sandbox per agent run or conversation
+- one app-defined custom grouping
 
 Sandbox access commands (`executeBash`, `readFile`, `writeFiles`, `destroySandbox`) require caller identity metadata so the service can enforce ownership.
 
@@ -157,6 +208,7 @@ const created = await eventBridge.invoke({
   payload: {
     payload: {
       projectId: 'project-1',
+      scope: { kind: 'agent-run', key: 'run-42' },
     },
     parameter: {},
   },
@@ -203,6 +255,22 @@ Use adapters based on deployment mode:
 - **Local filesystem adapter** (`createLocalFilesystemSandboxAdapter`): use for local dev/testing where direct workspace operations are acceptable.
 
 When using the service adapter, always forward `tenantId` and `principalId`. The sandbox service uses those message fields for access control.
+
+## Scope patterns
+
+Use these scope variants when the default shared sandbox is not enough:
+
+- `{ kind: 'shared-project-user' }`: explicit shared sandbox for one tenant + project + user
+- `{ kind: 'agent-run', key: runId }`: isolated sandbox per logical agent run
+- `{ kind: 'conversation', key: conversationId }`: isolated sandbox per conversation thread
+- `{ kind: 'runtime-instance', key: instanceId }`: isolated sandbox per runtime process or worker instance
+- `{ kind: 'custom', key: 'spec-branch-a' }`: application-defined grouping
+
+Recommendation:
+
+- default to shared project-user sandboxes for iterative developer workflows
+- use `agent-run` scope when parallel agents must not touch the same filesystem state
+- do not use runtime `instanceId` as the main default isolation key; prefer logical run or conversation ids
 
 ## Create a New Adapter
 

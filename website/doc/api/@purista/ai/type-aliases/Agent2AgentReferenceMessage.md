@@ -8,7 +8,7 @@
 
 > **Agent2AgentReferenceMessage** = `object`
 
-Defined in: [packages/ai/src/protocol/interoperability.ts:8](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/interoperability.ts#L8)
+Defined in: [packages/ai/src/protocol/interoperability.ts:8](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/protocol/interoperability.ts#L8)
 
 Reference shape that can be used as a bridge model for Agent-to-Agent style integrations.
 It is intentionally minimal and designed for easy conversion.
@@ -19,7 +19,7 @@ It is intentionally minimal and designed for easy conversion.
 
 > **frameType**: [`AgentProtocolFrame`](AgentProtocolFrame.md)\[`"kind"`\]
 
-Defined in: [packages/ai/src/protocol/interoperability.ts:19](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/interoperability.ts#L19)
+Defined in: [packages/ai/src/protocol/interoperability.ts:19](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/protocol/interoperability.ts#L19)
 
 ***
 
@@ -27,7 +27,7 @@ Defined in: [packages/ai/src/protocol/interoperability.ts:19](https://github.com
 
 > **id**: `string`
 
-Defined in: [packages/ai/src/protocol/interoperability.ts:9](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/interoperability.ts#L9)
+Defined in: [packages/ai/src/protocol/interoperability.ts:9](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/protocol/interoperability.ts#L9)
 
 ***
 
@@ -35,7 +35,7 @@ Defined in: [packages/ai/src/protocol/interoperability.ts:9](https://github.com/
 
 > `optional` **metadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/protocol/interoperability.ts:21](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/interoperability.ts#L21)
+Defined in: [packages/ai/src/protocol/interoperability.ts:21](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/protocol/interoperability.ts#L21)
 
 ***
 
@@ -43,7 +43,7 @@ Defined in: [packages/ai/src/protocol/interoperability.ts:21](https://github.com
 
 > `optional` **parentId**: `string`
 
-Defined in: [packages/ai/src/protocol/interoperability.ts:11](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/interoperability.ts#L11)
+Defined in: [packages/ai/src/protocol/interoperability.ts:11](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/protocol/interoperability.ts#L11)
 
 ***
 
@@ -51,7 +51,7 @@ Defined in: [packages/ai/src/protocol/interoperability.ts:11](https://github.com
 
 > **payload**: [`AgentProtocolFrame`](AgentProtocolFrame.md)
 
-Defined in: [packages/ai/src/protocol/interoperability.ts:20](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/interoperability.ts#L20)
+Defined in: [packages/ai/src/protocol/interoperability.ts:20](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/protocol/interoperability.ts#L20)
 
 ***
 
@@ -59,7 +59,7 @@ Defined in: [packages/ai/src/protocol/interoperability.ts:20](https://github.com
 
 > **sender**: `object`
 
-Defined in: [packages/ai/src/protocol/interoperability.ts:13](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/interoperability.ts#L13)
+Defined in: [packages/ai/src/protocol/interoperability.ts:13](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/protocol/interoperability.ts#L13)
 
 #### agent?
 
@@ -83,7 +83,7 @@ Defined in: [packages/ai/src/protocol/interoperability.ts:13](https://github.com
 
 > **threadId**: `string`
 
-Defined in: [packages/ai/src/protocol/interoperability.ts:10](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/interoperability.ts#L10)
+Defined in: [packages/ai/src/protocol/interoperability.ts:10](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/protocol/interoperability.ts#L10)
 
 ***
 
@@ -91,4 +91,4 @@ Defined in: [packages/ai/src/protocol/interoperability.ts:10](https://github.com
 
 > **timestamp**: `string`
 
-Defined in: [packages/ai/src/protocol/interoperability.ts:12](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/interoperability.ts#L12)
+Defined in: [packages/ai/src/protocol/interoperability.ts:12](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/protocol/interoperability.ts#L12)

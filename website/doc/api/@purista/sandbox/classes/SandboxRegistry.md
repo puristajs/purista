@@ -6,7 +6,7 @@
 
 # Class: SandboxRegistry
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:11](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L11)
+Defined in: [packages/sandbox-service/src/resources/SandboxRegistry.ts:11](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/resources/SandboxRegistry.ts#L11)
 
 SandboxRegistry - A state-store backed registry for tracking active sandboxes.
 This class handles the persistence of sandbox metadata and provides reconciliation
@@ -18,7 +18,7 @@ logic for self-healing after service restarts.
 
 > **new SandboxRegistry**(`store`): `SandboxRegistry`
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:19](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L19)
+Defined in: [packages/sandbox-service/src/resources/SandboxRegistry.ts:19](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/resources/SandboxRegistry.ts#L19)
 
 #### Parameters
 
@@ -36,9 +36,9 @@ The PURISTA StateStore instance to use for persistence.
 
 ### findByOwner()
 
-> **findByOwner**(`owner`): `Promise`\<\{ `containerName`: `string`; `createdAt`: `number`; `gitConfigured?`: `boolean`; `organizationId`: `string`; `projectId`: `string`; `sandboxId`: `string`; `userId`: `string`; \} \| `undefined`\>
+> **findByOwner**(`owner`): `Promise`\<\{ `containerName`: `string`; `createdAt`: `number`; `gitConfigured?`: `boolean`; `organizationId`: `string`; `projectId`: `string`; `sandboxId`: `string`; `scope?`: \{ `kind`: `"shared-project-user"`; \} \| \{ `key`: `string`; `kind`: `"agent-run"`; \} \| \{ `key`: `string`; `kind`: `"agent-instance"`; \} \| \{ `key`: `string`; `kind`: `"conversation"`; \} \| \{ `key`: `string`; `kind`: `"runtime-instance"`; \} \| \{ `key`: `string`; `kind`: `"custom"`; \}; `userId`: `string`; \} \| `undefined`\>
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:80](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L80)
+Defined in: [packages/sandbox-service/src/resources/SandboxRegistry.ts:92](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/resources/SandboxRegistry.ts#L92)
 
 Returns metadata for an existing sandbox bound to the same owner tuple.
 
@@ -54,21 +54,25 @@ Returns metadata for an existing sandbox bound to the same owner tuple.
 
 `string`
 
+###### scope?
+
+\{ `kind`: `"shared-project-user"`; \} \| \{ `key`: `string`; `kind`: `"agent-run"`; \} \| \{ `key`: `string`; `kind`: `"agent-instance"`; \} \| \{ `key`: `string`; `kind`: `"conversation"`; \} \| \{ `key`: `string`; `kind`: `"runtime-instance"`; \} \| \{ `key`: `string`; `kind`: `"custom"`; \}
+
 ###### userId
 
 `string`
 
 #### Returns
 
-`Promise`\<\{ `containerName`: `string`; `createdAt`: `number`; `gitConfigured?`: `boolean`; `organizationId`: `string`; `projectId`: `string`; `sandboxId`: `string`; `userId`: `string`; \} \| `undefined`\>
+`Promise`\<\{ `containerName`: `string`; `createdAt`: `number`; `gitConfigured?`: `boolean`; `organizationId`: `string`; `projectId`: `string`; `sandboxId`: `string`; `scope?`: \{ `kind`: `"shared-project-user"`; \} \| \{ `key`: `string`; `kind`: `"agent-run"`; \} \| \{ `key`: `string`; `kind`: `"agent-instance"`; \} \| \{ `key`: `string`; `kind`: `"conversation"`; \} \| \{ `key`: `string`; `kind`: `"runtime-instance"`; \} \| \{ `key`: `string`; `kind`: `"custom"`; \}; `userId`: `string`; \} \| `undefined`\>
 
 ***
 
 ### getMetadata()
 
-> **getMetadata**(`sandboxId`): `Promise`\<\{ `containerName`: `string`; `createdAt`: `number`; `gitConfigured?`: `boolean`; `organizationId`: `string`; `projectId`: `string`; `sandboxId`: `string`; `userId`: `string`; \} \| `undefined`\>
+> **getMetadata**(`sandboxId`): `Promise`\<\{ `containerName`: `string`; `createdAt`: `number`; `gitConfigured?`: `boolean`; `organizationId`: `string`; `projectId`: `string`; `sandboxId`: `string`; `scope?`: \{ `kind`: `"shared-project-user"`; \} \| \{ `key`: `string`; `kind`: `"agent-run"`; \} \| \{ `key`: `string`; `kind`: `"agent-instance"`; \} \| \{ `key`: `string`; `kind`: `"conversation"`; \} \| \{ `key`: `string`; `kind`: `"runtime-instance"`; \} \| \{ `key`: `string`; `kind`: `"custom"`; \}; `userId`: `string`; \} \| `undefined`\>
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:65](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L65)
+Defined in: [packages/sandbox-service/src/resources/SandboxRegistry.ts:77](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/resources/SandboxRegistry.ts#L77)
 
 Retrieves metadata for a specific sandbox.
 
@@ -82,7 +86,7 @@ Unique ID of the sandbox.
 
 #### Returns
 
-`Promise`\<\{ `containerName`: `string`; `createdAt`: `number`; `gitConfigured?`: `boolean`; `organizationId`: `string`; `projectId`: `string`; `sandboxId`: `string`; `userId`: `string`; \} \| `undefined`\>
+`Promise`\<\{ `containerName`: `string`; `createdAt`: `number`; `gitConfigured?`: `boolean`; `organizationId`: `string`; `projectId`: `string`; `sandboxId`: `string`; `scope?`: \{ `kind`: `"shared-project-user"`; \} \| \{ `key`: `string`; `kind`: `"agent-run"`; \} \| \{ `key`: `string`; `kind`: `"agent-instance"`; \} \| \{ `key`: `string`; `kind`: `"conversation"`; \} \| \{ `key`: `string`; `kind`: `"runtime-instance"`; \} \| \{ `key`: `string`; `kind`: `"custom"`; \}; `userId`: `string`; \} \| `undefined`\>
 
 Metadata object or undefined if not found or invalid.
 
@@ -92,7 +96,7 @@ Metadata object or undefined if not found or invalid.
 
 > **reconcile**(`sandboxes`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:113](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L113)
+Defined in: [packages/sandbox-service/src/resources/SandboxRegistry.ts:127](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/resources/SandboxRegistry.ts#L127)
 
 Reconciles a list of discovered sandboxes with the persistent registry.
 Discovered sandboxes that are missing from the registry are added.
@@ -115,7 +119,7 @@ List of sandboxes discovered by the driver (e.g., from Docker labels).
 
 > **register**(`metadata`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:36](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L36)
+Defined in: [packages/sandbox-service/src/resources/SandboxRegistry.ts:48](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/resources/SandboxRegistry.ts#L48)
 
 Registers a new sandbox in the persistent state store.
 
@@ -151,6 +155,10 @@ Indicates if Git/GitHub was configured
 
 `string` = `...`
 
+###### scope?
+
+\{ `kind`: `"shared-project-user"`; \} \| \{ `key`: `string`; `kind`: `"agent-run"`; \} \| \{ `key`: `string`; `kind`: `"agent-instance"`; \} \| \{ `key`: `string`; `kind`: `"conversation"`; \} \| \{ `key`: `string`; `kind`: `"runtime-instance"`; \} \| \{ `key`: `string`; `kind`: `"custom"`; \} = `...`
+
 ###### userId
 
 `string` = `...`
@@ -165,7 +173,7 @@ Indicates if Git/GitHub was configured
 
 > **unregister**(`sandboxId`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:47](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L47)
+Defined in: [packages/sandbox-service/src/resources/SandboxRegistry.ts:59](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/resources/SandboxRegistry.ts#L59)
 
 Removes a sandbox from the registry.
 

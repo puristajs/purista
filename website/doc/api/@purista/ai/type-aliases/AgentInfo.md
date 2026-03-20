@@ -8,7 +8,7 @@
 
 > **AgentInfo** = `object`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:11](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/types/AgentDefinition.ts#L11)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:11](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L11)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:11](https://github.com/pur
 
 > **agentName**: `string`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:12](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/types/AgentDefinition.ts#L12)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:12](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L12)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:12](https://github.com/pur
 
 > **agentVersion**: `string`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:13](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/types/AgentDefinition.ts#L13)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:13](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L13)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:13](https://github.com/pur
 
 > `optional` **description**: `string`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:14](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/types/AgentDefinition.ts#L14)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:14](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L14)
 
 ***
 
@@ -40,4 +40,4 @@ Defined in: [packages/ai/src/types/AgentDefinition.ts:14](https://github.com/pur
 
 > `optional` **successEventName**: `string`
 
-Defined in: [packages/ai/src/types/AgentDefinition.ts:15](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/types/AgentDefinition.ts#L15)
+Defined in: [packages/ai/src/types/AgentDefinition.ts:15](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/types/AgentDefinition.ts#L15)

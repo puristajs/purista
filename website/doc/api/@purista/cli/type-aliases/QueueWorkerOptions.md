@@ -8,7 +8,7 @@
 
 > **QueueWorkerOptions** = `object`
 
-Defined in: [addPuristaQueue.ts:26](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/addPuristaQueue.ts#L26)
+Defined in: [addPuristaQueue.ts:26](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/cli/src/api/addPuristaQueue.ts#L26)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [addPuristaQueue.ts:26](https://github.com/puristajs/purista/blob/24
 
 > **description**: `string`
 
-Defined in: [addPuristaQueue.ts:28](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/addPuristaQueue.ts#L28)
+Defined in: [addPuristaQueue.ts:28](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/cli/src/api/addPuristaQueue.ts#L28)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [addPuristaQueue.ts:28](https://github.com/puristajs/purista/blob/24
 
 > `optional` **intervalMs**: `number`
 
-Defined in: [addPuristaQueue.ts:30](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/addPuristaQueue.ts#L30)
+Defined in: [addPuristaQueue.ts:30](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/cli/src/api/addPuristaQueue.ts#L30)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [addPuristaQueue.ts:30](https://github.com/puristajs/purista/blob/24
 
 > **maxParallelHandlers**: `number`
 
-Defined in: [addPuristaQueue.ts:31](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/addPuristaQueue.ts#L31)
+Defined in: [addPuristaQueue.ts:31](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/cli/src/api/addPuristaQueue.ts#L31)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [addPuristaQueue.ts:31](https://github.com/puristajs/purista/blob/24
 
 > **mode**: `"continuous"` \| `"interval"` \| `"sequential"`
 
-Defined in: [addPuristaQueue.ts:29](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/addPuristaQueue.ts#L29)
+Defined in: [addPuristaQueue.ts:29](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/cli/src/api/addPuristaQueue.ts#L29)
 
 ***
 
@@ -48,4 +48,4 @@ Defined in: [addPuristaQueue.ts:29](https://github.com/puristajs/purista/blob/24
 
 > **name**: `string`
 
-Defined in: [addPuristaQueue.ts:27](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/addPuristaQueue.ts#L27)
+Defined in: [addPuristaQueue.ts:27](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/cli/src/api/addPuristaQueue.ts#L27)

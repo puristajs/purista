@@ -26,6 +26,10 @@ export class AppleContainerSandboxDriver implements SandboxDriver {
 		this.dockerCompatDriver = new DockerSandboxDriver(config)
 	}
 
+	public getImageName(): string {
+		return this.dockerCompatDriver.getImageName()
+	}
+
 	async createSandbox(params: {
 		organizationId: string
 		projectId: string

@@ -8,7 +8,7 @@
 
 > **getQueueBridgeMock**(`sandbox?`): `object`
 
-Defined in: mocks/getQueueBridge.mock.ts:11
+Defined in: [mocks/getQueueBridge.mock.ts:11](https://github.com/puristajs/purista/blob/master/packages/core/src/mocks/getQueueBridge.mock.ts#L11)
 
 Mocks the queue bridge and stubs the methods.
 

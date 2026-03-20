@@ -8,6 +8,6 @@
 
 > `const` **SandboxPayloadSchema**: `ZodObject`\<\{ `sandboxId`: `ZodString`; \}, `$strip`\>
 
-Defined in: [sandbox-service/src/types/SandboxDriver.ts:9](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/types/SandboxDriver.ts#L9)
+Defined in: [packages/sandbox-service/src/types/SandboxDriver.ts:41](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/types/SandboxDriver.ts#L41)
 
 Common payload for sandbox operations requiring a specific sandbox reference.

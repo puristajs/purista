@@ -39,17 +39,24 @@ docker build -t purista-sandbox-agent:alpine -f Dockerfile.sandbox.alpine .
 ### 2. Configure the Service
 
 ```typescript
-import { sandboxServiceBuilder, DockerSandboxDriver } from '@purista/sandbox'
+import {
+  createInMemorySandboxRegistry,
+  DockerSandboxDriver,
+  sandboxServiceBuilder,
+} from '@purista/sandbox'
 
 const driver = new DockerSandboxDriver({
   imageName: 'purista-sandbox-agent:latest',
   memory: '2g'
 })
 
+const registry = createInMemorySandboxRegistry()
+
 // In your PURISTA setup, inject resources at service instantiation:
 const sandboxService = await sandboxServiceBuilder.getInstance(eventBridge, {
   resources: {
     driver,
+    registry,
   },
 })
 ```
@@ -60,7 +67,8 @@ Sandbox ownership is derived from the PURISTA message:
 - `principalId` -> `userId`
 - `projectId` stays in the command payload
 
-Callers must therefore forward `tenantId` and `principalId` on sandbox commands.
+Callers should forward `tenantId` and `principalId` on sandbox commands when available.
+For local or unauthenticated app flows, you can intentionally fall back to stable defaults such as `"default"` so owner scoping remains deterministic.
 
 For Apple local development (OrbStack/Colima), you can also use:
 

@@ -8,7 +8,7 @@
 
 > **AgentContextMockResult**\<`Payload`, `Parameter`, `Resources`, `Models`\> = `object`
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:66
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:66](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L66)
 
 ## Type Parameters
 
@@ -34,7 +34,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:66
 
 > **context**: [`AgentHandlerContext`](AgentHandlerContext.md)\<`Payload`, `Parameter`, `Resources`, `Models`\>
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:72
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:72](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L72)
 
 ***
 
@@ -42,7 +42,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:72
 
 > **protocol**: `ReturnType`\<*typeof* [`createProtocolBuffer`](../functions/createProtocolBuffer.md)\>
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:73
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:73](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L73)
 
 ***
 
@@ -50,7 +50,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:73
 
 > **stubs**: `object`
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:74
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:74](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L74)
 
 #### agents
 
@@ -126,7 +126,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:74
 
 > **envelopes**(): `object`[]
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:100
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:100](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L100)
 
 #### Returns
 
@@ -138,7 +138,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:100
 
 > **flush**(): `Promise`\<`void`\>
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:101
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:101](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L101)
 
 #### Returns
 
@@ -150,7 +150,7 @@ Defined in: packages/ai/src/testing/createAgentContextMock.ts:101
 
 > **frames**(): (\{ `content`: `string`; `final?`: `boolean`; `kind`: `"message"`; `partial?`: `boolean`; `role`: `"user"` \| `"assistant"` \| `"system"` \| `"developer"` \| `"tool"`; `summary?`: `string`; \} \| \{ `artifactId`: `string`; `content`: `string` \| `Record`\<`string`, `unknown`\>; `kind`: `"artifact"`; `lastChunk?`: `boolean`; `mimeType?`: `string`; `phase`: `"final"` \| `"chunk"`; `sequence?`: `number`; `total?`: `number`; \} \| \{ `errorCode?`: `string`; `input?`: `unknown`; `kind`: `"tool"`; `message?`: `string`; `output?`: `unknown`; `status`: `"error"` \| `"success"` \| `"invoked"`; `toolName`: `string`; \} \| \{ `activeWorkers?`: `number`; `durationMs?`: `number`; `effectiveMaxConcurrencyHint?`: `number`; `kind`: `"telemetry"`; `maxConcurrencyPerInstance?`: `number`; `poolId?`: `string`; `provider?`: `string`; `replicaCountHint?`: `number`; `usage?`: \{ `completionTokens?`: `number`; `costUsd?`: `number`; `promptTokens?`: `number`; `totalTokens?`: `number`; \}; `waitingWorkers?`: `number`; `waitTimeMs?`: `number`; \} \| \{ `code`: `string`; `details?`: `unknown`; `handled`: `boolean`; `kind`: `"error"`; `message`: `string`; \})[]
 
-Defined in: packages/ai/src/testing/createAgentContextMock.ts:99
+Defined in: [packages/ai/src/testing/createAgentContextMock.ts:99](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/createAgentContextMock.ts#L99)
 
 #### Returns
 

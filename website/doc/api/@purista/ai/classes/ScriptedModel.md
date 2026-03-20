@@ -6,7 +6,7 @@
 
 # Class: ScriptedModel
 
-Defined in: packages/ai/src/testing/ScriptedModel.ts:36
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:36](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/ScriptedModel.ts#L36)
 
 Minimal interface providers must satisfy so they can be swapped at runtime.
 
@@ -30,7 +30,7 @@ Minimal interface providers must satisfy so they can be swapped at runtime.
 
 > `readonly` **calls**: (\{ `method`: `"stream"` \| `"generate"` \| `"generateText"`; `request`: [`ProviderRequest`](../type-aliases/ProviderRequest.md); \} \| \{ `method`: `"generateJson"`; `request`: [`ProviderJsonRequest`](../type-aliases/ProviderJsonRequest.md); \})[] = `[]`
 
-Defined in: packages/ai/src/testing/ScriptedModel.ts:43
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:43](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/ScriptedModel.ts#L43)
 
 ***
 
@@ -38,7 +38,7 @@ Defined in: packages/ai/src/testing/ScriptedModel.ts:43
 
 > `readonly` **capabilities**: `object`
 
-Defined in: packages/ai/src/testing/ScriptedModel.ts:38
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:38](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/ScriptedModel.ts#L38)
 
 #### json
 
@@ -62,7 +62,7 @@ Defined in: packages/ai/src/testing/ScriptedModel.ts:38
 
 > `readonly` **name**: `"scripted-model"` = `'scripted-model'`
 
-Defined in: packages/ai/src/testing/ScriptedModel.ts:37
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:37](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/ScriptedModel.ts#L37)
 
 #### Implementation of
 
@@ -74,7 +74,7 @@ Defined in: packages/ai/src/testing/ScriptedModel.ts:37
 
 > **generate**(`request`): `Promise`\<[`ProviderResponse`](../type-aliases/ProviderResponse.md)\>
 
-Defined in: packages/ai/src/testing/ScriptedModel.ts:113
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:113](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/ScriptedModel.ts#L113)
 
 #### Parameters
 
@@ -96,7 +96,7 @@ Defined in: packages/ai/src/testing/ScriptedModel.ts:113
 
 > **generateJson**\<`T`\>(`request`): `Promise`\<[`ProviderJsonResponse`](../type-aliases/ProviderJsonResponse.md)\<`T`\>\>
 
-Defined in: packages/ai/src/testing/ScriptedModel.ts:182
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:182](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/ScriptedModel.ts#L182)
 
 #### Type Parameters
 
@@ -124,7 +124,7 @@ Defined in: packages/ai/src/testing/ScriptedModel.ts:182
 
 > **generateText**(`request`): `Promise`\<`string`\>
 
-Defined in: packages/ai/src/testing/ScriptedModel.ts:167
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:167](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/ScriptedModel.ts#L167)
 
 High-level helper that yields one final text output while automatically
 preferring `stream()` and falling back to `generate()`.
@@ -149,7 +149,7 @@ preferring `stream()` and falling back to `generate()`.
 
 > **nextError**(`error`): `ScriptedModel`
 
-Defined in: packages/ai/src/testing/ScriptedModel.ts:71
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:71](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/ScriptedModel.ts#L71)
 
 #### Parameters
 
@@ -167,7 +167,7 @@ Defined in: packages/ai/src/testing/ScriptedModel.ts:71
 
 > **nextJson**(`reply`): `ScriptedModel`
 
-Defined in: packages/ai/src/testing/ScriptedModel.ts:66
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:66](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/ScriptedModel.ts#L66)
 
 #### Parameters
 
@@ -185,7 +185,7 @@ Defined in: packages/ai/src/testing/ScriptedModel.ts:66
 
 > **nextStream**(`chunks`, `options?`): `ScriptedModel`
 
-Defined in: packages/ai/src/testing/ScriptedModel.ts:56
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:56](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/ScriptedModel.ts#L56)
 
 #### Parameters
 
@@ -213,7 +213,7 @@ Defined in: packages/ai/src/testing/ScriptedModel.ts:56
 
 > **nextText**(`reply`, `options?`): `ScriptedModel`
 
-Defined in: packages/ai/src/testing/ScriptedModel.ts:51
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:51](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/ScriptedModel.ts#L51)
 
 #### Parameters
 
@@ -241,7 +241,7 @@ Defined in: packages/ai/src/testing/ScriptedModel.ts:51
 
 > **reset**(): `ScriptedModel`
 
-Defined in: packages/ai/src/testing/ScriptedModel.ts:76
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:76](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/ScriptedModel.ts#L76)
 
 #### Returns
 
@@ -253,7 +253,7 @@ Defined in: packages/ai/src/testing/ScriptedModel.ts:76
 
 > **stream**(`request`): [`ProviderStream`](../type-aliases/ProviderStream.md)
 
-Defined in: packages/ai/src/testing/ScriptedModel.ts:120
+Defined in: [packages/ai/src/testing/ScriptedModel.ts:120](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/ai/src/testing/ScriptedModel.ts#L120)
 
 #### Parameters
 

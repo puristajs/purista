@@ -6,7 +6,7 @@
 
 # Interface: PodmanSandboxDriverConfig
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:10](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L10)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:10](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L10)
 
 ## Properties
 
@@ -14,7 +14,7 @@ Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.
 
 > `optional` **cpus**: `string`
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:16](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L16)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:16](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L16)
 
 CPU limit
 
@@ -24,7 +24,7 @@ CPU limit
 
 > **imageName**: `string`
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:12](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L12)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:12](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L12)
 
 The name of the Podman image to use
 
@@ -34,7 +34,7 @@ The name of the Podman image to use
 
 > `optional` **memory**: `string`
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:14](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L14)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:14](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L14)
 
 Memory limit
 
@@ -44,6 +44,6 @@ Memory limit
 
 > `optional` **networkDisabled**: `boolean`
 
-Defined in: [sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:18](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L18)
+Defined in: [packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts:18](https://github.com/puristajs/purista/blob/01c6b50dcd0391349ebdcf4da669a8637214ec33/packages/sandbox-service/src/driver/PodmanSandboxDriver/PodmanSandboxDriver.ts#L18)
 
 Disable network
