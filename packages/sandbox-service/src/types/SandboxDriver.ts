@@ -3,6 +3,38 @@ import { z } from 'zod'
 const NonEmptyIdentifierSchema = z.string().min(1)
 
 /**
+ * Optional isolation scope for sandbox ownership and reuse.
+ * When omitted, sandboxes are shared per organization + project + user.
+ *
+ * @group Schemas
+ */
+export const SandboxScopeSchema = z.discriminatedUnion('kind', [
+	z.object({
+		kind: z.literal('shared-project-user'),
+	}),
+	z.object({
+		kind: z.literal('agent-run'),
+		key: NonEmptyIdentifierSchema.describe('Logical run identifier used for isolated sandbox reuse'),
+	}),
+	z.object({
+		kind: z.literal('agent-instance'),
+		key: NonEmptyIdentifierSchema.describe('Logical agent instance identifier used for isolated sandbox reuse'),
+	}),
+	z.object({
+		kind: z.literal('conversation'),
+		key: NonEmptyIdentifierSchema.describe('Conversation identifier used for isolated sandbox reuse'),
+	}),
+	z.object({
+		kind: z.literal('runtime-instance'),
+		key: NonEmptyIdentifierSchema.describe('Runtime instance identifier used for isolated sandbox reuse'),
+	}),
+	z.object({
+		kind: z.literal('custom'),
+		key: NonEmptyIdentifierSchema.describe('Application-defined isolation key'),
+	}),
+])
+
+/**
  * Common payload for sandbox operations requiring a specific sandbox reference.
  * @group Schemas
  */
@@ -29,6 +61,9 @@ export const SandboxMetadataSchema = z.object({
 	organizationId: NonEmptyIdentifierSchema.describe('The organization owning this sandbox'),
 	projectId: NonEmptyIdentifierSchema.describe('The project reference'),
 	userId: NonEmptyIdentifierSchema.describe('The user who created the sandbox'),
+	scope: SandboxScopeSchema.optional().describe(
+		'Optional isolation scope used to distinguish shared and isolated sandboxes',
+	),
 	containerName: NonEmptyIdentifierSchema.describe('The underlying container or VM name'),
 	createdAt: z.number().int().nonnegative().describe('Timestamp of creation'),
 	/** Indicates if Git/GitHub was configured */
@@ -43,6 +78,9 @@ export const SandboxOwnerSchema = z.object({
 	organizationId: NonEmptyIdentifierSchema.describe('The organization owning this sandbox'),
 	projectId: NonEmptyIdentifierSchema.describe('The project reference'),
 	userId: NonEmptyIdentifierSchema.describe('The user who created the sandbox'),
+	scope: SandboxScopeSchema.optional().describe(
+		'Optional isolation scope used to distinguish shared and isolated sandboxes',
+	),
 })
 
 /**
@@ -50,6 +88,7 @@ export const SandboxOwnerSchema = z.object({
  */
 export type SandboxMetadata = z.infer<typeof SandboxMetadataSchema>
 export type SandboxOwner = z.infer<typeof SandboxOwnerSchema>
+export type SandboxScope = z.infer<typeof SandboxScopeSchema>
 
 /**
  * Interface for sandbox drivers.

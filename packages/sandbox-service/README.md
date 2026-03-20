@@ -36,6 +36,13 @@ Optional Alpine variant (smaller image, stricter compatibility constraints):
 docker build -t purista-sandbox-agent:alpine -f Dockerfile.sandbox.alpine .
 ```
 
+The sandbox image is expected to stay running so the driver can `docker exec`
+into it. Keep the image startup contract compatible with the packaged
+Dockerfiles, which use:
+
+- no custom `ENTRYPOINT`
+- `CMD ["tail", "-f", "/dev/null"]`
+
 ### 2. Configure the Service
 
 ```typescript

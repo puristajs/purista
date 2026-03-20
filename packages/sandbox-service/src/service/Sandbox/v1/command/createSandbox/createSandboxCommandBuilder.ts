@@ -6,16 +6,6 @@ import { sandboxServiceBuilder } from '../../SandboxServiceBuilder.js'
 import { CreateSandboxInputSchema, CreateSandboxOutputSchema } from './schema.js'
 
 /**
- * Event payload for SandboxStarted
- */
-const SandboxStartedEventSchema = z.object({
-	sandboxId: z.string(),
-	organizationId: z.string(),
-	projectId: z.string(),
-	userId: z.string(),
-})
-
-/**
  * createSandboxCommandBuilder
  *
  * This command handles the end-to-end provisioning of a new sandbox environment.
@@ -25,13 +15,12 @@ const SandboxStartedEventSchema = z.object({
  * 1. Generates a unique Sandbox ID.
  * 2. Delegates infrastructure creation to the 'driver' resource.
  * 3. Persists sandbox metadata in the 'registry' resource.
- * 4. Emits a 'SandboxStarted' event.
+ * 4. Returns the sandbox reference to the caller.
  */
 export const createSandboxCommandBuilder: any = sandboxServiceBuilder
 	.getCommandBuilder('createSandbox', 'Provisions and starts a new sandbox environment')
 	.addPayloadSchema(CreateSandboxInputSchema)
 	.addOutputSchema(CreateSandboxOutputSchema)
-	.canEmit('SandboxStarted', SandboxStartedEventSchema)
 	.exposeAsHttpEndpoint('POST', 'sandbox')
 	.setCommandFunction(async function (context: any, payload: z.infer<typeof CreateSandboxInputSchema>) {
 		const owner = resolveSandboxOwnerFromMessage(context, payload)
@@ -60,14 +49,6 @@ export const createSandboxCommandBuilder: any = sandboxServiceBuilder
 			containerName: result.containerName,
 			createdAt: Date.now(),
 			gitConfigured: !!payload.gitConfig,
-		})
-
-		// The emit expects a payload that matches the schema
-		await context.emit('SandboxStarted', {
-			sandboxId,
-			organizationId: owner.organizationId,
-			projectId: owner.projectId,
-			userId: owner.userId,
 		})
 
 		return {

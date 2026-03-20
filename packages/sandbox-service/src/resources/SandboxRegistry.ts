@@ -1,5 +1,5 @@
 import type { StateStore } from '@purista/core'
-import { type SandboxMetadata, SandboxMetadataSchema } from '../types/SandboxDriver.js'
+import { type SandboxMetadata, SandboxMetadataSchema, type SandboxOwner } from '../types/SandboxDriver.js'
 
 /**
  * SandboxRegistry - A state-store backed registry for tracking active sandboxes.
@@ -24,8 +24,20 @@ export class SandboxRegistry {
 		return `${this.prefix}${sandboxId}`
 	}
 
-	private getOwnerIndexKey(owner: { organizationId: string; projectId: string; userId: string }): string {
-		return `${this.ownerPrefix}${owner.organizationId}:${owner.projectId}:${owner.userId}`
+	private getOwnerIndexKey(owner: {
+		organizationId: string
+		projectId: string
+		userId: string
+		scope?: SandboxOwner['scope']
+	}): string {
+		return `${this.ownerPrefix}${owner.organizationId}:${owner.projectId}:${owner.userId}:${this.getScopeKeyPart(owner)}`
+	}
+
+	private getScopeKeyPart(owner: Pick<SandboxOwner, 'scope'>): string {
+		if (!owner.scope || owner.scope.kind === 'shared-project-user') {
+			return 'shared-project-user'
+		}
+		return `${owner.scope.kind}:${owner.scope.key}`
 	}
 
 	/**
@@ -81,6 +93,7 @@ export class SandboxRegistry {
 		organizationId: string
 		projectId: string
 		userId: string
+		scope?: SandboxOwner['scope']
 	}): Promise<SandboxMetadata | undefined> {
 		const ownerKey = this.getOwnerIndexKey(owner)
 		const ownerEntry = await this.store.getState(ownerKey)
@@ -96,7 +109,8 @@ export class SandboxRegistry {
 		if (
 			metadata.organizationId !== owner.organizationId ||
 			metadata.projectId !== owner.projectId ||
-			metadata.userId !== owner.userId
+			metadata.userId !== owner.userId ||
+			this.getScopeKeyPart(metadata) !== this.getScopeKeyPart(owner)
 		) {
 			await this.store.removeState(ownerKey)
 			return undefined

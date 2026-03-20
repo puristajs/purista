@@ -127,6 +127,39 @@ describe('sandbox command ownership', () => {
 		).toBe(true)
 	})
 
+	it('uses scope to isolate parallel ensureSandbox requests for the same owner tuple', async () => {
+		const driver = {
+			executeBash: sandbox.stub(),
+			destroySandbox: sandbox.stub(),
+			createSandbox: sandbox.stub().resolves({ sandboxId: 'new-sb', containerName: 'container-2' }),
+		}
+		const registry = {
+			findByOwner: sandbox.stub().onFirstCall().resolves(undefined).onSecondCall().resolves(undefined),
+			unregister: sandbox.stub().resolves(),
+			register: sandbox.stub().resolves(),
+		}
+
+		const context = createContext(ensureSandboxCommandBuilder, { projectId: 'project-1' }, { driver, registry })
+		const fn = ensureSandboxCommandBuilder.getCommandFunction()
+
+		await fn(context.mock, { projectId: 'project-1', scope: { kind: 'agent-run', key: 'run-1' } }, {})
+		await fn(context.mock, { projectId: 'project-1', scope: { kind: 'agent-run', key: 'run-2' } }, {})
+
+		expect(registry.findByOwner.firstCall.args[0]).toMatchObject({
+			organizationId: 'tenant-1',
+			projectId: 'project-1',
+			userId: 'user-1',
+			scope: { kind: 'agent-run', key: 'run-1' },
+		})
+		expect(registry.findByOwner.secondCall.args[0]).toMatchObject({
+			organizationId: 'tenant-1',
+			projectId: 'project-1',
+			userId: 'user-1',
+			scope: { kind: 'agent-run', key: 'run-2' },
+		})
+		expect(driver.createSandbox.calledTwice).toBe(true)
+	})
+
 	it.each([
 		['execute', executeBashCommandBuilder, { sandboxId: 'sb-1', command: 'pwd' }, 'executeBash'],
 		['read', readFileCommandBuilder, { sandboxId: 'sb-1', path: '/tmp/file.txt' }, 'readFile'],

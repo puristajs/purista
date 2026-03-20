@@ -39,6 +39,7 @@ import type {
 	ProviderRerankRequest,
 	ProviderRerankResponse,
 } from '../providers/runtime/ModelProvider.js'
+import type { SkillDocument, SkillMetadata, SkillResource, SkillSearchInput } from '../skills/fileSystem.js'
 import type { AgentManifest, AllowedToolDefinition } from '../types/AgentManifest.js'
 import { type ConversationHelpers, createConversationHelpers } from './conversation.js'
 import { invokeAgent } from './invokeAgent.js'
@@ -504,6 +505,13 @@ export type AgentHandlerContext<
 	protocol: ProtocolEmitter
 	tools: ToolInvoker
 	expose: ExposeHelpers
+	skills: {
+		available: boolean
+		list(): Promise<SkillMetadata[]>
+		load(skillName: string): Promise<SkillDocument>
+		loadMany(skillNames: string[]): Promise<SkillDocument[]>
+		search(input: SkillSearchInput): Promise<SkillDocument[]>
+	}
 	resources: Resources
 	models: Models
 	agents: {
@@ -1059,6 +1067,36 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 	}
 }
 
+const getOptionalSkillResource = (resources: Record<string, unknown>): SkillResource | undefined => {
+	try {
+		return Reflect.get(resources, 'skills') as SkillResource | undefined
+	} catch {
+		return undefined
+	}
+}
+
+const createSkillHelpers = (resources: Record<string, unknown>) => {
+	const ensureSkillResource = () => {
+		const skillResource = getOptionalSkillResource(resources)
+
+		if (!skillResource) {
+			throw new HandledError(
+				StatusCode.InternalServerError,
+				'No skill resource is configured. Add a resources.skills implementation such as FileSkillResource.',
+			)
+		}
+		return skillResource
+	}
+
+	return {
+		available: getOptionalSkillResource(resources) !== undefined,
+		list: async () => await ensureSkillResource().list(),
+		load: async (skillName: string) => await ensureSkillResource().load(skillName),
+		loadMany: async (skillNames: string[]) => await ensureSkillResource().loadMany(skillNames),
+		search: async (input: SkillSearchInput) => await ensureSkillResource().search(input),
+	}
+}
+
 export const createAgentHandlerContext = <
 	Payload,
 	Parameter,
@@ -1099,6 +1137,7 @@ export const createAgentHandlerContext = <
 			agents,
 			protocol: input.protocol,
 		}),
+		skills: createSkillHelpers(input.resources),
 		resources: input.resources,
 		models: input.models,
 		agents,

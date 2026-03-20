@@ -7,6 +7,9 @@ describe('SandboxRegistry', () => {
 	afterEach(async () => {
 		await store.removeState('sandbox:registry:sb-1')
 		await store.removeState('sandbox:owner:org:proj:user')
+		await store.removeState('sandbox:owner:org:proj:user:shared-project-user')
+		await store.removeState('sandbox:owner:org:proj:user:agent-run:run-1')
+		await store.removeState('sandbox:owner:org:proj:user:agent-run:run-2')
 	})
 
 	it('registers and retrieves metadata', async () => {
@@ -39,6 +42,33 @@ describe('SandboxRegistry', () => {
 			userId: 'user',
 		})
 		expect(result?.sandboxId).toBe('sb-1')
+	})
+
+	it('isolates registry lookup by optional scope', async () => {
+		const registry = new SandboxRegistry(store)
+		await registry.register({
+			sandboxId: 'sb-1',
+			organizationId: 'org',
+			projectId: 'proj',
+			userId: 'user',
+			scope: { kind: 'agent-run', key: 'run-1' },
+			containerName: 'purista-sb-1',
+			createdAt: Date.now(),
+		})
+		const matching = await registry.findByOwner({
+			organizationId: 'org',
+			projectId: 'proj',
+			userId: 'user',
+			scope: { kind: 'agent-run', key: 'run-1' },
+		})
+		const different = await registry.findByOwner({
+			organizationId: 'org',
+			projectId: 'proj',
+			userId: 'user',
+			scope: { kind: 'agent-run', key: 'run-2' },
+		})
+		expect(matching?.sandboxId).toBe('sb-1')
+		expect(different).toBeUndefined()
 	})
 
 	it('cleans owner index on unregister', async () => {
@@ -77,7 +107,7 @@ describe('SandboxRegistry', () => {
 
 	it('cleans stale owner index entries pointing to mismatched metadata', async () => {
 		const registry = new SandboxRegistry(store)
-		await store.setState('sandbox:owner:org:proj:user', 'sb-1')
+		await store.setState('sandbox:owner:org:proj:user:shared-project-user', 'sb-1')
 		await store.setState('sandbox:registry:sb-1', {
 			sandboxId: 'sb-1',
 			organizationId: 'other-org',
@@ -94,7 +124,11 @@ describe('SandboxRegistry', () => {
 		})
 
 		expect(result).toBeUndefined()
-		expect((await store.getState('sandbox:owner:org:proj:user'))['sandbox:owner:org:proj:user']).toBeUndefined()
+		expect(
+			(await store.getState('sandbox:owner:org:proj:user:shared-project-user'))[
+				'sandbox:owner:org:proj:user:shared-project-user'
+			],
+		).toBeUndefined()
 	})
 
 	it('skips incomplete recovered sandboxes during reconcile', async () => {

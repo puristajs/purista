@@ -58,5 +58,5 @@ RUN chown -R agent:agent /home/agent
 # Switch to the non-root user
 USER agent
 
-# Set default entrypoint to bash
-ENTRYPOINT ["/bin/bash"]
+# Keep the container interface simple so drivers can choose the startup command
+CMD ["tail", "-f", "/dev/null"]

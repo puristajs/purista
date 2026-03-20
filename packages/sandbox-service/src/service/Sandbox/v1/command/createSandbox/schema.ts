@@ -1,9 +1,11 @@
 import { z } from 'zod'
+import { SandboxScopeSchema } from '../../../../../types/SandboxDriver.js'
 
 export const CreateSandboxInputSchema = z.object({
 	projectId: z.string(),
 	organizationId: z.string().optional(),
 	userId: z.string().optional(),
+	scope: SandboxScopeSchema.optional(),
 	/** Optional Git and GitHub configuration */
 	gitConfig: z
 		.object({

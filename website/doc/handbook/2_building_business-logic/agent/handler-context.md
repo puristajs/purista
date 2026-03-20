@@ -187,7 +187,41 @@ await run.finishSuccess('Architecture artifacts are ready.')
 
 Every persisted update emits a standard `run-state` artifact. In `ai-sdk-ui-message` mode this becomes a `data-run-state` part for the frontend. That is the contract that lets the UI render live progress and lock the composer while a queued durable agent is active.
 
-## 6. Resources for Retrieval, Skills, and External Data
+## 6. Skills (context.skills)
+
+When your app provides a skill registry resource, agent handlers can use the
+shared skill helpers directly from `context.skills`.
+
+The recommended filesystem convention is:
+
+```text
+skills/
+  skill-name/
+    SKILL.md
+    references/
+    scripts/
+    assets/
+```
+
+`SKILL.md` is the only required file. Optional frontmatter may provide metadata
+such as `name`, `description`, `topics`, and `requires_sandbox`.
+
+```ts
+const relevantSkills = await context.skills.search({
+  skillNames: ['purista-architecture', 'purista-queues'],
+  queries: [payload.prompt, 'architecture', 'queues'],
+  limit: 3,
+})
+
+const contextBlock = relevantSkills
+  .map(skill => `## ${skill.name}\n${skill.content}`)
+  .join('\n\n')
+```
+
+If no skill resource is configured, `context.skills.*` throws with a clear
+runtime error instead of silently inventing behavior.
+
+## 7. Resources for Retrieval, Skills, and External Data
 
 Retrieval and skill loading are application concerns, so they live behind normal resources instead of a special AI-only knowledge API.
 
@@ -205,7 +239,7 @@ Keep the boundary explicit:
 - `context.resources` for retrieval systems, skill registries, vector stores, or document indexes
 - `context.tools` when the model should call retrieval through an allowlisted command
 
-## 7. Telemetry & Embeddings
+## 8. Telemetry & Embeddings
 
 - `context.embeddings`: Access to embedding models for manual vectorization.
 - `context.rerankers`: Access to reranking models for precision search.

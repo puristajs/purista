@@ -1,5 +1,5 @@
 import { HandledError, StatusCode } from '@purista/core'
-import type { SandboxMetadata, SandboxOwner } from '../../../../types/SandboxDriver.js'
+import type { SandboxMetadata, SandboxOwner, SandboxScope } from '../../../../types/SandboxDriver.js'
 
 type MessageIdentityContext = {
 	message?: {
@@ -12,6 +12,7 @@ type ProvisioningPayload = {
 	projectId: string
 	organizationId?: string
 	userId?: string
+	scope?: SandboxScope
 }
 
 const getCallerIdentity = (context: MessageIdentityContext) => {
@@ -52,6 +53,7 @@ export const resolveSandboxOwnerFromMessage = (
 		organizationId: caller.organizationId,
 		projectId: payload.projectId,
 		userId: caller.userId,
+		scope: payload.scope,
 	}
 }
 

@@ -30,4 +30,4 @@ WORKDIR /home/agent/workspace
 RUN chown -R agent:agent /home/agent
 USER agent
 
-ENTRYPOINT ["/bin/bash"]
+CMD ["tail", "-f", "/dev/null"]

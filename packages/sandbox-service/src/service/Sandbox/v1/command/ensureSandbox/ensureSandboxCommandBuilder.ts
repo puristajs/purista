@@ -4,18 +4,10 @@ import { resolveSandboxOwnerFromMessage } from '../../helper/ownership.js'
 import { sandboxServiceBuilder } from '../../SandboxServiceBuilder.js'
 import { EnsureSandboxInputSchema, EnsureSandboxOutputSchema } from './schema.js'
 
-const SandboxStartedEventSchema = z.object({
-	sandboxId: z.string(),
-	organizationId: z.string(),
-	projectId: z.string(),
-	userId: z.string(),
-})
-
 export const ensureSandboxCommandBuilder: any = sandboxServiceBuilder
 	.getCommandBuilder('ensureSandbox', 'Returns an existing healthy sandbox for owner tuple or creates one if missing')
 	.addPayloadSchema(EnsureSandboxInputSchema)
 	.addOutputSchema(EnsureSandboxOutputSchema)
-	.canEmit('SandboxStarted', SandboxStartedEventSchema)
 	.exposeAsHttpEndpoint('POST', 'sandbox/ensure')
 	.setCommandFunction(async function (context: any, payload: z.infer<typeof EnsureSandboxInputSchema>) {
 		const owner = resolveSandboxOwnerFromMessage(context, payload)
@@ -59,13 +51,6 @@ export const ensureSandboxCommandBuilder: any = sandboxServiceBuilder
 			containerName: created.containerName,
 			createdAt: Date.now(),
 			gitConfigured: !!payload.gitConfig,
-		})
-
-		await context.emit('SandboxStarted', {
-			sandboxId,
-			organizationId: owner.organizationId,
-			projectId: owner.projectId,
-			userId: owner.userId,
 		})
 
 		return {

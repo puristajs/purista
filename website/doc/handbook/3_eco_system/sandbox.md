@@ -64,6 +64,14 @@ Optional Alpine variant:
 docker build -t purista-sandbox-agent:alpine -f packages/sandbox-service/Dockerfile.sandbox.alpine .
 ```
 
+Keep the image startup contract compatible with the PURISTA drivers:
+
+- no custom `ENTRYPOINT`
+- `CMD ["tail", "-f", "/dev/null"]`
+
+The drivers start a long-running container first and then execute commands via
+`docker exec` / equivalent runtime APIs.
+
 ### 2. Wire the service into PURISTA
 
 ```ts
