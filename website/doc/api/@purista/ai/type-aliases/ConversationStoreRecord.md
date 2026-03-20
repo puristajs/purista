@@ -8,7 +8,7 @@
 
 > **ConversationStoreRecord** = `object`
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:14](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/memory/conversationStore.ts#L14)
+Defined in: [packages/ai/src/memory/conversationStore.ts:14](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/memory/conversationStore.ts#L14)
 
 Basic record stored by [ConversationStore](../interfaces/ConversationStore.md) implementations.
 
@@ -18,7 +18,7 @@ Basic record stored by [ConversationStore](../interfaces/ConversationStore.md) i
 
 > **conversationId**: `string`
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:15](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/memory/conversationStore.ts#L15)
+Defined in: [packages/ai/src/memory/conversationStore.ts:15](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/memory/conversationStore.ts#L15)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/ai/src/memory/conversationStore.ts:15](https://github.com/
 
 > **data**: [`ConversationStoreRecordData`](ConversationStoreRecordData.md)
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:16](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/memory/conversationStore.ts#L16)
+Defined in: [packages/ai/src/memory/conversationStore.ts:16](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/memory/conversationStore.ts#L16)
 
 ***
 
@@ -34,4 +34,4 @@ Defined in: [packages/ai/src/memory/conversationStore.ts:16](https://github.com/
 
 > **updatedAt**: `number`
 
-Defined in: [packages/ai/src/memory/conversationStore.ts:17](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/memory/conversationStore.ts#L17)
+Defined in: [packages/ai/src/memory/conversationStore.ts:17](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/memory/conversationStore.ts#L17)

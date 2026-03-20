@@ -28,6 +28,7 @@ export type AgentExecutionCleanupPolicy = {
 export type AgentExecutionPolicy = {
 	leaseTtlMs?: number
 	heartbeatIntervalMs?: number
+	maxLeaseExtensions?: number
 	maxAttempts?: number
 	maxDurationMs?: number
 	maxModelSteps?: number
@@ -93,11 +94,6 @@ export type AgentSessionConfig = {
 
 export type AgentHistoryPreset = 'user' | 'agent'
 
-export type KnowledgeAdapterConfig = {
-	adapterName: string
-	options?: Record<string, unknown>
-}
-
 export type RetryPolicy = {
 	strategy?: 'fixed' | 'exponential'
 	maxAttempts: number
@@ -121,7 +117,6 @@ export type AgentManifest = {
 	models?: AgentModelBinding[]
 	modelResource?: { resourceName: string; variant?: string }
 	session?: AgentSessionConfig
-	knowledge?: KnowledgeAdapterConfig[]
 	retryPolicy?: RetryPolicy
 	telemetry?: { attributes?: Record<string, string | number | boolean> }
 	allowedTools: AllowedToolDefinition[]

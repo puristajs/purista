@@ -8,7 +8,7 @@
 
 > **ExternalBindingMetadata** = `object`
 
-Defined in: packages/ai/src/bridge/externalRuntime.ts:18
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:18](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/bridge/externalRuntime.ts#L18)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: packages/ai/src/bridge/externalRuntime.ts:18
 
 > **descriptor**: `BindingDescriptor` & `object`
 
-Defined in: packages/ai/src/bridge/externalRuntime.ts:20
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:20](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/bridge/externalRuntime.ts#L20)
 
 #### Type Declaration
 
@@ -30,4 +30,4 @@ Defined in: packages/ai/src/bridge/externalRuntime.ts:20
 
 > **kind**: [`ExternalBindingKind`](ExternalBindingKind.md)
 
-Defined in: packages/ai/src/bridge/externalRuntime.ts:19
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:19](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/bridge/externalRuntime.ts#L19)

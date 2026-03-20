@@ -2,7 +2,6 @@ import type { Tracer } from '@opentelemetry/api'
 import type { SpanProcessor } from '@opentelemetry/sdk-trace-node'
 import type { ConfigStore, EventBridge, Logger, QueueBridge, Schema, SecretStore, StateStore } from '@purista/core'
 
-import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
 import type { ConversationStore } from '../memory/conversationStore.js'
 import type { PoolManager } from '../pools/PoolManager.js'
 import type { AgentProtocolEnvelope } from '../protocol/types.js'
@@ -48,16 +47,9 @@ type BaseAgentInstanceOptions = {
 	config?: Record<string, unknown>
 }
 
-export type AgentInstanceOptions<KnowledgeAliases extends string = never> = BaseAgentInstanceOptions &
-	([KnowledgeAliases] extends [never]
-		? {
-				knowledgeAdapters?: Record<string, KnowledgeAdapter>
-			}
-		: {
-				knowledgeAdapters: Record<KnowledgeAliases, KnowledgeAdapter> & Record<string, KnowledgeAdapter>
-			})
+export type AgentInstanceOptions = BaseAgentInstanceOptions
 
-export type AgentDefinition<KnowledgeAliases extends string = never> = {
+export type AgentDefinition = {
 	info: AgentInfo
 	manifest: AgentManifest
 	schemas: {
@@ -68,12 +60,7 @@ export type AgentDefinition<KnowledgeAliases extends string = never> = {
 	}
 	getManifest(): AgentManifest
 	getExternalRuntimeMetadata(): ExternalRuntimeMetadata
-	getInstance(
-		eventBridge: EventBridge,
-		...options: [KnowledgeAliases] extends [never]
-			? [options?: AgentInstanceOptions<KnowledgeAliases>]
-			: [options: AgentInstanceOptions<KnowledgeAliases>]
-	): Promise<AgentRuntimeInstance>
+	getInstance(eventBridge: EventBridge, options?: AgentInstanceOptions): Promise<AgentRuntimeInstance>
 }
 
 export type AgentRuntimeInstance = {

@@ -11,10 +11,7 @@ import type { AgentDefinition } from '../types/AgentDefinition.js'
  * await publishAgentManifest(service.configs.setConfig.bind(service.configs), definition)
  * ```
  */
-export const publishAgentManifest = async <KnowledgeAliases extends string>(
-	configSetter: ConfigSetterFunction,
-	definition: AgentDefinition<KnowledgeAliases>,
-) => {
+export const publishAgentManifest = async (configSetter: ConfigSetterFunction, definition: AgentDefinition) => {
 	const configKey = `ai.manifest.${definition.manifest.agentName}.${definition.manifest.agentVersion}`
 	await configSetter(configKey, definition.manifest)
 	return {

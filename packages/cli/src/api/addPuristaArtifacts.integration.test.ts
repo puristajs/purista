@@ -225,8 +225,9 @@ describe('CLI artifact generation (e2e)', () => {
 			'.setHandler<{ sessionId?: string; prompt: string; context?: string }>(async function (context, payload) {',
 		)
 		const agentTestContent = readFileSync(join(agentDirPath, 'triageAgent.test.ts'), 'utf-8')
-		expect(agentTestContent).toContain('runs with deterministic provider and emits protocol frames')
-		expect(agentTestContent).toContain('new DeterministicTextProvider()')
+		expect(agentTestContent).toContain('runs with the agent test harness and emits protocol frames')
+		expect(agentTestContent).toContain("new ScriptedModel().nextText('hello')")
+		expect(agentTestContent).toContain('createAgentTestHarness')
 
 		const queueWorkerDir = join(serviceDir, 'queue-worker', 'processJobsWorker')
 		expect(readFileSync(join(queueWorkerDir, 'processJobsWorkerQueueWorkerBuilder.ts'), 'utf-8')).toContain(

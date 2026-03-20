@@ -1,4 +1,3 @@
-import { InMemoryKnowledgeAdapter } from '../../../../knowledge/adapters/inMemoryAdapter.js'
 import { InMemoryConversationStore } from '../../../../memory/conversationStore.js'
 import { PoolManager } from '../../../../pools/PoolManager.js'
 import { defaultModelResourceRegistry } from '../../../../providers/resources/ModelResourceRegistry.js'
@@ -9,7 +8,6 @@ import { aiWorkloadsQueueBuilder } from './aiWorkloads/aiWorkloadsQueueBuilder.j
 import { aiWorkloadQueuePayloadSchema } from './aiWorkloads/schema.js'
 
 const conversationStore = new InMemoryConversationStore()
-const knowledgeAdapter = new InMemoryKnowledgeAdapter()
 const poolManager = new PoolManager({ default: 2 })
 
 /**
@@ -98,7 +96,6 @@ export const executeWorkloadQueueWorkerBuilder = aiWorkerServiceBuilder
 				manifest,
 				provider,
 				conversationStore,
-				knowledgeAdapters: { default: knowledgeAdapter },
 				logger: context.logger,
 				startActiveSpan: (name, options, spanContext, fn) =>
 					context.startActiveSpan(name, options ?? {}, spanContext, span =>

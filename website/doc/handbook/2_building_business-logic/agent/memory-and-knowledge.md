@@ -1,10 +1,10 @@
 ---
-title: Memory & Knowledge
-description: Managing conversation history and Retrieval-Augmented Generation (RAG).
+title: Memory & Retrieval
+description: Managing conversation history, durable run state, and resource-backed retrieval.
 order: 203707
 ---
 
-# Memory & Knowledge
+# Memory & Retrieval
 
 Agents need to "remember" previous turns and access "external data" to provide high-quality answers.
 
@@ -36,35 +36,44 @@ setHandler(async (context, payload) => {
 })
 ```
 
-## 2. External Knowledge (RAG)
+## 2. External Retrieval (RAG)
 
-Knowledge adapters allow your agent to access external documents like FAQs, Wikis, or Vector databases.
+PURISTA does not ship a framework-owned knowledge base abstraction.
 
-### Defining Knowledge
-```ts
-export const supportAgent = new AgentBuilder({ ... })
-  .useKnowledgeAdapter('supportFaq')
-```
+Use normal resources for retrieval infrastructure such as vector stores, search indexes, document registries, or skill registries.
 
-### Querying Knowledge
 ```ts
 setHandler(async (context, payload) => {
-  const docs = await context.knowledge.supportFaq.query(payload.prompt, 3)
+  const docs = await context.resources.supportFaq.search({
+    query: payload.prompt,
+    limit: 3,
+    tenantId: context.service.tenantId,
+    principalId: context.service.principalId,
+  })
+
+  const prompt = [
+    payload.prompt,
+    '',
+    'Relevant documents:',
+    ...docs.map(doc => `- ${doc.title}: ${doc.content}`),
+  ].join('\n')
+
+  return await context.models.primary.generate({ prompt })
 })
 ```
 
-PURISTA automatically scopes queries by `tenantId`, `principalId`, `agentName`, `agentVersion`, and `sessionId` to ensure data separation.
+If retrieval must be model-invocable, expose it through an allowlisted command and hand that command to the external tool loop.
 
 ## 3. Configuration at Runtime
 
-Both memory and knowledge are "in-memory" by default. For production, inject persistent stores during bootstrap.
+Conversation memory is in-memory by default. For production, inject a persistent conversation store during bootstrap. Retrieval resources follow the same runtime resource pattern as any other dependency.
 
 ```ts
 const instance = await supportAgent.getInstance(eventBridge, {
   conversationStore: new RedisConversationStore(),
-  knowledgeAdapters: {
-    supportFaq: new PineconeAdapter()
-  }
+  resources: {
+    supportFaq: new PineconeFaqResource(),
+  },
 })
 ```
 
@@ -111,4 +120,4 @@ Every update persists first and then emits a `run-state` artifact into the strea
 ---
 
 ### Need something custom?
-If you need to build your own store or adapter, see the **[Custom AI Stores & Adapters](../advanced/ai-custom-stores.md)** section in the advanced handbook.
+If you need custom persistence or retrieval infrastructure, see the **[Custom AI Stores & Retrieval Resources](../advanced/ai-custom-stores.md)** section in the advanced handbook.

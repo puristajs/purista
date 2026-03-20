@@ -6,7 +6,7 @@
 
 # Interface: PascalCaseOptions
 
-Defined in: [change-case.ts:32](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/cli/src/api/change-case.ts#L32)
+Defined in: [change-case.ts:32](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/change-case.ts#L32)
 
 Options used for converting strings to pascal/camel case.
 
@@ -20,7 +20,7 @@ Options used for converting strings to pascal/camel case.
 
 > `optional` **delimiter**: `string`
 
-Defined in: [change-case.ts:44](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/cli/src/api/change-case.ts#L44)
+Defined in: [change-case.ts:44](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/change-case.ts#L44)
 
 #### Inherited from
 
@@ -32,7 +32,7 @@ Defined in: [change-case.ts:44](https://github.com/puristajs/purista/blob/12a89e
 
 > `optional` **locale**: [`Locale`](../type-aliases/Locale.md)
 
-Defined in: [change-case.ts:40](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/cli/src/api/change-case.ts#L40)
+Defined in: [change-case.ts:40](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/change-case.ts#L40)
 
 #### Inherited from
 
@@ -44,7 +44,7 @@ Defined in: [change-case.ts:40](https://github.com/puristajs/purista/blob/12a89e
 
 > `optional` **mergeAmbiguousCharacters**: `boolean`
 
-Defined in: [change-case.ts:33](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/cli/src/api/change-case.ts#L33)
+Defined in: [change-case.ts:33](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/change-case.ts#L33)
 
 ***
 
@@ -52,7 +52,7 @@ Defined in: [change-case.ts:33](https://github.com/puristajs/purista/blob/12a89e
 
 > `optional` **prefixCharacters**: `string`
 
-Defined in: [change-case.ts:45](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/cli/src/api/change-case.ts#L45)
+Defined in: [change-case.ts:45](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/change-case.ts#L45)
 
 #### Inherited from
 
@@ -64,7 +64,7 @@ Defined in: [change-case.ts:45](https://github.com/puristajs/purista/blob/12a89e
 
 > `optional` **separateNumbers**: `boolean`
 
-Defined in: [change-case.ts:43](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/cli/src/api/change-case.ts#L43)
+Defined in: [change-case.ts:43](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/change-case.ts#L43)
 
 #### Deprecated
 
@@ -80,7 +80,7 @@ Pass `split: splitSeparateNumbers` instead.
 
 > `optional` **split**: (`value`) => `string`[]
 
-Defined in: [change-case.ts:41](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/cli/src/api/change-case.ts#L41)
+Defined in: [change-case.ts:41](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/change-case.ts#L41)
 
 #### Parameters
 
@@ -102,7 +102,7 @@ Defined in: [change-case.ts:41](https://github.com/puristajs/purista/blob/12a89e
 
 > `optional` **suffixCharacters**: `string`
 
-Defined in: [change-case.ts:46](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/cli/src/api/change-case.ts#L46)
+Defined in: [change-case.ts:46](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/cli/src/api/change-case.ts#L46)
 
 #### Inherited from
 

@@ -8,59 +8,124 @@ order: 203708
 
 Testing LLM-based applications is notoriously difficult because of their non-deterministic nature. PURISTA provides tools to make your agent tests **reliable**, **fast**, and **deterministic**.
 
-## 1. Unit Testing Agents
+## 1. Testing Levels
 
-When you use `purista add agent`, a test file is automatically generated. The goal of a unit test is to verify your agent's logic (tool calls, state changes, schema validation) without making real LLM calls.
+Use three layers depending on what you want to verify:
 
-```ts title="src/agents/supportAgent/v1/supportAgent.test.ts"
-import { supportAgent } from './supportAgent.js'
-import { MockModel, testAgent } from '@purista/ai'
+- `@purista/core` mocks for service-level command, subscription, event bridge, and queue bridge tests.
+- `createAgentContextMock(...)` for agent handler unit tests.
+- `createAgentTestHarness(...)` for inline and queued runtime tests.
 
-describe('Support Agent', () => {
-  it('should call the ticketing tool if the user reports a bug', async () => {
-    const model = new MockModel()
-      .on(/broken laptop/i)
-      .reply('I have created a ticket for you.')
+### Service-level Tests
 
-    const { instance, eventBridge, destroy } = await testAgent(supportAgent, {
-      models: {
-        'openai:gpt-4o-mini': model
-      }
-    })
+Keep pure service tests on the core helper layer:
 
-    // 2. Mock the service command
-    const createTicketMock = vi.fn().mockResolvedValue({ id: 'ticket-123' })
-    eventBridge.registerCommand('ticketing', '1', 'createTicket', createTicketMock)
+- `getCommandContextMock(...)`
+- `getEventBridgeMock()`
+- `getQueueBridgeMock()`
 
-    // 3. Run the agent
-    const result = await instance.invoke({ payload: { prompt: 'My laptop is broken' } })
+These are the right choice when you do not need a real agent runtime.
 
-    // 4. Verify assertions
-    expect(createTicketMock).toHaveBeenCalledWith(
-      expect.objectContaining({ reason: 'Broken laptop' })
-    )
-    expect(result.envelopes.some(e => e.frame.kind === 'message')).toBe(true)
-    await destroy()
-  })
+### Agent Handler Unit Tests
+
+Use `createAgentContextMock(...)` when you want a real `AgentHandlerContext` without booting an agent instance:
+
+```ts
+import { createAgentContextMock } from '@purista/ai'
+
+const mock = createAgentContextMock({
+  payload: { prompt: 'Reset password' },
+  commands: {
+    support: {
+      '1': {
+        lookupFaq: async (payload) => ({ answer: `FAQ:${payload.question}` }),
+      },
+    },
+  },
+  agents: {
+    triageAgent: {
+      '1': {
+        text: 'urgent',
+      },
+    },
+  },
 })
+
+const result = await mock.context.tools.invoke.support['1'].lookupFaq({
+  question: 'Reset password',
+})
+
+expect(result.answer).toContain('FAQ:')
+expect(mock.stubs.commands.support['1'].lookupFaq.calls).toHaveLength(1)
 ```
 
-## 2. Using the Test Helper (`testAgent`)
+The mock context includes:
 
-The `testAgent` helper is your best friend. It:
-- Sets up an in-memory EventBridge.
-- Creates a runtime instance of your agent.
-- Injects mock models and providers.
-- Accepts a `queueBridge` when you are testing a queued durable agent.
-- Provides a clean way to register mock commands.
-- Returns `destroy()` to cleanly stop the instance and bridge.
+- `context.tools`
+- `context.agents`
+- `context.expose`
+- `context.runState`
+- protocol collection through `frames()`, `envelopes()`, and `flush()`
 
-`MockModel` gives deterministic scripting:
+### Agent Runtime Tests
+
+Use `createAgentTestHarness(...)` when you want to boot a real agent instance and assert normalized results:
+
+```ts
+import { ScriptedModel, createAgentTestHarness } from '@purista/ai'
+
+const harness = await createAgentTestHarness(supportAgent, {
+  models: {
+    'openai:gpt-4o-mini': new ScriptedModel().nextText('Resolved'),
+  },
+})
+
+const result = await harness.run({
+  payload: { prompt: 'My laptop is broken' },
+})
+
+expect(result.finalMessage).toBe('Resolved')
+expect(result.toolFrames).toEqual([])
+await harness.destroy()
+```
+
+The harness normalizes:
+
+- `finalMessage`
+- `frames`
+- `toolFrames`
+- `artifactFrames`
+- `telemetryFrames`
+- `runStateArtifacts`
+
+## 2. Provider Doubles
+
+`ScriptedModel` is the default model double for multi-step tests because it is ordered and explicit.
+
+```ts
+const model = new ScriptedModel()
+  .nextJson({ urgency: 'high' })
+  .nextStream(['Working ', 'on it'])
+```
+
+Use `MockModel` when matcher-based scripting is more convenient:
 
 - `.on(string | RegExp).reply(string | fn)`
 - `.onJson(matcher).reply(object | fn)`
 
-## 3. Strategies for Reliable Tests
+## 3. Protocol Assertions
+
+Use the protocol helpers instead of scanning envelopes manually:
+
+- `getFinalAssistantText(...)`
+- `getToolFrames(...)`
+- `getArtifactFrames(...)`
+- `getRunStateArtifacts(...)`
+- `getTelemetryFrames(...)`
+
+These helpers are read-only and keep assertions short without hiding the raw envelopes.
+
+## 4. Strategies for Reliable Tests
 
 ### A. Schema Validation
 Verify that your agent correctly handles malformed input. Because you've defined `addPayloadSchema`, PURISTA will automatically throw a `HandledError` before the agent even starts.
@@ -69,31 +134,32 @@ Verify that your agent correctly handles malformed input. Because you've defined
 If your agent uses `persistConversation`, you can verify the history state after a run:
 
 ```ts
-const session = await instance.session.load('test-session')
-expect(session.data.messages).toHaveLength(2)
+const state = await harness.instance.invoke({
+  payload: { prompt: 'hello', sessionId: 'test-session' },
+})
+expect(state.envelopes.length).toBeGreaterThan(0)
 ```
 
 ### C. Deterministic Output
-Mock the model output to verify how your agent handler processes it (e.g., extracting values from JSON or formatting a string).
+Use `ScriptedModel` or `MockModel` to verify how your agent handler processes model output, including JSON extraction, streaming, reasoning, and fallback behavior.
 
 ### D. Queued Durable Runs
-When the agent uses `setExecutionMode('queued')`, inject a queue bridge in the test and assert the emitted `run-state` artifact or final message:
+When the agent uses `setExecutionMode('queued')`, `createAgentTestHarness(...)` automatically accepts or provisions a queue bridge. Assert `run-state` artifacts or final messages directly:
 
 ```ts
-import { DefaultQueueBridge } from '@purista/core'
-
-const queueBridge = new DefaultQueueBridge()
-const { instance, destroy } = await testAgent(supportAgent, {
-  queueBridge,
-  models: {
-    'openai:gpt-4o-mini': model,
-  },
+const harness = await createAgentTestHarness(supportAgent, {
+  models: { 'openai:gpt-4o-mini': model },
 })
+
+const result = await harness.run({
+  payload: { prompt: 'Create architecture draft', sessionId: 's-1' },
+})
+
+expect(result.runStateArtifacts.length).toBeGreaterThan(0)
+await harness.destroy()
 ```
 
-This keeps the test deterministic while still covering the durable execution path.
-
-## 4. Evaluation Datasets (Advanced)
+## 5. Evaluation Datasets (Advanced)
 
 For production-ready agents, unit tests are not enough. You need to evaluate the **quality** of the LLM responses.
 

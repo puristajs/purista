@@ -13,8 +13,6 @@ import {
 	type StateStore,
 } from '@purista/core'
 import type { AgentHandler } from '../builder/AgentBuilder.js'
-import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
-import { InMemoryKnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
 import type { ConversationStore } from '../memory/conversationStore.js'
 import { InMemoryConversationStore } from '../memory/conversationStore.js'
 import { PoolManager } from '../pools/PoolManager.js'
@@ -43,9 +41,7 @@ export type AgentInstanceDependencies = {
 	prepareStep?: import('../builder/AgentBuilder.js').AgentPrepareStepHook
 }
 
-export type AgentRuntimeDependencies = Omit<AgentInstanceOptions<any>, 'knowledgeAdapters'> & {
-	knowledgeAdapters?: Record<string, KnowledgeAdapter>
-}
+export type AgentRuntimeDependencies = AgentInstanceOptions
 
 type ResolvedAgentRuntimeDependencies = {
 	eventBridge: EventBridge
@@ -57,7 +53,6 @@ type ResolvedAgentRuntimeDependencies = {
 	stateStore?: StateStore
 	queueBridge?: QueueBridge
 	conversationStore: ConversationStore
-	knowledgeAdapters: Record<string, KnowledgeAdapter>
 	poolManager: PoolManager
 	models: Record<string, ModelProvider>
 	resources: Record<string, unknown>
@@ -74,7 +69,6 @@ type AgentServiceConfig = {
 		handler: AgentHandler<any, any, Record<string, unknown>, Record<string, ModelProvider>, any>
 		manifest: AgentManifest
 		conversationStore: ConversationStore
-		knowledgeAdapters: Record<string, KnowledgeAdapter>
 		poolManager: PoolManager
 		models: Record<string, ModelProvider>
 		eventBridge: EventBridge
@@ -136,9 +130,6 @@ export class AgentInstance implements AgentInstanceContract {
 			queueBridge: runtime.queueBridge,
 			config: runtime.config,
 			conversationStore: runtime.conversationStore ?? new InMemoryConversationStore(),
-			knowledgeAdapters: runtime.knowledgeAdapters ?? {
-				default: new InMemoryKnowledgeAdapter(),
-			},
 			poolManager: runtime.poolManager ?? new PoolManager(),
 			models: runtime.models ?? {},
 			resources: runtime.resources ?? {},
@@ -177,7 +168,6 @@ export class AgentInstance implements AgentInstanceContract {
 				handler: this.dependencies.handler,
 				manifest: this.dependencies.manifest,
 				conversationStore: this.runtime.conversationStore,
-				knowledgeAdapters: this.runtime.knowledgeAdapters,
 				poolManager: this.runtime.poolManager,
 				models: this.runtime.models,
 				eventBridge: this.runtime.eventBridge,

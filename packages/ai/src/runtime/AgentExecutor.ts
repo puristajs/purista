@@ -1,7 +1,6 @@
 import type { Context, Span, SpanOptions } from '@opentelemetry/api'
 import type { Logger } from '@purista/core'
 import { PuristaSpanName } from '@purista/core'
-import type { KnowledgeAdapter, KnowledgeScope } from '../knowledge/adapters/inMemoryAdapter.js'
 import type { ConversationStore, ConversationStoreScope } from '../memory/conversationStore.js'
 import type { ConversationHistory } from '../memory/historyHelpers.js'
 import { appendMessage, summarizeHistory, trimHistory } from '../memory/historyHelpers.js'
@@ -22,7 +21,6 @@ export type AgentExecutionOptions = {
 	manifest: AgentManifest
 	provider: ModelProvider
 	conversationStore: ConversationStore
-	knowledgeAdapters: Record<string, KnowledgeAdapter>
 	logger: Logger
 	startActiveSpan: StartActiveSpanFunction
 }
@@ -61,7 +59,6 @@ export type AgentExecutionResult = {
  *   manifest,
  *   provider: myModelProvider,
  *   conversationStore: new InMemoryConversationStore(),
- *   knowledgeAdapters: { default: new InMemoryKnowledgeAdapter() },
  *   logger,
  *   startActiveSpan: startActiveSpanFn,
  * })
@@ -89,8 +86,7 @@ export class AgentExecutor {
 		const sessionRecord = await this.options.conversationStore.load(input.sessionId, conversationScope)
 		const existingHistory = (sessionRecord?.data.history as ConversationHistory | undefined) ?? []
 		const history = trimHistory(existingHistory, this.maxHistoryFrames)
-		const knowledgeContext = await this.collectKnowledge(manifest, input)
-		const providerContext = this.composeContext(input.context, history, knowledgeContext)
+		const providerContext = this.composeContext(input.context, history)
 
 		const response = await this.options.startActiveSpan(
 			PuristaSpanName.EventBridgeInvokeCommand,
@@ -139,56 +135,11 @@ export class AgentExecutor {
 		}
 	}
 
-	private createKnowledgeScope(input: AgentExecutionInput): KnowledgeScope {
-		return {
-			agentName: this.options.manifest.agentName,
-			agentVersion: this.options.manifest.agentVersion,
-			tenantId: input.tenantId,
-			principalId: input.principalId,
-			sessionId: input.sessionId,
-		}
-	}
-
-	private async collectKnowledge(manifest: AgentManifest, input: AgentExecutionInput) {
-		if (!manifest.knowledge?.length) {
-			return []
-		}
-
-		const snippets: string[] = []
-		const knowledgeScope = this.createKnowledgeScope(input)
-
-		for (const entry of manifest.knowledge) {
-			const adapter = this.options.knowledgeAdapters[entry.adapterName]
-			if (!adapter) {
-				this.options.logger.warn(
-					{ adapterName: entry.adapterName, agent: manifest.agentName },
-					'missing knowledge adapter',
-				)
-				continue
-			}
-			const documents = await adapter.query({
-				query: input.prompt,
-				limit: 5,
-				scope: knowledgeScope,
-				options: entry.options,
-			})
-			for (const doc of documents) {
-				snippets.push(`[${adapter.id}:${doc.id}] ${doc.content}`)
-			}
-		}
-
-		return snippets
-	}
-
-	private composeContext(explicitContext: string | undefined, history: ConversationHistory, knowledge: string[]) {
+	private composeContext(explicitContext: string | undefined, history: ConversationHistory) {
 		const segments: string[] = []
 
 		if (explicitContext) {
 			segments.push(explicitContext)
-		}
-
-		if (knowledge.length) {
-			segments.push(`Knowledge:\n${knowledge.join('\n')}`)
 		}
 
 		if (history.length) {

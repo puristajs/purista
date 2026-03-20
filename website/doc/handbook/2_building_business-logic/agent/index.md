@@ -44,7 +44,7 @@ flowchart TB
     subgraph Deps ["4. Injected Dependencies"]
         P[AiSdkProvider]:::storage
         CS[Conversation Store]:::storage
-        KA[Knowledge Adapter]:::storage
+        RR[Retrieval Resource]:::storage
         ST[State Store]:::storage
     end
 
@@ -56,7 +56,7 @@ flowchart TB
     AI --> RUN
     AI <--> P
     AI <--> CS
-    AI <--> KA
+    AI <--> RR
     AI <--> ST
 ```
 
@@ -87,7 +87,7 @@ flowchart TB
 7. **[Runtime](./runtime.md)** — Inject providers, queue bridges, and concurrency limits.
 8. **[Invocation](./invocation.md)** — Call agents from commands, services, and scripts.
 9. **[Web & SDK](./frontend.md)** — Attach durable progress to a React UI.
-10. **[Memory & Knowledge](./memory-and-knowledge.md)** — Keep chat memory separate from workflow state.
+10. **[Memory & Retrieval](./memory-and-knowledge.md)** — Keep chat memory separate from workflow state and resource-backed retrieval.
 11. **[Testing](./testing.md)** — Test inline and queued agents deterministically.
 
 For deeper queue bridge, store, or protocol details, see the advanced handbook.

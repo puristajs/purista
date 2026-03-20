@@ -15,102 +15,34 @@ export const getAgentTestFileContent = (input: {
 	const writer = new CodeBlockWriter(input.codeWriterOptions)
 	const agentIdentifier = toAgentIdentifier(input.agentName)
 
-	writer.writeLine("import { DefaultEventBridge } from '@purista/core'")
-	writer.writeLine("import type { ModelProvider, ProviderRequest } from '@purista/ai'")
+	writer.writeLine("import { createAgentTestHarness, ScriptedModel } from '@purista/ai'")
 	writer.writeLine("import { describe, expect, it } from 'vitest'")
 	writer.writeLine(`import { ${agentIdentifier} } from '${input.builderImportName}'`).blankLine()
-	writer.writeLine('class DeterministicTextProvider implements ModelProvider {')
-	writer.indent(() => {
-		writer.writeLine("readonly name = 'deterministic-text'")
-		writer.writeLine('readonly capabilities = { text: true, stream: true }').blankLine()
-		writer.writeLine('async generate(request: ProviderRequest) {')
-		writer.indent(() => {
-			writer.writeLine('return {')
-			writer.indent(() => {
-				writer.writeLine('output: request.prompt,')
-				writer.writeLine('tokens: {')
-				writer.indent(() => {
-					writer.writeLine('prompt: request.prompt.length,')
-					writer.writeLine('completion: request.prompt.length,')
-				})
-				writer.writeLine('},')
-				writer.writeLine('costUsd: 0,')
-			})
-			writer.writeLine('}')
-		})
-		writer.writeLine('}')
-		writer.blankLine()
-		writer.writeLine('stream(request: ProviderRequest) {')
-		writer.indent(() => {
-			writer.writeLine('const output = request.prompt')
-			writer.writeLine('return {')
-			writer.indent(() => {
-				writer.writeLine('async final() {')
-				writer.indent(() => {
-					writer.writeLine('return {')
-					writer.indent(() => {
-						writer.writeLine('output,')
-						writer.writeLine('tokens: {')
-						writer.indent(() => {
-							writer.writeLine('prompt: request.prompt.length,')
-							writer.writeLine('completion: request.prompt.length,')
-						})
-						writer.writeLine('},')
-						writer.writeLine('costUsd: 0,')
-					})
-					writer.writeLine('}')
-				})
-				writer.writeLine('},')
-				writer.writeLine('async *[Symbol.asyncIterator]() {')
-				writer.indent(() => {
-					writer.writeLine("yield { type: 'text-delta' as const, textDelta: output }")
-				})
-				writer.writeLine('},')
-			})
-			writer.writeLine('}')
-		})
-		writer.writeLine('}')
-	})
-	writer.writeLine('}').blankLine()
 
 	writer.writeLine(`describe('${agentIdentifier}', () => {`)
 	writer.indent(() => {
-		writer.writeLine("it('runs with deterministic provider and emits protocol frames', async () => {")
+		writer.writeLine("it('runs with the agent test harness and emits protocol frames', async () => {")
 		writer.indent(() => {
-			writer.writeLine('const eventBridge = new DefaultEventBridge()')
-			writer.writeLine('await eventBridge.start()')
-			writer.blankLine()
-			writer.writeLine(`const agent = await ${agentIdentifier}.getInstance(eventBridge, {`)
+			writer.writeLine(`const harness = await createAgentTestHarness(${agentIdentifier}, {`)
 			writer.indent(() => {
-				writer.writeLine("models: { 'openai:gpt-4o-mini': new DeterministicTextProvider() },")
+				writer.writeLine("models: { 'openai:gpt-4o-mini': new ScriptedModel().nextText('hello') },")
 			})
 			writer.writeLine('})')
-			writer.writeLine('await agent.start()')
-			writer.writeLine('await new Promise(resolve => setTimeout(resolve, 25))')
 			writer.blankLine()
 			writer.writeLine('try {')
 			writer.indent(() => {
-				writer.writeLine('const { envelopes } = await agent.invoke({')
+				writer.writeLine('const result = await harness.run({')
 				writer.indent(() => {
-					writer.writeLine("payload: { prompt: 'hello', message: 'hello', history: [], attachments: [] },")
+					writer.writeLine("payload: { prompt: 'hello' },")
 				})
 				writer.writeLine('})')
 				writer.blankLine()
-				writer.writeLine('const hasFinalMessage = envelopes.some(')
-				writer.indent(() => {
-					writer.writeLine(
-						"envelope => envelope.frame.kind === 'message' && envelope.frame.final === true && envelope.frame.content.length > 0,",
-					)
-				})
-				writer.writeLine(')')
-				writer.writeLine("const hasTelemetry = envelopes.some(envelope => envelope.frame.kind === 'telemetry')")
-				writer.writeLine('expect(hasFinalMessage).toBe(true)')
-				writer.writeLine('expect(hasTelemetry).toBe(true)')
+				writer.writeLine("expect(result.finalMessage).toBe('hello')")
+				writer.writeLine('expect(result.telemetryFrames.length).toBeGreaterThan(0)')
 			})
 			writer.writeLine('} finally {')
 			writer.indent(() => {
-				writer.writeLine('await agent.stop()')
-				writer.writeLine('await eventBridge.destroy()')
+				writer.writeLine('await harness.destroy()')
 			})
 			writer.writeLine('}')
 		})

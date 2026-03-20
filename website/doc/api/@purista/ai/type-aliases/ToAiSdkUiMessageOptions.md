@@ -8,7 +8,7 @@
 
 > **ToAiSdkUiMessageOptions** = `object`
 
-Defined in: [packages/ai/src/protocol/aiSdkStream.ts:47](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/aiSdkStream.ts#L47)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:47](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/aiSdkStream.ts#L47)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/protocol/aiSdkStream.ts:47](https://github.com/puri
 
 > `optional` **emitMessageMetadata**: `boolean`
 
-Defined in: [packages/ai/src/protocol/aiSdkStream.ts:52](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/aiSdkStream.ts#L52)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:52](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/aiSdkStream.ts#L52)
 
 When `true` (default), non-message frames are also emitted as `message-metadata`.
 Set to `false` when consumers only want explicit mapped data parts.
@@ -27,7 +27,7 @@ Set to `false` when consumers only want explicit mapped data parts.
 
 > `optional` **errorMode**: `"auto"` \| `"error-event"` \| `"data-part"`
 
-Defined in: [packages/ai/src/protocol/aiSdkStream.ts:66](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/aiSdkStream.ts#L66)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:66](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/aiSdkStream.ts#L66)
 
 Controls how protocol `error` frames are represented in UI-message streams.
 
@@ -41,7 +41,7 @@ Controls how protocol `error` frames are represented in UI-message streams.
 
 > `optional` **mapDataParts**: [`AiSdkUiDataPartMapper`](AiSdkUiDataPartMapper.md)
 
-Defined in: [packages/ai/src/protocol/aiSdkStream.ts:58](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/aiSdkStream.ts#L58)
+Defined in: [packages/ai/src/protocol/aiSdkStream.ts:58](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/aiSdkStream.ts#L58)
 
 Optional mapping hook to emit typed `data-*` parts for application-specific UI state.
 This is useful for custom dashboards (status, artifacts, tickets, etc.) while still

@@ -8,7 +8,7 @@
 
 > **CreateAgentBindingInput** = `BaseBindingFactoryInput` & `object`
 
-Defined in: packages/ai/src/bridge/externalRuntime.ts:57
+Defined in: [packages/ai/src/bridge/externalRuntime.ts:57](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/bridge/externalRuntime.ts#L57)
 
 ## Type Declaration
 

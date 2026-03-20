@@ -8,4 +8,4 @@
 
 > `const` **errorFrameSchema**: `ZodObject`\<\{ `code`: `ZodString`; `details`: `ZodOptional`\<`ZodUnknown`\>; `handled`: `ZodDefault`\<`ZodBoolean`\>; `kind`: `ZodLiteral`\<`"error"`\>; `message`: `ZodString`; \}, `$strip`\>
 
-Defined in: [packages/ai/src/protocol/types.ts:84](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/protocol/types.ts#L84)
+Defined in: [packages/ai/src/protocol/types.ts:84](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/protocol/types.ts#L84)

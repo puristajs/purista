@@ -8,7 +8,7 @@
 
 > **AgentModelCallPrepareInput** = `object`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:81](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/builder/AgentBuilder.ts#L81)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:80](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/builder/AgentBuilder.ts#L80)
 
 Input passed to model call preparation hooks.
 
@@ -18,7 +18,7 @@ Input passed to model call preparation hooks.
 
 > **alias**: `string`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:82](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/builder/AgentBuilder.ts#L82)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:81](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/builder/AgentBuilder.ts#L81)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:82](https://github.com/puri
 
 > **callKind**: [`AgentModelCallKind`](AgentModelCallKind.md)
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:83](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/builder/AgentBuilder.ts#L83)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:82](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/builder/AgentBuilder.ts#L82)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:83](https://github.com/puri
 
 > `optional` **requestMetadata**: `Record`\<`string`, `unknown`\>
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:95](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/builder/AgentBuilder.ts#L95)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:94](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/builder/AgentBuilder.ts#L94)
 
 Original request metadata provided by handler code for this call.
 
@@ -44,7 +44,7 @@ Original request metadata provided by handler code for this call.
 
 > **step**: `number`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:87](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/builder/AgentBuilder.ts#L87)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:86](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/builder/AgentBuilder.ts#L86)
 
 1-based sequential index of model invocations in the current agent run.
 
@@ -54,6 +54,6 @@ Defined in: [packages/ai/src/builder/AgentBuilder.ts:87](https://github.com/puri
 
 > **stepByAliasAndKind**: `number`
 
-Defined in: [packages/ai/src/builder/AgentBuilder.ts:91](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/builder/AgentBuilder.ts#L91)
+Defined in: [packages/ai/src/builder/AgentBuilder.ts:90](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/builder/AgentBuilder.ts#L90)
 
 1-based index scoped by model alias + call kind.

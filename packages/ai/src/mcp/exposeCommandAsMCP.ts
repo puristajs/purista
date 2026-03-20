@@ -30,8 +30,8 @@ export const exposeCommandAsMCP = (input: MCPCommandDescriptorInput): MCPToolDes
 export const exposeCommandsAsMCP = (inputs: MCPCommandDescriptorInput[]): MCPToolDescriptor[] =>
 	inputs.map(exposeCommandAsMCP)
 
-export type MCPExposeInput<KnowledgeAliases extends string = never> = {
-	agents?: Array<AgentDefinition<KnowledgeAliases>>
+export type MCPExposeInput = {
+	agents?: AgentDefinition[]
 	commands?: MCPCommandDescriptorInput[]
 }
 
@@ -39,9 +39,7 @@ export type MCPExposeInput<KnowledgeAliases extends string = never> = {
  * Exposes mixed agent + command descriptors as MCP tools.
  * Throws if duplicate tool names are detected.
  */
-export const exposeToolsAsMCP = <KnowledgeAliases extends string = never>(
-	input: MCPExposeInput<KnowledgeAliases>,
-): MCPToolDescriptor[] => {
+export const exposeToolsAsMCP = (input: MCPExposeInput): MCPToolDescriptor[] => {
 	const tools = [
 		...(input.agents?.map(agent => exposeAgentAsMCP(agent)) ?? []),
 		...exposeCommandsAsMCP(input.commands ?? []),

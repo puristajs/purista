@@ -20,8 +20,8 @@ const supportAgentInstance = await supportAgent.getInstance(eventBridge, {
     'openai:gpt-4o-mini': new AiSdkProvider({ model: openai('gpt-4o-mini') })
   },
   conversationStore: new RedisConversationStore(),
-  knowledgeAdapters: {
-    supportFaq: new VectorStoreAdapter()
+  resources: {
+    supportFaq: new SupportFaqResource(),
   },
   queueBridge: new DefaultQueueBridge(),
   poolConfig: {

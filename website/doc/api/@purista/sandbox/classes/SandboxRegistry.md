@@ -6,7 +6,7 @@
 
 # Class: SandboxRegistry
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:11](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/resources/SandboxRegistry.ts#L11)
+Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:11](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L11)
 
 SandboxRegistry - A state-store backed registry for tracking active sandboxes.
 This class handles the persistence of sandbox metadata and provides reconciliation
@@ -18,7 +18,7 @@ logic for self-healing after service restarts.
 
 > **new SandboxRegistry**(`store`): `SandboxRegistry`
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:19](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/resources/SandboxRegistry.ts#L19)
+Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:19](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L19)
 
 #### Parameters
 
@@ -38,7 +38,7 @@ The PURISTA StateStore instance to use for persistence.
 
 > **findByOwner**(`owner`): `Promise`\<\{ `containerName`: `string`; `createdAt`: `number`; `gitConfigured?`: `boolean`; `organizationId`: `string`; `projectId`: `string`; `sandboxId`: `string`; `userId`: `string`; \} \| `undefined`\>
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:80](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/resources/SandboxRegistry.ts#L80)
+Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:80](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L80)
 
 Returns metadata for an existing sandbox bound to the same owner tuple.
 
@@ -68,7 +68,7 @@ Returns metadata for an existing sandbox bound to the same owner tuple.
 
 > **getMetadata**(`sandboxId`): `Promise`\<\{ `containerName`: `string`; `createdAt`: `number`; `gitConfigured?`: `boolean`; `organizationId`: `string`; `projectId`: `string`; `sandboxId`: `string`; `userId`: `string`; \} \| `undefined`\>
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:65](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/resources/SandboxRegistry.ts#L65)
+Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:65](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L65)
 
 Retrieves metadata for a specific sandbox.
 
@@ -92,7 +92,7 @@ Metadata object or undefined if not found or invalid.
 
 > **reconcile**(`sandboxes`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:113](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/resources/SandboxRegistry.ts#L113)
+Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:113](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L113)
 
 Reconciles a list of discovered sandboxes with the persistent registry.
 Discovered sandboxes that are missing from the registry are added.
@@ -115,7 +115,7 @@ List of sandboxes discovered by the driver (e.g., from Docker labels).
 
 > **register**(`metadata`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:36](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/resources/SandboxRegistry.ts#L36)
+Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:36](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L36)
 
 Registers a new sandbox in the persistent state store.
 
@@ -165,7 +165,7 @@ Indicates if Git/GitHub was configured
 
 > **unregister**(`sandboxId`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:47](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/resources/SandboxRegistry.ts#L47)
+Defined in: [sandbox-service/src/resources/SandboxRegistry.ts:47](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/resources/SandboxRegistry.ts#L47)
 
 Removes a sandbox from the registry.
 

@@ -30,6 +30,12 @@ Add a new subscription to a service:
 purista add subscription
 ```
 
+Add a new agent:
+
+```bash
+purista add agent
+```
+
 There is the option to use the `add` functionality more shorthand:
 
 This will create a new service named "user"
@@ -37,6 +43,8 @@ This will create a new service named "user"
 ```bash
 purista add command user
 ```
+
+Generated agent tests use the public `@purista/ai` testing helpers such as `createAgentTestHarness(...)` and `ScriptedModel`, so new blueprints follow the current framework testing style by default.
 
 **Visit [purista.dev](https://purista.dev)**
 

@@ -8,7 +8,7 @@
 
 > **AgentExecutionResult** = `object`
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:45](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L45)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:43](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/AgentExecutor.ts#L43)
 
 Result emitted by the executor after the provider finishes.
 
@@ -18,7 +18,7 @@ Result emitted by the executor after the provider finishes.
 
 > `optional` **durationMs**: `number`
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:51](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L51)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:49](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/AgentExecutor.ts#L49)
 
 ***
 
@@ -26,7 +26,7 @@ Defined in: [packages/ai/src/runtime/AgentExecutor.ts:51](https://github.com/pur
 
 > **output**: `string`
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:46](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L46)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:44](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/AgentExecutor.ts#L44)
 
 ***
 
@@ -34,7 +34,7 @@ Defined in: [packages/ai/src/runtime/AgentExecutor.ts:46](https://github.com/pur
 
 > `optional` **tokens**: `object`
 
-Defined in: [packages/ai/src/runtime/AgentExecutor.ts:47](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/AgentExecutor.ts#L47)
+Defined in: [packages/ai/src/runtime/AgentExecutor.ts:45](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/AgentExecutor.ts#L45)
 
 #### completion
 

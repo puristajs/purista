@@ -97,7 +97,7 @@ export type ExposeHelpers = {
 }
 
 type AgentContextLike = Pick<
-	AgentHandlerContext<unknown, unknown, Record<string, unknown>, Record<string, never>, string, AgentInvokeList>,
+	AgentHandlerContext<unknown, unknown, Record<string, unknown>, Record<string, never>, AgentInvokeList>,
 	'manifest' | 'tools' | 'agents' | 'protocol'
 >
 
@@ -188,7 +188,7 @@ export const createExternalBindings = (input: CreateExternalBindingsInput): Exte
 
 const findAllowedCommand = (context: AgentContextLike, input: AllowedToolDefinition) => {
 	const descriptor = context.manifest.allowedTools.find(
-		entry =>
+		(entry: AllowedToolDefinition) =>
 			entry.serviceName === input.serviceName &&
 			entry.serviceVersion === input.serviceVersion &&
 			entry.commandName === input.commandName,
@@ -204,7 +204,7 @@ const findAllowedCommand = (context: AgentContextLike, input: AllowedToolDefinit
 
 const findAllowedAgent = (context: AgentContextLike, input: AllowedAgentDefinition) => {
 	const descriptor = (context.manifest.allowedAgents ?? []).find(
-		entry => entry.agentName === input.agentName && entry.agentVersion === input.agentVersion,
+		(entry: AllowedAgentDefinition) => entry.agentName === input.agentName && entry.agentVersion === input.agentVersion,
 	)
 	if (!descriptor) {
 		throw new HandledError(

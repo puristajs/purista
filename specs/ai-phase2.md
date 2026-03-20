@@ -70,23 +70,31 @@ const data = await context.agents.runObject<MySchema>({ agentName: '...', payloa
 
 ---
 
-## 6. Testing DSL: `MockModel`
-**Goal:** Make agent unit testing extremely low-code and readable.
+## 6. Testing Helpers
+**Goal:** Make agent unit and integration testing extremely low-code, strict, and reusable.
 
 ### Requirements
-- **New Utility:** Add a `MockModel` class to `@purista/ai`.
-- **Fluent API:** Support scripted responses based on input matching.
+- **Context Mock:** Provide `createAgentContextMock(...)` in `@purista/ai` for handler-level unit tests with strict defaults for tools, agents, stores, resources, and emitted protocol frames.
+- **Runtime Harness:** Provide `createAgentTestHarness(...)` in `@purista/ai` for inline and queued runtime tests with normalized access to final output, frames, tool events, artifacts, and run-state artifacts.
+- **Scripted Provider:** Provide `ScriptedModel` in `@purista/ai` for deterministic ordered responses including text, JSON, streaming chunks, reasoning chunks, and injected errors.
+- **Protocol Helpers:** Provide reusable protocol/frame extraction helpers so tests do not need to hand-scan envelopes.
 
 ### Example DX
 ```ts
-const { instance } = await testAgent(myAgent, {
+const harness = await createAgentTestHarness(myAgent, {
   models: {
-    'openai': new MockModel()
-      .on('Hello').reply('Hi there!')
-      .on(/order (.*)/).reply((match) => `Checking order ${match[1]}`)
-      .onJson({ type: 'query' }).reply({ status: 'active' })
-  }
-})
+    openai: new ScriptedModel()
+      .nextText("Hi there!")
+      .nextJson({ status: "active" }),
+  },
+});
+
+const result = await harness.run({ prompt: "Hello" });
+
+expect(result.finalMessage).toBe("Hi there!");
+expect(result.toolFrames).toEqual([]);
+
+await harness.destroy();
 ```
 
 ---
@@ -117,6 +125,6 @@ const { instance } = await testAgent(myAgent, {
 ## Definition of Done
 1. **Aggregated HTTP:** A `curl` call to an agent with `streamingMode: 'aggregate'` returns a valid JSON object, not a stream.
 2. **Simplified Context:** An agent can be called internally with `context.agents.runObject` in a single line of code.
-3. **DSL for Tests:** Existing agent tests in the `ai-basic` example can be refactored to use the new `MockModel` DSL, reducing test code by >30%.
+3. **Testing Helpers:** Existing agent tests in the `ai-basic` example use `createAgentContextMock(...)`, `createAgentTestHarness(...)`, and `ScriptedModel`, reducing bespoke setup and keeping inline and queued assertions consistent.
 4. **Clean Example:** The `ai-basic` example frontend code is reduced by ~70% and the backend uses LLM-driven tool calls.
 5. **Docs:** The handbook reflects the store patterns and the architectural rationale for independent scaling.

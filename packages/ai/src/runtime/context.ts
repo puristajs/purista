@@ -15,13 +15,6 @@ import { HandledError, StatusCode, validate } from '@purista/core'
 
 import { createExposeHelpers, type ExposeHelpers } from '../bridge/externalRuntime.js'
 import type {
-	KnowledgeAdapter,
-	KnowledgeDeleteRequest,
-	KnowledgeDocument,
-	KnowledgeQueryRequest,
-	KnowledgeUpsertRequest,
-} from '../knowledge/adapters/inMemoryAdapter.js'
-import type {
 	ConversationStore,
 	ConversationStoreRecord,
 	ConversationStoreRecordData,
@@ -493,143 +486,11 @@ const createSessionHelpers = (store: ConversationStore, input: SessionIdentityIn
 	}
 }
 
-export type KnowledgeQueryInput = number | Omit<KnowledgeQueryRequest, 'query' | 'scope' | 'options'>
-
-type KnowledgeAliasAccessor = {
-	query(query: string, input?: KnowledgeQueryInput): Promise<KnowledgeDocument[]>
-	upsert(
-		document: KnowledgeDocument,
-		input?: Omit<KnowledgeUpsertRequest, 'document' | 'scope' | 'options'>,
-	): Promise<void>
-	delete(id: string, input?: Omit<KnowledgeDeleteRequest, 'id' | 'scope' | 'options'>): Promise<void>
-}
-
-/**
- * High-level knowledge helper API exposed to agent handlers.
- *
- * Supports both generic calls (`context.knowledge.query('faq', ...)`) and
- * alias-first calls (`context.knowledge.faq.query(...)`).
- */
-export type KnowledgeHelpers<KnowledgeAliases extends string = never> = {
-	query(adapterName: string, query: string, input?: KnowledgeQueryInput): Promise<KnowledgeDocument[]>
-	upsert(
-		adapterName: string,
-		document: KnowledgeDocument,
-		input?: Omit<KnowledgeUpsertRequest, 'document' | 'scope' | 'options'>,
-	): Promise<void>
-	delete(
-		adapterName: string,
-		id: string,
-		input?: Omit<KnowledgeDeleteRequest, 'id' | 'scope' | 'options'>,
-	): Promise<void>
-} & { [Alias in KnowledgeAliases]: KnowledgeAliasAccessor }
-
-const createKnowledgeHelpers = (
-	adapters: Record<string, KnowledgeAdapter | undefined>,
-	manifest: AgentManifest,
-	session: SessionHelpers,
-): KnowledgeHelpers<string> => {
-	const adapterConfigMap = new Map((manifest.knowledge ?? []).map(entry => [entry.adapterName, entry.options] as const))
-
-	const resolveAdapter = (adapterName: string) => {
-		const adapter = adapters[adapterName]
-		if (!adapter) {
-			throw new HandledError(StatusCode.NotFound, `Knowledge adapter ${adapterName} not registered`)
-		}
-		return adapter
-	}
-
-	const parseInput = (input?: KnowledgeQueryInput) => {
-		if (typeof input === 'number') {
-			return { limit: input }
-		}
-		return input
-	}
-
-	const getScope = () => ({
-		agentName: session.identity.agentName,
-		agentVersion: session.identity.agentVersion,
-		tenantId: session.identity.tenantId,
-		principalId: session.identity.principalId,
-		sessionId: session.identity.baseSessionId,
-	})
-
-	const base: Pick<KnowledgeHelpers, 'query' | 'upsert' | 'delete'> = {
-		async query(adapterName, query, input) {
-			const parsedInput = parseInput(input)
-			return resolveAdapter(adapterName).query({
-				query,
-				...parsedInput,
-				scope: getScope(),
-				options: adapterConfigMap.get(adapterName),
-			})
-		},
-		async upsert(adapterName, document, input) {
-			await resolveAdapter(adapterName).upsert({
-				document,
-				...input,
-				scope: getScope(),
-				options: adapterConfigMap.get(adapterName),
-			})
-		},
-		async delete(adapterName, id, input) {
-			await resolveAdapter(adapterName).delete({
-				id,
-				...input,
-				scope: getScope(),
-				options: adapterConfigMap.get(adapterName),
-			})
-		},
-	}
-
-	return new Proxy(base, {
-		get(target, prop, receiver) {
-			if (typeof prop !== 'string') {
-				return Reflect.get(target, prop, receiver)
-			}
-			if (Reflect.has(target, prop)) {
-				return Reflect.get(target, prop, receiver)
-			}
-			return {
-				query: async (query: string, input?: KnowledgeQueryInput) => {
-					const parsedInput = parseInput(input)
-					return resolveAdapter(prop).query({
-						query,
-						...parsedInput,
-						scope: getScope(),
-						options: adapterConfigMap.get(prop),
-					})
-				},
-				upsert: async (
-					document: KnowledgeDocument,
-					input?: Omit<KnowledgeUpsertRequest, 'document' | 'scope' | 'options'>,
-				) => {
-					await resolveAdapter(prop).upsert({
-						document,
-						...input,
-						scope: getScope(),
-						options: adapterConfigMap.get(prop),
-					})
-				},
-				delete: async (id: string, input?: Omit<KnowledgeDeleteRequest, 'id' | 'scope' | 'options'>) => {
-					await resolveAdapter(prop).delete({
-						id,
-						...input,
-						scope: getScope(),
-						options: adapterConfigMap.get(prop),
-					})
-				},
-			}
-		},
-	}) as KnowledgeHelpers<string>
-}
-
 export type AgentHandlerContext<
 	Payload = unknown,
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
-	KnowledgeAliases extends string = never,
 	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > = {
 	logger: Logger
@@ -639,7 +500,6 @@ export type AgentHandlerContext<
 	emit: ProtocolContext['emit']
 	conversation: ConversationHelpers
 	session: SessionHelpers
-	knowledge: KnowledgeHelpers<KnowledgeAliases>
 	stream: AgentStreamEmitter
 	protocol: ProtocolEmitter
 	tools: ToolInvoker
@@ -697,7 +557,6 @@ export type CreateAgentHandlerContextInput<
 	Parameter,
 	Resources extends Record<string, unknown>,
 	Models extends Record<string, ModelProvider>,
-	KnowledgeAliases extends string = string,
 	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > = {
 	serviceContext:
@@ -725,7 +584,6 @@ export type CreateAgentHandlerContextInput<
 	payload: Payload
 	parameter: Parameter
 	conversationStore: ConversationStore
-	knowledgeAdapters: Record<KnowledgeAliases, KnowledgeAdapter | undefined>
 	protocol: ProtocolEmitter
 	resources: Resources
 	models: Models
@@ -1190,7 +1048,6 @@ const createAgentInvocationHelpers = <AgentInvokes extends AgentInvokeList>(inpu
 		unknown,
 		Record<string, unknown>,
 		Record<string, ModelProvider>,
-		string,
 		AgentInvokes
 	>['agents']['invoke']
 
@@ -1207,11 +1064,10 @@ export const createAgentHandlerContext = <
 	Parameter,
 	Resources extends Record<string, unknown>,
 	Models extends Record<string, ModelProvider>,
-	KnowledgeAliases extends string = string,
 	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 >(
-	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models, KnowledgeAliases, AgentInvokes>,
-): AgentHandlerContext<Payload, Parameter, Resources, Models, KnowledgeAliases, AgentInvokes> => {
+	input: CreateAgentHandlerContextInput<Payload, Parameter, Resources, Models, AgentInvokes>,
+): AgentHandlerContext<Payload, Parameter, Resources, Models, AgentInvokes> => {
 	const sessionHelpers = createSessionHelpers(input.conversationStore, {
 		context: input.serviceContext,
 		manifest: input.manifest,
@@ -1234,11 +1090,6 @@ export const createAgentHandlerContext = <
 		emit: input.serviceContext.emit.bind(input.serviceContext) as ProtocolContext['emit'],
 		session: sessionHelpers,
 		conversation: createConversationHelpers(sessionHelpers, input.manifest),
-		knowledge: createKnowledgeHelpers(
-			input.knowledgeAdapters,
-			input.manifest,
-			sessionHelpers,
-		) as KnowledgeHelpers<KnowledgeAliases>,
 		stream: createStreamEmitter(input.protocol),
 		protocol: input.protocol,
 		tools,
@@ -1256,17 +1107,9 @@ export const createAgentHandlerContext = <
 			Parameter,
 			Resources,
 			Models,
-			KnowledgeAliases,
 			AgentInvokes
 		>['embeddings'],
-		rerankers: input.rerankers as AgentHandlerContext<
-			Payload,
-			Parameter,
-			Resources,
-			Models,
-			KnowledgeAliases,
-			AgentInvokes
-		>['rerankers'],
+		rerankers: input.rerankers as AgentHandlerContext<Payload, Parameter, Resources, Models, AgentInvokes>['rerankers'],
 		serviceContext: input.serviceContext,
 		secrets: input.serviceContext.secrets,
 		configs: input.serviceContext.configs,

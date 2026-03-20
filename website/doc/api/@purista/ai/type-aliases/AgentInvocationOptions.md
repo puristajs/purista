@@ -8,7 +8,7 @@
 
 > **AgentInvocationOptions** = `object`
 
-Defined in: [packages/ai/src/runtime/context.ts:745](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L745)
+Defined in: [packages/ai/src/runtime/context.ts:603](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/context.ts#L603)
 
 ## Properties
 
@@ -16,7 +16,7 @@ Defined in: [packages/ai/src/runtime/context.ts:745](https://github.com/puristaj
 
 > **agentName**: `string`
 
-Defined in: [packages/ai/src/runtime/context.ts:746](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L746)
+Defined in: [packages/ai/src/runtime/context.ts:604](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/context.ts#L604)
 
 ***
 
@@ -24,7 +24,7 @@ Defined in: [packages/ai/src/runtime/context.ts:746](https://github.com/puristaj
 
 > **agentVersion**: `string`
 
-Defined in: [packages/ai/src/runtime/context.ts:747](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L747)
+Defined in: [packages/ai/src/runtime/context.ts:605](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/context.ts#L605)
 
 ***
 
@@ -32,7 +32,7 @@ Defined in: [packages/ai/src/runtime/context.ts:747](https://github.com/puristaj
 
 > `optional` **correlationId**: `string`
 
-Defined in: [packages/ai/src/runtime/context.ts:751](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L751)
+Defined in: [packages/ai/src/runtime/context.ts:609](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/context.ts#L609)
 
 ***
 
@@ -40,7 +40,7 @@ Defined in: [packages/ai/src/runtime/context.ts:751](https://github.com/puristaj
 
 > `optional` **emitInvocationToolEvents**: `boolean`
 
-Defined in: [packages/ai/src/runtime/context.ts:762](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L762)
+Defined in: [packages/ai/src/runtime/context.ts:620](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/context.ts#L620)
 
 ***
 
@@ -48,7 +48,7 @@ Defined in: [packages/ai/src/runtime/context.ts:762](https://github.com/puristaj
 
 > `optional` **failOnErrorFrame**: `boolean`
 
-Defined in: [packages/ai/src/runtime/context.ts:767](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L767)
+Defined in: [packages/ai/src/runtime/context.ts:625](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/context.ts#L625)
 
 Controls whether protocol `error` envelopes from the invoked sub-agent throw immediately.
 Defaults to `true`.
@@ -59,7 +59,7 @@ Defaults to `true`.
 
 > `optional` **forwardToCurrentStream**: `boolean` \| \{ `artifacts?`: `boolean`; `assistant?`: `boolean`; `errors?`: `boolean`; `reasoning?`: `boolean`; `toolEvents?`: `boolean`; \}
 
-Defined in: [packages/ai/src/runtime/context.ts:753](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L753)
+Defined in: [packages/ai/src/runtime/context.ts:611](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/context.ts#L611)
 
 ***
 
@@ -67,7 +67,7 @@ Defined in: [packages/ai/src/runtime/context.ts:753](https://github.com/puristaj
 
 > `optional` **parameter**: `unknown`
 
-Defined in: [packages/ai/src/runtime/context.ts:749](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L749)
+Defined in: [packages/ai/src/runtime/context.ts:607](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/context.ts#L607)
 
 ***
 
@@ -75,7 +75,7 @@ Defined in: [packages/ai/src/runtime/context.ts:749](https://github.com/puristaj
 
 > **payload**: `unknown`
 
-Defined in: [packages/ai/src/runtime/context.ts:748](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L748)
+Defined in: [packages/ai/src/runtime/context.ts:606](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/context.ts#L606)
 
 ***
 
@@ -83,7 +83,7 @@ Defined in: [packages/ai/src/runtime/context.ts:748](https://github.com/puristaj
 
 > `optional` **sessionId**: `string`
 
-Defined in: [packages/ai/src/runtime/context.ts:752](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L752)
+Defined in: [packages/ai/src/runtime/context.ts:610](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/context.ts#L610)
 
 ***
 
@@ -91,7 +91,7 @@ Defined in: [packages/ai/src/runtime/context.ts:752](https://github.com/puristaj
 
 > `optional` **stream**: [`AgentStreamResponder`](AgentStreamResponder.md)
 
-Defined in: [packages/ai/src/runtime/context.ts:768](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L768)
+Defined in: [packages/ai/src/runtime/context.ts:626](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/context.ts#L626)
 
 ***
 
@@ -99,4 +99,4 @@ Defined in: [packages/ai/src/runtime/context.ts:768](https://github.com/puristaj
 
 > `optional` **timeoutMs**: `number`
 
-Defined in: [packages/ai/src/runtime/context.ts:750](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/runtime/context.ts#L750)
+Defined in: [packages/ai/src/runtime/context.ts:608](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/runtime/context.ts#L608)

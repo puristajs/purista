@@ -6,7 +6,7 @@
 
 # Class: AppleContainerSandboxDriver
 
-Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:21](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L21)
+Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:21](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L21)
 
 AppleContainerSandboxDriver - macOS-focused local container driver.
 
@@ -23,7 +23,7 @@ OrbStack/Colima-based development without changing sandbox command contracts.
 
 > **new AppleContainerSandboxDriver**(`config`): `AppleContainerSandboxDriver`
 
-Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:25](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L25)
+Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:25](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L25)
 
 #### Parameters
 
@@ -41,7 +41,7 @@ Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContain
 
 > **name**: `string` = `'AppleContainerSandboxDriver'`
 
-Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:22](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L22)
+Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:22](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L22)
 
 The unique name of the driver implementation
 
@@ -55,7 +55,7 @@ The unique name of the driver implementation
 
 > **createSandbox**(`params`): `Promise`\<\{ `containerName`: `string`; `sandboxId`: `string`; \}\>
 
-Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:29](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L29)
+Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:29](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L29)
 
 Provisions and starts a new sandbox environment.
 
@@ -113,7 +113,7 @@ The sandbox ID and underlying container name
 
 > **destroySandbox**(`params`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:43](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L43)
+Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:43](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L43)
 
 Permanently removes a sandbox and its resources.
 
@@ -141,7 +141,7 @@ Reference to the sandbox to destroy
 
 > **executeBash**(`params`): `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
 
-Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:47](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L47)
+Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:47](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L47)
 
 Executes a bash command within the specified sandbox.
 
@@ -179,7 +179,7 @@ The result of the command execution
 
 > **readFile**(`params`): `Promise`\<`string`\>
 
-Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:55](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L55)
+Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:55](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L55)
 
 Reads the content of a file from the sandbox.
 
@@ -211,7 +211,7 @@ Path to the file
 
 > **scanRunningSandboxes**(): `Promise`\<`object`[]\>
 
-Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:63](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L63)
+Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:63](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L63)
 
 Scans the underlying system for running sandboxes and recovers their metadata.
 This is used for self-healing and service restarts.
@@ -230,7 +230,7 @@ This is used for self-healing and service restarts.
 
 > **writeFiles**(`params`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:59](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L59)
+Defined in: [sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts:59](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/AppleContainerSandboxDriver/AppleContainerSandboxDriver.ts#L59)
 
 Writes one or more files to the sandbox workspace.
 

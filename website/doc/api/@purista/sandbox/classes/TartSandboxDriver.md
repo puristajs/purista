@@ -6,7 +6,7 @@
 
 # Class: TartSandboxDriver
 
-Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:23](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L23)
+Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:23](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L23)
 
 TartSandboxDriver - A native Apple Virtualization Framework driver for Apple Silicon.
 It uses the 'tart' CLI to manage Linux/macOS VMs.
@@ -21,7 +21,7 @@ It uses the 'tart' CLI to manage Linux/macOS VMs.
 
 > **new TartSandboxDriver**(`config`): `TartSandboxDriver`
 
-Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:27](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L27)
+Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:27](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L27)
 
 #### Parameters
 
@@ -39,7 +39,7 @@ Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:2
 
 > **name**: `string` = `'TartSandboxDriver'`
 
-Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:24](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L24)
+Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:24](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L24)
 
 The unique name of the driver implementation
 
@@ -53,7 +53,7 @@ The unique name of the driver implementation
 
 > **createSandbox**(`params`): `Promise`\<\{ `containerName`: `string`; `sandboxId`: `string`; \}\>
 
-Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:38](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L38)
+Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:38](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L38)
 
 Provisions and starts a new sandbox environment.
 
@@ -111,7 +111,7 @@ The sandbox ID and underlying container name
 
 > **destroySandbox**(`params`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:98](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L98)
+Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:98](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L98)
 
 Permanently removes a sandbox and its resources.
 
@@ -139,7 +139,7 @@ Reference to the sandbox to destroy
 
 > **executeBash**(`params`): `Promise`\<\{ `exitCode`: `number`; `stderr`: `string`; `stdout`: `string`; \}\>
 
-Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:110](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L110)
+Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:110](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L110)
 
 Executes a bash command within the specified sandbox.
 
@@ -177,7 +177,7 @@ The result of the command execution
 
 > **readFile**(`params`): `Promise`\<`string`\>
 
-Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:139](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L139)
+Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:139](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L139)
 
 Reads the content of a file from the sandbox.
 
@@ -209,7 +209,7 @@ Path to the file
 
 > **scanRunningSandboxes**(): `Promise`\<`object`[]\>
 
-Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:160](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L160)
+Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:160](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L160)
 
 Scans the underlying system for running sandboxes and recovers their metadata.
 This is used for self-healing and service restarts.
@@ -228,7 +228,7 @@ This is used for self-healing and service restarts.
 
 > **writeFiles**(`params`): `Promise`\<`void`\>
 
-Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:146](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L146)
+Defined in: [sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts:146](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/sandbox-service/src/driver/TartSandboxDriver/TartSandboxDriver.ts#L146)
 
 Writes one or more files to the sandbox workspace.
 

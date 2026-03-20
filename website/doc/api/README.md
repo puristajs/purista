@@ -24,6 +24,10 @@ All notable changes to this project will be documented in this file.
 - Forward nested agent streams
 - Add nested agent forwarding helper
 
+### Refactor
+
+- Refactor ai external runtime dx
+
 ### Styling
 
 - Format nested agent forwarding helpers

@@ -35,6 +35,7 @@ Choose the execution model explicitly:
   scopeFromPayload: ['sessionId'],
   maxAttempts: 3,
   leaseTtlMs: 60_000,
+  maxLeaseExtensions: 20,
 })
 ```
 
@@ -43,6 +44,8 @@ Queued durable agents should use:
 - a `queueBridge` at runtime
 - `context.runState` for plans, tasks, checkpoints, and locks
 - attach-and-stream HTTP behavior so the caller can keep observing progress
+
+If you omit `maxLeaseExtensions`, PURISTA derives it from `maxDurationMs / leaseTtlMs` with a small safety margin so long-running queued agents do not silently expire after the core queue default.
 
 ## 3. Model Capabilities
 
@@ -120,7 +123,7 @@ Unary mode is still available when you want a final JSON response:
 | Schema | `addPayloadSchema`, `addParameterSchema`, `addOutputSchema`, `addContextSchema` |
 | Execution | `setExecutionMode`, `setExecutionPolicy` |
 | Capabilities | `defineModel`, `canInvoke`, `canEmit`, `canInvokeAgent` |
-| Memory / RAG | `persistConversation`, `useKnowledgeAdapter` |
+| Memory / Retrieval | `persistConversation` |
 | Transport | `exposeAsHttpEndpoint`, `setSseProtocol`, `setStreamingMode` |
 | Behavior | `setRetryPolicy`, `setSuccessEventName`, `setRuntime` |
 

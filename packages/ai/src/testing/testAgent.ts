@@ -2,7 +2,7 @@ import type { EventBridge } from '@purista/core'
 import { DefaultEventBridge } from '@purista/core'
 import type { AgentDefinition, AgentInstanceOptions, AgentRuntimeInstance } from '../types/AgentDefinition.js'
 
-type TestAgentOptions = AgentInstanceOptions<never> & {
+type TestAgentOptions = AgentInstanceOptions & {
 	eventBridge?: EventBridge
 }
 

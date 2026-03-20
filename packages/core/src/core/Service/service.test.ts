@@ -1,74 +1,13 @@
-import { stub } from 'sinon'
 import { vi } from 'vitest'
 import { z } from 'zod'
-import { getEventBridgeMock, getLoggerMock } from '../../mocks/index.js'
+import { getEventBridgeMock, getLoggerMock, getQueueBridgeMock } from '../../mocks/index.js'
 import { getCustomMessageMessageMock } from '../../mocks/messages/getCustomMessage.mock.js'
 import { QueueDefinitionBuilder } from '../../QueueDefinitionBuilder/QueueDefinitionBuilder.impl.js'
 import { QueueWorkerBuilder } from '../../QueueWorkerBuilder/QueueWorkerBuilder.impl.js'
 import { SubscriptionDefinitionBuilder } from '../../SubscriptionDefinitionBuilder/SubscriptionDefinitionBuilder.impl.js'
 import { UnhandledError } from '../Error/UnhandledError.impl.js'
-import type { QueueBridge } from '../QueueBridge/types/QueueBridge.js'
 import type { ServiceInfoType } from '../types/index.js'
 import { Service } from './Service.impl.js'
-
-const getQueueBridgeMock = () => {
-	const enqueue = stub().resolves({ jobId: 'job', queueName: 'queue' })
-	const leaseNext = stub().resolves(undefined)
-	const extendLease = stub().resolves()
-	const ack = stub().resolves()
-	const nack = stub().resolves()
-	const moveToDeadLetter = stub().resolves()
-	const metrics = stub().resolves({ pending: 0, inflight: 0, deadLetter: 0, retries: 0 })
-	const start = stub().resolves()
-	const destroy = stub().resolves()
-	const isReady = stub().resolves(true)
-	const isHealthy = stub().resolves(true)
-
-	const mock: QueueBridge = {
-		name: 'QueueBridgeMock',
-		instanceId: 'queue-mock',
-		capabilities: {
-			delayedDelivery: true,
-			fifoOrdering: true,
-			partitions: false,
-			priorities: false,
-			deadLetterNative: false,
-			exactlyOnce: false,
-			maxBatchSize: 1,
-			defaultDeadLetterPrefix: '',
-			defaultDeadLetterSuffix: '.dead-letter',
-			deadLetterInspectable: true,
-		},
-		start,
-		destroy,
-		isReady,
-		isHealthy,
-		enqueue,
-		leaseNext,
-		extendLease,
-		ack,
-		nack,
-		moveToDeadLetter,
-		metrics,
-	}
-
-	return {
-		mock,
-		stubs: {
-			enqueue,
-			leaseNext,
-			extendLease,
-			ack,
-			nack,
-			moveToDeadLetter,
-			metrics,
-			start,
-			destroy,
-			isReady,
-			isHealthy,
-		},
-	}
-}
 
 describe('Service', () => {
 	const serviceInfo: ServiceInfoType = {

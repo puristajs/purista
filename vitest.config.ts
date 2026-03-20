@@ -1,6 +1,13 @@
+import { fileURLToPath } from 'node:url'
 import { configDefaults, defineConfig } from 'vitest/config'
 
 export default defineConfig({
+	resolve: {
+		alias: {
+			'@purista/core': fileURLToPath(new URL('./packages/core/src/index.ts', import.meta.url)),
+			'@purista/ai': fileURLToPath(new URL('./packages/ai/src/index.ts', import.meta.url)),
+		},
+	},
 	test: {
 		isolate: false,
 		globals: true,

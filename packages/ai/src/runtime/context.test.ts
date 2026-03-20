@@ -1,6 +1,5 @@
 import { HandledError, StatusCode } from '@purista/core'
 import { describe, expect, it, vi } from 'vitest'
-import { InMemoryKnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
 import { InMemoryConversationStore } from '../memory/conversationStore.js'
 import { createArtifactFrame, createProtocolEnvelope } from '../protocol/helpers.js'
 import type { AgentManifest } from '../types/AgentManifest.js'
@@ -187,16 +186,14 @@ describe('runtime context helpers', () => {
 		expect(envelopes[1]?.messageId).toBe(second?.messageId)
 	})
 
-	it('creates a handler context with tool/session/knowledge helpers', async () => {
+	it('creates a handler context with tool/session/conversation helpers', async () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const conversationStore = new InMemoryConversationStore()
-		const knowledgeAdapter = new InMemoryKnowledgeAdapter()
 		const embed = vi.fn().mockResolvedValue({ embedding: [0.1, 0.2, 0.3] })
 		const rerank = vi.fn().mockResolvedValue({
 			ranking: [{ originalIndex: 0, score: 1, document: 'doc' }],
 			rerankedDocuments: ['doc'],
 		})
-		await knowledgeAdapter.upsert({ document: { id: 'doc-1', content: 'Reset password steps', metadata: {} } })
 
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,
@@ -204,7 +201,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: { locale: 'en' },
 			conversationStore,
-			knowledgeAdapters: { default: knowledgeAdapter },
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -221,17 +217,6 @@ describe('runtime context helpers', () => {
 		await context.session.save({ conversationId: 's1', data: { value: 1 }, updatedAt: Date.now() })
 		const session = await context.session.load('s1')
 		expect(session?.conversationId).toBe('s1')
-
-		const docs = await context.knowledge.query('default', 'Reset')
-		expect(docs).toHaveLength(1)
-		const docsByAlias = await context.knowledge.default.query('Reset')
-		expect(docsByAlias).toHaveLength(1)
-		await context.knowledge.default.upsert({
-			id: 'doc-2',
-			content: 'Reset MFA settings',
-		})
-		const docsWithLimit = await context.knowledge.query('default', 'Reset', 1)
-		expect(docsWithLimit).toHaveLength(1)
 
 		await context.conversation.addUser('Need password reset help')
 		await context.conversation.addAssistant('Use the forgot-password page.')
@@ -296,7 +281,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'plan' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -325,7 +309,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello', sessionId: 'chat-42' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -349,7 +332,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -368,7 +350,7 @@ describe('runtime context helpers', () => {
 		expect(envelopes[0]?.frame.kind).toBe('error')
 	})
 
-	it('validates allowlisted tools and knowledge adapters', async () => {
+	it('validates allowlisted tools', async () => {
 		const buffer = createProtocolBuffer(baseServiceContext)
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,
@@ -376,7 +358,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -386,9 +367,6 @@ describe('runtime context helpers', () => {
 		})
 
 		await expect(context.tools.invoke.Unknown['1'].run({})).rejects.toBeInstanceOf(HandledError)
-		await expect(context.knowledge.query('missing', 'test')).rejects.toMatchObject({
-			errorCode: StatusCode.NotFound,
-		})
 	})
 
 	it('supports message emission for primitive values and has() checks', () => {
@@ -437,7 +415,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello', sessionId: 'chat-7' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: createProtocolBuffer(baseServiceContext).protocol,
 			resources: {},
 			models: {},
@@ -492,7 +469,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: createProtocolBuffer(baseServiceContext).protocol,
 			resources: {},
 			models: {},
@@ -520,7 +496,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -548,7 +523,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -606,7 +580,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -647,7 +620,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -692,7 +664,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -735,7 +706,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -789,7 +759,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -828,7 +797,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: createProtocolBuffer(baseServiceContext).protocol,
 			resources: {},
 			models: {},
@@ -858,7 +826,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello', sessionId: 'chat-8' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: createProtocolBuffer(baseServiceContext).protocol,
 			resources: {},
 			models: {},
@@ -892,7 +859,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello', sessionId: 'chat-9' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: createProtocolBuffer(baseServiceContext).protocol,
 			resources: {},
 			models: {},
@@ -927,7 +893,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: createProtocolBuffer(baseServiceContext).protocol,
 			resources: {},
 			models: {},
@@ -955,7 +920,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: new InMemoryConversationStore(),
-			knowledgeAdapters: {},
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -987,7 +951,6 @@ describe('runtime context helpers', () => {
 			save: vi.fn().mockResolvedValue(undefined),
 			delete: vi.fn().mockResolvedValue(undefined),
 		}
-		const knowledgeAdapter = new InMemoryKnowledgeAdapter()
 
 		const context = createAgentHandlerContext({
 			serviceContext: baseServiceContext,
@@ -995,7 +958,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello' },
 			parameter: {},
 			conversationStore: conversationStore as any,
-			knowledgeAdapters: { default: knowledgeAdapter },
 			protocol: buffer.protocol,
 			resources: {},
 			models: {},
@@ -1037,7 +999,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello', sessionId: 'shared' },
 			parameter: {},
 			conversationStore: store,
-			knowledgeAdapters: {},
 			protocol: createProtocolBuffer(baseServiceContext).protocol,
 			resources: {},
 			models: {},
@@ -1057,7 +1018,6 @@ describe('runtime context helpers', () => {
 			payload: { prompt: 'hello', sessionId: 'shared' },
 			parameter: {},
 			conversationStore: store,
-			knowledgeAdapters: {},
 			protocol: createProtocolBuffer(baseServiceContext).protocol,
 			resources: {},
 			models: {},

@@ -6,7 +6,7 @@
 
 # Class: PoolManager
 
-Defined in: [packages/ai/src/pools/PoolManager.ts:29](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/pools/PoolManager.ts#L29)
+Defined in: [packages/ai/src/pools/PoolManager.ts:29](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/pools/PoolManager.ts#L29)
 
 Tracks concurrency pools for background agents so hosts can guard rate limits and costs.
 
@@ -25,7 +25,7 @@ pools.release('default')
 
 > **new PoolManager**(`initial?`): `PoolManager`
 
-Defined in: [packages/ai/src/pools/PoolManager.ts:32](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/pools/PoolManager.ts#L32)
+Defined in: [packages/ai/src/pools/PoolManager.ts:32](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/pools/PoolManager.ts#L32)
 
 #### Parameters
 
@@ -43,7 +43,7 @@ Defined in: [packages/ai/src/pools/PoolManager.ts:32](https://github.com/purista
 
 > **acquire**(`id`): `Promise`\<[`PoolAcquireResult`](../type-aliases/PoolAcquireResult.md)\>
 
-Defined in: [packages/ai/src/pools/PoolManager.ts:50](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/pools/PoolManager.ts#L50)
+Defined in: [packages/ai/src/pools/PoolManager.ts:50](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/pools/PoolManager.ts#L50)
 
 #### Parameters
 
@@ -61,7 +61,7 @@ Defined in: [packages/ai/src/pools/PoolManager.ts:50](https://github.com/purista
 
 > **getPoolStats**(`id`): [`PoolStats`](../type-aliases/PoolStats.md)
 
-Defined in: [packages/ai/src/pools/PoolManager.ts:81](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/pools/PoolManager.ts#L81)
+Defined in: [packages/ai/src/pools/PoolManager.ts:81](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/pools/PoolManager.ts#L81)
 
 #### Parameters
 
@@ -79,7 +79,7 @@ Defined in: [packages/ai/src/pools/PoolManager.ts:81](https://github.com/purista
 
 > **registerPool**(`id`, `maxParallel`): `void`
 
-Defined in: [packages/ai/src/pools/PoolManager.ts:40](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/pools/PoolManager.ts#L40)
+Defined in: [packages/ai/src/pools/PoolManager.ts:40](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/pools/PoolManager.ts#L40)
 
 #### Parameters
 
@@ -101,7 +101,7 @@ Defined in: [packages/ai/src/pools/PoolManager.ts:40](https://github.com/purista
 
 > **release**(`id`): `void`
 
-Defined in: [packages/ai/src/pools/PoolManager.ts:72](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/pools/PoolManager.ts#L72)
+Defined in: [packages/ai/src/pools/PoolManager.ts:72](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/pools/PoolManager.ts#L72)
 
 #### Parameters
 
@@ -119,7 +119,7 @@ Defined in: [packages/ai/src/pools/PoolManager.ts:72](https://github.com/purista
 
 > **snapshot**(): [`PoolStats`](../type-aliases/PoolStats.md)[]
 
-Defined in: [packages/ai/src/pools/PoolManager.ts:91](https://github.com/puristajs/purista/blob/12a89e5c0e7fe36c05e0697e87a03089d193d004/packages/ai/src/pools/PoolManager.ts#L91)
+Defined in: [packages/ai/src/pools/PoolManager.ts:91](https://github.com/puristajs/purista/blob/240dc32a05e13e75a31a2b67d91e129232f5f249/packages/ai/src/pools/PoolManager.ts#L91)
 
 #### Returns
 

@@ -146,12 +146,6 @@ describe('AgentBuilder', () => {
 		)
 	})
 
-	it('requires non-empty knowledge adapter names', () => {
-		expect(() => new AgentBuilder({ agentName: 'supportAgent', agentVersion: '1' }).useKnowledgeAdapter('')).toThrow(
-			'Knowledge adapter name must not be empty',
-		)
-	})
-
 	it('supports manifest mutation helpers and requires a handler before build()', () => {
 		const payloadSchema = z.object({ prompt: z.string() })
 		const parameterSchema = z.object({ locale: z.string().optional() })
@@ -163,14 +157,12 @@ describe('AgentBuilder', () => {
 			.useEventBridge('customBridge')
 			.useResource('llm', { resourceName: 'model' })
 			.useConversationStore({ storeName: 'sessions', maxFrames: 20 })
-			.useKnowledgeAdapter('knowledge', { topK: 3 })
 			.setRuntime('worker')
 			.setExecutionMode('queued')
 			.setExecutionPolicy({ maxAttempts: 4, scopeFromPayload: ['projectId'] })
 			.setModelResource({ resourceName: 'modelResource', variant: 'mini' })
 			.setRetryPolicy({ maxAttempts: 2, strategy: 'fixed', delayMs: 100 })
 			.setMemory({ storeName: 'memoryStore', maxFrames: 10 })
-			.setKnowledge([{ adapterName: 'knowledge2', options: { topK: 1 } }])
 			.canInvoke('Ticketing', '1', 'createTicket')
 			.canInvokeAgent('triageAgent', '1')
 			.setTelemetry({ attributes: { team: 'support' } })
@@ -193,7 +185,6 @@ describe('AgentBuilder', () => {
 		expect(manifest.eventBridge).toBe('customBridge')
 		expect(manifest.resources?.llm?.resourceName).toBe('model')
 		expect(manifest.session?.storeName).toBe('memoryStore')
-		expect(manifest.knowledge?.[0]?.adapterName).toBe('knowledge2')
 		expect(manifest.modelResource?.variant).toBe('mini')
 		expect(manifest.allowedTools).toHaveLength(1)
 		expect(
@@ -280,6 +271,59 @@ describe('AgentBuilder', () => {
 			await instance.stop()
 			await queueBridge.destroy()
 		}
+	})
+
+	it('derives queue lease extensions from agent execution policy for queued agents', async () => {
+		const builder = new AgentBuilder({
+			agentName: 'leaseAwareAgent',
+			agentVersion: '1',
+			description: 'Queued agent with derived queue lease budget',
+		})
+			.addPayloadSchema(z.object({ prompt: z.string(), projectId: z.string() }))
+			.setExecutionMode('queued')
+			.setExecutionPolicy({
+				leaseTtlMs: 30_000,
+				heartbeatIntervalMs: 10_000,
+				maxDurationMs: 15 * 60_000,
+				scopeFromPayload: ['projectId'],
+			})
+			.setHandler(async () => ({ message: 'ok' }))
+
+		builder.build()
+		const serviceDefinition = await (builder as any).serviceBuilder.getFullServiceDefinition()
+		const queueDefinition = serviceDefinition.queues.find(
+			(definition: { queueName: string }) => definition.queueName === 'agent:leaseAwareAgent:1:run',
+		)
+
+		expect(queueDefinition?.lifecycle?.visibilityTimeoutMs).toBe(30_000)
+		expect(queueDefinition?.lifecycle?.heartbeatIntervalMs).toBe(10_000)
+		expect(queueDefinition?.lifecycle?.maxLeaseExtensions).toBe(31)
+	})
+
+	it('honors explicit maxLeaseExtensions overrides for queued agents', async () => {
+		const builder = new AgentBuilder({
+			agentName: 'explicitLeaseAgent',
+			agentVersion: '1',
+			description: 'Queued agent with explicit lease override',
+		})
+			.addPayloadSchema(z.object({ prompt: z.string(), projectId: z.string() }))
+			.setExecutionMode('queued')
+			.setExecutionPolicy({
+				leaseTtlMs: 30_000,
+				heartbeatIntervalMs: 10_000,
+				maxDurationMs: 15 * 60_000,
+				maxLeaseExtensions: 64,
+				scopeFromPayload: ['projectId'],
+			})
+			.setHandler(async () => ({ message: 'ok' }))
+
+		builder.build()
+		const serviceDefinition = await (builder as any).serviceBuilder.getFullServiceDefinition()
+		const queueDefinition = serviceDefinition.queues.find(
+			(definition: { queueName: string }) => definition.queueName === 'agent:explicitLeaseAgent:1:run',
+		)
+
+		expect(queueDefinition?.lifecycle?.maxLeaseExtensions).toBe(64)
 	})
 
 	it('builds a definition with model aliases and creates an instance', async () => {
@@ -422,23 +466,6 @@ describe('AgentBuilder', () => {
 			strategy: 'summary',
 			maxFrames: 5,
 		})
-	})
-
-	it('infers typed knowledge aliases in handler context', () => {
-		const definition = new AgentBuilder({ agentName: 'typedKnowledgeAgent', agentVersion: '1' })
-			.useKnowledgeAdapter('supportFaq')
-			.useKnowledgeAdapter('billingPolicy')
-			.setHandler(async context => {
-				await context.knowledge.supportFaq.query('reset password', { limit: 2 })
-				await context.knowledge.billingPolicy.query('invoice', 2)
-				// @ts-expect-error unknown adapter alias should fail at compile-time
-				await context.knowledge.unknownAdapter.query('x')
-				return { message: 'ok' }
-			})
-			.build()
-
-		// @ts-expect-error knowledgeAdapters become required once aliases are defined
-		void definition.getInstance({} as any)
 	})
 
 	it('fails fast when required model aliases are missing at getInstance()', async () => {

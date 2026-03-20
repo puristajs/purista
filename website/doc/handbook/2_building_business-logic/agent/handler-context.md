@@ -187,13 +187,23 @@ await run.finishSuccess('Architecture artifacts are ready.')
 
 Every persisted update emits a standard `run-state` artifact. In `ai-sdk-ui-message` mode this becomes a `data-run-state` part for the frontend. That is the contract that lets the UI render live progress and lock the composer while a queued durable agent is active.
 
-## 6. Knowledge / RAG (context.knowledge)
+## 6. Resources for Retrieval, Skills, and External Data
 
-Typed access to your vector stores or document adapters.
+Retrieval and skill loading are application concerns, so they live behind normal resources instead of a special AI-only knowledge API.
 
 ```ts
-const docs = await context.knowledge.supportFaq.query(payload.prompt, 3)
+const docs = await context.resources.supportFaq.search({
+  query: payload.prompt,
+  limit: 3,
+})
 ```
+
+Keep the boundary explicit:
+
+- `context.conversation` for chat history
+- `context.runState` for durable execution state
+- `context.resources` for retrieval systems, skill registries, vector stores, or document indexes
+- `context.tools` when the model should call retrieval through an allowlisted command
 
 ## 7. Telemetry & Embeddings
 

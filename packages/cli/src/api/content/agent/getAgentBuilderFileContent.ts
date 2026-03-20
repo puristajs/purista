@@ -63,9 +63,15 @@ export const getAgentBuilderFileContent = (input: {
 			writer.writeLine("context.logger.info({ prompt: payload.prompt }, 'invoking agent')")
 			writer.writeLine('await context.conversation.addUser(payload.prompt)')
 			writer.writeLine('// This template is inline by default. Keep it for short interactive work.')
-			writer.writeLine("// For long-running work switch to .setExecutionMode('queued') and provide a queueBridge at runtime.")
-			writer.writeLine("// In queued mode PURISTA creates the run before the handler starts, so update it with context.runState.get(),")
-			writer.writeLine('// context.runState.replaceTasks(...), context.runState.step(...), and context.runState.finish(...).')
+			writer.writeLine(
+				"// For long-running work switch to .setExecutionMode('queued') and provide a queueBridge at runtime.",
+			)
+			writer.writeLine(
+				'// In queued mode PURISTA creates the run before the handler starts, so update it with context.runState.get(),',
+			)
+			writer.writeLine(
+				'// context.runState.replaceTasks(...), context.runState.step(...), and context.runState.finish(...).',
+			)
 			writer.writeLine('const prompt = await context.conversation.buildPromptInput()')
 			writer.writeLine("const model = context.models['openai:gpt-4o-mini']")
 			writer.writeLine('if (!model.generate) {')

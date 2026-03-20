@@ -20,7 +20,6 @@ import {
 } from '@purista/core'
 import { z } from 'zod'
 
-import type { KnowledgeAdapter } from '../knowledge/adapters/inMemoryAdapter.js'
 import type { ConversationStore } from '../memory/conversationStore.js'
 import type { PoolManager } from '../pools/PoolManager.js'
 import { toProtocolSseEvents } from '../protocol/sse.js'
@@ -125,19 +124,17 @@ export type AgentHandler<
 	Parameter = unknown,
 	Resources extends Record<string, unknown> = Record<string, unknown>,
 	Models extends Record<string, ModelProvider> = Record<string, ModelProvider>,
-	KnowledgeAliases extends string = never,
 	AgentInvokes extends AgentInvokeList = AgentInvokeList,
 > = (
-	context: AgentHandlerContext<Payload, Parameter, Resources, Models, KnowledgeAliases, AgentInvokes>,
+	context: AgentHandlerContext<Payload, Parameter, Resources, Models, AgentInvokes>,
 	payload: Payload,
 	parameter: Parameter,
 ) => Promise<AgentHandlerResult> | AgentHandlerResult
 
-type AgentRuntimeConfig<KnowledgeAliases extends string = string> = {
-	handler: AgentHandler<unknown, unknown, Record<string, unknown>, Record<string, ModelProvider>, KnowledgeAliases>
+type AgentRuntimeConfig = {
+	handler: AgentHandler<unknown, unknown, Record<string, unknown>, Record<string, ModelProvider>>
 	manifest: AgentManifest
 	conversationStore: ConversationStore
-	knowledgeAdapters: Record<KnowledgeAliases, KnowledgeAdapter>
 	poolManager: PoolManager
 	resources: Record<string, unknown>
 	models: Record<string, ModelProvider>
@@ -337,7 +334,6 @@ type DeclaredModelMap<
 }
 
 export class AgentBuilder<
-	KnowledgeAliases extends string = never,
 	ModelAliases extends string = never,
 	TextAliases extends string = never,
 	StreamAliases extends string = never,
@@ -355,13 +351,7 @@ export class AgentBuilder<
 	private commandDefinitionAdded = false
 	private streamDefinitionAdded = false
 	private manifest: AgentManifest
-	private handler?: AgentHandler<
-		unknown,
-		unknown,
-		Record<string, unknown>,
-		Record<string, ModelProvider>,
-		KnowledgeAliases
-	>
+	private handler?: AgentHandler<unknown, unknown, Record<string, unknown>, Record<string, ModelProvider>>
 
 	private payloadSchema?: Schema
 	private parameterSchema?: Schema
@@ -419,7 +409,6 @@ export class AgentBuilder<
 		alias: Alias,
 		options?: { capabilities?: Caps },
 	): AgentBuilder<
-		KnowledgeAliases,
 		ModelAliases | Alias,
 		TextAliases | (ResolveCapability<Caps, 'text'> extends true ? Alias : never),
 		StreamAliases | (ResolveCapability<Caps, 'stream'> extends true ? Alias : never),
@@ -450,7 +439,6 @@ export class AgentBuilder<
 		}
 		this.manifest.models = models
 		return this as unknown as AgentBuilder<
-			KnowledgeAliases,
 			ModelAliases | Alias,
 			TextAliases | (ResolveCapability<Caps, 'text'> extends true ? Alias : never),
 			StreamAliases | (ResolveCapability<Caps, 'stream'> extends true ? Alias : never),
@@ -463,50 +451,6 @@ export class AgentBuilder<
 	useConversationStore(config: AgentSessionConfig) {
 		this.manifest.session = config
 		return this
-	}
-
-	useKnowledgeAdapter<const Alias extends string>(
-		adapterName: Alias,
-		options?: Record<string, unknown>,
-	): AgentBuilder<
-		KnowledgeAliases | Alias,
-		ModelAliases,
-		TextAliases,
-		StreamAliases,
-		EmbeddingAliases,
-		RerankAliases,
-		ObjectAliases
-	>
-	useKnowledgeAdapter<const Adapter extends { adapterName: string; options?: Record<string, unknown> }>(
-		adapter: Adapter,
-	): AgentBuilder<
-		KnowledgeAliases | Adapter['adapterName'],
-		ModelAliases,
-		TextAliases,
-		StreamAliases,
-		EmbeddingAliases,
-		RerankAliases,
-		ObjectAliases
-	>
-	useKnowledgeAdapter(
-		adapterOrName: string | { adapterName: string; options?: Record<string, unknown> },
-		options?: Record<string, unknown>,
-	) {
-		const adapter = typeof adapterOrName === 'string' ? { adapterName: adapterOrName, options } : adapterOrName
-		if (!adapter.adapterName?.trim()) {
-			throw new Error('Knowledge adapter name must not be empty')
-		}
-		const existing = this.manifest.knowledge ?? []
-		this.manifest.knowledge = [...existing, { adapterName: adapter.adapterName.trim(), options: adapter.options }]
-		return this as unknown as AgentBuilder<
-			KnowledgeAliases | typeof adapter.adapterName,
-			ModelAliases,
-			TextAliases,
-			StreamAliases,
-			EmbeddingAliases,
-			RerankAliases,
-			ObjectAliases
-		>
 	}
 
 	/**
@@ -573,11 +517,6 @@ export class AgentBuilder<
 		return this.useConversationStore(config as AgentSessionConfig)
 	}
 
-	setKnowledge(adapters: AgentManifest['knowledge']) {
-		this.manifest.knowledge = adapters ?? []
-		return this
-	}
-
 	canInvoke(
 		serviceName: string,
 		serviceVersion: string,
@@ -628,7 +567,6 @@ export class AgentBuilder<
 		agentVersion: Version,
 		invokeConfigOrParameterSchema?: Parameter | AgentInvokeConfig<Payload, Parameter>,
 	): AgentBuilder<
-		KnowledgeAliases,
 		ModelAliases,
 		TextAliases,
 		StreamAliases,
@@ -678,7 +616,6 @@ export class AgentBuilder<
 		}
 
 		return this as unknown as AgentBuilder<
-			KnowledgeAliases,
 			ModelAliases,
 			TextAliases,
 			StreamAliases,
@@ -862,29 +799,34 @@ export class AgentBuilder<
 			RerankAliases,
 			ObjectAliases
 		>,
-	>(fn: AgentHandler<Payload, Parameter, Resources, Models, KnowledgeAliases, AgentInvokes>) {
+	>(fn: AgentHandler<Payload, Parameter, Resources, Models, AgentInvokes>) {
 		this.handler = fn as AgentHandler<
 			unknown,
 			unknown,
 			Record<string, unknown>,
 			Record<string, ModelProvider>,
-			KnowledgeAliases,
 			AgentInvokeList
 		>
 		const queueName = `agent:${this.info.agentName}:${this.info.agentVersion}:run`
 		const workerName = 'execute'
 		this.commandBuilder.canEnqueue(queueName, durableAgentQueuePayloadSchema)
 		this.streamBuilder.canEnqueue(queueName, durableAgentQueuePayloadSchema)
-		const resolveExecutionPolicy = () => ({
-			leaseTtlMs: this.manifest.executionPolicy?.leaseTtlMs ?? 30_000,
-			heartbeatIntervalMs: this.manifest.executionPolicy?.heartbeatIntervalMs ?? 10_000,
-			maxAttempts: this.manifest.executionPolicy?.maxAttempts ?? 3,
-			maxDurationMs: this.manifest.executionPolicy?.maxDurationMs ?? 15 * 60_000,
-			recovery: this.manifest.executionPolicy?.recovery ?? 'resume-from-checkpoints',
-			httpBehavior: this.manifest.executionPolicy?.httpBehavior ?? 'attach-and-stream',
-			cleanup: this.manifest.executionPolicy?.cleanup ?? {},
-			scopeFromPayload: this.manifest.executionPolicy?.scopeFromPayload ?? [],
-		})
+		const resolveExecutionPolicy = () => {
+			const leaseTtlMs = this.manifest.executionPolicy?.leaseTtlMs ?? 30_000
+			const maxDurationMs = this.manifest.executionPolicy?.maxDurationMs ?? 15 * 60_000
+			const derivedMaxLeaseExtensions = leaseTtlMs > 0 ? Math.max(3, Math.ceil(maxDurationMs / leaseTtlMs) + 1) : 3
+			return {
+				leaseTtlMs,
+				heartbeatIntervalMs: this.manifest.executionPolicy?.heartbeatIntervalMs ?? 10_000,
+				maxLeaseExtensions: this.manifest.executionPolicy?.maxLeaseExtensions ?? derivedMaxLeaseExtensions,
+				maxAttempts: this.manifest.executionPolicy?.maxAttempts ?? 3,
+				maxDurationMs,
+				recovery: this.manifest.executionPolicy?.recovery ?? 'resume-from-checkpoints',
+				httpBehavior: this.manifest.executionPolicy?.httpBehavior ?? 'attach-and-stream',
+				cleanup: this.manifest.executionPolicy?.cleanup ?? {},
+				scopeFromPayload: this.manifest.executionPolicy?.scopeFromPayload ?? [],
+			}
+		}
 		const deriveExtraScope = (payload: unknown) => {
 			const keys = resolveExecutionPolicy().scopeFromPayload
 			if (!payload || typeof payload !== 'object' || keys.length === 0) {
@@ -920,7 +862,7 @@ export class AgentBuilder<
 			}
 		}
 		const createQueuedProtocolContext = (
-			runtime: AgentRuntimeConfig<KnowledgeAliases>,
+			runtime: AgentRuntimeConfig,
 			context: QueueJobContext<DurableAgentQueuePayload>,
 			message: QueueMessage<DurableAgentQueuePayload>,
 		) =>
@@ -952,7 +894,7 @@ export class AgentBuilder<
 				invokeAgent: (context as { invokeAgent?: EmptyObject }).invokeAgent ?? ({} as EmptyObject),
 			}) as unknown as CommandFunctionContext
 		const executeAgent = async (
-			thisArg: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
+			thisArg: { config?: { runtime?: AgentRuntimeConfig } },
 			context: CommandFunctionContext | StreamFunctionContext,
 			payload: unknown,
 			parameter: unknown,
@@ -1467,7 +1409,6 @@ export class AgentBuilder<
 					payload,
 					parameter,
 					conversationStore: runtime.conversationStore,
-					knowledgeAdapters: runtime.knowledgeAdapters,
 					protocol: protocolBuffer.protocol,
 					resources: runtime.resources,
 					models: instrumentedModels,
@@ -1482,7 +1423,6 @@ export class AgentBuilder<
 						unknown,
 						Record<string, unknown>,
 						Record<string, ModelProvider>,
-						KnowledgeAliases,
 						AgentInvokes
 					>,
 					payload,
@@ -1538,7 +1478,7 @@ export class AgentBuilder<
 		}
 
 		const observeQueuedRun = async (
-			thisArg: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
+			thisArg: { config?: { runtime?: AgentRuntimeConfig } },
 			context: CommandFunctionContext | StreamFunctionContext,
 			payload: unknown,
 			parameter: unknown,
@@ -1564,7 +1504,6 @@ export class AgentBuilder<
 					serviceContext: context,
 					protocol: protocolBuffer.protocol,
 					conversationStore: runtime.conversationStore,
-					knowledgeAdapters: runtime.knowledgeAdapters,
 					resources: runtime.resources,
 					models: runtime.models,
 					eventBridge: runtime.eventBridge,
@@ -1626,7 +1565,7 @@ export class AgentBuilder<
 		}
 
 		const executeQueuedAgent = async (
-			thisArg: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
+			thisArg: { config?: { runtime?: AgentRuntimeConfig } },
 			context: CommandFunctionContext | StreamFunctionContext,
 			payload: unknown,
 			parameter: unknown,
@@ -1643,7 +1582,6 @@ export class AgentBuilder<
 				serviceContext: context,
 				protocol: createProtocolBuffer(context).protocol,
 				conversationStore: runtime.conversationStore,
-				knowledgeAdapters: runtime.knowledgeAdapters,
 				resources: runtime.resources,
 				models: runtime.models,
 				eventBridge: runtime.eventBridge,
@@ -1680,7 +1618,7 @@ export class AgentBuilder<
 		}
 
 		this.commandBuilder.setCommandFunction(async function commandImpl(
-			this: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
+			this: { config?: { runtime?: AgentRuntimeConfig } },
 			context: CommandFunctionContext,
 			payload: unknown,
 			parameter: unknown,
@@ -1692,7 +1630,7 @@ export class AgentBuilder<
 		})
 
 		this.streamBuilder.setStreamFunction(async function streamImpl(
-			this: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
+			this: { config?: { runtime?: AgentRuntimeConfig } },
 			context: StreamFunctionContext,
 			payload: unknown,
 			parameter: unknown,
@@ -1753,6 +1691,7 @@ export class AgentBuilder<
 				.setLifecycleConfig({
 					visibilityTimeoutMs: resolveExecutionPolicy().leaseTtlMs,
 					heartbeatIntervalMs: resolveExecutionPolicy().heartbeatIntervalMs,
+					maxLeaseExtensions: resolveExecutionPolicy().maxLeaseExtensions,
 					maxAttempts: resolveExecutionPolicy().maxAttempts,
 				})
 				.setQueueBridgeConfig({
@@ -1767,7 +1706,7 @@ export class AgentBuilder<
 				.setMode('continuous')
 				.setMaxParallelHandlers(1)
 				.setHandler(async function durableWorker(
-					this: { config?: { runtime?: AgentRuntimeConfig<KnowledgeAliases> } },
+					this: { config?: { runtime?: AgentRuntimeConfig } },
 					context: QueueJobContext<DurableAgentQueuePayload>,
 					message: QueueMessage<DurableAgentQueuePayload>,
 				) {
@@ -1785,7 +1724,6 @@ export class AgentBuilder<
 						serviceContext,
 						protocol: protocolBuffer.protocol,
 						conversationStore: runtime.conversationStore,
-						knowledgeAdapters: runtime.knowledgeAdapters,
 						resources: runtime.resources,
 						models: runtime.models,
 						eventBridge: runtime.eventBridge,
@@ -1889,7 +1827,6 @@ export class AgentBuilder<
 		}
 
 		return this as AgentBuilder<
-			KnowledgeAliases,
 			ModelAliases,
 			TextAliases,
 			StreamAliases,
@@ -1900,7 +1837,7 @@ export class AgentBuilder<
 		>
 	}
 
-	build(): AgentDefinition<KnowledgeAliases> {
+	build(): AgentDefinition {
 		if (!this.handler) {
 			throw new Error('Agent handler is required. Call setHandler() before build().')
 		}
@@ -1944,13 +1881,8 @@ export class AgentBuilder<
 				commands: manifest.allowedTools,
 				agents: manifest.allowedAgents ?? [],
 			}),
-			getInstance: async (
-				eventBridge,
-				...options: [KnowledgeAliases] extends [never]
-					? [options?: AgentInstanceOptions<KnowledgeAliases>]
-					: [options: AgentInstanceOptions<KnowledgeAliases>]
-			) => {
-				const runtimeOptions = options[0] as AgentInstanceOptions<KnowledgeAliases> | undefined
+			getInstance: async (eventBridge, options?: AgentInstanceOptions) => {
+				const runtimeOptions = options
 				const instance = new AgentInstance(dependencies, eventBridge, runtimeOptions)
 				return instance
 			},
