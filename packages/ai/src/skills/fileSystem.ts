@@ -6,6 +6,7 @@ export type SkillMetadata = {
 	description: string
 	path: string
 	topics?: string[]
+	phases?: string[]
 	requiresSandbox?: boolean
 }
 
@@ -16,6 +17,8 @@ export type SkillDocument = SkillMetadata & {
 export type SkillSearchInput = {
 	skillNames?: string[]
 	queries?: string[]
+	topics?: string[]
+	phases?: string[]
 	limit?: number
 }
 
@@ -27,7 +30,7 @@ export type SkillResource = {
 }
 
 const parseFrontmatter = (content: string): {
-	metadata: Partial<Pick<SkillMetadata, 'name' | 'description' | 'topics' | 'requiresSandbox'>>
+	metadata: Partial<Pick<SkillMetadata, 'name' | 'description' | 'topics' | 'phases' | 'requiresSandbox'>>
 	body: string
 } => {
 	if (!content.startsWith('---\n')) {
@@ -41,8 +44,8 @@ const parseFrontmatter = (content: string): {
 
 	const rawFrontmatter = content.slice(4, closingIndex)
 	const body = content.slice(closingIndex + 5)
-	const metadata: Partial<Pick<SkillMetadata, 'name' | 'description' | 'topics' | 'requiresSandbox'>> = {}
-	let currentArrayKey: 'topics' | undefined
+	const metadata: Partial<Pick<SkillMetadata, 'name' | 'description' | 'topics' | 'phases' | 'requiresSandbox'>> = {}
+	let currentArrayKey: 'topics' | 'phases' | undefined
 
 	for (const line of rawFrontmatter.split('\n')) {
 		const trimmed = line.trim()
@@ -71,6 +74,16 @@ const parseFrontmatter = (content: string): {
 				currentArrayKey = 'topics'
 				if (value.startsWith('[') && value.endsWith(']')) {
 					metadata.topics = value
+						.slice(1, -1)
+						.split(',')
+						.map(entry => entry.trim())
+						.filter(Boolean)
+				}
+				break
+			case 'phases':
+				currentArrayKey = 'phases'
+				if (value.startsWith('[') && value.endsWith(']')) {
+					metadata.phases = value
 						.slice(1, -1)
 						.split(',')
 						.map(entry => entry.trim())
@@ -166,6 +179,7 @@ export class FileSkillResource implements SkillResource {
 				name: metadata.name?.trim() || normalizedSkillName,
 				description: metadata.description?.trim() || summarizeDescription(body),
 				topics: metadata.topics,
+				phases: metadata.phases,
 				requiresSandbox: metadata.requiresSandbox,
 				path: loadedPath,
 				content: body,
@@ -194,16 +208,34 @@ export class FileSkillResource implements SkillResource {
 		const normalizedQueries = [
 			...new Set((input.queries ?? []).map(entry => entry.trim().toLowerCase()).filter(Boolean)),
 		]
+		const normalizedTopics = [
+			...new Set((input.topics ?? []).map(entry => entry.trim().toLowerCase()).filter(Boolean)),
+		]
+		const normalizedPhases = [
+			...new Set((input.phases ?? []).map(entry => entry.trim().toLowerCase()).filter(Boolean)),
+		]
 		const documents = await this.loadMany(candidateNames)
-		if (normalizedQueries.length === 0) {
+		if (normalizedQueries.length === 0 && normalizedTopics.length === 0 && normalizedPhases.length === 0) {
 			return documents.slice(0, limit)
 		}
 
 		const scored = documents
 			.map(document => {
 				const haystack =
-					`${document.name}\n${document.description}\n${document.topics?.join(' ') ?? ''}\n${document.content}`.toLowerCase()
+					`${document.name}\n${document.description}\n${document.topics?.join(' ') ?? ''}\n${document.phases?.join(' ') ?? ''}\n${document.content}`.toLowerCase()
 				let score = 0
+				const documentTopics = new Set((document.topics ?? []).map(entry => entry.toLowerCase()))
+				const documentPhases = new Set((document.phases ?? []).map(entry => entry.toLowerCase()))
+				for (const topic of normalizedTopics) {
+					if (documentTopics.has(topic)) {
+						score += 4
+					}
+				}
+				for (const phase of normalizedPhases) {
+					if (documentPhases.has(phase)) {
+						score += 5
+					}
+				}
 				for (const query of normalizedQueries) {
 					if (haystack.includes(query)) {
 						score += query.length > 12 ? 4 : 2
@@ -220,3 +252,11 @@ export class FileSkillResource implements SkillResource {
 		return scored.slice(0, limit).map(entry => entry.document)
 	}
 }
+
+export const renderSkillDocuments = (
+	label: string,
+	skillDocs: Array<Pick<SkillDocument, 'name' | 'content'>>,
+): string | undefined =>
+	skillDocs.length > 0
+		? `${label}:\n${skillDocs.map(document => `## ${document.name}\n${document.content}`).join('\n\n')}`
+		: undefined

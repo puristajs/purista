@@ -204,18 +204,19 @@ skills/
 ```
 
 `SKILL.md` is the only required file. Optional frontmatter may provide metadata
-such as `name`, `description`, `topics`, and `requires_sandbox`.
+such as `name`, `description`, `topics`, `phases`, and `requires_sandbox`.
 
 ```ts
+import { renderSkillDocuments } from '@purista/ai'
+
 const relevantSkills = await context.skills.search({
-  skillNames: ['purista-architecture', 'purista-queues'],
-  queries: [payload.prompt, 'architecture', 'queues'],
+  phases: ['architecture'],
+  topics: ['queues', 'services'],
+  queries: [payload.prompt, 'durable background work'],
   limit: 3,
 })
 
-const contextBlock = relevantSkills
-  .map(skill => `## ${skill.name}\n${skill.content}`)
-  .join('\n\n')
+const contextBlock = renderSkillDocuments('Relevant skills', relevantSkills)
 ```
 
 If no skill resource is configured, `context.skills.*` throws with a clear
